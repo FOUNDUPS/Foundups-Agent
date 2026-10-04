@@ -1,3 +1,69 @@
+## Existing Holo grounding — P16 checkpoint
+
+Current selection is **16/P0** (C3/I4/D5/Impact4), `in_progress`, under
+`work-order-resume-repair.json` at source `6efbc3ac19beb4191608e1bce18f6b56b4f2605b`.
+The original 14/P1 owner qualification exposed a concrete recovery gap. P15
+PR2062 closure and its retained synthetic consumer proof remain closed.
+
+Four actual controller attempts are preserved:
+
+1. 6.844s: resident startup failed because the external output sink lacked
+   `isatty`; the controller reported start/stop failures and the parent Job closed.
+2. 19.297s: the real task failed with
+   `HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED`; authority advanced to the
+   selected HEAD, while the old freshness receipt remained unchanged.
+3. 13.719s: the same task entered built-in `RETRY_WAIT`, with retry count 1 and
+   not-before `2026-10-04T18:44:58.431915Z`. This was scheduling, not maintenance completion.
+4. 51.188s: the eligible task failed with
+   `HOLOINDEX_MAINTENANCE_SEMANTIC_BACKEND_REQUIRED` after canonical invalidation.
+   The receipt now names the selected HEAD and `cli_maintenance_in_progress`;
+   it has not been restored or removed. Attempts 2–4 reported both owned runtimes
+   stopped in reverse order, and every parent reported normal Job closure.
+
+Three exact environment controls were qualified without global configuration
+changes: supported `PYDANTIC_DISABLE_PLUGINS=__all__`; process-only replay of the
+already trusted `safe.directory=O:/Foundups-Agent`; and
+`TORCHINDUCTOR_CACHE_DIR=O:/rsi-p16-temp-20261005/maintenance/torchinductor`.
+The Git control preserved private HOME and passed main/thread runtime preparation.
+The actual `-S -B`/`PYTHONPATH` import path then exposed TorchInductor's username
+fallback to unavailable Windows `pwd`. Paired imports retained the failure at
+6.750s and succeeded at 8.000s with only the cache setting changed. Both had no
+recorded denials and a source-matched, closed IPv6 loopback capability probe.
+No `.pth` repair or username disclosure was needed.
+
+A subsequent 8.047s parent / 7.250s child observation loaded the pinned cached
+MiniLM snapshot once and encoded one fixed input once: 384 finite nonzero
+`float32` values on CPU, no recorded denials or exceptions, stable pins and normal
+Job close. This qualifies that local encoder operation, not retrieval quality,
+current index completion or a generative worker. Full failure history remains.
+
+The latest saved task is `failed`, retry count 1, in the same private database.
+The current freshness gate is `STALE_INDEX`; that alone must remain insufficient
+for new admission. The selected source repair will validate an explicit pointer
+to the existing root-owned incident/task/request and reuse existing bounded
+coordinator retry and controller transactions. No new store, skill or authority
+is selected. The coordinator repair passes181 connected local cases, including
+the unchanged29 frozen cases (baseline28 missing-API failures/one control pass)
+and six candidate-only lifecycle controls. The first152-case connected run
+failed the private return-tuple test and675-line ceiling; the test now checks
+the added blank incident field and unchanged cleanup helpers moved into the
+existing liveness owner. No ceiling or frozen criterion was weakened.
+
+One actual local Qwen proposal passed formatting but failed semantics: it compared
+the full incident digest with the stripped suffix, and omitted type/error guards.
+It was rejected without application or retry. SDK telemetry:903 input/304 output,
+1207 total tokens;112.016s parent/98.907s child;0 paid calls. This is a failed
+worker attempt; the coordinator authored the repair. Publication and merged-source
+verification remain next, with no new live retry allocated by source tests. A
+new main HEAD requires its own existing admission; the original6efbc ticket and
+its failures must remain historical rather than be relabelled as resumed. Current
+CURRENT/no-gap grounding and native unattended RSI closure remain open.
+
+Evidence: `outputs/rsi-holo-grounding-20261005`; exact hashes and the prior
+current-process model-binding limitation are retained in backlog
+`current_observation.holo_grounding_20261005`. Qualified configuration is not an
+operating grant or a model-learning/generalized RSI result.
+
 ## Measured-zero fidelity — P15 checkpoint
 
 Selected 14/P1 (C2/I4/D4/Impact4) at main `0b3f6cbc37ef27eadb63ff979c847b7932745d61`:
@@ -24,11 +90,22 @@ PatternMemory runtime digest changed and both existing compatibility pins
 synchronized. Counts/thresholds are unchanged. Saved actual consumer
 returns now select `positive_skill` 0.4 over `zero_skill` 0.0. Independent source/
 result review is `cb359e6fb9efdbb5905c758074ebebb5a079d3bf4010bb94903dcca418c6f19b`.
-Publication, exact-main closure and later retained use remain pending. The
-preserved baseline SQLite snapshot has SHA256
-`b552a862630ebbb5c5e9aacebc85003a94a1ef477770d99eb6a6c2f6ed023541`;
-planned fresh-process retained/control/recovery observations must use private
-copies and verified source, without rewriting the original rows or timestamps.
+PR2062 head `937172882b544ad237a768fddae766d5db27373e` merged as
+`6efbc3ac19beb4191608e1bce18f6b56b4f2605b`, with exact reviewed-tree equality.
+All 11 PR checks and exact-main CI 37220878232/CodeQL 37220878018 passed.
+Hosted selections report 340 WRE and 675 effect cases; they are not summed.
+The three fresh-process retained/control/recovery phases passed in
+0.218s/0.219s/0.219s parent time, selecting positive → zero control → positive.
+Merged and recovered source preserve zero as 0.0; baseline source reproduces
+its incorrect 0.5 fallback. All rows, timestamps, source pins and original/private
+SQLite hashes remained unchanged; closes returned with no errors or denials.
+The preserved snapshot is
+`b552a862630ebbb5c5e9aacebc85003a94a1ef477770d99eb6a6c2f6ed023541`.
+The owned P15 root and branches are retired, with recovery bundle and evidence
+preserved and shared state unchanged. Closure receipt SHA256 is
+`d1f48bc564386d1c31131f134b4444429de8705114b1c3d5c86b0742a806d5e9`;
+independent retained review is
+`825c3d3d8868f7f1aead138027b3ad42f58de0d92b2cd63121a6a4c14690ccc3`.
 Synthetic structural fidelity is not model fitness, training or effect success.
 
 P14 PR2061 is closed: 11 PR checks plus exact-main CI 37217454010 and
@@ -37,7 +114,7 @@ CodeQL 37217453672 passed. Owned root/branches retired; recovery receipt
 preserves bundle/ignored evidence and unchanged shared state. Its short TEMP
 remains preserved because cleanup was blocked by tool policy.
 
-After P15 closure/retention, re-observe the existing production DECISION skill
+With P15 closure/retention verified, re-observe the existing production DECISION skill
 `reddog_operations` as a conditional 14/P1 admitted proposal candidate. The
 proposed new registry-audit operation is withdrawn under WSP97; prototype
 skills are not promoted. Actual scanner verdict, full-skill context capacity

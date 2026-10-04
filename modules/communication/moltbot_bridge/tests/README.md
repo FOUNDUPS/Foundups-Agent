@@ -1652,3 +1652,14 @@ worktree, OpenClaw, or execution-valve authority.
 Signer regressions also require the explicitly selected durable authoritative
 work state and reject missing state, split-path substitution, marker and
 queue/claim stripping, or injected state that differs from the durable payload.
+## Persisted HoloIndex admission recovery — 2026-10-05
+
+`test_holoindex_persisted_resume.py` has 29 frozen cases for durable bindings,
+pointer/authority rejection and existing retry timing/budget. Baseline: 28
+missing-API failures and one generic stale-index rejection pass. Candidate: 29
+pass. Six separate controller cases cover lease/preflight ordering, incident
+retention, exact-task runtime startup, retry-wait without startup, interruption
+and failed cleanup. The connected 181-case selection passes without errors/skips.
+Ports use in-memory DB/Git/runtime doubles; no live maintenance is proved.
+Original failing runs, frozen criteria and commands are retained under
+`outputs/rsi-holo-grounding-20261005`. CI runs the connected selection.

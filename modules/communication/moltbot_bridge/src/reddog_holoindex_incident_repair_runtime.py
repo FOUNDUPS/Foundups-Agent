@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
@@ -14,9 +15,12 @@ from modules.infrastructure.idle_automation.src.holoindex_postmerge_coordinator 
     coordinate_holoindex_postmerge,
 )
 from modules.infrastructure.idle_automation.src.holoindex_postmerge_contract import (
+    INCIDENT_EVENT_PREFIX,
     REPO_HEAD_MISMATCH,
     REQUEST_EVENT_PREFIX,
     TASK_PREFIX,
+    normalize_holoindex_incident_binding,
+    validate_holoindex_postmerge_request,
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_contract import (
     DEFERRED_STATUSES,
@@ -325,9 +329,75 @@ def coordinate_holoindex_incident_repair(
     )
 
 
+def _resume_incident_binding(
+    database: Any, resume_incident_id: str, target_repo_head_sha: str,
+    authority_root_digest: str,
+) -> dict[str, str] | None:
+    """Resolve a pointer through the existing durable admission validator."""
+    if type(resume_incident_id) is not str or re.fullmatch(r"sha256:[0-9a-f]{64}", resume_incident_id) is None:
+        return None
+    try:
+        event = database.get_coordination_event_by_id(INCIDENT_EVENT_PREFIX + resume_incident_id[7:])
+        payload = event.get("payload") if isinstance(event, Mapping) else None
+        if not isinstance(payload, Mapping):
+            return None
+        binding = normalize_holoindex_incident_binding(payload.get("incident_binding"), target_repo_head_sha)
+        if binding is None or binding["incident_id"] != resume_incident_id:
+            return None
+        request = validate_holoindex_postmerge_request(
+            database, task_id=TASK_PREFIX + target_repo_head_sha,
+            request_event_id=REQUEST_EVENT_PREFIX + target_repo_head_sha,
+            target_repo_head_sha=target_repo_head_sha,
+            authority_root_digest=authority_root_digest, incident_binding=binding,
+        )
+        return binding if request is not None else None
+    except Exception:
+        return None
+
+
+def resume_holoindex_incident_repair(
+    *, repo_root: Path | str, query: str, resume_incident_id: str,
+    db: Any | None = None, environment: Mapping[str, str] | None = None,
+    select_authority: Callable[[Path], HoloIndexAuthoritySelection] = resolve_holoindex_authority_root,
+    coordinator: Callable[..., Any] = coordinate_holoindex_postmerge,
+    query_runner: Callable[..., Mapping[str, Any]] | None = None,
+) -> HoloIndexIncidentRepairReceipt:
+    """Reconcile an existing admission; the incident pointer grants no authority."""
+    if type(resume_incident_id) is not str or re.fullmatch(r"sha256:[0-9a-f]{64}", resume_incident_id) is None:
+        return rejected_receipt("holoindex_resume_incident_id_invalid")
+    normalized_query = _validate_query(query)
+    if normalized_query is None:
+        return rejected_receipt("holoindex_incident_query_invalid")
+    root = Path(repo_root).resolve(strict=False)
+    selection = select_authority(root)
+    if not (selection.accepted and selection.selected_root
+            and selection.workspace_head_sha == selection.authority_head_sha):
+        return rejected_receipt("holoindex_incident_authority_unavailable")
+    if db is None:
+        from modules.infrastructure.database.src.agent_db import AgentDB
+        db = AgentDB()
+    target = selection.workspace_head_sha
+    binding = _resume_incident_binding(db, resume_incident_id, target, selection.authority_root_digest)
+    if binding is None:
+        return rejected_receipt("holoindex_resume_admission_invalid")
+    task = db.get_autonomous_task_by_id(TASK_PREFIX + target)
+    if not isinstance(task, Mapping) or task.get("status") not in {"pending", "failed", "retry_wait"}:
+        return rejected_receipt("holoindex_resume_task_not_retryable")
+    coordinated = coordinator(repo_root=root, db=db, environment=environment, incident_binding=binding)
+    return _coordination_receipt(
+        coordinated=coordinated, incident_id=resume_incident_id, query=normalized_query,
+        workspace_repo_root=root, selection=selection, expected_target_head=target,
+        binding={"owner_error": binding["incident_kind"],
+                 "workspace_repo_head_sha": binding["workspace_repo_head_sha"],
+                 "authority_repo_head_sha": binding["observed_authority_head_sha"]},
+        query_runner=query_runner,
+    )
+
+
 __all__ = [
     "HoloIndexIncidentRepairReceipt",
     "REPAIRABLE_ERRORS",
     "SCHEMA_VERSION",
     "coordinate_holoindex_incident_repair",
+    "resume_holoindex_incident_repair",
 ]

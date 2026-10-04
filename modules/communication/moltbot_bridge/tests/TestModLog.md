@@ -3533,3 +3533,20 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
 - Extended the existing bootstrap suite for omitted/None/empty/matching/conflicting plans, raw wrappers, tampered receipt/candidate, scope contradiction, one-read callback mutation and actual producer→seed handoff. Scope enters the fake model before admission; fresh receipt IDs remain untouched.
 - Baseline7failed/34passed; first repair41passed. Independent review reproduced invalid ancestor copy coercion; two additional cases failed, then final43passed. Connected638pass; independent43 overlap plus69 probe cases/191assertions, with exact pre/post hashes. Do not add overlapping counts together.
 - Existing legacy seed-byte oracle and explicit pre-read snapshot remain unchanged. Source215/public function111; manifest8pass, fast15groups, registry1651/269 current. No live provider, sandbox, signing authority or retained-improvement claim. Evidence: root backlog current_observation.
+## HoloIndex resume source qualification — 2026-10-05
+
+Initial PR2063 CI37228621136 stopped at the stale canonical test registry before
+application tests. Regenerated the existing registry:1685→1687 files,270 still
+quarantined. Only the two new resume files were added; existing entry metadata
+is unchanged apart from generated shard assignments. Local generator check
+passes. Replacement-head CI remains required; the initial failure is retained.
+
+WSP00/5/6/11/15/22/48/50/62/97. Existing baseline146 passed. Independently
+frozen29 resume cases:28 missing-API failures/one control pass, then29 passed.
+Connected152 initially failed2: private admission tuple migration and existing
+675-line controller ceiling. Updated the private test to assert the added blank
+incident field before admission; moved unchanged stop/wait helpers into the
+existing liveness owner. The ceiling and original29 criteria remain unchanged.
+Final connected181 passed, no errors/skips (5.516s). Six controller supplement
+cases were candidate-only. Evidence and exact commands: canonical RSI backlog
+`holo_grounding_20261005`; live resume, publication and retained use unverified.

@@ -4222,3 +4222,10 @@ WSP: WSP_00, WSP_15, WSP_22, WSP_87, WSP_97, WSP_109.
 - Regenerated the backend compatibility manifest for the bounded LOW-tier
   independent signer grant-provider modules. No client execution authority was
   added; elevated issuance remains blocked on verified consensus.
+## 2026-10-05 — Admitted HoloIndex recovery binding
+
+Regenerated the existing backend manifest and both digest pins for the incident
+resume/controller/liveness/CLI repair. Runtime membership remains1408; count,
+byte limits and admission checks are unchanged. Local/hosted validation is
+recorded in the canonical RSI backlog `holo_grounding_20261005`. No installed
+extension update or deployment is claimed. WSP5/11/15/22/50/62/97.

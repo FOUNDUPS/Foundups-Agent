@@ -8,11 +8,15 @@
   Actual reopened selection changes from zero misreported 0.5 to measured 0.4.
 - One local Qwen attempt rejected and unused: 971/99/1070 SDK tokens, 68.719s,
   zero paid calls, no retry or worker repair credit. Earlier harness failures
-  remain preserved. Publication and retained-use observations are pending.
+  remain preserved. PR2062 is merged/main-verified; all 11 PR checks and exact-main
+  CI/CodeQL passed. Retained/control/recovery selects positive → zero control →
+  positive in 0.218s/0.219s/0.219s, with unchanged rows/source and clean closes.
+  Owned lane retired; recovery bundle preserved and shared state unchanged.
 - Manifest 8/8 and RedDog fast 15 pass separately; 1408 runtime members unchanged,
   only PatternMemory digest changed and existing compatibility pins synchronized.
 - Reconciled PR2061 closure; WSP97 withdraws a duplicate registry operation in
-  favor of conditional existing `reddog_operations` investigation after closure.
+  favor of conditional existing `reddog_operations` investigation; P15 is closed.
+  Later route qualification and native admission remain separate.
   WSP00/5/6/11/15/22/62/97. See the [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint).
 
 ## 2026-10-05 — Qualify named scope telemetry

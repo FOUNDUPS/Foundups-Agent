@@ -12,14 +12,25 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — P15:** P14 PR2061 is merged/main-verified at `0b3f6cbc3`,
+**Current layer — P16 (in progress):** selected 16/P0 (C3/I4/D5/Impact4)
+repairs recovery of an already admitted Holo maintenance task. Four controller
+attempts are preserved; the latest failed after index invalidation. Exact
+process-environment controls and one cached MiniLM load/encode are qualified,
+and the coordinator's resume repair passes181 connected local tests. One local
+Qwen proposal was rejected. Current grounding and native RSI closure remain
+unproved; publication and merged-source runtime verification are next. See the [P16 checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint)
+and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).
+
+**Closed layer — P15:** P14 PR2061 is merged/main-verified at `0b3f6cbc3`,
 with its owned lane retired and recovery preserved. Selected 14/P1 now repairs
 measured-zero fidelity in existing PatternMemory statistics. The valid baseline
 has 4 expected failures/5 passes; the coordinator repair passes 9 frozen cases
 and 42 disjoint connected controls. The actual reopened selector now prefers
 measured 0.4 over measured 0.0. One local Qwen proposal was rejected and unused.
-P15 publication and later retained-use validation remain pending; structural
-fidelity is not model fitness or native authority. The existing registered
+P15 PR2062 is merged/main-verified at `6efbc3ac1`, and its owned lane is retired.
+The same saved rows select positive → zero control → positive under merged,
+baseline and recovered source. This verifies retained consumer behavior;
+structural fidelity is not model fitness or native authority. The existing registered
 `reddog_operations` proposal route is only a conditional next 14/P1 candidate.
 See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint)
 and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).

@@ -1,12 +1,14 @@
-## Current measured-zero layer — P15 checkpoint
+## Closed measured-zero layer — P15 checkpoint
 
 Selected 14/P1 (C2/I4/D4/Impact4): repair existing fidelity statistics without
 changing ranking or threshold semantics. Valid baseline: 4 failures/5 passes becomes 9 passes;
 42 disjoint connected controls pass. The coordinator supplied the minimal repair
-after one rejected local proposal. Publication and retained/control/recovery use
-of the preserved baseline SQLite rows are still pending, not completed learning.
+after one rejected local proposal. PR2062 is merged/main-verified at `6efbc3ac1`;
+retained/control/recovery use of unchanged baseline SQLite rows selects positive
+→ zero control → positive. The owned lane is retired with recovery preserved.
+This closes the measured consumer repair, not model learning or native admission.
 
-After closure/retention, re-observe existing production `reddog_operations` as
+With closure/retention verified, re-observe existing production `reddog_operations` as
 a conditional 14/P1 local proposal candidate. No new registry operation or skill
 is selected; scanner, full-context capacity and finite evolution budget still
 need qualification. Native unattended 18/P0 is separate. See the [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint).

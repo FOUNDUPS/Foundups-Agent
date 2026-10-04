@@ -13,6 +13,7 @@ from typing import Any, Callable, ContextManager, Mapping, Sequence
 
 from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_runtime import (
     coordinate_holoindex_incident_repair,
+    resume_holoindex_incident_repair,
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_owner_result_verification import (
     CURRENT,
@@ -34,6 +35,7 @@ from .holoindex_postmerge_supervisor_policy import (
     validate_supervisor_holoindex_postmerge_completion,
 )
 from .holoindex_postmerge_runtime_liveness import (
+    _stop_owned,
     holoindex_postmerge_runtime_inspection,
     preexisting_runtime_topology as _preexisting_runtime_topology,
     run_with_supervisor_binding_release,
@@ -43,6 +45,7 @@ from .holoindex_postmerge_runtime_liveness import (
 
 SCHEMA_VERSION = "reddog_holoindex_postmerge_runtime.v1"
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_INCIDENT_ID_RE = re.compile(r"sha256:[0-9a-f]{64}")
 _RUNTIME_LEASE_FILENAME = "reddog_holoindex_postmerge_runtime.lock"
 _POSTCOMPLETION_OWNER_PROOF_ATTEMPTS = 2
 _RUNTIME_STARTUP_TIMEOUT_SECONDS = 60.0
@@ -58,6 +61,7 @@ class HoloIndexPostmergeRuntimeResult:
     stopped_runtime_ids: tuple[str, ...] = ()
     rejection_reasons: tuple[str, ...] = ()
     no_holoindex_reindex_performed_by_controller: bool = True
+    incident_id: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         value = asdict(self)
@@ -110,17 +114,6 @@ def _exact_local_main(root: Path, runner: GitRunner) -> tuple[str, str]:
     if head.lower() != origin_main.lower():
         return "", "workspace_not_exact_origin_main"
     return head.lower(), ""
-
-
-def _wait_for(
-    predicate: Callable[[], bool], *, deadline: float,
-    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
-) -> bool:
-    while clock() < deadline:
-        if predicate():
-            return True
-        sleeper(interval)
-    return predicate()
 
 
 def _runtime_ready(status: Mapping[str, Any]) -> bool:
@@ -182,31 +175,6 @@ def _start_runtime(
         sleeper=sleeper, interval=interval,
     )
     return ready, owned, "" if ready else f"{runtime_id}_start_timeout"
-
-
-def _stop_owned(
-    broker: Any, owned: Sequence[str], *, deadline: float,
-    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
-) -> tuple[tuple[str, ...], tuple[str, ...]]:
-    stopped: list[str] = []
-    errors: list[str] = []
-    for runtime_id in reversed(tuple(owned)):
-        try:
-            requested = broker.stop_dae(runtime_id, actor_id="0102")
-            if requested.get("success") is not True:
-                errors.append(f"{runtime_id}_stop_failed")
-                continue
-            dead = _wait_for(
-                lambda: broker.get_runtime_status(runtime_id).get("thread_alive") is False,
-                deadline=deadline, clock=clock, sleeper=sleeper, interval=interval,
-            )
-            if dead:
-                stopped.append(runtime_id)
-            else:
-                errors.append(f"{runtime_id}_stop_timeout")
-        except BaseException:
-            errors.append(f"{runtime_id}_stop_exception")
-    return tuple(stopped), tuple(errors)
 
 
 def _owner_matches_completion(
@@ -299,41 +267,48 @@ def _query_initial_owner(
 
 def _coordinate_repair(
     *, root: Path, head: str, query: str, initial: Mapping[str, Any],
-    coordinator: Callable[..., Any],
-) -> tuple[str, str, HoloIndexPostmergeRuntimeResult | None]:
+    coordinator: Callable[..., Any], defer_retry_wait: bool = False,
+) -> tuple[str, str, str, HoloIndexPostmergeRuntimeResult | None]:
     try:
         repair_value = coordinator(
             repo_root=root, query=query, owner_failure=initial
         ).to_dict()
     except BaseException:
-        return "", "", HoloIndexPostmergeRuntimeResult(
+        return "", "", "", HoloIndexPostmergeRuntimeResult(
             False, "REJECTED", head,
             rejection_reasons=("repair_coordination_failed",),
         )
     if not isinstance(repair_value, Mapping) or repair_value.get("accepted") is not True:
-        return "", "", HoloIndexPostmergeRuntimeResult(
+        return "", "", "", HoloIndexPostmergeRuntimeResult(
             False, "REJECTED", head, rejection_reasons=("repair_rejected",),
         )
     if repair_value.get("status") == "OWNER_READY":
         ready = rehydrate_owner_ready_receipt(repair_value)
         if ready is None or ready.target_repo_head_sha != head:
-            return "", "", HoloIndexPostmergeRuntimeResult(
+            return "", "", "", HoloIndexPostmergeRuntimeResult(
                 False, "REJECTED", head,
                 rejection_reasons=("owner_ready_receipt_not_exact_head",),
             )
-        return "", "", HoloIndexPostmergeRuntimeResult(
+        return "", "", ready.incident_id, HoloIndexPostmergeRuntimeResult(
             True, "OWNER_READY", head,
             generation_id=ready.generation_id,
             freshness_receipt_digest=ready.freshness_receipt_digest,
+            incident_id=ready.incident_id,
         )
     deferred = rehydrate_deferred_receipt(repair_value)
     task_id = deferred.task_id if deferred else ""
     if deferred is None or task_id != HOLOINDEX_POSTMERGE_TASK_PREFIX + head:
-        return task_id, "", HoloIndexPostmergeRuntimeResult(
+        return task_id, "", "", HoloIndexPostmergeRuntimeResult(
             False, "REJECTED", head, task_id,
             rejection_reasons=("repair_task_not_exact_head",),
         )
-    return task_id, deferred.authority_root_digest, None
+    if defer_retry_wait and deferred.status == "RETRY_WAIT":
+        return task_id, deferred.authority_root_digest, deferred.incident_id, HoloIndexPostmergeRuntimeResult(
+            False, "RETRY_WAIT", head, task_id,
+            rejection_reasons=("postmerge_task_retry_wait",),
+            incident_id=deferred.incident_id,
+        )
+    return task_id, deferred.authority_root_digest, deferred.incident_id, None
 
 
 def _admit_or_coordinate(
@@ -341,10 +316,11 @@ def _admit_or_coordinate(
     query_runner: Callable[..., Mapping[str, Any]],
     select_authority: Callable[[Path], Any], coordinator: Callable[..., Any],
     runtime_preflight: Callable[[], bool],
-) -> tuple[str, str, str, HoloIndexPostmergeRuntimeResult | None]:
+    defer_retry_wait: bool = False,
+) -> tuple[str, str, str, str, HoloIndexPostmergeRuntimeResult | None]:
     head, error = _exact_local_main(root, git_runner)
     if error:
-        return "", "", "", HoloIndexPostmergeRuntimeResult(
+        return "", "", "", "", HoloIndexPostmergeRuntimeResult(
             False, "REJECTED", rejection_reasons=(error,)
         )
     initial, terminal = _query_initial_owner(
@@ -352,20 +328,21 @@ def _admit_or_coordinate(
         select_authority=select_authority,
     )
     if terminal is not None or initial is None:
-        return head, "", "", terminal
+        return head, "", "", "", terminal
     try:
         dependencies_ready = runtime_preflight()
     except BaseException:
         dependencies_ready = False
     if dependencies_ready is not True:
-        return head, "", "", HoloIndexPostmergeRuntimeResult(
+        return head, "", "", "", HoloIndexPostmergeRuntimeResult(
             False, "REJECTED", head,
             rejection_reasons=("runtime_dependencies_unavailable",),
         )
-    task_id, authority_root_digest, terminal = _coordinate_repair(
+    task_id, authority_root_digest, incident_id, terminal = _coordinate_repair(
         root=root, head=head, query=query, initial=initial, coordinator=coordinator,
+        defer_retry_wait=defer_retry_wait,
     )
-    return head, task_id, authority_root_digest, terminal
+    return head, task_id, authority_root_digest, incident_id, terminal
 
 
 def _start_required_runtimes(
@@ -585,21 +562,37 @@ def _run_holoindex_postmerge_runtime_for_test(
     runtime_preflight: Callable[[], bool] = lambda: True,
     task_binder: Callable[[str, Path], str] = lambda _task_id, _root: "bound",
     task_releaser: Callable[[str, Path], str] = lambda _task_id, _root: "released",
+    resume_incident_id: str | None = None,
 ) -> HoloIndexPostmergeRuntimeResult:
+    if resume_incident_id is not None and (
+        type(resume_incident_id) is not str or _INCIDENT_ID_RE.fullmatch(resume_incident_id) is None
+    ):
+        return HoloIndexPostmergeRuntimeResult(
+            False, "REJECTED", rejection_reasons=("resume_incident_id_invalid",)
+        )
     root = repo_root.resolve(strict=False)
+    incident_id = ""
+    if resume_incident_id is not None:
+        def coordinator(*, repo_root, query, owner_failure):
+            return resume_holoindex_incident_repair(
+                repo_root=repo_root, query=query, resume_incident_id=resume_incident_id,
+                db=database_provider(), select_authority=select_authority,
+                query_runner=query_runner,
+            )
     try:
         with lease_factory():
-            head, task_id, authority_root_digest, terminal = _admit_or_coordinate(
+            head, task_id, authority_root_digest, incident_id, terminal = _admit_or_coordinate(
                 root=root, query=query, git_runner=git_runner,
                 query_runner=query_runner, select_authority=select_authority,
                 coordinator=coordinator, runtime_preflight=runtime_preflight,
+                defer_retry_wait=resume_incident_id is not None,
             )
             if terminal is not None:
                 return _finalize_runtime_outcome(
                     outcome=terminal, owned=(), stopped=(), stop_errors=(),
                     root=root, head=head, git_runner=git_runner,
                 )
-            return _execute_runtime_transaction(
+            outcome = _execute_runtime_transaction(
                 root=root, head=head, task_id=task_id,
                 authority_root_digest=authority_root_digest, query=query,
                 timeout_seconds=timeout_seconds,
@@ -610,9 +603,11 @@ def _run_holoindex_postmerge_runtime_for_test(
                 git_runner=git_runner, task_binder=task_binder,
                 task_releaser=task_releaser,
             )
+            return replace(outcome, incident_id=incident_id)
     except BaseException:
         return HoloIndexPostmergeRuntimeResult(
-            False, "REJECTED", rejection_reasons=("runtime_controller_unavailable",)
+            False, "REJECTED", rejection_reasons=("runtime_controller_unavailable",),
+            incident_id=incident_id,
         )
 
 
@@ -629,6 +624,7 @@ def _production_runtime_lease() -> ContextManager[Any]:
 def run_holoindex_postmerge_runtime_once(
     *, repo_root: Path | str, query: str, timeout_seconds: float = 14_400.0,
     poll_interval_seconds: float = 1.0,
+    resume_incident_id: str | None = None,
 ) -> HoloIndexPostmergeRuntimeResult:
     """Run or reconcile one exact-main transaction and release owned runtimes."""
 
@@ -664,6 +660,7 @@ def run_holoindex_postmerge_runtime_once(
         runtime_preflight=openclaw_postmerge_runtime_dependencies_ready,
         task_binder=register_openclaw_supervisor_postmerge_task,
         task_releaser=release_openclaw_supervisor_postmerge_task,
+        resume_incident_id=resume_incident_id,
     )
 
 

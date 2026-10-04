@@ -6,7 +6,11 @@ repair changes its content digest to
 Both existing consumer/generator pins are refreshed, with unchanged member and
 byte limits. Eight generator contracts pass (63.719s); the RedDog fast tier
 passes all15 members (10.000s parent), with stable named source pins. Hosted
-publication remains pending. See the canonical P15 RSI checkpoint. WSP5/22/50/97.
+publication is verified: PR2062 and exact-main CI/CodeQL passed at `6efbc3ac1`.
+Hosted 340 WRE and 675 effect selections are recorded separately, not added to
+these integrity counts. P15 retained/control/recovery confirms the repaired
+consumer on unchanged saved rows; no model-learning or worker repair claim.
+See the canonical P15 RSI checkpoint. WSP5/22/50/97.
 
 ## 2026-10-05 — WRE telemetry manifest boundary
 
