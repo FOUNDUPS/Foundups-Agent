@@ -1057,7 +1057,7 @@ class WREMasterOrchestrator:
             f"{skill_content[:1500]}\n"
             f"\n"
             f"## Last Execution (fidelity={current_fidelity:.2f})\n"
-            f"Input: {json.dumps(input_context)[:500]}\n"
+            f"Input: {json.dumps({k: v for k, v in input_context.items() if k != 'parent_continuity_context'})[:500]}\n"
             f"Output: {json.dumps(failed_output)[:500]}\n"
             f"\n"
             f"## Past Failures\n"

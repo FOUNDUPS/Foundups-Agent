@@ -1881,9 +1881,9 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.queue_default_repair_20261004",
-    "base_commit": "a9d2b07a3b4f4214df43432974054528a54b6ea7",
-    "selected_action": "Close implicit social dispatch in existing post-commit runner",
+    "observation_path": "current_observation.local_continuity_proposal_20261004",
+    "base_commit": "c563304a5451245df41cadc661a3c64d447fe2f7",
+    "selected_action": "Repair reserved continuity metadata projection in existing local proposal/reflection prompts; test supervised local worker",
     "status": "source_repaired_local_validation_complete_publication_pending",
     "wsp15": {
       "complexity": 2,
@@ -1894,9 +1894,10 @@
       "priority": "P1"
     },
     "dispatchable": false,
+    "execution_plane": "coordinator-supervised local diagnostic; not WRE production admission",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.pattern_memory_failure_recall_20261004",
-    "next_action": "Finish exact-head reviewed publication/main/cleanup; then select the smallest eligible native proof handoff layer from fresh owner evidence."
+    "previous_observation": "current_observation.current_generation_quorum_20261004",
+    "next_action": "Bounded local proposal, independent fixed criteria, source review/publication, then separately reviewed later retained use."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -27915,7 +27916,7 @@
     },
     "current_generation_quorum_20261004": {
       "base": "3df09e895366e47d40b009f65045ba8cf043581e",
-      "state": "locally_validated_publication_pending",
+      "state": "merged_exact_main_verified_owned_lane_retired",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -27953,6 +27954,61 @@
         "quarantined_files": 270,
         "integrity_cases_passed": 8,
         "node_compatibility_contract": "passed"
+      },
+      "closure": {
+        "pr": 2050,
+        "merge": "c563304a5451245df41cadc661a3c64d447fe2f7",
+        "pr_checks_passed": 10,
+        "main_ci": 37180382606,
+        "main_codeql": 37180382203,
+        "main_exact_cases_passed": 452,
+        "owned_lane_retired": true,
+        "evidence": "O:/Foundups-Agent/outputs/rsi-current-generation-quorum-20261004/closure-receipt.json"
+      }
+    },
+    "local_continuity_proposal_20261004": {
+      "base": "c563304a5451245df41cadc661a3c64d447fe2f7",
+      "state": "source_repaired_local_validation_complete_publication_pending",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "reuse": [
+        "modules/infrastructure/wre_core/src/local_skill_inference.py",
+        "modules/infrastructure/wre_core/wre_master_orchestrator/src/wre_master_orchestrator.py"
+      ],
+      "baseline": {
+        "cases": 35,
+        "passed": 27,
+        "failed": 8,
+        "errors": 0,
+        "skipped": 0,
+        "distinct_projection_defects": 2
+      },
+      "native_admission": false,
+      "retained_rsi_gain": null,
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-local-continuity-proposal-20261004",
+      "next_gate": "Frozen criteria withheld; local proposal alone never proves effect or production admission.",
+      "validation": {
+        "frozen_passed": 35,
+        "connected_passed": 173,
+        "new_cases": 14,
+        "failures_errors_skips": 0,
+        "selections_overlap": true
+      },
+      "worker": {
+        "raw": "rejected_unusable_text",
+        "native_chat": "two_exact_expressions_applied",
+        "native_chat_seconds": 27.172,
+        "tokens": null,
+        "paid_inference_calls": 0,
+        "coordinator_cost": null,
+        "metadata_probe_loads": 1,
+        "production_effect_evidence": false
       }
     }
   }

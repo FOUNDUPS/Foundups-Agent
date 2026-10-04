@@ -1,3 +1,27 @@
+## Local continuity proposal canary — 2026-10-04
+
+The OpenClaw continuity object remains available to its lineage owner but is
+omitted from local proposal and reflection prompt JSON, matching existing
+PatternMemory handling. Ordinary task fields, input objects, indentation and
+reflection truncation are preserved; unrelated nonserializable values still
+fail. Two existing expressions changed; no new runtime module or admission.
+
+Independent frozen baseline:8 expected failures/27 passes across35 cases;
+repaired source:35/35 and173/173 connected cases pass (selections overlap,
+14 new cases). The raw local worker returned only “Do not claim effects.” and
+was rejected. The existing native-chat route supplied the exact two accepted
+expressions in27.172s after a counted metadata-only model load. Same task/model,
+different formatting and stop behavior: this is a route comparison, not isolated
+causal proof. Tokens unavailable; paid inference calls0; coordinator cost unknown.
+Model text remains unverified; independent source review, publication and later
+retained use are separate gates. No native Hermes/OpenClaw ticket admitted.
+
+WSP15:13/P1 (2/4/4/3). Source base `c563304a5`; evidence in backlog
+`current_observation.local_continuity_proposal_20261004`. PR2050 is now
+merged/main-verified,452 exact guarded passes, all10 PR checks, owned lane
+retired. Production native18/P0 remains blocked; do not add supplied authority
+assertions as a substitute for actual producers/admission.
+
 ## Current-generation quorum selection — 2026-10-04
 
 PR2048 is merged/main-verified at `3df09e895366e47d40b009f65045ba8cf043581e`.

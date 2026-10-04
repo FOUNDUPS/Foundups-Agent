@@ -1101,3 +1101,133 @@ def test_local_lifecycle_interruption_preserves_primary(mode, lifecycle_boundary
     assert state.engine_closes == state.constructed and len(state.constructed) == 1
     assert state.native_closes == [(None, False)]
     assert state.constructed[0].llm is None and state.constructed[0]._initialized is False
+
+
+# Transport lineage is consumed by the master, not serialized into model input.
+_CONTINUITY_REFLECTION = (
+    '# Skill Evolution Reflection\n\n## Current Skill\n# Skill\nReturn a proposal.\n\n'
+    '## Last Execution (fidelity=0.50)\n'
+    'Input: {"x": 1, "proposal_mode": "native_chat"}\n'
+    'Output: {"success": false}\n\n## Past Failures\nNone recorded yet.\n\n'
+    '## Past Successes\nNone recorded yet.\n\n## Task\n'
+    'Analyze why fidelity is 0.50 (below 0.90 target).\n'
+    'Generate IMPROVED skill instructions that address the failure patterns.\n'
+    'Output the improved SKILL.md content (YAML frontmatter + instructions).\n'
+    'Keep the same name: continuity_skill\n'
+)
+
+
+@pytest.fixture
+def continuity_proposal_parent():
+    from modules.communication.moltbot_bridge.src.continuity_context import (
+        ContinuityContext, RuntimeSurface,
+    )
+    return ContinuityContext(
+        continuity_id="synthetic-parent", surface=RuntimeSurface.OPENCLAW,
+        session_id="synthetic-session", sender="synthetic-sender", channel="test",
+        created_at="2026-10-04T00:00:00Z", last_activity_at="2026-10-04T00:00:00Z",
+        surface_metadata={"internal": "SYNTHETIC_CONTINUITY_ONLY"},
+    )
+
+
+def _continuity_reflection(context):
+    return WREMasterOrchestrator._build_reflection_prompt(
+        None, skill_name="continuity_skill", skill_content=_NATIVE_SKILL,
+        failed_output={"success": False}, input_context=context, current_fidelity=0.5,
+        failure_patterns=[], success_patterns=[],
+    )
+
+
+def test_continuity_proposal_ordinary_prompt_unchanged():
+    from modules.infrastructure.wre_core.src.local_skill_inference import _build_prompt
+    context = dict(_NATIVE_CONTEXT)
+    assert _build_prompt(_NATIVE_SKILL, context) == _NATIVE_PROMPT
+    assert context == _NATIVE_CONTEXT
+
+
+@pytest.mark.parametrize("kind", ["context", "none", "mapping"])
+def test_continuity_proposal_prompt_omits_reserved_field(kind, continuity_proposal_parent):
+    from modules.infrastructure.wre_core.src.local_skill_inference import _build_prompt
+    parent = continuity_proposal_parent
+    value = {"context": parent, "none": None, "mapping": parent.to_dict()}[kind]
+    context = {**_NATIVE_CONTEXT, "parent_continuity_context": value}
+    before, parent_before = dict(context), parent.to_dict()
+    assert _build_prompt(_NATIVE_SKILL, context) == _NATIVE_PROMPT
+    assert context == before and context["parent_continuity_context"] is value
+    assert parent.to_dict() == parent_before
+
+
+def test_continuity_proposal_prompt_rejects_unrelated_object():
+    from modules.infrastructure.wre_core.src.local_skill_inference import _build_prompt
+    unrelated = object()
+    context = {**_NATIVE_CONTEXT, "business_value": unrelated}
+    with pytest.raises(TypeError):
+        _build_prompt(_NATIVE_SKILL, context)
+    assert context["business_value"] is unrelated
+
+
+@pytest.mark.parametrize("mode", ["raw", "native_chat"])
+def test_continuity_proposal_route_keeps_lineage_and_truth(
+        mode, continuity_proposal_parent, lifecycle_boundary):
+    state, parent = lifecycle_boundary, continuity_proposal_parent
+    context = {**_NATIVE_CONTEXT, "parent_continuity_context": parent}
+    before, parent_before = dict(context), parent.to_dict()
+    result = _lifecycle_master(mode)._execute_skill_with_qwen(_NATIVE_SKILL, context, "qwen")
+    assert result["error_code"] == "unverified_model_proposal"
+    assert result["proposal"] == ("raw proposal" if mode == "raw" else "chat proposal")
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert result["output"] == "" and result["steps_completed"] == 0
+    if mode == "raw":
+        assert len(state.model.raw) == 1
+        assert state.model.raw[0][0] == _NATIVE_SYSTEM + "\n\n" + _NATIVE_PROMPT
+        assert state.handlers == []
+    else:
+        assert len(state.handlers) == len(state.model.completions) == 1
+        assert state.handlers[0][0] == [
+            {"role": "system", "content": _NATIVE_SYSTEM},
+            {"role": "user", "content": _NATIVE_PROMPT},
+        ]
+        assert state.model.raw == []
+    assert state.engine_closes == state.constructed and len(state.constructed) == 1
+    assert state.native_closes == [(None, False)]
+    assert state.constructed[0].llm is None and state.constructed[0]._initialized is False
+    assert context == before and context["parent_continuity_context"] is parent
+    assert parent.to_dict() == parent_before
+
+
+@pytest.mark.parametrize("mode", ["raw", "native_chat"])
+def test_continuity_proposal_route_rejects_unrelated_object(mode, lifecycle_boundary):
+    state = lifecycle_boundary
+    unrelated = object()
+    context = {**_NATIVE_CONTEXT, "business_value": unrelated}
+    result = _lifecycle_master(mode)._execute_skill_with_qwen(_NATIVE_SKILL, context, "qwen")
+    assert result["error_code"] == "local_model_unavailable" and result["proposal"] == ""
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert state.model.raw == state.handlers == state.model.completions == []
+    assert state.engine_closes == state.constructed and len(state.constructed) == 1
+    assert context["business_value"] is unrelated
+
+
+def test_continuity_proposal_ordinary_reflection_unchanged():
+    context = dict(_NATIVE_CONTEXT)
+    assert _continuity_reflection(context) == _CONTINUITY_REFLECTION
+    assert context == _NATIVE_CONTEXT
+
+
+@pytest.mark.parametrize("kind", ["context", "none", "mapping"])
+def test_continuity_proposal_reflection_omits_reserved_field(kind, continuity_proposal_parent):
+    parent = continuity_proposal_parent
+    value = {"context": parent, "none": None, "mapping": parent.to_dict()}[kind]
+    context = {**_NATIVE_CONTEXT, "parent_continuity_context": value}
+    before, parent_before = dict(context), parent.to_dict()
+    assert _continuity_reflection(context) == _CONTINUITY_REFLECTION
+    assert context == before and context["parent_continuity_context"] is value
+    assert parent.to_dict() == parent_before
+
+
+def test_continuity_proposal_reflection_rejects_unrelated_object():
+    unrelated = object()
+    context = {**_NATIVE_CONTEXT, "business_value": unrelated}
+    with pytest.raises(TypeError):
+        _continuity_reflection(context)
+    assert context["business_value"] is unrelated

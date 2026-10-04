@@ -600,6 +600,12 @@ Unsupported agent: `unsupported_local_agent`.
 Unavailable/import/init/generation failure: `local_model_unavailable`.
 Generated proposal: `unverified_model_proposal`.
 
+Local proposal and master reflection prompt builders omit only the reserved
+`parent_continuity_context` key from JSON. The original mapping/object is not
+modified; lineage consumption remains separate. No `default=str` coercion or
+generic serializer is added. Ordinary task values keep their prior encoding;
+unrelated nonserializable values remain errors.
+
 ## PatternMemory
 
 Every `PatternMemory(db_path=None)` or explicit-path instance owns a separate

@@ -115,6 +115,8 @@ WRE Core owns:
 - content-bound supply-chain scanning and manifest verification;
 - registry-adjacent programmatic executor dispatch;
 - proposal-only local model inference;
+  prompt JSON excludes reserved parent continuity metadata while lineage
+  retains the original object; unrelated serialization failures remain closed;
 - structural fidelity and durable execution-outcome storage;
 - bounded ReAct retries;
 - candidate variation storage;
