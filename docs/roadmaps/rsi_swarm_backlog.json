@@ -1881,23 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.terminal_fixture_observation_20261002",
-    "base_commit": "5e7faccfeeda635b342d37849b18769f74db13e2",
-    "selected_action": "Native autonomous RSI admission",
-    "status": "blocked_no_eligible_execution_after_terminal_diagnostic",
+    "observation_path": "current_observation.pattern_memory_failure_recall_20261004",
+    "base_commit": "dad6fc6b060e5436fdfb0bd74a566934534c74fa",
+    "selected_action": "Close false failure recall in existing PatternMemory",
+    "status": "source_repaired_local_validation_complete_publication_pending",
     "wsp15": {
-      "complexity": 4,
-      "importance": 5,
-      "deferability": 5,
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 4,
       "impact": 4,
-      "total": 18,
-      "priority": "P0"
+      "total": 14,
+      "priority": "P1"
     },
     "dispatchable": false,
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.logger_connection_controls_20261002",
-    "publication_state": "pending_exact_source_review_and_hosted_closure",
-    "next_action": "Obtain a designated resident-authority owner handoff for one exact queue/effect ticket and its authentic runtime/trust-evidence references; retain the existing admission dependency as blocked until those inputs change."
+    "previous_observation": "current_observation.terminal_fixture_observation_20261002",
+    "publication_state": "pending_exact_head_review_ci_main_closure",
+    "next_action": "Finish reviewed repair publication and owned-lane closure, then re-observe the existing native-admission prerequisites."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -27618,6 +27618,138 @@
         "known_unknown": "Installed authority/configuration was not inspected. The report does not claim installation is absent; no concrete operational owner path/ticket/provenance was supplied to this bounded assessment."
       },
       "authorization_distinction": "Standing authorization for ordinary repository development remains unchanged. The blocked state concerns authentic runtime/effect-use inputs and lack of an evidence-backed next code target, not a request to reapprove ordinary reversible development."
+    },
+    "pattern_memory_failure_recall_20261004": {
+      "base": "dad6fc6b060e5436fdfb0bd74a566934534c74fa",
+      "state": "source_repaired_local_validation_complete_publication_pending",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "selected": "Close false failure recall in existing PatternMemory",
+      "defect": "Successful low-fidelity outcomes were consumed as past failures by WRE skill evolution",
+      "repair": "Add success = 0 while retaining the inclusive cutoff, skill filter, ordering and limit",
+      "source": "modules/infrastructure/wre_core/src/pattern_memory.py",
+      "test": "modules/infrastructure/wre_core/tests/test_pattern_memory.py::TestPatternMemory::test_recall_failure_patterns",
+      "retrieval": {
+        "holo_error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "fallback": "Fresh main file identity, NAVIGATION and exact module/interface/test/caller source; no query-side repair"
+      },
+      "worker": {
+        "route": "existing local LlamaCppBackend; not native ticket dispatch",
+        "model": "Qwen2.5-Coder-7B",
+        "tokens": 395,
+        "wall_seconds": 33.797,
+        "autonomous_defect_discovery": false,
+        "paid_provider_calls": 0
+      },
+      "challenger": {
+        "model": "Qwen3.5-4B",
+        "tokens": 486,
+        "wall_seconds": 38.703,
+        "same_packet_output_ceiling": 112,
+        "result": "No complete SQL within ceiling; rejected for this task, not a general model ranking"
+      },
+      "validation": {
+        "original_with_extended_test": {
+          "passed": 40,
+          "failed": 1,
+          "seconds": 2.55
+        },
+        "candidate_four_suites": {
+          "passed": 159,
+          "failed": 0,
+          "skipped": 0,
+          "seconds": 8.1
+        },
+        "normal_pytest_fixtures": true,
+        "source_review": "Separate reviewer found no blocking defect; no independent execution claimed",
+        "consumer": "Real memory and unchanged extracted reflection builder; scratch later process retains correct exclusion",
+        "promoted_retained_gain": null,
+        "ci_configuration_replay": {
+          "passed": 159,
+          "failed": 0,
+          "skipped": 0,
+          "seconds": 6.16,
+          "receipt": "publication-tests.xml in local evidence directory",
+          "plugin_autoload_disabled": true,
+          "conftest_disabled": true
+        }
+      },
+      "runtime_advisory": {
+        "schema_version": "foundups_agent_wsl_runtime_receipt.v1",
+        "authority_class": "advisory_unverified_runtime_report",
+        "state": "PASS",
+        "distro": "Ubuntu-24.04",
+        "base_path": "E:\\Agents\\WSL\\Ubuntu-24.04",
+        "expected_base_path": "",
+        "components": [
+          {
+            "component_id": "openclaw",
+            "executable": "/usr/local/bin/openclaw",
+            "available": true,
+            "version": "OpenClaw 2026.7.1-2 (0790d9f)",
+            "reason": ""
+          },
+          {
+            "component_id": "hermes",
+            "executable": "/usr/local/bin/hermes",
+            "available": true,
+            "version": "Hermes Agent v0.20.4 (2026.8.18)",
+            "reason": ""
+          }
+        ],
+        "reasons": [],
+        "receipt_id": "sha256:876eba270f8e40237475d5006f19ee6cce97d2c989a795e573e683de3f5886af"
+      },
+      "permissions": "Prior session denial resolved by 012 full-access change; Git fetch/worktree creation verified",
+      "publication": "Exact head PR/CI/main and owned-lane closure required separately",
+      "local_evidence": "O:\\Foundups-Agent\\outputs\\rsi-local-agent-20261004-82f4e22da9564b24b23cbc4a19b9cf55",
+      "patch_sha256": "d85d72000f6fa204c14fac70e75ed6d9d22d1b33e373620c76552852ee949542",
+      "previous_selection": {
+        "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
+        "observation_path": "current_observation.terminal_fixture_observation_20261002",
+        "base_commit": "5e7faccfeeda635b342d37849b18769f74db13e2",
+        "selected_action": "Native autonomous RSI admission",
+        "status": "blocked_no_eligible_execution_after_terminal_diagnostic",
+        "wsp15": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 4,
+          "total": 18,
+          "priority": "P0"
+        },
+        "dispatchable": false,
+        "requires_fresh_reobservation_after_closure": true,
+        "previous_observation": "current_observation.logger_connection_controls_20261002",
+        "publication_state": "pending_exact_source_review_and_hosted_closure",
+        "next_action": "Obtain a designated resident-authority owner handoff for one exact queue/effect ticket and its authentic runtime/trust-evidence references; retain the existing admission dependency as blocked until those inputs change."
+      },
+      "next_gate": {
+        "selected": "Native autonomous RSI admission",
+        "wsp15": {
+          "complexity": 4,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 4,
+          "total": 18,
+          "priority": "P0"
+        },
+        "state": "blocked_authority_and_implementation_prerequisites",
+        "dependencies": [
+          "Designated resident-authority owner and authentic exact-ticket runtime/trust evidence",
+          "Qualified issuer-to-effect-consumer implementation; existing authoritative_use_lease=None is not fixed by host access",
+          "Independent verifier, admitted sandbox/model/provider and governed retention/rollback"
+        ],
+        "rule": "Re-observe after repair publication; no new orchestrator or reopening closed prefix diagnostic"
+      }
     }
   }
 }

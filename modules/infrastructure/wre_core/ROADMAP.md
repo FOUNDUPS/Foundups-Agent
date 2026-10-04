@@ -1,3 +1,12 @@
+## Current repository repair layer — 2026-10-04
+
+Failure recall now separates execution success from structural fidelity.
+159 local regressions pass; existing CI includes the affected suites. The
+[canonical observation](../../../docs/roadmaps/rsi_swarm_backlog.json) records
+local worker measurements and OpenClaw/Hermes version readiness. Promotion and
+native admitted/retained operation remain separate gates. Earlier diagnostic
+entries below are historical; the prefix diagnostic remains closed.
+
 ## Terminal fixture observation — 2026-10-02
 
 **fixture_inconclusive.** One reviewed terminal child returned normally in2.5s. The recorded7895232-byte fixture hash matched; import, params, backend interval/free, descriptor close and ERROR logger/capture restoration returned. Model load returned null; vocabulary/model-free were not attempted. Capture recorded0 writes/characters and no labels: fixture_inconclusive, diagnostic usefulness insufficient. The sole allowance and this diagnostic branch are closed; no usable worker or specific rejection explanation was established. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.

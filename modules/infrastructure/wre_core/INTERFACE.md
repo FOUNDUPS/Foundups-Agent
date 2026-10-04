@@ -625,6 +625,12 @@ independently bound transaction participant.
 success and structural fidelity. `outcome_quality` remains `0.0` until an
 independent authenticated evaluator supplies quality evidence.
 
+`recall_failure_patterns()` returns only explicitly unsuccessful outcomes
+(`success = 0`) at or below its inclusive `max_fidelity` threshold. Structural
+fidelity alone does not classify an execution as failed. Skill filtering,
+ascending fidelity/descending timestamp ordering and the result limit remain
+unchanged; high-fidelity failures require a correspondingly higher cutoff.
+
 `stage_variation_candidate(variation_id)` sets a non-production
 `candidate_ready` state. `promote_variation()` is a fail-closed compatibility
 method until the independent signed promoter is implemented.

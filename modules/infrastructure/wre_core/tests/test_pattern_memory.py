@@ -205,30 +205,24 @@ class TestPatternMemory:
         assert all(p["success"] == 1 for p in patterns)
 
     def test_recall_failure_patterns(self, memory):
-        """Test recalling failed execution patterns"""
-        # Store 2 successful and 3 failed outcomes
-        for i in range(5):
-            fidelity = 0.65 if i >= 2 else 0.92  # Last 3 are failures
-            outcome = SkillOutcome(
-                execution_id=f"exec_{i:03d}",
-                skill_name="qwen_gitpush",
-                agent="qwen",
-                timestamp=datetime.now().isoformat(),
-                input_context=json.dumps({}),
-                output_result=json.dumps({}),
-                success=(i < 2),
-                pattern_fidelity=fidelity,
-                outcome_quality=0.70,
-                execution_time_ms=1000,
-                step_count=4
-            )
-            memory.store_outcome(outcome)
-
-        # Recall failure patterns (≤0.70 fidelity)
+        """Failure recall separates outcome success from structural fidelity."""
+        cases = [(True, 0.20), (False, 0.20), (False, 0.65),
+                 (False, 0.70), (False, 0.99), (True, 0.92)]
+        for i, (success, fidelity) in enumerate(cases):
+            memory.store_outcome(SkillOutcome(
+                execution_id=f"exec_{i:03d}", skill_name="qwen_gitpush",
+                agent="qwen", timestamp=datetime.now().isoformat(),
+                input_context=json.dumps({}), output_result=json.dumps({}),
+                success=success, pattern_fidelity=fidelity, outcome_quality=0.70,
+                execution_time_ms=1000, step_count=4,
+            ))
         patterns = memory.recall_failure_patterns("qwen_gitpush", max_fidelity=0.70)
-
-        assert len(patterns) == 3
-        assert all(p["pattern_fidelity"] <= 0.70 for p in patterns)
+        assert {p["execution_id"] for p in patterns} == {"exec_001", "exec_002", "exec_003"}
+        assert all(p["success"] == 0 and p["pattern_fidelity"] <= 0.70 for p in patterns)
+        expanded = memory.recall_failure_patterns("qwen_gitpush", max_fidelity=1.0)
+        assert {p["execution_id"] for p in expanded} == {"exec_001", "exec_002", "exec_003", "exec_004"}
+        assert memory.recall_failure_patterns("absent") == []
+        assert memory.recall_failure_patterns("qwen_gitpush", limit=0) == []
 
     def test_get_skill_metrics_no_data(self, memory):
         """Test metrics for skill with no executions"""
