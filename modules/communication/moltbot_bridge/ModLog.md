@@ -1,3 +1,28 @@
+## Canonical effect request preparation — 2026-10-04
+
+The existing issuer now exposes `prepare_request(payload=..., authority_tier=...)`
+and `issue` reuses it after its original owner check and clock sample. This
+returns replay-bound canonical data before effect authorization; it does not
+grant freshness, signing permission or a runtime lease. Exact-type rejection,
+input preservation, Exception/interrupt handling and provider cleanup remain.
+
+Independent frozen43-case baseline:11 pass/32 missing-API failures; candidate43
+pass. Connected78 cases pass, including those43, with zero errors/skips. Two
+earlier wrapper/setup failures remain recorded. The same assertions and test
+bytes were used before and after; no new runtime module or trust domain.
+
+One local Qwen proposal supplied the method body but failed the raw format
+requirement. Coordinator fence removal/indentation preserved its AST; coordinator
+also integrated the caller. This is supervised reuse, not autonomous acceptance.
+One SDK event:948 input/124 output tokens;70.031s parent elapsed;0 paid inference
+calls; total cost unknown. No retry, promotion, grant or model-learning claim.
+
+Source/CI publication remains pending at this checkpoint. Evidence and exact
+commands: `current_observation.effect_request_preparation_20261004` in the
+canonical RSI backlog and `outputs/rsi-effect-request-preparation-20261004` on
+the execution PC. Native18/P0 remains blocked on authentic effect authority and
+producer/permit/provider/resolver composition. WSP00/5/6/11/15/22/48/50/62/84/97/99.
+
 ## Offline scanner environment — 2026-10-04
 
 The existing scanner child environment now fixes dotenv disabled, LiteLLM

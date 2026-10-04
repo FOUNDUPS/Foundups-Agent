@@ -1,3 +1,12 @@
+## Effect request preparation — 2026-10-04
+
+13/P1 source prerequisite: existing issuer preparation now feeds the canonical
+effect-binding surface before authorization. Local43/43 and connected78/78
+pass; publication/main verification remain pending. Local Qwen content required
+coordinator formatting recovery and caller integration; raw format remains a
+failure. Native authority is not activated. See canonical RSI backlog
+`effect_request_preparation_20261004` and module ModLog for evidence and limits.
+
 ## 2026-10-04: RSI MCP runtime qualification
 
 - Reconciled PR2056 main/cleanup closure and selected the next existing MCP
