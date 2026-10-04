@@ -30114,6 +30114,22 @@
         "child_seconds": 98.907,
         "paid_calls": 0,
         "total_cost": null
+      },
+      "initial_publication_failure": {
+        "added": [
+          "modules/communication/moltbot_bridge/tests/test_holoindex_persisted_resume.py",
+          "modules/communication/moltbot_bridge/tests/test_holoindex_resume_controller.py"
+        ],
+        "existing_entry_metadata_unchanged": true,
+        "shard_reassignment": "Canonical generator repartitioned existing unit shards; not manual editing.",
+        "total": 1687,
+        "quarantined": 270,
+        "registry_sha256": "4afa31670cb4c053fc05880140eb452020d37a017aecc342fe7613fe66357826",
+        "original_failed_ci": 37228621136,
+        "original_pr_head": "4eed2e61166b4f11f430315fcafa0312ce9a2d3b",
+        "original_log_sha256": "d58ce1aa94a8bd8c2ae8fc4f9ee49cddddd7ff326eccfb8a94f3dcfb16f4d74c",
+        "production_code_changed": false,
+        "hosted_replacement_checks_pending": true
       }
     }
   }

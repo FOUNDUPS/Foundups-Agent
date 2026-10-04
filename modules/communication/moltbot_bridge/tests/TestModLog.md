@@ -3535,6 +3535,12 @@ The 4 strict-xfail contracts from #738 are CONVERTED to passing assertions (gaps
 - Existing legacy seed-byte oracle and explicit pre-read snapshot remain unchanged. Source215/public function111; manifest8pass, fast15groups, registry1651/269 current. No live provider, sandbox, signing authority or retained-improvement claim. Evidence: root backlog current_observation.
 ## HoloIndex resume source qualification — 2026-10-05
 
+Initial PR2063 CI37228621136 stopped at the stale canonical test registry before
+application tests. Regenerated the existing registry:1685→1687 files,270 still
+quarantined. Only the two new resume files were added; existing entry metadata
+is unchanged apart from generated shard assignments. Local generator check
+passes. Replacement-head CI remains required; the initial failure is retained.
+
 WSP00/5/6/11/15/22/48/50/62/97. Existing baseline146 passed. Independently
 frozen29 resume cases:28 missing-API failures/one control pass, then29 passed.
 Connected152 initially failed2: private admission tuple migration and existing
