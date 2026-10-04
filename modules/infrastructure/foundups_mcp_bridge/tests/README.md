@@ -1,5 +1,24 @@
 # foundups_mcp_bridge Tests
 
+## MCP runtime compatibility
+
+The `mcp-runtime-compatibility` Windows CI job selects the existing launcher,
+HTTP server and query-candidate-binding suites. It installs the module's exact
+quartet in a disposable venv, supplies private HOME/TEMP, and requires every
+selected case to pass without skips. The existing directory-alias helper can
+use a junction when Windows symlink privilege is unavailable; that tests the
+same rejected reparse boundary, not symlink privilege itself.
+
+For the two live cases, `FOUNDUPS_MCP_TEST_PYTHON` must identify the disposable
+candidate interpreter. The fixture substitutes only the shared instance-lock
+acquisition and interpreter selection. Real capability, server, authentication
+and MCP readiness checks still execute. An ephemeral loopback endpoint must
+be observed as owned by the captured child PID before requests. This is a
+sampled ownership check, not a race-free socket lease. The finalizer observes
+lock release and reaps only captured children; emergency cleanup fails the test.
+No production singleton cleanup, public tunnel, OAuth flow, active-runtime
+upgrade, native WRE admission or generalized RSI gain follows from these tests.
+
 ## Optional child Job memory contract (2026-10-02)
 
 The existing `test_reddog_bounded_child_process.py` retains its original 22

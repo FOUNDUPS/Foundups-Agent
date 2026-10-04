@@ -10,17 +10,23 @@ WSP References:
 
 import asyncio
 import json
+import os
 import pytest
+import socket
+import subprocess
+import sys
 import threading
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
+from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 # FastMCP may only be installed in foundups-mcp-env
 pytest.importorskip("fastmcp")
 
+from modules.infrastructure.foundups_mcp_bridge.scripts import launch
 from modules.infrastructure.foundups_mcp_bridge.src.mcp_server import (
     REMOTE_READ_ONLY_ALLOWLIST,
     build_mcp_server,
@@ -58,6 +64,163 @@ def registered_tool_names(server):
         return {tool.name for tool in tools}
     tools = asyncio.run(server.get_tools())
     return set(tools)
+
+
+class _OwnedMCPRuntime:
+    """Test-only lock and process ownership; never touches the shared singleton."""
+
+    def __init__(self, candidate):
+        self.candidate = candidate
+        self.lock = MagicMock()
+        self.processes = []
+        self.commands = []
+        self.readiness = launch.verify_mcp_readiness
+        self.owner_checks = 0
+        self.probe_events = []
+        self.cleanup_errors = []
+        self.shell = Path(os.environ["SystemRoot"]) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
+        assert self.shell.is_file() and not self.shell.is_symlink()
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as reservation:
+            reservation.bind(("127.0.0.1", 0))
+            self.port = reservation.getsockname()[1]
+
+    def spawn(self, command, **kwargs):
+        assert not self.processes, "only one owned server per test"
+        assert "modules.infrastructure.foundups_mcp_bridge.src.mcp_server" in command
+        proc = subprocess.Popen(command, **kwargs)
+        self.processes.append(proc)  # Retained even if launch clears its handle.
+        self.commands.append({"argv": command, "pythonpath": kwargs["env"]["PYTHONPATH"]})
+        return proc
+
+    def probe(self, script):
+        observation = {"phase": "attempted", "timeout_sec": 10, "error_type": None}
+        started = time.monotonic()
+        try:
+            result = subprocess.run(
+                [str(self.shell), "-NoProfile", "-NonInteractive", "-Command", script],
+                capture_output=True, text=True, timeout=10, check=False,
+                env=launch._closed_child_base_env(),
+            )
+            observation.update(
+                phase="returned", returncode=result.returncode,
+                stdout_chars=len(result.stdout), stderr_chars=len(result.stderr),
+            )
+            return result
+        except BaseException as exc:
+            observation.update(phase="failed", error_type=type(exc).__name__)
+            raise
+        finally:
+            observation["elapsed_ms"] = round((time.monotonic() - started) * 1000, 3)
+            self.probe_events.append(observation)
+
+    def start_detail(self, result):
+        codes = {
+            "RuntimeError", "TimeoutExpired", "AssertionError", "FileNotFoundError",
+            "PermissionError", "OSError", "ValueError", "mcp_readiness_process_failed",
+            "mcp_readiness_timeout", "stop_timeout_still_running", "stopped",
+        }
+        status = result.get("status")
+        return {
+            "status": status if status in ("running", "failed", "error") else "unknown",
+            "error": result.get("error") if result.get("error") in codes else "unclassified",
+            "termination": result.get("termination") if result.get("termination") in codes else "unknown",
+            "owner_checks": self.owner_checks,
+            "ownership_probes": self.probe_events,
+        }
+
+    def check_endpoint(self):
+        assert len(self.processes) == 1
+        proc = self.processes[0]
+        handle = launch._active_runtime
+        assert handle is not None and handle.proc is proc
+        script = (
+            "$ErrorActionPreference='Stop'; "
+            f"Get-NetTCPConnection -LocalAddress 127.0.0.1 -LocalPort {self.port} "
+            "-State Listen -ErrorAction SilentlyContinue | "
+            "ForEach-Object { $_.OwningProcess }; exit 0"
+        )
+        for _attempt in range(4):
+            assert proc.poll() is None, "owned server exited before readiness"
+            result = self.probe(script)
+            assert result.returncode == 0 and not result.stderr, self.probe_events[-1]
+            assert len(result.stdout) <= 4096
+            rows = result.stdout.split()
+            if rows:
+                assert rows == [str(proc.pid)], "endpoint is not owned by test child"
+                assert proc.poll() is None
+                self.owner_checks += 1
+                return
+            time.sleep(0.05)
+        pytest.fail("owned listener was not observed; no protocol request sent")
+
+    def verify(self, host, port, **kwargs):
+        assert host == "127.0.0.1" and port == self.port
+        self.check_endpoint()  # Also gates the launcher's automatic readiness.
+        return self.readiness(host, port, **kwargs)
+
+    def close(self):
+        handle = launch._active_runtime
+        if handle is not None:
+            if handle.proc not in self.processes:
+                self.cleanup_errors.append("unexpected_runtime_not_touched")
+            else:
+                try:
+                    result = stop_mcp_bridge_sse()
+                    assert result.get("status") == "stopped"
+                except BaseException as exc:
+                    self.cleanup_errors.append(type(exc).__name__)
+        for proc in self.processes:
+            if proc.poll() is None:
+                self.cleanup_errors.append("emergency_owned_process_cleanup")
+                try:
+                    proc.terminate()
+                    try:
+                        proc.wait(timeout=3)
+                    except subprocess.TimeoutExpired:
+                        proc.kill()
+                        proc.wait(timeout=2)
+                except BaseException as exc:
+                    self.cleanup_errors.append(type(exc).__name__)
+            if proc.poll() is None:
+                self.cleanup_errors.append("owned_process_still_alive")
+        if launch._active_runtime is not None:
+            self.cleanup_errors.append("runtime_handle_not_cleared")
+        if self.processes and self.lock.release.call_count != 1:
+            self.cleanup_errors.append("owned_lock_release_count")
+        if self.cleanup_errors:
+            pytest.fail("owned lifecycle cleanup: " + ",".join(self.cleanup_errors))
+
+
+@pytest.fixture
+def owned_mcp(monkeypatch, request):
+    """Own only this test's process; outer timeout cleanup belongs to its Job."""
+    assert launch._active_runtime is None, "refuse an existing runtime"
+    candidate = Path(os.environ["FOUNDUPS_MCP_TEST_PYTHON"])
+    assert candidate.is_absolute() and not candidate.is_symlink()
+    candidate = candidate.resolve(strict=True)
+    assert candidate.is_file()
+    owned = _OwnedMCPRuntime(candidate)
+    monkeypatch.setattr(launch, "_get_mcp_env_python", lambda _root: candidate)
+    monkeypatch.setattr(launch, "_acquire_http_lock", lambda: (owned.lock, None))
+    monkeypatch.setattr(launch, "subprocess", SimpleNamespace(
+        Popen=owned.spawn, run=subprocess.run, TimeoutExpired=subprocess.TimeoutExpired,
+    ))
+    monkeypatch.setattr(launch, "verify_mcp_readiness", owned.verify)
+    try:
+        yield owned
+    finally:
+        try:
+            owned.close()
+        finally:
+            request.node.user_properties.append(("owned_lifecycle", json.dumps({
+                "candidate": str(candidate), "client_python": sys.executable,
+                "commands": owned.commands, "pids": [p.pid for p in owned.processes],
+                "returncodes": [p.poll() for p in owned.processes],
+                "owner_checks": owned.owner_checks,
+                "ownership_probes": owned.probe_events,
+                "lock_release_calls": owned.lock.release.call_count,
+                "cleanup_errors": owned.cleanup_errors,
+            }, sort_keys=True)))
 
 
 class TestMCPServerSSE:
@@ -149,12 +312,12 @@ class TestMCPServerSSE:
         assert isinstance(status, dict)
         assert "status" in status
 
-    def test_protocol_readiness_canary_auth_and_concurrency_lifecycle(self, repo_root):
+    def test_protocol_readiness_canary_auth_and_concurrency_lifecycle(self, repo_root, owned_mcp):
         """
         Test full start -> protocol canary handshake -> auth enforcement -> concurrency stop.
         """
         auth_token = "test-secret-token-123"
-        port = 8139
+        port = owned_mcp.port
 
         start_res = run_mcp_bridge_sse(
             host="127.0.0.1",
@@ -164,8 +327,9 @@ class TestMCPServerSSE:
             repo_root=repo_root,
             blocking=False,
         )
-        assert start_res.get("status") == "running"
+        assert start_res.get("status") == "running", owned_mcp.start_detail(start_res)
         assert start_res.get("readiness", {}).get("verified") is True
+        assert start_res["pid"] == owned_mcp.processes[0].pid
 
         # Test duplicate start protection
         dup_res = run_mcp_bridge_sse(
@@ -180,22 +344,27 @@ class TestMCPServerSSE:
         assert dup_res.get("already_running") is True
 
         # 1. Unauthenticated request to canonical /mcp -> 401
+        owned_mcp.check_endpoint()
         try:
             req = urllib.request.Request(f"http://127.0.0.1:{port}/mcp")
-            urllib.request.urlopen(req, timeout=2.0)
-            pytest.fail("Unauthenticated request should have failed with 401")
+            with urllib.request.urlopen(req, timeout=2.0):
+                pytest.fail("Unauthenticated request should have failed with 401")
         except urllib.error.HTTPError as exc:
-            assert exc.code == 401
+            with exc:
+                assert exc.code == 401
 
         # 2. URL query token (?token=...) MUST BE REJECTED with 401 (P0: prevent secret logging)
+        owned_mcp.check_endpoint()
         try:
             req = urllib.request.Request(f"http://127.0.0.1:{port}/mcp?token={auth_token}")
-            urllib.request.urlopen(req, timeout=2.0)
-            pytest.fail("URL query token request should have failed with 401 (Bearer header required)")
+            with urllib.request.urlopen(req, timeout=2.0):
+                pytest.fail("URL query token request should have failed with 401 (Bearer header required)")
         except urllib.error.HTTPError as exc:
-            assert exc.code == 401
+            with exc:
+                assert exc.code == 401
 
         # 3. Unauthenticated request to /health -> 200 with auth_required: True
+        owned_mcp.check_endpoint()
         health_req = urllib.request.Request(f"http://127.0.0.1:{port}/health")
         with urllib.request.urlopen(health_req, timeout=2.0) as resp:
             assert resp.status == 200
@@ -205,7 +374,7 @@ class TestMCPServerSSE:
             assert data.get("tool_count") == len(REMOTE_READ_ONLY_ALLOWLIST)
 
         # 4. Authenticated protocol readiness canary
-        canary = verify_mcp_readiness(
+        canary = owned_mcp.verify(
             host="127.0.0.1",
             port=port,
             auth_token=auth_token,
@@ -254,10 +423,10 @@ class TestMCPServerFailureBoundaries:
         assert res.get("status") == "error"
         assert res.get("error") == "auth_token_required_for_remote_exposure"
 
-    def test_canary_rejects_unauthenticated_connection(self, repo_root):
+    def test_canary_rejects_unauthenticated_connection(self, repo_root, owned_mcp):
         """P1 Verification: Protocol canary fails closed if unauthorized."""
         auth_token = "valid-secret-token"
-        port = 8142
+        port = owned_mcp.port
 
         start_res = run_mcp_bridge_sse(
             host="127.0.0.1",
@@ -267,11 +436,12 @@ class TestMCPServerFailureBoundaries:
             repo_root=repo_root,
             blocking=False,
         )
-        assert start_res.get("status") == "running"
+        assert start_res.get("status") == "running", owned_mcp.start_detail(start_res)
+        assert start_res["pid"] == owned_mcp.processes[0].pid
 
         try:
             # Canary with wrong token should fail
-            bad_canary = verify_mcp_readiness(
+            bad_canary = owned_mcp.verify(
                 host="127.0.0.1",
                 port=port,
                 auth_token="wrong-token",

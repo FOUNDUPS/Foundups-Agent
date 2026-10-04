@@ -1,3 +1,17 @@
+## 2026-10-04: RSI MCP runtime qualification
+
+- Reconciled PR2056 main/cleanup closure and selected the next existing MCP
+  compatibility slice with WSP15/WSP97. Paired pins, Windows selected-venv
+  startup and post-spawn ownership are repaired in the current launcher.
+- Local final evidence is46 nonlistener plus two live cases, no errors/skips.
+  New hosted Windows job enforces all48. Publication/hosted results pending.
+- One local Qwen proposal was rejected without application or retry;767/59 SDK
+  tokens recorded. Coordinator repairs are separately attributed. Existing
+  module documents, canonical roadmap/backlog and benchmark owner are reused.
+- Shared runtime/peer trees untouched; native effect admission remains open.
+  See `docs/operations/RSI_SWARM_DISPATCH.md` current MCP checkpoint.
+  WSP00/15/22/50/84/97.
+
 ## 2026-10-04 — Verify retained local repair and close P8
 
 - PR2055 merged/main-verified; reviewed tree matches. Hosted217 WRE/67 scanner/

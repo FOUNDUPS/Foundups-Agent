@@ -138,3 +138,20 @@ deployment qualification/mitigation remains with the corresponding runtime owner
 the three alerts stay open. This completes the local preflight, not R03/R04.
 The system re-score selects R11 authenticated mirror restoration (17/P0) while
 the higher-scored integrated migration lacks current runtime/owner admission.
+
+## 7. Paired compatibility continuation — 2026-10-04
+
+Current source3c10155f1ab25ffa1a16081bca70842c56e9253f reuses the historical
+paired candidate in an owned copy. Requirements and exact launcher pins now
+agree;46 nonlistener and two owned HTTP cases pass. See the current module
+[ModLog](../../ModLog.md) and [test evidence](../../tests/TestModLog.md).
+
+The failed first live attempt exposed a real post-spawn cleanup defect; the
+coordinator repair passes frozen failure controls and live lifecycle. A local
+worker proposal was rejected, preserved and not applied. Selected-venv normal
+site startup restores PyWin32 imports without changing the PID owner.
+
+PR1526/1525 remain superseded candidates awaiting verified combined publication;
+no bot PR merge or alert dismissal is claimed here. The shared runtime remains
+unchanged. Successful disposable-loopback qualification does not renew the
+expired August authority, deploy the service or establish native RSI admission.

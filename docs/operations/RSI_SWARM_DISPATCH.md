@@ -1,3 +1,53 @@
+## MCP runtime qualification and rejected worker proposal — 2026-10-04
+
+PR2056 is closed: merge3c10155f1ab25ffa1a16081bca70842c56e9253f,
+all10 PR checks and main CI37194072508/CodeQL37194072280 succeeded; its
+owned lane/branches retired with recovery preserved and shared state unchanged.
+
+Fresh WSP15/WSP97 selected paired MCP qualification13/P1(3/4/3/3).
+A real startup cleanup failure raised its focused repair to14/P1(2/4/4/4).
+Native18/P0 and effect-owner14/P1 remain blocked; the ordinary supervised
+maintenance lane is independently executable. Existing requirements/launcher
+pins now agree. Direct base-interpreter children initialize selected-venv site
+hooks and probes use explicit `-B`; post-spawn errors reuse the existing cleanup
+owner rather than forgetting a live process.
+
+| Evidence | Pass | Fail | Errors/skips |
+|---|---:|---:|---:|
+| Original startup/version source,44 criteria | 40 | 4 | 0/0 |
+| First startup repair, same44 | 44 | 0 | 0/0 |
+| Frozen post-spawn cleanup baseline,46 criteria | 44 | 2 | 0/0 |
+| Coordinator cleanup repair, same46 | 46 | 0 | 0/0 |
+| Final owned HTTP lifecycle, two distinct cases | 2 | 0 | 0/0 |
+
+The first live attempt had one pass, one failed case and its teardown error;
+fixture emergency cleanup reaped only its captured process. It remains a failed
+qualification. The original exception type is unknown. Final cleanup has no
+emergency/errors, one lock release per server and observed process exit.
+These runs establish48 distinct final criteria, not a sum of repeated cases.
+
+One local Qwen7B job ran through the existing proposal API after criteria freeze.
+It invented a helper, confused handle/lock identity, returned an invalid fallback
+and violated output format. Independent review rejected it before application.
+767 input +59 output tokens were observed in one SDK event; parent52.062s;
+paid inference calls0; total compute cost unknown. No automatic retry or worker
+repair credit. Coordinator discovery, guidance, implementation and publication
+remain explicit interventions. The existing AI Gateway benchmark owner retains
+the rejected outcome; this is measured failure, not an autonomous success claim.
+
+A Windows CI job requires all48 cases without skips using its own128MiB VHD;
+source review rejected an earlier SUBST fixture without weakening test anchors.
+Hosted execution/publication are pending. Local fixtures use the existing
+bounded child/Job owner and a copied paired environment; no shared runtime was
+upgraded. PID checks are sampled, the singleton lock is a fixture seam, and
+process reaping does not establish graceful ASGI shutdown or an atomic lease.
+
+Full commands, hashes, XML and failed attempts live in
+`outputs/rsi-mcp-runtime-qualification-20261004` on the execution PC. Current
+status and WSP15 queue: `current_observation.mcp_runtime_qualification_20261004`
+in the canonical backlog. Close exact-source publication and owned cleanup,
+then re-observe. Native authority and learned variation retention remain open.
+
 ## Retained local repair and remaining admission gate — 2026-10-04
 
 PR2055 is merged as `a2b130247c010419e1cb918e48c0595258831075`.

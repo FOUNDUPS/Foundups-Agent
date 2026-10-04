@@ -1881,23 +1881,23 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.retained_source_closure_20261004",
-    "base_commit": "a2b130247c010419e1cb918e48c0595258831075",
-    "selected_action": "Reconcile retained source evidence in existing canonical documents",
-    "status": "canonical_reconciliation_publication_pending",
+    "observation_path": "current_observation.mcp_runtime_qualification_20261004",
+    "base_commit": "3c10155f1ab25ffa1a16081bca70842c56e9253f",
+    "selected_action": "Extend existing MCP launcher and three suites; requirements/launcher paired pins; selected-venv startup and post-spawn ownership cleanup; Windows CI coverage",
+    "status": "local_qualification_complete_publication_pending",
     "wsp15": {
-      "complexity": 1,
-      "importance": 3,
-      "deferability": 3,
-      "impact": 3,
-      "total": 10,
-      "priority": "P2"
+      "complexity": 2,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "total": 14,
+      "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "ordinary coordinator documentation closure",
+    "execution_plane": "ordinary supervised repository maintenance; no native effect admission",
     "requires_fresh_reobservation_after_closure": true,
-    "previous_observation": "current_observation.local_worker_format_benchmark_20261004",
-    "next_action": "Native18/P0 remains blocked; resolve designated effect-domain producer and independent actual-use contract through existing owner. Supervised lane requires a fresh task; no automatic same-task retry or promotion."
+    "previous_observation": "current_observation.retained_source_closure_20261004",
+    "next_action": "Finish independent source review and exact-head CI/publication, verify main, retire only owned lane, then re-observe WSP15/WSP97. No automatic model retry or runtime activation."
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -28480,7 +28480,7 @@
     },
     "retained_source_closure_20261004": {
       "base": "a2b130247c010419e1cb918e48c0595258831075",
-      "state": "canonical_reconciliation_publication_pending",
+      "state": "merged_main_verified_owned_lane_retired",
       "wsp15": {
         "complexity": 1,
         "importance": 3,
@@ -28571,7 +28571,165 @@
       ],
       "native_assessment_sha256": "982bf560992bf42aa484d9656de581fd2f781987b6dae82b2152d4a773b05b18",
       "local_evidence": "O:/Foundups-Agent/outputs/rsi-retained-source-closure-20261004",
-      "next_action": "Native18/P0 remains blocked; resolve designated effect-domain producer and independent actual-use contract through existing owner. Supervised lane requires a fresh task; no automatic same-task retry or promotion."
+      "next_action": "Native18/P0 remains blocked; resolve designated effect-domain producer and independent actual-use contract through existing owner. Supervised lane requires a fresh task; no automatic same-task retry or promotion.",
+      "publication": {
+        "pr": 2056,
+        "base": "a2b130247c010419e1cb918e48c0595258831075",
+        "head": "d53e2126256c9a6c369ed1be8b0160ce86a27a6c",
+        "merge": "3c10155f1ab25ffa1a16081bca70842c56e9253f",
+        "reviewed_merge_tree_equal": true,
+        "pr_checks_passed": 10,
+        "main_ci": 37194072508,
+        "main_codeql": 37194072280,
+        "main_conclusion": "success",
+        "source_changes": false,
+        "changed_documents": 7,
+        "unrelated_observations_preserved": 91,
+        "retention_reported": "one supervised source repair;29pass/26pass+3expectedfail/29pass",
+        "native_effect_admission": false,
+        "unattended_rsi_complete": false,
+        "owned_lane_retired": true,
+        "owned_branches_absent": true,
+        "ignored_files_preserved": 4,
+        "shared_status_unchanged_during_cleanup": true,
+        "recovery_bundle": "pr2056-recovery.bundle",
+        "independent_review_sha256": "c8fc0dd3c0752b480270d2e0808b05a7f6fbcd7e32dd2c1a039e100399626f6f",
+        "closure_sha256": "db0d6bc563a92b7ad9fe173ee868637d9e4bbd18e3ed255f98fc7a3e1b350897"
+      }
+    },
+    "mcp_runtime_qualification_20261004": {
+      "base": "3c10155f1ab25ffa1a16081bca70842c56e9253f",
+      "state": "local_qualification_complete_publication_pending",
+      "execution_plane": "ordinary supervised repository maintenance; no native effect admission",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "initial_selection": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1",
+        "task": "paired MCP runtime qualification"
+      },
+      "scope": "Extend existing MCP launcher and three suites; requirements/launcher paired pins; selected-venv startup and post-spawn ownership cleanup; Windows CI coverage",
+      "source_repair_author": "coordinator",
+      "local_evidence": "O:/Foundups-Agent/outputs/rsi-mcp-runtime-qualification-20261004",
+      "measurements": {
+        "signal_class": "execution_feedback",
+        "frozen_nonlistener_unique_cases": 46,
+        "live_unique_cases": 2,
+        "final_distinct_cases": 48,
+        "cleanup_baseline_passed": 44,
+        "cleanup_baseline_failed": 2,
+        "candidate_passed": 46,
+        "candidate_failed": 0,
+        "live_passed": 2,
+        "live_failed": 0,
+        "final_errors": 0,
+        "final_skips": 0,
+        "case_ids_and_order_unchanged": true,
+        "earlier_startup_baseline": {
+          "selected": 44,
+          "passed": 40,
+          "failed": 4
+        },
+        "first_live_attempt": {
+          "selected": 2,
+          "passed": 1,
+          "failed": 1,
+          "associated_teardown_errors": 1,
+          "original_exception_type": null,
+          "emergency_cleanup_observed": true
+        },
+        "worker": {
+          "tasks": 1,
+          "calls": 1,
+          "accepted": 0,
+          "rejected": 1,
+          "proposal_applied": false,
+          "provider": "local llama_cpp0.3.20",
+          "model": "qwen2.5-coder-7b-instruct-q4_k_m",
+          "prompt_tokens": 767,
+          "completion_tokens": 59,
+          "total_tokens": 826,
+          "token_provenance": "one observed SDK completion event, not independent hardware counters",
+          "parent_seconds": 52.062,
+          "paid_inference_calls": 0,
+          "compute_cost_usd": null,
+          "automatic_retry": false,
+          "coordinator_intervention": true,
+          "benchmark_receipt_id": "model_combination_benchmark_run:91a4f1669940d4b4756a86fc43ac8c1382995e30a654218c68c99c1e4a82c27c",
+          "rejection_basis": "independent source review; generated proposal not executed",
+          "benchmark_rehydrated": true
+        },
+        "model_learning_gain": null,
+        "native_effect_admission": false
+      },
+      "retrieval": {
+        "ordering": "Current tests and launch/server/readiness owners first, then direct lock owner and existing lifecycle helpers; historical paired result used only as provenance.",
+        "noise": "Holo returned unrelated protocol hits; exact source fallback used.",
+        "staleness": "Holo authority/root heads differ and freshnessUNKNOWN/gaptrue; not accepted as current authority. Source is pinned3c10155.",
+        "missing": "memory/README.md absent; semantic freshnessUNKNOWN/gaptrue. Current exact fixture/source reviewed and locally qualified; hosted runtime remains unverified.",
+        "reuse": "Three existing suites, existing launch path and lifecycle patterns; no new runtime module, benchmark or orchestration system."
+      },
+      "limitations": [
+        "Selected venv normal site hooks are restored; no full runtime security closure or shared environment activation.",
+        "Live fixture bypasses real singleton lock with owned mock and samples PID/port ownership; no atomic lease, graceful ASGI shutdown or general concurrency proof.",
+        "One failed worker proposal; coordinator fixes receive no worker success credit.",
+        "Hosted CI and publication pending; production RSI remains incomplete."
+      ],
+      "evidence_bindings": {
+        "lifecycle-test-freeze.json": "7bf8fa2181bc9cbabc515fe162720950703ef6cfb9c235b702005ce1c3d5c37d",
+        "cleanup-baseline/receipt.json": "d46b7e8b438b83401838774a031132cbded4a34f07a34b668536954d07c7eb7d",
+        "cleanup-baseline/tests.xml": "311bac8ce267b243ff019d0c48d571cd5aea91f797f6b77067414a06492fc5a1",
+        "candidate-v2/receipt.json": "d461ee818508641b3247b002c0e92e0f6f01c87aee7a68499082d1ec56679733",
+        "candidate-v2/tests.xml": "cce6c0e15422303c0d95b203c7a3651fb91c89727419874c0c0c76e43adf4a73",
+        "live-v2/receipt.json": "663865095a018b7dc154d94c3af8741bc0db6a2ef3324e3212fe2d3c03bd06c5",
+        "live-v2/tests.xml": "5cd8b4689306d28b78223893d2f8b0eeb524e1dfcdbe0f3cca53e57613837c8e",
+        "worker-cleanup/native_worker-result.json": "ad75d1ed852e5ce53ec4a19fc63a310a5ba1618cef5d777a0787bb8fba945abe",
+        "worker-cleanup/result-review.json": "219a032f96ba9d9868b1e576cd2d3027c48746e1aba0465f690147b2eb5e6043",
+        "coordinator-cleanup-repair.json": "93ae36eff74ed2dd30700c8d577fe6fcf3fb08d6697d50bca7c495492d538edc",
+        "ci-fixture-review.json": "1b5fef060c6584fb36df015da3c2e9e1542de98232b3e30cfdbaa622f913cd43",
+        "final-local-qualification-review.json": "807f98eb63eb82d7660fb81e2d0f4bc5134df3ff87e5eb95223002a93578cbc2",
+        "postqualification-runtime-hygiene.json": "a7978a519dcbbe63e8e65a591f6cfe9294e01ef7d7317443e80fa7b5c6e0533c",
+        "worker-cleanup/benchmark-receipt.json": "c8f796212fee820e9f3d7ad733a7f008d5af2eb0045a14ef75e4db751f597597",
+        "worker-cleanup/benchmark-provenance.json": "41b5b2b8f82d50ffa3ff69055eec07c1107c7b1ab608eb6f3a857415678f557b",
+        "worker-cleanup/record_benchmark.py": "a4438a445d504113ec8f23d4f6901ec7fd314124fa41258310cd880c03b3bc13"
+      },
+      "next_action": "Finish independent source review and exact-head CI/publication, verify main, retire only owned lane, then re-observe WSP15/WSP97. No automatic model retry or runtime activation.",
+      "ranked_queue": [
+        {
+          "task": "native autonomous RSI admission",
+          "score": 18,
+          "priority": "P0",
+          "state": "blocked_on_authentic_effect_producer_and_composition"
+        },
+        {
+          "task": "effect-specific authority handoff",
+          "score": 14,
+          "priority": "P1",
+          "state": "blocked_on_owner_contract"
+        },
+        {
+          "task": "demonstrated MCP cleanup failure and paired runtime qualification",
+          "score": 14,
+          "priority": "P1",
+          "state": "selected_local_complete_publication_pending"
+        },
+        {
+          "task": "new local worker capability comparison",
+          "score": 11,
+          "priority": "P2",
+          "state": "defer; rejected output recorded, no new call selected"
+        }
+      ]
     }
   }
 }

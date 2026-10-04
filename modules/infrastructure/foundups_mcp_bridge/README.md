@@ -4,6 +4,22 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+## MCP runtime compatibility
+
+The HTTP launcher requires the exact quartet in `requirements.txt`: FastMCP
+3.2.0, MCP 1.28.1, Pydantic 2.12.3 and Uvicorn 0.38.0. Update these declarations
+and `scripts/launch.py:MCP_RUNTIME_VERSIONS` together. Older environments fail
+the capability gate; changing source does not upgrade or activate an installed
+service.
+
+On Windows, server and readiness children use the direct base interpreter for
+process ownership and explicitly process the selected virtual environment's
+site-packages startup hooks. This preserves dependencies such as PyWin32 that
+`PYTHONPATH` alone cannot initialize. The capability probe suppresses bytecode
+explicitly with `-B`, including when Python's isolated mode ignores environment
+settings. See [test setup and scope](tests/README.md#mcp-runtime-compatibility)
+and the existing [runtime assumption audit](docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md).
+
 ## Governed Holo evidence and clean-runtime boundary
 
 Static documentation is not live route authority. Consult generation-bound

@@ -16705,7 +16705,8 @@
       "suite_class": "unit",
       "shard_id": "modules-infrastructure-foundups-mcp-bridge-unit-part-01",
       "capabilities": [
-        "network"
+        "network",
+        "process"
       ],
       "execution_type": "unit",
       "collectable": true,

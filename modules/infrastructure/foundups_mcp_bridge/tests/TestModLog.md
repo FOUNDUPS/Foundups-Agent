@@ -1,5 +1,30 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-10-04] Paired runtime, startup hooks and cleanup
+
+Frozen before repair:44 nonlistener criteria yielded40pass/4fail against original
+source; repaired startup/version handling passed44/44. An earlier harness attempt
+had28pass/3fail/2skip due missing PyWin32 startup and symlink privilege; it was
+not accepted compatibility evidence. The first two-case live invocation yielded
+one pass, one failure plus its teardown error. The first startup exception type
+was not retained and remains unknown; fixture emergency cleanup terminated only
+its owned PID28932. The other owned PID13492 completed normal fixture cleanup.
+
+Two new frozen post-spawn controls then reproduced44pass/2fail on46 cases.
+The one local worker proposal was rejected without execution. Coordinator repair
+passes the identical46 cases, and revised live diagnostics pass both HTTP cases:
+48 distinct criteria total, not the sum of repeated attempts. The live timeout
+change affects metadata observation only; auth, tool allowlist, ownership and
+cleanup assertions remain. Tests/criteria were not changed after seeing worker
+output. Symlink-or-junction fallback retains the same reparse-point rejection.
+
+Exact commands, source hashes, XML, typed PID/cleanup observations and all failed
+attempts are preserved under `outputs/rsi-mcp-runtime-qualification-20261004`.
+Both final phases use the existing bounded child/Job owner, a disposable candidate
+copy and2GiB ceiling. Local test durations are in their individual receipts.
+CI separately requires all48/no skips on a fresh hosted Windows runtime; hosted
+execution remains pending. No production runtime activation or native admission.
+
 ## [2026-10-02] Optional Windows aggregate Job memory qualification
 
 - Frozen before implementation: 29 deterministic missing-API cases represent
