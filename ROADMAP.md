@@ -12,16 +12,15 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**2026-10-04 current layer:** PR2046 and PR2047 are merged/main-verified;
-both owned lanes are retired. Queue-default closure is `f1c183173`, all ten PR
-checks and main CI/CodeQL passed. Selected 14/P1: bounded effect-review quorum
-in existing owners. All 63 independently frozen cases and the overlapping
-315-case connected suite pass locally. Publication/main verification is separate.
-Native admission 18/P0 still needs current-generation quorum composition,
-authentic runtime inputs and effect-specific sovereign proof/provider wiring.
-See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#bounded-effect-review-quorum--2026-10-04)
-and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). Passing fixtures
-and source-level quorum are not autonomous RSI or retained improvement.
+**2026-10-04 current layer:** PR2046–PR2048 are merged/main-verified and their
+owned lanes retired. PR2048 at `3df09e895` passed all ten PR checks and exact-main
+CI/CodeQL; PR and main each passed404 guarded cases. New 14/P1 selection:
+current-generation review quorum, retaining every evidence record and checking
+inputs after final owner reread. All48 independently frozen cases now pass within466 connected local tests;
+publication/main closure is separate. Native18/P0 still needs authentic runtime evidence and the
+effect-specific sovereign proof/provider path. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#current-generation-quorum-selection--2026-10-04)
+and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json). These source layers
+do not establish native autonomous RSI or retained benefit.
 
 **2026-10-02 historical layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
 

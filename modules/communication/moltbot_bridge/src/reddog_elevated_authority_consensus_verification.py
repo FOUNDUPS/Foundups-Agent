@@ -151,23 +151,6 @@ def verify_effect_reviewer_decisions(
         return False
 
 
-def verify_current_effect_reviewer_decision(
-    *, owner_config_path, repo_root, decision, context, authority_request, target,
-    expected_target, policy, runtime_evidence_resolver,
-    revoked_key_epochs: frozenset[str] = frozenset(),
-) -> bool:
-    """Verify one review with current scoped keys; runtime evidence is supplied."""
-    from .reddog_current_effect_reviewer_verification import verify_current_effect_review
-
-    return verify_current_effect_review(
-        owner_config_path=owner_config_path, repo_root=repo_root, decision=decision,
-        context=context, authority_request=authority_request, target=target,
-        expected_target=expected_target, policy=policy,
-        runtime_evidence_resolver=runtime_evidence_resolver,
-        revoked_key_epochs=revoked_key_epochs,
-    )
-
-
 def _effect_reviewer_signing_input(decision) -> str:
     payload = decision.to_dict()
     payload.pop("signature")
@@ -193,8 +176,14 @@ def _mint_verified_capability(receipt, request_digest, authority_request):
     )
 
 
+from .reddog_current_effect_reviewer_verification import (
+    verify_current_effect_reviewer_decision, verify_current_effect_reviewer_decisions,
+)
+
+
 __all__ = [
     "ElevatedConsensusSignerAuthority",
     "verify_elevated_authority_consensus", "verify_effect_reviewer_decision",
-    "verify_current_effect_reviewer_decision", "verify_effect_reviewer_decisions",
+    "verify_current_effect_reviewer_decision", "verify_current_effect_reviewer_decisions",
+    "verify_effect_reviewer_decisions",
 ]

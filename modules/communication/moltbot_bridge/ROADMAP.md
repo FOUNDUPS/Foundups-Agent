@@ -1,3 +1,26 @@
+## Current-generation effect-review quorum — 2026-10-04
+
+Selected14/P1 (C3/I4/D4/Impact3), extending the existing leased owner and facade.
+The plural API holds one current-generation lease, authenticates scoped reviewer
+keys and verifies all reviews, then rechecks every retained runtime evidence
+reference/snapshot and key expiry. Input comparison now follows the final owner
+reread and trusted clock sample, closing the existing single-review timing gap.
+The runtime snapshot rejects a ninth call before invoking its supplied resolver.
+
+Independent baseline48 cases:45 missing-API failures (one capability), one late
+input-mutation failure, one missing snapshot bound, and one unchanged-single pass.
+Candidate153 selected and466 connected cases pass locally, zero errors/skips;
+these counts overlap. Tests were frozen before source edits and remain unchanged.
+Two runtime owners stay within200 lines/50 per function; thin wrappers are
+re-exported compatibly. No new runtime module, issuer or orchestration layer.
+
+This authenticates current scoped keys, not the supplied runtime producer or
+sovereign effect permission. Sampled mutation checks are not continuous atomic
+immutability. Effect permits, native admission and retained RSI gain remain open.
+Hosted publication/main closure remain separate gates. WSP00/5/6/10/11/15/22/48/
+49/50/62/84/97. Evidence: canonical backlog `current_generation_quorum_20261004`
+and `O:/Foundups-Agent/outputs/rsi-current-generation-quorum-20261004/`.
+
 ## Bounded effect-review quorum — 2026-10-04
 
 Selected 14/P1 (C3/I4/D4/Impact3) after closing PR2047 at `f1c183173`.

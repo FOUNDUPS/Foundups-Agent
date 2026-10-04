@@ -1,3 +1,14 @@
+## 2026-10-04 — Compose current-generation review quorum
+
+- Close PR2048 at `3df09e895`: all ten PR checks/main CI/CodeQL passed, PR/main
+  each404 guarded passes, owned lane retired with recovery evidence.
+- Selected14/P1 reuses two existing runtime owners for one-lease review sets,
+  every-record lifetime checks and final input revalidation. Baseline48:47 fail/
+  1 pass; candidate466 connected passes, including48 frozen cases.
+- Single API compatibility and200/50 structural caps preserved. Publication is
+  a separate gate; supplied runtime provenance, sovereign permission, native
+  admission and retained benefit remain open. WSP00/5/6/11/15/22/48/50/62/97.
+
 ## 2026-10-04 — Qualify bounded effect-review quorum
 
 - Close PR2047 queue-default repair at `f1c183173`; all ten PR checks and main

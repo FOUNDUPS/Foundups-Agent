@@ -1,8 +1,10 @@
-"""One effect-review verification under a current authenticated owner/lease.
+"""Effect-review verification under one current authenticated owner/lease.
 
-Runtime evidence is still supplied by the caller. Success is not quorum,
-an execution permit, or proof of a deployed independent reviewer runtime.
+Runtime evidence is still supplied by the caller. Success does not issue
+an execution permit or prove deployed independent reviewer runtimes.
 """
+
+from __future__ import annotations
 
 from dataclasses import asdict
 import json
@@ -17,6 +19,38 @@ from .reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
 
 def _now_epoch():
     return int(time.time())
+
+
+def verify_current_effect_reviewer_decision(
+    *, owner_config_path, repo_root, decision, context, authority_request, target,
+    expected_target, policy, runtime_evidence_resolver,
+    revoked_key_epochs: frozenset[str] = frozenset(),
+) -> bool:
+    """Verify one review with current scoped keys; runtime evidence is supplied."""
+    return verify_current_effect_review(
+        owner_config_path=owner_config_path, repo_root=repo_root, decision=decision,
+        context=context, authority_request=authority_request, target=target,
+        expected_target=expected_target, policy=policy,
+        runtime_evidence_resolver=runtime_evidence_resolver,
+        revoked_key_epochs=revoked_key_epochs,
+    )
+
+
+
+def verify_current_effect_reviewer_decisions(
+    *, owner_config_path, repo_root, decisions, context, authority_request, target,
+    expected_target, policy, runtime_evidence_resolver,
+    revoked_key_epochs: frozenset[str] = frozenset(),
+) -> bool:
+    """Verify a complete quorum under one lease; runtime evidence is supplied."""
+    return verify_current_effect_review(
+        owner_config_path=owner_config_path, repo_root=repo_root, decisions=decisions,
+        context=context, authority_request=authority_request, target=target,
+        expected_target=expected_target, policy=policy,
+        runtime_evidence_resolver=runtime_evidence_resolver,
+        revoked_key_epochs=revoked_key_epochs,
+    )
+
 
 
 def verify_current_effect_review(*, owner_config_path, repo_root, **inputs):
@@ -37,7 +71,7 @@ def verify_current_effect_review(*, owner_config_path, repo_root, **inputs):
 
 
 def _verify_leased(owner, owner_path, repo, selection, inputs, before):
-    from .reddog_elevated_authority_consensus_verification import verify_effect_reviewer_decision
+    from . import reddog_elevated_authority_consensus_verification as verification
 
     records, grants = principals.load_current_generation_principal_artifact(
         repo_root=repo, selection=selection,
@@ -52,15 +86,17 @@ def _verify_leased(owner, owner_path, repo, selection, inputs, before):
     )
     runtime = _RuntimeSnapshot(inputs["runtime_evidence_resolver"])
     try:
-        checked = verify_effect_reviewer_decision(
+        verify = (verification.verify_effect_reviewer_decisions if "decisions" in inputs
+                  else verification.verify_effect_reviewer_decision)
+        checked = verify(
             **{**inputs, "runtime_evidence_resolver": runtime},
             signature_verifier=Ed25519SignatureVerifier(), reviewer_key_resolver=keys, now=now,
         )
-        if checked is not True or before != _input_snapshot(inputs):
+        if checked is not True:
             return False
         current = loader._load_owner_config(owner_path, repo=repo)
         finish = _now_epoch()
-        return (current == owner and finish >= now
+        return (current == owner and finish >= now and before == _input_snapshot(inputs)
                 and _still_current(inputs, keys, runtime, finish))
     finally:
         keys.close()
@@ -69,18 +105,31 @@ def _verify_leased(owner, owner_path, repo, selection, inputs, before):
 def _still_current(inputs, keys, runtime, now):
     from .reddog_elevated_authority_consensus_effect_context import effect_approval_context_matches
 
-    decision = inputs["decision"]
-    key = keys.resolve(decision["reviewer_principal_id"], decision["reviewer_principal_provider"])
-    return (key is not None and now < key.expires_at and runtime.current(now)
-            and effect_approval_context_matches(
-                inputs["context"], parent=inputs["authority_request"], target=inputs["target"],
-                expected_target=inputs["expected_target"], now=now,
-            ))
+    for decision in _review_items(inputs):
+        key = keys.resolve(decision["reviewer_principal_id"], decision["reviewer_principal_provider"])
+        if key is None or type(key.expires_at) is not int or now >= key.expires_at:
+            return False
+    return (runtime.current(now) and effect_approval_context_matches(
+        inputs["context"], parent=inputs["authority_request"], target=inputs["target"],
+        expected_target=inputs["expected_target"], now=now,
+    ))
+
+
+def _review_items(inputs):
+    if ("decision" in inputs) == ("decisions" in inputs):
+        raise ValueError("effect_review_input_mode_invalid")
+    if "decision" in inputs:
+        return (inputs["decision"],)
+    decisions = inputs["decisions"]
+    if type(decisions) not in (list, tuple) or not 1 <= len(decisions) <= 8:
+        raise ValueError("effect_review_set_count_invalid")
+    return tuple(decisions)
 
 
 def _input_snapshot(inputs):
     payload = {
-        "decision": inputs["decision"], "context": inputs["context"].to_dict(),
+        "decisions": _review_items(inputs), "plural": "decisions" in inputs,
+        "context": inputs["context"].to_dict(),
         "parent": inputs["authority_request"].to_dict(),
         "target": asdict(inputs["target"]), "expected_target": inputs["expected_target"],
         "policy": asdict(inputs["policy"]),
@@ -90,17 +139,22 @@ def _input_snapshot(inputs):
 
 
 class _RuntimeSnapshot:
-    """Sample supplied runtime evidence once; retain its explicit limitation."""
+    """Retain each supplied evidence reference and its immediately sampled fields."""
 
     def __init__(self, resolver):
-        self.resolver, self.evidence, self.before = resolver, None, None
+        self.resolver, self.records = resolver, []
 
     def resolve(self, *args):
-        self.evidence = self.resolver.resolve(*args)
-        if self.evidence is not None:
-            self.before = asdict(self.evidence)
-        return self.evidence
+        if len(self.records) >= 8:
+            raise ValueError("effect_runtime_snapshot_limit_exceeded")
+        evidence = self.resolver.resolve(*args)
+        before = asdict(evidence) if evidence is not None else None
+        self.records.append((evidence, before))
+        return evidence
 
     def current(self, now):
-        return (self.evidence is not None and self.before == asdict(self.evidence)
-                and type(self.evidence.expires_at) is int and now < self.evidence.expires_at)
+        return bool(self.records) and all(
+            evidence is not None and before == asdict(evidence)
+            and type(evidence.expires_at) is int and now < evidence.expires_at
+            for evidence, before in self.records
+        )

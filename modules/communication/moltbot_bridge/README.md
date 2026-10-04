@@ -1,3 +1,12 @@
+## Current-generation review sets — 2026-10-04
+
+`verify_current_effect_reviewer_decisions` now composes the bounded quorum under
+one current-generation lease. It retains and rechecks every supplied evidence
+record; the existing single-review API remains available. See the
+[API contract](INTERFACE.md#current-generation-review-set-api--2026-10-04).
+Caller-supplied runtime evidence still requires independent provenance; this
+verification does not issue an execution permit or activate native workers.
+
 ## Effect-review quorum — 2026-10-04
 
 The existing consensus verifier now exposes `verify_effect_reviewer_decisions`
