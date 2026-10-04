@@ -1,7 +1,18 @@
+## Measured-zero fidelity — P15 contract
+
+`PatternMemory.get_skill_fidelity_stats(skill_name, days=30) -> dict` keeps its
+existing fields, queries, time windows and rounding. Measured zero is retained
+for overall, recent and older means. Only `None` means absence: overall uses 0.5;
+an empty temporal window uses the overall mean. `success_rate` still counts
+fidelity >= 0.7, independently of execution-success flags. Ranking weights and
+`SkillSelector` are unchanged. These values describe structural fidelity,
+not authenticated effects or model fitness. Nine frozen and 42 disjoint controls
+pass locally; publication and later retained-use observations remain separate.
+
 ## Named registry-scope telemetry — P14 contract
 
 Source-qualified contract with independently reviewed actual scanner,
-projection and private-persistence observation; publication closure is pending. Existing `auto_test_registry_audit` v2.3 supports the
+projection and private-persistence observation; PR2061 is merged/main-verified. Existing `auto_test_registry_audit` v2.3 supports the
 named `operation="project_scope"` with a `request` containing `base_sha`,
 `head_sha`, `expected_changed_paths` and `projection_input`. Only existing
 reserved `parent_continuity_context` is additionally accepted. Caller roots,

@@ -1,4 +1,17 @@
-## Current named telemetry layer — P14 checkpoint
+## Current measured-zero layer — P15 checkpoint
+
+Selected 14/P1 (C2/I4/D4/Impact4): repair existing fidelity statistics without
+changing ranking or threshold semantics. Valid baseline: 4 failures/5 passes becomes 9 passes;
+42 disjoint connected controls pass. The coordinator supplied the minimal repair
+after one rejected local proposal. Publication and retained/control/recovery use
+of the preserved baseline SQLite rows are still pending, not completed learning.
+
+After closure/retention, re-observe existing production `reddog_operations` as
+a conditional 14/P1 local proposal candidate. No new registry operation or skill
+is selected; scanner, full-context capacity and finite evolution budget still
+need qualification. Native unattended 18/P0 is separate. See the [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint).
+
+## Named telemetry layer — P14 checkpoint
 
 Selected 15/P1 (C3/I4/D4/Impact4): connect the existing registry scope projection
 to the named WRE TELEMETRY path and record one observation without effect success,
@@ -9,7 +22,8 @@ scanner/producer/private-persistence observation now completes:155 shards
 per side, one projected event and zero outcomes/variations. Earlier scanner
 and materialization failures are preserved. Isolated Cisco2.2.0 and short
 owned TEMP are qualified; shared runtime and global settings are unchanged.
-PR2061 publication closure remains open. The initial failed, source-drifted
+PR2061 is merged/main-verified at 0b3f6cbc3; its owned lane is retired. Recovery
+and short TEMP remain preserved, the latter following a tool-policy cleanup block. The initial failed, source-drifted
 connected observation remains historical.
 
 P13 PR2060 is now merged/main-verified at `b99d05309385e272cd5d0691fa23e5abb654864a`;

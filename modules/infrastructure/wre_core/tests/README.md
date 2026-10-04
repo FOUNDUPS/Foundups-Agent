@@ -1,3 +1,24 @@
+## Measured-zero fidelity regression — P15
+
+Nine frozen cases in existing `test_pattern_memory.py` cover overall/recent/
+older zero means, absent history/windows, nonzero behavior, inclusive 0.7 rate
+independent of effect success, and actual selection after SQLite close/reopen.
+Valid baseline: 4 expected failures/5 passes (3.625s parent); coordinator repair:
+9 passes (3.266s). Separately selected 42 existing memory/selector controls pass
+(7.109s); selections are disjoint, 51 cases total, not model-fitness coverage.
+Zero errors/skips/guard denials; all 17 source pins stable in both successful runs.
+Separate manifest contracts pass 8/8 (63.719s) and the 15-member RedDog fast
+tier passes (10.000s parent), with stable named source pins. These integrity
+selections are not added to the 51 semantic/legacy cases.
+Two earlier pretest harness failures and prelaunch pin omission are preserved.
+The worker proposal is rejected/unused, not candidate code under these tests.
+
+Commands, XML, fixed IDs, bounded observations and source review are saved in
+`outputs/rsi-zero-fidelity-20261005`. The reopened selector now chooses 0.4 over
+measured 0.0. A preserved baseline SQLite snapshot supports a future separately
+reviewed retained/control/recovery observation; it has not run. Structural
+fidelity and synthetic persistence do not prove model improvement or authority.
+
 ## Named registry telemetry qualification — P14
 
 Three new bounded test leaves plus `wre_registry_telemetry_test_support.py`

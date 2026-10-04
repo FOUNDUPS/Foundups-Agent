@@ -1,3 +1,16 @@
+## Preserve measured-zero fidelity — 2026-10-05
+
+Selected 14/P1 (C2/I4/D4/Impact4). The coordinator changed only three mean
+fallbacks in `get_skill_fidelity_stats` to distinguish `None` from measured zero;
+SQL, ranking, threshold-rate semantics and return schema remain unchanged.
+Method 58 → 50 lines. Valid baseline: 4 failures/5 passes becomes 9 passes; 42 disjoint connected
+controls pass. The reopened actual selector now prefers measured 0.4 over 0.0.
+One local Qwen attempt was rejected and unused, with no retry or repair credit.
+Publication and later use of the preserved baseline SQLite snapshot remain
+pending. PR2061/main 0b3f6cbc3 is closed, with recovery and short TEMP preserved.
+See the [checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint)
+and backlog `zero_fidelity_20261005`. WSP00/15/22/62/97.
+
 ## Named registry-scope telemetry qualification — 2026-10-05
 
 Selected 15/P1 candidate connects the existing named WRE scope planner to
@@ -6,8 +19,7 @@ independent-review repairs; stable connected306pass/two Windows link skips.
 Actual scanner/producer/private persistence now complete after two preserved
 runtime failures: isolated Cisco2.2.0 qualification and short owned TEMP resolve
 the observed environment barriers. One projected event,155 shards per side,
-zero outcomes/variations; effect success remains false. PR2061 publication
-closure remains open. One local Qwen helper proposal was rejected, not applied. No new learning
+zero outcomes/variations; effect success remains false. PR2061 is merged/main-verified at 0b3f6cbc3; its owned lane is retired. One local Qwen helper proposal was rejected, not applied. No new learning
 or native RSI admission is claimed. PR2060 is merged/main-verified and its
 owned lane retired. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint) and
 canonical backlog `test_scope_telemetry_20261004`. WSP00/15/22/97.

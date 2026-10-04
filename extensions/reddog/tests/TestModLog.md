@@ -1,3 +1,13 @@
+## 2026-10-05 — WRE measured-zero fidelity binding (P15)
+
+The existing runtime manifest still covers1408 files; the reviewed PatternMemory
+repair changes its content digest to
+`3938f30d19cd46ecc909fc429fad9f2e967a1beb5709d7e75dc69965ff84d183`.
+Both existing consumer/generator pins are refreshed, with unchanged member and
+byte limits. Eight generator contracts pass (63.719s); the RedDog fast tier
+passes all15 members (10.000s parent), with stable named source pins. Hosted
+publication remains pending. See the canonical P15 RSI checkpoint. WSP5/22/50/97.
+
 ## 2026-10-05 — WRE telemetry manifest boundary
 
 The existing compatibility boundary fixture now admits1408 members/rejects1409
