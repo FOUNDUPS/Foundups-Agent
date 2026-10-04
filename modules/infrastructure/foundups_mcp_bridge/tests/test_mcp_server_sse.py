@@ -66,6 +66,39 @@ def registered_tool_names(server):
     return set(tools)
 
 
+def _loopback_listener_pids(output, port):
+    """Project exact numeric TCP listener rows; never persist other endpoints."""
+    # Same Windows row format used by OpenClawSecuritySentinel._extract_binding.
+    # Keep this fixture stricter: exact IPv4 host/port/state and PID required.
+    assert len(output) <= 1024 * 1024, "oversized listener observation"
+    pids = []
+    for line in output.splitlines():
+        row = line.split()
+        if len(row) >= 4 and row[0] == "TCP" and row[1] == f"127.0.0.1:{port}" and row[3] == "LISTENING":
+            assert len(row) == 5 and row[2] == "0.0.0.0:0" and row[4].isascii() and row[4].isdigit(), "malformed listener row"
+            pids.append(row[4])
+    return pids
+
+
+def test_listener_projection_requires_exact_endpoint_state_and_pid():
+    correct = "TCP 127.0.0.1:43210 0.0.0.0:0 LISTENING 321"
+    unrelated = "\n".join([
+        "TCP 0.0.0.0:43210 0.0.0.0:0 LISTENING 999",
+        "TCP 127.0.0.1:4321 0.0.0.0:0 LISTENING 999",
+        "TCP 127.0.0.1:43210 127.0.0.1:333 ESTABLISHED 999",
+        "UDP 127.0.0.1:43210 *:* LISTENING 999",
+        "TCP [::1]:43210 [::]:0 LISTENING 999",
+    ])
+    assert _loopback_listener_pids(unrelated, 43210) == []
+    assert _loopback_listener_pids(correct + "\n" + unrelated, 43210) == ["321"]
+    assert _loopback_listener_pids(correct + "\n" + correct.replace(" 321", " 999"), 43210) == ["321", "999"]
+    for malformed in (correct.rsplit(" ", 1)[0], correct.replace(" 321", " unknown"), correct + " extra", correct.replace("0.0.0.0:0", "1.2.3.4:0")):
+        with pytest.raises(AssertionError, match="malformed"):
+            _loopback_listener_pids(malformed, 43210)
+    with pytest.raises(AssertionError, match="oversized"):
+        _loopback_listener_pids("x" * (1024 * 1024 + 1), 43210)
+
+
 class _OwnedMCPRuntime:
     """Test-only lock and process ownership; never touches the shared singleton."""
 
@@ -78,8 +111,8 @@ class _OwnedMCPRuntime:
         self.owner_checks = 0
         self.probe_events = []
         self.cleanup_errors = []
-        self.shell = Path(os.environ["SystemRoot"]) / "System32" / "WindowsPowerShell" / "v1.0" / "powershell.exe"
-        assert self.shell.is_file() and not self.shell.is_symlink()
+        self.observer = Path(os.environ["SystemRoot"]) / "System32" / "netstat.exe"
+        assert self.observer.is_file() and not self.observer.is_symlink()
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as reservation:
             reservation.bind(("127.0.0.1", 0))
             self.port = reservation.getsockname()[1]
@@ -92,13 +125,13 @@ class _OwnedMCPRuntime:
         self.commands.append({"argv": command, "pythonpath": kwargs["env"]["PYTHONPATH"]})
         return proc
 
-    def probe(self, script):
-        observation = {"phase": "attempted", "timeout_sec": 10, "error_type": None}
+    def probe(self, timeout):
+        observation = {"phase": "attempted", "timeout_sec": timeout, "error_type": None}
         started = time.monotonic()
         try:
             result = subprocess.run(
-                [str(self.shell), "-NoProfile", "-NonInteractive", "-Command", script],
-                capture_output=True, text=True, timeout=10, check=False,
+                [str(self.observer), "-ano", "-p", "tcp"],
+                capture_output=True, text=True, timeout=timeout, check=False,
                 env=launch._closed_child_base_env(),
             )
             observation.update(
@@ -133,18 +166,14 @@ class _OwnedMCPRuntime:
         proc = self.processes[0]
         handle = launch._active_runtime
         assert handle is not None and handle.proc is proc
-        script = (
-            "$ErrorActionPreference='Stop'; "
-            f"Get-NetTCPConnection -LocalAddress 127.0.0.1 -LocalPort {self.port} "
-            "-State Listen -ErrorAction SilentlyContinue | "
-            "ForEach-Object { $_.OwningProcess }; exit 0"
-        )
-        for _attempt in range(4):
+        # Fast netstat snapshots must allow the same15s startup window as
+        # the production protocol canary, independent of observer speed.
+        deadline = time.monotonic() + 15.0
+        while time.monotonic() < deadline:
             assert proc.poll() is None, "owned server exited before readiness"
-            result = self.probe(script)
+            result = self.probe(min(10.0, max(0.001, deadline - time.monotonic())))
             assert result.returncode == 0 and not result.stderr, self.probe_events[-1]
-            assert len(result.stdout) <= 4096
-            rows = result.stdout.split()
+            rows = _loopback_listener_pids(result.stdout, self.port)
             if rows:
                 assert rows == [str(proc.pid)], "endpoint is not owned by test child"
                 assert proc.poll() is None

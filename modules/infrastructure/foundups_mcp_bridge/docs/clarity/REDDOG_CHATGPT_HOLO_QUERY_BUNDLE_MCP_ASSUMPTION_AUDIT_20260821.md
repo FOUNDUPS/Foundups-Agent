@@ -155,3 +155,9 @@ PR1526/1525 remain superseded candidates awaiting verified combined publication;
 no bot PR merge or alert dismissal is claimed here. The shared runtime remains
 unchanged. Successful disposable-loopback qualification does not renew the
 expired August authority, deploy the service or establish native RSI admission.
+
+The first hosted attempt passed46 but timed out in both PowerShell ownership
+probes; both children and the owned test volume cleaned up. The replacement
+fixture keeps exact PID criteria using numeric netstat projection. Its additional
+negative-row control makes the local final coverage49; replacement hosted
+qualification remains pending. See TestModLog for the preserved failed attempts.

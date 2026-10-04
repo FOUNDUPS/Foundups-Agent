@@ -81,10 +81,10 @@ jobs:
           result = subprocess.run(command, env=env, cwd=root, timeout=300, check=False)
           if result.returncode: raise SystemExit(result.returncode)
           cases = ET.parse(out/'tests.xml').findall('.//testcase')
-          if len(cases) != 48 or any(c.find(tag) is not None for c in cases
+          if len(cases) != 49 or any(c.find(tag) is not None for c in cases
                                     for tag in ('failure','error','skipped')):
-              raise SystemExit('Expected all 48 MCP criteria to pass without skips')
-          print('MCP compatibility: 48 passed; owned Windows lifecycle included')
+              raise SystemExit('Expected all 49 MCP criteria to pass without skips')
+          print('MCP compatibility: 49 passed; owned Windows lifecycle included')
           '@ | python -I -B -
           if ($LASTEXITCODE -ne 0) { throw 'MCP qualification failed' }
       - uses: actions/upload-artifact@v4

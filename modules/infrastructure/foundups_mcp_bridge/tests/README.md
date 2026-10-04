@@ -14,7 +14,10 @@ candidate interpreter. The fixture substitutes only the shared instance-lock
 acquisition and interpreter selection. Real capability, server, authentication
 and MCP readiness checks still execute. An ephemeral loopback endpoint must
 be observed as owned by the captured child PID before requests. This is a
-sampled ownership check, not a race-free socket lease. The finalizer observes
+sampled ownership check, not a race-free socket lease. The fixed System32
+`netstat.exe -ano -p tcp` observer projects only exact numeric loopback listener
+PIDs; raw endpoint tables are not persisted. Its15s observation window precedes
+the protocol canary, with each command capped at10s or remaining time. The finalizer observes
 lock release and reaps only captured children; emergency cleanup fails the test.
 No production singleton cleanup, public tunnel, OAuth flow, active-runtime
 upgrade, native WRE admission or generalized RSI gain follows from these tests.

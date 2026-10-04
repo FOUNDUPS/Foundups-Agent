@@ -35,12 +35,19 @@ repair credit. Coordinator discovery, guidance, implementation and publication
 remain explicit interventions. The existing AI Gateway benchmark owner retains
 the rejected outcome; this is measured failure, not an autonomous success claim.
 
-A Windows CI job requires all48 cases without skips using its own128MiB VHD;
+A Windows CI job requires all49 cases without skips using its own128MiB VHD;
 source review rejected an earlier SUBST fixture without weakening test anchors.
 Hosted execution/publication are pending. Local fixtures use the existing
 bounded child/Job owner and a copied paired environment; no shared runtime was
 upgraded. PID checks are sampled, the singleton lock is a fixture seam, and
 process reaping does not establish graceful ASGI shutdown or an atomic lease.
+
+Hosted attempt1 at9f74a627 then failed its two live observer calls at10s while
+46 cases passed and both servers cleaned up. Its VHD detached. The fixture now
+uses numeric netstat/PID snapshots with a15s startup window; no production or
+prior48 test-function change. One additional parser-negative case had a test
+input typo, preserved as46pass/1fail, then corrected. Final local coverage is
+47 nonlistener +2 live =49 distinct criteria. Hosted replacement is pending.
 
 Full commands, hashes, XML and failed attempts live in
 `outputs/rsi-mcp-runtime-qualification-20261004` on the execution PC. Current

@@ -3,8 +3,8 @@
 - Reconciled PR2056 main/cleanup closure and selected the next existing MCP
   compatibility slice with WSP15/WSP97. Paired pins, Windows selected-venv
   startup and post-spawn ownership are repaired in the current launcher.
-- Local final evidence is46 nonlistener plus two live cases, no errors/skips.
-  New hosted Windows job enforces all48. Publication/hosted results pending.
+- Local final evidence is47 nonlistener plus two live cases, no errors/skips.
+  New hosted Windows job enforces all49. Publication/hosted results pending.
 - One local Qwen proposal was rejected without application or retry;767/59 SDK
   tokens recorded. Coordinator repairs are separately attributed. Existing
   module documents, canonical roadmap/backlog and benchmark owner are reused.

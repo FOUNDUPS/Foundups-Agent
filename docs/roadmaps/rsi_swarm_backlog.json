@@ -28625,7 +28625,7 @@
         "signal_class": "execution_feedback",
         "frozen_nonlistener_unique_cases": 46,
         "live_unique_cases": 2,
-        "final_distinct_cases": 48,
+        "final_distinct_cases": 49,
         "cleanup_baseline_passed": 44,
         "cleanup_baseline_failed": 2,
         "candidate_passed": 46,
@@ -28670,7 +28670,8 @@
           "benchmark_rehydrated": true
         },
         "model_learning_gain": null,
-        "native_effect_admission": false
+        "native_effect_admission": false,
+        "final_nonlistener_cases": 47
       },
       "retrieval": {
         "ordering": "Current tests and launch/server/readiness owners first, then direct lock owner and existing lifecycle helpers; historical paired result used only as provenance.",
@@ -28701,7 +28702,13 @@
         "postqualification-runtime-hygiene.json": "a7978a519dcbbe63e8e65a591f6cfe9294e01ef7d7317443e80fa7b5c6e0533c",
         "worker-cleanup/benchmark-receipt.json": "c8f796212fee820e9f3d7ad733a7f008d5af2eb0045a14ef75e4db751f597597",
         "worker-cleanup/benchmark-provenance.json": "41b5b2b8f82d50ffa3ff69055eec07c1107c7b1ab608eb6f3a857415678f557b",
-        "worker-cleanup/record_benchmark.py": "a4438a445d504113ec8f23d4f6901ec7fd314124fa41258310cd880c03b3bc13"
+        "worker-cleanup/record_benchmark.py": "a4438a445d504113ec8f23d4f6901ec7fd314124fa41258310cd880c03b3bc13",
+        "first-hosted-result.json": "4119a9e59059409609b0f7aafd0e7982f0e4c18ce0b60e2aee3d44d065edf263",
+        "candidate-v3/tests.xml": "1dc9ee325fa5a33ada238337bfff75df72ec6b038935bb03df97d02f61b0ff04",
+        "candidate-v4/receipt.json": "81254e614a8198a8877dd00b694c3c24996804fb8c1053d9d6331100a03b14ab",
+        "candidate-v4/tests.xml": "9ea5c8cc3991fa45aae41bd007619393b4953473ca6cb852461a029d51203ea2",
+        "live-v4/receipt.json": "62caa3a57b8674756025ed2e084950a37abf006882f0e68a9598ef881962005f",
+        "live-v4/tests.xml": "7851733202fff8a03956bf5f2709dea84093a7df9857fad5b244590ea0772af3"
       },
       "next_action": "Finish independent source review and exact-head CI/publication, verify main, retire only owned lane, then re-observe WSP15/WSP97. No automatic model retry or runtime activation.",
       "ranked_queue": [
@@ -28729,7 +28736,28 @@
           "priority": "P2",
           "state": "defer; rejected output recorded, no new call selected"
         }
-      ]
+      ],
+      "hosted_followup": {
+        "first_head": "9f74a62701eb10c6a1dc796c5f70f5b00ff6faf5",
+        "first_job": 111424090232,
+        "first_passed": 46,
+        "first_live_failed": 2,
+        "cleanup_errors": 0,
+        "first_vhd_detached": true,
+        "replacement_observer": "System32 netstat numeric TCP/PID projection",
+        "startup_window_seconds": 15,
+        "per_probe_max_seconds": 10,
+        "new_projection_negative_tests": 1,
+        "test_input_failure": {
+          "passed": 46,
+          "failed": 1,
+          "reason": "PID substitution also changed port; fixed onlyinput"
+        },
+        "local_final_passed": 49,
+        "production_changed": false,
+        "prior48_test_function_asts_unchanged": true,
+        "hosted_replacement_status": "pending"
+      }
     }
   }
 }

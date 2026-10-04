@@ -1,5 +1,25 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-10-04] Hosted observer correction
+
+First PR2057 head9f74a627 passed46 controls but failed both live cases: fixed
+PowerShell Get-NetTCPConnection exceeded10s before any protocol request. Both
+owned children terminated with one lock release/no cleanup errors; the owned
+VHD detached. This is an observed hosted fixture failure, not a passing release.
+
+Replaced only the test observer with fixed System32 netstat numeric TCP/PID
+projection, following the existing security sentinel's Windows row format.
+Exact host/port/listening state, a single captured PID and live process remain
+mandatory. No raw endpoint table is persisted. The1MiB character limit applies
+after capture; it is not a streaming memory bound. Polls share a15s startup
+window with each command capped at10s/remaining time.
+
+All prior48 test-function ASTs are unchanged. One new projection control covers
+foreign/wildcard/malformed/multiple-owner rows. Its first run failed because the
+test author's PID replacement also changed the port; only that input was fixed.
+Final47 nonlistener +2 live cases pass; original46 control IDs/order are intact.
+No additional model call or production change. Hosted replacement result pending.
+
 ## [2026-10-04] Paired runtime, startup hooks and cleanup
 
 Frozen before repair:44 nonlistener criteria yielded40pass/4fail against original
@@ -15,8 +35,8 @@ The one local worker proposal was rejected without execution. Coordinator repair
 passes the identical46 cases, and revised live diagnostics pass both HTTP cases:
 48 distinct criteria total, not the sum of repeated attempts. The live timeout
 change affects metadata observation only; auth, tool allowlist, ownership and
-cleanup assertions remain. Tests/criteria were not changed after seeing worker
-output. Symlink-or-junction fallback retains the same reparse-point rejection.
+cleanup assertions remain. The frozen cleanup cases stayed unchanged after worker
+output; the later hosted observer repair is recorded above. Symlink-or-junction fallback retains the same reparse-point rejection.
 
 Exact commands, source hashes, XML, typed PID/cleanup observations and all failed
 attempts are preserved under `outputs/rsi-mcp-runtime-qualification-20261004`.

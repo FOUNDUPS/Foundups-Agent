@@ -9,10 +9,10 @@ this closes a reproduced missing-PyWin32 startup failure. Capability probes use
 explicit `-B`. Unexpected post-spawn exceptions reuse the existing termination
 owner, retaining the handle and lock when termination fails.
 
-Local evidence:46 nonlistener cases and two real owned loopback HTTP cases
+Local evidence:47 nonlistener cases and two real owned loopback HTTP cases
 pass, with no errors/skips. The earlier live attempt failed cleanup and remains
 in the evidence. Frozen cleanup baseline:44pass/2fail; coordinator repair:46pass.
-The new Windows CI job requires all48, including real lifecycle checks, using
+The new Windows CI job requires all49, including real lifecycle checks, using
 its own128MiB VHD. Hosted verification/publication are pending at this checkpoint.
 
 One local Qwen proposal was rejected before application: invented helper,
@@ -28,6 +28,15 @@ uses a private mock lock, so real singleton cleanup is outside this qualificatio
 Evidence: `outputs/rsi-mcp-runtime-qualification-20261004` on the execution PC;
 canonical sequencing: root ROADMAP and `docs/roadmaps/rsi_swarm_backlog.json`.
 WSP00/15/22/50/84/97; no new module, skill or orchestrator.
+
+First hosted attempt:46pass/2livefail because its PowerShell ownership observer
+timed out at10s, while both owned processes cleaned up correctly. The revised
+fixture uses fixed System32 netstat numeric TCP/PID projection with unchanged
+ownership criteria and a15s startup observation window, capped10s per probe.
+One added projection negative test initially had a PID/port substitution typo;
+that failed run is retained. Corrected input and final47+2 local cases pass.
+The prior48 test-function ASTs and production source remain unchanged. Hosted
+replacement qualification remains pending; the first failure is not erased.
 
 ## 2026-10-02: Optional aggregate committed-memory limit for the existing child owner
 
