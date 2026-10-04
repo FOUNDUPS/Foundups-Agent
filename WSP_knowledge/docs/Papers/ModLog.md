@@ -3,7 +3,14 @@
 **Module**: WSP_knowledge/docs/Papers/
 **WSP Compliance**: [U+2705] ACTIVE
 **Purpose**: Research papers, patent documentation, and scientific materials
-**Last Update**: 2026-10-04 (CSSH bidirectional relation and immutability clarification)
+**Last Update**: 2026-10-04 (verified publication receipt; later CSSH revisions preserved)
+
+## [2026-10-04] rESP/CSSH research update published and verified
+
+- Recorded the one authorized page post as LIVE_VERIFIED in [the existing publication receipt](RESP_LINKEDIN_RESEARCH_UPDATE_2026-10-03.md#receipt), including the public permalink, page 107481170 identity, duplicate/schedule coverage, one submission and reopened text/link verification.
+- Preserved the exact approved copy and 0102 Digital Twin disclosure. Used the established authenticated PC Chrome session; no TinyFish, second publisher, new login, cookie export or legacy social helper.
+- Reused the unchanged equation audit: fresh 37/37 checks on the expected committed bytes. At publication, rESP 3.4 and CSSH 0.2 matched PR #2039; later revisions from PRs #2042–2044 are preserved and explicitly distinguished from the live copy. Mathematical consistency and live publication are separate evidence.
+- WSP 00/95/97: gate passed; source-bound lexical fallback and its UNKNOWN semantic freshness recorded; isolated receipt worktree preserves concurrent changes. No detector or cosmological validation is claimed.
 
 ## [2026-10-04] CSSH v0.3.2 — Restore 0102 ↔ 0201 and record persistence hypothesis
 
