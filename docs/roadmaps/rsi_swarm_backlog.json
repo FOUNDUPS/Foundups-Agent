@@ -1895,7 +1895,7 @@
     },
     "dispatchable": false,
     "execution_plane": "Authorized repository test maintenance, not native work admission",
-    "next_action": "Finish source publication/retention, then compare one installed alternative through existing local adapter on fixed saved task; no new orchestrator.",
+    "next_action": "Close this source publication/retention, then reconcile actual installed OpenClaw/Hermes runtime and authenticated input availability before selecting a native canary or demonstrated source repair.",
     "higher_priority_gates": [
       {
         "task": "Native autonomous RSI admission",
@@ -1907,6 +1907,18 @@
     ],
     "deferred": [
       {
+        "task": "Actual native runtime/input availability audit",
+        "total": 14,
+        "priority": "P1",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "reason": "Read-only prerequisite map; determine configuration versus code blockers before further changes."
+      },
+      {
         "task": "Local model/task qualification",
         "total": 12,
         "priority": "P2",
@@ -1916,7 +1928,7 @@
           "deferability": 4,
           "impact": 3
         },
-        "reason": "Follow closure of the measured coverage gap; one conditional Qwen3.5 comparison, not automatic promotion."
+        "reason": "Both installed candidates rejected this bounded task; no model promoted. Re-observe and choose a suitable separate task family, not repeated coaching on this example."
       }
     ]
   },
@@ -30829,7 +30841,7 @@
         "Synthetic keys and substituted transport; no credential custody or native enrollment proof",
         "Test registry remains1687 files,270 quarantined; no new file or generated-manifest change"
       ],
-      "next_gate": "Existing adapter model/task qualification; authentic custody/model/work grants still required for native18/P0",
+      "next_gate": "Inspect actual configured native runtime/authenticated input availability through existing providers. Local callable availability does not grant native authority. Further model/task qualification is separate.",
       "connected": {
         "counts": {
           "tests": 475,
@@ -30843,6 +30855,27 @@
         "suite_files": 17,
         "receipt_sha256": "65c5bca382e51fe9700d3d943fd878d94c757dd1afb857f4d563fbd479d4c074",
         "skip_reasons": "Windows AF_UNIX unavailable, symlink privilege and Linux-only transport; inherited controls unchanged"
+      },
+      "matched_alternative_model": {
+        "source": "40cac16eb6affe5d313a241c2e455dd129ec2f51",
+        "model": "installed Qwen3.5-4B Q4_K_M",
+        "task_context_matches": "typed Qwen7B attempt exactly; no oracle/test supplied",
+        "calls": 1,
+        "accepted": 0,
+        "format": "unclosed fence and incomplete string",
+        "finish_reason": "length",
+        "sdk_input_tokens": 1108,
+        "sdk_output_tokens": 512,
+        "parent_seconds": 109.547,
+        "inference_seconds": 103.266,
+        "context_tokens": 2048,
+        "runtime_fit": true,
+        "baseline_test_runs": 0,
+        "automatic_retries": 0,
+        "paid_inference_api_calls": 0,
+        "evaluation": "Rejected before pytest; no body repairs or promotion",
+        "review_sha256": "88bf4a66c40164cba039f745f5842bb3b353b1090f916851cc30aba80dae3060",
+        "ranking_limit": "One fixed task; no general model superiority or incapability claim"
       }
     }
   }

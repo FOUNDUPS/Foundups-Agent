@@ -23,6 +23,18 @@ Next: qualify an installed alternative on the same frozen task through the
 existing adapter before selecting a model; do not infer native admission from a
 local callable. Native18/P0 remains blocked by authentic runtime/custody inputs.
 
+
+A separate matched Qwen3.5-4B crossover subsequently ran once through the same
+adapter, task/context and fixed budget. Actual template/load and context fit
+succeeded (1108 input +512 output tokens), but output ended at the token limit
+with an unclosed fence/incomplete string: rejected before test execution. Parent
+109.547s;0/1 accepted, no retry, repair or promotion. This neither establishes
+model superiority nor changes the earlier Qwen7B0/2 or test authorship. Evidence:
+`local-model-crossover/result-review.json` under the current evidence root.
+Next inspect actual configured OpenClaw/Hermes runtime and authenticated input
+availability through existing owners, distinguishing configuration from source
+blocks before another native canary. Further model/task qualification is separate.
+
 ## Separate protected-use control proof — 2026-10-05
 
 **Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.

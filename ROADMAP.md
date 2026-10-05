@@ -17,7 +17,9 @@ WSP15 selects13/P1 (C2/I4/D4/Impact3). One additive existing-owner test detects 
 frozen control/work proof fault that the prior47 selected tests missed: correct48/48,
 fault47pass/1expected failure. Two local model proposals failed; the retained
 regression is team-authored. Connected475:468pass/7skip; publication pending.
-Next is bounded local model/task qualification using the existing adapter.
+A subsequent matched Qwen3.5 local call was also rejected: truncated output,
+0/1 accepted. Next inspect actual runtime/input availability through existing
+OpenClaw/Hermes owners; model/task qualification remains a separate gate.
 Native autonomous18/P0 remains open; no new orchestration layer is selected.
 See [the checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05)
 and canonical backlog `control_proof_regression_20261005`.
