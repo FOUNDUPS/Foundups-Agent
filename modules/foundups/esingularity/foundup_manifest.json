@@ -1,9 +1,9 @@
 {
   "$schema": "https://foundups.org/schemas/foundup-manifest/v1.json",
   "foundup_id": "esingularity_001",
-  "name": "eSingularity",
+  "name": "eSingularity.ai",
   "version": "0.1.0",
-  "description": "Japanese-first community campaign to save Sukatto Land Kuzuryu and demonstrate a new local future for Fukui.",
+  "description": "Regional AI infrastructure FoundUp for Fukui: AI Koban, three-site feasibility, Japan Hyperscaler Report research, and the YUMORI public-asset/community-reuse program.",
   "tagline": "温泉を守る。福井のAIの未来をつくる。",
   "tier": "F0_DAE",
   "lifecycle_stage": "proto",
@@ -12,14 +12,22 @@
   "icon_url": "frontend/public/pwa-icon-192.png",
   "required_subscription_tier": "free",
   "is_invite_only": false,
-  "capabilities": ["community_campaign", "multilingual", "offline", "pwa"],
+  "capabilities": [
+    "community_campaign",
+    "multilingual",
+    "offline",
+    "pwa",
+    "distributed_ai_infrastructure",
+    "research_publication",
+    "partner_development"
+  ],
   "agent_routes": [],
   "holo_collections": [],
   "data_namespace": "idb_esingularity_001",
   "cabr_contract": {
     "v1_gate": "not_applicable",
     "v2_proof": "not_applicable",
-    "v3_score_min": 0.0
+    "v3_score_min": 0
   },
   "owner_id": "012",
   "category": "community",
@@ -33,12 +41,21 @@
     "status": "BASELINE_DECLARATIVE_ONLY",
     "build": {
       "mode": "build",
-      "command": ["npm", "run", "build"],
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
       "working_directory": "modules/foundups/esingularity/frontend",
       "notes": "Declarative validation command only; no autonomous deployment authority."
     },
     "test": {
-      "command": ["python", "-m", "pytest", "modules/foundups/esingularity/tests"],
+      "command": [
+        "python",
+        "-m",
+        "pytest",
+        "modules/foundups/esingularity/tests"
+      ],
       "required": true,
       "notes": "Manifest, registry, route, and hosting contract tests."
     },
@@ -48,7 +65,9 @@
       "command": null,
       "notes": "Dry-run is required before any WRE execution."
     },
-    "safe_mutation_surface": ["modules/foundups/esingularity/**"],
+    "safe_mutation_surface": [
+      "modules/foundups/esingularity/**"
+    ],
     "forbidden_paths": [
       ".env",
       ".env.*",
