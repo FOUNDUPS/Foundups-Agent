@@ -12,22 +12,14 @@
   "icon_url": "frontend/public/pwa-icon-192.png",
   "required_subscription_tier": "free",
   "is_invite_only": false,
-  "capabilities": [
-    "community_campaign",
-    "multilingual",
-    "offline",
-    "pwa",
-    "distributed_ai_infrastructure",
-    "research_publication",
-    "partner_development"
-  ],
+  "capabilities": ["community_campaign", "multilingual", "offline", "pwa", "distributed_ai_infrastructure", "research_publication", "partner_development"],
   "agent_routes": [],
   "holo_collections": [],
   "data_namespace": "idb_esingularity_001",
   "cabr_contract": {
     "v1_gate": "not_applicable",
     "v2_proof": "not_applicable",
-    "v3_score_min": 0
+    "v3_score_min": 0.0
   },
   "owner_id": "012",
   "category": "community",
@@ -41,21 +33,12 @@
     "status": "BASELINE_DECLARATIVE_ONLY",
     "build": {
       "mode": "build",
-      "command": [
-        "npm",
-        "run",
-        "build"
-      ],
+      "command": ["npm", "run", "build"],
       "working_directory": "modules/foundups/esingularity/frontend",
       "notes": "Declarative validation command only; no autonomous deployment authority."
     },
     "test": {
-      "command": [
-        "python",
-        "-m",
-        "pytest",
-        "modules/foundups/esingularity/tests"
-      ],
+      "command": ["python", "-m", "pytest", "modules/foundups/esingularity/tests"],
       "required": true,
       "notes": "Manifest, registry, route, and hosting contract tests."
     },
@@ -65,9 +48,7 @@
       "command": null,
       "notes": "Dry-run is required before any WRE execution."
     },
-    "safe_mutation_surface": [
-      "modules/foundups/esingularity/**"
-    ],
+    "safe_mutation_surface": ["modules/foundups/esingularity/**"],
     "forbidden_paths": [
       ".env",
       ".env.*",
