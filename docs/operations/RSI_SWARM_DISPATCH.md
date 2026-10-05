@@ -1,3 +1,38 @@
+## Startup custody lifetime qualification — 2026-10-05
+
+Source4241b10; existing WSP71/97 owners, no replacement orchestrator or vault.
+The public entrypoint still selects an unavailable resolver and supplies no E0
+grant admission. Root LOAD uses work identity; ACQUIRE/FINISH may use the v2
+control identity. Existing materializers accept a request signer but the inspected
+production path does not supply a qualified one. The work backend cannot simply
+sign LOAD: it depends on that revocation check and does not admit its domain.
+
+Executed two bounded systemd255 public-canary cases on the local WSL host:
+
+- Expired before launch: service command returned243, with no child result.
+- Valid at launch: nonroot child started before expiry, then successfully read
+  the same manager-delivered canary after expiry. Encryption-envelope expiry
+  therefore does not establish per-request credential lifetime enforcement.
+- Both unique test units ended `not-found`/`inactive`; owned encrypted input was
+  removed. No real keys, principal enrollment, native tickets or grants created.
+
+Evidence: `outputs/rsi-startup-custody-20261005/credential-expiry-result.json`
+and its driver. This is mechanism qualification, not a completed RSI iteration.
+The result is local to this installed runtime and does not prove secure erasure,
+unswappable memory, permission admission or behavior on another host.
+
+Next selected work18/P0 (C4/I5/D5/Impact4): authenticated deferred startup supply.
+Extend the existing versioned owner loader, resolver-supply and public entrypoint.
+Capture only authenticated nonsecret metadata before isolation; construct custody,
+replay and revocation dependencies afterward. Bind credential identity, owner,
+generation and lifetime; check expiry for each request. A separately permissioned
+LOAD-only signer must reject ADVANCE, control proofs and ordinary work signing,
+and must not retain a generation lease across root RPC. Preserve v1-v6 behavior.
+The positive test must enter the real public route without an injected startup
+loader; bad selection/isolation must cause zero custody reads. Native admission
+remains incomplete until this connected path and its independent negative controls
+pass. Routine machine setup does not require012 to assemble these dependencies.
+
 ## Bootstrap grant-admission forwarding — 2026-10-05
 
 WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime
@@ -13,7 +48,14 @@ One bounded local Qwen3.5 proposal was rejected unchanged (incorrect plumbing);
 the four-line repair is coordinator-authored. No criteria were relaxed. Actual
 public startup still lacks authenticated dependency supply and credential custody.
 Evidence: `outputs/rsi-local-custody-20261005`; canonical backlog
-`bootstrap_grant_forwarding_20261005`. Publication pending; native RSI incomplete.
+`bootstrap_grant_forwarding_20261005`. PR2072 merged at4241b10; main CI37264074040
+and CodeQL37264073915 passed. Later merged-source4/4 passed. Governed maintenance
+completed while preserving8tasks/24events and adding one task/three events.
+Retrieval is CURRENT/no-gap. Two failed query-host invocations were preserved;
+using the source-pinned script and qualified interpreter resolved them without
+reindex or guard bypass. Independent review released cleanup; the owned worktree
+was retired with verified runtime archive and recovery bundle. Native RSI remains
+incomplete. Closure: `outputs/rsi-local-custody-20261005/publication-receipt.json`.
 
 Host qualification reused installed systemd255: public-input encryption roundtrip,
 wrong-name/tamper/unprivileged rejection, and one nonroot DynamicUser delivery

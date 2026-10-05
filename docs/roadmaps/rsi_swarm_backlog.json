@@ -1881,30 +1881,22 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.bootstrap_grant_forwarding_20261005",
-    "base_commit": "4d03a0f179d6a3c411922070c2502fd914d1c49a",
-    "selected_action": "Forward existing grant admission through signer runtime bootstrap",
-    "status": "local_source_qualified_publication_pending",
+    "observation_path": "current_observation.startup_custody_lifetime_20261005",
+    "base_commit": "4241b10cc349caadf4db2cd7ca2e5b1b9d8c2298",
+    "selected_action": "Connect authenticated deferred startup custody and grant admission",
+    "status": "implementation_open_lifetime_constraint_locally_measured",
     "wsp15": {
-      "priority": "P1",
-      "importance": 4,
-      "impact": 3,
+      "complexity": 4,
+      "importance": 5,
       "deferability": 5,
-      "total": 14,
-      "complexity": 2
+      "impact": 4,
+      "total": 18,
+      "priority": "P0"
     },
     "dispatchable": false,
-    "execution_plane": "Authorized source maintenance, not native work admission",
-    "next_action": "Close this source slice, then rescore authenticated startup supply and permissioned per-LOAD custody; compose existing owners before native worker dispatch.",
-    "higher_priority_gates": [
-      {
-        "task": "Native autonomous RSI admission",
-        "total": 18,
-        "priority": "P0",
-        "state": "blocked",
-        "reason": "Public startup has no authentic custody and admission dependency supply."
-      }
-    ]
+    "execution_plane": "Authorized source maintenance and bounded public-canary qualification; no native work grant",
+    "next_action": "Implement existing-owner authenticated supply after isolation, per-request lifetime checks and purpose-limited LOAD signing; verify through real public entrypoint",
+    "higher_priority_gates": []
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -30966,7 +30958,74 @@
         "runtime_files": 1417,
         "manifest_digest": "3aca2a40d6046c31528dbb375c3d08dd40051656e5c9b2e1c91808a616a695f9",
         "extension_fast_members_passed": 15
+      },
+      "publication": {
+        "pr": 2072,
+        "merge": "4241b10cc349caadf4db2cd7ca2e5b1b9d8c2298",
+        "main_ci": 37264074040,
+        "main_codeql": 37264073915,
+        "checks": "success",
+        "retained_tests_passed": 4,
+        "maintenance": "COMPLETED; historical8tasks/24events unchanged; new totals9/27",
+        "retrieval": "CURRENT/no-gap",
+        "owned_lane": "retired normally; evidence preserved",
+        "evidence": "outputs/rsi-local-custody-20261005/publication-receipt.json",
+        "native_rsi_complete": false
       }
+    },
+    "startup_custody_lifetime_20261005": {
+      "base": "4241b10cc349caadf4db2cd7ca2e5b1b9d8c2298",
+      "branch": "codex/rsi-startup-custody-20261005",
+      "wsp15": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability": 5,
+        "impact": 4,
+        "total": 18,
+        "priority": "P0"
+      },
+      "priority_rationale": "High-complexity connected startup; essential and blocking native dispatch; major shared benefit. Score does not authorize effects.",
+      "wsp97": "Reuse loader, bootstrap, resolver supply, replay and root authority owners. No new orchestration or duplicate credential store.",
+      "experiment": {
+        "kind": "real local systemd public-canary lifetime qualification",
+        "cases": 2,
+        "expired_before_launch_returncode": 243,
+        "valid_at_launch_returncode": 0,
+        "nonroot_uid": 64196,
+        "started_before_expiry": true,
+        "readable_after_expiry": true,
+        "units_removed": true,
+        "owned_input_removed": true,
+        "real_secrets_used": false,
+        "native_admission_created": false,
+        "conclusion": "Envelope expiry at load does not enforce per-request lifetime"
+      },
+      "evidence": "outputs/rsi-startup-custody-20261005/credential-expiry-result.json",
+      "required_controls": [
+        "Authenticated versioned identity/reference/generation/lifetime binding",
+        "Zero custody reads before selection and isolation accept",
+        "Expired request rejects before key access; no stale credential fallback",
+        "Separate permissioned LOAD-only signer; no recursive grant-backend dependency",
+        "LOAD retains work identity; control-key LOAD and LOAD-signer ADVANCE reject",
+        "No generation lease retained across root RPC",
+        "Real public entrypoint positive without substituted startup loader",
+        "Legacy schemas preserve behavior and missing supply fails closed"
+      ],
+      "alternatives": [
+        {
+          "task": "More credential primitive probes without connected implementation",
+          "state": "defer; measured boundary sufficient for next design"
+        },
+        {
+          "task": "Native worker dispatch",
+          "state": "dependent on actual custody/startup qualification; do not bypass"
+        },
+        {
+          "task": "New orchestrator or vault",
+          "state": "not selected; existing owners available"
+        }
+      ],
+      "native_rsi_complete": false
     }
   }
 }

@@ -1,3 +1,18 @@
+## Startup custody lifetime qualification — 2026-10-05
+
+At main4241b10, tested the installed systemd credential lifetime boundary with
+two bounded public-canary service invocations. Expired activation returned243;
+the positive nonroot child could still read its credential after envelope expiry.
+Both units ended inactive/not-found and owned input was removed. This is measured
+evidence that load-time expiry cannot replace the per-request WSP71 check, not
+native admission or RSI completion. Independent saved-artifact review is separate
+from independent execution. Driver/results: `outputs/rsi-startup-custody-20261005`.
+
+Reconciled PR2072 closure and selected the connected authenticated startup supply
+at18/P0 (C4/I5/D5/Impact4) in the existing roadmap/backlog/dispatch owners. Source
+implementation is still open. No new vault, orchestrator, secret enrollment or
+production service was added. WSP00/15/22/50/71/97.
+
 ## Direct revocation proof regression — 2026-10-05
 
 One added test retains the independently frozen control-key LOAD rejection;

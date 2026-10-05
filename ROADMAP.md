@@ -12,10 +12,22 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — connect existing signer admission (2026-10-05 JST):**
+**Current layer — authenticated startup and credential lifetime (2026-10-05 JST):**
+WSP15 selects18/P0 (C4/I5/D5/Impact4): connect the existing public startup,
+encrypted custody, purpose-limited LOAD signing and concrete grant admission.
+At4241b10, a real systemd public-canary experiment rejected an expired envelope
+at launch, but its nonroot child could still read a credential that expired
+after launch. Envelope expiry is not per-request expiry. The next implementation
+must bind authenticated lifetime metadata and reject each expired request before
+key access; it must also supply existing replay/revocation owners after isolation.
+No native admission, secret provisioning or autonomous RSI completion is implied.
+See [the measured constraint](docs/operations/RSI_SWARM_DISPATCH.md#startup-custody-lifetime-qualification--2026-10-05).
+
+**Closed source layer — connect existing signer admission (2026-10-05 JST):**
 Selected14/P1 (C2/I4/D5/Impact3): the bootstrap forwards the existing grant
 admission after its selection/isolation gates. Local connected479:472pass/7skip;
-publication pending. The local model proposal was rejected; this repair is
+PR2072 merged at4241b10; exact-main CI/CodeQL, later4/4, governed maintenance,
+CURRENT/no-gap retrieval and owned-lane closure verified. The local model proposal was rejected; this repair is
 coordinator-authored. Public credential/startup supply and native RSI remain open.
 See [the checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#bootstrap-grant-admission-forwarding--2026-10-05)
 and canonical backlog `bootstrap_grant_forwarding_20261005`.
