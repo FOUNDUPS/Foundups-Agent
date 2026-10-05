@@ -1880,23 +1880,30 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.startup_custody_lifetime_20261005",
-    "base_commit": "4241b10cc349caadf4db2cd7ca2e5b1b9d8c2298",
-    "selected_action": "Connect authenticated deferred startup custody and grant admission",
-    "status": "local_provider_qualified_authenticated_startup_supply_open",
+    "evidence": "outputs/rsi-startup-custody-20261005/permission-input-audit",
+    "observation_path": "current_observation.permission_evidence_type_20261005",
+    "base_commit": "e1ddf2e89d9f55cfc72d66f34b9187adbe932c63",
+    "selected_action": "Close exact permission-evidence type repair through existing publication gates",
+    "status": "locally_validated_publication_pending",
     "wsp15": {
-      "complexity": 4,
-      "importance": 5,
+      "complexity": 1,
+      "importance": 4,
       "deferability": 5,
       "impact": 4,
-      "total": 18,
-      "priority": "P0"
+      "total": 14,
+      "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "Authorized source maintenance and bounded public-canary qualification; no native work grant",
-    "next_action": "Implement existing-owner authenticated supply after isolation, per-request lifetime checks and purpose-limited LOAD signing; verify through real public entrypoint",
-    "higher_priority_gates": []
+    "execution_plane": "Authorized source maintenance; no native work grant",
+    "next_action": "Independent review, commit and gated publication; then rescore authenticated startup dependencies",
+    "higher_priority_gates": [
+      {
+        "observation_path": "current_observation.startup_custody_lifetime_20261005",
+        "total": 18,
+        "priority": "P0",
+        "blocker": "Authenticated purpose-limited startup custody and real native admission remain unresolved"
+      }
+    ]
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -31027,7 +31034,7 @@
       ],
       "native_rsi_complete": false,
       "provider_implementation": {
-        "status": "local_qualified_publication_pending",
+        "status": "merged_main_verified_native_startup_open",
         "production_files": [
           "modules/infrastructure/secrets_mcp/src/systemd_credential_secret_resolver.py",
           "modules/communication/moltbot_bridge/src/reddog_signer_system_service_wsp71_resolver_supply.py",
@@ -31061,7 +31068,60 @@
           "No real principal enrollment or native worker admission",
           "No Python zeroization or physical revocation claim"
         ]
+      },
+      "publication": {
+        "pr": 2073,
+        "merge": "e1ddf2e89d9f55cfc72d66f34b9187adbe932c63",
+        "main_ci": 37270932355,
+        "main_codeql": 37270932063,
+        "checks": "success",
+        "maintenance": "Historical postmerge refresh failed; original transient startup cause unknown; failed task preserved",
+        "retrieval": "Later unmodified governed query CURRENT/no-gap at merge source; runtime_environment_exact_closure_verified=false",
+        "evidence": "outputs/rsi-startup-custody-20261005/publication-receipt.json",
+        "native_rsi_complete": false
       }
+    },
+    "permission_evidence_type_20261005": {
+      "base": "e1ddf2e89d9f55cfc72d66f34b9187adbe932c63",
+      "branch": "codex/rsi-permission-evidence-20261005",
+      "wsp15": {
+        "complexity": 1,
+        "importance": 4,
+        "deferability": 5,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "wsp97": "Extend existing shared guard and regression; no new module or orchestration owner",
+      "state": "locally_validated_publication_pending",
+      "defect": "Truthy malformed freshness evidence allowed credential resolution; only literal True now passes the guard",
+      "authority_limit": "Literal True is not authentication or a new permission grant",
+      "baseline": {
+        "existing_passed": 6,
+        "existing_failed": 6,
+        "independent_frozen_passed": 0,
+        "independent_frozen_failed": 8
+      },
+      "candidate": {
+        "connected_passed": 193,
+        "connected_skipped": 3,
+        "connected_failed": 0,
+        "independent_frozen_passed": 8,
+        "independent_frozen_failed": 0,
+        "manifest_passed": 8,
+        "extension_fast_members_passed": 15
+      },
+      "local_worker": {
+        "proposals": 2,
+        "accepted": 0,
+        "reported_tokens": 556,
+        "paid_calls": 0,
+        "native_ticket_admission": false,
+        "repair_author": "coordinator"
+      },
+      "evidence": "outputs/rsi-startup-custody-20261005/permission-input-audit",
+      "native_rsi_complete": false,
+      "next_gate": "Publish verified prerequisite, re-observe and rescore; authenticated startup remains open"
     }
   }
 }

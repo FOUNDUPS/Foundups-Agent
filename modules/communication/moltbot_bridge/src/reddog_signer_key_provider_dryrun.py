@@ -210,7 +210,7 @@ def _build_signer_backend_from_provider_core(
     profile_rejection = validate_signer_key_provider_profile(profile)
     if profile_rejection is not None:
         return _reject(profile_rejection, profile=profile)
-    if not permission_snapshot_fresh:
+    if permission_snapshot_fresh is not True:
         return _reject(FAIL_PROVIDER_PERMISSION_DENIED, profile=profile)
 
     signing_result = _resolve(profile.signing_key_ref, profile.signer_agent_id, resolver)

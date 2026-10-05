@@ -1,3 +1,16 @@
+## Exact permission evidence type — 2026-10-05
+
+Existing twelve-case regression baseline:6pass/6fail. Independent frozen suite:
+0pass/8fail, covering float values, int subclasses and deceptive/raising operators across
+op and systemd references. Only the shared identity predicate changed.
+Candidate connected196:193pass/3platform skips; frozen held-out8/8 pass with
+unchanged test bytes, source stable and no audit denials. Permission denial now
+precedes secret reads and invokes no caller truth/equality methods. Positive
+boolean behavior remains covered. No criteria were altered after worker proposals.
+Two local proposals were rejected; this is a coordinator repair, not native RSI.
+Exact commands, logs, XML, hashes and independent reviews are in
+`outputs/rsi-startup-custody-20261005/permission-input-audit`. WSP00/15/71/97.
+
 ## Root composition fixture clock — 2026-10-05
 
 The PR2073 hosted signer selection failed one existing composition assertion:

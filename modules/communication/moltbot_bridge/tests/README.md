@@ -1,3 +1,14 @@
+## Permission evidence type regression — 2026-10-05
+
+The existing systemd reference-pair test now includes twelve permission inputs.
+Only literal `True` permits the two controlled resolver reads. False and malformed
+inputs require permission denial and zero reads. The unchanged-production baseline
+failed six of twelve cases. Separate frozen held-out cases cover both reference
+schemes and caller-defined truthiness/equality methods; baseline failed all eight.
+Evidence: `outputs/rsi-startup-custody-20261005/permission-input-audit`.
+Candidate validation and publication status are recorded in TestModLog/ModLog.
+These are synthetic credential tests, not native admission or secret provisioning.
+
 ## Local credential provider regression — 2026-10-05
 
 The existing key-provider tests cover systemd reference pairs, permission denial
