@@ -434,6 +434,10 @@ def test_protected_client_is_factory_only_opaque_and_router_preserves_revocation
 def test_root_composed_oracle_is_the_only_new_atomic_boundary(
     tmp_path, monkeypatch
 ) -> None:
+    # Composition is the subject here; separate wall-clock samples can straddle
+    # a second and legitimately trip the oracle's exact claimed-time check.
+    now = int(time.time())
+    monkeypatch.setattr(time, "time", lambda: now)
     values = runtime(tmp_path, monkeypatch)
     _install_current(values, signed_snapshot(values))
     _bind_router(values, monkeypatch)
@@ -465,6 +469,10 @@ def test_root_composed_oracle_is_the_only_new_atomic_boundary(
     assert composed.is_key_epoch_revoked(
         key_epoch="epoch-not-revoked", at_epoch=int(time.time())
     ) is False
+    with pytest.raises(ValueError, match="durable_revocation_oracle_clock_invalid"):
+        composed.is_key_epoch_revoked(
+            key_epoch="epoch-not-revoked", at_epoch=now - 1
+        )
     grant = {
         "grant_id": _sha("grant"), "key_epoch": "epoch-1",
         "signing_request_digest": _sha("request"),

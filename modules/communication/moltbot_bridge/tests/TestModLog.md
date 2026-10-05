@@ -1,3 +1,18 @@
+## Root composition fixture clock — 2026-10-05
+
+The PR2073 hosted signer selection failed one existing composition assertion:
+separately sampled integer wall times straddled a second, so the durable oracle
+correctly rejected the claimed epoch. The test now freezes a captured epoch before
+constructing its fixture and explicitly verifies that `at_epoch=now-1` rejects.
+No production time check, lifetime test or composition assertion was relaxed.
+
+Local evidence: initial module run30pass/1concurrency timeout; targeted composition
+and concurrency cases2/2; complete hosted selection595pass/7platform skips/0fail
+(602 cases,151.922s, source stable). All attempts are preserved under
+`outputs/rsi-startup-custody-20261005/connected`. The full rerun verifies the current
+selection; it does not establish that the separate intermittent timeout is fixed.
+Independent source review approved the narrow fixture repair. WSP00/15/22/97.
+
 ## Retain the direct revocation proof regression — 2026-10-05
 
 WSP00/15/50/62/97 selects13/P1 (C2/I4/D4/Impact3) at main724bb684.
