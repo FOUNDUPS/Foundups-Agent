@@ -912,3 +912,77 @@ def test_bootstrap_module_has_no_env_shell_repo_openclaw_hermes_or_holoindex_sur
                 assert node.func.id not in banned_name_calls
             if isinstance(node.func, ast.Attribute):
                 assert node.func.attr not in banned_attrs
+
+
+# Grant-aware bootstrap integration; synthetic selection is explicit below.
+from modules.communication.moltbot_bridge.src import reddog_signer_socket_service_runtime_bootstrap as bootstrap
+from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as fixture
+
+
+def test_bootstrap_preserves_lazy_grant_validation(tmp_path, monkeypatch):
+    case = fixture._admission_case(tmp_path, monkeypatch)
+    # Selection/packet loading is explicitly substituted in this seam probe.
+    # Runtime, owner validation, protected-use router and signatures remain real.
+    monkeypatch.setattr(bootstrap, "_load_bound_runtime_config", lambda *args: (
+        case.config, Path(case.values["config_path"]), case.owner.selection["config_digest"], None))
+
+    def serve(**kwargs):
+        assert case.resolver.calls == []
+        backend = kwargs["backend"]
+        assert fixture._admission_wire(case, backend, None)["accepted"] is False
+        assert fixture._admission_wire(case, backend, {**case.grant, "signature": "invalid-signature"})["accepted"] is False
+        assert case.resolver.calls == []
+        response = fixture._admission_wire(case, backend, case.grant)
+        assert response["accepted"] is True
+        assert fixture.protected_fixture.Ed25519SignatureVerifier().verify(
+            case.request.signer_public_key, case.request.signing_input, response["signature"])
+        assert len(case.resolver.calls) == 2
+        assert fixture._admission_wire(case, backend, case.grant)["accepted"] is False
+        assert len(case.resolver.calls) == 2
+        return fixture.CapturingBoundedService()(**kwargs)
+
+    result = bootstrap.run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=case.values["repo"], config_path=case.values["config_path"],
+        resolver=case.resolver, serve_bounded=serve,
+        secret_grant_admission=case.admission)
+    assert result.accepted is True, result.rejection_reasons
+    assert case.events == ["enter", "exit", "root_acquire", "enter", "resolve", "resolve",
+                           "sign", "verify", "exit", "root_finish"]
+
+
+def test_bootstrap_rejects_invalid_admission_before_resolution(tmp_path, monkeypatch):
+    case = fixture._admission_case(tmp_path, monkeypatch)
+    monkeypatch.setattr(bootstrap, "_load_bound_runtime_config", lambda *args: (
+        case.config, Path(case.values["config_path"]), case.owner.selection["config_digest"], None))
+    service = fixture.CapturingBoundedService()
+    result = bootstrap.run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=case.values["repo"], config_path=case.values["config_path"],
+        resolver=case.resolver, serve_bounded=service, secret_grant_admission=object())
+    assert result.accepted is False
+    assert case.resolver.calls == []
+    assert service.calls == []
+
+
+@pytest.mark.parametrize("gate", ["selection", "isolation"])
+def test_bootstrap_admission_preserves_pre_resolver_gates(tmp_path, monkeypatch, gate):
+    case = fixture._admission_case(tmp_path, monkeypatch)
+    if gate == "isolation":
+        monkeypatch.setattr(bootstrap, "_load_bound_runtime_config", lambda *args: (
+            case.config, Path(case.values["config_path"]), case.owner.selection["config_digest"], None))
+    created = []
+    service = fixture.CapturingBoundedService()
+
+    def factory():
+        created.append(True)
+        return case.resolver
+
+    result = bootstrap.run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=case.values["repo"], config_path=None, resolver_factory=factory,
+        serve_bounded=service, secret_grant_admission=case.admission,
+        process_isolation_required=True, process_isolation_gate=lambda *args, **kwargs: None,
+        expected_signer_uid=1234, expected_signer_gid=1234)
+    assert result.accepted is False
+    expected = (bootstrap.FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION if gate == "selection"
+                else bootstrap.FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION)
+    assert expected in result.rejection_reasons
+    assert created == [] and case.resolver.calls == [] and service.calls == []

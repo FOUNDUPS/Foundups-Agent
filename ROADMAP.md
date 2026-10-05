@@ -12,7 +12,19 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — retain a measured coverage repair (2026-10-05 JST):**
+**Current layer — connect existing signer admission (2026-10-05 JST):**
+Selected14/P1 (C2/I4/D5/Impact3): the bootstrap forwards the existing grant
+admission after its selection/isolation gates. Local connected479:472pass/7skip;
+publication pending. The local model proposal was rejected; this repair is
+coordinator-authored. Public credential/startup supply and native RSI remain open.
+See [the checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#bootstrap-grant-admission-forwarding--2026-10-05)
+and canonical backlog `bootstrap_grant_forwarding_20261005`.
+
+**Closed layer — retain a measured coverage repair (2026-10-05 JST):**
+PR2071 merged at4d03a0f1; hosted472pass/3skip, exact-main CI/CodeQL, retained
+fault discrimination, governed retrieval and owned-lane closure verified. The
+following qualification/pending wording records the earlier pre-publication state.
+
 WSP15 selects13/P1 (C2/I4/D4/Impact3). One additive existing-owner test detects a
 frozen control/work proof fault that the prior47 selected tests missed: correct48/48,
 fault47pass/1expected failure. Two local model proposals failed; the retained

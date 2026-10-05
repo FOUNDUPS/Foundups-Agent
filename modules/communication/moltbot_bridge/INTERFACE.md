@@ -1,3 +1,14 @@
+## Bootstrap grant-admission handoff — 2026-10-05
+
+`run_reddog_signer_socket_service_runtime_bootstrap` accepts optional
+`secret_grant_admission: SignerSocketServiceGrantAdmission | None = None`.
+The existing runtime validates the bundle against current owner/config/store
+state; supplying it is not authorization by itself. Config/selection and required
+process isolation precede resolver construction. Invalid admission prevents key
+resolution and serving, but can follow construction of an injected resolver.
+Default `None` retains the previous path. The public system-service entrypoint
+does not yet supply this argument or a production credential resolver.
+
 ## Authenticated effect consent — 2026-10-04
 
 The15/P1 source slice adds a distinct `authorize_exact_high_worktree_effect`

@@ -31,6 +31,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_ga
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import (
     ProcessIsolationGate,
+    SignerSocketServiceGrantAdmission,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
     SignerSocketServiceRuntimeBootstrapResult,
@@ -116,6 +117,7 @@ class RuntimeBootstrapRequest:
     process_isolation_gate: ProcessIsolationGate
     expected_signer_uid: int | None
     expected_signer_gid: int | None
+    secret_grant_admission: SignerSocketServiceGrantAdmission | None
 
 
 def run_reddog_signer_socket_service_runtime_bootstrap(
@@ -143,6 +145,7 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     process_isolation_required: bool = False,
     process_isolation_gate: ProcessIsolationGate = enforce_signer_process_isolation,
     expected_signer_uid: int | None = None, expected_signer_gid: int | None = None,
+    secret_grant_admission: SignerSocketServiceGrantAdmission | None = None,
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
@@ -189,6 +192,7 @@ def _run_runtime_bootstrap(
         conversation_scope_principal_resolver=conversation_resolver,
         proposal_replay_high_water_store=request.proposal_replay_high_water_store,
         verified_outcome_signing_authority=outcome_authority,
+        secret_grant_admission=request.secret_grant_admission,
     )
     return _bootstrap_runtime_result(
         runtime, path=path, digest=digest,
