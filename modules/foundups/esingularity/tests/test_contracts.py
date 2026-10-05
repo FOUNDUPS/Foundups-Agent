@@ -125,6 +125,8 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "BUDGET_PROPOSED -> BUDGET_APPROVED" in fukui_text
     assert "Copy the same media BCC list from last time." in fukui_text
     assert "Projection tabs such as Media" in fukui_text
+    assert "plain committee correspondence" in fukui_text
+    assert "canonical 0102 proxy voice" not in fukui_text
 
     funding_text = FUNDING_PPP_SKILL_PATH.read_text(encoding="utf-8")
     assert "name: yumori_funding_ppp_intelligence" in funding_text
@@ -132,10 +134,19 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "AWARDED" in funding_text
 
     correspondence_text = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
-    assert "Canonical 0102 proxy voice" in correspondence_text
+    assert "Plain committee correspondence" in correspondence_text
+    assert "communication_policy_revision: 2026-10-06" in correspondence_text
     assert "do not open with" in correspondence_text
     assert "0102です" in correspondence_text
-    assert "Default sign-off" in correspondence_text
+    assert "Default sign-off: `YUMORI.me設立準備委員会`." in correspondence_text
+    assert "Default sign-off:\n\n`0102`" not in correspondence_text
+    assert "signature_only_0102_default" not in correspondence_text
+    assert "monk_third_person_reference" not in correspondence_text
+    assert "Answer direct" in correspondence_text
+    assert "questions about AI assistance truthfully" in correspondence_text
+    assert "official form is not optional branding" not in correspondence_text  # Exact field rule is checked below.
+    assert "A required representative/translator field on an official form is not optional branding" in correspondence_text
+    assert "Do not remove `AI` from legitimate project descriptions" in correspondence_text
     assert "Never imply that 0102 personally performed a field action completed by the monk." in correspondence_text
     assert "RED DOG CANDIDATE" in correspondence_text
     assert "Correspondence State Capsule" in correspondence_text
@@ -186,6 +197,10 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
         for root in (".agents", ".claude"):
             projected = (REPOSITORY_ROOT / root / "skills" / slug / "SKILL.md").read_text(encoding="utf-8")
             assert canonical in projected
+            if slug == "yumori-contact-ledger":
+                assert "committee correspondence" in projected
+                assert "Default sign-off is `0102`" not in projected
+                assert "0102 writes as proxy" not in projected
 
 
 
@@ -245,7 +260,6 @@ def test_current_vision_propositions_and_progressive_disclosure_are_present() ->
         "熱を捨てない。地域へ戻す。",
         "60のFoundUpプロジェクト。1チーム最大3人。あとはAI。",
         "福井の課題から、福井のFoundUpをつくる。",
-        "福井から、日本の分散型コンピュートへ。",
         "建物は、まだ立っている。選択肢も、まだ残っている。",
     ):
         assert proposition in content
@@ -490,3 +504,25 @@ def test_correspondence_origin_schema_never_grants_send_authority():
         result = correspondence_execution_mode(CorrespondenceExecutionContext(**args))
         assert result == expected
         assert result not in {"SEND", "VERIFIED_SENT"}
+
+
+def test_phone_skill_is_human_led_plain_and_truthful_with_identical_projection():
+    canonical = (REPOSITORY_ROOT / ".claude/skills/reddog-phone-conversation/SKILL.md").read_text(encoding="utf-8")
+    projection = (REPOSITORY_ROOT / ".agents/skills/reddog-phone-conversation/SKILL.md").read_text(encoding="utf-8")
+    assert canonical == projection
+    for required in (
+        "Default mode: HUMAN_LED", "TRANSLATION_AUDIO", "human principal conducts the call",
+        "no mandatory AI/proxy introduction", "Answer direct questions about AI or synthetic",
+        "stop direct synthetic participation", "after refusal", "Do not conceal identity",
+        "Silence and gaps are not evidence of speech", "Phone A's outbound microphone",
+        "does not lift #1779", "Skillz/Wardrobe/Rolodex", "WSP_97_System_Execution_Prompting_Protocol.md",
+    ):
+        assert required in canonical
+    for obsolete in (
+        "the monk's disclosed AI representative", "Introduce the AI role and principal accurately",
+        "AIアシスタントの0102です", "0102's role: disclosed AI representative", "mosh-pit",
+    ):
+        assert obsolete not in canonical
+    opening = canonical.split("### Plain opening", 1)[1].split("### Optional translation audio", 1)[0]
+    assert "YUMORI.me設立準備委員会です。" in opening
+    assert "never impersonate" not in opening  # Keep operator instructions out of the spoken example.
