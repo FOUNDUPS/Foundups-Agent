@@ -1,3 +1,7 @@
+## Protected-use control-proof source binding — 2026-10-05
+
+Regenerate the existing backend manifest after two-owner descriptor/control-proof changes. Closure remains1,417 files; digest `70ae71c8d9973c071b4403f2e19e3d95fb541b452161031975d47105e3065d99` is pinned in existing JavaScript/Python consumers. Count limits and default startup are unchanged. See bridge module ModLog; no deployment or native RSI activation.
+
 ## Owner-bound lazy signer composition — 2026-10-05
 
 The existing backend import closure now reaches nine previously standalone signer

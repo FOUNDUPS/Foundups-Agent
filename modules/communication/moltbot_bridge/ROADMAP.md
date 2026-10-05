@@ -1,3 +1,13 @@
+## Separate protected-use control proof — 2026-10-05
+
+Selected13/P1 (C3/I4/D3/Impact3) at975fe7c: qualify a strict v2 descriptor
+with separate ACQUIRE/FINISH control proof. Two custody controls and17 candidate
+cases pass; connected474 cases pass (467pass/7platform skips), source review approved;
+publication pending. Next, authenticate
+real control credential custody before composing public startup. No production
+activation or native RSI claim. See module ModLog and canonical backlog
+`protected_use_control_authentication_20261005`; previous PR2067 is closed.
+
 ## Owner-bound lazy signer composition — 2026-10-05
 
 Existing signer runtime now has explicit one-target grant-aware composition;

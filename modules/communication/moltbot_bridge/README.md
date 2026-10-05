@@ -1,3 +1,7 @@
+## Separate protected-use control proof — 2026-10-05
+
+The optional v2 root descriptor separates ACQUIRE/FINISH control authentication from work signing. Existing v1 callers are unchanged. Synthetic source qualification passes (connected467pass/7platform skips); production credential supply and public startup are not activated. See INTERFACE, module ModLog and the canonical RSI backlog.
+
 ## Recover an admitted HoloIndex refresh — 2026-10-05
 
 Use the existing post-merge controller with the original `incident_id` as

@@ -1,3 +1,32 @@
+## Separate protected-use control proof — 2026-10-05
+
+WSP00/15/50/62/97: selected13/P1 (C3/I4/D3/Impact3) at main975fe7c.
+The legacy root request uses the work key before the protected callback may
+resolve it. Two dependency controls confirm safe rejection without that signer
+and success with a pre-provisioned synthetic signer; this is an operating
+limitation, not a regression in v1 authentication.
+
+Extend two existing owners only. Descriptor v2 adds a strict, distinct control
+identity committed by descriptor and authority-context digests. Only protected-use
+ACQUIRE/FINISH verifies that key. Reserve/commit and revocation proofs keep their
+work-key contract; default v1 and public startup remain unchanged. No new runtime
+module, skill, store, provider or enrollment flow.
+
+Initial17 cases failed at unsupported v2 shape; candidate17 pass. These are not17
+independent security defects. Independent review identified a masked negative
+oracle; identity-only validation now precedes retained full-grant assertions.
+Final connected474:467pass/7platform skips,0fail/errors; exact selected tests
+are hash-bound. Manifest8/8 and extension fast15 members pass. Independent
+source review approves; publication pending. Injected test callbacks
+are not purpose-limited secret custody, actual resolver execution, operating key
+enrollment or native RSI. Evidence: `outputs/rsi-control-auth-20261005`; current
+backlog key `protected_use_control_authentication_20261005`.
+
+PR2067 is closed at975fe7c: hosted281/281, exact-main CI/CodeQL and retained24/24
+passed; OpenClaw/WRE maintenance527.453s and CURRENT/no-gap query independently
+verified. Historical5task/15event rows preserved, now6/18. Recovery retained and
+completed worktree retired normally.
+
 ## Owner-bound lazy signer composition — 2026-10-05
 
 WSP15 selects15/P1 (C3/I4/D4/Impact4) at main904ae72e. Extend the existing

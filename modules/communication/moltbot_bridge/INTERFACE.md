@@ -1193,6 +1193,20 @@ service receipt alone does not mean a signing request succeeded.
 The public system-service entrypoint does not yet supply this opt-in admission.
 This interface neither establishes first trust nor activates an unattended agent.
 
+Descriptor `foundup_verified_outcome_root_authority.v2` adds exactly
+`root_control_authentication = {purpose, public_key, key_epoch}`. Purpose is
+`protected-use-acquire-finish.v1`; epoch is nonblank ASCII, at most128 characters;
+all three values are exact strings. The decoded Ed25519 control key must differ
+from the work key. The binding participates in both descriptor identity and
+co-signed authority context: v1 grants cannot be transferred to v2. Missing,
+unknown or mixed fields reject; v2 never falls back to work-key control proof.
+Only protected-use ACQUIRE/FINISH uses this identity. Other root operations and
+v1 preserve their existing proofs. Descriptor lifetime/current-owner checks and
+FINISH failure semantics remain in force. The injected request-signer callback
+is a source-composition dependency, not a qualified custody/provider capability.
+A distinct authentic control credential and public startup composition remain
+prerequisites to native activation.
+
 `load_system_service_root_protected_use_authority()` derives an opaque client from the existing root owner configuration and Unix transport. Only that exact factory-issued capability may compose the durable revocation oracle.
 Root ACQUIRE must precede the callback and exact FINISH must succeed before its result is returned; durable per-use replay markers and the global active-use high-water remain in the existing mirrored root state.
 No caller can construct, copy, pickle, or substitute the capability.

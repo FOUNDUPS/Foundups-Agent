@@ -1881,28 +1881,36 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.signer_lazy_owner_composition_20261005",
-    "base_commit": "904ae72eaafdf5b35fe9f77c2869aafde43b0838",
-    "selected_action": "Close owner-bound lazy signer source composition",
+    "observation_path": "current_observation.protected_use_control_authentication_20261005",
+    "base_commit": "975fe7c43861c7ad900785bed39ee057979d67f4",
+    "selected_action": "Qualify separate protected-use control authentication in existing owners",
     "status": "local_source_qualified_publication_pending",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
-      "deferability": 4,
-      "impact": 4,
-      "total": 15,
+      "deferability": 3,
+      "impact": 3,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
     "execution_plane": "Authorized Codex repository maintenance; not native WRE work admission",
-    "next_action": "Publish/review/verify exact source; then re-observe native bootstrap and first-trust enrollment before selecting one admitted canary",
+    "next_action": "Finish exact-source publication then re-observe current authenticated custody/supplier and bootstrap joins; never infer credential enrollment from descriptor data.",
     "higher_priority_gates": [
       {
         "task": "Native autonomous RSI admission",
         "total": 18,
         "priority": "P0",
         "state": "incomplete",
-        "reason": "Compose authentic owner/key/model admission in existing public system-service path before an admitted native canary; existing suppliers generate artifacts, absent env settings are not a paperwork handoff"
+        "reason": "Authentic owner/control/work/grant/revocation/model inputs and public composition not yet qualified"
+      }
+    ],
+    "deferred": [
+      {
+        "task": "Bootstrap admission forwarding",
+        "total": 13,
+        "priority": "P1",
+        "reason": "Does not supply independently authenticated control capability; dependency first"
       }
     ]
   },
@@ -30490,7 +30498,7 @@
     "signer_lazy_owner_composition_20261005": {
       "base": "904ae72eaafdf5b35fe9f77c2869aafde43b0838",
       "observed_on": "2026-10-05 JST",
-      "state": "LOCAL_SOURCE_QUALIFIED_PUBLICATION_PENDING",
+      "state": "MERGED_EXACT_MAIN_VERIFIED_RETRIEVAL_CURRENT_OWNED_LANE_RETIRED",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -30557,7 +30565,7 @@
         "bounds": "Two inherited sources reflowed with AST equality; no relaxed limits or expiry"
       },
       "github_observation": "Actual admin permission probe succeeded; five-minute snapshot expired. Not principal-key possession/designation.",
-      "remaining_gate": "Compose authentic owner/key/model admission in existing public system-service path before an admitted native canary; existing suppliers generate artifacts, absent env settings are not a paperwork handoff",
+      "remaining_gate": "Resolve the demonstrated pre-ACQUIRE work-key authentication dependency, then authenticate the real owner/key/model inputs and compose the public startup; source qualification alone is not native admission.",
       "evidence_root": "outputs/rsi-admission-unblock-20261005",
       "local_generative_provider_calls": 0,
       "paid_provider_api_calls": 0,
@@ -30569,7 +30577,128 @@
         "No authentic enrollment or service activation",
         "No key-zeroization guarantee",
         "Failed FINISH leaves cleanup unconfirmed"
-      ]
+      ],
+      "publication": {
+        "pr": 2067,
+        "head": "2630fce13bf6fb8d58a80185b3bcb51743b206b3",
+        "merge": "975fe7c43861c7ad900785bed39ee057979d67f4",
+        "reviewed_tree_equals_merged_tree": true,
+        "pr_checks_passed": 11,
+        "main_ci": 37248666690,
+        "main_codeql": 37248666011,
+        "main_conclusions": "success",
+        "hosted_connected_passed": 281,
+        "hosted_skipped": 0,
+        "retained_main_passed": 24,
+        "retained_main_skipped": 0,
+        "maintenance_seconds": 527.453,
+        "fresh_owner_query": "CURRENT/no-gap at merge",
+        "historical_task_event_rows_preserved": [
+          5,
+          15
+        ],
+        "post_task_event_rows": [
+          6,
+          18
+        ],
+        "independent_maintenance_review_sha256": "a09c26bdcc169cca1d60cafa63f702b035c2f5b91f9699e0df408d4597917cf4",
+        "owned_lane_retired": true,
+        "recovery_preserved": true,
+        "native_rsi_complete": false
+      }
+    },
+    "protected_use_control_authentication_20261005": {
+      "base": "975fe7c43861c7ad900785bed39ee057979d67f4",
+      "observed_on": "2026-10-05 JST",
+      "state": "LOCAL_SOURCE_QUALIFIED_PUBLICATION_PENDING",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 3,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "execution_plane": "Authorized Codex repository maintenance; not native WRE admission",
+      "scope": "Two existing descriptor/protected-use service owners; no new module, provider, secret or service",
+      "retrieval": {
+        "freshness": "CURRENT/no-gap at975",
+        "source": "Prior slice retained-main-owner-query.json",
+        "receipt_evidence_root": "outputs/rsi-admission-unblock-20261005",
+        "evaluation": "Broad semantic hits are historical/noisy and incomplete; direct existing owner docs/source fill gaps. No duplicate owner created."
+      },
+      "finding": "Current v1 request proof needs the work key before root ACQUIRE; actual lazy target resolution is afterward. Historical fixtures pre-supplied request signing. No production capability breaking this dependency was found in bounded source.",
+      "repair": "Explicit descriptor.v2 root_control_authentication exact purpose/public_key/key_epoch; decoded control/work identities differ. Bind descriptor and co-signed context. Only ACQUIRE/FINISH selects control proof; preserve v1, work/outcome/revocation proofs, peer checks and public startup.",
+      "baseline": {
+        "custody_controls": "2pass; unavailable request signer makes2attempts, zero transport/callback; preprovisioned positive completes",
+        "v2_cases": "17fail at unsupportedv2shape/context; not17 distinct security bugs"
+      },
+      "criteria_history": "Independent review caught generic malformed-input rejection masked by changed co-signed context. Added identity-only validation before preserved full-grant assertions; original freeze retained.",
+      "candidate": {
+        "v2_passed": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 5.593
+      },
+      "connected_initial": {
+        "tests": 474,
+        "passed": 467,
+        "skipped": 7,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 145.641,
+        "inventory_limit": "Inherited inventory omitted selected authority unit file; expanded exact selected-file inventory for final generated-input run."
+      },
+      "independent_source_review": {
+        "sha256": "2b9022e7277f349db744038940f2d7d4e29814410c8cc643cd39afa774503648",
+        "scope": "Narrow source semantics approved; final publication bindings separate"
+      },
+      "harness_history": [
+        "Initial CI selection read used cp932 on UTF-8; corrected before pytest invocation.",
+        "First manifest suite lacked Git/Node PATH in stripped environment:2pass/1fail/5errors; corrected exact tool directories without changing source or criteria.",
+        "First extension tier rejected CRLF introduced while updating JS pin; restored required LF bytes and reran unchanged tests."
+      ],
+      "integrity": {
+        "manifest_digest": "70ae71c8d9973c071b4403f2e19e3d95fb541b452161031975d47105e3065d99",
+        "runtime_files": 1417,
+        "closure_count_unchanged": true,
+        "test_registry_total": 1687,
+        "quarantined": 270,
+        "ci_connected_suites": 17,
+        "extension_fast_members": 15
+      },
+      "remaining_gate": "Independently authenticate real control credential custody/current-owner enrollment before public startup composition and an admitted native canary. Injected callback is not a qualified provider.",
+      "evidence_root": "outputs/rsi-control-auth-20261005",
+      "local_generative_provider_calls": 0,
+      "paid_provider_api_calls": 0,
+      "coordinator_subagent_cost": null,
+      "native_rsi_complete": false,
+      "retained_autonomous_benefit": null,
+      "limits": [
+        "Synthetic Ed25519 keys and substituted transport with actual router/service validation",
+        "Fixture possesses test keys before measured callback; no memory absence/zeroization claim",
+        "Callback access is not actual ResolvePerSign key resolution or native socket/peer qualification",
+        "No external setup, deploy, model call, grant enrollment or token/reward action"
+      ],
+      "final_validation": {
+        "receipt": "connected-published-inputs-receipt.json",
+        "sha256": "561e76fe2a67cc99b5bba1ca7e919a0dc9136f120201613033510bb1a92ee18f",
+        "counts": {
+          "tests": 474,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 7
+        },
+        "passed": 467,
+        "seconds": 147.407,
+        "source_stable": true,
+        "all_selected_test_files_bound": true,
+        "manifest_tests": "8pass/0skip; regenerates and compares exact manifest",
+        "extension_fast": "15members pass",
+        "denominator": "Custody2, candidate17 and repeated connected selections overlap474; do not sum.",
+        "skip_reasons": "Windows AF_UNIX unavailable, symlink privileges, Linux-only root transport"
+      }
     }
   }
 }

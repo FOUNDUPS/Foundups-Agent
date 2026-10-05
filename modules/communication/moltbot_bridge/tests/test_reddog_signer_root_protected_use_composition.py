@@ -673,3 +673,120 @@ def test_root_oracle_rejects_split_owner_provenance(tmp_path, monkeypatch, misma
         oracle._protected_use = changed
     assert oracle.matches_owner(policy=values["policy"], binding=values["binding"]) is False
     assert calls == []
+
+
+@pytest.mark.parametrize("preloaded", [False, True], ids=[
+    "unavailable_target_key", "legacy_preprovisioned_target_key",
+])
+def test_protected_use_request_signer_custody_boundary(tmp_path, monkeypatch, preloaded):
+    # Setup uses synthetic keys; measured unavailable closure has no key capability.
+    values = runtime(tmp_path, monkeypatch)
+    _install_current(values, signed_snapshot(values))
+    before = values["state"].load(PROTECTED_USE_BINDING)
+    events = []
+    if preloaded:
+        private = values["target_private"]
+        def request_signer(value):
+            events.append("request_signer")
+            return _sign(private, value)
+    else:
+        def request_signer(_value):
+            events.append("request_signer")
+            raise ValueError("test_target_key_capability_unavailable")
+
+    def roundtrip(_path, raw, _uid, _timeout):
+        events.append(json.loads(raw)["operation"])
+        return _route(values, raw)
+
+    def action():
+        events.append("callback")
+        return "inert_callback_result"
+
+    monkeypatch.setattr(root_client_module, "_root_socket_roundtrip", roundtrip)
+    transport = _lookup_revocation_client(values["client"]).exchange
+    client = _create_root_protected_use_authority(
+        values["snapshot"].descriptor,
+        owner_config_id=str(values["policy"]["owner_config_id"]),
+        policy=values["policy"], binding=values["binding"], exchange=transport,
+        request_signer=request_signer, now_epoch=int(time.time()),
+    )
+    if preloaded:
+        assert _authorize(client, action) == "inert_callback_result"
+        assert events == ["request_signer", "PROTECTED_USE_ACQUIRE", "callback",
+                          "request_signer", "PROTECTED_USE_FINISH"]
+        finished = values["state"].load(PROTECTED_USE_BINDING)
+        assert before is None and finished is not None and finished.sequence == 2
+    else:
+        with pytest.raises(ValueError, match="^test_target_key_capability_unavailable$"):
+            _authorize(client, action)
+        assert events == ["request_signer", "request_signer"]
+        assert values["state"].load(PROTECTED_USE_BINDING) == before
+
+
+def _two_key_runtime(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.tests import root_revocation_service_fixtures as fixture
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import _private_key, _public_text
+
+    control = _private_key()
+    original = fixture._descriptor
+
+    def descriptor(*args, **kwargs):
+        overrides = dict(kwargs.get("descriptor_overrides", {}))
+        overrides.update(schema_version="foundup_verified_outcome_root_authority.v2",
+                         root_control_authentication={"purpose": "protected-use-acquire-finish.v1",
+                             "public_key": _public_text(control), "key_epoch": "control-epoch-1"})
+        kwargs["descriptor_overrides"] = overrides
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(fixture, "_descriptor", descriptor)
+    values = runtime(tmp_path, monkeypatch)
+    _install_current(values, signed_snapshot(values))
+    return values, control
+
+
+@pytest.mark.parametrize("proof_key", ["control", "work", "unrelated"])
+def test_control_key_proof_precedes_work_key_access(tmp_path, monkeypatch, proof_key):
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import _private_key
+
+    values, control = _two_key_runtime(tmp_path, monkeypatch)
+    key = {"control": control, "work": values["target_private"], "unrelated": _private_key()}[proof_key]
+    events = []
+
+    def roundtrip(_path, raw, _uid, _timeout):
+        response = _route(values, raw)
+        if protected_response_from_bytes(response).accepted:
+            events.append(json.loads(raw)["operation"])
+        return response
+
+    def work():
+        events.append("work_key_access")
+        return _sign(values["target_private"], "bounded-test-work")
+
+    monkeypatch.setattr(root_client_module, "_root_socket_roundtrip", roundtrip)
+    client = _create_root_protected_use_authority(
+        values["snapshot"].descriptor, owner_config_id=values["policy"]["owner_config_id"],
+        policy=values["policy"], binding=values["binding"],
+        exchange=_lookup_revocation_client(values["client"]).exchange,
+        request_signer=lambda text: _sign(key, text), now_epoch=int(time.time()),
+    )
+    if proof_key != "control":
+        with pytest.raises(ValueError, match="request_rejected"):
+            _authorize(client, work)
+        assert events == [] and values["state"].load(PROTECTED_USE_BINDING) is None
+        return
+    signature = _authorize(client, work)
+    assert Ed25519SignatureVerifier().verify(values["policy"]["target_signer_public_key"], "bounded-test-work", signature)
+    assert events == ["PROTECTED_USE_ACQUIRE", "work_key_access", "PROTECTED_USE_FINISH"]
+    assert values["state"].load(PROTECTED_USE_BINDING).sequence == 2
+
+
+def test_control_key_never_replaces_shared_work_proof(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service import require_root_authority_signer_proof
+    from modules.communication.moltbot_bridge.tests.root_revocation_service_fixtures import legacy_roundtrip
+
+    values, control = _two_key_runtime(tmp_path, monkeypatch)
+    _bind_router(values, monkeypatch)
+    assert values["client"].load() is not None  # Existing work-key revocation proof.
+    assert legacy_roundtrip(values, _lookup_revocation_client(values["client"]).exchange)
+    with pytest.raises(ValueError, match="signer_proof_invalid"):
+        require_root_authority_signer_proof(values["snapshot"], "bounded-test-work", _sign(control, "bounded-test-work"))
