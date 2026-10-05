@@ -1,5 +1,13 @@
 ## Authenticated public startup continuation — 2026-10-06
 
+Actual OS trial231947 passes at `50008b241` in34.012s. Synthetic authority only;
+no child OS, clock, credential or transport substitutions. Actual isolation,
+one valid signature, nonce-replay rejection, one target sign and six root RPCs;
+both services exit0 and cleanup completes. Parent readback confirms1,023 source
+hashes and driver digest; copied dependency hashes stable. Evidence and failed
+fixture attempts are retained under the existing20261006 output root. Native
+admission, remote CI/publication and autonomous retained gain remain unverified.
+
 Public source integration passes1/1 with1,030 stable source pins. Missing grant
 and replay reject; valid signature verifies. OS/root ownership, custody, isolation
 and socket transport are explicit substitutions. The original replay no-read

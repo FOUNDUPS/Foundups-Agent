@@ -10,7 +10,9 @@ The container holds dependencies, not authority: existing signing, grant and
 replay validators remain mandatory. Legacy calls without the supplier are unchanged.
 The v7 loader supplies this hook to the public entrypoint. Source integration
 verifies a valid signature and missing/replayed grant rejection with controlled
-OS fixtures. Complete actual-OS public startup remains unverified.
+OS fixtures. A separate source-bound local OS experiment at `50008b241` qualifies
+public startup with synthetic authorities and actual systemd custody/isolation
+and Unix transport. Authentic principal enrollment/native admission remains open.
 When a deferred supplier is configured, the receipt's
 `no_runtime_secret_file_loaded` is `null`: bootstrap cannot attest that a supplier
 did not read credentials before returning or raising. Legacy calls retain the
@@ -40,7 +42,8 @@ The full policy ID/signature still covers the alias, and admission still require
 it to equal the authenticated current artifact generation. v5-v7 binding bytes
 and the default schema remain unchanged; existing policies are not silently
 reinterpreted. Three construction/alias checks and the connected consumer
-selection and public source integration pass locally; OS acceptance remains open.
+selection and public source integration pass locally. The separate synthetic
+authority OS experiment passes; this does not authorize production activation.
 
 ## Exact permission evidence type — 2026-10-05
 

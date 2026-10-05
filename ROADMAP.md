@@ -13,6 +13,17 @@ Status: canonical **system planning and completion-gate authority** in this repo
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
 **Current execution — authenticated startup integration (2026-10-06 JST):**
+Actual OS qualification now passes at `50008b241` using synthetic authorities:
+real DynamicUser/systemd credentials, isolation, public entrypoints and Unix
+peer transport; one verified target signature, missing-grant rejection and
+observed nonce-replay rejection. Six root RPCs, one protected use, one target
+sign, normal service exits and complete owned cleanup. All1,023 bound Python
+files still match; driver/dependency bindings are retained. This qualifies this
+startup mechanism, not authentic enrollment, native G1 admission or retained RSI.
+Evidence: `outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+Next close publication against fresh main, then connect the existing issuer to
+the governed valve with verified capabilities (15/P1, detailed at completion gates).
+
 PR2075 is merged at `a3def2a83`; exact-main CI37376433116 and
 CodeQL37376432711 passed. Later main invocation12/12 passed. Governed maintenance
 completed502.86s; all prior10tasks/29events unchanged, now11/32. Separate governed
@@ -31,7 +42,8 @@ versioned E0-v8 repair preserves v5-v7 bindings and keeps signed generation chec
 3construction tests and88consumer tests pass (1consumer platform skip).
 Public source integration now passes: valid signature verified, missing grant
 and replay rejected; all1,030 source pins stable. OS custody/isolation and socket
-transport remain fixture substitutions, so this does not prove live admission.
+transport remain fixture substitutions in that test; the separate OS trial above
+supplies actual mechanism evidence without claiming authentic native admission.
 Separate Linux authority qualification passes8/8 with stable source hashes;
 it does not cover complete public startup. Post-projection connected regression:
 104pass/2platform skips (`startup-connected-public.xml`). Generated bindings now

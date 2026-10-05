@@ -1,5 +1,13 @@
 ## Authenticated public startup regression — 2026-10-06
 
+Separate actual-OS qualification at `50008b241` passes using synthetic authority:
+real DynamicUser/systemd custody, production isolation/public entrypoints and
+Unix peer transport; missing grant rejection, one verified signature and nonce
+replay rejection. Exactly one target sign and six root RPCs, both services exit0,
+complete owned cleanup. Source-bound driver, observations and failed attempts:
+`outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+This local experiment is not hosted CI, authentic enrollment or native RSI.
+
 `test_reddog_signer_system_service_entrypoint.py::test_public_v7_startup_real_generation_grant_signature_and_replay`
 uses the public entrypoint, signed artifact generation, current E0 validation,
 deferred dependency materialization, root protocol handlers and durable replay.
@@ -12,8 +20,8 @@ the test distinguishes their proof-key reads from forbidden repeated target
 signing and ACQUIRE/FINISH. The original overly broad no-read assertion and
 its correction are preserved in `outputs/rsi-permission-evidence-20261006/`.
 Connected entrypoint/resolver/bootstrap selection:104pass/2platform skips.
-Separate existing Linux authority runner:8pass, stable source. Complete live
-public startup, native local-worker improvement and retained gain remain open.
+Separate existing Linux authority runner:8pass, stable source. Authentic
+enrollment, native local-worker improvement and retained gain remain open.
 
 ## Permission evidence type regression — 2026-10-05
 

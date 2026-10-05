@@ -1,5 +1,17 @@
 ## Authenticated startup integration in progress — 2026-10-06
 
+Actual OS qualification passes at `50008b241` in34.012s: real DynamicUser,
+systemd credential delivery, unchanged public entrypoints/isolation/provider,
+real Unix peer transport and six root RPCs. Missing v2 grant rejects at parsing;
+one valid target signature verifies; replay records NONCE_REPLAY with no repeat
+target signing or protected-use acquisition. Both services exit0; unit ends
+not-found/inactive, no sockets remain and owned directory is removed. Parent
+readback checked1,023 Python hashes against current source, with zero mismatch;
+driver matches and copied dependencies stayed stable. Synthetic test identities
+and authorities only: no native G1 enrollment or RSI benefit claim. Failed
+identity/interpreter/timing/lock/TTL fixture attempts remain separately preserved.
+Evidence: `outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+
 Post-checkpoint G1 reconciliation at `bf4aa1aaf`: seven historical blocker labels
 are not seven absent modules. Existing consensus, consent, model verification
 and handshake implementations require authentic inputs and connected consumers.

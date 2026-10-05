@@ -31174,14 +31174,30 @@
         "limits": "Public integration substitutes OS custody/isolation/transport. Separate Linux authority checks do not prove complete live public startup."
       },
       "remaining": [
-        "Full public entrypoint success through actual OS admission; synthetic protocol path passes",
+        "Actual OS mechanism qualified with synthetic authority; authentic enrollment/native admission remain separate",
         "Generated bindings refreshed and manifest/index tests8/8; final independent review, remote CI and publication remain",
         "Actual independently admitted worker improvement and later measured retention"
       ],
+      "actual_os_qualification": {
+        "source": "50008b241af790759a02dc8d05aca5702b7527e0",
+        "passed": true,
+        "authority_kind": "synthetic_test_authorities_only",
+        "runtime_substitutions": [],
+        "target_signatures_verified": 1,
+        "target_sign_calls": 1,
+        "root_rpc_count": 6,
+        "nonce_replay_observed": true,
+        "isolation_accepted": true,
+        "cleanup_complete": true,
+        "current_source_hashes_checked": 1023,
+        "current_source_hash_mismatches": 0,
+        "evidence": "outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/result.json",
+        "limits": "No authentic principal enrollment, admitted native worker, autonomous repair or retained benefit"
+      },
       "post_startup_candidate": {
         "task": "Connect existing external authoritative-use lease issuer to existing governed valve consumer",
         "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
-        "state": "conditional_after_startup_and_verified_capability_inputs",
+        "state": "startup_mechanism_qualified_pending_source_closure_and_verified_capability_inputs",
         "observation": "Existing issuer contract/adversarial baseline23/23; current resolver retains seven blocker reasons and hardcodes a null lease; no production issuer caller found",
         "wsp97": "Reuse existing issuer and verifier owners; reject missing capabilities and retain exact effect, replay, expiry and generation checks",
         "evidence": "outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json",
