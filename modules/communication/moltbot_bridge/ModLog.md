@@ -22,6 +22,12 @@ are not purpose-limited secret custody, actual resolver execution, operating key
 enrollment or native RSI. Evidence: `outputs/rsi-control-auth-20261005`; current
 backlog key `protected_use_control_authentication_20261005`.
 
+Hosted CI37252460162 exposed a pre-existing Windows-only mocked socket path in
+the newly selected authority-service suite:42fail/90setup errors,339pass/3skip.
+Both substituted-transport paths now use the platform filesystem anchor; all
+163 assertion ASTs and production validation remain unchanged. Preserve the
+failed run; require the corrected head to pass Linux CI before publication.
+
 PR2067 is closed at975fe7c: hosted281/281, exact-main CI/CodeQL and retained24/24
 passed; OpenClaw/WRE maintenance527.453s and CURRENT/no-gap query independently
 verified. Historical5task/15event rows preserved, now6/18. Recovery retained and

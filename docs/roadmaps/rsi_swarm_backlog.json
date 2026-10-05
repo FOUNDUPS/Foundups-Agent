@@ -30698,6 +30698,20 @@
         "extension_fast": "15members pass",
         "denominator": "Custody2, candidate17 and repeated connected selections overlap474; do not sum.",
         "skip_reasons": "Windows AF_UNIX unavailable, symlink privileges, Linux-only root transport"
+      },
+      "hosted_fixture_repair": {
+        "failed_run": 37252460162,
+        "head": "ff013899fd17bbb379052b6ae15f9e927d304b6e",
+        "counts": {
+          "passed": 339,
+          "failed": 42,
+          "errors": 90,
+          "skipped": 3
+        },
+        "cause": "Two Windows-only mocked socket paths rejected as relative by Linux. Shared fixture propagates setup errors.",
+        "repair": "Use Path(REPO_ROOT.anchor)/filename in the existing fixture and direct non-root test. Production validation and all163 assertion ASTs unchanged.",
+        "state": "Corrected local and hosted validation pending",
+        "evidence": "ci-37252460162-failed.log"
       }
     }
   }

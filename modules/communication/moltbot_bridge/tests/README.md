@@ -10,6 +10,11 @@ Source review approved; publication pending. Test key access
 inside the callback is not actual resolver execution or native key custody.
 Exact evidence: `outputs/rsi-control-auth-20261005`; see module ModLog.
 
+CI37252460162 found a Windows-only mocked socket path in the newly included
+authority-service suite (42fail/90setup errors). The two substituted-transport
+paths now derive the platform root; production checks and assertions are
+unchanged. Linux hosted validation must pass on the corrected head.
+
 ## Owner-bound lazy signer composition — 2026-10-05
 
 Existing signer runtime now has explicit one-target grant-aware composition;
