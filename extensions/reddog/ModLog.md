@@ -1,3 +1,11 @@
+## Owner-bound lazy signer composition — 2026-10-05
+
+The existing backend import closure now reaches nine previously standalone signer
+leaves:1408→1417 files. Regenerate the manifest, refresh both digest pins and
+require exactly1417/reject1418 in the existing compatibility boundary. Byte caps,
+allowlists and authority checks remain. No installed extension or service changed.
+See RSI backlog `signer_lazy_owner_composition_20261005` for verification/publication.
+
 ## 2026-10-05 — Named WRE telemetry source closure
 
 The existing backend manifest now binds the registry-audit executor and its

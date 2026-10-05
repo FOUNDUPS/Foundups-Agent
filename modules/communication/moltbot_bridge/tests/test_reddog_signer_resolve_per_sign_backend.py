@@ -948,3 +948,44 @@ def test_modified_socket_parser_functions_remain_bounded() -> None:
     assert functions
     for node in functions:
         assert node.end_lineno - node.lineno + 1 <= 50
+
+
+def _resolution_boundary_change_case(nonce_store, change):
+    request = _request()
+    grant = _grant(request, nonce_store)
+    clock = [NOW]
+    oracle = AtomicSignerSecretGrantRevocationOracle()
+    ephemeral = _EphemeralBackend()
+
+    class ChangingFactory(_Factory):
+        def __call__(self):
+            result = super().__call__()
+            if change == "expiry":
+                clock[0] = grant["expires_at"]
+            else:
+                oracle.revoke_grant(grant["grant_id"])
+            return result
+
+    factory = ChangingFactory(ephemeral)
+    backend = ResolvePerSignSignerBackend(
+        binding=_binding(nonce_store),
+        grant_boundary=SignerSecretAccessGrantBoundary(
+            nonce_store=nonce_store, revocation_oracle=oracle, clock=lambda: clock[0]),
+        signature_verifier=_Verifier(grant), principal_key_resolver=_Resolver(),
+        backend_factory=factory,
+    )
+    result = backend.sign_with_secret_grant(request, _peer(), grant)
+    assert factory.calls == 1
+    assert oracle.is_revoked(grant_id=grant["grant_id"], key_epoch=grant["key_epoch"],
+                             at_epoch=clock[0]) is (change == "revocation")
+    assert clock[0] == (grant["expires_at"] if change == "expiry" else NOW)
+    assert result.accepted is False and result.rejection_code == REJECT_SECRET_GRANT_INVALID
+    assert ephemeral.calls == 0
+
+
+def test_expiry_only_during_resolution_rejects_before_signing(nonce_store):
+    _resolution_boundary_change_case(nonce_store, "expiry")
+
+
+def test_local_revocation_only_during_resolution_rejects_before_signing(nonce_store):
+    _resolution_boundary_change_case(nonce_store, "revocation")

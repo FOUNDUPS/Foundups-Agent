@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import dataclass, replace
+import time
 from typing import Any
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
@@ -78,6 +80,21 @@ class Wsp71EphemeralSignerBackendFactory:
     secret_grant_rate_authority: DurableSignerSecretGrantRateAuthority | None = None
     elevated_consensus_signer_authority: Any | None = None
     signer_peer_instance_binding: SignerPeerInstanceBinding | None = None
+    owner_context: tuple[Any, Any, Any] | None = None
+
+    @contextmanager
+    def signing_authority_lease(self):
+        """Recheck owner state only inside the root protected-use callback."""
+        if self.owner_context is None:
+            yield
+            return
+        from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import lease_signer_socket_service_grant_admission
+        config, admission, expected = self.owner_context
+        with lease_signer_socket_service_grant_admission(config, admission) as (current, owner):
+            profile, binding = _owner_ephemeral_binding(current, admission, owner)
+            if profile != self.profile or binding != expected:
+                raise ValueError("signer_grant_current_owner_mismatch")
+            yield
 
     @property
     def signer_agent_id(self) -> str:
@@ -119,4 +136,51 @@ class Wsp71EphemeralSignerBackendFactory:
         return replace(result, backend=backend)
 
 
-__all__ = ["Wsp71EphemeralSignerBackendFactory"]
+def build_owner_leased_ephemeral_backend(
+    config: Any, resolver: SignerKeyResolver, admission: Any, owner: Any,
+    *, control_loop_anchor_store: ControlLoopAnchorStore | None,
+    control_loop_authority_policy: ControlLoopAuthorityPolicy | None,
+) -> Any:
+    """Compose existing one-use owners without resolving any signing material."""
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
+    from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant import SignerSecretAccessGrantBoundary
+    from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import ResolvePerSignSignerBackend
+    profile, binding = _owner_ephemeral_binding(config, admission, owner)
+    factory = Wsp71EphemeralSignerBackendFactory(
+        profile, resolver, control_loop_anchor_store=control_loop_anchor_store,
+        control_loop_authority_policy=control_loop_authority_policy,
+        signer_peer_instance_binding=config.signer_peer_instance_binding,
+        owner_context=(config, admission, binding),
+    )
+    return ResolvePerSignSignerBackend(
+        binding, SignerSecretAccessGrantBoundary(
+            nonce_store=admission.replay_store, revocation_oracle=admission.revocation_oracle,
+            clock=lambda: int(time.time()),
+        ), Ed25519SignatureVerifier(), owner.resolver, factory,
+    )
+
+
+def _owner_ephemeral_binding(config: Any, admission: Any, owner: Any):
+    from pathlib import Path
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_admission_validation import require_policy_config_binding
+    from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_grant_binding import resolve_secret_grant_target_binding, require_owner_bound_replay_store
+    from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_root_protected_use_oracle import RootAuthorizedSignerGrantRevocationOracle
+
+    profiles = tuple(config.key_provider_profiles) or (config.key_provider_profile,)
+    if len(profiles) != 1 or any(value is not None for value in (
+        config.proposal_authority_policy, config.conversation_scope_signer_policy,
+        config.verified_outcome_signer_policy,
+    )):
+        raise ValueError("signer_grant_profile_scope_unsupported")
+    profile = require_policy_config_binding(owner.policy, config)
+    oracle = admission.revocation_oracle
+    if type(oracle) is not RootAuthorizedSignerGrantRevocationOracle or not oracle.matches_owner(
+        policy=owner.policy, binding=owner.revocation_binding,
+    ):
+        raise ValueError("signer_grant_oracle_owner_mismatch")
+    require_owner_bound_replay_store(owner.policy, admission.replay_store, repo_root=Path(config.repo_root))
+    binding = resolve_secret_grant_target_binding(owner.policy, admission.replay_store)
+    return profile, binding
+
+
+__all__ = ["Wsp71EphemeralSignerBackendFactory", "build_owner_leased_ephemeral_backend"]

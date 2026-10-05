@@ -435,9 +435,7 @@ def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> Non
                 found.append(f"{path}.$key")
                 continue
             _visit_type_paths(child, f"{path}.{key}" if path else key, key, found)
-    elif isinstance(item, Sequence) and not isinstance(
-        item, (str, bytes, bytearray)
-    ):
+    elif isinstance(item, Sequence) and not isinstance(item, (str, bytes, bytearray)):
         for index, child in enumerate(item):
             _visit_type_paths(child, f"{path}[{index}]", "", found)
 

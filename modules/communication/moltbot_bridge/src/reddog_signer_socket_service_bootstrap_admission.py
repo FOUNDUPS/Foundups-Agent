@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
+import json
 from pathlib import Path
 from typing import Any, Optional, Protocol
 
@@ -17,6 +19,42 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
 
 SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED"
 SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT"
+
+@dataclass(frozen=True)
+class SignerSocketServiceGrantAdmission:
+    """Dependencies to verify against current owner state, never authority alone."""
+    owner_config_path: Path | str
+    owner_policy: Any
+    replay_store: Any
+    revocation_oracle: Any
+
+
+@contextmanager
+def lease_signer_socket_service_grant_admission(config: Any, admission: Any):
+    """Fence assembly or one protected callback; never enclose a root RPC."""
+    from modules.communication.moltbot_bridge.src import reddog_signer_owner_e0_current_selection as owner_source
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import _attach_peer_binding
+
+    if type(admission) is not SignerSocketServiceGrantAdmission:
+        raise ValueError("signer_grant_admission_invalid")
+    with owner_source.lease_validated_owner_e0_current_admission(
+        owner_config_path=admission.owner_config_path,
+        repo_root=Path(config.repo_root).resolve(), policy=admission.owner_policy,
+    ) as owner:
+        selected = owner.selection
+        attached = _attach_peer_binding(
+            owner.config, Path(config.repo_root).resolve(),
+            Path(selected["config_path"]), selected["config_digest"],
+            selected["run_packet_path"], None, admission.owner_config_path,
+            selected, selected["config_raw_digest"],
+        )
+        if attached is None or json.dumps(
+            asdict(config), sort_keys=True, default=str, allow_nan=False,
+        ) != json.dumps(
+            asdict(attached), sort_keys=True, default=str, allow_nan=False,
+        ):
+            raise ValueError("signer_grant_selected_config_mismatch")
+        yield attached, owner
 
 class ProcessIsolationGate(Protocol):
     def __call__(

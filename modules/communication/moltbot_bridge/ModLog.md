@@ -1,3 +1,41 @@
+## Owner-bound lazy signer composition — 2026-10-05
+
+WSP15 selects15/P1 (C3/I4/D4/Impact4) at main904ae72e. Extend the existing
+runtime, factory, grant and root-use owners: one explicit admission composes a
+lazy backend; legacy/default startup remains unchanged. Verify owner/oracle/store
+provenance before serving, consume the grant before root ACQUIRE, then hold a
+fresh generation lease only across resolution, exact-request signing and response
+verification. Release it before root FINISH. A post-resolution lifetime/local
+revocation check rejects before signing. No new module, skill or scheduler.
+
+Independent review refuted the initial service-wide lease: a real two-process
+generation-lock probe reproduced blocking until release. Tests also exposed
+foreign replay-store acceptance and signing after expiry/local revocation. Repairs
+retain those rejection oracles. Final connected281 cases:277pass/4 Windows skips,
+0fail/errors; CI selects the same14 suites. Synthetic owner/keys/transport prove
+source composition, not authentic enrollment or an operating system service.
+Whole-file AST-identical reflow closes two inherited WSP62 bounds failures;
+no threshold or exemption expiry was relaxed. Generated closure grows1408→1417
+through nine existing lazy-path dependencies; exact digest/count consumers are
+updated and reject1418. The old manifest test forbidding the newly connected
+backend is explicitly migrated to required inclusion, not silently discarded.
+
+Earlier fixture, observer and harness failures remain in the evidence history.
+In particular the original service-wide lock criteria were corrected only after
+the independent two-process result. FINISH retry failure means cleanup unknown;
+bounded service completion never establishes successful signing or zeroization.
+Independent semantic review passed; exact-head publication remains a separate gate.
+PC evidence: `outputs/rsi-admission-unblock-20261005`; canonical observation:
+`current_observation.signer_lazy_owner_composition_20261005` in the RSI backlog.
+
+GitHub admin permission was actually observed; that expired snapshot is not a
+principal-key designation. Existing suppliers already serialize configuration.
+The public system-service entrypoint still needs authentic owner/admission
+composition, principal-key enrollment and role-specific model evidence before
+the first native canary. Native RSI18/P0 remains incomplete. No provider call,
+live key, deployment or unattended improvement occurred in this source slice.
+WSP00/5/6/11/15/22/48/50/62/71/84/97/99.
+
 ## Factory peer-instance propagation — 2026-10-05
 
 Selected13/P1 (C2/I4/D4/Impact3) after PR2065 merged/main verification and one

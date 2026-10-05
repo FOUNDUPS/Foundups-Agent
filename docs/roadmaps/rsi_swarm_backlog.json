@@ -1881,36 +1881,28 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.signer_factory_peer_binding_20261005",
-    "base_commit": "fc6f6e021033af21556be3cca64f8e9c9e43fca3",
-    "selected_action": "Qualify peer-instance propagation through existing WSP71 factory",
+    "observation_path": "current_observation.signer_lazy_owner_composition_20261005",
+    "base_commit": "904ae72eaafdf5b35fe9f77c2869aafde43b0838",
+    "selected_action": "Close owner-bound lazy signer source composition",
     "status": "local_source_qualified_publication_pending",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 13,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "authorized repository source maintenance, not native work admission",
-    "previous_observation": "current_observation.signer_factory_composition_20261005",
-    "next_action": "Publish with exact-head review/CI and verify main; re-observe/score one-target one-request composition under the existing owner lease, preserving consume-before-resolve and protected-use signing. Authentic principal/model input is separate.",
+    "execution_plane": "Authorized Codex repository maintenance; not native WRE work admission",
+    "next_action": "Publish/review/verify exact source; then re-observe native bootstrap and first-trust enrollment before selecting one admitted canary",
     "higher_priority_gates": [
       {
         "task": "Native autonomous RSI admission",
         "total": 18,
         "priority": "P0",
-        "state": "blocked",
-        "reason": "Actual existing model-binding query returned MODEL_RUNTIME_BINDING_UNCONFIGURED; current grounding is not worker/verifier operating authority."
-      },
-      {
-        "task": "Genuine input handoff",
-        "total": 15,
-        "priority": "P1",
-        "state": "blocked_or_unknown",
-        "reason": "Ten named input paths are absent in observed process/user/machine scopes. Existing intake is draft-only; UI consumes a pre-issued signed credential. Genuine first-trust handoff remains unresolved, not a global absence claim."
+        "state": "incomplete",
+        "reason": "Compose authentic owner/key/model admission in existing public system-service path before an admitted native canary; existing suppliers generate artifacts, absent env settings are not a paperwork handoff"
       }
     ]
   },
@@ -30484,7 +30476,100 @@
         "No native grant, service activation, live vault access or route change",
         "No owner-held privileged-use, lifecycle or native-memory zeroization qualification"
       ],
-      "next_gate": "Publish with exact-head review/CI and verify main; re-observe/score one-target one-request composition under the existing owner lease, preserving consume-before-resolve and protected-use signing. Authentic principal/model input is separate."
+      "next_gate": "Publish with exact-head review/CI and verify main; re-observe/score one-target one-request composition under the existing owner lease, preserving consume-before-resolve and protected-use signing. Authentic principal/model input is separate.",
+      "closure": {
+        "state": "MERGED_MAIN_VERIFIED_RETRIEVAL_VERIFIED_OWNED_LANE_RETIRED",
+        "pr": 2066,
+        "reviewed_head": "91f99185216f8a8971cf194a181e6780c26b6f8f",
+        "merge": "904ae72eaafdf5b35fe9f77c2869aafde43b0838",
+        "tree": "db1dc1b02da10bcb53a8706b21952a9197f9a640",
+        "main_checks_verified": true,
+        "native_rsi_complete": false
+      }
+    },
+    "signer_lazy_owner_composition_20261005": {
+      "base": "904ae72eaafdf5b35fe9f77c2869aafde43b0838",
+      "observed_on": "2026-10-05 JST",
+      "state": "LOCAL_SOURCE_QUALIFIED_PUBLICATION_PENDING",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "execution_plane": "Authorized Codex repository maintenance; not native WRE work admission",
+      "scope": "Extend existing one-target runtime/factory/grant/root owners; no new modules or services",
+      "retrieval": {
+        "receipt": "holo-query.json",
+        "sha256": "51493ab6d7d43a795112396aded9eab404f22d9f77cbe76b4ef64cd567b96eea",
+        "freshness": "CURRENT at base",
+        "index_gap_detected": false,
+        "evaluation": "Historical/noisy broad hits; named owner docs and direct source fill missing paths. Optional memory/requirements absent. No new duplicate owner."
+      },
+      "defects": [
+        "Service-wide generation lease blocks root RPC acquiring same lock",
+        "Unrelated genuine replay store accepted",
+        "Grant expiry or local revocation during resolution still reaches sign"
+      ],
+      "repair": "Assembly lease ends before service; root ACQUIRE precedes callback-only owner lease; same-owner store/oracle checked; pure-time/local-atomic pre-sign check; lease released before FINISH",
+      "lock_reproduction": {
+        "receipt": "lock-order-reproduction-v2/result.json",
+        "sha256": "47d3ea0871c356746107c791d91fa88884c14db035b0fe63e002e2e3c56e5726",
+        "limits": "Actual two-child lock discriminator; not native signer deployment"
+      },
+      "frozen_baselines": {
+        "owner_match": "7fail missing API",
+        "initial_runtime": "13fail missing API",
+        "v4": "12pass/1fail foreign replay store",
+        "callback_v5": "10pass/5fail service-wide lock ordering",
+        "v8": "1pass/2fail separate expiry-only and local-revocation-only signing"
+      },
+      "criteria_history": "v1-v3 fixture policy/raw-digest mistakes; v5 revises lock criteria after real deadlock finding; v6-v8 correct FINISH observer to actual two attempts. Preserve all artifacts. Old manifest exclusion explicitly becomes inclusion after real runtime edge.",
+      "validation": {
+        "receipt": "connected-published-inputs-receipt.json",
+        "sha256": "b246718d6478bd8e8d1a7b753e0d9d5a12794fc98bb6b72a6822ad0ad379f082",
+        "counts": {
+          "tests": 281,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 4
+        },
+        "passed": 277,
+        "seconds": 71.484,
+        "source_stable": true,
+        "focused": "81pass including independent expiry/revocation, grant boundary and drift observation; matcher7pass",
+        "denominator": "Focused cases overlap connected281; repeated runs are not additional cases",
+        "skips": "AF_UNIX unavailable; two symlink privilege limits; one Linux-only case",
+        "execution": "Conventional pytest, private DB/temp and stripped environment; not an OS sandbox"
+      },
+      "independent_review": {
+        "receipt": "source-independent-review-final.json",
+        "sha256": "574b615231167c29c00f36b711ba5fe85e06272be040f450f11921cbbaf28789",
+        "scope": "Source semantics/local tests approved; final generated/publication bindings reviewed separately"
+      },
+      "integrity": {
+        "manifest_digest": "3fce1e9ff9cc5b2eb5fddc35c75973133796e38fda9a192f28c8e46c0104c0f3",
+        "runtime_files": 1417,
+        "closure_added_existing_leaves": 9,
+        "count_rejects": 1418,
+        "bounds": "Two inherited sources reflowed with AST equality; no relaxed limits or expiry"
+      },
+      "github_observation": "Actual admin permission probe succeeded; five-minute snapshot expired. Not principal-key possession/designation.",
+      "remaining_gate": "Compose authentic owner/key/model admission in existing public system-service path before an admitted native canary; existing suppliers generate artifacts, absent env settings are not a paperwork handoff",
+      "evidence_root": "outputs/rsi-admission-unblock-20261005",
+      "local_generative_provider_calls": 0,
+      "paid_provider_api_calls": 0,
+      "coordinator_subagent_cost": null,
+      "native_rsi_complete": false,
+      "retained_autonomous_benefit": null,
+      "limits": [
+        "Synthetic key/owner/transport fixtures",
+        "No authentic enrollment or service activation",
+        "No key-zeroization guarantee",
+        "Failed FINISH leaves cleanup unconfirmed"
+      ]
     }
   }
 }

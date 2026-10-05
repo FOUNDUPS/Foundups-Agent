@@ -12,16 +12,21 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — factory peer-instance propagation (2026-10-05 JST):**
-Selected **13/P1** (C2/I4/D4/Impact3): preserve the existing signer-owned peer
-binding through the ephemeral factory before attempting owner-held service
-composition. Frozen baseline:10 pass/4 missing-keyword failures; unchanged
-candidate:14/14 pass. Nine connected suites:127 pass/4 Windows platform skips,
-including the focused cases. Independent source/oracle review passed; exact-head
-publication remains open. The five-line factory extension preserves old positional
-inputs and default-unbound rejection. No routing or service activation changed.
-See the [peer-binding checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#factory-peer-instance-propagation--2026-10-05)
-and canonical backlog `signer_factory_peer_binding_20261005`.
+**Current layer — owner-bound lazy signer composition (2026-10-05 JST):**
+Selected15/P1 (C3/I4/D4/Impact4). Existing runtime/factory/authority components
+are joined for one explicitly admitted target. Independent tests/review exposed
+and fixed lock inversion, owner/store mismatch and expiry during resolution.
+Local281 cases:277pass/4platform skips; source reviewed, publication pending.
+Public system-service setup and native RSI remain incomplete. See the
+[composition checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#owner-bound-lazy-signer-composition--2026-10-05)
+and canonical backlog `signer_lazy_owner_composition_20261005`.
+
+**Closed layer — factory peer-instance propagation (2026-10-05 JST):**
+PR2066 merged at904ae72eaafdf5b35fe9f77c2869aafde43b0838. Hosted131/131,
+both exact-main workflows and a later merged-source14-case check passed.
+Governed Holo maintenance completed519.453s; CURRENT/no-gap query and normal
+owned-lane retirement were independently reviewed. These close source retention
+and retrieval for that checkpoint, not native autonomous RSI.
 
 **Closed layer — WSP71 factory composition (2026-10-05 JST):**
 Selected **15/P1** (C2/I4/D5/Impact4): repair a demonstrated short audit-hash versus
