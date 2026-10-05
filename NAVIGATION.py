@@ -26,6 +26,11 @@ ACHIEVEMENTS:
 # === NEED_TO: Problem -> Solution Mapping ===
 # Direct mapping of problems to existing code solutions
 NEED_TO = {
+    # Human-operated conversation skill; distinct from the message-only dialer
+    "RedDog phone conversation skill": ".claude/skills/reddog-phone-conversation/SKILL.md",
+    "create Japanese call conversation brief": ".claude/skills/reddog-phone-conversation/SKILL.md",
+    "two phone translate English resume": ".claude/skills/reddog-phone-conversation/SKILL.md",
+
     # Japanese message-call prototype and agent build assignments
     "make a phone call in Japanese": "modules/platform_integration/elevenlabs_calls/README.md",
     "Japanese call roadmap": "modules/platform_integration/elevenlabs_calls/ROADMAP.md",
