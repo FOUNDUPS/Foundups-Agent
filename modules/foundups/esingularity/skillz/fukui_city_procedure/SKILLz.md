@@ -208,9 +208,12 @@ repository-owned YUMORI.me correspondence parent:
 
 `modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md`
 
-That parent owns the canonical 0102 proxy voice, third-person monk reference,
+That parent owns plain committee correspondence, accurate attribution,
 Sent-first reconciliation, routing consent, receipt reconciliation, and recursive
-learning contract.
+learning. Its 2026-10-06 communication policy removes routine AI/proxy introductions
+and the default 0102 signature from external City messages. Required official-form
+identity/authority fields remain accurate and unchanged; no invented human role.
+Human-led phone assistance uses `.claude/skills/reddog-phone-conversation/SKILL.md`.
 
 Consequential outbound actions must also apply the repository-owned recipient guard:
 
