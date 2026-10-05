@@ -25,6 +25,8 @@ The WSP 97 workflow also covers bounded history/research, distinct homepage owne
 
 ## Government and correspondence operations skills
 
+- [MLIT F-08 official forms and verification](docs/official/mlit_ppp_study_20261005/README.md): preserved official ZIP, inventory, October 5 verification and unresolved Form 2-4 requirement.
+
 YUMORI operations use repository-owned skills instead of rebuilding procedure from chat memory:
 
 - [Fukui City procedure](skillz/fukui_city_procedure/SKILLz.md): Council 請願/陳情, exact official forms, executive PPP/PFI, information disclosure, procurement stages, meetings/access, routing and legal handoff.

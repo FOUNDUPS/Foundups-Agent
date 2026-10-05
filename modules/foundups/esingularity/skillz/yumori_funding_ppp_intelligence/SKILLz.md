@@ -158,3 +158,7 @@ When unsure where a grant fact belongs, put the full verified program fact in th
 - Do not infer that a closed facility satisfies baseline requirements.
 - Do not infer that a public asset is eligible merely because a City reuse program exists.
 - Do not use secondary articles when the current primary program source is available.
+
+## Retained F-08 form evidence
+
+Before retrieving MLIT study forms again, read [official-form provenance and verification](../../docs/official/mlit_ppp_study_20261005/README.md). Reverify current source/version and preserve the unresolved Form 2-4 boundary. Use the grant registry for program status; file readability is not eligibility or application evidence.
