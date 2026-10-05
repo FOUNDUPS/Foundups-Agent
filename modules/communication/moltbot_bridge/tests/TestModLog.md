@@ -1,3 +1,26 @@
+## Authenticated public startup continuation — 2026-10-06
+
+Public source integration passes1/1 with1,030 stable source pins. Missing grant
+and replay reject; valid signature verifies. OS/root ownership, custody, isolation
+and socket transport are explicit substitutions. The original replay no-read
+assertion was too broad: verify/consume each authenticates a root LOAD before
+nonce rejection. Corrected observation requires exactly two LOAD proof reads,
+zero repeated target signing and zero extra ACQUIRE/FINISH; prior failure retained.
+Source fix reuses existing launch projection at peer attachment only. Test-author
+review found no defect but is not independent test authorship.
+
+Connected entrypoint/resolver/bootstrap:104pass/2platform skips in45.59s
+(`startup-connected-public.xml`). Existing Linux authority runner:8pass/0skip,
+stable source hashes (`linux-owner-qualified-projection/receipt.json`). Neither
+is complete live public startup or native RSI. All evidence is under
+`outputs/rsi-permission-evidence-20261006/`.
+
+Publication prerequisites: manifest/index contracts8/8; extension fast tier15
+members passes after exact member bound refresh (failed prior run retained).
+New full CI owner/policy selection locally135pass/1platform skip in203.90s,
+recorded in `startup-ci-policy.xml`. Workflow YAML and backlog JSON parse.
+Remote CI, public OS startup, publication and native RSI remain unverified.
+
 ## Deferred startup supply ordering — 2026-10-06
 
 Existing bootstrap suite:48passed/0failed (23.11s), including18 added cases.

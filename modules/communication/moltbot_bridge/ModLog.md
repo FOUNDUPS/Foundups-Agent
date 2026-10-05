@@ -1,5 +1,44 @@
 ## Authenticated startup integration in progress — 2026-10-06
 
+Generated runtime bindings refreshed through the existing generator:1,419 files,
+canonical digest `dc4a72b48f0288b0b543da05b14a168a0fdafb9ff41b0609f4b018be97d485f0`.
+Manifest contracts pass8/8 including independent staged-index closure. Existing
+CI includes startup composition; add explicit full owner-version and policy
+consumer suites to cover the new v7/v8 paths. Remote execution remains unverified.
+The first extension fast run rejected the stale1,418-member bound. New startup
+imports add the existing resolver-supply module to the transitive closure, so
+raise the exact bound to1,419 and retain rejection at1,420. The failed run is
+preserved separately; no runtime member or digest validation was removed.
+Corrected extension fast tier passes15members; full owner/policy CI selection
+passes135cases with1platform skip in203.90s. Workflow/backlog parsing and diff
+whitespace checks pass. This is a local source checkpoint, not publication.
+
+Continuation after local checkpoint `f0b33d5e8`: the full public fixture reached
+real manifest/E0/dependency admission and exposed a selected-config attachment
+failure. The E0 lease returns four extra authority fields while the existing
+peer validator expects the launch projection. Reuse `_legacy_launch_values`
+only for peer attachment, retaining the full current lease for E0 checks.
+WSP15 prerequisite15/P1 (C1/I5/D5/Impact4) advances parent18/P0; no validator
+relaxation. Public integration now passes1/1 with1,030 stable source pins;
+separate Linux authority qualification passes8/8 with stable source hashes.
+Neither result establishes live public startup or native worker admission.
+Post-projection entrypoint/resolver-supply/bootstrap regression:104pass/2platform
+skips in45.59s; `startup-connected-public.xml` records all106 cases. This run
+does not provide a new whole-dependency source-freeze or OS startup proof.
+The public test's original no-additional-credential-read replay observation was
+corrected after tracing existing verify/consume revocation checks: exactly two
+authenticated LOAD proof reads are expected, with no additional target signing
+or ACQUIRE/FINISH. Original failures and criteria migration remain preserved in
+`public-startup-result-review.json`; this is not evidence of learned RSI gain.
+
+Linux qualification first stopped on the cross-OS worktree pointer, then on
+missing jsonschema in the existing test venv; the second run also had source
+drift and is invalid evidence. Process-local Git mount mapping resolves the
+correct head. An isolated test venv preserves pytest9.1.1/cryptography50.0.0 and
+adds the canonical FoundUps jsonschema requirement, with download hashes saved.
+No shared environment was modified. These are test prerequisites, not native
+signer or worker admission. Evidence stays under the existing20261006 output root.
+
 Owned branch `codex/rsi-authenticated-startup-20261006`, base `a3def2a83`.
 WSP00/15/71/97: resume existing18/P0 startup objective after PR2075 closure.
 Bootstrap now accepts one deferred dependency supply only after config admission

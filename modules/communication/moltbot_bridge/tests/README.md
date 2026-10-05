@@ -1,3 +1,20 @@
+## Authenticated public startup regression — 2026-10-06
+
+`test_reddog_signer_system_service_entrypoint.py::test_public_v7_startup_real_generation_grant_signature_and_replay`
+uses the public entrypoint, signed artifact generation, current E0 validation,
+deferred dependency materialization, root protocol handlers and durable replay.
+It verifies one valid signature and rejects missing/replayed grants. OS ownership,
+credential delivery, isolation and socket transport are controlled fixtures;
+this is source integration, not actual OS admission.
+
+Replay performs two authenticated revocation LOAD checks before nonce rejection;
+the test distinguishes their proof-key reads from forbidden repeated target
+signing and ACQUIRE/FINISH. The original overly broad no-read assertion and
+its correction are preserved in `outputs/rsi-permission-evidence-20261006/`.
+Connected entrypoint/resolver/bootstrap selection:104pass/2platform skips.
+Separate existing Linux authority runner:8pass, stable source. Complete live
+public startup, native local-worker improvement and retained gain remain open.
+
 ## Permission evidence type regression — 2026-10-05
 
 The existing systemd reference-pair test now includes twelve permission inputs.

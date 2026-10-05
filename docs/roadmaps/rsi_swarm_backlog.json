@@ -31158,10 +31158,24 @@
         "limits": "Separate local suites with explicit synthetic OS boundaries; not full public or native admission",
         "evidence_root": "outputs/rsi-permission-evidence-20261006"
       },
-      "construction_blocker": "Legacy E0 generation digest cycle reproduced. Explicit v8 repair passes constructive and downstream consumer checks while preserving legacy semantics; full public success still unverified.",
+      "construction_blocker": "Legacy E0 generation digest cycle reproduced. Explicit v8 repair passes constructive, downstream consumer and public source integration checks while preserving legacy semantics; actual OS public startup remains unverified.",
+      "public_projection_prerequisite": {
+        "wsp15": {"complexity": 1, "importance": 5, "deferability": 5, "impact": 4, "total": 15, "priority": "P1"},
+        "observed": "Real public startup reaches E0 lease, then strict peer binding rejects four lease-only selection fields",
+        "repair": "Reuse existing launch projection at peer attachment; preserve full E0 lease and strict validator",
+        "state": "public_source_integration_passed_not_live_admission",
+        "evidence": "outputs/rsi-permission-evidence-20261006/public-startup-result-review.json",
+        "public_tests_passed": 1,
+        "public_source_pins_stable": 1030,
+        "criteria_migration": "Replay rejects with two authenticated LOAD proof reads and no additional target signing; original failed observation preserved",
+        "linux_authority_tests_passed": 8,
+        "linux_source_hashes_stable": true,
+        "linux_evidence": "outputs/rsi-permission-evidence-20261006/linux-owner-qualified-projection/receipt.json",
+        "limits": "Public integration substitutes OS custody/isolation/transport. Separate Linux authority checks do not prove complete live public startup."
+      },
       "remaining": [
-        "Full public entrypoint success through real protocols and actual OS admission",
-        "Generated bindings, independent review and publication",
+        "Full public entrypoint success through actual OS admission; synthetic protocol path passes",
+        "Generated bindings refreshed and manifest/index tests8/8; final independent review, remote CI and publication remain",
         "Actual independently admitted worker improvement and later measured retention"
       ],
       "native_rsi_complete": false

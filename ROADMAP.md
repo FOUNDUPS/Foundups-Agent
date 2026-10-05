@@ -29,8 +29,14 @@ Independent review repaired two proof-signing defects and a frozen-policy conver
 Full public acceptance exposed an existing config/generation digest cycle. The
 versioned E0-v8 repair preserves v5-v7 bindings and keeps signed generation checks:
 3construction tests and88consumer tests pass (1consumer platform skip).
-Full public success remains in progress. Generated bindings still describe base
-and must be regenerated before publication. No activation or
+Public source integration now passes: valid signature verified, missing grant
+and replay rejected; all1,030 source pins stable. OS custody/isolation and socket
+transport remain fixture substitutions, so this does not prove live admission.
+Separate Linux authority qualification passes8/8 with stable source hashes;
+it does not cover complete public startup. Post-projection connected regression:
+104pass/2platform skips (`startup-connected-public.xml`). Generated bindings now
+cover1,419 runtime files; manifest/index validation passes8/8. Policy-consumer CI
+coverage is added; remote CI and publication remain unverified. No activation or
 native local-worker improvement is claimed. Evidence: `outputs/rsi-permission-evidence-20261006`.
 
 **Current layer — authenticated startup and credential lifetime (2026-10-05 JST):**

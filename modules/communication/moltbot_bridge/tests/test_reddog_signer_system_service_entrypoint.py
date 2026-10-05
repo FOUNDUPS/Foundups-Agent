@@ -699,6 +699,257 @@ def test_entrypoint_defers_startup_dependencies_until_isolation(
     assert json.loads(emitted[0])["result"]["no_runtime_secret_file_loaded"] is None
 
 
+def _public_startup_artifacts(tmp_path):
+    """Synthetic authorities, real manifest production and generation activation."""
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_owner_controlled_e0_admission as e0
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_system_service_manifest_selection_loader as mf
+    from modules.communication.moltbot_bridge.tests import test_reddog_signed_runtime_artifact_manifest as manifest
+    from modules.communication.moltbot_bridge.tests.reddog_grant_authority_service_policy_test_support import grant_service_git_provenance_policy_fields
+    from modules.communication.moltbot_bridge.src import reddog_signer_owner_e0_policy_contract as pc
+
+    e0_root = tmp_path / "e0"
+    e0_root.mkdir()
+    values = e0._fixture(e0_root)
+    (tmp_path / "manifest").mkdir()
+    harness = manifest._build_harness(tmp_path / "manifest", repo_root=e0_root / "repo")
+    policy = values["policy"]
+    policy.update(schema_version=pc.POLICY_SCHEMA_V8, target_signer_public_key=harness.reddog_public_key,
+                  target_signer_key_fingerprint=e0.public_key_fingerprint(harness.reddog_public_key),
+                  target_signer_key_epoch=KEY_EPOCH,
+                  signing_key_ref_hash=pc.signer_key_reference_digest("systemd-creds://work"),
+                  audit_mac_key_ref_hash=pc.signer_key_reference_digest("systemd-creds://audit"),
+                  allowed_operations=["signed_0102_readonly_review:foundup_module"],
+                  allowed_authority_tiers=["HIGH", "LOW"], consensus_required_tiers=["HIGH"])
+    policy.update(grant_service_git_provenance_policy_fields(repo_root_digest=e0.DIGEST_A,
+        source_commit_sha="1" * 40, object_format="sha1", source_policy_digest=e0.DIGEST_D,
+        source_descriptor_digest=e0.DIGEST_E))
+    state = _public_startup_state(tmp_path / "root-state", policy, harness.repo_root)
+    policy["revocation_anchor_state_binding_digest"] = state.state_binding_digest
+    config = e0._config(repo=harness.repo_root, runtime=harness.runtime_root,
+        signer=e0_root / "signer", target_public=harness.reddog_public_key,
+        signing_ref="systemd-creds://work", audit_ref="systemd-creds://audit",
+        authority_binding_digest=pc.signer_owner_e0_authority_binding_digest(policy))
+    config["key_provider_profiles"][0]["expected_key_epoch"] = KEY_EPOCH
+    config["control_loop_authority_policy"] = mf._runtime_config(harness)["control_loop_authority_policy"]
+    config_path = mf._write_json(harness.runtime_root / "signer_service_config.json", config)
+    principals = harness.runtime_root / "principal_authority_records.json"
+    mf._write_json(principals, values["principal_payload"])
+    owner_path = tmp_path / "signer-owner" / "owner.json"
+    packet_path, supplied = mf._runtime_packet(harness, config_path, owner_path)
+    authority, boundary = mf._fresh_manifest_authority(harness)
+    mf._sign_and_publish_manifest(harness, authority, boundary)
+    selector = mf.create_runtime_artifact_manifest_launch_selection_boundary(
+        authority=authority, authority_boundary=boundary, signature_verifier=mf.Ed25519SignatureVerifier())
+    selected = dict(selector.consume(selector.select(harness.read_manifest(), now_epoch=NOW)))
+    owner = mf._generation_owner_config(harness, selected)
+    values.update(harness=harness, repo=harness.repo_root, config=config, config_path=config_path,
+        target_private=harness.reddog_private_key, target_public=harness.reddog_public_key,
+        owner_config_path=owner_path, state=state, supplied=supplied, packet_path=packet_path)
+    return values, owner, selected
+
+
+def _public_startup_state(root, policy, repo):
+    from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import SqliteMonotonicAuthorityStore
+    from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_state import RootVerifiedOutcomeAuthorityState
+    stores = []
+    for name, filename, identifier, receipt in (
+        ("state", "verified-outcome-authority.sqlite3", policy["revocation_anchor_store_id"], policy["revocation_anchor_store_durability_receipt_id"]),
+        ("witness", "verified-outcome-authority-witness.sqlite3", "public-root-witness", "sha256:" + "a" * 64),
+        ("installation", "verified-outcome-authority-installation.sqlite3", "public-root-installation", "sha256:" + "b" * 64),
+    ):
+        stores.append(SqliteMonotonicAuthorityStore(root / name / filename, allowed_root=root / name,
+            repo_root=repo, store_id=identifier, durability_receipt_id=receipt))
+    return RootVerifiedOutcomeAuthorityState(*stores, repo_root=repo, require_root_ownership=False)  # OS seam only.
+
+
+def _public_startup_owner(values, owner, selected, tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_owner_controlled_e0_admission as e0
+    from modules.communication.moltbot_bridge.tests import test_reddog_effect_consent_owner_versions as versions
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as wf
+    from modules.communication.moltbot_bridge.src import reddog_signer_system_service_wsp71_resolver_supply as supply
+
+    control, public = e0._keypair()
+    policy, state = values["policy"], values["state"]
+    descriptor, _, _ = _descriptor(tmp_path / "descriptor", signer_key=values["target_private"],
+        grant_overrides={"issued_at": NOW - 1, "expires_at": NOW + 120}, descriptor_overrides={
+            "schema_version": "foundup_verified_outcome_root_authority.v2",
+            "root_control_authentication": {"purpose": supply.ROOT_CONTROL_PURPOSE, "public_key": public, "key_epoch": "control-1"},
+            "issued_at": NOW - 2, "expires_at": NOW + 200,
+            "signer_key_epoch": KEY_EPOCH, "signer_run_packet_id": values["supplied"].run_packet_id,
+            "signer_config_digest": selected["config_digest"], "signer_session_id": "session-prod",
+            "signer_manifest_id": selected["manifest_id"],
+            "signer_artifact_generation_digest": selected["artifact_generation_digest"],
+            "replay_store_id": state.store_id, "replay_store_durability_receipt_id": state.durability_receipt_id})
+    outcome = {"descriptor": descriptor, "authority_socket_path": str(tmp_path / "root-authority.sock"),
+        "authority_service_uid": 0, "signer_uid": 1201, "signer_gid": 1201, "signer_principal_id": "signer:reddog"}
+    for name, store in zip(("state", "state_witness", "installation"), (state._primary, state._witness, state._installation)):
+        outcome.update({name + "_root": str(store.rollback_domain_root), name + "_path": str(store.path),
+            name + "_store_id": store.store_id, name + "_durability_receipt_id": store.durability_receipt_id})
+    metadata_root = tmp_path / "metadata"
+    metadata_root.mkdir()
+    with monkeypatch.context() as metadata_only:
+        _, _, _, template, _ = versions.owner_fixture(metadata_only, metadata_root)
+    for key in ("independent_grant_authority", "grant_authority_source_policy", "reviewer_designation_authority", "effect_consent_authority"):
+        owner[key] = template[key]
+    owner["grant_authority_source_policy"]["repo_root_digest"] = owner["repo_root_digest"]
+    owner.update(schema_version=loader_module.SCHEMA_VERSION_V7, verified_outcome_authority=outcome)
+    replay_fixture = wf.factory_fixture.grant_fixture
+    replay = replay_fixture.SignerGrantReplayStoreConfig(
+        nonce_path=Path(policy["replay_path"]), nonce_root=Path(policy["replay_root"]),
+        high_water_path=tmp_path / "grant-high" / "authority.sqlite3", high_water_root=tmp_path / "grant-high",
+        repo_root=values["repo"], replay_store_binding_digest=replay_fixture._binding().replay_store_binding_digest,
+        replay_store_id=policy["replay_store_id"], durability_receipt_id=policy["replay_store_durability_receipt_id"])
+    replay_fixture._provision_store(replay)  # Explicit synthetic setup, not startup.
+    owner["startup_custody"] = _public_startup_custody(values, descriptor, replay)
+    owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+    values["owner_config_path"].parent.mkdir()
+    values["owner_config_path"].write_text(json.dumps(owner, sort_keys=True), encoding="ascii")
+    values.update(control_private=control, owner=owner, replay_config=replay)
+    return values
+
+
+def _public_startup_custody(values, descriptor, replay):
+    from modules.communication.moltbot_bridge.src import reddog_signer_system_service_wsp71_resolver_supply as supply
+    binding = dict(credential_directory="/run/credentials/public-startup.service", expected_uid=1201,
+        expected_gid=1201, expected_requester="signer:reddog", issued_at=NOW - 1, expires_at=NOW + 60,
+        credential_ids=["audit", "control", "integrity", "work"], max_secret_bytes=65536)
+    permissions = {}
+    for purpose, credential, identity in (
+        (supply.ROOT_LOAD_PURPOSE, "work", {"public_key": descriptor["signer_public_key"], "key_epoch": KEY_EPOCH}),
+        (supply.ROOT_CONTROL_PURPOSE, "control", descriptor["root_control_authentication"]),
+    ):
+        permissions[purpose] = dict(operation="SECRETS_READ", reference="systemd-creds://" + credential,
+            requester_id="signer:reddog", purpose=purpose, public_key=identity["public_key"], key_epoch=identity["key_epoch"],
+            issued_at=NOW - 1, expires_at=NOW + 30)
+    return dict(policy_path=str(values["owner_config_path"].parent / "e0-policy.json"), credential_binding=binding,
+        root_request_permissions=permissions, proposal_replay_store=None,
+        replay_store=dict(high_water_root=str(replay.high_water_root), high_water_path=str(replay.high_water_path),
+            replay_store_binding_digest=replay.replay_store_binding_digest),
+        replay_integrity_permission=dict(operation="SECRETS_READ", reference="systemd-creds://integrity",
+            requester_id="signer:reddog", purpose="signer-grant-replay-integrity.v1", encoding="utf8",
+            issued_at=NOW - 1, expires_at=NOW + 30))
+
+
+def _public_startup_finalize(values, monkeypatch):
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_owner_controlled_e0_admission as e0
+    from modules.communication.moltbot_bridge.src import reddog_signer_owner_e0_current_selection as current
+    from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import revocation_authority_binding_from_policy
+
+    # Only the OS root-file provenance check is replaced. The loader, signed
+    # manifest, durable generation anchor and all E0 validators remain real.
+    monkeypatch.setattr(loader_module, "_read_root_owned_bytes", lambda path, _root: path.read_bytes())
+    capability, boundary = loader_module.load_system_service_manifest_selection(
+        owner_config_path=values["owner_config_path"], repo_root=values["repo"])
+    selected = boundary.consume(capability)
+    policy = values["policy"]
+    for key in ("owner_config_id", "manifest_id", "artifact_generation_digest", "config_digest", "generation", "generation_revision"):
+        policy[key] = selected[key]
+    policy["target_signer_generation_id"] = policy["artifact_generation_digest"]
+    e0._resign(values)
+    Path(values["owner"]["startup_custody"]["policy_path"]).write_text(json.dumps(policy, sort_keys=True), encoding="ascii")
+    with current.lease_validated_owner_e0_current_admission(
+        owner_config_path=values["owner_config_path"], repo_root=values["repo"], policy=policy) as admitted:
+        values["admitted"] = admitted
+    values["binding"] = revocation_authority_binding_from_policy(policy, repo_root=values["repo"],
+        signer_runtime_root=Path(values["config"]["signer_runtime_root"]))
+
+
+def _public_startup_root_transport(values, monkeypatch):
+    from modules.communication.moltbot_bridge.tests import root_revocation_service_fixtures as root
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_root_protected_use_composition as composition
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority_service import _peer
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_authority import _sign
+
+    policy, owner = values["policy"], values["owner"]
+    descriptor = owner["verified_outcome_authority"]["descriptor"]
+    snapshot = root.RootAuthoritySnapshot(owner_config_id=owner["config_id"],
+        authority_generation_sequence=descriptor["authority_generation_sequence"],
+        state_binding_digest=values["state"].state_binding_digest, signer_principal_id="signer:reddog",
+        signer_uid=1201, signer_gid=1201, descriptor=descriptor)
+    root.initialize_root_authority_state(values["state"], snapshot, now_epoch=NOW)
+    authority = root._create_root_revocation_service_authority(owner_config_path=values["owner_config_path"], repo_root=values["repo"])
+    operations = []
+    def roundtrip(_path, raw, _uid, _timeout):
+        operations.append(json.loads(raw)["operation"])
+        return composition.handle_root_authority_wire_request(raw, peer=_peer("signer:reddog", uid=1201, gid=1201),
+            state=values["state"], snapshot_supplier=lambda: snapshot, revocation_authority=authority, now_epoch=NOW)
+    monkeypatch.setattr(outcome_client_module, "_require_protected_socket", lambda *_: None)
+    monkeypatch.setattr(outcome_client_module, "_root_socket_roundtrip", roundtrip)
+    exchange = root.build_root_authority_socket_exchange(repo_root=values["repo"], socket_path=owner["verified_outcome_authority"]["authority_socket_path"])
+    client = root._create_root_revocation_anchor_authority(descriptor, owner_config_id=owner["config_id"],
+        policy=policy, binding=values["binding"], exchange=exchange,
+        request_signer=lambda message: _sign(values["target_private"], message), now_epoch=NOW)
+    values.update(snapshot=snapshot, server_authority=authority, client=client,
+        store=root.SignerGrantRevocationAuthorityStore(values["binding"], repo_root=values["repo"]),
+        witness=root.witness_store(values["binding"], values["repo"]))
+    composition._install_current(values, root.signed_snapshot(values))  # Signed fixture provisioning before startup.
+    operations.clear()
+    return operations
+
+
+def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, monkeypatch):
+    """Synthetic enrollment; only OS custody/isolation and transports substituted."""
+    import time
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.src import reddog_signer_system_service_entrypoint as entry
+    from modules.communication.moltbot_bridge.src import reddog_signer_process_isolation_gate as isolation
+    from modules.communication.moltbot_bridge.tests.test_reddog_signer_process_isolation_gate import FakeIsolationBackend
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as wf
+    from modules.infrastructure.secrets_mcp.src import systemd_credential_secret_resolver as credentials
+
+    monkeypatch.setattr(time, "time", lambda: NOW)
+    # The resolver intentionally captures its clock default at import time.
+    # Freeze that clock too; retain the real constructor/type and lifetime checks.
+    constructor = credentials.SystemdCredentialSecretResolver.__init__
+    monkeypatch.setattr(constructor, "__kwdefaults__", {**constructor.__kwdefaults__, "clock": lambda: NOW})
+    values, owner, selected = _public_startup_artifacts(tmp_path)
+    _public_startup_owner(values, owner, selected, tmp_path, monkeypatch)
+    _public_startup_finalize(values, monkeypatch)
+    operations = _public_startup_root_transport(values, monkeypatch)
+    fixture = wf.factory_fixture.grant_fixture
+    monkeypatch.setattr(fixture, "NOW", NOW)
+    store = fixture.DurableSignerSecretGrantNonceStore(values["replay_config"], integrity_key=fixture.INTEGRITY_KEY, clock=lambda: NOW)
+    request, grant, peer = wf._admission_request(values, values["admitted"], store)
+    case = SimpleNamespace(request=request, grant=grant, peer=peer)
+    reads, responses = [], []
+    secrets = {"work": _private_key_secret(values["target_private"]), "control": _private_key_secret(values["control_private"]),
+               "audit": _audit_secret(), "integrity": fixture.INTEGRITY_KEY.decode("utf-8")}
+    def read_credential(binding, identifier):
+        assert binding.expected_requester == "signer:reddog"
+        reads.append(identifier)
+        return secrets[identifier]
+    monkeypatch.setattr(credentials, "_identity_matches", lambda binding: binding.expected_uid == binding.expected_gid == 1201)
+    monkeypatch.setattr(credentials, "_read_credential", read_credential)
+    monkeypatch.setattr(isolation, "LinuxSignerProcessIsolationBackend", FakeIsolationBackend)
+    def serve(**kwargs):
+        assert reads == ["integrity"]
+        backend = kwargs["backend"]
+        before = list(reads)
+        assert wf._admission_wire(case, backend, None)["accepted"] is False
+        assert reads == before
+        response = wf._admission_wire(case, backend, grant)
+        assert response["accepted"] is True, response.get("rejection_code")
+        assert wf.protected_fixture.Ed25519SignatureVerifier().verify(request.signer_public_key, request.signing_input, response["signature"]) is True
+        after = list(reads)
+        operation_count = len(operations)
+        assert wf._admission_wire(case, backend, grant)["accepted"] is False
+        # Both verify and consume authenticate revocation LOAD before checking
+        # nonce replay. Those proof reads must not become another protected sign.
+        assert reads == after + ["work", "work"]
+        assert operations[operation_count:] == ["REVOCATION_ANCHOR_LOAD"] * 2
+        responses.append(True)
+        return CapturingBoundedService()(**kwargs)
+    monkeypatch.setattr(entry, "serve_reddog_isolated_signer_socket_bounded", serve)
+    emitted = []
+    code = entry.run_reddog_signer_system_service_entrypoint(
+        ["--repo-root", str(values["repo"]), "--owner-authority-config", str(values["owner_config_path"])], emit=emitted.append)
+    assert code == 0, json.loads(emitted[0])["rejection_reasons"]
+    assert json.loads(emitted[0])["status"] == SYSTEM_SERVICE_ENTRYPOINT_ACCEPT
+    assert responses == [True]
+    assert "REVOCATION_ANCHOR_LOAD" in operations
+    assert "PROTECTED_USE_ACQUIRE" in operations and "PROTECTED_USE_FINISH" in operations
+
+
 def test_real_module_entrypoint_exposes_stable_help_command() -> None:
     completed = subprocess.run(
         [

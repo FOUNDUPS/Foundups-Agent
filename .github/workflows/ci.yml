@@ -1230,6 +1230,21 @@ jobs:
               modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py \
               modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_durable_authentication_wsp62.py
 
+      - name: Run authenticated startup owner and policy compatibility regression
+        timeout-minutes: 10
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          FOUNDUPS_DB_PATH: ${{ runner.temp }}/startup-policy-foundups.db
+          WRE_PATTERN_MEMORY_DB: ${{ runner.temp }}/startup-policy-pattern.db
+        run: |
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+            --import-mode=importlib -p no:cacheprovider \
+            modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_owner_versions.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py
+
       - name: Run RedDog fast test tier
         working-directory: extensions/reddog
         run: npm test

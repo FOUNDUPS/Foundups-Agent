@@ -8,8 +8,9 @@ resolver/factory, principal resolver, proposal replay store or grant admission.
 Malformed or failed supply returns `FAIL_SIGNER_BOOTSTRAP_DEPENDENCY_SUPPLY`.
 The container holds dependencies, not authority: existing signing, grant and
 replay validators remain mandatory. Legacy calls without the supplier are unchanged.
-The v7 loader now supplies this hook to the public entrypoint; full successful
-public-entrypoint acceptance remains unverified, so this wiring is not activation.
+The v7 loader supplies this hook to the public entrypoint. Source integration
+verifies a valid signature and missing/replayed grant rejection with controlled
+OS fixtures. Complete actual-OS public startup remains unverified.
 When a deferred supplier is configured, the receipt's
 `no_runtime_secret_file_loaded` is `null`: bootstrap cannot attest that a supplier
 did not read credentials before returning or raising. Legacy calls retain the
@@ -39,7 +40,7 @@ The full policy ID/signature still covers the alias, and admission still require
 it to equal the authenticated current artifact generation. v5-v7 binding bytes
 and the default schema remain unchanged; existing policies are not silently
 reinterpreted. Three construction/alias checks and the connected consumer
-selection pass locally; full public-entrypoint and OS acceptance remain open.
+selection and public source integration pass locally; OS acceptance remains open.
 
 ## Exact permission evidence type — 2026-10-05
 
