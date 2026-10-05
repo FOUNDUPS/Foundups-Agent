@@ -21,6 +21,26 @@ and its driver. This is mechanism qualification, not a completed RSI iteration.
 The result is local to this installed runtime and does not prove secure erasure,
 unswappable memory, permission admission or behavior on another host.
 
+Implemented prerequisite: `SystemdCredentialSecretResolver` under the existing
+secrets owner, plus explicit selection in the existing signer resolver factory
+and homogeneous reference validation in the lower key provider. The first real
+class invocation failed because mode bits concealed named-user ACL delivery:
+systemd uses root:root ownership, not the service GID. A separately observed ACLv2
+shape was encoded strictly (one named bound UID; no group/other access or extra
+principals). The corrected invocation passed initial read, wrong-requester
+rejection, expiry rejection without a value and cleanup, while raw storage stayed
+readable. Failed and successful invocations and exact source bindings are preserved.
+No reference-possession authority or native ticket was manufactured.
+
+Validation: focused206 cases (204pass/2skip), connected152 (151pass/1skip),
+manifest8/8, extension fast15 members. Existing CI now runs new provider and op
+regressions; it does not execute the privileged host experiment. Generated runtime
+closure adds exactly one provider file (1418 total), digest
+`4cb178329f62d04f1259835394ee6bd43dc125e9f84a4d2f2b1d01a53e9803c9`.
+Independent source/saved-result review approves this mechanism, not end-to-end
+RSI. Public entrypoint and configuration admission remain inactive for the new
+provider until versioned authenticated supply is composed. Publication pending.
+
 Next selected work18/P0 (C4/I5/D5/Impact4): authenticated deferred startup supply.
 Extend the existing versioned owner loader, resolver-supply and public entrypoint.
 Capture only authenticated nonsecret metadata before isolation; construct custody,

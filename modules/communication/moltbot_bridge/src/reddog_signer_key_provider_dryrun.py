@@ -62,6 +62,9 @@ from modules.infrastructure.secrets_mcp.src.vault_resolver import (
     hash_reference,
     parse_op_reference,
 )
+from modules.infrastructure.secrets_mcp.src.systemd_credential_secret_resolver import (
+    parse_systemd_credential_reference,
+)
 
 
 PROVIDER_MODE_TEST_ONLY_DRYRUN = "TEST_ONLY_DRYRUN"
@@ -89,7 +92,7 @@ class SignerKeyResolver(Protocol):
     """Injected WSP 71-like resolver boundary."""
 
     def resolve(self, reference: str, requester_id: Optional[str] = None) -> ResolveResult:
-        """Resolve an op:// reference or return a fail-closed result."""
+        """Resolve an explicitly supported reference or fail closed."""
 
 
 @dataclass(frozen=True)
@@ -632,8 +635,10 @@ def validate_signer_key_provider_profile(
         return FAIL_PROVIDER_PROFILE_INVALID
     if profile.signing_key_ref == profile.audit_mac_key_ref:
         return FAIL_PROVIDER_REFERENCE_FORBIDDEN
-    if not parse_op_reference(profile.signing_key_ref) or not parse_op_reference(
-        profile.audit_mac_key_ref
+    references = (profile.signing_key_ref, profile.audit_mac_key_ref)
+    if not (
+        all(parse_op_reference(ref) for ref in references)
+        or all(parse_systemd_credential_reference(ref) for ref in references)
     ):
         return FAIL_PROVIDER_REFERENCE_INVALID
     if profile.ttl_seconds <= 0:

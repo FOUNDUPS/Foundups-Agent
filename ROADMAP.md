@@ -21,6 +21,11 @@ after launch. Envelope expiry is not per-request expiry. The next implementation
 must bind authenticated lifetime metadata and reject each expired request before
 key access; it must also supply existing replay/revocation owners after isolation.
 No native admission, secret provisioning or autonomous RSI completion is implied.
+The local provider prerequisite is now implemented and qualified: actual nonroot
+read succeeds before expiry and rejects afterward, with exact root:root named-user
+ACL checks. Focused204pass/2skip, connected151pass/1skip; source publication pending.
+Existing factory/profile selection is wired; authenticated public startup supply
+and the first admitted native worker remain open.
 See [the measured constraint](docs/operations/RSI_SWARM_DISPATCH.md#startup-custody-lifetime-qualification--2026-10-05).
 
 **Closed source layer — connect existing signer admission (2026-10-05 JST):**

@@ -1,3 +1,19 @@
+## Explicit systemd custody provider supply — 2026-10-05
+
+Existing resolver factory accepts an explicit `SystemdCredentialBinding`, without
+op runner fallback or credential reads during construction. The lower key profile
+accepts homogeneous systemd reference pairs; malformed/mixed pairs and stale
+permission evidence reject before resolution. Public config/readiness and startup
+remain fail-closed pending authenticated versioned supply; this is not native
+activation. Existing grant-aware CI includes the new resolver and op regressions.
+
+Focused206:204pass/2skip; connected152:151pass/1skip. Actual local nonroot provider
+read/expiry/cleanup qualified with a public canary after correcting a preserved
+ACL-shape failure. See secrets_mcp ModLog and `outputs/rsi-startup-custody-20261005`.
+Independent saved-evidence review is not an independently executed worker run.
+WSP00/15/22/71/97. PR2072's preceding bootstrap repair is main-verified at4241b10;
+its earlier pending wording below is historical.
+
 ## Bootstrap grant-admission forwarding — 2026-10-05
 
 WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime

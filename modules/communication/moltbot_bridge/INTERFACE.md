@@ -1,3 +1,18 @@
+## Explicit local credential provider — 2026-10-05
+
+`build_system_service_wsp71_resolver_factory` accepts optional
+`credential_binding: SystemdCredentialBinding | None`. Omission retains the
+existing op CLI provider. Explicit binding selects the local systemd resolver;
+mixing it with an op runner rejects. Factory construction/resolver construction
+do not read credentials. The caller still must authenticate owner state and
+enforce isolation/grant gates; the owner ID string is not admission by itself.
+
+The lower key-provider profile accepts a pair of distinct `op://` references or
+a pair of strict `systemd-creds://` references. Mixed pairs reject before reads.
+Permission freshness and key identity checks are unchanged. Public config
+composition/readiness and the system-service entrypoint have not been activated
+for this provider: versioned authenticated startup supply remains outstanding.
+
 ## Bootstrap grant-admission handoff — 2026-10-05
 
 `run_reddog_signer_socket_service_runtime_bootstrap` accepts optional

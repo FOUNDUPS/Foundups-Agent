@@ -13,6 +13,10 @@ from modules.infrastructure.secrets_mcp.src.op_cli_secret_resolver import (
     OpCliCommandRunner,
     OpCliSecretResolver,
 )
+from modules.infrastructure.secrets_mcp.src.systemd_credential_secret_resolver import (
+    SystemdCredentialBinding,
+    SystemdCredentialSecretResolver,
+)
 
 
 SYSTEM_SERVICE_OP_EXECUTABLE = Path("/usr/bin/op")
@@ -25,10 +29,17 @@ class SystemServiceWsp71ResolverFactory:
 
     owner_config_id: str
     runner: OpCliCommandRunner | None = None
+    credential_binding: SystemdCredentialBinding | None = None
 
-    def __call__(self) -> OpCliSecretResolver:
+    def __call__(self) -> OpCliSecretResolver | SystemdCredentialSecretResolver:
         if not _sha256(self.owner_config_id):
             raise ValueError("system_service_owner_config_id_invalid")
+        if self.credential_binding is not None:
+            # This metadata is not admission. The caller must still authenticate
+            # owner state and run process/grant gates before invoking the factory.
+            if type(self.credential_binding) is not SystemdCredentialBinding or self.runner is not None:
+                raise ValueError("system_service_credential_binding_invalid")
+            return SystemdCredentialSecretResolver(self.credential_binding)
         _require_root_owned_executable(SYSTEM_SERVICE_OP_EXECUTABLE)
         return OpCliSecretResolver(
             op_executable=str(SYSTEM_SERVICE_OP_EXECUTABLE),
@@ -41,11 +52,13 @@ class SystemServiceWsp71ResolverFactory:
 
 
 def build_system_service_wsp71_resolver_factory(
-    *, owner_config_id: str,
+    *, owner_config_id: str, credential_binding: SystemdCredentialBinding | None = None,
 ) -> SystemServiceWsp71ResolverFactory:
     """Bind production resolver construction to root-selected authority."""
 
-    return SystemServiceWsp71ResolverFactory(owner_config_id=owner_config_id)
+    return SystemServiceWsp71ResolverFactory(
+        owner_config_id=owner_config_id, credential_binding=credential_binding,
+    )
 
 
 def _require_root_owned_executable(path: Path) -> None:

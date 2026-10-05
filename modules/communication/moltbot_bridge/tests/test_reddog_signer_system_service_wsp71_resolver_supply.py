@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import os
 import stat
+import time
 from pathlib import Path
 
 import pytest
@@ -19,6 +20,40 @@ from modules.infrastructure.secrets_mcp.src.op_cli_secret_resolver import (
 
 MODULE_PATH = Path(target.__file__).resolve()
 OWNER_ID = "sha256:" + "a" * 64
+
+
+def _systemd_binding():
+    now = time.time()
+    return target.SystemdCredentialBinding(
+        credential_directory="/run/credentials/reddog-signer.service",
+        expected_uid=1001, expected_gid=1001, expected_requester="signer:reddog",
+        issued_at=now - 1, expires_at=now + 30,
+        credential_ids=frozenset({"work-signing", "work-audit"}),
+    )
+
+
+def test_explicit_systemd_supply_is_lazy_and_does_not_select_op(monkeypatch):
+    def forbidden(*args):
+        raise AssertionError("op backend must not be inspected for systemd selection")
+    monkeypatch.setattr(target, "_require_root_owned_executable", forbidden)
+    binding = _systemd_binding()
+    factory = target.build_system_service_wsp71_resolver_factory(
+        owner_config_id=OWNER_ID, credential_binding=binding,
+    )
+    assert isinstance(factory(), target.SystemdCredentialSecretResolver)
+
+
+@pytest.mark.parametrize("owner,binding,runner", [
+    ("invalid", None, None),
+    (OWNER_ID, object(), None),
+    (OWNER_ID, "valid", object()),
+])
+def test_systemd_supply_rejects_invalid_owner_binding_or_mixed_backend(owner, binding, runner):
+    selected = _systemd_binding() if binding == "valid" or binding is None else binding
+    with pytest.raises(ValueError):
+        target.SystemServiceWsp71ResolverFactory(
+            owner, runner=runner, credential_binding=selected,
+        )()
 
 
 class _Runner:

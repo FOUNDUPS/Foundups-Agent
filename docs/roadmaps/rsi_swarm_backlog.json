@@ -1884,7 +1884,7 @@
     "observation_path": "current_observation.startup_custody_lifetime_20261005",
     "base_commit": "4241b10cc349caadf4db2cd7ca2e5b1b9d8c2298",
     "selected_action": "Connect authenticated deferred startup custody and grant admission",
-    "status": "implementation_open_lifetime_constraint_locally_measured",
+    "status": "local_provider_qualified_authenticated_startup_supply_open",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
@@ -31025,7 +31025,43 @@
           "state": "not selected; existing owners available"
         }
       ],
-      "native_rsi_complete": false
+      "native_rsi_complete": false,
+      "provider_implementation": {
+        "status": "local_qualified_publication_pending",
+        "production_files": [
+          "modules/infrastructure/secrets_mcp/src/systemd_credential_secret_resolver.py",
+          "modules/communication/moltbot_bridge/src/reddog_signer_system_service_wsp71_resolver_supply.py",
+          "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py"
+        ],
+        "actual_first_run": "rejected unobserved service-GID assumption; preserved",
+        "actual_corrected_run": "nonroot read before expiry; wrong requester and expired delivery reject; raw file remains readable; owned unit/input removed",
+        "custody_profile": "root:root readonly directory0550/file0440, exact44-byte ACLv2 with only bound named UID; no permissive group fallback",
+        "focused": {
+          "total": 206,
+          "passed": 204,
+          "skipped": 2,
+          "failed": 0
+        },
+        "connected": {
+          "total": 152,
+          "passed": 151,
+          "skipped": 1,
+          "failed": 0
+        },
+        "manifest_tests_passed": 8,
+        "extension_fast_members_passed": 15,
+        "manifest_runtime_files": 1418,
+        "manifest_digest": "4cb178329f62d04f1259835394ee6bd43dc125e9f84a4d2f2b1d01a53e9803c9",
+        "independent_review": "outputs/rsi-startup-custody-20261005/provider-independent-result-review.json",
+        "evidence": "outputs/rsi-startup-custody-20261005",
+        "limits": [
+          "Saved-result review is not independent execution",
+          "Binding metadata alone is not secrets permission",
+          "Public entrypoint/config readiness not activated",
+          "No real principal enrollment or native worker admission",
+          "No Python zeroization or physical revocation claim"
+        ]
+      }
     }
   }
 }
