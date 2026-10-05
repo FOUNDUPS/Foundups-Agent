@@ -76,6 +76,12 @@ If the exact official artifact cannot be retrieved or edited safely, set
 `BLOCKED_ON_OFFICIAL_TEMPLATE` and prepare only a field map. Do not create a substitute
 that could be mistaken for the official form.
 
+## Retained official national forms — MLIT study route
+
+For 官民連携基盤整備推進調査費 / F-08, read [the dated official-form evidence and untouched ZIP](../../docs/official/mlit_ppp_study_20261005/README.md) before searching again. It records the current downloaded inventory, integrity/open checks and the unresolved Form 2-4 discrepancy. Reverify the current round before use; this snapshot is not perpetual form approval.
+
+Separate an unresolved official submission requirement from preparatory work: hold the complete/submission-ready claim; do not invent the missing form. A clearly labeled decision memo, retrieved-form field map or clarification draft can proceed when the active instruction permits it. Preserve task-specific STOP conditions, DRAFT ONLY and recipient controls; this reference never authorizes an external send.
+
 ## Procedure lanes
 
 Classify the task before acting:

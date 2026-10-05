@@ -1,3 +1,10 @@
+## 2026-10-05 — Preserve MLIT F-08 official-form evidence
+
+- Archived the untouched official application ZIP under docs/official with source URLs, SHA-256, inventory and structural/open verification.
+- Linked the record from Fukui City procedure, funding intelligence, module README and F-08; retained the Form 2-4 discrepancy and all applicant/send boundaries.
+- Verified ZIP/OOXML integrity, visible-sheet inventory, XML parsing and read-only Office-library loading; no submission acceptance or visual fidelity claim.
+- Documentation-only change. Bootstrap used the documented torch-free fallback (torch absent); detector witness absent. No City communication, application, funding award or Drive/FIN mutation.
+
 ## 2026-10-02 — Separate 012-directed Work from Red Dog AUTO
 
 - Applied 012's explicit 19:09 JST operating correction: #1779 is not a blanket
