@@ -67,6 +67,13 @@ in fixture signing before reaching the consumer; preserved and corrected to
 test malformed stored input, without changing production checks. Source pins
 stable during both successful runs. Full public startup remains a separate gate.
 
+## 2026-10-06 — #1779 sender-authority reconciliation on current main
+
+- Reused the existing `test_reddog_recipient_preflight.py` and `test_reddog_correspondence_sender_boundary.mjs` owners; no parallel test file was created.
+- Reconciled the tested #2031 executable/test delta onto current main after proving the six transplanted artifacts did not overlap the intervening main changes.
+- The legacy caller-loadable V2 JavaScript sender wrapper is quarantined to permanent BLOCK; the service-owned Python V3 authority owns recipient preflight, state/finalized-draft gates, private receipt issuance, durable one-shot claims and exact provider Sent readback.
+- This source qualification does not claim ChatGPT/Work Gmail capability isolation. Exact-head hosted validation is required before merge, and #1779 remains open until the actual tool host is mechanically qualified.
+
 ## Exact permission evidence type — 2026-10-05
 
 Existing twelve-case regression baseline:6pass/6fail. Independent frozen suite:

@@ -1,3 +1,10 @@
+## 2026-10-06 — Canonical LinkedIn page concatenated into eSingularity.ai
+
+- Elevated the current public FoundUp identity to **eSingularity.ai** in the FoundUp/module metadata.
+- Bound LinkedIn company page ID `2199715` to `esingularity_001` as the canonical social/publishing surface for AI Koban, JHR amplification, regional/sovereign AI infrastructure and partner development.
+- Reclassified `linkedin_esingularity` as a legacy pfMALL/source compatibility alias rather than a separate venture; no catalog deletion or runtime migration was performed in this change.
+- Preserved the WSP 97 publication boundary: live signed-in LinkedIn identity/page-name verification remains required before mutation, because cached public labels may lag.
+
 ## 2026-10-05 — Preserve MLIT F-08 official-form evidence
 
 - Archived the untouched official application ZIP under docs/official with source URLs, SHA-256, inventory and structural/open verification.

@@ -14,6 +14,15 @@ Project eSingularity combines a Japanese-first community campaign with a staged 
 
 **Public site**: https://esingularity.ai/
 
+**Canonical LinkedIn project page**: https://www.linkedin.com/company/esingularity/  
+**LinkedIn company ID**: `2199715`
+
+The LinkedIn company page is a **social/publishing surface of `esingularity_001`**, not a separate FoundUp. Current partner-facing content should route through the eSingularity.ai project identity when the topic is AI Koban, regional/sovereign AI infrastructure, JHR, three-site feasibility, community-first compute, or strategic partner development. YUMORI.me remains the civic/community implementation surface. Historical Educational Singularity material is provenance, not the default scope of the current company page.
+
+The legacy pfMALL identifier `linkedin_esingularity` may remain temporarily as a compatibility/source alias, but it must not be treated as an independent venture beside `esingularity_001`. Migrate or retire that alias only through an explicit catalog change with regression coverage.
+
+LinkedIn mutation still requires live signed-in identity verification. Public naming and repository intent use **eSingularity.ai**; cached LinkedIn surfaces may lag, so a desired or cached label alone is not publication proof.
+
 **Lifecycle**: Internal Proto
 **Deployment**: OpenAI Sites
 

@@ -17,7 +17,7 @@ Speech-to-text output is never authoritative for project proper nouns. Normalize
 - Facility: **旧すかっとランド九頭竜** / **Sukatto Land Kuzuryu**.
 - River/facility geography uses **九頭竜**. The monk's public/spiritual name may use **九頭龍 泰澄**; do not interchange the two kanji forms mechanically.
 - Movement/domain: **YUMORI.me** (not `Yumori` in branded references).
-- Project: **eSingularity**.
+- Project/public brand: **eSingularity.ai**. Repository/module key remains `esingularity`; the canonical LinkedIn company page is company ID `2199715` (`/company/esingularity`).
 - Compute infrastructure: **COGDC** / **AI交番** as defined by the project.
 - Awara reference: **あわら温泉** and **横丁**; do not convert this to “Owarasa” or “cubicle restaurant.”
 - Current school-node names: **旧下宇坂小学校** and **旧羽生小学校**.

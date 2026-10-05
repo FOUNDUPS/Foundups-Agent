@@ -2810,3 +2810,9 @@ refresh. Tokens are opaque: no string conversion, trimming or ordering. Literal
 boundary is evaluated first, so invalid cached state still raises its existing
 error even when the observation is invalid. This check does not authenticate a
 provider or grant send authority.
+
+### #1779 current sender-authority override — 2026-10-06
+
+The caller-loadable V2 JavaScript correspondence boundary is quarantined and always BLOCKs. The canonical repository authority is `src/reddog_correspondence_sender_boundary.py`, which must be bootstrapped by a trusted service that owns provider credentials, live reconciliation and private correspondence state. Its issue/execute contract performs canonical recipient preflight, state and finalized-draft gating, private receipt registration, durable one-shot submission claims and exact provider Sent readback.
+
+This repository contract does **not** isolate the external ChatGPT/Work Gmail tool surface. A deployment is qualified only when direct/alternate provider mutations are mechanically unavailable to governed RedDog AUTO sessions and provider access is exposed exclusively through the authenticated authority service. `012_DIRECTED_WORK` remains the separate merged operating-policy lane and still requires fresh live checks.

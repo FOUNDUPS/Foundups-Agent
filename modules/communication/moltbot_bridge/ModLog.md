@@ -114,6 +114,13 @@ weakened. This is a recoverable local WIP checkpoint, not a published or admitte
 runtime: full public success, generated manifest/digest refresh, final independent
 review and publication remain pending. Generated bindings still describe base.
 
+## 2026-10-06 — Reconcile #1779 sender authority onto current main
+
+- Preserved the valid security delta from draft PR #2031 while discarding its stale base/document snapshots.
+- Quarantined the composer-loadable V2 host authority and restored the service-owned Python V3 sender boundary with canonical recipient preflight, correspondence-state gating, durable receipt/transaction claims and exact provider Sent verification.
+- Rebased only non-overlapping executable/test artifacts plus the architecture audit; current main documentation is amended additively rather than overwritten.
+- Repository enforcement remains distinct from external ChatGPT/Work capability isolation. Direct Gmail tools outside this runtime are not intercepted by this code.
+
 ## Permission evidence type boundary — 2026-10-05
 
 WSP00/15/50/71/97 selects14/P1 (C1/I4/D5/Impact4) as an executable repair
