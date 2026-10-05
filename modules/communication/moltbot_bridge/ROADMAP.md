@@ -1446,3 +1446,7 @@ unchanged; live pointer resume was not exercised. The stale shared checkout and
 rejected worker proposal remain recorded. Selected 10/P2 (C1/I3/D3/Impact3) is
 canonical closure/re-observation. Native admission 18/P0 and genuine input handoff
 15/P1 remain blocked/unresolved. See backlog `holo_grounding_20261005`.
+
+### #1779 deployment closure gate — 2026-10-06
+
+Repository-side V3 sender authority is implemented and must converge through exact-head CI. Issue closure still requires host deployment evidence: direct/alternate Gmail mutations denied for governed RedDog AUTO sessions, authenticated service ownership of provider credentials/reconciliation/private state, and pinned or conditional draft submission. Do not merge evidence claims with the separate `012_DIRECTED_WORK` operating-policy exception.

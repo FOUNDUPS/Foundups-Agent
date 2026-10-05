@@ -1210,3 +1210,7 @@ send authority; current routing and recipient preflight remain mandatory.
 Freshness comparison requires nonempty string watermarks and exact opaque equality.
 Missing, mistyped or empty observations require reconciliation; values are never
 coerced or trimmed. Existing invalid-cache errors still propagate first.
+
+### Correspondence authority status — 2026-10-06
+
+For #1779, the legacy V2 JavaScript sender boundary is a quarantined fail-closed compatibility surface. The canonical implementation is the service-owned Python `CorrespondenceSenderBoundary` in `src/reddog_correspondence_sender_boundary.py`. Repository tests qualify that contract only; external Gmail/Work capability isolation remains a deployment/host requirement and must not be inferred from source or a successful individual send.

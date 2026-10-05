@@ -231,6 +231,22 @@ class RedDogCorrespondenceStateStore(ModuleDB):
         super().__init__("reddog_correspondence")
 
     def _init_tables(self) -> None:
+        # Authority records contain digests/identity metadata, never mail bodies
+        # or address dumps. Unique claims survive restart and ambiguous sends.
+        self.create_table(
+            "send_receipts",
+            "receipt_id TEXT PRIMARY KEY, receipt_digest TEXT NOT NULL",
+        )
+        self.create_table(
+            "send_claims",
+            "transaction_digest TEXT PRIMARY KEY, reservation_digest TEXT UNIQUE NOT NULL, "
+            "receipt_id TEXT UNIQUE NOT NULL, outcome TEXT NOT NULL",
+        )
+        self.create_table(
+            "recipient_submission_state",
+            "transaction_digest TEXT NOT NULL, identity_id TEXT NOT NULL, role TEXT NOT NULL, "
+            "status TEXT NOT NULL, PRIMARY KEY (transaction_digest, identity_id, role)",
+        )
         self.create_table(
             "events",
             """
@@ -351,6 +367,33 @@ class RedDogCorrespondenceStateStore(ModuleDB):
         if not state.provider_watermark:
             return True
         return state.provider_watermark != observed_watermark
+
+    def register_send_receipt(self, receipt_id: str, receipt_digest: str) -> None:
+        self.insert("send_receipts", {"receipt_id": receipt_id, "receipt_digest": receipt_digest})
+
+    def authentic_send_receipt(self, receipt_id: str, receipt_digest: str) -> bool:
+        rows = self.select("send_receipts", "receipt_id = ?", (receipt_id,), limit=1)
+        return bool(rows and rows[0]["receipt_digest"] == receipt_digest)
+
+    def claim_submission(self, transaction_digest: str, reservation_digest: str, receipt_id: str) -> None:
+        # A single durable INSERT is atomic on both supported DB backends.
+        # Never delete/release claims on timeout, mismatch, or provider failure.
+        self.insert("send_claims", {
+            "transaction_digest": transaction_digest,
+            "reservation_digest": reservation_digest,
+            "receipt_id": receipt_id,
+            "outcome": "PROVIDER_STATE_UNKNOWN",
+        })
+
+    def record_submission_outcome(self, transaction_digest: str, outcome: str, recipients: Sequence) -> None:
+        self.update("send_claims", {"outcome": outcome}, "transaction_digest = ?", (transaction_digest,))
+        for recipient in recipients:
+            self.insert("recipient_submission_state", {
+                "transaction_digest": transaction_digest,
+                "identity_id": recipient.identity_id,
+                "role": recipient.role.value,
+                "status": outcome,
+            })
 
 
 def summarize_ask_state(
