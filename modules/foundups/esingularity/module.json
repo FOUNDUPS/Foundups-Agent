@@ -46,9 +46,7 @@
   },
   "api": {
     "type": "PWA",
-    "endpoints": [
-      "/api/interest"
-    ]
+    "endpoints": ["/api/interest"]
   },
   "memory": {
     "path": "memory/",
