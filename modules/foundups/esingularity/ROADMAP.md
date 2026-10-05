@@ -30,6 +30,7 @@ These are continuing acceptance gates, not completed features that may later be 
 
 ## Phase 3 — Campaign operations
 
+- [x] Bind LinkedIn company page ID `2199715` to `esingularity_001` as the canonical eSingularity.ai social/publishing surface; route AI Koban, JHR amplification, regional AI infrastructure and partner-development content here rather than treating `linkedin_esingularity` as a separate venture. Keep live signed-in page-name verification as a publication gate.
 - [x] Centralize approved YUMORI.me / guardian / JHR branding in the shared website skill, with eSingularity and YUMORI.me entrypoints plus ticker/report cross-references. This records the language contract; it does not publish or certify live compliance.
 - [ ] Focus eSingularity.ai navigation on three to four primary tabs; determine labels/grouping in the active redesign, preserve JHR and participation access, and verify desktop/mobile consistency. Keep YUMORI.me's movement funnel intact.
 - [x] Make the website skill resolve the target site, purpose, visitor goal and edit boundary before each change.

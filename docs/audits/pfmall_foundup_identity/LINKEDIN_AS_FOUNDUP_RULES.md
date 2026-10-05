@@ -7,6 +7,16 @@
 
 ---
 
+## 2026-10-06 superseding addendum — eSingularity.ai
+
+The April snapshot below is retained as historical audit evidence, but its eSingularity classification is superseded. eSingularity now has a canonical module at `modules/foundups/esingularity`, public domain `https://esingularity.ai/`, current AI Koban/JHR content, and a distinct regional-AI infrastructure/partner-development role. LinkedIn company ID `2199715` is therefore a **social/publishing surface of `esingularity_001`**, not a separate `LINKEDIN_MICRO_FOUNDUP` venture.
+
+The legacy catalog key `linkedin_esingularity` is a compatibility/source alias until an explicit pfMALL migration removes or remaps it. Do not create a second eSingularity venture around that alias.
+
+Live LinkedIn mutation still requires signed-in identity readback; this addendum establishes repository ownership, not proof of LinkedIn's currently rendered page label.
+
+---
+
 ## 1. The Question
 
 012 manages 10+ LinkedIn company pages. Some are described as "FoundUPs" in their config (e.g., EDUIT: "FoundUP for autonomous learning"). Others are content channels (e.g., Social Beneficial Capitalism), personal brands (UnDaoDu page), or restricted pages (LN Republican Voters).
