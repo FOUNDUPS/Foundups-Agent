@@ -790,3 +790,22 @@ def test_control_key_never_replaces_shared_work_proof(tmp_path, monkeypatch):
     assert legacy_roundtrip(values, _lookup_revocation_client(values["client"]).exchange)
     with pytest.raises(ValueError, match="signer_proof_invalid"):
         require_root_authority_signer_proof(values["snapshot"], "bounded-test-work", _sign(control, "bounded-test-work"))
+
+
+def test_control_key_cannot_load_revocations(tmp_path, monkeypatch):
+    """Keep v2 control authentication confined to protected-use operations."""
+    from dataclasses import asdict
+    from modules.communication.moltbot_bridge.tests.test_foundup_verified_outcome_root_revocation_service import _request
+    from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_protocol import (
+        canonical_signer_input, request_id_for, response_from_bytes,
+    )
+
+    values, control = _two_key_runtime(tmp_path, monkeypatch)
+    work = _request(values)
+    before = values["state"].load(values["binding"].anchor_binding_digest())
+    assert response_from_bytes(_route(values, work.to_bytes())).accepted is True
+    forged = replace(work, signer_instance_signature=_sign(control, canonical_signer_input(work)))
+    forged = replace(forged, request_id=request_id_for(asdict(forged)))
+    response = response_from_bytes(_route(values, forged.to_bytes()))
+    assert values["state"].load(values["binding"].anchor_binding_digest()) == before
+    assert response.accepted is False

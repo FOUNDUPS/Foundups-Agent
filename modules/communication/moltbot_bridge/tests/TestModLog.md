@@ -1,3 +1,28 @@
+## Retain the direct revocation proof regression — 2026-10-05
+
+WSP00/15/50/62/97 selects13/P1 (C2/I4/D4/Impact3) at main724bb684.
+Reuse the existing composition test owner; append one team-authored regression
+for a work-signed LOAD positive control and control-signed LOAD rejection, with
+unchanged durable state. All57 earlier top-level AST nodes are unchanged; the
+new behavioral body matches the independently frozen oracle. File811 lines is
+within the WSP62 cohesion-review range; the new function spans17 lines (19 added lines). No runtime,
+interface, manifest, skill, store or scheduler is added or changed.
+
+Correct source:48/48; the identical process-local fault:47pass/1expected failure
+at the new rejection assertion, no errors/skips. The original47 passed with and
+without that fault. This is measured coverage gain on one seeded fault, not a
+production vulnerability or model fitness result. Connected475:468pass/7platform
+skips, no failures/errors; source stable. Publication remains pending. Evidence: `outputs/rsi-control-regression-20261005`.
+
+Two preceding local Qwen2.5-Coder7B proposals were rejected unchanged:0/2 accepted,
+first dict-attribute misuse, second duplicate fixture setup. SDK totals1838 input
+and622 output tokens;206.843s summed parent duration;0 paid inference API calls.
+Coordination cost is unknown. One packet revision exposed the real typed helper;
+no acceptance criterion was relaxed. Neither proposal is retained in source.
+Next: qualify an installed alternative on the same frozen task through the
+existing adapter before selecting a model; do not infer native admission from a
+local callable. Native18/P0 remains blocked by authentic runtime/custody inputs.
+
 ## Owner-bound lazy signer composition — 2026-10-05
 
 WSP15 selects15/P1 (C3/I4/D4/Impact4) at main904ae72e. Extend the existing
