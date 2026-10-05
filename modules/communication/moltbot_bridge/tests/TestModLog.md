@@ -3767,3 +3767,15 @@ passed; another diagnostic attempt produced49 missing-Git setup failures because
 its reduced PATH omitted Git. No tests or production checks were weakened.
 Receipts: `outputs/rsi-permission-evidence-20261006/materializer-clock-baseline*.json`
 and original `startup-merged-connected.xml`. Independent review/hosted checks remain.
+## 2026-10-06 — Preserve bounded owner-test modules
+
+PR2078 CI reproduced the267line owner-test module exceeding its200line bound;
+674other effect-consensus cases passed. Relocate v7 startup tests to
+`test_reddog_effect_consent_startup_owner.py`, keeping v6 tests in
+`test_reddog_effect_consent_owner_versions.py`. Keep200line/50line limits and
+adjust only expected family membership37to38. Independent AST comparison preserves
+all11 original test functions, parameter decorators and assertions. CI includes
+both modules explicitly; production and generated runtime bindings are unchanged.
+Focused validation passes48/48 without skips in7.468s: the structural oracle plus
+all47 original parameterized owner cases, with stable source hashes. Receipt:
+`outputs/rsi-permission-evidence-20261006/startup-owner-structural-repair-review.json`.

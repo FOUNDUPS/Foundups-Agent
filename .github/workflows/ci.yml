@@ -1242,6 +1242,7 @@ jobs:
           python -B -m pytest -q --tb=short -c /dev/null --noconftest \
             --import-mode=importlib -p no:cacheprovider \
             modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_owner_versions.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_startup_owner.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py
 

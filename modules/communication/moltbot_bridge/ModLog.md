@@ -1,5 +1,16 @@
 ## Authenticated startup integration in progress — 2026-10-06
 
+PR2078 hosted qualification at `025626636` exposed a reproducible structural
+failure: effect-consent owner tests grew to267lines against the200line bound
+(674other cases passed). Extract v7 startup checks into the same effect-consent
+family's bounded startup-owner test module, retaining v6 in its existing owner.
+Both remain under200lines; function limits remain50. Structural membership changes
+37to38, not the limits. CI explicitly selects both owners. Parent AST comparison
+confirms all11 original test functions, parameter decorators and assertions remain.
+No production code changes; the original intermittent credential failure remains
+separate. Hosted failure evidence: `startup-hosted-failure.log` in the existing
+20261006 evidence directory.
+
 Finite regression investigation at `438a20113`: full seven-file diagnostic run
 and original `-S`/PYTHONPATH bootstrap each pass275/skip3 with unchanged production
 and test bytes. Original274pass/1fail/3skip remains preserved and unexplained;
