@@ -1224,6 +1224,8 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_entrypoint.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_key_provider_dryrun.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py \
+            modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py \
+            modules/infrastructure/secrets_mcp/tests/test_op_cli_secret_resolver.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_conversation_wiring.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py \
               modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_durable_authentication_wsp62.py

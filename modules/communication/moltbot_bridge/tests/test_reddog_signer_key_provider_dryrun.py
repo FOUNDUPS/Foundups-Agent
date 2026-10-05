@@ -224,6 +224,43 @@ def test_default_path_rejects_without_explicit_test_only_mode() -> None:
     assert result.backend is None
 
 
+@pytest.mark.parametrize("fresh", [True, False])
+def test_systemd_reference_pair_preserves_provider_permission_gate(fresh: bool) -> None:
+    """Synthetic material tests provider composition, not custody or admission."""
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    signing_ref, audit_ref = "systemd-creds://work-signing", "systemd-creds://work-audit"
+    profile = _profile(public_key, signing_key_ref=signing_ref, audit_mac_key_ref=audit_ref)
+    resolver = FakeResolver({signing_ref: _private_key_secret(private_key), audit_ref: _audit_secret()})
+    result = build_signer_backend_from_provider(
+        profile, resolver, provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+        allow_test_only_key_material=False, permission_snapshot_fresh=fresh,
+    )
+    assert result.ok is fresh
+    assert resolver.calls == (
+        [(signing_ref, profile.signer_agent_id), (audit_ref, profile.signer_agent_id)]
+        if fresh else []
+    )
+    if not fresh:
+        assert result.rejection_code == FAIL_PROVIDER_PERMISSION_DENIED
+
+
+@pytest.mark.parametrize("audit_ref", [
+    "op://test-vault/reddog-audit/mac", "systemd-creds://../audit",
+    "systemd-creds://work-audit?path=/tmp/audit",
+])
+def test_systemd_profile_rejects_mixed_or_malformed_references_before_resolution(audit_ref: str) -> None:
+    private_key = _private_key()
+    resolver = FakeResolver({})
+    result = build_signer_backend_from_provider(
+        _profile(_public_text(private_key), signing_key_ref="systemd-creds://work-signing", audit_mac_key_ref=audit_ref),
+        resolver, provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+        allow_test_only_key_material=False, permission_snapshot_fresh=True,
+    )
+    assert result.rejection_code == FAIL_PROVIDER_REFERENCE_INVALID
+    assert resolver.calls == []
+
+
 def test_wsp71_permissioned_mode_accepts_injected_non_mock_resolver_without_test_only_override() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)

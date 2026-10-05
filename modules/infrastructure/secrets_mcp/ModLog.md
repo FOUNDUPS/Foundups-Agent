@@ -1,5 +1,23 @@
 # Secrets MCP Server Module Modification Log
 
+## 2026-10-05: Explicit manager credential provider
+
+Added `SystemdCredentialSecretResolver` in the existing secrets owner, reusing
+`ResolveResult`/`AuditEvent`. Strict reference and immutable metadata binding,
+fd-relative no-follow reads, exact root:root systemd ACLv2 custody, bounded UTF-8
+content and dual-clock per-request expiry replace no existing vault or authority.
+The audit event explicitly describes pre-delivery validation; final delivery is
+checked again after the callback. No cache or Python zeroization claim.
+
+The first actual nonroot run rejected a mistaken service-GID assumption. A bounded
+public-canary ACL observation established the exact named-user ACL; the repair
+rejects missing/extra principals rather than dropping the access check. The next
+actual run read before expiry and rejected after expiry while the raw file remained
+readable. Units and owned inputs were removed; both success and failure preserved
+under `outputs/rsi-startup-custody-20261005`. Focused206 cases:204pass/2platform skips.
+Controlled OS tests and saved-result independent review are distinct from actual
+execution. Production entrypoint/custody admission remains incomplete. WSP00/15/71/97.
+
 ## 2026-07-17: SECRETS_MCP_WSP71_OP_CLI_VAULT_RESOLVER_PHASE1
 
 **Author**: 0102 (Codex) | Commander: 012 | WSP: 00, 15, 71, 97

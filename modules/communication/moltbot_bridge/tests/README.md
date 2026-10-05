@@ -1,3 +1,20 @@
+## Local credential provider regression — 2026-10-05
+
+The existing key-provider tests cover systemd reference pairs, permission denial
+without reads and malformed/mixed references. Existing resolver-supply tests cover
+lazy explicit backend selection and invalid owner/binding/mixed runner rejection.
+`modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py`
+uses controlled OS fixtures for lifetime, ACL, file identity, symlink, size, encoding
+and audit-callback negatives. These tests do not prove actual systemd delivery.
+
+The separate local public-canary experiment exercised the real class under an
+isolated nonroot systemd unit: valid read, expired rejection without a value,
+wrong requester rejection and cleanup. It also preserves the initial group-shape
+failure that prompted strict fd-bound ACL validation. Source-bound results:
+`outputs/rsi-startup-custody-20261005`; focused206:204pass/2skip and connected152:
+151pass/1skip. Existing hosted grant-aware regression now includes resolver tests;
+hosted CI does not replay the privileged local canary.
+
 ## Bootstrap grant-admission forwarding — 2026-10-05
 
 WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime

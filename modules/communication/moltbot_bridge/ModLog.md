@@ -1,3 +1,30 @@
+## Composition clock fixture closure — 2026-10-05
+
+PR2073 CI37269273608 exposed a second-boundary sampling race in the existing
+root-composed oracle test (598pass/3skip/1fail). Freeze only that test's wall clock
+before fixture construction; retain an explicit mismatched-epoch rejection.
+Production clocks and authority checks are unchanged. The complete hosted signer
+selection passes locally:602 cases,595pass/7platform skips, source stable.
+An earlier local concurrency timeout and its successful targeted rerun remain in
+`outputs/rsi-startup-custody-20261005/connected`; no passing-only history is claimed.
+WSP00/15/22/97; hosted validation of this repair remains pending.
+
+## Explicit systemd custody provider supply — 2026-10-05
+
+Existing resolver factory accepts an explicit `SystemdCredentialBinding`, without
+op runner fallback or credential reads during construction. The lower key profile
+accepts homogeneous systemd reference pairs; malformed/mixed pairs and stale
+permission evidence reject before resolution. Public config/readiness and startup
+remain fail-closed pending authenticated versioned supply; this is not native
+activation. Existing grant-aware CI includes the new resolver and op regressions.
+
+Focused206:204pass/2skip; connected152:151pass/1skip. Actual local nonroot provider
+read/expiry/cleanup qualified with a public canary after correcting a preserved
+ACL-shape failure. See secrets_mcp ModLog and `outputs/rsi-startup-custody-20261005`.
+Independent saved-evidence review is not an independently executed worker run.
+WSP00/15/22/71/97. PR2072's preceding bootstrap repair is main-verified at4241b10;
+its earlier pending wording below is historical.
+
 ## Bootstrap grant-admission forwarding — 2026-10-05
 
 WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime

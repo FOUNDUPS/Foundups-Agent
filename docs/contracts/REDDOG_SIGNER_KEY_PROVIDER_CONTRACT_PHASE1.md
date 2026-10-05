@@ -103,7 +103,13 @@ receipts and static tests prove no secret value can serialize.
 
 - Production code must not use `MockVaultResolver` as the credential authority.
   It may be used only in tests and dry-run fixtures labeled test-only.
-- Secret references must match the WSP 71 `op://vault/item/field` shape.
+- The op provider requires the WSP 71 `op://vault/item/field` shape. The explicit
+  local-custody extension (2026-10-05) permits a homogeneous pair of
+  `systemd-creds://<credential-id>` references in the lower provider profile.
+  It requires the separately bound systemd resolver described in
+  `modules/infrastructure/secrets_mcp/INTERFACE.md`; reference possession remains
+  insufficient. Mixed backend pairs reject. This extension does not activate
+  the public startup/configuration path or supersede its admission requirements.
 - Secret values must never appear in `repr`, `str`, logs, exceptions, receipts,
   terminal output, prompts, Copy-MD, HoloIndex, or Git history.
 - A resolver result that contains a secret value is consumed only inside the
