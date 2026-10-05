@@ -583,3 +583,79 @@ def test_unknown_fields_direct_construction_and_forged_reservation_reject(
         authority.commit(
             {"receipt_id": grant["receipt_id"]}, _sha("signature")
         )
+
+
+def _control_descriptor(tmp_path):
+    control = _private_key()
+    descriptor, grant, store = _descriptor(tmp_path, descriptor_overrides={
+        "schema_version": "foundup_verified_outcome_root_authority.v2",
+        "root_control_authentication": {
+            "purpose": "protected-use-acquire-finish.v1",
+            "public_key": _public_text(control), "key_epoch": "control-epoch-1",
+        },
+    })
+    return descriptor, grant, store
+
+
+def test_control_descriptor_commits_separate_identity(tmp_path):
+    descriptor, grant, store = _control_descriptor(tmp_path)
+    checked = validate_root_verified_outcome_descriptor(
+        descriptor, replay_store=store, now_epoch=NOW,
+    )
+    assert checked == descriptor
+    assert descriptor["root_control_authentication"]["public_key"] != descriptor["signer_public_key"]
+    assert grant["authority_context_digest"] == authority_context_digest_for(descriptor)
+    for field, replacement in (("key_epoch", "control-epoch-2"),
+                               ("public_key", _public_text(_private_key()))):
+        changed = copy.deepcopy(descriptor)
+        changed["root_control_authentication"][field] = replacement
+        assert descriptor_id_for(changed) != descriptor["descriptor_id"]
+        assert authority_context_digest_for(changed) != grant["authority_context_digest"]
+        changed["descriptor_id"] = descriptor_id_for(changed)
+        with pytest.raises(ValueError, match="authority_context_invalid"):
+            validate_root_verified_outcome_descriptor(changed, replay_store=store, now_epoch=NOW)
+
+
+@pytest.mark.parametrize("mutation", [
+    "missing", "extra", "purpose", "key_type", "key_invalid", "same_key",
+    "epoch_bool", "epoch_empty", "epoch_long", "legacy_extra", "unknown_version",
+])
+def test_control_descriptor_rejects_malformed_or_mixed_binding(tmp_path, mutation):
+    from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import validate_root_verified_outcome_descriptor_identity_public
+
+    descriptor, _grant, store = _control_descriptor(tmp_path)
+    binding = descriptor["root_control_authentication"]
+    if mutation == "missing":
+        descriptor.pop("root_control_authentication")
+    elif mutation == "extra":
+        binding["authorized"] = True
+    elif mutation == "purpose":
+        binding["purpose"] = "arbitrary-signing"
+    elif mutation == "key_type":
+        binding["public_key"] = True
+    elif mutation == "key_invalid":
+        binding["public_key"] = "not-an-ed25519-key"
+    elif mutation == "same_key":
+        binding["public_key"] = descriptor["signer_public_key"]
+    elif mutation.startswith("epoch_"):
+        binding["key_epoch"] = {"epoch_bool": True, "epoch_empty": "", "epoch_long": "e" * 129}[mutation]
+    else:
+        descriptor["schema_version"] = DESCRIPTOR_SCHEMA if mutation == "legacy_extra" else "unknown.v3"
+    descriptor["descriptor_id"] = descriptor_id_for(descriptor)
+    # Isolate shape/type checks from stale grant signatures after mutation.
+    with pytest.raises(ValueError):
+        validate_root_verified_outcome_descriptor_identity_public(descriptor, now_epoch=NOW)
+    with pytest.raises(ValueError):
+        validate_root_verified_outcome_descriptor(descriptor, replay_store=store, now_epoch=NOW)
+
+
+def test_legacy_grants_do_not_transfer_to_control_descriptor(tmp_path):
+    legacy, _grant, store = _descriptor(tmp_path)
+    legacy["schema_version"] = "foundup_verified_outcome_root_authority.v2"
+    legacy["root_control_authentication"] = {
+        "purpose": "protected-use-acquire-finish.v1",
+        "public_key": _public_text(_private_key()), "key_epoch": "control-epoch-1",
+    }
+    legacy["descriptor_id"] = descriptor_id_for(legacy)
+    with pytest.raises(ValueError, match="authority_context_invalid"):
+        validate_root_verified_outcome_descriptor(legacy, replay_store=store, now_epoch=NOW)

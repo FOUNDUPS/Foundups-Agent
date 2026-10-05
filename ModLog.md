@@ -1,3 +1,7 @@
+## Separate protected-use control proof — 2026-10-05
+
+Two existing root-authority owners now distinguish protected-use control proof from work proof using an explicit v2 descriptor. Synthetic17-case candidate and two dependency controls pass; connected474:467pass/7platform skips, manifest8/8, extension fast15 members and independent source review passed; publication pending. This advances the blocked native-admission prerequisite without credential or startup activation. PR2067 exact-main, retrieval and owned-lane closure are reconciled in the existing roadmap/backlog. WSP00/15/22/50/62/97; see module ModLog.
+
 ## Owner-bound lazy signer composition — 2026-10-05
 
 Existing signer runtime now has explicit one-target grant-aware composition;

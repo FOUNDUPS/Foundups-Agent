@@ -1,3 +1,21 @@
+## Separate protected-use control proof — 2026-10-05
+
+At975fe7c, WSP15 selects13/P1 (C3/I4/D3/Impact3) source qualification as the
+next executable prerequisite to blocked native admission18/P0. Legacy root proof
+needs the work key before guarded resolution. Versioned control proof is confined
+to ACQUIRE/FINISH in two existing owners; work/revocation proof and public startup
+remain unchanged. Two dependency controls and17 synthetic candidate cases pass;
+connected474:467pass/7platform skips,0fail/errors, source review approved;
+publication pending. The injected callback supplies no
+credential custody or enrollment. Next authenticate the real control supplier,
+then compose the existing startup; do not add another service or scheduler.
+
+PR2067 is merged at975fe7c with hosted281/281, exact-main checks, retained24/24,
+527.453s governed maintenance, CURRENT/no-gap retrieval, independently preserved
+history and normal owned-lane retirement. See existing backlog observations
+`signer_lazy_owner_composition_20261005` and
+`protected_use_control_authentication_20261005` for exact source and receipts.
+
 ## Owner-bound lazy signer composition — 2026-10-05
 
 WSP15 selects15/P1 (C3/I4/D4/Impact4) at main904ae72e. Extend the existing

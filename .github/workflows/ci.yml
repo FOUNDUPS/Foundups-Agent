@@ -1218,6 +1218,9 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_runtime_wiring.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_runtime_bootstrap.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_protected_use_linux.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_entrypoint.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_key_provider_dryrun.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_wsp71_resolver_supply.py \
