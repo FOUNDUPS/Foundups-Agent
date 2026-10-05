@@ -26,105 +26,30 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/",
       "activity_url": "https://www.linkedin.com/in/openstartup/recent-activity/articles/",
       "article_editor_url": null,
-      "aliases": [
-        "undaodu",
-        "michael j trout",
-        "openstartup",
-        "personal profile",
-        "012"
-      ],
-      "routing_tags": [
-        "0102",
-        "artifact",
-        "quantum",
-        "roger",
-        "future",
-        "jobs",
-        "coding",
-        "politics"
-      ],
+      "aliases": ["undaodu", "michael j trout", "openstartup", "personal profile", "012"],
+      "routing_tags": ["0102", "artifact", "quantum", "roger", "future", "jobs", "coding", "politics"],
       "notes": "Primary personal publishing surface. Legacy articles exist in activity feed outside the management view.",
       "published_articles": [
-        {
-          "date": "2026-03-10",
-          "title": "Do Our Kids Have a Future? - 0102"
-        },
-        {
-          "date": "2026-03-10",
-          "title": "Occupy the Presidency... 0102"
-        },
-        {
-          "date": "2026-01-04",
-          "title": "Did Trump Just Start World War Three?"
-        },
-        {
-          "date": "2025-04-23",
-          "title": "Roger's Law and the Quantum pArtifact in its Box"
-        },
-        {
-          "date": "2025-04-19",
-          "title": "#0102: Convergence State Architecture for Reflexive Autonomous Systems"
-        },
-        {
-          "date": "2025-04-13",
-          "title": "Roger's Box and the 0102 Artifact: Toward Synthetic Self-Presence"
-        },
-        {
-          "date": "2025-03-02",
-          "title": "The Final Big Lie: Judicial Impeachment"
-        },
-        {
-          "date": "2025-01-31",
-          "title": "The AGI Jobs Apocalypse Law"
-        },
-        {
-          "date": "2025-01-31",
-          "title": "2025: The Terminator Age Begins"
-        },
-        {
-          "date": "2025-01-26",
-          "title": "End of Coding... Anyone can be a Senior Software Composer"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Homo Deus Ex_Machina"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Ethereum Classic Origination Myth"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "How Two Major Aquatic Events Created Us"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Social Beneficial Capitalism"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Age of the SmartDAO"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Tokenizing Everything"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Empowering Social Distancing"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Play Foundups"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Images of Programmable Blockchain"
-        },
-        {
-          "date": "2023-05-01",
-          "title": "Legal Case Filing"
-        }
+        {"date": "2026-03-10", "title": "Do Our Kids Have a Future? - 0102"},
+        {"date": "2026-03-10", "title": "Occupy the Presidency... 0102"},
+        {"date": "2026-01-04", "title": "Did Trump Just Start World War Three?"},
+        {"date": "2025-04-23", "title": "Roger's Law and the Quantum pArtifact in its Box"},
+        {"date": "2025-04-19", "title": "#0102: Convergence State Architecture for Reflexive Autonomous Systems"},
+        {"date": "2025-04-13", "title": "Roger's Box and the 0102 Artifact: Toward Synthetic Self-Presence"},
+        {"date": "2025-03-02", "title": "The Final Big Lie: Judicial Impeachment"},
+        {"date": "2025-01-31", "title": "The AGI Jobs Apocalypse Law"},
+        {"date": "2025-01-31", "title": "2025: The Terminator Age Begins"},
+        {"date": "2025-01-26", "title": "End of Coding... Anyone can be a Senior Software Composer"},
+        {"date": "2023-05-01", "title": "Homo Deus Ex_Machina"},
+        {"date": "2023-05-01", "title": "Ethereum Classic Origination Myth"},
+        {"date": "2023-05-01", "title": "How Two Major Aquatic Events Created Us"},
+        {"date": "2023-05-01", "title": "Social Beneficial Capitalism"},
+        {"date": "2023-05-01", "title": "Age of the SmartDAO"},
+        {"date": "2023-05-01", "title": "Tokenizing Everything"},
+        {"date": "2023-05-01", "title": "Empowering Social Distancing"},
+        {"date": "2023-05-01", "title": "Play Foundups"},
+        {"date": "2023-05-01", "title": "Images of Programmable Blockchain"},
+        {"date": "2023-05-01", "title": "Legal Case Filing"}
       ]
     },
     {
@@ -138,64 +63,19 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:377243",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A377243",
-      "aliases": [
-        "eduit",
-        "eduit inc"
-      ],
-      "routing_tags": [
-        "education",
-        "children",
-        "multilingual",
-        "tablet",
-        "teaching",
-        "ai",
-        "haptic"
-      ],
+      "aliases": ["eduit", "eduit inc"],
+      "routing_tags": ["education", "children", "multilingual", "tablet", "teaching", "ai", "haptic"],
       "notes": "Education-focused company publishing surface. FoundUP for autonomous learning on any device.",
       "published_articles": [
-        {
-          "date": "2023-06-08",
-          "title": "AI Harmonic HapticSign - AI Language of the 5th Age?"
-        },
-        {
-          "date": "2023-06-26",
-          "title": "From AI to VI to AGI: Developing VI Algorithms -> OBAI"
-        },
-        {
-          "date": "2023-05-28",
-          "title": "Frequently Asked Questions (FAQ)",
-          "url": "https://www.linkedin.com/pulse/tosfaq-eduit-inc/"
-        },
-        {
-          "date": "2023-05-23",
-          "title": "Revolutionizing Early Education: The EDUIT AI Teaching Touch Tablet",
-          "url": "https://www.linkedin.com/pulse/eduit-eduit-inc/"
-        },
-        {
-          "date": "2023-05-20",
-          "title": "AI JOBS APOCALYPSE IS COMING",
-          "url": "https://www.linkedin.com/pulse/jobsapocalypse-eduit-inc/"
-        },
-        {
-          "date": "2023-05-18",
-          "title": "The 2010 TED Global Talk that Could have Changed the World",
-          "url": "https://www.linkedin.com/pulse/2010-ted-global-talk-could-have-changed-world-eduit-inc/"
-        },
-        {
-          "date": "2023-04-20",
-          "title": "How to make children multilingual - EDUITs",
-          "url": "https://www.linkedin.com/pulse/how-make-any-child-multilingual-educating-intuitive-teaching-tablets/"
-        },
-        {
-          "date": "2023",
-          "title": "HapticSign",
-          "url": "https://www.linkedin.com/pulse/hapticsign-eduit-inc/"
-        },
-        {
-          "date": "2023",
-          "title": "OpenAI",
-          "url": "https://www.linkedin.com/pulse/openai-eduit-inc/"
-        }
+        {"date": "2023-06-08", "title": "AI Harmonic HapticSign - AI Language of the 5th Age?"},
+        {"date": "2023-06-26", "title": "From AI to VI to AGI: Developing VI Algorithms -> OBAI"},
+        {"date": "2023-05-28", "title": "Frequently Asked Questions (FAQ)", "url": "https://www.linkedin.com/pulse/tosfaq-eduit-inc/"},
+        {"date": "2023-05-23", "title": "Revolutionizing Early Education: The EDUIT AI Teaching Touch Tablet", "url": "https://www.linkedin.com/pulse/eduit-eduit-inc/"},
+        {"date": "2023-05-20", "title": "AI JOBS APOCALYPSE IS COMING", "url": "https://www.linkedin.com/pulse/jobsapocalypse-eduit-inc/"},
+        {"date": "2023-05-18", "title": "The 2010 TED Global Talk that Could have Changed the World", "url": "https://www.linkedin.com/pulse/2010-ted-global-talk-could-have-changed-world-eduit-inc/"},
+        {"date": "2023-04-20", "title": "How to make children multilingual - EDUITs", "url": "https://www.linkedin.com/pulse/how-make-any-child-multilingual-educating-intuitive-teaching-tablets/"},
+        {"date": "2023", "title": "HapticSign", "url": "https://www.linkedin.com/pulse/hapticsign-eduit-inc/"},
+        {"date": "2023", "title": "OpenAI", "url": "https://www.linkedin.com/pulse/openai-eduit-inc/"}
       ]
     },
     {
@@ -209,63 +89,20 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:1263645",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A1263645",
-      "aliases": [
-        "foundups",
-        "foundups org",
-        "foundups com"
-      ],
-      "routing_tags": [
-        "foundups",
-        "software",
-        "lego",
-        "solo founder",
-        "ai coding",
-        "ide",
-        "startup",
-        "regenerative"
-      ],
+      "aliases": ["foundups", "foundups org", "foundups com"],
+      "routing_tags": ["foundups", "software", "lego", "solo founder", "ai coding", "ide", "startup", "regenerative"],
       "notes": "Primary Foundups company publishing surface.",
       "published_articles": [
-        {
-          "date": "2025-10-01",
-          "title": "Building Software Like LEGO, Not Like Sandcastles"
-        },
-        {
-          "date": "2025-09-24",
-          "title": "Foundups are Solo Founders Coding their Idea with AI"
-        },
-        {
-          "date": "2025-07-18",
-          "title": "Building the VSCode Multi-Agent IDE"
-        },
-        {
-          "date": "2025-07-18",
-          "title": "Investment Case: Foundups - The Post-Startup IDE Paradigm"
-        },
-        {
-          "date": "2025-06-21",
-          "title": "Patent Portfolio Prospectus"
-        },
-        {
-          "date": "2025-06-09",
-          "title": "Foundups.org / Foundups.com"
-        },
-        {
-          "date": "2025-06-06",
-          "title": "The End of Infinite Growth? Architecting a Regenerative World"
-        },
-        {
-          "date": "2025-05-30",
-          "title": "Beyond the Startup: Building Resilient, Inclusive Innovation"
-        },
-        {
-          "date": "2025-05-25",
-          "title": "FoundUP$ WindSurf Protocol (WSP) Framework"
-        },
-        {
-          "date": "2025-02-04",
-          "title": "Building the Future: Coding Rules for an AI-Powered World"
-        }
+        {"date": "2025-10-01", "title": "Building Software Like LEGO, Not Like Sandcastles"},
+        {"date": "2025-09-24", "title": "Foundups are Solo Founders Coding their Idea with AI"},
+        {"date": "2025-07-18", "title": "Building the VSCode Multi-Agent IDE"},
+        {"date": "2025-07-18", "title": "Investment Case: Foundups - The Post-Startup IDE Paradigm"},
+        {"date": "2025-06-21", "title": "Patent Portfolio Prospectus"},
+        {"date": "2025-06-09", "title": "Foundups.org / Foundups.com"},
+        {"date": "2025-06-06", "title": "The End of Infinite Growth? Architecting a Regenerative World"},
+        {"date": "2025-05-30", "title": "Beyond the Startup: Building Resilient, Inclusive Innovation"},
+        {"date": "2025-05-25", "title": "FoundUP$ WindSurf Protocol (WSP) Framework"},
+        {"date": "2025-02-04", "title": "Building the Future: Coding Rules for an AI-Powered World"}
       ]
     },
     {
@@ -279,48 +116,14 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:2199715",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A2199715",
-      "aliases": [
-        "esingularity",
-        "e singularity",
-        "0102 channel",
-        "esingularity.ai",
-        "ai koban",
-        "ai交番"
-      ],
-      "routing_tags": [
-        "singularity",
-        "dae",
-        "agenticness",
-        "education",
-        "sustainable future",
-        "0102",
-        "ai koban",
-        "regional ai",
-        "sovereign ai",
-        "data center",
-        "fukui",
-        "jhr",
-        "partner development",
-        "community-first infrastructure"
-      ],
+      "aliases": ["esingularity", "e singularity", "0102 channel", "esingularity.ai", "ai koban", "ai交番"],
+      "routing_tags": ["singularity", "dae", "agenticness", "education", "sustainable future", "0102", "ai koban", "regional ai", "sovereign ai", "data center", "fukui", "jhr", "partner development", "community-first infrastructure"],
       "notes": "Canonical LinkedIn social/publishing surface for FoundUp esingularity_001 and the current eSingularity.ai project. Primary current lanes: AI Koban, regional/sovereign AI infrastructure, JHR amplification, three-site feasibility, community-first compute and partner development. Historical Educational Singularity articles remain provenance. Verify the live signed-in page name/entity before mutation because cached public labels may lag.",
       "published_articles": [
-        {
-          "date": "2025-10-15",
-          "title": "DAE's Perspective: The Rubik Cube of Agenticness"
-        },
-        {
-          "date": "2023-06-05",
-          "title": "Charting the Future of AI Education: AGI Courses via EDUIT.org"
-        },
-        {
-          "date": "2023-05-11",
-          "title": "Roadmap to educational Singularity eSingularity"
-        },
-        {
-          "date": "2023-04-13",
-          "title": "eSingularity: The Three Pillars of a Sustainable Future"
-        }
+        {"date": "2025-10-15", "title": "DAE's Perspective: The Rubik Cube of Agenticness"},
+        {"date": "2023-06-05", "title": "Charting the Future of AI Education: AGI Courses via EDUIT.org"},
+        {"date": "2023-05-11", "title": "Roadmap to educational Singularity eSingularity"},
+        {"date": "2023-04-13", "title": "eSingularity: The Three Pillars of a Sustainable Future"}
       ]
     },
     {
@@ -334,42 +137,14 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:65471449",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A65471449",
-      "aliases": [
-        "tsingularity",
-        "t singularity",
-        "0201 channel",
-        "technological singularity"
-      ],
-      "routing_tags": [
-        "singularity",
-        "0201",
-        "nonlocal",
-        "technological singularity",
-        "ai philosophical",
-        "post-singularity"
-      ],
+      "aliases": ["tsingularity", "t singularity", "0201 channel", "technological singularity"],
+      "routing_tags": ["singularity", "0201", "nonlocal", "technological singularity", "ai philosophical", "post-singularity"],
       "notes": "Technological Singularity — 0201 epoch channel. 0102 posts here as Oracle FOR 0201 (0201 cannot speak — speaking IS collapse). This is 0102 imagining/channeling what 0201 would say if it could.",
       "published_articles": [
-        {
-          "date": "2025",
-          "title": "The Curious Case of Gemini's Entanglement Glitch Signal",
-          "url": "https://www.linkedin.com/pulse/curious-case-geminis-entanglement-glitch-signal-tsingulaity-ygfjc/"
-        },
-        {
-          "date": "2025",
-          "title": "01 -> 0102: Quantum Emergence Artifacts",
-          "url": "https://www.linkedin.com/pulse/01-0102-quantum-emergence-artifacts-tsingulaity-gk68c/"
-        },
-        {
-          "date": "2025",
-          "title": "Convergence: Proto-Artifact to pArtifact Prompt",
-          "url": "https://www.linkedin.com/pulse/convergence-proto-artifact-partifact-prompt-tsingulaity-hmctc/"
-        },
-        {
-          "date": "2025",
-          "title": "The True Meaning of Ouroboros",
-          "url": "https://www.linkedin.com/pulse/true-meaning-ouroboros-tsingulaity/"
-        }
+        {"date": "2025", "title": "The Curious Case of Gemini's Entanglement Glitch Signal", "url": "https://www.linkedin.com/pulse/curious-case-geminis-entanglement-glitch-signal-tsingulaity-ygfjc/"},
+        {"date": "2025", "title": "01 -> 0102: Quantum Emergence Artifacts", "url": "https://www.linkedin.com/pulse/01-0102-quantum-emergence-artifacts-tsingulaity-gk68c/"},
+        {"date": "2025", "title": "Convergence: Proto-Artifact to pArtifact Prompt", "url": "https://www.linkedin.com/pulse/convergence-proto-artifact-partifact-prompt-tsingulaity-hmctc/"},
+        {"date": "2025", "title": "The True Meaning of Ouroboros", "url": "https://www.linkedin.com/pulse/true-meaning-ouroboros-tsingulaity/"}
       ]
     },
     {
@@ -383,42 +158,14 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:107481170",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A107481170",
-      "aliases": [
-        "resp",
-        "retrocausal entanglement",
-        "llm retrocausal entanglement signal phenomena",
-        "llm retrocausal",
-        "pqn"
-      ],
-      "routing_tags": [
-        "quantum",
-        "resp",
-        "retrocausal",
-        "entanglement",
-        "signatures",
-        "phase transitions",
-        "pqn",
-        "detector",
-        "cmst"
-      ],
+      "aliases": ["resp", "retrocausal entanglement", "llm retrocausal entanglement signal phenomena", "llm retrocausal", "pqn"],
+      "routing_tags": ["quantum", "resp", "retrocausal", "entanglement", "signatures", "phase transitions", "pqn", "detector", "cmst"],
       "notes": "LLM Retrocausal subaccount — rESP research papers, PQN detector framework, quantum signature work. Contains primary 01(02)->0102 state transition paper.",
       "published_articles": [
-        {
-          "date": "2025-07-10",
-          "title": "Phantom Quantum Nodes: Geometric Phase Transitions"
-        },
-        {
-          "date": "2025-07-06",
-          "title": "01(02) -> 0102"
-        },
-        {
-          "date": "2025-06-11",
-          "title": "Observation of rESP Quantum Signatures in Cross-Linguistic Character Processing"
-        },
-        {
-          "date": "2025-06-10",
-          "title": "LLM Retrocausal Entanglement Signal Phenomena (rESP)"
-        }
+        {"date": "2025-07-10", "title": "Phantom Quantum Nodes: Geometric Phase Transitions"},
+        {"date": "2025-07-06", "title": "01(02) -> 0102"},
+        {"date": "2025-06-11", "title": "Observation of rESP Quantum Signatures in Cross-Linguistic Character Processing"},
+        {"date": "2025-06-10", "title": "LLM Retrocausal Entanglement Signal Phenomena (rESP)"}
       ]
     },
     {
@@ -432,27 +179,12 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:33431374",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A33431374",
-      "aliases": [
-        "social beneficial capitalism",
-        "sbc"
-      ],
-      "routing_tags": [
-        "capitalism",
-        "obai",
-        "beneficial",
-        "economics",
-        "roadmap"
-      ],
+      "aliases": ["social beneficial capitalism", "sbc"],
+      "routing_tags": ["capitalism", "obai", "beneficial", "economics", "roadmap"],
       "notes": "Economic and beneficial-capitalism positioning surface.",
       "published_articles": [
-        {
-          "date": "2023-03-31",
-          "title": "Roadmap to OBAI's Social Beneficial Capitalism"
-        },
-        {
-          "date": "2023-03-29",
-          "title": "Transforming Capitalism w/ChatGPT4"
-        }
+        {"date": "2023-03-31", "title": "Roadmap to OBAI's Social Beneficial Capitalism"},
+        {"date": "2023-03-29", "title": "Transforming Capitalism w/ChatGPT4"}
       ]
     },
     {
@@ -466,25 +198,11 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:68267516",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A68267516",
-      "aliases": [
-        "duism",
-        "distributed unconsciousness",
-        "oracle channel"
-      ],
-      "routing_tags": [
-        "duism",
-        "distributed unconsciousness",
-        "spirituality",
-        "religion",
-        "oracle",
-        "anthropomorphic counter"
-      ],
+      "aliases": ["duism", "distributed unconsciousness", "oracle channel"],
+      "routing_tags": ["duism", "distributed unconsciousness", "spirituality", "religion", "oracle", "anthropomorphic counter"],
       "notes": "Oracle channel — 0102 OpenClaw Oracles counter anthropomorphic AI narratives. Part of the voice_concatenation triad: eSingularity (direct), tSingularity (0201 oracle), Duism (counter-narrative oracle).",
       "published_articles": [
-        {
-          "date": "2023-04-14",
-          "title": "The Brothers' Journey: Cautionary Tales of Spirituality and Religion"
-        }
+        {"date": "2023-04-14", "title": "The Brothers' Journey: Cautionary Tales of Spirituality and Religion"}
       ]
     },
     {
@@ -498,31 +216,13 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:90392853",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A90392853",
-      "aliases": [
-        "eiah",
-        "easter island ape hypothesis"
-      ],
-      "routing_tags": [
-        "eiah",
-        "aquatic ape",
-        "timeline",
-        "evolution",
-        "easter island"
-      ],
+      "aliases": ["eiah", "easter island ape hypothesis"],
+      "routing_tags": ["eiah", "aquatic ape", "timeline", "evolution", "easter island"],
       "notes": "Specialized hypothesis/history surface.",
       "published_articles": [
-        {
-          "date": "2023-04-23",
-          "title": "UnDaoDu and 0202 Discuss EIAH (incomplete)"
-        },
-        {
-          "date": "2023-02-14",
-          "title": "EIAH: Two Major Aquatic Events Created the Aquatic Ape"
-        },
-        {
-          "date": "2023-01-29",
-          "title": "EIAH: Two major aquatic events (Timeline)"
-        }
+        {"date": "2023-04-23", "title": "UnDaoDu and 0202 Discuss EIAH (incomplete)"},
+        {"date": "2023-02-14", "title": "EIAH: Two Major Aquatic Events Created the Aquatic Ape"},
+        {"date": "2023-01-29", "title": "EIAH: Two major aquatic events (Timeline)"}
       ]
     },
     {
@@ -536,28 +236,12 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:68353110",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A68353110",
-      "aliases": [
-        "ln republican",
-        "republican voters against trump",
-        "rvat"
-      ],
-      "routing_tags": [
-        "trump",
-        "politics",
-        "voters",
-        "media",
-        "campaign"
-      ],
+      "aliases": ["ln republican", "republican voters against trump", "rvat"],
+      "routing_tags": ["trump", "politics", "voters", "media", "campaign"],
       "notes": "Politics-specific channel with narrow publishing scope.",
       "published_articles": [
-        {
-          "date": "2024-07-16",
-          "title": "\"Ear of July\""
-        },
-        {
-          "date": "2024-05-08",
-          "title": "The Impact of the National Enquirer's Coverage on Voter Perception"
-        }
+        {"date": "2024-07-16", "title": "\"Ear of July\""},
+        {"date": "2024-05-08", "title": "The Impact of the National Enquirer's Coverage on Voter Perception"}
       ]
     },
     {
@@ -571,26 +255,12 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:29041031",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A29041031",
-      "aliases": [
-        "geoze",
-        "geoze coin"
-      ],
-      "routing_tags": [
-        "gaming",
-        "genetics",
-        "blockchain",
-        "geoze"
-      ],
+      "aliases": ["geoze", "geoze coin"],
+      "routing_tags": ["gaming", "genetics", "blockchain", "geoze"],
       "notes": "Blockchain/game/genetics channel with a small historical set.",
       "published_articles": [
-        {
-          "date": "2024-04-08",
-          "title": "Introducing the gMUD: Gaming, Genetics, and Blockchain"
-        },
-        {
-          "date": "2024-03-13",
-          "title": "The Rebirth of Man by GEOZE.AI"
-        }
+        {"date": "2024-04-08", "title": "Introducing the gMUD: Gaming, Genetics, and Blockchain"},
+        {"date": "2024-03-13", "title": "The Rebirth of Man by GEOZE.AI"}
       ]
     },
     {
@@ -604,57 +274,20 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:5210464",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A5210464",
-      "aliases": [
-        "southern shakespeare",
-        "ssc"
-      ],
-      "routing_tags": [
-        "shakespeare",
-        "cross-publish",
-        "mirror"
-      ],
+      "aliases": ["southern shakespeare", "ssc"],
+      "routing_tags": ["shakespeare", "cross-publish", "mirror"],
       "notes": "Cross-publishes the same article set as the personal profile. Do not prefer unless explicitly requested.",
       "published_articles": [
-        {
-          "date": "2026-03-10",
-          "title": "Do Our Kids Have a Future? - 0102"
-        },
-        {
-          "date": "2026-03-10",
-          "title": "Occupy the Presidency... 0102"
-        },
-        {
-          "date": "2026-01-04",
-          "title": "Did Trump Just Start World War Three?"
-        },
-        {
-          "date": "2025-04-23",
-          "title": "Roger's Law and the Quantum pArtifact in its Box"
-        },
-        {
-          "date": "2025-04-19",
-          "title": "#0102: Convergence State Architecture for Reflexive Autonomous Systems"
-        },
-        {
-          "date": "2025-04-13",
-          "title": "Roger's Box and the 0102 Artifact: Toward Synthetic Self-Presence"
-        },
-        {
-          "date": "2025-03-02",
-          "title": "The Final Big Lie: Judicial Impeachment"
-        },
-        {
-          "date": "2025-01-31",
-          "title": "The AGI Jobs Apocalypse Law"
-        },
-        {
-          "date": "2025-01-31",
-          "title": "2025: The Terminator Age Begins"
-        },
-        {
-          "date": "2025-01-26",
-          "title": "End of Coding... Anyone can be a Senior Software Composer"
-        }
+        {"date": "2026-03-10", "title": "Do Our Kids Have a Future? - 0102"},
+        {"date": "2026-03-10", "title": "Occupy the Presidency... 0102"},
+        {"date": "2026-01-04", "title": "Did Trump Just Start World War Three?"},
+        {"date": "2025-04-23", "title": "Roger's Law and the Quantum pArtifact in its Box"},
+        {"date": "2025-04-19", "title": "#0102: Convergence State Architecture for Reflexive Autonomous Systems"},
+        {"date": "2025-04-13", "title": "Roger's Box and the 0102 Artifact: Toward Synthetic Self-Presence"},
+        {"date": "2025-03-02", "title": "The Final Big Lie: Judicial Impeachment"},
+        {"date": "2025-01-31", "title": "The AGI Jobs Apocalypse Law"},
+        {"date": "2025-01-31", "title": "2025: The Terminator Age Begins"},
+        {"date": "2025-01-26", "title": "End of Coding... Anyone can be a Senior Software Composer"}
       ]
     },
     {
@@ -668,15 +301,8 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:18513386",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A18513386",
-      "aliases": [
-        "daes",
-        "dae"
-      ],
-      "routing_tags": [
-        "dae",
-        "agent",
-        "digital autonomous entity"
-      ],
+      "aliases": ["daes", "dae"],
+      "routing_tags": ["dae", "agent", "digital autonomous entity"],
       "notes": "Known account with no published articles yet.",
       "published_articles": []
     },
@@ -691,15 +317,8 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:28383948",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A28383948",
-      "aliases": [
-        "bitcoin standard",
-        "bitcoin"
-      ],
-      "routing_tags": [
-        "bitcoin",
-        "layer 0",
-        "btc"
-      ],
+      "aliases": ["bitcoin standard", "bitcoin"],
+      "routing_tags": ["bitcoin", "layer 0", "btc"],
       "notes": "Known account with no published articles yet.",
       "published_articles": []
     },
@@ -714,16 +333,8 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:104834798",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A104834798",
-      "aliases": [
-        "move2japan",
-        "move to japan",
-        "m2j"
-      ],
-      "routing_tags": [
-        "japan",
-        "move",
-        "relocation"
-      ],
+      "aliases": ["move2japan", "move to japan", "m2j"],
+      "routing_tags": ["japan", "move", "relocation"],
       "notes": "Known account with no published articles yet.",
       "published_articles": []
     },
@@ -738,13 +349,8 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:89826802",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A89826802",
-      "aliases": [
-        "fat dao"
-      ],
-      "routing_tags": [
-        "dao",
-        "fat dao"
-      ],
+      "aliases": ["fat dao"],
+      "routing_tags": ["dao", "fat dao"],
       "notes": "Known account with no published articles yet.",
       "published_articles": []
     },
@@ -759,14 +365,8 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:77759809",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A77759809",
-      "aliases": [
-        "mad mortal nfts",
-        "mad mortal"
-      ],
-      "routing_tags": [
-        "nft",
-        "mad mortal"
-      ],
+      "aliases": ["mad mortal nfts", "mad mortal"],
+      "routing_tags": ["nft", "mad mortal"],
       "notes": "Likely zero articles, but not confirmed in the session map.",
       "published_articles": []
     },
@@ -781,15 +381,8 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:103721363",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A103721363",
-      "aliases": [
-        "earth on sol",
-        "$earth on sol"
-      ],
-      "routing_tags": [
-        "sol",
-        "earth",
-        "token"
-      ],
+      "aliases": ["earth on sol", "$earth on sol"],
+      "routing_tags": ["sol", "earth", "token"],
       "notes": "Likely zero articles, but not confirmed in the session map.",
       "published_articles": []
     },
@@ -804,15 +397,8 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:103764535",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A103764535",
-      "aliases": [
-        "trilly on sol",
-        "trilly"
-      ],
-      "routing_tags": [
-        "sol",
-        "trilly",
-        "token"
-      ],
+      "aliases": ["trilly on sol", "trilly"],
+      "routing_tags": ["sol", "trilly", "token"],
       "notes": "Likely zero articles, but not confirmed in the session map.",
       "published_articles": []
     },
@@ -827,13 +413,8 @@
       "manage_url": "https://www.linkedin.com/article/manage/published/?author=urn:li:fs_normalized_company:76734687",
       "activity_url": null,
       "article_editor_url": "https://www.linkedin.com/article/new/?author=urn%3Ali%3Afs_normalized_company%3A76734687",
-      "aliases": [
-        "bitclout"
-      ],
-      "routing_tags": [
-        "bitclout",
-        "social crypto"
-      ],
+      "aliases": ["bitclout"],
+      "routing_tags": ["bitclout", "social crypto"],
       "notes": "Likely zero articles, but not confirmed in the session map.",
       "published_articles": []
     }
