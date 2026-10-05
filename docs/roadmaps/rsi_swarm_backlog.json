@@ -1883,7 +1883,7 @@
     "observation_path": "current_observation.authenticated_startup_integration_20261006",
     "base_commit": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
     "selected_action": "Connect authenticated startup custody through public consumer after isolation",
-    "status": "implementation_in_progress_not_admitted",
+    "status": "startup_os_qualified_regression_closure_pending_not_admitted",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
@@ -1894,7 +1894,7 @@
     },
     "dispatchable": false,
     "execution_plane": "Owned source implementation with synthetic tests; no runtime grant",
-    "next_action": "Exercise successful full public startup using constructive v8 binding, then qualify actual OS admission and scoped local work",
+    "next_action": "Resolve combined-suite replay-credential regression without weakening acceptance, finish independent review and source publication, then connect existing issuer to valve with verified capability inputs for scoped local work",
     "higher_priority_gates": []
   },
   "current_observation": {
@@ -31193,6 +31193,28 @@
         "current_source_hash_mismatches": 0,
         "evidence": "outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/result.json",
         "limits": "No authentic principal enrollment, admitted native worker, autonomous repair or retained benefit"
+      },
+      "merged_source_validation": {
+        "source": "9039bead92b40ebabd6a5697989d79f7c10f9256",
+        "actual_os_requalification_passed": true,
+        "actual_os_evidence": "outputs/rsi-permission-evidence-20261006/public-startup-merge-requalification.json",
+        "combined_passed": 274,
+        "combined_skipped": 3,
+        "combined_failed": 1,
+        "combined_evidence": "outputs/rsi-permission-evidence-20261006/startup-merged-connected.xml",
+        "closure_blocker": "Replay-credential resolution in materializer positive fixture; clock/import-order cause under investigation, no production defect or repair yet established",
+        "publication": "not_pushed_no_pr_not_merged"
+      },
+      "publication_validation_debt": {
+        "task": "Reconcile expired WSP62 exemptions and stale interface-document ceiling under existing owners",
+        "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 3, "total": 14, "priority": "P1"},
+        "state": "observed_inherited_debt_not_repaired",
+        "local_passed": 11,
+        "local_failed": 5,
+        "failure_causes": "Four expired2026-09-30 exemptions and one stale exact interface-document ceiling1517; main document already2771lines",
+        "baseline_evidence": "Tests/policies unchanged from main; source comparison only, no executed full-main baseline",
+        "wsp97": "Reuse existing WSP62 owners; do not silently extend expiry or inflate ceilings for a passing result",
+        "evidence": "outputs/rsi-permission-evidence-20261006/startup-wsp62.xml"
       },
       "post_startup_candidate": {
         "task": "Connect existing external authoritative-use lease issuer to existing governed valve consumer",

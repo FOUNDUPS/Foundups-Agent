@@ -21,6 +21,13 @@ sign, normal service exits and complete owned cleanup. All1,023 bound Python
 files still match; driver/dependency bindings are retained. This qualifies this
 startup mechanism, not authentic enrollment, native G1 admission or retained RSI.
 Evidence: `outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+The unchanged OS driver also passed once on merged `9039bead9` in35.550s;
+see `public-startup-merge-requalification.json` in the same evidence root.
+Publication qualification additionally found inherited WSP62 debt:5failed/11pass
+(four expired2026-09-30 exemptions; one stale exact interface-document ceiling).
+Main already has2,771 interface lines against1,517; policies/tests are unchanged.
+This is source comparison, not an executed full-main baseline. No expiry or
+ceiling was relaxed. Startup proofs do not imply whole-repository validation.
 Next close publication against fresh main, then connect the existing issuer to
 the governed valve with verified capabilities (15/P1, detailed at completion gates).
 

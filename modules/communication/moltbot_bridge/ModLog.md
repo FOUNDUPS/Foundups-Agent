@@ -1,5 +1,24 @@
 ## Authenticated startup integration in progress — 2026-10-06
 
+Combined merged-source regression:274passed/3skipped/1failed. The positive
+runtime-dependency materializer fixture rejects its replay credential. Investigation
+is checking the frozen fixture clock against the resolver's import-captured default;
+no cause or repair is claimed before reproduction. Preserve `startup-merged-connected.xml`.
+Publication remains pending. WSP97 reconciliation updates the backlog's stale
+next action: public OS startup has passed, regression closure precedes the existing
+issuer-to-valve connection. This does not establish admitted worker execution.
+
+Merged-source requalification: exact prior OS driver passes once at `9039bead9`
+in35.550s; six real root RPCs, one valid target signature, nonce-replay rejection,
+normal service exits, actual isolation and complete cleanup. Manifest regeneration
+is unchanged at1,419files. `public-startup-merge-requalification.json` binds the
+current head separately from the unchanged driver's historical metadata.
+Additional WSP62 check:11pass/5fail. Four failures are expired2026-09-30 exemptions;
+one is an exact INTERFACE.md ceiling1517 versus current2818. Main already has2771
+lines; test and exemption policies match main byte-for-byte. This source comparison
+establishes inherited debt, not an executed main baseline. No dates/limits changed.
+Keep that14/P1 reconciliation separate from startup and native G1 claims.
+
 Actual OS qualification passes at `50008b241` in34.012s: real DynamicUser,
 systemd credential delivery, unchanged public entrypoints/isolation/provider,
 real Unix peer transport and six root RPCs. Missing v2 grant rejects at parsing;
