@@ -1881,36 +1881,54 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.protected_use_control_authentication_20261005",
-    "base_commit": "975fe7c43861c7ad900785bed39ee057979d67f4",
-    "selected_action": "Qualify separate protected-use control authentication in existing owners",
-    "status": "local_source_qualified_publication_pending",
+    "observation_path": "current_observation.control_proof_regression_20261005",
+    "base_commit": "724bb684e5e46302a6e7cd2cf9473e1db661650b",
+    "selected_action": "Retain the independently verified direct revocation control-key rejection regression",
+    "status": "local_coverage_qualified_publication_pending",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
-      "deferability": 3,
+      "deferability": 4,
       "impact": 3,
       "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "Authorized Codex repository maintenance; not native WRE work admission",
-    "next_action": "Finish exact-source publication then re-observe current authenticated custody/supplier and bootstrap joins; never infer credential enrollment from descriptor data.",
+    "execution_plane": "Authorized repository test maintenance, not native work admission",
+    "next_action": "Close this source publication/retention, then reconcile actual installed OpenClaw/Hermes runtime and authenticated input availability before selecting a native canary or demonstrated source repair.",
     "higher_priority_gates": [
       {
         "task": "Native autonomous RSI admission",
         "total": 18,
         "priority": "P0",
-        "state": "incomplete",
-        "reason": "Authentic owner/control/work/grant/revocation/model inputs and public composition not yet qualified"
+        "state": "blocked",
+        "reason": "Authentic owner/control/work/grant/revocation/model inputs and public composition remain unqualified; Python callable and plan labels grant no authority."
       }
     ],
     "deferred": [
       {
-        "task": "Bootstrap admission forwarding",
-        "total": 13,
+        "task": "Actual native runtime/input availability audit",
+        "total": 14,
         "priority": "P1",
-        "reason": "Does not supply independently authenticated control capability; dependency first"
+        "wsp15": {
+          "complexity": 2,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4
+        },
+        "reason": "Read-only prerequisite map; determine configuration versus code blockers before further changes."
+      },
+      {
+        "task": "Local model/task qualification",
+        "total": 12,
+        "priority": "P2",
+        "wsp15": {
+          "complexity": 2,
+          "importance": 3,
+          "deferability": 4,
+          "impact": 3
+        },
+        "reason": "Both installed candidates rejected this bounded task; no model promoted. Re-observe and choose a suitable separate task family, not repeated coaching on this example."
       }
     ]
   },
@@ -30610,7 +30628,7 @@
     "protected_use_control_authentication_20261005": {
       "base": "975fe7c43861c7ad900785bed39ee057979d67f4",
       "observed_on": "2026-10-05 JST",
-      "state": "LOCAL_SOURCE_QUALIFIED_PUBLICATION_PENDING",
+      "state": "MERGED_MAIN_VERIFIED_RETAINED_MAINTENANCE_QUERY_REVIEWED_OWNED_LANE_RETIRED",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -30710,8 +30728,154 @@
         },
         "cause": "Two Windows-only mocked socket paths rejected as relative by Linux. Shared fixture propagates setup errors.",
         "repair": "Use Path(REPO_ROOT.anchor)/filename in the existing fixture and direct non-root test. Production validation and all163 assertion ASTs unchanged.",
-        "state": "Corrected local and hosted validation pending",
+        "state": "Corrected local467pass/7skip; hosted471pass/3skip, no failures/errors; merged and exact-main verified",
         "evidence": "ci-37252460162-failed.log"
+      },
+      "publication": {
+        "pr": 2068,
+        "merge": "724bb684e5e46302a6e7cd2cf9473e1db661650b",
+        "reviewed_head": "fc0597b3475b83330c43f61584743338ec9a4243",
+        "pr_ci_run": 37253462978,
+        "main_ci_run": 37254048948,
+        "main_codeql_run": 37254048507,
+        "main_checks": "success",
+        "hosted": {
+          "total": 474,
+          "passed": 471,
+          "skipped": 3,
+          "failures": 0,
+          "errors": 0
+        },
+        "retained_merged": {
+          "passed": 19,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "seconds": 6.64
+        }
+      },
+      "maintenance": {
+        "completed": true,
+        "parent_seconds": 442.5,
+        "historical_tasks_preserved": 6,
+        "historical_events_preserved": 18,
+        "total_tasks": 7,
+        "total_events": 21,
+        "retry_count": 0,
+        "query": "CURRENT/no-gap, source/authority724, one attempt/no retry,44.615s",
+        "native_rsi_admission": false,
+        "independent_final_review": "8e4aa7cc2882aa8be3768d412a2ae83e2ba84c9e021abdc2c7f20ba0ec54fe68"
+      },
+      "owned_lane": {
+        "retired": true,
+        "normal_git_worktree_remove": true,
+        "recovery_bundle_verified": true,
+        "ignored_files_archived": 4
+      }
+    },
+    "control_proof_regression_20261005": {
+      "base": "724bb684e5e46302a6e7cd2cf9473e1db661650b",
+      "observed_on": "2026-10-05 JST",
+      "state": "LOCAL_COVERAGE_QUALIFIED_PUBLICATION_PENDING",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "execution_plane": "Authorized repository test maintenance, not native work admission",
+      "scope": "One test in existing test_reddog_signer_root_protected_use_composition.py; existing documentation only",
+      "authorship": "Coordinator/team frozen oracle. 0/2 local-model proposals accepted.",
+      "reconciliation": "PR2068 is merged, not pending source work. Extend existing test owner; no new runtime, skill, evaluator store or roadmap. Existing model capability owners remain next.",
+      "evidence_root": "outputs/rsi-control-regression-20261005",
+      "prior_evidence_root": "outputs/rsi-control-auth-20261005",
+      "retrieval": {
+        "ok": true,
+        "freshness": "CURRENT",
+        "index_gap_detected": false,
+        "same_source_head": true,
+        "noise": "Relevant module but leading oracle hit is adjacent, not direct revocation test.",
+        "ordering": "Read README/INTERFACE/ROADMAP and direct composition plus revocation owner; NAVIGATION confirms existing bridge ownership.",
+        "missing": "No Tier0 required omissions; memory/README.md optional and absent. Requested requirements.txt also absent. Existing module requirements owner retained; no new docs to satisfy a template.",
+        "staleness": "CURRENT/no-gap for724. Documentation publication-pending text is stale and will be reconciled against actual merged receipts.",
+        "duplication": "Existing test helper and frozen oracle reused; no new test file, module, skill, store or registry."
+      },
+      "behavioral_ast": "57 previous top-level AST nodes unchanged; new body equals frozen oracle excluding imports/docstring/name",
+      "correct": {
+        "tests": 48,
+        "passed": 48,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 35.282
+      },
+      "fault": {
+        "tests": 48,
+        "passed": 47,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 0,
+        "seconds": 36.313,
+        "only_failed": "test_control_key_cannot_load_revocations",
+        "restored": true
+      },
+      "baseline_fault": "The earlier selected47 all passed with the same seeded fault; no production fault alleged",
+      "fault_sha256": "610999876d36d12a35b0c37ed005439dd52b4df27a7cfad2b9f4c415cef0e44e",
+      "local_attempts": {
+        "calls": 2,
+        "accepted": 0,
+        "failed_baseline_tests": 2,
+        "automatic_retries": 0,
+        "packet_revisions": 1,
+        "sdk_input_tokens": 1838,
+        "sdk_output_tokens": 622,
+        "summed_parent_seconds": 206.843,
+        "paid_inference_api_calls": 0,
+        "coordination_cost": null,
+        "autonomous_benefit": null
+      },
+      "limits": [
+        "Finite seeded-fault coverage gain, not model learning or general evaluator completeness",
+        "Synthetic keys and substituted transport; no credential custody or native enrollment proof",
+        "Test registry remains1687 files,270 quarantined; no new file or generated-manifest change"
+      ],
+      "next_gate": "Inspect actual configured native runtime/authenticated input availability through existing providers. Local callable availability does not grant native authority. Further model/task qualification is separate.",
+      "connected": {
+        "counts": {
+          "tests": 475,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 7
+        },
+        "passed": 468,
+        "seconds": 145.75,
+        "source_stable": true,
+        "suite_files": 17,
+        "receipt_sha256": "65c5bca382e51fe9700d3d943fd878d94c757dd1afb857f4d563fbd479d4c074",
+        "skip_reasons": "Windows AF_UNIX unavailable, symlink privilege and Linux-only transport; inherited controls unchanged"
+      },
+      "matched_alternative_model": {
+        "source": "40cac16eb6affe5d313a241c2e455dd129ec2f51",
+        "model": "installed Qwen3.5-4B Q4_K_M",
+        "task_context_matches": "typed Qwen7B attempt exactly; no oracle/test supplied",
+        "calls": 1,
+        "accepted": 0,
+        "format": "unclosed fence and incomplete string",
+        "finish_reason": "length",
+        "sdk_input_tokens": 1108,
+        "sdk_output_tokens": 512,
+        "parent_seconds": 109.547,
+        "inference_seconds": 103.266,
+        "context_tokens": 2048,
+        "runtime_fit": true,
+        "baseline_test_runs": 0,
+        "automatic_retries": 0,
+        "paid_inference_api_calls": 0,
+        "evaluation": "Rejected before pytest; no body repairs or promotion",
+        "review_sha256": "88bf4a66c40164cba039f745f5842bb3b353b1090f916851cc30aba80dae3060",
+        "ranking_limit": "One fixed task; no general model superiority or incapability claim"
       }
     }
   }

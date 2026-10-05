@@ -12,13 +12,26 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current layer — separate protected-use control proof (2026-10-05 JST):**
+**Current layer — retain a measured coverage repair (2026-10-05 JST):**
+WSP15 selects13/P1 (C2/I4/D4/Impact3). One additive existing-owner test detects a
+frozen control/work proof fault that the prior47 selected tests missed: correct48/48,
+fault47pass/1expected failure. Two local model proposals failed; the retained
+regression is team-authored. Connected475:468pass/7skip; publication pending.
+A subsequent matched Qwen3.5 local call was also rejected: truncated output,
+0/1 accepted. Next inspect actual runtime/input availability through existing
+OpenClaw/Hermes owners; model/task qualification remains a separate gate.
+Native autonomous18/P0 remains open; no new orchestration layer is selected.
+See [the checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05)
+and canonical backlog `control_proof_regression_20261005`.
+
+**Closed source layer — separate protected-use control proof (2026-10-05 JST):**
 Selected13/P1 (C3/I4/D3/Impact3), the executable prerequisite to blocked native
 admission18/P0. Descriptor v1 needs the work key to authenticate ACQUIRE before
 the guarded callback can obtain that key. An explicit v2 descriptor separates
 ACQUIRE/FINISH control proof while preserving work, grant and peer checks.
 Two custody controls and17 synthetic contract cases pass; connected474 cases (467pass/7platform skips), manifest8/8 and extension15-member
-fast tier pass. Independent source review approves; publication pending. Actual credential custody,
+fast tier pass. PR2068 merged at724bb684; hosted471pass/3skip, exact-main
+CI/CodeQL and later merged-source19/19 pass. Actual credential custody,
 public startup and native RSI remain open. See canonical backlog
 `protected_use_control_authentication_20261005` and the existing
 [dispatch checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#separate-protected-use-control-proof--2026-10-05).

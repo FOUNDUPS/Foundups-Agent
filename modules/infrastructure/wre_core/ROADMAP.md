@@ -8,10 +8,12 @@ retained/control/recovery use of unchanged baseline SQLite rows selects positive
 → zero control → positive. The owned lane is retired with recovery preserved.
 This closes the measured consumer repair, not model learning or native admission.
 
-With closure/retention verified, re-observe existing production `reddog_operations` as
-a conditional 14/P1 local proposal candidate. No new registry operation or skill
-is selected; scanner, full-context capacity and finite evolution budget still
-need qualification. Native unattended 18/P0 is separate. See the [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint).
+**Current selection:** follow the [canonical system checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05).
+At724bb684 the bounded existing local adapter produced two rejected regression
+proposals (0/2 accepted). Retain the independently verified team-authored coverage
+repair, then qualify installed models on the fixed task. The earlier registered
+`reddog_operations`14/P1 remains conditional on scanner, full-context capacity and
+admission; it is not an executable native worker. Native unattended18/P0 is separate.
 
 ## Named telemetry layer — P14 checkpoint
 

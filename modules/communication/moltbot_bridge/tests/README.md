@@ -1,4 +1,22 @@
+## Direct revocation proof regression — 2026-10-05
+
+One added test retains the independently frozen control-key LOAD rejection;
+correct48/48 versus controlled-fault47pass/1expected failure. Existing runtime
+and tests are unchanged. This is a coordinator/team repair after0/2 accepted
+local proposals. Connected475:468pass/7skip; publication pending. See module ModLog
+and canonical backlog `control_proof_regression_20261005` for evidence.
+
 ## Separate protected-use control proof — 2026-10-05
+
+**Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.
+Hosted474:471pass/3skip; exact-main CI37254048948 and CodeQL37254048507 succeeded.
+Later merged-source19/19 passed. Governed OpenClaw/WRE refresh completed442.5s;
+CURRENT/no-gap query took44.615s, one attempt/no retry. Historical6task/18event
+rows are unchanged, now7/21. Independent maintenance review and normal owned-lane
+retirement are complete; branch, bundle and ignored-file archive are preserved.
+This closes source/retrieval retention, not native worker admission or key custody.
+
+Earlier source-qualification record (historical):
 
 Two legacy custody controls pass. The17 new cases cover v2 identity/context
 binding, strict nested fields, mixed versions, real-router two-key proofs and

@@ -1,5 +1,15 @@
 ## Separate protected-use control proof — 2026-10-05
 
+**Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.
+Hosted474:471pass/3skip; exact-main CI37254048948 and CodeQL37254048507 succeeded.
+Later merged-source19/19 passed. Governed OpenClaw/WRE refresh completed442.5s;
+CURRENT/no-gap query took44.615s, one attempt/no retry. Historical6task/18event
+rows are unchanged, now7/21. Independent maintenance review and normal owned-lane
+retirement are complete; branch, bundle and ignored-file archive are preserved.
+This closes source/retrieval retention, not native worker admission or key custody.
+
+Earlier source-qualification record (historical):
+
 The optional v2 root descriptor separates ACQUIRE/FINISH control authentication from work signing. Existing v1 callers are unchanged. Synthetic source qualification passes (connected467pass/7platform skips); production credential supply and public startup are not activated. See INTERFACE, module ModLog and the canonical RSI backlog.
 
 ## Recover an admitted HoloIndex refresh — 2026-10-05
