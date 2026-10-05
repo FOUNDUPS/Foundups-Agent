@@ -144,7 +144,6 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "monk_third_person_reference" not in correspondence_text
     assert "Answer direct" in correspondence_text
     assert "questions about AI assistance truthfully" in correspondence_text
-    assert "official form is not optional branding" not in correspondence_text  # Exact field rule is checked below.
     assert "A required representative/translator field on an official form is not optional branding" in correspondence_text
     assert "Do not remove `AI` from legitimate project descriptions" in correspondence_text
     assert "Never imply that 0102 personally performed a field action completed by the monk." in correspondence_text
@@ -175,7 +174,8 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "YUMORI WORK HANDOFF" in work_text
     assert "MPS = Complexity + Importance + Deferability + Impact" in work_text
     assert "Capital-network expansion protocol" in work_text
-    assert "Capital Targets" in work_text and "Capital People" in work_text
+    assert "Capital Targets" in work_text
+    assert "Capital People" in work_text
     assert "1ST_DEGREE_VERIFIED" in work_text
     assert "mutual connections" in work_text
     assert "Visible Contact Info is a routable candidate, not send authorization." in work_text
@@ -260,6 +260,7 @@ def test_current_vision_propositions_and_progressive_disclosure_are_present() ->
         "熱を捨てない。地域へ戻す。",
         "60のFoundUpプロジェクト。1チーム最大3人。あとはAI。",
         "福井の課題から、福井のFoundUpをつくる。",
+        "福井から、日本の分散型コンピュートへ。",
         "建物は、まだ立っている。選択肢も、まだ残っている。",
     ):
         assert proposition in content
@@ -524,5 +525,7 @@ def test_phone_skill_is_human_led_plain_and_truthful_with_identical_projection()
     ):
         assert obsolete not in canonical
     opening = canonical.split("### Plain opening", 1)[1].split("### Optional translation audio", 1)[0]
-    assert "YUMORI.me設立準備委員会です。" in opening
-    assert "never impersonate" not in opening  # Keep operator instructions out of the spoken example.
+    spoken = next(line for line in opening.splitlines() if line.startswith("`YUMORI."))
+    assert "YUMORI.me設立準備委員会です。" in spoken
+    for label in ("0102", "AI", "代理", "digital twin"):
+        assert label not in spoken
