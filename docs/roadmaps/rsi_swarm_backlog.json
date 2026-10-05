@@ -31202,7 +31202,8 @@
         "combined_skipped": 3,
         "combined_failed": 1,
         "combined_evidence": "outputs/rsi-permission-evidence-20261006/startup-merged-connected.xml",
-        "closure_blocker": "Replay-credential resolution in materializer positive fixture; clock/import-order cause under investigation, no production defect or repair yet established",
+        "closure_blocker": "Original replay-credential failure remains unreproduced and unexplained; full diagnostic and exact-bootstrap runs each pass275/skip3 with unchanged source. No correction claimed. Independent review and hosted validation required before merge.",
+        "reproduction_evidence": ["outputs/rsi-permission-evidence-20261006/materializer-clock-baseline5.json", "outputs/rsi-permission-evidence-20261006/materializer-clock-baseline6.json"],
         "publication": "not_pushed_no_pr_not_merged"
       },
       "publication_validation_debt": {
@@ -31221,6 +31222,7 @@
         "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
         "state": "startup_mechanism_qualified_pending_source_closure_and_verified_capability_inputs",
         "observation": "Existing issuer contract/adversarial baseline23/23; current resolver retains seven blocker reasons and hardcodes a null lease; no production issuer caller found",
+        "composition_dependency": "Source audit at438a20113 finds no production construction of IndependentSignerSecretGrantProvider or ExternalSignerAuthoritativeUseLeaseIssuer in modules/scripts. Resident queue bootstrap constructs the resolver without an issuer; runtime dependency bundle exposes neither issuer nor grant provider. Existing lease tests use _LeasedGrantProvider. Reuse the real grant provider and existing client supply, qualify their composition with the issuer, and preserve all missing-authority rejections before queue admission.",
         "wsp97": "Reuse existing issuer and verifier owners; reject missing capabilities and retain exact effect, replay, expiry and generation checks",
         "evidence": "outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json",
         "limits": "No authentic enrollment or native G1 admission established; this connection alone does not satisfy every capability prerequisite"

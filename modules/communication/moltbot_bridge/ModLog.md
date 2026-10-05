@@ -1,5 +1,16 @@
 ## Authenticated startup integration in progress — 2026-10-06
 
+Finite regression investigation at `438a20113`: full seven-file diagnostic run
+and original `-S`/PYTHONPATH bootstrap each pass275/skip3 with unchanged production
+and test bytes. Original274pass/1fail/3skip remains preserved and unexplained;
+no fixture correction is claimed. A diagnostic run lacking Git PATH produced49
+setup failures and is classified separately as runner failure. Evidence:
+`materializer-clock-baseline5.json` and `materializer-clock-baseline6.json` in
+the existing20261006 evidence directory. Draft publication may expose this for
+review/hosted validation; merge remains gated. G1 audit additionally finds no
+production construction of the existing independent grant provider or lease issuer;
+qualify their real composition before claiming queue execution capability.
+
 Combined merged-source regression:274passed/3skipped/1failed. The positive
 runtime-dependency materializer fixture rejects its replay credential. Investigation
 is checking the frozen fixture clock against the resolver's import-captured default;

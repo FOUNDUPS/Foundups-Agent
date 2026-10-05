@@ -3756,3 +3756,14 @@ existing liveness owner. The ceiling and original29 criteria remain unchanged.
 Final connected181 passed, no errors/skips (5.516s). Six controller supplement
 cases were candidate-only. Evidence and exact commands: canonical RSI backlog
 `holo_grounding_20261005`; live resume, publication and retained use unverified.
+## 2026-10-06 — Startup combined regression investigation
+
+At `438a20113`, the seven-file startup/owner/provenance/materializer suite passes
+275 cases with3skips in two runs: diagnostic bootstrap277.48s and original
+`-S -B -X utf8 -m pytest`/PYTHONPATH bootstrap282.38s. Production/test hashes stay
+unchanged. The earlier274pass/1fail/3skip result is preserved; replay-credential
+failure cause remains unresolved, not fixed by rerunning. Three narrower probes
+passed; another diagnostic attempt produced49 missing-Git setup failures because
+its reduced PATH omitted Git. No tests or production checks were weakened.
+Receipts: `outputs/rsi-permission-evidence-20261006/materializer-clock-baseline*.json`
+and original `startup-merged-connected.xml`. Independent review/hosted checks remain.
