@@ -2,7 +2,7 @@
   "name": "esingularity",
   "version": "0.2.0",
   "type": "foundup",
-  "description": "Japanese-first public campaign PWA for Save Sukatto Land Kuzuryu, Project eSingularity Fukui, and Japan Hyperscaler Report research",
+  "description": "eSingularity.ai regional AI infrastructure FoundUp for AI Koban, the Fukui three-site feasibility program, YUMORI public-asset reuse, and Japan Hyperscaler Report research",
   "deployment": {
     "platform": "openai_sites",
     "public_url": "https://esingularity.ai/",
@@ -17,7 +17,9 @@
       "Multilingual",
       "LINE campaign",
       "Mobile-first",
-      "Japan Hyperscaler Report"
+      "Japan Hyperscaler Report",
+      "AI Koban",
+      "Partner Development"
     ]
   },
   "research": {
@@ -44,7 +46,9 @@
   },
   "api": {
     "type": "PWA",
-    "endpoints": ["/api/interest"]
+    "endpoints": [
+      "/api/interest"
+    ]
   },
   "memory": {
     "path": "memory/",
