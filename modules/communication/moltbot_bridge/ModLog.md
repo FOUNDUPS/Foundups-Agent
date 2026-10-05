@@ -1,5 +1,19 @@
 ## Authenticated startup integration in progress — 2026-10-06
 
+Post-checkpoint G1 reconciliation at `bf4aa1aaf`: seven historical blocker labels
+are not seven absent modules. Existing consensus, consent, model verification
+and handshake implementations require authentic inputs and connected consumers.
+The governed valve resolver still retains seven reasons and returns no use lease;
+the existing external lease issuer has no production caller found by inspection.
+Its existing contract/adversarial baseline passes23/23 in5.75s.
+Two existing resolver tests also pass, confirming current-generation proof removes
+only three generation blockers and leaves missing authority inputs rejected
+(`valve-consumer-baseline.xml`,3.76s). This verifies the blocker behavior, not G1.
+The roadmap and backlog now record the conditional15/P1 connection after startup; missing
+capabilities must remain rejected. Evidence: `native-admission-reconciliation.json`
+and `existing-use-lease-baseline.json` under the existing20261006 output root.
+This is a source-bound next-action audit, not native admission or retained RSI.
+
 Generated runtime bindings refreshed through the existing generator:1,419 files,
 canonical digest `dc4a72b48f0288b0b543da05b14a168a0fdafb9ff41b0609f4b018be97d485f0`.
 Manifest contracts pass8/8 including independent staged-index closure. Existing

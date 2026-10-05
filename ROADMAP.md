@@ -1097,6 +1097,23 @@ only after measured benefit, resource limits and acceptance gates justify it.
 
 ## Completion gates
 
+**G1 consumer reconciliation (2026-10-06, source `bf4aa1aaf`):** the seven
+historical missing-verifier labels mix implemented components, missing runtime
+inputs and unconnected consumers. The existing governed use-time resolver still
+retains all seven reasons and returns no authoritative use lease. The external
+lease issuer exists and its three contract/adversarial suites pass23/23 locally,
+but source inspection found no production caller. Neither observation proves
+authentic enrollment or permission to execute a worker.
+
+After actual startup qualification, the conditional next connection is **15/P1**
+(C3/I4/D4/Impact4): extend the existing resolver/caller to use the existing issuer
+only with verified capabilities. Do not delete rejection reasons unconditionally
+or introduce another issuer. Missing capability, expired/replayed authority,
+wrong effect/peer/generation and rotation at use must remain rejected. Startup
+remains18/P0; independent evaluation, retention/rollback and later benefit stay
+open. Exact source bindings and acceptance criteria:
+`outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json`.
+
 | Gate | Required evidence | Failure means |
 |---|---|---|
 | G0: reproducible baseline | Clean pinned source; current registry; recorded test failures/quarantine; usable Holo receipt; active lane reconciliation. | No code packet may assume stale source or silently absorb another lane. |

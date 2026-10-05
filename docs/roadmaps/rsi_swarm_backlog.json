@@ -31178,6 +31178,15 @@
         "Generated bindings refreshed and manifest/index tests8/8; final independent review, remote CI and publication remain",
         "Actual independently admitted worker improvement and later measured retention"
       ],
+      "post_startup_candidate": {
+        "task": "Connect existing external authoritative-use lease issuer to existing governed valve consumer",
+        "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
+        "state": "conditional_after_startup_and_verified_capability_inputs",
+        "observation": "Existing issuer contract/adversarial baseline23/23; current resolver retains seven blocker reasons and hardcodes a null lease; no production issuer caller found",
+        "wsp97": "Reuse existing issuer and verifier owners; reject missing capabilities and retain exact effect, replay, expiry and generation checks",
+        "evidence": "outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json",
+        "limits": "No authentic enrollment or native G1 admission established; this connection alone does not satisfy every capability prerequisite"
+      },
       "native_rsi_complete": false
     }
   }
