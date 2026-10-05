@@ -784,3 +784,381 @@ def test_module_has_no_env_shell_file_repo_openclaw_hermes_or_holoindex_surface(
                 assert node.func.id not in banned_name_calls
             if isinstance(node.func, ast.Attribute):
                 assert node.func.attr not in banned_attrs
+
+
+# Admission composition fixtures are synthetic; no operating trust is enrolled.
+from contextlib import contextmanager
+from dataclasses import asdict, replace
+from types import SimpleNamespace
+import weakref
+from modules.communication.moltbot_bridge.src import (
+    reddog_signer_socket_service_runtime_wiring as grant_runtime,
+    reddog_signer_owner_e0_current_selection as grant_owner,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_grant_binding import resolve_secret_grant_target_binding
+from modules.communication.moltbot_bridge.src.reddog_signer_wsp71_ephemeral_backend_factory import Wsp71EphemeralSignerBackendFactory
+from modules.communication.moltbot_bridge.tests import (
+    test_reddog_signer_root_protected_use_composition as protected_fixture,
+    test_reddog_signer_wsp71_ephemeral_backend_factory as factory_fixture,
+    test_reddog_signer_owner_controlled_e0_admission as owner_fixture,
+)
+
+
+def _admission_root_case(tmp_path, monkeypatch):
+    admission_type = getattr(grant_runtime, "SignerSocketServiceGrantAdmission", None)
+    assert admission_type is not None, "missing independent owner-held grant runtime API"
+    old_policy = owner_fixture._policy
+
+    def low_policy(**kwargs):
+        value = old_policy(**kwargs)
+        value.update(allowed_operations=["signed_0102_readonly_review:foundup_module"],
+                     allowed_authority_tiers=["HIGH", "LOW"], consensus_required_tiers=["HIGH"])
+        return value
+
+    monkeypatch.setattr(owner_fixture, "_policy", low_policy)
+    monkeypatch.setattr(protected_fixture.time, "time", lambda: factory_fixture.grant_fixture.NOW)
+    values = protected_fixture.runtime(tmp_path / "root-owner", monkeypatch)
+    protected_fixture._install_current(values, protected_fixture.signed_snapshot(values))
+    protected_fixture._bind_router(values, monkeypatch)
+    owner_fixture._CURRENT_SELECTION.update(run_packet_path=str(tmp_path / "synthetic-packet.json"),
+                                            session_id="synthetic-session",
+                                            config_raw_digest=owner_fixture._raw_file_digest(values["config_path"]))
+    with grant_owner.lease_validated_owner_e0_current_admission(
+        owner_config_path=values["owner_config_path"], repo_root=values["repo"],
+        policy=values["policy"],
+    ) as owner:
+        pass
+    return admission_type, values, owner
+
+
+def _admission_store(tmp_path, owner):
+    fixture = factory_fixture.grant_fixture
+    policy = owner.policy
+    config = fixture.SignerGrantReplayStoreConfig(
+        nonce_path=Path(policy["replay_path"]), nonce_root=Path(policy["replay_root"]),
+        high_water_path=tmp_path / "high-water" / "authority.sqlite3",
+        high_water_root=tmp_path / "high-water", repo_root=Path(owner.config.repo_root),
+        replay_store_binding_digest=fixture._binding().replay_store_binding_digest,
+        replay_store_id=policy["replay_store_id"],
+        durability_receipt_id=policy["replay_store_durability_receipt_id"],
+    )
+    fixture._provision_store(config)
+    return fixture.DurableSignerSecretGrantNonceStore(
+        config, integrity_key=fixture.INTEGRITY_KEY, clock=lambda: fixture.NOW)
+
+
+def _admission_oracle(values, owner):
+    durable = protected_fixture.UncomposedDurableSignerGrantRevocationOracle(
+        binding=values["binding"], policy=values["policy"],
+        reader=values["store"].reader(), witness=values["witness"].reader(),
+        anchor=values["client"], principal_key_resolver=owner.resolver,
+        signature_verifier=protected_fixture.Ed25519SignatureVerifier(),
+        clock=lambda: factory_fixture.grant_fixture.NOW,
+    )
+    return protected_fixture.RootAuthorizedSignerGrantRevocationOracle(
+        durable=durable, protected_use=protected_fixture._protected_client(values))
+
+
+def _admission_request(values, owner, store):
+    fixture = factory_fixture.grant_fixture
+    binding = resolve_secret_grant_target_binding(owner.policy, store)
+    operation = owner.policy["allowed_operations"][0]
+    text = 'reddog-workauth.v1.' + json.dumps(
+        {"authority_tier": "LOW", "requested_operation": operation,
+         "work_order_id": "synthetic-runtime-grant"}, sort_keys=True, separators=(",", ":"))
+    request = factory_fixture.signer_fixture._request(
+        binding.signer_public_key, signing_input=text,
+        payload_digest=factory_fixture.signer_fixture._request_digest(text),
+        requester_principal_id=binding.issuer_principal_id, key_epoch=binding.key_epoch,
+        requested_operation=operation, authority_tier="LOW", consensus_receipt_digest=None,
+    )
+    grant = fixture._grant(request, store, **asdict(binding))
+    grant["signature"] = protected_fixture.encode_ed25519_signature(
+        values["grant_private"].sign(fixture.canonical_signer_secret_access_grant_input(grant).encode("ascii")))
+    peer = replace(fixture._peer(), peer_principal_id=request.requester_principal_id)
+    return request, grant, peer
+
+
+def _admission_case(tmp_path, monkeypatch):
+    admission_type, values, owner = _admission_root_case(tmp_path, monkeypatch)
+    store = _admission_store(tmp_path, owner)
+    oracle = _admission_oracle(values, owner)
+    profile = grant_runtime._profiles(owner.config)[0][0]
+    resolver = factory_fixture._Resolver({
+        profile.signing_key_ref: _private_key_secret(values["target_private"]),
+        profile.audit_mac_key_ref: _audit_secret(),
+    })
+    request, grant, peer = _admission_request(values, owner, store)
+    admission = admission_type(owner_config_path=values["owner_config_path"],
+                               owner_policy=owner.policy, replay_store=store,
+                               revocation_oracle=oracle)
+    attached = _admission_attached_config(owner, monkeypatch)
+    case = SimpleNamespace(config=attached, owner=owner, admission=admission,
+                           resolver=resolver, request=request, grant=grant, peer=peer,
+                           active=False, events=[], builds=[], values=values)
+    real_lease = grant_owner.lease_validated_owner_e0_current_admission
+
+    @contextmanager
+    def tracked_lease(**kwargs):
+        with real_lease(**kwargs) as selected:
+            case.active = True
+            case.events.append("enter")
+            try:
+                yield selected
+            finally:
+                assert all(ref() is None for ref in case.builds + case.signing_backends)
+                case.active = False
+                case.events.append("exit")
+
+    monkeypatch.setattr(grant_owner, "lease_validated_owner_e0_current_admission", tracked_lease)
+    monkeypatch.setattr(grant_runtime, "lease_validated_owner_e0_current_admission", tracked_lease, raising=False)
+    _observe_admission_resolution(case, monkeypatch)
+    _observe_admission_root_roundtrip(case, monkeypatch)
+    return case
+
+
+def _admission_attached_config(owner, monkeypatch):
+    from modules.communication.moltbot_bridge.src import reddog_signer_socket_service_runtime_bootstrap as bootstrap
+    from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import SignerPeerInstanceBinding, SignerPeerProfileBinding
+    profile = grant_runtime._profiles(owner.config)[0][0]
+    selected = owner.selection
+    binding = SignerPeerInstanceBinding(
+        run_packet_id="sha256:" + "a" * 64, config_digest=selected["config_digest"],
+        session_id="synthetic-session", socket_path=str(owner.config.socket_path),
+        signer_profiles=(SignerPeerProfileBinding(profile.signer_profile_id,
+                         profile.expected_public_key, profile.expected_key_epoch),),
+        manifest_id=selected["manifest_id"], artifact_generation_digest=selected["artifact_generation_digest"],
+        generation=selected["generation"], generation_revision=selected["generation_revision"],
+        owner_config_id=selected["owner_config_id"],
+    )
+    attached = replace(owner.config, signer_peer_instance_binding=binding,
+                       system_service_owner_config_id=selected["owner_config_id"])
+
+    def attach(config, *args, **kwargs):
+        # Explicit synthetic packet-loader boundary; production config stays real.
+        assert asdict(config) == asdict(owner.config)
+        return attached
+
+    monkeypatch.setattr(bootstrap, "_attach_peer_binding", attach)
+    return attached
+
+
+def _observe_admission_resolution(case, monkeypatch):
+    real_call = Wsp71EphemeralSignerBackendFactory.__call__
+    real_resolve = case.resolver.resolve
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import Ed25519SignerBackend
+    real_sign = Ed25519SignerBackend.sign
+    from modules.communication.moltbot_bridge.src import reddog_signer_resolve_per_sign_backend as backend_module
+    real_verify = backend_module.signature_matches
+    case.signing_backends = []
+
+    def tracked_verify(*args):
+        assert case.active is True
+        case.events.append("verify")
+        return real_verify(*args)
+
+    def tracked_sign(backend, request, peer):
+        assert case.active is True
+        case.signing_backends.append(weakref.ref(backend))
+        case.events.append("sign")
+        return real_sign(backend, request, peer)
+
+    def tracked_call(factory):
+        assert case.active is True
+        result = real_call(factory)
+        if result.backend is not None:
+            case.builds.append(weakref.ref(result.backend))
+        return result
+
+    def tracked_resolve(reference, requester_id=None):
+        assert case.active is True
+        assert case.admission.replay_store.consume_grant(case.grant) is False
+        case.events.append("resolve")
+        return real_resolve(reference, requester_id)
+
+    monkeypatch.setattr(Wsp71EphemeralSignerBackendFactory, "__call__", tracked_call)
+    monkeypatch.setattr(case.resolver, "resolve", tracked_resolve)
+    monkeypatch.setattr(Ed25519SignerBackend, "sign", tracked_sign)
+    monkeypatch.setattr(backend_module, "signature_matches", tracked_verify)
+
+
+def _observe_admission_root_roundtrip(case, monkeypatch):
+    module = protected_fixture.root_client_module
+    original = module._root_socket_roundtrip
+
+    def roundtrip(*args):
+        assert case.active is False, "root RPC while owner generation lease held"
+        operation = json.loads(args[1]).get("operation")
+        if operation == "PROTECTED_USE_ACQUIRE":
+            case.events.append("root_acquire")
+        elif operation == "PROTECTED_USE_FINISH":
+            case.events.append("root_finish")
+        return original(*args)
+
+    monkeypatch.setattr(module, "_root_socket_roundtrip", roundtrip)
+
+
+def _admission_wire(case, backend, grant):
+    fixture = factory_fixture.grant_fixture
+    wire = {"schema_version": fixture.SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2,
+            "request": case.request.to_dict(), "secret_access_grant": grant}
+    if grant is None:
+        wire.pop("secret_access_grant")
+    return json.loads(fixture.handle_reddog_isolated_signer_socket_request(
+        json.dumps(wire).encode("utf-8"), peer=case.peer, backend=backend))
+
+
+def test_grant_runtime_actual_v2_lazy_one_use_and_replay(tmp_path, monkeypatch):
+    case = _admission_case(tmp_path, monkeypatch)
+
+    def serve(**kwargs):
+        assert case.active is False and case.resolver.calls == []
+        backend = kwargs["backend"]
+        assert type(backend) is factory_fixture.grant_fixture.ResolvePerSignSignerBackend
+        assert _admission_wire(case, backend, None)["accepted"] is False
+        assert case.resolver.calls == []
+        bad = {**case.grant, "signature": "invalid-signature"}
+        assert _admission_wire(case, backend, bad)["accepted"] is False
+        assert case.resolver.calls == []
+        response = _admission_wire(case, backend, case.grant)
+        assert response["accepted"] is True, response["rejection_code"]
+        assert protected_fixture.Ed25519SignatureVerifier().verify(
+            case.request.signer_public_key, case.request.signing_input, response["signature"])
+        assert len(case.resolver.calls) == 2 and len(case.builds) == 1
+        assert _admission_wire(case, backend, case.grant)["accepted"] is False
+        assert len(case.resolver.calls) == 2
+        return CapturingBoundedService()(**kwargs)
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        case.config, case.resolver, serve_bounded=serve, secret_grant_admission=case.admission)
+    assert result.accepted is True, result.rejection_reasons
+    assert case.events == ["enter", "exit", "root_acquire", "enter",
+                           "resolve", "resolve", "sign", "verify", "exit", "root_finish"]
+    assert case.active is False and all(ref() is None for ref in case.builds)
+    assert len(case.signing_backends) == 1 and all(ref() is None for ref in case.signing_backends)
+
+
+@pytest.mark.parametrize("corruption", ["config", "peer", "owner_id", "multiple_profiles", "specialized_policy",
+                                           "store", "store_path", "oracle_type", "durable_binding", "protected_owner"])
+def test_grant_runtime_rejects_substituted_admission_before_resolve(tmp_path, monkeypatch, corruption):
+    case = _admission_case(tmp_path, monkeypatch)
+    if corruption == "config":
+        case.config = replace(case.config, max_requests=case.config.max_requests + 1)
+    elif corruption == "peer":
+        case.config = replace(case.config, signer_peer_instance_binding=replace(
+            case.config.signer_peer_instance_binding, session_id="wrong-session"))
+    elif corruption == "owner_id":
+        case.config = replace(case.config, system_service_owner_config_id="sha256:" + "f" * 64)
+    elif corruption == "multiple_profiles":
+        profiles = case.config.key_provider_profiles
+        case.config = replace(case.config, key_provider_profiles=profiles + profiles)
+    elif corruption == "specialized_policy":
+        case.config = replace(case.config, conversation_scope_signer_policy={"unexpected": True})
+    elif corruption == "store":
+        case.admission = replace(case.admission, replay_store=factory_fixture.grant_fixture._store(tmp_path / "other"))
+    elif corruption == "store_path":
+        case.admission = replace(case.admission, replay_store=_alternate_admission_store(case, tmp_path))
+    elif corruption == "oracle_type":
+        case.admission = replace(case.admission, revocation_oracle=SimpleNamespace(binding=case.owner.revocation_binding))
+    elif corruption == "durable_binding":
+        case.admission.revocation_oracle._durable.binding = replace(
+            case.owner.revocation_binding, primary_store_id="substituted-store")
+    else:
+        old = protected_fixture._protected_client(case.values)
+        from modules.communication.moltbot_bridge.src import foundup_verified_outcome_root_protected_use_client as client
+        state = client._lookup_client(old)
+        changed = replace(state, owner_config_id="sha256:" + "f" * 64)
+        foreign = object.__new__(client.RootProtectedUseAuthority)
+        client._issue_client(foreign, changed)
+        case.admission.revocation_oracle._protected_use = foreign
+    service = CapturingBoundedService()
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        case.config, case.resolver, serve_bounded=service, secret_grant_admission=case.admission)
+    assert result.accepted is False and result.rejection_reasons
+    assert service.calls == [] and case.resolver.calls == []
+    assert case.active is False
+
+
+def _alternate_admission_store(case, tmp_path):
+    fixture = factory_fixture.grant_fixture
+    config = replace(case.admission.replay_store._config,
+                     nonce_root=tmp_path / "alternate-nonce",
+                     nonce_path=tmp_path / "alternate-nonce" / "grant-nonces.json",
+                     high_water_root=tmp_path / "alternate-high-water",
+                     high_water_path=tmp_path / "alternate-high-water" / "authority.sqlite3")
+    fixture._provision_store(config)
+    return fixture.DurableSignerSecretGrantNonceStore(
+        config, integrity_key=fixture.INTEGRITY_KEY, clock=lambda: fixture.NOW)
+
+
+@pytest.mark.parametrize("failure", ["service_exception", "service_rejection", "resolver_exception"])
+def test_grant_runtime_exits_generation_lease_on_failure(tmp_path, monkeypatch, failure):
+    case = _admission_case(tmp_path, monkeypatch)
+
+    def serve(**kwargs):
+        assert case.active is False and case.resolver.calls == []
+        case.events.append("serve")
+        if failure == "service_exception":
+            raise RuntimeError("synthetic service failure")
+        if failure == "resolver_exception":
+            def reject_resolve(*args, **kwargs):
+                raise RuntimeError("synthetic resolution failure")
+            monkeypatch.setattr(case.resolver, "resolve", reject_resolve)
+            assert _admission_wire(case, kwargs["backend"], case.grant)["accepted"] is False
+        return IsolatedSignerSocketResidentServiceResult(
+            accepted=False, status=SIGNER_SOCKET_RESIDENT_SERVICE_REJECT,
+            rejection_reasons=("synthetic_rejection",), socket_path=str(case.config.socket_path),
+            requests_handled=0, response_digests=(), socket_removed=True)
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        case.config, case.resolver, serve_bounded=serve, secret_grant_admission=case.admission)
+    assert result.accepted is False
+    expected = ["enter", "exit", "serve"]
+    if failure == "resolver_exception":
+        expected += ["root_acquire", "enter", "exit", "root_finish"]
+    assert case.events == expected
+    assert case.active is False and case.resolver.calls == []
+
+
+def test_grant_runtime_rechecks_generation_after_root_acquire(tmp_path, monkeypatch):
+    case = _admission_case(tmp_path, monkeypatch)
+    original = dict(owner_fixture._CURRENT_SELECTION)
+    from modules.communication.moltbot_bridge.src import foundup_verified_outcome_root_protected_use_client as client
+    real_exchange = client._exchange
+    finish_results = []
+
+    def rotated_exchange(*args):
+        operation = args[1]
+        assert case.active is False, "root exchange while owner lease held"
+        try:
+            result = real_exchange(*args)
+        except Exception as exc:
+            if operation == client.OP_FINISH:
+                finish_results.append(("raised", type(exc).__name__))
+            raise
+        if operation == client.OP_ACQUIRE:
+            owner_fixture._CURRENT_SELECTION["artifact_generation_digest"] = "sha256:" + "f" * 64
+        elif operation == client.OP_FINISH:
+            finish_results.append(("returned", result))
+        return result
+
+    monkeypatch.setattr(client, "_exchange", rotated_exchange)
+
+    def serve(**kwargs):
+        assert case.active is False and case.resolver.calls == []
+        response = _admission_wire(case, kwargs["backend"], case.grant)
+        assert response["accepted"] is False
+        assert case.resolver.calls == [] and case.builds == []
+        return CapturingBoundedService()(**kwargs)
+
+    try:
+        result = run_reddog_signer_socket_service_runtime_wiring(
+            case.config, case.resolver, serve_bounded=serve, secret_grant_admission=case.admission)
+    finally:
+        owner_fixture._CURRENT_SELECTION.clear()
+        owner_fixture._CURRENT_SELECTION.update(original)
+    assert result.accepted is True, result.rejection_reasons
+    # Service completion is not signing success; failed FINISH does not prove cleanup.
+    assert [event for event in case.events if event != "root_finish"] == ["enter", "exit", "root_acquire"]
+    assert len(finish_results) == 2 and all(kind == "raised" for kind, _ in finish_results)
+    assert case.active is False

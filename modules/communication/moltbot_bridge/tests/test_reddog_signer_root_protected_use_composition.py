@@ -592,7 +592,84 @@ def test_backend_manifest_binds_every_protected_use_runtime_module() -> None:
         for path in source.glob("foundup_verified_outcome_root_protected_use_*.py")
     }
     assert expected <= bound
-    assert not any(
-        path.endswith("reddog_signer_resolve_per_sign_backend.py")
-        for path in bound
+    assert {
+        (source / name).relative_to(root).as_posix()
+        for name in (
+            "reddog_signer_wsp71_ephemeral_backend_factory.py",
+            "reddog_signer_resolve_per_sign_backend.py",
+            "reddog_signer_resolve_per_sign_validation.py",
+            "reddog_signer_independent_secret_grant_binding.py",
+        )
+    } <= bound
+
+
+def _owner_match_oracle(values, monkeypatch):
+    """Real component metadata; synthetic stores/transport, no admission claim."""
+    durable = UncomposedDurableSignerGrantRevocationOracle(
+        binding=values["binding"], policy=values["policy"],
+        reader=values["store"].reader(), witness=values["witness"].reader(),
+        anchor=values["client"], principal_key_resolver=resolve_fixture._Resolver(),
+        signature_verifier=Ed25519SignatureVerifier(), clock=lambda: int(time.time()),
     )
+    oracle = RootAuthorizedSignerGrantRevocationOracle(
+        durable=durable, protected_use=_protected_client(values)
+    )
+    calls = []
+
+    def forbidden_effect(*_args, **_kwargs):
+        calls.append("unexpected_effect")
+        raise AssertionError("owner_matching_must_only_compare_metadata")
+
+    monkeypatch.setattr(root_client_module, "_root_socket_roundtrip", forbidden_effect)
+    monkeypatch.setattr(durable, "_current", forbidden_effect)
+    monkeypatch.setattr(durable.resolver, "resolve", forbidden_effect)
+    return oracle, calls
+
+
+def test_root_oracle_matches_exact_owner_without_effects(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_capability_state import (
+        freeze_owner_e0_policy,
+    )
+
+    assert callable(getattr(RootAuthorizedSignerGrantRevocationOracle, "matches_owner", None)), "owner_match_api_missing"
+    values = runtime(tmp_path, monkeypatch)
+    oracle, calls = _owner_match_oracle(values, monkeypatch)
+    assert oracle.matches_owner(policy=values["policy"], binding=values["binding"]) is True
+    assert oracle.matches_owner(
+        policy=freeze_owner_e0_policy(values["policy"]), binding=values["binding"]
+    ) is True
+    assert calls == []
+
+
+@pytest.mark.parametrize("mismatch", [
+    "durable_binding", "durable_snapshot", "protected_binding",
+    "protected_policy", "protected_owner", "unregistered_protected",
+])
+def test_root_oracle_rejects_split_owner_provenance(tmp_path, monkeypatch, mismatch):
+    from modules.communication.moltbot_bridge.src import (
+        foundup_verified_outcome_root_protected_use_client as client_module,
+    )
+
+    assert callable(getattr(RootAuthorizedSignerGrantRevocationOracle, "matches_owner", None)), "owner_match_api_missing"
+    values = runtime(tmp_path, monkeypatch)
+    oracle, calls = _owner_match_oracle(values, monkeypatch)
+    assert oracle.matches_owner(policy=values["policy"], binding=values["binding"]) is True
+    if mismatch == "durable_binding":
+        oracle._durable.binding = replace(values["binding"], primary_store_id="other-store")
+    elif mismatch == "durable_snapshot":
+        oracle._durable.expected = replace(oracle._durable.expected, owner_config_id=_sha("other-owner"))
+    else:
+        original = client_module._lookup_client(oracle._protected_use)
+        changed = object.__new__(RootProtectedUseAuthority)
+        if mismatch == "protected_binding":
+            state = replace(original, binding=replace(original.binding, primary_store_id="other-store"))
+        elif mismatch == "protected_policy":
+            state = replace(original, policy={**original.policy, "expires_at": original.policy["expires_at"] + 1})
+        else:
+            state = replace(original, owner_config_id=_sha("other-owner"))
+        if mismatch != "unregistered_protected":
+            # Deliberate test-only registered-state faults; no operating credential.
+            client_module._issue_client(changed, state)
+        oracle._protected_use = changed
+    assert oracle.matches_owner(policy=values["policy"], binding=values["binding"]) is False
+    assert calls == []

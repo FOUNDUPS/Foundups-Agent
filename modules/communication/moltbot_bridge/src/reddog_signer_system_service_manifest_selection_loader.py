@@ -12,15 +12,13 @@ from pathlib import Path
 from typing import Any, Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
-    _create_service_backed_outcome_authority,
-    build_root_authority_socket_exchange,
+    _create_service_backed_outcome_authority, build_root_authority_socket_exchange,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_dependency import (
     RootAuthorityServiceDependencies,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_runtime_materializer import (
-    materialize_revocation_anchor_authority,
-    materialize_root_authority_service_dependencies,
+    materialize_revocation_anchor_authority, materialize_root_authority_service_dependencies,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_client import (
     RootRevocationAnchorAuthority,
@@ -37,15 +35,10 @@ from modules.communication.moltbot_bridge.src.reddog_current_generation_manifest
     create_current_generation_manifest_launch_selection_boundary,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
-    RuntimeArtifactManifestError,
-    ascii_deep,
-    digest,
-    is_sha256,
-    raw_digest,
+    RuntimeArtifactManifestError, ascii_deep, digest, is_sha256, raw_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_launch_selection import (
-    CONFIG_FILENAME,
-    RUN_PACKET_FILENAME,
+    CONFIG_FILENAME, RUN_PACKET_FILENAME,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_reader import (
     DurableSignerRuntimeGenerationReader,
@@ -66,8 +59,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     RootVerifiedOutcomeSigningAuthority,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    validate_runtime_artifact_path,
-    validate_runtime_root_path,
+    validate_runtime_artifact_path, validate_runtime_root_path,
 )
 
 SCHEMA_VERSION = "reddog_signer_system_service_owner_config.v1"
@@ -78,46 +70,25 @@ SCHEMA_VERSION_V5 = "reddog_signer_system_service_owner_config.v5"
 SCHEMA_VERSION_V6 = "reddog_signer_system_service_owner_config.v6"
 MAX_OWNER_CONFIG_BYTES = 64 * 1024
 ROOT_UID = 0
-FIELDS = frozenset(
-    {
-        "schema_version",
-        "config_id",
-        "repo_root_digest",
-        "runtime_root",
-        "anchor_path",
-        "anchor_id",
-        "generation_public_key",
-        "generation_authenticator_id",
-        "generation_key_epoch",
-        "generation_signer_public_key_fingerprint",
-        "high_water_root",
-        "high_water_path",
-        "high_water_store_id",
-        "high_water_durability_receipt_id",
-        "witness_root",
-        "witness_path",
-        "witness_store_id",
-        "witness_durability_receipt_id",
-    }
-)
+FIELDS = frozenset({
+    "schema_version", "config_id", "repo_root_digest", "runtime_root", "anchor_path", "anchor_id",
+    "generation_public_key", "generation_authenticator_id", "generation_key_epoch",
+    "generation_signer_public_key_fingerprint", "high_water_root", "high_water_path",
+    "high_water_store_id", "high_water_durability_receipt_id", "witness_root", "witness_path",
+    "witness_store_id", "witness_durability_receipt_id",
+})
 V2_FIELDS = FIELDS | {"verified_outcome_authority"}
 V3_FIELDS = V2_FIELDS | {"independent_grant_authority"}
 V4_FIELDS = V3_FIELDS | {"grant_authority_source_policy"}
 V5_FIELDS = V4_FIELDS | {"reviewer_designation_authority"}
 V6_FIELDS = V5_FIELDS | {"effect_consent_authority"}
-_OUTCOME_OWNER_FIELDS = frozenset(
-    {
-        "descriptor", "authority_socket_path",
-        "authority_service_uid", "signer_uid",
-        "signer_gid", "signer_principal_id",
-        "state_root", "state_path",
-        "state_store_id", "state_durability_receipt_id",
-        "state_witness_root", "state_witness_path",
-        "state_witness_store_id", "state_witness_durability_receipt_id",
-        "installation_root", "installation_path",
-        "installation_store_id", "installation_durability_receipt_id",
-    }
-)
+_OUTCOME_OWNER_FIELDS = frozenset({
+    "descriptor", "authority_socket_path", "authority_service_uid", "signer_uid", "signer_gid",
+    "signer_principal_id", "state_root", "state_path", "state_store_id",
+    "state_durability_receipt_id", "state_witness_root", "state_witness_path",
+    "state_witness_store_id", "state_witness_durability_receipt_id", "installation_root",
+    "installation_path", "installation_store_id", "installation_durability_receipt_id",
+})
 
 
 @dataclass(frozen=True)
@@ -689,18 +660,10 @@ def _ascii(value: object) -> bool:
 
 
 __all__ = [
-    "RootAuthorityServiceDependencies",
-    "SCHEMA_VERSION",
-    "SCHEMA_VERSION_V2",
-    "SCHEMA_VERSION_V3",
-    "SCHEMA_VERSION_V4",
-    "SCHEMA_VERSION_V5",
-    "SCHEMA_VERSION_V6",
-    "SystemServiceStartupSelection",
-    "load_system_service_manifest_selection",
-    "load_system_service_revocation_anchor_authority",
-    "load_system_service_signer_identity",
-    "load_system_service_startup_selection",
+    "RootAuthorityServiceDependencies", "SCHEMA_VERSION", "SCHEMA_VERSION_V2", "SCHEMA_VERSION_V3",
+    "SCHEMA_VERSION_V4", "SCHEMA_VERSION_V5", "SCHEMA_VERSION_V6", "SystemServiceStartupSelection",
+    "load_system_service_manifest_selection", "load_system_service_revocation_anchor_authority",
+    "load_system_service_signer_identity", "load_system_service_startup_selection",
     "load_system_service_verified_outcome_signing_authority",
     "load_root_authority_service_dependencies",
 ]

@@ -1171,6 +1171,28 @@ model-authored free text, proposal body, or queue candidate survives. This
 interface grants no work, repository, signer, merge, FoundUp projection, or
 HoloIndex authority. Disclosure issuance remains outside this module.
 ## Exact-request signer admission
+`run_reddog_signer_socket_service_runtime_wiring(..., secret_grant_admission=...)`
+opts one existing owner-selected target into resolve-per-sign composition.
+`SignerSocketServiceGrantAdmission` contains the owner path/policy, durable
+replay store and registered root protected-use oracle; this data is not authority.
+The existing current-generation admission reconstructs the complete selected
+configuration. Owner, oracle and replay-store provenance must match before
+serving; proposal, conversation and verified-outcome profiles are outside this
+single-target mode. Omitting the argument preserves the existing runtime path.
+
+The assembly lease ends before serving. Each request consumes its verified grant,
+obtains root ACQUIRE, then obtains a fresh generation lease for key resolution,
+exact-request signing and signature verification. The generation lease ends
+before root FINISH. Holding it across a root exchange would deadlock against the
+root service's generation lock. Generation drift rejects before key resolution;
+expiry after resolution rejects before signing. Python backend references are
+released within the callback lease; this is not native-memory zeroization.
+FINISH failure rejects the result and leaves cleanup unconfirmed. A bounded
+service receipt alone does not mean a signing request succeeded.
+
+The public system-service entrypoint does not yet supply this opt-in admission.
+This interface neither establishes first trust nor activates an unattended agent.
+
 `load_system_service_root_protected_use_authority()` derives an opaque client from the existing root owner configuration and Unix transport. Only that exact factory-issued capability may compose the durable revocation oracle.
 Root ACQUIRE must precede the callback and exact FINISH must succeed before its result is returned; durable per-use replay markers and the global active-use high-water remain in the existing mirrored root state.
 No caller can construct, copy, pickle, or substitute the capability.

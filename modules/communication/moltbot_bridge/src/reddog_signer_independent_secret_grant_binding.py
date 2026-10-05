@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+from pathlib import Path
 from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import (
@@ -13,10 +14,29 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authori
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_nonce_store import (
     DurableSignerSecretGrantNonceStore,
+    SignerGrantReplayStoreConfig,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     constant_time_compare,
 )
+
+
+def require_owner_bound_replay_store(
+    policy: Mapping[str, Any], replay_store: DurableSignerSecretGrantNonceStore,
+    *, repo_root: Path,
+) -> None:
+    """Reject a genuine store belonging to a different selected owner."""
+    if type(replay_store) is not DurableSignerSecretGrantNonceStore:
+        raise ValueError("secret_grant_replay_store_invalid")
+    config = replay_store._config
+    if type(config) is not SignerGrantReplayStoreConfig or any((
+        config.repo_root.resolve() != repo_root.resolve(),
+        config.nonce_root.resolve() != Path(policy["replay_root"]).resolve(),
+        config.nonce_path.resolve() != Path(policy["replay_path"]).resolve(),
+        not constant_time_compare(config.replay_store_id, policy["replay_store_id"]),
+        not constant_time_compare(config.durability_receipt_id, policy["replay_store_durability_receipt_id"]),
+    )):
+        raise ValueError("secret_grant_replay_store_owner_mismatch")
 
 
 def resolve_secret_grant_target_binding(
@@ -91,6 +111,7 @@ def build_secret_grant_authority_policy(
 
 
 __all__ = [
+    "require_owner_bound_replay_store",
     "build_secret_grant_authority_policy",
     "resolve_secret_grant_target_binding",
 ]

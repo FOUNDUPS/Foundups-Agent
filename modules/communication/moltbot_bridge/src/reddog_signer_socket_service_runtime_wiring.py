@@ -81,6 +81,7 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
 from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import ConversationScopeSignerPolicy
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_authority_policy_runtime import (
     FAIL_CONTROL_ANCHOR,
+    rehydrate_architect_proposal_signer_policy, _proposal_policy_authorization, _is_proposal_signer_profile,
     control_loop_anchor_store as _control_loop_anchor_store,
     control_loop_authority_policy as _control_loop_authority_policy,
     verified_outcome_signer_policy as _verified_outcome_signer_policy,
@@ -110,6 +111,11 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_root_path,
 )
 
+
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import (
+    SignerSocketServiceGrantAdmission, lease_signer_socket_service_grant_admission,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_wsp71_ephemeral_backend_factory import build_owner_leased_ephemeral_backend
 
 SIGNER_SOCKET_RUNTIME_WIRING_SERVED = "SIGNER_SOCKET_RUNTIME_WIRING_SERVED"
 SIGNER_SOCKET_RUNTIME_WIRING_REJECT = "SIGNER_SOCKET_RUNTIME_WIRING_REJECT"
@@ -329,6 +335,41 @@ def run_reddog_signer_socket_service_runtime_wiring(
     proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
     verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
     conversation_scope_principal_resolver: PrincipalAuthorityResolver | None = None,
+    secret_grant_admission: SignerSocketServiceGrantAdmission | None = None,
+) -> SignerSocketServiceRuntimeWiringResult:
+    """Serve legacy mode or one explicitly owner-admitted grant-aware target."""
+    kwargs = dict(locals())
+    kwargs.pop("secret_grant_admission")
+    if secret_grant_admission is None:
+        return _run_signer_socket_service_runtime(**kwargs)
+    try:
+        with lease_signer_socket_service_grant_admission(config, secret_grant_admission) as (selected, owner):
+            kwargs["config"] = selected
+            anchor, reasons = _control_loop_anchor_store(selected)
+            if reasons:
+                raise ValueError("signer_grant_control_anchor_invalid")
+            backend = build_owner_leased_ephemeral_backend(
+                selected, resolver, secret_grant_admission, owner,
+                control_loop_anchor_store=anchor,
+                control_loop_authority_policy=_control_loop_authority_policy(selected.control_loop_authority_policy),
+            )
+        return _run_signer_socket_service_runtime(**kwargs, secret_grant_backend=backend)
+    except Exception:
+        return _reject("FAIL_SIGNER_RUNTIME_SECRET_GRANT_ADMISSION_INVALID",
+                       injected_dependency_effects_unobserved=True)
+
+
+def _run_signer_socket_service_runtime(
+    config: SignerSocketServiceRuntimeWiringConfig,
+    resolver: SignerKeyResolver,
+    *,
+    serve_bounded: ServeSignerSocketBounded = serve_reddog_isolated_signer_socket_bounded,
+    ready_callback: Optional[Callable[[], None]] = None,
+    principal_key_resolver: PrincipalKeyResolver | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
+    conversation_scope_principal_resolver: PrincipalAuthorityResolver | None = None,
+    secret_grant_backend: IsolatedSignerBackend | None = None,
 ) -> SignerSocketServiceRuntimeWiringResult:
     """Build a signer backend and serve a bounded signer socket service."""
 
@@ -393,75 +434,52 @@ def run_reddog_signer_socket_service_runtime_wiring(
             ),
         )
     if proposal_policy is not None:
-        try:
-            high_water_authority_valid = bool(
-                isinstance(
-                    proposal_replay_high_water_store,
-                    ProposalReplayHighWaterStore,
-                )
-                and hmac.compare_digest(
-                    proposal_replay_high_water_store.store_id,
-                    str(proposal_replay_high_water_store_id),
-                )
-                and (
-                    config.provider_mode
-                    != PROVIDER_MODE_WSP71_PERMISSIONED
-                    or (
-                        proposal_replay_high_water_store.durable is True
-                        and _is_sha256_digest(
-                            proposal_replay_high_water_store
-                            .durability_receipt_id
-                        )
-                        and hmac.compare_digest(
-                            str(
-                                proposal_replay_high_water_store
-                                .durability_receipt_id
-                            ),
-                            str(
-                                config
-                                .proposal_replay_high_water_durability_receipt_id
-                            ),
-                        )
-                    )
-                )
-            )
-        except Exception:
-            high_water_authority_valid = False
+        high_water_authority_valid = _proposal_high_water_valid(
+            config, proposal_replay_high_water_store, proposal_replay_high_water_store_id,
+        )
         if not high_water_authority_valid:
             return _reject(
                 FAIL_SIGNER_RUNTIME_PROPOSAL_NONCE_STORE_INVALID,
                 injected_dependency_effects_unobserved=True,
             )
-    backend, proposal_nonce_store, key_receipt, key_reasons = _build_backend(
-        profiles,
-        resolver,
-        provider_mode=config.provider_mode,
-        allow_test_only_key_material=config.allow_test_only_key_material,
-        permission_snapshot_fresh=config.permission_snapshot_fresh,
-        control_loop_anchor_store=anchor_store,
-        control_loop_authority_policy=control_authority_policy,
-        verified_outcome_signer_policy=outcome_policy,
-        verified_outcome_signing_authority=verified_outcome_signing_authority if outcome_policy else None,
-        conversation_scope_binding=conversation_binding,
-        proposal_authority_policy=proposal_policy,
-        proposal_policy_authorization=proposal_authorization,
-        proposal_nonce_store_path=proposal_nonce_store_path,
-        proposal_replay_high_water_store=(
-            proposal_replay_high_water_store
-        ),
-        proposal_replay_high_water_store_id=(
-            proposal_replay_high_water_store_id
-        ),
-        proposal_replay_high_water_durability_receipt_id=str(
-            config.proposal_replay_high_water_durability_receipt_id or ""
-        ),
-        repo_root=Path(config.repo_root).resolve(),
-        signer_runtime_root=validate_runtime_root_path(
-            config.signer_runtime_root,
+    if secret_grant_backend is None:
+        backend, proposal_nonce_store, key_receipt, key_reasons = _build_backend(
+            profiles,
+            resolver,
+            provider_mode=config.provider_mode,
+            allow_test_only_key_material=config.allow_test_only_key_material,
+            permission_snapshot_fresh=config.permission_snapshot_fresh,
+            control_loop_anchor_store=anchor_store,
+            control_loop_authority_policy=control_authority_policy,
+            verified_outcome_signer_policy=outcome_policy,
+            verified_outcome_signing_authority=verified_outcome_signing_authority if outcome_policy else None,
+            conversation_scope_binding=conversation_binding,
+            proposal_authority_policy=proposal_policy,
+            proposal_policy_authorization=proposal_authorization,
+            proposal_nonce_store_path=proposal_nonce_store_path,
+            proposal_replay_high_water_store=(
+                proposal_replay_high_water_store
+            ),
+            proposal_replay_high_water_store_id=(
+                proposal_replay_high_water_store_id
+            ),
+            proposal_replay_high_water_durability_receipt_id=str(
+                config.proposal_replay_high_water_durability_receipt_id or ""
+            ),
             repo_root=Path(config.repo_root).resolve(),
-        ),
-        signer_peer_instance_binding=config.signer_peer_instance_binding,
-    )
+            signer_runtime_root=validate_runtime_root_path(
+                config.signer_runtime_root,
+                repo_root=Path(config.repo_root).resolve(),
+            ),
+            signer_peer_instance_binding=config.signer_peer_instance_binding,
+        )
+    else:
+        backend = secret_grant_backend
+        proposal_nonce_store, key_reasons = None, ()
+        key_receipt = _key_provider_receipt(True, [{
+            "public_key": backend.binding.signer_public_key,
+            "resolution_deferred": True, "secret_values_returned": False,
+        }])
     if key_reasons:
         return _reject(
             *key_reasons,
@@ -741,6 +759,44 @@ def _profiles(
     return profiles, ()
 
 
+def _proposal_high_water_valid(config: Any, proposal_replay_high_water_store: Any, proposal_replay_high_water_store_id: Any) -> bool:
+    try:
+        high_water_authority_valid = bool(
+            isinstance(
+                proposal_replay_high_water_store,
+                ProposalReplayHighWaterStore,
+            )
+            and hmac.compare_digest(
+                proposal_replay_high_water_store.store_id,
+                str(proposal_replay_high_water_store_id),
+            )
+            and (
+                config.provider_mode
+                != PROVIDER_MODE_WSP71_PERMISSIONED
+                or (
+                    proposal_replay_high_water_store.durable is True
+                    and _is_sha256_digest(
+                        proposal_replay_high_water_store
+                        .durability_receipt_id
+                    )
+                    and hmac.compare_digest(
+                        str(
+                            proposal_replay_high_water_store
+                            .durability_receipt_id
+                        ),
+                        str(
+                            config
+                            .proposal_replay_high_water_durability_receipt_id
+                        ),
+                    )
+                )
+            )
+        )
+    except Exception:
+        high_water_authority_valid = False
+    return high_water_authority_valid
+
+
 def _build_backend(
     profiles: list[SignerKeyProviderProfile],
     resolver: SignerKeyResolver,
@@ -882,53 +938,6 @@ def _bind_peer_instance(
     return replace(backend, signer_peer_instance_binding=binding)
 
 
-def rehydrate_architect_proposal_signer_policy(
-    value: ArchitectProposalSignerPolicy | Mapping[str, Any] | None,
-) -> ArchitectProposalSignerPolicy | None:
-    if isinstance(value, ArchitectProposalSignerPolicy):
-        return (
-            value
-            if 0 < int(value.max_ttl_seconds)
-            <= DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS
-            else None
-        )
-    if not isinstance(value, Mapping):
-        return None
-    expected = value.get("expected_payload")
-    try:
-        payload = rehydrate_architect_proposal_authenticity_payload(
-            expected if isinstance(expected, Mapping) else {}
-        )
-        max_ttl = int(value.get("max_ttl_seconds"))
-    except (TypeError, ValueError):
-        return None
-    if not 0 < max_ttl <= DEFAULT_PROPOSAL_AUTHENTICITY_MAX_TTL_SECONDS:
-        return None
-    return ArchitectProposalSignerPolicy(payload, max_ttl)
-
-
-def _proposal_policy_authorization(
-    config: SignerSocketServiceRuntimeWiringConfig,
-    *,
-    principal_key_resolver: PrincipalKeyResolver | None,
-    require_trusted_principal: bool,
-) -> ArchitectProposalPolicyAuthorization | None:
-    try:
-        from modules.communication.moltbot_bridge.src.reddog_architect_proposal_runtime_authorization import (
-            verify_architect_proposal_runtime_authorization,
-        )
-
-        _, verified = verify_architect_proposal_runtime_authorization(
-            config,
-            principal_key_resolver=principal_key_resolver,
-            now_epoch=int(time.time()),
-            require_trusted_principal=require_trusted_principal,
-        )
-        return verified
-    except (OSError, TypeError, ValueError):
-        return None
-
-
 def _proposal_nonce_store(
     config: SignerSocketServiceRuntimeWiringConfig,
     *,
@@ -1024,22 +1033,6 @@ def _commit_policy_authorization(
         return False
 
 
-def _is_proposal_signer_profile(
-    profile: SignerKeyProviderProfile,
-    policy: ArchitectProposalSignerPolicy | None,
-) -> bool:
-    return bool(
-        policy is not None
-        and profile.signer_profile_id
-        == REDDOG_WORK_AUTHORITY_SIGNER_PROFILE_ID
-        and profile.signer_agent_id
-        == REDDOG_WORK_AUTHORITY_SIGNER_AGENT_ID
-        and profile.expected_public_key
-        == policy.expected_payload.signer_public_key
-        and profile.expected_key_epoch == policy.expected_payload.key_epoch
-    )
-
-
 def _is_sha256_digest(value: object) -> bool:
     text = str(value or "")
     return len(text) == 71 and text.startswith("sha256:") and all(
@@ -1124,6 +1117,7 @@ def _reject(
 
 
 __all__ = [
+    "SignerSocketServiceGrantAdmission",
     "FAIL_SIGNER_RUNTIME_CONFIG_INVALID",
     "FAIL_SIGNER_RUNTIME_CONTROL_ANCHOR_INVALID",
     "FAIL_SIGNER_RUNTIME_KEY_PROVIDER_COUNT_INVALID",

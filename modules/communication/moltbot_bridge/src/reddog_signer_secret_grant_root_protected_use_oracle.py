@@ -6,6 +6,14 @@ from typing import Any, Callable, Mapping, TypeVar
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_protected_use_client import (
     RootProtectedUseAuthority,
+    _lookup_client,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_capability_state import (
+    freeze_owner_e0_policy,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
+    SignerGrantRevocationAuthorityBinding,
+    expected_snapshot_binding,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_durable_oracle import (
     UncomposedDurableSignerGrantRevocationOracle,
@@ -32,6 +40,26 @@ class RootAuthorizedSignerGrantRevocationOracle:
             raise ValueError("root_authorized_revocation_oracle_invalid")
         self._durable = durable
         self._protected_use = protected_use
+
+    def matches_owner(
+        self, *, policy: Mapping[str, Any],
+        binding: SignerGrantRevocationAuthorityBinding,
+    ) -> bool:
+        """Match both oracle halves to one leased owner without performing I/O."""
+        try:
+            client = _lookup_client(self._protected_use)
+            return bool(
+                type(self) is RootAuthorizedSignerGrantRevocationOracle
+                and type(self._durable) is UncomposedDurableSignerGrantRevocationOracle
+                and type(binding) is SignerGrantRevocationAuthorityBinding
+                and self._durable.binding == binding
+                and self._durable.expected == expected_snapshot_binding(policy, binding)
+                and client.binding == binding
+                and client.owner_config_id == policy["owner_config_id"]
+                and client.policy == freeze_owner_e0_policy(policy)
+            )
+        except (AttributeError, KeyError, TypeError, ValueError):
+            return False
 
     def is_revoked(self, *, grant_id: str, key_epoch: str, at_epoch: int) -> bool:
         return self._durable.is_revoked(
