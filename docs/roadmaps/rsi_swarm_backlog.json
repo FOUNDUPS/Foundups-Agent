@@ -1881,54 +1881,28 @@
   },
   "current_selection": {
     "evidence": "docs/roadmaps/rsi_swarm_backlog.json",
-    "observation_path": "current_observation.control_proof_regression_20261005",
-    "base_commit": "724bb684e5e46302a6e7cd2cf9473e1db661650b",
-    "selected_action": "Retain the independently verified direct revocation control-key rejection regression",
-    "status": "local_coverage_qualified_publication_pending",
+    "observation_path": "current_observation.bootstrap_grant_forwarding_20261005",
+    "base_commit": "4d03a0f179d6a3c411922070c2502fd914d1c49a",
+    "selected_action": "Forward existing grant admission through signer runtime bootstrap",
+    "status": "local_source_qualified_publication_pending",
     "wsp15": {
-      "complexity": 2,
+      "priority": "P1",
       "importance": 4,
-      "deferability": 4,
       "impact": 3,
-      "total": 13,
-      "priority": "P1"
+      "deferability": 5,
+      "total": 14,
+      "complexity": 2
     },
     "dispatchable": false,
-    "execution_plane": "Authorized repository test maintenance, not native work admission",
-    "next_action": "Close this source publication/retention, then reconcile actual installed OpenClaw/Hermes runtime and authenticated input availability before selecting a native canary or demonstrated source repair.",
+    "execution_plane": "Authorized source maintenance, not native work admission",
+    "next_action": "Close this source slice, then rescore authenticated startup supply and permissioned per-LOAD custody; compose existing owners before native worker dispatch.",
     "higher_priority_gates": [
       {
         "task": "Native autonomous RSI admission",
         "total": 18,
         "priority": "P0",
         "state": "blocked",
-        "reason": "Authentic owner/control/work/grant/revocation/model inputs and public composition remain unqualified; Python callable and plan labels grant no authority."
-      }
-    ],
-    "deferred": [
-      {
-        "task": "Actual native runtime/input availability audit",
-        "total": 14,
-        "priority": "P1",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 4,
-          "deferability": 4,
-          "impact": 4
-        },
-        "reason": "Read-only prerequisite map; determine configuration versus code blockers before further changes."
-      },
-      {
-        "task": "Local model/task qualification",
-        "total": 12,
-        "priority": "P2",
-        "wsp15": {
-          "complexity": 2,
-          "importance": 3,
-          "deferability": 4,
-          "impact": 3
-        },
-        "reason": "Both installed candidates rejected this bounded task; no model promoted. Re-observe and choose a suitable separate task family, not repeated coaching on this example."
+        "reason": "Public startup has no authentic custody and admission dependency supply."
       }
     ]
   },
@@ -30876,6 +30850,122 @@
         "evaluation": "Rejected before pytest; no body repairs or promotion",
         "review_sha256": "88bf4a66c40164cba039f745f5842bb3b353b1090f916851cc30aba80dae3060",
         "ranking_limit": "One fixed task; no general model superiority or incapability claim"
+      },
+      "closure_20261005": {
+        "state": "merged_main_verified_owned_lane_retired",
+        "pr": 2071,
+        "merge": "4d03a0f179d6a3c411922070c2502fd914d1c49a",
+        "hosted": {
+          "passed": 472,
+          "skipped": 3,
+          "failures": 0
+        },
+        "main_ci": 37258659087,
+        "main_codeql": 37258659042,
+        "retained_correct_pass": 1,
+        "retained_controlled_fault_expected_failure": 1,
+        "evidence": "outputs/rsi-control-regression-20261005/publication-receipt.json",
+        "holo": "CURRENT/no-gap at merge; history preserved",
+        "native_rsi_complete": false
+      }
+    },
+    "bootstrap_grant_forwarding_20261005": {
+      "base": "4d03a0f179d6a3c411922070c2502fd914d1c49a",
+      "branch": "codex/rsi-local-custody-20261005",
+      "selected": "Forward existing grant admission through signer runtime bootstrap",
+      "wsp15": {
+        "priority": "P1",
+        "importance": 4,
+        "impact": 3,
+        "deferability": 5,
+        "total": 14,
+        "complexity": 2
+      },
+      "alternatives": [
+        {
+          "state": "blocked on authentic custody and startup composition",
+          "score": 18,
+          "task": "Native autonomous RSI"
+        },
+        {
+          "task": "New orchestrator",
+          "state": "duplicate; rejected by WSP97"
+        }
+      ],
+      "baseline": {
+        "discard_reason": "pytest pythonpath imported shared checkout; not baseline evidence",
+        "failed": 2,
+        "cases": 2,
+        "reason": "unsupported secret_grant_admission argument",
+        "discarded_runs": 2
+      },
+      "candidate_initial": {
+        "selection": "synthetic outer selection; actual lower grant runtime, signing, rejection and replay",
+        "passed": 2,
+        "cases": 2
+      },
+      "model": {
+        "reasons": [
+          "incorrect import path",
+          "default in nondefault dataclass fields",
+          "wrong public function argument",
+          "runtime keyword missing value"
+        ],
+        "input_tokens": 312,
+        "parent_seconds": 35.25,
+        "accepted": 0,
+        "native_admission": false,
+        "paid_inference_calls": 0,
+        "attempts": 1,
+        "output_tokens": 93
+      },
+      "authorship": "coordinator repair; local proposal rejected without alteration",
+      "custody": {
+        "swap_protection": "unverified",
+        "principal_enrollment": false,
+        "primitive": "qualified public canary",
+        "native_activation": false,
+        "delivery": "qualified nonroot DynamicUser canary",
+        "mount": "tmpfs"
+      },
+      "remaining": [
+        "authenticated owner startup dependency supply",
+        "permissioned per-LOAD request signer",
+        "credential backend and reference binding",
+        "admitted local worker improvement",
+        "independent retained-benefit proof"
+      ],
+      "state": "in_progress",
+      "created_utc": "2026-10-05T04:20:06.5530805Z",
+      "status": "local_source_qualified_publication_pending",
+      "source_scope": [
+        "modules/communication/moltbot_bridge/src/reddog_signer_socket_service_runtime_bootstrap.py"
+      ],
+      "focused": {
+        "baseline_failed": 2,
+        "candidate_passed": 2,
+        "gate_cases_passed": 2
+      },
+      "connected": {
+        "total": 479,
+        "passed": 472,
+        "skipped": 7,
+        "failures": 0,
+        "errors": 0,
+        "source_stable": true,
+        "seconds": 151.719
+      },
+      "evidence": "outputs/rsi-local-custody-20261005",
+      "native_rsi_complete": false,
+      "verification_limits": [
+        "Synthetic outer selection and peer attachment; real lower grant path.",
+        "Independent source/log review; no independent execution claimed.",
+        "Host credential canaries use public test input only."
+      ],
+      "integrity": {
+        "runtime_files": 1417,
+        "manifest_digest": "3aca2a40d6046c31528dbb375c3d08dd40051656e5c9b2e1c91808a616a695f9",
+        "extension_fast_members_passed": 15
       }
     }
   }

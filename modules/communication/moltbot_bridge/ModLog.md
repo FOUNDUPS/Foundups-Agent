@@ -1,3 +1,20 @@
+## Bootstrap grant-admission forwarding — 2026-10-05
+
+WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime
+bootstrap now forwards optional `secret_grant_admission` unchanged to the
+existing grant-aware runtime after selection and isolation. Default `None`
+preserves legacy behavior. Two frozen integration cases previously rejected the
+keyword; both now pass. Two gate-order cases also pass; connected479:472pass/7skip.
+The positive fixture substitutes outer selection/peer attachment, while executing
+actual lower grant validation, protected use, signature verification and replay
+rejection. Independent source/log review is distinct from independent execution.
+
+One bounded local Qwen3.5 proposal was rejected unchanged (incorrect plumbing);
+the four-line repair is coordinator-authored. No criteria were relaxed. Actual
+public startup still lacks authenticated dependency supply and credential custody.
+Evidence: `outputs/rsi-local-custody-20261005`; canonical backlog
+`bootstrap_grant_forwarding_20261005`. Publication pending; native RSI incomplete.
+
 ## Retain the direct revocation proof regression — 2026-10-05
 
 WSP00/15/50/62/97 selects13/P1 (C2/I4/D4/Impact3) at main724bb684.

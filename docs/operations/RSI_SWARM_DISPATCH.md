@@ -1,3 +1,39 @@
+## Bootstrap grant-admission forwarding — 2026-10-05
+
+WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime
+bootstrap now forwards optional `secret_grant_admission` unchanged to the
+existing grant-aware runtime after selection and isolation. Default `None`
+preserves legacy behavior. Two frozen integration cases previously rejected the
+keyword; both now pass. Two gate-order cases also pass; connected479:472pass/7skip.
+The positive fixture substitutes outer selection/peer attachment, while executing
+actual lower grant validation, protected use, signature verification and replay
+rejection. Independent source/log review is distinct from independent execution.
+
+One bounded local Qwen3.5 proposal was rejected unchanged (incorrect plumbing);
+the four-line repair is coordinator-authored. No criteria were relaxed. Actual
+public startup still lacks authenticated dependency supply and credential custody.
+Evidence: `outputs/rsi-local-custody-20261005`; canonical backlog
+`bootstrap_grant_forwarding_20261005`. Publication pending; native RSI incomplete.
+
+Host qualification reused installed systemd255: public-input encryption roundtrip,
+wrong-name/tamper/unprivileged rejection, and one nonroot DynamicUser delivery
+passed. The read-only credential mount is tmpfs, not proven unswappable. The
+standard root-only0400 host wrapping key was created and retained; the transient
+unit and owned encrypted canary input were removed. No principal keys were
+generated or native job admitted. This is feasibility evidence, not signer setup.
+
+WSP97 reuses existing owners: no new vault/orchestrator is added. The v1-v6 owner
+loader lacks authenticated supply for the E0 policy, replay integrity key and
+revocation/protected-use clients. LOAD requires a work-identity request signer;
+the v2 control key is not a substitute. A separately permissioned per-LOAD signer
+can be designed under WSP71; recursively using the same grant-protected backend
+would create a dependency cycle. Do not bypass these gates or ask012 to manually
+assemble routine machine dependencies.
+
+Previous slice closure: PR2071 merged at4d03a0f1; hosted472pass/3skip, exact-main
+CI/CodeQL passed, later frozen fault discrimination retained, governed retrieval
+CURRENT/no-gap and owned lane retired. Its earlier pending text below is historical.
+
 ## Retain the direct revocation proof regression — 2026-10-05
 
 WSP00/15/50/62/97 selects13/P1 (C2/I4/D4/Impact3) at main724bb684.
