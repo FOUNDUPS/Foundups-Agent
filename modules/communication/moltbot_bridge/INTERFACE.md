@@ -1,3 +1,12 @@
+## Exact permission evidence type — 2026-10-05
+
+The shared key-provider boundary accepts `permission_snapshot_fresh` only when
+it is the literal boolean `True`. Strings, numbers, containers and custom objects
+reject with `FAIL_PROVIDER_PERMISSION_DENIED` before either credential read;
+truthiness/equality hooks are not invoked. This narrows malformed-input behavior,
+not the authority model: callers must still authenticate current permission.
+The flag alone does not establish a grant or authorize bootstrap key access.
+
 ## Explicit local credential provider — 2026-10-05
 
 `build_system_service_wsp71_resolver_factory` accepts optional

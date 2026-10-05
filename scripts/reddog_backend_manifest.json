@@ -2134,7 +2134,7 @@
     "modules/communication/moltbot_bridge/src/reddog_signer_independent_grant_authority_binding.py": "d04a410da5bd057b17b060478cd9c8ce47552a199ed1f4cf0c6941122249a984",
     "modules/communication/moltbot_bridge/src/reddog_signer_independent_grant_authority_client_supply.py": "555fcf736f22052da866f457817ab128561c6c6ce0b9aff94361d7b1a4866a34",
     "modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_binding.py": "4ce1fe970dd8d7371a6574347180ae717d92cc1f76b22abda33b9a8dc72f14bd",
-    "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py": "84fe9377bf230d7070e0d6d4fbf1232f37a52050b7f6d7de3e20387757822b77",
+    "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py": "168f67e63748d3144f205477d1dece82c1178b3934b67a14dc05f73179cf650f",
     "modules/communication/moltbot_bridge/src/reddog_signer_mutual_peer_handshake.py": "ba24793e973d522610dfa603344e670fa01b3d1d3d497a824f1eb7a0da8fd2fe",
     "modules/communication/moltbot_bridge/src/reddog_signer_optional_authority_bindings.py": "895fe6f9638e6a70018af7c00ca9a901b42e3c8ac2add052dc1e405d14d31234",
     "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_admission_contract.py": "054ffc0e2b5fe23989555c4549d724ccab9b247b7cac5e6b7b962743dfa24573",

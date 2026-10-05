@@ -1,3 +1,21 @@
+## Permission evidence type boundary — 2026-10-05
+
+WSP00/15/50/71/97 selects14/P1 (C1/I4/D5/Impact4) as an executable repair
+found while tracing authenticated startup. The existing provider accepted truthy
+non-boolean permission evidence, including the string "false", and read both
+credentials. Tighten its shared guard to literal `True`; valid boolean callers
+are unchanged. Baseline:6/12 regression failures and8/8 independent held-out
+failures. Candidate connected196:193pass/3platform skips; unchanged independent
+held-out8/8 pass, no errors/skips or audit denials. Publication remains pending.
+
+Two bounded local Qwen3.5-4B proposals through the existing WRE adapter both
+inverted the rejection guard. Both were rejected without application:0/2 accepted,
+556 reported inference tokens,0 paid calls. The correction is coordinator-authored.
+No native ticket admission, autonomous retained improvement or new authority is
+claimed. Preserve evidence under `outputs/rsi-startup-custody-20261005/permission-input-audit`.
+Authenticated startup still requires separately authorized purpose-limited custody;
+metadata/ACLs and a freshness boolean cannot supply that permission.
+
 ## Composition clock fixture closure — 2026-10-05
 
 PR2073 CI37269273608 exposed a second-boundary sampling race in the existing

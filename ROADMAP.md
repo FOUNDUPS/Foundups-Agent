@@ -12,6 +12,16 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+**Executable prerequisite — exact permission evidence (2026-10-05 JST):**
+Selected14/P1 (C1/I4/D5/Impact4) while native startup18/P0 remains open.
+A shared provider guard accepted truthy malformed permission evidence and read
+credentials. Candidate rejects all values except literal `True`: connected193pass/
+3skip and independent frozen8/8, versus baseline6/12 and8/8 failures respectively.
+Both local model proposals were rejected; this is coordinator-authored, publication
+pending. See bridge ModLog/TestModLog and existing startup-custody evidence.
+The remaining startup prerequisite is separately authorized, purpose-limited
+LOAD/control custody; an unverified permission flag cannot replace that authority.
+
 **Current layer — authenticated startup and credential lifetime (2026-10-05 JST):**
 WSP15 selects18/P0 (C4/I5/D5/Impact4): connect the existing public startup,
 encrypted custody, purpose-limited LOAD signing and concrete grant admission.

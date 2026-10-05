@@ -224,8 +224,10 @@ def test_default_path_rejects_without_explicit_test_only_mode() -> None:
     assert result.backend is None
 
 
-@pytest.mark.parametrize("fresh", [True, False])
-def test_systemd_reference_pair_preserves_provider_permission_gate(fresh: bool) -> None:
+@pytest.mark.parametrize("fresh", [
+    True, False, None, 0, 1, -1, "false", "true", [], [True], {}, {"approved": True},
+])
+def test_systemd_reference_pair_preserves_provider_permission_gate(fresh: object) -> None:
     """Synthetic material tests provider composition, not custody or admission."""
     private_key = _private_key()
     public_key = _public_text(private_key)
@@ -236,12 +238,13 @@ def test_systemd_reference_pair_preserves_provider_permission_gate(fresh: bool) 
         profile, resolver, provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
         allow_test_only_key_material=False, permission_snapshot_fresh=fresh,
     )
-    assert result.ok is fresh
+    allowed = fresh is True
+    assert result.ok is allowed
     assert resolver.calls == (
         [(signing_ref, profile.signer_agent_id), (audit_ref, profile.signer_agent_id)]
-        if fresh else []
+        if allowed else []
     )
-    if not fresh:
+    if not allowed:
         assert result.rejection_code == FAIL_PROVIDER_PERMISSION_DENIED
 
 
