@@ -1,3 +1,46 @@
+## Deferred startup dependencies (unmerged integration, 2026-10-06)
+
+`run_reddog_signer_socket_service_runtime_bootstrap` accepts optional
+`runtime_dependencies_supplier`, a zero-argument callable returning exact
+`SignerSocketServiceRuntimeDependencies`. It runs once after config admission
+and successful required process isolation. It cannot coexist with explicit
+resolver/factory, principal resolver, proposal replay store or grant admission.
+Malformed or failed supply returns `FAIL_SIGNER_BOOTSTRAP_DEPENDENCY_SUPPLY`.
+The container holds dependencies, not authority: existing signing, grant and
+replay validators remain mandatory. Legacy calls without the supplier are unchanged.
+The v7 loader now supplies this hook to the public entrypoint; full successful
+public-entrypoint acceptance remains unverified, so this wiring is not activation.
+When a deferred supplier is configured, the receipt's
+`no_runtime_secret_file_loaded` is `null`: bootstrap cannot attest that a supplier
+did not read credentials before returning or raising. Legacy calls retain the
+existing Boolean field. Consumers must preserve unknown, not coerce it to proof.
+
+The unmerged owner configuration v7 extends v6 with `startup_custody`:
+external `policy_path`, `credential_binding`, purpose-specific
+`root_request_permissions`, `replay_store`, `replay_integrity_permission`, and
+nullable `proposal_replay_store`. The owner configuration digest covers this
+metadata; the separately read signed E0 policy binds the owner digest, avoiding
+an embedded-policy digest cycle. Metadata alone never constitutes admission.
+
+`materialize_system_service_runtime_dependencies` runs after isolation, checks
+current signed E0 authority, and reuses existing durable replay and root
+revocation/protected-use owners. Missing replay state rejects rather than being
+provisioned at startup. Root requests reauthenticate permission for each proof;
+LOAD uses the work identity, ACQUIRE/FINISH the separate control identity.
+Root RPC occurs outside the current-generation lease. Existing replay-store
+implementation retains its MAC key in process; this is not a key-zeroization
+or no-secret-retention claim. No worker promotion or deployment is authorized.
+
+E0 policy v8 (explicit opt-in, unmerged) retains v7 fields and Git provenance.
+Its config authority-binding digest additionally excludes
+`target_signer_generation_id`, an alias of the already excluded artifact
+generation digest. This breaks the config-to-generation-to-config hash cycle.
+The full policy ID/signature still covers the alias, and admission still requires
+it to equal the authenticated current artifact generation. v5-v7 binding bytes
+and the default schema remain unchanged; existing policies are not silently
+reinterpreted. Three construction/alias checks and the connected consumer
+selection pass locally; full public-entrypoint and OS acceptance remain open.
+
 ## Exact permission evidence type — 2026-10-05
 
 The shared key-provider boundary accepts `permission_snapshot_fresh` only when

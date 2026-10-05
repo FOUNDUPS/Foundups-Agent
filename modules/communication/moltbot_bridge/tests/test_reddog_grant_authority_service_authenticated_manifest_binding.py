@@ -62,7 +62,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
     POLICY_FIELDS_V5,
     POLICY_FIELDS_V6,
     POLICY_SCHEMA_V5,
-    POLICY_SCHEMA_V7,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artifact_manifest import (
     NOW,
@@ -816,3 +816,41 @@ def _unsigned_payload_stub() -> dict[str, Any]:
         "nonce": "nonce-1", "issued_at": NOW, "expires_at": NOW + 120,
     }
     return payload
+
+
+def _use_provenance_policy_schema(setup: dict[str, Any], schema: str) -> None:
+    """Re-sign synthetic E0/config and manifest; keep real provenance readers."""
+    e0 = setup["e0"]
+    e0["policy"]["schema_version"] = schema
+    _rebind_config_and_sign(e0, e0["grant_private"])
+    _align_manifest_authority(e0, setup["harness"], setup["manifest"])
+    _bind_policy(e0, setup["manifest"])
+
+
+def _change_provenance_manifest(setup: dict[str, Any], case: str) -> None:
+    field = "grant_authority_source_policy_digest"
+    if case == "missing":
+        setup["manifest"].pop(field)
+        target = next(setup["harness"].manifest_directory.glob("*.json"))
+        _write_json(target, setup["manifest"])
+        return
+    setup["manifest"][field] = "sha256:" + "f" * 64
+    _align_manifest_authority(setup["e0"], setup["harness"], setup["manifest"])
+    _bind_policy(setup["e0"], setup["manifest"])
+
+
+@pytest.mark.parametrize("schema", [POLICY_SCHEMA_V7, POLICY_SCHEMA_V8])
+@pytest.mark.parametrize("case", ["valid", "missing", "inconsistent"])
+def test_v7_v8_binding_keeps_signed_manifest_provenance(tmp_path, monkeypatch, schema, case):
+    setup = _setup(tmp_path, monkeypatch,
+                   runtime_profile=RUNTIME_PROFILE_GRANT_AUTHORITY_SERVICE_GIT_PROVENANCE)
+    _use_provenance_policy_schema(setup, schema)
+    if case != "valid":
+        _change_provenance_manifest(setup, case)
+        with pytest.raises(RuntimeArtifactManifestError):
+            _bind(setup)
+        return
+    result = _bind(setup)
+    assert result.owner_policy_id == setup["e0"]["policy"]["policy_id"]
+    assert result.source_policy_digest == setup["manifest"]["grant_authority_source_policy_digest"]
+    assert result.archive_source_descriptor_digest == setup["manifest"]["grant_authority_archive_source_descriptor_digest"]

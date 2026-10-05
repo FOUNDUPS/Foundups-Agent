@@ -12,15 +12,26 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Executable prerequisite — exact permission evidence (2026-10-05 JST):**
-Selected14/P1 (C1/I4/D5/Impact4) while native startup18/P0 remains open.
-A shared provider guard accepted truthy malformed permission evidence and read
-credentials. Candidate rejects all values except literal `True`: connected193pass/
-3skip and independent frozen8/8, versus baseline6/12 and8/8 failures respectively.
-Both local model proposals were rejected; this is coordinator-authored, publication
-pending. See bridge ModLog/TestModLog and existing startup-custody evidence.
-The remaining startup prerequisite is separately authorized, purpose-limited
-LOAD/control custody; an unverified permission flag cannot replace that authority.
+**Current execution — authenticated startup integration (2026-10-06 JST):**
+PR2075 is merged at `a3def2a83`; exact-main CI37376433116 and
+CodeQL37376432711 passed. Later main invocation12/12 passed. Governed maintenance
+completed502.86s; all prior10tasks/29events unchanged, now11/32. Separate governed
+query CURRENT/no-gap on the exact merge; evidence lives in
+`outputs/rsi-permission-evidence-20261006/maintenance-after-merge`.
+The coordinator repair is retained, not an autonomous local-worker RSI result.
+
+The existing18/P0 startup objective is now in progress on
+`codex/rsi-authenticated-startup-20261006`. Deferred dependency ordering passes
+48bootstrap cases, including18 new cases. Connected entrypoint/supplier/bootstrap
+checkpoint:100pass/2platform skips with stable modified-source pins. Owner-v7
+schema/legacy checks:72pass/7platform skips; materializer protocol/store tests:5pass.
+Independent review repaired two proof-signing defects and a frozen-policy conversion.
+Full public acceptance exposed an existing config/generation digest cycle. The
+versioned E0-v8 repair preserves v5-v7 bindings and keeps signed generation checks:
+3construction tests and88consumer tests pass (1consumer platform skip).
+Full public success remains in progress. Generated bindings still describe base
+and must be regenerated before publication. No activation or
+native local-worker improvement is claimed. Evidence: `outputs/rsi-permission-evidence-20261006`.
 
 **Current layer — authenticated startup and credential lifetime (2026-10-05 JST):**
 WSP15 selects18/P0 (C4/I5/D5/Impact4): connect the existing public startup,

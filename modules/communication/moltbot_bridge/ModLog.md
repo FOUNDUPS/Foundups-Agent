@@ -1,3 +1,54 @@
+## Authenticated startup integration in progress — 2026-10-06
+
+Owned branch `codex/rsi-authenticated-startup-20261006`, base `a3def2a83`.
+WSP00/15/71/97: resume existing18/P0 startup objective after PR2075 closure.
+Bootstrap now accepts one deferred dependency supply only after config admission
+and required process isolation. Mixed eager/deferred inputs, malformed supply and
+supplier failure reject; existing runtime authority and replay checks still apply.
+The existing bootstrap suite passes48/48, including18 new ordering/negative cases.
+Fixtures substitute selection/isolation; this is not real OS startup admission.
+
+Purpose-limited request signing and authenticated public-entrypoint assembly are
+part of this same unmerged integration. Do not publish a supplier-only completion.
+Required before closure: versioned owner permission contract, connected public
+consumer, real protocol acceptance, adversarial checks, generated binding refresh,
+independent review and normal publication. No runtime grant or native RSI claimed.
+Evidence: `outputs/rsi-permission-evidence-20261006/bootstrap-deferred.xml`.
+
+Continuation: the public entrypoint now consumes a deferred v7 dependency
+supplier. Existing root runtime materialization composes E0-authenticated
+custody, pre-provisioned replay stores and existing revocation/protected-use
+clients. Root RPC is outside the current-owner lease. Integration remains WIP.
+Independent review reproduced two request-signing defects (numeric-type policy
+equality and expiry during final owner reread); canonical comparison and final
+lifetime checks repair those boundaries. Diagnostic entrypoint/supplier run:
+52 passed, 2 platform skips. Source was being integrated concurrently, so this
+is not the final exact-source publication receipt. Connected materializer tests,
+stable-source rerun, generated bindings and independent final review remain open.
+
+Stable modified-source checkpoint: entrypoint/supplier/bootstrap suites now
+100passed/2platform skips in38.69s, with zero changed modified-Python pins across
+the run (`startup-connected-result.json`). Independent materializer acceptance
+initially reproduced a frozen-policy/list-format mismatch; thawing the policy
+at the existing validator boundary repaired both positive cases. The same five
+tests then passed, exercising real LOAD/ACQUIRE/FINISH and three missing-store
+failures without credential reads or implicit provisioning. OS custody and
+owner fixture substitutions remain explicit. Full public v7 success acceptance
+is still being constructed; no native worker or retained improvement claimed.
+
+That construction exposed a pre-existing hash cycle: the config authority
+binding included `target_signer_generation_id`, which admission equates to the
+digest of artifacts including the config. Explicit E0 v8 now excludes only that
+derived alias from the config binding while retaining it in the signed policy
+and current-generation checks. v5-v7 retain their original digest semantics.
+Three provenance/permission consumers accept v8 with the same checks as v7.
+Construction/alias tests:3pass with stable pins. Connected legacy/v7/v8 consumer
+selection:88pass/1existing platform skip, including16 added cases. Initial
+fixture-construction failures are preserved separately; no source checks were
+weakened. This is a recoverable local WIP checkpoint, not a published or admitted
+runtime: full public success, generated manifest/digest refresh, final independent
+review and publication remain pending. Generated bindings still describe base.
+
 ## Permission evidence type boundary — 2026-10-05
 
 WSP00/15/50/71/97 selects14/P1 (C1/I4/D5/Impact4) as an executable repair

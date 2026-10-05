@@ -51,7 +51,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8,
 )
 
 
@@ -91,7 +91,7 @@ def _verify_manifest_bindings(
     manifest: Mapping[str, Any], repo: Path, root: Path,
     policy: Mapping[str, Any],
 ) -> None:
-    provenance = policy.get("schema_version") == POLICY_SCHEMA_V7
+    provenance = policy.get("schema_version") in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8}
     expected = {
         "schema_version": (
             SCHEMA_VERSION_V3 if provenance else SCHEMA_VERSION_V2
@@ -175,7 +175,7 @@ def _read_artifacts(
 def _verify_archive_provenance(
     raw: bytes, repo: Path, policy: Mapping[str, Any]
 ) -> Mapping[str, Any]:
-    if policy.get("schema_version") != POLICY_SCHEMA_V7:
+    if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8}:
         validate_grant_service_archive(raw)
         return {}
     provenance = derive_grant_service_git_provenance(

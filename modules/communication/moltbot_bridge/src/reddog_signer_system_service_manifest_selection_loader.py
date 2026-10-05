@@ -68,6 +68,7 @@ SCHEMA_VERSION_V3 = "reddog_signer_system_service_owner_config.v3"
 SCHEMA_VERSION_V4 = "reddog_signer_system_service_owner_config.v4"
 SCHEMA_VERSION_V5 = "reddog_signer_system_service_owner_config.v5"
 SCHEMA_VERSION_V6 = "reddog_signer_system_service_owner_config.v6"
+SCHEMA_VERSION_V7 = "reddog_signer_system_service_owner_config.v7"
 MAX_OWNER_CONFIG_BYTES = 64 * 1024
 ROOT_UID = 0
 FIELDS = frozenset({
@@ -82,6 +83,7 @@ V3_FIELDS = V2_FIELDS | {"independent_grant_authority"}
 V4_FIELDS = V3_FIELDS | {"grant_authority_source_policy"}
 V5_FIELDS = V4_FIELDS | {"reviewer_designation_authority"}
 V6_FIELDS = V5_FIELDS | {"effect_consent_authority"}
+V7_FIELDS = V6_FIELDS | {"startup_custody"}
 _OUTCOME_OWNER_FIELDS = frozenset({
     "descriptor", "authority_socket_path", "authority_service_uid", "signer_uid", "signer_gid",
     "signer_principal_id", "state_root", "state_path", "state_store_id",
@@ -101,13 +103,14 @@ class SystemServiceStartupSelection:
     signer_uid: int
     signer_gid: int
     conversation_principal_authority_resolver_supplier: Callable[[], Any] | None = None
+    runtime_dependencies_supplier: Callable[[], Any] | None = None
 
 
 def load_system_service_startup_selection(*, owner_config_path: Path | str, repo_root: Path) -> SystemServiceStartupSelection:
     """Load all production signer authority from one root-owned v2 snapshot."""
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
-    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6}:
+    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
         raise RuntimeArtifactManifestError("signer_owner_config_v2_required")
     manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
 
@@ -121,9 +124,15 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
         return ManifestBoundCurrentPrincipalAuthorityResolver(repo, boundary)
 
     signer_uid, signer_gid = _signer_identity_from_owner(owner)
+    def runtime_dependencies_supplier() -> Any:
+        from .foundup_verified_outcome_root_runtime_materializer import materialize_system_service_runtime_dependencies
+        return materialize_system_service_runtime_dependencies(
+            owner_config_path=owner_config_path, repo=repo, expected_owner_config_id=str(owner["config_id"]),
+        )
     return SystemServiceStartupSelection(
         str(owner["config_id"]), manifest, boundary, authority_supplier,
-        signer_uid, signer_gid, principal_authority_supplier
+        signer_uid, signer_gid, principal_authority_supplier,
+        runtime_dependencies_supplier if owner["schema_version"] == SCHEMA_VERSION_V7 else None,
     )
 
 
@@ -193,9 +202,7 @@ def load_system_service_verified_outcome_signing_authority(
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
     return _verified_outcome_authority_from_owner(
-        owner,
-        repo=repo,
-        now_epoch=int(time.time()) if now_epoch is None else now_epoch,
+        owner, repo=repo, now_epoch=int(time.time()) if now_epoch is None else now_epoch,
     )
 
 
@@ -312,9 +319,7 @@ def _witness_binding(
 ) -> SignerRuntimeGenerationWitnessBinding:
     return SignerRuntimeGenerationWitnessBinding(
         authenticator_id=str(owner["generation_authenticator_id"]),
-        signer_public_key_fingerprint=str(
-            owner["generation_signer_public_key_fingerprint"]
-        ),
+        signer_public_key_fingerprint=str(owner["generation_signer_public_key_fingerprint"]),
         key_epoch=str(owner["generation_key_epoch"]),
         runtime_root_digest=raw_digest(str(runtime).encode("utf-8")),
         high_water_store_id=str(owner["high_water_store_id"]),
@@ -341,7 +346,7 @@ def _load_owner_config(path: Path | str, *, repo: Path) -> dict[str, Any]:
                 result[key] = item
             return result
         value = json.loads(raw.decode("ascii"), object_pairs_hook=object_pairs)
-        if isinstance(value, dict) and value.get("schema_version") in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6} and duplicates:
+        if isinstance(value, dict) and value.get("schema_version") in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7} and duplicates:
             raise RuntimeArtifactManifestError("signer_owner_config_duplicate_key")
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise RuntimeArtifactManifestError("signer_owner_config_malformed") from exc
@@ -442,7 +447,8 @@ def _validate_owner_config(
     schema = value.get("schema_version")
     expected_fields = {SCHEMA_VERSION: FIELDS, SCHEMA_VERSION_V2: V2_FIELDS,
                        SCHEMA_VERSION_V3: V3_FIELDS, SCHEMA_VERSION_V4: V4_FIELDS,
-                       SCHEMA_VERSION_V5: V5_FIELDS, SCHEMA_VERSION_V6: V6_FIELDS}.get(schema)
+                       SCHEMA_VERSION_V5: V5_FIELDS, SCHEMA_VERSION_V6: V6_FIELDS,
+                       SCHEMA_VERSION_V7: V7_FIELDS}.get(schema)
     if expected_fields is None or set(value) != expected_fields:
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     checked = dict(value)
@@ -455,17 +461,17 @@ def _validate_owner_config(
         raise RuntimeArtifactManifestError("signer_owner_repo_binding_mismatch")
     _validate_owner_text_and_digests(checked)
     _validate_owner_paths(checked, repo=repo, owner_root=owner_root)
-    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6}:
+    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
         _validate_outcome_authority_owner_config(
             checked, repo=repo, owner_root=owner_root
         )
-    if schema in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6}:
+    if schema in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
         from modules.communication.moltbot_bridge.src.reddog_signer_independent_grant_authority_client_supply import validate_independent_grant_authority_owner_config
         validate_independent_grant_authority_owner_config(checked, repo=repo, owner_root=owner_root)
-    if schema in {SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6}:
+    if schema in {SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
         from modules.communication.moltbot_bridge.src.reddog_grant_authority_source_policy_authority import validate_grant_authority_source_policy_owner_config
         validate_grant_authority_source_policy_owner_config(checked, repo=repo)
-    if schema in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6}:
+    if schema in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
         from .reddog_reviewer_designation_contract import validate_reviewer_designation_authority
         try:
             checked["reviewer_designation_authority"] = validate_reviewer_designation_authority(
@@ -473,29 +479,25 @@ def _validate_owner_config(
             )
         except ValueError as exc:
             raise RuntimeArtifactManifestError("reviewer_designation_authority_invalid") from exc
-    if schema == SCHEMA_VERSION_V6:
+    if schema in {SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
         from .reddog_effect_consent_contract import validate_effect_consent_authority
         try:
             checked["effect_consent_authority"] = validate_effect_consent_authority(checked["effect_consent_authority"])
         except ValueError as exc:
             raise RuntimeArtifactManifestError("effect_consent_authority_invalid") from exc
+    if schema == SCHEMA_VERSION_V7:
+        from .reddog_signer_system_service_wsp71_resolver_supply import validate_system_service_startup_custody
+        validate_system_service_startup_custody(checked, repo_root=repo, owner_root=owner_root)
     return checked
 
 def _validate_owner_text_and_digests(value: Mapping[str, Any]) -> None:
     text_fields = (
-        "anchor_id",
-        "generation_public_key",
-        "generation_authenticator_id",
-        "generation_key_epoch",
-        "high_water_store_id",
-        "witness_store_id",
+        "anchor_id", "generation_public_key", "generation_authenticator_id",
+        "generation_key_epoch", "high_water_store_id", "witness_store_id",
     )
     digest_fields = (
-        "config_id",
-        "repo_root_digest",
-        "generation_signer_public_key_fingerprint",
-        "high_water_durability_receipt_id",
-        "witness_durability_receipt_id",
+        "config_id", "repo_root_digest", "generation_signer_public_key_fingerprint",
+        "high_water_durability_receipt_id", "witness_durability_receipt_id",
     )
     if any(not _ascii(value.get(name)) for name in text_fields) or any(
         not is_sha256(value.get(name)) for name in digest_fields
@@ -587,10 +589,8 @@ def _validate_outcome_authority_owner_config(
 def _validated_outcome_owner_paths(
     raw: Mapping[str, Any], *, repo: Path
 ) -> dict[str, Path]:
-    roots = {
-        prefix: validate_runtime_root_path(raw[f"{prefix}_root"], repo_root=repo)
-        for prefix in ("state", "state_witness", "installation")
-    }
+    roots = {prefix: validate_runtime_root_path(raw[f"{prefix}_root"], repo_root=repo)
+             for prefix in ("state", "state_witness", "installation")}
     expected = {
         "state": "verified-outcome-authority.sqlite3",
         "state_witness": "verified-outcome-authority-witness.sqlite3",
@@ -661,7 +661,7 @@ def _ascii(value: object) -> bool:
 
 __all__ = [
     "RootAuthorityServiceDependencies", "SCHEMA_VERSION", "SCHEMA_VERSION_V2", "SCHEMA_VERSION_V3",
-    "SCHEMA_VERSION_V4", "SCHEMA_VERSION_V5", "SCHEMA_VERSION_V6", "SystemServiceStartupSelection",
+    "SCHEMA_VERSION_V4", "SCHEMA_VERSION_V5", "SCHEMA_VERSION_V6", "SCHEMA_VERSION_V7", "SystemServiceStartupSelection",
     "load_system_service_manifest_selection", "load_system_service_revocation_anchor_authority",
     "load_system_service_signer_identity", "load_system_service_startup_selection",
     "load_system_service_verified_outcome_signing_authority",

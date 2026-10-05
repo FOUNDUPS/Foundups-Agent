@@ -1880,30 +1880,22 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "evidence": "outputs/rsi-startup-custody-20261005/permission-input-audit",
-    "observation_path": "current_observation.permission_evidence_type_20261005",
-    "base_commit": "e1ddf2e89d9f55cfc72d66f34b9187adbe932c63",
-    "selected_action": "Close exact permission-evidence type repair through existing publication gates",
-    "status": "locally_validated_publication_pending",
+    "observation_path": "current_observation.authenticated_startup_integration_20261006",
+    "base_commit": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
+    "selected_action": "Connect authenticated startup custody through public consumer after isolation",
+    "status": "implementation_in_progress_not_admitted",
     "wsp15": {
-      "complexity": 1,
-      "importance": 4,
+      "complexity": 4,
+      "importance": 5,
       "deferability": 5,
       "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "total": 18,
+      "priority": "P0"
     },
     "dispatchable": false,
-    "execution_plane": "Authorized source maintenance; no native work grant",
-    "next_action": "Independent review, commit and gated publication; then rescore authenticated startup dependencies",
-    "higher_priority_gates": [
-      {
-        "observation_path": "current_observation.startup_custody_lifetime_20261005",
-        "total": 18,
-        "priority": "P0",
-        "blocker": "Authenticated purpose-limited startup custody and real native admission remain unresolved"
-      }
-    ]
+    "execution_plane": "Owned source implementation with synthetic tests; no runtime grant",
+    "next_action": "Exercise successful full public startup using constructive v8 binding, then qualify actual OS admission and scoped local work",
+    "higher_priority_gates": []
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -31093,7 +31085,7 @@
         "priority": "P1"
       },
       "wsp97": "Extend existing shared guard and regression; no new module or orchestration owner",
-      "state": "locally_validated_publication_pending",
+      "state": "merged_verified_main",
       "defect": "Truthy malformed freshness evidence allowed credential resolution; only literal True now passes the guard",
       "authority_limit": "Literal True is not authentication or a new permission grant",
       "baseline": {
@@ -31121,7 +31113,58 @@
       },
       "evidence": "outputs/rsi-startup-custody-20261005/permission-input-audit",
       "native_rsi_complete": false,
-      "next_gate": "Publish verified prerequisite, re-observe and rescore; authenticated startup remains open"
+      "next_gate": "Publish verified prerequisite, re-observe and rescore; authenticated startup remains open",
+      "publication": {
+        "pr": 2075,
+        "merge": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
+        "main_ci": 37376433116,
+        "main_codeql": 37376432711,
+        "checks": "success",
+        "retained_main_passed": 12,
+        "maintenance": "COMPLETED; unchanged prior10/29, now11/32",
+        "retrieval": "CURRENT/no-gap exact merge first attempt",
+        "native_rsi_complete": false
+      }
+    },
+    "authenticated_startup_integration_20261006": {
+      "base": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
+      "branch": "codex/rsi-authenticated-startup-20261006",
+      "wsp15": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability": 5,
+        "impact": 4,
+        "total": 18,
+        "priority": "P0"
+      },
+      "wsp97": "Extend existing bootstrap, resolver supply, loader and root materializer; preserve grant and use-time checks",
+      "state": "implementation_in_progress_not_admitted",
+      "bootstrap_tests": {
+        "passed": 48,
+        "failed": 0,
+        "new_cases": 18,
+        "limits": "Synthetic selection and isolation; not real OS startup"
+      },
+      "connected_checkpoint": {
+        "entry_supplier_bootstrap_passed": 100,
+        "entry_supplier_bootstrap_skipped": 2,
+        "modified_python_pins_changed": 0,
+        "schema_legacy_passed": 72,
+        "schema_legacy_skipped": 7,
+        "materializer_protocol_cases_passed": 5,
+        "versioned_binding_cases_passed": 3,
+        "policy_consumer_cases_passed": 88,
+        "policy_consumer_cases_skipped": 1,
+        "limits": "Separate local suites with explicit synthetic OS boundaries; not full public or native admission",
+        "evidence_root": "outputs/rsi-permission-evidence-20261006"
+      },
+      "construction_blocker": "Legacy E0 generation digest cycle reproduced. Explicit v8 repair passes constructive and downstream consumer checks while preserving legacy semantics; full public success still unverified.",
+      "remaining": [
+        "Full public entrypoint success through real protocols and actual OS admission",
+        "Generated bindings, independent review and publication",
+        "Actual independently admitted worker improvement and later measured retention"
+      ],
+      "native_rsi_complete": false
     }
   }
 }

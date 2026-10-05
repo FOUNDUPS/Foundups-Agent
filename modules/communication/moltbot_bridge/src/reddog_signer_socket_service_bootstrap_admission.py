@@ -29,6 +29,16 @@ class SignerSocketServiceGrantAdmission:
     revocation_oracle: Any
 
 
+@dataclass(frozen=True)
+class SignerSocketServiceRuntimeDependencies:
+    """Deferred dependencies, not authority; existing use-time gates still apply."""
+
+    resolver: Any
+    principal_key_resolver: Any
+    proposal_replay_high_water_store: Any
+    secret_grant_admission: SignerSocketServiceGrantAdmission
+
+
 @contextmanager
 def lease_signer_socket_service_grant_admission(config: Any, admission: Any):
     """Fence assembly or one protected callback; never enclose a root RPC."""
@@ -77,7 +87,7 @@ class SignerSocketServiceRuntimeBootstrapResult:
     process_isolation_receipt: Optional[dict[str, Any]] = None
     no_env_parsed: bool = True
     no_process_spawned: bool = True
-    no_runtime_secret_file_loaded: bool = True
+    no_runtime_secret_file_loaded: bool | None = True
     no_repo_mutation_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
     no_hermes_dispatch_performed: bool = True
@@ -166,6 +176,8 @@ def reject_bootstrap(
 
 __all__ = [
     "ProcessIsolationGate",
+    "SignerSocketServiceGrantAdmission",
+    "SignerSocketServiceRuntimeDependencies",
     "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT",
     "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED",
     "SignerSocketServiceRuntimeBootstrapResult",

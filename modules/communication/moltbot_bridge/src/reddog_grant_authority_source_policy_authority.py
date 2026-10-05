@@ -174,9 +174,10 @@ def _owner_source_policy_schemas() -> frozenset[str]:
         SCHEMA_VERSION_V4,
         SCHEMA_VERSION_V5,
         SCHEMA_VERSION_V6,
+        SCHEMA_VERSION_V7,
     )
 
-    return frozenset({SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6})
+    return frozenset({SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7})
 
 
 __all__ = [

@@ -986,3 +986,168 @@ def test_bootstrap_admission_preserves_pre_resolver_gates(tmp_path, monkeypatch,
                 else bootstrap.FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION)
     assert expected in result.rejection_reasons
     assert created == [] and case.resolver.calls == [] and service.calls == []
+
+
+def _dependency_supply_case(tmp_path, monkeypatch, *, isolation_accepted=True):
+    """Synthetic selection/isolation; actual lazy grant runtime stays in use."""
+    from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import SignerProcessIsolationReceipt
+
+    case = fixture._admission_case(tmp_path, monkeypatch)
+    order = []
+
+    def load(*args):
+        order.append("config")
+        return (case.config, Path(case.values["config_path"]),
+                case.owner.selection["config_digest"], None)
+
+    def isolate(*args, **kwargs):
+        order.append("isolation")
+        return SignerProcessIsolationReceipt(
+            accepted=isolation_accepted, rejection_reasons=(),
+            signer_uid=1234, signer_gid=1234, distinct_consumer_uid=True,
+            ptrace_scope_enforced=True, cap_sys_ptrace_absent=True,
+            tracer_absent=True, core_dumps_disabled=True,
+            dumpable_disabled=True, environment_cleared=True)
+
+    monkeypatch.setattr(bootstrap, "_load_bound_runtime_config", load)
+    options = dict(repo_root=case.values["repo"],
+                   config_path=case.values["config_path"],
+                   process_isolation_required=True, process_isolation_gate=isolate,
+                   expected_signer_uid=1234, expected_signer_gid=1234)
+    return case, order, options
+
+
+def _supplied_dependencies(case, **changes):
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import SignerSocketServiceRuntimeDependencies
+
+    values = dict(resolver=case.resolver,
+                  principal_key_resolver=fixture.SimpleNamespace(resolve=lambda *args: None),
+                  proposal_replay_high_water_store=None,
+                  secret_grant_admission=case.admission)
+    values.update(changes)
+    return SignerSocketServiceRuntimeDependencies(**values)
+
+
+def test_dependency_supplier_not_called_after_denied_isolation(tmp_path, monkeypatch):
+    case, order, options = _dependency_supply_case(
+        tmp_path, monkeypatch, isolation_accepted=False)
+    calls = []
+    service = CapturingBoundedService()
+    result = bootstrap.run_reddog_signer_socket_service_runtime_bootstrap(
+        **options, serve_bounded=service,
+        runtime_dependencies_supplier=lambda: calls.append("supplier"))
+    assert result.accepted is False
+    assert bootstrap.FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION in result.rejection_reasons
+    assert order == ["config", "isolation"]
+    assert calls == [] and case.resolver.calls == [] and service.calls == []
+
+
+def test_dependency_supplier_not_called_after_real_config_rejection(tmp_path):
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    path = _write_json(runtime / "signer-service.json", _config(
+        _public_text(_private_key()), socket_path=runtime / "signer.sock"))
+    launch = _launch_binding(repo, path)
+    path.write_text("{malformed", encoding="utf-8")
+    calls = []
+    service = CapturingBoundedService()
+    result = bootstrap.run_reddog_signer_socket_service_runtime_bootstrap(
+        repo_root=repo, config_path=path, serve_bounded=service, **launch,
+        process_isolation_required=True,
+        process_isolation_gate=lambda *args, **kwargs: calls.append("isolation"),
+        expected_signer_uid=1234, expected_signer_gid=1234,
+        runtime_dependencies_supplier=lambda: calls.append("supplier"))
+    assert result.accepted is False
+    assert bootstrap.FAIL_SIGNER_BOOTSTRAP_CONFIG_UNREADABLE in result.rejection_reasons
+    assert calls == [] and service.calls == []
+
+
+@pytest.mark.parametrize("conflict", ["isolation_not_required", "resolver",
+    "resolver_factory", "principal_key_resolver", "proposal_replay_high_water_store",
+    "secret_grant_admission"])
+def test_dependency_supplier_rejects_mixed_or_unisolated_supply(tmp_path, monkeypatch, conflict):
+    case, order, options = _dependency_supply_case(tmp_path, monkeypatch)
+    monkeypatch.setattr(bootstrap, "run_reddog_signer_socket_service_runtime_wiring",
+                        lambda *args, **kwargs: pytest.fail("conflicting supply reached wiring"))
+    if conflict == "isolation_not_required":
+        options["process_isolation_required"] = False
+    else:
+        options[conflict] = lambda: pytest.fail("explicit dependency factory invoked")
+    calls = []
+    service = CapturingBoundedService()
+    result = bootstrap.run_reddog_signer_socket_service_runtime_bootstrap(
+        **options, serve_bounded=service,
+        runtime_dependencies_supplier=lambda: calls.append("supplier"))
+    assert result.accepted is False
+    assert "FAIL_SIGNER_BOOTSTRAP_DEPENDENCY_SUPPLY" in result.rejection_reasons
+    assert calls == [] and case.resolver.calls == [] and service.calls == []
+
+
+@pytest.mark.parametrize("failure", ["raises", "wrong_type", "resolver_missing",
+    "resolver_invalid", "principal_missing", "principal_invalid", "grant_missing", "grant_invalid"])
+def test_dependency_supplier_invalid_result_never_reaches_wiring(tmp_path, monkeypatch, failure):
+    case, order, options = _dependency_supply_case(tmp_path, monkeypatch)
+    monkeypatch.setattr(bootstrap, "run_reddog_signer_socket_service_runtime_wiring",
+                        lambda *args, **kwargs: pytest.fail("invalid supply reached wiring"))
+
+    def supply():
+        order.append("supplier")
+        if failure == "raises":
+            raise RuntimeError("synthetic supplier failure")
+        if failure == "wrong_type":
+            return fixture.SimpleNamespace(resolver=case.resolver,
+                                           secret_grant_admission=case.admission)
+        field, shape = failure.rsplit("_", 1)
+        name = {"resolver": "resolver", "principal": "principal_key_resolver",
+                "grant": "secret_grant_admission"}[field]
+        return _supplied_dependencies(case, **{name: None if shape == "missing" else object()})
+
+    result = bootstrap.run_reddog_signer_socket_service_runtime_bootstrap(
+        **options, serve_bounded=CapturingBoundedService(), runtime_dependencies_supplier=supply)
+    assert result.accepted is False
+    assert "FAIL_SIGNER_BOOTSTRAP_DEPENDENCY_SUPPLY" in result.rejection_reasons
+    assert order == ["config", "isolation", "supplier"]
+    assert case.resolver.calls == [] and case.events == []
+
+
+@pytest.mark.parametrize("optional_store", [False, True])
+def test_dependency_supplier_forwards_once_to_real_lazy_grant_runtime(tmp_path, monkeypatch, optional_store):
+    case, order, options = _dependency_supply_case(tmp_path, monkeypatch)
+    # This control-only config does not require a proposal high-water store.
+    dependencies = _supplied_dependencies(case,
+        proposal_replay_high_water_store=object() if optional_store else None)
+    real_wiring = bootstrap.run_reddog_signer_socket_service_runtime_wiring
+
+    def supply():
+        assert order == ["config", "isolation"] and case.resolver.calls == []
+        order.append("supplier")
+        return dependencies
+
+    def wiring(config, resolver, **kwargs):
+        order.append("wiring")
+        assert config is case.config and resolver is dependencies.resolver
+        assert kwargs["principal_key_resolver"] is dependencies.principal_key_resolver
+        assert kwargs["proposal_replay_high_water_store"] is dependencies.proposal_replay_high_water_store
+        assert kwargs["secret_grant_admission"] is dependencies.secret_grant_admission
+        return real_wiring(config, resolver, **kwargs)
+
+    def serve(**kwargs):
+        assert case.resolver.calls == []
+        backend = kwargs["backend"]
+        assert fixture._admission_wire(case, backend, None)["accepted"] is False
+        assert case.resolver.calls == []
+        response = fixture._admission_wire(case, backend, case.grant)
+        assert response["accepted"] is True
+        assert fixture.protected_fixture.Ed25519SignatureVerifier().verify(
+            case.request.signer_public_key, case.request.signing_input, response["signature"])
+        assert fixture._admission_wire(case, backend, case.grant)["accepted"] is False
+        assert len(case.resolver.calls) == 2
+        return CapturingBoundedService()(**kwargs)
+
+    monkeypatch.setattr(bootstrap, "run_reddog_signer_socket_service_runtime_wiring", wiring)
+    result = bootstrap.run_reddog_signer_socket_service_runtime_bootstrap(
+        **options, serve_bounded=serve, runtime_dependencies_supplier=supply)
+    assert result.accepted is True, result.rejection_reasons
+    assert order == ["config", "isolation", "supplier", "wiring"]
+    assert case.events == ["enter", "exit", "root_acquire", "enter", "resolve", "resolve",
+                           "sign", "verify", "exit", "root_finish"]

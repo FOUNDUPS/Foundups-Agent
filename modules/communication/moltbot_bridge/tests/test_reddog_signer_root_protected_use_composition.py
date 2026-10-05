@@ -817,3 +817,160 @@ def test_control_key_cannot_load_revocations(tmp_path, monkeypatch):
     response = response_from_bytes(_route(values, forged.to_bytes()))
     assert values["state"].load(values["binding"].anchor_binding_digest()) == before
     assert response.accepted is False
+
+
+def _startup_materializer_owner(values, tmp_path, grant_fixture):
+    from dataclasses import asdict
+    from modules.infrastructure.secrets_mcp.src.systemd_credential_secret_resolver import SystemdCredentialBinding
+
+    policy = values["policy"]
+    config = grant_fixture.SignerGrantReplayStoreConfig(
+        nonce_path=Path(policy["replay_path"]), nonce_root=Path(policy["replay_root"]),
+        high_water_path=tmp_path / "startup-high-water" / "authority.sqlite3",
+        high_water_root=tmp_path / "startup-high-water", repo_root=values["repo"],
+        replay_store_binding_digest=grant_fixture._binding().replay_store_binding_digest,
+        replay_store_id=policy["replay_store_id"],
+        durability_receipt_id=policy["replay_store_durability_receipt_id"])
+    grant_fixture._provision_store(config)  # Explicit test setup, never the materializer.
+    now = int(time.time())
+    binding = SystemdCredentialBinding(
+        credential_directory="/run/credentials/startup-test.service",
+        expected_uid=1001, expected_gid=1001, expected_requester="reddog-e0-signer",
+        issued_at=now - 1, expires_at=now + 60, credential_ids=frozenset({"replay"}))
+    metadata = asdict(binding)
+    metadata["credential_ids"] = sorted(binding.credential_ids)
+    owner = {"config_id": policy["owner_config_id"], "verified_outcome_authority": {
+        "descriptor": values["snapshot"].descriptor,
+        "authority_socket_path": str(tmp_path / "root-authority.sock"), "authority_service_uid": 0},
+        "startup_custody": {"policy_path": str(tmp_path / "policy.json"),
+            "credential_binding": metadata, "proposal_replay_store": None,
+            "replay_store": {"high_water_path": str(config.high_water_path),
+                "high_water_root": str(config.high_water_root),
+                "replay_store_binding_digest": config.replay_store_binding_digest},
+            "replay_integrity_permission": {"reference": "systemd-creds://replay",
+                "requester_id": binding.expected_requester, "issued_at": now - 1,
+                "expires_at": now + 30}}}
+    return owner, binding, config
+
+
+def _startup_materializer_case(tmp_path, monkeypatch):
+    """Synthetic owner files, OS custody and proof keys; real leases, stores and RPC router."""
+    from modules.communication.moltbot_bridge.src import reddog_signer_owner_e0_current_selection as owner_source
+    from modules.communication.moltbot_bridge.src import reddog_signer_system_service_manifest_selection_loader as loader
+    from modules.communication.moltbot_bridge.src import reddog_signer_system_service_wsp71_resolver_supply as supply
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as wiring_fixture
+    from modules.infrastructure.secrets_mcp.src import systemd_credential_secret_resolver as credential_os
+
+    now = int(time.time())
+    monkeypatch.setattr(time, "time", lambda: now)
+    values, control = _two_key_runtime(tmp_path, monkeypatch)
+    grant_fixture = wiring_fixture.factory_fixture.grant_fixture
+    owner, binding, replay = _startup_materializer_owner(values, tmp_path, grant_fixture)
+    monkeypatch.setattr(loader, "_load_owner_config", lambda *args, **kwargs: copy.deepcopy(owner))
+    monkeypatch.setattr(loader, "_read_root_owned_bytes", lambda *args: json.dumps(values["policy"]).encode("ascii"))
+    events, secret_reads, active = [], [], []
+    _track_materializer_lease(monkeypatch, owner_source, events, active)
+
+    def request_signer(**kwargs):
+        assert active
+        key = values["target_private"] if kwargs["purpose"] == supply.ROOT_LOAD_PURPOSE else control
+        return lambda message: _sign(key, message)
+
+    def read_credential(selected, identifier):
+        assert selected == binding
+        secret_reads.append(identifier)
+        return grant_fixture.INTEGRITY_KEY.decode("utf-8")
+
+    def roundtrip(_path, raw, _uid, _timeout):
+        assert active == [], "owner lease held across root transport"
+        events.append(json.loads(raw)["operation"])
+        return _route(values, raw)
+
+    monkeypatch.setattr(supply, "build_system_service_root_request_signer", request_signer)
+    monkeypatch.setattr(credential_os, "_identity_matches", lambda selected: selected == binding)
+    monkeypatch.setattr(credential_os, "_read_credential", read_credential)
+    monkeypatch.setattr(root_client_module, "_root_socket_roundtrip", roundtrip)
+    return values, owner, binding, replay, events, secret_reads, active
+
+
+def _track_materializer_lease(monkeypatch, owner_source, events, active):
+    from contextlib import contextmanager
+
+    original = owner_source.lease_validated_owner_e0_current_admission
+
+    @contextmanager
+    def lease(**kwargs):
+        with original(**kwargs) as current:
+            active.append(True)
+            events.append("lease_enter")
+            try:
+                yield current
+            finally:
+                active.pop()
+                events.append("lease_exit")
+
+    monkeypatch.setattr(owner_source, "lease_validated_owner_e0_current_admission", lease)
+
+
+def test_system_service_oracle_releases_owner_lease_before_real_root_rpc(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.src import foundup_verified_outcome_root_runtime_materializer as materializer
+
+    values, owner, binding, replay, events, reads, active = _startup_materializer_case(tmp_path, monkeypatch)
+    oracle = materializer.materialize_system_service_revocation_oracle(
+        owner_config_path=values["owner_config_path"], repo=values["repo"],
+        policy=values["policy"], credential_binding=binding)
+    assert type(oracle) is RootAuthorizedSignerGrantRevocationOracle
+    assert active == [] and reads == []
+    assert events == ["lease_enter", "lease_exit", "lease_enter", "lease_exit"]
+    assert oracle.is_key_epoch_revoked(key_epoch="not-revoked", at_epoch=int(time.time())) is False
+    grant = {"grant_id": _sha("startup-grant"), "key_epoch": "epoch-1",
+             "signing_request_digest": _sha("startup-request"), "expires_at": int(time.time()) + 20}
+    assert oracle.authorize_grant_use(grant, lambda: "inert-result") == "inert-result"
+    assert "REVOCATION_ANCHOR_LOAD" in events
+    assert "PROTECTED_USE_ACQUIRE" in events and "PROTECTED_USE_FINISH" in events
+    assert active == []
+
+
+def test_system_service_dependencies_compose_existing_provisioned_stores(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.src import foundup_verified_outcome_root_runtime_materializer as materializer
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import SignerSocketServiceRuntimeDependencies
+    from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_grant_binding import require_owner_bound_replay_store
+
+    values, owner, binding, replay, events, reads, active = _startup_materializer_case(tmp_path, monkeypatch)
+    dependencies = materializer.materialize_system_service_runtime_dependencies(
+        owner_config_path=values["owner_config_path"], repo=values["repo"],
+        expected_owner_config_id=owner["config_id"])
+    assert type(dependencies) is SignerSocketServiceRuntimeDependencies
+    assert reads == ["replay"] and active == []
+    assert dependencies.proposal_replay_high_water_store is None
+    admission = dependencies.secret_grant_admission
+    require_owner_bound_replay_store(values["policy"], admission.replay_store, repo_root=values["repo"])
+    assert admission.revocation_oracle.matches_owner(policy=values["policy"], binding=values["binding"])
+    assert admission.revocation_oracle.is_key_epoch_revoked(
+        key_epoch="not-revoked", at_epoch=int(time.time())) is False
+    assert "REVOCATION_ANCHOR_LOAD" in events and active == []
+
+
+@pytest.mark.parametrize("missing", ["nonce", "high_water", "unprovisioned_high_water"])
+def test_system_service_dependencies_reject_unprovisioned_replay_without_secret_reads(tmp_path, monkeypatch, missing):
+    import sqlite3
+    from modules.communication.moltbot_bridge.src import foundup_verified_outcome_root_runtime_materializer as materializer
+
+    values, owner, binding, replay, events, reads, active = _startup_materializer_case(tmp_path, monkeypatch)
+    if missing == "nonce":
+        replay.nonce_path.unlink()
+    elif missing == "high_water":
+        replay.high_water_path.unlink()
+    else:
+        replay.high_water_path.write_bytes(b"")
+    paths = (replay.nonce_path, replay.high_water_path)
+    before = {str(p): p.read_bytes() if p.exists() else None for p in paths}
+    inventory = sorted(p.relative_to(tmp_path).as_posix() for p in tmp_path.rglob("*") if p.is_file())
+    with pytest.raises((ValueError, sqlite3.DatabaseError)):
+        materializer.materialize_system_service_runtime_dependencies(
+            owner_config_path=values["owner_config_path"], repo=values["repo"],
+            expected_owner_config_id=owner["config_id"])
+    assert reads == [] and active == []
+    assert not any(event.startswith("REVOCATION_") or event.startswith("PROTECTED_USE_") for event in events)
+    assert {str(p): p.read_bytes() if p.exists() else None for p in paths} == before
+    assert sorted(p.relative_to(tmp_path).as_posix() for p in tmp_path.rglob("*") if p.is_file()) == inventory

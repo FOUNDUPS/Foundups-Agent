@@ -1,3 +1,41 @@
+## Deferred startup supply ordering — 2026-10-06
+
+Existing bootstrap suite:48passed/0failed (23.11s), including18 added cases.
+Denied isolation or malformed config makes zero supplier calls; mixed explicit
+inputs, unisolated use, exceptions and malformed dependencies reject. Positive
+cases exercise existing lazy signing/replay checks with synthetic selection and
+isolation boundaries. All60 preexisting top-level test AST nodes were preserved.
+This proves the ordering hook only; authenticated public startup is still under
+implementation. XML: `outputs/rsi-permission-evidence-20261006/bootstrap-deferred.xml`.
+WSP00/15/71/97; no native worker admission claim.
+
+Independent request-signer review: two frozen baseline cases failed at the
+intended assertions (0 setup errors): altered numeric type reached credential
+retrieval, and a final owner reread outlived permission expiry. Candidate uses
+canonical policy bytes and checks lifetime after the reread and lease exit.
+Diagnostic entrypoint plus supplier suites:52passed/2platform skips in16.56s,
+including those regressions and two entrypoint isolation-ordering cases.
+XML: `outputs/rsi-permission-evidence-20261006/startup-entry-connected.xml`.
+This diagnostic overlapped integration writes; a stable-source rerun is required.
+
+Subsequent stable checkpoint:100passed/2platform skips across entrypoint,
+request supplier and bootstrap,38.69s; all modified-Python before/after pins
+unchanged. `startup-connected-result.json` records exact scope and limits.
+Independent materializer suite: first3pass/2fail exposed frozen-policy tuples
+at a strict JSON-list validator; after source-only conversion repair the same
+five tests passed,0errors/skips. `materializer-result-review.json` distinguishes
+real protocol/store behavior from simulated OS custody. These are local
+integration receipts, not production or full public-entrypoint admission.
+
+E0 v8 construction checks:3pass, verifying legacy digest dependence, constructive
+artifact-byte generation without rewriting config, and actual config-validator
+rejection of a tampered generation alias (`versioned-binding-result-review.json`).
+Connected grant manifest/permission consumers:88pass/1existing symlink skip,
+including16 v7/v8 positive/adversarial cases. First missing-field tests failed
+in fixture signing before reaching the consumer; preserved and corrected to
+test malformed stored input, without changing production checks. Source pins
+stable during both successful runs. Full public startup remains a separate gate.
+
 ## Exact permission evidence type — 2026-10-05
 
 Existing twelve-case regression baseline:6pass/6fail. Independent frozen suite:

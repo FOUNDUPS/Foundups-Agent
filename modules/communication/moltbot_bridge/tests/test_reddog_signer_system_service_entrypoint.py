@@ -64,6 +64,115 @@ MODULE_PATH = (
 )
 
 
+def test_legacy_e0_config_binding_retains_generation_alias_dependency(tmp_path):
+    """Observe the legacy custody-assembly cycle; this is not public acceptance."""
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_owner_controlled_e0_admission as e0
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
+        signer_owner_e0_authority_binding_digest, POLICY_SCHEMA_V6,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import REQUIRED_RUNTIME_ARTIFACTS
+
+    values = e0._fixture(tmp_path)
+    policy = values["policy"]
+    assert policy["schema_version"] == POLICY_SCHEMA_V6
+    assert policy["target_signer_generation_id"] == policy["artifact_generation_digest"]
+    original = signer_owner_e0_authority_binding_digest(policy)
+    config = json.loads(values["config_path"].read_text(encoding="ascii"))
+    assert config["owner_e0_authority_binding_digest"] == original
+    assert "signer_service_config.json" in REQUIRED_RUNTIME_ARTIFACTS
+    changed = dict(policy)
+    changed["artifact_generation_digest"] = "sha256:" + "f" * 64
+    assert changed["artifact_generation_digest"] != policy["artifact_generation_digest"]
+    assert signer_owner_e0_authority_binding_digest(changed) == original
+    changed["target_signer_generation_id"] = changed["artifact_generation_digest"]
+    rebound = signer_owner_e0_authority_binding_digest(changed)
+    assert rebound != original  # Legacy behavior must not silently change.
+    rebound_config = {**config, "owner_e0_authority_binding_digest": rebound}
+    assert digest(rebound_config) != digest(config)
+
+
+def _v8_generation_binding_case(tmp_path):
+    """Construct real config/artifact hashes; this does not publish a manifest."""
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_owner_controlled_e0_admission as e0
+    from modules.communication.moltbot_bridge.tests.reddog_grant_authority_service_policy_test_support import grant_service_git_provenance_policy_fields
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import POLICY_SCHEMA_V8
+    from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import REQUIRED_RUNTIME_ARTIFACTS
+    from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_io import _describe_runtime_artifacts_unlocked
+    from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_config_loader import load_current_generation_signer_config
+
+    values = e0._fixture(tmp_path)
+    policy, selection = values["policy"], values["selection"]
+    policy.update(grant_service_git_provenance_policy_fields(
+        repo_root_digest=e0.DIGEST_A, source_commit_sha="1" * 40,
+        object_format="sha1", source_policy_digest=e0.DIGEST_D,
+        source_descriptor_digest=e0.DIGEST_E,
+    ))
+    policy["schema_version"] = POLICY_SCHEMA_V8
+    e0._rebind_config_and_sign(values, values["grant_private"])
+    raw_config = values["config_path"].read_bytes()
+    runtime = Path(selection["runtime_root"])
+    for name in REQUIRED_RUNTIME_ARTIFACTS:
+        path = runtime / name
+        if name == "signer_service_config.json":
+            path.write_bytes(raw_config)
+        elif name == "authoritative_work_state.json":
+            path.write_text(json.dumps({"revision": "binding-fixture", "wre_queue_items": [{"queue_item_id": "binding-fixture"}]}), encoding="ascii")
+        elif not path.exists():
+            path.write_bytes(b"{}")  # Inert artifacts, never admitted/published.
+    descriptors = _describe_runtime_artifacts_unlocked({
+        **selection, "authority_profile_digest": digest({}),
+        "signer_service_config_digest": selection["config_digest"],
+        "work_state_revision": "binding-fixture", "queue_item_id": "binding-fixture",
+    })
+    generation = digest(tuple(item.to_dict() for item in descriptors))
+    policy["artifact_generation_digest"] = generation
+    policy["target_signer_generation_id"] = generation
+    selection["artifact_generation_digest"] = generation
+    e0._resign(values)
+    config = load_current_generation_signer_config(
+        repo_root=Path(selection["repo_root"]), selection=selection,
+    )
+    return values, config, raw_config
+
+
+def test_v8_e0_binding_constructs_generation_without_rewriting_config(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
+        canonical_signer_owner_e0_policy_input, signer_owner_e0_authority_binding_digest,
+        validated_signer_owner_e0_policy, POLICY_PREFIX_V8,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_admission_validation import require_policy_config_binding
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
+
+    values, config, raw_config = _v8_generation_binding_case(tmp_path)
+    policy = values["policy"]
+    validated_signer_owner_e0_policy(policy, now_epoch=policy["issued_at"] + 1)
+    assert signer_owner_e0_authority_binding_digest(policy) == values["config"]["owner_e0_authority_binding_digest"]
+    assert values["config_path"].read_bytes() == raw_config
+    assert require_policy_config_binding(policy, config).signer_agent_id == policy["target_signer_agent_id"]
+    canonical = canonical_signer_owner_e0_policy_input(policy)
+    assert canonical.startswith(POLICY_PREFIX_V8)
+    assert Ed25519SignatureVerifier().verify(values["grant_public"], canonical, policy["signature"]) is True
+    tampered = {**policy, "target_signer_generation_id": "sha256:" + "f" * 64}
+    assert Ed25519SignatureVerifier().verify(values["grant_public"], canonical_signer_owner_e0_policy_input(tampered), policy["signature"]) is False
+
+
+def test_v8_e0_config_validator_rejects_tampered_generation_alias(tmp_path):
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_owner_controlled_e0_admission as e0
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_admission_validation import require_policy_config_binding
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import signer_owner_e0_authority_binding_digest
+
+    values, config, _raw_config = _v8_generation_binding_case(tmp_path)
+    policy = values["policy"]
+    original = signer_owner_e0_authority_binding_digest(policy)
+    require_policy_config_binding(policy, config)  # Discriminatory valid control.
+    policy["target_signer_generation_id"] = "sha256:" + "f" * 64
+    assert policy["target_signer_generation_id"] != policy["artifact_generation_digest"]
+    e0._resign(values)  # Even a re-signed inconsistent alias must fail binding.
+    assert signer_owner_e0_authority_binding_digest(policy) == original
+    with pytest.raises(ValueError, match="^e0_target_profile_binding_mismatch$"):
+        require_policy_config_binding(policy, config)
+
+
 @pytest.fixture(autouse=True)
 def _trusted_clock(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW)
@@ -544,6 +653,50 @@ def test_production_secret_resolver_fails_closed_without_e0() -> None:
     assert result.success is False
     assert result.get_value() is None
     assert result.error_message == "system_service_secret_resolver_not_admitted"
+
+
+@pytest.mark.parametrize("isolation_accepts", [False, True])
+def test_entrypoint_defers_startup_dependencies_until_isolation(
+    tmp_path, monkeypatch, isolation_accepts,
+):
+    """Real bootstrap ordering; isolation and dependency failure are synthetic."""
+    from dataclasses import replace
+
+    prepared = _prepare_real_cli_owner(tmp_path, monkeypatch)
+    _upgrade_prepared_owner_to_v2(prepared, tmp_path)
+    startup = loader_module.load_system_service_startup_selection(
+        owner_config_path=prepared["owner_path"], repo_root=prepared["harness"].repo_root,
+    )
+    calls = []
+
+    def dependencies():
+        calls.append("dependencies")
+        raise ValueError("synthetic_missing_provisioned_custody")
+
+    def isolation(policy, **kwargs):
+        calls.append("isolation")
+        if not isolation_accepts:
+            raise ValueError("synthetic_isolation_denied")
+        return _accepted_isolation(policy, **kwargs)
+
+    startup = replace(startup, runtime_dependencies_supplier=dependencies)
+    factory = CapturingResolverFactory(FakeResolver({}))
+    service = CapturingBoundedService()
+    emitted = []
+    code = _run_entrypoint_args(
+        argparse.Namespace(repo_root=str(prepared["harness"].repo_root),
+                           owner_authority_config=str(prepared["owner_path"])),
+        resolver_factory=factory, serve_bounded=service, emit=emitted.append,
+        principal_key_resolver=FailClosedPrincipalKeyResolver(),
+        proposal_replay_high_water_store=None,
+        startup_selection_loader=lambda **kwargs: startup,
+        process_isolation_gate=isolation,
+    )
+    assert code == 2
+    assert calls == (["isolation", "dependencies"] if isolation_accepts else ["isolation"])
+    assert factory.calls == [] and service.calls == []
+    assert json.loads(emitted[0])["status"] == SYSTEM_SERVICE_ENTRYPOINT_REJECT
+    assert json.loads(emitted[0])["result"]["no_runtime_secret_file_loaded"] is None
 
 
 def test_real_module_entrypoint_exposes_stable_help_command() -> None:
