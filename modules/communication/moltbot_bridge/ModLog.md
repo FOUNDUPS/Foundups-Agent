@@ -1,5 +1,12 @@
 ## Authenticated startup integration in progress — 2026-10-06
 
+Follow-up CI at `14e6c023a` correctly rejected the stale canonical test registry
+after the test split. Regenerated using the existing WRE generator; `--check`
+reports current at1,689files with270quarantined unchanged. Diff adds only the
+new test owner plus deterministic shard-boundary shifts. No registry policy or
+quarantine change; runtime manifest excludes this registry. Evidence:
+`startup-test-registry-failure.log` in the same20261006 evidence directory.
+
 PR2078 hosted qualification at `025626636` exposed a reproducible structural
 failure: effect-consent owner tests grew to267lines against the200line bound
 (674other cases passed). Extract v7 startup checks into the same effect-consent
