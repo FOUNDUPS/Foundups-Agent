@@ -248,13 +248,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1422) {
+  while (candidate.required_runtime_files.length < 1423) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1422);
-  assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1422);
   assert.strictEqual(candidate.required_runtime_files.length, 1423);
+  assert.deepStrictEqual(validator.validateManifest(candidate), []);
+  addMember(1423);
+  assert.strictEqual(candidate.required_runtime_files.length, 1424);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

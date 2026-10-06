@@ -23,7 +23,8 @@ snapshots and a short lifetime. Review found and repaired post-load mutation and
 expiry across owner IO;8baseline failures,97connected passes/3platform skips,
 128adjacent passes including v7/v8 startup. Real Ed25519 acceptance/rejection
 and one-shot replay3pass; final startup38pass. Independent recheck found no blocker.
-Publication pending; detailed evidence in the existing moltbot_bridge ModLog and
+PR2095 CI exposed the existing source-size cap; reviewed extraction preserves
+the cap and public API. Connected90pass/1skip; publication pending. Detailed evidence in the existing moltbot_bridge ModLog and
 `outputs/rsi-permission-evidence-20261006/model-owner-execution.json`.
 
 This supplies trusted inputs, not native admission. Next: bind the exact owner ID

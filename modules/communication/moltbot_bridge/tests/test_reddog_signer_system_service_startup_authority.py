@@ -8,6 +8,10 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    _real_model_evidence_signatures, _corrupt_model_evidence_signature,
+)
+
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_system_service_entrypoint import (
     CapturingBoundedService,
     CapturingResolverFactory,
@@ -122,7 +126,8 @@ def test_model_verifier_owner_lifetime_and_exact_snapshot(tmp_path, monkeypatch,
         item["raw_digest"] = loader_module.raw_digest(raw)
         owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
         values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
-    checked_read = loader_module.secure_read_confined_bytes
+    from modules.communication.moltbot_bridge.src import reddog_signer_system_service_owner_inputs as owner_inputs
+    checked_read = owner_inputs.secure_read_confined_bytes
     def read(path, **kwargs):
         result = checked_read(path, **kwargs)
         reads.append(str(path))
@@ -132,7 +137,7 @@ def test_model_verifier_owner_lifetime_and_exact_snapshot(tmp_path, monkeypatch,
             elif case == "expire_during_read":
                 now[0] = authority["expires_at"]
         return result
-    monkeypatch.setattr(loader_module, "secure_read_confined_bytes", read)
+    monkeypatch.setattr(owner_inputs, "secure_read_confined_bytes", read)
     def load():
         return loader_module.load_system_service_model_runtime_verifier(
             owner_config_path=values["owner_config_path"], repo_root=values["repo"],
@@ -173,43 +178,6 @@ def test_model_verifier_rechecks_memory_and_owner_read_time(tmp_path, monkeypatc
         monkeypatch.setattr(loader_module, "_load_owner_config", delayed)
     with pytest.raises(ValueError):
         actual.trusted_now_epoch()
-
-
-def _real_model_evidence_signatures(monkeypatch):
-    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-    from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
-    from modules.ai_intelligence.ai_gateway.tests import model_signed_evidence_test_helpers as signed
-    from modules.communication.moltbot_bridge.tests import model_runtime_binding_receipt_test_helpers as bound
-    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
-        Ed25519SignatureVerifier, encode_ed25519_public_key, encode_ed25519_signature,
-    )
-    keys = {}
-    for name in ("BENCHMARK_PUBLIC_KEY", "PROMOTION_PUBLIC_KEY"):
-        key = Ed25519PrivateKey.generate()
-        public = encode_ed25519_public_key(key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw))
-        keys[public] = key
-        monkeypatch.setattr(signed, name, public)
-        monkeypatch.setattr(bound, name, public)
-    monkeypatch.setattr(signed, "deterministic_signature",
-                        lambda public, message: encode_ed25519_signature(keys[public].sign(message.encode("utf-8"))))
-    monkeypatch.setattr(signed, "DeterministicSignatureVerifier", Ed25519SignatureVerifier)
-    monkeypatch.setattr(bound, "DeterministicSignatureVerifier", Ed25519SignatureVerifier)
-
-
-def _corrupt_model_evidence_signature(value):
-    from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import build_model_signed_evidence_receipt
-    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import encode_ed25519_signature
-    if isinstance(value, dict):
-        if "signature" in value:
-            fields = {k: v for k, v in value.items() if k not in {"receipt_id", "schema_version"}}
-            fields["signature"] = encode_ed25519_signature(bytes(64))
-            value.update(build_model_signed_evidence_receipt(**fields).to_dict())
-        else:
-            for item in value.values():
-                _corrupt_model_evidence_signature(item)
-    elif isinstance(value, list):
-        for item in value:
-            _corrupt_model_evidence_signature(item)
 
 
 @pytest.mark.parametrize("case", ["valid", "bad_signature", "wrong_trust_key"])
