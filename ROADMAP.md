@@ -12,7 +12,31 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — provider issuance handoff (2026-10-06 JST):**
+**Current execution — local-first RSI admission (2026-10-06 JST):**
+PR2084 is merged at `2837b0db389c567de9a5402e22fa711affcf176d` with equal
+reviewed/merged trees,94 connected passes,8 integrity passes and successful
+exact-main CI/CodeQL. The first main compatibility attempt failed during pip
+index parsing; its unchanged-source retry passed. The repair branch is retired.
+
+Existing local LM Studio lifecycle + AI Gateway caller completed one Qwen Coder7B
+call and unloaded it in10.672s. Independent inspection confirmed cleanup. The
+server remains on127.0.0.1:1234; no paid provider call occurred. `READY.` failed
+the exact `READY` instruction. This is runtime evidence, not admitted RSI.
+
+The next work follows the [local-first operating budget](docs/operations/RSI_SWARM_DISPATCH.md#local-first-operating-budget--2026-10-06).
+Native18/P0 remains blocked: the resident resolver still returns no use lease;
+the real provider lacks an effect-specific HIGH/ULTRA permit; authentic runtime
+inputs remain unverified. Reuse the existing effect review/consent/grant/issuer
+owners (15/P1,C3/I4/D4/impact4) before composing the resident join. Windows-local
+callers already exist, so WSL networking is provider-dependent, not a universal
+prerequisite. No CodeAct or synthetic-authority bypass. Independent review of
+this new audit is unavailable because its worker hit a usage limit.
+
+Evidence: `outputs/rsi-permission-evidence-20261006/provider-handoff-pr2084-merge-closure.json`,
+`local-qwen-runtime-smoke.json` and its independent review. Coordinator repairs,
+local inference and passing tests do not establish retained autonomous benefit.
+
+**Historical provider issuance handoff (2026-10-06 JST):**
 PR2083 merged at `4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708`; reviewed and
 merged trees match. Exact-main CI37401710455 and CodeQL37401710274 passed.
 The old owned branch is retired with a verified recovery bundle. WSP15 selects

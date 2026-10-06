@@ -1880,24 +1880,37 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-      "observation_path": "current_observation.provider_issuance_handoff_20261006",
-      "base_commit": "4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708",
-      "selected_action": "Exit provider issuance lease before target signing; retain authenticated target revalidation",
-      "status": "candidate_connected_validation_in_progress",
+      "observation_path": "current_observation.local_first_admission_20261006",
+      "base_commit": "2837b0db389c567de9a5402e22fa711affcf176d",
+      "selected_action": "Qualify existing effect authorization-to-grant contract and resident issuer join; use local-first bounded execution",
+      "status": "source_reconciled_independent_review_unavailable",
       "wsp15": {
-          "complexity": 2,
+          "complexity": 3,
           "importance": 4,
           "deferability": 4,
           "impact": 4,
-          "total": 14,
+          "total": 15,
           "priority": "P1"
       },
       "dispatchable": false,
       "execution_plane": "Owned source repair; no native runtime grant",
-      "next_action": "Freeze semantic lease-lifetime baseline, extend existing provider/client, preserve legacy lease API, independently validate and publish before actual runtime admission",
+      "next_action": "Freeze effect-domain acceptance and negative controls under existing owners; preserve authentic admission and independent review. Apply local-first operating budget; no further broad audit or paid worker fan-out.",
       "higher_priority_gates": ["Native RSI18/P0 requires legitimate verified model/runtime admission; known-root inputs absent, not whole-machine absence"]
   },
   "current_observation": {
+    "local_first_admission_20261006": {
+      "source": "2837b0db389c567de9a5402e22fa711affcf176d",
+      "previous_closure": "PR2084 merged; exact-main CI attempt2 and CodeQL passed; first pip index-parse failure preserved; branch retired",
+      "local_runtime": "One existing managed-lifecycle Qwen Coder7B call10.672s; unloaded independently verified; localhost server retained; exact READY response failed punctuation; token values are word-count estimates",
+      "blockers": ["Resident resolver returns no use lease", "Effect-specific HIGH/ULTRA permit absent from real provider path", "Authentic runtime/trust inputs unverified"],
+      "budget_owner": "docs/operations/RSI_SWARM_DISPATCH.md#local-first-operating-budget--2026-10-06",
+      "budget_scope": "Planning instruction, not implemented global limiter or runtime grant",
+      "default_paid_worker_calls": 0,
+      "initial_local_candidates": 1,
+      "max_diagnosed_retries": 1,
+      "review": "New audit independent worker hit usage limit; no review returned",
+      "native_rsi_complete": false
+    },
     "provider_issuance_handoff_20261006": {
         "source": "4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708",
         "branch": "codex/rsi-provider-handoff-20261006",

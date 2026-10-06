@@ -61155,3 +61155,12 @@ if cooldown_sets:
 - Reapplied WSP15/97 to27 candidates. The closed bootstrap handoff leaves the queue; residual local M2M context/child fidelity is15/P1, without inheriting the old18/P0. No principal writer/seed reader incompatibility was established, so no speculative normalization repair.
 - Next17/P0: existing typed genesis intake-to-job lineage. Declared intent lacks the expected payload; build job drops envelope data; the existing positive fixture can accept commander denial. Independent source-bound review and four verified owner paths show the next bounded contract. No second source sprint or live dispatch in this checkpoint.
 - AmIBot remains existing draft1751 with failing validate and issue1750 open. Current source/evidence/next planning packet: docs/roadmaps/rsi_swarm_backlog.json#current_observation.post_sprint_reobservation. WSP00/15/22/50/62/84/97/99/109.
+## Local-first RSI operating policy — 2026-10-06
+
+WSP00/15/97: reconcile merged PR2084 and measured local inference with the
+remaining native admission gaps. 012 directs reduced architect token use:
+reuse exact-source evidence, no paid worker fan-out by default, one local
+candidate with fixed deterministic verification and one diagnosed retry.
+Retain independent promotion/rollback gates. This documents operating limits;
+it does not implement a global budget controller or confer runtime authority.
+Local lifecycle evidence is retained; actual RSI benefit remains unproven.
