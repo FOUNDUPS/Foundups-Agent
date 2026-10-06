@@ -8,6 +8,9 @@
 
 ## Dynamic RedDog Model Evidence
 
+- [x] Strict positive integer use-time clock;55 connected offline tests pass.
+  This does not satisfy the production trust-configuration item below.
+
 - [x] Exact OpenRouter Kimi K3 request-truth boundary: explicit/env/default
   resolution, 4,096 floor, 131,072 cap, mandatory maximum reasoning, no
   temperature, and pre-transport rejection.

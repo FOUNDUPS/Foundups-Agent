@@ -1880,29 +1880,48 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.signer_peer_join_20261007",
-    "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
-    "selected_action": "Connect existing fresh signer-peer verification to resident use-time evidence",
-    "status": "LOCAL_COMPONENT_CONNECTION_VALIDATED; PUBLICATION_PENDING",
+    "observation_path": "current_observation.model_clock_20261007",
+    "base_commit": "ad1d673ffe86ab49b11d89a8bbd37a1d342930da",
+    "selected_action": "Reject coerced trusted time in existing model evidence verifier",
+    "status": "LOCALLY_VALIDATED_PUBLICATION_PENDING",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
-      "impact": 4,
-      "total": 15,
+      "impact": 3,
+      "total": 13,
       "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "Source-only consumer connection; independently authenticated runtime enrollment remains separate",
-    "next_action": "Publish reviewed peer consumer in existing PR2093; verify exact-head CI before closure; then re-observe five remaining independent trust connections using WSP15/97. No runtime grant inferred.",
-    "higher_priority_gates": [
-      "Native18/P0: admitted local worker improvement, independent baseline-controlled evaluation, retained use and later benefit remain unproven"
-    ]
+    "next_action": "Close reviewed clock repair; then connect existing model evidence to authenticated runtime supply, without minting trust from caller configuration"
   },
   "current_observation": {
+    "model_clock_20261007": {
+      "base_commit": "ad1d673ffe86ab49b11d89a8bbd37a1d342930da",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 3,
+        "total": 13,
+        "priority": "P1"
+      },
+      "truth": "Local deterministic fixture verification only",
+      "finding": "String and fractional clock values accepted by int coercion; exact positive integer now required",
+      "validation": {
+        "baseline_failed": 8,
+        "connected_passed": 55,
+        "seconds": 1.54
+      },
+      "evidence": "outputs/rsi-permission-evidence-20261006/model-clock-execution.json",
+      "blocked_upstream": "AI Gateway roadmap leaves production signer/trust/revocation/replay setup open; actual current provisioning still requires verification; no independent current binding to resident model inputs established",
+      "native_rsi_demonstrated": false,
+      "worker_calls": 0,
+      "coordinator_review_tokens": null
+    },
     "signer_peer_join_20261007": {
       "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
-      "truth": "LOCALLY_VERIFIED_COMPONENT_CONNECTION; hosted consumer checks and native grant-backed operation unverified",
+      "truth": "MERGED_VERIFIED_MAIN; source qualified, native operation unverified",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1965,8 +1984,10 @@
         "source_review": "outputs/rsi-permission-evidence-20261006/peer-consumer-time-evidence-correction-review.json",
         "remaining": "Five unrelated trust reasons after valid live collection; real enrolled grant supply and native RSI still unverified",
         "pr": 2093,
-        "publication": "consumer diff not yet pushed"
-      }
+        "publication": "PR2093 merged; exact reviewed/main tree equal; branch CI/CodeQL success; main checks pending"
+      },
+      "merge_commit": "ad1d673ffe86ab49b11d89a8bbd37a1d342930da",
+      "closure_evidence": "outputs/rsi-permission-evidence-20261006/peer-consumer-2093-merge-closure.json"
     },
     "principal_generation_join_20261007": {
       "base_commit": "6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd",

@@ -1,3 +1,13 @@
+## Peer connection closure / model clock guard — 2026-10-07
+
+WSP00/6/15/22/50/97: PR2093 merged ad1d673ff, exact reviewed/main tree equal;
+branch CI381 startup/566resident1skip and CodeQL passed. Main checks pending;
+owned branch retired/recoverable. Five trust gates and native RSI remain open.
+Next13/P1: existing AI Gateway use-time clock guard. Eight baseline failures,
+55 connected offline tests passed; two inputs previously accepted, six rejection
+contracts normalized. No native authority or worker-model retry. See module
+ModLog and current root roadmap for evidence; publication pending.
+
 ## Fresh peer resident connection — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97: existing bootstrap supplies an optional grant callback
