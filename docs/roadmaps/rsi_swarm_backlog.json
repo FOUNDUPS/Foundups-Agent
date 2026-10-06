@@ -1915,7 +1915,7 @@
       "paid_provider_calls": 0,
       "architect_review_cost": "unmeasured",
       "review": "Expiry blocker resolved; effect-expiry-independent-review.json SHA256 f6dfc88449f9127a085086dea8c0b62a64579541445d0f1d818e320d733f497d",
-      "publication": "Draft PR2090; first CI37505730046 failed shared-backend file bound; reviewed repair pending new-head checks",
+      "publication": "Draft PR2090; first CI37505730046 file bound repaired; second CI37507545251 passed signing677/3skip and startup248 then failed extension count1419. Reviewed exact1421/reject1422 correction passes fast tier15; new-head checks pending.",
       "next_dependency": "Inventory14/P1 observed no root/profile in inspected Windows scopes or gateway processes; eight exact public artifact names absent at conditional Windows default. Resolve existing authenticated supply configuration; do not fabricate authority.",
       "expiry_baseline": {
         "failed": 3,

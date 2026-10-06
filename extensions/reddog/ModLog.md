@@ -1,3 +1,18 @@
+## Effect approval closure count — PR2090, 2026-10-07
+
+Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`
+and `reddog_current_effect_signing_authority.py`, removes none. The existing
+compatibility cap and boundary regression now accept1421/reject1422, and require
+both named additions. Digest remainsbc84374ad861c79d9b51c79964722916a7f6b0e336a2356909fe486923e0259d;
+byte limits, allowlists and signatures are unchanged. No service/extension install.
+
+CI37507545251 passed signing677/3skip and startup248, then exposed the stale1419
+extension boundary. Local full fast tier15 members passed in9468ms after restoring
+required LF to changed JS files. Independent two-file review found no blocker;
+receipt `effect-signing-extension-count-review.json`, SHA256
+`d09b48a349f4016dd964ab0bae45440661c4e86dc2f4a0e9c74e3e60846b6bb4`.
+WSP00/6/15/22/50/84/97. New-head hosted checks pending; no native RSI claim.
+
 ## Protected-use control-proof source binding — 2026-10-05
 
 Regenerate the existing backend manifest after two-owner descriptor/control-proof changes. Closure remains1,417 files; digest `70ae71c8d9973c071b4403f2e19e3d95fb541b452161031975d47105e3065d99` is pinned in existing JavaScript/Python consumers. Count limits and default startup are unchanged. See bridge module ModLog; no deployment or native RSI activation.

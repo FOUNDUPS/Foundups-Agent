@@ -20,8 +20,10 @@ provider and independent signer owners without changing the exact target digest.
 707 local connected/structural tests pass after reproducing and repairing the approval-to-grant
 expiry defect (baseline3fail/1pass). Independent bounded review found no new defect;
 Draft PR2090: first hosted run failed backend678>675; reviewed extraction restores
-674 lines and includes the missed structural suite locally. New-head publication
-checks pending. Fixture-backed source qualification is not native admission.
+674 lines and includes the missed structural suite locally. Second hosted run
+passed signing677/3skip and startup248, then exposed the old1419 extension cap.
+Reviewed count correction accepts exactly1421/rejects1422; local fast tier15 passed.
+New-head publication checks pending. Fixture-backed source qualification is not native admission.
 
 The local-first budget remains: deterministic checks, no repeat broad audits,
 no failed-Qwen-route retries or paid-provider fallback. Architect/review usage is
