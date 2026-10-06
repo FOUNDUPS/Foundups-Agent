@@ -1,4 +1,4 @@
-"""Production-seam fixtures for elevated-consensus end-to-end tests."""
+"""Elevated-consensus composition fixtures; synthetic owner seams are explicit."""
 from __future__ import annotations
 
 import hashlib
@@ -119,6 +119,7 @@ def build_route(
     target_key: Ed25519PrivateKey,
     grant_key: Ed25519PrivateKey,
     consensus_authority: ElevatedConsensusSignerAuthority,
+    *, synthetic_owner_unit: bool = False,
 ) -> tuple[IndependentSignerSecretGrantProvider, RedDogIsolatedSignerSocketClient, dict[str, Any]]:
     store = _store(root)
     target_public, grant_public = public_key(target_key), public_key(grant_key)
@@ -127,7 +128,7 @@ def build_route(
     provider = _grant_provider(
         root, role, store, binding, policy, grant_key, consensus_authority
     )
-    return provider, _target_client(root, store, binding, target_key), policy
+    return provider, _target_client(root, store, binding, target_key, synthetic_owner_unit), policy
 
 
 def _grant_provider(
@@ -167,8 +168,11 @@ def _grant_provider(
 def _target_client(
     root: Path, store: Any, binding: ResolvePerSignBinding,
     target_key: Ed25519PrivateKey,
+    synthetic_owner_unit: bool = False,
 ) -> RedDogIsolatedSignerSocketClient:
-    target_backend = ResolvePerSignSignerBackend(
+    from modules.communication.moltbot_bridge.tests.test_reddog_signer_resolve_per_sign_backend import _UnitGrantAndResolutionBackend
+    backend_type = _UnitGrantAndResolutionBackend if synthetic_owner_unit else ResolvePerSignSignerBackend
+    target_backend = backend_type(
         binding=binding,
         grant_boundary=SignerSecretAccessGrantBoundary(
             nonce_store=store, revocation_oracle=AtomicSignerSecretGrantRevocationOracle(),

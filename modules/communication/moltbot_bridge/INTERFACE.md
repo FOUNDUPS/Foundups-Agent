@@ -1274,6 +1274,16 @@ configuration. Owner, oracle and replay-store provenance must match before
 serving; proposal, conversation and verified-outcome profiles are outside this
 single-target mode. Omitting the argument preserves the existing runtime path.
 
+The resolve-per-sign backend requires the exact owner-bound
+`Wsp71EphemeralSignerBackendFactory`; a callable factory or lease-shaped hook
+does not confer admission. Its current lease must derive the same binding as the
+consuming backend, and the consuming grant boundary must use the admission's
+exact replay store and root revocation oracle. Ownerless factories and substituted
+boundaries reject before key resolution. Security-critical lease/protected-use
+calls use the checked class implementations rather than instance-shadowed methods.
+This deliberately tightens the generic constructor contract; synthetic unit
+fixtures do not qualify the public admission path.
+
 The assembly lease ends before serving. Each request consumes its verified grant,
 obtains root ACQUIRE, then obtains a fresh generation lease for key resolution,
 exact-request signing and signature verification. The generation lease ends

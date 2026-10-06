@@ -1008,13 +1008,16 @@ def _admission_wire(case, backend, grant):
         json.dumps(wire).encode("utf-8"), peer=case.peer, backend=backend))
 
 
-def test_grant_runtime_actual_v2_lazy_one_use_and_replay(tmp_path, monkeypatch):
+@pytest.mark.parametrize("shadow_boundary", [False, True])
+def test_grant_runtime_actual_v2_lazy_one_use_and_replay(tmp_path, monkeypatch, shadow_boundary):
     case = _admission_case(tmp_path, monkeypatch)
 
     def serve(**kwargs):
         assert case.active is False and case.resolver.calls == []
         backend = kwargs["backend"]
         assert type(backend) is factory_fixture.grant_fixture.ResolvePerSignSignerBackend
+        if shadow_boundary:
+            backend.grant_boundary.authorize_consumed_use = lambda grant, action: action()
         assert _admission_wire(case, backend, None)["accepted"] is False
         assert case.resolver.calls == []
         bad = {**case.grant, "signature": "invalid-signature"}
@@ -1036,6 +1039,65 @@ def test_grant_runtime_actual_v2_lazy_one_use_and_replay(tmp_path, monkeypatch):
                            "resolve", "resolve", "sign", "verify", "exit", "root_finish"]
     assert case.active is False and all(ref() is None for ref in case.builds)
     assert len(case.signing_backends) == 1 and all(ref() is None for ref in case.signing_backends)
+
+
+def test_grant_runtime_rejects_substituted_consuming_boundary(tmp_path, monkeypatch):
+    case = _admission_case(tmp_path, monkeypatch)
+    fixture = factory_fixture.grant_fixture
+    observed = []
+
+    def serve(**kwargs):
+        boundary = fixture.SignerSecretAccessGrantBoundary(
+            nonce_store=case.admission.replay_store,
+            revocation_oracle=fixture.AtomicSignerSecretGrantRevocationOracle(),
+            clock=lambda: fixture.NOW,
+        )
+        backend = replace(kwargs["backend"], grant_boundary=boundary)
+        response = _admission_wire(case, backend, case.grant)
+        observed.append((response["accepted"], len(case.resolver.calls), len(case.builds)))
+        return CapturingBoundedService()(**kwargs)
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        case.config, case.resolver, serve_bounded=serve, secret_grant_admission=case.admission)
+    assert result.accepted is True, result.rejection_reasons
+    assert observed == [(False, 0, 0)]
+
+
+@pytest.mark.parametrize("corruption", ["ownerless_factory", "shadowed_lease", "binding_mismatch"])
+def test_grant_runtime_requires_matching_factory_owner(tmp_path, monkeypatch, corruption):
+    case = _admission_case(tmp_path, monkeypatch)
+
+    def serve(**kwargs):
+        backend = kwargs["backend"]
+        factory = backend.backend_factory
+        if corruption in ("ownerless_factory", "shadowed_lease"):
+            factory = replace(factory, owner_context=None)
+            if corruption == "shadowed_lease":
+                from contextlib import nullcontext
+                factory.__dict__["signing_authority_lease"] = lambda: nullcontext(backend.binding)
+        else:
+            from modules.communication.moltbot_bridge.src.reddog_signer_wsp71_ephemeral_backend_factory import _lease_authenticated_factory
+            binding = factory.owner_context[2]
+            # Exercise the guard directly so grant validation cannot mask this check.
+            expected = replace(binding, signer_profile_id=binding.signer_profile_id + "-substituted")
+            before = len(case.events)
+            with pytest.raises(ValueError, match="signer_grant_current_owner_mismatch"):
+                with _lease_authenticated_factory(factory, expected, backend.grant_boundary):
+                    pytest.fail("mismatched binding entered protected body")
+            assert case.events[before:] == ["enter", "exit"]
+            assert case.resolver.calls == [] and case.builds == []
+            return CapturingBoundedService()(**kwargs)
+        backend = replace(backend, backend_factory=factory)
+        response = _admission_wire(case, backend, case.grant)
+        assert response["accepted"] is False
+        assert case.resolver.calls == [] and case.builds == []
+        assert case.active is False
+        return CapturingBoundedService()(**kwargs)
+
+    result = run_reddog_signer_socket_service_runtime_wiring(
+        case.config, case.resolver, serve_bounded=serve, secret_grant_admission=case.admission)
+    assert result.accepted is True, result.rejection_reasons
+    assert "sign" not in case.events and "resolve" not in case.events
 
 
 @pytest.mark.parametrize("corruption", ["config", "peer", "owner_id", "multiple_profiles", "specialized_policy",

@@ -1,3 +1,24 @@
+## Authenticated target-owner qualification — 2026-10-06 (in progress)
+
+WSP00/15/97. Frozen absent/no-op owner hook controls reproduced unsafe signing.
+Ownerless factory, mismatched binding, shadowed method and substituted consuming
+boundary controls exercise exact production rejection before resolution. Root
+ACQUIRE/FINISH remain required by positive event ordering, including a shadowed
+boundary method. Genuine owner-leased factory and concurrent revocation fixtures
+replace former ownerless positives; revocation-first now also uses admitted setup.
+
+Synthetic grant/crypto and HIGH/effect orchestration fixtures are explicitly unit
+scoped. Original acceptance assertions are retained there; exact-production
+variants reject and persist no authority or effect lease. These tests do not
+qualify HIGH/effect runtime admission. Independent review accepted this evidence
+distinction and found original assertions retained. Initial four-owner120pass/1skip;
+expanded133pass/1fail/1skip. The failure was a missing ledger field after correct
+rejection; strengthened empty-ledger assertion then passed (elevated2/2).
+Final connected134pass/1skip in70.46s; integrity8pass in68.70s. One Windows symlink
+case skips for unavailable privilege. Collection typo nonce_runtime.py was
+corrected to existing nonce_transaction.py; no tests ran in that failed command.
+Evidence under outputs/rsi-permission-evidence-20261006/target-owner-*.xml.
+
 ## Generation-fenced response commit — 2026-10-06
 
 WSP15 selects14/P1 (C3/I4/D4/impact3) after PR2078 merged at a2a45ddec;

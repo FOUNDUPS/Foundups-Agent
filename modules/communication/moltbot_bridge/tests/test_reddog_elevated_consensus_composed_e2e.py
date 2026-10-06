@@ -5,6 +5,7 @@ from __future__ import annotations
 from contextlib import contextmanager
 from dataclasses import replace
 from types import SimpleNamespace
+import pytest
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -61,9 +62,11 @@ class _RoleRoutingSigner:
         return response
 
 
+@pytest.mark.parametrize("synthetic_owner_unit", [False, True])
 def test_complete_elevated_consensus_chain_commits_authority(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, synthetic_owner_unit
 ) -> None:
+    """Unit composition accepts; exact production rejects this ownerless fixture."""
     principal_key = Ed25519PrivateKey.generate()
     reddog_key = Ed25519PrivateKey.generate()
     request = _request(
@@ -83,6 +86,7 @@ def test_complete_elevated_consensus_chain_commits_authority(
     signer, routing_signer = _external_signer(
         tmp_path, monkeypatch, authority,
         {"principal": principal_key, "reddog": reddog_key},
+        synthetic_owner_unit=synthetic_owner_unit,
     )
     repo_root = tmp_path / "repo"
     runtime_root = tmp_path / "runtime"
@@ -102,6 +106,11 @@ def test_complete_elevated_consensus_chain_commits_authority(
         elevated_consensus_capability=capability, now=NOW,
     )
 
+    if not synthetic_owner_unit:
+        assert result.accepted is False
+        assert store.load() == {}
+        assert routing_signer.responses and all(not item.accepted for item in routing_signer.responses)
+        return
     assert result.accepted is True, (
         result.receipt.rejection_reasons, routing_signer.responses
     )
@@ -129,13 +138,14 @@ def _authority(request):
     )
 
 
-def _external_signer(tmp_path, monkeypatch, authority, target_keys):
+def _external_signer(tmp_path, monkeypatch, authority, target_keys, *, synthetic_owner_unit=False):
     providers, clients, policies = {}, {}, {}
     for role, target_key in target_keys.items():
         root = tmp_path / role
         root.mkdir()
         provider, client, policy = build_route(
-            root, role, target_key, Ed25519PrivateKey.generate(), authority
+            root, role, target_key, Ed25519PrivateKey.generate(), authority,
+            synthetic_owner_unit=synthetic_owner_unit,
         )
         providers[role], clients[role] = provider, client
         policies[str(provider.owner_config_path)] = policy

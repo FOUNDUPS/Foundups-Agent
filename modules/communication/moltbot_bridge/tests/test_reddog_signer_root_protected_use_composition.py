@@ -330,58 +330,87 @@ def test_revocation_first_rejects_before_callback(tmp_path, monkeypatch) -> None
     assert called == []
 
 
+def _admitted_resolve_backend(tmp_path, monkeypatch):
+    # Local import avoids the existing runtime-fixture -> this module dependency.
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as admitted
+    case = admitted._admission_case(tmp_path, monkeypatch)
+    # Competing revocation RPC is expected while the signing thread holds its
+    # lease; use the real router without the single-thread observer's assertion.
+    _bind_router(case.values, monkeypatch)
+    service = admitted.CapturingBoundedService()
+    result = admitted.run_reddog_signer_socket_service_runtime_wiring(
+        case.config, case.resolver, serve_bounded=service,
+        secret_grant_admission=case.admission,
+    )
+    assert result.accepted is True, result.rejection_reasons
+    backend = service.calls[0]["backend"]
+    assert type(backend) is ResolvePerSignSignerBackend
+    return case, backend
+
+
 def test_resolve_per_sign_acquire_first_blocks_revocation(
     tmp_path, monkeypatch
 ) -> None:
-    values = runtime(tmp_path, monkeypatch)
-    _install_current(values, signed_snapshot(values))
-    _bind_router(values, monkeypatch)
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import Ed25519SignerBackend
+    case, backend = _admitted_resolve_backend(tmp_path, monkeypatch)
+    values, request, grant = case.values, case.request, case.grant
     entered, release = threading.Event(), threading.Event()
+    ephemeral = SimpleNamespace(calls=0)  # Observer only; actual signing is Ed25519.
+    actual_sign = Ed25519SignerBackend.sign
 
-    class BarrierBackend(resolve_fixture._EphemeralBackend):
-        def sign(self, request, peer):
-            entered.set()
-            assert release.wait(5)
-            return super().sign(request, peer)
+    def barrier_sign(self, request, peer):
+        entered.set()
+        assert release.wait(5)
+        ephemeral.calls += 1
+        return actual_sign(self, request, peer)
 
-    ephemeral = BarrierBackend()
-    backend, request, grant = _resolve_backend(values, tmp_path, ephemeral)
+    monkeypatch.setattr(Ed25519SignerBackend, "sign", barrier_sign)
     responses = []
     thread = threading.Thread(
         target=lambda: responses.append(
-            backend.sign_with_secret_grant(
-                request, resolve_fixture._peer(), grant
-            )
+            backend.sign_with_secret_grant(request, case.peer, grant)
         )
     )
     thread.start()
-    assert entered.wait(5)
-    candidate = signed_snapshot(values, sequence=2)
-    stage(values, candidate)
-    with pytest.raises(ValueError, match="request_rejected"):
-        values["client"].advance_snapshot(candidate["snapshot_id"])
-    release.set()
-    thread.join(5)
+    try:
+        assert entered.wait(5)
+        candidate = signed_snapshot(values, sequence=2)
+        stage(values, candidate)
+        with pytest.raises(ValueError, match="request_rejected"):
+            values["client"].advance_snapshot(candidate["snapshot_id"])
+    finally:
+        release.set()
+        thread.join(5)
     assert len(responses) == 1 and responses[0].accepted is True
     assert ephemeral.calls == 1
+    assert Ed25519SignatureVerifier().verify(
+        request.signer_public_key, request.signing_input, responses[0].signature)
 
 
 def test_resolve_per_sign_revocation_first_emits_no_signature(
     tmp_path, monkeypatch
 ) -> None:
-    values = runtime(tmp_path, monkeypatch)
-    request = resolve_fixture._request()
-    _install_current(values, signed_snapshot(values))
-    _bind_router(values, monkeypatch)
-    ephemeral = resolve_fixture._EphemeralBackend()
-    backend, request, grant = _resolve_backend(values, tmp_path, ephemeral)
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import Ed25519SignerBackend
+    case, backend = _admitted_resolve_backend(tmp_path, monkeypatch)
+    values, request, grant = case.values, case.request, case.grant
+    ephemeral = SimpleNamespace(calls=0)  # Observe the actual signing method.
+    actual_sign = Ed25519SignerBackend.sign
+
+    def observed_sign(self, request, peer):
+        ephemeral.calls += 1
+        return actual_sign(self, request, peer)
+
+    monkeypatch.setattr(Ed25519SignerBackend, "sign", observed_sign)
     candidate = _revoking_snapshot(values, str(grant["grant_id"]), 2)
     _install_current(values, candidate)
-    response = backend.sign_with_secret_grant(
-        request, resolve_fixture._peer(), grant
-    )
+    response = backend.sign_with_secret_grant(request, case.peer, grant)
     assert response.accepted is False
     assert ephemeral.calls == 0
+    assert response.rejection_code == resolve_fixture.REJECT_SECRET_GRANT_INVALID
+    assert case.resolver.calls == [] and case.builds == []
+    assert case.signing_backends == [] and "sign" not in case.events
 
 
 def test_unfinished_use_fails_closed_and_blocks_later_use_and_revocation(

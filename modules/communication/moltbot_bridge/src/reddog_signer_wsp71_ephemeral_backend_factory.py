@@ -86,15 +86,14 @@ class Wsp71EphemeralSignerBackendFactory:
     def signing_authority_lease(self):
         """Recheck owner state only inside the root protected-use callback."""
         if self.owner_context is None:
-            yield
-            return
+            raise ValueError("signer_grant_owner_context_required")
         from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import lease_signer_socket_service_grant_admission
         config, admission, expected = self.owner_context
         with lease_signer_socket_service_grant_admission(config, admission) as (current, owner):
             profile, binding = _owner_ephemeral_binding(current, admission, owner)
             if profile != self.profile or binding != expected:
                 raise ValueError("signer_grant_current_owner_mismatch")
-            yield
+            yield binding
 
     @property
     def signer_agent_id(self) -> str:
@@ -136,6 +135,20 @@ class Wsp71EphemeralSignerBackendFactory:
         return replace(result, backend=backend)
 
 
+@contextmanager
+def _lease_authenticated_factory(factory: Any, expected_binding: Any, boundary: Any):
+    """Require a real owner lease matching the consuming backend's binding."""
+    from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import ResolvePerSignBinding
+    from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant import SignerSecretAccessGrantBoundary
+    if type(factory) is not Wsp71EphemeralSignerBackendFactory:
+        raise ValueError("signer_grant_factory_unverified")
+    with Wsp71EphemeralSignerBackendFactory.signing_authority_lease(factory) as binding:
+        if not (type(binding) is type(expected_binding) is ResolvePerSignBinding
+                and binding == expected_binding and type(boundary) is SignerSecretAccessGrantBoundary
+                and boundary._nonce_store is factory.owner_context[1].replay_store
+                and boundary._revocation_oracle is factory.owner_context[1].revocation_oracle):
+            raise ValueError("signer_grant_current_owner_mismatch")
+        yield
 def build_owner_leased_ephemeral_backend(
     config: Any, resolver: SignerKeyResolver, admission: Any, owner: Any,
     *, control_loop_anchor_store: ControlLoopAnchorStore | None,
