@@ -61155,3 +61155,31 @@ if cooldown_sets:
 - Reapplied WSP15/97 to27 candidates. The closed bootstrap handoff leaves the queue; residual local M2M context/child fidelity is15/P1, without inheriting the old18/P0. No principal writer/seed reader incompatibility was established, so no speculative normalization repair.
 - Next17/P0: existing typed genesis intake-to-job lineage. Declared intent lacks the expected payload; build job drops envelope data; the existing positive fixture can accept commander denial. Independent source-bound review and four verified owner paths show the next bounded contract. No second source sprint or live dispatch in this checkpoint.
 - AmIBot remains existing draft1751 with failing validate and issue1750 open. Current source/evidence/next planning packet: docs/roadmaps/rsi_swarm_backlog.json#current_observation.post_sprint_reobservation. WSP00/15/22/50/62/84/97/99/109.
+## Local-first RSI operating policy — 2026-10-06
+
+WSP00/15/97: reconcile merged PR2084 and measured local inference with the
+remaining native admission gaps. 012 directs reduced architect token use:
+reuse exact-source evidence, no paid worker fan-out by default, one local
+candidate with fixed deterministic verification and one diagnosed retry.
+Retain independent promotion/rollback gates. This documents operating limits;
+it does not implement a global budget controller or confer runtime authority.
+Local lifecycle evidence is retained; actual RSI benefit remains unproven.
+
+Bounded experiment: Qwen Coder7B made two local calls through existing managed
+LM Studio lifecycle (9.843s and45.64s), zero paid provider calls. First raw
+completion returned a code fence; the diagnostic harness also used an incorrect
+receipt attribute, preserved in attempt1 evidence. Chat retry completed but
+retained the effect issuer's unsafe ordering and removed an annotation import.
+Frozen regression baseline3fail/1pass; candidate3fail/6pass in4.70s. Rejected;
+no accepted improvement or independent review. These are coordinator-authored
+tests and a quarantined proposal, not admitted WRE execution. Owned source/test
+edits restored after evidence capture; model list empty. Same frozen task is the
+next instruction/API qualification gate; no further paid or local retry here.
+Evidence: `outputs/rsi-permission-evidence-20261006/effect-handoff-*`.
+
+2026-10-07 closure: coordinator repair PR2087 merged atbbb975b4f with equal
+checked/main trees,184 local passes, independent source review and passing
+exact-head CI/CodeQL. Exact-main CI37486916613/CodeQL37486916968 passed. Reconcile this existing policy
+PR with main while preserving both the rejected local experiment and completed
+repair. Next15/P1: authenticated reviewer runtime evidence before effect permit
+issuance; native18/P0 remains blocked. No new model retries or runtime grants.

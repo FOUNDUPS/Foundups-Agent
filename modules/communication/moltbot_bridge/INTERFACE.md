@@ -1,4 +1,4 @@
-## Effect issuer grant handoff — 2026-10-06 (local candidate)
+## Effect issuer grant handoff — merged PR2087, 2026-10-07
 
 `AuthoritativeUseLeaseGrantProvider` now requires `issue_grant(request) -> Mapping`.
 `ExternalSignerAuthoritativeUseLeaseIssuer.issue()` obtains the grant after clean

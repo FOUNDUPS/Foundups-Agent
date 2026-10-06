@@ -12,19 +12,63 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — effect issuer handoff (2026-10-06 JST):**
-Base/main2837b0db3 includes merged PR2084. Two local Qwen attempts failed the
-fixed effect-issuer repair; retry budget is exhausted (experiment/policy in
-draft PR2085). WSP15 selects the executable prerequisite15/P1,C3/I4/D4/impact4:
-reuse issue_grant in the existing effect issuer and dispatch after provider exit.
-Coordinator repair passes80 connected tests; the four frozen controls improve
-from3fail/1pass to4pass. Independent source review found no blocker; reviewed
-head46e9eb816 passed CI/CodeQL. PR2087 now reconciles mainb91823b28 (PR2086),
-preserving its host recovery work; refreshed hosted validation is pending. This is a
-source prerequisite, not an autonomous retained improvement. Native18/P0 still
-requires effect-specific HIGH/ULTRA permits, authentic runtime inputs and resolver
-wiring, then independent baseline-controlled evaluation and later retained use.
-See module interface/ModLog and current backlog for scope and exact evidence.
+**Current execution — runtime evidence before effect permission (2026-10-07 JST):**
+PR2087 merged at `bbb975b4f20fec5981a85a971f55fd26e3c7c6e8`. Its checked head
+and main have identical tree `d10f4e91051009d5eb025ac80499a65ac58f5888`.
+Independent source review found no blocker;184 local tests and exact-head
+CI37485625238/CodeQL37485619460 passed. Exact-main CI37486916613 and
+CodeQL37486916968 also passed.
+The issuer handoff source prerequisite is closed; it is a coordinator repair,
+not retained autonomous RSI. Preserve the failed local attempt below.
+
+Re-observed15/P1 (C3/I4/D4/impact4): connect the existing authenticated model
+runtime verifier to the effect reviewer's exact principal and receipt bindings.
+The signed review already binds reviewer identity to model/receipt claims; no
+new principal-to-runtime designation schema is required. Independently verify
+the cited artifacts with the existing use-time verifier and consume its exact
+registered capability. Receipt rehydration alone is insufficient. Reuse verifier
+bootstrap and current-review owners; the architect-specific display query is
+not the admission adapter. This does not prove the model generated the review.
+Native18/P0 remains blocked pending authentic
+runtime inputs, separate single-target effect permission, resident wiring,
+independent evaluation, retention/rollback and benefit in a later invocation.
+Do not widen the delegated two-child permit or turn verifier booleans into grants.
+
+**Historical local-first experiment (2026-10-06 JST):**
+PR2084 is merged at `2837b0db389c567de9a5402e22fa711affcf176d` with equal
+reviewed/merged trees,94 connected passes,8 integrity passes and successful
+exact-main CI/CodeQL. The first main compatibility attempt failed during pip
+index parsing; its unchanged-source retry passed. The repair branch is retired.
+
+Existing local LM Studio lifecycle + AI Gateway caller completed one Qwen Coder7B
+call and unloaded it in10.672s. Independent inspection confirmed cleanup. The
+server remains on127.0.0.1:1234; no paid provider call occurred. `READY.` failed
+the exact `READY` instruction. This is runtime evidence, not admitted RSI.
+
+The next work follows the [local-first operating budget](docs/operations/RSI_SWARM_DISPATCH.md#local-first-operating-budget--2026-10-06).
+First bounded local repair experiment: two Qwen Coder7B calls, zero paid provider
+calls, no accepted patch. Frozen effect-issuer tests reproduce three failures;
+the normalized local candidate retains all three (6 other cases pass). Raw text
+completion returned only a fence; chat retry returned source but retained the
+fault and removed a required annotation import. Stop at the retry cap. Source
+and owned test edits were restored; frozen tests, raw proposals and receipts are
+preserved in `outputs/rsi-permission-evidence-20261006/effect-handoff-*`.
+This is a controlled diagnostic failure, not an admitted worker or RSI gain.
+Local worker qualification remains pending; do not repeat this exhausted
+experiment while the higher-priority permission prerequisite is unresolved. Do not infer model
+incapability or a transport root cause from this single experiment.
+
+Native18/P0 remains blocked: the resident resolver still returns no use lease;
+the real provider lacks an effect-specific HIGH/ULTRA permit; authentic runtime
+inputs remain unverified. Reuse the existing effect review/consent/grant/issuer
+owners (15/P1,C3/I4/D4/impact4) before composing the resident join. Windows-local
+callers already exist, so WSL networking is provider-dependent, not a universal
+prerequisite. No CodeAct or synthetic-authority bypass. Independent review of
+this new audit is unavailable because its worker hit a usage limit.
+
+Evidence: `outputs/rsi-permission-evidence-20261006/provider-handoff-pr2084-merge-closure.json`,
+`local-qwen-runtime-smoke.json` and its independent review. Coordinator repairs,
+local inference and passing tests do not establish retained autonomous benefit.
 
 **Historical provider issuance handoff (2026-10-06 JST):**
 PR2083 merged at `4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708`; reviewed and

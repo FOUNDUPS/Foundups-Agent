@@ -4695,3 +4695,27 @@ Practical cost controls:
 - Use caching and supported asynchronous batch pricing only after the specific API/adapter contract is verified. Codex subscription usage and OpenRouter/API billing are different meters; do not present public API prices as this task's account charge.
 
 Recommended operating rhythm: one architect pass to define acceptance, one economical worker, deterministic validation, one independent review, then compact results back into the roadmap and module memory. Extra high is justified for the hard authority decisions in this audit; it is excessive as the permanent default for routine roadmap execution.
+# Local-first operating budget — 2026-10-06
+
+012 directs this RSI lane to minimize paid architect compute and prioritize
+actual local execution. This is an operating instruction, not a runtime grant
+or a claim that these limits are globally enforced.
+
+- Reuse cached source-pinned evidence. Re-audit changed dependencies or a
+  demonstrated failure; do not repeat whole-repository audits per cycle.
+- No paid worker/reviewer fan-out or OpenRouter fallback by default. Local
+  Qwen drafts bounded proposals; deterministic tests evaluate fixed criteria.
+  Gemma pattern checks cannot substitute for independent outcome verification.
+- Begin with one admitted ticket, one local candidate and one verification
+  pass. Permit at most one targeted retry after a diagnosed failure. Stop a
+  repeated failure with a compact receipt; do not double cycle budgets.
+- Keep frozen baseline/held-out checks outside worker ownership. Preserve
+  scope, scanner, signed-role and effect-authority gates. Unadmitted proposals
+  remain quarantined; local availability does not confer execution authority.
+- Architect intervention is for a concrete blocker, design conflict or
+  promotion/rollback decision. Never spend another broad audit merely because
+  the previous local operation finished. Batch routine results in receipts.
+- Record local calls, attempts, pass/fail, wall time, actual token usage when
+  available, estimate provenance, paid provider calls and accepted/retained
+  improvements. Track architect usage separately; zero paid model calls is
+  not zero total compute cost. Autonomous retained benefit remains unproven.

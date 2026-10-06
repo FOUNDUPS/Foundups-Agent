@@ -1,4 +1,16 @@
-## Effect issuer handoff — 2026-10-06
+## Effect issuer handoff closed — 2026-10-07
+
+PR2087 merged atbbb975b4f; merged and checked trees match. Exact-head
+CI37485625238 and CodeQL37485619460 passed; exact-main CI37486916613 and
+CodeQL37486916968 also passed.
+Independent source review found no blocker;184 local cases passed. Next15/P1:
+authenticate the runtime evidence used by current effect-review verification
+through the existing model verifier before single-target effect permit work.
+Signed reviews already bind reviewer identity to model claims; do not add a
+separate designation schema. Artifact verification is not execution provenance.
+Native admission and retained autonomous benefit remain unproven.
+
+## Effect issuer handoff — 2026-10-06 (historical implementation checkpoint)
 
 15/P1 coordinator repair after the capped local-worker experiment failed.
 Reuse the merged provider's issue_grant interface in the existing effect issuer.
