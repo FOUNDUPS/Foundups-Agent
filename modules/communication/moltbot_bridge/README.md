@@ -1,3 +1,10 @@
+## Resident effect admission — 2026-10-07
+
+Existing resident bootstrap accepts an explicitly provisioned worktree lease
+issuer; see [INTERFACE](INTERFACE.md#resident-final-decision-effect-join--2026-10-07).
+Local connected fixtures are tested. Native admission still requires authentic
+runtime supply and all independent trust gates.
+
 ## Reviewer artifact verification — 2026-10-07
 
 Reuse `ReviewerRuntimeArtifacts` and `ModelRuntimeReviewerEvidenceResolver` from

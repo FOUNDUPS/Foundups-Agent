@@ -1,27 +1,27 @@
-## Current selection — 2026-10-07
+## Resident final-decision effect join — 2026-10-07
 
-PR2090 closed the lifetime repair at b7a0d996b5fe96133bd010015882730110bdde3a;
-reviewed/main trees match, main CI37510970982 and four CodeQL analyses passed.
-707 connected/structural tests,8 integrity tests and15 extension fast members
-passed in the preceding source slice. These are fixture/source proofs.
+WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
+issuer to the resident valve owner. Approval binds the final decision, order,
+plan, signed authority, identity and expected bindings before one-use admission.
+After issuance, reload source/authority and repeat canonical evaluation with
+fresh trusted time. Independent review found strict permission expiry during
+approval; the repair rejects expired permission even with a live opaque lease.
+All seven unresolved trust reasons remain enforced. No new module or store.
 
-Next16/P0 (4/4/4/4): resident effect join, SPECIFIED_NOT_IMPLEMENTED.
-`ResidentQueueExecutionValveStageHandler` resolves authority before constructing
-the valve decision. `authoritative_worktree_lease_digest` binds the final decision,
-plan and order. Connect preparation -> checked decision -> exact effect approval/
-external issuance -> one-use admission through these existing owners. Do not
-infer that the resolver's current `None` can simply be replaced by an issuer.
-Preserve every unresolved non-effect gate, current queue truth and expiry check;
-never turn a preview into execution permission. Wrong decision/order/plan, replay,
-expired approval and failed cleanup must stop before a worktree or worker runs.
+Local connected qualification:229 passed/2 skipped in79.67s. Source-bound evidence:
+`outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json`
+and XML/log. Real disposable signatures, synthetic owner/runtime inputs. Windows
+skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
+recursive test-clock stall are retained. CI now selects four resident wiring
+suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
 
-Re-observation18pass/6.79s covers existing effect lease, resident valve-handler
-and queue-binding tests; it does not execute the missing join. Runtime supply14/P1
-(2/4/4/4) remains unconfigured in the four inspected environment fields of both
-running gateway user services. Resolve authentic existing supply before a live
-ticket; no global absence claim or fabricated enrollment. Native18/P0 and later
-retained RSI benefit remain open. Evidence and source pins live in the existing
-RSI evidence directory and canonical backlog, not a separate roadmap.
+WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
+Native18/P0 remains blocked on authentic admission, fixed independent baseline/
+held-out evaluation, retention/rollback and later benefit. Next prerequisite:
+authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
+No further model calls or service changes. Reuse saved receipts and rerun only
+affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
+
 
 ## Single-effect grant composition — 2026-10-07 checkpoint
 

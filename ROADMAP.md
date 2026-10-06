@@ -12,36 +12,37 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — resident effect join (2026-10-07 JST):**
-PR2090 is merged as `b7a0d996b5fe96133bd010015882730110bdde3a`; reviewed
-and merged trees match. Exact-main CI37510970982 and all four CodeQL analyses
-passed. The separate eSingularity sharp Dependabot update failed and remains
-outside this lane. Closure: `outputs/rsi-permission-evidence-20261006/effect-signing-2090-merge-closure.json`.
+**Current selection — resident effect join (2026-10-07):**
 
-WSP15 selects16/P0 (C4/I4/D4/impact4): connect the existing resident valve,
-effect approval/issuer and one-use worktree admission owners. The resolver runs
-before the valve decision exists, while the exact effect digest includes that
-decision. Passing an issuer into the current resolver alone is insufficient;
-bind the final checked decision before approval/signing and registration. Do not
-clear unresolved trust-anchor reasons or accept a serialized capability to open
-the valve. This join is **SPECIFIED_NOT_IMPLEMENTED**.
+WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
+issuer to the resident valve owner. Approval binds the final decision, order,
+plan, signed authority, identity and expected bindings before one-use admission.
+After issuance, reload source/authority and repeat canonical evaluation with
+fresh trusted time. Independent review found strict permission expiry during
+approval; the repair rejects expired permission even with a live opaque lease.
+All seven unresolved trust reasons remain enforced. No new module or store.
 
-Targeted re-observation at that merge:18 tests passed in6.79s across the effect
-lease, resident valve handler and current queue-binding suites. They separately
-qualify disposable-signature issuance and rejection behavior, not the connected
-native path. Both gateway user services were running; four inspected owner/root/
-profile/model-binding settings were absent from their process environments.
-Authenticated supply14/P1 (C2/I4/D4/impact4) remains a prerequisite for a live
-ticket; this limited observation does not prove global absence. Holo retrieval
-was rejected for authority-root/head mismatch; exact-source reads substitute for
-navigation, not for CURRENT index evidence. See the existing module roadmap and
-`current_observation.resident_effect_join_20261007` in the canonical backlog.
+Local connected qualification:229 passed/2 skipped in79.67s. Source-bound evidence:
+`outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json`
+and XML/log. Real disposable signatures, synthetic owner/runtime inputs. Windows
+skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
+recursive test-clock stall are retained. CI now selects four resident wiring
+suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
 
-Native18/P0 remains incomplete: admitted local improvement, independent fixed
-baseline/held-out verification, governed retention/rollback and later benefit.
-No model calls, grants, service activation or worker retry occurred in this audit.
-Architect compute is unmeasured. Reuse these receipts; repeat only when the
-relevant source/configuration changes or a concrete failure requires it.
+WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
+Native18/P0 remains blocked on authentic admission, fixed independent baseline/
+held-out evaluation, retention/rollback and later benefit. Next prerequisite:
+authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
+No further model calls or service changes. Reuse saved receipts and rerun only
+affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
+
+PR2090/main `b7a0d996b5fe96133bd010015882730110bdde3a` remains the verified
+historical checkpoint: CI37510970982 and four CodeQL analyses passed. The current
+slice is isolated from it. Holo retrieval rejected authority-root/head mismatch;
+exact-source navigation is not CURRENT index evidence. Both gateway services
+were running, but four inspected authority settings were absent from their
+process environments; this does not prove global absence. See the existing
+`current_observation.resident_effect_join_20261007` backlog record.
 
 **Historical execution — single-effect grant composition (2026-10-07 JST):**
 PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;

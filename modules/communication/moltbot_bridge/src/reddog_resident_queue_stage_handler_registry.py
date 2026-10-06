@@ -220,6 +220,7 @@ def build_reddog_resident_queue_stage_handler_registry(
     ] = None,
     intake_target: str = "foundup_job",
     expected_valve_state: str = VALVE_OPEN_WORKTREE_CREATE,
+    worktree_lease_issuer: Any = None,
     worktree_runner: Any = None,
     pilot_dryrun_binding_enabled: bool = False,
     generic_writer_dryrun_result: Optional[Mapping[str, Any]] = None,
@@ -422,7 +423,7 @@ def build_reddog_resident_queue_stage_handler_registry(
             now=now_datetime,
             intake_target=intake_target,
             expected_valve_state=expected_valve_state,
-            worktree_admission_registry=admission_registry,
+            worktree_admission_registry=admission_registry, worktree_lease_issuer=worktree_lease_issuer,
         ),
     )
     _add_if_ready(

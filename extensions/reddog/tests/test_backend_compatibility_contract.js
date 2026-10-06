@@ -238,7 +238,7 @@ function assertConfigurationMigrationPrecedence() {
 }
 
 function assertRuntimeFileCountBoundary() {
-  for (const name of ['reddog_effect_consensus_proof.py', 'reddog_current_effect_signing_authority.py']) {
+  for (const name of ['reddog_effect_consensus_proof.py', 'reddog_current_effect_signing_authority.py', 'reddog_external_signer_authoritative_use_lease.py']) {
     assert(manifest.required_runtime_files.includes(`modules/communication/moltbot_bridge/src/${name}`));
   }
   const validator = require('../backend_compatibility_manifest');
@@ -248,13 +248,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1421) {
+  while (candidate.required_runtime_files.length < 1422) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1421);
-  assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1421);
   assert.strictEqual(candidate.required_runtime_files.length, 1422);
+  assert.deepStrictEqual(validator.validateManifest(candidate), []);
+  addMember(1422);
+  assert.strictEqual(candidate.required_runtime_files.length, 1423);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

@@ -1,5 +1,6 @@
 """Real disposable approval signatures; explicitly synthetic owner/runtime inputs."""
 
+import json
 from copy import deepcopy
 from dataclasses import asdict, replace
 from types import SimpleNamespace
@@ -71,10 +72,12 @@ def _prepare_reviewers(state, monkeypatch):
     state.decisions = [decision, second]
 
 
-def setup(monkeypatch, tmp_path, *, target_overrides=None):
+def setup(monkeypatch, tmp_path, *, target_overrides=None, parent_overrides=None):
     tmp_path.mkdir(parents=True, exist_ok=True)
     original_verify = module.reviews.Ed25519SignatureVerifier.verify
     _, state = consent.setup(monkeypatch, tmp_path)
+    if parent_overrides:
+        state.kw["parent"] = replace(state.kw["parent"], **parent_overrides)
     approval_verify = module.reviews.Ed25519SignatureVerifier.verify
     def verify(self, key, message, signature):
         if message.startswith(("reddog-effect-consent.", "reddog-reviewer-designation.", "reddog-effect-consensus-review.")):
@@ -108,3 +111,55 @@ def setup(monkeypatch, tmp_path, *, target_overrides=None):
 
 def reset_owner_reads(state):
     state.reads = 0
+
+
+def resident_case(monkeypatch, tmp_path):
+    from . import test_reddog_resident_queue_execution_valve_handler as resident
+    from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import InMemoryWorktreeAdmissionRegistry
+    tmp_path.mkdir(parents=True, exist_ok=True)
+    monkeypatch.setitem(resident._canonical_runtime_roots.__globals__, "NOW", resident.NOW.isoformat())
+    _, runtime = resident._canonical_runtime_roots(tmp_path, canonical_artifacts=True)
+    env = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
+    governed = resident.GovernedExecutionValveEnvironment.from_mapping(env)
+    resolution = resident.GovernedValveUseTimeResolution(
+        environment=governed, expected_bindings={k: env[k] for k in resident.CANONICAL_BINDING_FIELDS},
+        permission_ttl_seconds=300, permission_expires_at=resident._future_expiry(),
+        rejection_reasons=(), signed_authority_reverified=True)
+    store = resident._seeded_store()
+    order = resident._work_order(**{k: env[k] for k in ("work_order_id", "requested_operation", "repo_full_name", "foundup_id")})
+    order["repo_permission_snapshot"]["digest"] = env["permission_snapshot_digest"]
+    profile = json.loads((runtime / "authority_profile.json").read_text(encoding="utf-8"))
+    order["wsp15_allocation_receipt"] = profile["wsp15_allocation_receipt"]
+    stages = store._state["stage_results"]
+    stages["work_order_invocation"]["invocation_result"]["work_order_id"] = env["work_order_id"]
+    stages["executor_plan"]["executor_plan_result"]["work_order_id"] = env["work_order_id"]
+    # Synthetic reverified parent identity; no claim of enrollment or native admission.
+    store._state["stage_results"]["authority_runtime"]["authority_result"]["identity"] = {"principal_id": "test-principal"}
+    registry = InMemoryWorktreeAdmissionRegistry()
+    handler = resident.build_reddog_resident_queue_execution_valve_stage_handler(
+        chain_results_store=store, work_order_resolver=resident._Resolver(order),
+        valve_environment=governed, governed_use_time_authority_resolver=resident._UseTimeResolver(resolution),
+        worktree_admission_registry=registry, now=resident.NOW)
+    handler.governed_use_time_authority_resolver.trusted_now_epoch = lambda: int(resident.NOW.timestamp())
+    request = resident.ResidentQueueStageDispatchRequest(
+        stage_key=resident.EXECUTION_VALVE_STAGE_KEY, next_action=resident.NEXT_QUEUE_EXECUTION_VALVE_INVOKE,
+        queue_item_id="queue-1", selected_slice="REDDOG_TEST_SLICE_PHASE1", plan_id="plan-1", accepted_stages=())
+    return handler, request, registry, store
+
+
+def resident_proof_supplier(change, effect, order, store, handler, resolution, state):
+    calls = []
+    def proof(expected):
+        calls.append(expected)
+        assert expected["effect_payload"] == effect
+        if change == "order":
+            order["changed_during_approval"] = True
+        elif change == "chain":
+            store._state["changed_during_approval"] = True
+        elif change == "resolution":
+            handler.governed_use_time_authority_resolver.result = replace(resolution,
+                rejection_reasons=("canonical_memex_supply_signed_evidence_verifier_missing",))
+        elif change == "exception":
+            raise RuntimeError("approval_unavailable")
+        return state.proof
+    return proof, calls

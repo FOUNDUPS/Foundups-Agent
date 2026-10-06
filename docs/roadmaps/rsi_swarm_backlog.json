@@ -1883,7 +1883,7 @@
     "observation_path": "current_observation.resident_effect_join_20261007",
     "base_commit": "b7a0d996b5fe96133bd010015882730110bdde3a",
     "selected_action": "Connect existing resident checked decision to exact effect approval, external issuer and one-use worktree admission",
-    "status": "SPECIFIED_NOT_IMPLEMENTED",
+    "status": "IMPLEMENTED_NOT_VALIDATED",
     "wsp15": {
       "complexity": 4,
       "importance": 4,
@@ -1894,15 +1894,16 @@
     },
     "dispatchable": false,
     "execution_plane": "Supervised source connection; live admission still requires authenticated supply",
-    "next_action": "Implement the bounded resident join after checking final-decision ordering and trusted supply contracts; no repeat whole-repo audit or exhausted Qwen route retry",
+    "next_action": "Close owned source publication/CI then authenticated runtime supply/verifiers14/P1; preserve seven trust gates; no exhausted model-route retry",
     "higher_priority_gates": [
       "Native18/P0: admitted local worker improvement, independent baseline-controlled evaluation, retained use and later benefit remain unproven"
-    ]
+    ],
+    "local_qualification": "229 passed, 2 platform skips; synthetic owner/runtime, no native admission"
   },
   "current_observation": {
     "resident_effect_join_20261007": {
       "base_commit": "b7a0d996b5fe96133bd010015882730110bdde3a",
-      "truth": "SPECIFIED_NOT_IMPLEMENTED",
+      "truth": "IMPLEMENTED_NOT_VALIDATED",
       "wsp15": {
         "complexity": 4,
         "importance": 4,
@@ -1912,12 +1913,6 @@
         "priority": "P0"
       },
       "selected_action": "Connect existing resident checked decision to exact effect approval, external issuer and one-use worktree admission",
-      "source_sha256": {
-        "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "43c7cc9467b14e6bb54678db668787c105de35c621878c21c95803364e53953b",
-        "modules/communication/moltbot_bridge/src/reddog_resident_queue_execution_valve_handler.py": "6396f8414e24a5ac1ea0e7700aa699b1c2b210fa39baf7c7990749be143aff70",
-        "modules/communication/moltbot_bridge/src/reddog_worktree_admission_capability.py": "966970c69c79557deebf684e77c287a175d27fb75d55e1b35e5f0a39be9a72ae",
-        "modules/communication/moltbot_bridge/src/reddog_external_signer_authoritative_use_lease.py": "5715631252c111d6c5d6952399936d4d4643d3198b2caae5182c3448109e6e70"
-      },
       "finding": "Authority resolution precedes final valve evaluation, but the exact worktree effect digest includes that decision. A direct issuer substitution alone is insufficient; preview is not permission.",
       "acceptance": [
         "Use existing owners; no second scheduler or authority store.",
@@ -1936,11 +1931,13 @@
         "priority": "P1"
       },
       "validation": {
-        "passed": 18,
+        "passed": 229,
+        "skipped": 2,
         "failed": 0,
-        "seconds": 6.79,
-        "xml": "outputs/rsi-permission-evidence-20261006/resident-join-reobservation.xml",
-        "scope": "Existing effect lease, resident handler and queue-binding suites; synthetic provenance; missing connected join not exercised"
+        "seconds": 79.67,
+        "execution": "outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json",
+        "xml": "outputs/rsi-permission-evidence-20261006/resident-join-qualified.xml",
+        "scope": "connected final decision to one-use admission; synthetic runtime/owner inputs"
       },
       "retrieval": {
         "ok": false,
@@ -1953,7 +1950,18 @@
       "paid_provider_calls": 0,
       "architect_tokens": "unmeasured",
       "native_rsi_demonstrated": false,
-      "independent_review": "Not performed for this planning re-observation; prior source reviews retained in PR2090 closure."
+      "independent_review": "Not performed for this planning re-observation; prior source reviews retained in PR2090 closure.",
+      "local_qualification": "229 passed, 2 platform skips; synthetic owner/runtime, no native admission",
+      "next_action": "Close owned source publication/CI then authenticated runtime supply/verifiers14/P1; preserve seven trust gates; no exhausted model-route retry",
+      "baseline_source_sha256": {
+        "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "43c7cc9467b14e6bb54678db668787c105de35c621878c21c95803364e53953b",
+        "modules/communication/moltbot_bridge/src/reddog_resident_queue_execution_valve_handler.py": "6396f8414e24a5ac1ea0e7700aa699b1c2b210fa39baf7c7990749be143aff70",
+        "modules/communication/moltbot_bridge/src/reddog_worktree_admission_capability.py": "966970c69c79557deebf684e77c287a175d27fb75d55e1b35e5f0a39be9a72ae",
+        "modules/communication/moltbot_bridge/src/reddog_external_signer_authoritative_use_lease.py": "5715631252c111d6c5d6952399936d4d4643d3198b2caae5182c3448109e6e70"
+      },
+      "repair": "Fresh canonical reevaluation rejects permission expiry with live lease, changed inputs and wrong targets.",
+      "model_calls": 0,
+      "publication": "pending"
     },
     "effect_signing_composition_20261007": {
       "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",

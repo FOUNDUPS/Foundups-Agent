@@ -12,7 +12,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional
@@ -133,6 +133,20 @@ class GovernedValveUseTimeAuthorityResolver:
         queue_item_id: Optional[str],
         selected_slice: Optional[str],
     ) -> GovernedValveUseTimeResolution:
+        try:
+            now = self.trusted_now_epoch()
+            if type(now) is not int or now < self.now_epoch:
+                raise ValueError("trusted_clock_invalid")
+        except Exception:
+            return GovernedValveUseTimeResolution(
+                environment=None, expected_bindings={}, permission_ttl_seconds=0,
+                permission_expires_at="", rejection_reasons=("canonical_trusted_clock_invalid",),
+                signed_authority_reverified=False)
+        return replace(self, now_epoch=now)._resolve_current(
+            chain_state=chain_state, work_order=work_order,
+            queue_item_id=queue_item_id, selected_slice=selected_slice)
+
+    def _resolve_current(self, *, chain_state, work_order, queue_item_id, selected_slice):
         reasons: list[str] = []
         if not _chain_snapshot_is_canonical(chain_state):
             reasons.append("canonical_chain_results_revision_invalid")

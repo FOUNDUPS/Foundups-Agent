@@ -329,11 +329,20 @@ def test_generation_projection_does_not_change_resident_readiness(tmp_path, monk
         queue_item_id=QUEUE_ID, selected_slice=SLICE,
     )
 
+    if case == "clock-exception":
+        signed.assert_not_called()
+        generation.assert_not_called()
+        clock.assert_called_once()
+        assert result.rejection_reasons == ("canonical_trusted_clock_invalid",)
+        assert not result.signed_authority_reverified and result.authoritative_use_lease is None
+        _assert_readiness_retains_generation_gates(repo, runtime, (signed, clock, generation))
+        assert {path.name: path.read_bytes() for path in runtime.glob("*.json")} == before_bytes
+        return
     signed.assert_called_once()
     assert signed.call_args.kwargs["verification_phase"] is (
         use_time_module.WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING
     )
-    assert clock.call_count == (0 if case == "signed-work-rejected" else 1)
+    assert clock.call_count == (1 if case == "signed-work-rejected" else 2)
     generation_calls = 0 if case in ("signed-work-rejected", "clock-exception") else 1
     assert generation.call_count == generation_calls
     if generation_calls:
@@ -388,7 +397,7 @@ def test_rejected_bindings_do_not_acquire_generation(tmp_path, monkeypatch, case
     assert result.authoritative_use_lease is None
     signed.assert_called_once()
     assert signed.call_args.kwargs["verification_phase"] is use_time_module.WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING
-    clock.assert_not_called()
+    clock.assert_called_once()  # Current authority verification samples time before generation lookup.
     generation.assert_not_called()
     consume.assert_not_called()
     assert {path.name: path.read_bytes() for path in runtime.glob("*.json")} == before_bytes

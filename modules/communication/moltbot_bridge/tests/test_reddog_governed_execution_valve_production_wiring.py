@@ -58,7 +58,9 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
         encoding="utf-8",
     )
     captured: dict[str, object] = {}
-    dependency_bundle = SimpleNamespace(
+    issuer = object()
+    from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import RedDogMainResidentQueueRuntimeDependencyBundle
+    dependency_bundle = RedDogMainResidentQueueRuntimeDependencyBundle(
         accepted=True,
         rejection_reasons=(),
         status="READY",
@@ -110,9 +112,11 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
         now_iso=NOW,
         now_epoch=dependency_bundle.now_epoch,
         max_steps=1,
+        worktree_lease_issuer=issuer,
     )
 
     assert result.accepted is True, result.rejection_reasons
+    assert captured["worktree_lease_issuer"] is issuer
     assert isinstance(captured["valve_environment"], GovernedExecutionValveEnvironment)
     resolver = captured["governed_use_time_authority_resolver"]
     assert isinstance(resolver, GovernedValveUseTimeAuthorityResolver)
@@ -271,8 +275,9 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
     assert result.rejection_reasons == ("malformed_valve_environment",)
 
 
+@pytest.mark.parametrize("fresh_now", [1_784_006_400, 1_784_006_405, True, None, 1_784_006_399])
 def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors(
-    tmp_path, monkeypatch,
+    tmp_path, monkeypatch, fresh_now,
 ) -> None:
     repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
@@ -342,7 +347,7 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         revocation_oracle=object(),
         now_epoch=1_784_006_400,
         required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
-        trusted_now_epoch=lambda: 1_784_006_400,
+        trusted_now_epoch=lambda: fresh_now,
     )
 
     result = resolver.resolve(
@@ -352,7 +357,13 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
     )
 
+    if type(fresh_now) is not int or fresh_now < resolver.now_epoch:
+        assert not calls
+        assert result.rejection_reasons == ("canonical_trusted_clock_invalid",)
+        assert result.signed_authority_reverified is False
+        return
     assert len(calls) == 1
+    assert calls[0]["now"] == fresh_now
     assert (
         calls[0]["verification_phase"]
         == WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING

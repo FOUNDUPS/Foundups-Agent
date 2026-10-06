@@ -35,6 +35,8 @@ def provider_route(monkeypatch, tmp_path, state, *, store=None):
     state.grant_requests, state.grant_responses = [], []
     def sign(request):
         state.grant_requests.append(request)
+        # The simulated independent server starts a new owner-read transaction.
+        reset_owner_reads(state)
         response = client.sign(request)
         state.grant_responses.append(response)
         return response
