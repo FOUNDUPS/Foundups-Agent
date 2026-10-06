@@ -23,6 +23,7 @@ not mean RedDog has 376 canonical specifications.
 | Recurring human connection | `extensions/reddog/docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md` | Non-biometric PoC implemented; broader confidence ladder specified; not deployed |
 | Public guest caps, timeouts and Lick Verification input | `extensions/reddog/docs/REDDOG_PUBLIC_SURFACE_ADMISSION.md` | Guest and non-biometric Lick isolated boundary; unmounted, not deployed; not private 0102 access |
 | Public host and AutoPost/site integration work order | `extensions/reddog/docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` | Remaining implementation/activation gates; never completion evidence |
+| Host-recovery salvage and stranded PR closure | [2026-10-06 reconciliation](audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md) | Exact-base audit, owned scope and validation; not resident activation |
 | Contact/relationship memory | `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md` | Architecture vision; specified, not implemented |
 | Moshpit activity projection | `extensions/reddog/docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` | Existing inputs only; unified renderer not implemented |
 | Memex projection emitter | `extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` | Product contract; specified, not implemented |

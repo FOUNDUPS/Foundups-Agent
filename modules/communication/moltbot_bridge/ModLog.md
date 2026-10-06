@@ -1,15 +1,15 @@
+## Public host recovery salvage — 2026-10-06
+
+WSP00/5/6/10/15/22/34/50/62/97:14/P1 (C3/I4/D4/impact3), base2837b0db3. Salvage #1680 host leases; fence unconfigured recovery, legacy completion and absent lease proof; preserve Lick/quotas.210tests pass,95% coverage; hosted/main gates pending. No activation/provider-death proof. [Audit](../../../docs/audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md).
+
 ## Provider issuance handoff — 2026-10-06 (local candidate)
 
-WSP00/15/97: PR2083 prerequisite merged at4e00032cf with exact-main CI success.
-Select14/P1 (C2/I4/D4/impact4). Independent frozen regression completes the
-synthetic HIGH chain then fails because both target calls hold the provider
-lease. Reuse the existing provider lease in `issue_grant`; return only after
-successful exit. Existing consensus client dispatches afterward. Legacy lease,
-one-use permit checks, provider independence and target admission are preserved.
-No new module or runtime authority. Manual coordinator repair is necessary
-while legitimate model/runtime admission is unverified; this is not a local-agent
-RSI success. Independent source review found no concrete defect in the delta.
-Initial36pass; expanded91pass in24.49s including clean/failed lease exit controls.
+WSP00/15/97: PR2083 prerequisite merged at4e00032cf with exact-main CI success. Select14/P1 (C2/I4/D4/impact4).
+Independent frozen regression completes the synthetic HIGH chain then fails because both target calls hold the provider lease.
+Reuse the existing provider lease in `issue_grant`; return only after successful exit. Existing consensus client dispatches afterward.
+Legacy lease, one-use permit checks, provider independence and target admission are preserved. No new module or runtime authority.
+Manual coordinator repair is necessary while legitimate model/runtime admission is unverified; this is not a local-agent RSI success.
+Independent source review found no concrete defect. Initial36pass; expanded91pass in24.49s including clean/failed lease exit controls.
 Final adapter controls pass; connected94/94 in26.13s. Integrity8/8 passed in63.61s; publication pending.
 Evidence: `outputs/rsi-permission-evidence-20261006/provider-handoff-*`.
 
