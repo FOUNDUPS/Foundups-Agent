@@ -1,3 +1,26 @@
+## Retention closure and native Holo maintenance — 2026-10-07
+
+WSP00/15/22/50/97. PR2097 merged15089a44fe2ffc7150e7cd09688260fa3560e607;
+reviewed1319907e2372c0529b570c700d635df4cb7f4958 and main have equal trees.
+Final branch CI37546071345/CodeQL37546067553 and main
+CI37547076619/CodeQL37547076345 passed. Recovery bundle verified; old owned lane
+retired. Earlier pending/retry entries below are historical.
+
+Reused `reddog_holoindex_postmerge_runtime_once.py` for the exact-main queued
+maintenance task. An initial resume invocation correctly rejected the unequal
+authority/workspace heads; the normal entry reconciled the same task and ran it
+through OpenClaw and its supervisor. COMPLETED, no rejection, both owned runtimes
+stopped. Subsequent owner query CURRENT/no-gap agreed with the runtime generation
+and freshness receipt. The controller did not reindex; the existing maintenance
+owner performed the governed transaction. No new module, authority or scheduler.
+
+Evidence: `outputs/rsi-permission-evidence-20261006/`:
+`memex-retention-2097-merge-closure.json`, `memex-current-use-holo-runtime-initial.json`,
+`memex-current-use-restored-holo.json`, `memex-current-use-next-slice.json`.
+No coordinator-initiated local/paid model calls; total inference/coordination cost
+unmeasured. No repeated broad tests. Next15/P1 is existing current-generation Memex
+consumption; no native worker improvement, retention or later benefit is claimed.
+
 ## Retained proposal verification inputs — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97; selected14/P1 (C2/I4/D4/impact4).
