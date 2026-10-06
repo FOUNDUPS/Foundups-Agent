@@ -435,7 +435,15 @@ def _authority(
         assert signer_profile_id == "reddog-work-authority"
         return current
 
+    from contextlib import contextmanager
+
+    @contextmanager
+    def lease(self, **kwargs):
+        # Synthetic generation evidence; actual fence lifetime has separate tests.
+        yield self.resolve(**kwargs)
+
     monkeypatch.setattr(SignerCurrentGenerationRuntimeAuthority, "resolve", resolve)
+    monkeypatch.setattr(SignerCurrentGenerationRuntimeAuthority, "lease", lease)
     return authority
 
 

@@ -1,3 +1,15 @@
+## Leased current-generation binding — 2026-10-06
+
+`SignerCurrentGenerationRuntimeAuthority.lease(now_epoch=..., signer_profile_id=...)`
+yields audit-only binding while the existing owner generation fence remains held.
+Use it only for local response validation/replay/capability commit, never around a
+remote signer RPC. `resolve()` retains snapshot compatibility and rejected binding
+on validation or cleanup errors. The authoritative-use rehydrator consumes the
+leased path and refreshes time before durable replay and capability commit.
+Failure after durable replay consumption may spend the nonce without returning a
+capability; it must not retry by relaxing replay checks. This API supplies no
+signing permit and does not resolve the provider's outer-fence composition.
+
 ## Deferred startup dependencies (unmerged integration, 2026-10-06)
 
 `run_reddog_signer_socket_service_runtime_bootstrap` accepts optional

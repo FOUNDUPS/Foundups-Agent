@@ -1,3 +1,33 @@
+## Generation-fenced response commit — 2026-10-06
+
+WSP15 selects14/P1 (C3/I4/D4/impact3) after PR2078 merged at a2a45ddec;
+exact-main CI37396021088 passed. Reuse current-generation selection lease in the
+existing runtime-binding owner and consume it through the existing authoritative
+use rehydrator. Signature verification, durable replay consumption and capability
+issuance remain inside that local fence; no remote signer call is added inside it.
+Fresh time checks reject expiry before replay commit and before capability issue.
+Snapshot resolve preserves rejected-binding behavior for selection-exit errors.
+An outer ExitStack also releases the boundary on validation-time interrupts;
+KeyboardInterrupt/SystemExit cleanup is covered without suppressing interruption.
+CI explicitly selects all five connected generation/lease test owners.
+
+Frozen independent expiry regression: baseline1pass/1intended failure, candidate
+2pass with unchanged oracle. Expired handles were not claimed usable. Connected
+candidate56pass in29.27s, including actual selection-boundary lifetime and exit
+failure, plus synthetic rehydrator lease scope. Evidence under
+outputs/rsi-permission-evidence-20261006: generation-commit-expiry-baseline-review.json,
+generation-commit-expiry-candidate-review.json, generation-commit-connected3.xml.
+The fixture now explicitly supplies synthetic lease evidence; it does not claim
+authentic enrollment or cross-process rotation coverage. Holo query rejected
+HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH (authority a3def2a83, shared host0c81418fe);
+exact-source fallback used, no reindex. Bounded source review approved; publication remains pending.
+Provider issuance handoff, effect permits, native G1 and retained RSI remain open.
+Independent review receipt: generation-commit-final-source-review.json, SHA256
+`a3984454d6704ff50cd4a711bacc8d0fe229bc0919a807cb7cf966f2a298c128`.
+Production structural checks pass. Existing external-issuer test owner grows
+from676to684lines for its explicit synthetic lease seam; no whole-test-tree
+WSP62 compliance is claimed. Registry remains1690files/270quarantined unchanged.
+
 ## Native admission lock-topology diagnostic — 2026-10-06
 
 WSP15/97: preserve18/P0 startup publication gate;15/P1 issuer wiring stays

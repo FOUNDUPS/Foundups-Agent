@@ -12,7 +12,15 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — authenticated startup integration (2026-10-06 JST):**
+**Current execution — generation commit fence (2026-10-06 JST):**
+PR2078 is merged at `a2a45ddec`; reviewed/merged trees match and exact-main CI
+37396021088 passed. Next14/P1 (C3/I4/D4/impact3) reuses the current selection lease
+through response validation and replay/capability commit. Frozen expiry regression
+fails on baseline and passes on candidate; connected56tests pass. Independent
+source review approved the bounded change; publication is pending. Provider handoff/effect permit remain
+blocked; no admitted native worker or retained RSI gain is claimed.
+
+**Historical startup integration checkpoint (2026-10-06 JST):**
 Actual OS qualification now passes at `50008b241` using synthetic authorities:
 real DynamicUser/systemd credentials, isolation, public entrypoints and Unix
 peer transport; one verified target signature, missing-grant rejection and
