@@ -73,6 +73,7 @@ def _reserve_elevated(
         proof,
         signing_request_digest=str(grant["signing_request_digest"]),
         now=now_epoch,
+        grant_expires_at=grant["expires_at"],
     )
 
 

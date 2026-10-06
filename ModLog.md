@@ -1,3 +1,20 @@
+## RSI effect lifetime repair — 2026-10-07
+
+Reproduced and repaired the prior checkpoint blocker; 697 connected Windows
+fixture cases pass and bounded independent review found no new defect. Existing
+roadmap/backlog updated. Native admission remains unverified; running OpenClaw/
+Hermes services do not establish it. No model calls or runtime activation.
+Details: modules/communication/moltbot_bridge/ModLog.md. WSP00/6/15/22/50/84/97.
+
+## RSI single-effect composition checkpoint — 2026-10-07
+
+Existing owner/provider/signer path extended; 687 connected Windows fixture tests
+pass. Independent review blocks promotion until signed grant lifetime is capped
+by verified approval validity. No runtime activation, PR or merge for this slice.
+Root/module roadmap and backlog identify that repair without opening a new plan.
+No local model retry or paid provider call; coordinator/review usage is unmeasured.
+WSP00/6/15/22/50/84/97. Details: modules/communication/moltbot_bridge/ModLog.md.
+
 ## RSI local-worker rejection and grant digest repair — 2026-10-07
 
 A source-grounded14/P1 defect accepted mismatched outer consensus metadata at

@@ -1,3 +1,36 @@
+## Current selection — 2026-10-07
+
+The checkpoint lifetime blocker below is repaired: 697 connected Windows cases
+pass, bounded independent review reports no new defect. Publication pending.
+Next14/P1: verify the designated resident's existing public runtime/admission
+artifacts; do not infer artifact absence from gateway environment settings.
+Native18/P0 and later retained RSI benefit remain open.
+
+## Single-effect grant composition — 2026-10-07 checkpoint
+
+Connect current-owner consent and reviewer quorum to one target permission,
+independent grant signing and the existing authoritative-use lease issuer.
+The target keeps its null consensus digest; the outer grant binds a distinct
+bounded effect proof. Legacy delegated approval remains unchanged.
+
+Local Windows connected regression: 687 passed in 34.90s. Tests use real disposable
+signatures with synthetic owner/runtime provenance and in-process socket transport;
+they do not qualify native admission or an OS service. Dedicated Linux-root tests
+are excluded from this Windows run. Independent review blocks promotion: grant
+expiry can exceed verified approval lifetime. Cap it through independently verified
+evidence and test delayed target use before activation/publication.
+No local model retry or paid provider call was made for this slice; architect and
+review compute remain separate, unmeasured costs. WSP00/6/15/22/50/84/97.
+
+PR2089 is closed at ac645be6a6a30913381edc97ef93595ee20af76e, equal reviewed/main
+tree 8fecfc991ce7896a967c1a6f690888cca90f4bae. Main CI37498282161 and
+CodeQL37498284318 succeeded. The pending publication entries below are historical.
+
+Next: independently review this boundary, then compose authentic runtime inputs
+and resident use through existing owners. Native RSI, independent held-out benefit,
+and retention in a later invocation remain open; no new orchestrator is needed.
+
+
 ## Current grant digest repair — 2026-10-07
 
 Close observed14/P1 request/proof mismatch before broadening effect permission.

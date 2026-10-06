@@ -1274,6 +1274,9 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_adversarial.py \
             modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py \
             modules/communication/moltbot_bridge/tests/test_reddog_external_signer_authoritative_use_lease.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_effect_signing_composition.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_effect_signing_grant.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_effect_signing_lease.py \
             modules/communication/moltbot_bridge/tests/test_reddog_elevated_consensus_composed_e2e.py \
             modules/communication/moltbot_bridge/tests/test_reddog_elevated_consensus_provider_independence.py \
             modules/communication/moltbot_bridge/tests/test_reddog_elevated_consensus_nonce_transaction.py \

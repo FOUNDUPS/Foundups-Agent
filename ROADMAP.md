@@ -12,18 +12,31 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — grant proof binding repair (2026-10-07 JST):**
-PR2088 is merged/main-verified at91ba0bd05; reviewed/merged treeb2cf3e62 matches.
-Local510 checks and hosted699 exact effect cases passed (overlapping suites).
-New evidence selects14/P1 (C2/I4/D4/impact4): the existing grant signer accepts
-an outer consensus digest different from its valid proof. One local Qwen proposal
-failed5/5 and was rejected without retry; coordinator guard passes63 connected
-checks. Independent review found no blocker; publication pending. No paid-provider call;
-local call12.61s, token/coordinator cost unmeasured. This is not native RSI.
+**Current execution — single-effect grant composition (2026-10-07 JST):**
+PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;
+reviewed/main tree matches. Main CI37498282161 and CodeQL37498284318 passed.
+Re-observation selects16/P0 (C4/I4/D4/impact4): connect existing consent/reviewer,
+provider and independent signer owners without changing the exact target digest.
+707 local connected/structural tests pass after reproducing and repairing the approval-to-grant
+expiry defect (baseline3fail/1pass). Independent bounded review found no new defect;
+Draft PR2090: first hosted run failed backend678>675; reviewed extraction restores
+674 lines and includes the missed structural suite locally. Second hosted run
+passed signing677/3skip and startup248, then exposed the old1419 extension cap.
+Reviewed count correction accepts exactly1421/rejects1422; local fast tier15 passed.
+New-head publication checks pending. Fixture-backed source qualification is not native admission.
 
-Next effect-domain connection must preserve null digest on the exact target but
-bind the separate grant proof/digest at the independent signer. A permit object
-alone cannot close that path. Authentic input supply and native18/P0 remain open.
+The local-first budget remains: deterministic checks, no repeat broad audits,
+no failed-Qwen-route retries or paid-provider fallback. Architect/review usage is
+unmeasured. Re-observation selects the existing14/P1 resident-artifact inventory
+(C2/I4/D4/impact4), then authentic runtime/resident composition. OpenClaw and Hermes
+user services were active; six inspected RSI settings were absent in their process
+environments. This does not establish global artifact absence or a missing producer.
+The named root/profile settings are also absent in inspected Windows process/user/
+machine scopes; eight expected public artifacts are absent at the source-derived
+Windows candidate root (not a designated authority). Resolve existing authenticated
+supply configuration before invoking any producer. No global absence claim.
+Native18/P0 still requires an admitted worker, independent baseline-controlled
+validation, governed retention/rollback and benefit in a later invocation.
 
 **Historical selection — runtime evidence before effect permission:**
 PR2087 merged at `bbb975b4f20fec5981a85a971f55fd26e3c7c6e8`. Its checked head
