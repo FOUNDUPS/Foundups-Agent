@@ -1,3 +1,24 @@
+## Protected model verification inputs (owner v8)
+
+`load_system_service_model_runtime_verifier(owner_config_path, repo_root,
+expected_owner_config_id, trusted_now_epoch)` is keyword-only. It reads the
+existing protected owner file and returns the existing
+`ModelRuntimeBindingUseTimeVerifier`; it does not verify a model receipt itself.
+`model_verifier_authority` has exactly `issued_at`, `expires_at`, `inputs`.
+Times are positive integers, increasing, at most3600seconds apart. Inputs are
+exactly `catalog`, `benchmarks`, `promotions`, `evidence`, `policy`, `trusted_keys`;
+each descriptor has an absolute confined `path` and SHA256 `raw_digest`.
+
+The expected owner ID must originate from current-generation selection; a caller
+string alone is not that proof. Inputs are bounded to1MiB each, parsed from the
+same hash-checked bytes with duplicate keys rejected. No injected signature
+backend is accepted. Owner rotation, expiry across IO, backwards clocks and
+post-load payload mutation fail closed. Checked snapshots are retained; this
+is not immutable execution or isolation from hostile code in the same process.
+Connect under the existing generation lease and consume the existing one-shot
+model capability before changing resident acceptance. Production provisioning
+and that consumer connection are not established by this API.
+
 ## Resident fresh peer use — 2026-10-07
 
 Bootstrap and resolver accept optional `signer_peer_secret_access_grant_supplier`;
@@ -906,7 +927,7 @@ owners and composition prerequisites; it does not admit a worker.
 | Work identity | `reddog_main_resident_queue_serial_loop_bootstrap` → `GovernedValveUseTimeAuthorityResolver` | Exact queue/slice, full work-order/base digest, runtime root, trusted time and signed authority. No concrete selected runtime ticket was supplied or observed in this slice. |
 | Generation | Root-owned manifest selection → `verify_signer_current_generation_runtime_binding` → use-time collector | Accepted typed evidence removes only three of ten named trust reasons. Binding verification consumes a selection capability; it is not a passive status probe. |
 | Readiness | `reddog_resident_runtime_artifact_readiness` → canary readiness projection | Seven artifact files are checked; three generation reasons are added independently. This is not the resolver's complete reason set or authority. |
-| Remaining trust | Existing consensus, sovereign, principal, model, Memex and peer owners → resolver | Seven reasons remain even after accepted generation. This does not mean every lower-level verifier is absent; authentic consumer composition remains unqualified. |
+| Remaining trust | Existing consensus, sovereign, principal, model, Memex and peer owners → resolver | Five reasons remain after accepted generation, principal and live peer evidence. This does not mean every lower-level verifier is absent; authentic consumer composition remains unqualified. |
 | Effect-lease request | `reddog_authoritative_use_lease_contract` → `ExternalSignerAuthoritativeUseLeaseIssuer` | Only HIGH/ULTRA; role `signer:authoritative-use-lease`. Builder and validator require absent consensus digest. |
 | Grant handoff | External issuer → `IndependentSignerSecretGrantProvider.lease` | Issuer supplies no elevated-consensus permit. Real provider rejects non-LOW without a consumed typed permit before owner/grant work. Positive issuer tests substitute `_LeasedGrantProvider`; they do not prove this direct production pairing. |
 | Permit domain | `prepare_elevated_authority_signing_permit` / `ElevatedConsensusExternalSignerClient` | Existing permit preparation binds exactly two HIGH principal/reddog requests and their consensus digest; client dispatch supports those roles. Adding a keyword alone cannot qualify the effect-lease role or ULTRA. Effect requests also hash the payload directly, while elevated canonical requests hash the signing-input mapping; these digest contracts are distinct. |
@@ -914,11 +935,10 @@ owners and composition prerequisites; it does not admit a worker.
 | Skill safety | `skill_runtime_admission.admit_runtime_skill` → registered skill executor | Exact bundle/manifest/scanner fingerprint is separate from signed per-effect permission. |
 | External supervision | Root-selected supervisor observation + actual requester → existing lifecycle owner | Existing corrected contract still needs authenticated transport, canonical consumption and qualified visibility. Earlier strict-decoder candidates remain rejected; no retry or new parser is selected here. |
 
-The seven remaining resolver anchors are consensus receipt, sovereign
-authorization, principal subject-key attestation, model signed-evidence trust,
-model-selection signed-evidence verification, Memex signed-evidence verification,
-and signer/client peer handshake. Other validation failures may also occur;
-ten/three/seven describes this named subset, not every possible rejection.
+After accepted generation, principal and peer evidence, the five remaining
+resolver anchors are consensus receipt, sovereign authorization, model signed-
+evidence trust, model-selection verification and Memex signed-evidence verification. Other validation failures may also occur;
+These counts describe named subsets, not every possible rejection.
 
 `ExternalSignerAuthoritativeUseLeaseIssuer.issue` enters a grant lease, external
 signing and response rehydration. Rehydration consumes durable replay state;

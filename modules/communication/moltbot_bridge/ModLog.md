@@ -1,3 +1,29 @@
+## Protected model verifier input supply — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
+The existing protected owner loader adds v8, inheriting v1-v7 checks and binding
+six exact input paths/raw digests plus a maximum one-hour interval into config_id.
+It constructs the existing model verifier from the checked bytes, with fixed
+Ed25519 verification and no injected-verifier path. Each use checks in-memory
+input digests, current owner identity and strict time after owner-file IO.
+Adjacent consent/reviewer/grant/startup readers retain v7 behavior for v8.
+
+Independent review caught mutable snapshots and time sampled before owner IO.
+Eight regression cases fail on reconstructed pre-repair source; repaired connected
+validation97passed/3platform skips; adjacent compatibility128passed, including
+both v7/v8 public startup, grant signature and replay controls. OS custody and
+transport use existing test seams: this is source qualification, not enrollment.
+Review recheck found no remaining blocker. Evidence:
+`outputs/rsi-permission-evidence-20261006/model-owner-execution.json`.
+
+No resident gate clears in this slice. The caller must bind the expected owner ID
+to the current generation under its existing lease, then consume an actual model
+verification capability. Five resident trust reasons remain. Native worker,
+independent retained improvement and later benefit remain unproven. No local
+model or paid-provider call; coordinator/review cost is unmeasured. Generated closure remains1422 files. Initial integrity7pass/1staging failure;
+corrected staged-manifest case1pass. Extension fast15pass; registrycurrent1695/270.
+Publication remains pending until recorded in the closure receipt.
+
 ## Fresh peer resident connection — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97: existing bootstrap supplies an optional grant callback

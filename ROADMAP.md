@@ -12,22 +12,24 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — signed-model verifier safety (2026-10-07):**
-PR2093 merged `ad1d673ffe86ab49b11d89a8bbd37a1d342930da`, equal reviewed/main
-tree5971debd98cb3915e8fb42dcbce6451bb554ec58. Exact-head CI37530799117 passed
-(startup381; resident566/1skip); all CodeQL analyses37530792861 passed. Main
-CI37531919181 and CodeQL37531920943 pending. Owned branch retired with verified
-recovery. Closure: `outputs/rsi-permission-evidence-20261006/peer-consumer-2093-merge-closure.json`.
+**Current selection — protected model input supply (2026-10-07):**
+PR2094 merged at84f1f963c595d0d4124b197f706579b4ff7464a6, with equal reviewed/main
+trees. Branch CI/CodeQL and main CI37533974884/CodeQL37533975579 passed. The
+signed-model CI step ran55 cases. Owned branch retired with recovery bundle.
 
-Fresh peer connection is source-qualified, not an authentic enrolled operation.
-Five independent trust gates remain. Existing AI Gateway roadmap explicitly
-leaves production signer/trust/revocation/replay setup open; reuse its signed
-model verifier instead of adding another evaluator. Bounded clock probe found
-string/fractional trusted times accepted. Selected13/P1 (C2/I4/D4/impact3): reject
-invalid clock types before model verification. Baseline8fail (two accepted-invalid,
-six inconsistent rejection); minimal guard plus existing regressions55pass1.54s.
-Independent review found no blocker; publication pending. Integrity8/8 and
-extension fast15 passed. No worker inference or runtime authority created.
+Selected15/P1 (C3/I4/D4/impact4): extend existing protected owner configuration
+and verifier construction, not another evaluator. Owner v8 binds six model input
+snapshots and a short lifetime. Review found and repaired post-load mutation and
+expiry across owner IO;8baseline failures,97connected passes/3platform skips,
+128adjacent passes including v7/v8 startup. Independent recheck found no blocker.
+Publication pending; detailed evidence in the existing moltbot_bridge ModLog and
+`outputs/rsi-permission-evidence-20261006/model-owner-execution.json`.
+
+This supplies trusted inputs, not native admission. Next: bind the exact owner ID
+under current-generation selection, verify the model artifacts and consume their
+one-shot capability. Five resident trust reasons remain. Six environment input
+settings were absent in inspected Windows scopes and the running OpenClaw/Hermes
+processes; alternate provisioning was not ruled out. No inference calls this slice.
 
 Native18/P0 remains blocked: admitted local-agent improvement, independent fixed
 baseline/held-out validation, governed retention/rollback and later benefit remain

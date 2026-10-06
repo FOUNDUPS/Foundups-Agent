@@ -59,7 +59,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
     RootVerifiedOutcomeSigningAuthority,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    validate_runtime_artifact_path, validate_runtime_root_path,
+    validate_runtime_artifact_path, validate_runtime_root_path, secure_read_confined_bytes,
 )
 
 SCHEMA_VERSION = "reddog_signer_system_service_owner_config.v1"
@@ -69,6 +69,8 @@ SCHEMA_VERSION_V4 = "reddog_signer_system_service_owner_config.v4"
 SCHEMA_VERSION_V5 = "reddog_signer_system_service_owner_config.v5"
 SCHEMA_VERSION_V6 = "reddog_signer_system_service_owner_config.v6"
 SCHEMA_VERSION_V7 = "reddog_signer_system_service_owner_config.v7"
+SCHEMA_VERSION_V8 = "reddog_signer_system_service_owner_config.v8"
+MODEL_VERIFIER_INPUTS = ("catalog", "benchmarks", "promotions", "evidence", "policy", "trusted_keys")
 MAX_OWNER_CONFIG_BYTES = 64 * 1024
 ROOT_UID = 0
 FIELDS = frozenset({
@@ -84,6 +86,7 @@ V4_FIELDS = V3_FIELDS | {"grant_authority_source_policy"}
 V5_FIELDS = V4_FIELDS | {"reviewer_designation_authority"}
 V6_FIELDS = V5_FIELDS | {"effect_consent_authority"}
 V7_FIELDS = V6_FIELDS | {"startup_custody"}
+V8_FIELDS = V7_FIELDS | {"model_verifier_authority"}
 _OUTCOME_OWNER_FIELDS = frozenset({
     "descriptor", "authority_socket_path", "authority_service_uid", "signer_uid", "signer_gid",
     "signer_principal_id", "state_root", "state_path", "state_store_id",
@@ -110,7 +113,7 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
     """Load all production signer authority from one root-owned v2 snapshot."""
     repo = Path(repo_root).resolve()
     owner = _load_owner_config(owner_config_path, repo=repo)
-    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
+    if owner.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
         raise RuntimeArtifactManifestError("signer_owner_config_v2_required")
     manifest, boundary = _manifest_selection_from_owner(owner, repo=repo)
 
@@ -132,7 +135,7 @@ def load_system_service_startup_selection(*, owner_config_path: Path | str, repo
     return SystemServiceStartupSelection(
         str(owner["config_id"]), manifest, boundary, authority_supplier,
         signer_uid, signer_gid, principal_authority_supplier,
-        runtime_dependencies_supplier if owner["schema_version"] == SCHEMA_VERSION_V7 else None,
+        runtime_dependencies_supplier if owner["schema_version"] in {SCHEMA_VERSION_V7, SCHEMA_VERSION_V8} else None,
     )
 
 
@@ -349,7 +352,7 @@ def _load_owner_config(path: Path | str, *, repo: Path) -> dict[str, Any]:
                 result[key] = item
             return result
         value = json.loads(raw.decode("ascii"), object_pairs_hook=object_pairs)
-        if isinstance(value, dict) and value.get("schema_version") in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7} and duplicates:
+        if isinstance(value, dict) and value.get("schema_version") in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8} and duplicates:
             raise RuntimeArtifactManifestError("signer_owner_config_duplicate_key")
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise RuntimeArtifactManifestError("signer_owner_config_malformed") from exc
@@ -451,7 +454,7 @@ def _validate_owner_config(
     expected_fields = {SCHEMA_VERSION: FIELDS, SCHEMA_VERSION_V2: V2_FIELDS,
                        SCHEMA_VERSION_V3: V3_FIELDS, SCHEMA_VERSION_V4: V4_FIELDS,
                        SCHEMA_VERSION_V5: V5_FIELDS, SCHEMA_VERSION_V6: V6_FIELDS,
-                       SCHEMA_VERSION_V7: V7_FIELDS}.get(schema)
+                       SCHEMA_VERSION_V7: V7_FIELDS, SCHEMA_VERSION_V8: V8_FIELDS}.get(schema)
     if expected_fields is None or set(value) != expected_fields:
         raise RuntimeArtifactManifestError("signer_owner_config_shape_invalid")
     checked = dict(value)
@@ -464,17 +467,17 @@ def _validate_owner_config(
         raise RuntimeArtifactManifestError("signer_owner_repo_binding_mismatch")
     _validate_owner_text_and_digests(checked)
     _validate_owner_paths(checked, repo=repo, owner_root=owner_root)
-    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
+    if schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
         _validate_outcome_authority_owner_config(
             checked, repo=repo, owner_root=owner_root
         )
-    if schema in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
+    if schema in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
         from modules.communication.moltbot_bridge.src.reddog_signer_independent_grant_authority_client_supply import validate_independent_grant_authority_owner_config
         validate_independent_grant_authority_owner_config(checked, repo=repo, owner_root=owner_root)
-    if schema in {SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
+    if schema in {SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
         from modules.communication.moltbot_bridge.src.reddog_grant_authority_source_policy_authority import validate_grant_authority_source_policy_owner_config
         validate_grant_authority_source_policy_owner_config(checked, repo=repo)
-    if schema in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
+    if schema in {SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
         from .reddog_reviewer_designation_contract import validate_reviewer_designation_authority
         try:
             checked["reviewer_designation_authority"] = validate_reviewer_designation_authority(
@@ -482,16 +485,100 @@ def _validate_owner_config(
             )
         except ValueError as exc:
             raise RuntimeArtifactManifestError("reviewer_designation_authority_invalid") from exc
-    if schema in {SCHEMA_VERSION_V6, SCHEMA_VERSION_V7}:
+    if schema in {SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
         from .reddog_effect_consent_contract import validate_effect_consent_authority
         try:
             checked["effect_consent_authority"] = validate_effect_consent_authority(checked["effect_consent_authority"])
         except ValueError as exc:
             raise RuntimeArtifactManifestError("effect_consent_authority_invalid") from exc
-    if schema == SCHEMA_VERSION_V7:
+    if schema in {SCHEMA_VERSION_V7, SCHEMA_VERSION_V8}:
         from .reddog_signer_system_service_wsp71_resolver_supply import validate_system_service_startup_custody
         validate_system_service_startup_custody(checked, repo_root=repo, owner_root=owner_root)
+    if schema == SCHEMA_VERSION_V8:
+        _validate_model_verifier_authority(checked, repo=repo)
     return checked
+
+def _validate_model_verifier_authority(owner, *, repo):
+    value = owner.get("model_verifier_authority")
+    if (type(value) is not dict or set(value) != {"issued_at", "expires_at", "inputs"}
+            or any(type(value[key]) is not int for key in ("issued_at", "expires_at"))
+            or not 0 < value["issued_at"] < value["expires_at"]
+            or value["expires_at"] - value["issued_at"] > 3600
+            or type(value["inputs"]) is not dict or set(value["inputs"]) != set(MODEL_VERIFIER_INPUTS)):
+        raise RuntimeArtifactManifestError("model_verifier_authority_invalid")
+    paths = set()
+    for descriptor in value["inputs"].values():
+        if (type(descriptor) is not dict or set(descriptor) != {"path", "raw_digest"}
+                or type(descriptor["path"]) is not str or not Path(descriptor["path"]).is_absolute()
+                or not is_sha256(descriptor["raw_digest"])):
+            raise RuntimeArtifactManifestError("model_verifier_descriptor_invalid")
+        path = validate_runtime_artifact_path(descriptor["path"], repo_root=repo,
+                                              allowed_root=owner["runtime_root"])
+        if path in paths:
+            raise RuntimeArtifactManifestError("model_verifier_duplicate_path")
+        paths.add(path)
+
+
+def load_system_service_model_runtime_verifier(
+    *, owner_config_path: Path | str, repo_root: Path,
+    expected_owner_config_id: str, trusted_now_epoch: Callable[[], int],
+):
+    """Snapshot protected inputs; caller must bind the owner to a current generation.
+
+    This supplies a verifier, not execution authority or a verified model receipt.
+    No caller-injected verifier or second read of a hash-checked input is accepted.
+    """
+    from . import reddog_model_runtime_verifier_bootstrap as model
+    repo = Path(repo_root).resolve()
+    owner = _load_owner_config(owner_config_path, repo=repo)
+    if owner["schema_version"] != SCHEMA_VERSION_V8 or owner["config_id"] != expected_owner_config_id:
+        raise RuntimeArtifactManifestError("model_verifier_owner_binding_invalid")
+    authority = owner["model_verifier_authority"]
+    payloads, expected_inputs_digest = None, None
+    def current_clock():
+        started = trusted_now_epoch()
+        current = _load_owner_config(owner_config_path, repo=repo)
+        now = trusted_now_epoch()
+        if (type(started) is not int or type(now) is not int or now < started
+                or not authority["issued_at"] <= started <= now < authority["expires_at"]
+                or current["config_id"] != expected_owner_config_id):
+            raise RuntimeArtifactManifestError("model_verifier_owner_not_current")
+        if payloads is not None and digest(payloads) != expected_inputs_digest:
+            raise RuntimeArtifactManifestError("model_verifier_snapshot_changed")
+        return now
+    current_clock()
+    payloads = _read_model_verifier_snapshots(owner)
+    expected_inputs_digest = digest(payloads)
+    resolver, reasons = model._key_resolver(payloads["trusted_keys"])
+    backend, errors = model._signature_verifier("ed25519")
+    benchmarks = model._records(payloads["benchmarks"], "benchmark_evidence_receipts")
+    promotions = model._records(payloads["promotions"], "promotion_evidence_receipts")
+    if reasons or errors or resolver is None or backend is None or benchmarks is None or promotions is None:
+        raise RuntimeArtifactManifestError("model_verifier_snapshot_invalid")
+    current_clock()
+    return model._verifier(payloads, benchmarks, promotions, resolver, backend, current_clock)
+
+
+def _read_model_verifier_snapshots(owner):
+    payloads = {}
+    def unique_object(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise RuntimeArtifactManifestError("model_verifier_json_duplicate")
+            result[key] = value
+        return result
+    for name, descriptor in owner["model_verifier_authority"]["inputs"].items():
+        raw, _ = secure_read_confined_bytes(Path(descriptor["path"]),
+            allowed_root=Path(owner["runtime_root"]), max_bytes=1024 * 1024)
+        if raw_digest(raw) != descriptor["raw_digest"]:
+            raise RuntimeArtifactManifestError("model_verifier_input_digest_mismatch")
+        payload = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_object)
+        if type(payload) is not dict:
+            raise RuntimeArtifactManifestError("model_verifier_snapshot_invalid")
+        payloads[name] = payload
+    return payloads
+
 
 def _validate_owner_text_and_digests(value: Mapping[str, Any]) -> None:
     text_fields = (
@@ -664,7 +751,7 @@ def _ascii(value: object) -> bool:
 
 __all__ = [
     "RootAuthorityServiceDependencies", "SCHEMA_VERSION", "SCHEMA_VERSION_V2", "SCHEMA_VERSION_V3",
-    "SCHEMA_VERSION_V4", "SCHEMA_VERSION_V5", "SCHEMA_VERSION_V6", "SCHEMA_VERSION_V7", "SystemServiceStartupSelection",
+    "SCHEMA_VERSION_V4", "SCHEMA_VERSION_V5", "SCHEMA_VERSION_V6", "SCHEMA_VERSION_V7", "SCHEMA_VERSION_V8", "SystemServiceStartupSelection",
     "load_system_service_manifest_selection", "load_system_service_revocation_anchor_authority",
     "load_system_service_signer_identity", "load_system_service_startup_selection",
     "load_system_service_verified_outcome_signing_authority",
