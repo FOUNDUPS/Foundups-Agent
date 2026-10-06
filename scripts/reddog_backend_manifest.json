@@ -2176,7 +2176,7 @@
     "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_revocation_snapshot_validation.py": "8da4d513404e67259d736dc1aff0493377f5421584a9eb9e930db0c3b1195bfb",
     "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_revocation_store_codec.py": "488381fe696838b3bbe10259c6639279f4497dd25f9fbbc5372e3080390c9ceb",
     "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_root_protected_use_oracle.py": "7e9a11f8dca997eead79f538aa53028f77f99dd8cef7d24efc423d730f95cfc6",
-    "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_signer_admission.py": "bd3e80a446fcb61c34aebfd5b92c5231cd5b72398427ec133b2f8da11170dc7a",
+    "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_signer_admission.py": "f4ff7676cc242772525901f8204972951b3a7a31d015a7fe512090439076ce1a",
     "modules/communication/moltbot_bridge/src/reddog_signer_socket_peer_credential_attestor.py": "4a245f01b9cf7f396417f9682b6c2ee04341beae2ba76a1ebee3afb880d94325",
     "modules/communication/moltbot_bridge/src/reddog_signer_socket_schema.py": "53b98f783c0ebe132f81c0d514399ab3e9bedf6f492af1033ae119d062d0f1b7",
     "modules/communication/moltbot_bridge/src/reddog_signer_socket_service_authority_policy_runtime.py": "63edbb3619aa65e82d4c6105b284a2dd136a628cc3ef5166614048dc83167f79",

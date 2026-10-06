@@ -1880,26 +1880,62 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.effect_runtime_provenance_20261007",
-    "base_commit": "a503f6615ba6f9cec2898c8fb275a384ca0bcce8",
-    "selected_action": "Connect effect reviewer evidence to the existing authenticated model runtime verification owner before effect permit issuance",
-    "status": "implemented_locally_validated_independently_reviewed_publication_pending",
+    "observation_path": "current_observation.grant_consensus_digest_20261007",
+    "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",
+    "selected_action": "Reject grant request/proof consensus mismatch before nonce and signing key use",
+    "status": "coordinator_repair_validated_reviewed_publication_pending",
     "wsp15": {
-        "complexity": 3,
+        "complexity": 2,
         "importance": 4,
         "deferability": 4,
         "impact": 4,
-        "total": 15,
+        "total": 14,
         "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "Owned source repair; no native runtime grant",
-    "next_action": "Finish independent review and exact-source publication. Re-observe single-target effect permission15/P1; native admission18/P0 remains blocked.",
+    "execution_plane": "Supervised developer-plane source repair; no native authority",
+    "next_action": "Complete connected validation, independent review and publication; then re-observe effect proof/provider/signer composition together",
     "higher_priority_gates": [
-        "Native RSI18/P0 requires legitimate verified model/runtime admission; known-root inputs absent, not whole-machine absence"
+        "Native18/P0 requires authentic runtime inputs and effect permission; a standalone permit cannot close provider/signer digest composition"
     ]
 },
   "current_observation": {
+    "grant_consensus_digest_20261007": {
+    "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",
+    "finding": "Unchanged valid proof plus substituted outer consensus digest accepted and consumed nonce; existing independent grant signer did not bind those fields",
+    "baseline": {
+        "passed": 4,
+        "failed": 1
+    },
+    "local_worker": {
+        "model": "qwen-coder-7b",
+        "calls": 1,
+        "paid_provider_calls": 0,
+        "seconds": 12.61,
+        "passed": 0,
+        "failed": 5,
+        "accepted": false,
+        "retry": false,
+        "unload_confirmed": true,
+        "token_usage": "unavailable"
+    },
+    "coordinator_repair": {
+        "connected_passed": 63,
+        "seconds": 15.16,
+        "review": "No concrete blocker; grant-digest-independent-review.json SHA256 8fa883a1f9571f6b55893ff2efa7519bf341952c0fb1589e6b3afb47e5831a56",
+        "publication": "pending"
+    },
+    "closure_pr2088": {
+        "merge": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",
+        "main_ci": 37494466573,
+        "main_codeql": 37494466969,
+        "result": "success",
+        "equal_tree": "b2cf3e62eba02e81e7e49e51c1798c4f8bcf3202"
+    },
+    "evidence_directory": "outputs/rsi-permission-evidence-20261006",
+    "next_dependency": "Preserve exact target consensus=None, but route a distinct effect proof/digest through provider and independent signer; do not weaken existing grant or two-child permission checks",
+    "native_rsi_complete": false
+},
     "reviewer_artifact_composition_20261007": {
     "base_commit": "a503f6615ba6f9cec2898c8fb275a384ca0bcce8",
     "truth": "Local composition validated; synthetic model authority, not native admission or execution provenance",

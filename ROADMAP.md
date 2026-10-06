@@ -12,13 +12,18 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — publish reviewer artifact composition (2026-10-07 JST):**
-The existing bootstrap now supplies a concrete runtime resolver: reverify signed
-artifacts, consume exact capabilities, reject stale/mismatched evidence. Local502
-tests pass, including24 new controls. Independent source review found no blocker; publication pending.
-Test authority is synthetic; model-authored reviews/native RSI are not established.
-No paid model calls in this slice. After closure, re-observe the15/P1 single-target
-effect-permission prerequisite. Native18/P0 remains blocked as detailed below.
+**Current execution — grant proof binding repair (2026-10-07 JST):**
+PR2088 is merged/main-verified at91ba0bd05; reviewed/merged treeb2cf3e62 matches.
+Local510 checks and hosted699 exact effect cases passed (overlapping suites).
+New evidence selects14/P1 (C2/I4/D4/impact4): the existing grant signer accepts
+an outer consensus digest different from its valid proof. One local Qwen proposal
+failed5/5 and was rejected without retry; coordinator guard passes63 connected
+checks. Independent review found no blocker; publication pending. No paid-provider call;
+local call12.61s, token/coordinator cost unmeasured. This is not native RSI.
+
+Next effect-domain connection must preserve null digest on the exact target but
+bind the separate grant proof/digest at the independent signer. A permit object
+alone cannot close that path. Authentic input supply and native18/P0 remain open.
 
 **Historical selection — runtime evidence before effect permission:**
 PR2087 merged at `bbb975b4f20fec5981a85a971f55fd26e3c7c6e8`. Its checked head

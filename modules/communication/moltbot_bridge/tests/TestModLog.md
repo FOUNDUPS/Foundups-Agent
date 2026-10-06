@@ -1,3 +1,25 @@
+## Grant request/proof digest binding — 2026-10-07 candidate
+
+Final connected63/63 pass in15.16s; manifest integrity8/8 pass in61.49s.
+Independent source/saved-result review found no concrete blocker; receipt
+`grant-digest-independent-review.json`, SHA256
+`8fa883a1f9571f6b55893ff2efa7519bf341952c0fb1589e6b3afb47e5831a56`.
+The test observes empty nonce state, not a reservation invocation counter;
+early rejection is also supported by source ordering. Publication pending.
+
+Extend `test_reddog_elevated_consensus_nonce_transaction.py` (existing owner)
+with `test_outer_consensus_digest_mismatch_preserves_nonce_and_signing_key`.
+At91ba0bd05, frozen5-case baseline:4pass/1fail. A substituted outer digest was
+accepted with unchanged proof and consumed a nonce. The new case requires ten
+invalid attempts to leave key/nonce/rate capacity untouched, then valid signing.
+One local Qwen candidate changed proof input to a digest:0pass/5fail; rejected,
+original source restored, no retry. Coordinator repair passes all5 unchanged
+cases and63 connected cases in15.16s. Connected validation and independent review complete; publication pending.
+Existing CI already executes this entire nonce suite; no new file or CI list.
+Synthetic consensus authority plus disposable real signer keys; not native
+admission or autonomous repair. Evidence: `grant-digest-*.xml/json` in existing
+20261006 evidence directory. WSP00/6/15/22/50/84/97.
+
 ## Reviewer runtime artifact composition — 2026-10-07
 
 Independent review found no concrete blocker in the documented trusted-input

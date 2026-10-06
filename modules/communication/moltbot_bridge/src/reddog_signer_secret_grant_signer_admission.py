@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -64,8 +64,13 @@ def _reserve_elevated(
     authority = backend.elevated_consensus_signer_authority
     if type(authority) is not ElevatedConsensusSignerAuthority:
         return None
+    proof = request.elevated_consensus_proof
+    receipt = proof.get("consensus_receipt") if isinstance(proof, Mapping) else None
+    if (not isinstance(receipt, Mapping)
+            or receipt.get("receipt_id") != request.consensus_receipt_digest):
+        return None
     return authority.reserve(
-        request.elevated_consensus_proof,
+        proof,
         signing_request_digest=str(grant["signing_request_digest"]),
         now=now_epoch,
     )

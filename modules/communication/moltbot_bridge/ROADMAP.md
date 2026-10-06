@@ -1,3 +1,12 @@
+## Current grant digest repair — 2026-10-07
+
+Close observed14/P1 request/proof mismatch before broadening effect permission.
+Local coordinator repair passes63 connected cases; independent review found no blocker; publication pending. PR2088 is merged/main-verified at91ba0bd05.
+The remaining single-target effect path must carry a separately bound proof
+through provider and independent signer, not merely add a permit object.
+The target retains null consensus digest; grant issuance needs its own verified
+consensus association. Authentic runtime supply and native RSI remain open.
+
 ## Reviewer artifact composition — 2026-10-07 candidate
 
 Selected15/P1 adapter is implemented and locally validated (502 cases). Independent source review found no blocker; finish exact-source publication. Then re-observe the15/P1

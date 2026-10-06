@@ -1,3 +1,12 @@
+## RSI local-worker rejection and grant digest repair — 2026-10-07
+
+A source-grounded14/P1 defect accepted mismatched outer consensus metadata at
+the signer. One local qwen-coder-7b call (12.61s, zero paid-provider calls) failed
+all5 frozen cases; no retry, no worker success claim. Coordinator repair passes63
+connected checks. LM Studio confirmed unload; token usage/coordinator cost are
+unmeasured. Existing module contracts/tests/backlog record exact boundaries.
+PR2088's merge and main checks are verified. WSP00/6/15/22/50/84/97.
+
 ## RSI reviewer runtime artifact connection — 2026-10-07 candidate
 
 WSP00/15/97: existing bootstrap now supplies reverified artifact evidence to the
