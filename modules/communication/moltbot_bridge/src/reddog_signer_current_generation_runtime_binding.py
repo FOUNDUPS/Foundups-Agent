@@ -71,6 +71,9 @@ class SignerCurrentGenerationRuntimeBinding:
     signer_uid: int | None = None
     signer_gid: int | None = None
     manifest_expires_at: int | None = None
+    model_work_order_digest: str | None = None
+    model_artifact_pair_digest: str | None = None
+    model_valid_until: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -111,6 +114,8 @@ def verify_signer_current_generation_runtime_binding(
     principal_identity: Mapping[str, Any] | None = None,
     principal_work_authority: Mapping[str, Any] | None = None,
     include_process_identity: bool = False,
+    model_work_order: Mapping[str, Any] | None = None,
+    trusted_now_epoch=None,
 ) -> SignerCurrentGenerationRuntimeBinding:
     """Verify root-owned current selection against trusted time and bytes."""
     try:
@@ -119,6 +124,7 @@ def verify_signer_current_generation_runtime_binding(
             run_packet_path=run_packet_path, signer_profile_id=signer_profile_id,
             principal_identity=principal_identity, principal_work_authority=principal_work_authority,
             include_process_identity=include_process_identity,
+            model_work_order=model_work_order, trusted_now_epoch=trusted_now_epoch,
         ) as binding:
             return binding
     except Exception:
@@ -136,6 +142,7 @@ def _lease_current_generation_runtime_binding(
     principal_identity: Mapping[str, Any] | None = None,
     principal_work_authority: Mapping[str, Any] | None = None,
     include_process_identity: bool = False,
+    model_work_order: Mapping[str, Any] | None = None, trusted_now_epoch=None,
 ) -> Iterator[SignerCurrentGenerationRuntimeBinding]:
     with ExitStack() as stack:
         try:
@@ -155,9 +162,7 @@ def _lease_current_generation_runtime_binding(
             )
             packet = _mapping(packet_raw)
             capability, boundary = load_system_service_manifest_selection(
-                owner_config_path=_required_absolute_path(
-                    packet.get("owner_authority_config_path")
-                ),
+                owner_config_path=_required_absolute_path(packet.get("owner_authority_config_path")),
                 repo_root=repo,
                 config_path=_required_absolute_path(packet.get("config_path")),
                 run_packet_path=packet_path,
@@ -178,6 +183,9 @@ def _lease_current_generation_runtime_binding(
                     repo, selection, principal_identity, principal_work_authority)
             if include_process_identity is True:
                 values.update(_process_identity_values(repo, packet, selection))
+            if model_work_order is not None:
+                values.update(_validated_model_values(repo, packet, selection, model_work_order,
+                    principal_work_authority, trusted_now_epoch, now_epoch))
             binding = _accepted_binding(values)
         except Exception:
             stack.close()
@@ -186,6 +194,74 @@ def _lease_current_generation_runtime_binding(
                 rejection_reasons=(SIGNER_CURRENT_GENERATION_BINDING_REJECTED,),
             )
         yield binding
+
+
+def _validated_model_values(repo, packet, selected, work, authority, clock, started):
+    from . import reddog_signer_system_service_manifest_selection_loader as owner_loader
+    from .reddog_work_order_binding import canonical_full_work_order_digest
+    from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+        consume_verified_runtime_binding_capability, discard_verified_runtime_binding_capability,
+        verified_runtime_binding_receipt,
+    )
+    capability, last_time = None, [started]
+    def monotonic_clock():
+        value = clock()
+        if type(value) is not int or value < last_time[0]:
+            raise ValueError("model_trusted_clock_reversed")
+        last_time[0] = value
+        return value
+    try:
+        work_digest, pair = _model_work_snapshot(work, authority)
+        model_selection, model_binding = pair.values()
+        owner_path = _required_absolute_path(packet["owner_authority_config_path"])
+        owner = owner_loader._load_owner_config(owner_path, repo=repo)
+        if owner["config_id"] != selected["owner_config_id"]:
+            raise ValueError("model_selected_owner_mismatch")
+        verifier = owner_loader.load_system_service_model_runtime_verifier(
+            owner_config_path=owner_path, repo_root=repo,
+            expected_owner_config_id=selected["owner_config_id"], trusted_now_epoch=monotonic_clock)
+        args = dict(selection=model_selection, binding=model_binding)
+        capability = verifier.verify(**args)
+        receipt = verified_runtime_binding_receipt(model_binding)
+        if consume_verified_runtime_binding_capability(capability, receipt=receipt, **args) != receipt or receipt is None:
+            raise ValueError("model_capability_not_consumed")
+        checked_at = verifier.trusted_now_epoch()
+        deadline = min(receipt.valid_until, owner["model_verifier_authority"]["expires_at"])
+        if (type(checked_at) is not int or checked_at < receipt.verified_at or checked_at >= deadline
+                or checked_at >= selected["selection_expires_at"] or checked_at >= selected["manifest_expires_at"]
+                or canonical_full_work_order_digest(work) != work_digest):
+            raise ValueError("model_evidence_no_longer_current")
+        return dict(model_work_order_digest=work_digest, model_artifact_pair_digest=_digest(pair),
+                    model_valid_until=deadline)
+    except Exception:
+        # Model rejection cannot certify either model gate or erase other evidence.
+        return {}
+    finally:
+        discard_verified_runtime_binding_capability(capability)
+
+
+def _model_work_snapshot(work, authority):
+    from .reddog_work_order_binding import canonical_full_work_order_digest
+    from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import canonical_model_runtime_binding_digest
+    snapshot = json.loads(json.dumps(work, allow_nan=False))
+    work_digest = canonical_full_work_order_digest(snapshot)
+    if authority.get("work_order_digest") != work_digest:
+        raise ValueError("model_work_order_not_authorized")
+    context = snapshot.get("operational_context_binding", {})
+    pair = {}
+    for name in ("model_selection_receipt", "model_runtime_binding_receipt"):
+        candidates = [container[name] for container in (snapshot, context) if name in container]
+        if not candidates or any(type(item) is not dict or item != candidates[0] for item in candidates):
+            raise ValueError("model_artifact_pair_missing_or_ambiguous")
+        pair[name] = candidates[0]
+    model_selection, model_binding = pair.values()
+    expected = dict(model_selection_receipt_id=model_selection["receipt_id"],
+        model_selection_digest=_digest(model_selection),
+        model_runtime_binding_receipt_id=model_binding["receipt_id"],
+        model_runtime_binding_digest=canonical_model_runtime_binding_digest(model_binding))
+    if any(snapshot.get(key) != value or authority.get(key) != value for key, value in expected.items()):
+        raise ValueError("model_signed_work_binding_mismatch")
+    return work_digest, pair
 
 
 def _process_identity_values(repo, packet, selection):

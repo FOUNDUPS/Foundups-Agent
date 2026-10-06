@@ -1,3 +1,22 @@
+## Current-generation model consumption
+
+`verify_signer_current_generation_runtime_binding` and its existing lease accept
+optional `model_work_order` and `trusted_now_epoch`. The collector accepts
+`model_work_order`; the valve forwards its existing signed-bound work order.
+Artifacts come from the existing top-level or `operational_context_binding`
+fields; contradictory duplicates reject. Both receipt IDs and canonical digests
+must match the work order and work authority, including the full work digest.
+
+`SignerCurrentGenerationRuntimeBinding` adds `model_work_order_digest`,
+`model_artifact_pair_digest`, `model_valid_until`. These are audit evidence, not
+serializable admission capabilities. The producer performs actual verification
+and one-shot consumption under the current-generation lease, with monotonic time
+and owner/model/selection/manifest deadlines. Missing or rejected model inputs
+clear no model reason. The collector compares stable model evidence around peer
+RPC and final deadlines. `GovernedValveUseTimeResolution` adds optional
+`signer_model_binding_receipt_id`; no authoritative effect lease is produced.
+Native root/model/peer enrollment remains unverified.
+
 ## Protected model verification inputs (owner v8)
 
 `load_system_service_model_runtime_verifier(owner_config_path, repo_root,
@@ -17,7 +36,7 @@ post-load payload mutation fail closed. Checked snapshots are retained; this
 is not immutable execution or isolation from hostile code in the same process.
 Connect under the existing generation lease and consume the existing one-shot
 model capability before changing resident acceptance. Production provisioning
-and that consumer connection are not established by this API.
+is not established by this API. The consumer above binds its use to the current generation.
 
 ## Resident fresh peer use — 2026-10-07
 

@@ -103,6 +103,7 @@ class GovernedValveUseTimeResolution:
     authoritative_use_lease: Optional["AuthoritativeUseLease"] = None
     signer_generation_binding_receipt_id: Optional[str] = None
     signer_peer_binding_receipt_id: Optional[str] = None
+    signer_model_binding_receipt_id: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -152,7 +153,6 @@ class GovernedValveUseTimeAuthorityResolver:
         reasons: list[str] = []
         if not _chain_snapshot_is_canonical(chain_state):
             reasons.append("canonical_chain_results_revision_invalid")
-
         artifacts, read_reasons = _read_runtime_artifacts(self)
         reasons.extend(read_reasons)
         environment = _governed_environment(artifacts.get("valve_environment"), reasons)
@@ -176,20 +176,20 @@ class GovernedValveUseTimeAuthorityResolver:
             self.trusted_now_epoch,
             principal_identity=identity, principal_work_authority=work_authority,
             peer_secret_access_grant_supplier=self.signer_peer_secret_access_grant_supplier,
+            model_work_order=work_order,
         )
         generation_binding_receipt_id = generation_evidence.receipt_id
         reasons.extend(
             generation_evidence.remaining_reasons(
                 INCOMPLETE_TRUST_ANCHOR_REASONS,
                 CURRENT_GENERATION_TRUST_ANCHOR_REASONS
-                + generation_evidence.bound_identity_reasons(identity, work_authority),
+                + generation_evidence.bound_identity_reasons(identity, work_authority, work_order),
             )
         )
 
         # Current-generation evidence is not effect authority. The external
         # signer peer remains the only future issuer for a live use lease.
         authoritative_use_lease = None
-
         expiry_epoch = _integer(work_authority.get("expires_at")) or self.now_epoch
         ttl = max(1, min(3600, expiry_epoch - self.now_epoch))
         expires = (
@@ -207,6 +207,7 @@ class GovernedValveUseTimeAuthorityResolver:
             authoritative_use_lease=authoritative_use_lease,
             signer_generation_binding_receipt_id=generation_binding_receipt_id,
             signer_peer_binding_receipt_id=generation_evidence.peer_receipt_id,
+            signer_model_binding_receipt_id=(generation_binding_receipt_id if generation_evidence.model_matches(work_order) else None),
         )
 
     def _reverify_and_bind(

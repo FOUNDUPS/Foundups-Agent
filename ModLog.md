@@ -1,3 +1,39 @@
+## Current-generation model consumption — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
+PR2095 merged c83ff5c840a69174e20836758cb650457adbdec9; reviewed/main trees
+match. Branch and main CI/CodeQL passed (main37538959066/37538959007);
+owned branch retired with verified recovery bundle.
+
+Existing generation binding now snapshots the exact work-order model pair,
+binds both IDs/digests to signed work authority, loads protected owner v8 inputs
+inside the selected generation lease, executes Ed25519 verification and consumes
+the one-shot capability. Missing/rejected model inputs preserve other evidence.
+The existing collector carries this proof into the valve; only the two model
+reasons can clear, with an exact current work-order match. Peer RPC stays outside
+the generation fence; both snapshots and final model/owner/generation expiry are
+checked. No effect lease or credentials are minted.
+
+Baseline missing API:8fail9.07s. First connected77pass/6fail (size limit plus five
+stale call assertions); corrected without widening limits. Review found a clock
+rollback across crypto:1fail4.18s reproduced, then fixed with an invocation-wide
+monotonic clock and receipt start/end checks. Repaired connected88pass79.73s;
+additional real collector/mutation check1pass4.58s. Independent source recheck
+found no blocker; it did not independently execute tests. Real producer/collector
+fixtures substitute principal validation; valve/peer projection substitutes the
+producer. Native enrollment, admitted worker improvement and retained later benefit
+remain unproven. Conditional model acceptance leaves consensus, sovereign and
+Memex reasons; unprovisioned native runtimes still fail closed.
+
+Evidence: `outputs/rsi-permission-evidence-20261006/model-consumer-execution.json`.
+A later real-collector test reproduced rollback after producer return (1fail4.58s).
+The collector now shares a monotonic clock across all phases; connected89pass79.56s.
+Review required an external assertion to prove the negative reached a valid producer;
+that oracle was strengthened: final8 integrity tests plus corrected case9pass69.96s;
+extension15pass15.625s, registry1695/270 current. Runtime manifest1423 files.
+Exact bindings and test IDs are in the receipt.
+No local-model or paid-provider calls; coordinator/review usage is unmeasured.
+
 ## Protected model verifier input supply — 2026-10-07
 
 Real-signature acceptance added before promotion: disposable Ed25519 keys feed

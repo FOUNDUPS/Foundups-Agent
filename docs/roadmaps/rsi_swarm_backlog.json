@@ -1880,9 +1880,9 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.model_owner_20261007",
-    "base_commit": "84f1f963c595d0d4124b197f706579b4ff7464a6",
-    "selected_action": "Bind model verifier inputs to protected existing owner v8",
+    "observation_path": "current_observation.model_consumer_20261007",
+    "base_commit": "c83ff5c840a69174e20836758cb650457adbdec9",
+    "selected_action": "Consume protected model verification in existing current-generation resident path",
     "status": "LOCALLY_VALIDATED_PUBLICATION_PENDING",
     "wsp15": {
       "complexity": 3,
@@ -1893,9 +1893,29 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "next_action": "Close reviewed supply; bind current owner/generation and consume model proof before clearing model trust reasons"
+    "next_action": "Close exact-source publication; rescore existing consensus/sovereign/Memex and authentic runtime provisioning. Native improvement remains blocked."
   },
   "current_observation": {
+    "model_consumer_20261007": {
+      "base_commit": "c83ff5c840a69174e20836758cb650457adbdec9",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "truth": "LOCAL_FIXTURE_VALIDATION_NOT_NATIVE_ADMISSION",
+      "connected_passed": 89,
+      "real_collector_passed": 1,
+      "clock_review_baseline_failed": 1,
+      "conditional_remaining_trust_reasons": 3,
+      "native_rsi_demonstrated": false,
+      "worker_calls": 0,
+      "coordinator_review_tokens": null,
+      "evidence": "outputs/rsi-permission-evidence-20261006/model-consumer-execution.json"
+    },
     "model_owner_20261007": {
       "base_commit": "84f1f963c595d0d4124b197f706579b4ff7464a6",
       "wsp15": {

@@ -562,3 +562,100 @@ def test_peer_connection_uses_real_renewed_generation(tmp_path, monkeypatch, cas
     assert len(observed)==2 and all(b.accepted for b in observed)
     assert (observed[0].selection_expires_at != observed[1].selection_expires_at) is (case == "renewed")
     assert result.peer_verified is (case=="renewed")
+
+
+@pytest.mark.parametrize("case", ["valid", "wrong-authority", "wrong-digest", "missing",
+    "owner-rotated", "expired-after-crypto", "boolean-clock", "work-mutated", "clock-reversed-after-crypto", "collector-clock-reversed"])
+def test_current_generation_consumes_protected_model_pair(tmp_path, monkeypatch, case):
+    from modules.communication.moltbot_bridge.tests.test_reddog_signer_system_service_startup_authority import (
+        _model_input_owner_case, _real_model_evidence_signatures,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_work_order_binding import canonical_full_work_order_digest
+    from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import canonical_model_runtime_binding_digest
+    from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_use_time_verifier import ModelRuntimeBindingUseTimeVerifier
+    _real_model_evidence_signatures(monkeypatch)
+    values, owner, _ = _model_input_owner_case(tmp_path, monkeypatch)
+    now = [NOW]
+    monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW)
+    pair = dict(model_selection_receipt=values["model_selection"],
+                model_runtime_binding_receipt=values["model_binding"])
+    work = dict(work_order_id="model-current-use", operational_context_binding=pair,
+        model_selection_receipt_id=pair["model_selection_receipt"]["receipt_id"],
+        model_selection_digest=binding_module._digest(pair["model_selection_receipt"]),
+        model_runtime_binding_receipt_id=pair["model_runtime_binding_receipt"]["receipt_id"],
+        model_runtime_binding_digest=canonical_model_runtime_binding_digest(pair["model_runtime_binding_receipt"]))
+    authority = dict(work, work_order_digest=canonical_full_work_order_digest(work))
+    if case == "wrong-authority":
+        authority["model_selection_receipt_id"] = "wrong"
+    if case == "wrong-digest":
+        work["model_runtime_binding_digest"] = "sha256:" + "0" * 64
+        authority.update(work, work_order_digest=canonical_full_work_order_digest(work))
+    if case == "missing":
+        work.pop("operational_context_binding")
+        authority["work_order_digest"] = canonical_full_work_order_digest(work)
+    # Principal signature/subject verification has separate connected coverage.
+    # This seam isolates real generation selection, owner input and model crypto.
+    monkeypatch.setattr(binding_module, "_validated_principal_digest",
+        lambda repo, selection, identity, work_authority: binding_module._digest(
+            {"identity": identity, "work_authority": work_authority}))
+    original, observed = ModelRuntimeBindingUseTimeVerifier.verify, []
+    def verify(self, **kwargs):
+        if case in {"clock-reversed-after-crypto", "collector-clock-reversed"}:
+            now[0] = NOW + 5
+        capability = original(self, **kwargs)
+        observed.append(capability)
+        if case == "clock-reversed-after-crypto":
+            now[0] = NOW + 2
+        if case == "expired-after-crypto":
+            now[0] = owner["model_verifier_authority"]["expires_at"]
+        elif case == "boolean-clock":
+            now[0] = True
+        elif case == "owner-rotated":
+            owner["model_verifier_authority"]["expires_at"] += 1
+            owner["config_id"] = binding_module._digest({k:v for k,v in owner.items() if k != "config_id"})
+            values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
+        elif case == "work-mutated":
+            work["work_order_id"] = "changed"
+        return capability
+    monkeypatch.setattr(ModelRuntimeBindingUseTimeVerifier, "verify", verify)
+    result = verify_signer_current_generation_runtime_binding(repo_root=values["repo"],
+        runtime_root=Path(owner["runtime_root"]), run_packet_path=values["packet_path"],
+        now_epoch=NOW, principal_identity={"principal_id":"fixture"},
+        principal_work_authority=authority, model_work_order=work,
+        trusted_now_epoch=lambda: now[0])
+    assert result.accepted, result.rejection_reasons
+    assert (result.model_work_order_digest is not None) is (case in {"valid", "collector-clock-reversed"})
+    if case in {"valid", "collector-clock-reversed"}:
+        assert observed and result.model_work_order_digest == canonical_full_work_order_digest(work)
+        assert result.model_valid_until == owner["model_verifier_authority"]["expires_at"]
+        if case == "collector-clock-reversed":
+            from modules.communication.moltbot_bridge.src import reddog_signer_current_generation_use_time_gate as gate
+            real_verify = gate.verify_signer_current_generation_runtime_binding
+            producer_digests = []
+            def reversed_after_producer(**kwargs):
+                result = real_verify(**kwargs)
+                producer_digests.append(result.model_work_order_digest)
+                now[0] = NOW + 2
+                return result
+            monkeypatch.setattr(gate, "verify_signer_current_generation_runtime_binding", reversed_after_producer)
+            now[0] = NOW
+        evidence = collect_signer_current_generation_use_time_evidence(True, values["repo"],
+            Path(owner["runtime_root"]), lambda: now[0], principal_identity={"principal_id":"fixture"},
+            principal_work_authority=authority, model_work_order=work)
+        assert evidence.model_matches(work) is (case == "valid")
+        if case == "collector-clock-reversed":
+            assert producer_digests == [canonical_full_work_order_digest(work)]
+            return
+        assert set(evidence.bound_identity_reasons({"principal_id":"fixture"}, authority, work)) == {
+            "canonical_principal_subject_key_attestation_missing",
+            "canonical_model_signed_evidence_trust_anchor_incomplete",
+            "canonical_model_selection_signed_evidence_verifier_missing"}
+        work["task_summary"] = "substituted after collection"
+        assert not evidence.model_matches(work)
+    if case in {"owner-rotated", "expired-after-crypto", "boolean-clock", "work-mutated", "clock-reversed-after-crypto"}:
+        assert observed, "negative control must reach actual cryptography"
+    from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import consume_verified_runtime_binding_capability, verified_runtime_binding_receipt
+    for capability in observed:
+        assert consume_verified_runtime_binding_capability(capability,
+            selection=values["model_selection"], binding=values["model_binding"],
+            receipt=verified_runtime_binding_receipt(values["model_binding"])) is None

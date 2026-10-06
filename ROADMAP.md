@@ -12,32 +12,29 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — protected model input supply (2026-10-07):**
-PR2094 merged at84f1f963c595d0d4124b197f706579b4ff7464a6, with equal reviewed/main
-trees. Branch CI/CodeQL and main CI37533974884/CodeQL37533975579 passed. The
-signed-model CI step ran55 cases. Owned branch retired with recovery bundle.
+**Current selection — current-generation model consumption (2026-10-07):**
+PR2095 merged c83ff5c840a69174e20836758cb650457adbdec9 with equal reviewed/main
+trees; branch and main CI/CodeQL passed. Owned branch retired and
+recoverable. Protected input supply is closed as a source slice.
 
-Selected15/P1 (C3/I4/D4/impact4): extend existing protected owner configuration
-and verifier construction, not another evaluator. Owner v8 binds six model input
-snapshots and a short lifetime. Review found and repaired post-load mutation and
-expiry across owner IO;8baseline failures,97connected passes/3platform skips,
-128adjacent passes including v7/v8 startup. Real Ed25519 acceptance/rejection
-and one-shot replay3pass; final startup38pass. Independent recheck found no blocker.
-PR2095 CI exposed the existing source-size cap; reviewed extraction preserves
-the cap and public API. Connected90pass/1skip; publication pending. Detailed evidence in the existing moltbot_bridge ModLog and
-`outputs/rsi-permission-evidence-20261006/model-owner-execution.json`.
+Selected15/P1 (C3/I4/D4/impact4): connect that supplier through the existing
+generation lease, collector and valve. Exact work/model binding and capability
+consumption now have connected89pass, including the real collector. Review
+reproduced producer and collector clock rollbacks (1fail each) and cleared the repairs. Publication pending;
+see module ModLog and `outputs/rsi-permission-evidence-20261006/model-consumer-execution.json`.
 
-This supplies trusted inputs, not native admission. Next: bind the exact owner ID
-under current-generation selection, verify the model artifacts and consume their
-one-shot capability. Five resident trust reasons remain. Six environment input
-settings were absent in inspected Windows scopes and the running OpenClaw/Hermes
-processes; alternate provisioning was not ruled out. No inference calls this slice.
+This is fixture-qualified runtime wiring, not native enrollment. Real model crypto
+uses a principal-verification seam; valve/peer projection uses producer fixtures.
+With valid provisioned evidence, two model reasons can clear; consensus, sovereign
+and Memex remain independent. Without authentic inputs, native gates stay closed.
+Next: finish exact-source closure, re-score the remaining trust/effect-lease
+connections and authentic runtime provisioning before an admitted local-agent run.
 
-Native18/P0 remains blocked: admitted local-agent improvement, independent fixed
-baseline/held-out validation, governed retention/rollback and later benefit remain
-unproven. Local Linux86/14 historical failed broad run remains recorded debt.
-Holo authority-root/head mismatch persists; exact-source reads are a bounded
-navigation fallback, not CURRENT index evidence.
+Native18/P0 remains blocked: scoped local-agent improvement, independent baseline
+and held-out validation, governed retention/rollback, and benefit in a later
+invocation remain unproven. No whole-system completion percentage is claimed.
+Holo authority-root/head mismatch persists; exact-source fallback is not CURRENT
+index evidence. Local Linux86/14 historical failed broad run remains recorded debt.
 
 **Coordination cost discipline:** reuse source-bound receipts and deterministic
 checks; repeat audits/tests only after relevant changes or new failures. One
