@@ -1,3 +1,12 @@
+## RSI single-effect composition checkpoint — 2026-10-07
+
+Existing owner/provider/signer path extended; 687 connected Windows fixture tests
+pass. Independent review blocks promotion until signed grant lifetime is capped
+by verified approval validity. No runtime activation, PR or merge for this slice.
+Root/module roadmap and backlog identify that repair without opening a new plan.
+No local model retry or paid provider call; coordinator/review usage is unmeasured.
+WSP00/6/15/22/50/84/97. Details: modules/communication/moltbot_bridge/ModLog.md.
+
 ## RSI local-worker rejection and grant digest repair — 2026-10-07
 
 A source-grounded14/P1 defect accepted mismatched outer consensus metadata at

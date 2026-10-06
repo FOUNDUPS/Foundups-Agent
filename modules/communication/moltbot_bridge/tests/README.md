@@ -1,3 +1,16 @@
+## Effect signing composition regression — 2026-10-07
+
+Run `test_reddog_effect_signing_composition.py`, `test_reddog_effect_signing_grant.py`
+and `test_reddog_effect_signing_lease.py` with the existing consensus/consent/reviewer
+and provider suites. Shared fixture: `reddog_effect_signing_test_support.py`.
+Covers exact target and one-use permissions, invalid evidence, expiry during
+reservation/commit, clean fence exit before RPC, owner rotation, cleanup failure,
+held-fence API rejection, real grant signatures and final lease consumption.
+The full Windows selection passed 687 cases; dedicated Linux-root qualification
+requires its own fixture and was not run. Evidence is in
+`outputs/rsi-permission-evidence-20261006/effect-signing-connected-windows.{xml,log}`.
+
+
 ## Provider issuance regression — 2026-10-06
 
 The frozen composed test observes whether each target call still holds the

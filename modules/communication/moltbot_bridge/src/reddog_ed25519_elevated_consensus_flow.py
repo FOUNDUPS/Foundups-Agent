@@ -7,6 +7,7 @@ from typing import Any, Mapping
 from modules.communication.moltbot_bridge.src.reddog_elevated_consensus_signer_reservation import (
     commit_elevated_consensus_nonce,
     rollback_elevated_consensus_nonce,
+    elevated_consensus_reservation_current,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,

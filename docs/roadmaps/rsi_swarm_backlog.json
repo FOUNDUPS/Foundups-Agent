@@ -1880,26 +1880,44 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.grant_consensus_digest_20261007",
-    "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",
-    "selected_action": "Reject grant request/proof consensus mismatch before nonce and signing key use",
-    "status": "coordinator_repair_validated_reviewed_publication_pending",
+    "observation_path": "current_observation.effect_signing_composition_20261007",
+    "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",
+    "selected_action": "Connect existing single-effect consent/review approval through provider and independent grant signer",
+    "status": "locally_validated_review_blocks_promotion",
     "wsp15": {
-        "complexity": 2,
-        "importance": 4,
-        "deferability": 4,
-        "impact": 4,
-        "total": 14,
-        "priority": "P1"
+      "complexity": 4,
+      "importance": 4,
+      "deferability": 4,
+      "impact": 4,
+      "total": 16,
+      "priority": "P0"
     },
     "dispatchable": false,
-    "execution_plane": "Supervised developer-plane source repair; no native authority",
-    "next_action": "Complete connected validation, independent review and publication; then re-observe effect proof/provider/signer composition together",
+    "execution_plane": "Supervised developer-plane source repair; synthetic qualification, no native authority",
+    "next_action": "Cap effect grant validity by independently verified approval lifetime, test delayed use, then re-review before runtime composition",
     "higher_priority_gates": [
-        "Native18/P0 requires authentic runtime inputs and effect permission; a standalone permit cannot close provider/signer digest composition"
+      "Native18/P0 awaits authentic admission, independent evaluation, retention and later benefit"
     ]
-},
+  },
   "current_observation": {
+    "effect_signing_composition_20261007": {
+      "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",
+      "local_validation": {
+        "passed": 687,
+        "failed": 0,
+        "seconds": 34.9,
+        "evidence": "outputs/rsi-permission-evidence-20261006/effect-signing-connected-windows.xml",
+        "excluded": "Dedicated Linux-root fixture tests; not verified on this Windows host"
+      },
+      "scope": "Existing effect consent/reviewer -> one-use permission -> independent grant -> existing lease issuer",
+      "truth": "LOCAL_FIXTURE_VALIDATED; synthetic owner/runtime and in-process socket; not native RSI",
+      "local_model_calls": 0,
+      "paid_provider_calls": 0,
+      "architect_review_cost": "unmeasured",
+      "review": "Promotion blocked: signed grant expiry can exceed verified approval lifetime; issuance-only semantics not established",
+      "publication": "Owned recoverable checkpoint only; no PR, merge or activation",
+      "next_dependency": "Approval-to-grant expiry bound and delayed-use regression, then authentic runtime/resident composition"
+    },
     "grant_consensus_digest_20261007": {
     "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",
     "finding": "Unchanged valid proof plus substituted outer consensus digest accepted and consumed nonce; existing independent grant signer did not bind those fields",
@@ -1923,7 +1941,7 @@
         "connected_passed": 63,
         "seconds": 15.16,
         "review": "No concrete blocker; grant-digest-independent-review.json SHA256 8fa883a1f9571f6b55893ff2efa7519bf341952c0fb1589e6b3afb47e5831a56",
-        "publication": "pending"
+        "publication": "PR2089 merged ac645be6a6a30913381edc97ef93595ee20af76e; exact-main CI37498282161 and CodeQL37498284318 success"
     },
     "closure_pr2088": {
         "merge": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",

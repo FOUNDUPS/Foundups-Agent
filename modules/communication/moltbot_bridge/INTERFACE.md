@@ -1,3 +1,32 @@
+## Single-effect approval to grant — 2026-10-07 unpromoted candidate
+
+**Open review blocker:** grant expiry is not yet capped by the independently
+verified approval interval. Do not activate this candidate; issuance-only approval
+semantics are not established. See ROADMAP for the focused follow-up.
+
+`CurrentEffectSigningAuthority` takes explicitly trusted owner, policy, author and
+reviewer runtime, sovereign authorization and nonce dependencies. `prepare_permit`
+verifies consent and reviewer quorum under one selected owner lease and returns a
+process-local, exact-target, expiring, one-use `VerifiedEffectSigningPermit`.
+`reddog_effect_consensus_proof.v1` is capped at 16 KiB and binds the context, signed
+consent/reviews, parent request and exact target. Structural parsing alone confers
+no authority. The target consensus digest stays null; the outer grant digest must
+match the separate proof receipt ID. The independent signer reverifies the proof.
+
+`ExternalSignerAuthoritativeUseLeaseIssuer.issue(..., effect_signing_permit=...)`
+forwards that permit through `issue_grant`. Effect issuance releases the provider
+owner fence before the independent signer RPC, then reenters and checks unchanged
+policy/binding and the final signed grant. Failed cleanup or rotation returns no
+grant; a root-issued but rejected grant is not misreported as never issued.
+The legacy held-fence `lease` API rejects effect permits.
+
+Reviewer/key snapshots and expiry limits remain live through nonce reservation,
+before signing, and before nonce commit. Expiry rolls back reserved state. These
+sampled checks do not assert immutable execution. Trusted dependencies and real
+resident enrollment remain external prerequisites; fixture qualification does not
+establish model authorship, native RSI, or deployment.
+
+
 ## Outer consensus binding at grant signing — 2026-10-07 candidate
 
 Before reserving an elevated consensus nonce, the existing grant signer admission

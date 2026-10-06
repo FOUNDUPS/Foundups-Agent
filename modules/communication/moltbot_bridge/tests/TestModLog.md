@@ -1,3 +1,25 @@
+## Single-effect grant composition — 2026-10-07 checkpoint
+
+Connect current-owner consent and reviewer quorum to one target permission,
+independent grant signing and the existing authoritative-use lease issuer.
+The target keeps its null consensus digest; the outer grant binds a distinct
+bounded effect proof. Legacy delegated approval remains unchanged.
+
+Local Windows connected regression: 687 passed in 34.90s. Generated manifest
+integrity: 8 passed in 64.61s. Test registry current (1695 files, 270 quarantined). Tests use real disposable
+signatures with synthetic owner/runtime provenance and in-process socket transport;
+they do not qualify native admission or an OS service. Dedicated Linux-root tests
+are excluded from this Windows run. Independent review blocks promotion: grant
+expiry can exceed verified approval lifetime. Cap it through independently verified
+evidence and test delayed target use before activation/publication.
+No local model retry or paid provider call was made for this slice; architect and
+review compute remain separate, unmeasured costs. WSP00/6/15/22/50/84/97.
+
+PR2089 is closed at ac645be6a6a30913381edc97ef93595ee20af76e, equal reviewed/main
+tree 8fecfc991ce7896a967c1a6f690888cca90f4bae. Main CI37498282161 and
+CodeQL37498284318 succeeded. The pending publication entries below are historical.
+
+
 ## Grant request/proof digest binding — 2026-10-07 candidate
 
 Final connected63/63 pass in15.16s; manifest integrity8/8 pass in61.49s.

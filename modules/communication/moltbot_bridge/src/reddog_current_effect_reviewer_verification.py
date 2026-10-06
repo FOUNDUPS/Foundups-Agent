@@ -70,7 +70,7 @@ def verify_current_effect_review(*, owner_config_path, repo_root, **inputs):
         return False
 
 
-def _verify_leased(owner, owner_path, repo, selection, inputs, before):
+def _verify_leased(owner, owner_path, repo, selection, inputs, before, *, valid_until=None, completion_checks=None):
     from . import reddog_elevated_authority_consensus_verification as verification
 
     records, grants = principals.load_current_generation_principal_artifact(
@@ -96,8 +96,18 @@ def _verify_leased(owner, owner_path, repo, selection, inputs, before):
             return False
         current = loader._load_owner_config(owner_path, repo=repo)
         finish = _now_epoch()
-        return (current == owner and finish >= now and before == _input_snapshot(inputs)
-                and _still_current(inputs, keys, runtime, finish))
+        valid = (current == owner and finish >= now and before == _input_snapshot(inputs)
+                 and _still_current(inputs, keys, runtime, finish))
+        if valid and valid_until is not None:
+            valid_until.extend(evidence.expires_at for evidence, _ in runtime.records)
+            key_refs = [keys.resolve(d["reviewer_principal_id"], d["reviewer_principal_provider"])
+                        for d in _review_items(inputs)]
+            valid_until.extend(key.expires_at for key in key_refs)
+            snapshots = [asdict(key) for key in key_refs]
+            if completion_checks is not None:
+                completion_checks.append(lambda now: runtime.current(now)
+                    and snapshots == [asdict(key) for key in key_refs])
+        return valid
     finally:
         keys.close()
 

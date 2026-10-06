@@ -14,6 +14,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
     SigningRequest,
     SigningResponse,
 )
+from .reddog_effect_consensus_proof import VerifiedEffectSigningPermit, consume_effect_signing_permit
 
 
 class ElevatedConsensusGrantLease(Protocol):
@@ -131,9 +132,9 @@ def admit_secret_grant_consensus(
         if permit is not None or request.consensus_receipt_digest is not None:
             raise ValueError("secret_grant_consensus_invalid")
         return None
-    proof = consume_elevated_authority_signing_permit(
-        permit, signing_request=request, now=now
-    )
+    consume = (consume_effect_signing_permit if type(permit) is VerifiedEffectSigningPermit
+               else consume_elevated_authority_signing_permit)
+    proof = consume(permit, signing_request=request, now=now)
     if proof is None:
         raise ValueError("secret_grant_consensus_invalid")
     return proof

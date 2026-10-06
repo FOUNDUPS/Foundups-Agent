@@ -34,7 +34,7 @@ class GrantAwareExternalSigner(Protocol):
 
 class AuthoritativeUseLeaseGrantProvider(Protocol):
     def issue_grant(
-        self, request: SigningRequest
+        self, request: SigningRequest, *, elevated_consensus_signing_permit: Any = None
     ) -> Mapping[str, Any]:
         """Return the verified grant only after clean issuance lease exit."""
 
@@ -68,6 +68,7 @@ class ExternalSignerAuthoritativeUseLeaseIssuer:
         *,
         payload: Mapping[str, Any],
         authority_tier: str,
+        effect_signing_permit=None,
     ) -> AuthoritativeUseLease | None:
         try:
             if (
@@ -82,7 +83,9 @@ class ExternalSignerAuthoritativeUseLeaseIssuer:
             )
             if request is None:
                 return None
-            grant = self.grant_provider.issue_grant(request)
+            grant = (self.grant_provider.issue_grant(request) if effect_signing_permit is None
+                     else self.grant_provider.issue_grant(
+                         request, elevated_consensus_signing_permit=effect_signing_permit))
             if not isinstance(grant, Mapping):
                 return None
             response = self.signer.sign_with_secret_grant(request, grant)
