@@ -61,6 +61,7 @@ def _model_input_owner_case(tmp_path, monkeypatch):
                  model_verifier_authority=dict(issued_at=NOW - 1, expires_at=NOW + 30, inputs=inputs))
     owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
     values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
+    values.update(model_selection=selection, model_binding=binding)
     return values, owner, payloads
 
 
@@ -172,6 +173,91 @@ def test_model_verifier_rechecks_memory_and_owner_read_time(tmp_path, monkeypatc
         monkeypatch.setattr(loader_module, "_load_owner_config", delayed)
     with pytest.raises(ValueError):
         actual.trusted_now_epoch()
+
+
+def _real_model_evidence_signatures(monkeypatch):
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+    from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
+    from modules.ai_intelligence.ai_gateway.tests import model_signed_evidence_test_helpers as signed
+    from modules.communication.moltbot_bridge.tests import model_runtime_binding_receipt_test_helpers as bound
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+        Ed25519SignatureVerifier, encode_ed25519_public_key, encode_ed25519_signature,
+    )
+    keys = {}
+    for name in ("BENCHMARK_PUBLIC_KEY", "PROMOTION_PUBLIC_KEY"):
+        key = Ed25519PrivateKey.generate()
+        public = encode_ed25519_public_key(key.public_key().public_bytes(Encoding.Raw, PublicFormat.Raw))
+        keys[public] = key
+        monkeypatch.setattr(signed, name, public)
+        monkeypatch.setattr(bound, name, public)
+    monkeypatch.setattr(signed, "deterministic_signature",
+                        lambda public, message: encode_ed25519_signature(keys[public].sign(message.encode("utf-8"))))
+    monkeypatch.setattr(signed, "DeterministicSignatureVerifier", Ed25519SignatureVerifier)
+    monkeypatch.setattr(bound, "DeterministicSignatureVerifier", Ed25519SignatureVerifier)
+
+
+def _corrupt_model_evidence_signature(value):
+    from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import build_model_signed_evidence_receipt
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import encode_ed25519_signature
+    if isinstance(value, dict):
+        if "signature" in value:
+            fields = {k: v for k, v in value.items() if k not in {"receipt_id", "schema_version"}}
+            fields["signature"] = encode_ed25519_signature(bytes(64))
+            value.update(build_model_signed_evidence_receipt(**fields).to_dict())
+        else:
+            for item in value.values():
+                _corrupt_model_evidence_signature(item)
+    elif isinstance(value, list):
+        for item in value:
+            _corrupt_model_evidence_signature(item)
+
+
+@pytest.mark.parametrize("case", ["valid", "bad_signature", "wrong_trust_key"])
+def test_protected_model_inputs_execute_real_signature_verification(tmp_path, monkeypatch, case):
+    from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+        verified_runtime_binding_receipt, consume_verified_runtime_binding_capability,
+        discard_verified_runtime_binding_capability,
+    )
+    _real_model_evidence_signatures(monkeypatch)
+    values, owner, payloads = _model_input_owner_case(tmp_path, monkeypatch)
+    if case != "valid":
+        name = "evidence" if case == "bad_signature" else "trusted_keys"
+        if case == "bad_signature":
+            _corrupt_model_evidence_signature(payloads[name])
+        else:
+            keys = payloads[name]["trusted_public_keys"]
+            keys[0]["public_key"] = keys[1]["public_key"]
+        raw = json.dumps(payloads[name], sort_keys=True).encode("utf-8")
+        item = owner["model_verifier_authority"]["inputs"][name]
+        Path(item["path"]).write_bytes(raw)
+        item["raw_digest"] = loader_module.raw_digest(raw)
+        owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+        values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
+    verifier = loader_module.load_system_service_model_runtime_verifier(
+        owner_config_path=values["owner_config_path"], repo_root=values["repo"],
+        expected_owner_config_id=owner["config_id"], trusted_now_epoch=lambda: NOW)
+    args = dict(selection=values["model_selection"], binding=values["model_binding"])
+    backend_type = type(verifier.signature_verifier)
+    verify_signature, observed = backend_type.verify, []
+    def recording_verify(self, *arguments):
+        accepted = verify_signature(self, *arguments)
+        observed.append(accepted)
+        return accepted
+    monkeypatch.setattr(backend_type, "verify", recording_verify)
+    if case != "valid":
+        with pytest.raises(ValueError):
+            verifier.verify(**args)
+        if case == "bad_signature":
+            assert observed and False in observed
+        return
+    capability = verifier.verify(**args)
+    assert observed and all(observed)
+    try:
+        receipt = verified_runtime_binding_receipt(args["binding"])
+        assert consume_verified_runtime_binding_capability(capability, receipt=receipt, **args) == receipt
+        assert consume_verified_runtime_binding_capability(capability, receipt=receipt, **args) is None
+    finally:
+        discard_verified_runtime_binding_capability(capability)
 
 
 def test_legacy_e0_config_binding_retains_generation_alias_dependency(tmp_path):

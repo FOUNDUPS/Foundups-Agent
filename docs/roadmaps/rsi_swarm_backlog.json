@@ -1911,6 +1911,8 @@
       "connected_passed": 97,
       "connected_skipped": 3,
       "adjacent_passed": 128,
+      "real_signature_passed": 3,
+      "final_startup_passed": 38,
       "evidence": "outputs/rsi-permission-evidence-20261006/model-owner-execution.json",
       "remaining_trust_reasons": 5,
       "native_rsi_demonstrated": false,

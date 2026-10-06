@@ -1,5 +1,13 @@
 ## Protected model verifier input supply — 2026-10-07
 
+Real-signature acceptance added before promotion: disposable Ed25519 keys feed
+the existing evidence fixtures; the protected loader's fixed production verifier
+accepts valid evidence, rejects a canonical record with an invalid signature at
+the real backend, and rejects a wrong trusted key. One-shot consumption/replay
+is checked. Strict3pass5.64s; final startup file38pass48.71s. Independent recheck
+confirms the crypto path. Root-file provenance remains a fixture seam; production
+runtime source and generated manifest are unchanged.
+
 WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
 The existing protected owner loader adds v8, inheriting v1-v7 checks and binding
 six exact input paths/raw digests plus a maximum one-hour interval into config_id.

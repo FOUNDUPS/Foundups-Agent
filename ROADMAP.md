@@ -21,7 +21,8 @@ Selected15/P1 (C3/I4/D4/impact4): extend existing protected owner configuration
 and verifier construction, not another evaluator. Owner v8 binds six model input
 snapshots and a short lifetime. Review found and repaired post-load mutation and
 expiry across owner IO;8baseline failures,97connected passes/3platform skips,
-128adjacent passes including v7/v8 startup. Independent recheck found no blocker.
+128adjacent passes including v7/v8 startup. Real Ed25519 acceptance/rejection
+and one-shot replay3pass; final startup38pass. Independent recheck found no blocker.
 Publication pending; detailed evidence in the existing moltbot_bridge ModLog and
 `outputs/rsi-permission-evidence-20261006/model-owner-execution.json`.
 
