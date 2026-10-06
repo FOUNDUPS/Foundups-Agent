@@ -1,3 +1,31 @@
+## Retained proposal verification inputs
+
+Optional runtime-only `proposal_verification_inputs` uses
+`reddog_proposal_verification_inputs.v1`. Exact members: `schema_version`,
+`attestation`, `original_authority_profile`, `proposal_admission`, `determination`,
+`queue_candidate`, `memex_supply_receipt`. The bundle is capped at262144 canonical
+ASCII JSON bytes, depth20 and8192 visited nodes. Exact dictionaries and plain
+JSON scalars are required; exact tuples from existing typed receipts normalize
+to lists. Nested bundles, secrets, unknown bundle fields and nonfinite values
+reject. Existing whole-profile digest/secret checks remain in force.
+
+`snapshot_retained_architect_proposal_inputs(value)` detaches and checks structure,
+source identity and reconstructed payload; it does not authenticate a signature.
+`verify_retained_architect_proposal_authority(value, *, signer_runtime_config,
+principal_key_resolver, now_epoch, revoked_key_epochs=frozenset())` reuses the
+existing signature/runtime verifier and checks Memex freshness at the explicit
+caller time. It returns the existing `ArchitectProposalAuthorityBinding`.
+Trusted resolver/configuration and private credentials are not retained. A caller-provided timestamp
+is not a live clock or authenticated current-generation owner. The result does
+not grant execution, clear the resident Memex reason or establish native trust.
+
+The profile keeps the original source data as canonical JSON, separately
+from the promoted profile. Outer attestation/Memex/admission digests bind the
+retained members. Existing profiles without the bundle remain readable; committed
+legacy retries select the original bundle-free profile only when its exact digest
+matches the committed promotion and publication. New publication adds the bundle;
+no historical publication is silently enriched under its old ID.
+
 ## Current-generation model consumption
 
 `verify_signer_current_generation_runtime_binding` and its existing lease accept

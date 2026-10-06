@@ -1266,6 +1266,11 @@ jobs:
         run: |
           python -B -m pytest -q --tb=short -c /dev/null --noconftest \
             --import-mode=importlib -p no:cacheprovider \
+            modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_publication.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_architect_proposal_verified_authority.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_exact_schema.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_model_runtime_promotion.py \
             modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_owner_versions.py \
             modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_startup_owner.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
@@ -1320,6 +1325,7 @@ jobs:
         run: |
           python -m pip install "chromadb==1.5.5" "pytz>=2023.3" "psutil>=5.9.6"
           python -m pytest \
+            modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py \
             modules/communication/moltbot_bridge/tests/test_reddog_governed_execution_valve_production_wiring.py \
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_execution_valve_handler.py \
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_stage_handler_registry.py \
