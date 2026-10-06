@@ -12,23 +12,24 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — current-generation model consumption (2026-10-07):**
-PR2095 merged c83ff5c840a69174e20836758cb650457adbdec9 with equal reviewed/main
-trees; branch and main CI/CodeQL passed. Owned branch retired and
-recoverable. Protected input supply is closed as a source slice.
+**Current selection — retained proposal verification inputs (2026-10-07):**
+PR2096 merged `0383b9804ce08fffaac6cf74fb0aeedd93eb04d2`; reviewed/main
+trees match. Branch and main CI/CodeQL passed (main37541532041/37541531595).
+Owned branch retired with a verified recovery bundle. This closes source wiring,
+not native enrollment or demonstrated RSI.
 
-Selected15/P1 (C3/I4/D4/impact4): connect that supplier through the existing
-generation lease, collector and valve. Exact work/model binding and capability
-consumption now have connected89pass, including the real collector. Review
-reproduced producer and collector clock rollbacks (1fail each) and cleared the repairs. Publication pending;
-see module ModLog and `outputs/rsi-permission-evidence-20261006/model-consumer-execution.json`.
+Selected14/P1 (C2/I4/D4/impact4): preserve the signed proposal and Memex inputs
+that publication previously discarded. The existing profile artifact now retains
+bounded detached evidence; the existing verifier can recheck it with explicitly
+supplied current trust/time. Local connected222pass; independent review found a
+legacy-replay regression, reproduced and repaired without rewriting old artifacts.
+Publication pending. Evidence: module ModLog and
+`outputs/rsi-permission-evidence-20261006/memex-retention-execution.json`.
 
-This is fixture-qualified runtime wiring, not native enrollment. Real model crypto
-uses a principal-verification seam; valve/peer projection uses producer fixtures.
-With valid provisioned evidence, two model reasons can clear; consensus, sovereign
-and Memex remain independent. Without authentic inputs, native gates stay closed.
-Next: finish exact-source closure, re-score the remaining trust/effect-lease
-connections and authentic runtime provisioning before an admitted local-agent run.
+No worker/provider calls, effect permission or resident trust reason is
+created by this slice. Current-generation consumption still needs an authenticated
+proposal runtime supplier and live use-time verification. After exact-source
+closure, re-observe those existing owners before selecting the next connection.
 
 Native18/P0 remains blocked: scoped local-agent improvement, independent baseline
 and held-out validation, governed retention/rollback, and benefit in a later

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import math
 import re
 from collections.abc import Mapping, Sequence
@@ -332,10 +333,34 @@ def rehydrate_authority_profile_effect_scope(value: Any) -> dict[str, Any]:
         raise ValueError("authority_profile_not_canonical_json") from exc
 
 
+def _snapshot_retained_proposal(value: dict[str, Any]) -> dict[str, Any]:
+    # Lazy: the proposal verifier already depends on source-profile rehydration.
+    from modules.communication.moltbot_bridge.src.reddog_architect_proposal_verified_authority import (
+        snapshot_retained_architect_proposal_inputs,
+    )
+    bundle = snapshot_retained_architect_proposal_inputs(value["proposal_verification_inputs"])
+    expected = {
+        "proposal_authenticity_attestation_id": bundle["attestation"]["attestation_id"],
+        "memex_supply_receipt_id": bundle["memex_supply_receipt"]["receipt_id"],
+        "authority_profile_source_receipt_id": bundle["original_authority_profile"]["authority_profile_source_receipt_id"],
+    }
+    for field, member in (("proposal_authenticity_attestation_digest", "attestation"),
+                          ("memex_supply_digest", "memex_supply_receipt"),
+                          ("proposal_admission_digest", "proposal_admission")):
+        raw = json.dumps(bundle[member], sort_keys=True, separators=(",", ":"),
+                         ensure_ascii=True, allow_nan=False).encode("utf-8")
+        expected[field] = "sha256:" + hashlib.sha256(raw).hexdigest()
+    if any(value.get(key) != item for key, item in expected.items()):
+        raise ValueError("authority_profile_retained_proposal_binding_mismatch")
+    return {**value, "proposal_verification_inputs": bundle}
+
+
 def _rehydrate(value: Any, *, mode: str) -> dict[str, Any]:
     if type(value) is not dict:
         raise ValueError("authority_profile_not_plain_mapping")
     value = snapshot_authority_profile_m2m(value)
+    if mode == "runtime" and "proposal_verification_inputs" in value:
+        value = _snapshot_retained_proposal(value)
     if mode == "runtime":
         unknown = authority_profile_runtime_unknown_field_paths(value)
     else:
@@ -380,6 +405,8 @@ def _invalid_type_paths(value: Any) -> tuple[str, ...]:
 
 
 def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> None:
+    if path == "proposal_verification_inputs":
+        return  # Exact bounded bundle validated before generic profile traversal.
     if field == "m2m_envelope" and path in _M2M_PATHS:
         return  # Complete JSON and nested policies checked before generic traversal.
     if item is None:

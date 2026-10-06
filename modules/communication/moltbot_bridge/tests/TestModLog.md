@@ -1,3 +1,35 @@
+## Retained proposal verification inputs — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97; selected14/P1 (C2/I4/D4/impact4).
+PR2096 merged0383b9804ce08fffaac6cf74fb0aeedd93eb04d2; equal reviewed/main trees,
+branch/main CI and CodeQL passed. Holo query still reports authority-root/head
+mismatch; source-pinned fallback is not CURRENT index evidence.
+
+The existing promotion/publication path retains the original signed attestation,
+source profile, admission, determination, queue candidate and typed Memex receipt
+inside the existing runtime profile artifact. Inputs are detached before signature
+verification; current runtime configuration and keys are supplied separately when
+rechecking. Runtime-profile validation binds the bundle to its outer digests;
+source/seed profiles reject it. Legacy retries preserve original bytes/revision.
+No new store, orchestrator, worker call or admission capability is created.
+
+Corrected baseline reached missing retained field (1fail). Initial test setup had
+stale work-state/Memex revision bindings; those were corrected before claiming a
+product defect. First connected218pass/1 Windows temp-length setup failure;
+review found legacy retry rejection (1fail), repaired with exact old-digest matching.
+Final connected222pass42.60s across six existing suites, including21 publication
+roundtrip cases. Independent source review cleared the replay repair; it did not
+independently execute tests. Final manifest integrity8pass63.74s; extension15pass8.137s; registry1695/270
+current. Manifest1425 binds two existing newly reachable modules; exact cap
+accepts1425/rejects1426. CI includes all six suites. Publication pending.
+
+This is disposable-fixture verification, not native RSI. It clears no resident
+trust reason. Current-generation authenticated supply/live-time consumption,
+scoped worker improvement, independent baseline/held-out validation and later
+retained benefit remain outstanding. No local-model or paid-provider calls;
+coordinator/review usage unmeasured. Evidence:
+`outputs/rsi-permission-evidence-20261006/memex-retention-execution.json`.
+
 ## Current-generation model consumption — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).

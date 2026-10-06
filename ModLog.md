@@ -1,3 +1,13 @@
+## 2026-10-07 — Retain proposal verification evidence
+
+WSP00/6/15/22/50/62/84/97;14/P1. Existing RedDog promotion preserves bounded
+public proposal/Memex inputs in its existing profile artifact, with legacy replay
+compatibility. Connected222pass; integrity8pass; extension15pass; registry current.
+Independent review cleared the reproduced legacy replay defect. Existing CI
+compatibility job now covers the six connected suites. No native RSI/admission
+claim or worker/provider call. See module ModLog/INTERFACE and canonical ROADMAP.
+PR2096 predecessor is merged, equal-tree and branch/main CI/CodeQL verified.
+
 ## Current-generation model consumption — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).

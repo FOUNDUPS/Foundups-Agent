@@ -1,10 +1,20 @@
+## Retained proposal evidence checkpoint — 2026-10-07
+
+Selected14/P1: existing publication now preserves bounded verification inputs.
+Six connected suites222pass, including old-publication replay and caller mutation.
+Independent source review cleared the reproduced replay regression. Publication
+pending; see INTERFACE/ModLog. No runtime gate or native RSI claim advances.
+Next: exact-source closure, then re-observe the authenticated supplier and live
+current-generation consumption needed by the existing Memex gate.
+
 ## Current-generation model consumer checkpoint — 2026-10-07
 
 Existing producer/collector/valve wiring is locally qualified with disposable
 model signatures and explicit principal/peer seams. Connected89pass including the real
 collector; source review cleared the reproduced clock rollback. See
 INTERFACE/ModLog and existing current-generation runtime/use-time test files.
-Native admission and retained RSI remain unproven; publication pending.
+Native admission and retained RSI remain unproven. PR2096 merged0383b9804;
+branch/main CI and CodeQL passed; owned lane retired.
 
 ## Model input authority checkpoint — 2026-10-07
 

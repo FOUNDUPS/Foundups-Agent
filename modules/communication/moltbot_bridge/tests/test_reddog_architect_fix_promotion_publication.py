@@ -29,6 +29,119 @@ class SimulatedCrash(BaseException):
     pass
 
 
+@pytest.mark.parametrize("case", [
+    "valid", "memex", "attestation", "profile", "expired", "scope", "secret", "extra",
+    "nested", "depth", "size", "nan", "bool_time", "revoked", "signature",
+    "profile_binding", "source_profile", "seed_profile", "legacy_retry",
+    "memex_expired", "snapshot_mutation",
+])
+def test_published_promotion_retains_reverifiable_inputs(tmp_path, case, monkeypatch):
+    from modules.communication.moltbot_bridge.tests import test_reddog_architect_fix_signed_wsp15_work_order_promotion as fixture
+    from modules.communication.moltbot_bridge.tests.architect_proposal_promotion_test_helpers import build_proposal_runtime_inputs
+    from modules.communication.moltbot_bridge.src import reddog_architect_proposal_verified_authority as verifier
+    runtime, store, publisher = _runtime(tmp_path)
+    store.commit(fixture._work_state(), expected_revision=store.load()["revision"])
+    determination, profile, memex = fixture._determination(), fixture._authority_profile(), fixture._memex_supply()
+    determination = fixture._rebind_determination_admission(
+        determination, {"work_state_revision": store.load()["revision"]},
+    )
+    memex = fixture._memex_supply(source_revision=store.load()["revision"])
+    if case == "memex_expired":
+        memex = fixture._memex_supply(source_revision=store.load()["revision"],
+                                      policy_expires_at="2026-07-16T00:00:10+00:00")
+    attestation, config, keys = build_proposal_runtime_inputs(determination, profile, memex, now_epoch=fixture.NOW_EPOCH)
+    original_attestation = json.loads(json.dumps(attestation))
+    arguments = dict(store=store, architect_determination=determination,
+        authority_profile=profile, memex_supply_receipt=memex,
+        proposal_authenticity_attestation=attestation, signer_runtime_config=config,
+        principal_key_resolver=keys, authority_profile_publication_publisher=publisher.publish)
+    from modules.communication.moltbot_bridge.src import reddog_architect_fix_promotion_transaction as transaction
+    build_profile = transaction._build_profile
+
+    def legacy_profile(*args):
+        value = dict(build_profile(*args))
+        value.pop("proposal_verification_inputs")
+        return value
+
+    verify = verifier.verify_architect_proposal_promotion_authority
+
+    def mutate_caller_after_verification(**kwargs):
+        checked = verify(**kwargs)
+        attestation["nonce"] = "changed-by-caller"
+        memex["assignment_count"] = 999
+        return checked
+
+    with monkeypatch.context() as context:
+        if case == "legacy_retry": context.setattr(transaction, "_build_profile", legacy_profile)
+        if case == "snapshot_mutation":
+            context.setattr(verifier, "verify_architect_proposal_promotion_authority",
+                            mutate_caller_after_verification)
+        result, _ = fixture._promote(**arguments)
+    assert result.accepted, result.rejection_reasons
+    if case == "legacy_retry":
+        before = (runtime / "authority_profile.json").read_bytes()
+        revision = store.load()["revision"]
+        retried, _ = fixture._promote(**arguments)
+        assert retried.accepted, retried.rejection_reasons
+        assert "proposal_verification_inputs" not in retried.authority_profile
+        assert store.load()["revision"] == revision
+        assert (runtime / "authority_profile.json").read_bytes() == before
+        return
+    persisted = json.loads((runtime / "authority_profile.json").read_text("utf-8"))
+    bundle = persisted["proposal_verification_inputs"]
+    assert bundle == result.authority_profile["proposal_verification_inputs"]
+    assert bundle["original_authority_profile"] == profile
+    assert bundle["attestation"] == original_attestation
+    if case == "snapshot_mutation":
+        assert memex["assignment_count"] == 999
+        assert bundle["memex_supply_receipt"]["assignment_count"] == 1
+        assert attestation["nonce"] == "changed-by-caller"
+    now = fixture.NOW_EPOCH
+    if case == "memex": bundle["memex_supply_receipt"]["assignment_count"] += 1
+    if case == "attestation":
+        bundle["attestation"] = build_proposal_runtime_inputs(determination, profile, memex, now_epoch=now)[0]
+    if case == "profile": bundle["original_authority_profile"]["foundup_id"] = "substituted"
+    if case == "expired": now += 121
+    if case == "memex_expired": now += 11
+    if case == "scope": bundle["queue_candidate"]["foundup_id"] = "substituted"
+    if case == "secret": bundle["determination"]["private_key"] = "forbidden-fixture-field"
+    if case == "extra": bundle["unrecognized"] = True
+    if case == "nested": bundle["determination"]["proposal_verification_inputs"] = {}
+    if case == "depth":
+        nested = {}
+        bundle["determination"]["nested"] = nested
+        for _ in range(22):
+            nested["nested"] = {}
+            nested = nested["nested"]
+    if case == "size": bundle["determination"]["summary"] = "x" * 262145
+    if case == "nan": bundle["determination"]["unused"] = float("nan")
+    if case == "bool_time": now = True
+    if case == "signature": bundle["attestation"]["signature"] = "invalid-signature"
+    args = dict(signer_runtime_config=config, principal_key_resolver=keys, now_epoch=now)
+    if case == "revoked": args["revoked_key_epochs"] = frozenset({profile["key_epoch"]})
+    if case in ("profile_binding", "source_profile", "seed_profile"):
+        from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+            rehydrate_authority_profile_runtime, rehydrate_authority_profile_source,
+            rehydrate_authority_profile_seed,
+        )
+        readers = dict(profile_binding=rehydrate_authority_profile_runtime,
+                       source_profile=rehydrate_authority_profile_source,
+                       seed_profile=rehydrate_authority_profile_seed)
+        if case == "profile_binding": persisted["memex_supply_digest"] = "sha256:" + "f" * 64
+        with pytest.raises(ValueError):
+            readers[case](persisted)
+        return
+    if case in ("valid", "snapshot_mutation"):
+        checked = verifier.verify_retained_architect_proposal_authority(bundle, **args)
+        assert checked.attestation_id == attestation["attestation_id"]
+        assert checked.memex_supply_receipt_id == memex["receipt_id"]
+        assert checked.memex_supply_digest == canonical_digest(bundle["memex_supply_receipt"])
+        assert not publisher.stage_path.exists() and not publisher.journal_path.exists()
+    else:
+        with pytest.raises(ValueError):
+            verifier.verify_retained_architect_proposal_authority(bundle, **args)
+
+
 def _repo(tmp_path: Path) -> Path:
     repo = tmp_path / "repo"
     (repo / ".git").mkdir(parents=True)
