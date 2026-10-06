@@ -66,6 +66,7 @@ class SignerCurrentGenerationRuntimeBinding:
     effect_capability_issued: bool = False
     no_repo_mutation_performed: bool = True
     no_holoindex_reindex_performed: bool = True
+    principal_binding_digest: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -103,12 +104,15 @@ def verify_signer_current_generation_runtime_binding(
     now_epoch: int,
     run_packet_path: Path | str | None = None,
     signer_profile_id: str | None = None,
+    principal_identity: Mapping[str, Any] | None = None,
+    principal_work_authority: Mapping[str, Any] | None = None,
 ) -> SignerCurrentGenerationRuntimeBinding:
     """Verify root-owned current selection against trusted time and bytes."""
     try:
         with _lease_current_generation_runtime_binding(
             repo_root=repo_root, runtime_root=runtime_root, now_epoch=now_epoch,
             run_packet_path=run_packet_path, signer_profile_id=signer_profile_id,
+            principal_identity=principal_identity, principal_work_authority=principal_work_authority,
         ) as binding:
             return binding
     except Exception:
@@ -123,6 +127,8 @@ def _lease_current_generation_runtime_binding(
     *, repo_root: Path | str, runtime_root: Path | str, now_epoch: int,
     run_packet_path: Path | str | None = None,
     signer_profile_id: str | None = None,
+    principal_identity: Mapping[str, Any] | None = None,
+    principal_work_authority: Mapping[str, Any] | None = None,
 ) -> Iterator[SignerCurrentGenerationRuntimeBinding]:
     with ExitStack() as stack:
         try:
@@ -160,6 +166,9 @@ def _lease_current_generation_runtime_binding(
                 now_epoch=now_epoch,
                 signer_profile_id=signer_profile_id,
             )
+            if principal_identity is not None or principal_work_authority is not None:
+                values["principal_binding_digest"] = _validated_principal_digest(
+                    repo, selection, principal_identity, principal_work_authority)
             binding = _accepted_binding(values)
         except Exception:
             stack.close()
@@ -168,6 +177,22 @@ def _lease_current_generation_runtime_binding(
                 rejection_reasons=(SIGNER_CURRENT_GENERATION_BINDING_REJECTED,),
             )
         yield binding
+
+
+def _validated_principal_digest(repo, selection, identity, work_authority):
+    from .reddog_signer_owner_e0_principal_authority import verify_current_generation_principal_identity
+
+    # Bind exactly the value checked, even when caller dictionaries mutate during IO.
+    serialized = json.dumps({"identity": identity, "work_authority": work_authority},
+                            sort_keys=True, allow_nan=False)
+    snapshot = json.loads(serialized)
+    verify_current_generation_principal_identity(
+        repo_root=repo, selection=selection, identity=snapshot["identity"],
+        work_authority=snapshot["work_authority"])
+    if serialized != json.dumps({"identity": identity, "work_authority": work_authority},
+                                sort_keys=True, allow_nan=False):
+        raise ValueError("current_principal_binding_changed")
+    return _digest(snapshot)
 
 
 def _validated_values(

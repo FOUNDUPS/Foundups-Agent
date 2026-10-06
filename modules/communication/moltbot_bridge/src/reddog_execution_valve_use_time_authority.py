@@ -172,12 +172,16 @@ class GovernedValveUseTimeAuthorityResolver:
             self.repo_root,
             self.runtime_allowed_root,
             self.trusted_now_epoch,
+            principal_identity=identity, principal_work_authority=work_authority,
         )
         generation_binding_receipt_id = generation_evidence.receipt_id
         reasons.extend(
             generation_evidence.remaining_reasons(
                 INCOMPLETE_TRUST_ANCHOR_REASONS,
-                CURRENT_GENERATION_TRUST_ANCHOR_REASONS,
+                CURRENT_GENERATION_TRUST_ANCHOR_REASONS + (
+                    ("canonical_principal_subject_key_attestation_missing",)
+                    if generation_evidence.principal_matches(identity, work_authority) else ()
+                ),
             )
         )
 

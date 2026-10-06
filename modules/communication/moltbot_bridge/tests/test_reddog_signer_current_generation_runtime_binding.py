@@ -395,3 +395,106 @@ def test_generation_validation_interrupt_releases_selection(tmp_path, monkeypatc
             run_packet_path=values["packet_path"], now_epoch=NOW,
         )
     assert active == []
+
+
+def _principal_fixture(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.tests import (
+        test_reddog_signer_system_service_manifest_selection_loader as owner_tests,
+    )
+    original = owner_tests._build_harness
+    def build(path):
+        harness = original(path)
+        identity = harness.identity
+        record = {key: identity[key] for key in (
+            "principal_id", "principal_provider", "principal_public_key", "repo_scope", "foundup_scope")}
+        record.update(verified_subject_digest="sha256:" + "d" * 64,
+                      reward_account=None, owner_dae=None, principal_wallet=None)
+        payload = {"schema_version": "reddog_authority_runtime_resolver_supply.v1",
+                   "principals": {record["principal_provider"] + "|" + record["principal_id"]: record},
+                   "principal_count": 1, "resolver_supply_receipt_id": "sha256:" + "e" * 64,
+                   "no_holoindex_reindex_performed": True}
+        (harness.runtime_root / "principal_authority_records.json").write_text(
+            json.dumps(payload), encoding="ascii")
+        return harness
+    monkeypatch.setattr(owner_tests, "_build_harness", build)
+    return _fixture(tmp_path, monkeypatch)
+
+
+@pytest.mark.parametrize("case", ["valid", "wrong-key", "wrong-id", "wrong-provider",
+    "wrong-repo", "wrong-foundup", "missing-key", "missing-authority", "changed-artifact", "expired"])
+def test_principal_binding_uses_current_signed_generation(tmp_path, monkeypatch, case):
+    values = _principal_fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    path = harness.runtime_root / "principal_authority_records.json"
+    artifact = json.loads(path.read_text("ascii"))
+    record = next(iter(artifact["principals"].values()))
+    identity = {key: record[key] for key in (
+        "principal_id", "principal_provider", "principal_public_key")}
+    authority = {"principal_id": identity["principal_id"],
+                 "repo_full_name": record["repo_scope"][0],
+                 "foundup_id": record["foundup_scope"][0]}
+    changes = {"wrong-key": (identity, "principal_public_key"),
+               "wrong-id": (identity, "principal_id"),
+               "wrong-provider": (identity, "principal_provider"),
+               "wrong-repo": (authority, "repo_full_name"),
+               "wrong-foundup": (authority, "foundup_id")}
+    if case in changes:
+        target, key = changes[case]
+        target[key] = "not-the-admitted-value"
+    if case == "missing-key":
+        identity.pop("principal_public_key")
+    if case == "missing-authority":
+        authority = None
+    if case == "changed-artifact":
+        record["principal_public_key"] = "substituted-key"
+        path.write_text(json.dumps(artifact), encoding="ascii")
+    result = verify_signer_current_generation_runtime_binding(
+        repo_root=harness.repo_root, runtime_root=harness.runtime_root,
+        now_epoch=NOW + 86400 if case == "expired" else NOW,
+        principal_identity=identity, principal_work_authority=authority,
+    )
+    assert result.accepted is (case == "valid")
+    if case == "valid":
+        assert result.principal_binding_digest == binding_module._digest(
+            {"identity": identity, "work_authority": authority})
+    else:
+        assert result.principal_binding_digest is None
+    assert result.authority_granted is False
+    assert result.effect_capability_issued is False
+
+
+@pytest.mark.parametrize("target", ["key", "scope"])
+def test_principal_mapping_change_during_read_fails_closed(tmp_path, monkeypatch, target):
+    from modules.communication.moltbot_bridge.src import reddog_signer_owner_e0_principal_authority as owner
+    values = _principal_fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    identity, authority = dict(harness.identity), dict(harness.work_authority)
+    original = owner.load_current_generation_principal_authority_resolver
+    called = []
+    def load(**kwargs):
+        result = original(**kwargs)
+        called.append(True)
+        if target == "key":
+            identity["principal_public_key"] = "substituted-key"
+        else:
+            authority["foundup_id"] = "other-foundup"
+        return result
+    monkeypatch.setattr(owner, "load_current_generation_principal_authority_resolver", load)
+    result = verify_signer_current_generation_runtime_binding(
+        repo_root=harness.repo_root, runtime_root=harness.runtime_root, now_epoch=NOW,
+        principal_identity=identity, principal_work_authority=authority)
+    assert called == [True]
+    assert result.accepted is False and result.principal_binding_digest is None
+
+
+def test_real_principal_evidence_matches_only_checked_work(tmp_path, monkeypatch):
+    values = _principal_fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    identity, authority = dict(harness.identity), dict(harness.work_authority)
+    evidence = collect_signer_current_generation_use_time_evidence(
+        True, harness.repo_root, harness.runtime_root, lambda: NOW,
+        principal_identity=identity, principal_work_authority=authority)
+    assert evidence.receipt_id is not None
+    assert evidence.principal_matches(identity, authority)
+    authority["work_order_id"] = "another-work-order"
+    assert not evidence.principal_matches(identity, authority)

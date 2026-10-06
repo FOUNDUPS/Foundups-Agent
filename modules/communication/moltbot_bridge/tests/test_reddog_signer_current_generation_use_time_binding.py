@@ -346,7 +346,9 @@ def test_generation_projection_does_not_change_resident_readiness(tmp_path, monk
     generation_calls = 0 if case in ("signed-work-rejected", "clock-exception") else 1
     assert generation.call_count == generation_calls
     if generation_calls:
-        generation.assert_called_once_with(repo_root=repo, runtime_root=runtime, now_epoch=NOW_EPOCH)
+        recorded = store.load()["stage_results"]["authority_runtime"]["authority_result"]
+        generation.assert_called_once_with(repo_root=repo, runtime_root=runtime, now_epoch=NOW_EPOCH,
+            principal_identity=recorded["identity"], principal_work_authority=recorded["work_authority"])
     all_anchors = set(use_time_module.INCOMPLETE_TRUST_ANCHOR_REASONS)
     expected_anchors = set(all_anchors)
     if case == "typed-accepted":
@@ -401,3 +403,30 @@ def test_rejected_bindings_do_not_acquire_generation(tmp_path, monkeypatch, case
     generation.assert_not_called()
     consume.assert_not_called()
     assert {path.name: path.read_bytes() for path in runtime.glob("*.json")} == before_bytes
+
+
+@pytest.mark.parametrize("binding", ["current", "other-work", "serialized", "missing"])
+def test_resident_principal_evidence_preserves_six_other_gates(tmp_path, monkeypatch, binding):
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_runtime_binding import _digest
+    repo, runtime, resolver, store, work, signed, clock, generation = (
+        _generation_projection_case(tmp_path, monkeypatch, "typed-accepted", consistent=True))
+    def verify(**kwargs):
+        identity, authority = kwargs["principal_identity"], dict(kwargs["principal_work_authority"])
+        if binding == "other-work":
+            authority["work_order_id"] = "other-work"
+        digest = _digest({"identity": identity, "work_authority": authority})
+        proof = SignerCurrentGenerationRuntimeBinding(True, (), receipt_id="sha256:" + "a" * 64,
+            principal_binding_digest=None if binding == "missing" else digest)
+        return proof.to_dict() if binding == "serialized" else proof
+    generation.side_effect = verify
+    result = resolver.resolve(chain_state=store.load(), work_order=work,
+                              queue_item_id=QUEUE_ID, selected_slice=SLICE)
+    missing = "canonical_principal_subject_key_attestation_missing"
+    assert (missing not in result.rejection_reasons) is (binding == "current")
+    other = set(use_time_module.INCOMPLETE_TRUST_ANCHOR_REASONS).difference(
+        use_time_module.CURRENT_GENERATION_TRUST_ANCHOR_REASONS, {missing})
+    assert len(other) == 6 and other.issubset(result.rejection_reasons)
+    assert result.authoritative_use_lease is None
+    signed.assert_called_once()
+    generation.assert_called_once()

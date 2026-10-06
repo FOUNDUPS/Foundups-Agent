@@ -1,3 +1,34 @@
+## Principal current-generation consumer — 2026-10-07
+
+WSP00/15/22/50/84/97, selected15/P1: reuse existing signed-generation principal
+records in the resident use-time check. Validate identity/provider/key and work
+principal/repo/FoundUp scope under the existing selection lease. Bind the checked
+snapshot to the audit receipt; reject mutations during artifact IO and retain
+six unrelated trust reasons. No new module, scheduler, store or runtime grant.
+
+Corrected baseline10 missing-API failures; connected100 passed/1 platform skip
+in40.44s. Independent review found a mutable-input race; same-snapshot checking
+and post-read comparison repair it. Recheck found no further concrete blocker.
+Initial invalid fixture and intermediate failures remain in saved evidence.
+Evidence: `outputs/rsi-permission-evidence-20261006/principal-generation-connected-execution.json`.
+Native RSI is unproven. No worker/provider retry; coordinator/review cost unknown.
+Generated manifest remains1422 files; integrity8/8 and extension fast15 members pass.
+Initial JS newline failure was corrected before the passing fast rerun. Registry
+current1695/270; all connected source hashes unchanged after validation. Publication pending.
+
+## RSI closure and next verified-owner connection — 2026-10-07
+
+WSP00/15/22/50/97: PR2091 merged6ad4ee360; exact reviewed/main tree match,
+branch CI37520547883 and main CI37521571358 passed (resident566/1skip).
+Main CodeQL Actions check failed during upload; available evidence gives no
+cause and GitHub rejects generated-workflow retry. Three other language jobs pass. Recoverable
+owned branch retired; no other owner changed. Re-observed resolver retains seven
+unconditional non-generation reasons. Select principal-generation verifier
+connection15/P1 (3/4/4/4) using existing owners, retaining the other six gates.
+Source work does not enroll authority or prove native RSI. Preserve local
+Linux86/14 failed broad-run evidence for separate triage; focused repaired pair2/2.
+Details and exact sources remain in the existing roadmap/backlog and RSI receipts.
+
 ## PR2091 Linux fixture closure — 2026-10-07
 
 Hosted CI37517696484: bounded resident regression564 passed/2 failed/1 skipped.

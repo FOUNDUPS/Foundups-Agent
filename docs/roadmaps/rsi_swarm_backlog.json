@@ -1880,27 +1880,80 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.resident_effect_join_20261007",
-    "base_commit": "b7a0d996b5fe96133bd010015882730110bdde3a",
-    "selected_action": "Connect existing resident checked decision to exact effect approval, external issuer and one-use worktree admission",
-    "status": "IMPLEMENTED_NOT_VALIDATED",
+    "observation_path": "current_observation.principal_generation_join_20261007",
+    "base_commit": "6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd",
+    "selected_action": "Connect existing signed-generation principal verification to the resident principal subject-key gate",
+    "status": "SPECIFIED_NOT_IMPLEMENTED",
     "wsp15": {
-      "complexity": 4,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 16,
-      "priority": "P0"
+      "total": 15,
+      "priority": "P1"
     },
     "dispatchable": false,
-    "execution_plane": "Supervised source connection; live admission still requires authenticated supply",
-    "next_action": "Close owned source publication/CI then authenticated runtime supply/verifiers14/P1; preserve seven trust gates; no exhausted model-route retry",
+    "execution_plane": "Source-only consumer connection; independently authenticated runtime enrollment remains separate",
+    "next_action": "Connect existing root-selected principal evidence to the resident principal subject-key gate; preserve other six unresolved reasons. Verify exact identity/key and scope against current signed generation, fail closed on unavailable, changed, expired or fabricated evidence. No new authority store or issuer.",
     "higher_priority_gates": [
       "Native18/P0: admitted local worker improvement, independent baseline-controlled evaluation, retained use and later benefit remain unproven"
-    ],
-    "local_qualification": "229 passed, 2 platform skips; synthetic owner/runtime, no native admission"
+    ]
   },
   "current_observation": {
+    "principal_generation_join_20261007": {
+      "base_commit": "6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd",
+      "truth": "LOCAL_FIXTURE_VALIDATED; publication and native admission not verified",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "finding": "Production use-time resolver appends all seven non-generation rejection reasons unconditionally. Environment provisioning alone cannot enable admission.",
+      "selected_action": "Connect existing root-selected principal evidence to the resident principal subject-key gate; preserve other six unresolved reasons. Verify exact identity/key and scope against current signed generation, fail closed on unavailable, changed, expired or fabricated evidence. No new authority store or issuer.",
+      "score_reconciliation": "Re-observation separates simple supply configuration14/P1 from the newly identified security-sensitive consumer connection: C3/I4/D4/impact4=15/P1. Native18/P0 remains blocked; no priority framework change.",
+      "source_sha256": {
+        "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "ed1848ab9ee72db94b6021d2c5e2d66f690490a617b69296afb4fce53c0d2d61",
+        "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_runtime_dependency_bundle.py": "a460a8f9b55bd6c988075f85066c3f58388f1fe8114d4439ade829b3939e0a55",
+        "modules/communication/moltbot_bridge/src/reddog_signer_current_principal_authority_resolver.py": "a888e97c9a6ac79aa09b268043113edea72392e029f9ca65b2baa28730ecb733",
+        "modules/communication/moltbot_bridge/src/reddog_signer_owner_e0_principal_authority.py": "752fd64e22c0dba6c8f0e5d78a581c0505b8bc725b8ec2770f531c5a60bc28fb",
+        "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py": "67f09d843c9142e4840f64f69c6b3345d44dbcc5a9a195fc591cf5dc0fd7f490",
+        "modules/communication/moltbot_bridge/src/reddog_operational_memex_supply_receipt.py": "98adf7d4e12682ee1076ab48f943db53ae255128def034e05c25dfe10c797dbf"
+      },
+      "dispatchable": false,
+      "acceptance": [
+        "Use existing root-selected artifact verification; no new store or trust flag",
+        "Bind actual identity, principal key and repo/FoundUp scope to current signed generation",
+        "Reject missing, changed, expired and fabricated evidence; keep six unrelated gates",
+        "Execute real admitted local worker only after all authentic authority prerequisites hold"
+      ],
+      "local_test_debt": {
+        "source": "outputs/rsi-permission-evidence-20261006/resident-join-linux-qualified.xml",
+        "passed": 86,
+        "failed": 14,
+        "truth": "failed broad local run; environment and unchanged-case triage outstanding"
+      },
+      "coordination_budget_policy": {
+        "mode": "deterministic_first",
+        "repeat_audit": "only on changed source, evidence or objective",
+        "worker_retry": "paused rejected route; no automatic OpenRouter fallback",
+        "review": "one concrete source slice; no repeated review of unchanged source",
+        "polling": "bounded status checks; no inference loop waiting for unchanged state",
+        "cost_accounting": "record local worker, external provider and coordinator separately; unknown is not zero",
+        "runtime_authority": "unchanged; policy is planning, not an executable grant"
+      },
+      "implementation": "Existing leased principal artifact verifier joined to resident identity/key/requested-scope check; snapshot binding and post-read comparison; six other gates preserved.",
+      "validation": {
+        "passed": 100,
+        "skipped": 1,
+        "failed": 0,
+        "seconds": 40.44,
+        "evidence": "outputs/rsi-permission-evidence-20261006/principal-generation-connected-execution.json",
+        "independent_review": "outputs/rsi-permission-evidence-20261006/principal-generation-independent-recheck.json"
+      }
+    },
     "resident_effect_join_20261007": {
       "base_commit": "b7a0d996b5fe96133bd010015882730110bdde3a",
       "truth": "IMPLEMENTED_NOT_VALIDATED",
@@ -1952,7 +2005,7 @@
       "native_rsi_demonstrated": false,
       "independent_review": "Not performed for this planning re-observation; prior source reviews retained in PR2090 closure.",
       "local_qualification": "229 passed, 2 platform skips; synthetic owner/runtime, no native admission",
-      "next_action": "Close owned source publication/CI then authenticated runtime supply/verifiers14/P1; preserve seven trust gates; no exhausted model-route retry",
+      "next_action": "Principal-generation verifier consumer connection15/P1; preserve six other non-generation gates",
       "baseline_source_sha256": {
         "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "43c7cc9467b14e6bb54678db668787c105de35c621878c21c95803364e53953b",
         "modules/communication/moltbot_bridge/src/reddog_resident_queue_execution_valve_handler.py": "6396f8414e24a5ac1ea0e7700aa699b1c2b210fa39baf7c7990749be143aff70",
@@ -1961,7 +2014,32 @@
       },
       "repair": "Fresh canonical reevaluation rejects permission expiry with live lease, changed inputs and wrong targets.",
       "model_calls": 0,
-      "publication": "pending"
+      "publication": "MERGED_VERIFIED_MAIN",
+      "merge_commit": "6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd",
+      "closure_evidence": "outputs/rsi-permission-evidence-20261006/resident-join-2091-merge-closure.json",
+      "branch_ci": {
+        "id": 37520547883,
+        "conclusion": "success",
+        "resident_passed": 566,
+        "resident_skipped": 1
+      },
+      "main_ci": {
+        "id": 37521571358,
+        "status": "completed",
+        "conclusion": "success",
+        "resident_passed": 566,
+        "resident_skipped": 1,
+        "resident_seconds": 30.04
+      },
+      "main_codeql": {
+        "id": 37521571956,
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_job": "Analyze (actions)",
+        "last_observed_operation": "Uploading results",
+        "cause": "unknown; no failure diagnostic in available log/annotations",
+        "retry": "GitHub rejected retry: This workflow run cannot be retried"
+      }
     },
     "effect_signing_composition_20261007": {
       "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",

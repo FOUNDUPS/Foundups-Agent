@@ -113,7 +113,33 @@ def load_current_generation_principal_artifact(
     return parse_principal_artifact(raw)
 
 
+def verify_current_generation_principal_identity(
+    *, repo_root: Path, selection: Mapping[str, Any],
+    identity: Mapping[str, Any], work_authority: Mapping[str, Any],
+) -> None:
+    """Check principal/key/scope inside the caller's authenticated generation lease.
+
+    This relies on the root-selected subject attestation, not a fresh login.
+    It grants no permission and does not authenticate caller-built selections.
+    """
+    if not isinstance(identity, Mapping) or not isinstance(work_authority, Mapping):
+        raise ValueError("current_principal_binding_missing")
+    principal, provider, key = (identity.get(name) for name in
+        ("principal_id", "principal_provider", "principal_public_key"))
+    repo, foundup = (work_authority.get(name) for name in ("repo_full_name", "foundup_id"))
+    if any(not isinstance(value, str) or not value for value in
+           (principal, provider, key, repo, foundup)):
+        raise ValueError("current_principal_binding_invalid")
+    record = load_current_generation_principal_authority_resolver(
+        repo_root=repo_root, selection=selection).resolve(principal, provider)
+    if (record is None or not constant_time_compare(record.principal_public_key, key)
+            or work_authority.get("principal_id") != principal
+            or repo not in record.repo_scope or foundup not in record.foundup_scope):
+        raise ValueError("current_principal_binding_mismatch")
+
+
 __all__ = [
+    "verify_current_generation_principal_identity",
     "CurrentGenerationPrincipalAuthorityResolver",
     "CurrentGenerationPrincipalKeyResolver",
     "load_current_generation_principal_authority_resolver",
