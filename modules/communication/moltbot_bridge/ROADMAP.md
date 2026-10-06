@@ -1,3 +1,11 @@
+## Current-generation model consumer checkpoint — 2026-10-07
+
+Existing producer/collector/valve wiring is locally qualified with disposable
+model signatures and explicit principal/peer seams. Connected89pass including the real
+collector; source review cleared the reproduced clock rollback. See
+INTERFACE/ModLog and existing current-generation runtime/use-time test files.
+Native admission and retained RSI remain unproven; publication pending.
+
 ## Model input authority checkpoint — 2026-10-07
 
 Protected owner v8 supply is locally qualified; current-generation resident

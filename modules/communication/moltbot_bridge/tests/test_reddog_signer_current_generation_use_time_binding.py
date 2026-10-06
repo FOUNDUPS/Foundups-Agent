@@ -348,7 +348,9 @@ def test_generation_projection_does_not_change_resident_readiness(tmp_path, monk
     if generation_calls:
         recorded = store.load()["stage_results"]["authority_runtime"]["authority_result"]
         generation.assert_called_once_with(repo_root=repo, runtime_root=runtime, now_epoch=NOW_EPOCH,
-            principal_identity=recorded["identity"], principal_work_authority=recorded["work_authority"])
+            principal_identity=recorded["identity"], principal_work_authority=recorded["work_authority"],
+            model_work_order=work_order, trusted_now_epoch=generation.call_args.kwargs["trusted_now_epoch"])
+        assert callable(generation.call_args.kwargs["trusted_now_epoch"])
     all_anchors = set(use_time_module.INCOMPLETE_TRUST_ANCHOR_REASONS)
     expected_anchors = set(all_anchors)
     if case == "typed-accepted":
@@ -438,6 +440,7 @@ def test_resident_principal_evidence_preserves_six_other_gates(tmp_path, monkeyp
     "wrong-key", "wrong-epoch", "wrong-session", "wrong-socket", "wrong-manifest",
     "wrong-generation", "wrong-config", "wrong-packet", "no-os-peer", "no-handshake",
     "peer-exception", "identity-mutated",
+    "model-current", "model-expired", "model-swapped", "model-missing-after",
 ])
 def test_resident_peer_connection_requires_fresh_bound_evidence(tmp_path, monkeypatch, case):
     from dataclasses import replace
@@ -460,6 +463,13 @@ def test_resident_peer_connection_requires_fresh_bound_evidence(tmp_path, monkey
             signer_public_key="fixture-public-key", key_epoch="epoch-1", selection_expires_at=NOW_EPOCH+60,
             principal_binding_digest=_digest({"identity": kwargs["principal_identity"],
                 "work_authority": kwargs["principal_work_authority"]}), signer_uid=1234, signer_gid=1235)
+        if case.startswith("model-"):
+            proof = replace(proof, model_work_order_digest=canonical_full_work_order_digest(work),
+                model_artifact_pair_digest=digest, model_valid_until=NOW_EPOCH+10)
+            if len(calls)>1 and case == "model-swapped":
+                proof = replace(proof, model_artifact_pair_digest="sha256:"+"c"*64)
+            if len(calls)>1 and case == "model-missing-after":
+                proof = replace(proof, model_work_order_digest=None, model_artifact_pair_digest=None, model_valid_until=None)
         return replace(proof, generation_revision="rev-2") if case == "rotated" and len(calls)>1 else proof
     generation.side_effect = verify
     seen = []
@@ -478,6 +488,7 @@ def test_resident_peer_connection_requires_fresh_bound_evidence(tmp_path, monkey
             "wrong-generation":"artifact_generation_digest", "wrong-config":"config_digest", "wrong-packet":"run_packet_id"}
         if case in fields: result=replace(result, **{fields[case]:"substituted"})
         if case == "expired": clock.return_value=NOW_EPOCH+31
+        if case == "model-expired": clock.return_value=NOW_EPOCH+11
         if case == "clock-reversed": clock.return_value=NOW_EPOCH-1
         if case == "clock-bool": clock.return_value=True
         if case == "peer-rejected": result=replace(result,accepted=False)
@@ -491,12 +502,17 @@ def test_resident_peer_connection_requires_fresh_bound_evidence(tmp_path, monkey
     resolver = replace(resolver, signer_peer_secret_access_grant_supplier=supplier)
     result = resolver.resolve(chain_state=store.load(), work_order=work, queue_item_id=QUEUE_ID, selected_slice=SLICE)
     reason="canonical_signer_client_peer_handshake_verifier_missing"
-    assert (reason not in result.rejection_reasons) is (case == "current")
-    assert (result.signer_peer_binding_receipt_id is not None) is (case == "current")
+    assert (reason not in result.rejection_reasons) is (case in {"current", "model-current"})
+    assert (result.signer_peer_binding_receipt_id is not None) is (case in {"current", "model-current"})
     other=set(use_time_module.INCOMPLETE_TRUST_ANCHOR_REASONS).difference(
         use_time_module.CURRENT_GENERATION_TRUST_ANCHOR_REASONS,
         {reason,"canonical_principal_subject_key_attestation_missing"})
-    assert len(other)==5 and other.issubset(result.rejection_reasons)
+    model_reasons={"canonical_model_signed_evidence_trust_anchor_incomplete", "canonical_model_selection_signed_evidence_verifier_missing"}
+    if case == "model-current":
+        other -= model_reasons
+        assert model_reasons.isdisjoint(result.rejection_reasons)
+    assert other.issubset(result.rejection_reasons)
+    assert (result.signer_model_binding_receipt_id is not None) is (case == "model-current")
     assert result.authoritative_use_lease is None
     if case in ("no-grant", "bad-grant"): probe.assert_not_called()
     if case == "current":

@@ -50,13 +50,26 @@ class SignerCurrentGenerationUseTimeEvidence:
         except (TypeError, ValueError):
             return False
 
-    def bound_identity_reasons(self, identity, authority) -> tuple[str, ...]:
+    def bound_identity_reasons(self, identity, authority, work_order=None) -> tuple[str, ...]:
         reasons = ()
         if self.principal_matches(identity, authority):
             reasons += ("canonical_principal_subject_key_attestation_missing",)
+            if self.model_matches(work_order):
+                reasons += ("canonical_model_signed_evidence_trust_anchor_incomplete",
+                            "canonical_model_selection_signed_evidence_verifier_missing")
         if self.peer_verified:
             reasons += ("canonical_signer_client_peer_handshake_verifier_missing",)
         return reasons
+
+    def model_matches(self, work_order) -> bool:
+        from .reddog_work_order_binding import canonical_full_work_order_digest
+        if self.receipt_id is None or work_order is None:
+            return False
+        try:
+            return (is_sha256(self.binding.model_artifact_pair_digest)
+                    and self.binding.model_work_order_digest == canonical_full_work_order_digest(work_order))
+        except (TypeError, ValueError):
+            return False
 
     def remaining_reasons(
         self, all_reasons: Iterable[str], bound_reasons: Iterable[str]
@@ -76,15 +89,17 @@ def collect_signer_current_generation_use_time_evidence(
     trusted_now_epoch: Callable[[], int],
     *, principal_identity=None, principal_work_authority=None,
     peer_secret_access_grant_supplier=None,
+    model_work_order=None,
 ) -> SignerCurrentGenerationUseTimeEvidence:
     """Collect current-generation evidence without minting a capability."""
 
     if enabled is not True:
         return SignerCurrentGenerationUseTimeEvidence(None)
+    trusted_now_epoch = _nondecreasing_clock(trusted_now_epoch)
     try:
         if peer_secret_access_grant_supplier is not None:
             return _collect_fresh_peer(repo_root, runtime_root, trusted_now_epoch,
-                principal_identity, principal_work_authority, peer_secret_access_grant_supplier)
+                principal_identity, principal_work_authority, peer_secret_access_grant_supplier, model_work_order)
         now_epoch = trusted_now_epoch()
         binding = verify_signer_current_generation_runtime_binding(
             repo_root=repo_root,
@@ -92,13 +107,29 @@ def collect_signer_current_generation_use_time_evidence(
             now_epoch=now_epoch,
             principal_identity=principal_identity,
             principal_work_authority=principal_work_authority,
+            model_work_order=model_work_order, trusted_now_epoch=trusted_now_epoch,
         )
+        if binding.model_work_order_digest is not None:
+            checked_at = trusted_now_epoch()
+            if type(checked_at) is not int or checked_at < now_epoch or not _generation_fresh(binding, checked_at):
+                return SignerCurrentGenerationUseTimeEvidence(None)
     except Exception:
         return SignerCurrentGenerationUseTimeEvidence(None)
     return SignerCurrentGenerationUseTimeEvidence(binding)
 
 
-def _collect_fresh_peer(repo, runtime, clock, identity, authority, grant_supplier):
+def _nondecreasing_clock(clock):
+    last = [-1]
+    def read():
+        now = clock()
+        if type(now) is not int or now < 0 or now < last[0]:
+            raise ValueError("use_time_clock_reversed")
+        last[0] = now
+        return now
+    return read
+
+
+def _collect_fresh_peer(repo, runtime, clock, identity, authority, grant_supplier, model_work_order=None):
     if not callable(grant_supplier):
         return SignerCurrentGenerationUseTimeEvidence(None)
     start = clock()
@@ -106,7 +137,8 @@ def _collect_fresh_peer(repo, runtime, clock, identity, authority, grant_supplie
         return SignerCurrentGenerationUseTimeEvidence(None)
     args = dict(repo_root=repo, runtime_root=runtime,
         signer_profile_id="reddog-work-authority", include_process_identity=True,
-        principal_identity=identity, principal_work_authority=authority)
+        principal_identity=identity, principal_work_authority=authority,
+        model_work_order=model_work_order, trusted_now_epoch=clock)
     before = verify_signer_current_generation_runtime_binding(now_epoch=start, **args)
     evidence = SignerCurrentGenerationUseTimeEvidence(before)
     if not evidence.principal_matches(identity, authority):
@@ -150,13 +182,18 @@ def _same_peer_identity(before, after):
         "owner_config_id", "config_digest", "config_raw_digest", "run_packet_digest", "run_packet_id",
         "session_id", "socket_path_digest", "signer_profile_id", "signer_public_key", "key_epoch",
         "principal_binding_digest", "signer_uid", "signer_gid", "manifest_expires_at")
+    model_fields = ("model_work_order_digest", "model_artifact_pair_digest", "model_valid_until")
+    if any(getattr(before, field) != getattr(after, field) for field in model_fields):
+        return False
     return all(getattr(before, field) is not None and
                getattr(before, field) == getattr(after, field) for field in fields)
 
 
 def _generation_fresh(binding, now):
-    return all(type(expiry) is int and expiry > now for expiry in
-               (binding.selection_expires_at, binding.manifest_expires_at))
+    deadlines = (binding.selection_expires_at, binding.manifest_expires_at)
+    if binding.model_work_order_digest is not None:
+        deadlines += (binding.model_valid_until,)
+    return all(type(expiry) is int and expiry > now for expiry in deadlines)
 
 
 def _peer_matches(peer, binding, requester, now):
