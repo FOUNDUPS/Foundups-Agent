@@ -1903,10 +1903,10 @@
     "effect_signing_composition_20261007": {
       "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",
       "local_validation": {
-        "passed": 697,
+        "passed": 707,
         "failed": 0,
-        "seconds": 35.53,
-        "evidence": "outputs/rsi-permission-evidence-20261006/effect-expiry-connected.xml",
+        "seconds": 40.85,
+        "evidence": "outputs/rsi-permission-evidence-20261006/effect-signing-ci-structure-repair.xml",
         "excluded": "Dedicated Linux-root tests"
       },
       "scope": "Existing effect consent/reviewer -> one-use permission -> independent grant -> existing lease issuer",
@@ -1915,15 +1915,21 @@
       "paid_provider_calls": 0,
       "architect_review_cost": "unmeasured",
       "review": "Expiry blocker resolved; effect-expiry-independent-review.json SHA256 f6dfc88449f9127a085086dea8c0b62a64579541445d0f1d818e320d733f497d",
-      "publication": "Pending",
+      "publication": "Draft PR2090; first CI37505730046 failed shared-backend file bound; reviewed repair pending new-head checks",
       "next_dependency": "Inventory14/P1 observed no root/profile in inspected Windows scopes or gateway processes; eight exact public artifact names absent at conditional Windows default. Resolve existing authenticated supply configuration; do not fabricate authority.",
       "expiry_baseline": {
         "failed": 3,
         "passed": 1
       },
       "runtime_presence": "OpenClaw/Hermes user services active; six inspected RSI settings absent from their environments; no global artifact absence inference",
-      "runtime_inventory_evidence": ["outputs/rsi-permission-evidence-20261006/effect-expiry-runtime-presence.json", "outputs/rsi-permission-evidence-20261006/effect-expiry-windows-root-inventory.json", "outputs/rsi-permission-evidence-20261006/effect-expiry-public-artifact-inventory.json"],
-      "inventory_limits": "No secret reads, recursive search, bootstrap supply, runtime grants or service changes. Windows candidate root is not a designated authority; absence there is not global absence."
+      "runtime_inventory_evidence": [
+        "outputs/rsi-permission-evidence-20261006/effect-expiry-runtime-presence.json",
+        "outputs/rsi-permission-evidence-20261006/effect-expiry-windows-root-inventory.json",
+        "outputs/rsi-permission-evidence-20261006/effect-expiry-public-artifact-inventory.json"
+      ],
+      "inventory_limits": "No secret reads, recursive search, bootstrap supply, runtime grants or service changes. Windows candidate root is not a designated authority; absence there is not global absence.",
+      "structural_review": "No behavioral discrepancy; effect-signing-ci-structure-review.json SHA2560925addac58381bdad69d4e9ea0be22ea94379254f673d5b3370e931b3621d57",
+      "holo_query": "runtime-admission-holo.json: rejected HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; freshnessUNKNOWN,index_gap_detected=true; no reindex or authority mutation"
     },
     "grant_consensus_digest_20261007": {
     "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",

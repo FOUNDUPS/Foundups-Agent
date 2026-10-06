@@ -17,9 +17,11 @@ PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;
 reviewed/main tree matches. Main CI37498282161 and CodeQL37498284318 passed.
 Re-observation selects16/P0 (C4/I4/D4/impact4): connect existing consent/reviewer,
 provider and independent signer owners without changing the exact target digest.
-697 local connected tests pass after reproducing and repairing the approval-to-grant
+707 local connected/structural tests pass after reproducing and repairing the approval-to-grant
 expiry defect (baseline3fail/1pass). Independent bounded review found no new defect;
-publication pending. Fixture-backed source qualification is not native admission.
+Draft PR2090: first hosted run failed backend678>675; reviewed extraction restores
+674 lines and includes the missed structural suite locally. New-head publication
+checks pending. Fixture-backed source qualification is not native admission.
 
 The local-first budget remains: deterministic checks, no repeat broad audits,
 no failed-Qwen-route retries or paid-provider fallback. Architect/review usage is

@@ -1,3 +1,21 @@
+## PR2090 CI structural correction — 2026-10-07
+
+Exact-head CI37505730046 failed the existing conversation-authentication bound:
+signer backend678 lines exceeded675; its regression step otherwise had676 passes
+and3 skips. Move the pre-sign approval guard and pure attestation selection into
+the existing consensus-flow owner, preserving rejection/rollback/commit behavior.
+Backend is674 lines; no limit or existing assertion changed. This was a gap in the
+local test selection; include `test_reddog_conversation_scope_durable_authentication_wsp62.py`
+whenever this shared backend changes.
+
+Expanded local selection:707 passed in40.85s, including3 callback-invocation cases.
+Independent bounded review found no behavioral discrepancy; receipt
+`effect-signing-ci-structure-review.json`, SHA256
+`0925addac58381bdad69d4e9ea0be22ea94379254f673d5b3370e931b3621d57`.
+Updated-head manifest integrity8/8 passed in61.19s; registry current. Hosted
+checks pending. No runtime activation or native
+RSI claim. WSP00/6/15/22/50/62/84/97.
+
 ## Effect approval lifetime repair — 2026-10-07
 
 At checkpoint982a74cf9, frozen lifetime regression: 3 failed, 1 passed. Verified

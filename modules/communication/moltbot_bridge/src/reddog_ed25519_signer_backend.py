@@ -249,13 +249,9 @@ def _sign_prepared_payloads(
     outcome_reservation, conversation_payload, conversation_preparation,
 ) -> SigningResponse:
     payloads = (control_payload, manifest_payload, outcome_payload, conversation_payload)
-    requires_attestation = consensus_flow.requires_signer_audit_attestation(
-        request, *payloads
+    response, reason = consensus_flow.sign_prepared_consensus(
+        consensus_reservation, _sign_response, backend, request, peer, payloads
     )
-    if consensus_reservation is not None and not consensus_flow.elevated_consensus_reservation_current(consensus_reservation):
-        response, reason = None, REJECT_ED25519_SIGNER_REQUEST_INVALID
-    else:
-        response, reason = _sign_response(backend, request, peer, requires_attestation)
     if reason:
         _rollback_proposal_reservation(backend, proposal_reservation)
         _rollback_manifest_reservation(backend, manifest_reservation)

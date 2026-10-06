@@ -1,3 +1,12 @@
+## Shared-backend test selection — PR2090
+
+Include `test_reddog_conversation_scope_durable_authentication_wsp62.py` with the
+existing effect/consensus/provider selection. Hosted CI caught backend678>675
+that the earlier selection missed. Preserve this guard; current extraction yields
+674 lines. Expanded selection707/707 passed; source/log review is separate from
+independent test execution. Evidence: `effect-signing-ci-structure-repair.xml` in
+the current RSI evidence directory.
+
 ## Effect lifetime boundary regression — 2026-10-07
 
 Existing effect signing tests now reproduce and repair excessive grant lifetime,

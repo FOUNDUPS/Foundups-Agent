@@ -125,3 +125,18 @@ def test_effect_signer_rejects_missing_invalid_or_excess_grant_lifetime(monkeypa
         now=s.now, grant_expires_at=expires)
     assert reservation is None
     assert not s.nonces.reserved and not s.nonces.consumed
+
+
+@pytest.mark.parametrize("mode", ["expired", "current", "no_reservation"])
+def test_consensus_flow_guards_actual_signing_callback(monkeypatch, mode):
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.src import reddog_ed25519_elevated_consensus_flow as flow
+    monkeypatch.setattr(flow, "elevated_consensus_reservation_current", lambda _: mode == "current")
+    calls = []
+    def sign(*args):
+        calls.append(args)
+        return "signed", ""
+    result = flow.sign_prepared_consensus(None if mode == "no_reservation" else object(),
+        sign, "backend", SimpleNamespace(requested_operation="fixture"), "peer", ())
+    assert bool(calls) is (mode != "expired")
+    assert result == ((None, "REJECT_ED25519_SIGNER_REQUEST_INVALID") if mode == "expired" else ("signed", ""))
