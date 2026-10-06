@@ -25,7 +25,10 @@
     "onCommand:reddog.setConversationSessionCredential",
     "onCommand:reddog.clearConversationSessionCredential",
     "onCommand:reddog.setPrincipalMemexDisclosure",
-    "onCommand:reddog.clearPrincipalMemexDisclosure"
+    "onCommand:reddog.clearPrincipalMemexDisclosure",
+    "onCommand:reddog.capturePrincipalActivity",
+    "onCommand:reddog.showPrincipalActivityContext",
+    "onCommand:reddog.principalActivityStatus"
   ],
   "main": "./extension.js",
   "scripts": {
@@ -68,6 +71,21 @@
         "command": "reddog.clearPrincipalMemexDisclosure",
         "title": "Clear Principal Memex Disclosure",
         "category": "RedDog"
+      },
+      {
+        "command": "reddog.capturePrincipalActivity",
+        "title": "Capture Principal Activity (Local)",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.showPrincipalActivityContext",
+        "title": "Show Principal Activity Context (Local)",
+        "category": "RedDog"
+      },
+      {
+        "command": "reddog.principalActivityStatus",
+        "title": "Principal Activity Status (Local)",
+        "category": "RedDog"
       }
     ],
     "menus": {
@@ -89,6 +107,15 @@
         },
         {
           "command": "reddog.clearPrincipalMemexDisclosure"
+        },
+        {
+          "command": "reddog.capturePrincipalActivity"
+        },
+        {
+          "command": "reddog.showPrincipalActivityContext"
+        },
+        {
+          "command": "reddog.principalActivityStatus"
         }
       ],
       "editor/title": [
@@ -128,7 +155,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Evaluation fallback critic models used only when no receipt-bound production runtime binding is configured. The extension forwards at most seven so Python can prove over-cap truncation."
+          "description": "Evaluation fallback critic models used only when no production runtime binding is configured. The extension forwards at most seven so Python can prove over-cap truncation."
         },
         "reddog.allowEvaluationFallback": {
           "type": "boolean",
