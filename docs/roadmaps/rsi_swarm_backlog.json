@@ -1880,10 +1880,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.effect_signing_composition_20261007",
-    "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",
-    "selected_action": "Connect existing single-effect consent/review approval through provider and independent grant signer",
-    "status": "source_repair_reviewed_publication_pending",
+    "observation_path": "current_observation.resident_effect_join_20261007",
+    "base_commit": "b7a0d996b5fe96133bd010015882730110bdde3a",
+    "selected_action": "Connect existing resident checked decision to exact effect approval, external issuer and one-use worktree admission",
+    "status": "IMPLEMENTED_NOT_VALIDATED",
     "wsp15": {
       "complexity": 4,
       "importance": 4,
@@ -1893,13 +1893,76 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "execution_plane": "Supervised developer-plane source repair; synthetic qualification, no native authority",
-    "next_action": "Publish reviewed expiry repair through existing gates, then inspect designated resident public admission artifacts",
+    "execution_plane": "Supervised source connection; live admission still requires authenticated supply",
+    "next_action": "Close owned source publication/CI then authenticated runtime supply/verifiers14/P1; preserve seven trust gates; no exhausted model-route retry",
     "higher_priority_gates": [
-      "Native18/P0 awaits authentic admission, independent evaluation, retention and later benefit"
-    ]
+      "Native18/P0: admitted local worker improvement, independent baseline-controlled evaluation, retained use and later benefit remain unproven"
+    ],
+    "local_qualification": "229 passed, 2 platform skips; synthetic owner/runtime, no native admission"
   },
   "current_observation": {
+    "resident_effect_join_20261007": {
+      "base_commit": "b7a0d996b5fe96133bd010015882730110bdde3a",
+      "truth": "IMPLEMENTED_NOT_VALIDATED",
+      "wsp15": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 16,
+        "priority": "P0"
+      },
+      "selected_action": "Connect existing resident checked decision to exact effect approval, external issuer and one-use worktree admission",
+      "finding": "Authority resolution precedes final valve evaluation, but the exact worktree effect digest includes that decision. A direct issuer substitution alone is insufficient; preview is not permission.",
+      "acceptance": [
+        "Use existing owners; no second scheduler or authority store.",
+        "Bind final checked decision, current queue/order and executor plan to exact effect approval before registering a real opaque lease.",
+        "Preserve unresolved trust gates; reject changed decision/order/plan, expiry, replay and cleanup failure before effects.",
+        "Run the connected path with authentic supplied runtime authority before claiming native admission."
+      ],
+      "runtime_presence_evidence": "outputs/rsi-permission-evidence-20261006/resident-authority-configuration-presence.json",
+      "runtime_observation": "Both user gateway services running; four inspected owner/root/profile/model-binding settings absent. Other configuration surfaces not covered.",
+      "runtime_supply_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "validation": {
+        "passed": 229,
+        "skipped": 2,
+        "failed": 0,
+        "seconds": 79.67,
+        "execution": "outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json",
+        "xml": "outputs/rsi-permission-evidence-20261006/resident-join-qualified.xml",
+        "scope": "connected final decision to one-use admission; synthetic runtime/owner inputs"
+      },
+      "retrieval": {
+        "ok": false,
+        "freshness": "UNKNOWN",
+        "index_gap_detected": true,
+        "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "method": "Bounded exact-source reads; no reindex; no claim of complete semantic coverage"
+      },
+      "local_inference_calls": 0,
+      "paid_provider_calls": 0,
+      "architect_tokens": "unmeasured",
+      "native_rsi_demonstrated": false,
+      "independent_review": "Not performed for this planning re-observation; prior source reviews retained in PR2090 closure.",
+      "local_qualification": "229 passed, 2 platform skips; synthetic owner/runtime, no native admission",
+      "next_action": "Close owned source publication/CI then authenticated runtime supply/verifiers14/P1; preserve seven trust gates; no exhausted model-route retry",
+      "baseline_source_sha256": {
+        "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "43c7cc9467b14e6bb54678db668787c105de35c621878c21c95803364e53953b",
+        "modules/communication/moltbot_bridge/src/reddog_resident_queue_execution_valve_handler.py": "6396f8414e24a5ac1ea0e7700aa699b1c2b210fa39baf7c7990749be143aff70",
+        "modules/communication/moltbot_bridge/src/reddog_worktree_admission_capability.py": "966970c69c79557deebf684e77c287a175d27fb75d55e1b35e5f0a39be9a72ae",
+        "modules/communication/moltbot_bridge/src/reddog_external_signer_authoritative_use_lease.py": "5715631252c111d6c5d6952399936d4d4643d3198b2caae5182c3448109e6e70"
+      },
+      "repair": "Fresh canonical reevaluation rejects permission expiry with live lease, changed inputs and wrong targets.",
+      "model_calls": 0,
+      "publication": "pending"
+    },
     "effect_signing_composition_20261007": {
       "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",
       "local_validation": {
@@ -1915,7 +1978,7 @@
       "paid_provider_calls": 0,
       "architect_review_cost": "unmeasured",
       "review": "Expiry blocker resolved; effect-expiry-independent-review.json SHA256 f6dfc88449f9127a085086dea8c0b62a64579541445d0f1d818e320d733f497d",
-      "publication": "Draft PR2090; first CI37505730046 file bound repaired; second CI37507545251 passed signing677/3skip and startup248 then failed extension count1419. Reviewed exact1421/reject1422 correction passes fast tier15; new-head checks pending.",
+      "publication": "PR2090 merged at b7a0d996b5fe96133bd010015882730110bdde3a; exact main/reviewed tree f2db8ca71e0ba49d9314e510dd9ef53332c74e7e; main CI37510970982 and four CodeQL analyses passed. Unrelated eSingularity sharp Dependabot failure separately recorded.",
       "next_dependency": "Inventory14/P1 observed no root/profile in inspected Windows scopes or gateway processes; eight exact public artifact names absent at conditional Windows default. Resolve existing authenticated supply configuration; do not fabricate authority.",
       "expiry_baseline": {
         "failed": 3,
@@ -1929,7 +1992,8 @@
       ],
       "inventory_limits": "No secret reads, recursive search, bootstrap supply, runtime grants or service changes. Windows candidate root is not a designated authority; absence there is not global absence.",
       "structural_review": "No behavioral discrepancy; effect-signing-ci-structure-review.json SHA2560925addac58381bdad69d4e9ea0be22ea94379254f673d5b3370e931b3621d57",
-      "holo_query": "runtime-admission-holo.json: rejected HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; freshnessUNKNOWN,index_gap_detected=true; no reindex or authority mutation"
+      "holo_query": "runtime-admission-holo.json: rejected HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; freshnessUNKNOWN,index_gap_detected=true; no reindex or authority mutation",
+      "closure_evidence": "outputs/rsi-permission-evidence-20261006/effect-signing-2090-merge-closure.json"
     },
     "grant_consensus_digest_20261007": {
     "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",

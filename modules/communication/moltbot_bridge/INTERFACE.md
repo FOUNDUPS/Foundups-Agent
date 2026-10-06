@@ -1,3 +1,19 @@
+## Resident final-decision effect join — 2026-10-07
+
+Bootstrap and stage registry accept optional `worktree_lease_issuer=None`.
+`ExternalSignerAuthoritativeUseLeaseIssuer.issue_for_worktree` requires explicitly
+provisioned `CurrentEffectSigningAuthority` and `effect_proof_supplier`. Supplier
+input is inert exact-effect/context digests; output is the existing bounded proof
+envelope. The issuer checks exact target and replay-store binding before issuance.
+The handler invokes it only after canonical acceptance with no unresolved gates,
+then reloads source/authority and reevaluates using fresh trusted time. Resolver
+`resolve` samples trusted time every call; invalid/pre-bootstrap time fails closed.
+Sampling does not prove immutable execution. Existing callers without an issuer
+retain their previous path. No default enrollment, keys or runtime grants exist.
+
+Local fixtures:229 passed/2 platform skips. Authentic production supply, seven
+independent trust gates and native RSI remain unvalidated.
+
 ## Single-effect approval to grant — 2026-10-07 reviewed candidate
 
 The prior lifetime blocker is repaired: effect permit consumption carries its

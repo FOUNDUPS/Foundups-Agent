@@ -12,7 +12,44 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — single-effect grant composition (2026-10-07 JST):**
+**Current selection — resident effect join (2026-10-07):**
+
+WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
+issuer to the resident valve owner. Approval binds the final decision, order,
+plan, signed authority, identity and expected bindings before one-use admission.
+After issuance, reload source/authority and repeat canonical evaluation with
+fresh trusted time. Independent review found strict permission expiry during
+approval; the repair rejects expired permission even with a live opaque lease.
+All seven unresolved trust reasons remain enforced. No new module or store.
+
+Local connected qualification:229 passed/2 skipped in79.67s. Source-bound evidence:
+`outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json`
+and XML/log. Real disposable signatures, synthetic owner/runtime inputs. Windows
+skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
+recursive test-clock stall are retained. CI now selects four resident wiring
+suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
+
+PR2091 hosted regression exposed two Linux-only stale fixtures (564 pass/2 fail/1
+skip). Focused repairs now pass both Linux cases and have independent review;
+hosted rerun remains pending. The broader local Linux86pass/14fail is retained
+as failed evidence; see module TestModLog for environment and unchanged-test debt.
+
+WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
+Native18/P0 remains blocked on authentic admission, fixed independent baseline/
+held-out evaluation, retention/rollback and later benefit. Next prerequisite:
+authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
+No local-worker/OpenRouter calls or service changes. Reuse receipts and rerun only
+affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
+
+PR2090/main `b7a0d996b5fe96133bd010015882730110bdde3a` remains the verified
+historical checkpoint: CI37510970982 and four CodeQL analyses passed. The current
+slice is isolated from it. Holo retrieval rejected authority-root/head mismatch;
+exact-source navigation is not CURRENT index evidence. Both gateway services
+were running, but four inspected authority settings were absent from their
+process environments; this does not prove global absence. See the existing
+`current_observation.resident_effect_join_20261007` backlog record.
+
+**Historical execution — single-effect grant composition (2026-10-07 JST):**
 PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;
 reviewed/main tree matches. Main CI37498282161 and CodeQL37498284318 passed.
 Re-observation selects16/P0 (C4/I4/D4/impact4): connect existing consent/reviewer,

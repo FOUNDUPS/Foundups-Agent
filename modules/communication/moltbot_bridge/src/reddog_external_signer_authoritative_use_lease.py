@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from copy import deepcopy
 import time
-from typing import Any, Mapping, Protocol
+from typing import Any, Callable, Mapping, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_authoritative_use_lease import (
     AuthoritativeUseLease,
@@ -47,6 +48,62 @@ class ExternalSignerAuthoritativeUseLeaseIssuer:
     grant_provider: AuthoritativeUseLeaseGrantProvider
     replay_store: DurableSignerSecretGrantNonceStore
     current_generation_authority: SignerCurrentGenerationRuntimeAuthority
+    effect_signing_authority: Any = None
+    effect_proof_supplier: Callable[[Mapping[str, Any]], Mapping[str, Any]] | None = None
+
+    def issue_for_worktree(
+        self, *, queue_item_id, selected_slice, work_order, executor_plan_result,
+        valve_decision, signed_work_authority, identity, expected_bindings,
+    ) -> AuthoritativeUseLease | None:
+        """Request approval for the final checked decision, never a preview grant.
+
+        Explicitly provisioned dependencies supply authentic effect evidence.
+        This adapter discharges no other resident use-time rejection reason.
+        """
+        from .reddog_current_effect_signing_authority import CurrentEffectSigningAuthority
+        from .reddog_effect_consensus_proof import (
+            snapshot_effect_consensus_proof, discard_effect_signing_permit,
+        )
+        from .reddog_authoritative_use_lease_contract import (
+            authoritative_use_effect_digest, digest_mapping,
+            validate_authoritative_use_lease_request,
+        )
+        from .reddog_worktree_admission_capability import authoritative_worktree_effect_payload
+        from .reddog_wre_execution_valve import VALVE_OPEN_WORKTREE_CREATE
+
+        permit = None
+        try:
+            if (type(self.effect_signing_authority) is not CurrentEffectSigningAuthority
+                    or not callable(self.effect_proof_supplier)
+                    or type(queue_item_id) is not str or not queue_item_id.strip()
+                    or type(selected_slice) is not str or not selected_slice.strip()
+                    or valve_decision.get("valve_state") != VALVE_OPEN_WORKTREE_CREATE
+                    or valve_decision.get("rejection_reasons") != []
+                    or not signed_work_authority or not identity or not expected_bindings):
+                return None
+            effect = authoritative_worktree_effect_payload(
+                queue_item_id, selected_slice, work_order, executor_plan_result, valve_decision)
+            expected = dict(effect_kind="worktree_create", effect_payload=effect,
+                effect_request_digest=authoritative_use_effect_digest("worktree_create", effect),
+                work_authority_digest=digest_mapping(signed_work_authority),
+                identity_digest=digest_mapping(identity),
+                expected_bindings_digest=digest_mapping(expected_bindings))
+            proof, _, _, target = snapshot_effect_consensus_proof(
+                self.effect_proof_supplier(deepcopy(expected)))
+            payload = validate_authoritative_use_lease_request(target, now_epoch=int(time.time()))
+            if payload is None or any(payload[k] != v for k, v in expected.items()):
+                return None
+            if self.prepare_request(payload=payload, authority_tier=target.authority_tier) != target:
+                return None
+            permit = self.effect_signing_authority.prepare_permit(proof)
+            if permit is None:
+                return None
+            return self.issue(payload=payload, authority_tier=target.authority_tier,
+                              effect_signing_permit=permit)
+        except Exception:
+            return None
+        finally:
+            discard_effect_signing_permit(permit)
 
     def prepare_request(self, *, payload: Mapping[str, Any], authority_tier: str) -> SigningRequest | None:
         try:

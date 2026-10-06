@@ -1,3 +1,73 @@
+## PR2091 Linux fixture closure — 2026-10-07
+
+Hosted CI37517696484: bounded resident regression564 passed/2 failed/1 skipped.
+Both failures were Windows-skipped fixture drift. Symlink test now supplies its
+canonical work-order inventory so the actual symlink guard is reached. Socket
+test uses a short pytest-owned runtime root, a confined socket, profile work-order
+materialization and the existing bounded resident service for both signing RPCs.
+The preflight nonce assertion now matches the canonical non-consuming phase;
+exactly one issued authority and both verified signatures remain required.
+No production source, admission check or runtime authority was changed.
+
+Local Linux affected pair:2 passed/0 skipped in13.43s. Evidence and exact command:
+`resident-join-linux-pair-qualified-execution.json`, XML/log in the existing RSI
+evidence directory. Ubuntu system Python3.12 and cryptography, read-only reused
+pure-Python pytest; no package installs or gateway changes. Broader local run:
+86 passed/14 failed (12 missing-pip main-import failures, two unchanged socket
+unit cases); it is not a passing full-suite result. Those failures are preserved
+in `resident-join-linux-qualified.xml`, not suppressed or bundled into this fix.
+Test registry remains current1695/270. Independent nonce/source recheck:
+`resident-join-linux-nonce-followup-review.json`, SHA256
+`27793f978e652f328a9f10464efe0cd357a87beb7292cd5e0484e1caeeabfb36`.
+Hosted rerun pending. WSP00/6/15/22/50/84/97. No local-worker/OpenRouter retries;
+Codex architecture/review token use remains unmeasured. Native RSI remains unproven.
+
+## Resident final-decision effect join — 2026-10-07
+
+WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
+issuer to the resident valve owner. Approval binds the final decision, order,
+plan, signed authority, identity and expected bindings before one-use admission.
+After issuance, reload source/authority and repeat canonical evaluation with
+fresh trusted time. Independent review found strict permission expiry during
+approval; the repair rejects expired permission even with a live opaque lease.
+All seven unresolved trust reasons remain enforced. No new module or store.
+
+Local connected qualification:229 passed/2 skipped in79.67s. Source-bound evidence:
+`outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json`
+and XML/log. Real disposable signatures, synthetic owner/runtime inputs. Windows
+skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
+recursive test-clock stall are retained. CI now selects four resident wiring
+suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
+
+WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
+Native18/P0 remains blocked on authentic admission, fixed independent baseline/
+held-out evaluation, retention/rollback and later benefit. Next prerequisite:
+authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
+No further model calls or service changes. Reuse saved receipts and rerun only
+affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
+
+Independent recheck: `resident-join-independent-recheck.json`, SHA256
+`ae409ebe72670d88d56cb1e861875cc5d5b0277150aa7986ad98b56166affd2e`.
+Generated binding review: `resident-join-generated-binding-review.json`, SHA256
+`0c14cc2e53ec2ee2fa5fa9ac9df56d37e275d6909388fe8983f1dd7c2b72a175`.
+Integrity8/8 passed in63.04s after staging source and generated bindings together;
+extension fast15/15 passed in12.624s. Manifest adds the existing issuer only:
+1422 files, exact digest0d1364227d76606d7329e4101911c491f487c36927bb074f3e425e48dd4508f8.
+Initial integrity attempt correctly rejected stale staged bindings. Test registry
+current:1695 files/270 quarantined. Hosted results remain pending.
+
+
+## RSI resident admission re-observation — 2026-10-07
+
+WSP00/15/22/50/97: close PR2090 as merged/main-verified and rescore the existing
+resident join16/P0. Source inspection identifies ordering: final valve decision
+is part of the exact worktree effect, so permission must bind that decision before
+registration. Existing18-case regression passed; no connected native success is
+claimed. Four admission-related settings are absent in the two inspected running
+gateway environments; this is not global absence. Root/module roadmaps and the
+existing backlog now distinguish source closure, missing connection and genuine
+runtime-supply prerequisites. No production code, services, keys or models changed.
+
 ## RSI effect lifetime repair — 2026-10-07
 
 Reproduced and repaired the prior checkpoint blocker; 697 connected Windows

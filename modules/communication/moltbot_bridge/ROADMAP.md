@@ -1,10 +1,27 @@
-## Current selection — 2026-10-07
+## Resident final-decision effect join — 2026-10-07
 
-The checkpoint lifetime blocker below is repaired: 697 connected Windows cases
-pass, bounded independent review reports no new defect. Publication pending.
-Next14/P1: verify the designated resident's existing public runtime/admission
-artifacts; do not infer artifact absence from gateway environment settings.
-Native18/P0 and later retained RSI benefit remain open.
+WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
+issuer to the resident valve owner. Approval binds the final decision, order,
+plan, signed authority, identity and expected bindings before one-use admission.
+After issuance, reload source/authority and repeat canonical evaluation with
+fresh trusted time. Independent review found strict permission expiry during
+approval; the repair rejects expired permission even with a live opaque lease.
+All seven unresolved trust reasons remain enforced. No new module or store.
+
+Local connected qualification:229 passed/2 skipped in79.67s. Source-bound evidence:
+`outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json`
+and XML/log. Real disposable signatures, synthetic owner/runtime inputs. Windows
+skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
+recursive test-clock stall are retained. CI now selects four resident wiring
+suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
+
+WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
+Native18/P0 remains blocked on authentic admission, fixed independent baseline/
+held-out evaluation, retention/rollback and later benefit. Next prerequisite:
+authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
+No further model calls or service changes. Reuse saved receipts and rerun only
+affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
+
 
 ## Single-effect grant composition — 2026-10-07 checkpoint
 
