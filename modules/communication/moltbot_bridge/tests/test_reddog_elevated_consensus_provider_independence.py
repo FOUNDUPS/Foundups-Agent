@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import replace
+from types import SimpleNamespace
+import pytest
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -53,6 +55,31 @@ def test_external_signer_rejects_one_provider_for_both_roles(tmp_path) -> None:
         assert str(exc) == "elevated_consensus_grant_providers_not_independent"
     else:
         raise AssertionError("shared elevated consensus provider accepted")
+
+
+@pytest.mark.parametrize("failure", ["issuance_error", "invalid_grant", "legacy_only"])
+def test_issuance_failure_never_dispatches_target(tmp_path, failure):
+    principal, _ = _provider(tmp_path, "principal")
+    reddog, _ = _provider(tmp_path, "reddog")
+    calls = []
+
+    def issue(*args, **kwargs):
+        if failure == "issuance_error":
+            raise ValueError("test_issuance_exit_failed")
+        return None
+
+    selected = SimpleNamespace(
+        elevated_consensus_provider_identity=principal.elevated_consensus_provider_identity
+    )
+    if failure != "legacy_only":
+        selected.issue_grant = issue
+    signer = SimpleNamespace(sign_with_secret_grant=lambda *args: calls.append(args))
+    client = _client(signer, selected, reddog)
+    response = client.sign_with_elevated_consensus(
+        SimpleNamespace(signer_role="principal"), object()
+    )
+    assert response.accepted is False
+    assert calls == []
 
 
 def test_external_signer_rejects_same_authority_with_requester_alias(

@@ -1,3 +1,12 @@
+## Provider handoff — 2026-10-06
+
+Current14/P1 source slice follows merged PR2083. Frozen ordering regression
+reproduced; candidate issues through the existing lease and dispatches target
+only after exit. Final connected94pass; independent source review complete.
+Integrity8/8 passed in63.61s; finish publication. Native model
+admission, independent worker evaluation and later retained benefit remain open.
+See root roadmap/current backlog for system sequencing, not older checkpoints.
+
 ## Direct revocation proof regression — 2026-10-05
 
 One added test retains the independently frozen control-key LOAD rejection;

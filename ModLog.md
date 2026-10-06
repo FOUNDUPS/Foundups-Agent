@@ -1,3 +1,13 @@
+## RSI provider handoff — 2026-10-06 (local candidate)
+
+WSP00/15/97 selects14/P1 after merged PR2083. Existing secret-grant provider
+now exposes issuance after clean lease exit; consensus target dispatch follows.
+Frozen baseline reproduced both target calls under the lease; connected94/94
+pass in26.13s after repair, including cleanup/adapter rejection controls and
+legacy lease preservation. Independent production review found no concrete
+defect. Integrity8/8 passed in63.61s; publication pending. No native RSI or admitted HIGH claim.
+Canonical sequencing: ROADMAP.md and docs/roadmaps/rsi_swarm_backlog.json.
+
 ## Local credential provider implementation — 2026-10-05
 
 Implemented the measured prerequisite in secrets_mcp and connected its explicit

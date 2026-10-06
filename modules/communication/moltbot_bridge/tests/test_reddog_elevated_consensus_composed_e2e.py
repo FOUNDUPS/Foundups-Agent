@@ -12,15 +12,11 @@ from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from modules.communication.moltbot_bridge.src import (
     reddog_signer_independent_secret_grant_provider as provider_module,
 )
-from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_client import (
-    ElevatedConsensusExternalSignerClient,
-)
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_client import ElevatedConsensusExternalSignerClient
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_verification import (
     ElevatedConsensusSignerAuthority,
 )
-from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import (
-    AtomicJsonAuthorityRuntimeStore,
-)
+from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store import AtomicJsonAuthorityRuntimeStore
 from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_e2e_support import (
     NOW,
     Resolver,
@@ -173,3 +169,31 @@ def _external_signer(tmp_path, monkeypatch, authority, target_keys, *, synthetic
         principal_grant_provider=providers["principal"],
         reddog_grant_provider=providers["reddog"],
     ), routing
+
+
+def test_target_signing_runs_after_provider_owner_lease_exits(tmp_path, monkeypatch):
+    """Synthetic HIGH orchestration only; not admitted target authority."""
+    import sys
+    create, target = _external_signer, _RoleRoutingSigner.sign_with_secret_grant
+    active, observed = [], []
+    def create_observed(*args, **kwargs):
+        result = create(*args, **kwargs)
+        original = provider_module.lease_validated_owner_e0_current_admission
+        @contextmanager
+        def owner_lease(**values):
+            with original(**values) as owner:
+                active.append(True)
+                try:
+                    yield owner
+                finally:
+                    active.pop()
+        monkeypatch.setattr(provider_module, "lease_validated_owner_e0_current_admission", owner_lease)
+        return result
+    def sign_observed(self, request, grant):
+        observed.append((request.signer_role, bool(active)))
+        return target(self, request, grant)
+    monkeypatch.setattr(sys.modules[__name__], "_external_signer", create_observed)
+    monkeypatch.setattr(_RoleRoutingSigner, "sign_with_secret_grant", sign_observed)
+    test_complete_elevated_consensus_chain_commits_authority(tmp_path, monkeypatch, synthetic_owner_unit=True)
+    assert observed == [("principal", False), ("reddog", False)], "target signing held provider owner fence"
+    assert active == []

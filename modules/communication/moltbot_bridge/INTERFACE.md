@@ -1,3 +1,17 @@
+## Provider issuance handoff — 2026-10-06 (local candidate)
+
+`IndependentSignerSecretGrantProvider.issue_grant(request, *,
+elevated_consensus_signing_permit=None)` returns a verified grant only after
+the existing issuance lease exits successfully. The legacy `lease()` API
+continues to hold admission through caller use. Consensus clients now require
+`issue_grant()` and call the target afterward; lease-only custom providers fail
+closed rather than falling back to signing inside a provider lease. Issuance or
+cleanup exceptions prevent target dispatch. Consensus permits are consumed by
+the existing lease path once. The target must authenticate its own current owner;
+the returned mapping alone does not authorize execution. Grant-authority RPC
+still occurs inside issuance. This change does not establish admitted HIGH/effect
+execution or native RSI readiness.
+
 ## Leased current-generation binding — 2026-10-06
 
 `SignerCurrentGenerationRuntimeAuthority.lease(now_epoch=..., signer_profile_id=...)`

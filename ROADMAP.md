@@ -12,7 +12,37 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — authenticated target owner prerequisite (2026-10-06 JST):**
+**Current execution — provider issuance handoff (2026-10-06 JST):**
+PR2083 merged at `4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708`; reviewed and
+merged trees match. Exact-main CI37401710455 and CodeQL37401710274 passed.
+The old owned branch is retired with a verified recovery bundle. WSP15 selects
+14/P1 (C2/I4/D4/impact4): issue a verified grant through the existing provider,
+exit its generation lease, then call the target through the existing client.
+Preserve the legacy lease API, one-use consensus permits, independent providers
+and target admission. The target now revalidates its own authenticated owner.
+Grant-authority RPC inside issuance remains a separate topology qualification;
+do not claim all remote calls are outside all fences. No new runtime grant,
+HIGH/effect admission or autonomous worker result is implied by this source slice.
+Frozen baseline reproduced target calls inside the provider lease. Candidate
+passes94 connected cases; independent source review found no concrete defect.
+Failure controls pass; integrity8/8 passed in63.61s; publication remains pending.
+The existing manifest generator leaves its digest unchanged: these two provider/
+client files are not in the current executable dependency closure. Tests bind
+their exact source separately. Wiring/admitting their native runtime remains a
+separate requirement; manifest success must not imply deployed consumption.
+
+Readiness re-observation: WSL OpenClaw2026.7.1-2 and Hermes0.20.4 are installed;
+their gateways are active. The Windows architect query is UNCONFIGURED, and
+the eight standard model evidence files are absent at the known
+`O:/.reddog/resident/Foundups-Agent` root. Named consumer variables are absent
+in both inspected gateway environments. The existing Hermes API transport gets
+status0 from127.0.0.1:8642; a messaging gateway is not proof of API availability.
+This is scoped evidence, not whole-machine absence. Signed-evidence producers
+already exist; native18/P0 requires legitimate runtime inputs and remains blocked.
+Evidence: `outputs/rsi-permission-evidence-20261006/` model-binding re-observation,
+resident-model-artifact inventory and target-owner-pr2083-merge-closure receipts.
+
+**Historical authenticated target owner prerequisite (2026-10-06 JST):**
 PR2082 is merged at `5420b85a02a76efe21947a5dc00c8aecb854e5d3`;
 exact-main CI37397915051 passed (rechecked through GitHub). WSP15 selects
 15/P1 (C3/I4/D5/impact3): require an authenticated target owner lease before
@@ -34,7 +64,8 @@ found a test assertion assuming a ledger field existed after rejection; the
 corrected empty-ledger assertion passes with both elevated cases (2/2).
 Final connected run134pass/1skip in70.46s. Runtime manifest regenerated with
 1,419 files; integrity8/8 pass. Independent final production review found no
-additional concrete blocker. Publication remains pending.
+additional concrete blocker. PR2083 publication and exact-main CI are now verified
+in the current checkpoint above; this paragraph preserves historical test detail.
 Evidence: `target-owner-connected-final.xml` (earlier failures remain preserved).
 Evidence: `outputs/rsi-permission-evidence-20261006/target-owner-lease-baseline-review.json`.
 Provider handoff follows this prerequisite; effect permits, actual local worker

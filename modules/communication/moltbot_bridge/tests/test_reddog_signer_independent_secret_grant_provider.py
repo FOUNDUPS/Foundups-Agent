@@ -609,6 +609,41 @@ def test_provider_holds_generation_lease_through_caller_use(
     assert client.calls == 1
 
 
+@pytest.mark.parametrize("exit_fails", [False, True])
+def test_issue_grant_requires_clean_owner_lease_exit(tmp_path, monkeypatch, exit_fails):
+    store = _store(tmp_path)
+    private = Ed25519PrivateKey.generate()
+    client = _GrantClient(private)
+    policy = _owner_policy(_binding(store, _public(private)))
+    provider = _provider_for(
+        tmp_path, monkeypatch, store=store, private=private, client=client, policy=policy
+    )
+    original = provider_module.lease_validated_owner_e0_current_admission
+    events = []
+
+    @contextmanager
+    def lease(**kwargs):
+        with original(**kwargs) as owner:
+            events.append("enter")
+            yield owner
+        events.append("exit")
+        if exit_fails:
+            raise ValueError("test_owner_exit_failed")
+
+    monkeypatch.setattr(provider_module, "lease_validated_owner_e0_current_admission", lease)
+    if exit_fails:
+        with pytest.raises(ValueError, match="test_owner_exit_failed"):
+            provider.issue_grant(_target_request())
+    else:
+        grant = provider.issue_grant(_target_request())
+        assert events == ["enter", "exit"]
+        assert Ed25519SignatureVerifier().verify(
+            _public(private), canonical_signer_secret_access_grant_input(grant), grant["signature"]
+        )
+    assert events == ["enter", "exit"]
+    assert client.calls == 1
+
+
 def test_provider_rejects_invalid_audit_attestation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
