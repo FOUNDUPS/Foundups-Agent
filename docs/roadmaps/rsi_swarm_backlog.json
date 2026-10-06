@@ -1894,7 +1894,7 @@
     },
     "dispatchable": false,
     "execution_plane": "Owned source repair; no native runtime grant",
-    "next_action": "Qualify existing verified runtime artifact to exact reviewer principal/selection/binding mapping; preserve no-permit behavior until authenticated consent and independent signer re-verification are composed",
+    "next_action": "Reverify the runtime artifacts cited by the signed reviewer decision with the existing use-time verifier and consume its exact registered capability. No new identity designation schema; preserve consent, independence and no-permit boundaries",
     "higher_priority_gates": [
         "Native RSI18/P0 requires legitimate verified model/runtime admission; known-root inputs absent, not whole-machine absence"
     ]
@@ -1910,15 +1910,16 @@
         "total": 15,
         "priority": "P1"
     },
-    "previous_closure": "PR2087 merged atbbb975b4f; reviewed/merged tree d10f4e91051009d5eb025ac80499a65ac58f5888 matches; exact-head CI37485625238 and CodeQL37485619460 success; exact-main checks pending",
+    "previous_closure": "PR2087 merged atbbb975b4f; reviewed/merged tree d10f4e91051009d5eb025ac80499a65ac58f5888 matches; exact-head CI37485625238 and CodeQL37485619460 success; exact-main CI37486916613 and CodeQL37486916968 success",
+    "independent_design_check": "effect-review-runtime-design-check.json SHA256 0ed41a465b1c85e2f72ef1de78c1ad2e8d35440e4b632a459603623bd06f6223: signed reviewer decision already binds principal/provider to model and receipt IDs/digests; no separate designation schema required",
     "finding": "Effect reviewer verifier accepts a caller-supplied runtime resolver; production search found protocols and verification consumers, not an authenticated concrete reviewer runtime resolver",
     "reuse": [
-        "modules/communication/moltbot_bridge/src/reddog_model_runtime_binding_query.py",
+        "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_use_time_verifier.py",
         "modules/communication/moltbot_bridge/src/reddog_model_runtime_verifier_bootstrap.py",
         "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_evidence_verifier.py",
         "modules/communication/moltbot_bridge/src/reddog_current_effect_reviewer_verification.py"
     ],
-    "constraint": "Resident receipt rehydration alone is not signature verification or reviewer principal binding. Do not broaden the delegated two-child permit or mint authority from supplied booleans.",
+    "constraint": "Verify cited runtime evidence independently; the signed review supplies identity/model association. Do not use architect display-query output as admission, broaden the delegated two-child permit, or mint authority from booleans. Qualified model artifacts do not prove that model generated a review; execution provenance requires runner/custody evidence.",
     "native_rsi_complete": false
 },
     "local_first_admission_20261006": {
@@ -1970,7 +1971,7 @@
       "source": "2837b0db389c567de9a5402e22fa711affcf176d",
       "branch": "agent/rsi-effect-issuer-handoff-20261006",
       "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
-      "status": "merged_exact_tree_verified_main_checks_pending",
+      "status": "merged_exact_tree_verified_main_checks_passed",
       "independent_review": "46e9eb816 reviewed, no concrete blocker; effect-issuer-independent-review.json SHA256 da3f2520f817854bcd1c04b8654ab37d2a58576bbe3abb0a70dda07d726a3874",
       "hosted_validation": "Reviewed head46e9eb816: CI37483954789 and CodeQL37483627186 success. Mainb91823b28 arrived via PR2086; refresh after preserving both ModLog entries. No native RSI claim.",
       "reason": "Existing issuer still called target while holding provider lease; local proposals failed, so use the permitted coordinator exception without more model retries",

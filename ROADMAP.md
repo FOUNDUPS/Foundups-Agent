@@ -16,15 +16,20 @@ Status: canonical **system planning and completion-gate authority** in this repo
 PR2087 merged at `bbb975b4f20fec5981a85a971f55fd26e3c7c6e8`. Its checked head
 and main have identical tree `d10f4e91051009d5eb025ac80499a65ac58f5888`.
 Independent source review found no blocker;184 local tests and exact-head
-CI37485625238/CodeQL37485619460 passed. Exact-main checks are pending.
+CI37485625238/CodeQL37485619460 passed. Exact-main CI37486916613 and
+CodeQL37486916968 also passed.
 The issuer handoff source prerequisite is closed; it is a coordinator repair,
 not retained autonomous RSI. Preserve the failed local attempt below.
 
 Re-observed15/P1 (C3/I4/D4/impact4): connect the existing authenticated model
 runtime verifier to the effect reviewer's exact principal and receipt bindings.
-The effect reviewer currently receives a caller-supplied runtime resolver;
-receipt rehydration alone does not authenticate it. Reuse existing verifier,
-query and current-review owners. Native18/P0 remains blocked pending authentic
+The signed review already binds reviewer identity to model/receipt claims; no
+new principal-to-runtime designation schema is required. Independently verify
+the cited artifacts with the existing use-time verifier and consume its exact
+registered capability. Receipt rehydration alone is insufficient. Reuse verifier
+bootstrap and current-review owners; the architect-specific display query is
+not the admission adapter. This does not prove the model generated the review.
+Native18/P0 remains blocked pending authentic
 runtime inputs, separate single-target effect permission, resident wiring,
 independent evaluation, retention/rollback and benefit in a later invocation.
 Do not widen the delegated two-child permit or turn verifier booleans into grants.

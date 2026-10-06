@@ -3,11 +3,15 @@
 PR2087 merged atbbb975b4f20fec5981a85a971f55fd26e3c7c6e8. Checked
 ff1fdd504 and merge have tree d10f4e91051009d5eb025ac80499a65ac58f5888.
 Exact-head CI37485625238/CodeQL37485619460 passed. Independent source
-review and184 local cases qualify this source repair; exact-main checks pending.
+review and184 local cases qualify this source repair. Exact-main CI37486916613
+and CodeQL37486916968 passed.
 PR2086 host recovery was preserved during the sole ModLog merge conflict.
 Recovery bundle: `outputs/rsi-permission-evidence-20261006/effect-issuer-pr2087.bundle`.
 WSP15/97 re-observation selects authenticated effect-review runtime evidence
-before permit issuance. No local-agent retained improvement or native RSI claim.
+before permit issuance. Independent design check clarifies: signed reviews already
+bind identity/model claims; verify their referenced artifacts through existing
+use-time verifier capabilities, without another designation schema. Artifact
+verification alone does not prove model execution. No retained RSI claim.
 
 ## Effect issuer handoff — 2026-10-06 (historical implementation checkpoint)
 

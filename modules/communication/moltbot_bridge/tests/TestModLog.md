@@ -1,7 +1,8 @@
 ## Effect issuer qualification — merged PR2087, 2026-10-07
 
 Publication headff1fdd504 passed CI37485625238/CodeQL37485619460;
-mergebbb975b4f has the identical tree. Exact-main checks remain pending.
+mergebbb975b4f has the identical tree. Exact-main CI37486916613 and
+CodeQL37486916968 passed.
 
 Extend existing `test_reddog_external_signer_authoritative_use_lease.py` with
 four frozen controls: successful provider exit before target; cleanup failure,
