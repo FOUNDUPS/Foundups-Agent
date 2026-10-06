@@ -12,42 +12,33 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — resident effect join (2026-10-07):**
+**Current selection — principal generation evidence (2026-10-07):**
+PR2091 is merged at `6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd`; main and reviewed
+file trees match. Exact-head CI37520547883 passed, including566 resident cases
+and1 skip. Two Linux-only stale fixtures were repaired and independently reviewed;
+local focused pair2/2 passed. Main CI37521571358 remains pending at this checkpoint.
+Owned branch retired with a verified recovery bundle; shared owners untouched.
+Closure: `outputs/rsi-permission-evidence-20261006/resident-join-2091-merge-closure.json`.
 
-WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
-issuer to the resident valve owner. Approval binds the final decision, order,
-plan, signed authority, identity and expected bindings before one-use admission.
-After issuance, reload source/authority and repeat canonical evaluation with
-fresh trusted time. Independent review found strict permission expiry during
-approval; the repair rejects expired permission even with a live opaque lease.
-All seven unresolved trust reasons remain enforced. No new module or store.
+Re-observation: configuration alone cannot open the resident valve. The resolver
+still unconditionally retains seven non-generation trust reasons. Existing
+signed-generation principal artifact verification can be reused for one of them.
+Next15/P1 (C3/I4/D4/impact4): connect that verifier to the resident principal/key
+attestation check, binding the actual identity, key and scope to the current
+root-selected generation. Preserve the other six checks. No new authority store,
+caller-declared trust flag or runtime enrollment. This is SPECIFIED_NOT_IMPLEMENTED.
+The15 supersedes the earlier14/P1 simple configuration estimate for this narrower
+security-sensitive connection; authentic runtime provisioning remains separate.
 
-Local connected qualification:229 passed/2 skipped in79.67s. Source-bound evidence:
-`outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json`
-and XML/log. Real disposable signatures, synthetic owner/runtime inputs. Windows
-skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
-recursive test-clock stall are retained. CI now selects four resident wiring
-suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
-
-PR2091 hosted regression exposed two Linux-only stale fixtures (564 pass/2 fail/1
-skip). Focused repairs now pass both Linux cases and have independent review;
-hosted rerun remains pending. The broader local Linux86pass/14fail is retained
-as failed evidence; see module TestModLog for environment and unchanged-test debt.
-
-WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
-Native18/P0 remains blocked on authentic admission, fixed independent baseline/
-held-out evaluation, retention/rollback and later benefit. Next prerequisite:
-authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
-No local-worker/OpenRouter calls or service changes. Reuse receipts and rerun only
-affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
-
-PR2090/main `b7a0d996b5fe96133bd010015882730110bdde3a` remains the verified
-historical checkpoint: CI37510970982 and four CodeQL analyses passed. The current
-slice is isolated from it. Holo retrieval rejected authority-root/head mismatch;
-exact-source navigation is not CURRENT index evidence. Both gateway services
-were running, but four inspected authority settings were absent from their
-process environments; this does not prove global absence. See the existing
-`current_observation.resident_effect_join_20261007` backlog record.
+Native18/P0 remains blocked: admitted local-agent improvement, independent fixed
+baseline/held-out validation, governed retention/rollback and later benefit are
+unproven. The connected source fixtures establish none of those by themselves.
+Local Linux broader run86pass/14fail remains failed evidence:12 missing-pip
+main-import cases and2 unchanged socket unit cases require separate triage.
+Holo authority-root/head mismatch remains unresolved; exact-source reads are a
+bounded navigation fallback, not CURRENT index evidence. Reuse saved receipts;
+no further local-worker/OpenRouter retries. Codex architecture/review cost is
+unmeasured. See the existing backlog's principal-generation observation.
 
 **Historical execution — single-effect grant composition (2026-10-07 JST):**
 PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;

@@ -1,27 +1,12 @@
-## Resident final-decision effect join — 2026-10-07
+## Current selection — principal generation connection, 2026-10-07
 
-WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
-issuer to the resident valve owner. Approval binds the final decision, order,
-plan, signed authority, identity and expected bindings before one-use admission.
-After issuance, reload source/authority and repeat canonical evaluation with
-fresh trusted time. Independent review found strict permission expiry during
-approval; the repair rejects expired permission even with a live opaque lease.
-All seven unresolved trust reasons remain enforced. No new module or store.
-
-Local connected qualification:229 passed/2 skipped in79.67s. Source-bound evidence:
-`outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json`
-and XML/log. Real disposable signatures, synthetic owner/runtime inputs. Windows
-skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
-recursive test-clock stall are retained. CI now selects four resident wiring
-suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
-
-WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
-Native18/P0 remains blocked on authentic admission, fixed independent baseline/
-held-out evaluation, retention/rollback and later benefit. Next prerequisite:
-authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
-No further model calls or service changes. Reuse saved receipts and rerun only
-affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
-
+PR2091 merged/main tree verified at6ad4ee360; branch CI37520547883 passed566/1skip.
+Main CI37521571358 pending. Native RSI remains unproven. Next15/P1 (3/4/4/4):
+reuse the existing root-selected principal artifact verifier at the resident
+principal/key gate, with exact identity/key/scope/current-generation binding.
+Other six non-generation reasons remain enforced; no enrollment or new store.
+See root ROADMAP and canonical backlog for source evidence, failed local Linux
+broad-run debt, closure receipt and acceptance. SPECIFIED_NOT_IMPLEMENTED.
 
 ## Single-effect grant composition — 2026-10-07 checkpoint
 

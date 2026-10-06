@@ -1,3 +1,14 @@
+## RSI closure and next verified-owner connection — 2026-10-07
+
+WSP00/15/22/50/97: PR2091 merged6ad4ee360; exact reviewed/main tree match,
+branch CI37520547883 passed (resident566/1skip), main CI pending. Recoverable
+owned branch retired; no other owner changed. Re-observed resolver retains seven
+unconditional non-generation reasons. Select principal-generation verifier
+connection15/P1 (3/4/4/4) using existing owners, retaining the other six gates.
+Source work does not enroll authority or prove native RSI. Preserve local
+Linux86/14 failed broad-run evidence for separate triage; focused repaired pair2/2.
+Details and exact sources remain in the existing roadmap/backlog and RSI receipts.
+
 ## PR2091 Linux fixture closure — 2026-10-07
 
 Hosted CI37517696484: bounded resident regression564 passed/2 failed/1 skipped.
