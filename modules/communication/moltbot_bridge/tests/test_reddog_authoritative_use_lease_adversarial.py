@@ -193,3 +193,51 @@ def test_contract_has_no_execution_or_secret_surface() -> None:
     ):
         assert forbidden not in combined
     assert json.dumps(_payload(), sort_keys=True, ensure_ascii=True).isascii()
+
+
+@pytest.mark.parametrize("expire_during_verification", [False, True], ids=["steady-clock", "expires-before-commit"])
+def test_rehydration_checks_expiry_after_response_verification(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, expire_during_verification: bool
+) -> None:
+    """Synthetic generation/clock; real response verification and durable replay."""
+    clock = [NOW]
+    monkeypatch.setattr(lease_module.time, "time", lambda: clock[0])
+    store = _store(tmp_path)
+    request = _request(store, expires_at=NOW + 20)
+    response = _backend(request, exact=True).sign(request, _peer())
+    assert response.accepted is True
+    authority = _authority(tmp_path, monkeypatch)
+    events = []
+    verify = lease_module._response_valid
+    consume = type(store).consume_authoritative_use_lease
+    issue = lease_module._LEASES.issue
+
+    def verify_then_advance(*args):
+        valid = verify(*args)
+        assert valid is True
+        events.append("verified_response")
+        if expire_during_verification:
+            clock[0] = NOW + 20
+        return valid
+
+    def observe_consume(self, **kwargs):
+        events.append("durable_consume")
+        return consume(self, **kwargs)
+
+    def observe_issue(*args, **kwargs):
+        events.append("capability_issue")
+        return issue(*args, **kwargs)
+
+    monkeypatch.setattr(lease_module, "_response_valid", verify_then_advance)
+    monkeypatch.setattr(type(store), "consume_authoritative_use_lease", observe_consume)
+    monkeypatch.setattr(lease_module._LEASES, "issue", observe_issue)
+    result = lease_module._rehydrate_external_authoritative_use_lease(
+        request=request, response=response, current_generation_authority=authority,
+        replay_store=store, now_epoch=NOW,
+    )
+    if expire_during_verification:
+        assert result is None, "expired response must reject before replay or capability commit"
+        assert events == ["verified_response"]
+    else:
+        assert _is_lease(result) and _consume_lease(result)
+        assert events == ["verified_response", "durable_consume", "capability_issue"]

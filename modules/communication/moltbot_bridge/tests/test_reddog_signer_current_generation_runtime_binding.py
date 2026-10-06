@@ -264,3 +264,134 @@ def test_slice_preserves_no_effect_and_wsp62_boundaries() -> None:
             if isinstance(node, ast.ClassDef):
                 assert node.end_lineno is not None
                 assert node.end_lineno - node.lineno + 1 <= 200
+
+
+@pytest.mark.parametrize("abort", [False, True])
+def test_generation_lease_keeps_real_selection_boundary_until_exit(tmp_path, monkeypatch, abort):
+    from contextlib import contextmanager
+
+    values = _fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    original = selection_module._Boundary._lease_current
+    active = []
+
+    @contextmanager
+    def observed(self, capability):
+        with original(self, capability) as selected:
+            active.append(True)
+            try:
+                yield selected
+            finally:
+                active.pop()
+
+    monkeypatch.setattr(selection_module._Boundary, "_lease_current", observed)
+    def consume():
+        with binding_module._lease_current_generation_runtime_binding(
+            repo_root=harness.repo_root, runtime_root=harness.runtime_root,
+            run_packet_path=values["packet_path"], now_epoch=NOW,
+        ) as binding:
+            assert binding.accepted, binding.rejection_reasons
+            assert active == [True]
+            if abort:
+                raise RuntimeError("consumer_abort")
+    if abort:
+        with pytest.raises(RuntimeError, match="consumer_abort"):
+            consume()
+    else:
+        consume()
+    assert active == []
+
+
+def test_rehydration_commits_inside_generation_lease(tmp_path, monkeypatch):
+    from contextlib import contextmanager
+    from modules.communication.moltbot_bridge.src import reddog_authoritative_use_lease as leases
+    from modules.communication.moltbot_bridge.tests.test_reddog_external_signer_authoritative_use_lease import (
+        NOW as LEASE_NOW, _authority, _backend, _current_generation, _peer, _request, _store,
+    )
+
+    monkeypatch.setattr(leases.time, "time", lambda: LEASE_NOW)
+    store = _store(tmp_path)
+    request = _request(store)
+    response = _backend(request, exact=True).sign(request, _peer())
+    authority = _authority(tmp_path, monkeypatch)
+    active, events = [], []
+
+    @contextmanager
+    def held(self, **kwargs):
+        active.append(True)
+        try:
+            yield _current_generation()
+        finally:
+            active.pop()
+
+    monkeypatch.setattr(SignerCurrentGenerationRuntimeAuthority, "lease", held)
+    for owner, name in ((leases, "_response_valid"),
+                        (type(store), "consume_authoritative_use_lease"),
+                        (leases._LEASES, "issue")):
+        original = getattr(owner, name)
+        def checked(*args, _original=original, _name=name, **kwargs):
+            assert active == [True], _name
+            events.append(_name)
+            return _original(*args, **kwargs)
+        monkeypatch.setattr(owner, name, checked)
+    result = leases._rehydrate_external_authoritative_use_lease(
+        request=request, response=response, current_generation_authority=authority,
+        replay_store=store, now_epoch=LEASE_NOW,
+    )
+    assert result is not None
+    assert events == ["_response_valid", "consume_authoritative_use_lease", "issue"]
+    assert active == []
+
+
+def test_snapshot_binding_rejects_selection_exit_failure(tmp_path, monkeypatch):
+    from contextlib import contextmanager
+
+    values = _fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    original = selection_module._Boundary._lease_current
+
+    @contextmanager
+    def failing_exit(self, capability):
+        with original(self, capability) as selected:
+            yield selected
+        raise OSError("synthetic_release_failure")
+
+    monkeypatch.setattr(selection_module._Boundary, "_lease_current", failing_exit)
+    result = verify_signer_current_generation_runtime_binding(
+        repo_root=harness.repo_root, runtime_root=harness.runtime_root,
+        run_packet_path=values["packet_path"], now_epoch=NOW,
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == (SIGNER_CURRENT_GENERATION_BINDING_REJECTED,)
+
+
+@pytest.mark.parametrize("interrupt", [KeyboardInterrupt, SystemExit])
+def test_generation_validation_interrupt_releases_selection(tmp_path, monkeypatch, interrupt):
+    from contextlib import contextmanager
+
+    values = _fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    original = selection_module._Boundary._lease_current
+    active = []
+
+    @contextmanager
+    def observed(self, capability):
+        with original(self, capability) as selected:
+            active.append(True)
+            try:
+                yield selected
+            finally:
+                active.pop()
+
+    def interrupted(**kwargs):
+        assert active == [True]
+        raise interrupt("synthetic_validation_interrupt")
+
+    monkeypatch.setattr(selection_module._Boundary, "_lease_current", observed)
+    monkeypatch.setattr(binding_module, "_validated_values", interrupted)
+    with pytest.raises(interrupt):
+        verify_signer_current_generation_runtime_binding(
+            repo_root=harness.repo_root, runtime_root=harness.runtime_root,
+            run_packet_path=values["packet_path"], now_epoch=NOW,
+        )
+    assert active == []

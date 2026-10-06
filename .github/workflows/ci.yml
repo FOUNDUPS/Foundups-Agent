@@ -1245,7 +1245,12 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_owner_versions.py \
             modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_startup_owner.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
-            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_lease_adversarial.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_issue.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_external_signer_authoritative_use_lease.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_use_time_binding.py
 
       - name: Run RedDog fast test tier
         working-directory: extensions/reddog

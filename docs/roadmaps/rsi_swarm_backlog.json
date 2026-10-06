@@ -1880,24 +1880,35 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.authenticated_startup_integration_20261006",
-    "base_commit": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
-    "selected_action": "Connect authenticated startup custody through public consumer after isolation",
-    "status": "startup_os_qualified_regression_closure_pending_not_admitted",
-    "wsp15": {
-      "complexity": 4,
-      "importance": 5,
-      "deferability": 5,
-      "impact": 4,
-      "total": 18,
-      "priority": "P0"
-    },
-    "dispatchable": false,
-    "execution_plane": "Owned source implementation with synthetic tests; no runtime grant",
-    "next_action": "Finish PR2078 hosted validation and source closure. The Windows bounded real-lock discriminator supports the conditional wait-cycle risk; next reconcile existing lock ownership and elevated-permit contracts before issuer-to-valve implementation. Original intermittent credential rejection remains documented, not claimed repaired",
-    "higher_priority_gates": []
+      "observation_path": "current_observation.generation_commit_fence_20261006",
+      "base_commit": "a2a45ddecfa762de85cda5ca826992e337c0b9f7",
+      "selected_action": "Hold existing generation fence through local response replay/capability commit",
+      "status": "candidate_56_local_tests_passed_review_approved",
+      "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+      },
+      "dispatchable": false,
+      "execution_plane": "Owned source repair; no native runtime grant",
+      "next_action": "Review and publish bounded generation-commit repair, then reconcile provider issuance handoff and effect permit before issuer wiring",
+      "higher_priority_gates": []
   },
   "current_observation": {
+    "generation_commit_fence_20261006": {
+        "source": "a2a45ddecfa762de85cda5ca826992e337c0b9f7",
+        "branch": "codex/rsi-generation-commit-fence-20261006",
+        "baseline": "1pass/1intended expiry failure",
+        "candidate": "frozen2/2; connected56/56",
+        "evidence": "outputs/rsi-permission-evidence-20261006/generation-commit-connected3.xml",
+        "source_review": "generation-commit-final-source-review.json; bounded source approved",
+        "publication": "not_yet_published",
+        "native_rsi_complete": false,
+        "remaining": "provider outer-fence composition, effect permit, admitted worker, independent held-out evaluation and later retained benefit"
+    },
     "observation_id": "measurement-seam-20260929",
     "base": "7c2e0b6f4d8dd2a37b5fdcadec1c844d9360e4a6",
     "self": "0102",

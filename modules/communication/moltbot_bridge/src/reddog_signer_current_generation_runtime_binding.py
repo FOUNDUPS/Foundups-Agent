@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from contextlib import ExitStack, contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping
+from typing import Any, Iterator, Mapping
 
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     DEFAULT_MAX_TTL_SECONDS,
@@ -77,6 +78,13 @@ class SignerCurrentGenerationRuntimeAuthority:
     repo_root: Path
     runtime_root: Path
 
+    def lease(self, *, now_epoch: int, signer_profile_id: str):
+        """Keep the current generation fenced through a local consumer commit."""
+        return _lease_current_generation_runtime_binding(
+            repo_root=self.repo_root, runtime_root=self.runtime_root,
+            now_epoch=now_epoch, signer_profile_id=signer_profile_id,
+        )
+
     def resolve(
         self, *, now_epoch: int, signer_profile_id: str
     ) -> SignerCurrentGenerationRuntimeBinding:
@@ -98,46 +106,68 @@ def verify_signer_current_generation_runtime_binding(
 ) -> SignerCurrentGenerationRuntimeBinding:
     """Verify root-owned current selection against trusted time and bytes."""
     try:
-        if type(now_epoch) is not int or now_epoch <= 0:
-            raise ValueError("trusted_time_invalid")
-        repo = Path(repo_root).resolve()
-        runtime = validate_runtime_root_path(runtime_root, repo_root=repo)
-        packet_path = validate_runtime_artifact_path(
-            run_packet_path or runtime / "signer_service_run_packet.json",
-            repo_root=repo,
-            allowed_root=runtime,
-        )
-        packet_raw, _ = secure_read_confined_bytes(
-            packet_path,
-            allowed_root=runtime,
-            max_bytes=MAX_RUNTIME_ARTIFACT_BYTES,
-        )
-        packet = _mapping(packet_raw)
-        capability, boundary = load_system_service_manifest_selection(
-            owner_config_path=_required_absolute_path(
-                packet.get("owner_authority_config_path")
-            ),
-            repo_root=repo,
-            config_path=_required_absolute_path(packet.get("config_path")),
-            run_packet_path=packet_path,
-        )
-        selection = dict(boundary.consume(capability))
-        values = _validated_values(
-            selection=selection,
-            packet=packet,
-            packet_path=packet_path,
-            packet_raw=packet_raw,
-            repo=repo,
-            runtime=runtime,
-            now_epoch=now_epoch,
-            signer_profile_id=signer_profile_id,
-        )
-        return _accepted_binding(values)
+        with _lease_current_generation_runtime_binding(
+            repo_root=repo_root, runtime_root=runtime_root, now_epoch=now_epoch,
+            run_packet_path=run_packet_path, signer_profile_id=signer_profile_id,
+        ) as binding:
+            return binding
     except Exception:
         return SignerCurrentGenerationRuntimeBinding(
             accepted=False,
             rejection_reasons=(SIGNER_CURRENT_GENERATION_BINDING_REJECTED,),
         )
+
+
+@contextmanager
+def _lease_current_generation_runtime_binding(
+    *, repo_root: Path | str, runtime_root: Path | str, now_epoch: int,
+    run_packet_path: Path | str | None = None,
+    signer_profile_id: str | None = None,
+) -> Iterator[SignerCurrentGenerationRuntimeBinding]:
+    with ExitStack() as stack:
+        try:
+            if type(now_epoch) is not int or now_epoch <= 0:
+                raise ValueError("trusted_time_invalid")
+            repo = Path(repo_root).resolve()
+            runtime = validate_runtime_root_path(runtime_root, repo_root=repo)
+            packet_path = validate_runtime_artifact_path(
+                run_packet_path or runtime / "signer_service_run_packet.json",
+                repo_root=repo,
+                allowed_root=runtime,
+            )
+            packet_raw, _ = secure_read_confined_bytes(
+                packet_path,
+                allowed_root=runtime,
+                max_bytes=MAX_RUNTIME_ARTIFACT_BYTES,
+            )
+            packet = _mapping(packet_raw)
+            capability, boundary = load_system_service_manifest_selection(
+                owner_config_path=_required_absolute_path(
+                    packet.get("owner_authority_config_path")
+                ),
+                repo_root=repo,
+                config_path=_required_absolute_path(packet.get("config_path")),
+                run_packet_path=packet_path,
+            )
+            selection = stack.enter_context(boundary._lease_current(capability))
+            values = _validated_values(
+                selection=selection,
+                packet=packet,
+                packet_path=packet_path,
+                packet_raw=packet_raw,
+                repo=repo,
+                runtime=runtime,
+                now_epoch=now_epoch,
+                signer_profile_id=signer_profile_id,
+            )
+            binding = _accepted_binding(values)
+        except Exception:
+            stack.close()
+            binding = SignerCurrentGenerationRuntimeBinding(
+                accepted=False,
+                rejection_reasons=(SIGNER_CURRENT_GENERATION_BINDING_REJECTED,),
+            )
+        yield binding
 
 
 def _validated_values(
