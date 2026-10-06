@@ -1,3 +1,21 @@
+## Startup fixture cleanup discrimination — 2026-10-06
+
+Hosted PR2078 at41cf91cfe:667passed/3skipped/1failed; the failing negative
+materializer test lost only setup SQLite WAL/SHM sidecars. Forced collection
+reproduces that exact signature on unchanged source; settling setup finalizers
+before the inventory snapshot passes the matched control. Add test-only
+`gc.collect()` after fixture construction, preserving all83 assertion ASTs,
+parameterization, no-secret/no-RPC checks, target bytes and full inventory equality.
+Five focused cases pass (pytest XML7.129s; runner8.031s); repaired forced-collection
+probe also passes. No production edits or inventory filtering. This does not
+explain the separate historical positive credential rejection. Hosted GC timing
+was not traced; reproduction establishes fixture sensitivity, not a directly
+observed hosted cause. Evidence: `outputs/rsi-permission-evidence-20261006/`
+`startup-fixture-sqlite-cleanup-review.json`, SHA256
+`9ce36ec07109cdb69773b68d87fc7710747cf08772f1abb52e869f927ac1f685`.
+WSP15/97: close existing startup slice before blocked native worker wiring.
+Remote verification of this repair and native RSI remain pending.
+
 ## Authenticated public startup continuation — 2026-10-06
 
 Actual OS trial231947 passes at `50008b241` in34.012s. Synthetic authority only;

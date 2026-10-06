@@ -953,10 +953,13 @@ def test_system_service_dependencies_compose_existing_provisioned_stores(tmp_pat
 
 @pytest.mark.parametrize("missing", ["nonce", "high_water", "unprovisioned_high_water"])
 def test_system_service_dependencies_reject_unprovisioned_replay_without_secret_reads(tmp_path, monkeypatch, missing):
+    import gc
     import sqlite3
     from modules.communication.moltbot_bridge.src import foundup_verified_outcome_root_runtime_materializer as materializer
 
     values, owner, binding, replay, events, reads, active = _startup_materializer_case(tmp_path, monkeypatch)
+    # Settle setup-only SQLite finalizers before measuring materializer effects.
+    gc.collect()
     if missing == "nonce":
         replay.nonce_path.unlink()
     elif missing == "high_water":
