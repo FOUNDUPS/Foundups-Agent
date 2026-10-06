@@ -1,3 +1,11 @@
+## Reviewer artifact verification — 2026-10-07
+
+Reuse `ReviewerRuntimeArtifacts` and `ModelRuntimeReviewerEvidenceResolver` from
+the existing runtime verifier bootstrap with current-effect review verification.
+See [INTERFACE](INTERFACE.md#reviewer-runtime-artifact-adapter--2026-10-07) for
+trusted-input requirements. Local composition is validated with test authority;
+production reviewer execution and native RSI are not established.
+
 ## Separate protected-use control proof — 2026-10-05
 
 **Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.

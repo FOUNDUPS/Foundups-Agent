@@ -12,7 +12,15 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — runtime evidence before effect permission (2026-10-07 JST):**
+**Current execution — publish reviewer artifact composition (2026-10-07 JST):**
+The existing bootstrap now supplies a concrete runtime resolver: reverify signed
+artifacts, consume exact capabilities, reject stale/mismatched evidence. Local502
+tests pass, including24 new controls. Independent source review found no blocker; publication pending.
+Test authority is synthetic; model-authored reviews/native RSI are not established.
+No paid model calls in this slice. After closure, re-observe the15/P1 single-target
+effect-permission prerequisite. Native18/P0 remains blocked as detailed below.
+
+**Historical selection — runtime evidence before effect permission:**
 PR2087 merged at `bbb975b4f20fec5981a85a971f55fd26e3c7c6e8`. Its checked head
 and main have identical tree `d10f4e91051009d5eb025ac80499a65ac58f5888`.
 Independent source review found no blocker;184 local tests and exact-head

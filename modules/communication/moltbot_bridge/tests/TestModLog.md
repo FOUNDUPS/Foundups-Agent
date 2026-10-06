@@ -1,3 +1,29 @@
+## Reviewer runtime artifact composition — 2026-10-07
+
+Independent review found no concrete blocker in the documented trusted-input
+boundary (`reviewer-artifact-independent-review.json`, SHA256
+`aaa7185e968a9ff91ec0cdbba538e4d732cd158ea538fa5af97404ce7976fc64`).
+Generated runtime manifest/pins verified:8 integrity cases pass in65.06s;
+test registry check passes at1692 files. Publication remains pending.
+
+New `test_reddog_reviewer_runtime_artifacts.py` covers the distinct artifact-to-review
+contract, reusing existing quorum/signature/model fixtures. Existing quorum tests
+already occupy the200-line structural limit; update inventory38->39 and registry.
+Initial18 cases failed for absent API. First implementation17/18 exposed expiry
+at the current instant; strict expiry and monotonic integer clocks repaired it.
+Connected502 cases pass in17.85s, including24 new cases plus existing reviewer,
+consensus, bootstrap integration and model binding security. CI explicitly lists
+all24 new IDs. Controls include both reviewers, receipt/model/signature mismatch,
+capability single-use/cleanup, later tampering and clock boundaries.
+
+Review signatures are disposable Ed25519; model signatures use the existing
+deterministic fixture verifier. Owner/lease seams are inert. These tests do not
+prove native authority, model authorship or retained benefit. First broad selection
+had2 collection errors (Linux fixture on Windows and missing gateway helper path).
+Corrected selection excludes the dedicated Linux fixture and adds that helper
+path; no assertion weakened. Evidence: existing20261006 directory,
+`reviewer-artifacts-connected2.xml`. WSP00/6/15/22/50/84/97.
+
 ## Effect issuer qualification — merged PR2087, 2026-10-07
 
 Publication headff1fdd504 passed CI37485625238/CodeQL37485619460;

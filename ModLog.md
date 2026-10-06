@@ -1,3 +1,11 @@
+## RSI reviewer runtime artifact connection — 2026-10-07 candidate
+
+WSP00/15/97: existing bootstrap now supplies reverified artifact evidence to the
+current-review contract, consuming exact capabilities. Local502 tests pass;
+24 new IDs join CI. Coordinator-authored source integration with synthetic model
+authority; no native RSI claim. No paid model calls or repeated candidate generation.
+Independent source review found no blocker; publication pending; module docs own API and test details.
+
 ## RSI provider handoff — 2026-10-06 (local candidate)
 
 WSP00/15/97 selects14/P1 after merged PR2083. Existing secret-grant provider

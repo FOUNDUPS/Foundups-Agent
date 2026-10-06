@@ -1,3 +1,18 @@
+## Reviewer runtime artifact connection — 2026-10-07 candidate
+
+Independent review found no concrete blocker in the documented trusted-input
+boundary (`reviewer-artifact-independent-review.json`, SHA256
+`aaa7185e968a9ff91ec0cdbba538e4d732cd158ea538fa5af97404ce7976fc64`).
+Generated runtime manifest/pins verified:8 integrity cases pass in65.06s;
+test registry check passes at1692 files. Publication remains pending.
+
+Extend existing verifier bootstrap with bounded reviewer resolver. Reverify exact
+artifacts and consume registered capabilities; preserve review signatures, roles,
+independence, expiry and no-permit boundaries. No new designation/store/orchestrator.
+Local502 cases pass;24 new IDs added to CI. Independent source review found no blocker; publication pending.
+Native trust enrollment/wiring and model authorship remain separate gates.
+See INTERFACE and tests/TestModLog. WSP00/6/15/22/50/84/97/99.
+
 ## Effect issuer publication — 2026-10-07
 
 PR2087 merged atbbb975b4f20fec5981a85a971f55fd26e3c7c6e8. Checked

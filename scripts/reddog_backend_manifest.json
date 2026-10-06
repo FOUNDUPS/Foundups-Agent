@@ -2023,7 +2023,7 @@
     "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py": "84015db0596f626e713c383f13a43b0ad7e3cc9343fb2dbf324373cec413b8e8",
     "modules/communication/moltbot_bridge/src/reddog_memex_snapshot_projection_supplier.py": "d8958c7215e5c81a5bdacd674d27bbdaae16e722b8b6c55c889a9a2d57128fe8",
     "modules/communication/moltbot_bridge/src/reddog_model_runtime_binding_query.py": "4971d4045aa3e31f2861c37fea139101770c0dcb65011de521a9ea604fddcb32",
-    "modules/communication/moltbot_bridge/src/reddog_model_runtime_verifier_bootstrap.py": "cb55dd600b0b6bc48bf790a99af5379893b40670d6bb689b391c06329b36b19e",
+    "modules/communication/moltbot_bridge/src/reddog_model_runtime_verifier_bootstrap.py": "bfed1ab9f6e854ef70a51faedf906ce0f707224b146bee6214a4ec02331047b9",
     "modules/communication/moltbot_bridge/src/reddog_openclaw_adapter_dryrun.py": "0d936130fbd60cd82b92abcf0a5159bb82060fe1ea11cd7c1a83150e6f845f15",
     "modules/communication/moltbot_bridge/src/reddog_openclaw_assurance_capacity.py": "6e6e4cffebddff2c2c2da7fdf7292bb86328b0e5f5d7239ac7c51b18ad5b9863",
     "modules/communication/moltbot_bridge/src/reddog_openclaw_gateway_artifact_provider.py": "b5aafa542d098c91170ae75474f1865667e66b5b0fb8dc2d42ccd19eb241ff92",

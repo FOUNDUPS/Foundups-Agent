@@ -1881,9 +1881,9 @@
   },
   "current_selection": {
     "observation_path": "current_observation.effect_runtime_provenance_20261007",
-    "base_commit": "bbb975b4f20fec5981a85a971f55fd26e3c7c6e8",
+    "base_commit": "a503f6615ba6f9cec2898c8fb275a384ca0bcce8",
     "selected_action": "Connect effect reviewer evidence to the existing authenticated model runtime verification owner before effect permit issuance",
-    "status": "source_retrieved_not_implemented",
+    "status": "implemented_locally_validated_independently_reviewed_publication_pending",
     "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1894,12 +1894,28 @@
     },
     "dispatchable": false,
     "execution_plane": "Owned source repair; no native runtime grant",
-    "next_action": "Reverify the runtime artifacts cited by the signed reviewer decision with the existing use-time verifier and consume its exact registered capability. No new identity designation schema; preserve consent, independence and no-permit boundaries",
+    "next_action": "Finish independent review and exact-source publication. Re-observe single-target effect permission15/P1; native admission18/P0 remains blocked.",
     "higher_priority_gates": [
         "Native RSI18/P0 requires legitimate verified model/runtime admission; known-root inputs absent, not whole-machine absence"
     ]
 },
   "current_observation": {
+    "reviewer_artifact_composition_20261007": {
+    "base_commit": "a503f6615ba6f9cec2898c8fb275a384ca0bcce8",
+    "truth": "Local composition validated; synthetic model authority, not native admission or execution provenance",
+    "tests": {
+        "passed": 502,
+        "new_cases": 24,
+        "seconds": 17.85,
+        "report": "outputs/rsi-permission-evidence-20261006/reviewer-artifacts-connected2.xml"
+    },
+    "paid_model_calls": 0,
+    "architect_token_cost": "not measured",
+    "review": "No concrete blocker; reviewer-artifact-independent-review.json SHA256 aaa7185e968a9ff91ec0cdbba538e4d732cd158ea538fa5af97404ce7976fc64",
+    "publication": "pending",
+    "next_gate": "Separate single-target effect permission; authentic enrollment/resident wiring outstanding",
+    "native_rsi_complete": false
+},
     "effect_runtime_provenance_20261007": {
     "source": "bbb975b4f20fec5981a85a971f55fd26e3c7c6e8",
     "wsp15": {
