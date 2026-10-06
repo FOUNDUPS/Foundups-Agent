@@ -1,3 +1,21 @@
+## Signer peer prerequisites — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97, selected15/P1: extend existing generation/owner
+loader and healthcheck. Optional process identity binds the same root-loaded
+owner ID to the current selection. Reuse existing socket UID/GID/root checks;
+forward supplied secret grants without silent bare-sign fallback. Append audit
+session/socket/epoch fields. No new module, authority enrollment or gate removal.
+
+Windows82 passed/5 skipped; Linux29 passed/0 skipped, including three real socket
+identity cases. Grant fixtures prove forwarding only, not grant authorization.
+Baseline4 missing-API failures and intermediate41pass/2 fixture failures/1skip
+remain recorded. Independent source review found no prerequisite blocker.
+Full fresh resident peer consumer remains open; native RSI unproven. Evidence:
+`outputs/rsi-permission-evidence-20261006/peer-preconditions-execution.json`.
+PR2092 main CI37525762999 and CodeQL37525764472 now both pass.
+No worker/provider retries; coordinator/reviewer cost remains unmeasured.
+Generated bindings1422; integrity8 passed, extension fast15 passed, registry1695/270 current.
+
 ## Principal connection closure / peer selection — 2026-10-07
 
 WSP00/15/22/50/97: PR2092 merged e3894546f, exact reviewed/main tree match.

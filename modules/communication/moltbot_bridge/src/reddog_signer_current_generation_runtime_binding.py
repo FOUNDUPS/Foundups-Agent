@@ -20,6 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_i
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
     load_system_service_manifest_selection,
+    load_system_service_signer_identity,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_rehydration import (
     rehydrate_signer_socket_service_runtime_config,
@@ -67,6 +68,8 @@ class SignerCurrentGenerationRuntimeBinding:
     no_repo_mutation_performed: bool = True
     no_holoindex_reindex_performed: bool = True
     principal_binding_digest: str | None = None
+    signer_uid: int | None = None
+    signer_gid: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -106,6 +109,7 @@ def verify_signer_current_generation_runtime_binding(
     signer_profile_id: str | None = None,
     principal_identity: Mapping[str, Any] | None = None,
     principal_work_authority: Mapping[str, Any] | None = None,
+    include_process_identity: bool = False,
 ) -> SignerCurrentGenerationRuntimeBinding:
     """Verify root-owned current selection against trusted time and bytes."""
     try:
@@ -113,6 +117,7 @@ def verify_signer_current_generation_runtime_binding(
             repo_root=repo_root, runtime_root=runtime_root, now_epoch=now_epoch,
             run_packet_path=run_packet_path, signer_profile_id=signer_profile_id,
             principal_identity=principal_identity, principal_work_authority=principal_work_authority,
+            include_process_identity=include_process_identity,
         ) as binding:
             return binding
     except Exception:
@@ -129,6 +134,7 @@ def _lease_current_generation_runtime_binding(
     signer_profile_id: str | None = None,
     principal_identity: Mapping[str, Any] | None = None,
     principal_work_authority: Mapping[str, Any] | None = None,
+    include_process_identity: bool = False,
 ) -> Iterator[SignerCurrentGenerationRuntimeBinding]:
     with ExitStack() as stack:
         try:
@@ -169,6 +175,8 @@ def _lease_current_generation_runtime_binding(
             if principal_identity is not None or principal_work_authority is not None:
                 values["principal_binding_digest"] = _validated_principal_digest(
                     repo, selection, principal_identity, principal_work_authority)
+            if include_process_identity is True:
+                values.update(_process_identity_values(repo, packet, selection))
             binding = _accepted_binding(values)
         except Exception:
             stack.close()
@@ -177,6 +185,13 @@ def _lease_current_generation_runtime_binding(
                 rejection_reasons=(SIGNER_CURRENT_GENERATION_BINDING_REJECTED,),
             )
         yield binding
+
+
+def _process_identity_values(repo, packet, selection):
+    uid, gid = load_system_service_signer_identity(
+        owner_config_path=_required_absolute_path(packet["owner_authority_config_path"]),
+        repo_root=repo, expected_owner_config_id=selection["owner_config_id"])
+    return {"signer_uid": uid, "signer_gid": gid}
 
 
 def _validated_principal_digest(repo, selection, identity, work_authority):

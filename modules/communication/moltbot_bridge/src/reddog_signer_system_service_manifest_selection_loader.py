@@ -229,11 +229,14 @@ def _verified_outcome_authority_from_owner(
 
 
 def load_system_service_signer_identity(
-    *, owner_config_path: Path | str, repo_root: Path
+    *, owner_config_path: Path | str, repo_root: Path,
+    expected_owner_config_id: str | None = None,
 ) -> tuple[int, int]:
-    """Load the exact root-authorized signer process identity."""
+    """Load process identity, optionally bound to the caller's selected owner."""
 
     owner = _load_owner_config(owner_config_path, repo=Path(repo_root).resolve())
+    if expected_owner_config_id is not None and expected_owner_config_id != owner["config_id"]:
+        raise RuntimeArtifactManifestError("signer_owner_selection_mismatch")
     return _signer_identity_from_owner(owner)
 
 

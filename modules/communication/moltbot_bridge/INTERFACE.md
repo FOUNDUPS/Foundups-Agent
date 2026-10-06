@@ -1,3 +1,23 @@
+## Peer healthcheck prerequisites — 2026-10-07
+
+`load_system_service_signer_identity` optionally accepts `expected_owner_config_id`;
+mismatch with the same loaded root owner rejects. Current-generation verifier
+option `include_process_identity=True` requires that binding and appends signer
+UID/GID to its audit result. Default callers keep generation-only behavior.
+
+Healthcheck accepts `expected_server_uid`, `expected_server_gid`,
+`trusted_socket_root` and `secret_access_grant_supplier(request)`. The existing
+socket client enforces OS identity; custom connectors cannot satisfy strict
+identity checks. A supplied grant callback must return a mapping; missing,
+throwing or invalid grants reject without falling back to bare signing. Omitted
+callback preserves legacy behavior. Actual grant authorization remains the signer.
+
+Successful audit results append session ID, socket-path digest, key epoch and
+`server_identity_verified`. These are diagnostic fields, not independently
+trusted provenance. Caller-supplied generation IDs or cached READY cannot satisfy
+a resident authorization gate. Fresh root-bound before/after verification remains
+unconnected; no existing missing-evidence reason is removed in this change.
+
 ## Principal use-time generation binding — 2026-10-07
 
 `verify_signer_current_generation_runtime_binding` and its use-time collector

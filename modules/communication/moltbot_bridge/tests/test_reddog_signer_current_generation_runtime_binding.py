@@ -498,3 +498,24 @@ def test_real_principal_evidence_matches_only_checked_work(tmp_path, monkeypatch
     assert evidence.principal_matches(identity, authority)
     authority["work_order_id"] = "another-work-order"
     assert not evidence.principal_matches(identity, authority)
+
+
+@pytest.mark.parametrize("case", ["current", "owner-rotated", "missing-v2-owner"])
+def test_generation_process_identity_is_bound_to_selected_owner(tmp_path, monkeypatch, case):
+    from unittest.mock import Mock
+    values = _fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    loader = Mock(return_value=(1234, 1235))
+    if case == "owner-rotated":
+        loader.side_effect = ValueError("signer_owner_selection_mismatch")
+    if case != "missing-v2-owner":
+        monkeypatch.setattr(binding_module, "load_system_service_signer_identity", loader)
+    result = verify_signer_current_generation_runtime_binding(
+        repo_root=harness.repo_root, runtime_root=harness.runtime_root, now_epoch=NOW,
+        include_process_identity=True)
+    assert result.accepted is (case == "current")
+    assert (result.signer_uid, result.signer_gid) == ((1234, 1235) if case == "current" else (None, None))
+    if case != "missing-v2-owner":
+        loader.assert_called_once_with(owner_config_path=values["owner_path"].resolve(),
+            repo_root=harness.repo_root.resolve(), expected_owner_config_id=json.loads(values["owner_path"].read_text("ascii"))["config_id"])
+    assert not result.authority_granted and not result.effect_capability_issued

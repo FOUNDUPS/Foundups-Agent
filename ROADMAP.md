@@ -16,7 +16,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 PR2092 merged at `e3894546f5328b61d0746f4baa3c4ed318392fb5`; reviewed/main trees
 match. Branch CI37524576983 passed, including320 startup and566 resident cases
 with1 skip; all four CodeQL analyses passed. Main CI37525762999 and
-CodeQL37525764472 are pending. Owned branch retired; verified recovery bundle
+CodeQL37525764472 both passed. Owned branch retired; verified recovery bundle
 preserved. Closure: `outputs/rsi-permission-evidence-20261006/principal-generation-2092-merge-closure.json`.
 
 One principal evidence gap is closed in source. Re-observation selects15/P1
@@ -25,7 +25,13 @@ resident use time. Current dependency construction supplies a socket client but
 no such evidence to the resolver. Bind current root-selected signer/profile,
 session, generation and requester; reject stale, replayed or substituted peers.
 A copied healthcheck result is insufficient. Preserve five other trust reasons.
-This next slice is SPECIFIED_NOT_IMPLEMENTED, not an executable runtime grant.
+Peer prerequisites are locally validated: exact selected-owner UID/GID projection,
+existing OS peer checks and grant-bearing challenge requests. Windows82pass/5skip;
+Linux29pass, including real kernel peer credentials; bounded independent review
+found no blocker. This is PARTIALLY_IMPLEMENTED: the before/after generation,
+requester and expiry connection remains unimplemented; all six reasons still hold.
+No runtime grant, autonomous repair or retained benefit is claimed. Evidence:
+`outputs/rsi-permission-evidence-20261006/peer-preconditions-execution.json`.
 
 Native18/P0 remains blocked: admitted local-agent improvement, independent fixed
 baseline/held-out validation, governed retention/rollback and later benefit remain

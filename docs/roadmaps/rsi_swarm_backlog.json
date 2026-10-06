@@ -1883,7 +1883,7 @@
     "observation_path": "current_observation.signer_peer_join_20261007",
     "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
     "selected_action": "Connect existing fresh signer-peer verification to resident use-time evidence",
-    "status": "SPECIFIED_NOT_IMPLEMENTED",
+    "status": "PARTIALLY_IMPLEMENTED",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1902,7 +1902,7 @@
   "current_observation": {
     "signer_peer_join_20261007": {
       "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
-      "truth": "SPECIFIED_NOT_IMPLEMENTED",
+      "truth": "PARTIALLY_IMPLEMENTED; prerequisites locally validated; resident consumer unconnected",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1930,7 +1930,25 @@
       ],
       "native_gate": "18/P0 remains blocked; actual admitted local-worker improvement, independent baseline comparison, retention and later benefit unproven",
       "retrieval": "Existing Holo owner root/head mismatch; exact-source fallback, not CURRENT index evidence",
-      "cost": "Deterministic checks first; paused rejected worker route; no paid fallback; coordinator usage unknown"
+      "cost": "Deterministic checks first; paused rejected worker route; no paid fallback; coordinator usage unknown",
+      "prerequisites": {
+        "windows": {
+          "passed": 82,
+          "skipped": 5,
+          "failed": 0
+        },
+        "linux": {
+          "passed": 29,
+          "skipped": 0,
+          "failed": 0
+        },
+        "review": "peer-prerequisite-independent-review.json",
+        "evidence": "outputs/rsi-permission-evidence-20261006/peer-preconditions-execution.json",
+        "remaining": "Fresh grant-compatible RPC, before/after generation and requester/expiry comparison; all six resident reasons remain",
+        "runtime_authority_changed": false,
+        "worker_calls": 0,
+        "coordinator_review_tokens": null
+      }
     },
     "principal_generation_join_20261007": {
       "base_commit": "6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd",
@@ -1987,7 +2005,12 @@
       },
       "merge_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
       "pr": 2092,
-      "closure_evidence": "outputs/rsi-permission-evidence-20261006/principal-generation-2092-merge-closure.json"
+      "closure_evidence": "outputs/rsi-permission-evidence-20261006/principal-generation-2092-merge-closure.json",
+      "main_checks": {
+        "ci": 37525762999,
+        "codeql": 37525764472,
+        "conclusion": "success"
+      }
     },
     "resident_effect_join_20261007": {
       "base_commit": "b7a0d996b5fe96133bd010015882730110bdde3a",

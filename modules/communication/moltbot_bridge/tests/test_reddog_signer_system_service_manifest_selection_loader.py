@@ -537,3 +537,23 @@ def _write_owner_config(tmp_path: Path, owner: dict[str, Any]) -> Path:
         encoding="ascii",
     )
     return owner_path
+
+
+@pytest.mark.parametrize("expected,accepted", [("sha256:" + "a" * 64, True),
+    ("sha256:" + "b" * 64, False), (True, False), ("", False)])
+def test_signer_process_identity_is_from_exact_selected_owner(tmp_path, monkeypatch, expected, accepted):
+    from unittest.mock import Mock
+    owner = {"config_id": "sha256:" + "a" * 64,
+             "verified_outcome_authority": {"signer_uid": 1234, "signer_gid": 1235}}
+    load = Mock(return_value=owner)
+    monkeypatch.setattr(loader_module, "_load_owner_config", load)
+    def resolve():
+        return loader_module.load_system_service_signer_identity(
+            owner_config_path=tmp_path / "owner.json", repo_root=tmp_path,
+            expected_owner_config_id=expected)
+    if accepted:
+        assert resolve() == (1234, 1235)
+    else:
+        with pytest.raises(RuntimeArtifactManifestError, match="signer_owner_selection_mismatch"):
+            resolve()
+    load.assert_called_once_with(tmp_path / "owner.json", repo=tmp_path.resolve())

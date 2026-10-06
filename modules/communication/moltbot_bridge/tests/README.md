@@ -1,3 +1,15 @@
+## Peer prerequisites — 2026-10-07
+
+Reuse owner-loader, current-generation binding, healthcheck and mutual-handshake
+suites. Windows82passed/5skipped; Linux healthcheck29passed/0skipped. Linux cases
+use real AF_UNIX/SO_PEERCRED with disposable signatures and synthetic signer
+audit fields. They establish OS peer rejection, not native signer enrollment.
+Grant tests establish forwarding/no fallback, not authorization of a real grant.
+Saved baseline/intermediate failures and exact commands are in the existing
+RSI evidence directory (`peer-preconditions-execution.json`). Linux source hashes
+were stable; test-only EOF guard was added after the Windows run started and is
+covered by the final Linux run. No unchanged connected-suite rerun required.
+
 ## Principal generation connection — 2026-10-07
 
 Existing current-generation runtime/use-time suites cover key/provider/identity,

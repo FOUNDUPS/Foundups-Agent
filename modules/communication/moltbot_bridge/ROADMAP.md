@@ -1,7 +1,17 @@
+## Peer prerequisite checkpoint — 2026-10-07
+
+Existing owner/process identity and grant-aware socket challenge paths are
+locally validated (Windows82/5skip, Linux29/0skip), independently source-reviewed.
+Six resident trust reasons remain. Next15/P1: use an authenticated grant and
+requester, verify generation before/after the fresh RPC without holding its
+admission fence across RPC, and compare exact session/profile/key/epoch/socket
+and trusted expiry. Preserve five unrelated gates; do not trust copied READY.
+This is a partial source checkpoint, not native admission or autonomous RSI.
+
 ## Current selection — signer peer connection, 2026-10-07
 
 PR2092 merged/main tree verified at e3894546f. Exact-head CI and CodeQL passed;
-main checks pending. Principal consumer locally100pass/1skip; source review
+main CI and CodeQL passed. Principal consumer locally100pass/1skip; source review
 cleared the snapshot race. Next15/P1: connect existing root-selected mutual peer
 verification at resident use time. Fresh current signer/session/generation and
 requester binding required; cached readiness is insufficient. Five other trust
