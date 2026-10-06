@@ -405,10 +405,9 @@ def _invalid_type_paths(value: Any) -> tuple[str, ...]:
 
 
 def _visit_type_paths(item: Any, path: str, field: str, found: list[str]) -> None:
-    if path == "proposal_verification_inputs":
-        return  # Exact bounded bundle validated before generic profile traversal.
-    if field == "m2m_envelope" and path in _M2M_PATHS:
-        return  # Complete JSON and nested policies checked before generic traversal.
+    if (path == "proposal_verification_inputs"
+            or (field == "m2m_envelope" and path in _M2M_PATHS)):
+        return  # Both exact subtrees are validated before generic traversal.
     if item is None:
         if not any(path.endswith(suffix) for suffix in _NULLABLE_RUNTIME_SUFFIXES):
             found.append(path)

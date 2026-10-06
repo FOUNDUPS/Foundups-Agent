@@ -1907,8 +1907,9 @@
         "priority": "P1"
       },
       "truth": "LOCAL_FIXTURE_VALIDATION_NOT_NATIVE_ADMISSION",
-      "connected_passed": 222,
+      "connected_passed": 229,
       "legacy_replay_baseline_failed": 1,
+      "first_hosted_ci": "702 passed, 3 skipped, 1 WSP62 function-bound failure; equivalent early-return repair locally229passed",
       "native_rsi_demonstrated": false,
       "worker_calls": 0,
       "paid_provider_calls": 0,

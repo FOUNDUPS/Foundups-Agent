@@ -21,9 +21,10 @@ not native enrollment or demonstrated RSI.
 Selected14/P1 (C2/I4/D4/impact4): preserve the signed proposal and Memex inputs
 that publication previously discarded. The existing profile artifact now retains
 bounded detached evidence; the existing verifier can recheck it with explicitly
-supplied current trust/time. Local connected222pass; independent review found a
+supplied current trust/time. Local connected229pass including structural bounds; independent review found a
 legacy-replay regression, reproduced and repaired without rewriting old artifacts.
-Publication pending. Evidence: module ModLog and
+PR2097 CI found a61-line function against the60-line limit; repaired with unchanged
+semantics and local229pass. Revised hosted checks pending. Evidence: module ModLog and
 `outputs/rsi-permission-evidence-20261006/memex-retention-execution.json`.
 
 No worker/provider calls, effect permission or resident trust reason is

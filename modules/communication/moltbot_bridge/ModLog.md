@@ -30,6 +30,12 @@ retained benefit remain outstanding. No local-model or paid-provider calls;
 coordinator/review usage unmeasured. Evidence:
 `outputs/rsi-permission-evidence-20261006/memex-retention-execution.json`.
 
+PR2097 first CI37543877695 passed702/3skip but failed the existing60-line WSP62
+bound: `_visit_type_paths` had61 lines. Combined equivalent early returns without
+changing the bound or allowed paths; independent delta review found no issue.
+Revalidated all six connected suites plus the missed structural suite:229pass48.02s.
+Revised manifest integrity8pass63.36s; extension15pass8.738s. Hosted retry pending.
+
 ## Current-generation model consumption — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
