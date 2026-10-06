@@ -1,3 +1,24 @@
+## Reviewer runtime artifact adapter — 2026-10-07
+
+The existing verifier bootstrap now exports `ReviewerRuntimeArtifacts(model_id,
+selection, binding, verifier)` and `ModelRuntimeReviewerEvidenceResolver(records)`.
+Supply up to eight principal-ID-keyed records, with independently trusted
+`ModelRuntimeBindingUseTimeVerifier` instances from the existing bootstrap.
+Pass the resolver to current-effect reviewer verification. Its existing
+`resolve(principal_id, selection_receipt_id, runtime_binding_receipt_id)` contract
+returns frozen `ReviewerRuntimeEvidence` or `None`. Each lookup snapshots the
+artifact pair, reverifies model evidence and consumes its exact registered
+capability. Missing/mismatched artifacts, unqualified models, invalid signatures,
+expired/noninteger/backward clocks or failed consumption reject. Capabilities
+are discarded on exit. Later lookups reverify.
+
+The composition owner must authenticate verifier configuration/trust roots.
+This adapter does not authenticate arbitrary supplied trust configuration, prove
+model authorship, issue a permit or enroll a runtime. Current review verification
+still checks signed principal/model/receipt association, roles and independence,
+then rechecks retained evidence and expiry. It does not hold an immutable model
+source lease or detect every transient change. Native wiring remains outstanding.
+
 ## Effect issuer grant handoff — merged PR2087, 2026-10-07
 
 `AuthoritativeUseLeaseGrantProvider` now requires `issue_grant(request) -> Mapping`.

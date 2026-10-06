@@ -1,3 +1,11 @@
+## Reviewer artifact composition — 2026-10-07 candidate
+
+Selected15/P1 adapter is implemented and locally validated (502 cases). Independent source review found no blocker; finish exact-source publication. Then re-observe the15/P1
+single-target effect-permission prerequisite; do not widen the delegated
+two-child permit. Native18/P0 still requires authentic admission, resident
+wiring, independent worker evaluation, retention/rollback and later benefit.
+See root roadmap/current backlog. Prior entries are historical checkpoints.
+
 ## Effect issuer handoff closed — 2026-10-07
 
 PR2087 merged atbbb975b4f; merged and checked trees match. Exact-head
