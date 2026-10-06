@@ -12,45 +12,33 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — principal generation evidence (2026-10-07):**
-PR2091 is merged at `6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd`; main and reviewed
-file trees match. Exact-head CI37520547883 passed, including566 resident cases
-and1 skip. Two Linux-only stale fixtures were repaired and independently reviewed;
-local focused pair2/2 passed. Main CI37521571358 passed (resident566/1skip,30.04s).
-Main CodeQL37521571956 failed in Actions result upload; cause unknown and
-GitHub rejects retry of this generated workflow. Other three language jobs passed.
-Owned branch retired with a verified recovery bundle; shared owners untouched.
-Closure: `outputs/rsi-permission-evidence-20261006/resident-join-2091-merge-closure.json`.
+**Current selection — signer peer evidence (2026-10-07):**
+PR2092 merged at `e3894546f5328b61d0746f4baa3c4ed318392fb5`; reviewed/main trees
+match. Branch CI37524576983 passed, including320 startup and566 resident cases
+with1 skip; all four CodeQL analyses passed. Main CI37525762999 and
+CodeQL37525764472 are pending. Owned branch retired; verified recovery bundle
+preserved. Closure: `outputs/rsi-permission-evidence-20261006/principal-generation-2092-merge-closure.json`.
 
-Re-observation: configuration alone cannot open the resident valve. The resolver
-still unconditionally retains seven non-generation trust reasons. Existing
-signed-generation principal artifact verification can be reused for one of them.
-Next15/P1 (C3/I4/D4/impact4): connect that verifier to the resident principal/key
-attestation check, binding the actual identity, key and scope to the current
-root-selected generation. Preserve the other six checks. No new authority store,
-caller-declared trust flag or runtime enrollment. This source connection is now
-locally fixture-validated:100pass/1skip, independent source recheck after repairing
-a mutable-input race. Publication pending; native authority remains unproven.
-The15 supersedes the earlier14/P1 simple configuration estimate for this narrower
-security-sensitive connection; authentic runtime provisioning remains separate.
+One principal evidence gap is closed in source. Re-observation selects15/P1
+(C3/I4/D4/impact4): reuse the existing mutual signer-peer challenge verifier at
+resident use time. Current dependency construction supplies a socket client but
+no such evidence to the resolver. Bind current root-selected signer/profile,
+session, generation and requester; reject stale, replayed or substituted peers.
+A copied healthcheck result is insufficient. Preserve five other trust reasons.
+This next slice is SPECIFIED_NOT_IMPLEMENTED, not an executable runtime grant.
 
 Native18/P0 remains blocked: admitted local-agent improvement, independent fixed
-baseline/held-out validation, governed retention/rollback and later benefit are
-unproven. The connected source fixtures establish none of those by themselves.
-Local Linux broader run86pass/14fail remains failed evidence:12 missing-pip
-main-import cases and2 unchanged socket unit cases require separate triage.
-Holo authority-root/head mismatch remains unresolved; exact-source reads are a
-bounded navigation fallback, not CURRENT index evidence. Reuse saved receipts;
-no further local-worker/OpenRouter retries. Codex architecture/review cost is
-unmeasured. See the existing backlog's principal-generation observation.
+baseline/held-out validation, governed retention/rollback and later benefit remain
+unproven. Local Linux86/14 historical failed broad run remains recorded debt.
+Holo authority-root/head mismatch persists; exact-source reads are a bounded
+navigation fallback, not CURRENT index evidence.
 
 **Coordination cost discipline:** reuse source-bound receipts and deterministic
-checks; repeat audits or tests only after relevant changes or new failures.
-One concrete blocker per bounded source pass; review only its changed surface.
-No inference loop for unchanged CI/runtime state, no rejected-worker retry or
-automatic paid-provider fallback. Record coordinator, local-worker and external
-provider usage separately; unknown cost is not zero. This is a planning rule,
-not an installed autonomous scheduler or permission to bypass runtime admission.
+checks; repeat audits/tests only after relevant changes or new failures. One
+concrete blocker per bounded source pass; review only its changed surface. No
+inference loop for unchanged state, rejected-worker retry or automatic paid
+fallback. Record coordinator, local-worker and provider usage separately; unknown
+is not zero. This planning rule is not a new autonomous scheduler.
 
 **Historical execution — single-effect grant composition (2026-10-07 JST):**
 PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;

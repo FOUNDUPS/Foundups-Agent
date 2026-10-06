@@ -1,15 +1,12 @@
-## Current selection — principal generation connection, 2026-10-07
+## Current selection — signer peer connection, 2026-10-07
 
-PR2091 merged/main tree verified at6ad4ee360; branch CI37520547883 passed566/1skip.
-Main CI37521571358 passed566/1skip; generated CodeQL Actions check failed
-during result upload, cause unknown/retry unavailable. Native RSI remains unproven. Next15/P1 (3/4/4/4):
-reuse the existing root-selected principal artifact verifier at the resident
-principal/key gate, with exact identity/key/scope/current-generation binding.
-Other six non-generation reasons remain enforced; no enrollment or new store.
-See root ROADMAP and canonical backlog for source evidence, failed local Linux
-broad-run debt, closure receipt and acceptance. Source connection now100pass/1skip with independent
-source recheck after snapshot-race repair. Publication pending; native admission
-and later retained improvement remain unproven.
+PR2092 merged/main tree verified at e3894546f. Exact-head CI and CodeQL passed;
+main checks pending. Principal consumer locally100pass/1skip; source review
+cleared the snapshot race. Next15/P1: connect existing root-selected mutual peer
+verification at resident use time. Fresh current signer/session/generation and
+requester binding required; cached readiness is insufficient. Five other trust
+checks remain. Source work does not provision native runtime authority.
+See root ROADMAP and canonical backlog for evidence/limits. Native RSI unproven.
 
 ## Single-effect grant composition — 2026-10-07 checkpoint
 
