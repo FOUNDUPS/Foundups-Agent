@@ -36,6 +36,13 @@ changing the bound or allowed paths; independent delta review found no issue.
 Revalidated all six connected suites plus the missed structural suite:229pass48.02s.
 Revised manifest integrity8pass63.36s; extension15pass8.738s. Hosted retry pending.
 
+Second hosted CI37545061909 passed the size/signing gate, then startup reported
+588pass/1skip/28 main-entry failures because ChromaDB was not installed yet.
+Moved only the main-bootstrap suite after the existing pinned ChromaDB install
+in resident-chain tests. All six suites remain selected exactly once; YAML and
+ordering checks passed, independent delta review found no issue. No runtime or
+dependency changes; third hosted run pending. Do not repeat unchanged local tests.
+
 ## Current-generation model consumption — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).

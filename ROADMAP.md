@@ -24,7 +24,9 @@ bounded detached evidence; the existing verifier can recheck it with explicitly
 supplied current trust/time. Local connected229pass including structural bounds; independent review found a
 legacy-replay regression, reproduced and repaired without rewriting old artifacts.
 PR2097 CI found a61-line function against the60-line limit; repaired with unchanged
-semantics and local229pass. Revised hosted checks pending. Evidence: module ModLog and
+semantics and local229pass. Second CI found main-entry tests ran before the existing
+ChromaDB install; suite moved after it with all coverage retained. Hosted retry
+pending. Evidence: module ModLog and
 `outputs/rsi-permission-evidence-20261006/memex-retention-execution.json`.
 
 No worker/provider calls, effect permission or resident trust reason is
