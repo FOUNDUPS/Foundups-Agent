@@ -1,3 +1,11 @@
+## Model input authority checkpoint — 2026-10-07
+
+Protected owner v8 supply is locally qualified; current-generation resident
+consumption and native admission remain pending. See INTERFACE/ModLog and
+`tests/test_reddog_signer_system_service_startup_authority.py` for the existing
+API,22 input/lifetime controls,3 real-signature controls and v7/v8 startup compatibility. No model or
+provider calls are needed for these tests.
+
 ## Resident effect admission — 2026-10-07
 
 Existing resident bootstrap accepts an explicitly provisioned worktree lease

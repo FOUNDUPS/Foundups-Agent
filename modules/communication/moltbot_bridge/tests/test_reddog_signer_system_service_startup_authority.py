@@ -8,6 +8,10 @@ from pathlib import Path
 
 import pytest
 
+from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+    _real_model_evidence_signatures, _corrupt_model_evidence_signature,
+)
+
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_system_service_entrypoint import (
     CapturingBoundedService,
     CapturingResolverFactory,
@@ -33,6 +37,195 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signer_system_servic
     digest,
     loader_module,
 )
+
+
+def _model_input_owner_case(tmp_path, monkeypatch):
+    import time
+    from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_test_helpers import (
+        model_selection_and_runtime_binding_receipts, model_runtime_binding_test_verifier,
+    )
+    monkeypatch.setattr(time, "time", lambda: NOW)
+    values, owner, selected = _public_startup_artifacts(tmp_path)
+    _public_startup_owner(values, owner, selected, tmp_path, monkeypatch)
+    monkeypatch.setattr(loader_module, "_read_root_owned_bytes", lambda path, _root: path.read_bytes())
+    selection, binding = model_selection_and_runtime_binding_receipts(runtime_surface="reddog_artifact_generation")
+    verifier = model_runtime_binding_test_verifier(binding)
+    payloads = dict(catalog=verifier.catalog_snapshot,
+        benchmarks={"benchmark_evidence_receipts": verifier.benchmark_evidence_receipts},
+        promotions={"promotion_evidence_receipts": verifier.promotion_evidence_receipts},
+        evidence=verifier.verified_evidence_bundle, policy=verifier.runtime_policy,
+        trusted_keys=verifier.trusted_keys_payload)
+    inputs = {}
+    for name, payload in payloads.items():
+        path = Path(owner["runtime_root"]) / ("model-" + name + ".json")
+        raw = json.dumps(payload, sort_keys=True).encode("utf-8")
+        path.write_bytes(raw)
+        inputs[name] = {"path": str(path), "raw_digest": loader_module.raw_digest(raw)}
+    owner.update(schema_version="reddog_signer_system_service_owner_config.v8",
+                 model_verifier_authority=dict(issued_at=NOW - 1, expires_at=NOW + 30, inputs=inputs))
+    owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+    values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
+    values.update(model_selection=selection, model_binding=binding)
+    return values, owner, payloads
+
+
+@pytest.mark.parametrize("case", ["valid", "owner_id", "payload_changed", "missing", "extra", "relative", "duplicate_path", "expiry", "boolean_time"])
+def test_model_verifier_owner_inputs_are_exact_and_current(tmp_path, monkeypatch, case):
+    values, owner, payloads = _model_input_owner_case(tmp_path, monkeypatch)
+    authority = owner["model_verifier_authority"]
+    expected = owner["config_id"]
+    if case == "owner_id":
+        expected = "sha256:" + "0" * 64
+    elif case == "payload_changed":
+        Path(authority["inputs"]["policy"]["path"]).write_text("{}", encoding="ascii")
+    elif case == "missing":
+        authority["inputs"].pop("trusted_keys")
+    elif case == "extra":
+        authority["signature_verifier"] = "injected"
+    elif case == "relative":
+        authority["inputs"]["policy"]["path"] = "model-policy.json"
+    elif case == "duplicate_path":
+        authority["inputs"]["policy"] = authority["inputs"]["trusted_keys"]
+    elif case == "expiry":
+        authority["expires_at"] = NOW
+    elif case == "boolean_time":
+        authority["issued_at"] = True
+    if case not in {"valid", "owner_id", "payload_changed"}:
+        owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+        expected = owner["config_id"]
+        values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
+    def load():
+        return loader_module.load_system_service_model_runtime_verifier(
+            owner_config_path=values["owner_config_path"], repo_root=values["repo"],
+            expected_owner_config_id=expected, trusted_now_epoch=lambda: NOW)
+    if case != "valid":
+        with pytest.raises(ValueError):
+            load()
+        return
+    actual = load()
+    assert actual.catalog_snapshot == payloads["catalog"]
+    assert actual.runtime_policy == payloads["policy"]
+    assert type(actual.signature_verifier).__name__ == "Ed25519SignatureVerifier"
+    Path(authority["inputs"]["policy"]["path"]).write_text("{}", encoding="ascii")
+    assert actual.runtime_policy == payloads["policy"]  # Exact checked snapshot, no reread.
+
+
+@pytest.mark.parametrize("case", ["rotate_during_read", "expire_during_read", "rotate_after_load", "expire_after_load", "duplicate_json"])
+def test_model_verifier_owner_lifetime_and_exact_snapshot(tmp_path, monkeypatch, case):
+    values, owner, payloads = _model_input_owner_case(tmp_path, monkeypatch)
+    authority = owner["model_verifier_authority"]
+    now, reads = [NOW], []
+    def rotate():
+        owner["model_verifier_authority"]["expires_at"] -= 1
+        owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+        values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
+    if case == "duplicate_json":
+        item = authority["inputs"]["policy"]
+        raw = b'{"x":1,"x":2}'
+        Path(item["path"]).write_bytes(raw)
+        item["raw_digest"] = loader_module.raw_digest(raw)
+        owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+        values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
+    from modules.communication.moltbot_bridge.src import reddog_signer_system_service_owner_inputs as owner_inputs
+    checked_read = owner_inputs.secure_read_confined_bytes
+    def read(path, **kwargs):
+        result = checked_read(path, **kwargs)
+        reads.append(str(path))
+        if len(reads) == 6:
+            if case == "rotate_during_read":
+                rotate()
+            elif case == "expire_during_read":
+                now[0] = authority["expires_at"]
+        return result
+    monkeypatch.setattr(owner_inputs, "secure_read_confined_bytes", read)
+    def load():
+        return loader_module.load_system_service_model_runtime_verifier(
+            owner_config_path=values["owner_config_path"], repo_root=values["repo"],
+            expected_owner_config_id=owner["config_id"], trusted_now_epoch=lambda: now[0])
+    if case in {"rotate_during_read", "expire_during_read", "duplicate_json"}:
+        with pytest.raises(ValueError):
+            load()
+        return
+    actual = load()
+    assert len(reads) == len(set(reads)) == 6
+    assert actual.trusted_now_epoch() == NOW
+    if case == "rotate_after_load":
+        rotate()
+    else:
+        now[0] = authority["expires_at"]
+    with pytest.raises(ValueError):
+        actual.trusted_now_epoch()
+
+
+@pytest.mark.parametrize("case", ["catalog", "benchmarks", "promotions", "evidence", "policy", "trusted_keys", "expiry_in_owner_read", "backwards_in_owner_read"])
+def test_model_verifier_rechecks_memory_and_owner_read_time(tmp_path, monkeypatch, case):
+    values, owner, _ = _model_input_owner_case(tmp_path, monkeypatch)
+    now = [NOW]
+    actual = loader_module.load_system_service_model_runtime_verifier(
+        owner_config_path=values["owner_config_path"], repo_root=values["repo"],
+        expected_owner_config_id=owner["config_id"], trusted_now_epoch=lambda: now[0])
+    mappings = dict(catalog=actual.catalog_snapshot,
+        benchmarks=actual.benchmark_evidence_receipts[0], promotions=actual.promotion_evidence_receipts[0],
+        evidence=actual.verified_evidence_bundle, policy=actual.runtime_policy, trusted_keys=actual.trusted_keys_payload)
+    if case in mappings:
+        mappings[case]["changed_after_authenticated_read"] = True
+    else:
+        read_owner = loader_module._load_owner_config
+        def delayed(*args, **kwargs):
+            checked = read_owner(*args, **kwargs)
+            now[0] = owner["model_verifier_authority"]["expires_at"] if case == "expiry_in_owner_read" else NOW - 1
+            return checked
+        monkeypatch.setattr(loader_module, "_load_owner_config", delayed)
+    with pytest.raises(ValueError):
+        actual.trusted_now_epoch()
+
+
+@pytest.mark.parametrize("case", ["valid", "bad_signature", "wrong_trust_key"])
+def test_protected_model_inputs_execute_real_signature_verification(tmp_path, monkeypatch, case):
+    from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import (
+        verified_runtime_binding_receipt, consume_verified_runtime_binding_capability,
+        discard_verified_runtime_binding_capability,
+    )
+    _real_model_evidence_signatures(monkeypatch)
+    values, owner, payloads = _model_input_owner_case(tmp_path, monkeypatch)
+    if case != "valid":
+        name = "evidence" if case == "bad_signature" else "trusted_keys"
+        if case == "bad_signature":
+            _corrupt_model_evidence_signature(payloads[name])
+        else:
+            keys = payloads[name]["trusted_public_keys"]
+            keys[0]["public_key"] = keys[1]["public_key"]
+        raw = json.dumps(payloads[name], sort_keys=True).encode("utf-8")
+        item = owner["model_verifier_authority"]["inputs"][name]
+        Path(item["path"]).write_bytes(raw)
+        item["raw_digest"] = loader_module.raw_digest(raw)
+        owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+        values["owner_config_path"].write_text(json.dumps(owner), encoding="ascii")
+    verifier = loader_module.load_system_service_model_runtime_verifier(
+        owner_config_path=values["owner_config_path"], repo_root=values["repo"],
+        expected_owner_config_id=owner["config_id"], trusted_now_epoch=lambda: NOW)
+    args = dict(selection=values["model_selection"], binding=values["model_binding"])
+    backend_type = type(verifier.signature_verifier)
+    verify_signature, observed = backend_type.verify, []
+    def recording_verify(self, *arguments):
+        accepted = verify_signature(self, *arguments)
+        observed.append(accepted)
+        return accepted
+    monkeypatch.setattr(backend_type, "verify", recording_verify)
+    if case != "valid":
+        with pytest.raises(ValueError):
+            verifier.verify(**args)
+        if case == "bad_signature":
+            assert observed and False in observed
+        return
+    capability = verifier.verify(**args)
+    assert observed and all(observed)
+    try:
+        receipt = verified_runtime_binding_receipt(args["binding"])
+        assert consume_verified_runtime_binding_capability(capability, receipt=receipt, **args) == receipt
+        assert consume_verified_runtime_binding_capability(capability, receipt=receipt, **args) is None
+    finally:
+        discard_verified_runtime_binding_capability(capability)
 
 
 def test_legacy_e0_config_binding_retains_generation_alias_dependency(tmp_path):
@@ -392,7 +585,8 @@ def test_generation_capability_failure_rejects_before_resolver_or_service(
     assert service.calls == []
 
 
-def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, monkeypatch):
+@pytest.mark.parametrize("owner_version", [7, 8])
+def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, monkeypatch, owner_version):
     """Synthetic enrollment; only OS custody/isolation and transports substituted."""
     import time
     from types import SimpleNamespace
@@ -406,8 +600,11 @@ def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, 
     # Freeze that clock too; retain the real constructor/type and lifetime checks.
     constructor = credentials.SystemdCredentialSecretResolver.__init__
     monkeypatch.setattr(constructor, "__kwdefaults__", {**constructor.__kwdefaults__, "clock": lambda: NOW})
-    values, owner, selected = _public_startup_artifacts(tmp_path)
-    _public_startup_owner(values, owner, selected, tmp_path, monkeypatch)
+    if owner_version == 8:
+        values, owner, _ = _model_input_owner_case(tmp_path, monkeypatch)
+    else:
+        values, owner, selected = _public_startup_artifacts(tmp_path)
+        _public_startup_owner(values, owner, selected, tmp_path, monkeypatch)
     _public_startup_finalize(values, monkeypatch)
     operations = _public_startup_root_transport(values, monkeypatch)
     fixture = wf.factory_fixture.grant_fixture

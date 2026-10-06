@@ -1,3 +1,47 @@
+## Protected model verifier input supply — 2026-10-07
+
+Real-signature acceptance added before promotion: disposable Ed25519 keys feed
+the existing evidence fixtures; the protected loader's fixed production verifier
+accepts valid evidence, rejects a canonical record with an invalid signature at
+the real backend, and rejects a wrong trusted key. One-shot consumption/replay
+is checked. Strict3pass5.64s; final startup file38pass48.71s. Independent recheck
+confirms the crypto path. Root-file provenance remains a fixture seam; production
+runtime source and generated manifest were unchanged at that test-only checkpoint.
+
+CI then caught the existing 675-line source limit. The reviewed repair moves
+owner input loading into `reddog_signer_system_service_owner_inputs.py` within
+the existing module, preserving the public loader exports. The owner loader is
+668 lines and the extracted leaf108; the limit is unchanged. Moved crypto
+fixtures reuse the existing test helper. Connected extraction validation:
+90passed/1skip79.38s, including both structural suites. Review found no blocker.
+Generated runtime closure is now1423 files; final integrity results are recorded
+in the existing execution receipt: integrity8pass63.62s; extension15pass9.716s.
+No native admission claim.
+
+WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
+The existing protected owner loader adds v8, inheriting v1-v7 checks and binding
+six exact input paths/raw digests plus a maximum one-hour interval into config_id.
+It constructs the existing model verifier from the checked bytes, with fixed
+Ed25519 verification and no injected-verifier path. Each use checks in-memory
+input digests, current owner identity and strict time after owner-file IO.
+Adjacent consent/reviewer/grant/startup readers retain v7 behavior for v8.
+
+Independent review caught mutable snapshots and time sampled before owner IO.
+Eight regression cases fail on reconstructed pre-repair source; repaired connected
+validation97passed/3platform skips; adjacent compatibility128passed, including
+both v7/v8 public startup, grant signature and replay controls. OS custody and
+transport use existing test seams: this is source qualification, not enrollment.
+Review recheck found no remaining blocker. Evidence:
+`outputs/rsi-permission-evidence-20261006/model-owner-execution.json`.
+
+No resident gate clears in this slice. The caller must bind the expected owner ID
+to the current generation under its existing lease, then consume an actual model
+verification capability. Five resident trust reasons remain. Native worker,
+independent retained improvement and later benefit remain unproven. No local
+model or paid-provider call; coordinator/review cost is unmeasured. Initial generated closure was1422 files. Initial integrity7pass/1staging failure;
+corrected staged-manifest case1pass. Extension fast15pass; registrycurrent1695/270.
+Publication remains pending until recorded in the closure receipt.
+
 ## Peer connection closure / model clock guard — 2026-10-07
 
 WSP00/6/15/22/50/97: PR2093 merged ad1d673ff, exact reviewed/main tree equal;

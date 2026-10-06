@@ -1880,22 +1880,45 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.model_clock_20261007",
-    "base_commit": "ad1d673ffe86ab49b11d89a8bbd37a1d342930da",
-    "selected_action": "Reject coerced trusted time in existing model evidence verifier",
+    "observation_path": "current_observation.model_owner_20261007",
+    "base_commit": "84f1f963c595d0d4124b197f706579b4ff7464a6",
+    "selected_action": "Bind model verifier inputs to protected existing owner v8",
     "status": "LOCALLY_VALIDATED_PUBLICATION_PENDING",
     "wsp15": {
-      "complexity": 2,
+      "complexity": 3,
       "importance": 4,
       "deferability": 4,
-      "impact": 3,
-      "total": 13,
+      "impact": 4,
+      "total": 15,
       "priority": "P1"
     },
     "dispatchable": false,
-    "next_action": "Close reviewed clock repair; then connect existing model evidence to authenticated runtime supply, without minting trust from caller configuration"
+    "next_action": "Close reviewed supply; bind current owner/generation and consume model proof before clearing model trust reasons"
   },
   "current_observation": {
+    "model_owner_20261007": {
+      "base_commit": "84f1f963c595d0d4124b197f706579b4ff7464a6",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "truth": "LOCAL_FIXTURE_VALIDATION_NOT_NATIVE_ADMISSION",
+      "baseline_review_failures": 8,
+      "connected_passed": 97,
+      "connected_skipped": 3,
+      "adjacent_passed": 128,
+      "real_signature_passed": 3,
+      "final_startup_passed": 38,
+      "evidence": "outputs/rsi-permission-evidence-20261006/model-owner-execution.json",
+      "remaining_trust_reasons": 5,
+      "native_rsi_demonstrated": false,
+      "worker_calls": 0,
+      "coordinator_review_tokens": null
+    },
     "model_clock_20261007": {
       "base_commit": "ad1d673ffe86ab49b11d89a8bbd37a1d342930da",
       "wsp15": {
@@ -1917,7 +1940,10 @@
       "blocked_upstream": "AI Gateway roadmap leaves production signer/trust/revocation/replay setup open; actual current provisioning still requires verification; no independent current binding to resident model inputs established",
       "native_rsi_demonstrated": false,
       "worker_calls": 0,
-      "coordinator_review_tokens": null
+      "coordinator_review_tokens": null,
+      "merge_commit": "84f1f963c595d0d4124b197f706579b4ff7464a6",
+      "main_ci": "success",
+      "main_codeql": "success"
     },
     "signer_peer_join_20261007": {
       "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",

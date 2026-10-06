@@ -67,7 +67,7 @@ class CurrentEffectSigningAuthority:
             frozen, context, parent, target = snapshot_effect_consensus_proof(proof)
             repo = Path(self.repo_root).resolve()
             owner = reviews.loader._load_owner_config(self.owner_config_path, repo=repo)
-            if owner["schema_version"] != reviews.loader.SCHEMA_VERSION_V7:
+            if owner["schema_version"] not in {reviews.loader.SCHEMA_VERSION_V7, reviews.loader.SCHEMA_VERSION_V8}:
                 return None
             selected, boundary = reviews.loader._manifest_selection_from_owner(owner, repo=repo)
             with boundary._lease_current(selected) as selection:
