@@ -39,7 +39,7 @@ held-wait reaches its diagnostic deadline; release-before-call control completes
 All four children exit0 and owned cleanup completes in1.140s. This is synthetic
 topology evidence, not an executed permit-qualified issuer or a proposed lock
 relaxation. Evidence: `outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json`.
-The13/P1 prerequisite remains open for a contract-preserving composition repair;
+The completed13/P1 probe leads to a14/P1 contract reconciliation (C3/I4/D4/impact3);
 close startup publication against fresh main before dependent implementation.
 
 PR2075 is merged at `a3def2a83`; exact-main CI37376433116 and
