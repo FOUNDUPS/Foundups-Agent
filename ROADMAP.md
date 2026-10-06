@@ -18,7 +18,9 @@ fixed effect-issuer repair; retry budget is exhausted (experiment/policy in
 draft PR2085). WSP15 selects the executable prerequisite15/P1,C3/I4/D4/impact4:
 reuse issue_grant in the existing effect issuer and dispatch after provider exit.
 Coordinator repair passes80 connected tests; the four frozen controls improve
-from3fail/1pass to4pass. Independent review/publication remain open. This is a
+from3fail/1pass to4pass. Independent source review found no blocker; reviewed
+head46e9eb816 passed CI/CodeQL. PR2087 now reconciles mainb91823b28 (PR2086),
+preserving its host recovery work; refreshed hosted validation is pending. This is a
 source prerequisite, not an autonomous retained improvement. Native18/P0 still
 requires effect-specific HIGH/ULTRA permits, authentic runtime inputs and resolver
 wiring, then independent baseline-controlled evaluation and later retained use.

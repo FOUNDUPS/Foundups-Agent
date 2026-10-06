@@ -6,27 +6,30 @@ prerequisite instead of spending more calls. Frozen ordering/failure tests remai
 unchanged: baseline3fail/1pass, repaired4/4. Connected80pass in15.24s. Update
 existing inert issuance tests for provider exit before signing, including target
 interrupt propagation regardless of the exited provider's suppression setting.
-No new owner/module or runtime grant. Independent review unavailable; no native
+No new owner/module or runtime grant. Independent review found no blocker; no native
 worker success or retained RSI benefit claimed. Evidence: existing
 `outputs/rsi-permission-evidence-20261006/effect-issuer-*` and frozen
 `effect-handoff-*` inputs. Holo lexical bundle has unknown semantic freshness and
 index gap; exact-source docs/tests supply this bounded review, not semantic proof.
 Additional boundary104pass in5.32s; total184 local cases. Existing manifest
-check passes unchanged; issuer outside its1419-file closure. Publication and
-independent review remain separate gates.
+check passes unchanged; issuer outside its1419-file closure. Reviewed head46e9eb816
+passed CI37483954789 and CodeQL37483627186. Main advanced through PR2086;
+preserve its host recovery entry and refresh hosted validation after reconciliation.
+Review receipt: `effect-issuer-independent-review.json`, SHA256
+`da3f2520f817854bcd1c04b8654ab37d2a58576bbe3abb0a70dda07d726a3874`.
+
+## Public host recovery salvage — 2026-10-06
+
+WSP00/5/6/10/15/22/34/50/62/97:14/P1 (C3/I4/D4/impact3), base2837b0db3. Salvage #1680 host leases; fence unconfigured recovery, legacy completion and absent lease proof; preserve Lick/quotas.210tests pass,95% coverage; hosted/main gates pending. No activation/provider-death proof. [Audit](../../../docs/audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md).
 
 ## Provider issuance handoff — 2026-10-06 (historical PR2084)
 
-WSP00/15/97: PR2083 prerequisite merged at4e00032cf with exact-main CI success.
-Select14/P1 (C2/I4/D4/impact4). Independent frozen regression completes the
-synthetic HIGH chain then fails because both target calls hold the provider
-lease. Reuse the existing provider lease in `issue_grant`; return only after
-successful exit. Existing consensus client dispatches afterward. Legacy lease,
-one-use permit checks, provider independence and target admission are preserved.
-No new module or runtime authority. Manual coordinator repair is necessary
-while legitimate model/runtime admission is unverified; this is not a local-agent
-RSI success. Independent source review found no concrete defect in the delta.
-Initial36pass; expanded91pass in24.49s including clean/failed lease exit controls.
+WSP00/15/97: PR2083 prerequisite merged at4e00032cf with exact-main CI success. Select14/P1 (C2/I4/D4/impact4).
+Independent frozen regression completes the synthetic HIGH chain then fails because both target calls hold the provider lease.
+Reuse the existing provider lease in `issue_grant`; return only after successful exit. Existing consensus client dispatches afterward.
+Legacy lease, one-use permit checks, provider independence and target admission are preserved. No new module or runtime authority.
+Manual coordinator repair is necessary while legitimate model/runtime admission is unverified; this is not a local-agent RSI success.
+Independent source review found no concrete defect. Initial36pass; expanded91pass in24.49s including clean/failed lease exit controls.
 Final adapter controls pass; connected94/94 in26.13s. Integrity8/8 passed in63.61s; publication pending.
 Evidence: `outputs/rsi-permission-evidence-20261006/provider-handoff-*`.
 

@@ -9,7 +9,8 @@ issue_grant to the existing synthetic provider fixture. Migrate the existing
 interface; preserve all prior test identifiers, replay checks and interrupt
 coverage. Four connected suites80pass in15.24s; synthetic grants are not native
 effect authority. Local Qwen candidate failed these controls; this repair is
-coordinator-authored, independently unreviewed. Evidence: `effect-issuer-connected.xml`
+coordinator-authored. Independent source review of46e9eb816 found no blocker;
+CI37483954789 and CodeQL37483627186 passed. Evidence: `effect-issuer-connected.xml`
 and `effect-handoff-baseline2.xml` in the existing20261006 evidence directory.
 Additional consent/sovereign/structure104pass in5.32s (184 total). Existing
 manifest --check passes unchanged at1419 files; issuer is outside that runtime

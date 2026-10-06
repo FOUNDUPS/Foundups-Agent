@@ -1881,9 +1881,9 @@
   },
   "current_selection": {
       "observation_path": "current_observation.effect_issuer_handoff_20261006",
-      "base_commit": "2837b0db389c567de9a5402e22fa711affcf176d",
+      "base_commit": "b91823b2867fc117aee153a4d0f6cdaa14bc078c",
       "selected_action": "Use completed provider handoff in existing effect issuer; no signing before clean issuance exit",
-      "status": "locally_tested_independent_review_pending",
+      "status": "independently_reviewed_reconciling_concurrent_main",
       "wsp15": {
           "complexity": 3,
           "importance": 4,
@@ -1894,7 +1894,7 @@
       },
       "dispatchable": false,
       "execution_plane": "Owned source repair; no native runtime grant",
-      "next_action": "Obtain independent review of184 local passes, then reconcile effect-specific permit compatibility before native dependency wiring; no extra model retries",
+      "next_action": "Verify reconciled PR2087 head through hosted gates; effect-specific permit compatibility precedes native dependency wiring; no extra model retries",
       "higher_priority_gates": ["Native RSI18/P0 requires legitimate verified model/runtime admission; known-root inputs absent, not whole-machine absence"]
   },
   "current_observation": {
@@ -1902,7 +1902,9 @@
       "source": "2837b0db389c567de9a5402e22fa711affcf176d",
       "branch": "agent/rsi-effect-issuer-handoff-20261006",
       "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
-      "status": "coordinator_repair_locally_tested_independent_review_pending",
+      "status": "coordinator_repair_independently_reviewed_reconciling_concurrent_main",
+      "independent_review": "46e9eb816 reviewed, no concrete blocker; effect-issuer-independent-review.json SHA256 da3f2520f817854bcd1c04b8654ab37d2a58576bbe3abb0a70dda07d726a3874",
+      "hosted_validation": "Reviewed head46e9eb816: CI37483954789 and CodeQL37483627186 success. Mainb91823b28 arrived via PR2086; refresh after preserving both ModLog entries. No native RSI claim.",
       "reason": "Existing issuer still called target while holding provider lease; local proposals failed, so use the permitted coordinator exception without more model retries",
       "baseline": "Frozen four controls: three failures, one pass",
       "candidate": "Same four controls pass; connected80pass in15.24s plus104 boundary passes in5.32s;184 total",
