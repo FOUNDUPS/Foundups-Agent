@@ -5,9 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import socket
-import tempfile
 import threading
-import uuid
 from pathlib import Path
 from typing import Mapping
 from unittest.mock import patch
@@ -51,9 +49,9 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
 )
-from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_service import (
-    SIGNER_SOCKET_SERVICE_SERVED,
-    serve_reddog_isolated_signer_socket_once,
+from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_resident_service import (
+    SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
+    serve_reddog_isolated_signer_socket_bounded,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -1622,10 +1620,6 @@ def _ed25519_signing_material_with_socket_backend():
     )
 
 
-def _outside_repo_socket_path() -> Path:
-    return Path(tempfile.gettempdir()) / f"rdog-{uuid.uuid4().hex}.sock"
-
-
 def _ratchet_model_runtime_inputs(principal_public, reddog_public, overrides):
     with patch(
         "modules.ai_intelligence.ai_gateway.tests."
@@ -1996,11 +1990,13 @@ def test_bootstrap_serial_loop_verifies_ed25519_authority_when_configured(
 
 
 def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
-    tmp_path: Path,
+    tmp_path_factory,
 ) -> None:
     if not hasattr(socket, "AF_UNIX"):
         pytest.skip("AF_UNIX sockets are unavailable in this Python build")
 
+    # Keep the socket confined to its runtime root and below AF_UNIX path limits.
+    tmp_path = tmp_path_factory.mktemp("resident-socket")
     repo = _repo(tmp_path)
     principal_public, reddog_public, backend = (
         _ed25519_signing_material_with_socket_backend()
@@ -2019,21 +2015,22 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
     )
     chain = tmp_path / "runtime" / "chain_results.json"
     authority_state = tmp_path / "runtime" / "authority_state.json"
-    socket_path = _outside_repo_socket_path()
+    socket_path = tmp_path / "runtime" / "signer.sock"
     ready = threading.Event()
     service_result: dict[str, object] = {}
 
-    def serve_once() -> None:
-        service_result["result"] = serve_reddog_isolated_signer_socket_once(
+    def serve_pair() -> None:
+        service_result["result"] = serve_reddog_isolated_signer_socket_bounded(
             repo_root=repo,
             socket_path=socket_path,
             backend=backend,
             peer_attestor=_StaticSocketPeerAttestor(),
+            max_requests=2,
             timeout_s=5.0,
             ready_callback=ready.set,
         )
 
-    thread = threading.Thread(target=serve_once, daemon=True)
+    thread = threading.Thread(target=serve_pair, daemon=True)
     thread.start()
     assert ready.wait(5.0)
 
@@ -2042,6 +2039,7 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
         work_state_path=state,
         chain_results_path=chain,
         authority_profile_path=profile,
+        work_order_materializer_mode="authority_profile",
         authority_state_path=authority_state,
         permission_snapshots_path=snapshots,
         principal_authority_records_path=principals,
@@ -2058,9 +2056,10 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
 
     assert thread.is_alive() is False
     served = service_result["result"]
-    assert served.accepted is True
-    assert served.status == SIGNER_SOCKET_SERVICE_SERVED
-    assert served.request_handled is True
+    assert served.accepted is True, (served.rejection_reasons, result.rejection_reasons)
+    assert served.status == SIGNER_SOCKET_RESIDENT_SERVICE_SERVED
+    assert served.requests_handled == 2
+    assert len(served.response_digests) == 2
     assert served.socket_removed is True
     assert served.no_private_key_loaded is True
     assert served.no_repo_mutation_performed is True
@@ -2092,7 +2091,9 @@ def test_bootstrap_serial_loop_verifies_authority_via_real_socket_service(
     assert verification["decision"] == "QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT"
     assert verification["verification_result"]["accepted"] is True
     authority = json.loads(authority_state.read_text(encoding="utf-8"))
-    assert authority["verified_work_authority_nonces"] == ["workauth-nonce-0001"]
+    # Queue verification is preflight; only authoritative use consumes this nonce.
+    assert authority.get("verified_work_authority_nonces", []) == []
+    assert len(authority["issued_authorities"]) == 1
     assert not socket_path.exists()
 
 

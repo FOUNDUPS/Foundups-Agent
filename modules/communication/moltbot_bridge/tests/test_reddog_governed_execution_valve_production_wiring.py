@@ -245,6 +245,11 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
     tmp_path, monkeypatch,
 ) -> None:
     repo, runtime = _roots(tmp_path, canonical_artifacts=True)
+    valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
+    work_order_id = valve["work_order_id"]
+    work_orders_path = runtime / "work_orders.json"
+    work_orders_path.write_text(json.dumps({"work_orders": {
+        work_order_id: {"work_order_id": work_order_id}}}), encoding="utf-8")
     link = runtime / "valve-link.json"
     try:
         link.symlink_to(runtime / "execution_valve_env.json")
@@ -263,7 +268,7 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
         work_state_path=runtime / "authoritative_work_state.json",
         chain_results_path=runtime / "chain_results.json",
         authority_profile_path=runtime / "authority_profile.json",
-        work_order_materializer_mode="authority_profile",
+        work_orders_path=work_orders_path,
         valve_environment_path=link,
         runtime_allowed_root=runtime,
         requested_queue_item_id=QUEUE_ID,

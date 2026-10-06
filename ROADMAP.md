@@ -29,11 +29,16 @@ skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
 recursive test-clock stall are retained. CI now selects four resident wiring
 suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
 
+PR2091 hosted regression exposed two Linux-only stale fixtures (564 pass/2 fail/1
+skip). Focused repairs now pass both Linux cases and have independent review;
+hosted rerun remains pending. The broader local Linux86pass/14fail is retained
+as failed evidence; see module TestModLog for environment and unchanged-test debt.
+
 WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
 Native18/P0 remains blocked on authentic admission, fixed independent baseline/
 held-out evaluation, retention/rollback and later benefit. Next prerequisite:
 authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
-No further model calls or service changes. Reuse saved receipts and rerun only
+No local-worker/OpenRouter calls or service changes. Reuse receipts and rerun only
 affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
 
 PR2090/main `b7a0d996b5fe96133bd010015882730110bdde3a` remains the verified

@@ -1,3 +1,27 @@
+## PR2091 Linux fixture closure — 2026-10-07
+
+Hosted CI37517696484: bounded resident regression564 passed/2 failed/1 skipped.
+Both failures were Windows-skipped fixture drift. Symlink test now supplies its
+canonical work-order inventory so the actual symlink guard is reached. Socket
+test uses a short pytest-owned runtime root, a confined socket, profile work-order
+materialization and the existing bounded resident service for both signing RPCs.
+The preflight nonce assertion now matches the canonical non-consuming phase;
+exactly one issued authority and both verified signatures remain required.
+No production source, admission check or runtime authority was changed.
+
+Local Linux affected pair:2 passed/0 skipped in13.43s. Evidence and exact command:
+`resident-join-linux-pair-qualified-execution.json`, XML/log in the existing RSI
+evidence directory. Ubuntu system Python3.12 and cryptography, read-only reused
+pure-Python pytest; no package installs or gateway changes. Broader local run:
+86 passed/14 failed (12 missing-pip main-import failures, two unchanged socket
+unit cases); it is not a passing full-suite result. Those failures are preserved
+in `resident-join-linux-qualified.xml`, not suppressed or bundled into this fix.
+Test registry remains current1695/270. Independent nonce/source recheck:
+`resident-join-linux-nonce-followup-review.json`, SHA256
+`27793f978e652f328a9f10464efe0cd357a87beb7292cd5e0484e1caeeabfb36`.
+Hosted rerun pending. WSP00/6/15/22/50/84/97. No local-worker/OpenRouter retries;
+Codex architecture/review token use remains unmeasured. Native RSI remains unproven.
+
 ## Resident final-decision effect join — 2026-10-07
 
 WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
