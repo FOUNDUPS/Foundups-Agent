@@ -12,7 +12,38 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — single-effect grant composition (2026-10-07 JST):**
+**Current selection — resident effect join (2026-10-07 JST):**
+PR2090 is merged as `b7a0d996b5fe96133bd010015882730110bdde3a`; reviewed
+and merged trees match. Exact-main CI37510970982 and all four CodeQL analyses
+passed. The separate eSingularity sharp Dependabot update failed and remains
+outside this lane. Closure: `outputs/rsi-permission-evidence-20261006/effect-signing-2090-merge-closure.json`.
+
+WSP15 selects16/P0 (C4/I4/D4/impact4): connect the existing resident valve,
+effect approval/issuer and one-use worktree admission owners. The resolver runs
+before the valve decision exists, while the exact effect digest includes that
+decision. Passing an issuer into the current resolver alone is insufficient;
+bind the final checked decision before approval/signing and registration. Do not
+clear unresolved trust-anchor reasons or accept a serialized capability to open
+the valve. This join is **SPECIFIED_NOT_IMPLEMENTED**.
+
+Targeted re-observation at that merge:18 tests passed in6.79s across the effect
+lease, resident valve handler and current queue-binding suites. They separately
+qualify disposable-signature issuance and rejection behavior, not the connected
+native path. Both gateway user services were running; four inspected owner/root/
+profile/model-binding settings were absent from their process environments.
+Authenticated supply14/P1 (C2/I4/D4/impact4) remains a prerequisite for a live
+ticket; this limited observation does not prove global absence. Holo retrieval
+was rejected for authority-root/head mismatch; exact-source reads substitute for
+navigation, not for CURRENT index evidence. See the existing module roadmap and
+`current_observation.resident_effect_join_20261007` in the canonical backlog.
+
+Native18/P0 remains incomplete: admitted local improvement, independent fixed
+baseline/held-out verification, governed retention/rollback and later benefit.
+No model calls, grants, service activation or worker retry occurred in this audit.
+Architect compute is unmeasured. Reuse these receipts; repeat only when the
+relevant source/configuration changes or a concrete failure requires it.
+
+**Historical execution — single-effect grant composition (2026-10-07 JST):**
 PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;
 reviewed/main tree matches. Main CI37498282161 and CodeQL37498284318 passed.
 Re-observation selects16/P0 (C4/I4/D4/impact4): connect existing consent/reviewer,

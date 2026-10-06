@@ -1,10 +1,27 @@
 ## Current selection — 2026-10-07
 
-The checkpoint lifetime blocker below is repaired: 697 connected Windows cases
-pass, bounded independent review reports no new defect. Publication pending.
-Next14/P1: verify the designated resident's existing public runtime/admission
-artifacts; do not infer artifact absence from gateway environment settings.
-Native18/P0 and later retained RSI benefit remain open.
+PR2090 closed the lifetime repair at b7a0d996b5fe96133bd010015882730110bdde3a;
+reviewed/main trees match, main CI37510970982 and four CodeQL analyses passed.
+707 connected/structural tests,8 integrity tests and15 extension fast members
+passed in the preceding source slice. These are fixture/source proofs.
+
+Next16/P0 (4/4/4/4): resident effect join, SPECIFIED_NOT_IMPLEMENTED.
+`ResidentQueueExecutionValveStageHandler` resolves authority before constructing
+the valve decision. `authoritative_worktree_lease_digest` binds the final decision,
+plan and order. Connect preparation -> checked decision -> exact effect approval/
+external issuance -> one-use admission through these existing owners. Do not
+infer that the resolver's current `None` can simply be replaced by an issuer.
+Preserve every unresolved non-effect gate, current queue truth and expiry check;
+never turn a preview into execution permission. Wrong decision/order/plan, replay,
+expired approval and failed cleanup must stop before a worktree or worker runs.
+
+Re-observation18pass/6.79s covers existing effect lease, resident valve-handler
+and queue-binding tests; it does not execute the missing join. Runtime supply14/P1
+(2/4/4/4) remains unconfigured in the four inspected environment fields of both
+running gateway user services. Resolve authentic existing supply before a live
+ticket; no global absence claim or fabricated enrollment. Native18/P0 and later
+retained RSI benefit remain open. Evidence and source pins live in the existing
+RSI evidence directory and canonical backlog, not a separate roadmap.
 
 ## Single-effect grant composition — 2026-10-07 checkpoint
 

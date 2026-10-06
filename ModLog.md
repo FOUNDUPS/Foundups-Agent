@@ -1,3 +1,14 @@
+## RSI resident admission re-observation — 2026-10-07
+
+WSP00/15/22/50/97: close PR2090 as merged/main-verified and rescore the existing
+resident join16/P0. Source inspection identifies ordering: final valve decision
+is part of the exact worktree effect, so permission must bind that decision before
+registration. Existing18-case regression passed; no connected native success is
+claimed. Four admission-related settings are absent in the two inspected running
+gateway environments; this is not global absence. Root/module roadmaps and the
+existing backlog now distinguish source closure, missing connection and genuine
+runtime-supply prerequisites. No production code, services, keys or models changed.
+
 ## RSI effect lifetime repair — 2026-10-07
 
 Reproduced and repaired the prior checkpoint blocker; 697 connected Windows
