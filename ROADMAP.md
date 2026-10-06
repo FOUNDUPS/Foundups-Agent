@@ -28,7 +28,9 @@ signed-generation principal artifact verification can be reused for one of them.
 Next15/P1 (C3/I4/D4/impact4): connect that verifier to the resident principal/key
 attestation check, binding the actual identity, key and scope to the current
 root-selected generation. Preserve the other six checks. No new authority store,
-caller-declared trust flag or runtime enrollment. This is SPECIFIED_NOT_IMPLEMENTED.
+caller-declared trust flag or runtime enrollment. This source connection is now
+locally fixture-validated:100pass/1skip, independent source recheck after repairing
+a mutable-input race. Publication pending; native authority remains unproven.
 The15 supersedes the earlier14/P1 simple configuration estimate for this narrower
 security-sensitive connection; authentic runtime provisioning remains separate.
 

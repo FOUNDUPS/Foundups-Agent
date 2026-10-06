@@ -1,3 +1,20 @@
+## Principal use-time generation binding — 2026-10-07
+
+`verify_signer_current_generation_runtime_binding` and its use-time collector
+accept optional `principal_identity` / `principal_work_authority`. Omitted pairs
+preserve prior generation-only behavior; partial, missing-field or mismatched
+pairs reject. Existing root-selected principal artifact verification runs inside
+the generation lease. The accepted audit receipt adds `principal_binding_digest`
+for the exact checked JSON pair. The field is appended for positional compatibility.
+
+The resident resolver supplies actual recorded identity/authority; only a matching
+typed, accepted result can remove the principal subject/key missing-evidence reason.
+Other six non-generation reasons remain. Plain serialized claims are insufficient.
+This trusts the current root-selected subject attestation, not a fresh login.
+Inputs are snapshotted before IO and compared after it; transient change-and-restore
+is not established absent by sampling. No permission/capability is issued here.
+Connected100pass/1skip and independent source recheck are fixture evidence only.
+
 ## Resident final-decision effect join — 2026-10-07
 
 Bootstrap and stage registry accept optional `worktree_lease_issuer=None`.

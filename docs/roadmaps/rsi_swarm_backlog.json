@@ -1902,7 +1902,7 @@
   "current_observation": {
     "principal_generation_join_20261007": {
       "base_commit": "6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd",
-      "truth": "SPECIFIED_NOT_IMPLEMENTED",
+      "truth": "LOCAL_FIXTURE_VALIDATED; publication and native admission not verified",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1943,6 +1943,15 @@
         "polling": "bounded status checks; no inference loop waiting for unchanged state",
         "cost_accounting": "record local worker, external provider and coordinator separately; unknown is not zero",
         "runtime_authority": "unchanged; policy is planning, not an executable grant"
+      },
+      "implementation": "Existing leased principal artifact verifier joined to resident identity/key/requested-scope check; snapshot binding and post-read comparison; six other gates preserved.",
+      "validation": {
+        "passed": 100,
+        "skipped": 1,
+        "failed": 0,
+        "seconds": 40.44,
+        "evidence": "outputs/rsi-permission-evidence-20261006/principal-generation-connected-execution.json",
+        "independent_review": "outputs/rsi-permission-evidence-20261006/principal-generation-independent-recheck.json"
       }
     },
     "resident_effect_join_20261007": {

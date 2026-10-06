@@ -1,3 +1,12 @@
+## Principal generation connection — 2026-10-07
+
+Existing current-generation runtime/use-time suites cover key/provider/identity,
+repo/FoundUp scope, absent evidence, altered artifacts, expiry, mutable inputs,
+serialized claims and mismatched work receipts. Consumer controls preserve six
+other gates. Connected six-file run100pass/1 Windows platform skip; exact source
+hashes and historical failures are in `principal-generation-connected-execution.json`
+under the current RSI evidence directory. No native worker admission is claimed.
+
 ## Shared-backend test selection — PR2090
 
 Include `test_reddog_conversation_scope_durable_authentication_wsp62.py` with the

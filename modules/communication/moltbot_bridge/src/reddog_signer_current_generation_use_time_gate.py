@@ -11,6 +11,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_runtime_binding import (
     SignerCurrentGenerationRuntimeBinding,
+    _digest,
     verify_signer_current_generation_runtime_binding,
 )
 
@@ -31,6 +32,15 @@ class SignerCurrentGenerationUseTimeEvidence:
             return None
         return binding.receipt_id if is_sha256(binding.receipt_id) else None
 
+    def principal_matches(self, identity, work_authority) -> bool:
+        if self.receipt_id is None:
+            return False
+        try:
+            return self.binding.principal_binding_digest == _digest(
+                {"identity": identity, "work_authority": work_authority})
+        except (TypeError, ValueError):
+            return False
+
     def remaining_reasons(
         self, all_reasons: Iterable[str], bound_reasons: Iterable[str]
     ) -> tuple[str, ...]:
@@ -47,6 +57,7 @@ def collect_signer_current_generation_use_time_evidence(
     repo_root: Path,
     runtime_root: Path,
     trusted_now_epoch: Callable[[], int],
+    *, principal_identity=None, principal_work_authority=None,
 ) -> SignerCurrentGenerationUseTimeEvidence:
     """Collect current-generation evidence without minting a capability."""
 
@@ -58,6 +69,8 @@ def collect_signer_current_generation_use_time_evidence(
             repo_root=repo_root,
             runtime_root=runtime_root,
             now_epoch=now_epoch,
+            principal_identity=principal_identity,
+            principal_work_authority=principal_work_authority,
         )
     except Exception:
         return SignerCurrentGenerationUseTimeEvidence(None)

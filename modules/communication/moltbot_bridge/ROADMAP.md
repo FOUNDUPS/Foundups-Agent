@@ -7,7 +7,9 @@ reuse the existing root-selected principal artifact verifier at the resident
 principal/key gate, with exact identity/key/scope/current-generation binding.
 Other six non-generation reasons remain enforced; no enrollment or new store.
 See root ROADMAP and canonical backlog for source evidence, failed local Linux
-broad-run debt, closure receipt and acceptance. SPECIFIED_NOT_IMPLEMENTED.
+broad-run debt, closure receipt and acceptance. Source connection now100pass/1skip with independent
+source recheck after snapshot-race repair. Publication pending; native admission
+and later retained improvement remain unproven.
 
 ## Single-effect grant composition — 2026-10-07 checkpoint
 
