@@ -1,12 +1,12 @@
-## Peer prerequisite checkpoint — 2026-10-07
+## Fresh peer consumer checkpoint — 2026-10-07
 
-Existing owner/process identity and grant-aware socket challenge paths are
-locally validated (Windows82/5skip, Linux29/0skip), independently source-reviewed.
-Six resident trust reasons remain. Next15/P1: use an authenticated grant and
-requester, verify generation before/after the fresh RPC without holding its
-admission fence across RPC, and compare exact session/profile/key/epoch/socket
-and trusted expiry. Preserve five unrelated gates; do not trust copied READY.
-This is a partial source checkpoint, not native admission or autonomous RSI.
+The existing bootstrap/resolver/collector path now consumes an explicitly supplied
+`signer_peer_secret_access_grant_supplier`. Fresh current-generation snapshots,
+OS peer checks, signed challenge and final deadlines are checked in one invocation.
+Review-driven renewal/manifest-expiry repairs are locally verified: connected123pass/
+1 fixture failure/5skip, then corrected affected pair2pass; native RSI not demonstrated. Five other independent trust connections,
+actual admitted worker improvement and later retained benefit remain open.
+Historical prerequisite evidence follows; current work stays in PR2093.
 
 ## Current selection — signer peer connection, 2026-10-07
 

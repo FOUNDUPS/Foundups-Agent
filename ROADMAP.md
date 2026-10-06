@@ -25,13 +25,17 @@ resident use time. Current dependency construction supplies a socket client but
 no such evidence to the resolver. Bind current root-selected signer/profile,
 session, generation and requester; reject stale, replayed or substituted peers.
 A copied healthcheck result is insufficient. Preserve five other trust reasons.
-Peer prerequisites are locally validated: exact selected-owner UID/GID projection,
-existing OS peer checks and grant-bearing challenge requests. Windows82pass/5skip;
-Linux29pass, including real kernel peer credentials; bounded independent review
-found no blocker. This is PARTIALLY_IMPLEMENTED: the before/after generation,
-requester and expiry connection remains unimplemented; all six reasons still hold.
-No runtime grant, autonomous repair or retained benefit is claimed. Evidence:
-`outputs/rsi-permission-evidence-20261006/peer-preconditions-execution.json`.
+Peer prerequisites passed Windows82/5skip and Linux29/0skip. The existing
+collector/resolver/bootstrap now connects fresh grant-aware peer verification to
+root-selected process, signer, principal, generation and endpoint identity.
+Independent review found renewal equality and missing final manifest expiry;
+both were reproduced with the real selection producer and repaired. Stable
+identity is compared before/after RPC; both snapshots and peer must remain fresh.
+No generation fence is held across RPC. Five other trust gates stay closed.
+Connected source checks:123pass/1 fixture failure/5skip; corrected affected pair2pass.
+No production change after the broad run; all cases covered across those runs. This is locally verified,
+not native RSI. PR2093 prerequisite head6dee7696f passed CI37529011107 and
+CodeQL37529006351; those results do not qualify the new consumer diff.
 
 Native18/P0 remains blocked: admitted local-agent improvement, independent fixed
 baseline/held-out validation, governed retention/rollback and later benefit remain

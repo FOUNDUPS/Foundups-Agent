@@ -1,3 +1,16 @@
+## Fresh peer consumer controls — 2026-10-07
+
+Existing generation use-time suite adds23 adversarial cases for rotation, stale
+peer, substitutions, bad clocks, absent grants, missing OS evidence and mutation.
+Existing real-generation suite adds renewal and manifest-expiry controls using
+the actual selection producer; profile/process and handshake are substituted.
+Initial API baseline23fail; first focused52pass/1skip missed two review defects.
+The first expiry baseline was invalid (fixture KeyError). Corrected real-producer
+baseline2fail/0errors reproduces both intended failures against review-pinned source.
+Connected123pass/1fixturefail/5skip; corrected affected pair2pass with production
+bytes unchanged. All prior failed runs remain recorded.
+Independent recheck confirms both repairs; no live grant or native RSI claim.
+
 ## Peer prerequisites — 2026-10-07
 
 Reuse owner-loader, current-generation binding, healthcheck and mutual-handshake

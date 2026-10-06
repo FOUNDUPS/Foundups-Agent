@@ -1,3 +1,25 @@
+## Resident fresh peer use — 2026-10-07
+
+Bootstrap and resolver accept optional `signer_peer_secret_access_grant_supplier`;
+the collector receives it as `peer_secret_access_grant_supplier`. The callback
+must already own authentic grant supply. No default credentials or grant issuer
+are constructed. Omission preserves the closed peer gate. Invalid supplied
+callbacks or probe failure fail closed without stale-generation fallback.
+
+`SignerCurrentGenerationRuntimeBinding` appends authenticated `manifest_expires_at`.
+The collector checks stable generation/revision/owner/config/packet/principal/
+process/signer/endpoint identity before and after RPC, excluding refreshed
+selection expiry and audit receipt. It checks both snapshots' selection/manifest
+expiry plus handshake expiry at a final nondecreasing trusted time. Sampling
+cannot prove absence of a transient change-and-restore. No fence spans RPC.
+
+`SignerCurrentGenerationUseTimeEvidence.peer_receipt_id` and resolver result
+`signer_peer_binding_receipt_id` are diagnostic bindings to the generation,
+request, response and requester. Only live internal collection supplies this
+path; saved typed/serialized READY is not an admission input. Five unrelated
+trust gates remain. Tests use disposable/substituted authority; native activation
+and retained autonomous improvement are unverified.
+
 ## Peer healthcheck prerequisites — 2026-10-07
 
 `load_system_service_signer_identity` optionally accepts `expected_owner_config_id`;
@@ -15,8 +37,8 @@ callback preserves legacy behavior. Actual grant authorization remains the signe
 Successful audit results append session ID, socket-path digest, key epoch and
 `server_identity_verified`. These are diagnostic fields, not independently
 trusted provenance. Caller-supplied generation IDs or cached READY cannot satisfy
-a resident authorization gate. Fresh root-bound before/after verification remains
-unconnected; no existing missing-evidence reason is removed in this change.
+a resident authorization gate. These prerequisite fields now feed the live internal
+collector described above; the healthcheck alone still grants no authority.
 
 ## Principal use-time generation binding — 2026-10-07
 

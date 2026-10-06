@@ -1883,7 +1883,7 @@
     "observation_path": "current_observation.signer_peer_join_20261007",
     "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
     "selected_action": "Connect existing fresh signer-peer verification to resident use-time evidence",
-    "status": "PARTIALLY_IMPLEMENTED",
+    "status": "LOCAL_COMPONENT_CONNECTION_VALIDATED; PUBLICATION_PENDING",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1894,7 +1894,7 @@
     },
     "dispatchable": false,
     "execution_plane": "Source-only consumer connection; independently authenticated runtime enrollment remains separate",
-    "next_action": "Trace and reuse existing root-selected signer instance/profile and mutual peer healthcheck at resident use time. Require exact current signer/session/generation/requester binding and bounded fresh evidence; do not accept copied healthcheck status as live peer authentication. Preserve other five reasons.",
+    "next_action": "Publish reviewed peer consumer in existing PR2093; verify exact-head CI before closure; then re-observe five remaining independent trust connections using WSP15/97. No runtime grant inferred.",
     "higher_priority_gates": [
       "Native18/P0: admitted local worker improvement, independent baseline-controlled evaluation, retained use and later benefit remain unproven"
     ]
@@ -1902,7 +1902,7 @@
   "current_observation": {
     "signer_peer_join_20261007": {
       "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
-      "truth": "PARTIALLY_IMPLEMENTED; prerequisites locally validated; resident consumer unconnected",
+      "truth": "LOCALLY_VERIFIED_COMPONENT_CONNECTION; hosted consumer checks and native grant-backed operation unverified",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1948,6 +1948,24 @@
         "runtime_authority_changed": false,
         "worker_calls": 0,
         "coordinator_review_tokens": null
+      },
+      "consumer": {
+        "connected": {
+          "passed": 123,
+          "failed": 1,
+          "skipped": 5,
+          "failure": "expiry test legacy fixture key; original failed run retained"
+        },
+        "corrected_pair": {
+          "passed": 2,
+          "failed": 0,
+          "production_unchanged": true
+        },
+        "baseline": "corrected review-pinned source reproduces renewal rejection and expired-manifest acceptance; earlier expiry baseline invalid",
+        "source_review": "outputs/rsi-permission-evidence-20261006/peer-consumer-time-evidence-correction-review.json",
+        "remaining": "Five unrelated trust reasons after valid live collection; real enrolled grant supply and native RSI still unverified",
+        "pr": 2093,
+        "publication": "consumer diff not yet pushed"
       }
     },
     "principal_generation_join_20261007": {

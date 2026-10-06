@@ -70,6 +70,7 @@ class SignerCurrentGenerationRuntimeBinding:
     principal_binding_digest: str | None = None
     signer_uid: int | None = None
     signer_gid: int | None = None
+    manifest_expires_at: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -320,6 +321,7 @@ def _binding_values(
         **_runtime_identity(packet),
         **signer_identity,
         "selection_expires_at": expires_at,
+        "manifest_expires_at": selection["manifest_expires_at"],
     }
 
 
