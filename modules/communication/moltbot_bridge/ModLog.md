@@ -1,5 +1,17 @@
 ## Authenticated startup integration in progress — 2026-10-06
 
+Hosted `11b8bd56d` passed the earlier registry/consensus gates, then exposed
+bootstrap691lines against675 (667other cases passed,3skipped). Relocate the unchanged
+dependency-supply helper into the existing bootstrap admission owner; bootstrap
+becomes666lines. Parent independently verified every top-level definition AST
+unchanged across both owners. All48 bootstrap tests pass, as do the exact structural
+oracle and qualified cold-import check. Regenerated runtime manifest remains1,419
+files; new canonical digest37bfeb1c5a9e41dbd8d737a32819028d4906bad17f50a9f4f8bcfc960f3bafba.
+Manifest/index tests8/8 and extension fast tier15members pass. Wider structural
+inspection also found entrypoint tests1010lines and one61line test; their bounded
+test-owner extraction preserves675/60limits and the public fixture import surface.
+Original hosted evidence remains in `startup-grant-composition-failure.log`.
+
 Follow-up CI at `14e6c023a` correctly rejected the stale canonical test registry
 after the test split. Regenerated using the existing WRE generator; `--check`
 reports current at1,689files with270quarantined unchanged. Diff adds only the

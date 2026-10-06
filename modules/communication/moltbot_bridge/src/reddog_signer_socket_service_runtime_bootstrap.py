@@ -32,6 +32,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_ga
     enforce_signer_process_isolation,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import (
+    _supply_isolated_dependencies,
     ProcessIsolationGate,
     SignerSocketServiceGrantAdmission,
     SignerSocketServiceRuntimeDependencies,
@@ -595,32 +596,6 @@ def rehydrate_signer_socket_service_runtime_config(
         expected_runtime_root,
         payload,
         expected_config_digest=expected_config_digest,
-    )
-
-
-def _supply_isolated_dependencies(request: RuntimeBootstrapRequest) -> RuntimeBootstrapRequest:
-    """Consume one supply only after config/isolation checks; never infer grants."""
-    if request.process_isolation_required is not True or any(
-        item is not None for item in (
-            request.resolver, request.resolver_factory, request.principal_key_resolver,
-            request.proposal_replay_high_water_store, request.secret_grant_admission,
-        )
-    ):
-        raise ValueError("signer_runtime_dependency_supply_conflict")
-    supplied = request.runtime_dependencies_supplier()
-    if (
-        type(supplied) is not SignerSocketServiceRuntimeDependencies
-        or not callable(getattr(supplied.resolver, "resolve", None))
-        or not callable(getattr(supplied.principal_key_resolver, "resolve", None))
-        or type(supplied.secret_grant_admission) is not SignerSocketServiceGrantAdmission
-    ):
-        raise ValueError("signer_runtime_dependency_supply_invalid")
-    return replace(
-        request, resolver=supplied.resolver,
-        principal_key_resolver=supplied.principal_key_resolver,
-        proposal_replay_high_water_store=supplied.proposal_replay_high_water_store,
-        secret_grant_admission=supplied.secret_grant_admission,
-        runtime_dependencies_supplier=None,
     )
 
 

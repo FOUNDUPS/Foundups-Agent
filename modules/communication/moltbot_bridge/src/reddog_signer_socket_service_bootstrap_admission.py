@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 from pathlib import Path
-from typing import Any, Optional, Protocol
+from typing import TYPE_CHECKING, Any, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
     SignerProcessIsolationReceipt,
@@ -15,6 +15,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
     PeerCredentialPolicy,
     rehydrate_peer_credential_policy,
 )
+
+
+if TYPE_CHECKING:
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import RuntimeBootstrapRequest
 
 
 SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED"
@@ -37,6 +41,32 @@ class SignerSocketServiceRuntimeDependencies:
     principal_key_resolver: Any
     proposal_replay_high_water_store: Any
     secret_grant_admission: SignerSocketServiceGrantAdmission
+
+
+def _supply_isolated_dependencies(request: RuntimeBootstrapRequest) -> RuntimeBootstrapRequest:
+    """Consume one supply only after config/isolation checks; never infer grants."""
+    if request.process_isolation_required is not True or any(
+        item is not None for item in (
+            request.resolver, request.resolver_factory, request.principal_key_resolver,
+            request.proposal_replay_high_water_store, request.secret_grant_admission,
+        )
+    ):
+        raise ValueError("signer_runtime_dependency_supply_conflict")
+    supplied = request.runtime_dependencies_supplier()
+    if (
+        type(supplied) is not SignerSocketServiceRuntimeDependencies
+        or not callable(getattr(supplied.resolver, "resolve", None))
+        or not callable(getattr(supplied.principal_key_resolver, "resolve", None))
+        or type(supplied.secret_grant_admission) is not SignerSocketServiceGrantAdmission
+    ):
+        raise ValueError("signer_runtime_dependency_supply_invalid")
+    return replace(
+        request, resolver=supplied.resolver,
+        principal_key_resolver=supplied.principal_key_resolver,
+        proposal_replay_high_water_store=supplied.proposal_replay_high_water_store,
+        secret_grant_admission=supplied.secret_grant_admission,
+        runtime_dependencies_supplier=None,
+    )
 
 
 @contextmanager

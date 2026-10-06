@@ -3779,3 +3779,18 @@ both modules explicitly; production and generated runtime bindings are unchanged
 Focused validation passes48/48 without skips in7.468s: the structural oracle plus
 all47 original parameterized owner cases, with stable source hashes. Receipt:
 `outputs/rsi-permission-evidence-20261006/startup-owner-structural-repair-review.json`.
+## 2026-10-06 — Bootstrap admission and public-test owner bounds
+
+Preserved hosted667pass/3skip/1fail receipt for bootstrap691>675. Existing
+admission owner now contains the unchanged deferred-dependency helper, while
+bootstrap reimports its original symbol. All48 bootstrap cases and target bound
+pass; cold-import passes with qualified child PYTHONPATH. Parent AST comparison
+confirms all production definitions unchanged. Manifest/index8/8 in64.19s and
+extension fast tier15members pass with refreshed runtime pins. Additional public
+entrypoint test extraction is covered by the existing675/60 structural contract;
+no exemption or threshold increase is introduced.
+Final extracted-owner qualification:21/21pass, no skips,26.391s; all19 original
+entrypoint cases plus both atomic structural checks. Parent AST review independently
+confirms definitions preserved across old/new owners. The canonical generator
+reports current1,690test files,270quarantined unchanged. CI explicitly includes
+the extracted startup-authority owner; original driver helpers/NOW stay in place.

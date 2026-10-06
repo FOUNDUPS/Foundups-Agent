@@ -1894,7 +1894,7 @@
     },
     "dispatchable": false,
     "execution_plane": "Owned source implementation with synthetic tests; no runtime grant",
-    "next_action": "Resolve combined-suite replay-credential regression without weakening acceptance, finish independent review and source publication, then connect existing issuer to valve with verified capability inputs for scoped local work",
+    "next_action": "Finish PR2078 hosted validation and source closure, then run the bounded real-lock composition discriminator before attempting issuer-to-valve integration; original intermittent credential rejection remains documented, not claimed repaired",
     "higher_priority_gates": []
   },
   "current_observation": {
@@ -31220,11 +31220,14 @@
       "post_startup_candidate": {
         "task": "Connect existing external authoritative-use lease issuer to existing governed valve consumer",
         "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
-        "state": "startup_mechanism_qualified_pending_source_closure_and_verified_capability_inputs",
+        "state": "blocked_on_effect_permit_compatibility_and_generation_lock_composition_after_source_closure",
         "observation": "Existing issuer contract/adversarial baseline23/23; current resolver retains seven blocker reasons and hardcodes a null lease; no production issuer caller found",
         "composition_dependency": "Source audit at438a20113 finds no production construction of IndependentSignerSecretGrantProvider or ExternalSignerAuthoritativeUseLeaseIssuer in modules/scripts. Resident queue bootstrap constructs the resolver without an issuer; runtime dependency bundle exposes neither issuer nor grant provider. Existing lease tests use _LeasedGrantProvider. Reuse the real grant provider and existing client supply, qualify their composition with the issuer, and preserve all missing-authority rejections before queue admission.",
         "wsp97": "Reuse existing issuer and verifier owners; reject missing capabilities and retain exact effect, replay, expiry and generation checks",
         "evidence": "outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json",
+        "followup_evidence": "outputs/rsi-permission-evidence-20261006/native-admission-issuer-valve-followup-20261006.json",
+        "followup_findings": "HIGH/ULTRA effect requests lack the typed consumed elevated permit required by the real grant provider; existing rejection coverage already demonstrates this. Provider-held generation fence and target/current-generation fence reentry are a source-grounded risk, not yet a reproduced execution result.",
+        "next_eligible_prerequisite": {"task": "Bounded real-lock composition discriminator using existing generation-fence owners", "wsp15": {"complexity": 2, "importance": 4, "deferability": 4, "impact": 3, "total": 13, "priority": "P1"}, "limits": "Disposable inputs, finite timeout, child cleanup; no permit bypass or native admission claim"},
         "limits": "No authentic enrollment or native G1 admission established; this connection alone does not satisfy every capability prerequisite"
       },
       "native_rsi_complete": false
