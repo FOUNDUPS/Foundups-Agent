@@ -1,3 +1,11 @@
+## Outer consensus binding at grant signing — 2026-10-07 candidate
+
+Before reserving an elevated consensus nonce, the existing grant signer admission
+requires the outer request's consensus digest to match its proof receipt ID.
+Missing/malformed receipt or mismatch rejects before nonce/rate/private-key use;
+the existing independent authority still reverifies the complete proof. No API
+or LOW behavior change, effect-domain permission or trust enrollment is added.
+
 ## Reviewer runtime artifact adapter — 2026-10-07
 
 The existing verifier bootstrap now exports `ReviewerRuntimeArtifacts(model_id,

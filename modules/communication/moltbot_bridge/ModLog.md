@@ -1,3 +1,22 @@
+## Bind grant consensus metadata to its verified proof — 2026-10-07 candidate
+
+Final connected63/63 pass in15.16s; manifest integrity8/8 pass in61.49s.
+Independent source/saved-result review found no concrete blocker; receipt
+`grant-digest-independent-review.json`, SHA256
+`8fa883a1f9571f6b55893ff2efa7519bf341952c0fb1589e6b3afb47e5831a56`.
+The test observes empty nonce state, not a reservation invocation counter;
+early rejection is also supported by source ordering. Publication pending.
+
+WSP15 selects14/P1 (2/4/4/4): observed grant metadata substitution is accepted
+by the existing signer path. Add one guard before nonce reservation, preserving
+independent proof verification and legacy two-child permission. Frozen baseline
+4pass/1fail; coordinator repair63 connected passes. Local worker failed5/5 and
+was rejected; no retry. No native RSI claim. See tests/TestModLog and INTERFACE.
+
+Previous PR2088 merged91ba0bd05; head/main trees equalb2cf3e62. Exact-main
+CI37494466573 and CodeQL37494466969 passed. Recovery bundle and source/CI binding
+receipt are retained in the20261006 evidence directory. WSP00/6/15/22/50/84/97.
+
 ## Reviewer runtime artifact connection — 2026-10-07 candidate
 
 Independent review found no concrete blocker in the documented trusted-input

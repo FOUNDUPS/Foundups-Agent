@@ -100,3 +100,30 @@ def test_concurrent_real_signer_path_has_one_accepted_signature(tmp_path) -> Non
         responses = list(executor.map(lambda _: backend.sign(request, peer), range(8)))
     assert sum(response.accepted is True for response in responses) == 1
     assert len(nonce_authority.consumed) == 1
+
+
+def test_outer_consensus_digest_mismatch_preserves_nonce_and_signing_key(tmp_path) -> None:
+    class CountingPrivateKey:
+        def __init__(self, delegate):
+            self.delegate, self.sign_calls = delegate, 0
+
+        def public_key(self):
+            return self.delegate.public_key()
+
+        def sign(self, payload):
+            self.sign_calls += 1
+            return self.delegate.sign(payload)
+
+    nonce = TestConsensusNonceAuthority()
+    backend, request, peer = build_grant_signing_case(tmp_path, nonce)
+    key = CountingPrivateKey(backend.private_key)
+    guarded = replace(backend, private_key=key)
+    invalid = replace(request, consensus_receipt_digest="sha256:" + "f" * 64)
+    assert invalid.consensus_receipt_digest != request.consensus_receipt_digest
+    for _ in range(10):
+        assert guarded.sign(invalid, peer).accepted is False
+    assert key.sign_calls == 0
+    assert nonce.reserved == {} and nonce.consumed == set()
+    assert guarded.sign(request, peer).accepted is True
+    assert key.sign_calls == 2
+    assert len(nonce.consumed) == 1

@@ -4719,3 +4719,17 @@ or a claim that these limits are globally enforced.
   available, estimate provenance, paid provider calls and accepted/retained
   improvements. Track architect usage separately; zero paid model calls is
   not zero total compute cost. Autonomous retained benefit remains unproven.
+
+## Local authority-repair routing evidence — 2026-10-07
+
+The qwen-coder-7b signer-repair route has three rejected proposals across two
+observed tasks: two effect-issuer attempts (2026-10-06) and one outer-consensus
+digest attempt (2026-10-07). The latest call took12.61s; unchanged five-case
+validation failed5/5. No retries, promotion or learned-gain claim. It was unloaded.
+
+For this lane, pause further signer-authority repair proposals through this exact
+model/prompt route until a separately budgeted fixed evaluation qualifies a
+replacement. This is a scoped operating decision, not a global runtime routing
+change or a general judgment of the model. Continue deterministic validation;
+reserve paid review for concrete security/promotion decisions. Receipt:
+`outputs/rsi-permission-evidence-20261006/grant-digest-local-evaluation.json`.
