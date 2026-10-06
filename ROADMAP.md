@@ -16,7 +16,9 @@ Status: canonical **system planning and completion-gate authority** in this repo
 PR2091 is merged at `6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd`; main and reviewed
 file trees match. Exact-head CI37520547883 passed, including566 resident cases
 and1 skip. Two Linux-only stale fixtures were repaired and independently reviewed;
-local focused pair2/2 passed. Main CI37521571358 remains pending at this checkpoint.
+local focused pair2/2 passed. Main CI37521571358 passed (resident566/1skip,30.04s).
+Main CodeQL37521571956 failed in Actions result upload; cause unknown and
+GitHub rejects retry of this generated workflow. Other three language jobs passed.
 Owned branch retired with a verified recovery bundle; shared owners untouched.
 Closure: `outputs/rsi-permission-evidence-20261006/resident-join-2091-merge-closure.json`.
 
@@ -39,6 +41,14 @@ Holo authority-root/head mismatch remains unresolved; exact-source reads are a
 bounded navigation fallback, not CURRENT index evidence. Reuse saved receipts;
 no further local-worker/OpenRouter retries. Codex architecture/review cost is
 unmeasured. See the existing backlog's principal-generation observation.
+
+**Coordination cost discipline:** reuse source-bound receipts and deterministic
+checks; repeat audits or tests only after relevant changes or new failures.
+One concrete blocker per bounded source pass; review only its changed surface.
+No inference loop for unchanged CI/runtime state, no rejected-worker retry or
+automatic paid-provider fallback. Record coordinator, local-worker and external
+provider usage separately; unknown cost is not zero. This is a planning rule,
+not an installed autonomous scheduler or permission to bypass runtime admission.
 
 **Historical execution — single-effect grant composition (2026-10-07 JST):**
 PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;

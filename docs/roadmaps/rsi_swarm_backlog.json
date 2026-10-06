@@ -1934,6 +1934,15 @@
         "passed": 86,
         "failed": 14,
         "truth": "failed broad local run; environment and unchanged-case triage outstanding"
+      },
+      "coordination_budget_policy": {
+        "mode": "deterministic_first",
+        "repeat_audit": "only on changed source, evidence or objective",
+        "worker_retry": "paused rejected route; no automatic OpenRouter fallback",
+        "review": "one concrete source slice; no repeated review of unchanged source",
+        "polling": "bounded status checks; no inference loop waiting for unchanged state",
+        "cost_accounting": "record local worker, external provider and coordinator separately; unknown is not zero",
+        "runtime_authority": "unchanged; policy is planning, not an executable grant"
       }
     },
     "resident_effect_join_20261007": {
@@ -2007,7 +2016,20 @@
       },
       "main_ci": {
         "id": 37521571358,
-        "status": "pending"
+        "status": "completed",
+        "conclusion": "success",
+        "resident_passed": 566,
+        "resident_skipped": 1,
+        "resident_seconds": 30.04
+      },
+      "main_codeql": {
+        "id": 37521571956,
+        "status": "completed",
+        "conclusion": "failure",
+        "failed_job": "Analyze (actions)",
+        "last_observed_operation": "Uploading results",
+        "cause": "unknown; no failure diagnostic in available log/annotations",
+        "retry": "GitHub rejected retry: This workflow run cannot be retried"
       }
     },
     "effect_signing_composition_20261007": {

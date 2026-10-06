@@ -1,7 +1,9 @@
 ## RSI closure and next verified-owner connection — 2026-10-07
 
 WSP00/15/22/50/97: PR2091 merged6ad4ee360; exact reviewed/main tree match,
-branch CI37520547883 passed (resident566/1skip), main CI pending. Recoverable
+branch CI37520547883 and main CI37521571358 passed (resident566/1skip).
+Main CodeQL Actions check failed during upload; available evidence gives no
+cause and GitHub rejects generated-workflow retry. Three other language jobs pass. Recoverable
 owned branch retired; no other owner changed. Re-observed resolver retains seven
 unconditional non-generation reasons. Select principal-generation verifier
 connection15/P1 (3/4/4/4) using existing owners, retaining the other six gates.

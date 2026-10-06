@@ -1,7 +1,8 @@
 ## Current selection — principal generation connection, 2026-10-07
 
 PR2091 merged/main tree verified at6ad4ee360; branch CI37520547883 passed566/1skip.
-Main CI37521571358 pending. Native RSI remains unproven. Next15/P1 (3/4/4/4):
+Main CI37521571358 passed566/1skip; generated CodeQL Actions check failed
+during result upload, cause unknown/retry unavailable. Native RSI remains unproven. Next15/P1 (3/4/4/4):
 reuse the existing root-selected principal artifact verifier at the resident
 principal/key gate, with exact identity/key/scope/current-generation binding.
 Other six non-generation reasons remain enforced; no enrollment or new store.
