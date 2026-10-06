@@ -28,8 +28,19 @@ Publication qualification additionally found inherited WSP62 debt:5failed/11pass
 Main already has2,771 interface lines against1,517; policies/tests are unchanged.
 This is source comparison, not an executed full-main baseline. No expiry or
 ceiling was relaxed. Startup proofs do not imply whole-repository validation.
-Next close publication against fresh main, then connect the existing issuer to
-the governed valve with verified capabilities (15/P1, detailed at completion gates).
+Current publication: PR2078, pushed head19ddae326; exact-head CI remains pending.
+Its test-only setup-finalizer repair preserves the full negative oracle (5/5
+focused cases pass). Actual OS mechanism qualification also passed at41cf91cfe;
+production bytes are unchanged by19ddae326. No native admission is claimed.
+Before connecting issuer to valve (15/P1), resolve the existing elevated-permit
+contract mismatch and generation-lock composition. A bounded Windows diagnostic
+using the unchanged generation lock supports the synchronous wait-cycle risk:
+held-wait reaches its diagnostic deadline; release-before-call control completes.
+All four children exit0 and owned cleanup completes in1.140s. This is synthetic
+topology evidence, not an executed permit-qualified issuer or a proposed lock
+relaxation. Evidence: `outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json`.
+The13/P1 prerequisite remains open for a contract-preserving composition repair;
+close startup publication against fresh main before dependent implementation.
 
 PR2075 is merged at `a3def2a83`; exact-main CI37376433116 and
 CodeQL37376432711 passed. Later main invocation12/12 passed. Governed maintenance

@@ -1,3 +1,20 @@
+## Native admission lock-topology diagnostic — 2026-10-06
+
+WSP15/97: preserve18/P0 startup publication gate;15/P1 issuer wiring stays
+blocked by elevated-permit compatibility and lock ownership. Existing13/P1
+prerequisite now has a Windows real-generation-lock discriminator: held synchronous
+wait times out, diagnostic release lets consumer finish; release-before-call
+control completes normally. All4 children exit0/reaped, exact owned temp removed,
+source hashes stable;1.140s. Parent inspected event protocol and results. This is
+synthetic topology, not actual issuer admission, Linux coverage or a safe repair.
+Evidence: `outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json`
+SHA256 `d491a984f3d659f74cff14667b7ee6d9df3c004d6e17ee1a9aeb551436800bf4`.
+Root roadmap/backlog now reflect this dependency rather than direct wiring.
+Independent review of19dd fixture repair preserved83 assertions and confirmed562
+production pins match actual41cf OS qualification; no OS rerun needed for that
+test-only delta. Review receipt SHA256
+`603e33bb4b57e899e93f73b1b59f4a44fda50103355b35f6163ee971b7fe9de5`.
+
 ## Startup fixture cleanup discrimination — 2026-10-06
 
 Hosted PR2078 at41cf91cfe:667passed/3skipped/1failed; the failing negative

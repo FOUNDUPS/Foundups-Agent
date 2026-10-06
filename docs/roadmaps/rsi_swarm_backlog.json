@@ -1894,7 +1894,7 @@
     },
     "dispatchable": false,
     "execution_plane": "Owned source implementation with synthetic tests; no runtime grant",
-    "next_action": "Finish PR2078 hosted validation and source closure, then run the bounded real-lock composition discriminator before attempting issuer-to-valve integration; original intermittent credential rejection remains documented, not claimed repaired",
+    "next_action": "Finish PR2078 hosted validation and source closure. The Windows bounded real-lock discriminator supports the conditional wait-cycle risk; next reconcile existing lock ownership and elevated-permit contracts before issuer-to-valve implementation. Original intermittent credential rejection remains documented, not claimed repaired",
     "higher_priority_gates": []
   },
   "current_observation": {
@@ -31226,7 +31226,8 @@
         "wsp97": "Reuse existing issuer and verifier owners; reject missing capabilities and retain exact effect, replay, expiry and generation checks",
         "evidence": "outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json",
         "followup_evidence": "outputs/rsi-permission-evidence-20261006/native-admission-issuer-valve-followup-20261006.json",
-        "followup_findings": "HIGH/ULTRA effect requests lack the typed consumed elevated permit required by the real grant provider; existing rejection coverage already demonstrates this. Provider-held generation fence and target/current-generation fence reentry are a source-grounded risk, not yet a reproduced execution result.",
+        "followup_findings": "HIGH/ULTRA effect requests lack the typed consumed elevated permit required by the real grant provider; existing rejection coverage already demonstrates this. Windows real-lock synthetic topology supports the synchronous wait-cycle risk; actual permit-qualified issuer and same-process rehydration remain unexecuted. Release-before-call is a diagnostic control, not an approved authority relaxation.",
+        "lock_topology_diagnostic": {"source": "19ddae32620af3b05b1154b29893bcc90aaf08f6", "evidence": "outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json", "sha256": "d491a984f3d659f74cff14667b7ee6d9df3c004d6e17ee1a9aeb551436800bf4", "held_wait": "diagnostic_deadline_then_consumer_completion_after_release", "release_before_call_control": "completed_without_wait_deadline", "seconds": 1.140, "children_exited_and_reaped": 4, "cleanup_complete": true, "source_pins_stable": true, "native_admission": false},
         "next_eligible_prerequisite": {"task": "Bounded real-lock composition discriminator using existing generation-fence owners", "wsp15": {"complexity": 2, "importance": 4, "deferability": 4, "impact": 3, "total": 13, "priority": "P1"}, "limits": "Disposable inputs, finite timeout, child cleanup; no permit bypass or native admission claim"},
         "limits": "No authentic enrollment or native G1 admission established; this connection alone does not satisfy every capability prerequisite"
       },
