@@ -13,9 +13,7 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
     Ed25519SignatureVerifier,
     encode_ed25519_public_key,
 )
-from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
-    Ed25519SignerBackend,
-)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import Ed25519SignerBackend
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_verification import (
     ElevatedConsensusSignerAuthority,
 )
@@ -26,9 +24,7 @@ from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_prot
     SignerPeerAttestation,
     handle_reddog_isolated_signer_socket_request,
 )
-from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
-    SigningRequest,
-)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import SigningRequest
 from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_grant_binding import (
     build_secret_grant_authority_policy,
 )

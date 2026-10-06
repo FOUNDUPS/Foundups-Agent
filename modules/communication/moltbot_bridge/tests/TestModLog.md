@@ -1,5 +1,13 @@
 ## Authenticated target-owner qualification — 2026-10-06 (in progress)
 
+PR2083 first hosted run37400587065:674pass/1fail in the effect-consensus stage.
+The global fixture-bound check found the helper at204lines; local follow-up also
+found the expanded test above50lines. Preserve limits: compact two imports and
+extract unchanged persistence assertions into a helper. All16 structure/composed/
+provider/nonce regressions then pass in8.33s. No production bytes or acceptance
+assertions changed. Earlier source review did not cover this global test bound;
+the failed CI remains evidence of that validation gap.
+
 WSP00/15/97. Frozen absent/no-op owner hook controls reproduced unsafe signing.
 Ownerless factory, mismatched binding, shadowed method and substituted consuming
 boundary controls exercise exact production rejection before resolution. Root

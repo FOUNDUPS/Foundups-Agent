@@ -76,9 +76,7 @@ def test_complete_elevated_consensus_chain_commits_authority(
         identity_expires_at=NOW + 3600,
         work_authority_expires_at=NOW + 300,
     )
-    principal = replace(
-        _principal(), principal_public_key=request.principal_public_key
-    )
+    principal = replace(_principal(), principal_public_key=request.principal_public_key)
     request, capability, _ = verified_consensus_for_request(
         request, now=NOW, principal=principal
     )
@@ -114,6 +112,10 @@ def test_complete_elevated_consensus_chain_commits_authority(
     assert result.accepted is True, (
         result.receipt.rejection_reasons, routing_signer.responses
     )
+    _assert_persisted_authority(request, result, store, store_path, runtime_root, repo_root)
+
+
+def _assert_persisted_authority(request, result, store, store_path, runtime_root, repo_root):
     assert len(result.receipt.store_revision) == 64
     assert request.work_order_id in store.load()["issued_authorities"]
     restarted = AtomicJsonAuthorityRuntimeStore(
