@@ -12,7 +12,19 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — provider issuance handoff (2026-10-06 JST):**
+**Current execution — effect issuer handoff (2026-10-06 JST):**
+Base/main2837b0db3 includes merged PR2084. Two local Qwen attempts failed the
+fixed effect-issuer repair; retry budget is exhausted (experiment/policy in
+draft PR2085). WSP15 selects the executable prerequisite15/P1,C3/I4/D4/impact4:
+reuse issue_grant in the existing effect issuer and dispatch after provider exit.
+Coordinator repair passes80 connected tests; the four frozen controls improve
+from3fail/1pass to4pass. Independent review/publication remain open. This is a
+source prerequisite, not an autonomous retained improvement. Native18/P0 still
+requires effect-specific HIGH/ULTRA permits, authentic runtime inputs and resolver
+wiring, then independent baseline-controlled evaluation and later retained use.
+See module interface/ModLog and current backlog for scope and exact evidence.
+
+**Historical provider issuance handoff (2026-10-06 JST):**
 PR2083 merged at `4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708`; reviewed and
 merged trees match. Exact-main CI37401710455 and CodeQL37401710274 passed.
 The old owned branch is retired with a verified recovery bundle. WSP15 selects

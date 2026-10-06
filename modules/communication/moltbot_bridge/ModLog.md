@@ -1,4 +1,21 @@
-## Provider issuance handoff — 2026-10-06 (local candidate)
+## Effect issuer handoff — 2026-10-06 (local candidate)
+
+WSP00/15/22/50/97/99:15/P1 (C3/I4/D4/impact4), base2837b0db3.
+Two local Qwen proposals failed; coordinator implements the bounded source
+prerequisite instead of spending more calls. Frozen ordering/failure tests remain
+unchanged: baseline3fail/1pass, repaired4/4. Connected80pass in15.24s. Update
+existing inert issuance tests for provider exit before signing, including target
+interrupt propagation regardless of the exited provider's suppression setting.
+No new owner/module or runtime grant. Independent review unavailable; no native
+worker success or retained RSI benefit claimed. Evidence: existing
+`outputs/rsi-permission-evidence-20261006/effect-issuer-*` and frozen
+`effect-handoff-*` inputs. Holo lexical bundle has unknown semantic freshness and
+index gap; exact-source docs/tests supply this bounded review, not semantic proof.
+Additional boundary104pass in5.32s; total184 local cases. Existing manifest
+check passes unchanged; issuer outside its1419-file closure. Publication and
+independent review remain separate gates.
+
+## Provider issuance handoff — 2026-10-06 (historical PR2084)
 
 WSP00/15/97: PR2083 prerequisite merged at4e00032cf with exact-main CI success.
 Select14/P1 (C2/I4/D4/impact4). Independent frozen regression completes the

@@ -1880,24 +1880,39 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-      "observation_path": "current_observation.provider_issuance_handoff_20261006",
-      "base_commit": "4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708",
-      "selected_action": "Exit provider issuance lease before target signing; retain authenticated target revalidation",
-      "status": "candidate_connected_validation_in_progress",
+      "observation_path": "current_observation.effect_issuer_handoff_20261006",
+      "base_commit": "2837b0db389c567de9a5402e22fa711affcf176d",
+      "selected_action": "Use completed provider handoff in existing effect issuer; no signing before clean issuance exit",
+      "status": "locally_tested_independent_review_pending",
       "wsp15": {
-          "complexity": 2,
+          "complexity": 3,
           "importance": 4,
           "deferability": 4,
           "impact": 4,
-          "total": 14,
+          "total": 15,
           "priority": "P1"
       },
       "dispatchable": false,
       "execution_plane": "Owned source repair; no native runtime grant",
-      "next_action": "Freeze semantic lease-lifetime baseline, extend existing provider/client, preserve legacy lease API, independently validate and publish before actual runtime admission",
+      "next_action": "Obtain independent review of184 local passes, then reconcile effect-specific permit compatibility before native dependency wiring; no extra model retries",
       "higher_priority_gates": ["Native RSI18/P0 requires legitimate verified model/runtime admission; known-root inputs absent, not whole-machine absence"]
   },
   "current_observation": {
+    "effect_issuer_handoff_20261006": {
+      "source": "2837b0db389c567de9a5402e22fa711affcf176d",
+      "branch": "agent/rsi-effect-issuer-handoff-20261006",
+      "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
+      "status": "coordinator_repair_locally_tested_independent_review_pending",
+      "reason": "Existing issuer still called target while holding provider lease; local proposals failed, so use the permitted coordinator exception without more model retries",
+      "baseline": "Frozen four controls: three failures, one pass",
+      "candidate": "Same four controls pass; connected80pass in15.24s plus104 boundary passes in5.32s;184 total",
+      "integrity": "Manifest --check passes unchanged,1419 files,digest2c745813ae97d48141870a1601098a32730e93d72b18d3a99026aee6514cd6f2; issuer outside manifest closure, not deployment evidence",
+      "evidence_root": "outputs/rsi-permission-evidence-20261006",
+      "retrieval": "Holo lexical bundle only: freshness UNKNOWN, index gap true; bounded exact source and test inspection",
+      "next": "Effect-specific HIGH/ULTRA permit compatibility, then native dependency/resolver wiring under authentic authority",
+      "native_rsi_complete": false,
+      "retained_autonomous_improvement": false
+    },
     "provider_issuance_handoff_20261006": {
         "source": "4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708",
         "branch": "codex/rsi-provider-handoff-20261006",
