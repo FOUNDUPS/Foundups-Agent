@@ -129,6 +129,11 @@ class _LeasedGrantProvider:
     def lease(self, request: SigningRequest):
         yield self._factory(request)
 
+    def issue_grant(self, request: SigningRequest):
+        with self.lease(request) as grant:
+            issued = grant
+        return issued
+
 
 class _ProtocolGrantBackend:
     def sign(self, _request: SigningRequest, _peer: SignerPeerAttestation) -> SigningResponse:
@@ -599,6 +604,52 @@ def test_external_issuer_uses_root_generation_and_durable_replay(
 
     assert _is_lease(lease) is True
     assert _consume_lease(lease) is True
+
+
+@pytest.mark.parametrize("failure", [None, "cleanup", "invalid", "lease_only"])
+def test_external_issuer_dispatches_only_after_successful_provider_exit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str | None
+) -> None:
+    """Synthetic grant unit: ordering evidence, not admitted effect authority."""
+    monkeypatch.setattr(issuer_module.time, "time", lambda: NOW)
+    store = _store(tmp_path)
+    events = []
+
+    class Provider(_LeasedGrantProvider):
+        @contextmanager
+        def lease(self, request):
+            events.append("enter")
+            try:
+                yield None if failure == "invalid" else self._factory(request)
+            finally:
+                events.append("exit")
+                if failure == "cleanup":
+                    raise RuntimeError("provider cleanup failed")
+
+    class Signer(_GrantAwareSigner):
+        def sign_with_secret_grant(self, request, grant):
+            events.append("target")
+            return super().sign_with_secret_grant(request, grant)
+
+    provider = Provider(lambda _request: {"grant_id": "root-grant-1"})
+    if failure == "lease_only":
+        provider.issue_grant = None
+    issuer = ExternalSignerAuthoritativeUseLeaseIssuer(
+        signer=Signer(), grant_provider=provider, replay_store=store,
+        current_generation_authority=_authority(tmp_path, monkeypatch),
+    )
+    payload = _payload()
+    for field in _replay_binding(store):
+        payload.pop(field)
+    result = issuer.issue(payload=payload, authority_tier="HIGH")
+    if failure is None:
+        assert _is_lease(result) is True
+        assert events == ["enter", "exit", "target"]
+        assert _consume_lease(result) is True
+        assert _consume_lease(result) is False
+    else:
+        assert result is None
+        assert "target" not in events
 
 
 def test_real_lease_reaches_direct_wre_spine_without_monkeypatch(
