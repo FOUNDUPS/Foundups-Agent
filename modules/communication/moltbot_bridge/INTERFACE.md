@@ -1,8 +1,12 @@
-## Single-effect approval to grant — 2026-10-07 unpromoted candidate
+## Single-effect approval to grant — 2026-10-07 reviewed candidate
 
-**Open review blocker:** grant expiry is not yet capped by the independently
-verified approval interval. Do not activate this candidate; issuance-only approval
-semantics are not established. See ROADMAP for the focused follow-up.
+The prior lifetime blocker is repaired: effect permit consumption carries its
+registered expiry into the unsigned grant, before computing its ID and signature.
+Independent admission passes the actual validated grant expiry into `reserve`,
+which requires an exact integer with `now < grant_expires_at <= verified_expiry`.
+The proof's untrusted context alone cannot establish this limit. Legacy delegated
+reserve semantics are unchanged. Connected tests and bounded review support the
+source repair; native residency and authentic admission remain unverified.
 
 `CurrentEffectSigningAuthority` takes explicitly trusted owner, policy, author and
 reviewer runtime, sovereign authorization and nonce dependencies. `prepare_permit`

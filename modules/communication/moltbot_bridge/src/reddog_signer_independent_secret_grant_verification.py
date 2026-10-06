@@ -38,17 +38,20 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 def issue_effect_secret_grant(provider, request, permit):
     """Verify an effect grant across clean owner-fence exits, never across RPC."""
     from . import reddog_signer_independent_secret_grant_provider as owner
-    from .reddog_elevated_authority_consensus_signer_client import admit_secret_grant_consensus
+    from .reddog_effect_consensus_proof import consume_effect_signing_permit
 
     if type(request) is not SigningRequest:
         raise ValueError("secret_grant_request_invalid")
-    proof = admit_secret_grant_consensus(request, permit, now=provider._now())
+    sealed = consume_effect_signing_permit(permit, signing_request=request, now=provider._now(), include_expiry=True)
+    if sealed is None:
+        raise ValueError("secret_grant_consensus_invalid")
+    proof, approval_expires = sealed
     lease = owner.lease_validated_owner_e0_current_admission
     inputs = dict(owner_config_path=provider.owner_config_path,
                   repo_root=provider.repo_root.resolve(), policy=provider.owner_policy)
     with lease(**inputs) as selected:
         before = deepcopy(dict(selected.policy))
-        grant, signing_request, binding = provider._prepare_issue(request, selected, proof)
+        grant, signing_request, binding = provider._prepare_issue(request, selected, proof, approval_expires)
     signed = provider._sign_grant(grant, signing_request)
     with lease(**inputs) as selected:
         if before != dict(selected.policy) or binding != provider._resolve_binding(selected):

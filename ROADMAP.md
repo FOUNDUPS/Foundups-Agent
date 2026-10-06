@@ -17,16 +17,22 @@ PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;
 reviewed/main tree matches. Main CI37498282161 and CodeQL37498284318 passed.
 Re-observation selects16/P0 (C4/I4/D4/impact4): connect existing consent/reviewer,
 provider and independent signer owners without changing the exact target digest.
-687 local connected tests pass. Independent review blocks promotion: grant expiry
-can exceed verified approval lifetime. Next repair must cap that lifetime and
-test delayed target use. This is an owned checkpoint, not published completion.
-Fixture-backed source qualification is not native runtime admission.
+697 local connected tests pass after reproducing and repairing the approval-to-grant
+expiry defect (baseline3fail/1pass). Independent bounded review found no new defect;
+publication pending. Fixture-backed source qualification is not native admission.
 
-The existing local-first budget remains in force: deterministic checks first,
-no repeat broad audit, no further failed Qwen signer-route retry, no paid-provider
-fallback. Architect/review usage is not zero or currently measured. After this lifetime repair and reviewed closure, authentic runtime/resident
-composition remains next; native18/P0
-and retained benefit in a later invocation remain open.
+The local-first budget remains: deterministic checks, no repeat broad audits,
+no failed-Qwen-route retries or paid-provider fallback. Architect/review usage is
+unmeasured. Re-observation selects the existing14/P1 resident-artifact inventory
+(C2/I4/D4/impact4), then authentic runtime/resident composition. OpenClaw and Hermes
+user services were active; six inspected RSI settings were absent in their process
+environments. This does not establish global artifact absence or a missing producer.
+The named root/profile settings are also absent in inspected Windows process/user/
+machine scopes; eight expected public artifacts are absent at the source-derived
+Windows candidate root (not a designated authority). Resolve existing authenticated
+supply configuration before invoking any producer. No global absence claim.
+Native18/P0 still requires an admitted worker, independent baseline-controlled
+validation, governed retention/rollback and benefit in a later invocation.
 
 **Historical selection — runtime evidence before effect permission:**
 PR2087 merged at `bbb975b4f20fec5981a85a971f55fd26e3c7c6e8`. Its checked head

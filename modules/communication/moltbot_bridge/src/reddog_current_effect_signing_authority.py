@@ -40,13 +40,15 @@ class CurrentEffectSigningAuthority:
         frozen, _, _, expires, _ = checked
         return _mint_effect_signing_permit(frozen, expires_at=expires)
 
-    def reserve(self, proof, *, signing_request_digest, now):
+    def reserve(self, proof, *, signing_request_digest, now, grant_expires_at=None):
         if type(now) is not int or now < 0:
             return None
         checked = self._verify(proof)
         if checked is None:
             return None
         frozen, context, target, expires, current = checked
+        if type(grant_expires_at) is not int or not now < grant_expires_at <= expires:
+            return None
         digest = signer_secret_access_request_digest(target.to_dict())
         if digest != signing_request_digest or not context.issued_at <= now < expires:
             return None

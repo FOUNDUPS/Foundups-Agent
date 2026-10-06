@@ -1,3 +1,22 @@
+## Effect approval lifetime repair — 2026-10-07
+
+At checkpoint982a74cf9, frozen lifetime regression: 3 failed, 1 passed. Verified
+reviewer expiry1001 still allowed a grant lasting to1030 and target use at1002.
+The provider now consumes the registered permit expiry and caps the unsigned
+grant before its ID/signing request. The independent signer separately requires
+an integer grant expiry after now and no later than its freshly verified approval
+minimum. Missing, boolean, float, text and out-of-range bounds reject before nonce
+reservation. Existing delegated approval behavior is unchanged.
+
+Connected Windows suite: 697 passed in35.53s (includes frozen cases and 7 malformed
+lifetime cases). Independent bounded review found no new concrete defect; receipt
+`effect-expiry-independent-review.json`, SHA256
+`f6dfc88449f9127a085086dea8c0b62a64579541445d0f1d818e320d733f497d`.
+This closes the prior source blocker, not native RSI. Fixtures remain synthetic
+at owner/runtime seams; no Linux-root execution or real service transport claim.
+Generated manifest integrity: 8 passed in61.88s; registry current (1695 files,
+270 quarantined). Publication pending. WSP00/6/15/22/50/84/97.
+
 ## Single-effect grant composition — 2026-10-07 checkpoint
 
 Connect current-owner consent and reviewer quorum to one target permission,

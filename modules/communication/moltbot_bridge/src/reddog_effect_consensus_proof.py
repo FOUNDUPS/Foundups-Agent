@@ -78,7 +78,7 @@ def _mint_effect_signing_permit(proof, *, expires_at):
     return permit
 
 
-def consume_effect_signing_permit(permit, *, signing_request, now):
+def consume_effect_signing_permit(permit, *, signing_request, now, include_expiry=False):
     if type(permit) is not VerifiedEffectSigningPermit or type(now) is not int:
         return None
     try:
@@ -90,7 +90,8 @@ def consume_effect_signing_permit(permit, *, signing_request, now):
         if seal is None or not 0 <= now < seal[1] or digest != seal[0]:
             return None
         _PERMITS.pop(permit, None)
-        return deepcopy(seal[2])
+        proof = deepcopy(seal[2])
+        return (proof, seal[1]) if include_expiry else proof
 
 
 def discard_effect_signing_permit(permit):

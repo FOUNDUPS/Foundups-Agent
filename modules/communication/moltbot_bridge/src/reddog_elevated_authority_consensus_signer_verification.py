@@ -56,14 +56,15 @@ class ElevatedConsensusSignerAuthority:
     effect_authority: Any = None
 
     def reserve(
-        self, proof: Mapping[str, Any], *, signing_request_digest: str, now: int
+        self, proof: Mapping[str, Any], *, signing_request_digest: str, now: int, grant_expires_at=None
     ) -> VerifiedElevatedConsensusSignerReservation | None:
         from .reddog_current_effect_signing_authority import CurrentEffectSigningAuthority
         from .reddog_effect_consensus_proof import SCHEMA
         if isinstance(proof, Mapping) and proof.get("schema_version") == SCHEMA:
             if type(self.effect_authority) is not CurrentEffectSigningAuthority:
                 return None
-            return self.effect_authority.reserve(proof, signing_request_digest=signing_request_digest, now=now)
+            return self.effect_authority.reserve(proof, signing_request_digest=signing_request_digest,
+                now=now, grant_expires_at=grant_expires_at)
         return self._reserve_delegated(proof, signing_request_digest=signing_request_digest, now=now)
 
     def _reserve_delegated(self, proof, *, signing_request_digest, now):

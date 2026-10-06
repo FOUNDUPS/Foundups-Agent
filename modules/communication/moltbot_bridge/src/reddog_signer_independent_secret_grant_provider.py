@@ -105,11 +105,11 @@ class IndependentSignerSecretGrantProvider:
         signed = self._sign_grant(grant, sign_request)
         require_final_secret_grant(signed, request, binding, owner.resolver, now_epoch=self._now())
         return signed
-    def _prepare_issue(self, request, owner, consensus_proof):
+    def _prepare_issue(self, request, owner, consensus_proof, approval_expires=None):
         now = self._now()
         binding = self._resolve_binding(owner)
         policy = self._authority_policy(owner, binding)
-        grant = self._unsigned_grant(request, binding, owner.policy, now)
+        grant = self._unsigned_grant(request, binding, owner.policy, now, approval_expires)
         sign_request = build_secret_grant_signing_request(
             grant,
             policy=policy,
@@ -150,12 +150,13 @@ class IndependentSignerSecretGrantProvider:
         request: SigningRequest,
         binding: ResolvePerSignBinding,
         owner_policy: Mapping[str, Any],
-        now: int,
+        now: int, approval_expires: int | None = None,
     ) -> dict[str, Any]:
         nonce = self._nonce()
         expires = min(
             now + self._ttl(),
             int(owner_policy["expires_at"]),
+            approval_expires if approval_expires is not None else int(owner_policy["expires_at"]),
         )
         if expires <= now:
             raise ValueError("secret_grant_expired")

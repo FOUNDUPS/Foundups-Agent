@@ -28,12 +28,12 @@ def test_current_effect_seal_keeps_target_unchanged_and_is_one_use(monkeypatch, 
     assert consume_effect_signing_permit(permit, signing_request=target, now=s.now) is None
     reset_owner_reads(s)
     reserved = s.signing.reserve(proof,
-        signing_request_digest=signer_secret_access_request_digest(before), now=s.now)
+        signing_request_digest=signer_secret_access_request_digest(before), now=s.now, grant_expires_at=1020)
     assert reserved is not None
     assert commit_elevated_consensus_nonce(reserved)
     reset_owner_reads(s)
     assert s.signing.reserve(proof,
-        signing_request_digest=signer_secret_access_request_digest(before), now=s.now) is None
+        signing_request_digest=signer_secret_access_request_digest(before), now=s.now, grant_expires_at=1020) is None
 
 
 @pytest.mark.parametrize("case", ["consent", "review", "runtime", "author", "parent", "expiry", "generation", "target"])
@@ -107,11 +107,21 @@ def test_expired_permission_rolls_back_nonce(monkeypatch, tmp_path, phase):
         return token
     monkeypatch.setattr(s.nonces, "reserve", reserve)
     reservation = s.signing.reserve(s.proof,
-        signing_request_digest=signer_secret_access_request_digest(s.kw["target"].to_dict()), now=s.now)
+        signing_request_digest=signer_secret_access_request_digest(s.kw["target"].to_dict()), now=s.now, grant_expires_at=1020)
     if phase == "reserve":
         assert reservation is None
     else:
         assert reservation is not None
         s.now = 1020
         assert not commit_elevated_consensus_nonce(reservation)
+    assert not s.nonces.reserved and not s.nonces.consumed
+
+
+@pytest.mark.parametrize("expires", [None, True, 1001.0, "1001", 0, 1000, 1021])
+def test_effect_signer_rejects_missing_invalid_or_excess_grant_lifetime(monkeypatch, tmp_path, expires):
+    s = setup(monkeypatch, tmp_path)
+    reservation = s.signing.reserve(s.proof,
+        signing_request_digest=signer_secret_access_request_digest(s.kw["target"].to_dict()),
+        now=s.now, grant_expires_at=expires)
+    assert reservation is None
     assert not s.nonces.reserved and not s.nonces.consumed

@@ -1883,7 +1883,7 @@
     "observation_path": "current_observation.effect_signing_composition_20261007",
     "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",
     "selected_action": "Connect existing single-effect consent/review approval through provider and independent grant signer",
-    "status": "locally_validated_review_blocks_promotion",
+    "status": "source_repair_reviewed_publication_pending",
     "wsp15": {
       "complexity": 4,
       "importance": 4,
@@ -1894,7 +1894,7 @@
     },
     "dispatchable": false,
     "execution_plane": "Supervised developer-plane source repair; synthetic qualification, no native authority",
-    "next_action": "Cap effect grant validity by independently verified approval lifetime, test delayed use, then re-review before runtime composition",
+    "next_action": "Publish reviewed expiry repair through existing gates, then inspect designated resident public admission artifacts",
     "higher_priority_gates": [
       "Native18/P0 awaits authentic admission, independent evaluation, retention and later benefit"
     ]
@@ -1903,20 +1903,27 @@
     "effect_signing_composition_20261007": {
       "base_commit": "ac645be6a6a30913381edc97ef93595ee20af76e",
       "local_validation": {
-        "passed": 687,
+        "passed": 697,
         "failed": 0,
-        "seconds": 34.9,
-        "evidence": "outputs/rsi-permission-evidence-20261006/effect-signing-connected-windows.xml",
-        "excluded": "Dedicated Linux-root fixture tests; not verified on this Windows host"
+        "seconds": 35.53,
+        "evidence": "outputs/rsi-permission-evidence-20261006/effect-expiry-connected.xml",
+        "excluded": "Dedicated Linux-root tests"
       },
       "scope": "Existing effect consent/reviewer -> one-use permission -> independent grant -> existing lease issuer",
       "truth": "LOCAL_FIXTURE_VALIDATED; synthetic owner/runtime and in-process socket; not native RSI",
       "local_model_calls": 0,
       "paid_provider_calls": 0,
       "architect_review_cost": "unmeasured",
-      "review": "Promotion blocked: signed grant expiry can exceed verified approval lifetime; issuance-only semantics not established",
-      "publication": "Owned recoverable checkpoint only; no PR, merge or activation",
-      "next_dependency": "Approval-to-grant expiry bound and delayed-use regression, then authentic runtime/resident composition"
+      "review": "Expiry blocker resolved; effect-expiry-independent-review.json SHA256 f6dfc88449f9127a085086dea8c0b62a64579541445d0f1d818e320d733f497d",
+      "publication": "Pending",
+      "next_dependency": "Inventory14/P1 observed no root/profile in inspected Windows scopes or gateway processes; eight exact public artifact names absent at conditional Windows default. Resolve existing authenticated supply configuration; do not fabricate authority.",
+      "expiry_baseline": {
+        "failed": 3,
+        "passed": 1
+      },
+      "runtime_presence": "OpenClaw/Hermes user services active; six inspected RSI settings absent from their environments; no global artifact absence inference",
+      "runtime_inventory_evidence": ["outputs/rsi-permission-evidence-20261006/effect-expiry-runtime-presence.json", "outputs/rsi-permission-evidence-20261006/effect-expiry-windows-root-inventory.json", "outputs/rsi-permission-evidence-20261006/effect-expiry-public-artifact-inventory.json"],
+      "inventory_limits": "No secret reads, recursive search, bootstrap supply, runtime grants or service changes. Windows candidate root is not a designated authority; absence there is not global absence."
     },
     "grant_consensus_digest_20261007": {
     "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",

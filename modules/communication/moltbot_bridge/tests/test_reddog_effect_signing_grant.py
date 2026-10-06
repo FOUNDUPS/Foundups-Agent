@@ -123,3 +123,25 @@ def test_effect_permission_cannot_use_held_fence_api(monkeypatch, tmp_path):
         with provider.lease(state.kw["target"], elevated_consensus_signing_permit=permit):
             pytest.fail("effect grant entered legacy held-fence API")
     assert not state.grant_requests
+
+
+def test_grant_expires_with_verified_reviewer_runtime(monkeypatch, tmp_path):
+    state = setup(monkeypatch, tmp_path / "approval")
+    state.runtime_records["reviewer:test"] = replace(state.runtime_records["reviewer:test"], expires_at=1001)
+    provider, _ = provider_route(monkeypatch, tmp_path / "grant", state)
+    permit = state.signing.prepare_permit(state.proof)
+    reset_owner_reads(state)
+    grant = provider.issue_grant(state.kw["target"], elevated_consensus_signing_permit=permit)
+    assert grant["expires_at"] == 1001
+
+
+def test_root_rejects_grant_outliving_independent_approval(monkeypatch, tmp_path):
+    state = setup(monkeypatch, tmp_path / "approval")
+    state.runtime_records["reviewer:test"] = replace(state.runtime_records["reviewer:test"], expires_at=1001)
+    provider, _ = provider_route(monkeypatch, tmp_path / "grant", state)
+    from modules.communication.moltbot_bridge.src import reddog_signer_independent_secret_grant_provider as owner
+    with owner.lease_validated_owner_e0_current_admission() as selected:
+        _, request, _ = provider._prepare_issue(state.kw["target"], selected, state.proof)
+    response = provider.grant_authority.client.sign(request)
+    assert response.accepted is False
+    assert not state.nonces.reserved and not state.nonces.consumed

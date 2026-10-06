@@ -1,3 +1,11 @@
+## Current selection — 2026-10-07
+
+The checkpoint lifetime blocker below is repaired: 697 connected Windows cases
+pass, bounded independent review reports no new defect. Publication pending.
+Next14/P1: verify the designated resident's existing public runtime/admission
+artifacts; do not infer artifact absence from gateway environment settings.
+Native18/P0 and later retained RSI benefit remain open.
+
 ## Single-effect grant composition — 2026-10-07 checkpoint
 
 Connect current-owner consent and reviewer quorum to one target permission,

@@ -1,3 +1,11 @@
+## Effect lifetime boundary regression — 2026-10-07
+
+Existing effect signing tests now reproduce and repair excessive grant lifetime,
+independent root acceptance of that lifetime, and delayed target use. Frozen
+baseline3fail/1pass becomes passing within697 connected Windows cases. Seven
+missing/type/range cases also reject before nonce consumption. Evidence:
+`outputs/rsi-permission-evidence-20261006/effect-expiry-{baseline,focused,connected}.xml`.
+
 ## Effect signing composition regression — 2026-10-07
 
 Run `test_reddog_effect_signing_composition.py`, `test_reddog_effect_signing_grant.py`

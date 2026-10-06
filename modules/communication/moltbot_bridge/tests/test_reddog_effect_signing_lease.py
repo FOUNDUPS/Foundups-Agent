@@ -3,6 +3,8 @@
 from contextlib import contextmanager
 from dataclasses import replace
 import json
+from types import SimpleNamespace
+import pytest
 
 from .reddog_effect_signing_test_support import setup, reset_owner_reads
 from .test_reddog_effect_signing_grant import provider_route, fixtures
@@ -28,13 +30,15 @@ def current_authority(monkeypatch, root, payload):
     return kind(root, root)
 
 
-def test_effect_proof_reaches_verified_one_use_lease(monkeypatch, tmp_path):
+@pytest.mark.parametrize("delayed", [False, True])
+def test_effect_proof_reaches_verified_one_use_lease(monkeypatch, tmp_path, delayed):
     monkeypatch.setitem(fixtures._store.__globals__, "NOW", 1000)
     store = fixtures._store(tmp_path / "store")
     target_key = fixtures.Ed25519PrivateKey.generate()
     overrides = dict(existing._replay_binding(store), signer_public_key=fixtures._public(target_key),
                      socket_path_digest=existing.digest_text(existing._binding().socket_path))
     state = setup(monkeypatch, tmp_path / "approval", target_overrides=overrides)
+    state.runtime_records["reviewer:test"] = replace(state.runtime_records["reviewer:test"], expires_at=1001)
     provider, _ = provider_route(monkeypatch, tmp_path / "grant", state, store=store)
     payload = json.loads(state.kw["target"].signing_input.split(".", 2)[2])
     monkeypatch.setitem(_target_client.__globals__, "NOW", 1000)
@@ -50,11 +54,20 @@ def test_effect_proof_reaches_verified_one_use_lease(monkeypatch, tmp_path):
     issuer = issuer_module.ExternalSignerAuthoritativeUseLeaseIssuer(
         signer=signer, grant_provider=provider, replay_store=store,
         current_generation_authority=current_authority(monkeypatch, tmp_path, payload))
+    if delayed:
+        def issue_grant(*args, **kwargs):
+            grant = provider.issue_grant(*args, **kwargs)
+            monkeypatch.setitem(_target_client.__globals__, "NOW", 1002)
+            return grant
+        issuer = replace(issuer, grant_provider=SimpleNamespace(issue_grant=issue_grant))
     assert issuer.prepare_request(payload=payload, authority_tier="HIGH") == state.kw["target"]
     permit = state.signing.prepare_permit(state.proof)
     assert permit is not None
     reset_owner_reads(state)
     lease = issuer.issue(payload=payload, authority_tier="HIGH", effect_signing_permit=permit)
+    if delayed:
+        assert lease is None
+        return
     expected = dict(effect_kind="worktree_create", effect_request_digest=payload["effect_request_digest"])
     assert is_authoritative_use_lease(lease, **expected)
     assert consume_authoritative_use_lease(lease, **expected)
