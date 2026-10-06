@@ -1,4 +1,19 @@
-## Authenticated target owner prerequisite — 2026-10-06 (in progress)
+## Provider issuance handoff — 2026-10-06 (local candidate)
+
+WSP00/15/97: PR2083 prerequisite merged at4e00032cf with exact-main CI success.
+Select14/P1 (C2/I4/D4/impact4). Independent frozen regression completes the
+synthetic HIGH chain then fails because both target calls hold the provider
+lease. Reuse the existing provider lease in `issue_grant`; return only after
+successful exit. Existing consensus client dispatches afterward. Legacy lease,
+one-use permit checks, provider independence and target admission are preserved.
+No new module or runtime authority. Manual coordinator repair is necessary
+while legitimate model/runtime admission is unverified; this is not a local-agent
+RSI success. Independent source review found no concrete defect in the delta.
+Initial36pass; expanded91pass in24.49s including clean/failed lease exit controls.
+Final adapter controls pass; connected94/94 in26.13s. Integrity8/8 passed in63.61s; publication pending.
+Evidence: `outputs/rsi-permission-evidence-20261006/provider-handoff-*`.
+
+## Authenticated target owner prerequisite — 2026-10-06 (historical)
 
 WSP00/15/97: PR2082 merged at5420b85a; exact-main CI37397915051 passed.
 Select15/P1 (C3/I4/D5/impact3) before provider handoff. Independent baseline

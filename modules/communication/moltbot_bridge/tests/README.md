@@ -1,3 +1,14 @@
+## Provider issuance regression — 2026-10-06
+
+The frozen composed test observes whether each target call still holds the
+provider owner lease. It failed twice in the baseline chain, then passes after
+the issuance handoff repair. The HIGH chain uses explicit synthetic admission;
+it is not native authority. Provider tests retain legacy lease lifetime and add
+clean/failed exit cases. Adapter tests reject issuance exceptions, invalid grants
+and lease-only providers before target dispatch. Connected94/94 pass in26.13s;
+commands and source review are in `outputs/rsi-permission-evidence-20261006/`.
+Production target admission and later retained RSI benefit remain separate gates.
+
 ## Authenticated public startup regression — 2026-10-06
 
 Separate actual-OS qualification at `50008b241` passes using synthetic authority:

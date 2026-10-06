@@ -1,4 +1,14 @@
-## Authenticated target-owner qualification — 2026-10-06 (in progress)
+## Provider issuance qualification — 2026-10-06 (local candidate)
+
+Frozen source4e00032cf:1 intended semantic failure/1 structural pass in4.453s.
+Original20 top-level test ASTs retained. Candidate36pass, then91pass in24.49s
+across provider, composed, structure, independence, nonce, target and factory
+owners. Clean-exit/signature and failed-exit controls exercise actual provider
+issuance with synthetic admission. Final adapter failure controls pass; connected94/94 in26.13s. Synthetic HIGH composition is not admitted HIGH or a native worker run.
+Evidence: provider-handoff-4e000-baseline-review.json, provider-handoff-connected3.xml
+under `outputs/rsi-permission-evidence-20261006/`.
+
+## Authenticated target-owner qualification — 2026-10-06 (historical)
 
 PR2083 first hosted run37400587065:674pass/1fail in the effect-consensus stage.
 The global fixture-bound check found the helper at204lines; local follow-up also

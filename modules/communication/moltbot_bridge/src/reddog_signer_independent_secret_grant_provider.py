@@ -69,6 +69,14 @@ class IndependentSignerSecretGrantProvider:
             authority.public_key, authority.key_epoch,
             str(self.owner_config_path.resolve()),
         )
+    def issue_grant(self, request: SigningRequest, *, elevated_consensus_signing_permit=None) -> Mapping[str, Any]:
+        """Return a verified grant only after issuance admission exits cleanly."""
+        with self.lease(
+            request, elevated_consensus_signing_permit=elevated_consensus_signing_permit
+        ) as grant:
+            issued = grant
+        return issued
+
     @contextmanager
     def lease(
         self,

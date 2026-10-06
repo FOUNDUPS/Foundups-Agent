@@ -1880,24 +1880,37 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-      "observation_path": "current_observation.authenticated_target_owner_20261006",
-      "base_commit": "5420b85a02a76efe21947a5dc00c8aecb854e5d3",
-      "selected_action": "Require authenticated target owner lease before provider handoff",
-      "status": "candidate_connected_134_pass_integrity_8_pass_publication_pending",
+      "observation_path": "current_observation.provider_issuance_handoff_20261006",
+      "base_commit": "4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708",
+      "selected_action": "Exit provider issuance lease before target signing; retain authenticated target revalidation",
+      "status": "candidate_connected_validation_in_progress",
       "wsp15": {
-          "complexity": 3,
+          "complexity": 2,
           "importance": 4,
-          "deferability": 5,
-          "impact": 3,
-          "total": 15,
+          "deferability": 4,
+          "impact": 4,
+          "total": 14,
           "priority": "P1"
       },
       "dispatchable": false,
       "execution_plane": "Owned source repair; no native runtime grant",
-      "next_action": "Validate exact owner factory and binding, reconcile connected fixtures without weakening admission, independently review and publish; then resume provider handoff and effect permit",
-      "higher_priority_gates": []
+      "next_action": "Freeze semantic lease-lifetime baseline, extend existing provider/client, preserve legacy lease API, independently validate and publish before actual runtime admission",
+      "higher_priority_gates": ["Native RSI18/P0 requires legitimate verified model/runtime admission; known-root inputs absent, not whole-machine absence"]
   },
   "current_observation": {
+    "provider_issuance_handoff_20261006": {
+        "source": "4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708",
+        "branch": "codex/rsi-provider-handoff-20261006",
+        "previous_closure": "PR2083 merged; exact-main CI37401710455 and CodeQL37401710274 success; old branch archived and retired",
+        "runtime_inventory": "Known resident root lacks eight standard model evidence files; architect query UNCONFIGURED; WSL gateways active but Hermes API status0. Scoped observations do not prove whole-machine absence.",
+        "selection_reason": "Target-owner prerequisite closed; provider handoff is a bounded executable source dependency while native runtime inputs remain unverified",
+        "baseline": "Independent frozen1intended failure/1structure pass; both target calls held provider lease",
+        "candidate": "Connected94pass in26.13s; independent production source review found no concrete defect; integrity8/8 passed in63.61s; publication pending",
+        "runtime_closure": "Existing generator unchanged: provider/client are outside current executable dependency closure. Exact-source tests do not prove native wiring or admitted runtime consumption.",
+        "evidence_root": "outputs/rsi-permission-evidence-20261006",
+        "native_rsi_complete": false,
+        "remaining": "Grant-authority RPC topology, HIGH/effect admission, legitimate model binding, admitted worker, independent evaluator and later retained benefit"
+    },
     "authenticated_target_owner_20261006": {
         "source": "5420b85a02a76efe21947a5dc00c8aecb854e5d3",
         "branch": "codex/rsi-provider-issuance-handoff-20261006",
@@ -1905,7 +1918,7 @@
         "candidate": "Final connected134pass/1skip in70.46s, target-owner-connected-final.xml. Prior assertion failure preserved. Explicit HIGH/effect unit acceptance is distinct from exact production rejection; real LOW/root paths admitted in fixture.",
         "evidence": "outputs/rsi-permission-evidence-20261006/target-owner-lease-baseline-review.json",
         "selection_reason": "Unsafe target fallback blocks provider handoff; extend existing factory and backend, no new authority or orchestrator",
-        "publication": "uncommitted_candidate_not_approved",
+        "publication": "PR2083 merged4e00032cf; reviewed/merged trees equal; exact-main CI37401710455 and CodeQL37401710274 success",
         "native_rsi_complete": false,
         "remaining": "Final connected/integrity validation and publication, provider handoff, actual HIGH/effect admission, admitted local worker, independent evaluator and later retained benefit"
     },

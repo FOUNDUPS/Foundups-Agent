@@ -36,12 +36,12 @@ class ElevatedConsensusGrantProvider(Protocol):
         self,
     ) -> ElevatedConsensusGrantProviderIdentity: ...
 
-    def lease(
+    def issue_grant(
         self,
         request: SigningRequest,
         *,
         elevated_consensus_signing_permit: VerifiedElevatedAuthoritySigningPermit,
-    ) -> ElevatedConsensusGrantLease: ...
+    ) -> Mapping[str, Any]: ...
 
 
 class GrantAwareSigner(Protocol):
@@ -77,13 +77,13 @@ class ElevatedConsensusExternalSignerClient:
     ) -> SigningResponse:
         try:
             provider = _provider_for_role(self, request.signer_role)
-            with provider.lease(
+            grant = provider.issue_grant(
                 request,
                 elevated_consensus_signing_permit=permit,
-            ) as grant:
-                if not isinstance(grant, Mapping):
-                    return _reject(RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED)
-                return self.signer.sign_with_secret_grant(request, grant)
+            )
+            if not isinstance(grant, Mapping):
+                return _reject(RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED)
+            return self.signer.sign_with_secret_grant(request, grant)
         except Exception:
             return _reject(RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED)
 
