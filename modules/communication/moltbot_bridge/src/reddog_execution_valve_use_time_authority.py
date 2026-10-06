@@ -102,6 +102,7 @@ class GovernedValveUseTimeResolution:
     signed_authority_reverified: bool
     authoritative_use_lease: Optional["AuthoritativeUseLease"] = None
     signer_generation_binding_receipt_id: Optional[str] = None
+    signer_peer_binding_receipt_id: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -124,6 +125,7 @@ class GovernedValveUseTimeAuthorityResolver:
     forbidden_operations: tuple[str, ...] = ()
     revoked_key_epochs: tuple[str, ...] = ()
     leeway_s: int = 60
+    signer_peer_secret_access_grant_supplier: Any = None
 
     def resolve(
         self,
@@ -173,15 +175,14 @@ class GovernedValveUseTimeAuthorityResolver:
             self.runtime_allowed_root,
             self.trusted_now_epoch,
             principal_identity=identity, principal_work_authority=work_authority,
+            peer_secret_access_grant_supplier=self.signer_peer_secret_access_grant_supplier,
         )
         generation_binding_receipt_id = generation_evidence.receipt_id
         reasons.extend(
             generation_evidence.remaining_reasons(
                 INCOMPLETE_TRUST_ANCHOR_REASONS,
-                CURRENT_GENERATION_TRUST_ANCHOR_REASONS + (
-                    ("canonical_principal_subject_key_attestation_missing",)
-                    if generation_evidence.principal_matches(identity, work_authority) else ()
-                ),
+                CURRENT_GENERATION_TRUST_ANCHOR_REASONS
+                + generation_evidence.bound_identity_reasons(identity, work_authority),
             )
         )
 
@@ -205,6 +206,7 @@ class GovernedValveUseTimeAuthorityResolver:
             signed_authority_reverified=reverified,
             authoritative_use_lease=authoritative_use_lease,
             signer_generation_binding_receipt_id=generation_binding_receipt_id,
+            signer_peer_binding_receipt_id=generation_evidence.peer_receipt_id,
         )
 
     def _reverify_and_bind(

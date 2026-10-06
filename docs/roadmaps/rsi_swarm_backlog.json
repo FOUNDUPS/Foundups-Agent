@@ -1880,10 +1880,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.principal_generation_join_20261007",
-    "base_commit": "6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd",
-    "selected_action": "Connect existing signed-generation principal verification to the resident principal subject-key gate",
-    "status": "SPECIFIED_NOT_IMPLEMENTED",
+    "observation_path": "current_observation.signer_peer_join_20261007",
+    "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
+    "selected_action": "Connect existing fresh signer-peer verification to resident use-time evidence",
+    "status": "LOCAL_COMPONENT_CONNECTION_VALIDATED; PUBLICATION_PENDING",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1894,15 +1894,83 @@
     },
     "dispatchable": false,
     "execution_plane": "Source-only consumer connection; independently authenticated runtime enrollment remains separate",
-    "next_action": "Connect existing root-selected principal evidence to the resident principal subject-key gate; preserve other six unresolved reasons. Verify exact identity/key and scope against current signed generation, fail closed on unavailable, changed, expired or fabricated evidence. No new authority store or issuer.",
+    "next_action": "Publish reviewed peer consumer in existing PR2093; verify exact-head CI before closure; then re-observe five remaining independent trust connections using WSP15/97. No runtime grant inferred.",
     "higher_priority_gates": [
       "Native18/P0: admitted local worker improvement, independent baseline-controlled evaluation, retained use and later benefit remain unproven"
     ]
   },
   "current_observation": {
+    "signer_peer_join_20261007": {
+      "base_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
+      "truth": "LOCALLY_VERIFIED_COMPONENT_CONNECTION; hosted consumer checks and native grant-backed operation unverified",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "finding": "Resident dependency construction uses the existing isolated socket client; it does not supply mutual-challenge evidence to the use-time resolver. Existing healthcheck owns challenge/response verification. Principal source connection is now merged; six other reasons remain.",
+      "selected_action": "Trace and reuse existing root-selected signer instance/profile and mutual peer healthcheck at resident use time. Require exact current signer/session/generation/requester binding and bounded fresh evidence; do not accept copied healthcheck status as live peer authentication. Preserve other five reasons.",
+      "why_this_slice": "Independent peer verification can be tested with existing disposable local socket fixtures without model inference or building another orchestrator. Consent/quorum composition still depends on final-effect bindings; supplied model/Memex trust roots remain a separate owner connection. This selection is not a claim those dependencies are solved.",
+      "source_sha256": {
+        "modules/communication/moltbot_bridge/src/reddog_execution_valve_use_time_authority.py": "58b6c362c60c544c27642b4e1c3b03738b5e253491f3290540c26b601ab059ac",
+        "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_runtime_dependency_bundle.py": "a460a8f9b55bd6c988075f85066c3f58388f1fe8114d4439ade829b3939e0a55",
+        "modules/communication/moltbot_bridge/src/reddog_isolated_signer_socket_client.py": "214e838dbfe13b0ceda972f0375f6bac7e44fd5ed2b309de52d57e2a8efb871a",
+        "modules/communication/moltbot_bridge/src/reddog_signer_mutual_peer_handshake.py": "e1fa243fa1c5febcf837a63d7383f3d5be734e9f96603e9327e1584d1858189e",
+        "modules/communication/moltbot_bridge/src/reddog_signer_socket_service_healthcheck.py": "50ab19acded93dcff7279289e79abd399fd4f3227f07b2bba7e37a985569836c"
+      },
+      "dispatchable": false,
+      "acceptance": [
+        "Root-selected signer/profile and exact current generation binding",
+        "Fresh signed challenge and current transport/peer controls; fail closed on replay, stale or substituted peer",
+        "Preserve five unrelated trust gates; no credentials or enrollment fabricated",
+        "Real disposable socket test and independent source review before closure"
+      ],
+      "native_gate": "18/P0 remains blocked; actual admitted local-worker improvement, independent baseline comparison, retention and later benefit unproven",
+      "retrieval": "Existing Holo owner root/head mismatch; exact-source fallback, not CURRENT index evidence",
+      "cost": "Deterministic checks first; paused rejected worker route; no paid fallback; coordinator usage unknown",
+      "prerequisites": {
+        "windows": {
+          "passed": 82,
+          "skipped": 5,
+          "failed": 0
+        },
+        "linux": {
+          "passed": 29,
+          "skipped": 0,
+          "failed": 0
+        },
+        "review": "peer-prerequisite-independent-review.json",
+        "evidence": "outputs/rsi-permission-evidence-20261006/peer-preconditions-execution.json",
+        "remaining": "Fresh grant-compatible RPC, before/after generation and requester/expiry comparison; all six resident reasons remain",
+        "runtime_authority_changed": false,
+        "worker_calls": 0,
+        "coordinator_review_tokens": null
+      },
+      "consumer": {
+        "connected": {
+          "passed": 123,
+          "failed": 1,
+          "skipped": 5,
+          "failure": "expiry test legacy fixture key; original failed run retained"
+        },
+        "corrected_pair": {
+          "passed": 2,
+          "failed": 0,
+          "production_unchanged": true
+        },
+        "baseline": "corrected review-pinned source reproduces renewal rejection and expired-manifest acceptance; earlier expiry baseline invalid",
+        "source_review": "outputs/rsi-permission-evidence-20261006/peer-consumer-time-evidence-correction-review.json",
+        "remaining": "Five unrelated trust reasons after valid live collection; real enrolled grant supply and native RSI still unverified",
+        "pr": 2093,
+        "publication": "consumer diff not yet pushed"
+      }
+    },
     "principal_generation_join_20261007": {
       "base_commit": "6ad4ee36028e65e3f47cda8d12ee3ecaa10643bd",
-      "truth": "LOCAL_FIXTURE_VALIDATED; publication and native admission not verified",
+      "truth": "MERGED_VERIFIED_MAIN; source fixture and hosted CI qualified; native RSI unproven",
       "wsp15": {
         "complexity": 3,
         "importance": 4,
@@ -1952,6 +2020,14 @@
         "seconds": 40.44,
         "evidence": "outputs/rsi-permission-evidence-20261006/principal-generation-connected-execution.json",
         "independent_review": "outputs/rsi-permission-evidence-20261006/principal-generation-independent-recheck.json"
+      },
+      "merge_commit": "e3894546f5328b61d0746f4baa3c4ed318392fb5",
+      "pr": 2092,
+      "closure_evidence": "outputs/rsi-permission-evidence-20261006/principal-generation-2092-merge-closure.json",
+      "main_checks": {
+        "ci": 37525762999,
+        "codeql": 37525764472,
+        "conclusion": "success"
       }
     },
     "resident_effect_join_20261007": {

@@ -1,3 +1,45 @@
+## Resident fresh peer use — 2026-10-07
+
+Bootstrap and resolver accept optional `signer_peer_secret_access_grant_supplier`;
+the collector receives it as `peer_secret_access_grant_supplier`. The callback
+must already own authentic grant supply. No default credentials or grant issuer
+are constructed. Omission preserves the closed peer gate. Invalid supplied
+callbacks or probe failure fail closed without stale-generation fallback.
+
+`SignerCurrentGenerationRuntimeBinding` appends authenticated `manifest_expires_at`.
+The collector checks stable generation/revision/owner/config/packet/principal/
+process/signer/endpoint identity before and after RPC, excluding refreshed
+selection expiry and audit receipt. It checks both snapshots' selection/manifest
+expiry plus handshake expiry at a final nondecreasing trusted time. Sampling
+cannot prove absence of a transient change-and-restore. No fence spans RPC.
+
+`SignerCurrentGenerationUseTimeEvidence.peer_receipt_id` and resolver result
+`signer_peer_binding_receipt_id` are diagnostic bindings to the generation,
+request, response and requester. Only live internal collection supplies this
+path; saved typed/serialized READY is not an admission input. Five unrelated
+trust gates remain. Tests use disposable/substituted authority; native activation
+and retained autonomous improvement are unverified.
+
+## Peer healthcheck prerequisites — 2026-10-07
+
+`load_system_service_signer_identity` optionally accepts `expected_owner_config_id`;
+mismatch with the same loaded root owner rejects. Current-generation verifier
+option `include_process_identity=True` requires that binding and appends signer
+UID/GID to its audit result. Default callers keep generation-only behavior.
+
+Healthcheck accepts `expected_server_uid`, `expected_server_gid`,
+`trusted_socket_root` and `secret_access_grant_supplier(request)`. The existing
+socket client enforces OS identity; custom connectors cannot satisfy strict
+identity checks. A supplied grant callback must return a mapping; missing,
+throwing or invalid grants reject without falling back to bare signing. Omitted
+callback preserves legacy behavior. Actual grant authorization remains the signer.
+
+Successful audit results append session ID, socket-path digest, key epoch and
+`server_identity_verified`. These are diagnostic fields, not independently
+trusted provenance. Caller-supplied generation IDs or cached READY cannot satisfy
+a resident authorization gate. These prerequisite fields now feed the live internal
+collector described above; the healthcheck alone still grants no authority.
+
 ## Principal use-time generation binding — 2026-10-07
 
 `verify_signer_current_generation_runtime_binding` and its use-time collector

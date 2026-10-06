@@ -498,3 +498,67 @@ def test_real_principal_evidence_matches_only_checked_work(tmp_path, monkeypatch
     assert evidence.principal_matches(identity, authority)
     authority["work_order_id"] = "another-work-order"
     assert not evidence.principal_matches(identity, authority)
+
+
+@pytest.mark.parametrize("case", ["current", "owner-rotated", "missing-v2-owner"])
+def test_generation_process_identity_is_bound_to_selected_owner(tmp_path, monkeypatch, case):
+    from unittest.mock import Mock
+    values = _fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    loader = Mock(return_value=(1234, 1235))
+    if case == "owner-rotated":
+        loader.side_effect = ValueError("signer_owner_selection_mismatch")
+    if case != "missing-v2-owner":
+        monkeypatch.setattr(binding_module, "load_system_service_signer_identity", loader)
+    result = verify_signer_current_generation_runtime_binding(
+        repo_root=harness.repo_root, runtime_root=harness.runtime_root, now_epoch=NOW,
+        include_process_identity=True)
+    assert result.accepted is (case == "current")
+    assert (result.signer_uid, result.signer_gid) == ((1234, 1235) if case == "current" else (None, None))
+    if case != "missing-v2-owner":
+        loader.assert_called_once_with(owner_config_path=values["owner_path"].resolve(),
+            repo_root=harness.repo_root.resolve(), expected_owner_config_id=json.loads(values["owner_path"].read_text("ascii"))["config_id"])
+    assert not result.authority_granted and not result.effect_capability_issued
+
+
+@pytest.mark.parametrize("case", ["renewed", "manifest-expired-during-read"])
+def test_peer_connection_uses_real_renewed_generation(tmp_path, monkeypatch, case):
+    from modules.communication.moltbot_bridge.src import reddog_signer_current_generation_use_time_gate as gate
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import SignerServiceHealthcheckResult
+    values = _principal_fixture(tmp_path, monkeypatch)
+    harness = values["harness"]
+    initial = NOW if case == "renewed" else harness.read_manifest()["expires_at"]-2
+    now = [initial]
+    monkeypatch.setattr(selection_module, "_now_epoch", lambda: now[0] if case == "renewed" else initial)
+    monkeypatch.setattr(binding_module, "load_system_service_signer_identity", lambda **_: (1234,1235))
+    # Legacy fixture has no enrolled v2 process/profile owner; isolate selection producer.
+    monkeypatch.setattr(binding_module, "_selected_signer_identity", lambda **_: {
+        "signer_profile_id":"reddog-work-authority", "signer_public_key":harness.reddog_public_key,
+        "key_epoch":"fixture-epoch"})
+    observed = []
+    real_verify = gate.verify_signer_current_generation_runtime_binding
+    def verify(**kwargs):
+        result = real_verify(**kwargs)
+        observed.append(result)
+        if case == "manifest-expired-during-read" and len(observed) == 2:
+            now[0] = harness.read_manifest()["expires_at"]
+        return result
+    monkeypatch.setattr(gate, "verify_signer_current_generation_runtime_binding", verify)
+    def probe(**kwargs):
+        before=observed[0]
+        assert before.accepted, before.rejection_reasons
+        now[0]+=1
+        return SignerServiceHealthcheckResult(True, "READY", str(values["packet_path"]),
+            before.run_packet_id, "fixture-config", before.config_digest, "fixture-socket",
+            before.signer_profile_id, before.signer_public_key, kwargs["requester_principal_id"],
+            "sha256:"+"a"*64,"sha256:"+"b"*64,(),manifest_id=before.manifest_id,
+            artifact_generation_digest=before.artifact_generation_digest,peer_handshake_verified=True,
+            peer_handshake_expires_at=initial+600,session_id=before.session_id,
+            socket_path_digest=before.socket_path_digest,key_epoch=before.key_epoch,server_identity_verified=True)
+    monkeypatch.setattr(gate,"run_reddog_signer_socket_service_healthcheck",probe)
+    result=gate.collect_signer_current_generation_use_time_evidence(True,harness.repo_root,
+        harness.runtime_root,lambda:now[0],principal_identity=dict(harness.identity),
+        principal_work_authority=dict(harness.work_authority),peer_secret_access_grant_supplier=lambda request:{})
+    assert len(observed)==2 and all(b.accepted for b in observed)
+    assert (observed[0].selection_expires_at != observed[1].selection_expires_at) is (case == "renewed")
+    assert result.peer_verified is (case=="renewed")

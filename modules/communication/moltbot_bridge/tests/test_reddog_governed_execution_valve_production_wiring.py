@@ -113,6 +113,7 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
         now_epoch=dependency_bundle.now_epoch,
         max_steps=1,
         worktree_lease_issuer=issuer,
+        signer_peer_secret_access_grant_supplier=issuer,
     )
 
     assert result.accepted is True, result.rejection_reasons
@@ -120,6 +121,7 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
     assert isinstance(captured["valve_environment"], GovernedExecutionValveEnvironment)
     resolver = captured["governed_use_time_authority_resolver"]
     assert isinstance(resolver, GovernedValveUseTimeAuthorityResolver)
+    assert resolver.signer_peer_secret_access_grant_supplier is issuer
     assert resolver.valve_environment_path == runtime / "execution_valve_env.json"
     assert resolver.permission_snapshots_path == runtime / "permission_snapshots.json"
 

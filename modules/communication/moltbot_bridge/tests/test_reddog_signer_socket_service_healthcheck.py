@@ -530,3 +530,103 @@ def test_healthcheck_module_has_no_spawn_secret_resolution_or_runtime_authority_
                 assert node.func.id not in banned_name_calls
             if isinstance(node.func, ast.Attribute):
                 assert node.func.attr not in banned_attrs
+
+
+@pytest.mark.parametrize("mode", ["grant", "absent", "wrong-type", "exception"])
+def test_healthcheck_protected_request_never_falls_back_to_bare_sign(tmp_path, mode):
+    repo = _repo(tmp_path)
+    packet = _packet(repo, tmp_path / "runtime")
+    supplied, sent = [], []
+    def supply(request):
+        supplied.append(request)
+        if mode == "exception":
+            raise ValueError("unavailable")
+        return {"fixture_grant": "bounded-test-only"} if mode == "grant" else ([] if mode == "wrong-type" else None)
+    def connector(path, raw, timeout, limit):
+        decoded = json.loads(raw)
+        sent.append(decoded)
+        return _accepted_connector(path, raw, timeout, limit)
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=packet, requester_principal_id="github:mjtrout",
+        connector=connector, secret_access_grant_supplier=supply, **_manifest_bindings())
+    assert len(supplied) == 1
+    assert result.accepted is (mode == "grant")
+    assert not result.server_identity_verified
+    if mode == "grant":
+        assert len(sent) == 1 and sent[0]["schema_version"] == "reddog_signer_socket_request.v2"
+        assert sent[0]["request"] == supplied[0].to_dict()
+        assert sent[0]["secret_access_grant"] == {"fixture_grant": "bounded-test-only"}
+        assert result.session_id and result.key_epoch == "epoch-1"
+        assert result.socket_path_digest.startswith("sha256:")
+    else:
+        assert sent == []
+        assert "signer_healthcheck_grant_unavailable" in result.rejection_reasons
+
+
+def test_healthcheck_kernel_identity_disallows_custom_connector(tmp_path):
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    packet = _packet(repo, runtime)
+    called = []
+    def connector(*args):
+        called.append(True)
+        raise AssertionError("must reject before untrusted transport")
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=packet, requester_principal_id="github:mjtrout",
+        connector=connector, expected_server_uid=1234, expected_server_gid=1235,
+        trusted_socket_root=runtime, **_manifest_bindings())
+    assert not result.accepted and not result.server_identity_verified and called == []
+
+
+@pytest.mark.parametrize("mode", ["current", "wrong-uid", "wrong-gid"])
+def test_healthcheck_real_socket_checks_kernel_peer(tmp_path_factory, mode):
+    import os
+    import socket
+    import threading
+    if not hasattr(socket, "SO_PEERCRED"):
+        pytest.skip("Linux kernel peer credentials required")
+    root = tmp_path_factory.mktemp("hp")
+    repo = _repo(root)
+    runtime = root / "runtime"
+    packet = _packet(repo, runtime)
+    path = runtime / "signer.sock"
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    errors, requests = [], []
+    worker = None
+    try:
+        server.bind(str(path))
+        path.chmod(0o600)
+        server.listen(1)
+        server.settimeout(5)
+        def serve():
+            try:
+                with server.accept()[0] as client:
+                    client.settimeout(5)
+                    raw = b""
+                    while not raw.endswith(b"\n"):
+                        chunk = client.recv(4096)
+                        assert chunk, "truncated request"
+                        raw += chunk
+                        assert len(raw) < 16384
+                    requests.append(json.loads(raw))
+                    client.sendall(_accepted_connector(path, raw, 2, 8192))
+            except Exception as exc:
+                errors.append(type(exc).__name__)
+        if mode == "current":
+            worker = threading.Thread(target=serve, daemon=True)
+            worker.start()
+        result = run_reddog_signer_socket_service_healthcheck(
+            repo_root=repo, run_packet_path=packet, requester_principal_id="github:mjtrout",
+            expected_server_uid=os.geteuid() + (mode == "wrong-uid"),
+            expected_server_gid=os.getegid() + (mode == "wrong-gid"),
+            trusted_socket_root=runtime, **_manifest_bindings())
+        assert result.accepted is (mode == "current")
+        assert result.server_identity_verified is (mode == "current")
+    finally:
+        server.close()
+        if worker:
+            worker.join(6)
+            assert not worker.is_alive()
+        path.unlink(missing_ok=True)
+    assert errors == []
+    assert len(requests) == (1 if mode == "current" else 0)

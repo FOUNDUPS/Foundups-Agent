@@ -1,3 +1,28 @@
+## Fresh peer consumer controls — 2026-10-07
+
+Existing generation use-time suite adds23 adversarial cases for rotation, stale
+peer, substitutions, bad clocks, absent grants, missing OS evidence and mutation.
+Existing real-generation suite adds renewal and manifest-expiry controls using
+the actual selection producer; profile/process and handshake are substituted.
+Initial API baseline23fail; first focused52pass/1skip missed two review defects.
+The first expiry baseline was invalid (fixture KeyError). Corrected real-producer
+baseline2fail/0errors reproduces both intended failures against review-pinned source.
+Connected123pass/1fixturefail/5skip; corrected affected pair2pass with production
+bytes unchanged. All prior failed runs remain recorded.
+Independent recheck confirms both repairs; no live grant or native RSI claim.
+
+## Peer prerequisites — 2026-10-07
+
+Reuse owner-loader, current-generation binding, healthcheck and mutual-handshake
+suites. Windows82passed/5skipped; Linux healthcheck29passed/0skipped. Linux cases
+use real AF_UNIX/SO_PEERCRED with disposable signatures and synthetic signer
+audit fields. They establish OS peer rejection, not native signer enrollment.
+Grant tests establish forwarding/no fallback, not authorization of a real grant.
+Saved baseline/intermediate failures and exact commands are in the existing
+RSI evidence directory (`peer-preconditions-execution.json`). Linux source hashes
+were stable; test-only EOF guard was added after the Windows run started and is
+covered by the final Linux run. No unchanged connected-suite rerun required.
+
 ## PR2091 Linux fixture closure — 2026-10-07
 
 Hosted CI37517696484: bounded resident regression564 passed/2 failed/1 skipped.

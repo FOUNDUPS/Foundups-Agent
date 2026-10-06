@@ -430,3 +430,77 @@ def test_resident_principal_evidence_preserves_six_other_gates(tmp_path, monkeyp
     assert result.authoritative_use_lease is None
     signed.assert_called_once()
     generation.assert_called_once()
+
+
+@pytest.mark.parametrize("case", [
+    "current", "rotated", "expired", "clock-reversed", "clock-bool", "no-grant",
+    "bad-grant", "peer-rejected", "serialized", "wrong-requester", "wrong-profile",
+    "wrong-key", "wrong-epoch", "wrong-session", "wrong-socket", "wrong-manifest",
+    "wrong-generation", "wrong-config", "wrong-packet", "no-os-peer", "no-handshake",
+    "peer-exception", "identity-mutated",
+])
+def test_resident_peer_connection_requires_fresh_bound_evidence(tmp_path, monkeypatch, case):
+    from dataclasses import replace
+    from unittest.mock import Mock
+    from modules.communication.moltbot_bridge.src import reddog_signer_socket_service_healthcheck as health
+    from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_runtime_binding import _digest
+
+    repo, runtime, resolver, store, work, signed, clock, generation = (
+        _generation_projection_case(tmp_path, monkeypatch, "typed-accepted", consistent=True))
+    calls = []
+    digest = "sha256:" + "b" * 64
+    def verify(**kwargs):
+        calls.append(kwargs)
+        proof = SignerCurrentGenerationRuntimeBinding(True, (), receipt_id=digest,
+            manifest_id=digest, artifact_generation_digest=digest, generation=1,
+            generation_revision="rev-1", owner_config_id=digest, config_digest=digest,
+            config_raw_digest=digest, run_packet_id="packet-1", run_packet_digest=digest,
+            session_id="session-1", socket_path_digest=digest, signer_profile_id="reddog-work-authority",
+            manifest_expires_at=NOW_EPOCH+120,
+            signer_public_key="fixture-public-key", key_epoch="epoch-1", selection_expires_at=NOW_EPOCH+60,
+            principal_binding_digest=_digest({"identity": kwargs["principal_identity"],
+                "work_authority": kwargs["principal_work_authority"]}), signer_uid=1234, signer_gid=1235)
+        return replace(proof, generation_revision="rev-2") if case == "rotated" and len(calls)>1 else proof
+    generation.side_effect = verify
+    seen = []
+    def handshake(**kwargs):
+        seen.append(kwargs)
+        if case == "peer-exception": raise RuntimeError("fixture failure")
+        result = health.SignerServiceHealthcheckResult(True, health.SIGNER_SERVICE_HEALTHCHECK_READY,
+            str(runtime/"signer_service_run_packet.json"), "packet-1", "fixture-config", digest,
+            "fixture-socket", "reddog-work-authority", "fixture-public-key", kwargs["requester_principal_id"],
+            digest, digest, (), manifest_id=digest, artifact_generation_digest=digest,
+            peer_handshake_verified=True, peer_handshake_expires_at=NOW_EPOCH+30,
+            session_id="session-1", socket_path_digest=digest, key_epoch="epoch-1", server_identity_verified=True)
+        fields = {"wrong-requester":"requester_principal_id", "wrong-profile":"signer_profile_id",
+            "wrong-key":"signer_public_key", "wrong-epoch":"key_epoch", "wrong-session":"session_id",
+            "wrong-socket":"socket_path_digest", "wrong-manifest":"manifest_id",
+            "wrong-generation":"artifact_generation_digest", "wrong-config":"config_digest", "wrong-packet":"run_packet_id"}
+        if case in fields: result=replace(result, **{fields[case]:"substituted"})
+        if case == "expired": clock.return_value=NOW_EPOCH+31
+        if case == "clock-reversed": clock.return_value=NOW_EPOCH-1
+        if case == "clock-bool": clock.return_value=True
+        if case == "peer-rejected": result=replace(result,accepted=False)
+        if case == "no-os-peer": result=replace(result,server_identity_verified=False)
+        if case == "no-handshake": result=replace(result,peer_handshake_verified=False)
+        if case == "identity-mutated": calls[0]["principal_identity"]["principal_id"]="substituted"
+        return result.to_dict() if case == "serialized" else result
+    probe=Mock(side_effect=handshake)
+    monkeypatch.setattr(gate_module, "run_reddog_signer_socket_service_healthcheck", probe, raising=False)
+    supplier = None if case == "no-grant" else ({} if case == "bad-grant" else lambda request: {})
+    resolver = replace(resolver, signer_peer_secret_access_grant_supplier=supplier)
+    result = resolver.resolve(chain_state=store.load(), work_order=work, queue_item_id=QUEUE_ID, selected_slice=SLICE)
+    reason="canonical_signer_client_peer_handshake_verifier_missing"
+    assert (reason not in result.rejection_reasons) is (case == "current")
+    assert (result.signer_peer_binding_receipt_id is not None) is (case == "current")
+    other=set(use_time_module.INCOMPLETE_TRUST_ANCHOR_REASONS).difference(
+        use_time_module.CURRENT_GENERATION_TRUST_ANCHOR_REASONS,
+        {reason,"canonical_principal_subject_key_attestation_missing"})
+    assert len(other)==5 and other.issubset(result.rejection_reasons)
+    assert result.authoritative_use_lease is None
+    if case in ("no-grant", "bad-grant"): probe.assert_not_called()
+    if case == "current":
+        assert len(calls)==2 and all(c["include_process_identity"] is True for c in calls)
+        assert seen[0]["expected_server_uid"]==1234 and seen[0]["expected_server_gid"]==1235
+        assert seen[0]["trusted_socket_root"]==runtime
+        assert seen[0]["secret_access_grant_supplier"] is supplier
