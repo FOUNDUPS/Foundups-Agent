@@ -12,30 +12,22 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — signer peer evidence (2026-10-07):**
-PR2092 merged at `e3894546f5328b61d0746f4baa3c4ed318392fb5`; reviewed/main trees
-match. Branch CI37524576983 passed, including320 startup and566 resident cases
-with1 skip; all four CodeQL analyses passed. Main CI37525762999 and
-CodeQL37525764472 both passed. Owned branch retired; verified recovery bundle
-preserved. Closure: `outputs/rsi-permission-evidence-20261006/principal-generation-2092-merge-closure.json`.
+**Current selection — signed-model verifier safety (2026-10-07):**
+PR2093 merged `ad1d673ffe86ab49b11d89a8bbd37a1d342930da`, equal reviewed/main
+tree5971debd98cb3915e8fb42dcbce6451bb554ec58. Exact-head CI37530799117 passed
+(startup381; resident566/1skip); all CodeQL analyses37530792861 passed. Main
+CI37531919181 and CodeQL37531920943 pending. Owned branch retired with verified
+recovery. Closure: `outputs/rsi-permission-evidence-20261006/peer-consumer-2093-merge-closure.json`.
 
-One principal evidence gap is closed in source. Re-observation selects15/P1
-(C3/I4/D4/impact4): reuse the existing mutual signer-peer challenge verifier at
-resident use time. Current dependency construction supplies a socket client but
-no such evidence to the resolver. Bind current root-selected signer/profile,
-session, generation and requester; reject stale, replayed or substituted peers.
-A copied healthcheck result is insufficient. Preserve five other trust reasons.
-Peer prerequisites passed Windows82/5skip and Linux29/0skip. The existing
-collector/resolver/bootstrap now connects fresh grant-aware peer verification to
-root-selected process, signer, principal, generation and endpoint identity.
-Independent review found renewal equality and missing final manifest expiry;
-both were reproduced with the real selection producer and repaired. Stable
-identity is compared before/after RPC; both snapshots and peer must remain fresh.
-No generation fence is held across RPC. Five other trust gates stay closed.
-Connected source checks:123pass/1 fixture failure/5skip; corrected affected pair2pass.
-No production change after the broad run; all cases covered across those runs. This is locally verified,
-not native RSI. PR2093 prerequisite head6dee7696f passed CI37529011107 and
-CodeQL37529006351; those results do not qualify the new consumer diff.
+Fresh peer connection is source-qualified, not an authentic enrolled operation.
+Five independent trust gates remain. Existing AI Gateway roadmap explicitly
+leaves production signer/trust/revocation/replay setup open; reuse its signed
+model verifier instead of adding another evaluator. Bounded clock probe found
+string/fractional trusted times accepted. Selected13/P1 (C2/I4/D4/impact3): reject
+invalid clock types before model verification. Baseline8fail (two accepted-invalid,
+six inconsistent rejection); minimal guard plus existing regressions55pass1.54s.
+Independent review found no blocker; publication pending. Integrity8/8 and
+extension fast15 passed. No worker inference or runtime authority created.
 
 Native18/P0 remains blocked: admitted local-agent improvement, independent fixed
 baseline/held-out validation, governed retention/rollback and later benefit remain
