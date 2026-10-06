@@ -1899,6 +1899,24 @@
   },
   "current_observation": {
     "local_first_admission_20261006": {
+      "local_repair_experiment": {
+        "source": "2837b0db389c567de9a5402e22fa711affcf176d",
+        "task": "Existing external effect-lease issuer must release provider admission before target dispatch",
+        "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
+        "local_model": "qwen-coder-7b",
+        "local_calls": 2,
+        "paid_provider_calls": 0,
+        "model_transaction_seconds": [9.843, 45.64],
+        "baseline": "Three failures and one pass in the four frozen ordering/failure controls",
+        "candidate": "Three failures and six passes; same three controls fail; 4.70 seconds",
+        "outcome": "REJECTED; no retained patch; retry budget exhausted",
+        "diagnostic_errors": "First response only a fence; coordinator receipt attribute error preserved. Chat retry included fences and retained old behavior. No causal transport diagnosis established.",
+        "cleanup": "Owned production/test files restored; frozen test patch and candidate preserved externally; loaded model list empty",
+        "evidence": "outputs/rsi-permission-evidence-20261006/effect-handoff-local-evaluation.json",
+        "independent_review": "not performed",
+        "native_admission": false,
+        "next": "Qualify existing local worker instruction/API contract with the same fixed task before repeated jobs; no paid fallback or live-authority bypass"
+      },
       "source": "2837b0db389c567de9a5402e22fa711affcf176d",
       "previous_closure": "PR2084 merged; exact-main CI attempt2 and CodeQL passed; first pip index-parse failure preserved; branch retired",
       "local_runtime": "One existing managed-lifecycle Qwen Coder7B call10.672s; unloaded independently verified; localhost server retained; exact READY response failed punctuation; token values are word-count estimates",

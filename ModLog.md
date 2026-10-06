@@ -61164,3 +61164,15 @@ candidate with fixed deterministic verification and one diagnosed retry.
 Retain independent promotion/rollback gates. This documents operating limits;
 it does not implement a global budget controller or confer runtime authority.
 Local lifecycle evidence is retained; actual RSI benefit remains unproven.
+
+Bounded experiment: Qwen Coder7B made two local calls through existing managed
+LM Studio lifecycle (9.843s and45.64s), zero paid provider calls. First raw
+completion returned a code fence; the diagnostic harness also used an incorrect
+receipt attribute, preserved in attempt1 evidence. Chat retry completed but
+retained the effect issuer's unsafe ordering and removed an annotation import.
+Frozen regression baseline3fail/1pass; candidate3fail/6pass in4.70s. Rejected;
+no accepted improvement or independent review. These are coordinator-authored
+tests and a quarantined proposal, not admitted WRE execution. Owned source/test
+edits restored after evidence capture; model list empty. Same frozen task is the
+next instruction/API qualification gate; no further paid or local retry here.
+Evidence: `outputs/rsi-permission-evidence-20261006/effect-handoff-*`.

@@ -24,6 +24,18 @@ server remains on127.0.0.1:1234; no paid provider call occurred. `READY.` failed
 the exact `READY` instruction. This is runtime evidence, not admitted RSI.
 
 The next work follows the [local-first operating budget](docs/operations/RSI_SWARM_DISPATCH.md#local-first-operating-budget--2026-10-06).
+First bounded local repair experiment: two Qwen Coder7B calls, zero paid provider
+calls, no accepted patch. Frozen effect-issuer tests reproduce three failures;
+the normalized local candidate retains all three (6 other cases pass). Raw text
+completion returned only a fence; chat retry returned source but retained the
+fault and removed a required annotation import. Stop at the retry cap. Source
+and owned test edits were restored; frozen tests, raw proposals and receipts are
+preserved in `outputs/rsi-permission-evidence-20261006/effect-handoff-*`.
+This is a controlled diagnostic failure, not an admitted worker or RSI gain.
+Next: qualify this existing local worker's instruction/API contract against the
+same frozen task before granting it repeated repository jobs. Do not infer model
+incapability or a transport root cause from this single experiment.
+
 Native18/P0 remains blocked: the resident resolver still returns no use lease;
 the real provider lacks an effect-specific HIGH/ULTRA permit; authentic runtime
 inputs remain unverified. Reuse the existing effect review/consent/grant/issuer
