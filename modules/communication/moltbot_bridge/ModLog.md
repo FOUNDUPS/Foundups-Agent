@@ -1,3 +1,214 @@
+## Native admission lock-topology diagnostic — 2026-10-06
+
+WSP15/97: preserve18/P0 startup publication gate;15/P1 issuer wiring stays
+blocked by elevated-permit compatibility and lock ownership. Existing13/P1
+prerequisite now has a Windows real-generation-lock discriminator: held synchronous
+wait times out, diagnostic release lets consumer finish; release-before-call
+control completes normally. All4 children exit0/reaped, exact owned temp removed,
+source hashes stable;1.140s. Parent inspected event protocol and results. This is
+synthetic topology, not actual issuer admission, Linux coverage or a safe repair.
+Evidence: `outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json`
+SHA256 `d491a984f3d659f74cff14667b7ee6d9df3c004d6e17ee1a9aeb551436800bf4`.
+Root roadmap/backlog now reflect this dependency rather than direct wiring.
+Independent review of19dd fixture repair preserved83 assertions and confirmed562
+production pins match actual41cf OS qualification; no OS rerun needed for that
+test-only delta. Review receipt SHA256
+`603e33bb4b57e899e93f73b1b59f4a44fda50103355b35f6163ee971b7fe9de5`.
+
+## Startup fixture cleanup discrimination — 2026-10-06
+
+Hosted PR2078 at41cf91cfe:667passed/3skipped/1failed; the failing negative
+materializer test lost only setup SQLite WAL/SHM sidecars. Forced collection
+reproduces that exact signature on unchanged source; settling setup finalizers
+before the inventory snapshot passes the matched control. Add test-only
+`gc.collect()` after fixture construction, preserving all83 assertion ASTs,
+parameterization, no-secret/no-RPC checks, target bytes and full inventory equality.
+Five focused cases pass (pytest XML7.129s; runner8.031s); repaired forced-collection
+probe also passes. No production edits or inventory filtering. This does not
+explain the separate historical positive credential rejection. Hosted GC timing
+was not traced; reproduction establishes fixture sensitivity, not a directly
+observed hosted cause. Evidence: `outputs/rsi-permission-evidence-20261006/`
+`startup-fixture-sqlite-cleanup-review.json`, SHA256
+`9ce36ec07109cdb69773b68d87fc7710747cf08772f1abb52e869f927ac1f685`.
+WSP15/97: close existing startup slice before blocked native worker wiring.
+Remote verification of this repair and native RSI remain pending.
+
+## Authenticated startup integration in progress — 2026-10-06
+
+Hosted `11b8bd56d` passed the earlier registry/consensus gates, then exposed
+bootstrap691lines against675 (667other cases passed,3skipped). Relocate the unchanged
+dependency-supply helper into the existing bootstrap admission owner; bootstrap
+becomes666lines. Parent independently verified every top-level definition AST
+unchanged across both owners. All48 bootstrap tests pass, as do the exact structural
+oracle and qualified cold-import check. Regenerated runtime manifest remains1,419
+files; new canonical digest37bfeb1c5a9e41dbd8d737a32819028d4906bad17f50a9f4f8bcfc960f3bafba.
+Manifest/index tests8/8 and extension fast tier15members pass. Wider structural
+inspection also found entrypoint tests1010lines and one61line test; their bounded
+test-owner extraction preserves675/60limits and the public fixture import surface.
+Original hosted evidence remains in `startup-grant-composition-failure.log`.
+
+Follow-up CI at `14e6c023a` correctly rejected the stale canonical test registry
+after the test split. Regenerated using the existing WRE generator; `--check`
+reports current at1,689files with270quarantined unchanged. Diff adds only the
+new test owner plus deterministic shard-boundary shifts. No registry policy or
+quarantine change; runtime manifest excludes this registry. Evidence:
+`startup-test-registry-failure.log` in the same20261006 evidence directory.
+
+PR2078 hosted qualification at `025626636` exposed a reproducible structural
+failure: effect-consent owner tests grew to267lines against the200line bound
+(674other cases passed). Extract v7 startup checks into the same effect-consent
+family's bounded startup-owner test module, retaining v6 in its existing owner.
+Both remain under200lines; function limits remain50. Structural membership changes
+37to38, not the limits. CI explicitly selects both owners. Parent AST comparison
+confirms all11 original test functions, parameter decorators and assertions remain.
+No production code changes; the original intermittent credential failure remains
+separate. Hosted failure evidence: `startup-hosted-failure.log` in the existing
+20261006 evidence directory.
+
+Finite regression investigation at `438a20113`: full seven-file diagnostic run
+and original `-S`/PYTHONPATH bootstrap each pass275/skip3 with unchanged production
+and test bytes. Original274pass/1fail/3skip remains preserved and unexplained;
+no fixture correction is claimed. A diagnostic run lacking Git PATH produced49
+setup failures and is classified separately as runner failure. Evidence:
+`materializer-clock-baseline5.json` and `materializer-clock-baseline6.json` in
+the existing20261006 evidence directory. Draft publication may expose this for
+review/hosted validation; merge remains gated. G1 audit additionally finds no
+production construction of the existing independent grant provider or lease issuer;
+qualify their real composition before claiming queue execution capability.
+
+Combined merged-source regression:274passed/3skipped/1failed. The positive
+runtime-dependency materializer fixture rejects its replay credential. Investigation
+is checking the frozen fixture clock against the resolver's import-captured default;
+no cause or repair is claimed before reproduction. Preserve `startup-merged-connected.xml`.
+Publication remains pending. WSP97 reconciliation updates the backlog's stale
+next action: public OS startup has passed, regression closure precedes the existing
+issuer-to-valve connection. This does not establish admitted worker execution.
+
+Merged-source requalification: exact prior OS driver passes once at `9039bead9`
+in35.550s; six real root RPCs, one valid target signature, nonce-replay rejection,
+normal service exits, actual isolation and complete cleanup. Manifest regeneration
+is unchanged at1,419files. `public-startup-merge-requalification.json` binds the
+current head separately from the unchanged driver's historical metadata.
+Additional WSP62 check:11pass/5fail. Four failures are expired2026-09-30 exemptions;
+one is an exact INTERFACE.md ceiling1517 versus current2818. Main already has2771
+lines; test and exemption policies match main byte-for-byte. This source comparison
+establishes inherited debt, not an executed main baseline. No dates/limits changed.
+Keep that14/P1 reconciliation separate from startup and native G1 claims.
+
+Actual OS qualification passes at `50008b241` in34.012s: real DynamicUser,
+systemd credential delivery, unchanged public entrypoints/isolation/provider,
+real Unix peer transport and six root RPCs. Missing v2 grant rejects at parsing;
+one valid target signature verifies; replay records NONCE_REPLAY with no repeat
+target signing or protected-use acquisition. Both services exit0; unit ends
+not-found/inactive, no sockets remain and owned directory is removed. Parent
+readback checked1,023 Python hashes against current source, with zero mismatch;
+driver matches and copied dependencies stayed stable. Synthetic test identities
+and authorities only: no native G1 enrollment or RSI benefit claim. Failed
+identity/interpreter/timing/lock/TTL fixture attempts remain separately preserved.
+Evidence: `outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+
+Post-checkpoint G1 reconciliation at `bf4aa1aaf`: seven historical blocker labels
+are not seven absent modules. Existing consensus, consent, model verification
+and handshake implementations require authentic inputs and connected consumers.
+The governed valve resolver still retains seven reasons and returns no use lease;
+the existing external lease issuer has no production caller found by inspection.
+Its existing contract/adversarial baseline passes23/23 in5.75s.
+Two existing resolver tests also pass, confirming current-generation proof removes
+only three generation blockers and leaves missing authority inputs rejected
+(`valve-consumer-baseline.xml`,3.76s). This verifies the blocker behavior, not G1.
+The roadmap and backlog now record the conditional15/P1 connection after startup; missing
+capabilities must remain rejected. Evidence: `native-admission-reconciliation.json`
+and `existing-use-lease-baseline.json` under the existing20261006 output root.
+This is a source-bound next-action audit, not native admission or retained RSI.
+
+Generated runtime bindings refreshed through the existing generator:1,419 files,
+canonical digest `dc4a72b48f0288b0b543da05b14a168a0fdafb9ff41b0609f4b018be97d485f0`.
+Manifest contracts pass8/8 including independent staged-index closure. Existing
+CI includes startup composition; add explicit full owner-version and policy
+consumer suites to cover the new v7/v8 paths. Remote execution remains unverified.
+The first extension fast run rejected the stale1,418-member bound. New startup
+imports add the existing resolver-supply module to the transitive closure, so
+raise the exact bound to1,419 and retain rejection at1,420. The failed run is
+preserved separately; no runtime member or digest validation was removed.
+Corrected extension fast tier passes15members; full owner/policy CI selection
+passes135cases with1platform skip in203.90s. Workflow/backlog parsing and diff
+whitespace checks pass. This is a local source checkpoint, not publication.
+
+Continuation after local checkpoint `f0b33d5e8`: the full public fixture reached
+real manifest/E0/dependency admission and exposed a selected-config attachment
+failure. The E0 lease returns four extra authority fields while the existing
+peer validator expects the launch projection. Reuse `_legacy_launch_values`
+only for peer attachment, retaining the full current lease for E0 checks.
+WSP15 prerequisite15/P1 (C1/I5/D5/Impact4) advances parent18/P0; no validator
+relaxation. Public integration now passes1/1 with1,030 stable source pins;
+separate Linux authority qualification passes8/8 with stable source hashes.
+Neither result establishes live public startup or native worker admission.
+Post-projection entrypoint/resolver-supply/bootstrap regression:104pass/2platform
+skips in45.59s; `startup-connected-public.xml` records all106 cases. This run
+does not provide a new whole-dependency source-freeze or OS startup proof.
+The public test's original no-additional-credential-read replay observation was
+corrected after tracing existing verify/consume revocation checks: exactly two
+authenticated LOAD proof reads are expected, with no additional target signing
+or ACQUIRE/FINISH. Original failures and criteria migration remain preserved in
+`public-startup-result-review.json`; this is not evidence of learned RSI gain.
+
+Linux qualification first stopped on the cross-OS worktree pointer, then on
+missing jsonschema in the existing test venv; the second run also had source
+drift and is invalid evidence. Process-local Git mount mapping resolves the
+correct head. An isolated test venv preserves pytest9.1.1/cryptography50.0.0 and
+adds the canonical FoundUps jsonschema requirement, with download hashes saved.
+No shared environment was modified. These are test prerequisites, not native
+signer or worker admission. Evidence stays under the existing20261006 output root.
+
+Owned branch `codex/rsi-authenticated-startup-20261006`, base `a3def2a83`.
+WSP00/15/71/97: resume existing18/P0 startup objective after PR2075 closure.
+Bootstrap now accepts one deferred dependency supply only after config admission
+and required process isolation. Mixed eager/deferred inputs, malformed supply and
+supplier failure reject; existing runtime authority and replay checks still apply.
+The existing bootstrap suite passes48/48, including18 new ordering/negative cases.
+Fixtures substitute selection/isolation; this is not real OS startup admission.
+
+Purpose-limited request signing and authenticated public-entrypoint assembly are
+part of this same unmerged integration. Do not publish a supplier-only completion.
+Required before closure: versioned owner permission contract, connected public
+consumer, real protocol acceptance, adversarial checks, generated binding refresh,
+independent review and normal publication. No runtime grant or native RSI claimed.
+Evidence: `outputs/rsi-permission-evidence-20261006/bootstrap-deferred.xml`.
+
+Continuation: the public entrypoint now consumes a deferred v7 dependency
+supplier. Existing root runtime materialization composes E0-authenticated
+custody, pre-provisioned replay stores and existing revocation/protected-use
+clients. Root RPC is outside the current-owner lease. Integration remains WIP.
+Independent review reproduced two request-signing defects (numeric-type policy
+equality and expiry during final owner reread); canonical comparison and final
+lifetime checks repair those boundaries. Diagnostic entrypoint/supplier run:
+52 passed, 2 platform skips. Source was being integrated concurrently, so this
+is not the final exact-source publication receipt. Connected materializer tests,
+stable-source rerun, generated bindings and independent final review remain open.
+
+Stable modified-source checkpoint: entrypoint/supplier/bootstrap suites now
+100passed/2platform skips in38.69s, with zero changed modified-Python pins across
+the run (`startup-connected-result.json`). Independent materializer acceptance
+initially reproduced a frozen-policy/list-format mismatch; thawing the policy
+at the existing validator boundary repaired both positive cases. The same five
+tests then passed, exercising real LOAD/ACQUIRE/FINISH and three missing-store
+failures without credential reads or implicit provisioning. OS custody and
+owner fixture substitutions remain explicit. Full public v7 success acceptance
+is still being constructed; no native worker or retained improvement claimed.
+
+That construction exposed a pre-existing hash cycle: the config authority
+binding included `target_signer_generation_id`, which admission equates to the
+digest of artifacts including the config. Explicit E0 v8 now excludes only that
+derived alias from the config binding while retaining it in the signed policy
+and current-generation checks. v5-v7 retain their original digest semantics.
+Three provenance/permission consumers accept v8 with the same checks as v7.
+Construction/alias tests:3pass with stable pins. Connected legacy/v7/v8 consumer
+selection:88pass/1existing platform skip, including16 added cases. Initial
+fixture-construction failures are preserved separately; no source checks were
+weakened. This is a recoverable local WIP checkpoint, not a published or admitted
+runtime: full public success, generated manifest/digest refresh, final independent
+review and publication remain pending. Generated bindings still describe base.
+
 ## 2026-10-06 — Reconcile #1779 sender authority onto current main
 
 - Preserved the valid security delta from draft PR #2031 while discarding its stale base/document snapshots.

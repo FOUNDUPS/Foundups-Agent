@@ -5,8 +5,10 @@ Slice: REDDOG_SIGNER_SOCKET_SERVICE_RUNTIME_BOOTSTRAP_PHASE1
 This signer-owned bootstrap reads one outside-repo JSON config, builds the
 existing signer socket service runtime wiring config, and invokes that wiring
 with an injected resolver. It does not parse environment variables, spawn a
-process, load secret files, mutate the repository, enqueue OpenClaw, dispatch
+process, directly load secret files, mutate the repository, enqueue OpenClaw, dispatch
 Hermes, publish PRs, settle rewards, or re-index HoloIndex.
+An admitted deferred dependency supplier may access governed credentials;
+bootstrap reports its absence-of-secret-read field as unknown in that mode.
 """
 
 from __future__ import annotations
@@ -30,8 +32,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_ga
     enforce_signer_process_isolation,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_bootstrap_admission import (
+    _supply_isolated_dependencies,
     ProcessIsolationGate,
     SignerSocketServiceGrantAdmission,
+    SignerSocketServiceRuntimeDependencies,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT,
     SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED,
     SignerSocketServiceRuntimeBootstrapResult,
@@ -84,6 +88,7 @@ FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH = (
 )
 FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED = "FAIL_SIGNER_BOOTSTRAP_RUNTIME_REJECTED"
 FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION = "FAIL_SIGNER_BOOTSTRAP_PROCESS_ISOLATION"
+FAIL_SIGNER_BOOTSTRAP_DEPENDENCY_SUPPLY = "FAIL_SIGNER_BOOTSTRAP_DEPENDENCY_SUPPLY"
 FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION = (
     "FAIL_SIGNER_BOOTSTRAP_MANIFEST_SELECTION"
 )
@@ -118,6 +123,7 @@ class RuntimeBootstrapRequest:
     expected_signer_uid: int | None
     expected_signer_gid: int | None
     secret_grant_admission: SignerSocketServiceGrantAdmission | None
+    runtime_dependencies_supplier: Callable[[], SignerSocketServiceRuntimeDependencies] | None
 
 
 def run_reddog_signer_socket_service_runtime_bootstrap(
@@ -146,10 +152,16 @@ def run_reddog_signer_socket_service_runtime_bootstrap(
     process_isolation_gate: ProcessIsolationGate = enforce_signer_process_isolation,
     expected_signer_uid: int | None = None, expected_signer_gid: int | None = None,
     secret_grant_admission: SignerSocketServiceGrantAdmission | None = None,
+    runtime_dependencies_supplier: Callable[[], SignerSocketServiceRuntimeDependencies] | None = None,
 ) -> SignerSocketServiceRuntimeBootstrapResult:
     """Read a signer-owned outside-repo config and run signer service wiring."""
 
-    return _run_runtime_bootstrap(RuntimeBootstrapRequest(**locals()))
+    result = _run_runtime_bootstrap(RuntimeBootstrapRequest(**locals()))
+    if runtime_dependencies_supplier is not None:
+        # A dependency supplier may have read a credential before either
+        # succeeding or raising. Bootstrap cannot attest absence of those reads.
+        return replace(result, no_runtime_secret_file_loaded=None)
+    return result
 
 
 def _run_runtime_bootstrap(
@@ -178,6 +190,15 @@ def _run_runtime_bootstrap(
             config_digest=digest,
             process_isolation_receipt=(isolation.to_dict() if isolation else None),
         )
+    if request.runtime_dependencies_supplier is not None:
+        try:
+            request = _supply_isolated_dependencies(request)
+        except Exception:
+            return _reject(
+                FAIL_SIGNER_BOOTSTRAP_DEPENDENCY_SUPPLY,
+                config_path=str(path), config_digest=digest,
+                process_isolation_receipt=(isolation.to_dict() if isolation else None),
+            )
     dependencies, rejected = _admitted_runtime_dependencies(
         request, config, path, digest
     )
@@ -628,6 +649,7 @@ def _is_inside(child: Path, parent: Path) -> bool:
 
 
 __all__ = [
+    "FAIL_SIGNER_BOOTSTRAP_DEPENDENCY_SUPPLY",
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_DIGEST_MISMATCH",
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_MALFORMED",
     "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO",

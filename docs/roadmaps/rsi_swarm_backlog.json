@@ -1880,30 +1880,22 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "evidence": "outputs/rsi-startup-custody-20261005/permission-input-audit",
-    "observation_path": "current_observation.permission_evidence_type_20261005",
-    "base_commit": "e1ddf2e89d9f55cfc72d66f34b9187adbe932c63",
-    "selected_action": "Close exact permission-evidence type repair through existing publication gates",
-    "status": "locally_validated_publication_pending",
+    "observation_path": "current_observation.authenticated_startup_integration_20261006",
+    "base_commit": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
+    "selected_action": "Connect authenticated startup custody through public consumer after isolation",
+    "status": "startup_os_qualified_regression_closure_pending_not_admitted",
     "wsp15": {
-      "complexity": 1,
-      "importance": 4,
+      "complexity": 4,
+      "importance": 5,
       "deferability": 5,
       "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "total": 18,
+      "priority": "P0"
     },
     "dispatchable": false,
-    "execution_plane": "Authorized source maintenance; no native work grant",
-    "next_action": "Independent review, commit and gated publication; then rescore authenticated startup dependencies",
-    "higher_priority_gates": [
-      {
-        "observation_path": "current_observation.startup_custody_lifetime_20261005",
-        "total": 18,
-        "priority": "P0",
-        "blocker": "Authenticated purpose-limited startup custody and real native admission remain unresolved"
-      }
-    ]
+    "execution_plane": "Owned source implementation with synthetic tests; no runtime grant",
+    "next_action": "Finish PR2078 hosted validation and source closure. The Windows bounded real-lock discriminator supports the conditional wait-cycle risk; next reconcile existing lock ownership and elevated-permit contracts before issuer-to-valve implementation. Original intermittent credential rejection remains documented, not claimed repaired",
+    "higher_priority_gates": []
   },
   "current_observation": {
     "observation_id": "measurement-seam-20260929",
@@ -31093,7 +31085,7 @@
         "priority": "P1"
       },
       "wsp97": "Extend existing shared guard and regression; no new module or orchestration owner",
-      "state": "locally_validated_publication_pending",
+      "state": "merged_verified_main",
       "defect": "Truthy malformed freshness evidence allowed credential resolution; only literal True now passes the guard",
       "authority_limit": "Literal True is not authentication or a new permission grant",
       "baseline": {
@@ -31121,7 +31113,125 @@
       },
       "evidence": "outputs/rsi-startup-custody-20261005/permission-input-audit",
       "native_rsi_complete": false,
-      "next_gate": "Publish verified prerequisite, re-observe and rescore; authenticated startup remains open"
+      "next_gate": "Publish verified prerequisite, re-observe and rescore; authenticated startup remains open",
+      "publication": {
+        "pr": 2075,
+        "merge": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
+        "main_ci": 37376433116,
+        "main_codeql": 37376432711,
+        "checks": "success",
+        "retained_main_passed": 12,
+        "maintenance": "COMPLETED; unchanged prior10/29, now11/32",
+        "retrieval": "CURRENT/no-gap exact merge first attempt",
+        "native_rsi_complete": false
+      }
+    },
+    "authenticated_startup_integration_20261006": {
+      "base": "a3def2a83a2e9d67cb1f31bc08e9e19f73b6d0b3",
+      "branch": "codex/rsi-authenticated-startup-20261006",
+      "wsp15": {
+        "complexity": 4,
+        "importance": 5,
+        "deferability": 5,
+        "impact": 4,
+        "total": 18,
+        "priority": "P0"
+      },
+      "wsp97": "Extend existing bootstrap, resolver supply, loader and root materializer; preserve grant and use-time checks",
+      "state": "implementation_in_progress_not_admitted",
+      "bootstrap_tests": {
+        "passed": 48,
+        "failed": 0,
+        "new_cases": 18,
+        "limits": "Synthetic selection and isolation; not real OS startup"
+      },
+      "connected_checkpoint": {
+        "entry_supplier_bootstrap_passed": 100,
+        "entry_supplier_bootstrap_skipped": 2,
+        "modified_python_pins_changed": 0,
+        "schema_legacy_passed": 72,
+        "schema_legacy_skipped": 7,
+        "materializer_protocol_cases_passed": 5,
+        "versioned_binding_cases_passed": 3,
+        "policy_consumer_cases_passed": 88,
+        "policy_consumer_cases_skipped": 1,
+        "limits": "Separate local suites with explicit synthetic OS boundaries; not full public or native admission",
+        "evidence_root": "outputs/rsi-permission-evidence-20261006"
+      },
+      "construction_blocker": "Legacy E0 generation digest cycle reproduced. Explicit v8 repair passes constructive, downstream consumer and public source integration checks while preserving legacy semantics; actual OS public startup remains unverified.",
+      "public_projection_prerequisite": {
+        "wsp15": {"complexity": 1, "importance": 5, "deferability": 5, "impact": 4, "total": 15, "priority": "P1"},
+        "observed": "Real public startup reaches E0 lease, then strict peer binding rejects four lease-only selection fields",
+        "repair": "Reuse existing launch projection at peer attachment; preserve full E0 lease and strict validator",
+        "state": "public_source_integration_passed_not_live_admission",
+        "evidence": "outputs/rsi-permission-evidence-20261006/public-startup-result-review.json",
+        "public_tests_passed": 1,
+        "public_source_pins_stable": 1030,
+        "criteria_migration": "Replay rejects with two authenticated LOAD proof reads and no additional target signing; original failed observation preserved",
+        "linux_authority_tests_passed": 8,
+        "linux_source_hashes_stable": true,
+        "linux_evidence": "outputs/rsi-permission-evidence-20261006/linux-owner-qualified-projection/receipt.json",
+        "limits": "Public integration substitutes OS custody/isolation/transport. Separate Linux authority checks do not prove complete live public startup."
+      },
+      "remaining": [
+        "Actual OS mechanism qualified with synthetic authority; authentic enrollment/native admission remain separate",
+        "Generated bindings refreshed and manifest/index tests8/8; final independent review, remote CI and publication remain",
+        "Actual independently admitted worker improvement and later measured retention"
+      ],
+      "actual_os_qualification": {
+        "source": "50008b241af790759a02dc8d05aca5702b7527e0",
+        "passed": true,
+        "authority_kind": "synthetic_test_authorities_only",
+        "runtime_substitutions": [],
+        "target_signatures_verified": 1,
+        "target_sign_calls": 1,
+        "root_rpc_count": 6,
+        "nonce_replay_observed": true,
+        "isolation_accepted": true,
+        "cleanup_complete": true,
+        "current_source_hashes_checked": 1023,
+        "current_source_hash_mismatches": 0,
+        "evidence": "outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/result.json",
+        "limits": "No authentic principal enrollment, admitted native worker, autonomous repair or retained benefit"
+      },
+      "merged_source_validation": {
+        "source": "9039bead92b40ebabd6a5697989d79f7c10f9256",
+        "actual_os_requalification_passed": true,
+        "actual_os_evidence": "outputs/rsi-permission-evidence-20261006/public-startup-merge-requalification.json",
+        "combined_passed": 274,
+        "combined_skipped": 3,
+        "combined_failed": 1,
+        "combined_evidence": "outputs/rsi-permission-evidence-20261006/startup-merged-connected.xml",
+        "closure_blocker": "Original replay-credential failure remains unreproduced and unexplained; full diagnostic and exact-bootstrap runs each pass275/skip3 with unchanged source. No correction claimed. Independent review and hosted validation required before merge.",
+        "reproduction_evidence": ["outputs/rsi-permission-evidence-20261006/materializer-clock-baseline5.json", "outputs/rsi-permission-evidence-20261006/materializer-clock-baseline6.json"],
+        "publication": "not_pushed_no_pr_not_merged"
+      },
+      "publication_validation_debt": {
+        "task": "Reconcile expired WSP62 exemptions and stale interface-document ceiling under existing owners",
+        "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 3, "total": 14, "priority": "P1"},
+        "state": "observed_inherited_debt_not_repaired",
+        "local_passed": 11,
+        "local_failed": 5,
+        "failure_causes": "Four expired2026-09-30 exemptions and one stale exact interface-document ceiling1517; main document already2771lines",
+        "baseline_evidence": "Tests/policies unchanged from main; source comparison only, no executed full-main baseline",
+        "wsp97": "Reuse existing WSP62 owners; do not silently extend expiry or inflate ceilings for a passing result",
+        "evidence": "outputs/rsi-permission-evidence-20261006/startup-wsp62.xml"
+      },
+      "post_startup_candidate": {
+        "task": "Connect existing external authoritative-use lease issuer to existing governed valve consumer",
+        "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
+        "state": "blocked_on_effect_permit_compatibility_and_generation_lock_composition_after_source_closure",
+        "observation": "Existing issuer contract/adversarial baseline23/23; current resolver retains seven blocker reasons and hardcodes a null lease; no production issuer caller found",
+        "composition_dependency": "Source audit at438a20113 finds no production construction of IndependentSignerSecretGrantProvider or ExternalSignerAuthoritativeUseLeaseIssuer in modules/scripts. Resident queue bootstrap constructs the resolver without an issuer; runtime dependency bundle exposes neither issuer nor grant provider. Existing lease tests use _LeasedGrantProvider. Reuse the real grant provider and existing client supply, qualify their composition with the issuer, and preserve all missing-authority rejections before queue admission.",
+        "wsp97": "Reuse existing issuer and verifier owners; reject missing capabilities and retain exact effect, replay, expiry and generation checks",
+        "evidence": "outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json",
+        "followup_evidence": "outputs/rsi-permission-evidence-20261006/native-admission-issuer-valve-followup-20261006.json",
+        "followup_findings": "HIGH/ULTRA effect requests lack the typed consumed elevated permit required by the real grant provider; existing rejection coverage already demonstrates this. Windows real-lock synthetic topology supports the synchronous wait-cycle risk; actual permit-qualified issuer and same-process rehydration remain unexecuted. Release-before-call is a diagnostic control, not an approved authority relaxation.",
+        "lock_topology_diagnostic": {"source": "19ddae32620af3b05b1154b29893bcc90aaf08f6", "evidence": "outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json", "sha256": "d491a984f3d659f74cff14667b7ee6d9df3c004d6e17ee1a9aeb551436800bf4", "held_wait": "diagnostic_deadline_then_consumer_completion_after_release", "release_before_call_control": "completed_without_wait_deadline", "seconds": 1.140, "children_exited_and_reaped": 4, "cleanup_complete": true, "source_pins_stable": true, "native_admission": false},
+        "next_eligible_prerequisite": {"task": "Reconcile existing generation-lock ownership and elevated-permit contracts before issuer composition", "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 3, "total": 14, "priority": "P1"}, "limits": "Completed Windows topology diagnostic is historical evidence, not a task to repeat. Reuse existing owners; preserve generation freshness and elevated admission; no permit bypass or native admission claim"},
+        "limits": "No authentic enrollment or native G1 admission established; this connection alone does not satisfy every capability prerequisite"
+      },
+      "native_rsi_complete": false
     }
   }
 }

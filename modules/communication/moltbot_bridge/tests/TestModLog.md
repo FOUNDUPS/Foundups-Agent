@@ -1,3 +1,90 @@
+## Startup fixture cleanup discrimination — 2026-10-06
+
+Hosted PR2078 at41cf91cfe:667passed/3skipped/1failed; the failing negative
+materializer test lost only setup SQLite WAL/SHM sidecars. Forced collection
+reproduces that exact signature on unchanged source; settling setup finalizers
+before the inventory snapshot passes the matched control. Add test-only
+`gc.collect()` after fixture construction, preserving all83 assertion ASTs,
+parameterization, no-secret/no-RPC checks, target bytes and full inventory equality.
+Five focused cases pass (pytest XML7.129s; runner8.031s); repaired forced-collection
+probe also passes. No production edits or inventory filtering. This does not
+explain the separate historical positive credential rejection. Hosted GC timing
+was not traced; reproduction establishes fixture sensitivity, not a directly
+observed hosted cause. Evidence: `outputs/rsi-permission-evidence-20261006/`
+`startup-fixture-sqlite-cleanup-review.json`, SHA256
+`9ce36ec07109cdb69773b68d87fc7710747cf08772f1abb52e869f927ac1f685`.
+WSP15/97: close existing startup slice before blocked native worker wiring.
+Remote verification of this repair and native RSI remain pending.
+
+## Authenticated public startup continuation — 2026-10-06
+
+Actual OS trial231947 passes at `50008b241` in34.012s. Synthetic authority only;
+no child OS, clock, credential or transport substitutions. Actual isolation,
+one valid signature, nonce-replay rejection, one target sign and six root RPCs;
+both services exit0 and cleanup completes. Parent readback confirms1,023 source
+hashes and driver digest; copied dependency hashes stable. Evidence and failed
+fixture attempts are retained under the existing20261006 output root. Native
+admission, remote CI/publication and autonomous retained gain remain unverified.
+
+Public source integration passes1/1 with1,030 stable source pins. Missing grant
+and replay reject; valid signature verifies. OS/root ownership, custody, isolation
+and socket transport are explicit substitutions. The original replay no-read
+assertion was too broad: verify/consume each authenticates a root LOAD before
+nonce rejection. Corrected observation requires exactly two LOAD proof reads,
+zero repeated target signing and zero extra ACQUIRE/FINISH; prior failure retained.
+Source fix reuses existing launch projection at peer attachment only. Test-author
+review found no defect but is not independent test authorship.
+
+Connected entrypoint/resolver/bootstrap:104pass/2platform skips in45.59s
+(`startup-connected-public.xml`). Existing Linux authority runner:8pass/0skip,
+stable source hashes (`linux-owner-qualified-projection/receipt.json`). Neither
+is complete live public startup or native RSI. All evidence is under
+`outputs/rsi-permission-evidence-20261006/`.
+
+Publication prerequisites: manifest/index contracts8/8; extension fast tier15
+members passes after exact member bound refresh (failed prior run retained).
+New full CI owner/policy selection locally135pass/1platform skip in203.90s,
+recorded in `startup-ci-policy.xml`. Workflow YAML and backlog JSON parse.
+Remote CI, public OS startup, publication and native RSI remain unverified.
+
+## Deferred startup supply ordering — 2026-10-06
+
+Existing bootstrap suite:48passed/0failed (23.11s), including18 added cases.
+Denied isolation or malformed config makes zero supplier calls; mixed explicit
+inputs, unisolated use, exceptions and malformed dependencies reject. Positive
+cases exercise existing lazy signing/replay checks with synthetic selection and
+isolation boundaries. All60 preexisting top-level test AST nodes were preserved.
+This proves the ordering hook only; authenticated public startup is still under
+implementation. XML: `outputs/rsi-permission-evidence-20261006/bootstrap-deferred.xml`.
+WSP00/15/71/97; no native worker admission claim.
+
+Independent request-signer review: two frozen baseline cases failed at the
+intended assertions (0 setup errors): altered numeric type reached credential
+retrieval, and a final owner reread outlived permission expiry. Candidate uses
+canonical policy bytes and checks lifetime after the reread and lease exit.
+Diagnostic entrypoint plus supplier suites:52passed/2platform skips in16.56s,
+including those regressions and two entrypoint isolation-ordering cases.
+XML: `outputs/rsi-permission-evidence-20261006/startup-entry-connected.xml`.
+This diagnostic overlapped integration writes; a stable-source rerun is required.
+
+Subsequent stable checkpoint:100passed/2platform skips across entrypoint,
+request supplier and bootstrap,38.69s; all modified-Python before/after pins
+unchanged. `startup-connected-result.json` records exact scope and limits.
+Independent materializer suite: first3pass/2fail exposed frozen-policy tuples
+at a strict JSON-list validator; after source-only conversion repair the same
+five tests passed,0errors/skips. `materializer-result-review.json` distinguishes
+real protocol/store behavior from simulated OS custody. These are local
+integration receipts, not production or full public-entrypoint admission.
+
+E0 v8 construction checks:3pass, verifying legacy digest dependence, constructive
+artifact-byte generation without rewriting config, and actual config-validator
+rejection of a tampered generation alias (`versioned-binding-result-review.json`).
+Connected grant manifest/permission consumers:88pass/1existing symlink skip,
+including16 v7/v8 positive/adversarial cases. First missing-field tests failed
+in fixture signing before reaching the consumer; preserved and corrected to
+test malformed stored input, without changing production checks. Source pins
+stable during both successful runs. Full public startup remains a separate gate.
+
 ## 2026-10-06 — #1779 sender-authority reconciliation on current main
 
 - Reused the existing `test_reddog_recipient_preflight.py` and `test_reddog_correspondence_sender_boundary.mjs` owners; no parallel test file was created.
@@ -3687,3 +3774,41 @@ existing liveness owner. The ceiling and original29 criteria remain unchanged.
 Final connected181 passed, no errors/skips (5.516s). Six controller supplement
 cases were candidate-only. Evidence and exact commands: canonical RSI backlog
 `holo_grounding_20261005`; live resume, publication and retained use unverified.
+## 2026-10-06 — Startup combined regression investigation
+
+At `438a20113`, the seven-file startup/owner/provenance/materializer suite passes
+275 cases with3skips in two runs: diagnostic bootstrap277.48s and original
+`-S -B -X utf8 -m pytest`/PYTHONPATH bootstrap282.38s. Production/test hashes stay
+unchanged. The earlier274pass/1fail/3skip result is preserved; replay-credential
+failure cause remains unresolved, not fixed by rerunning. Three narrower probes
+passed; another diagnostic attempt produced49 missing-Git setup failures because
+its reduced PATH omitted Git. No tests or production checks were weakened.
+Receipts: `outputs/rsi-permission-evidence-20261006/materializer-clock-baseline*.json`
+and original `startup-merged-connected.xml`. Independent review/hosted checks remain.
+## 2026-10-06 — Preserve bounded owner-test modules
+
+PR2078 CI reproduced the267line owner-test module exceeding its200line bound;
+674other effect-consensus cases passed. Relocate v7 startup tests to
+`test_reddog_effect_consent_startup_owner.py`, keeping v6 tests in
+`test_reddog_effect_consent_owner_versions.py`. Keep200line/50line limits and
+adjust only expected family membership37to38. Independent AST comparison preserves
+all11 original test functions, parameter decorators and assertions. CI includes
+both modules explicitly; production and generated runtime bindings are unchanged.
+Focused validation passes48/48 without skips in7.468s: the structural oracle plus
+all47 original parameterized owner cases, with stable source hashes. Receipt:
+`outputs/rsi-permission-evidence-20261006/startup-owner-structural-repair-review.json`.
+## 2026-10-06 — Bootstrap admission and public-test owner bounds
+
+Preserved hosted667pass/3skip/1fail receipt for bootstrap691>675. Existing
+admission owner now contains the unchanged deferred-dependency helper, while
+bootstrap reimports its original symbol. All48 bootstrap cases and target bound
+pass; cold-import passes with qualified child PYTHONPATH. Parent AST comparison
+confirms all production definitions unchanged. Manifest/index8/8 in64.19s and
+extension fast tier15members pass with refreshed runtime pins. Additional public
+entrypoint test extraction is covered by the existing675/60 structural contract;
+no exemption or threshold increase is introduced.
+Final extracted-owner qualification:21/21pass, no skips,26.391s; all19 original
+entrypoint cases plus both atomic structural checks. Parent AST review independently
+confirms definitions preserved across old/new owners. The canonical generator
+reports current1,690test files,270quarantined unchanged. CI explicitly includes
+the extracted startup-authority owner; original driver helpers/NOW stay in place.

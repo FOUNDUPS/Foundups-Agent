@@ -3,10 +3,10 @@
 from __future__ import annotations
 
 from contextlib import contextmanager
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 import json
 from pathlib import Path
-from typing import Any, Optional, Protocol
+from typing import TYPE_CHECKING, Any, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_signer_process_isolation_gate import (
     SignerProcessIsolationReceipt,
@@ -15,6 +15,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_peer_credenti
     PeerCredentialPolicy,
     rehydrate_peer_credential_policy,
 )
+
+
+if TYPE_CHECKING:
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import RuntimeBootstrapRequest
 
 
 SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED = "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED"
@@ -29,11 +33,48 @@ class SignerSocketServiceGrantAdmission:
     revocation_oracle: Any
 
 
+@dataclass(frozen=True)
+class SignerSocketServiceRuntimeDependencies:
+    """Deferred dependencies, not authority; existing use-time gates still apply."""
+
+    resolver: Any
+    principal_key_resolver: Any
+    proposal_replay_high_water_store: Any
+    secret_grant_admission: SignerSocketServiceGrantAdmission
+
+
+def _supply_isolated_dependencies(request: RuntimeBootstrapRequest) -> RuntimeBootstrapRequest:
+    """Consume one supply only after config/isolation checks; never infer grants."""
+    if request.process_isolation_required is not True or any(
+        item is not None for item in (
+            request.resolver, request.resolver_factory, request.principal_key_resolver,
+            request.proposal_replay_high_water_store, request.secret_grant_admission,
+        )
+    ):
+        raise ValueError("signer_runtime_dependency_supply_conflict")
+    supplied = request.runtime_dependencies_supplier()
+    if (
+        type(supplied) is not SignerSocketServiceRuntimeDependencies
+        or not callable(getattr(supplied.resolver, "resolve", None))
+        or not callable(getattr(supplied.principal_key_resolver, "resolve", None))
+        or type(supplied.secret_grant_admission) is not SignerSocketServiceGrantAdmission
+    ):
+        raise ValueError("signer_runtime_dependency_supply_invalid")
+    return replace(
+        request, resolver=supplied.resolver,
+        principal_key_resolver=supplied.principal_key_resolver,
+        proposal_replay_high_water_store=supplied.proposal_replay_high_water_store,
+        secret_grant_admission=supplied.secret_grant_admission,
+        runtime_dependencies_supplier=None,
+    )
+
+
 @contextmanager
 def lease_signer_socket_service_grant_admission(config: Any, admission: Any):
     """Fence assembly or one protected callback; never enclose a root RPC."""
     from modules.communication.moltbot_bridge.src import reddog_signer_owner_e0_current_selection as owner_source
     from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_bootstrap import _attach_peer_binding
+    from modules.communication.moltbot_bridge.src.reddog_current_generation_manifest_launch_selection import _legacy_launch_values
 
     if type(admission) is not SignerSocketServiceGrantAdmission:
         raise ValueError("signer_grant_admission_invalid")
@@ -46,7 +87,7 @@ def lease_signer_socket_service_grant_admission(config: Any, admission: Any):
             owner.config, Path(config.repo_root).resolve(),
             Path(selected["config_path"]), selected["config_digest"],
             selected["run_packet_path"], None, admission.owner_config_path,
-            selected, selected["config_raw_digest"],
+            _legacy_launch_values(selected), selected["config_raw_digest"],
         )
         if attached is None or json.dumps(
             asdict(config), sort_keys=True, default=str, allow_nan=False,
@@ -77,7 +118,7 @@ class SignerSocketServiceRuntimeBootstrapResult:
     process_isolation_receipt: Optional[dict[str, Any]] = None
     no_env_parsed: bool = True
     no_process_spawned: bool = True
-    no_runtime_secret_file_loaded: bool = True
+    no_runtime_secret_file_loaded: bool | None = True
     no_repo_mutation_performed: bool = True
     no_openclaw_enqueue_performed: bool = True
     no_hermes_dispatch_performed: bool = True
@@ -166,6 +207,8 @@ def reject_bootstrap(
 
 __all__ = [
     "ProcessIsolationGate",
+    "SignerSocketServiceGrantAdmission",
+    "SignerSocketServiceRuntimeDependencies",
     "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_REJECT",
     "SIGNER_SOCKET_RUNTIME_BOOTSTRAP_SERVED",
     "SignerSocketServiceRuntimeBootstrapResult",

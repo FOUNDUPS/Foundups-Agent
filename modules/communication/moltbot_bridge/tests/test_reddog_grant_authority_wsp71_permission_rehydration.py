@@ -47,7 +47,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     PermissionSnapshot,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8,
 )
 
 
@@ -572,3 +572,39 @@ class _RevocationOracle:
         if self.revoked or self.now_epoch >= expires_at:
             raise RuntimeError("signer_key_epoch_use_rejected")
         return result
+
+
+@pytest.mark.parametrize("schema", [POLICY_SCHEMA_V7, POLICY_SCHEMA_V8])
+@pytest.mark.parametrize("case", ["valid", "missing", "inconsistent", "archive", "oracle"])
+def test_v7_v8_permission_preserves_provenance_and_oracle(tmp_path, monkeypatch, schema, case):
+    setup, _ = _permission_setup(tmp_path, monkeypatch)
+    grant_fixture._use_provenance_policy_schema(setup, schema)
+    with permission_module.lease_validated_owner_e0_current_admission(
+        owner_config_path=setup["e0"]["owner_config_path"],
+        repo_root=setup["e0"]["boundary"]._repo_root,
+        policy=setup["e0"]["policy"],
+    ) as admission:
+        setup["revocation_oracle"].binding = admission.revocation_binding
+    if case in {"missing", "inconsistent"}:
+        grant_fixture._change_provenance_manifest(setup, case)
+    elif case == "archive":
+        authority = setup["harness"].authority_boundary.require(setup["harness"].authority)
+        archive = build_grant_service_archive_from_git(
+            repo_root=setup["harness"].repo_root,
+            source_commit_sha=str(authority["authorized_base_sha"]),
+            sources={"reddog_grant_authority_service.py": "service/attacker_selected_service.py"},
+        )
+        (setup["harness"].runtime_root / "grant_authority_service.pyz").write_bytes(archive)
+        _rebuild_grant_artifacts(setup)
+    elif case == "oracle":
+        setup["revocation_oracle"].binding = object()
+    calls = []
+    action = lambda: calls.append(GET_SECRET) or "resolved"
+    if case == "valid":
+        assert _authorize(setup, action=action) == "resolved"
+        assert calls == [GET_SECRET] and setup["revocation_oracle"].authorize_calls == 1
+    else:
+        expected = "git_authority_mismatch" if case == "archive" else None
+        with pytest.raises(RuntimeArtifactManifestError, match=expected):
+            _authorize(setup, action=action)
+        assert calls == [] and setup["revocation_oracle"].authorize_calls == 0

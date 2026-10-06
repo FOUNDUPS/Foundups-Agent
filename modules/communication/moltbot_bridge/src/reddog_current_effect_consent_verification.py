@@ -41,7 +41,7 @@ def resolve_current_effect_sovereign_authorization(
             return None
         repo = Path(repo_root).resolve()
         owner = loader._load_owner_config(owner_config_path, repo=repo)
-        if owner["schema_version"] != loader.SCHEMA_VERSION_V6:
+        if owner["schema_version"] not in {loader.SCHEMA_VERSION_V6, loader.SCHEMA_VERSION_V7}:
             return None
         selected, boundary = loader._manifest_selection_from_owner(owner, repo=repo)
         with boundary._lease_current(selected) as selection:

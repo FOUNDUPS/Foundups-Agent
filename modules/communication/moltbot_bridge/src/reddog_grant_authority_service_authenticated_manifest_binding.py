@@ -20,7 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
     POLICY_SCHEMA_V6,
-    POLICY_SCHEMA_V7,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     constant_time_compare,
@@ -72,6 +72,7 @@ def bind_grant_authority_service_manifest(
         if policy.get("schema_version") not in {
             POLICY_SCHEMA_V6,
             POLICY_SCHEMA_V7,
+            POLICY_SCHEMA_V8,
         }:
             raise RuntimeArtifactManifestError(
                 "grant_authority_service_binding_invalid"

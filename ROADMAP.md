@@ -12,15 +12,62 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Executable prerequisite — exact permission evidence (2026-10-05 JST):**
-Selected14/P1 (C1/I4/D5/Impact4) while native startup18/P0 remains open.
-A shared provider guard accepted truthy malformed permission evidence and read
-credentials. Candidate rejects all values except literal `True`: connected193pass/
-3skip and independent frozen8/8, versus baseline6/12 and8/8 failures respectively.
-Both local model proposals were rejected; this is coordinator-authored, publication
-pending. See bridge ModLog/TestModLog and existing startup-custody evidence.
-The remaining startup prerequisite is separately authorized, purpose-limited
-LOAD/control custody; an unverified permission flag cannot replace that authority.
+**Current execution — authenticated startup integration (2026-10-06 JST):**
+Actual OS qualification now passes at `50008b241` using synthetic authorities:
+real DynamicUser/systemd credentials, isolation, public entrypoints and Unix
+peer transport; one verified target signature, missing-grant rejection and
+observed nonce-replay rejection. Six root RPCs, one protected use, one target
+sign, normal service exits and complete owned cleanup. All1,023 bound Python
+files still match; driver/dependency bindings are retained. This qualifies this
+startup mechanism, not authentic enrollment, native G1 admission or retained RSI.
+Evidence: `outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+The unchanged OS driver also passed once on merged `9039bead9` in35.550s;
+see `public-startup-merge-requalification.json` in the same evidence root.
+Publication qualification additionally found inherited WSP62 debt:5failed/11pass
+(four expired2026-09-30 exemptions; one stale exact interface-document ceiling).
+Main already has2,771 interface lines against1,517; policies/tests are unchanged.
+This is source comparison, not an executed full-main baseline. No expiry or
+ceiling was relaxed. Startup proofs do not imply whole-repository validation.
+Current publication: PR2078, pushed head19ddae326; exact-head CI remains pending.
+Its test-only setup-finalizer repair preserves the full negative oracle (5/5
+focused cases pass). Actual OS mechanism qualification also passed at41cf91cfe;
+production bytes are unchanged by19ddae326. No native admission is claimed.
+Before connecting issuer to valve (15/P1), resolve the existing elevated-permit
+contract mismatch and generation-lock composition. A bounded Windows diagnostic
+using the unchanged generation lock supports the synchronous wait-cycle risk:
+held-wait reaches its diagnostic deadline; release-before-call control completes.
+All four children exit0 and owned cleanup completes in1.140s. This is synthetic
+topology evidence, not an executed permit-qualified issuer or a proposed lock
+relaxation. Evidence: `outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json`.
+The completed13/P1 probe leads to a14/P1 contract reconciliation (C3/I4/D4/impact3);
+close startup publication against fresh main before dependent implementation.
+
+PR2075 is merged at `a3def2a83`; exact-main CI37376433116 and
+CodeQL37376432711 passed. Later main invocation12/12 passed. Governed maintenance
+completed502.86s; all prior10tasks/29events unchanged, now11/32. Separate governed
+query CURRENT/no-gap on the exact merge; evidence lives in
+`outputs/rsi-permission-evidence-20261006/maintenance-after-merge`.
+The coordinator repair is retained, not an autonomous local-worker RSI result.
+
+The existing18/P0 startup objective is now in progress on
+`codex/rsi-authenticated-startup-20261006`. Deferred dependency ordering passes
+48bootstrap cases, including18 new cases. Connected entrypoint/supplier/bootstrap
+checkpoint:100pass/2platform skips with stable modified-source pins. Owner-v7
+schema/legacy checks:72pass/7platform skips; materializer protocol/store tests:5pass.
+Independent review repaired two proof-signing defects and a frozen-policy conversion.
+Full public acceptance exposed an existing config/generation digest cycle. The
+versioned E0-v8 repair preserves v5-v7 bindings and keeps signed generation checks:
+3construction tests and88consumer tests pass (1consumer platform skip).
+Public source integration now passes: valid signature verified, missing grant
+and replay rejected; all1,030 source pins stable. OS custody/isolation and socket
+transport remain fixture substitutions in that test; the separate OS trial above
+supplies actual mechanism evidence without claiming authentic native admission.
+Separate Linux authority qualification passes8/8 with stable source hashes;
+it does not cover complete public startup. Post-projection connected regression:
+104pass/2platform skips (`startup-connected-public.xml`). Generated bindings now
+cover1,419 runtime files; manifest/index validation passes8/8. Policy-consumer CI
+coverage is added; remote CI and publication remain unverified. No activation or
+native local-worker improvement is claimed. Evidence: `outputs/rsi-permission-evidence-20261006`.
 
 **Current layer — authenticated startup and credential lifetime (2026-10-05 JST):**
 WSP15 selects18/P0 (C4/I5/D5/Impact4): connect the existing public startup,
@@ -1079,6 +1126,23 @@ proven before claiming shared schema inheritance. Increase cycles/agent count
 only after measured benefit, resource limits and acceptance gates justify it.
 
 ## Completion gates
+
+**G1 consumer reconciliation (2026-10-06, source `bf4aa1aaf`):** the seven
+historical missing-verifier labels mix implemented components, missing runtime
+inputs and unconnected consumers. The existing governed use-time resolver still
+retains all seven reasons and returns no authoritative use lease. The external
+lease issuer exists and its three contract/adversarial suites pass23/23 locally,
+but source inspection found no production caller. Neither observation proves
+authentic enrollment or permission to execute a worker.
+
+After actual startup qualification, the conditional next connection is **15/P1**
+(C3/I4/D4/Impact4): extend the existing resolver/caller to use the existing issuer
+only with verified capabilities. Do not delete rejection reasons unconditionally
+or introduce another issuer. Missing capability, expired/replayed authority,
+wrong effect/peer/generation and rotation at use must remain rejected. Startup
+remains18/P0; independent evaluation, retention/rollback and later benefit stay
+open. Exact source bindings and acceptance criteria:
+`outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json`.
 
 | Gate | Required evidence | Failure means |
 |---|---|---|
