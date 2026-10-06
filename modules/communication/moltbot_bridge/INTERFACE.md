@@ -1,4 +1,17 @@
-## Provider issuance handoff — 2026-10-06 (local candidate)
+## Effect issuer grant handoff — merged PR2087, 2026-10-07
+
+`AuthoritativeUseLeaseGrantProvider` now requires `issue_grant(request) -> Mapping`.
+`ExternalSignerAuthoritativeUseLeaseIssuer.issue()` obtains the grant after clean
+provider exit, then dispatches the target and rehydrates under existing current
+generation/replay checks. Lease-only providers fail closed; there is no fallback.
+Issuance/cleanup exceptions or a nonmapping grant prevent target dispatch.
+An exited provider context cannot suppress a subsequent target interruption.
+The provider's legacy `lease()` API remains unchanged for its other callers.
+This is an interface change for injected issuer providers. The real provider's
+effect-specific HIGH/ULTRA permit support and native dependency wiring remain
+unresolved; this handoff does not mint those authorities.
+
+## Provider issuance handoff — 2026-10-06 (historical PR2084)
 
 `IndependentSignerSecretGrantProvider.issue_grant(request, *,
 elevated_consensus_signing_permit=None)` returns a verified grant only after

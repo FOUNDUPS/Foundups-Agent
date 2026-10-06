@@ -1,4 +1,25 @@
-## Provider issuance qualification — 2026-10-06 (local candidate)
+## Effect issuer qualification — merged PR2087, 2026-10-07
+
+Publication headff1fdd504 passed CI37485625238/CodeQL37485619460;
+mergebbb975b4f has the identical tree. Exact-main checks remain pending.
+
+Extend existing `test_reddog_external_signer_authoritative_use_lease.py` with
+four frozen controls: successful provider exit before target; cleanup failure,
+invalid mapping and lease-only provider prevent dispatch. Baseline3fail/1pass;
+candidate passes all four without editing their acceptance criteria. Add
+issue_grant to the existing synthetic provider fixture. Migrate the existing
+`test_reddog_authoritative_use_request_issue.py` event expectations to the new
+interface; preserve all prior test identifiers, replay checks and interrupt
+coverage. Four connected suites80pass in15.24s; synthetic grants are not native
+effect authority. Local Qwen candidate failed these controls; this repair is
+coordinator-authored. Independent source review of46e9eb816 found no blocker;
+CI37483954789 and CodeQL37483627186 passed. Evidence: `effect-issuer-connected.xml`
+and `effect-handoff-baseline2.xml` in the existing20261006 evidence directory.
+Additional consent/sovereign/structure104pass in5.32s (184 total). Existing
+manifest --check passes unchanged at1419 files; issuer is outside that runtime
+closure. Frozen test text matches byte-for-byte after line-ending normalization.
+
+## Provider issuance qualification — 2026-10-06 (historical PR2084)
 
 Frozen source4e00032cf:1 intended semantic failure/1 structural pass in4.453s.
 Original20 top-level test ASTs retained. Candidate36pass, then91pass in24.49s

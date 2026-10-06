@@ -12,7 +12,24 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — local-first RSI admission (2026-10-06 JST):**
+**Current execution — runtime evidence before effect permission (2026-10-07 JST):**
+PR2087 merged at `bbb975b4f20fec5981a85a971f55fd26e3c7c6e8`. Its checked head
+and main have identical tree `d10f4e91051009d5eb025ac80499a65ac58f5888`.
+Independent source review found no blocker;184 local tests and exact-head
+CI37485625238/CodeQL37485619460 passed. Exact-main checks are pending.
+The issuer handoff source prerequisite is closed; it is a coordinator repair,
+not retained autonomous RSI. Preserve the failed local attempt below.
+
+Re-observed15/P1 (C3/I4/D4/impact4): connect the existing authenticated model
+runtime verifier to the effect reviewer's exact principal and receipt bindings.
+The effect reviewer currently receives a caller-supplied runtime resolver;
+receipt rehydration alone does not authenticate it. Reuse existing verifier,
+query and current-review owners. Native18/P0 remains blocked pending authentic
+runtime inputs, separate single-target effect permission, resident wiring,
+independent evaluation, retention/rollback and benefit in a later invocation.
+Do not widen the delegated two-child permit or turn verifier booleans into grants.
+
+**Historical local-first experiment (2026-10-06 JST):**
 PR2084 is merged at `2837b0db389c567de9a5402e22fa711affcf176d` with equal
 reviewed/merged trees,94 connected passes,8 integrity passes and successful
 exact-main CI/CodeQL. The first main compatibility attempt failed during pip
@@ -32,8 +49,8 @@ fault and removed a required annotation import. Stop at the retry cap. Source
 and owned test edits were restored; frozen tests, raw proposals and receipts are
 preserved in `outputs/rsi-permission-evidence-20261006/effect-handoff-*`.
 This is a controlled diagnostic failure, not an admitted worker or RSI gain.
-Next: qualify this existing local worker's instruction/API contract against the
-same frozen task before granting it repeated repository jobs. Do not infer model
+Local worker qualification remains pending; do not repeat this exhausted
+experiment while the higher-priority permission prerequisite is unresolved. Do not infer model
 incapability or a transport root cause from this single experiment.
 
 Native18/P0 remains blocked: the resident resolver still returns no use lease;

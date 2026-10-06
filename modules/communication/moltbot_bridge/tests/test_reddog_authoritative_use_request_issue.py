@@ -26,6 +26,10 @@ def _observe(case, monkeypatch, fault=None, interrupt=None, suppress=False):
         return real_builder(*args, **kwargs)
 
     class Provider:
+        def issue_grant(self, request):
+            with self.lease(request) as issued:
+                result = issued
+            return result
         def lease(self, request):
             event("lease")
             requests.append(request)
@@ -77,7 +81,7 @@ def test_issue_reuses_preparation_with_original_clock_and_identity(tmp_path, mon
 
     monkeypatch.setattr(type(case.issuer), "prepare_request", record)
     assert case.issuer.issue(payload=case.payload, authority_tier="HIGH") is sentinel
-    assert trace == ["clock", "prepare", "build", "lease", "enter", "sign", "rehydrate", "exit"]
+    assert trace == ["clock", "prepare", "build", "lease", "enter", "exit", "sign", "rehydrate"]
     assert requests[0] is prepared[0] and requests[0].to_dict() == expected.to_dict() == _expected(case.payload)
     assert requests[1] is None
     _quiet(case)
@@ -89,9 +93,9 @@ def test_issue_reuses_preparation_with_original_clock_and_identity(tmp_path, mon
     ("lease", ["clock", "build", "lease"]),
     ("enter", ["clock", "build", "lease", "enter"]),
     ("grant", ["clock", "build", "lease", "enter", "exit"]),
-    ("sign", ["clock", "build", "lease", "enter", "sign", "exit"]),
-    ("rehydrate", ["clock", "build", "lease", "enter", "sign", "rehydrate", "exit"]),
-    ("exit", ["clock", "build", "lease", "enter", "sign", "rehydrate", "exit"]),
+    ("sign", ["clock", "build", "lease", "enter", "exit", "sign"]),
+    ("rehydrate", ["clock", "build", "lease", "enter", "exit", "sign", "rehydrate"]),
+    ("exit", ["clock", "build", "lease", "enter", "exit"]),
 ], ids=["clock", "construction", "lease", "enter", "grant", "sign", "rehydrate", "exit"])
 def test_issue_preserves_fail_closed_order_and_cleanup(tmp_path, monkeypatch, fault, expected):
     case = _case(tmp_path, monkeypatch)
@@ -113,15 +117,13 @@ def test_issue_invalid_payload_still_samples_clock_before_construction(tmp_path,
 
 @pytest.mark.parametrize("suppress", [False, True])
 def test_issue_preserves_interrupt_and_context_suppression(tmp_path, monkeypatch, suppress):
+    """An exited provider context cannot suppress target interruptions."""
     case = _case(tmp_path, monkeypatch)
     error = KeyboardInterrupt("inert")
     trace, requests, _ = _observe(case, monkeypatch, "sign", error, suppress)
-    if suppress:
-        assert case.issuer.issue(payload=case.payload, authority_tier="HIGH") is None
-    else:
-        with pytest.raises(KeyboardInterrupt) as caught:
-            case.issuer.issue(payload=case.payload, authority_tier="HIGH")
-        assert caught.value is error
-    assert trace == ["clock", "build", "lease", "enter", "sign", "exit"]
-    assert requests[1] is error
+    with pytest.raises(KeyboardInterrupt) as caught:
+        case.issuer.issue(payload=case.payload, authority_tier="HIGH")
+    assert caught.value is error
+    assert trace == ["clock", "build", "lease", "enter", "exit", "sign"]
+    assert requests[1] is None
     _quiet(case)

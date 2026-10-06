@@ -61176,3 +61176,10 @@ tests and a quarantined proposal, not admitted WRE execution. Owned source/test
 edits restored after evidence capture; model list empty. Same frozen task is the
 next instruction/API qualification gate; no further paid or local retry here.
 Evidence: `outputs/rsi-permission-evidence-20261006/effect-handoff-*`.
+
+2026-10-07 closure: coordinator repair PR2087 merged atbbb975b4f with equal
+checked/main trees,184 local passes, independent source review and passing
+exact-head CI/CodeQL. Exact-main checks pending. Reconcile this existing policy
+PR with main while preserving both the rejected local experiment and completed
+repair. Next15/P1: authenticated reviewer runtime evidence before effect permit
+issuance; native18/P0 remains blocked. No new model retries or runtime grants.

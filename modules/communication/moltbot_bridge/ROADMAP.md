@@ -1,4 +1,24 @@
-## Provider handoff — 2026-10-06
+## Effect issuer handoff closed — 2026-10-07
+
+PR2087 merged atbbb975b4f; merged and checked trees match. Exact-head
+CI37485625238 and CodeQL37485619460 passed; exact-main checks pending.
+Independent source review found no blocker;184 local cases passed. Next15/P1:
+authenticate the runtime evidence used by current effect-review verification
+through the existing model verifier before single-target effect permit work.
+Native admission and retained autonomous benefit remain unproven.
+
+## Effect issuer handoff — 2026-10-06 (historical implementation checkpoint)
+
+15/P1 coordinator repair after the capped local-worker experiment failed.
+Reuse the merged provider's issue_grant interface in the existing effect issuer.
+Frozen regression now passes; connected80pass plus104 boundary cases. Independent
+source review found no blocker and reviewed head46e9eb816 passed CI/CodeQL.
+Reconcile concurrent mainb91823b28, then refresh hosted validation/publication.
+Next eligible source work: effect-specific HIGH/ULTRA permit
+compatibility before resolver/runtime composition. Authentic native admission,
+independent evaluation and later retained benefit remain separate unmet gates.
+
+## Provider handoff — 2026-10-06 (historical PR2084)
 
 Current14/P1 source slice follows merged PR2083. Frozen ordering regression
 reproduced; candidate issues through the existing lease and dispatches target

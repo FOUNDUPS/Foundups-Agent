@@ -2049,7 +2049,7 @@
     "modules/communication/moltbot_bridge/src/reddog_proposal_authenticity_nonce_store.py": "f2eb8c2586204e5b4c2d571ccc1a2762765f57edbe56b2540ee4e7214bfae106",
     "modules/communication/moltbot_bridge/src/reddog_provider_call_evidence.py": "6b3328ddfd14de557fffee2296174b8147b7aae324933876486ba967ff8239c2",
     "modules/communication/moltbot_bridge/src/reddog_public_policy.py": "2eb15cbca25c9840e5d3fa2d870073d19c7c71de1e9f78b813c6b8f5757b31e7",
-    "modules/communication/moltbot_bridge/src/reddog_public_session_gate.py": "0c8432302870b71521f036f4c7d5ef1b7d6de7b78b3bec5970d4c3d7f930d2d8",
+    "modules/communication/moltbot_bridge/src/reddog_public_session_gate.py": "c17e7cdc482893f3acfe307a06482f38dc3212ac43e72bab45cc46a5fc99e3bf",
     "modules/communication/moltbot_bridge/src/reddog_queue_authority_admission.py": "507b1a1dfbb00132228451419eb0a9b11931913185bab8800ddd06ad7dd10fc7",
     "modules/communication/moltbot_bridge/src/reddog_queue_model_runtime_authority.py": "92219d108c5e979d4366ddc59d0fd4fa357ed2d4792d8c84f8fa15c56a64d0ea",
     "modules/communication/moltbot_bridge/src/reddog_read_only_runtime_json_store.py": "4461691c172dde4249c1474e2962b395b552833b620a968201687e65709a84da",
