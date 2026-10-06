@@ -6,7 +6,6 @@ resolves one ephemeral key and authorizes one exact request.
 
 from __future__ import annotations
 
-from contextlib import nullcontext
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping, Protocol
 
@@ -131,11 +130,11 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
         consumed_grant: Mapping[str, Any],
     ) -> SigningResponse:
         def protected_action():
-            lease = getattr(self.backend_factory, "signing_authority_lease", nullcontext)
-            with lease():
+            from modules.communication.moltbot_bridge.src.reddog_signer_wsp71_ephemeral_backend_factory import _lease_authenticated_factory
+            with _lease_authenticated_factory(self.backend_factory, self.binding, self.grant_boundary):
                 return self._resolve_and_sign_current(request, peer, consumed_grant)
         try:
-            return self.grant_boundary.authorize_consumed_use(consumed_grant, protected_action)
+            return SignerSecretAccessGrantBoundary.authorize_consumed_use(self.grant_boundary, consumed_grant, protected_action)
         except SignerSecretAccessGrantRejected:
             return _reject(REJECT_SECRET_GRANT_INVALID)
         except Exception:

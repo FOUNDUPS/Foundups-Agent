@@ -1743,6 +1743,23 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_executio
 ```
 
 Focused signer resolve-per-sign E0 boundary:
+
+The synthetic grant/crypto matrix in `test_reddog_signer_resolve_per_sign_backend.py`
+uses an explicitly named unit backend to isolate grant consumption, revocation,
+resolution and response checks. It is not authenticated owner-admission evidence.
+Its frozen factory-rejection cases still instantiate the exact production class.
+The admitted socket runtime suite covers real owner leases, consuming-boundary
+identity, instance-method substitution, current binding, root ACQUIRE/FINISH
+ordering and replay with synthetic enrolled keys and transport fixtures.
+
+The HIGH elevated-consensus and effect-issuer composition tests explicitly
+parameterize `synthetic_owner_unit`: only the synthetic unit route accepts their
+ownerless fixtures. The exact production route must reject and issue no authority
+or effect lease. Their original orchestration assertions remain useful but do
+not establish authenticated HIGH/effect admission. That capability remains an
+open roadmap prerequisite. LOW runtime/factory and concurrent revocation tests
+use the actual owner-leased constructor rather than the unit adapter.
+
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_contract.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_durable_authority.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py -q
 ```

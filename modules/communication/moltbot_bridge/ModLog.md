@@ -1,3 +1,33 @@
+## Authenticated target owner prerequisite — 2026-10-06 (in progress)
+
+WSP00/15/97: PR2082 merged at5420b85a; exact-main CI37397915051 passed.
+Select15/P1 (C3/I4/D5/impact3) before provider handoff. Independent baseline
+found absent/no-op owner hooks permit resolution/signing. Extend existing
+WSP71 factory and resolve-per-sign backend to require exact factory type,
+authenticated owner context and matching fresh binding while the lease is held.
+Class-directed lease dispatch prevents an instance-shadowed method from
+substituting a no-op. Root ACQUIRE/FINISH ordering is preserved.
+
+Initial focused18pass; connected diagnostic19fail/103pass/1skip exposes existing
+ownerless fixture assumptions. Runtime test source was edited during that
+connected run, so it is not exact-source qualification and must be rerun.
+Additional ownerless, shadowed-method and binding-mismatch coverage passed.
+Independent review then found a consuming-boundary substitution; the frozen
+regression reproduced accepted=True/two resolutions/one build. Bind boundary
+store/oracle to authenticated admission and use class-directed protected-use
+dispatch. Latest two-owner70pass/1skip in31.46s. The old fake-crypto matrix uses
+an explicit test-only unit seam; unchanged exact production negatives and real
+admission fixtures cover owner enforcement. Four other composed fixture owners
+were reconciled: factory and root paths use admitted construction; HIGH/effect
+paths explicitly separate synthetic unit acceptance from exact-production denial.
+Final connected134pass/1skip in70.46s; manifest/integrity8pass in68.70s.
+Independent production review: target-owner-independent-final-review.json,
+SHA2563bdbd46a84d484994896cd6a55fd15cb9dda29343184b20da251694d0f03dda8.
+Publication remains pending. No admitted HIGH/effect execution or native RSI claim.
+Evidence: outputs/rsi-permission-evidence-20261006/target-owner-*.xml and
+target-owner-lease-baseline-review.json. Existing assertions and frozen negatives
+are retained; no production bypass is admitted to make legacy tests pass.
+
 ## Generation-fenced response commit — 2026-10-06
 
 WSP15 selects14/P1 (C3/I4/D4/impact3) after PR2078 merged at a2a45ddec;

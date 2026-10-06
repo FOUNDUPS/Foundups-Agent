@@ -12,7 +12,36 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current execution — generation commit fence (2026-10-06 JST):**
+**Current execution — authenticated target owner prerequisite (2026-10-06 JST):**
+PR2082 is merged at `5420b85a02a76efe21947a5dc00c8aecb854e5d3`;
+exact-main CI37397915051 passed (rechecked through GitHub). WSP15 selects
+15/P1 (C3/I4/D5/impact3): require an authenticated target owner lease before
+moving target calls outside the provider fence. Frozen baseline demonstrates
+two unsafe cases: absent and no-op factory hooks each resolve and sign once.
+The candidate rejects these and preserves the admitted runtime path (18 initial
+focused passes). Connected qualification found19fail/103pass/1skip, largely older
+ownerless fixtures; this is diagnostic evidence, not publication qualification.
+Review additionally identified instance-shadowable lease dispatch; the candidate
+now invokes the checked class implementation. A further reproduced substitution
+of the consuming grant boundary is rejected by binding its replay store and
+oracle to the admission; class-directed boundary dispatch retains root RPCs.
+Latest two-owner run:70pass/1skip. Synthetic crypto unit fixtures are explicitly
+unit-scoped; exact production negatives and admitted runtime positives remain.
+Factory and root-revocation fixtures now use admitted construction. HIGH/effect
+fixtures retain explicit synthetic-unit acceptance and exact-production rejection;
+they do not establish admitted HIGH/effect support. Expanded run133pass/1fail/1skip
+found a test assertion assuming a ledger field existed after rejection; the
+corrected empty-ledger assertion passes with both elevated cases (2/2).
+Final connected run134pass/1skip in70.46s. Runtime manifest regenerated with
+1,419 files; integrity8/8 pass. Independent final production review found no
+additional concrete blocker. Publication remains pending.
+Evidence: `target-owner-connected-final.xml` (earlier failures remain preserved).
+Evidence: `outputs/rsi-permission-evidence-20261006/target-owner-lease-baseline-review.json`.
+Provider handoff follows this prerequisite; effect permits, actual local worker
+admission, independent evaluation and retained benefit remain open. No native
+RSI result or runtime authorization is implied by this source repair.
+
+**Historical generation commit fence checkpoint (2026-10-06 JST):**
 PR2078 is merged at `a2a45ddec`; reviewed/merged trees match and exact-main CI
 37396021088 passed. Next14/P1 (C3/I4/D4/impact3) reuses the current selection lease
 through response validation and replay/capability commit. Frozen expiry regression

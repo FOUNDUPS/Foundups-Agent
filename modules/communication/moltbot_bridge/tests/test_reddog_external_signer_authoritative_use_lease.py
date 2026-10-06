@@ -407,9 +407,12 @@ def _root_grant(
 
 
 def _resolve_backend(
-    grant: Mapping[str, Any], store: DurableSignerSecretGrantNonceStore
+    grant: Mapping[str, Any], store: DurableSignerSecretGrantNonceStore,
+    *, synthetic_owner_unit: bool = False,
 ) -> ResolvePerSignSignerBackend:
-    return ResolvePerSignSignerBackend(
+    from modules.communication.moltbot_bridge.tests.test_reddog_signer_resolve_per_sign_backend import _UnitGrantAndResolutionBackend
+    backend_type = _UnitGrantAndResolutionBackend if synthetic_owner_unit else ResolvePerSignSignerBackend
+    return backend_type(
         binding=_resolve_binding(store),
         grant_boundary=SignerSecretAccessGrantBoundary(
             nonce_store=store,
@@ -634,9 +637,11 @@ def test_real_lease_reaches_direct_wre_spine_without_monkeypatch(
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT
 
 
+@pytest.mark.parametrize("synthetic_owner_unit", [False, True])
 def test_composed_e0_socket_issuer_reaches_real_wre_spine(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, synthetic_owner_unit: bool
 ) -> None:
+    """Synthetic issuer composition is distinct from production target admission."""
     monkeypatch.setattr(lease_module.time, "time", lambda: NOW)
     monkeypatch.setattr(issuer_module.time, "time", lambda: NOW)
     store = _store(tmp_path / "e0-store")
@@ -658,7 +663,8 @@ def test_composed_e0_socket_issuer_reaches_real_wre_spine(
         message = json.loads(raw)
         grant = message["secret_access_grant"]
         return handle_reddog_isolated_signer_socket_request(
-            raw, peer=_peer(), backend=_resolve_backend(grant, store)
+            raw, peer=_peer(), backend=_resolve_backend(
+                grant, store, synthetic_owner_unit=synthetic_owner_unit)
         )
 
     client = RedDogIsolatedSignerSocketClient(
@@ -681,4 +687,8 @@ def test_composed_e0_socket_issuer_reaches_real_wre_spine(
     result = _invoke_direct_spine(order, repo, lease)
 
     assert _is_lease(lease) is False
+    if not synthetic_owner_unit:
+        assert lease is None
+        assert result.decision != EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT
+        return
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT

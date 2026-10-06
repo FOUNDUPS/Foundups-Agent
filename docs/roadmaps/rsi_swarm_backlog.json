@@ -1880,24 +1880,35 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-      "observation_path": "current_observation.generation_commit_fence_20261006",
-      "base_commit": "a2a45ddecfa762de85cda5ca826992e337c0b9f7",
-      "selected_action": "Hold existing generation fence through local response replay/capability commit",
-      "status": "candidate_56_local_tests_passed_review_approved",
+      "observation_path": "current_observation.authenticated_target_owner_20261006",
+      "base_commit": "5420b85a02a76efe21947a5dc00c8aecb854e5d3",
+      "selected_action": "Require authenticated target owner lease before provider handoff",
+      "status": "candidate_connected_134_pass_integrity_8_pass_publication_pending",
       "wsp15": {
           "complexity": 3,
           "importance": 4,
-          "deferability": 4,
+          "deferability": 5,
           "impact": 3,
-          "total": 14,
+          "total": 15,
           "priority": "P1"
       },
       "dispatchable": false,
       "execution_plane": "Owned source repair; no native runtime grant",
-      "next_action": "Review and publish bounded generation-commit repair, then reconcile provider issuance handoff and effect permit before issuer wiring",
+      "next_action": "Validate exact owner factory and binding, reconcile connected fixtures without weakening admission, independently review and publish; then resume provider handoff and effect permit",
       "higher_priority_gates": []
   },
   "current_observation": {
+    "authenticated_target_owner_20261006": {
+        "source": "5420b85a02a76efe21947a5dc00c8aecb854e5d3",
+        "branch": "codex/rsi-provider-issuance-handoff-20261006",
+        "baseline": "2 intended unsafe-factory failures; 2 controls pass",
+        "candidate": "Final connected134pass/1skip in70.46s, target-owner-connected-final.xml. Prior assertion failure preserved. Explicit HIGH/effect unit acceptance is distinct from exact production rejection; real LOW/root paths admitted in fixture.",
+        "evidence": "outputs/rsi-permission-evidence-20261006/target-owner-lease-baseline-review.json",
+        "selection_reason": "Unsafe target fallback blocks provider handoff; extend existing factory and backend, no new authority or orchestrator",
+        "publication": "uncommitted_candidate_not_approved",
+        "native_rsi_complete": false,
+        "remaining": "Final connected/integrity validation and publication, provider handoff, actual HIGH/effect admission, admitted local worker, independent evaluator and later retained benefit"
+    },
     "generation_commit_fence_20261006": {
         "source": "a2a45ddecfa762de85cda5ca826992e337c0b9f7",
         "branch": "codex/rsi-generation-commit-fence-20261006",
@@ -1905,7 +1916,7 @@
         "candidate": "frozen2/2; connected56/56",
         "evidence": "outputs/rsi-permission-evidence-20261006/generation-commit-connected3.xml",
         "source_review": "generation-commit-final-source-review.json; bounded source approved",
-        "publication": "not_yet_published",
+        "publication": "PR2082 merged at5420b85a02a76efe21947a5dc00c8aecb854e5d3; exact-main CI37397915051 success",
         "native_rsi_complete": false,
         "remaining": "provider outer-fence composition, effect permit, admitted worker, independent held-out evaluation and later retained benefit"
     },

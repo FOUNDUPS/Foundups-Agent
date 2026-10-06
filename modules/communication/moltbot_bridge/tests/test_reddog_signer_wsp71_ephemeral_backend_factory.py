@@ -127,19 +127,14 @@ def _real_factory_grant_case(tmp_path):
     return store, profile, binding, request, grant, resolver
 
 def test_real_factory_socket_grant_consumes_before_both_resolutions(tmp_path, monkeypatch):
-    store, profile, binding, request, grant, resolver = _real_factory_grant_case(tmp_path)
+    """Real owner/factory/router; synthetic keys, peer/config attachment and transport."""
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as admitted
+
+    case = admitted._admission_case(tmp_path, monkeypatch)
+    store, request, grant, resolver = case.admission.replay_store, case.request, case.grant, case.resolver
+    profile = admitted.grant_runtime._profiles(case.owner.config)[0][0]
     verifier = Ed25519SignatureVerifier()
-    keys = SimpleNamespace(resolve=lambda principal, provider: binding.issuer_public_key
-                           if (principal, provider) == (binding.issuer_principal_id,
-                                                       binding.issuer_principal_provider) else None)
-    boundary = grant_fixture.SignerSecretAccessGrantBoundary(
-        nonce_store=store,
-        revocation_oracle=grant_fixture.AtomicSignerSecretGrantRevocationOracle(),
-        clock=lambda: grant_fixture.NOW,
-    )
-    factory = Wsp71EphemeralSignerBackendFactory(profile, resolver)
-    backend = grant_fixture.ResolvePerSignSignerBackend(binding, boundary, verifier, keys, factory)
-    nonce_path = grant_fixture._store_config(tmp_path).nonce_path
+    nonce_path = store._config.nonce_path
     assert resolver.calls == []
     assert json.loads(nonce_path.read_text(encoding="utf-8"))["consumed"] == {}
     original_resolve, observed = resolver.resolve, []
@@ -147,21 +142,31 @@ def test_real_factory_socket_grant_consumes_before_both_resolutions(tmp_path, mo
     def resolve_after_durable_consumption(reference, requester_id=None):
         state = json.loads(nonce_path.read_text(encoding="utf-8"))
         assert len(state["consumed"]) == 1 and state["reservations"] == {}
-        assert grant_fixture._store(tmp_path).consume_grant(grant) is False
+        reopened = grant_fixture.DurableSignerSecretGrantNonceStore(
+            store._config, integrity_key=grant_fixture.INTEGRITY_KEY, clock=lambda: grant_fixture.NOW)
+        assert reopened.consume_grant(grant) is False
         observed.append(reference)
         return original_resolve(reference, requester_id)
 
     monkeypatch.setattr(resolver, "resolve", resolve_after_durable_consumption)
-    wire = {"schema_version": grant_fixture.SIGNER_SOCKET_REQUEST_SCHEMA_VERSION_V2,
-            "request": request.to_dict(), "secret_access_grant": grant}
-    response = json.loads(grant_fixture.handle_reddog_isolated_signer_socket_request(
-        json.dumps(wire).encode("utf-8"), peer=grant_fixture._peer(), backend=backend,
-    ))
-    assert response["accepted"] is True, (response["rejection_code"], len(observed), len(resolver.calls))
-    assert observed == [profile.signing_key_ref, profile.audit_mac_key_ref]
-    assert resolver.calls == [(reference, profile.signer_agent_id) for reference in observed]
-    assert verifier.verify(profile.expected_public_key, request.signing_input, response["signature"])
-    assert not verifier.verify(profile.expected_public_key, request.signing_input + " ", response["signature"])
+
+    def serve(**kwargs):
+        backend = kwargs["backend"]
+        assert type(backend.backend_factory) is Wsp71EphemeralSignerBackendFactory
+        response = admitted._admission_wire(case, backend, grant)
+        assert response["accepted"] is True, (response["rejection_code"], len(observed), len(resolver.calls))
+        assert observed == [profile.signing_key_ref, profile.audit_mac_key_ref]
+        assert resolver.calls == [(reference, profile.signer_agent_id) for reference in observed]
+        assert verifier.verify(profile.expected_public_key, request.signing_input, response["signature"])
+        assert not verifier.verify(profile.expected_public_key, request.signing_input + " ", response["signature"])
+        assert admitted._admission_wire(case, backend, grant)["accepted"] is False
+        assert len(observed) == len(resolver.calls) == 2
+        return admitted.CapturingBoundedService()(**kwargs)
+
+    result = admitted.run_reddog_signer_socket_service_runtime_wiring(
+        case.config, resolver, serve_bounded=serve, secret_grant_admission=case.admission)
+    assert result.accepted is True, result.rejection_reasons
+    assert case.active is False
 
 @pytest.mark.parametrize(("case", "expected"), [
     ("wrong_reference", "FAIL_PROVIDER_REFERENCE_INVALID"),
