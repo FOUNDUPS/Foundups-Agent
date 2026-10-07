@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0.0",
+  "foundup_id": "eduit",
+  "event_id": "synthetic_event_001",
+  "session_ref": "synthetic_session_001",
+  "learner_ref": "synthetic_learner_001",
+  "mode": "practice",
+  "pack_id": "pattern_rule_demo",
+  "pack_version": "0.0.1",
+  "item_id": "pattern_001",
+  "scoring_version": "0.0.1",
+  "sequence": 0,
+  "outcome": "correct",
+  "input_mode": "keyboard",
+  "synthetic": true
+}
