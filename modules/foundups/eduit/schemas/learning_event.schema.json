@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EDUIT synthetic learning event v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "foundup_id",
+    "event_id",
+    "session_ref",
+    "learner_ref",
+    "mode",
+    "pack_id",
+    "pack_version",
+    "item_id",
+    "scoring_version",
+    "sequence",
+    "outcome",
+    "input_mode",
+    "synthetic"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0.0"
+    },
+    "foundup_id": {
+      "const": "eduit"
+    },
+    "event_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "session_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "learner_ref": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "mode": {
+      "enum": [
+        "placement",
+        "practice",
+        "measurement"
+      ]
+    },
+    "pack_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "pack_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "item_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
+    },
+    "scoring_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "outcome": {
+      "enum": [
+        "correct",
+        "incorrect",
+        "skipped",
+        "interrupted",
+        "invalid"
+      ]
+    },
+    "input_mode": {
+      "enum": [
+        "touch",
+        "keyboard",
+        "switch",
+        "pointer"
+      ]
+    },
+    "synthetic": {
+      "const": true
+    }
+  }
+}
