@@ -349,7 +349,8 @@ def test_generation_projection_does_not_change_resident_readiness(tmp_path, monk
         recorded = store.load()["stage_results"]["authority_runtime"]["authority_result"]
         generation.assert_called_once_with(repo_root=repo, runtime_root=runtime, now_epoch=NOW_EPOCH,
             principal_identity=recorded["identity"], principal_work_authority=recorded["work_authority"],
-            model_work_order=work_order, trusted_now_epoch=generation.call_args.kwargs["trusted_now_epoch"])
+            model_work_order=work_order, trusted_now_epoch=generation.call_args.kwargs["trusted_now_epoch"],
+            retained_proposal_inputs=None, revoked_key_epochs=frozenset())
         assert callable(generation.call_args.kwargs["trusted_now_epoch"])
     all_anchors = set(use_time_module.INCOMPLETE_TRUST_ANCHOR_REASONS)
     expected_anchors = set(all_anchors)
@@ -520,3 +521,37 @@ def test_resident_peer_connection_requires_fresh_bound_evidence(tmp_path, monkey
         assert seen[0]["expected_server_uid"]==1234 and seen[0]["expected_server_gid"]==1235
         assert seen[0]["trusted_socket_root"]==runtime
         assert seen[0]["secret_access_grant_supplier"] is supplier
+
+
+def test_valve_routes_retained_memex_and_revocations_without_effect_authority(tmp_path, monkeypatch):
+    """Routing seam only; real artifact/crypto coverage lives in producer tests."""
+    from dataclasses import replace
+    from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_runtime_binding import _digest
+    repo, runtime, resolver, store, work, signed, clock, generation = (
+        _generation_projection_case(tmp_path, monkeypatch, "typed-accepted", consistent=True))
+    bundle = {"routing_fixture": "retained-evidence"}
+    original = use_time_module._read_runtime_artifacts
+    def artifacts(owner):
+        values, reasons = original(owner)
+        values["authority_profile"] = dict(values["authority_profile"], proposal_verification_inputs=bundle)
+        return values, reasons
+    monkeypatch.setattr(use_time_module, "_read_runtime_artifacts", artifacts)
+    def proof(**kwargs):
+        digest = "sha256:" + "b"*64
+        return SignerCurrentGenerationRuntimeBinding(True, (), receipt_id=digest,
+            selection_expires_at=NOW_EPOCH+60, manifest_expires_at=NOW_EPOCH+60,
+            principal_binding_digest=_digest({"identity": kwargs["principal_identity"],
+                "work_authority": kwargs["principal_work_authority"]}),
+            memex_work_order_digest=canonical_full_work_order_digest(work),
+            memex_evidence_digest=_digest(bundle), memex_valid_until=NOW_EPOCH+30)
+    generation.side_effect = proof
+    resolver = replace(resolver, revoked_key_epochs=("retired-epoch",))
+    result = resolver.resolve(chain_state=store.load(), work_order=work, queue_item_id=QUEUE_ID, selected_slice=SLICE)
+    assert generation.call_count == 1
+    assert generation.call_args.kwargs["retained_proposal_inputs"] is bundle
+    assert generation.call_args.kwargs["revoked_key_epochs"] == frozenset({"retired-epoch"})
+    cleared = set(use_time_module.CURRENT_GENERATION_TRUST_ANCHOR_REASONS) | {
+        "canonical_principal_subject_key_attestation_missing", "canonical_memex_supply_signed_evidence_verifier_missing"}
+    assert cleared.isdisjoint(result.rejection_reasons)
+    assert set(use_time_module.INCOMPLETE_TRUST_ANCHOR_REASONS).difference(cleared).issubset(result.rejection_reasons)
+    assert result.authoritative_use_lease is None

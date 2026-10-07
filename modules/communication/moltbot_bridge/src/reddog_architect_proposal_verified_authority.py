@@ -146,6 +146,57 @@ def verify_retained_architect_proposal_authority(
     )
 
 
+def verify_retained_proposal_work_binding(
+    value, *, work_order, work_authority, principal_identity, signer_identity,
+    signer_runtime_config, principal_key_resolver, now_epoch,
+    revoked_key_epochs=frozenset(),
+):
+    """Bind verified retained evidence to exact work; caller owns current trust."""
+    from .reddog_work_order_binding import canonical_full_work_order_digest
+    from .reddog_operational_memex_supply_freshness import DEFAULT_MAX_AGE_SECONDS
+    bundle = snapshot_retained_architect_proposal_inputs(value)
+    work = json.loads(json.dumps(work_order, allow_nan=False))
+    authority = json.loads(json.dumps(work_authority, allow_nan=False))
+    work_digest = canonical_full_work_order_digest(work)
+    if authority.get("work_order_digest") != work_digest:
+        raise ValueError("retained_proposal_work_not_authorized")
+    verified = verify_retained_architect_proposal_authority(bundle,
+        signer_runtime_config=signer_runtime_config, principal_key_resolver=principal_key_resolver,
+        now_epoch=now_epoch, revoked_key_epochs=revoked_key_epochs)
+    _verify_retained_work_fields(bundle, work, authority, principal_identity, signer_identity, verified)
+    authorization = signer_runtime_config.proposal_policy_authorization
+    authorization = authorization if isinstance(authorization, Mapping) else authorization.to_dict()
+    memex = _retained_memex(bundle, now_epoch)
+    deadline = min(bundle["attestation"]["expires_at"], authorization["expires_at"],
+        int(datetime.fromisoformat(memex.policy_expires_at.replace("Z", "+00:00")).timestamp()),
+        int(datetime.fromisoformat(memex.policy_issued_at.replace("Z", "+00:00")).timestamp()) + DEFAULT_MAX_AGE_SECONDS)
+    if now_epoch >= deadline:
+        raise ValueError("retained_proposal_work_evidence_expired")
+    return dict(memex_work_order_digest=work_digest, memex_evidence_digest=_digest(bundle),
+                memex_valid_until=deadline)
+
+
+def _verify_retained_work_fields(bundle, work, authority, identity, signer, verified):
+    profile = bundle["original_authority_profile"]
+    if (signer.get("signer_profile_id") != "reddog-work-authority"
+            or signer.get("signer_public_key") != verified.reddog_public_key
+            or signer.get("key_epoch") != verified.key_epoch
+            or authority.get("principal_id") != verified.principal_id
+            or any(identity.get(key) != getattr(verified, key) for key in
+                   ("principal_id", "principal_provider", "principal_public_key"))):
+        raise ValueError("retained_proposal_current_signer_mismatch")
+    common = dict(repo_full_name=profile["repo_full_name"], foundup_id=profile["foundup_id"],
+        memex_supply_receipt_id=verified.memex_supply_receipt_id, memex_supply_digest=verified.memex_supply_digest)
+    expected = dict(common, proposal_authenticity_attestation_id=verified.attestation_id,
+        proposal_authenticity_attestation_digest=verified.attestation_digest,
+        proposal_policy_authorization_id=verified.policy_authorization_id,
+        proposal_policy_authorization_digest=verified.policy_authorization_digest,
+        proposal_signer_runtime_context_digest=verified.signer_runtime_context_digest)
+    if (any(work.get(key) != item for key, item in expected.items())
+            or any(authority.get(key) != item for key, item in common.items())):
+        raise ValueError("retained_proposal_signed_work_binding_mismatch")
+
+
 @dataclass(frozen=True)
 class ArchitectProposalAuthorityBinding:
     """Verified signed evidence bound to one active signer runtime."""

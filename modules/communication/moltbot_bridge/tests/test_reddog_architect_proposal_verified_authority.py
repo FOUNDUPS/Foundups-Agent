@@ -94,6 +94,70 @@ def _verify(**overrides: Any):
     return verify_architect_proposal_promotion_authority(**values)
 
 
+def _retained_work_inputs(now_epoch=NOW_EPOCH, transform_config=None, profile_overrides=None):
+    from modules.communication.moltbot_bridge.src.reddog_work_order_binding import canonical_full_work_order_digest
+    from modules.communication.moltbot_bridge.src import reddog_architect_proposal_verified_authority as verifier
+    from datetime import datetime, timezone
+    determination, profile = _determination(), _authority_profile(**(profile_overrides or {}))
+    memex_raw = _memex_supply(policy_issued_at=datetime.fromtimestamp(now_epoch-10, timezone.utc).isoformat(),
+        policy_expires_at=datetime.fromtimestamp(now_epoch+590, timezone.utc).isoformat())
+    attestation, config, resolver = build_proposal_runtime_inputs(determination, profile, memex_raw, now_epoch=now_epoch)
+    resolver = StaticPrincipalKeyResolver(profile["principal_public_key"])
+    if transform_config is not None: config = transform_config(config, profile)
+    bundle = dict(schema_version=verifier.RETAINED_PROPOSAL_INPUTS_SCHEMA,
+        attestation=attestation, original_authority_profile=profile,
+        proposal_admission=determination["proposal_admission"], determination=determination,
+        queue_candidate=determination["queue_candidate"], memex_supply_receipt=memex_raw)
+    checked = verifier.verify_retained_architect_proposal_authority(bundle,
+        signer_runtime_config=config, principal_key_resolver=resolver, now_epoch=now_epoch)
+    work = dict(repo_full_name=profile["repo_full_name"], foundup_id=profile["foundup_id"],
+        memex_supply_receipt_id=checked.memex_supply_receipt_id, memex_supply_digest=checked.memex_supply_digest,
+        proposal_authenticity_attestation_id=checked.attestation_id,
+        proposal_authenticity_attestation_digest=checked.attestation_digest,
+        proposal_policy_authorization_id=checked.policy_authorization_id,
+        proposal_policy_authorization_digest=checked.policy_authorization_digest,
+        proposal_signer_runtime_context_digest=checked.signer_runtime_context_digest)
+    authority = dict(work, principal_id=profile["principal_id"],
+                     work_order_digest=canonical_full_work_order_digest(work))
+    signer = dict(signer_profile_id="reddog-work-authority", signer_public_key=checked.reddog_public_key,
+                  key_epoch=checked.key_epoch)
+    return bundle, work, authority, signer, config, resolver
+
+
+@pytest.mark.parametrize("case", ["valid", "work", "authority", "memex-id", "memex-digest",
+    "attestation-id", "attestation-digest", "policy-id", "policy-digest", "runtime-context",
+    "repo", "foundup", "principal", "signer-key", "signer-epoch", "signer-profile", "revoked", "expired"])
+def test_retained_proposal_binds_exact_work_and_current_signer(case):
+    from modules.communication.moltbot_bridge.src import reddog_architect_proposal_verified_authority as verifier
+    from modules.communication.moltbot_bridge.src.reddog_work_order_binding import canonical_full_work_order_digest
+    bundle, work, authority, signer, config, resolver = _retained_work_inputs()
+    fields = {"memex-id":"memex_supply_receipt_id", "memex-digest":"memex_supply_digest",
+        "attestation-id":"proposal_authenticity_attestation_id", "attestation-digest":"proposal_authenticity_attestation_digest",
+        "policy-id":"proposal_policy_authorization_id", "policy-digest":"proposal_policy_authorization_digest",
+        "runtime-context":"proposal_signer_runtime_context_digest", "repo":"repo_full_name", "foundup":"foundup_id"}
+    if case in fields:
+        work[fields[case]] = authority[fields[case]] = "substituted"
+        authority["work_order_digest"] = canonical_full_work_order_digest(work)
+    if case == "work": work["task_summary"] = "substituted"
+    if case == "authority": authority["work_order_digest"] = "sha256:" + "0" * 64
+    if case == "principal": authority["principal_id"] = "unrelated"
+    if case.startswith("signer-"):
+        signer[{"signer-key":"signer_public_key", "signer-epoch":"key_epoch", "signer-profile":"signer_profile_id"}[case]] = "unrelated"
+    args = dict(work_order=work, work_authority=authority, signer_identity=signer,
+        principal_identity={key: bundle["original_authority_profile"][key] for key in
+                            ("principal_id", "principal_provider", "principal_public_key")},
+        signer_runtime_config=config, principal_key_resolver=resolver,
+        now_epoch=NOW_EPOCH + (121 if case == "expired" else 0),
+        revoked_key_epochs=frozenset({signer["key_epoch"]}) if case == "revoked" else frozenset())
+    if case == "valid":
+        result = verifier.verify_retained_proposal_work_binding(bundle, **args)
+        assert result["memex_work_order_digest"] == canonical_full_work_order_digest(work)
+        assert result["memex_valid_until"] == NOW_EPOCH + 120
+        assert result["memex_evidence_digest"].startswith("sha256:")
+    else:
+        with pytest.raises(ValueError): verifier.verify_retained_proposal_work_binding(bundle, **args)
+
+
 def test_untrusted_principal_cannot_self_mint_authority() -> None:
     with pytest.raises(ValueError):
         _verify(

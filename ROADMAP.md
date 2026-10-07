@@ -25,7 +25,12 @@ to the existing authenticated current-generation producer, collector and valve.
 Reuse selected runtime configuration, protected principal resolver and existing
 signature verifier. Full work-order binding, current signer identity, revocation,
 expiry and caller-mutation controls must hold; other trust reasons and effect
-permission remain independent. This source connection is not implemented yet.
+permission remain independent. The source connection is now locally qualified:
+connected168pass plus routing1pass, independent source review cleared the
+reproduced principal-provider substitution. Publication pending. Native proposal
+packet supply and grant-aware backend each retain an explicit unsupported-policy
+guard; next re-observation targets their existing principal/replay adapters.
+Fixture provisioning is not native admission or retained RSI.
 Evidence: `outputs/rsi-permission-evidence-20261006/memex-current-use-next-slice.json`
 and `memex-retention-2097-merge-closure.json` in the same directory.
 

@@ -1,3 +1,28 @@
+## Current-generation Memex consumption
+
+The existing generation producer and use-time collector accept optional
+`retained_proposal_inputs` and `revoked_key_epochs`; the valve supplies its
+runtime-profile bundle and current revocations. The producer rehydrates selected
+config bytes and loads the manifest-bound principal resolver inside the existing
+generation lease. `verify_retained_proposal_work_binding` joins actual proposal
+signatures to the exact work-order digest, Memex IDs/digests, proposal authorization,
+runtime context, current signer, and principal ID/provider/public key.
+
+Audit fields `memex_work_order_digest`, `memex_evidence_digest` and
+`memex_valid_until` carry that result. Final checks cover config/principal artifact
+rereads, caller-input changes, nondecreasing time, proposal/policy/Memex lifetime
+and generation/manifest expiry. Memex evidence is bounded conservatively by its
+300-second maximum age. The collector compares evidence before/after peer RPC and
+checks expiry again. Only the Memex reason can clear from this proof; principal,
+peer, model, consensus, sovereignty and effect authority retain their own checks.
+No capability is minted, and serialized binding objects are not trusted grants.
+
+Native provisioning is not established by the connected tests. They create an
+explicit test packet before signing the generation artifacts; the production
+run-packet supplier rejects proposal policies, as does the grant-aware ephemeral
+backend factory. Existing principal/replay adapters require a separate admitted
+integration; this consumer does not relax either guard.
+
 ## Retained proposal verification inputs
 
 Optional runtime-only `proposal_verification_inputs` uses

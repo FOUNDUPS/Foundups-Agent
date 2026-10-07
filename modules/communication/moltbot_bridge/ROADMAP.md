@@ -1,3 +1,13 @@
+## Current-generation Memex checkpoint — 2026-10-07
+
+The existing retained-evidence consumer is locally qualified: connected168pass
+and valve routing1pass; independent source review cleared the reproduced
+principal-provider identity defect. Native proposal packet/grant provisioning
+remains blocked by two explicit guards. Publication pending; fixture qualification
+is not autonomous RSI. See INTERFACE, ModLog and test evidence for boundaries.
+Next: re-observe the existing principal/replay adapter owners, then select one
+bounded admitted integration. No repeated broad audit or failed model retry.
+
 ## Retained proposal evidence checkpoint — 2026-10-07
 
 Selected14/P1: existing publication now preserves bounded verification inputs.

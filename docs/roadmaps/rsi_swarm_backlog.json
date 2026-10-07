@@ -1883,7 +1883,7 @@
     "observation_path": "current_observation.memex_current_use_20261007",
     "base_commit": "15089a44fe2ffc7150e7cd09688260fa3560e607",
     "selected_action": "Connect retained proposal and Memex inputs to existing current-generation producer, collector and valve",
-    "status": "SELECTED_NOT_IMPLEMENTED",
+    "status": "LOCALLY_QUALIFIED_PUBLICATION_PENDING",
     "wsp15": {
       "complexity": 3,
       "importance": 4,
@@ -1893,7 +1893,7 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "next_action": "Reuse authenticated selected config and principal resolver; bind exact signed work, current signer, expiry, revocations and caller-mutation controls. No effect authority or native RSI claim."
+    "next_action": "Close exact-source publication, then re-observe proposal run-packet and ephemeral-backend adapter guards; preserve admission, independent verification and no-paid-fallback boundaries."
   },
   "current_observation": {
     "memex_current_use_20261007": {
@@ -1906,7 +1906,7 @@
         "total": 15,
         "priority": "P1"
       },
-      "status": "SELECTED_NOT_IMPLEMENTED",
+      "status": "LOCALLY_QUALIFIED_PUBLICATION_PENDING",
       "maintenance_status": "COMPLETED",
       "owner_freshness": "CURRENT",
       "index_gap_detected": false,
@@ -1919,7 +1919,11 @@
       "coordinator_initiated_model_calls": 0,
       "coordinator_tokens": null,
       "runtime_inference_usage": null,
-      "evidence": "outputs/rsi-permission-evidence-20261006/memex-current-use-next-slice.json"
+      "evidence": "outputs/rsi-permission-evidence-20261006/memex-current-use-execution.json",
+      "local_connected_passed": 168,
+      "local_routing_passed": 1,
+      "independent_source_review": "CLEARED; reviewer did not independently execute tests",
+      "native_provisioning": "NOT_ESTABLISHED: run-packet and ephemeral backend reject proposal policies"
     },
     "memex_retention_20261007": {
       "base_commit": "0383b9804ce08fffaac6cf74fb0aeedd93eb04d2",

@@ -1,3 +1,11 @@
+## 2026-10-07 — Bind retained Memex evidence at current use
+
+Existing producer/collector/valve extended; no new module or authority.
+Connected168pass + routing1pass; independent source review cleared the reproduced
+principal-provider substitution defect. Native provisioning guards remain.
+WSP00/6/15/22/50/62/84/97. See bridge ModLog and execution receipt.
+Publication pending; local fixture qualification is not retained RSI.
+
 ## 2026-10-07 — Close retained evidence and execute local Holo maintenance
 
 WSP00/15/22/50/97. PR2097 merged15089a44f, reviewed/main trees equal;

@@ -41,6 +41,162 @@ def _fixture(
     return _prepare_real_cli_owner(tmp_path, monkeypatch)
 
 
+def _memex_generation_fixture(tmp_path, monkeypatch):
+    from dataclasses import asdict, replace
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.src import reddog_signer_socket_service_authority_policy_runtime as policy_runtime
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_system_service_manifest_selection_loader as owners
+    from modules.communication.moltbot_bridge.tests.test_reddog_architect_proposal_verified_authority import _retained_work_inputs
+    from modules.communication.moltbot_bridge.tests import architect_proposal_promotion_test_helpers as signing_helpers
+    from modules.communication.moltbot_bridge.tests.test_reddog_architect_proposal_signer_policy_runtime import _policy_authorization
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import architect_proposal_security_context_digest
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import SIGNER_SERVICE_CONFIG_SCHEMA_VERSION
+    build, legacy_config, runtime_packet, retained = owners._build_harness, owners._runtime_config, owners._runtime_packet, {}
+    monkeypatch.setattr(policy_runtime, "time", SimpleNamespace(time=lambda: NOW))
+    def build_with_evidence(path):
+        harness = build(path)
+        for name, value in dict(PRINCIPAL_PRIVATE_KEY=harness.principal_private_key,
+            REDDOG_PRIVATE_KEY=harness.reddog_private_key, PRINCIPAL_PUBLIC_KEY=harness.principal_public_key,
+            REDDOG_PUBLIC_KEY=harness.reddog_public_key).items():
+            monkeypatch.setattr(signing_helpers, name, value)
+        def move_config(config, profile):
+            signer = harness.runtime_root.parent / "memex-signer"
+            value = replace(config, repo_root=harness.repo_root, runtime_root=harness.runtime_root,
+                signer_runtime_root=signer, socket_path=harness.runtime_root / "signer.sock",
+                control_loop_anchor_path=signer / "signer_control_loop_anchor.json",
+                control_loop_authority_policy=legacy_config(harness)["control_loop_authority_policy"],
+                key_provider_profiles=tuple(replace(p, expected_key_epoch=profile["key_epoch"]) for p in config.key_provider_profiles),
+                proposal_nonce_store_path=signer / "architect_proposal_nonce_store.json",
+                proposal_policy_authorization=None, proposal_security_context_digest=None)
+            security = architect_proposal_security_context_digest(value)
+            authorization = _policy_authorization(value.proposal_authority_policy,
+                principal_private=harness.principal_private_key, public_key=profile["reddog_public_key"],
+                signer_runtime_root=signer, security_context_digest=security, profile=profile,
+                issued_at=NOW-10, expires_at=NOW+120)
+            return replace(value, proposal_policy_authorization=authorization, proposal_security_context_digest=security)
+        retained["inputs"] = _retained_work_inputs(NOW, move_config,
+            dict(principal_public_key=harness.principal_public_key, reddog_public_key=harness.reddog_public_key,
+                 key_epoch=harness.authority_profile["key_epoch"]))
+        bundle, _, _, _, config, _ = retained["inputs"]
+        profile = bundle["original_authority_profile"]
+        record = {key: profile[key] for key in ("principal_id", "principal_provider", "principal_public_key")}
+        record.update(repo_scope=[profile["repo_full_name"]], foundup_scope=[profile["foundup_id"]],
+            verified_subject_digest="sha256:"+"d"*64, reward_account=None, owner_dae=None, principal_wallet=None)
+        artifact = dict(schema_version="reddog_authority_runtime_resolver_supply.v1",
+            principals={record["principal_provider"]+"|"+record["principal_id"]:record}, principal_count=1,
+            resolver_supply_receipt_id="sha256:"+"e"*64, no_holoindex_reindex_performed=True)
+        alternate = dict(record, principal_provider="alternate-provider",
+                         principal_public_key=signing_helpers._public_key(signing_helpers._private_key(23)))
+        artifact["principals"][alternate["principal_provider"]+"|"+alternate["principal_id"]] = alternate
+        artifact["principal_count"] = 2
+        retained["alternate_identity"] = {key: alternate[key] for key in ("principal_id", "principal_provider", "principal_public_key")}
+        (harness.runtime_root / "principal_authority_records.json").write_text(json.dumps(artifact), encoding="ascii")
+        retained["identity"] = {key: record[key] for key in ("principal_id", "principal_provider", "principal_public_key")}
+        retained["config"] = json.loads(json.dumps(asdict(config), default=lambda x: str(x) if isinstance(x, Path) else x.value))
+        retained["config"]["schema_version"] = SIGNER_SERVICE_CONFIG_SCHEMA_VERSION
+        return harness
+    monkeypatch.setattr(owners, "_build_harness", build_with_evidence)
+    monkeypatch.setattr(owners, "_runtime_config", lambda harness, **kwargs: retained["config"])
+    def fixture_packet(harness, config_path, owner_path):
+        # Production supplier deliberately rejects proposal configs. This fixture
+        # proves consumption after authenticated provisioning, NOT native supply.
+        from dataclasses import replace
+        original = config_path.read_bytes()
+        config_path.write_text(json.dumps(legacy_config(harness)), encoding="ascii")
+        packet_path, supplied = runtime_packet(harness, config_path, owner_path)
+        config_path.write_bytes(original)
+        packet = json.loads(packet_path.read_text("ascii"))
+        packet["config_digest"] = binding_module._digest(retained["config"])
+        packet.pop("run_packet_id")
+        packet["run_packet_id"] = binding_module._digest(packet)
+        packet_path.write_text(json.dumps(packet,sort_keys=True,separators=(",", ":")),encoding="ascii")
+        return packet_path, replace(supplied, config_digest=packet["config_digest"],
+            run_packet_id=packet["run_packet_id"],run_packet_digest=binding_module._digest(packet))
+    monkeypatch.setattr(owners, "_runtime_packet", fixture_packet)
+    values = _fixture(tmp_path, monkeypatch)
+    return values, retained
+
+
+@pytest.mark.parametrize("case", ["valid", "revoked", "work-mutated", "bundle-mutated",
+    "config-mutated", "principal-mutated", "expired-after-crypto", "clock-reversed", "collector-clock-reversed",
+    "peer-valid", "peer-expired", "peer-bundle-mutated", "other-provider"])
+def test_current_generation_verifies_retained_memex_evidence(tmp_path, monkeypatch, case):
+    from modules.communication.moltbot_bridge.src import reddog_architect_proposal_verified_authority as verifier
+    from modules.communication.moltbot_bridge.src import reddog_signer_current_generation_use_time_gate as gate
+    values, retained = _memex_generation_fixture(tmp_path, monkeypatch)
+    bundle, work, authority, signer, _, _ = retained["inputs"]
+    harness, now, calls = values["harness"], [NOW], []
+    identity = retained["alternate_identity"] if case == "other-provider" else retained["identity"]
+    original = verifier.verify_retained_proposal_work_binding
+    crypto, actual_crypto = [], verifier.verify_retained_architect_proposal_authority
+    def checked_crypto(*args, **kwargs):
+        result = actual_crypto(*args, **kwargs)
+        crypto.append(result.attestation_id)
+        return result
+    monkeypatch.setattr(verifier, "verify_retained_architect_proposal_authority", checked_crypto)
+    def verify(*args, **kwargs):
+        result = original(*args, **kwargs)
+        calls.append(result)
+        if case == "work-mutated": work["task_summary"] = "substituted"
+        if case == "bundle-mutated": bundle["attestation"]["signature"] = "substituted"
+        if case == "config-mutated": values["config_path"].write_text("{}", encoding="ascii")
+        if case == "principal-mutated": (harness.runtime_root / "principal_authority_records.json").write_text("{}", encoding="ascii")
+        if case == "expired-after-crypto": now[0] = NOW+120
+        if case == "clock-reversed": now[0] = NOW-1
+        return result
+    monkeypatch.setattr(verifier, "verify_retained_proposal_work_binding", verify)
+    grant_supplier = None
+    if case.startswith("peer-"):
+        from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import SignerServiceHealthcheckResult
+        # OS identity and peer RPC are explicit seams; generation/config/key/signatures remain real.
+        monkeypatch.setattr(binding_module, "load_system_service_signer_identity", lambda **kwargs: (1234, 1235))
+        producer, observed = gate.verify_signer_current_generation_runtime_binding, []
+        def capture(**kwargs):
+            result = producer(**kwargs)
+            observed.append(result)
+            return result
+        monkeypatch.setattr(gate, "verify_signer_current_generation_runtime_binding", capture)
+        def handshake(**kwargs):
+            b = observed[-1]
+            if case == "peer-expired": now[0] = NOW+120
+            if case == "peer-bundle-mutated": bundle["attestation"]["signature"] = "changed-during-peer"
+            return SignerServiceHealthcheckResult(True, "READY", str(values["packet_path"]),
+                b.run_packet_id, "fixture-config", b.config_digest, "fixture-socket", b.signer_profile_id,
+                b.signer_public_key, kwargs["requester_principal_id"], "sha256:"+"a"*64, "sha256:"+"b"*64, (),
+                manifest_id=b.manifest_id, artifact_generation_digest=b.artifact_generation_digest,
+                peer_handshake_verified=True, peer_handshake_expires_at=NOW+180, session_id=b.session_id,
+                socket_path_digest=b.socket_path_digest, key_epoch=b.key_epoch, server_identity_verified=True)
+        monkeypatch.setattr(gate, "run_reddog_signer_socket_service_healthcheck", handshake)
+        grant_supplier = lambda request: {}
+    if case == "collector-clock-reversed":
+        producer = gate.verify_signer_current_generation_runtime_binding
+        producer_digests = []
+        def reverse_after_producer(**kwargs):
+            result = producer(**kwargs)
+            producer_digests.append(result.memex_work_order_digest)
+            now[0] = NOW-1
+            return result
+        monkeypatch.setattr(gate, "verify_signer_current_generation_runtime_binding", reverse_after_producer)
+    evidence = gate.collect_signer_current_generation_use_time_evidence(True, harness.repo_root,
+        harness.runtime_root, lambda: now[0], principal_identity=identity,
+        principal_work_authority=authority, model_work_order=work, retained_proposal_inputs=bundle,
+        peer_secret_access_grant_supplier=grant_supplier,
+        revoked_key_epochs=frozenset({signer["key_epoch"]}) if case == "revoked" else frozenset())
+    valid = case in {"valid", "peer-valid"}
+    assert evidence.memex_matches(work, bundle) is valid
+    if case == "collector-clock-reversed":
+        from modules.communication.moltbot_bridge.src.reddog_work_order_binding import canonical_full_work_order_digest
+        assert producer_digests == [canonical_full_work_order_digest(work)]
+    if case != "revoked": assert crypto, "control must reach real signature verification"
+    reasons = evidence.bound_identity_reasons(identity, authority, work, bundle)
+    assert ("canonical_memex_supply_signed_evidence_verifier_missing" in reasons) is valid
+    assert evidence.peer_verified is (case == "peer-valid")
+    if valid:
+        assert evidence.binding.authority_granted is False and evidence.binding.effect_capability_issued is False
+        work["task_summary"] = "changed after collection"
+        assert not evidence.memex_matches(work, bundle)
+
+
 def test_exact_current_generation_round_trip_is_audit_only(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

@@ -170,20 +170,20 @@ class GovernedValveUseTimeAuthorityResolver:
         )
 
         generation_evidence = collect_signer_current_generation_use_time_evidence(
-            reverified and not reasons,
-            self.repo_root,
-            self.runtime_allowed_root,
-            self.trusted_now_epoch,
+            reverified and not reasons, self.repo_root, self.runtime_allowed_root, self.trusted_now_epoch,
             principal_identity=identity, principal_work_authority=work_authority,
             peer_secret_access_grant_supplier=self.signer_peer_secret_access_grant_supplier,
             model_work_order=work_order,
+            retained_proposal_inputs=artifacts.get("authority_profile", {}).get("proposal_verification_inputs"),
+            revoked_key_epochs=frozenset(self.revoked_key_epochs),
         )
         generation_binding_receipt_id = generation_evidence.receipt_id
         reasons.extend(
             generation_evidence.remaining_reasons(
                 INCOMPLETE_TRUST_ANCHOR_REASONS,
                 CURRENT_GENERATION_TRUST_ANCHOR_REASONS
-                + generation_evidence.bound_identity_reasons(identity, work_authority, work_order),
+                + generation_evidence.bound_identity_reasons(identity, work_authority, work_order,
+                    artifacts.get("authority_profile", {}).get("proposal_verification_inputs")),
             )
         )
 
