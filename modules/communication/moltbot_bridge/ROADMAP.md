@@ -2,8 +2,8 @@
 
 PR2098 is merged/main-verified at1e220147c; its prior publication-pending entries
 are historical. Next16/P0 extends the existing deferred factory/runtime.
-Local component/regression72pass/1skip; full admitted proposal integration and
-packet supply remain unqualified. No native RSI or retention claim. See current
+Local connected119pass/2skip now covers owner/grant handshake and proposal
+composition under synthetic selection/transport. Native packet supply remains unqualified. No native RSI or retention claim. See current
 ModLog/INTERFACE for boundaries, review findings and exact evidence.
 
 ## Current-generation Memex checkpoint — 2026-10-07

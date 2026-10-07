@@ -1,3 +1,30 @@
+## Deferred handshake and admitted proposal regression — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97. Existing16/P0 selection retained.
+The saved integration reproducer reached a valid handshake signature, but the
+resolve-per-sign validator rejected its nonempty response attestation. The existing
+canonical handshake verifier now checks both signatures and request freshness;
+other operation shapes remain closed. Seven controls cover valid evidence,
+substituted/missing signatures, wrong binding, expiry and unrelated operations.
+The owner/grant fixture now completes handshake, proposal signing, outer-grant
+replay rejection and inner proposal replay rejection. Selection/OS transport and
+pre-issued grants remain synthetic; this is not native admission or retained RSI.
+
+Connected119pass/2skip (42.32s). Skips: Windows symlink privilege and AF_UNIX.
+The first connected run found an inherited337-line factory against its200-line
+limit. Proposal authority helpers were extracted without intended semantic change;
+all moved definitions were independently AST-compared. Review caught a missing
+factory time import; repaired before the passing run. The new helper is included
+in the existing200-line/50-line-function and prohibited-import checks.
+
+Runtime closure1426 members, digest27c2486858303bd6d9f7aaccbebbe6aff5ac259cd89d555c8378a28926155827.
+Extension fast tier15groups passed after correcting local CRLF package bytes.
+Evidence: outputs/rsi-permission-evidence-20261006/proposal-handshake-closure.json.
+Independent source review only; no independent test execution or native qualification.
+No local-model or paid-worker calls; coordinator/reviewer usage unmeasured.
+Next: exact-source publication, then existing packet-supply principal/replay adapters.
+No automatic retry, promotion, merge or runtime grant follows from these tests.
+
 ## Deferred proposal activation checkpoint — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97;16/P0 (C4/I4/D4/impact4). Base main

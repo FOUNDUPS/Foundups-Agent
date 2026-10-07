@@ -348,7 +348,7 @@ def _proposal_factory_case(tmp_path):
 
 
 def _call_proposal_component(case, action=None):
-    from modules.communication.moltbot_bridge.src import reddog_signer_wsp71_ephemeral_backend_factory as module
+    from modules.communication.moltbot_bridge.src import reddog_signer_proposal_activation as module
     scope = module._ProposalLeaseScope(case.factory, case.config, case.owner)
     token = module._LEASED_PROPOSAL_OWNER.set(scope)
     try:
@@ -384,7 +384,7 @@ def test_proposal_factory_activation_survives_fresh_resolution_only_in_same_fact
 @pytest.mark.parametrize("control", ["no-lease", "principal", "store", "commit", "expired"])
 def test_proposal_factory_activation_failure_has_no_retained_capability(tmp_path, monkeypatch, control):
     from modules.communication.moltbot_bridge.src import reddog_signer_socket_service_runtime_wiring as wiring
-    from modules.communication.moltbot_bridge.src import reddog_signer_wsp71_ephemeral_backend_factory as module
+    from modules.communication.moltbot_bridge.src import reddog_signer_proposal_activation as module
     case = _proposal_factory_case(tmp_path)
     if control == "principal":
         case.owner.resolver = SimpleNamespace(resolve=lambda *args: None)
@@ -404,7 +404,7 @@ def test_proposal_factory_activation_failure_has_no_retained_capability(tmp_path
 def test_proposal_activation_review_regressions(tmp_path, monkeypatch, control):
     from contextvars import copy_context
     from modules.communication.moltbot_bridge.src import reddog_signer_socket_service_runtime_wiring as wiring
-    from modules.communication.moltbot_bridge.src import reddog_signer_wsp71_ephemeral_backend_factory as module
+    from modules.communication.moltbot_bridge.src import reddog_signer_proposal_activation as module
     case = _proposal_factory_case(tmp_path)
     if control == "copied-context":
         contexts, original = [], case.factory.resolver.resolve
@@ -464,7 +464,7 @@ def test_proposal_factory_copied_live_scope_rejects_another_thread(tmp_path):
 
 
 def test_proposal_factory_expiry_during_request_reserve_prevents_signature(tmp_path, monkeypatch):
-    from modules.communication.moltbot_bridge.src import reddog_signer_wsp71_ephemeral_backend_factory as module
+    from modules.communication.moltbot_bridge.src import reddog_signer_proposal_activation as module
     case = _proposal_factory_case(tmp_path)
     request = case.proposal._signing_request(case.policy.expected_payload)
     signed = []
@@ -488,7 +488,7 @@ def test_proposal_factory_expiry_during_request_reserve_prevents_signature(tmp_p
 
 @pytest.mark.parametrize("phase", ["before-sign", "after-sign"])
 def test_proposal_key_expiry_in_principal_io_never_returns_signature(tmp_path, monkeypatch, phase):
-    from modules.communication.moltbot_bridge.src import reddog_signer_wsp71_ephemeral_backend_factory as module
+    from modules.communication.moltbot_bridge.src import reddog_signer_proposal_activation as module
     case = _proposal_factory_case(tmp_path)
     calls, signed = [], []
     def act(result):
@@ -514,7 +514,7 @@ def test_proposal_key_expiry_in_principal_io_never_returns_signature(tmp_path, m
 
 
 def test_proposal_authority_check_uses_one_monotonic_clock(tmp_path, monkeypatch):
-    from modules.communication.moltbot_bridge.src import reddog_signer_wsp71_ephemeral_backend_factory as module
+    from modules.communication.moltbot_bridge.src import reddog_signer_proposal_activation as module
     case = _proposal_factory_case(tmp_path)
     def act(result):
         key = result.backend.private_key
@@ -526,3 +526,123 @@ def test_proposal_authority_check_uses_one_monotonic_clock(tmp_path, monkeypatch
         with pytest.raises(ValueError, match="clock_reversed"):
             key._require_authority()
     _call_proposal_component(case, act)
+
+
+
+def _admitted_proposal_case(tmp_path, monkeypatch):
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as admitted
+    from modules.communication.moltbot_bridge.tests import test_reddog_architect_proposal_signer_policy_runtime as proposal
+    owner_fixture = admitted.owner_fixture
+    keypair, write_config = owner_fixture._keypair, owner_fixture._write_fixture_config
+    keys, captured = {}, {}
+    def remember_keys():
+        private, public = keypair()
+        keys[public] = private
+        return private, public
+    def proposal_config(roots, owner_policy, target_public, signing_ref, audit_ref):
+        owner_policy["allowed_operations"] = sorted(set(owner_policy["allowed_operations"] + [proposal.PROPOSAL_AUTHENTICITY_SIGNING_OPERATION, "signer_socket_peer_handshake"]))
+        owner_policy["allowed_authority_tiers"] = ["HIGH", "LOW", "ULTRA"]
+        owner_policy["consensus_required_tiers"] = ["HIGH", "ULTRA"]
+        raw, path, _ = write_config(roots, owner_policy, target_public, signing_ref, audit_ref)
+        raw, policy = _admitted_proposal_config(raw, roots, owner_policy, target_public,
+                                              keys[owner_policy["grant_authority_public_key"]], proposal, admitted)
+        path.write_text(json.dumps(raw, sort_keys=True), encoding="ascii")
+        captured["policy"] = policy
+        return raw, path, owner_fixture._canonical_digest(raw)
+    monkeypatch.setattr(owner_fixture, "_keypair", remember_keys)
+    monkeypatch.setattr(owner_fixture, "_write_fixture_config", proposal_config)
+    case = admitted._admission_case(tmp_path, monkeypatch)
+    from modules.communication.moltbot_bridge.src import reddog_signer_key_provider_dryrun as provider
+    nonce_store = provider.AtomicProposalAuthenticityNonceStore
+    # This constructor captures time.time at import; use the fixture's clock too.
+    monkeypatch.setattr(provider, "AtomicProposalAuthenticityNonceStore",
+                        lambda *args, **kwargs: nonce_store(*args, **kwargs, clock=lambda: grant_fixture.NOW))
+    case.proposal_policy = captured["policy"]
+    case.proposal_store = proposal._SqliteProposalReplayHighWaterStore(tmp_path / "proposal-high-water" / "authority.sqlite3")
+    case.proposal_fixture = proposal
+    case.admitted_fixture = admitted
+    return case
+
+
+def _admitted_proposal_config(raw, roots, owner_policy, target_public, principal_private, proposal, admitted):
+    payload = proposal._payload(target_public, requester_principal_id="principal:grant-admin", key_epoch="target-epoch-1")
+    policy = proposal.ArchitectProposalSignerPolicy(payload)
+    raw.update(proposal_authority_policy=asdict(policy), proposal_policy_authorization=None,
+               proposal_nonce_store_path=str(roots["signer"] / "architect_proposal_nonce_store.json"),
+               proposal_replay_high_water_store_id=proposal.HIGH_WATER_STORE_ID,
+               proposal_replay_high_water_durability_receipt_id=proposal.HIGH_WATER_DURABILITY_RECEIPT_ID,
+               proposal_security_context_digest=None)
+    values = {key: value for key, value in raw.items()
+              if key not in {"schema_version", "owner_e0_authority_binding_digest"}}
+    config = admitted.grant_runtime.SignerSocketServiceRuntimeWiringConfig(repo_root=roots["repo"], **values)
+    digest = admitted.grant_runtime.architect_proposal_security_context_digest(config)
+    profile = proposal._profile(target_public, principal_public_key=owner_policy["grant_authority_public_key"])
+    profile.update(principal_id="principal:grant-admin", key_epoch="target-epoch-1")
+    authorization = proposal._policy_authorization(
+        policy, principal_private=principal_private, public_key=target_public,
+        signer_runtime_root=roots["signer"], security_context_digest=digest, profile=profile)
+    raw.update(proposal_policy_authorization=authorization.to_dict(), proposal_security_context_digest=digest)
+    return raw, policy
+
+
+def _admitted_proposal_grant(case, request, nonce):
+    admitted = case.admitted_fixture
+    binding = admitted.resolve_secret_grant_target_binding(case.owner.policy, case.admission.replay_store)
+    grant = grant_fixture._grant(request, case.admission.replay_store, nonce=nonce, **asdict(binding))
+    grant["signature"] = encode_ed25519_signature(case.values["grant_private"].sign(
+        grant_fixture.canonical_signer_secret_access_grant_input(grant).encode("ascii")))
+    case.grant = grant
+    return grant
+
+
+def test_admitted_proposal_runtime_handshake_then_proposal(tmp_path, monkeypatch):
+    # Real owner lease, root-protected-use router, grants and crypto. Existing fixture
+    # supplies synthetic selection/OS transport and pre-issued test grants.
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_mutual_peer_handshake as handshake
+    case = _admitted_proposal_case(tmp_path, monkeypatch)
+    admitted = case.admitted_fixture
+    observed = []
+    original_factory_call = Wsp71EphemeralSignerBackendFactory.__call__
+    def frozen_factory(factory):
+        result = original_factory_call(factory)
+        if result.backend is not None:
+            result = replace(result, backend=replace(result.backend, proposal_clock=lambda: grant_fixture.NOW))
+        return result
+    monkeypatch.setattr(Wsp71EphemeralSignerBackendFactory, "__call__", frozen_factory)
+    def execute(**kwargs):
+        assert case.active is False and case.resolver.calls == []
+        backend = kwargs["backend"]
+        binding = case.config.signer_peer_instance_binding
+        case.request = handshake._request(case.values["target_private"],
+            run_packet_id=binding.run_packet_id, manifest_id=binding.manifest_id,
+            artifact_generation_digest=binding.artifact_generation_digest,
+            config_digest=binding.config_digest, session_id=binding.session_id,
+            socket_path=binding.socket_path, key_epoch="target-epoch-1",
+            requester_principal_id="principal:grant-admin", now_epoch=grant_fixture.NOW)
+        response = admitted._admission_wire(case, backend, _admitted_proposal_grant(case, case.request, "proposal-handshake"))
+        assert response["accepted"], response["rejection_code"]
+        assert len(case.resolver.calls) == 2
+        case.request = case.proposal_fixture._signing_request(case.proposal_policy.expected_payload)
+        grant = _admitted_proposal_grant(case, case.request, "proposal-1")
+        response = admitted._admission_wire(case, backend, grant)
+        assert response["accepted"], response["rejection_code"]
+        assert Ed25519SignatureVerifier().verify(case.request.signer_public_key, case.request.signing_input, response["signature"])
+        assert len(case.resolver.calls) == 4
+        assert not admitted._admission_wire(case, backend, grant)["accepted"]
+        assert len(case.resolver.calls) == 4
+        replay = _admitted_proposal_grant(case, case.request, "proposal-2")
+        assert not admitted._admission_wire(case, backend, replay)["accepted"]
+        assert len(case.resolver.calls) == 6
+        return admitted.CapturingBoundedService()(**kwargs)
+    def serve(**kwargs):
+        try:
+            return execute(**kwargs)
+        except Exception as exc:
+            observed.append((type(exc).__name__, str(exc)[:180]))
+            raise
+    result = admitted.run_reddog_signer_socket_service_runtime_wiring(
+        case.config, case.resolver, serve_bounded=serve, secret_grant_admission=case.admission,
+        proposal_replay_high_water_store=case.proposal_store,
+        principal_key_resolver=case.owner.resolver)
+    assert result.accepted, json.dumps([result.rejection_reasons, observed, case.events])
+    assert case.active is False

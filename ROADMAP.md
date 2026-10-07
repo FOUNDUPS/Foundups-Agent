@@ -20,12 +20,14 @@ activation with grant-protected deferred signing. The legacy fixture succeeds;
 the deferred seam rejects before key resolution because startup lacks its policy
 nonce store. Merely removing two guards cannot make the path executable.
 
-The existing factory/runtime extension has component/regression72pass/1skip.
-Full admitted proposal composition, packet supply and final qualification remain
-pending; native RSI is unproven. Independent review reproduced scope/time
-faults; all reported deltas were repaired and source-rechecked. Final changed
-factory/structural35pass follows the connected run. See bridge ModLog and
-`outputs/rsi-permission-evidence-20261006/proposal-activation-execution.json`.
+The existing factory/runtime extension now has connected119pass/2skip, including
+owner/grant proposal integration with synthetic selection/transport. A reproduced
+handshake-response rejection is repaired using the existing canonical verifier.
+Independent source review covered the handshake repair and mechanical extraction
+needed to preserve the factory's200-line limit. Native packet supply, actual worker
+execution and retained benefit remain unproven. Exact-source publication is next;
+then re-observe the existing packet-supply principal/replay adapters.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-handshake-closure.json`.
 The exact-main Holo transaction rejected overlapping workspace edits and stopped
 its owned runtimes. Retry only from a clean frozen checkout of exact main; do not call this
 CURRENT retrieval. Source inspection is pinned to the merged tree and scoped delta.
@@ -87,7 +89,7 @@ inference loop for unchanged state, rejected-worker retry or automatic paid
 fallback. Record coordinator, local-worker and provider usage separately; unknown
 is not zero. This planning rule is not a new autonomous scheduler.
 
-**Cost-bounded execution checkpoint (2026-10-07):** the admitted proposal
+**Historical cost-bounded failure checkpoint (2026-10-07; repaired above):** the admitted proposal
 integration fixture now reaches a successful handshake signature, then rejects
 in deferred response validation before cryptographic response verification.
 The existing attestation-shape validator permits a nonempty attestation only

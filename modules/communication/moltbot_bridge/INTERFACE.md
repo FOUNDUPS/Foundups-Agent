@@ -10,10 +10,13 @@ authorization checks apply to actual key signatures. Restart must consume a new
 policy authorization; consumed state alone cannot reconstruct activation.
 
 The runtime defers its eager policy reservation only for matching existing
-backend/factory/config/high-water identities. Native grant-aware proposal
-composition and packet provisioning are not yet qualified. The packet supplier
+backend/factory/config/high-water identities. Grant-aware proposal
+composition is covered by a fixture-backed owner/grant integration; native packet
+provisioning is not qualified. The packet supplier
 still rejects proposal policies. Component tests use an explicit synthetic lease;
-they do not certify native authority. Existing generic paths retain their gates.
+they do not certify native authority. Deferred peer-handshake responses additionally
+use the canonical verifier for both signatures and freshness; only that exact
+operation accepts handshake attestations. Existing generic paths retain their gates.
 
 ## Current-generation Memex consumption
 

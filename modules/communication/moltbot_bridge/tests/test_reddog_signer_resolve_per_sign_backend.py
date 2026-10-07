@@ -68,9 +68,42 @@ SOURCES = tuple(
         "reddog_signer_secret_grant_durable_nonce_store.py",
         "reddog_signer_secret_grant_revocation_oracle.py",
         "reddog_signer_wsp71_ephemeral_backend_factory.py",
+        "reddog_signer_proposal_activation.py",
     )
 )
 PROTOCOL_SOURCE = SOURCE_ROOT / "reddog_isolated_signer_socket_protocol.py"
+
+
+@pytest.mark.parametrize("mutation", ["valid", "attestation", "signature", "missing", "binding", "expired", "other-operation"])
+def test_deferred_handshake_uses_canonical_response_verifier(monkeypatch, mutation):
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_mutual_peer_handshake as fixture
+    from modules.communication.moltbot_bridge.src import reddog_signer_mutual_peer_handshake as handshake
+    from modules.communication.moltbot_bridge.src import reddog_signer_resolve_per_sign_validation as validation
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
+    monkeypatch.setattr(handshake.time, "time", lambda: fixture.NOW)
+    private = fixture._private_key()
+    request = fixture._request(private)
+    mac = SimpleNamespace(build=lambda *args: "audit-mac-v1:" + "a" * 64)
+    response = replace(fixture._backend(private), audit_mac_builder=mac).sign(request, fixture._peer())
+    assert response.accepted
+    binding = SimpleNamespace(signer_public_key=response.signer_public_key,
+                              signer_key_fingerprint=response.key_fingerprint, key_epoch=response.key_epoch)
+    if mutation == "attestation":
+        response = replace(response, audit_attestation_signature=response.signature)
+    elif mutation == "signature":
+        response = replace(response, signature=response.audit_attestation_signature)
+    elif mutation == "missing":
+        response = replace(response, audit_attestation_signature="")
+    elif mutation == "binding":
+        binding.signer_public_key = "wrong-key"
+    elif mutation == "expired":
+        monkeypatch.setattr(handshake.time, "time", lambda: fixture.NOW + 120)
+    elif mutation == "other-operation":
+        request = replace(request, requested_operation="unsupported-operation")
+    accepted = validation.response_matches(response, request, binding) and validation.signature_matches(
+        response, request, Ed25519SignatureVerifier(), binding)
+    assert accepted is (mutation == "valid")
 
 
 def _digest(character: str) -> str:

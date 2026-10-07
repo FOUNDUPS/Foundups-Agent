@@ -1,3 +1,10 @@
+## RSI deferred handshake qualification — 2026-10-07
+
+WSP15/22/50/62/97: repaired the existing deferred handshake verifier connection.
+Bridge connected119pass/2skip; independently source-reviewed. Proposal activation
+helpers extracted to preserve existing structural limits. Native RSI remains
+unproven; see bridge ModLog and root ROADMAP for source/evidence/next boundary.
+
 ## Deferred proposal activation — current checkpoint, 2026-10-07
 
 PR2098 is merged/main-verified at1e220147c; its prior publication-pending entries
