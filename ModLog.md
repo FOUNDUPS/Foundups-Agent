@@ -1,3 +1,10 @@
+## RSI proposal startup connection — 2026-10-07
+
+WSP15/22/50/84/97: reused existing public-startup principal/replay adapters and
+removed the packet supplier's obsolete blanket proposal rejection. Connected113pass,
+independent source review, explicit fixture/native boundary. PR2099 main validation
+and exact-base Holo maintenance closed. See bridge ModLog and root ROADMAP.
+
 ## RSI deferred handshake qualification — 2026-10-07
 
 WSP15/22/50/62/97: repaired the existing deferred handshake verifier connection.

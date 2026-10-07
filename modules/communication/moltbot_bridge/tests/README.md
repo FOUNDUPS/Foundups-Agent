@@ -1,3 +1,11 @@
+## Proposal startup connection — current checkpoint, 2026-10-07
+
+Existing materializer/adapters reused; real proposal packet supply and public
+startup composition now pass connected113tests under explicit enrollment/OS/transport
+fixtures. Missing/empty stores still reject before service entry or target-key reads.
+Publication pending. Native enrollment and the worker/evaluator/retention/later-use
+loop remain unproven. See ModLog for failures, repairs and exact-source receipts.
+
 ## Deferred proposal activation — current checkpoint, 2026-10-07
 
 PR2098 is merged/main-verified at1e220147c; its prior publication-pending entries

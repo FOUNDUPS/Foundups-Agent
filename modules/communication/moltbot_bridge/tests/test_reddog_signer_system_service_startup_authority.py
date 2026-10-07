@@ -585,8 +585,10 @@ def test_generation_capability_failure_rejects_before_resolver_or_service(
     assert service.calls == []
 
 
-@pytest.mark.parametrize("owner_version", [7, 8])
-def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, monkeypatch, owner_version):
+@pytest.mark.parametrize("owner_version,proposal_mode", [
+    (7, False), (8, False), (7, True), (7, "missing_store"), (7, "empty_store"),
+])
+def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, monkeypatch, owner_version, proposal_mode):
     """Synthetic enrollment; only OS custody/isolation and transports substituted."""
     import time
     from types import SimpleNamespace
@@ -600,10 +602,13 @@ def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, 
     # Freeze that clock too; retain the real constructor/type and lifetime checks.
     constructor = credentials.SystemdCredentialSecretResolver.__init__
     monkeypatch.setattr(constructor, "__kwdefaults__", {**constructor.__kwdefaults__, "clock": lambda: NOW})
+    if proposal_mode:
+        _install_proposal_startup_fixture(monkeypatch)
     if owner_version == 8:
         values, owner, _ = _model_input_owner_case(tmp_path, monkeypatch)
     else:
-        values, owner, selected = _public_startup_artifacts(tmp_path)
+        values, owner, selected = _public_startup_artifacts(
+            tmp_path, configure=_configure_startup_proposal if proposal_mode else None)
         _public_startup_owner(values, owner, selected, tmp_path, monkeypatch)
     _public_startup_finalize(values, monkeypatch)
     operations = _public_startup_root_transport(values, monkeypatch)
@@ -612,7 +617,14 @@ def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, 
     store = fixture.DurableSignerSecretGrantNonceStore(values["replay_config"], integrity_key=fixture.INTEGRITY_KEY, clock=lambda: NOW)
     request, grant, peer = wf._admission_request(values, values["admitted"], store)
     case = SimpleNamespace(request=request, grant=grant, peer=peer)
-    reads, responses = [], []
+    if proposal_mode:
+        from modules.communication.moltbot_bridge.tests import test_reddog_architect_proposal_signer_policy_runtime as proposal
+        request = proposal._signing_request(values["proposal_policy"].expected_payload)
+        case.request = request
+        case.admitted_fixture, case.owner, case.values = wf, values["admitted"], values
+        case.admission = SimpleNamespace(replay_store=store)
+        grant = wf.factory_fixture._admitted_proposal_grant(case, request, "public-startup-proposal")
+    reads, responses, service_calls = [], [], []
     secrets = {"work": _private_key_secret(values["target_private"]), "control": _private_key_secret(values["control_private"]),
                "audit": _audit_secret(), "integrity": fixture.INTEGRITY_KEY.decode("utf-8")}
     def read_credential(binding, identifier):
@@ -623,6 +635,7 @@ def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, 
     monkeypatch.setattr(credentials, "_read_credential", read_credential)
     monkeypatch.setattr(isolation, "LinuxSignerProcessIsolationBackend", FakeIsolationBackend)
     def serve(**kwargs):
+        service_calls.append(True)
         assert reads == ["integrity"]
         backend = kwargs["backend"]
         before = list(reads)
@@ -642,10 +655,58 @@ def test_public_v7_startup_real_generation_grant_signature_and_replay(tmp_path, 
         return CapturingBoundedService()(**kwargs)
     monkeypatch.setattr(entry, "serve_reddog_isolated_signer_socket_bounded", serve)
     emitted = []
+    rejected_store = None
+    if proposal_mode in ("missing_store", "empty_store"):
+        rejected_store = Path(values["proposal_replay_store"]["high_water_path"])
+        if proposal_mode == "missing_store":
+            rejected_store.unlink()
+        else:
+            rejected_store.write_bytes(b"")
     code = entry.run_reddog_signer_system_service_entrypoint(
         ["--repo-root", str(values["repo"]), "--owner-authority-config", str(values["owner_config_path"])], emit=emitted.append)
+    if rejected_store is not None:
+        assert code == 2 and responses == [] and service_calls == []
+        assert json.loads(emitted[0])["status"] == SYSTEM_SERVICE_ENTRYPOINT_REJECT
+        assert reads == ["integrity"] and operations == []
+        assert (rejected_store.read_bytes() if rejected_store.exists() else None) == (
+            None if proposal_mode == "missing_store" else b"")
+        return
     assert code == 0, json.loads(emitted[0])["rejection_reasons"]
     assert json.loads(emitted[0])["status"] == SYSTEM_SERVICE_ENTRYPOINT_ACCEPT
     assert responses == [True]
+    assert service_calls == [True]
     assert "REVOCATION_ANCHOR_LOAD" in operations
     assert "PROTECTED_USE_ACQUIRE" in operations and "PROTECTED_USE_FINISH" in operations
+
+
+def _configure_startup_proposal(config, policy, values, harness, tmp_path):
+    from modules.communication.moltbot_bridge.tests import test_reddog_architect_proposal_signer_policy_runtime as proposal
+    from modules.communication.moltbot_bridge.tests import test_reddog_signer_socket_service_runtime_wiring as wf
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import signer_owner_e0_authority_binding_digest
+    from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import SqliteMonotonicAuthorityStore
+    policy["allowed_operations"] = sorted(set(policy["allowed_operations"] + [proposal.PROPOSAL_AUTHENTICITY_SIGNING_OPERATION, "signer_socket_peer_handshake"]))
+    policy["allowed_authority_tiers"], policy["consensus_required_tiers"] = ["HIGH", "LOW", "ULTRA"], ["HIGH", "ULTRA"]
+    config["owner_e0_authority_binding_digest"] = signer_owner_e0_authority_binding_digest(policy)
+    roots = {"repo": harness.repo_root, "signer": Path(config["signer_runtime_root"])}
+    _, authority = wf.factory_fixture._admitted_proposal_config(
+        config, roots, policy, harness.reddog_public_key, values["grant_private"], proposal, wf,
+        key_epoch=config["key_provider_profiles"][0]["expected_key_epoch"])
+    raw = {"high_water_root": str(tmp_path / "proposal-high"),
+           "high_water_path": str(tmp_path / "proposal-high" / "authority.sqlite3")}
+    # Explicit test provisioning; the real startup materializer must only open it.
+    SqliteMonotonicAuthorityStore(raw["high_water_path"], allowed_root=raw["high_water_root"],
+        repo_root=harness.repo_root, store_id=config["proposal_replay_high_water_store_id"],
+        durability_receipt_id=config["proposal_replay_high_water_durability_receipt_id"])
+    values.update(proposal_policy=authority, proposal_replay_store=raw)
+
+
+def _install_proposal_startup_fixture(monkeypatch):
+    from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import AtomicProposalAuthenticityNonceStore
+    from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import Ed25519SignerBackend
+    constructor = AtomicProposalAuthenticityNonceStore.__init__
+    monkeypatch.setattr(constructor, "__kwdefaults__", {**constructor.__kwdefaults__, "clock": lambda: NOW})
+    original = Ed25519SignerBackend.__init__
+    def frozen_backend(self, *args, **kwargs):
+        kwargs.setdefault("proposal_clock", lambda: NOW)
+        original(self, *args, **kwargs)
+    monkeypatch.setattr(Ed25519SignerBackend, "__init__", frozen_backend)
