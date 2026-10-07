@@ -1,3 +1,31 @@
+## Current-generation Memex use-time verification — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
+Existing producer, collector and valve now recheck retained proposal signatures
+using selected runtime configuration and manifest-bound principal records. Exact
+work, signer, principal ID/provider/key, revocation, lifetime and mutation bindings
+are checked. Independent source review found a same-ID/different-provider gap;
+the authenticated fixture reproduced it (1fail), and the identity join repaired it.
+Nondecreasing time is checked across verification and final collection.
+
+Local connected168pass plus the separately added valve-routing case1pass; no
+failures/skips in these final runs. Tests use real signatures/generation records,
+but provision the proposal packet explicitly in fixtures; OS/peer seams are
+substituted. Source review was independent; test execution was not independent.
+The valve-routing case is a routing test, not evidence authenticity proof.
+No effect authority, native enrollment or retained autonomous benefit is claimed.
+
+Native run-packet supply still rejects proposal policies with
+`signer_run_packet_proposal_runtime_adapters_unavailable`; the existing ephemeral
+backend factory rejects them with `signer_grant_profile_scope_unsupported`.
+Re-observe those existing owners next; do not remove guards without admitted
+principal/replay adapters. Reuse before extending; no new orchestrator or store.
+Evidence: `outputs/rsi-permission-evidence-20261006/memex-current-use-execution.json`.
+Packaging: integrity8pass66.90s; extension15groups pass9.109s; registry current
+1695 files/270 quarantined. Manifest1425 files, digest79d3798f92fe8abea185e5ede72563557ee619b867f8bcde67f5d3fa2738fb47.
+Publication pending. Coordinator/worker cost remains separately accounted: no
+coordinator-initiated model calls in this slice; coordinator/reviewer tokens unknown.
+
 ## Retained proposal verification inputs — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97; selected14/P1 (C2/I4/D4/impact4).

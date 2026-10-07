@@ -12,7 +12,29 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — retained proposal verification inputs (2026-10-07):**
+**Current selection — current-generation Memex verification (2026-10-07):**
+PR2097 merged `15089a44fe2ffc7150e7cd09688260fa3560e607`; reviewed/main trees
+match. Main CI37547076619 and CodeQL37547076345 passed. The existing bounded
+OpenClaw/WRE maintenance controller completed the exact-main Holo task and
+stopped both owned runtimes. A subsequent owner query verified CURRENT/no-gap
+with the same generation and receipt. This is operational maintenance evidence,
+not a worker-made code improvement or retained RSI benefit.
+
+Re-observation selects15/P1 (C3/I4/D4/impact4): connect the retained proposal inputs
+to the existing authenticated current-generation producer, collector and valve.
+Reuse selected runtime configuration, protected principal resolver and existing
+signature verifier. Full work-order binding, current signer identity, revocation,
+expiry and caller-mutation controls must hold; other trust reasons and effect
+permission remain independent. The source connection is now locally qualified:
+connected168pass plus routing1pass, independent source review cleared the
+reproduced principal-provider substitution. Publication pending. Native proposal
+packet supply and grant-aware backend each retain an explicit unsupported-policy
+guard; next re-observation targets their existing principal/replay adapters.
+Fixture provisioning is not native admission or retained RSI.
+Evidence: `outputs/rsi-permission-evidence-20261006/memex-current-use-next-slice.json`
+and `memex-retention-2097-merge-closure.json` in the same directory.
+
+**Closed prerequisite — retained proposal verification inputs (2026-10-07):**
 PR2096 merged `0383b9804ce08fffaac6cf74fb0aeedd93eb04d2`; reviewed/main
 trees match. Branch and main CI/CodeQL passed (main37541532041/37541531595).
 Owned branch retired with a verified recovery bundle. This closes source wiring,
@@ -25,8 +47,8 @@ supplied current trust/time. Local connected229pass including structural bounds;
 legacy-replay regression, reproduced and repaired without rewriting old artifacts.
 PR2097 CI found a61-line function against the60-line limit; repaired with unchanged
 semantics and local229pass. Second CI found main-entry tests ran before the existing
-ChromaDB install; suite moved after it with all coverage retained. Hosted retry
-pending. Evidence: module ModLog and
+ChromaDB install; suite moved after it with all coverage retained. Final branch
+and main checks passed; publication is closed. Evidence: module ModLog and
 `outputs/rsi-permission-evidence-20261006/memex-retention-execution.json`.
 
 No worker/provider calls, effect permission or resident trust reason is
@@ -37,8 +59,8 @@ closure, re-observe those existing owners before selecting the next connection.
 Native18/P0 remains blocked: scoped local-agent improvement, independent baseline
 and held-out validation, governed retention/rollback, and benefit in a later
 invocation remain unproven. No whole-system completion percentage is claimed.
-Holo authority-root/head mismatch persists; exact-source fallback is not CURRENT
-index evidence. Local Linux86/14 historical failed broad run remains recorded debt.
+The Holo authority-root/head mismatch is resolved at main15089a44f; later revisions
+require their own freshness proof. Local Linux86/14 historical failed broad run remains recorded debt.
 
 **Coordination cost discipline:** reuse source-bound receipts and deterministic
 checks; repeat audits/tests only after relevant changes or new failures. One

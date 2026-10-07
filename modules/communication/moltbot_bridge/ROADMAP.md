@@ -1,11 +1,23 @@
+## Current-generation Memex checkpoint — 2026-10-07
+
+The existing retained-evidence consumer is locally qualified: connected168pass
+and valve routing1pass; independent source review cleared the reproduced
+principal-provider identity defect. Native proposal packet/grant provisioning
+remains blocked by two explicit guards. Publication pending; fixture qualification
+is not autonomous RSI. See INTERFACE, ModLog and test evidence for boundaries.
+Next: re-observe the existing principal/replay adapter owners, then select one
+bounded admitted integration. No repeated broad audit or failed model retry.
+
 ## Retained proposal evidence checkpoint — 2026-10-07
 
 Selected14/P1: existing publication now preserves bounded verification inputs.
-Six connected suites222pass, including old-publication replay and caller mutation.
-Independent source review cleared the reproduced replay regression. Publication
-pending; see INTERFACE/ModLog. No runtime gate or native RSI claim advances.
-Next: exact-source closure, then re-observe the authenticated supplier and live
-current-generation consumption needed by the existing Memex gate.
+Final connected/structural229pass, including old-publication replay and caller mutation.
+Independent source review cleared the reproduced replay regression. PR2097 merged
+15089a44f; equal reviewed/main trees and branch/main CI/CodeQL verified. No runtime
+gate or native RSI claim advances. Existing OpenClaw/WRE Holo maintenance completed
+at that exact main; subsequent owner query CURRENT/no-gap, matching generation.
+Next15/P1 (C3/I4/D4/impact4): authenticated current-generation consumption of the
+retained inputs through the existing Memex gate; implementation remains pending.
 
 ## Current-generation model consumer checkpoint — 2026-10-07
 

@@ -74,6 +74,9 @@ class SignerCurrentGenerationRuntimeBinding:
     model_work_order_digest: str | None = None
     model_artifact_pair_digest: str | None = None
     model_valid_until: int | None = None
+    memex_work_order_digest: str | None = None
+    memex_evidence_digest: str | None = None
+    memex_valid_until: int | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
@@ -116,6 +119,7 @@ def verify_signer_current_generation_runtime_binding(
     include_process_identity: bool = False,
     model_work_order: Mapping[str, Any] | None = None,
     trusted_now_epoch=None,
+    retained_proposal_inputs=None, revoked_key_epochs=frozenset(),
 ) -> SignerCurrentGenerationRuntimeBinding:
     """Verify root-owned current selection against trusted time and bytes."""
     try:
@@ -125,6 +129,7 @@ def verify_signer_current_generation_runtime_binding(
             principal_identity=principal_identity, principal_work_authority=principal_work_authority,
             include_process_identity=include_process_identity,
             model_work_order=model_work_order, trusted_now_epoch=trusted_now_epoch,
+            retained_proposal_inputs=retained_proposal_inputs, revoked_key_epochs=revoked_key_epochs,
         ) as binding:
             return binding
     except Exception:
@@ -143,6 +148,7 @@ def _lease_current_generation_runtime_binding(
     principal_work_authority: Mapping[str, Any] | None = None,
     include_process_identity: bool = False,
     model_work_order: Mapping[str, Any] | None = None, trusted_now_epoch=None,
+    retained_proposal_inputs=None, revoked_key_epochs=frozenset(),
 ) -> Iterator[SignerCurrentGenerationRuntimeBinding]:
     with ExitStack() as stack:
         try:
@@ -169,23 +175,23 @@ def _lease_current_generation_runtime_binding(
             )
             selection = stack.enter_context(boundary._lease_current(capability))
             values = _validated_values(
-                selection=selection,
-                packet=packet,
-                packet_path=packet_path,
-                packet_raw=packet_raw,
-                repo=repo,
-                runtime=runtime,
-                now_epoch=now_epoch,
-                signer_profile_id=signer_profile_id,
+                selection=selection, packet=packet, packet_path=packet_path,
+                packet_raw=packet_raw, repo=repo, runtime=runtime, now_epoch=now_epoch,
+                signer_profile_id=signer_profile_id or ("reddog-work-authority" if retained_proposal_inputs is not None else None),
             )
             if principal_identity is not None or principal_work_authority is not None:
                 values["principal_binding_digest"] = _validated_principal_digest(
                     repo, selection, principal_identity, principal_work_authority)
             if include_process_identity is True:
                 values.update(_process_identity_values(repo, packet, selection))
+            trusted_now_epoch = _evidence_clock(trusted_now_epoch, now_epoch)
             if model_work_order is not None:
                 values.update(_validated_model_values(repo, packet, selection, model_work_order,
                     principal_work_authority, trusted_now_epoch, now_epoch))
+            if retained_proposal_inputs is not None:
+                values.update(_validated_memex_values(repo, runtime, packet_path, packet_raw,
+                    packet, selection, values, retained_proposal_inputs, model_work_order,
+                    principal_work_authority, principal_identity, trusted_now_epoch, now_epoch, revoked_key_epochs))
             binding = _accepted_binding(values)
         except Exception:
             stack.close()
@@ -194,6 +200,54 @@ def _lease_current_generation_runtime_binding(
                 rejection_reasons=(SIGNER_CURRENT_GENERATION_BINDING_REJECTED,),
             )
         yield binding
+
+
+def _evidence_clock(clock, started):
+    last = [started]
+    def read():
+        now = clock()
+        if type(now) is not int or now < last[0]:
+            raise ValueError("current_evidence_clock_reversed")
+        last[0] = now
+        return now
+    return read
+
+
+def _validated_memex_values(repo, runtime, packet_path, packet_raw, packet, selected,
+    signer, bundle, work, authority, identity, clock, started, revoked):
+    from .reddog_architect_proposal_verified_authority import (
+        snapshot_retained_architect_proposal_inputs, verify_retained_proposal_work_binding,
+    )
+    from .reddog_signer_owner_e0_principal_authority import load_current_generation_principal_key_resolver
+    from .reddog_work_order_binding import canonical_full_work_order_digest
+    try:
+        inputs = snapshot_retained_architect_proposal_inputs(bundle)
+        authority_digest = _digest({"identity": identity, "authority": authority})
+        args = dict(selection=selected, packet=packet, packet_path=packet_path,
+                    packet_raw=packet_raw, repo=repo, runtime=runtime)
+        raw = _read_bound_config(**args)
+        config = rehydrate_signer_socket_service_runtime_config(repo, runtime,
+            dict(_mapping(raw)), expected_config_digest=selected["config_digest"])
+        resolver = load_current_generation_principal_key_resolver(repo_root=repo, selection=selected)
+        checked_at = clock()
+        if type(checked_at) is not int or checked_at < started:
+            raise ValueError("memex_trusted_clock_invalid")
+        result = verify_retained_proposal_work_binding(inputs, work_order=work,
+            work_authority=authority, principal_identity=identity, signer_identity=signer, signer_runtime_config=config,
+            principal_key_resolver=resolver, now_epoch=checked_at, revoked_key_epochs=revoked)
+        # Re-read manifest-bound artifacts; checked input cannot survive replacement.
+        _read_bound_config(**args)
+        load_current_generation_principal_key_resolver(repo_root=repo, selection=selected)
+        final = clock()
+        if (type(final) is not int or final < checked_at
+                or final >= min(result["memex_valid_until"], selected["selection_expires_at"], selected["manifest_expires_at"])
+                or canonical_full_work_order_digest(work) != result["memex_work_order_digest"]
+                or _digest(snapshot_retained_architect_proposal_inputs(bundle)) != result["memex_evidence_digest"]
+                or _digest({"identity": identity, "authority": authority}) != authority_digest):
+            raise ValueError("memex_evidence_no_longer_current")
+        return result
+    except Exception:
+        return {}
 
 
 def _validated_model_values(repo, packet, selected, work, authority, clock, started):
