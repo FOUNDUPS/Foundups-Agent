@@ -1,3 +1,23 @@
+## Deferred proposal policy activation (implementation checkpoint)
+
+`build_owner_leased_ephemeral_backend` additionally accepts optional
+`proposal_replay_high_water_store`. Proposal mode validates that store and current
+owner-resolved principal authorization before deferred startup. The existing
+factory activates policy replay state on its first protected request, then retains
+only a bound digest; it never retains a resolved backend or nonce-store object.
+Each request still resolves fresh keys. Scope liveness/thread checks and current
+authorization checks apply to actual key signatures. Restart must consume a new
+policy authorization; consumed state alone cannot reconstruct activation.
+
+The runtime defers its eager policy reservation only for matching existing
+backend/factory/config/high-water identities. Grant-aware proposal
+composition is covered by a fixture-backed owner/grant integration; native packet
+provisioning is not qualified. The packet supplier
+still rejects proposal policies. Component tests use an explicit synthetic lease;
+they do not certify native authority. Deferred peer-handshake responses additionally
+use the canonical verifier for both signatures and freshness; only that exact
+operation accepts handshake attestations. Existing generic paths retain their gates.
+
 ## Current-generation Memex consumption
 
 The existing generation producer and use-time collector accept optional

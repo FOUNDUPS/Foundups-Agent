@@ -352,6 +352,7 @@ def run_reddog_signer_socket_service_runtime_wiring(
                 selected, resolver, secret_grant_admission, owner,
                 control_loop_anchor_store=anchor,
                 control_loop_authority_policy=_control_loop_authority_policy(selected.control_loop_authority_policy),
+                proposal_replay_high_water_store=proposal_replay_high_water_store,
             )
         return _run_signer_socket_service_runtime(**kwargs, secret_grant_backend=backend)
     except Exception:
@@ -487,11 +488,13 @@ def _run_signer_socket_service_runtime(
             max_requests=config.max_requests,
             injected_dependency_effects_unobserved=True,
         )
-    authorization_reservation = _reserve_policy_authorization(
-        proposal_nonce_store,
-        proposal_authorization,
+    from .reddog_signer_wsp71_ephemeral_backend_factory import deferred_proposal_activation_matches
+    deferred_activation = proposal_authorization is not None and deferred_proposal_activation_matches(
+        secret_grant_backend, config, proposal_replay_high_water_store,
     )
-    if proposal_authorization is not None and not authorization_reservation:
+    startup_authorization = None if deferred_activation else proposal_authorization
+    authorization_reservation = _reserve_policy_authorization(proposal_nonce_store, startup_authorization)
+    if startup_authorization is not None and not authorization_reservation:
         return _reject(
             FAIL_SIGNER_RUNTIME_PROPOSAL_POLICY_AUTHORIZATION_INVALID,
             key_provider_receipt=key_receipt,

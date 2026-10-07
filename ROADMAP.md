@@ -12,7 +12,27 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — current-generation Memex verification (2026-10-07):**
+**Current selection — deferred proposal activation (2026-10-07):**
+PR2098 merged/main-verified at1e220147c20dbe733e8673e46ac391ff2277651d;
+reviewed/main trees match. Main CI37551876853 and CodeQL37551877035 passed.
+Re-observation selects16/P0 (C4/I4/D4/impact4): compose existing proposal policy
+activation with grant-protected deferred signing. The legacy fixture succeeds;
+the deferred seam rejects before key resolution because startup lacks its policy
+nonce store. Merely removing two guards cannot make the path executable.
+
+The existing factory/runtime extension now has connected119pass/2skip, including
+owner/grant proposal integration with synthetic selection/transport. A reproduced
+handshake-response rejection is repaired using the existing canonical verifier.
+Independent source review covered the handshake repair and mechanical extraction
+needed to preserve the factory's200-line limit. Native packet supply, actual worker
+execution and retained benefit remain unproven. Exact-source publication is next;
+then re-observe the existing packet-supply principal/replay adapters.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-handshake-closure.json`.
+The exact-main Holo transaction rejected overlapping workspace edits and stopped
+its owned runtimes. Retry only from a clean frozen checkout of exact main; do not call this
+CURRENT retrieval. Source inspection is pinned to the merged tree and scoped delta.
+
+**Closed source prerequisite — current-generation Memex verification:**
 PR2097 merged `15089a44fe2ffc7150e7cd09688260fa3560e607`; reviewed/main trees
 match. Main CI37547076619 and CodeQL37547076345 passed. The existing bounded
 OpenClaw/WRE maintenance controller completed the exact-main Holo task and
@@ -68,6 +88,23 @@ concrete blocker per bounded source pass; review only its changed surface. No
 inference loop for unchanged state, rejected-worker retry or automatic paid
 fallback. Record coordinator, local-worker and provider usage separately; unknown
 is not zero. This planning rule is not a new autonomous scheduler.
+
+**Historical cost-bounded failure checkpoint (2026-10-07; repaired above):** the admitted proposal
+integration fixture now reaches a successful handshake signature, then rejects
+in deferred response validation before cryptographic response verification.
+The existing attestation-shape validator permits a nonempty attestation only
+for authoritative-use leases, whereas peer handshakes also supply one. Inspect
+and reuse the canonical handshake verifier next; do not weaken this gate.
+The saved reproducer also corrects stale-grant and frozen-clock fixture mismatches.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-admitted-cost-checkpoint.json`.
+No native RSI gain or model execution is established by this failed test.
+
+For subsequent slices, deterministic local checks own unchanged-state polling;
+local models receive one admitted, scoped ticket with finite usage and retry
+limits. Escalate only a changed failure signature or a reviewable candidate to
+the coordinator. Record local-model calls, paid calls, elapsed time and accepted
+improvements separately. Checkpoint unresolved diagnostics instead of expanding
+the audit. This is execution discipline; a resident loop remains unqualified.
 
 **Historical execution — single-effect grant composition (2026-10-07 JST):**
 PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;
