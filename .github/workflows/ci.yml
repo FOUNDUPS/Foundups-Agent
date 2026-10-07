@@ -1141,7 +1141,11 @@ jobs:
             modules/infrastructure/wre_core/tests/test_wre_auto_researcher.py \
             modules/infrastructure/wre_core/tests/test_wre_research_evaluator_inputs.py \
             modules/infrastructure/wre_core/tests/test_wre_research_program_consumption.py \
-            modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py
+            modules/infrastructure/wre_core/tests/test_dashboard_snapshot_export.py \
+            modules/infrastructure/idle_automation/tests/test_self_research_refresh.py \
+            modules/infrastructure/wre_core/tests/test_daemon_self_audit_scan_status.py \
+            modules/infrastructure/wre_core/tests/test_daemon_self_audit_loop.py \
+            modules/infrastructure/wre_core/tests/test_daemon_self_audit_diagnostic_outcomes.py
 
       - name: Run WRE merge sentinel prerequisite tests
         id: merge_sentinel

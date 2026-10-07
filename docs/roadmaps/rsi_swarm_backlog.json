@@ -1880,22 +1880,56 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.proposal_startup_composition_20261007",
-    "base_commit": "5fd8336468720133faab980ec82f81b1929a4b3e",
-    "selected_action": "Qualify proposal packet supply through existing public startup adapters",
+    "observation_path": "current_observation.internal_audit_status_20261007",
+    "base_commit": "453f6c3570f980a7c30364ca3727084754ff9f55",
+    "selected_action": "Preserve measured internal-audit coverage in existing research reports",
     "status": "IMPLEMENTED_NOT_VALIDATED",
     "wsp15": {
-      "complexity": 4,
+      "complexity": 2,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 16,
-      "priority": "P0"
+      "total": 14,
+      "priority": "P1"
     },
     "dispatchable": false,
-    "next_action": "PR2099 merged/main-verified. Existing packet supplier and public startup adapters now pass connected113tests; independent source review complete. Close exact-source publication, inspect current native admission readiness, then select an admitted local-worker canary. Native admission and retained benefit remain unproven."
+    "next_action": "Close source publication, resolve one current finding to actual module scope, then a bounded existing local-worker/evaluator trial. Read-only audit readiness does not require new production enrollment; autonomous effects still require admission."
   },
   "current_observation": {
+    "internal_audit_status_20261007": {
+      "base": "453f6c3570f980a7c30364ca3727084754ff9f55",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "evidence_root": "outputs/rsi-permission-evidence-20261006/internal-audit-*",
+      "live_audit": {
+        "log_files": 3193,
+        "first_events": 20,
+        "second_events": 0,
+        "proposals": 20,
+        "executable_tickets": 0,
+        "direction": "request_context"
+      },
+      "hermes": "0.20.4 canonical read-only preflight accepted after bounded startup wait; unauthenticated401 and four authenticated200 endpoints",
+      "openclaw": "Exact-main maintenance COMPLETED; owned runtimes stopped; subsequent query CURRENT/no-gap",
+      "repair": {
+        "baseline_failed": 6,
+        "overflow_review_reproduced": true,
+        "connected_passed": 140,
+        "persisted_status_verified": true,
+        "authorship": "coordinator",
+        "independent_source_review": true,
+        "independent_test_execution": false
+      },
+      "worker_calls": 0,
+      "paid_provider_calls": 0,
+      "native_rsi_complete": false
+    },
     "proposal_startup_composition_20261007": {
       "base_commit": "5fd8336468720133faab980ec82f81b1929a4b3e",
       "truth": "IMPLEMENTED_NOT_VALIDATED for native operation; fixture-backed public startup locally verified",
