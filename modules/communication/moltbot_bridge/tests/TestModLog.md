@@ -1,3 +1,37 @@
+## Proposal packet and public startup composition — 2026-10-07
+
+WSP00/6/15/22/50/84/97;16/P0 (C4/I4/D4/impact4). Base main5fd833646
+closes PR2099; branch/main CI and CodeQL passed and reviewed/main trees match.
+The existing startup materializer already supplies current principal resolution,
+proposal high-water storage and grant admission after isolation. Reuse those owners.
+The old unconditional proposal-packet rejection is removed after a reproduced
+failure and positive public-entrypoint test. Packet creation never grants authority
+or starts a service; all existing startup/use-time gates remain in force.
+
+Final connected113pass,0skip (86.34s): real packet producer, manifest generation,
+public entrypoint, startup materializer, proposal signature and replay rejection.
+Missing/empty proposal stores reject with zero service entries, no target-key reads,
+no root operations and unchanged missing/empty files. Enrollment, OS custody,
+isolation and transport are explicit test fixtures, not native qualification.
+Independent source review cleared the change after strengthening the callback-entry
+oracle. Review did not execute tests independently.
+
+Earlier connected111pass/2fail: old fixture wrote a packet above its repo (runtime
+path rejection); moved it into its existing runtime directory. Windows spawn could
+not import the test package; final runner explicitly adds the bridge package root
+to PYTHONPATH. No production gate or acceptance criterion was weakened.
+Regenerated resident manifest is unchanged (1426 members); packet emission is
+outside that resident dependency closure. No package pin or runtime update required.
+
+Governed OpenClaw/WRE Holo maintenance completed at this exact base and stopped both
+owned runtimes. Subsequent owner query CURRENT/no-gap; retrieval top result is the
+expected materializer, with noisy ancillary results and tests supplemented directly.
+Evidence: outputs/rsi-permission-evidence-20261006/proposal-startup-closure.json.
+No local-worker inference requested; coordinator/reviewer usage unmeasured.
+Next: close publication, then inspect current native admission readiness and select
+an admitted bounded local-worker canary. Retention/rollback and later-use benefit
+remain required; test success is not RSI completion.
+
 ## Deferred handshake and admitted proposal regression — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97. Existing16/P0 selection retained.

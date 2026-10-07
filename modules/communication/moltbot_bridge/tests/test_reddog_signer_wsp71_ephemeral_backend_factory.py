@@ -564,8 +564,8 @@ def _admitted_proposal_case(tmp_path, monkeypatch):
     return case
 
 
-def _admitted_proposal_config(raw, roots, owner_policy, target_public, principal_private, proposal, admitted):
-    payload = proposal._payload(target_public, requester_principal_id="principal:grant-admin", key_epoch="target-epoch-1")
+def _admitted_proposal_config(raw, roots, owner_policy, target_public, principal_private, proposal, admitted, key_epoch="target-epoch-1"):
+    payload = proposal._payload(target_public, requester_principal_id="principal:grant-admin", key_epoch=key_epoch)
     policy = proposal.ArchitectProposalSignerPolicy(payload)
     raw.update(proposal_authority_policy=asdict(policy), proposal_policy_authorization=None,
                proposal_nonce_store_path=str(roots["signer"] / "architect_proposal_nonce_store.json"),
@@ -577,7 +577,7 @@ def _admitted_proposal_config(raw, roots, owner_policy, target_public, principal
     config = admitted.grant_runtime.SignerSocketServiceRuntimeWiringConfig(repo_root=roots["repo"], **values)
     digest = admitted.grant_runtime.architect_proposal_security_context_digest(config)
     profile = proposal._profile(target_public, principal_public_key=owner_policy["grant_authority_public_key"])
-    profile.update(principal_id="principal:grant-admin", key_epoch="target-epoch-1")
+    profile.update(principal_id="principal:grant-admin", key_epoch=key_epoch)
     authorization = proposal._policy_authorization(
         policy, principal_private=principal_private, public_key=target_public,
         signer_runtime_root=roots["signer"], security_context_digest=digest, profile=profile)

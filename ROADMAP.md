@@ -12,7 +12,22 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — deferred proposal activation (2026-10-07):**
+**Current selection — proposal startup composition (2026-10-07):**
+PR2099 merged/main-verified at5fd8336468720133faab980ec82f81b1929a4b3e;
+reviewed/main trees match. Main CI37556610302 and CodeQL37556610148 passed.
+The exact-main OpenClaw/WRE Holo maintenance completed and stopped its owned
+runtimes; follow-up retrieval CURRENT/no-gap before scoped edits.
+
+16/P0 (C4/I4/D4/impact4): the existing proposal packet supplier now connects to
+existing owner-custody principal/replay adapters. Final connected113pass with
+positive public startup and missing/empty-store controls; independent source review
+cleared the change. Enrollment/OS/transport remain synthetic test boundaries.
+Publication pending. Next: current native admission readiness, then a bounded
+local-worker canary. Native18/P0, independent improvement evaluation, governed
+retention/rollback and later-use benefit remain unproven.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-startup-closure.json`.
+
+**Historical selection — deferred proposal activation (2026-10-07):**
 PR2098 merged/main-verified at1e220147c20dbe733e8673e46ac391ff2277651d;
 reviewed/main trees match. Main CI37551876853 and CodeQL37551877035 passed.
 Re-observation selects16/P0 (C4/I4/D4/impact4): compose existing proposal policy

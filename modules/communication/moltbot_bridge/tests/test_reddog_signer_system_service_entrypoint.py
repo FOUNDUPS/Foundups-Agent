@@ -342,7 +342,7 @@ def test_entrypoint_defers_startup_dependencies_until_isolation(
     assert json.loads(emitted[0])["result"]["no_runtime_secret_file_loaded"] is None
 
 
-def _public_startup_artifacts(tmp_path):
+def _public_startup_artifacts(tmp_path, configure=None):
     """Synthetic authorities, real manifest production and generation activation."""
     from modules.communication.moltbot_bridge.tests import test_reddog_signer_owner_controlled_e0_admission as e0
     from modules.communication.moltbot_bridge.tests import test_reddog_signer_system_service_manifest_selection_loader as mf
@@ -374,6 +374,8 @@ def _public_startup_artifacts(tmp_path):
         authority_binding_digest=pc.signer_owner_e0_authority_binding_digest(policy))
     config["key_provider_profiles"][0]["expected_key_epoch"] = KEY_EPOCH
     config["control_loop_authority_policy"] = mf._runtime_config(harness)["control_loop_authority_policy"]
+    if configure is not None:
+        configure(config, policy, values, harness, tmp_path)
     config_path = mf._write_json(harness.runtime_root / "signer_service_config.json", config)
     principals = harness.runtime_root / "principal_authority_records.json"
     mf._write_json(principals, values["principal_payload"])
@@ -444,6 +446,7 @@ def _public_startup_owner(values, owner, selected, tmp_path, monkeypatch):
         replay_store_id=policy["replay_store_id"], durability_receipt_id=policy["replay_store_durability_receipt_id"])
     replay_fixture._provision_store(replay)  # Explicit synthetic setup, not startup.
     owner["startup_custody"] = _public_startup_custody(values, descriptor, replay)
+    owner["startup_custody"]["proposal_replay_store"] = values.get("proposal_replay_store")
     owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
     values["owner_config_path"].parent.mkdir()
     values["owner_config_path"].write_text(json.dumps(owner, sort_keys=True), encoding="ascii")

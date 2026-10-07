@@ -12,8 +12,9 @@ policy authorization; consumed state alone cannot reconstruct activation.
 The runtime defers its eager policy reservation only for matching existing
 backend/factory/config/high-water identities. Grant-aware proposal
 composition is covered by a fixture-backed owner/grant integration; native packet
-provisioning is not qualified. The packet supplier
-still rejects proposal policies. Component tests use an explicit synthetic lease;
+enrollment is not qualified. The packet supplier now serializes valid proposal
+configs; the public startup path still requires current owner custody, principal
+verification and a provisioned proposal replay store after isolation. Component tests use an explicit synthetic lease;
 they do not certify native authority. Deferred peer-handshake responses additionally
 use the canonical verifier for both signatures and freshness; only that exact
 operation accepts handshake attestations. Existing generic paths retain their gates.
@@ -39,9 +40,9 @@ No capability is minted, and serialized binding objects are not trusted grants.
 
 Native provisioning is not established by the connected tests. They create an
 explicit test packet before signing the generation artifacts; the production
-run-packet supplier rejects proposal policies, as does the grant-aware ephemeral
-backend factory. Existing principal/replay adapters require a separate admitted
-integration; this consumer does not relax either guard.
+run-packet supplier and grant-aware factory now compose existing principal/replay
+adapters in fixture-backed public startup tests. Native enrollment is still
+unproven; these consumers do not confer authority or bypass use-time checks.
 
 ## Retained proposal verification inputs
 
@@ -1818,10 +1819,11 @@ parameters. Proposal backend construction is an internal runtime-only path
 reached after principal authorization, replay-authority, durability-receipt,
 and path validation. It always constructs the canonical atomic nonce store;
 callers cannot inject a volatile proposal nonce store through the public
-provider boundary. Proposal-enabled configuration is intentionally rejected by
-the signer run-packet supplier until production principal resolution and
-durable replay-authority composition exist in the CLI sidecar. Direct runtime
-and bootstrap injection remain the tested integration seams in this slice.
+provider boundary. Proposal-enabled configuration can be serialized by the
+run-packet supplier. The public service entrypoint composes existing current-owner
+principal resolution and provisioned durable replay authority after isolation.
+Connected tests exercise that path with explicit enrollment/OS/transport fixtures;
+packet creation does not start a service or establish native admission.
 
 Production policy still keeps `architect_proposal_admission_authenticity`
 unavailable because the resident proposal path does not yet derive the exact

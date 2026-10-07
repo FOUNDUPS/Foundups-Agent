@@ -137,12 +137,8 @@ def run_reddog_signer_socket_service_run_packet_supply(
     assert config_resolved is not None
     assert output_resolved is not None
     assert owner_resolved is not None
-    if config.get("proposal_authority_policy") is not None:
-        return _reject(
-            (
-                FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE,
-            )
-        )
+    # Proposal dependencies are supplied by the current owner's startup custody
+    # after process isolation. A packet is configuration, never admission.
     socket_path = Path(str(config["socket_path"])).resolve()
     profiles = tuple(config.get("key_provider_profiles") or ())
     executable = str(python_executable or sys.executable)
