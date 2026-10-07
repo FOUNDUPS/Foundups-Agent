@@ -1,3 +1,45 @@
+## Deferred proposal activation checkpoint — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97;16/P0 (C4/I4/D4/impact4). Base main
+1e220147c20dbe733e8673e46ac391ff2277651d closes PR2098; tested/main trees
+match87dd5d72246e629f55f7d8bb41fbef2926ff47c4. Branch CI37550952810 and
+CodeQL37550949998 passed; main CI37551876853 and CodeQL37551877035 passed.
+
+Existing deferred factory and runtime now compose proposal activation inside the
+owner lease. Keys resolve afresh; only a bound activation digest survives calls.
+Current principal/policy checks surround resolution and each key signature.
+A live thread-bound scope invalidates copied contexts on exit. Durable policy
+activation occurs once; a fresh factory cannot reconstruct it from consumed state.
+The startup gate defers activation only for the matching existing backend/factory,
+config and high-water store. Other specialized modes remain rejected.
+
+IMPLEMENTED_NOT_VALIDATED for native admission. Component/regression72pass/1skip;
+these include real cryptography and durable nonce-store controls but inject a
+synthetic owner scope for proposal factory cases. Full grant/root-owner/runtime
+proposal composition is still required. The run-packet supplier remains closed.
+No native enrollment, worker improvement or retained RSI benefit is demonstrated.
+
+Independent review found copied-context lifetime and expiry-during-commit defects;
+both reproduced (2fail), repaired, and included in the passing connected result.
+An intermediate59pass/1fail/1skip exposed the key adapter's missing public-key API;
+repaired without weakening signature verification. A further principal-I/O expiry gap
+reproduced in two cases and is repaired by final monotonic/deadline checks.
+A separate clock-composition rollback reproduced1fail; all leased verification
+samples now share one checked clock. Final changed factory/structural35pass12.97s
+follows connected72pass/1skip34.93s. The skip is Windows symlink creation privilege
+(WinError1314). Independent source recheck cleared these repaired deltas; it did
+not execute tests. Packaging integrity8pass65.49s, extension15groups pass6.977s,
+registry1695/270 current. Manifest1425 files, digest9879095d4b038967c6d5a4de9cde381204c325be1fcf8112f8c074c629379a8a.
+This is a recoverable local checkpoint, not native qualification or publication.
+
+The exact-main Holo maintenance transaction rejected `workspace_changed_during_transaction`
+after coordinator edits overlapped its workspace check; both owned runtimes stopped.
+This is a coordinator sequencing error, not fresh retrieval evidence. Retry only
+from a clean frozen checkout of the exact target main, without an overlapping writer. Preserve the failure.
+Next: test actual admitted proposal composition and all grant/replay failures,
+then qualify packet supply. No broad reaudit, failed-worker retry or paid fallback.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-activation-execution.json`.
+
 ## Current-generation Memex use-time verification — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).

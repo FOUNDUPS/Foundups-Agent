@@ -12,7 +12,25 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — current-generation Memex verification (2026-10-07):**
+**Current selection — deferred proposal activation (2026-10-07):**
+PR2098 merged/main-verified at1e220147c20dbe733e8673e46ac391ff2277651d;
+reviewed/main trees match. Main CI37551876853 and CodeQL37551877035 passed.
+Re-observation selects16/P0 (C4/I4/D4/impact4): compose existing proposal policy
+activation with grant-protected deferred signing. The legacy fixture succeeds;
+the deferred seam rejects before key resolution because startup lacks its policy
+nonce store. Merely removing two guards cannot make the path executable.
+
+The existing factory/runtime extension has component/regression72pass/1skip.
+Full admitted proposal composition, packet supply and final qualification remain
+pending; native RSI is unproven. Independent review reproduced scope/time
+faults; all reported deltas were repaired and source-rechecked. Final changed
+factory/structural35pass follows the connected run. See bridge ModLog and
+`outputs/rsi-permission-evidence-20261006/proposal-activation-execution.json`.
+The exact-main Holo transaction rejected overlapping workspace edits and stopped
+its owned runtimes. Retry only from a clean frozen checkout of exact main; do not call this
+CURRENT retrieval. Source inspection is pinned to the merged tree and scoped delta.
+
+**Closed source prerequisite — current-generation Memex verification:**
 PR2097 merged `15089a44fe2ffc7150e7cd09688260fa3560e607`; reviewed/main trees
 match. Main CI37547076619 and CodeQL37547076345 passed. The existing bounded
 OpenClaw/WRE maintenance controller completed the exact-main Holo task and

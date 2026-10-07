@@ -1,3 +1,11 @@
+## Deferred proposal activation — current checkpoint, 2026-10-07
+
+PR2098 is merged/main-verified at1e220147c; its prior publication-pending entries
+are historical. Next16/P0 extends the existing deferred factory/runtime.
+Local component/regression72pass/1skip; full admitted proposal integration and
+packet supply remain unqualified. No native RSI or retention claim. See current
+ModLog/INTERFACE for boundaries, review findings and exact evidence.
+
 ## 2026-10-07 — Bind retained Memex evidence at current use
 
 Existing producer/collector/valve extended; no new module or authority.

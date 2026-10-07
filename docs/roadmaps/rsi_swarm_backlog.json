@@ -1880,22 +1880,45 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.memex_current_use_20261007",
-    "base_commit": "15089a44fe2ffc7150e7cd09688260fa3560e607",
-    "selected_action": "Connect retained proposal and Memex inputs to existing current-generation producer, collector and valve",
-    "status": "LOCALLY_QUALIFIED_PUBLICATION_PENDING",
+    "observation_path": "current_observation.proposal_lazy_activation_20261007",
+    "base_commit": "1e220147c20dbe733e8673e46ac391ff2277651d",
+    "selected_action": "Compose existing deferred proposal policy activation with grant-protected signing",
+    "status": "IMPLEMENTED_NOT_VALIDATED",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 4,
       "importance": 4,
       "deferability": 4,
       "impact": 4,
-      "total": 15,
-      "priority": "P1"
+      "total": 16,
+      "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close exact-source publication, then re-observe proposal run-packet and ephemeral-backend adapter guards; preserve admission, independent verification and no-paid-fallback boundaries."
+    "next_action": "Qualify actual admitted proposal runtime composition, independent review and integrity bindings; preserve packet guard until adapters are demonstrated."
   },
   "current_observation": {
+    "proposal_lazy_activation_20261007": {
+      "observation_path": "current_observation.proposal_lazy_activation_20261007",
+      "base_commit": "1e220147c20dbe733e8673e46ac391ff2277651d",
+      "selected_action": "Compose existing deferred proposal policy activation with grant-protected signing",
+      "status": "IMPLEMENTED_NOT_VALIDATED",
+      "wsp15": {
+        "complexity": 4,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 16,
+        "priority": "P0"
+      },
+      "dispatchable": false,
+      "next_action": "Qualify actual admitted proposal runtime composition, independent review and integrity bindings; preserve packet guard until adapters are demonstrated.",
+      "local_component_regression_passed": 72,
+      "final_changed_surface_passed": 35,
+      "validation_note": "Earlier connected72pass/1skip; final clock delta factory/structural35pass. Native composition pending.",
+      "skipped": 1,
+      "native_rsi_demonstrated": false,
+      "holo_status": "REJECTED: workspace_changed_during_transaction; owned runtimes stopped",
+      "evidence": "outputs/rsi-permission-evidence-20261006/proposal-activation-execution.json"
+    },
     "memex_current_use_20261007": {
       "base_commit": "15089a44fe2ffc7150e7cd09688260fa3560e607",
       "wsp15": {
@@ -1906,7 +1929,7 @@
         "total": 15,
         "priority": "P1"
       },
-      "status": "LOCALLY_QUALIFIED_PUBLICATION_PENDING",
+      "status": "MERGED_MAIN_VERIFIED",
       "maintenance_status": "COMPLETED",
       "owner_freshness": "CURRENT",
       "index_gap_detected": false,
@@ -1923,7 +1946,10 @@
       "local_connected_passed": 168,
       "local_routing_passed": 1,
       "independent_source_review": "CLEARED; reviewer did not independently execute tests",
-      "native_provisioning": "NOT_ESTABLISHED: run-packet and ephemeral backend reject proposal policies"
+      "native_provisioning": "NOT_ESTABLISHED: run-packet and ephemeral backend reject proposal policies",
+      "merge_commit": "1e220147c20dbe733e8673e46ac391ff2277651d",
+      "main_ci_run": 37551876853,
+      "main_codeql_run": 37551877035
     },
     "memex_retention_20261007": {
       "base_commit": "0383b9804ce08fffaac6cf74fb0aeedd93eb04d2",
