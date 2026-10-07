@@ -84,7 +84,7 @@ investigate exceptional abilities wherever learners live; connect consenting lea
 to enrichment, mentors, schools, and scholarships; improve games through governed AI.
 
 Current engineering decision: establish the documentation and declarative FoundUp
-scaffold first. Preserve `eduit` as the parent, name the internal capability EDUIT Discovery,
+scaffold first. Preserve `eduit` as the parent, name the internal capability EDuIT Discovery,
 and keep all runtime and validation claims at SPECIFIED_NOT_IMPLEMENTED.
 The 2026 safety, evaluation, and release gates are new implementation decisions,
 not claims that these safeguards existed in the old designs.

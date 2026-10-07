@@ -1,12 +1,16 @@
-# Naming decision — EDUIT and its modules
+# Naming decision — EDuIT and its modules
 
 Decision date: 2026-10-08. Scope: working product and engineering names; no legal rename,
 trademark clearance, domain registration, social-account rename, or public launch.
 
 ## Decision
 
-Keep **EDUIT** as the educational parent and stable FoundUp ID `eduit`.
-Use **EDUIT Discovery** as the working label for potential-discovery and opportunity routing
+Keep **EDuIT** as the styled educational parent and stable FoundUp ID `eduit`.
+Retain **EDUIT** in historical quotations and original document titles. **Eduit** is
+an unstyled textual variant; **eDuit** is not the selected brand. Capitalization does
+not create a new acronym expansion or rename any legal entity. This styling follows
+the founder’s clarification in the current conversation.
+Use **EDuIT Discovery** as the working label for potential-discovery and opportunity routing
 within EDUIT. Use **The Experience** for the learner-facing adaptive play environment.
 Keep The Tool / The Content / The Experience as the historical architectural vocabulary.
 
@@ -22,7 +26,7 @@ Keep The Tool / The Content / The Experience as the historical architectural voc
 | GuiGame / widget eGames | Community game-creation proposal | Historical authoring concept; no existing engine claimed |
 | Baby0 / B0e | Early-childhood learning and parent-interaction research concept | Retain as a separately gated future research module |
 | OBAI | AI vision in 2023 documents | Preserve original terminology; no installed service assumed |
-| EDUIT Discovery | Current documentation decision | New internal working name, not a historical claim |
+| EDuIT Discovery | Current documentation decision | New internal working name, not a historical claim |
 | Edguit | Speech-transcription form in this conversation | Resolve to EDUIT; do not create a duplicate entity |
 
 ## Alternatives considered

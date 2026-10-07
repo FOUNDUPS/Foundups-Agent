@@ -1,4 +1,4 @@
-# Product requirements — EDUIT Discovery
+# Product requirements — EDuIT Discovery
 
 Status: specification. Requirements below are present-day design decisions unless
 explicitly marked historical. They do not certify educational or scientific efficacy.

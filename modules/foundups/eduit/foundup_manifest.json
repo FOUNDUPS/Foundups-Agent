@@ -16,5 +16,6 @@
   "data_namespace": "idb_eduit",
   "app_mount": "/f/eduit/app",
   "capabilities_status": "SPECIFIED_NOT_IMPLEMENTED",
-  "working_product_name": "EDUIT Discovery"
+  "working_product_name": "EDuIT Discovery",
+  "display_name": "EDuIT"
 }

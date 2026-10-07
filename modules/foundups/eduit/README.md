@@ -1,12 +1,14 @@
-# EDUIT — autonomous learning and discovery
+# EDuIT — autonomous learning and discovery
 
 Status: **SPECIFIED_NOT_IMPLEMENTED**. Documentation and declarative onboarding only.
 No educational runtime, validated talent detector, deployed route, scholarship pipeline,
 token issuance, or autonomous game-publishing worker is claimed.
 
-EDUIT retains its original expansion, **Education Using Information Technology**.
+**EDuIT** is the current styled brand; **EDUIT** is retained in historical quotations.
+The original expansion is **Education Using Information Technology**.
+Do not use `eDuit` as the brand. Machine identifiers remain `eduit`.
 Its mission is accessible, personalized learning through play on ordinary devices.
-**EDUIT Discovery** is the new working name for an internal capability that investigates
+**EDuIT Discovery** is the new working name for an internal capability that investigates
 exceptional domain-specific potential and connects consenting learners with human-reviewed
 opportunities. It is not a second FoundUp or a replacement name for EDUIT.
 

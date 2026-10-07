@@ -1,4 +1,10 @@
-# EDUIT ModLog
+# EDuIT ModLog
+
+## 2026-10-08 — brand styling clarification
+
+Use EDuIT for styled branding and EDuIT Discovery for the internal capability.
+Preserve EDUIT in historical quotations/source titles, and eduit in machine identifiers.
+No eDuit branding, new entity, route, token, domain, or historical-source rewrite.
 
 ## 2026-10-08 — historical recovery and software-first specification
 
@@ -8,7 +14,7 @@ choose a subordinate product/module name, and prepare the core FoundUp build doc
 Added: source register/history, naming decision, requirements, architecture/interfaces,
 game and data contracts, evaluation/safeguards, DAE/RSI governance, onboarding map,
 roadmap, contributor rules, test inventory and memory boundary. Selected the working
-label EDUIT Discovery within `eduit`; preserved The Experience, GuiGame and Baby0 lineage.
+label EDuIT Discovery within `eduit`; preserved The Experience, GuiGame and Baby0 lineage.
 Prepared the declarative manifest/registry entry with SPECIFIED and NO_RUNTIME boundaries.
 
 Preserved: original Drive documents, historical media/social lane, unrelated registry
