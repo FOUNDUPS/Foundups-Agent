@@ -1,3 +1,21 @@
+## Cost-bounded admitted proposal diagnostic — 2026-10-07
+
+WSP15/22/50/97; existing16/P0 selection retained. Source f4087d8b42207f797736670e872c7c8d83930955.
+The saved integration fixture corrected its consumed-grant observer and captured
+clocks. The real owner/grant composition under synthetic selection/transport
+reaches successful handshake signing, then rejects at deferred response validation;
+signature verification and the proposal phase are not reached. The existing
+attestation-shape check permits nonempty evidence only for authoritative-use leases,
+not peer handshakes. Next: reuse the canonical handshake verifier and test the
+response boundary without weakening rejection of unsupported operations.
+
+Latest targeted run:1failed/28deselected,4.34s; no local-model or paid-worker calls.
+Coordinator usage unknown. Reproducer and failure evidence saved under
+outputs/rsi-permission-evidence-20261006/proposal-admitted-cost-checkpoint.json.
+Only the owned unfinished test was restored to its committed version after a
+byte-for-byte diagnostic backup. No runtime change, independent review, remote
+publication, native admission or retained RSI benefit is claimed for this diagnostic.
+
 ## Deferred proposal activation checkpoint — 2026-10-07
 
 WSP00/6/15/22/50/62/84/97;16/P0 (C4/I4/D4/impact4). Base main

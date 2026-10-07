@@ -87,6 +87,23 @@ inference loop for unchanged state, rejected-worker retry or automatic paid
 fallback. Record coordinator, local-worker and provider usage separately; unknown
 is not zero. This planning rule is not a new autonomous scheduler.
 
+**Cost-bounded execution checkpoint (2026-10-07):** the admitted proposal
+integration fixture now reaches a successful handshake signature, then rejects
+in deferred response validation before cryptographic response verification.
+The existing attestation-shape validator permits a nonempty attestation only
+for authoritative-use leases, whereas peer handshakes also supply one. Inspect
+and reuse the canonical handshake verifier next; do not weaken this gate.
+The saved reproducer also corrects stale-grant and frozen-clock fixture mismatches.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-admitted-cost-checkpoint.json`.
+No native RSI gain or model execution is established by this failed test.
+
+For subsequent slices, deterministic local checks own unchanged-state polling;
+local models receive one admitted, scoped ticket with finite usage and retry
+limits. Escalate only a changed failure signature or a reviewable candidate to
+the coordinator. Record local-model calls, paid calls, elapsed time and accepted
+improvements separately. Checkpoint unresolved diagnostics instead of expanding
+the audit. This is execution discipline; a resident loop remains unqualified.
+
 **Historical execution — single-effect grant composition (2026-10-07 JST):**
 PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;
 reviewed/main tree matches. Main CI37498282161 and CodeQL37498284318 passed.
