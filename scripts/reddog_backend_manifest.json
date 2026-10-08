@@ -2616,7 +2616,7 @@
     "modules/infrastructure/idle_automation/src/schedule_claim_codec.py": "c7cb297462864ef799d435ec4793eeb5724fb10b6731844079435d59d2a3d41f",
     "modules/infrastructure/idle_automation/src/schedule_claim_state.py": "9ada04669442cca1873fda289d533870522dd533efa35389bcdc4ddccd20655b",
     "modules/infrastructure/idle_automation/src/schedule_evaluator.py": "eb695f7ec36269b31f2a6275a521c6ea47f42923cd96f8d1165e60463cb7e5b6",
-    "modules/infrastructure/idle_automation/src/self_research_refresh.py": "2068aa9d3877bc2e9344ac47843b5e3f8b84fac086cb473e9537813374f1b9cb",
+    "modules/infrastructure/idle_automation/src/self_research_refresh.py": "fde50fae851cad8bc87180256370687fcae49a1d2dddb3a1ea53314f28d01df8",
     "modules/infrastructure/idle_automation/src/startup_maintenance_gate.py": "39a14c22e68d736635c7a964f2d51ccb356f9ac8d507787d4ced66a807b1a4d5",
     "modules/infrastructure/idle_automation/tests/__init__.py": "0111b11ae48acae429f0e329d2c6cd5c2e1f68ed1bbf7724f0c8af0327f5c885",
     "modules/infrastructure/idle_automation/tests/test_startup_maintenance_gate.py": "68da00d64bcedc51fb70e78f55d6c00298b9b08c84a0007ebfb15bea5eac03ed",

@@ -12,7 +12,27 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — proposal startup composition (2026-10-07):**
+**Current selection — measured internal audits (2026-10-07):**
+PR2100 merged/main-verified at453f6c357; CI37559426252 and CodeQL37559426685
+passed, reviewed/main trees equal, owned branch retired with recovery bundle.
+Internal read-only audits do not require new production signer enrollment.
+Existing OpenClaw/WRE maintenance completed; Hermes0.20.4 authenticated preflight
+passed after bounded startup readiness. Existing self-audit observed3193log files,
+20dry-run proposals, then0new events on the next scan; all20 need verified repair
+scope. No worker inference, paid provider call or execution grant was requested.
+
+14/P1 (C2/I4/D4/impact4): preserve actual self-audit coverage/failure status in the
+existing research report. Six baseline failures and one independently identified
+history-overflow failure reproduced; connected final140pass. Live report persistence
+preserves the scan snapshot separately from20historical signatures and3ranked
+candidates. Publication pending; source/review evidence is not native RSI.
+Next: resolve one current finding to its actual module and bounded repair scope,
+then qualify one existing local worker and independent evaluator. Production
+signer enrollment remains separate from read-only audit readiness. No claim of
+retained autonomous improvement or complete RSI. See idle_automation ModLog and
+`outputs/rsi-permission-evidence-20261006/internal-audit-*`.
+
+**Historical selection — proposal startup composition (2026-10-07):**
 PR2099 merged/main-verified at5fd8336468720133faab980ec82f81b1929a4b3e;
 reviewed/main trees match. Main CI37556610302 and CodeQL37556610148 passed.
 The exact-main OpenClaw/WRE Holo maintenance completed and stopped its owned
