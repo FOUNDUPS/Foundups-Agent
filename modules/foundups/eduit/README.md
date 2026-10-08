@@ -1,18 +1,18 @@
 # EDUIT — Education Using Information Technology
 
 **FoundUp status:** SPECIFIED_NOT_IMPLEMENTED  
-**Product module:** EDUIT Discovery — adaptive learning through play  
+**Product module:** Play EDUIT — adaptive learning through play  
 **Historical educational vision:** eSingularity — learn anything, anytime, anywhere (LAAA)
 
 EDUIT is an independent educational FoundUp. The existing `modules/foundups/esingularity/` application is a separate, live Fukui campaign and must not be modified by EDUIT work.
 
 ## Purpose and history
 
-The 2007 EDUIT mission proposed freely accessible online education. The 2007 eSingularity initiative described **The Tool + The Content + The Experience**; the 2009 book and 2010 Malaysian prize proposal described adaptive games, learning-object assessment and identifying underserved talent. The 2023 EDUIT AI Teaching Touch Tablet and Baby0 discussions explored infant multilingual learning and explicitly proposed starting with an app. These are **historical proposals**, not evidence of measured outcomes.
+The 2007 EDUIT mission proposed freely accessible online education. The 2007 eSingularity initiative described **The Tool + The Content + The Experience**; the 2009 book and 2010 Malaysian prize proposal described adaptive games, learning-object assessment and identifying underserved talent. The 2023 EDUIT AI Teaching Touch Tablet and Baby0 discussions explored infant multilingual learning and explicitly proposed starting with an app. In the project's operator interpretation, Baby0 is an early conceptual ancestor of the OBAI/0102/Red Dog lineage; this is not a verified claim of uninterrupted software or model identity since 2001–2003. These are **historical proposals**, not evidence of measured outcomes.
 
 [Historical lineage and primary sources](../../../docs/audits/pfmall_eduit/EDUIT_DISCOVERY_HISTORICAL_LINEAGE_2026-10-08.md)
 
-## MVP: EDUIT Discovery
+## MVP: Play EDUIT
 
 A browser-first, device-independent adaptive learning game. The initial product measures **game-specific learning progress**, not intelligence, diagnosis, or genius. Opportunity referrals and any profiling of minors require independent validation, parental/guardian consent, and human review. Do not collect child-identifying data for the initial synthetic demonstration.
 
@@ -37,6 +37,10 @@ A browser-first, device-independent adaptive learning game. The initial product 
 ## WSP 91 — DAEmon observability
 
 No autonomous production worker exists. Planned outputs: health status, last action, error classification, recommended next action, queue/work state (N/A until worker exists), and telemetry under the `eduit` namespace. Never emit child identifiers or raw learner interaction data into telemetry.
+
+## Autonomous operator continuity
+
+0102 / Red Dog owns the next small verified implementation slices, WSP 97 closure and merge-to-main receipts. README and other module documentation are machine-operational context, not required reading for 012. Keep decisions, evidence, current state, and next steps inside the repository. No background execution is implied by this instruction.
 
 ## Next implementation slice
 

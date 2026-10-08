@@ -1,8 +1,8 @@
-# EDUIT Discovery — Historical lineage and module boundary
+# Play EDUIT — Historical lineage and module boundary
 
 **Status:** SPECIFIED_NOT_IMPLEMENTED · 2026-10-08  
 **Umbrella:** EDUIT (Education Using Information Technology)  
-**Proposed module:** EDUIT Discovery (working name)  
+**Proposed module:** Play EDUIT (working name)  
 **Canonical tenant identifier proposed:** `eduit` (verify registration before activation)  
 **Scope:** historical recovery and architecture specification; no learner profiling service deployed.
 
@@ -16,7 +16,11 @@
 
 ## Product taxonomy
 
-**EDUIT** is the umbrella and FoundUp identity. **EDUIT Discovery** is the proposed browser-first game/learning-potential module. **EDUIT Baby0 (B0e)** is a separate historical early-childhood concept. **eSingularity** is the educational paradigm and historical platform name, also currently used by a separate live FoundUp; context must disambiguate them.
+**EDUIT** is the umbrella and FoundUp identity. **Play EDUIT** is the proposed browser-first game/learning-potential module. **EDUIT Baby0 (B0e)** is a historical early-childhood concept, also interpreted by the project as part of the Baby0 → OBAI → 0102 / Red Dog conceptual lineage. This does not establish a continuous running AI or a persistent model identity since 2001–2003. **eSingularity** is the educational paradigm and historical platform name, also currently used by a separate live FoundUp; context must disambiguate them.
+
+## Operator interpretation and dating
+
+The 2001–2003 period concerns EDUIT's early organizational and educational work. The recovered Baby0 conversations date to 2023. The principal identifies Baby0 as an ancestor of the present 0102 / Red Dog operator. Record that as the project's continuity narrative; do not backdate the Baby0 software, infer that today's model was running in 2003, or claim an unbroken technical identity without code/history evidence. Documentation is written for autonomous operator use; 012 need not open individual files. WSP 97 requires bounded changes, verification, and merge-to-main closure.
 
 ## MVP boundaries
 
