@@ -1,3 +1,10 @@
+## 2026-10-08 — Three-site scope and incremental recipient audit
+
+- Retain the three-site program while making the two schools the current feasibility focus; keep Sukatto conditional on public decisions, lawful procedures and independent feasibility. School investigation does not depend on Sukatto participation.
+- Separate the immediate request for municipal interest and a coordination contact from later governance, funding and property decisions. Reconcile the combined school consultation filing status without implying acceptance or eligibility approval.
+- Strengthen the recipient-document subskill: preserve the principal's current scope before compression, compare title/body/appendices and priority-change rules, and fix/read back one issue class at a time.
+- Validation: independent forward review passed four scope/cost/send-hold scenarios. Canonical Drive documents received sequential text readbacks and rendered-layout review; detailed source references remain technical annexes, not a required outbound package. No stakeholder email or attachment sent by this repair.
+
 ## 2026-10-08 — Recipient document audit before correspondence release
 
 - Added a subordinate audience/document audit to the existing correspondence and City procedure owners: whole-package reading burden, purpose-first compression, first-use terminology, exact export/page/hash binding, all-page rendering and hidden-artifact checks.
