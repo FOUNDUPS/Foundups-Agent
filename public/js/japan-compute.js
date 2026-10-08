@@ -1,18 +1,17 @@
-/* Stage-one presentation only: no auth, CRM, investment intake or tracking. */
+/* Presentation only: no auth, CRM, investment intake or tracking. */
 (function () {
   'use strict';
   var params = new URLSearchParams(window.location.search);
   var legacyKeys = ['sse', 'sse_url', 'invite', 'inviteCode', '__clerk_ticket', '__clerk_status', '__clerk_synced'];
   var legacyHashes = ['#how', '#roc', '#build', '#beta'];
-  // Keep known historical product entry links on the unchanged Innovate page.
   if (legacyKeys.some(function (key) { return params.has(key); }) || legacyHashes.indexOf(window.location.hash) !== -1) {
     window.location.replace('/innovate.html' + window.location.search + window.location.hash);
     return;
   }
   document.documentElement.classList.add('js');
   var descriptions = {
-    ja: '日本の空き施設を、AIを動かす拠点へ。Foundups Japan Computeは、AI Kobanを通じてFoundUps・EDUIT・地域の事業を支える全国構想です。現在は事業性の検証段階です。',
-    en: 'A proposed Japan-wide network of local AI Koban compute nodes for autonomous FoundUps, EDUIT and regional businesses. Currently at feasibility stage.'
+    ja: '計算基盤は誰のものか。誰が使い、利用料を払うのか。Foundups Japan ComputeのAI Koban構想を、所有・需要・価格・投資採算から検討する投資家向け事業概要。',
+    en: 'Who owns the compute? Review the AI Koban investment thesis: ownership, paying customers, affordability and transparent scenario economics. feasibility-stage information.'
   };
   function setLanguage(language, updateUrl) {
     var lang = language === 'en' ? 'en' : 'ja';
