@@ -1,3 +1,13 @@
+## 2026-10-08 — Close audit reporting and qualify layered-worker direction
+
+WSP00/15/22/48/97: PR2101 merged0bcae38f3, owned paths match reviewed head;
+main CI37738302526/CodeQL37738302661 pass. Current gateway panel lacks accepted
+output handoff. One real local source-audit call rejected an unsupported coverage
+claim;0/1 accepted,24.438s,0paid calls, cleanup confirmed. Public catalog refresh
+368accepted/99rejected. Existing roadmap/backlog/dispatch now separate local
+layer qualification, held-out comparison, routed-worker gates and later retained
+benefit. No runtime code, new orchestrator, grant or native RSI completion.
+
 ## RSI proposal startup connection — 2026-10-07
 
 ## 2026-10-07 — Execute internal audits and retain scan diagnostics

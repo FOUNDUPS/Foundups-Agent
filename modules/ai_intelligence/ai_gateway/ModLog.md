@@ -1,5 +1,17 @@
 # AI Gateway Module Change Log
 
+## [2026-10-08] - Measure local audit and distinguish panels from layers
+
+WSP00/15/22/48/50/77/97/99: reused public catalog discovery (368accepted/99rejected)
+and exact installed LM Studio lifecycle for one read-only Qwen-Coder7B audit.
+Independent source review froze oracle before invocation; strict answer rejected
+one false coverage claim (3/4 facts correct),24.438s,0retries/paid calls, confirmed
+load/unload, unknown token usage. Injected production-runner probe confirms panel
+does not forward earlier outputs. Roadmap/dispatch define budget-matched layered
+and routed-worker experiments; neither comparison nor native RSI is complete.
+No runtime implementation or tests changed. Evidence:
+`O:/RedDog-Builder-Artifacts/rsi-layered-workers-20261008/`.
+
 ## [2026-10-07] - Strict model use-time clock
 
 WSP00/6/15/22/50/97,13/P1: existing verifier now requires an exact positive
