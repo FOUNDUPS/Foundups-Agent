@@ -12,6 +12,27 @@ Current Drive working model: **FIN — YUMORI Three-Site Portfolio, Demand-Led F
 
 Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizing`, and one candidate-site tab per site. The older integrated XLSX remains reference-only.
 
+## Current emphasis and flexible inclusion
+
+The program retains all three candidate sites. The present feasibility focus is
+the two former schools: Hanyu as the initial compute/economic candidate and
+Shimousaka as the expansion, education, research and community candidate.
+Sukatto remains an ancillary, conditional reuse option while its demolition and
+reuse pathway is being considered; this is project positioning, not a claim that
+demolition is suspended or a new City review has been opened.
+
+School investigation and implementation do not depend on Sukatto. School order
+may change with verified demand, power, communications, building and finance
+evidence. Sukatto may join or change priority only after the relevant City/council
+decisions, lawful asset procedure, rights and independent feasibility support it.
+A favorable technical comparison alone does not include or promote Sukatto.
+
+The immediate request is City interest in exploring feasibility and an appropriate
+coordinating office. A DX working group, prefectural coordination or investor-led
+project vehicle are options to discuss, not established bodies or commitments.
+The preparatory committee facilitates; no operator, board, funder or customer is
+appointed by the proposal or by automated research.
+
 ## Site 1 — 旧すかっとランド九頭竜 / Sukatto Land Kuzuryu
 
 - Portfolio Priority: **Priority 3 / tertiary optional adaptive-reuse node**.
