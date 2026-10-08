@@ -56,6 +56,13 @@ action must be understandable without opening a technical dossier.
 
 ## 3. Apply WSP 97 at sentence and package level
 
+- Preserve the principal's latest scope, site hierarchy, conditional options and
+  requested deliverable before simplifying for the reader. A new-project overview
+  must not become a summary of an older petition; school-focused does not mean
+  deleting a retained optional third site. Audit titles, body, diagrams, appendices
+  and conclusions against the same scope, including every priority-change rule.
+- Repair one issue class at a time, read back and challenge that repair, then move
+  to the next. Keep the canonical source and its derived overview consistent.
 - Lead with the requested action and only the facts needed to decide it.
 - For an unsolicited official briefing, default to one readable A4 page. This is
   an editorial default, not a legal rule: preserve official templates and every
