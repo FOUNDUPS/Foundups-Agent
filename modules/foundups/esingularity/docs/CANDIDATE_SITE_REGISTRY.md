@@ -12,6 +12,27 @@ Current Drive working model: **FIN — YUMORI Three-Site Portfolio, Demand-Led F
 
 Current decision tabs include `Service Catalog`, `Demand & Capacity`, `Node Sizing`, and one candidate-site tab per site. The older integrated XLSX remains reference-only.
 
+## Current emphasis and flexible inclusion
+
+The program retains all three candidate sites. The present feasibility focus is
+the two former schools: Hanyu as the initial compute/economic candidate and
+Shimousaka as the expansion, education, research and community candidate.
+Sukatto remains an ancillary, conditional reuse option while its demolition and
+reuse pathway is being considered; this is project positioning, not a claim that
+demolition is suspended or a new City review has been opened.
+
+School investigation and implementation do not depend on Sukatto. School order
+may change with verified demand, power, communications, building and finance
+evidence. Sukatto may join or change priority only after the relevant City/council
+decisions, lawful asset procedure, rights and independent feasibility support it.
+A favorable technical comparison alone does not include or promote Sukatto.
+
+The immediate request is City interest in exploring feasibility and an appropriate
+coordinating office. A DX working group, prefectural coordination or investor-led
+project vehicle are options to discuss, not established bodies or commitments.
+The preparatory committee facilitates; no operator, board, funder or customer is
+appointed by the proposal or by automated research.
+
 ## Site 1 — 旧すかっとランド九頭竜 / Sukatto Land Kuzuryu
 
 - Portfolio Priority: **Priority 3 / tertiary optional adaptive-reuse node**.
@@ -84,8 +105,9 @@ cross-default is assumed. A failed or excluded Sukatto case leaves Hanyu operabl
 
 Fukui City's current school call lists Hanyu and Shimousaka, not Sukatto. Use one
 umbrella concept plus asset-specific annexes and the City's correct procedures.
-Mandatory school prior consultation and the official form package do not establish
-that two sites can be filed in one application. Obtain that answer from the City.
+The City's subsequent correspondence directs one prior-consultation form when
+treating the two schools as one proposal; the combined Form 1 has been submitted.
+This is not approval of eligibility, the project, asset use or a combined contract.
 Sukatto needs a separately designated PPP/PFI receiving route; PFI Act Article 6
 is an option pending City determination. Source:
 https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html (checked 2026-09-29 JST).
@@ -97,7 +119,7 @@ The minimum physical first phase still needs a lawful whole-property use plan.
 - Listed properties are **旧下宇坂小学校** and **旧羽生小学校**. Sukatto is not in this call.
 - Prior consultation is mandatory. The City states a **2026-11-30** cutoff for prior consultation/site survey and a **2026-12-15** proposal-document deadline.
 - The current official page links the City form bundle. The official Word artifact remains the submission master; do not recreate a look-alike.
-- The singular/property-specific filing structure still does **not** prove that one filing can cover both schools. Preserve the open gate: obtain written City confirmation of the required filing unit.
+- Subsequent City guidance resolves the prior-consultation filing unit: use one Form 1 for the integrated two-school proposal. A combined Form 1 has been submitted. Final proposal/contract structure and eligibility remain separate questions.
 - Utility/carrier inquiries are feasibility evidence and annex material, not separate City asset-proposal properties.
 - Keep this `ASSET_PROPOSAL` lane separate from Sukatto's `PPP_PFI` lane.
 
