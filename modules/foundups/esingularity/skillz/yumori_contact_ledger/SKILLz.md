@@ -3,6 +3,7 @@ name: yumori_contact_ledger
 description: Ground YUMORI.me correspondence in live Gmail/CRM state, preserve routing consent, write plain committee correspondence, reconcile receipts, and promote repeated operator failures into reusable rules.
 version: 0.8.0
 communication_policy_revision: 2026-10-06
+document_audit_policy_revision: 2026-10-08
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -21,6 +22,7 @@ evals:
   - committee_signature_default
   - no_parallel_contact_database
   - moshpit_receipt_integrity
+  - recipient_document_audit_required
   - recursive_learning_promotion
   - capital_network_graph_reconciliation
 ---
@@ -73,10 +75,13 @@ For every substantive YUMORI.me correspondence task:
 4. Read the complete relevant thread and every current draft for the same recipient/topic scope.
 5. Reconcile the latest real state against Email Log / Action Queue / Correspondence Routing / relevant Moshpit receipts.
 6. Build the **Correspondence State Capsule** below. No substantive recipient-finalized draft may be created or materially updated before the capsule resolves.
-7. Draft or act only within the capsule's current authorization and next-allowed-action state.
-8. Verify provider state after mutation.
-9. Reconcile the canonical records.
-10. If the run exposed a meaningful error, near-miss, stale assumption, duplicate, coverage failure, or reusable improvement, update the operating rule and 0102 learning log.
+7. For a proposal, PDF, form, briefing, presentation or substantive linked document, load
+   `../recipient_document_audit/SKILLz.md` and audit the whole package before finalization.
+   Preserve review-only instructions; an audit PASS is not send authorization.
+8. Draft or act only within the capsule's current authorization and next-allowed-action state.
+9. Verify provider state after mutation.
+10. Reconcile the canonical records.
+11. If the run exposed a meaningful error, near-miss, stale assumption, duplicate, coverage failure, or reusable improvement, update the operating rule and 0102 learning log.
 
 Do not replace these reads with memory.
 
@@ -481,6 +486,9 @@ then:
 Routine successful runs do not create learning entries.
 
 ## Dependencies
+
+- `recipient_document_audit` for audience fit, total reading burden, exact PDF/export
+  visual review, internal-artifact removal and review-only release control.
 
 - `reddog_correspondence_state` for provider-delta continuity, stable ask IDs, watermarks and private runtime persistence.
 - `yumori_moshpit` for campaign-vs-agent logging.

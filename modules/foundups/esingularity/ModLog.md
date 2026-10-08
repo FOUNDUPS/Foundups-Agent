@@ -1,3 +1,11 @@
+## 2026-10-08 — Recipient document audit before correspondence release
+
+- Added a subordinate audience/document audit to the existing correspondence and City procedure owners: whole-package reading burden, purpose-first compression, first-use terminology, exact export/page/hash binding, all-page rendering and hidden-artifact checks.
+- Preserve official forms, required content, recipient supplement refusals, review-only instructions and existing send controls. A skill rule is not a mechanical sender-boundary fix.
+- Validation: independent forward review handled five synthetic cases (oversized package, refusal/review-only, official-form exception, missing glyphs, mutable document); clarified release-only progression and immediate revision recheck. Existing operational-skill contract passes.
+- Generalized the observed failure: internal technical evidence became required reading for a procedural recipient. Private correspondence and identifiers remain in Gmail/Drive logs, not Git.
+- Retrieval used the documented lexical module bundle (semantic freshness UNKNOWN); direct owner reads resolved the irrelevant protocol hits. Bootstrap used the documented torch-free gate fallback; detector witness absent. No stakeholder send or sender-boundary deployment in this change.
+
 ## 2026-10-06 — Canonical LinkedIn page concatenated into eSingularity.ai
 
 - Elevated the current public FoundUp identity to **eSingularity.ai** in the FoundUp/module metadata.
