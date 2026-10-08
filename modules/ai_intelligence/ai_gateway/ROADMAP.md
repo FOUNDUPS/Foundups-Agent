@@ -8,6 +8,29 @@
 
 ## Dynamic RedDog Model Evidence
 
+### Layered worker qualification — 2026-10-08
+
+- [x] Execute public catalog discovery:368 accepted/99 rejected records. Candidate
+  evidence only; no model selection, license validation or inference admission.
+- [x] Verify existing panel dataflow using an injected-caller execution: prompts
+  are prepared from the original task; prior output is not passed onward.
+- [x] Run one bounded local Qwen source audit against an independently reviewed
+  frozen oracle: rejected one false test-coverage claim;3/4 facts correct,24.438s,
+  no retry or paid inference; model loaded/unloaded. No general quality claim.
+- [ ] Preserve available SDK usage/finish metadata through the existing local
+  compatibility adapter; validate unknown semantics without inference calls.
+- [ ] Qualify metered, equal-budget single vs two-layer artifact handoff using
+  existing runner/evaluator seams; rejected layers must not become inputs. Reuse
+  RedDog Fusion's existing text handoff where appropriate; its critic quorum is
+  not an independently verified code-artifact gate.
+- [ ] Reconcile the HALTED configured-campaign gates below with later source
+  changes before a pinned paid challenger. Catalog refresh is not execution.
+- [ ] Demonstrate independently verified benefit on a later invocation before
+  retaining a routing/workflow improvement or calling it RSI.
+
+Canonical sequencing and evidence: root ROADMAP and
+`docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08`.
+
 - [x] Strict positive integer use-time clock;55 connected offline tests pass.
   This does not satisfy the production trust-configuration item below.
 

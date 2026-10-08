@@ -1,3 +1,102 @@
+## Layered-worker qualification — 2026-10-08
+
+Source `0bcae38f3`, WSP00/15/48/50/77/97/99. Reuse existing owners; this is
+planning plus supervised diagnostic evidence, not a runtime grant. Architect
+owns task boundaries and adjudication; local/routed models supply bounded work.
+OpenClaw/Hermes are agent runtimes; OpenRouter supplies model discovery/routing.
+
+### Observed, not inferred
+
+- Existing `model_autoresearch_configured_gateway_runner._prepare_run` prepares
+  every role from the same source prompt. `_execute_run` invokes those prepared
+  calls without forwarding prior output. An injected-caller execution confirmed
+  two calls, original prompt in both and no first-result marker in the second.
+  This is a panel, not the proposed accepted-artifact construction chain.
+- Separate RedDog Fusion already forwards lead text to critics and combines
+  lead/critic results for synthesis (`scripts/advisory_model_once.py` and
+  `reddog_advisory_bridge_support.py`). Reuse this owner before adding text
+  handoffs. Critic quorum is not independent execution verification of code.
+  The advisory `openrouter_single` path is not the halted campaign runner; its
+  HTTP retries and unbounded `response.read()` are not a qualified bounded
+  benchmark transport. Do not generalize one lane's halt to every provider use.
+- Independent source review froze a four-boolean audit oracle. One supervised
+  local `qwen-coder-7b` call returned strict JSON with three correct facts and one
+  false claim that the panel test proves forwarding. Result REJECTED;0/1 accepted,
+  no repair/retry,24.438s including lifecycle, load/unload confirmed,0 paid calls.
+  SDK adapter returned no usage/finish fields: token count is unknown, not zero.
+  Worker had source excerpts only, no tools or repository write access. This was
+  read-only evaluation, not an OS sandbox or autonomous WRE job.
+- Fresh explicit public catalog request returned HTTP200:368 accepted,99
+  `record_invalid` rejections,778366 response bytes. Rejection causes were not
+  individually diagnosed. Snapshot is candidate metadata, not provider admission,
+  model quality, license verification or agent-framework update approval.
+- The prototype Qwen roadmap-auditor skill still says `needs_validation` and
+  `evals: []`; checkbox matching cannot certify runtime completion. Its broad
+  scan/percentage recipe was not used as an evaluator.
+- Configured gateway campaign documentation still declares HALTED. Some later
+  code/docs describe exclusive output claims, so reconcile each gate against
+  current source and tests rather than assuming every historical defect persists.
+  No paid inference, production promotion or new scheduler was enabled.
+
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-layered-workers-20261008/` contains
+source/prompt/oracle hashes, raw local result, lifecycle/evaluation, panel probe,
+and provider attempt/candidate receipts. Initial ad-hoc probe had an indentation
+error before execution; corrected probe above completed. Holo owner initially
+rejected stale authority; the first maintenance invocation lacked dependencies.
+Qualified existing WRE maintenance then COMPLETED and stopped its two owned
+runtimes. Subsequent query was CURRENT/no-gap. Retrieval ranked discovery ahead
+of the runner, exposed the relevant advisory bridge and included unrelated browser
+routing noise; must-include module docs/source supplied missing coverage. Do not
+treat search ranking as WSP15 ranking. These failures remain recorded; no query-side
+reindex or guard bypass.
+
+### Next bounded experiment, not a second orchestrator
+
+1. First repair the observed measurement seam: existing
+   `shared_utilities/local_llm_backends.py` LM Studio chat adapter projects the
+   SDK response to content only, discarding usage and finish metadata. Use injected
+   SDK fixtures to preserve available measured counts and missing/invalid values
+   accurately; do not infer counts from text length. No inference is needed for
+   this prerequisite. Then freeze a small internal-code task set and separate development/held-out cases
+   under the existing benchmark owner. Include a negative control where plausible
+   test names do not prove behavior. Give workers public acceptance conditions;
+   keep final held-out checks and promotion criteria outside their writable scope.
+2. Compare A: one worker, B: two fresh worker contexts with a verified artifact
+   handoff. B is dependency-ordered, not simultaneous same-file writers. Initially
+   use the installed local model sequentially on this PC. Never silently replace
+   a failed first layer with architect-authored work and count it as autonomous.
+3. Use the same task/context availability and aggregate caps per arm: proposed
+   local pilot at most4096 generated tokens,16384 input tokens,300s,0 retries,
+   0 paid inference. A gets one call; B splits its output/time budget across two.
+   These are proposed experiment limits, not measured capacity or native grants.
+   Resolve authoritative usage/context fit first; record setup and verifier costs
+   separately. If the adapter cannot meter a required cap, stop before claiming
+   a budget-matched comparison. The one-call audit above does not meet this gate.
+4. Handoff only a source-bound accepted patch/artifact and concise verified
+   receipt. Rejected, crashed, truncated, timed-out or unverified layers terminate
+   that arm; retain its denominator. Fresh context alone is not independent review.
+   Reuse isolated worktrees and existing scope/test owners for actual code effects.
+5. C: one exact pinned OpenRouter challenger on the same held-out tasks only after
+   configured execution admission, endpoint privacy/license checks, authoritative
+   usage and numeric total spend reservation are satisfied. No automatic fallback
+   or newest-model default. Reconcile existing catalog/transport/runtime-identity
+   gates first; no live C-arm budget or admission has been created here.
+6. Measure accepted tasks/attempted tasks, semantic errors, false acceptance,
+   regression failures, scope violations, retries, wall time, measured input/output
+   tokens and spend, architect interventions and useful accepted change per cost.
+   Separate arm results and unmatched budgets. One small task cannot establish
+   general superiority. Keep an unchanged control and evaluate later unseen work.
+7. Retain a workflow/model change only after independent verification and benefit
+   in a subsequent invocation. Then extend to AmIBot/Mind Horizon after current
+   ownership/registry checks; preserve active eSingularity/YUMORI/AutoPost lanes.
+
+WSP15 re-observation: native retained RSI18/P0 remains owner/admission-blocked;
+configured routed-worker gate reconciliation15/P1 (C4/I4/D3/Impact4) requires an
+exact gate audit; bounded local audit/evaluator qualification14/P1 is executable.
+Default-off catalog schedule activation10/P2 (C2/I3/D2/Impact3) follows configured
+runtime ownership. Use the existing idle daily adapter; discovery alone must not
+change champions or grant execution. No new module, skill or report family needed.
+
 ## Startup custody lifetime qualification — 2026-10-05
 
 Source4241b10; existing WSP71/97 owners, no replacement orchestrator or vault.

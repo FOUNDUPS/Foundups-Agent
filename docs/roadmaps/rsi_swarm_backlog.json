@@ -1880,10 +1880,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.internal_audit_status_20261007",
-    "base_commit": "453f6c3570f980a7c30364ca3727084754ff9f55",
-    "selected_action": "Preserve measured internal-audit coverage in existing research reports",
-    "status": "IMPLEMENTED_NOT_VALIDATED",
+    "observation_path": "current_observation.layered_worker_qualification_20261008",
+    "base_commit": "0bcae38f3e701d9c13be6cfc749bbb27da7ffe40",
+    "selected_action": "Preserve local adapter usage and finish metadata before matched worker experiments",
+    "status": "QUALIFICATION_FAILED_NOT_NATIVE_RSI",
     "wsp15": {
       "complexity": 2,
       "importance": 4,
@@ -1893,9 +1893,58 @@
       "priority": "P1"
     },
     "dispatchable": false,
-    "next_action": "Close source publication, resolve one current finding to actual module scope, then a bounded existing local-worker/evaluator trial. Read-only audit readiness does not require new production enrollment; autonomous effects still require admission."
+    "next_action": "Repair the observed LM Studio compatibility projection with injected SDK fixtures; then freeze a metered single-versus-two-layer experiment. Reuse existing Fusion handoff. Reconcile configured OpenRouter gates separately from the advisory route; never forward rejected findings."
   },
   "current_observation": {
+    "layered_worker_qualification_20261008": {
+      "base_commit": "0bcae38f3e701d9c13be6cfc749bbb27da7ffe40",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-layered-workers-20261008",
+      "panel_dataflow": {
+        "synthetic_calls": 2,
+        "prior_output_forwarded": false,
+        "real_model_calls": 0
+      },
+      "local_audit": {
+        "model": "qwen-coder-7b",
+        "attempted": 1,
+        "accepted": 0,
+        "facts_correct": 3,
+        "facts_total": 4,
+        "failure": "panel_test_proves_forwarding falsely true",
+        "seconds": 24.438,
+        "load_confirmed": true,
+        "unload_confirmed": true,
+        "paid_provider_calls": 0,
+        "token_usage": null,
+        "architect_cost": null,
+        "independent_source_oracle_review": true,
+        "independent_model_execution": false,
+        "retries": 0
+      },
+      "catalog": {
+        "outcome": "COMPLETED",
+        "http_status": 200,
+        "accepted_records": 368,
+        "rejected_records": 99,
+        "rejection_counts": {
+          "record_invalid": 99
+        },
+        "response_bytes": 778366,
+        "candidate_only": true
+      },
+      "configured_campaign": "HALTED declaration retained pending source/gate reconciliation; no remote inference attempted",
+      "layered_comparison_executed": false,
+      "native_rsi_complete": false,
+      "next_packet": "docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08"
+    },
     "internal_audit_status_20261007": {
       "base": "453f6c3570f980a7c30364ca3727084754ff9f55",
       "wsp15": {

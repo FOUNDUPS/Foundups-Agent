@@ -12,7 +12,38 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — measured internal audits (2026-10-07):**
+**Current selection — qualify layered workers before scaling (2026-10-08):**
+WSP15 14/P1 (C2/I4/D4/Impact4), source `0bcae38f3`. Reuse the AI Gateway
+benchmark, exact local lifecycle, WRE tickets and independent evaluator. Existing
+panels make ordered calls from the original prompt; they do not forward accepted
+work between layers. A production-runner probe with an injected caller confirmed
+that boundary. One real Qwen-Coder7B read-only audit got three of four facts right
+but falsely said the panel test proves forwarding: rejected, no retry,24.438s,
+load/unload confirmed, zero paid inference calls; token usage unavailable.
+Do not build a chain on an unverified model assertion. This is qualification,
+not a layered-worker comparison, native admission or retained RSI gain.
+
+Public OpenRouter discovery completed:368 accepted records/99 rejected; those
+are candidates, not measured coding capability or open-source license approval.
+Configured campaign execution remains declared HALTED; reconcile the current
+implementation with its outstanding gates before a paid comparison. Daily
+catalog scheduling exists default-off, not demonstrated resident operation.
+RedDog Fusion already forwards lead output to critics and synthesis; reuse this
+text-handoff owner where appropriate. It does not establish independently accepted
+code layers. Its advisory single-call route is separate from the halted campaign;
+neither its retries nor unbounded response read qualifies the proposed experiment.
+Next concrete repair: preserve actual usage/finish metadata in the existing
+LM Studio compatibility adapter, which currently returns only content. Validate
+with injected SDK responses before another inference call; unknown stays unknown.
+The [bounded experiment contract](docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08)
+defines single-worker, gated-layer and routed-worker arms plus measurable outcomes.
+
+PR2101 merged at `0bcae38f3e701d9c13be6cfc749bbb27da7ffe40`; all changed paths
+match reviewed head038307295. Other owners' intervening commits explain the
+different whole-tree digest. Main CI37738302526 and CodeQL37738302661 passed.
+The internal-audit reporting source layer below is closed; native RSI remains open.
+
+**Historical selection — measured internal audits (2026-10-07):**
 PR2100 merged/main-verified at453f6c357; CI37559426252 and CodeQL37559426685
 passed, reviewed/main trees equal, owned branch retired with recovery bundle.
 Internal read-only audits do not require new production signer enrollment.
@@ -25,7 +56,7 @@ scope. No worker inference, paid provider call or execution grant was requested.
 existing research report. Six baseline failures and one independently identified
 history-overflow failure reproduced; connected final140pass. Live report persistence
 preserves the scan snapshot separately from20historical signatures and3ranked
-candidates. Publication pending; source/review evidence is not native RSI.
+candidates. Publication closed by PR2101 above; source/review evidence is not native RSI.
 Next: resolve one current finding to its actual module and bounded repair scope,
 then qualify one existing local worker and independent evaluator. Production
 signer enrollment remains separate from read-only audit readiness. No claim of
