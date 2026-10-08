@@ -2,6 +2,7 @@
 name: fukui_city_procedure
 description: Verify and execute Fukui City / Fukui City Council procedures for YUMORI and Sukatto Land without relearning or guessing forms, routes, deadlines, or procurement state.
 version: 0.2.0
+document_audit_policy_revision: 2026-10-08
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -15,6 +16,7 @@ evals:
   - current_primary_source_required
   - official_form_binary_fidelity
   - independent_procedure_lane_classification
+  - recipient_document_audit_required
   - recipient_preflight_required_for_correspondence
   - budget_not_contract
   - acknowledgment_not_statutory_filing
@@ -200,6 +202,16 @@ milestone, not from the budget date alone.
   then clear only the projection blocker and verify both source and projection.
 - A projection row must never reuse a Contact ID that belongs to a different
   canonical Contacts identity.
+
+## Recipient-facing documents
+
+Before finalizing a proposal, PDF, official form or linked document package, run
+`../recipient_document_audit/SKILLz.md`. Default to a one-page decision brief for
+unsolicited explanations; preserve every official-form requirement. Audit linked
+dossiers and quoted history as well as attachments. Do not treat a request to
+circulate an original petition as permission to add a new technical package.
+A recipient refusal of supplements means no further unsolicited supplements;
+keep revisions for review unless that restriction changes.
 
 ## Routing and outbound correspondence dependency
 
