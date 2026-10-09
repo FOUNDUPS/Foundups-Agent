@@ -11,7 +11,7 @@
   document.documentElement.classList.add('js');
   var descriptions = {
     ja: '計算基盤は誰のものか。誰が使い、利用料を払うのか。Foundups Japan ComputeのAI Koban構想を、所有・需要・価格・投資採算から検討する投資家向け事業概要。',
-    en: 'Who owns the compute? Review the AI Koban investment thesis: ownership, paying customers, affordability and transparent scenario economics. feasibility-stage information.'
+    en: 'Who owns the compute? Review the AI Koban investment thesis: ownership, paying customers, affordability and transparent economics at feasibility stage.'
   };
   function setLanguage(language, updateUrl) {
     var lang = language === 'en' ? 'en' : 'ja';
