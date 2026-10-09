@@ -74,11 +74,11 @@ test('Unique ids and valid local section links', () => {
   for (const match of html.matchAll(/href="#([^"]+)"/g)) assert.ok(ids.includes(match[1]), match[1]);
   assert.equal((html.match(/<h1\b/g) || []).length, 1);
 });
-test('Separate partnership route; no investment or authentication form', () => {
+test('Separate investor enquiry route; no investment or authentication form', () => {
   assert.match(html, /mailto:info@foundups\.com\?subject=/);
   assert.doesNotMatch(html, /<form\b|<iframe\b|clerk\.browser|firebase-app\.js/);
   assert.match(html, /No payback period or yield is offered/);
-  assert.match(html, /Planned, not deployed/);
+  assert.match(html, /planned, not deployed/i);
 });
 test('Existing Innovate destination and qualified national figure', () => {
   assert.match(html, /href="\/innovate\.html"/);
@@ -92,6 +92,35 @@ test('Existing hosting owner and FoundUp routes are preserved', () => {
   assert.equal(config.hosting.public, 'public');
   assert.equal(config.hosting.rewrites.find(route => route.source === '/f/**').destination, '/f/index.html');
   assert.equal(config.hosting.rewrites.find(route => route.source === '**').destination, '/innovate.html');
+});
+test('Investor questions and immediate readable brief replace vague copy', () => {
+  assert.match(html, /Who owns<br>the compute\?/);
+  assert.match(html, /Who uses—and pays for—it\?/);
+  assert.match(html, /Is compute affordable\?/);
+  assert.match(html, /href="#investment-brief"/);
+  assert.match(html, /Read the investment brief/);
+  assert.match(html, /id="investment-brief"/);
+  assert.doesNotMatch(html, /Japan-wide possibility|Discuss a partnership/);
+});
+test('Scope, ownership and negative economics cannot disappear', () => {
+  assert.match(html, /800-site case/);
+  assert.match(html, /approximately 41%/);
+  assert.match(html, /Revenue is not profit or investor distributions/);
+  assert.match(html, /−64\.8/);
+  assert.match(html, /base case also has a shortfall that year/);
+  assert.match(html, /Investor IRR and payback are not established/);
+  assert.match(html, /Proposed site SPVs/);
+  assert.match(html, /not customers' data/);
+});
+test('Displayed scale arithmetic matches the cited reference inputs', () => {
+  const gpus = Math.ceil(360000 / (8760 * 0.75 * 8)) * 8;
+  const facilityKw = ((gpus / 8) * 10.2 + 6) * 1.35;
+  assert.equal(gpus, 56);
+  assert.ok(Math.abs(facilityKw - 104.49) < 1e-9);
+  assert.equal(gpus * 195, 10920);
+  assert.equal(gpus * 800, 44800);
+  assert.equal(160000 * 550 * 800, 70400000000);
+  for (const value of ['10,920','44,800','104.49 kW','¥70.40bn','¥454.0bn']) assert.ok(html.includes(value), value);
 });
 const originalPath = path.join(root, 'public/innovate.html');
 if (fs.existsSync(originalPath)) {
