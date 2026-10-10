@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://foundups.com/schemas/receipt-accounting-event-v1.json",
+  "title": "ReceiptAccountingEventV1",
+  "description": "Private accounting intake contract emitted by a capture client such as AutoPost. This schema contains metadata only; receipt images and financial records must not be committed to the public repository.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "receipt_id",
+    "foundup_id",
+    "entity_id",
+    "captured_at",
+    "evidence",
+    "extraction",
+    "accounting",
+    "privacy"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "receipt-accounting-event/v1"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "foundup_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entity_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "captured_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sha256", "mime_type", "uri"],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "mime_type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uri": {
+          "type": "string",
+          "minLength": 1
+        },
+        "original_filename": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "extraction": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "document_type",
+        "transaction_date",
+        "vendor",
+        "currency",
+        "gross_minor",
+        "purpose",
+        "confidence"
+      ],
+      "properties": {
+        "document_type": {
+          "enum": ["receipt", "invoice", "credit_note", "other"]
+        },
+        "transaction_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "vendor": {
+          "type": "string",
+          "minLength": 1
+        },
+        "receipt_number": {
+          "type": ["string", "null"]
+        },
+        "currency": {
+          "type": "string",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "gross_minor": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "net_minor": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "tax_minor": {
+          "type": ["integer", "null"],
+          "minimum": 0
+        },
+        "tax_rate": {
+          "type": ["number", "null"],
+          "minimum": 0
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1
+        },
+        "pickup_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "raw_text_ref": {
+          "type": ["string", "null"]
+        }
+      }
+    },
+    "accounting": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "debit_account",
+        "credit_account",
+        "payment_source",
+        "reimbursement_status",
+        "transaction_id"
+      ],
+      "properties": {
+        "state": {
+          "enum": [
+            "CAPTURED",
+            "REVIEW_REQUIRED",
+            "APPROVED",
+            "POSTED",
+            "REVERSED"
+          ]
+        },
+        "debit_account": {
+          "type": ["string", "null"]
+        },
+        "credit_account": {
+          "type": ["string", "null"]
+        },
+        "payment_source": {
+          "type": ["string", "null"]
+        },
+        "reimbursement_status": {
+          "enum": [
+            "NOT_APPLICABLE",
+            "PENDING",
+            "REIMBURSED",
+            "WAIVED",
+            "UNKNOWN"
+          ]
+        },
+        "transaction_id": {
+          "type": ["string", "null"]
+        },
+        "approved_by": {
+          "type": ["string", "null"]
+        },
+        "approved_at": {
+          "type": ["string", "null"],
+          "format": "date-time"
+        }
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["public_repo_allowed"],
+      "properties": {
+        "public_repo_allowed": {
+          "const": false
+        },
+        "retention_class": {
+          "enum": ["accounting_evidence", "temporary_capture"]
+        }
+      }
+    }
+  }
+}
