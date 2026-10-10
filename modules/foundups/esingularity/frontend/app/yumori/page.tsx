@@ -4,6 +4,7 @@ import CampaignTicker from '../../components/CampaignTicker';
 const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScSKFyzCym8NCarvNIa5cT9c2Pe8C-cY2AbC4zLgsDOKspYKA/viewform';
 const JHR_URL = '/reports/jhr';
 const ESINGULARITY_URL = 'https://esingularity.ai/';
+const MONTHLY_MEET_URL = 'https://meet.google.com/twb-ihey-bhu';
 const INZAI_IMAGE = 'https://www.re-port.net/picture_l/report/0000074457_09.png';
 
 export const metadata: Metadata = {
@@ -37,6 +38,18 @@ export default function YumoriPage() {
       <p style={body}>9月25日の採決は終了しました。旧すかっとランド九頭竜について、設立準備委員会は解体工事に進む前のPPP/PFIによる解体案と再利用案の比較検証を求めています。<a href="/vote-no" style={link}>現在の要請と公開記録を見る →</a></p>
       <div style={{marginTop:30}}><Join /></div>
       <p style={{marginTop:18, opacity:.65}}>準備委員会の最初の目標：1,000人。1,000人に達した段階で、全国運動を支える正式な組織化を検討します。</p>
+    </section>
+
+    <section id="monthly-meeting" style={{...panel, background:'#111511', color:'#f4f1e8', borderTop:'1px solid rgba(244,241,232,.18)', borderBottom:'1px solid rgba(244,241,232,.18)'}}>
+      <p style={{fontWeight:850,letterSpacing:'.15em'}}>YUMORI MEMBER MEETING / 月例メンバーミーティング</p>
+      <h2 style={title}>毎月第2火曜日、<br/>オンラインで集まります。</h2>
+      <p style={body}>YUMORI.me設立準備委員会の定例会を、毎月第2火曜日 19:00〜20:00（日本時間）に開催します。初回は<strong>2026年10月13日（火）</strong>です。Google Meetからオンライン参加できます。</p>
+      <p style={body}>初回は、委員会印章、主たる事務所・郵送先、郵便私書箱、委員会名義銀行口座、規約・会員名簿・活動実績・収支報告、三拠点YUMORI / eSingularity / AI Kobanの進捗を確認します。主たる事務所と銀行口座は準備中で、まだ完了扱いではありません。</p>
+      <div style={{display:'flex',gap:14,flexWrap:'wrap',marginTop:28}}>
+        <a href={MONTHLY_MEET_URL} target="_blank" rel="noreferrer" style={join}>Google Meetで参加 ↗</a>
+        <a href={FORM_URL} target="_blank" rel="noreferrer" style={{...join,background:'transparent',color:'#f4f1e8',border:'1px solid rgba(244,241,232,.45)'}}>準備委員会に参加する ↗</a>
+      </div>
+      <p style={{marginTop:18,opacity:.65}}>定例：毎月第2火曜日 19:00〜20:00 JST / 次回：2026年10月13日</p>
     </section>
 
     <section style={{...panel, background:'#e9e3d6', color:'#111511'}}>

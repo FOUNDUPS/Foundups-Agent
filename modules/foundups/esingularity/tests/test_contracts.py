@@ -204,6 +204,16 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
 
 
 
+def test_yumori_monthly_member_meeting_notice_is_public() -> None:
+    page = read("app/yumori/page.tsx")
+    assert "毎月第2火曜日" in page
+    assert "19:00〜20:00" in page
+    assert "2026年10月13日（火）" in page
+    assert "https://meet.google.com/twb-ihey-bhu" in page
+    assert 'id="monthly-meeting"' in page
+    assert "主たる事務所と銀行口座は準備中" in page
+
+
 def test_sites_configuration_and_primary_routes_are_present() -> None:
     hosting = load_json(FRONTEND_ROOT / ".openai" / "hosting.json")
     package = load_json(FRONTEND_ROOT / "package.json")
