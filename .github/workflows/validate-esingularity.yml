@@ -42,7 +42,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22.13.0'
+          # Match the runtime used to qualify SQLite numbered bindings and the build.
+          node-version: '24.19.0'
           cache: npm
           cache-dependency-path: modules/foundups/esingularity/frontend/package-lock.json
 
