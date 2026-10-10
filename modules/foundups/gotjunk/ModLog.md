@@ -1,3 +1,20 @@
+## Security authorization boundaries — 2026-10-10
+
+WSP 50/77/97: inspected exact-source rules and clients using lexical retrieval;
+semantic HoloIndex freshness is not claimed in this detached review runtime.
+- Bound Storage writes to Firebase UID; retained read access to existing assets.
+- Canonicalized Firebase rules; made public discussion history append-only with
+  author binding and creator-only lifecycle changes, including concurrent sync.
+- Restricted votes/reservations to caller identity and server-time bounds.
+- Added Firebase bearer verification, bounded write admission/body parsing and
+  explicit CORS for the separate Liberty API; configuration absence fails closed.
+- Removed committed Cesium demo token; explicit public browser config required.
+- Validation: 9/9 real Firestore/Storage emulator scenarios passed, including
+  production TypeScript concurrent sync; 7/7 offline API admission tests passed.
+  Four changed TS/TSX sources also passed syntax transpilation; no full UI build
+  or deployed-environment verification claimed.
+- No production deployment, credential rotation or edge/global quota proof claimed.
+
 ## Iframe Embed Unblock - Shell Compatibility Fix (2026-04-12)
 
 **Worker**: BV
@@ -1666,3 +1683,13 @@ const getButtonStyle = (isActive: boolean) => {
 **Next Steps**: See ROADMAP.md for Prototype phase features
 
 
+
+## Authorization release gate — 2026-10-10
+
+- Added credential-free Firestore/Storage emulator checks for PR/main/manual runs.
+- Main-only serialized deployment uses existing GCP ADC and verified Firebase CLI
+  14.27.0 to publish rules to the source-confirmed project before Cloud Build.
+- Cloud Build uploads only a tracked-source archive, excluding runner ADC files.
+- IAM or test failures block rollout; indexes and project configuration are not
+  deployed. Rule tightening is not automatically rolled back if frontend build fails.
+- Workflow/source verification only; no Firebase deployment is claimed here.

@@ -356,3 +356,14 @@ curl -sI https://gotjunk-56566376153.us-west1.run.app/ | grep -i content-securit
 **Last Synced**: 2026-04-12
 **Cloud Run URL**: https://gotjunk-56566376153.us-west1.run.app/
 **Shell Embed Status**: Dockerfile fix in place; redeploy required for entry_url activation
+
+## Security admission update — 2026-10-10
+
+Liberty Alert POST routes require an actual Firebase ID token in
+`Authorization: Bearer …`; missing identity configuration fails closed (503),
+missing/invalid token returns 401, exhausted admission returns 429/503, and a
+body larger than 1 MiB returns 413. See SECURITY.md for project/origin settings,
+replica/edge limits, and emulator validation. Public reads remain public.
+Cloud messages now append under the authenticated author UID; thread lifecycle
+changes require the creator. Storage uploads use UID paths, and votes/reservations
+use dedicated transactions rather than unrestricted whole-document replacement.

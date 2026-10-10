@@ -1,3 +1,16 @@
+## 2026-10-10 — Scanner coverage failure regressions
+
+- Confirmed failed exits/payloads never become successful zero-finding scans;
+  secret/config findings retain type/location and secret values stay out of reports.
+- Confirmed secret gates survive scanner→WRE→real policy, partial findings remain
+  visible, failed CLI outcomes return 2, controller status persists partial/error,
+  and dry-run cannot execute on a live-capable controller.
+- Confirmed source and modern-lockfile edits propose SAST/SCA scans.
+- 131 passed, zero skipped across scanner, executor, trigger, controller and stack
+  E2E suites (2.45s); policy suite separately 29 passed (0.35s). The AI Overseer
+  conftest marks unrelated tests skipped when combined; separate runs avoid that
+  collection behavior without disabling its policy.
+
 ## Measured-zero fidelity regression — P15
 
 Nine frozen cases in existing `test_pattern_memory.py` cover overall/recent/

@@ -40,7 +40,7 @@ SEC3 (this skill) → orchestration wrapper
 
 | Tool | Type | Description |
 |------|------|-------------|
-| snyk | SCA/SAST | Dependency and code scanning |
+| snyk | SCA | Dependency scanning (`snyk test`) |
 | trivy | SCA | Container and filesystem scanning |
 | semgrep | SAST | Static analysis with patterns |
 | all | Aggregate | Run all available tools |
@@ -62,7 +62,7 @@ SEC3 (this skill) → orchestration wrapper
   "scan_tool": "snyk",
   "target": ".",
   "tool_available": true,
-  "scan_status": "completed|tool_unavailable|error",
+  "scan_status": "completed|partial|tool_unavailable|error",
   "findings": [...],
   "max_severity": "critical|high|medium|low|info",
   "total_findings": 5,
@@ -113,3 +113,12 @@ python -m modules.infrastructure.wre_core.skillz.security_scan.executor trivy --
 - Auto-remediation
 - Qwen/Gemma fix generation
 - CLI tool installation
+
+## Coverage failures and CLI exit codes (2026-10-10)
+
+Exit 0 means the requested scan completed without a policy gate; exit 1 means
+completed with an 012 gate; exit 2 means incomplete/failed/unavailable coverage.
+`all` is partial when only some tools complete and error when all attempts fail
+without findings. Valid partial findings are retained and routed, including
+secret-specific gates and file/line locations. `repair_scan_coverage` requests
+scanner repair rather than treating zero findings as a clean audit.

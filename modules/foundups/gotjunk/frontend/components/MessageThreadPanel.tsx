@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { messageStore } from '../src/message/messageStore';
 import { MessageContextRef, Message, MessageThread } from '../src/message/types';
 import { subscribeToThread, isMessageSyncConfigured } from '../src/message/messageSync';
+import { getCurrentUserId } from '../services/firebaseAuth';
 import { Z_LAYERS } from '../constants/zLayers';
 
 interface MessageThreadPanelProps {
@@ -142,9 +143,11 @@ export const MessageThreadPanel: React.FC<MessageThreadPanelProps> = ({ context,
     if (!input.trim()) return;
 
     try {
+      const authorId = getCurrentUserId();
+      if (!authorId) throw new Error('Sign in before sending a message.');
       messageStore.addMessage({
         context,
-        authorId: 'local-user',
+        authorId,
         authorDisplayName: 'You',
         text: input.trim(),
       });

@@ -1,3 +1,11 @@
+## 2026-10-10 — Security audit remediation
+
+- Bound interest request bodies before JSON parsing, retained field/consent validation, rejected cross-origin requests, added transactional D1 client/global quotas and daily email deduplication. No existing submissions deleted.
+- Removed unpublished portraits and unused original group imagery from the static public root while preserving approved published profile images.
+- Corrected pre-existing PWA purpose typing and duplicate translation keys, retaining last-key-wins displayed copy, so type verification can run.
+- Added real SQLite admission tests and streamed request tests, including a midnight rotation regression found in independent review. Eight security tests, 18 domain-routing tests, and 82 existing module tests passed before integration. Deployment receipt is recorded separately; this entry alone is not proof of publication.
+- WSP00 documented torch-free bootstrap; source-bound lexical retrieval UNKNOWN freshness/index gap, direct file inspection at main b4f1a97 and Sites 90e539f. Manual review because no available verified production security overseer covers this repository. WSP22/50/77/97.
+
 ## 2026-10-08 — Three-site scope and incremental recipient audit
 
 - Retain the three-site program while making the two schools the current feasibility focus; keep Sukatto conditional on public decisions, lawful procedures and independent feasibility. School investigation does not depend on Sukatto participation.

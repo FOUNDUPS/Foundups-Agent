@@ -1,21 +1,98 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // GotJunk items
+    function signedIn() { return request.auth != null; }
+    function owner() { return signedIn() && resource.data.ownerUid == request.auth.uid; }
+    function validItem(data) {
+      return data.keys().hasAll(['id', 'ownerUid', 'status', 'createdAt', 'updatedAt'])
+        && data.ownerUid is string
+        && data.status in ['draft', 'listed', 'browsing', 'in_cart', 'skipped', 'purchased']
+        && data.createdAt is timestamp && data.updatedAt is timestamp;
+    }
+    function validVote() {
+      let before = resource.data.get('moderationVotes', {'keep': [], 'remove': []});
+      let after = request.resource.data.moderationVotes;
+      let uid = request.auth.uid;
+      let beforeKeep = before.get('keep', []);
+      let beforeRemove = before.get('remove', []);
+      let afterKeep = after.get('keep', []);
+      let afterRemove = after.get('remove', []);
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['moderationVotes', 'updatedAt'])
+        && after.keys().hasOnly(['keep', 'remove'])
+        && beforeKeep is list && beforeRemove is list
+        && afterKeep is list && afterRemove is list
+        && !(uid in beforeKeep) && !(uid in beforeRemove)
+        && afterKeep.size() + afterRemove.size() <= 1000
+        && ((afterKeep == beforeKeep.concat([uid]) && afterRemove == beforeRemove)
+          || (afterRemove == beforeRemove.concat([uid]) && afterKeep == beforeKeep));
+    }
+    function validReservation() {
+      let before = resource.data.get('cartReservation', null);
+      let after = request.resource.data.get('cartReservation', null);
+      let now = request.time.toMillis();
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['cartReservation', 'updatedAt'])
+        && (before == null || before.reservedBy == request.auth.uid || before.expiresAt <= now)
+        && (after == null || (after is map
+          && after.keys().hasOnly(['reservedBy', 'reservedAt', 'expiresAt'])
+          && after.reservedBy == request.auth.uid
+          && after.reservedAt is number && after.expiresAt is number
+          && after.reservedAt >= now - 60000 && after.reservedAt <= now + 10000
+          && after.expiresAt > now && after.expiresAt <= now + 300000
+          && after.expiresAt <= after.reservedAt + 300000));
+    }
     match /gotjunk_items/{itemId} {
-      allow read: if true; // Public reads (tighten if needed)
-      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.ownerUid;
+      allow read: if true;
+      allow create: if signedIn() && validItem(request.resource.data)
+        && request.resource.data.id == itemId
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.get('cartReservation', null) == null
+        && !request.resource.data.keys().hasAny(['moderationVotes', 'moderationStatus', 'reportCount', 'reportedBy']);
+      allow update: if signedIn() && validItem(request.resource.data)
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.id == resource.data.id
+        && request.resource.data.createdAt == resource.data.createdAt
+        && ((owner() && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+          'cartReservation', 'moderationVotes', 'moderationStatus', 'reportCount', 'reportedBy']))
+          || validVote() || validReservation());
+      allow delete: if owner();
     }
-
-    // Wave-style messaging threads
+    match /gotjunk_blobs/{blobId} {
+      allow read: if true;
+      allow write: if signedIn()
+        && exists(/databases/$(database)/documents/gotjunk_items/$(blobId))
+        && get(/databases/$(database)/documents/gotjunk_items/$(blobId)).data.ownerUid == request.auth.uid;
+    }
+    function validMessage(message) {
+      return message.keys().hasAll(['id', 'authorId', 'text', 'createdAt'])
+        && message.keys().hasOnly(['id', 'authorId', 'authorDisplayName', 'text', 'createdAt', 'parentId', 'ttlMs', 'expiresAt'])
+        && message.id is string && message.id.size() <= 128
+        && message.authorId == request.auth.uid
+        && message.text is string && message.text.size() > 0 && message.text.size() <= 4000
+        && message.createdAt is number;
+    }
+    function appendMessage() {
+      let before = resource.data.messages;
+      let after = request.resource.data.messages;
+      return resource.data.status == 'active'
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['messages', 'updatedAt'])
+        && after is list && after.size() == before.size() + 1 && after.size() <= 500
+        && validMessage(after[after.size() - 1])
+        && after == before.concat([after[after.size() - 1]]);
+    }
     match /gotjunk_messages/{threadKey} {
-      allow read: if true; // Public reads (tighten if needed)
-      allow create: if request.auth != null && request.resource.data.ownerUid == request.auth.uid;
-      // Allow any authenticated user to add messages; owner-only delete
-      allow update: if request.auth != null;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.ownerUid;
+      // These are public item discussion threads, not private messages.
+      allow read: if true;
+      allow create: if signedIn() && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.threadKey == threadKey
+        && request.resource.data.status == 'active'
+        && request.resource.data.messages is list && request.resource.data.messages.size() == 1
+        && validMessage(request.resource.data.messages[0]);
+      allow update: if signedIn() && request.resource.data.ownerUid == resource.data.ownerUid
+        && (appendMessage() || (owner()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'closedAt', 'closedReason', 'updatedAt'])
+          && request.resource.data.status in ['active', 'closed', 'locked']));
+      allow delete: if owner();
     }
+    match /{document=**} { allow read, write: if false; }
   }
 }
