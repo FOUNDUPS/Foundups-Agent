@@ -1,3 +1,10 @@
+## 2026-10-10 — Security audit remediation
+
+- Fixed fail-clean scanner/WRE behavior, blocking secret CI, GotJunk rules/API/client boundaries, eSingularity input/admission/privacy boundaries, weak public session IDs and IDE webview interpolation.
+- Seven npm lockfile audits reduced 137 dependency findings to 46 with no critical findings remaining; residual unpatched/dependency-migration and missing-source blockers are explicit.
+- Detailed source evidence and release boundaries: [security remediation](docs/security/SECURITY_AUDIT_REMEDIATION_2026_10_10.md). Local tests are not claims of live rules/IAM or daemon activation.
+- WSP00 documented fallback, lexical Holo freshness UNKNOWN; WSP22/50/77/97. No correspondence or alert-dismissal action.
+
 ## RSI proposal startup connection — 2026-10-07
 
 ## 2026-10-07 — Execute internal audits and retain scan diagnostics

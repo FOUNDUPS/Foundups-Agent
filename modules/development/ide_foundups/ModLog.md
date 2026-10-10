@@ -5,6 +5,15 @@ This log tracks all changes to the IDE FoundUps module following WSP 22 (Module 
 
 ---
 
+## Temporal Insight Rendering Security Fix (2026-10-10)
+
+- Replaced the broken nested template literal with DOM creation and `textContent`; insight labels and explanations cannot inject HTML into the extension webview.
+- Added a Node regression test with malicious HTML strings and replacement behavior: `node --test modules/development/ide_foundups/tests/test_temporal_insight_rendering.cjs`.
+- Refreshed extension dependencies, migrated deprecated `vsce` to `@vscode/vsce`, and retained CommonJS-compatible `uuid` 11.1.1. The registry audit reports zero dependency findings.
+- Validation: dependency installation and rendering regression pass. Full compilation proceeds past the repaired syntax but remains blocked by existing missing WRE/orchestrator methods, stale import, and VS Code option type errors; no extension deployment is claimed.
+
+---
+
 ## WRE Import Seam Fix (2026-05-02)
 
 ### Change Summary

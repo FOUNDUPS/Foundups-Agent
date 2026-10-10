@@ -572,3 +572,64 @@ class TestErrorHandling:
 
         assert report.scan_status == "error"
         assert "Authentication failed" in report.error_message
+
+
+@pytest.mark.parametrize("status,requires_gate,exit_code", [
+    ("tool_unavailable", False, 2), ("error", False, 2), ("partial", False, 2),
+    ("partial", True, 2), ("completed", True, 1), ("completed", False, 0),
+])
+def test_cli_distinguishes_coverage_failure_from_findings(status, requires_gate, exit_code):
+    from modules.infrastructure.wre_core.skillz.security_scan.executor import main
+    report = SecurityScanReport("test", "all", ".", True, status, requires_012=requires_gate)
+    with patch("sys.argv", ["security_scan", "all"]), patch.object(SecurityScanExecutor, "scan", return_value=report):
+        assert main() == exit_code
+
+
+def test_trivy_secret_reaches_real_policy_with_location(tmp_path):
+    from modules.infrastructure.security_scanner.src.schemas import normalize_trivy_output
+    from modules.infrastructure.security_scanner.src.security_scanner import ScanResult
+    from modules.ai_intelligence.ai_overseer.src.vulnerability_scan_policy import VulnerabilityScanPolicy
+    scanner = MockSecurityScanner(MockToolAvailability(trivy_available=True))
+    report = normalize_trivy_output({"Results": [{"Target": "src/config", "Secrets": [
+        {"RuleID": "synthetic", "Severity": "HIGH", "StartLine": 11}]}]}, "test", ".")
+    scanner.set_scan_result("trivy", ScanResult("trivy", True, True, report=report))
+    result = SecurityScanExecutor(scanner, VulnerabilityScanPolicy(), tmp_path).scan("trivy")
+    assert result.requires_012 is True
+    assert result.findings[0]["finding_type"] == "secret"
+    assert result.findings[0]["file_path"] == "src/config"
+    assert result.findings[0]["line_number"] == 11
+
+
+def test_partial_semgrep_findings_retained_and_all_error_is_not_partial(tmp_path):
+    from modules.infrastructure.security_scanner.src.schemas import normalize_semgrep_output
+    from modules.infrastructure.security_scanner.src.security_scanner import ScanResult
+    scanner = MockSecurityScanner(MockToolAvailability(semgrep_available=True))
+    report = normalize_semgrep_output({"results": [{"check_id": "rule", "path": "api.py", "start": {"line": 2},
+        "extra": {"severity": "ERROR", "message": "unsafe call"}}], "errors": [{"message": "file failed"}]}, "test", ".")
+    scanner.set_scan_result("semgrep", ScanResult("semgrep", False, True, report=report, error_message=report.error_message))
+    executor = SecurityScanExecutor(scanner, reports_dir=tmp_path)
+    result = executor.scan_all()
+    assert result.scan_status == "partial"
+    assert result.total_findings == 1
+    assert result.findings[0]["finding_type"] == "sast"
+    assert result.recommended_next_action == "repair_scan_coverage"
+    scanner.set_scan_result("semgrep", ScanResult("semgrep", False, True, error_message="failed"))
+    result = executor.scan_all()
+    assert result.scan_status == "error"
+    assert result.recommended_next_action == "repair_scan_coverage"
+
+
+def test_secret_remains_gated_when_policy_is_unavailable(tmp_path):
+    executor = SecurityScanExecutor(reports_dir=tmp_path)
+    with patch.object(executor, "_ensure_policy", return_value=False):
+        decision = executor._get_policy_decision("high", "secret")
+    assert decision["requires_012"] is True
+    assert decision["escalation"] == "gate_012"
+
+
+def test_scanner_exception_is_coverage_failure_without_exception_content(tmp_path):
+    scanner = MockSecurityScanner(MockToolAvailability(snyk_available=True))
+    scanner.scan_snyk = MagicMock(side_effect=RuntimeError("synthetic private exception"))
+    result = SecurityScanExecutor(scanner=scanner, reports_dir=tmp_path).scan("snyk")
+    assert result.scan_status == "error"
+    assert "synthetic private exception" not in result.to_json()

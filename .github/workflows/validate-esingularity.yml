@@ -53,6 +53,9 @@ jobs:
         working-directory: modules/foundups/esingularity/frontend
         run: npm ci
 
+      - name: Test signup abuse controls and private image delivery
+        run: node --experimental-strip-types --test modules/foundups/esingularity/frontend/tests/interest-security.test.mjs
+
       - name: Lint frontend
         working-directory: modules/foundups/esingularity/frontend
         run: npm run lint

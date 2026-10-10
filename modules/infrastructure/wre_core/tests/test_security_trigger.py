@@ -152,16 +152,17 @@ class TestSecurityTriggerDetector:
         assert len(report.proposals) == 0
         assert len(report.skipped_files) == 3
 
-    def test_test_files_no_proposals(self):
-        """Verify test file changes do not propose security scan."""
+    def test_executable_test_files_propose_sast(self):
+        """Executable tests are code and must not bypass source scan proposals."""
         changed = [
             "tests/test_security.py",
             "test_integration.py",
         ]
         report = self.detector.detect(changed)
 
-        assert len(report.proposals) == 0
-        assert len(report.skipped_files) == 2
+        assert len(report.proposals) == 1
+        assert report.proposals[0].scan_type == "sast"
+        assert report.skipped_files == []
 
     def test_generic_json_no_proposals(self):
         """Verify generic JSON (not package.json) does not propose scan."""
@@ -308,3 +309,12 @@ class TestSecurityPatterns:
 
         # CI/CD files
         assert "github" in patterns_str.lower() or "workflows" in patterns_str
+
+
+def test_website_sources_and_modern_lockfiles_trigger_scans():
+    detector = SecurityTriggerDetector()
+    report = detector.detect(["web/src/auth.ts", "web/src/index.tsx", "service/api.py", "pnpm-lock.yaml", "uv.lock",
+                              "docs/app.js", "latest/handler.py", "Pipfile.lock", "poetry.lock", "bun.lock"])
+    assert report.skipped_files == []
+    assert {p.scan_type for p in report.proposals} == {"sca", "sast"}
+    assert all(p.status == "proposed" for p in report.proposals)

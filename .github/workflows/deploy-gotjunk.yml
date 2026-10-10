@@ -5,6 +5,11 @@ on:
     branches: [main]
     paths:
       - 'modules/foundups/gotjunk/**'
+      - '.github/workflows/deploy-gotjunk.yml'
+  pull_request:
+    paths:
+      - 'modules/foundups/gotjunk/**'
+      - '.github/workflows/deploy-gotjunk.yml'
   workflow_dispatch:
     inputs:
       reason:
@@ -13,7 +18,41 @@ on:
         default: 'Manual trigger'
 
 jobs:
+  security-rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Setup emulator Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install isolated security test tools
+        run: |
+          npm install --prefix "$RUNNER_TEMP/gotjunk-security-tools" --ignore-scripts --no-audit --no-fund \
+            firebase-tools@14.27.0 @firebase/rules-unit-testing@4.0.1 firebase@11.10.0 typescript@5.9.3
+      - name: Verify Firestore and Storage authorization with emulators
+        run: |
+          export SECURITY_NODE_MODULES="$RUNNER_TEMP/gotjunk-security-tools/node_modules"
+          "$SECURITY_NODE_MODULES/.bin/firebase" emulators:exec \
+            --only firestore,storage --project demo-gotjunk-security \
+            --config modules/foundups/gotjunk/firebase.security-tests.json \
+            'node modules/foundups/gotjunk/tests/security_rules.mjs'
+
   deploy:
+    needs: security-rules
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    concurrency:
+      group: gotjunk-production-release
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -27,21 +66,51 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
+          create_credentials_file: true
+          export_environment_variables: true
 
       - name: Setup Cloud SDK
         uses: google-github-actions/setup-gcloud@v2
 
+      - name: Setup Node for Firebase deployment
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install verified Firebase CLI
+        run: npm install --prefix "$RUNNER_TEMP/gotjunk-firebase-deploy" --ignore-scripts --no-audit --no-fund firebase-tools@14.27.0
+
+      - name: Deploy authorization rules before frontend rollout
+        working-directory: modules/foundups/gotjunk
+        env:
+          FIREBASE_PROJECT_ID: gen-lang-client-0061781628
+        run: |
+          # Uses the existing GCP action's ADC file; never print credential contents.
+          test -n "$GOOGLE_APPLICATION_CREDENTIALS"
+          test -f "$GOOGLE_APPLICATION_CREDENTIALS"
+          node -e 'const fs=require("fs"); const expected=process.env.FIREBASE_PROJECT_ID; if(JSON.parse(fs.readFileSync(".firebaserc","utf8")).projects.default!==expected || !fs.readFileSync("frontend/services/firebaseConfig.ts","utf8").includes("projectId: " + String.fromCharCode(39) + expected + String.fromCharCode(39))) throw new Error("Firebase project binding mismatch");'
+          "$RUNNER_TEMP/gotjunk-firebase-deploy/node_modules/.bin/firebase" deploy \
+            --config firebase.json --project "$FIREBASE_PROJECT_ID" \
+            --only firestore:rules,storage --non-interactive
+
       - name: Trigger Cloud Build
         run: |
           echo "Deploying GotJunk from commit ${{ github.sha }}"
+          # Archive tracked source only: exclude auth-action ADC and runner files.
+          build_source="$(mktemp -d "$RUNNER_TEMP/gotjunk-cloudbuild.XXXXXX")"
+          git archive HEAD | tar -x -C "$build_source"
           gcloud builds submit \
             --config=modules/foundups/gotjunk/cloudbuild.yaml \
             --substitutions=COMMIT_SHA=${{ github.sha }} \
-            .
+            "$build_source"
 
       - name: Verify Deployment
         run: |
           echo "Waiting for deployment to propagate..."
           sleep 30
-          echo "Checking CSP headers..."
-          curl -sI https://gotjunk-56566376153.us-west1.run.app/ | grep -iE "content-security|x-frame" || echo "Headers check complete"
+          set -euo pipefail
+          headers=$(curl --fail --silent --show-error --retry 3 --max-time 30 \
+            --dump-header - --output /dev/null https://gotjunk-56566376153.us-west1.run.app/)
+          printf '%s\n' "$headers" | grep -iqE '^content-security-policy:.*frame-ancestors[[:space:]]'
+          printf '%s\n' "$headers" | grep -iqE '^x-content-type-options:[[:space:]]*nosniff[[:space:]]*$'
+          echo "Required CSP and nosniff headers verified"

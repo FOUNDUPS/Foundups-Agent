@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "firebase": "^12.9.0",
-    "vercel": "^32.0.0"
+    "vercel": "63.1.2"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -26,5 +26,15 @@
     "vercel"
   ],
   "author": "FoundUps",
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "@grpc/grpc-js": "1.13.6",
+    "tar": "7.5.22",
+    "ajv@8": "8.18.0",
+    "minimatch@10": "10.2.3",
+    "path-to-regexp@6": "6.3.0",
+    "path-to-regexp@8": "8.4.0",
+    "js-yaml@4": "4.3.2",
+    "smol-toml": "1.9.1"
+  }
 }

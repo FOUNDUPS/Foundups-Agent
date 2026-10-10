@@ -1375,18 +1375,9 @@ jobs:
         run: ruff check modules/ --ignore E501,F401 --exit-zero
 
   security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check for secrets
-        run: |
-          # Check for common secret patterns in tracked files
-          ! git grep -l "AIza\|sk-\|ghp_\|gho_\|AKIA" -- "*.py" "*.json" | grep -v node_modules | grep -v ".example" || echo "Warning: Possible secrets found"
-
-      - name: Verify .env not tracked
-        run: |
-          ! git ls-files | grep "^\.env$" || (echo "ERROR: .env is tracked!" && exit 1)
+    uses: ./.github/workflows/security-scan.yml
+    permissions:
+      contents: read
 
   holoindex_freshness:
     runs-on: ubuntu-latest

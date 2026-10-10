@@ -1,3 +1,17 @@
+## Security scan coverage contract (2026-10-10)
+
+The `security_scan` executor distinguishes `completed`, `partial`, `error`, and
+`tool_unavailable`. Aggregate `partial` means some evidence completed or findings
+were retained but requested coverage is incomplete; all attempted tools failing
+without findings is `error`. CLI exits: 0 complete/no gate, 1 complete/012 gate,
+2 incomplete coverage (including unavailable tools). Findings remain available
+for policy escalation even in partial reports, with type and source location.
+
+SEC9 status includes `scans_completed`, `scans_partial`, and `scans_failed`; live errors cannot
+become `completed`. Dry-run/report-only calls remain proposals and never execute.
+SEC4 proposes scans for website/application/test source and modern lockfiles;
+these changes do not enroll any scheduler or runtime.
+
 ## Measured-zero fidelity — P15 contract
 
 `PatternMemory.get_skill_fidelity_stats(skill_name, days=30) -> dict` keeps its
