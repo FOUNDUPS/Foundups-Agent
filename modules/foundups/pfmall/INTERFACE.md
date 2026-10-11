@@ -144,3 +144,20 @@ they do not fetch, render, or execute content.
 - `modules/foundups/docs/PFMALL_DATA_ISOLATION_MODEL.md`
 - `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
 - `public/member/INTERFACE.md`
+
+## GotJunk public listing discovery (first review slice, 2026-10-12)
+
+`GET /pfmall/listings/search?q=...&category=...&limit=...` is an
+**unauthenticated, public-only** read surface for `gotjunk_001`. The server
+must supply a trusted `app.state.listing_evidence_provider` that independently
+joins an item with a server-owned publication approval. No such production
+provider is installed; unconfigured or failed lookup returns **HTTP 503**.
+Cross-FoundUp and owner-scoped requests return **HTTP 403**. A configured
+provider returns only approved public `source_item_id`, `foundup_id`,
+`source_collection`, `title`, `category`, and `deep_link`; no
+media URLs, private locations or arbitrary captured descriptions.
+
+This endpoint is not the member JavaScript search feature, authenticated
+private search, an upload service, or a deployment claim. Publication approvals
+must not be imported from untrusted legacy client fields. See
+[GOTJUNK_LISTING_READ_SLICE.md](GOTJUNK_LISTING_READ_SLICE.md).
