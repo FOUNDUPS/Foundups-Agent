@@ -97,7 +97,7 @@ documentation repair.
 
 ## GotJunk listing read slice (2026-10-12)
 
-Mall now contains a separately reviewed public-only GotJunk item projection
+Mall now contains a independently reviewable public-only GotJunk item projection
 and `GET /pfmall/listings/search`. The endpoint defaults to **503** until
 an independently secured publication-evidence provider is installed server-side;
 it must not read raw legacy captures as public. `gotjunk_001` and
