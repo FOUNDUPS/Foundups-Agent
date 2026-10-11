@@ -90,6 +90,11 @@ def test_http_public_only_and_missing_provider(monkeypatch):
         assert r.status_code == 200
         assert [v["source_item_id"] for v in r.json()["results"]] == ["item-1"]
         assert r.json()["foundup_id"] == GOTJUNK_ID
+        route = client.get("/pfmall/resolve-route", params={"path": r.json()["results"][0]["deep_link"]})
+        assert route.status_code == 200
+        assert route.json()["kind"] == "foundup"
+        assert route.json()["foundup_id"] == GOTJUNK_ID
+        assert route.json()["foundup_path"] == "/listings/item-1"
         assert client.get("/pfmall/listings/search", params={"foundup_id": "getk_001"}).status_code == 403
         assert client.get("/pfmall/listings/search", params={"owner_uid": "alice"}).status_code == 403
         assert client.get("/pfmall/listings/search", params={"limit": 51}).status_code == 422
