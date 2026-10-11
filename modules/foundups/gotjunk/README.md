@@ -1,5 +1,19 @@
 # GotJUNK? FoundUp
 
+## Architecture direction — 2026-10-12
+
+GotJunk is a legacy FoundUp to be migrated onto the shared Play FoundUps /
+p.fMALL architecture alongside Shop and GetK. The Mall owns internal discovery
+and search; GotJunk retains its capture and item-management behavior. Its
+existing Mall manifest/route does not mean storage and services are shared.
+
+See [migration decision and agent handoff](PFMALL_MIGRATION_HANDOFF.md) for
+verified owners, storage gaps, staged implementation and acceptance gates.
+Migration is **not implemented**. The deployment instructions below describe
+the legacy system, not a recommendation to expand it. Do not enable legacy
+Firebase Storage just to unblock deployment before resolving shared storage
+ownership. Preserve the security fixes and assess any live legacy exposure.
+
 **Purpose**: Rapid-capture PWA to take photos/videos and organize them with AI-powered swipe interface and geo-fencing
 
 **Domain**: `modules/foundups/` (WSP 3 functional distribution)
