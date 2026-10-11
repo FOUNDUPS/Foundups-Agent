@@ -1,6 +1,22 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-10-11 - Explicit native reasoning omission after local audit trial
+
+WSP00/6/11/15/22/50/84/97. The actual installed non-reasoning Qwen Coder route
+returnedHTTP400 when the adapter forced reasoning=off. Preserve the existing
+native API and add explicitNone omission; existing defaultoff, instance checks,
+request/response bounds and storage/streaming settings remain unchanged. None
+means server default; the caller checks model capability, with no automatic retry.
+
+Regression first failed1/passed1; connected backend/lifecycle/topology-proposer
+61pass. Independent source review accepted the repair and identified quotation
+errors in model output. Real post-repair coder calls completed with lifecycle
+load/unload confirmed; both outputs still fail the frozen review contract.
+See `docs/operations/RSI_SWARM_DISPATCH.md` for source-bound measurements.
+This is a coordinator-authored reusable repair prompted by real model trials,
+not autonomous code repair, native author admission or model promotion.
+
 ## 2026-08-28 - Windows confined identity and alternate-stream proof
 
 - Corrected confined identity comparison for Windows' suffix-projected execute

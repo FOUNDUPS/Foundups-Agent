@@ -61523,3 +61523,11 @@ exact-head CI/CodeQL. Exact-main CI37486916613/CodeQL37486916968 passed. Reconci
 PR with main while preserving both the rejected local experiment and completed
 repair. Next15/P1: authenticated reviewer runtime evidence before effect permit
 issuance; native18/P0 remains blocked. No new model retries or runtime grants.
+## 2026-10-12 — Isolate local worker transport repair for review
+
+WSP00/6/11/15/22/48/50/84/97: bring the measured native reasoning-control repair
+onto fresh main without unrelated canary or runtime-upgrade changes. Reuse the
+shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
+local schema-constrained reviews produced valid JSON but insufficient quotations,
+so no worker qualification, native admission or retained RSI gain is claimed.
+See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.

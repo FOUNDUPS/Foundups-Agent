@@ -1,3 +1,59 @@
+## Local review and admission checkpoint — 2026-10-12
+
+Remote main rechecked at `4095ad9ee6042f4e9b5668bf4f6bf50c493c5964`.
+PR #2111 is OPEN/draft at `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` with
+successful reported checks; issue #1522 remains OPEN. These are current GitHub
+observations, not claims that native RSI or this new repair passed CI.
+
+The local repair from checkpoint `144bcebfe` is isolated here against main:
+explicit `reasoning=None` omits that native API field for callers selecting a
+model without the capability. Default `off`, identity checks and byte limits
+remain. No model routing, authority, skill, service or scheduler is added.
+The original regression and actual local Coder transport retest are preserved
+at `O:/RedDog-Builder-Artifacts/rsi-local-audit-20261011/`. Four completed native
+reviews were rejected; one additional request failed with HTTP 400 before repair.
+
+Fresh-main local qualification: 132 tests passed, one skipped across the seven
+documented LM Studio release suites plus manifest tests; all 15 extension
+fast-tier members passed. Independent source review found no blocking issue.
+Runtime manifest regeneration changed only the adapter member hash. Remote CI,
+merge and native author execution require separate evidence.
+
+Follow-up bounded diagnostic at source `144bcebfe`, using existing lifecycle and
+bounded loopback transport: two Qwen Coder 7B requests to `/v1/chat/completions`
+with the existing supported JSON-schema control. Original prompts/case digests
+are unchanged; these are known controls, not held-out generalization evidence.
+Both responses have valid JSON and correct verdicts. Neither provides the
+required exact relevant source quotation: accepted reviews remain 0/2.
+Schema conformance is not factual verification. Native and compatibility
+endpoints differ, so this is not a schema-only causal comparison.
+
+Measured follow-up usage: 3,846 input and 174 output tokens; request time
+4.078s + 6.125s. No retries, paid calls or provider fallback. Existing lifecycle
+records owned load/unload; inventory afterward has no residents. Compatibility
+responses are not the native signed provider receipt path. No native author,
+promotion, retained benefit, hardware-cost or coordinator-cost claim is made.
+Raw contract, prompts, responses and inventory remain at
+`O:/RedDog-Builder-Artifacts/rsi-review-contract-20261012/`.
+
+Independent admission source audit found v7/v8 supplier composition already
+present. The inspected resident roots/services lacked authoritative work
+state, principal/permission records, execution valve, signer configuration and
+run packet, signer socket and declared provider identity. This does not prove
+that enrollment exists nowhere; locate the real owner deployment inputs before
+invoking existing suppliers. Test fixtures, GitHub login or this roadmap cannot
+manufacture principal key custody or an execution grant. Fresh presence-only
+inspection on 2026-10-12 confirms all eight files absent at the resident root
+and `/etc/foundups/reddog-signer-owner.json` absent. Both gateway services are
+running but expose none of the six inspected principal/signer/provider bindings.
+No secret values were printed or service settings changed. The bounded result
+is saved as `admission-presence-current.json` in the follow-up evidence directory.
+
+Holo retrieval rejected authority/query-head mismatch: freshness UNKNOWN,
+gap=true. Exact source/adjacent contracts were the fallback; no query reindex.
+WSP00/15/48/50/84/97/99: retain frozen failures, repair demonstrated defects,
+and keep admission, verifier qualification, promotion and learning distinct.
+
 ## Startup custody lifetime qualification — 2026-10-05
 
 Source4241b10; existing WSP71/97 owners, no replacement orchestrator or vault.

@@ -1,5 +1,35 @@
 # TestModLog
 
+## 2026-10-12 - Fresh-main qualification of native reasoning omission
+
+Base `4095ad9ee6042f4e9b5668bf4f6bf50c493c5964`, branch
+`agent/rsi-native-reasoning-control-20261012`: documented seven-suite local
+LM Studio release gate plus backend manifest tests passed 132 cases, with one
+skip, in 71.77s. RedDog extension fast tier passed all 15 members in 10.502s.
+The manifest contains 1,426 files and only the adapter digest changed; both
+consumer pins match `f8ddc69d77d50e2e282ab4047d2b41f2dfd0c108996281030f3bb8a37a6f68a0`.
+Logs: `O:/RedDog-Builder-Artifacts/rsi-review-contract-20261012/exact-source-tests.txt`
+and `extension-tests.txt`. Independent source review found no blocking issue;
+remote CI and native author admission are not inferred from these local tests.
+
+## 2026-10-11 - Native optional reasoning control (historical checkpoint 144bcebfe)
+
+WSP00/6/11/22/97: old adapter rejected explicitNone (1fail/1pass reproducer).
+After repair:61pass,0skip in2.74s across local backend, exact model lifecycle
+and AI Gateway topology-proposer suites. Updated request capture asserts None
+omission versus unchangedoff, expected instance, authentication, byte bound,
+disabled storage and streaming. CI explicitly selects these suites.
+Independent review inspected source and saved results; remote CI unverified.
+Two real local Coder requests succeeded after the control repair, but their
+outputs remain rejected by the frozen content contract. Evidence at
+`O:/RedDog-Builder-Artifacts/rsi-local-audit-20261011/adapter-tests.*` and
+`qwen-coder-repair/`. No automatic promotion or autonomous repair is implied.
+
+Final integrity validation: 8 manifest tests passed in 66.22s and all 15 RedDog
+extension fast-tier members passed in 8.388s. The initial stale compatibility-pin
+failure is preserved; both pins now match the regenerated runtime manifest.
+Canonical test registry check passed without a registry change.
+
 ## 2026-08-28 - Windows Runtime Artifact Safety
 
 - Added focused coverage for executable-suffix mode projection, clean file and

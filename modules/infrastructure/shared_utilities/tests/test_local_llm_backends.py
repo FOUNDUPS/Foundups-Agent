@@ -548,10 +548,11 @@ class TestCompatibilityMethods:
         }
         assert "unauthorized_control" not in call
 
+    @pytest.mark.parametrize("reasoning", ["off", None])
     @patch(
         "modules.infrastructure.shared_utilities.local_llm_backends._open_lm_studio_request"
     )
-    def test_lm_studio_native_chat_uses_reasoning_off_and_bounded_read(self, urlopen):
+    def test_lm_studio_native_chat_uses_explicit_reasoning_and_bounded_read(self, urlopen, reasoning):
         from modules.infrastructure.shared_utilities.local_llm_backends import (
             LMStudioBackend,
         )
@@ -576,7 +577,7 @@ class TestCompatibilityMethods:
             input_text="Return JSON",
             system_prompt="JSON only",
             max_output_tokens=128,
-            reasoning="off",
+            reasoning=reasoning,
             max_response_bytes=4096,
         )
 
@@ -586,7 +587,10 @@ class TestCompatibilityMethods:
         assert request.full_url == "http://localhost:1234/api/v1/chat"
         assert request.get_header("Authorization") == "Bearer test-token"
         assert payload["model"] == "test-instance"
-        assert payload["reasoning"] == "off"
+        if reasoning is None:
+            assert "reasoning" not in payload
+        else:
+            assert payload["reasoning"] == reasoning
         assert payload["store"] is False
         assert payload["stream"] is False
         response.read.assert_called_once_with(4097)
