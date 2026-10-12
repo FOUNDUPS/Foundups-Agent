@@ -1,0 +1,100 @@
+{
+  "schema_version": "1.0.0",
+  "authority": "Research leads only; the existing CANDIDATE_SITE_REGISTRY.md remains canonical for three-site YUMORI program and economics.",
+  "crawl_approved": false,
+  "send_approved": false,
+  "notes": "No coordinates invented; do not infer site availability, electricity, funding or suitability from this register. Verify official call status again before action.",
+  "leads": [
+    {
+      "id": "FUKUI-CITY-HANYU",
+      "name": "旧羽生小学校",
+      "prefecture": "福井県",
+      "municipality": "福井市",
+      "address": "福井県福井市大宮町12-31",
+      "status": "OPEN_ASSET_PROPOSAL",
+      "source_url": "https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html",
+      "next_gate": "School Form1 submitted; await City eligibility; Nov30 prior consultation / Dec15 proposal deadlines",
+      "power_capacity_verified": false,
+      "site_rights_verified": false,
+      "last_checked": "2026-10-13"
+    },
+    {
+      "id": "FUKUI-CITY-SHIMOUSAKA",
+      "name": "旧下宇坂小学校",
+      "prefecture": "福井県",
+      "municipality": "福井市",
+      "address": null,
+      "status": "OPEN_ASSET_PROPOSAL",
+      "source_url": "https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html",
+      "next_gate": "Combined Form1 submitted; exact address and property-specific engineering to check",
+      "power_capacity_verified": false,
+      "site_rights_verified": false,
+      "last_checked": "2026-10-13"
+    },
+    {
+      "id": "FUKUI-CITY-SUKATTO",
+      "name": "旧すかっとランド九頭竜",
+      "prefecture": "福井県",
+      "municipality": "福井市",
+      "address": "福井県福井市天菅生町3字10番地",
+      "status": "CONDITIONAL_NOT_IN_2026_CALL",
+      "source_url": "https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html",
+      "next_gate": "Separate property/legal/procurement approval; excluded from school call",
+      "power_capacity_verified": false,
+      "site_rights_verified": false,
+      "last_checked": "2026-10-13"
+    },
+    {
+      "id": "FUKUI-ONO-WARABYO",
+      "name": "旧蕨生小学校",
+      "prefecture": "福井県",
+      "municipality": "大野市",
+      "address": "福井県大野市蕨生第126号32番地",
+      "status": "INVITATION_PUBLISHED_RECHECK",
+      "source_url": "https://www.city.ono.fukui.jp/shisei/sonota/shiyuzaisan-baikyaku/kokyo_warabyo.html",
+      "next_gate": "Older official invitation; verify current 2026 availability",
+      "power_capacity_verified": false,
+      "site_rights_verified": false,
+      "last_checked": "2026-10-13"
+    },
+    {
+      "id": "FUKUI-ONO-KAMISHO",
+      "name": "旧上庄中学校",
+      "prefecture": "福井県",
+      "municipality": "大野市",
+      "address": "福井県大野市稲郷74番25番地",
+      "status": "INVITATION_PUBLISHED_RECHECK",
+      "source_url": "https://www.city.ono.fukui.jp/shisei/sonota/shiyuzaisan-baikyaku/kokyo_kamisyo.html",
+      "next_gate": "2026 July mayor speech notes proposal process; check results and access",
+      "power_capacity_verified": false,
+      "site_rights_verified": false,
+      "last_checked": "2026-10-13"
+    },
+    {
+      "id": "ISHIKAWA-NANAO-ODON",
+      "name": "旧大吞保育園",
+      "prefecture": "石川県",
+      "municipality": "七尾市",
+      "address": "石川県七尾市庵町ヨ部31番地",
+      "status": "CLOSED_2026_ROUND_RECHECK",
+      "source_url": "https://www.city.nanao.lg.jp/kikaku-s/akishisetsu2.html",
+      "next_gate": "Aug20 fifth-round deadline passed; September result says no application; next call unknown",
+      "power_capacity_verified": false,
+      "site_rights_verified": false,
+      "last_checked": "2026-10-13"
+    },
+    {
+      "id": "ISHIKAWA-NANAO-SHIRAHAMA",
+      "name": "旧白浜保育園",
+      "prefecture": "石川県",
+      "municipality": "七尾市",
+      "address": "石川県七尾市白浜町251番地",
+      "status": "CLOSED_2026_ROUND_RECHECK",
+      "source_url": "https://www.city.nanao.lg.jp/kikaku-s/akishisetsu2.html",
+      "next_gate": "Aug20 fifth-round deadline passed; September result says no application; next call unknown",
+      "power_capacity_verified": false,
+      "site_rights_verified": false,
+      "last_checked": "2026-10-13"
+    }
+  ]
+}
