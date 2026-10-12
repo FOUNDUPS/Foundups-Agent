@@ -1,3 +1,14 @@
+## Play FoundUps migration direction — 2026-10-12
+
+Recorded 012's decision to converge legacy GotJunk with the Mall architecture,
+alongside Shop/GetK, and make Mall the internal search surface. Added a
+source-bound implementation handoff, ownership/storage gaps, migration and
+security acceptance gates. README/roadmap now distinguish direction from
+implementation. Firebase Storage enablement is a provider decision, not an
+automatic prerequisite for Mall routing. Documentation-only; no production
+settings, runtime, user data or security gates changed. WSP 22/50/84/97/98.
+Validation: source references and narrow diff reviewed; no runtime tests needed.
+
 ## Security authorization boundaries — 2026-10-10
 
 WSP 50/77/97: inspected exact-source rules and clients using lexical retrieval;

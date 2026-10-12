@@ -3,9 +3,19 @@ name: Deploy GotJunk
 on:
   push:
     branches: [main]
+    # Production release only when deployable GotJunk surfaces change.
+    # Docs, tests, offline inventory and migration planning must never
+    # trigger Firebase rule deployment or Cloud Build automatically.
     paths:
-      - 'modules/foundups/gotjunk/**'
-      - '.github/workflows/deploy-gotjunk.yml'
+      - 'modules/foundups/gotjunk/frontend/**'
+      - 'modules/foundups/gotjunk/backend/**'
+      - 'modules/foundups/gotjunk/deployment/**'
+      - 'modules/foundups/gotjunk/firestore.rules'
+      - 'modules/foundups/gotjunk/storage.rules'
+      - 'modules/foundups/gotjunk/firestore.indexes.json'
+      - 'modules/foundups/gotjunk/firebase.json'
+      - 'modules/foundups/gotjunk/.firebaserc'
+      - 'modules/foundups/gotjunk/cloudbuild.yaml'
   pull_request:
     paths:
       - 'modules/foundups/gotjunk/**'
