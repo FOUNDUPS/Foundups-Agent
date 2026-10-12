@@ -3,7 +3,7 @@
   "authority": "Research leads only; the existing CANDIDATE_SITE_REGISTRY.md remains canonical for three-site YUMORI program and economics.",
   "crawl_approved": false,
   "send_approved": false,
-  "notes": "No coordinates invented; do not infer site availability, electricity, funding or suitability from this register. Verify official call status again before action.",
+  "notes": "No coordinates invented; do not infer site availability, electricity, funding or suitability from this register. Verify official call status again before action. The two Fukui schools are also listed as designated shelters in the City's official open data; check disaster-use conflict before any reuse design.",
   "leads": [
     {
       "id": "FUKUI-CITY-HANYU",
@@ -16,20 +16,30 @@
       "next_gate": "School Form1 submitted; await City eligibility; Nov30 prior consultation / Dec15 proposal deadlines",
       "power_capacity_verified": false,
       "site_rights_verified": false,
-      "last_checked": "2026-10-13"
+      "last_checked": "2026-10-13",
+      "location_evidence_url": "https://steam.fukui.jp/opendata/fukui-shi/datasets/981a490814/",
+      "geo_source": "official_fukui_shelter_dataset",
+      "lat": 35.99921,
+      "lon": 136.4158,
+      "shelter_use": "DESIGNATED_EARTHQUAKE_SHELTER_VERIFY_CONTINUITY"
     },
     {
       "id": "FUKUI-CITY-SHIMOUSAKA",
       "name": "旧下宇坂小学校",
       "prefecture": "福井県",
       "municipality": "福井市",
-      "address": null,
+      "address": "福井県福井市市波町55-5",
       "status": "OPEN_ASSET_PROPOSAL",
       "source_url": "https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html",
       "next_gate": "Combined Form1 submitted; exact address and property-specific engineering to check",
       "power_capacity_verified": false,
       "site_rights_verified": false,
-      "last_checked": "2026-10-13"
+      "last_checked": "2026-10-13",
+      "location_evidence_url": "https://steam.fukui.jp/opendata/fukui-shi/datasets/981a490814/",
+      "geo_source": "official_fukui_shelter_dataset",
+      "lat": 36.01545,
+      "lon": 136.3329,
+      "shelter_use": "DESIGNATED_EARTHQUAKE_SHELTER_VERIFY_CONTINUITY"
     },
     {
       "id": "FUKUI-CITY-SUKATTO",
