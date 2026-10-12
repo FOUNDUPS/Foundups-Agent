@@ -61525,6 +61525,15 @@ repair. Next15/P1: authenticated reviewer runtime evidence before effect permit
 issuance; native18/P0 remains blocked. No new model retries or runtime grants.
 ## 2026-10-13 — Follow through on RSI repair CI failures
 
+Exact source4848d9ca0 CI38323381660 passed; PR2115 ready for review, unmerged.
+Follow-on local reviewer qualification executed eight calls with independent
+blinded adjudication and executed reference outcomes. Both prompts were correct
+on2/4cases; acceptance0/4 versus1/4 does not qualify the model as an approval
+verifier. Owned model unloaded; no paid calls, promotion or native admission.
+Reconciled root roadmap, dispatch evidence and stale machine current-selection
+pointer. Next18/P0 is authentic owner enrollment; unchanged model retries are not
+selected. WSP00/15/22/48/50/84/97; see RSI dispatch for measured denominators.
+
 PR #2115 remote test and secret jobs failed after the original local checkpoint.
 Reproduce and fix the offline test's optional SDK assumption (61 passes both
 with SDK absent and normally). Independently re-review 37 unchanged generated

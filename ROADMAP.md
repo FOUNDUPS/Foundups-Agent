@@ -12,7 +12,25 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — local worker transport (2026-10-12):**
+**Current checkpoint — local reviewer qualification (2026-10-13):**
+PR #2115 is open/ready for review at `4848d9ca0`; exact-head CI38323381660
+and all reported PR checks passed. It is not merged or deployed.
+Eight real local Qwen Coder 7B calls compared frozen prompts on four fresh,
+independently executed source variants. Baseline and candidate each got only
+2/4 verdicts correct. Exact quotes increased from2/4 to4/4, but full acceptance
+was0/4 versus1/4: the model is not qualified to approve changes. No promotion.
+
+WSP97 reconciliation: the machine backlog's older current selection is superseded
+by this measured result. Native admission remains18/P0 (4/5/5/4), blocked on
+authentic owner enrollment. The existing root-state installer consumes an already
+authenticated configuration; no production initial-enrollment command was
+established by the audit. Do not substitute fixtures or self-issued authority.
+Next: resolve that owner bootstrap, then use existing deterministic execution
+checks plus independent review for one admitted author ticket. Do not repeat the
+unchanged model trial or treat source quotations as semantic proof. See the
+[qualification evidence](docs/operations/RSI_SWARM_DISPATCH.md#paired-local-reviewer-qualification--2026-10-13).
+
+**Historical checkpoint — local worker transport (2026-10-12):**
 Fresh remote main is `4095ad9ee`; PR #2111 remains an open draft and issue #1522
 remains open. One local-model transport defect has a bounded shared-adapter
 repair: explicit `reasoning=None` omits an unsupported control, while the existing

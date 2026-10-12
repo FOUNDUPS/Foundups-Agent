@@ -1,3 +1,52 @@
+## Paired local reviewer qualification — 2026-10-13
+
+Source `4848d9ca022df826dbcb50e1258216df65558fd0`; PR2115 open/ready for
+review, exact-head CI38323381660 and all reported checks successful. No merge.
+WSP00/15/48/50/84/97: selected executable14/P1 qualification while native18/P0
+remains blocked. Holo owner retrieval still rejects authority/query-head mismatch
+(freshness UNKNOWN/gap true); exact source is the scoped fallback, not CURRENT Holo.
+
+Reused existing LM Studio lifecycle/transport with installed `qwen-coder-7b`.
+Baseline and quotation-explicit candidate prompts were frozen before a separate
+Codex reviewer prepared four fresh pure-function variants of the existing canary
+environment behavior. The reviewer executed reference outcomes independently.
+Both prompts received identical cases; eight calls were counterbalanced with
+temperature0,512 output-token cap,90s request timeout, no retries/paid fallback.
+The worker received no oracle. Later adjudication was blind to prompt arm.
+
+| Measurement | Baseline /4 | Candidate /4 |
+|---|---:|---:|
+| Valid JSON | 4 | 4 |
+| Correct verdict | 2 | 2 |
+| Exact executable quotation | 2 | 4 |
+| Correct explanation | 2 | 1 |
+| Fully accepted | 0 | 1 |
+
+Decision: NOT QUALIFIED as an approval verifier. The candidate misread setdefault
+and value rebinding despite quoting executable code. The25percentage-point accepted
+fraction difference is only this four-case sample; relative gain is undefined from
+zero baseline. No retained benefit or generalization is demonstrated. Keep model
+output advisory and existing execution checks authoritative for their tested properties.
+
+Model verdicts are learned judgment; executed reference outcomes are execution
+feedback. Exact substring checks do not prove semantics. Independent Codex review
+is unsigned source/execution review, not an authenticated native verifier receipt.
+Usage:3010input/624output tokens,24.624s total request time,0paid calls. Local
+compute/coordinator cost unknown. Owned load/unload confirmed; final inventory0.
+No native author, promotion, production memory write, account effect or deployment.
+
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-review-qualification-20261013/`:
+`contract.json`, `cases.json`, executed `oracle.json`, `execution-plan.json`, raw
+requests/responses, `independent-adjudication.json`, `measured-result.json` and
+lifecycle/inventory. Contract SHA256 `c6534dbdbcab6182b16b43bfe9fbd726d655c9b06ec429ef1ab9935da291b4db`;
+adjudication SHA256 `65653619fc181add5f60cfeb2cefea023acfd382bb9d40ada03a40f54b468406`.
+
+Next18/P0: resolve authentic owner enrollment before one admitted native author
+ticket. The current root-state installer requires an existing authenticated owner
+configuration; it does not establish initial trust. Additional inspected WSL
+`/etc/foundups`, `/var/lib/foundups`, `/var/lib/reddog` roots are absent. These are
+bounded observations, not proof of absence everywhere. No keys/grants fabricated.
+
 ## Local review and admission checkpoint — 2026-10-12
 
 Remote main rechecked at `4095ad9ee6042f4e9b5668bf4f6bf50c493c5964`.
