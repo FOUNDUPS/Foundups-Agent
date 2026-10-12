@@ -178,6 +178,7 @@ def _approved_pair(item_id="item-1", source_rev="rev-1", owner="alice"):
         {item_id: {
             "foundupId": GOTJUNK_ID, "itemId": item_id, "ownerUid": owner,
             "reviewerUid": "reviewer-1", "reviewedAt": "reviewed",
+            "privacyReviewed": True, "fieldAllowlistVersion": "public_listing_v1",
             "approvedSourceUpdatedAt": source_rev,
             "state": "approved_public", "publicTitle": "Used table",
             "publicCategory": "reuse",
@@ -203,6 +204,8 @@ def test_firestore_provider_publishes_only_independently_reviewed_matching_revis
     ("approval", "reviewerUid", "alice"),
     ("approval", "approvedSourceUpdatedAt", "old-revision"),
     ("approval", "reviewedAt", None),
+    ("approval", "privacyReviewed", False),
+    ("approval", "fieldAllowlistVersion", "unreviewed"),
     ("item", "status", "draft"),
     ("item", "updatedAt", "changed-revision"),
     ("item", "ownerUid", "other-owner"),
