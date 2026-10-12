@@ -90,3 +90,11 @@ control.
 uses only local synthetic metadata. CI registers the test in
 `WSP_knowledge/WSP_Test_Registry.json`. No source/system deployment,
 production data reconciliation, media safety audit or rollback drill has run.
+
+## Independent acceptance checkpoints
+
+The focused offline test is run with the Mall reviewed-listing acceptance in
+the existing CI gate. This branch is intentionally kept stacked on the
+reviewed-source adapter and includes no storage client initialization.
+A passing synthetic test is not evidence of production-source inventory,
+retention, rollback or data-migration completion.
