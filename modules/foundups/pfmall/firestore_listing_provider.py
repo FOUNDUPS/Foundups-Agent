@@ -58,6 +58,8 @@ class FirestoreGotJunkPublicationProvider:
                         or reviewer_uid == owner_uid
                         or approval.get("foundupId") != GOTJUNK_ID
                         or approval.get("state") != "approved_public"
+                        or approval.get("privacyReviewed") is not True
+                        or approval.get("fieldAllowlistVersion") != "public_listing_v1"
                         or approval.get("reviewedAt") is None
                         or approval.get("approvedSourceUpdatedAt") is None):
                     continue
