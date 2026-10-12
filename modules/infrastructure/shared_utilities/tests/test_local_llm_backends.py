@@ -73,7 +73,17 @@ class TestIsLMStudioAvailable:
 class TestLMStudioNativeResidency:
     """Backend initialization must use native loaded-instance truth."""
 
-    @patch("openai.OpenAI")
+    @pytest.fixture
+    def openai(self, monkeypatch):
+        """Mock the optional SDK without requiring it in the offline test host."""
+        import sys
+        from types import ModuleType
+
+        sdk = ModuleType("openai")
+        sdk.OpenAI = MagicMock()
+        monkeypatch.setitem(sys.modules, "openai", sdk)
+        return sdk.OpenAI
+
     @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
     def test_installed_but_not_resident_is_not_initialized(self, urlopen, openai):
         from modules.infrastructure.shared_utilities.local_llm_backends import (
@@ -119,7 +129,6 @@ class TestLMStudioNativeResidency:
             assert isinstance(proxy, urllib.request.ProxyHandler)
             assert proxy.proxies == {}
 
-    @patch("openai.OpenAI")
     @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
     def test_exact_native_instance_initializes_backend(self, urlopen, openai):
         from modules.infrastructure.shared_utilities.local_llm_backends import (
@@ -152,7 +161,6 @@ class TestLMStudioNativeResidency:
         assert backend.expected_instance_id == "nemotron-owned"
         assert openai.call_args.kwargs["api_key"] == "test-token"
 
-    @patch("openai.OpenAI")
     @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
     def test_unexpected_instance_identity_fails_closed(self, urlopen, openai):
         from modules.infrastructure.shared_utilities.local_llm_backends import (

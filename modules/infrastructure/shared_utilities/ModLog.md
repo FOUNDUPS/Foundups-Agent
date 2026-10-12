@@ -1,6 +1,14 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-10-13 - Close optional SDK assumption exposed by remote CI
+
+WSP6/22/50/97: remote CI failed three offline residency tests because their mock
+decorators imported an uninstalled optional SDK. Replace only the test boundary
+with an explicit restored module fixture; preserve all behavior assertions.
+Reproducer: 3 failed/5 passed. Connected suites: 61 passed with SDK absent and
+61 passed normally. No production code changes or dependency expansion.
+
 ## 2026-10-11 - Explicit native reasoning omission after local audit trial
 
 WSP00/6/11/15/22/50/84/97. The actual installed non-reasoning Qwen Coder route

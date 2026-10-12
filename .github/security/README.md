@@ -37,6 +37,19 @@ reviewed file may require re-review of its synthetic/metadata findings. History
 can contain older findings that are not covered by current-tree reviews; those
 remain visible and blocking on full-history runs until individually resolved.
 
+### Manifest metadata re-review — 2026-10-13
+
+PR #2115 changed one generated manifest member hash. This invalidated 37
+whole-file-bound reviews even though the 37 flagged lines were unchanged.
+Each finding was independently inspected: 35 generic-api-key and two
+discord-api-token matches are `required_runtime_sha256` entries whose 64-hex
+values match the actual source members under the generator's CRLF normalization.
+Append only those 37 exact fingerprints for the committed manifest at
+`3af34371d4dcd8b1b2a7fe8f5c015462df8e04aa`; retain the 109 historical records.
+No scanner rule, path exclusion or fingerprint algorithm changes. Any subsequent
+manifest change requires another review. Sanitized per-finding evidence is at
+`O:/RedDog-Builder-Artifacts/rsi-ci-closure-20261013/reviewed-metadata-evidence.json`.
+
 Local invocation (with the pinned Gitleaks on PATH):
 
 ```

@@ -1,5 +1,16 @@
 # TestModLog
 
+## 2026-10-13 - Reproduce and repair minimal CI host dependency
+
+PR #2115 exposed three `openai.OpenAI` patch decorators that require the optional
+SDK to be installed before the offline tests can run. Reproduced with the import
+deliberately unavailable: three failures and five passes in the residency class.
+Use an explicit per-test module fixture, restored by pytest monkeypatch, while
+preserving SDK-construction assertions and native inventory checks. The same
+three CI-selected suites pass 61 tests with the SDK unavailable and 61 normally.
+No production dependency or runtime behavior changed. Independent source review
+found no blocking issue. Logs: `O:/RedDog-Builder-Artifacts/rsi-ci-closure-20261013/`.
+
 ## 2026-10-12 - Fresh-main qualification of native reasoning omission
 
 Base `4095ad9ee6042f4e9b5668bf4f6bf50c493c5964`, branch
