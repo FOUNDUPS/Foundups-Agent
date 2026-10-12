@@ -136,6 +136,15 @@ jobs:
         run: |
           python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
 
+      - name: Run Mall GotJunk public listing acceptance
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -B -m pytest -q -c /dev/null --noconftest \
+            -o pythonpath=. -p no:cacheprovider \
+            modules/foundups/pfmall/tests/test_listing_discovery.py
+
       - name: Run LinkedIn offline activity contracts
         run: python -I -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py -v
 
