@@ -75,7 +75,7 @@ def fetch_text(url: str, robots: dict[str, RobotFileParser]) -> str:
         markup = raw.decode("utf-8", "replace")
     parser = VisibleText()
     parser.feed(markup)
-    return re.sub(r"\\s+", " ", unescape(" ".join(parser.fragments))).strip()
+    return re.sub(r"\s+", " ", unescape(" ".join(parser.fragments))).strip()
 
 
 def main() -> int:
