@@ -90,3 +90,15 @@ Historical Educational Singularity / eSingularity material (including 2007–201
 - [ ] Replace MODEL ONLY scope quantities and rates with surveys/vendor/utility evidence.
 - [ ] Obtain customer orders, carrier route, City use terms and finance/tax review; then select a deployable minimum phase.
 - [ ] Resolve dated drawdowns, VAT bridge, refurbishment scope and actual commissioning sequence. No deployment gate is passed by entering planning estimates.
+
+## 2026-10-13 — governed regional AI Koban expansion pilot (bounded)
+
+- [x] Reconcile 2026-10-09 Hokuriku utility procedural reply (Gmail MID 1a11e5995aa26b04) into YUMORI canonical Gmail / Contacts / Email Log / Moshpit. No capacity, service price or asset rights established.
+- [x] Send a **new**, scope-limited prefectural nuclear-to-DC policy-owner inquiry through the verified Energy Division route, with Governor public correspondence office copied; exact Sent MID 1a13288a812bff6d. This is not a power allocation, City approval or grant application.
+- [x] Seed 7 sourced public-asset research leads across Fukui City, Ono City, Ishikawa/Nanao in [AI_KOBAN_REGIONAL_PUBLIC_ASSET_LEADS.json](docs/AI_KOBAN_REGIONAL_PUBLIC_ASSET_LEADS.json). Existing YUMORI sites retain canonical 3-site priority and city-owner independence.
+- [x] Record a compact restart/yes-no decision contract in [AI_KOBAN_YUMORI_GATES.json](docs/AI_KOBAN_YUMORI_GATES.json). It supplements WSP97 and existing RedDog Work orchestrator; **not** a replacement CRM, Brain, Breadcrumbs or send signer.
+- [x] Add manually run, read-only [official-source page pulse](tools/ai_koban_official_asset_scan.py) seeded by exact site sources. Offline validation is default; `--fetch` is bounded, robots-gated and does not edit status.
+- [ ] Independently test the scanner with live municipal pages where robots permit, compare changed content against official call result/deadline, and route any candidate status change for human verification.
+- [ ] Extend locality coverage in small batches from Fukui to Ishikawa via official municipality sources; MEXT listings are discovery inputs only, not proof the current owner is soliciting.
+- [ ] Validate native RedDog/ModuleDB to Breadcrumbs/Brain exact-once event admission; Docs/Sheets projections do **not** prove runtime ingestion.
+- [ ] Wait for City feedback to the unified school Form1, prefectural office reply, and demand/retailer inputs before any capacity request, legal-use assumption, investment claim or deployment recommendation.
