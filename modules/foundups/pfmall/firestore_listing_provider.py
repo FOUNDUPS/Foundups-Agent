@@ -12,7 +12,7 @@ from __future__ import annotations
 from typing import Any, Mapping
 import re
 
-_SAFE_ITEM_ID = re.compile(r"[A-Za-z0-9_-]{1,128}\\Z")
+_SAFE_ITEM_ID = re.compile(r"[A-Za-z0-9_-]{1,128}\Z")
 
 from modules.foundups.pfmall.listing_discovery import (
     GOTJUNK_ID, ListingEvidence, PublicationApproval, SourceItem,
