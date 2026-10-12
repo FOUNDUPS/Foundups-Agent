@@ -171,7 +171,7 @@ must not be imported from untrusted legacy client fields. See
 not readable or writable through browser Firebase rules (default catch-all
 deny). It must be independently populated by an authorized reviewer service,
 not a seller-controlled status field. Reviews require matching FoundUp,
-item/owner, reviewer distinct from owner and exact source `updatedAt` revision.
+item/owner, reviewer distinct from owner, explicit `privacyReviewed=true`, fixed `fieldAllowlistVersion=public_listing_v1`, and exact source `updatedAt` revision.
 Changes to source items automatically invalidate the approval read.
 
 This adapter **does not** initialize Firebase credentials, create approvals,
