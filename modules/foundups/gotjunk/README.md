@@ -1,3 +1,14 @@
+## Mall migration evidence stage — 2026-10-12
+
+GotJunk remains an **offline-first** source. Its actual browser database is
+`got-junk-pwa` / `captured_items`; no rename, cloud migration, or production
+cutover is authorized. The new
+[metadata-only inventory planner](MIGRATION_INVENTORY_README.md) accepts
+explicit operator exports and reports conflicts without including owner IDs,
+location or raw media. It does not access Firebase or install a new backend.
+Mall public discovery and independently reviewed publication reads are in
+stacked PRs #2117 and #2118. Review them before enabling any provider.
+
 # GotJUNK? FoundUp
 
 **Purpose**: Rapid-capture PWA to take photos/videos and organize them with AI-powered swipe interface and geo-fencing

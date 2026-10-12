@@ -143,7 +143,8 @@ jobs:
         run: |
           python -B -m pytest -q -c /dev/null --noconftest \
             -o pythonpath=. -p no:cacheprovider \
-            modules/foundups/pfmall/tests/test_listing_discovery.py
+            modules/foundups/pfmall/tests/test_listing_discovery.py \
+            modules/foundups/gotjunk/tests/test_migration_inventory.py
 
       - name: Run LinkedIn offline activity contracts
         run: python -I -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py -v
