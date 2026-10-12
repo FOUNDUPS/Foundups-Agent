@@ -1,13 +1,13 @@
 """Security/availability acceptance for GotJunk -> Mall public read slice."""
 
 import pytest
-from fastapi.testclient import TestClient
+from fastapi import HTTPException
 
 from modules.foundups.pfmall.listing_discovery import (
     GOTJUNK_ID, ListingEvidence, ListingProviderUnavailable,
     PublicationApproval, SourceItem, search_gotjunk_public_listings,
 )
-from modules.foundups.pfmall.http_api import app
+from modules.foundups.pfmall.http_api import app, public_listing_search, resolve_route
 
 
 class Provider:
@@ -79,24 +79,32 @@ def test_absent_broken_or_malformed_provider_is_not_empty_success():
         search_gotjunk_public_listings(provider)
 
 
-def test_http_public_only_and_missing_provider(monkeypatch):
+def test_http_handler_public_only_and_missing_provider(monkeypatch):
+    # Exercise the HTTP handler's admission/status logic directly, avoiding
+    # the repository runner's optional Starlette httpx2 TestClient dependency.
     monkeypatch.delattr(app.state, "listing_evidence_provider", raising=False)
-    client = TestClient(app)
-    assert client.get("/pfmall/listings/search").status_code == 503
+    with pytest.raises(HTTPException) as missing:
+        public_listing_search(foundup_id=GOTJUNK_ID, q="", category=None,
+                              owner_uid=None, limit=20)
+    assert missing.value.status_code == 503
     provider = Provider([published(), published("private", status="draft")])
     app.state.listing_evidence_provider = provider
     try:
-        r = client.get("/pfmall/listings/search", params={"q": "desk"})
-        assert r.status_code == 200
-        assert [v["source_item_id"] for v in r.json()["results"]] == ["item-1"]
-        assert r.json()["foundup_id"] == GOTJUNK_ID
-        route = client.get("/pfmall/resolve-route", params={"path": r.json()["results"][0]["deep_link"]})
-        assert route.status_code == 200
-        assert route.json()["kind"] == "foundup"
-        assert route.json()["foundup_id"] == GOTJUNK_ID
-        assert route.json()["foundup_path"] == "/listings/item-1"
-        assert client.get("/pfmall/listings/search", params={"foundup_id": "getk_001"}).status_code == 403
-        assert client.get("/pfmall/listings/search", params={"owner_uid": "alice"}).status_code == 403
-        assert client.get("/pfmall/listings/search", params={"limit": 51}).status_code == 422
+        result = public_listing_search(foundup_id=GOTJUNK_ID, q="desk",
+                                       category=None, owner_uid=None, limit=20)
+        assert [v["source_item_id"] for v in result["results"]] == ["item-1"]
+        assert result["foundup_id"] == GOTJUNK_ID
+        route = resolve_route(path=result["results"][0]["deep_link"])
+        assert route["kind"] == "foundup"
+        assert route["foundup_id"] == GOTJUNK_ID
+        assert route["foundup_path"] == "/listings/item-1"
+        with pytest.raises(HTTPException) as other:
+            public_listing_search(foundup_id="getk_001", q="", category=None,
+                                  owner_uid=None, limit=20)
+        assert other.value.status_code == 403
+        with pytest.raises(HTTPException) as owner:
+            public_listing_search(foundup_id=GOTJUNK_ID, q="", category=None,
+                                  owner_uid="alice", limit=20)
+        assert owner.value.status_code == 403
     finally:
         del app.state.listing_evidence_provider
