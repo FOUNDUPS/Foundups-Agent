@@ -63,3 +63,11 @@ publication store or deployment**.
 ```bash
 python -m pytest modules/foundups/pfmall/tests/test_listing_discovery.py -q
 ```
+
+### Server-injected Firestore provider regression
+
+The same `test_listing_discovery.py` adds mocked source/approval collection
+scenarios: independently reviewed revision, cross-tenant and cross-owner
+denials, draft/revoked/stale item rejection, wrong-project constructor denial,
+failed provider => 503 at the HTTP boundary. No network or SDK credentials.
+The production reviewer, Firestore rules and deployment are **not tested**.

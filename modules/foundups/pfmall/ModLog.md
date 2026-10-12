@@ -1,3 +1,21 @@
+## 2026-10-12 — GotJunk privileged publication-evidence adapter (second gated slice)
+
+**WSP:** 00/22/50/84/97/98. **Parent:** implementation PR #2117
+(commit `58321915fa8c4ee5b02371d0e263a5f8711f5cf8`).
+This is a **stacked review**, not a production cutover.
+
+- Added server-injected read-only `FirestoreGotJunkPublicationProvider`,
+  joining independently controlled `gotjunk_public_approvals` to legacy
+  `gotjunk_items` by FoundUp, exact item ID, owner, reviewer, revision and
+  listed status. Invalid records are omitted; provider failures propagate as
+  unavailable without partial results. Privileged Firestore reads validate ID
+  shape before issuing document requests.
+- Extended focused fake-Firestore security tests (no network/credentials).
+  Kept provider disabled until independently authorized reviewer, server IAM,
+  source rule access and separate deployment checks exist.
+- No Firebase API enablement, migration, identity account linking,
+  publication writer, data changes or production exposure.
+
 ## 2026-10-12 — GotJunk public-only listing discovery (first gated slice)
 
 **WSP:** 00, 22, 50, 84, 97, 98. **Base:** main
