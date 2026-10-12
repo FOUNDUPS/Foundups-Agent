@@ -11,6 +11,16 @@ three CI-selected suites pass 61 tests with the SDK unavailable and 61 normally.
 No production dependency or runtime behavior changed. Independent source review
 found no blocking issue. Logs: `O:/RedDog-Builder-Artifacts/rsi-ci-closure-20261013/`.
 
+Follow-through run `38322453913` passed security but terminated with SIGILL while
+the fallback initialization test's mock imported the real llama_cpp library.
+Replace that import boundary with a per-test module double, restored by
+monkeypatch; retain initialization checks and strengthen constructor/instance
+assertions. Import-unavailable reproducer: 1 failed/2 passed. Connected three
+suites with both optional SDK imports unavailable: 61 passed in 1.50s. Saved
+logs: `llama-import-baseline.txt`, `both-sdk-absent-tests.txt`, and
+`updated-head-failure.txt` under the same evidence root. Remote rerun remains
+required; this is not hardware/native-model qualification.
+
 ## 2026-10-12 - Fresh-main qualification of native reasoning omission
 
 Base `4095ad9ee6042f4e9b5668bf4f6bf50c493c5964`, branch

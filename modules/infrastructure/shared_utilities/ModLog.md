@@ -9,6 +9,13 @@ with an explicit restored module fixture; preserve all behavior assertions.
 Reproducer: 3 failed/5 passed. Connected suites: 61 passed with SDK absent and
 61 passed normally. No production code changes or dependency expansion.
 
+The next CI run exposed the same import-before-mock issue in the llama_cpp
+initialization test: loading the real native library terminated Python with an
+illegal instruction. Replace that test's import boundary with a restored module
+double and assert the returned instance and constructor arguments. An unavailable
+import reproduces 1 failure/2 passes; all 61 connected cases pass with both SDK
+imports unavailable. This validates offline adapter contracts, not native inference.
+
 ## 2026-10-11 - Explicit native reasoning omission after local audit trial
 
 WSP00/6/11/15/22/50/84/97. The actual installed non-reasoning Qwen Coder route

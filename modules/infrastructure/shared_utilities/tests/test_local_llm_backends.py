@@ -673,26 +673,33 @@ class TestCompatibilityMethods:
 class TestLlamaCppFallbackPath:
     """Test the llama_cpp fallback path works correctly."""
 
-    def test_llama_cpp_backend_initializes_with_valid_model(self):
+    def test_llama_cpp_backend_initializes_with_valid_model(self, monkeypatch):
         """LlamaCppBackend.initialize() succeeds with valid model path."""
+        import sys
+        from types import ModuleType
+
         from modules.infrastructure.shared_utilities.local_llm_backends import (
             LlamaCppBackend,
         )
 
-        # Llama is imported inside initialize(), so patch at llama_cpp module
-        with patch("llama_cpp.Llama") as mock_llama:
-            mock_llama.return_value = MagicMock()
+        # Replace the import boundary before resolving Llama. Importing the real
+        # optional package can load a CPU-incompatible native library in CI.
+        sdk = ModuleType("llama_cpp")
+        sdk.Llama = MagicMock()
+        monkeypatch.setitem(sys.modules, "llama_cpp", sdk)
 
-            backend = LlamaCppBackend(
-                model_path=Path("E:/models/test.gguf"), n_ctx=1024
-            )
+        backend = LlamaCppBackend(
+            model_path=Path("E:/models/test.gguf"), n_ctx=1024
+        )
 
-            # Mock path.exists()
-            with patch.object(Path, "exists", return_value=True):
-                result = backend.initialize()
+        with patch.object(Path, "exists", return_value=True):
+            result = backend.initialize()
 
-            assert result is True
-            assert backend._llm is not None
+        assert result is True
+        assert backend._llm is sdk.Llama.return_value
+        sdk.Llama.assert_called_once()
+        assert sdk.Llama.call_args.kwargs["model_path"] == str(backend.model_path)
+        assert sdk.Llama.call_args.kwargs["n_ctx"] == 1024
 
     def test_llama_cpp_backend_fails_with_missing_model(self):
         """LlamaCppBackend.initialize() fails if model file doesn't exist."""
