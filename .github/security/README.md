@@ -41,6 +41,9 @@ and their content is still scanned. Missing scanner, timeout, invalid output,
 and other scanner errors fail. Only rule/path/line/commit metadata reaches logs;
 reports are fully redacted, temporary, and not uploaded. Inline `gitleaks:allow`
 and implicit `.gitleaksignore` files cannot silently suppress the gate.
+Shallow checkouts fail before either scan: fetch full history first. This
+guards local/manual callers as well as CI; `--all` only covers fetched refs,
+so record the fetched-ref scope separately from complete commit ancestry.
 
 ## Reviewed findings — 2026-10-10
 
@@ -75,3 +78,14 @@ status, missing reports/binary, nested environment files, history ranges,
 content-bound exceptions, and actual deployment-header shell success/failures.
 The GotJunk deployment check now requires an HTTP success, a CSP frame-ancestors
 directive, and nosniff; absence is a failed deployment verification.
+
+## Historical manifest review — 2026-10-13
+
+At main `0bb7e6c68f05dd82dd69579ae5d81b93b55871c7`, a scan of complete
+main ancestry (3001 commits) returned 168 candidates: 24 already reviewed and
+144 unreviewed. For 53 manifest findings, the referenced source was loaded at
+the finding's exact commit and its SHA256 recomputed. Every value matched.
+Only those 53 exact fingerprints were added; safe per-finding proof metadata
+is retained in `reviewed-history-manifest-evidence.json`. The other 91 remain
+unreviewed and blocking. This is neither a full retained-ref scan nor evidence
+of credential revocation or secure deployed configuration.
