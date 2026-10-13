@@ -1,3 +1,14 @@
+## 2026-10-14 — R15 planning baseline and independent oracle boundary
+
+WSP00/15/48/50/84/97: measured the existing registry dispatcher on exact main `57670f536`.
+Two complete projections agree; two malformed-input controls reject. No source
+implementation changed or native worker was admitted. Recorded timings distinguish
+profiled/unprofiled conditions; no speedup or learning claim. Current classification
+is shared across historical tree checks, so the next candidate must use a separate
+frozen baseline oracle. Reconciled verified PR #2115/#2129 closure in the existing
+roadmap; enrollment remains the critical pending decision. Evidence and measured
+bounds: docs/operations/RSI_SWARM_DISPATCH.md, R15 October 14 checkpoint.
+
 ## 2026-10-13 — Owned RSI publication closure
 
 WSP10/15/22/50/71/97: PR2115 merged at62abfec9f after exact-head

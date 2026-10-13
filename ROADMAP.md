@@ -12,13 +12,36 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — local reviewer qualification (2026-10-13):**
+**Current checkpoint — R15 deterministic planning baseline (2026-10-14):**
+Main `57670f536` is unchanged. Governed OpenClaw/WRE Holo maintenance completed
+and stopped both owned runtimes; a new October 14 query is CURRENT/no-gap at
+that source. The existing registered audit dispatcher produced identical
+SYSTEMIC plans twice for `6c7405988` → `57670f536`: 155 shards/five batches per side,
+1,429 → 1,430 collectable test paths. Changed-path substitution and a Boolean file
+bound rejected. This is direct component telemetry, not native worker admission,
+scanner/master-orchestrator qualification, executed tests or retained learning.
+The profiled initial 140.443s and unprofiled repeat 77.843s are not a speedup pair.
+
+WSP15: baseline preparation 14/P1 (2/4/4/4) is complete; native enrollment 18/P0
+(4/5/5/4) remains blocked on the pending isolated-enrollment decision under the
+prior no-new-signing-keys restriction. Do not retry unchanged qualification calls.
+The measured optimization candidate is redundant static classification work.
+Before admitting it, freeze the original generator/classifier/dependencies at
+57670f536 as a separate oracle: the current planner uses its active classifier
+for both historical trees, so self-consistency cannot prove unchanged semantics.
+Require identical canonical bytes, classifications/quarantine and complete plans;
+measure performance separately with matched unprofiled baseline/candidate runs.
+No code defect, accepted improvement or G1–G5 advance is established. See the
+[component baseline and next gate](docs/operations/RSI_SWARM_DISPATCH.md#r15-registry-component-baseline--2026-10-14).
+
+**Historical checkpoint — local reviewer qualification (2026-10-13):**
 PR #2115 merged at `62abfec9f9d720f88fe7f1e7877960ea88fa8477` after
-exact-head CI38327520174 and all reported checks passed at `69111a905`.
+exact-head CI 38327520174 and all reported checks passed at `69111a905`.
 Fetched main matches the reviewed integration tree. PR #2111 is closed with
-its unique evidence preserved below. Main CI38328147555 is pending at this
-checkpoint; no deployment or native RSI completion is claimed. The separate
-provider-selection repair is undergoing exact-head closure in PR #2129.
+its unique evidence preserved below. Main CI 38328147555 and CodeQL 38328146970
+passed. Provider-selection PR #2129 merged at `57670f536`; exact-head checks and
+main CI 38331796107/CodeQL 38331795483 passed. Owned worktrees/branches were
+retired with verified recovery archives. No native RSI completion is claimed.
 Eight real local Qwen Coder 7B calls compared frozen prompts on four fresh,
 independently executed source variants. Baseline and candidate each got only
 2/4 verdicts correct. Exact quotes increased from2/4 to4/4, but full acceptance
