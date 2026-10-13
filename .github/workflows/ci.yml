@@ -1310,6 +1310,18 @@ jobs:
         working-directory: extensions/reddog
         run: npm test
 
+      - name: Run local model adapter and lifecycle contracts
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+        run: |
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+            --import-mode=importlib -p no:cacheprovider \
+            modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py \
+            modules/infrastructure/shared_utilities/tests/test_lm_studio_model_lifecycle.py \
+            modules/ai_intelligence/ai_gateway/tests/test_model_topology_proposal_lm_studio.py
+
       - name: Run simulator tests
         run: |
           python -m pytest modules/foundups/simulator/tests/ -v --tb=short --ignore=modules/foundups/simulator/tests/test_sse_server.py
