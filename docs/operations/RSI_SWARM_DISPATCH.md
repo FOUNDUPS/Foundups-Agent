@@ -1,3 +1,60 @@
+## R15 registry component baseline — 2026-10-14
+
+Source `57670f536`; base `6c7405988`. Existing
+`auto_test_registry_audit` v2.3 executor and `dispatch_registered_skill_executor`
+were measured directly, without replacing the producer, constructing grants or
+running the WRE master/scanner/native worker. The 18 expected paths equal the
+actual Git diff. Input digests bind the recorded local allocation, interpreter,
+environment and lineage; these are unsigned planning records, not authority.
+SYSTEMIC scope and dependency freshness=false avoid claiming reduced coverage.
+
+| Observation | Measured result |
+|---|---|
+| Initial, cProfile enabled | 140.443s; valid plan |
+| Repeat, profiling disabled | 77.843s; complete result identical |
+| Per-source scope | 155 shards, five batches; 1,429 baseline/1,430 candidate paths |
+| Changed-path substitution | Rejected; 0.331s; `FAIL_TEST_REGISTRY_PLAN_CHANGED_PATHS` |
+| Boolean max_files | Rejected; 0.002s; `FAIL_TEST_REGISTRY_PROJECTION_INPUT` |
+| Models/native tickets/paid calls | 0/0/0; coordinator cost and host energy unknown |
+
+Both projected results preserve success=false, effect evidence=false and all
+execution/authority/isolation/capability flags false. No candidate tests were
+imported or executed. The negative controls reject before materialization.
+Independent source/evidence review confirmed request bindings, result equality
+and truth flags; the reviewer did not rerun the measurement.
+
+The timings differ in profiling overhead, cache state and order: do not claim
+speedup. Caller-thread profile attributes 94.381s cumulatively to registry
+verification, including 91.076s generation and 90.398s across 3,399 classifications;
+these nested values must not be added. Blob-copy worker internals were not
+profiled. Materialization 32.886s includes waits, not a diagnosis of its internals.
+
+Next candidate: reduce redundant static classification work only if an admitted
+author can preserve meaning. Keep the original generator, classifier and
+recognized dependencies at `57670f536` outside candidate control as the oracle.
+The current producer imports its active checkout classifier for both historical
+trees; internal consistency is insufficient. Independently compare canonical
+registry bytes, every classification/quarantine decision and complete projection,
+including fixed negative/held-out cases. Freeze matched unprofiled baseline and
+candidate conditions and a variance-informed stopping rule before performance
+claims; retain failures. Activation/rollback and a later-use gain remain separate.
+
+WSP00/15/48/50/84/97: preparation 14/P1 complete; native enrollment 18/P0 remains
+blocked on explicit isolated enrollment authorization or existing owner references.
+No new initial-enrollment implementation gap was established: v7/v8 supply exists,
+and the installer consumes authenticated owner configuration. October 13 presence
+observations are dated, location-bounded evidence; this baseline did not rescan
+authentication state. No keys, grants, model calls or account effects occurred.
+
+Holo: the existing exact-main controller completed and stopped its owned
+OpenClaw/supervisor on October 13. Separate October 14 retrieval is CURRENT/no-gap
+at `57670f536`; intended skill ranks first, general code/docs are noisy, and direct
+source supplied exact owner coverage. No redundant maintenance was run.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-registry-baseline-20261014/` contains
+frozen allocation/environment/lineage/request, Holo receipt, initial/repeat/control
+results, profile and decision. Prior maintenance/admission evidence remains in
+`O:/RedDog-Builder-Artifacts/rsi-minimal-loop-20261013/`. No RSI gain is claimed.
+
 ## Paired local reviewer qualification — 2026-10-13
 
 Source `4848d9ca022df826dbcb50e1258216df65558fd0`; PR2115 open/ready for
