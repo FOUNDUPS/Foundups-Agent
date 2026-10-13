@@ -2648,7 +2648,7 @@
     "modules/infrastructure/shared_utilities/lm_studio_lifecycle_intent.py": "6c4298322d032e96e247d6b47742a54971f9529ee7be2ac468e170d54b3b7d6c",
     "modules/infrastructure/shared_utilities/lm_studio_model_lifecycle.py": "6759ed76baff9b3c7a982dbbb658e0636d184a315993edc14e155bc3a771f914",
     "modules/infrastructure/shared_utilities/lm_studio_native_transport.py": "9780fb9b5a2db94ed76b0e8bfebd69fa3559357f4a28fa9289b37fc7f6c5ab95",
-    "modules/infrastructure/shared_utilities/local_llm_backends.py": "46eca9c4e912603c2d01a73aca68afa0ee362081255c84b5c6372b074c56eb03",
+    "modules/infrastructure/shared_utilities/local_llm_backends.py": "072d5346979c2bc7aecfd2549a837f6c85cdf6e1bfcc2ddbedcbfbdb3b2e2efd",
     "modules/infrastructure/shared_utilities/local_llm_resolver.py": "df5352db0aa0665970d0260f6a6e2e5f74f37d2e02324b4bca7bd8c08384adb9",
     "modules/infrastructure/shared_utilities/local_model_selection.py": "6031a4881177f1484d6a9f4cccd649c623206df85743eccef5c77a0f147b1c7b",
     "modules/infrastructure/shared_utilities/reddog_runtime_artifact_generation.py": "94c400e8896ca1289b3d343c5a3e941319cd4cad9ba5deb27d5c3162bf7e3c35",

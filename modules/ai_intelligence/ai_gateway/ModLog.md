@@ -1,5 +1,15 @@
 # AI Gateway Module Change Log
 
+## [2026-10-13] - Retain PR2111 historical qualification evidence
+
+WSP10/15/22/48/50/77/97/99: reconcile the unique October8 record from
+`cc32547b9677f2d2a5adf09bb924e52edbe9a4de` without restoring its stale selection.
+Saved audit0/1 accepted,3/4 facts correct,24.438s, owned load/unload, unknown token
+usage; injected panel probe and catalog368/99 remain separate evidence classes.
+No runtime or evaluator change. Root October13 selection stays current; the
+unexecuted experiment contract is archived in RSI_SWARM_DISPATCH. PR2111 closure
+requires verified integration; this entry does not claim merge or fresh CI.
+
 ## [2026-10-07] - Strict model use-time clock
 
 WSP00/6/15/22/50/97,13/P1: existing verifier now requires an exact positive

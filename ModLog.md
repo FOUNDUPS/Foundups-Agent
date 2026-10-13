@@ -61560,3 +61560,38 @@ exact-head CI/CodeQL. Exact-main CI37486916613/CodeQL37486916968 passed. Reconci
 PR with main while preserving both the rejected local experiment and completed
 repair. Next15/P1: authenticated reviewer runtime evidence before effect permit
 issuance; native18/P0 remains blocked. No new model retries or runtime grants.
+## 2026-10-13 — Preserve PR2111 evidence before owned-lane closure
+
+WSP10/15/22/48/50/77/97/99: retain unique October8 observations from
+PR2111 `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` as historical evidence.
+The one-call failed audit, injected panel probe, catalog snapshot and unexecuted
+comparison contract remain distinct from October13 qualification. Preserve the
+current checkpoint/selection and every newer observation. No runtime changes;
+PR2111 closure and branch cleanup follow verified integration, not this edit.
+
+## 2026-10-13 — Follow through on RSI repair CI failures
+
+Exact source4848d9ca0 CI38323381660 passed; PR2115 ready for review, unmerged.
+Follow-on local reviewer qualification executed eight calls with independent
+blinded adjudication and executed reference outcomes. Both prompts were correct
+on2/4cases; acceptance0/4 versus1/4 does not qualify the model as an approval
+verifier. Owned model unloaded; no paid calls, promotion or native admission.
+Reconciled root roadmap, dispatch evidence and stale machine current-selection
+pointer. Next18/P0 is authentic owner enrollment; unchanged model retries are not
+selected. WSP00/15/22/48/50/84/97; see RSI dispatch for measured denominators.
+
+PR #2115 remote test and secret jobs failed after the original local checkpoint.
+Reproduce and fix the offline test's optional SDK assumption (61 passes both
+with SDK absent and normally). Independently re-review 37 unchanged generated
+manifest checksum findings and append only exact current-file fingerprints;
+preserve historical reviews and all scanner checks. These close publication
+dependencies, not native worker admission or retained RSI. WSP6/15/22/50/97.
+
+## 2026-10-12 — Isolate local worker transport repair for review
+
+WSP00/6/11/15/22/48/50/84/97: bring the measured native reasoning-control repair
+onto fresh main without unrelated canary or runtime-upgrade changes. Reuse the
+shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
+local schema-constrained reviews produced valid JSON but insufficient quotations,
+so no worker qualification, native admission or retained RSI gain is claimed.
+See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.

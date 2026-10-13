@@ -12,7 +12,50 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — measured internal audits (2026-10-07):**
+**Current checkpoint — local reviewer qualification (2026-10-13):**
+PR #2115 is open/ready for review at `4848d9ca0`; exact-head CI38323381660
+and all reported PR checks passed. It is not merged or deployed.
+Eight real local Qwen Coder 7B calls compared frozen prompts on four fresh,
+independently executed source variants. Baseline and candidate each got only
+2/4 verdicts correct. Exact quotes increased from2/4 to4/4, but full acceptance
+was0/4 versus1/4: the model is not qualified to approve changes. No promotion.
+
+WSP97 reconciliation: the machine backlog's older current selection is superseded
+by this measured result. Native admission remains18/P0 (4/5/5/4), blocked on
+authentic owner enrollment. The existing root-state installer consumes an already
+authenticated configuration; no production initial-enrollment command was
+established by the audit. Do not substitute fixtures or self-issued authority.
+Next: resolve that owner bootstrap, then use existing deterministic execution
+checks plus independent review for one admitted author ticket. Do not repeat the
+unchanged model trial or treat source quotations as semantic proof. See the
+[qualification evidence](docs/operations/RSI_SWARM_DISPATCH.md#paired-local-reviewer-qualification--2026-10-13).
+
+**Historical checkpoint — local worker transport (2026-10-12):**
+Fresh remote main is `4095ad9ee`; PR #2111 remains an open draft and issue #1522
+remains open. One local-model transport defect has a bounded shared-adapter
+repair: explicit `reasoning=None` omits an unsupported control, while the existing
+default and runtime checks remain. This is a coordinator repair, not autonomous
+RSI. Native admission still needs authentic owner/principal deployment inputs;
+source inspection found its v7/v8 startup suppliers already connected.
+
+WSP15: admission is blocked 18/P0 (4/5/5/4); qualifying the local review contract
+is executable 14/P1 (2/4/4/4). Schema-constrained local reviews now satisfy JSON
+shape and verdict on two known controls, but neither supplies adequate exact
+source quotations. No reviewer promotion or G2–G5 completion follows. Next:
+verify source-bound evidence on fresh cases using existing audit owners, while
+locating authentic enrollment through the existing authority owner. See the
+[measured checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#local-review-and-admission-checkpoint--2026-10-12).
+
+**Historical evidence — layered-worker qualification (2026-10-08):**
+PR2111 source `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` retained a distinct
+one-call audit (0/1 accepted; unknown tokens), panel dataflow probe and public
+catalog snapshot. Its proposed comparison was not executed. Its former current
+selection is superseded by the October13 checkpoint above; preserving this
+history neither selects another trial nor admits a worker. See the
+[archived evidence and experiment contract](docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08).
+PR2111 closure follows verified integration of this historical record.
+
+**Historical selection — measured internal audits (2026-10-07):**
 PR2100 merged/main-verified at453f6c357; CI37559426252 and CodeQL37559426685
 passed, reviewed/main trees equal, owned branch retired with recovery bundle.
 Internal read-only audits do not require new production signer enrollment.
