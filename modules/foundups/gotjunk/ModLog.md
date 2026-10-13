@@ -1,3 +1,25 @@
+## 2026-10-12 — Metadata-only Mall migration dry-run slice
+
+**WSP:** 00, 22, 50, 84, 97, 98.
+**Dependency:** draft PR #2117 public read projection and PR #2118
+privileged review reader. No production execution.
+
+- Combined CI first ran 24 tests (22 passed, 2 failed): the provider's
+  item-ID regex was over-escaped, silently rejecting valid approvals.
+  Corrected in the owning Mall provider and added a same-head CI retest.
+  This was source-only; no publication or production access was enabled.
+- Added pure offline `src/migration_inventory.py` that requires explicit
+  `--dry-run`, reads bounded metadata-only JSON from stdin, and reports
+  deterministic idempotency-set digest, duplicate/conflicting items,
+  redacted counts and blocked reasons. Uses no Firebase APIs, browser DB,
+  network or cloud state and makes **zero writes**.
+- Added `test_migration_inventory.py` with deterministic replay,
+  conflict-blocking, tenant validation, private-field exclusion and zero-write
+  acceptance. Registered suite in canonical WRE test registry and CI.
+- Added `MIGRATION_INVENTORY_README.md` documenting authoritative source
+  audit, offline origin constraints, rollout canary, independent proof and
+  rollback preconditions. Does not authorize a data move or cutover.
+
 ## Play FoundUps migration direction — 2026-10-12
 
 Recorded 012's decision to converge legacy GotJunk with the Mall architecture,
