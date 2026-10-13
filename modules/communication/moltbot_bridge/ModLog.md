@@ -1,3 +1,14 @@
+## Canary provider publication closure — 2026-10-13
+
+WSP00/10/15/22/97; base `53bb8814494989548fcb3fd65de0f33331a5734f`.
+Extracted the provider-selection source/tests and contract corrections from
+historical checkpoint `29bd97d44`; its planning and experiment records are not
+replayed wholesale. The canary preserves configured Hermes/OpenClaw selection
+without relaxing signed admission or invocation-time provider checks.
+New-base local validation: 133 passed, 2 Windows skips in 191.81s. Registry
+regenerated/checked at 1,700 tests; runtime manifest unchanged at 1,426 members.
+Hosted checks and publication remain pending; see tests/TestModLog.md.
+
 ## Proposal packet and public startup composition — 2026-10-07
 
 WSP00/6/15/22/50/84/97;16/P0 (C4/I4/D4/impact4). Base main5fd833646

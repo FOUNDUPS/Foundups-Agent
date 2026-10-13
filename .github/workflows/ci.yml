@@ -1382,6 +1382,18 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_executor_plan_handler.py \
             -q --tb=short
 
+      - name: Run RedDog provider-specific canary admission contracts
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+        run: |
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+            --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_provider_readiness.py
+
   lint:
     runs-on: ubuntu-latest
     steps:

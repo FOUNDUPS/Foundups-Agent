@@ -1,3 +1,21 @@
+## 2026-10-13 — Owned RSI publication closure
+
+WSP10/15/22/50/71/97: PR2115 merged at62abfec9f after exact-head
+CI38327520174 and CodeQL passed; fetched main equals the reviewed tree.
+PR2111 closed after its unique observations were preserved. Verified recovery
+bundle retains all owned source checkpoints; unrelated lanes remain untouched.
+PR2129 publishes the remaining29bd provider-selection repair separately:
+133 local passes/2 Windows skips, regenerated1700-test registry, unchanged
+runtime manifest; fresh hosted checks and worktree retirement remain pending.
+Hosted Linux qualification caught a stale linked-path assertion (1 fail/134 pass).
+The existing fail-closed reader is unchanged; the corrected test checks both
+outer error and linked-path cause. Pinned-source Linux rerun:135 pass/no skips.
+See module tests/TestModLog for environment failures and reproduction evidence.
+The one new ModLog security finding was independently proven unchanged prose;
+merge reconciliation retains all212 individually reviewed records. No rules
+or authority were weakened. Native enrollment and retained RSI remain unproven.
+
+
 ## 2026-10-13 — Security history coverage and exact manifest triage (0102)
 
 - Closed PR #2128 by squash merge `0bb7e6c68f05dd82dd69579ae5d81b93b55871c7` after all 11 exact-head checks passed. The prior draft-only stop was premature; 012's completion authorization includes the ordinary repository closure loop.

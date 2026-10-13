@@ -1,3 +1,36 @@
+## Linux linked-path expectation closure — 2026-10-13
+
+Hosted CI38328790781 on dc5bb86f6 exposed a stale assertion: 1 failed/134 passed.
+The unchanged reader raises control_receipt_stream_unreadable with a confined
+linked-path cause; the old test expected an empty tuple. Independent history
+review confirmed the exception contract predates the stale assertion.
+A pinned dc5bb86 source archive reproduced 1 failed/32 deselected on Linux.
+Change only the assertion to require the exact outer ValueError and exact
+confined_read_path_link_rejected cause; retain the mapping-reader assertion.
+With that test patch, all three canary suites passed **135/135, no skips**,18.05s
+in an isolated Ubuntu/CPython3.12 environment. Optional dependencies required by
+main.py were installed only there. Initial mounted-drive collection and missing
+optional-dependency failures remain recorded; they were not passing tests.
+Command: `python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+-p pytest_asyncio.plugin -p no:cacheprovider` plus the three README suite paths.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-owned-closure-20261013/`, especially
+`linux-reproducer-pinned.txt` and `linux-final-ci-dependencies.txt`.
+Production source and rejection behavior remain unchanged; fresh hosted checks
+are required. WSP10/22/50/71/97; no native worker or retained-benefit claim.
+
+## Canary provider closure validation — 2026-10-13
+
+Base `53bb8814494989548fcb3fd65de0f33331a5734f`; focused extraction from
+`29bd97d44`. Fresh local result: **133 passed, 2 Windows symlink skips**,
+191.81s. Qualified CPython3.12.10 with bytecode/dotenv/plugin autoload disabled:
+`python -S -B -m pytest -q -c O:/rsi-permission-input-tests-20261005/pytest.ini
+--noconftest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider`
+on the three suites named in README, with isolated external basetemp.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-owned-closure-20261013/canary-local-tests.txt`.
+Registry write/check: 1,700 tests/270 quarantined. Backend manifest check:
+1,426 members unchanged. Hosted Linux checks remain pending. No model/service
+execution or native admission follows from fixture validation.
+
 ## Proposal packet and public startup composition — 2026-10-07
 
 WSP00/6/15/22/50/84/97;16/P0 (C4/I4/D4/impact4). Base main5fd833646
