@@ -12,8 +12,17 @@ The existing fail-closed reader is unchanged; the corrected test checks both
 outer error and linked-path cause. Pinned-source Linux rerun:135 pass/no skips.
 See module tests/TestModLog for environment failures and reproduction evidence.
 The one new ModLog security finding was independently proven unchanged prose;
-merge reconciliation retains all159 individually reviewed records. No rules
+merge reconciliation retains all212 individually reviewed records. No rules
 or authority were weakened. Native enrollment and retained RSI remain unproven.
+
+
+## 2026-10-13 — Security history coverage and exact manifest triage (0102)
+
+- Closed PR #2128 by squash merge `0bb7e6c68f05dd82dd69579ae5d81b93b55871c7` after all 11 exact-head checks passed. The prior draft-only stop was premature; 012's completion authorization includes the ordinary repository closure loop.
+- Reproduced a false-clean coverage gap: a real depth-1 checkout passed the old security gate while older commits were absent. The gate now rejects shallow history before either scan. Baseline regression: 1 failed/1 passed; repaired focused suite: 17 passed.
+- Retrieved complete main ancestry (3001 commits) and ran checksum-verified Gitleaks 8.30.1 at the merged SHA: 168 findings, 24 already reviewed, no scanner stderr. Recomputed 53 historical manifest entries against their referenced source bytes at the same commits; all 53 matched. Added only those exact content/rule/line fingerprints, preserving prior records. Evidence: `.github/security/reviewed-history-manifest-evidence.json`.
+- Remaining 91 historical candidates stay blocking. No literal values, blanket exceptions, credential testing/revocation, history rewrite, or new external scanner transmission. Complete main ancestry is not coverage of unfetched branch histories or deployed configuration.
+- WSP 00 tracker passed using the documented fallback; torch detector unavailable. Source-bound Holo bundle used direct owner files with UNKNOWN semantic freshness. WSP 10/22/50/71/97; no services or production deployments started.
 
 ## 2026-10-13 — 0102 security ownership and stacked-PR CI coverage
 

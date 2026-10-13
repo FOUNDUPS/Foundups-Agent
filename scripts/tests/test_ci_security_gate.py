@@ -36,6 +36,32 @@ def test_nested_environment_files_and_exact_templates():
     assert gate.tracked_env_files(paths) == paths[:3] + paths[-1:]
 
 
+@pytest.mark.parametrize('shallow', [True, False])
+def test_history_gate_rejects_real_shallow_checkout(tmp_path, monkeypatch, capsys, shallow):
+    origin = tmp_path / 'origin'
+    origin.mkdir()
+    def git(*args, cwd=origin):
+        return subprocess.run(['git', *args], cwd=cwd, check=True, capture_output=True)
+    git('init', '-q')
+    source = origin / 'fixture.txt'
+    for content in ('historical synthetic canary', 'current harmless content'):
+        source.write_text(content)
+        git('add', 'fixture.txt')
+        git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+            'commit', '-qm', 'fixture')
+    checkout = tmp_path / 'checkout'
+    git('clone', '-q', *(['--depth=1'] if shallow else []),
+        origin.as_uri(), str(checkout))
+    monkeypatch.setattr(gate, 'ROOT', checkout)
+    for name in ('SECURITY_EVENT', 'SECURITY_BASE', 'SECURITY_HEAD'):
+        monkeypatch.delenv(name, raising=False)
+    scans = []
+    monkeypatch.setattr(gate, 'scan', lambda args, report: scans.append(args) or 0)
+    assert gate.main() == int(shallow)
+    assert len(scans) == (0 if shallow else 2)
+    assert ('coverage incomplete' in capsys.readouterr().out) == shallow
+
+
 def test_commit_range_includes_intermediate_commits():
     base, head = 'a' * 40, 'b' * 40
     assert gate.history_range('pull_request', base, head) == base + '..' + head

@@ -93,6 +93,13 @@ def scan(arguments, report):
 
 
 def main():
+    # A shallow checkout silently truncates git-log scans. Refuse to certify
+    # history until the caller has fetched the complete ancestry.
+    shallow = subprocess.check_output(
+        ['git', 'rev-parse', '--is-shallow-repository'], cwd=ROOT, text=True).strip()
+    if shallow != 'false':
+        print('ERROR: security history coverage incomplete; fetch full history before scanning')
+        return 1
     paths = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode().split('\0')
     forbidden = tracked_env_files(filter(None, paths))
     for path in forbidden:
