@@ -103,6 +103,61 @@ gap=true. Exact source/adjacent contracts were the fallback; no query reindex.
 WSP00/15/48/50/84/97/99: retain frozen failures, repair demonstrated defects,
 and keep admission, verifier qualification, promotion and learning distinct.
 
+## Layered-worker qualification — 2026-10-08
+
+Historical record reconciled from PR2111, commit
+`cc32547b9677f2d2a5adf09bb924e52edbe9a4de`, against experiment source
+`0bcae38f3e701d9c13be6cfc749bbb27da7ffe40`. These observations and proposed
+limits belong to October8; the October13 checkpoint and machine current_selection
+remain authoritative. PR2111 closure follows verified integration, not this edit.
+
+The saved production-runner probe used two injected calls: both received the
+original prompt and the second received no prior result. It establishes panel
+dataflow, not real model behavior. Separate Fusion lead/critic/synthesis text
+handoffs already existed; critic quorum did not establish accepted code layers.
+One actual Qwen Coder7B source audit matched three of four independently reviewed
+oracle facts but falsely claimed the panel test proved forwarding: 0/1 accepted,
+24.438s including lifecycle, no retry or paid call, owned load/unload confirmed.
+Usage and finish metadata were unavailable through the then-used compatibility
+projection; unknown is not zero. This denominator is separate from October13's
+four paired cases. Worker source excerpts had no tools or repository write access;
+that does not establish an OS sandbox or autonomous WRE execution.
+
+The public catalog observation returned HTTP200, 368 accepted and 99
+record_invalid rejections from 778,366 bytes. Individual rejection causes were
+not diagnosed. This is dated discovery metadata, not coding quality, license
+approval or execution admission. At that source, configured campaigns were
+declared HALTED; the separate advisory route's retries and unbounded response
+read did not qualify it as benchmark transport. No current provider-state claim
+or paid comparison follows. The prototype roadmap skill's needs_validation and
+empty evals were not used to certify completion.
+
+The unexecuted experiment contract proposed preserving measured SDK usage/finish
+metadata with injected fixtures before a metered comparison: A one worker;
+B two fresh, dependency-ordered contexts receiving only an independently accepted
+artifact; C an exact pinned routed challenger only after configured admission,
+privacy/license checks and a numeric spend reservation. Proposed local aggregate
+caps were 4,096 output tokens, 16,384 input tokens, 300s, zero retries and zero paid
+inference per arm. Unknown usage prevents a budget-matched claim. Rejected,
+crashed, truncated or timed-out layers remain in denominators and stop their arm;
+architect-written replacements cannot count as worker output. Compare acceptance,
+false acceptance, regressions, scope violations, time, measured tokens/spend and
+intervention costs on separate development/held-out cases; require benefit on a
+later invocation before retention. These historical proposals are not selected
+work, validated capacity or grants. WSP15 scores then were local qualification
+14/P1, routed-gate reconciliation15/P1 and default-off scheduling10/P2; native
+retained RSI18/P0 remained blocked.
+
+Evidence remains at `O:/RedDog-Builder-Artifacts/rsi-layered-workers-20261008/`:
+`local-audit-input.json`, `local-audit-oracle.json`, `local-audit-evaluation.json`,
+`local-audit-result.json`, `panel-dataflow-probe.json`, `openrouter-attempt.json`,
+`openrouter-candidate.json` and `roadmap-validation.json`. Preserve the failed
+pre-execution indentation probe and first maintenance dependency failure there.
+The later source-bound owner query was CURRENT/no-gap after governed maintenance;
+that historical result does not clear today's Holo mismatch. PR2111 also recorded
+PR2101 merged at0bcae38f3, owned paths matching reviewed038307295 and passing
+main CI37738302526/CodeQL37738302661; this is its historical publication record.
+
 ## Startup custody lifetime qualification — 2026-10-05
 
 Source4241b10; existing WSP71/97 owners, no replacement orchestrator or vault.

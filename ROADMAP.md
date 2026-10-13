@@ -46,6 +46,15 @@ verify source-bound evidence on fresh cases using existing audit owners, while
 locating authentic enrollment through the existing authority owner. See the
 [measured checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#local-review-and-admission-checkpoint--2026-10-12).
 
+**Historical evidence — layered-worker qualification (2026-10-08):**
+PR2111 source `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` retained a distinct
+one-call audit (0/1 accepted; unknown tokens), panel dataflow probe and public
+catalog snapshot. Its proposed comparison was not executed. Its former current
+selection is superseded by the October13 checkpoint above; preserving this
+history neither selects another trial nor admits a worker. See the
+[archived evidence and experiment contract](docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08).
+PR2111 closure follows verified integration of this historical record.
+
 **Historical selection — measured internal audits (2026-10-07):**
 PR2100 merged/main-verified at453f6c357; CI37559426252 and CodeQL37559426685
 passed, reviewed/main trees equal, owned branch retired with recovery bundle.

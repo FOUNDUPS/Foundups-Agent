@@ -1896,6 +1896,55 @@
     "next_action": "Existing root-state installer consumes pre-existing authenticated owner configuration; establish real owner enrollment without fixture identities or self-issued grants. Use deterministic execution checks and independent review for one admitted author ticket; local model is advisory, not approval authority. Do not repeat unchanged qualification calls."
   },
   "current_observation": {
+    "layered_worker_qualification_20261008": {
+      "base_commit": "0bcae38f3e701d9c13be6cfc749bbb27da7ffe40",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-layered-workers-20261008",
+      "panel_dataflow": {
+        "synthetic_calls": 2,
+        "prior_output_forwarded": false,
+        "real_model_calls": 0
+      },
+      "local_audit": {
+        "model": "qwen-coder-7b",
+        "attempted": 1,
+        "accepted": 0,
+        "facts_correct": 3,
+        "facts_total": 4,
+        "failure": "panel_test_proves_forwarding falsely true",
+        "seconds": 24.438,
+        "load_confirmed": true,
+        "unload_confirmed": true,
+        "paid_provider_calls": 0,
+        "token_usage": null,
+        "architect_cost": null,
+        "independent_source_oracle_review": true,
+        "independent_model_execution": false,
+        "retries": 0
+      },
+      "catalog": {
+        "outcome": "COMPLETED",
+        "http_status": 200,
+        "accepted_records": 368,
+        "rejected_records": 99,
+        "rejection_counts": {
+          "record_invalid": 99
+        },
+        "response_bytes": 778366,
+        "candidate_only": true
+      },
+      "configured_campaign": "HALTED declaration retained pending source/gate reconciliation; no remote inference attempted",
+      "layered_comparison_executed": false,
+      "native_rsi_complete": false,
+      "next_packet": "docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08"
+    },
     "local_reviewer_qualification_20261013": {
       "source": "4848d9ca022df826dbcb50e1258216df65558fd0",
       "pr": 2115,
