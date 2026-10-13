@@ -1,3 +1,16 @@
+## 2026-10-13 — Owned RSI publication closure
+
+WSP10/15/22/50/71/97: PR2115 merged at62abfec9f after exact-head
+CI38327520174 and CodeQL passed; fetched main equals the reviewed tree.
+PR2111 closed after its unique observations were preserved. Verified recovery
+bundle retains all owned source checkpoints; unrelated lanes remain untouched.
+PR2129 publishes the remaining29bd provider-selection repair separately:
+133 local passes/2 Windows skips, regenerated1700-test registry, unchanged
+runtime manifest; fresh hosted checks and worktree retirement remain pending.
+The one new ModLog security finding was independently proven unchanged prose;
+merge reconciliation retains all159 individually reviewed records. No rules
+or authority were weakened. Native enrollment and retained RSI remain unproven.
+
 ## 2026-10-13 — 0102 security ownership and stacked-PR CI coverage
 
 - Publication continuation: explicit 012 push authorization received; rebased

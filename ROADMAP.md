@@ -13,8 +13,12 @@ Status: canonical **system planning and completion-gate authority** in this repo
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
 **Current checkpoint — local reviewer qualification (2026-10-13):**
-PR #2115 is open/ready for review at `4848d9ca0`; exact-head CI38323381660
-and all reported PR checks passed. It is not merged or deployed.
+PR #2115 merged at `62abfec9f9d720f88fe7f1e7877960ea88fa8477` after
+exact-head CI38327520174 and all reported checks passed at `69111a905`.
+Fetched main matches the reviewed integration tree. PR #2111 is closed with
+its unique evidence preserved below. Main CI38328147555 is pending at this
+checkpoint; no deployment or native RSI completion is claimed. The separate
+provider-selection repair is undergoing exact-head closure in PR #2129.
 Eight real local Qwen Coder 7B calls compared frozen prompts on four fresh,
 independently executed source variants. Baseline and candidate each got only
 2/4 verdicts correct. Exact quotes increased from2/4 to4/4, but full acceptance
