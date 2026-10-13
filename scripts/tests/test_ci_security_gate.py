@@ -6,11 +6,28 @@ import subprocess
 from types import SimpleNamespace
 
 import pytest
+import yaml
 
 SPEC = importlib.util.spec_from_file_location('ci_security_gate',
     Path(__file__).resolve().parents[2] / '.github/scripts/security_gate.py')
 gate = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(gate)
+
+
+def test_security_checks_cover_stacked_and_retargeted_pull_requests():
+    root = Path(__file__).resolve().parents[2]
+    # BaseLoader preserves YAML's `on` key (SafeLoader treats it as bool).
+    workflow = yaml.load((root / '.github/workflows/ci.yml').read_text(),
+                         Loader=yaml.BaseLoader)
+    trigger = workflow['on']['pull_request']
+    for filter_name in ('branches', 'branches-ignore', 'paths', 'paths-ignore'):
+        assert filter_name not in trigger
+    assert {'opened', 'synchronize', 'reopened', 'edited', 'ready_for_review'} <= set(trigger['types'])
+    assert 'pull_request_target' not in workflow['on']
+    security = workflow['jobs']['security']
+    assert security['uses'] == './.github/workflows/security-scan.yml'
+    assert 'if' not in security  # Draft/stacked PRs must not skip the gate.
+    assert security['permissions'] == {'contents': 'read'}
 
 
 def test_nested_environment_files_and_exact_templates():

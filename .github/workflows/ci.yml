@@ -4,7 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    # Stacked PRs need their own checks even when their base is a feature branch.
+    # Retargeting a PR must also produce fresh evidence for its new base.
+    types: [opened, synchronize, reopened, edited, ready_for_review]
 
 jobs:
   mcp-runtime-compatibility:
