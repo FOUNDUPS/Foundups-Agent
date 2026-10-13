@@ -1,3 +1,9 @@
+## 2026-10-13 — JHR website-first downstream newsletter contract (instruction-only)
+
+- 012 clarified: eSingularity.ai is the primary public publication for the Japan Hyperscaler Report. LinkedIn JHR is a **derived newsletter edition**, distributed after the exact site issue passes verified production deployment and live issue-anchor readback.
+- Updated the site workflow, JHR entrypoint and JHR README to require an explicit site release receipt before handing a source issue to the existing LinkedIn publishing skill. CSS, ticker, non-JHR site changes and NO_REPORT do not trigger social publication.
+- The upstream artifact identity and published permalink must survive the handoff; LinkedIn editorial copy cannot invent additional facts or preempt the site. No site content or website deployment changed in this slice; existing live articles retain their status. WSP00/97 evidence and exact-action approval remain required.
+
 ## 2026-10-10 — Security audit remediation
 
 - Bound interest request bodies before JSON parsing, retained field/consent validation, rejected cross-origin requests, added transactional D1 client/global quotas and daily email deduplication. No existing submissions deleted.
