@@ -104,3 +104,12 @@ it must not read raw legacy captures as public. `gotjunk_001` and
 `/f/gotjunk_001` remain stable. No provider deployment, media storage
 selection, browser search hookup, or production cutover is included.
 See [ownership, tests and migration gates](GOTJUNK_LISTING_READ_SLICE.md).
+
+## Second slice: privileged read adapter (2026-10-12)
+
+`firestore_listing_provider.py` provides an **opt-in** server-injected
+Firestore approval reader. It performs a separate reviewed-approval and
+legacy-item join, checks owner/FoundUp and exact source revision, and returns
+only evidence for the existing Mall public projection. It has no writes,
+automatic SDK startup or deployment. Missing reviewer service, IAM and
+configured provider mean live listings remain unavailable, not published.

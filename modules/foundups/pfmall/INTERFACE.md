@@ -161,3 +161,22 @@ This endpoint is not the member JavaScript search feature, authenticated
 private search, an upload service, or a deployment claim. Publication approvals
 must not be imported from untrusted legacy client fields. See
 [GOTJUNK_LISTING_READ_SLICE.md](GOTJUNK_LISTING_READ_SLICE.md).
+
+## Server-injected GotJunk publication reader (second review slice)
+
+`FirestoreGotJunkPublicationProvider(client, expected_project_id=...)`
+(`firestore_listing_provider.py`) implements the existing
+`ListingEvidenceProvider` for two **server-controlled** collections:
+`gotjunk_items` and `gotjunk_public_approvals`. The latter is intentionally
+not readable or writable through browser Firebase rules (default catch-all
+deny). It must be independently populated by an authorized reviewer service,
+not a seller-controlled status field. Reviews require matching FoundUp,
+item/owner, reviewer distinct from owner, explicit `privacyReviewed=true`, fixed `fieldAllowlistVersion=public_listing_v1`, and exact source `updatedAt` revision.
+Changes to source items automatically invalidate the approval read.
+
+This adapter **does not** initialize Firebase credentials, create approvals,
+configure `app.state.listing_evidence_provider`, install a production
+publisher, or deploy. A trusted server bootstrap with explicit matching
+project and IAM must inject the client and activate the provider after
+security and deployment gates; otherwise HTTP search remains 503. Firebase
+Admin client libraries and deployment configuration remain external.
