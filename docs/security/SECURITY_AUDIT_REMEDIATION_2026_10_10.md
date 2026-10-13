@@ -1,5 +1,39 @@
 # Security audit remediation — 2026-10-10
 
+## 0102 continuation — 2026-10-13
+
+0102 owns this queue under WSP71 sections 5.4–5.5. It is operational memory,
+not a report-review assignment to 012. Initial findings below are historical
+observations; revalidate each target before changing its owner.
+
+| Priority / owner | Verified evidence | Next action / closure condition |
+| --- | --- | --- |
+| P0 / CI owner | Main 4095ad9 limits PR checks to main-targeted PRs; stacked #2118 head 606deb77 has no checks | Focused source fix removes the PR base filter and adds retarget events; local 15-test gate suite passes. Publish and verify CI, then reconcile existing stacked branches. Do not claim parent coverage from child results. |
+| P1 / secret-gate owner | Run 38185428800 on main 4095ad9 completed: tree 0 unreviewed / 108 exact-reviewed; retained history 145 unreviewed / 24 exact-reviewed | Individually classify historical candidates against exact blobs. Retain unknowns and real exposures; no blanket exception refresh. Closure requires scan evidence and, for real credentials, authorized provider-side disposition. |
+| P1 / local-model CI owner | #2115 head 3af34371 remains draft with known dependency-test and changed-fingerprint failures | Revalidate exact head, repair missing test dependency in its owning lane, and independently re-review altered manifest fingerprints. No source-hash-to-key inference. |
+| P1 / GotJunk and PF Mall owners | Main deployment previously failed before rules/frontend publication; #2117 and #2119 passed branch checks; #2118 lacks independent branch checks | Reuse the Mall migration chain and documented shared ownership. Do not enable legacy Storage merely to make deployment pass. Verify provider, identity mapping, rules and actual deployed revision before closing exposure. |
+| P1 / Functions owner | Application entry source absent at audit; dependency-major migration lacks application validation | Recover authoritative Functions/rules source and test compatibility before any major dependency rollout. An empty scaffold cannot supply acceptance evidence. |
+
+The scheduled retained-history workflow is now evidenced by an actual run;
+its failure is a blocking unreviewed-candidate result, not scanner completion
+failure. No confirmed live secret is inferred from these counts. WRE's manual
+prototype and skill sentinel remain separate from this GitHub workflow.
+
+Publication continuation (2026-10-13 09:07 JST): 012 explicitly authorized
+pushing the security fixes to FOUNDUPS/Foundups-Agent, resolving the prior
+runtime approval rejection. That authorization is retained for this repair;
+routine publication must not be repeatedly handed back for confirmation.
+Repository procedures govern execution within that authority; they do not
+override runtime access controls or grant unrelated production effects.
+
+Before publication, main advanced to
+`39993955f57c70da76970a6a6dbef2d0d68aeb92`: the GotJunk/Mall owner merged
+#2116, #2117, #2118 and #2119, plus deployment-trigger correction #2121.
+The table above records the earlier review state; #2118 is no longer open.
+Rebased `fix/security-review-ownership-20261013` on this current main without
+overwriting that work. The all-base PR trigger remains a preventive CI fix;
+historical scan candidates and production applicability remain separate gates.
+
 Scope: source at main `b4f1a97bb2992e391634f83f949da6ee314c11a7`, seven npm lockfiles, WRE/scanner/CI, GotJunk rules/API/client, and eSingularity Sites source `90e539f760b6aefab027676ae7dff1ad2862e643`. This is evidence of source remediation and scoped validation, not certification that every code path or deployed environment is secure.
 
 ## Implemented corrections
