@@ -1,3 +1,13 @@
+## Canary provider closure — current checkpoint, 2026-10-13
+
+Eligible 14/P1 (C2/I4/D4/Impact4): publish the isolated provider-selection repair
+after fresh-base tests, review and required checks. Configured Hermes/OpenClaw
+selection is preserved; readiness does not supply execution authority.
+Native enrollment remains blocked 18/P0 and is a separate gate. Historical
+`29bd97d44` is retained as a checkpoint, not replayed as current planning.
+Local contracts: 133 passed, 2 Windows skips; hosted checks/publication pending.
+No native ticket or retained benefit claim.
+
 ## Proposal startup connection — current checkpoint, 2026-10-07
 
 Existing materializer/adapters reused; real proposal packet supply and public

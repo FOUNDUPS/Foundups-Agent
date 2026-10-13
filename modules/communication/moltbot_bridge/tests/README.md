@@ -1,3 +1,14 @@
+## Canary provider closure tests — 2026-10-13
+
+Select `test_reddog_resident_live_canary.py`,
+`test_reddog_resident_live_canary_integration.py` and
+`test_reddog_resident_live_canary_provider_readiness.py` together using
+`--noconftest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider`.
+Controls cover provider preservation, invalid configuration, confined credential
+checks, environment restoration and refusal to invoke without authority.
+Fresh-base Windows result: 133 passed/2 skipped. Hosted Linux validation remains
+pending; neither fixture result establishes native worker admission.
+
 ## Proposal startup connection — current checkpoint, 2026-10-07
 
 Existing materializer/adapters reused; real proposal packet supply and public

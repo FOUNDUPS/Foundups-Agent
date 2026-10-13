@@ -66,12 +66,14 @@ PRODUCTION_PATHS = (
     SRC_ROOT / "reddog_resident_control_loop_outcomes.py",
     SRC_ROOT / "reddog_resident_control_loop_effects.py",
     SRC_ROOT / "reddog_resident_live_canary_environment.py",
+    SRC_ROOT / "reddog_resident_live_canary_provider_readiness.py",
     SRC_ROOT / "reddog_resident_live_canary_control_preflight.py",
 )
 COMMUNICATION_TEST_PATHS = (
     Path(__file__),
     Path(__file__).with_name("reddog_resident_live_canary_test_support.py"),
     Path(__file__).with_name("test_reddog_resident_live_canary_integration.py"),
+    Path(__file__).with_name("test_reddog_resident_live_canary_provider_readiness.py"),
 )
 def test_readiness_is_non_executing_and_does_not_serialize_secret(tmp_path: Path) -> None:
     repo, runtime = _roots(tmp_path)

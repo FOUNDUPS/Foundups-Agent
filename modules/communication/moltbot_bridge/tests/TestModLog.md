@@ -1,3 +1,16 @@
+## Canary provider closure validation — 2026-10-13
+
+Base `53bb8814494989548fcb3fd65de0f33331a5734f`; focused extraction from
+`29bd97d44`. Fresh local result: **133 passed, 2 Windows symlink skips**,
+191.81s. Qualified CPython3.12.10 with bytecode/dotenv/plugin autoload disabled:
+`python -S -B -m pytest -q -c O:/rsi-permission-input-tests-20261005/pytest.ini
+--noconftest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider`
+on the three suites named in README, with isolated external basetemp.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-owned-closure-20261013/canary-local-tests.txt`.
+Registry write/check: 1,700 tests/270 quarantined. Backend manifest check:
+1,426 members unchanged. Hosted Linux checks remain pending. No model/service
+execution or native admission follows from fixture validation.
+
 ## Proposal packet and public startup composition — 2026-10-07
 
 WSP00/6/15/22/50/84/97;16/P0 (C4/I4/D4/impact4). Base main5fd833646

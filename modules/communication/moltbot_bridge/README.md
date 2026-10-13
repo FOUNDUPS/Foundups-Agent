@@ -1073,7 +1073,17 @@ Execution additionally requires `--execute --confirm
 REDDOG_RESIDENT_LIVE_CANARY_PHASE1`. The runtime root must be outside the
 repository and already contain the authority, permission, execution-valve,
 signer config/run-packet, and live signer socket artifacts named by the CLI
-receipt. The harness never starts the signer or resolves secret values.
+receipt. The harness never starts the signer or resolves principal signing keys.
+Select an existing author adapter with `--artifact-generator-mode` (or
+`REDDOG_ARTIFACT_GENERATOR_MODE`): `foundups_fusion` (default),
+`openclaw_gateway`, or `hermes_api`. Unsupported or explicitly empty modes reject.
+All modes require declared model-provider identity; this declaration does not
+replace signed model admission. Fusion additionally requires OpenRouter presence.
+Hermes readiness reads and discards the existing confined service credential
+through `RuntimeHermesApiKeyProvider`; no credential value enters the receipt.
+OpenClaw checks executable availability. These checks do not establish service
+health, sandbox confinement, model authority, budget, or worker execution.
+The receipt's `artifact_generator_mode` records selected configuration only.
 The signed runtime-artifact manifest producer is available as a
 content-addressed foundation. Canonical artifact writers and publication share
 a runtime-generation fence, and final publication uses OS-level no-replace
