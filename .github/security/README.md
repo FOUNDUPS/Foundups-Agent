@@ -64,6 +64,19 @@ reviewed file may require re-review of its synthetic/metadata findings. History
 can contain older findings that are not covered by current-tree reviews; those
 remain visible and blocking on full-history runs until individually resolved.
 
+### Canary changelog prose re-review — 2026-10-13
+
+PR #2129 added 11 lines to the moltbot bridge changelog at
+`416b9cf79c472764ed7dcb7596f8637406770227`. The single generic-api-key
+finding at line 3206 is unchanged authority-boundary prose from line 3195 of
+`0bb7e6c68f05dd82dd69579ae5d81b93b55871c7`, whose exact fingerprint was
+already reviewed. The same terminology appears in the module interface at
+line 1834; the finding contains no credential assignment or literal. Independent
+review verified exact committed bytes and retained all 109 existing records,
+adding only one whole-file/rule/line fingerprint (110 total for this branch).
+No matched values, scanner rules or exclusions changed. Sanitized evidence:
+`O:/RedDog-Builder-Artifacts/rsi-owned-closure-20261013/canary-modlog-review.json`.
+
 Local invocation (with the pinned Gitleaks on PATH):
 
 ```
