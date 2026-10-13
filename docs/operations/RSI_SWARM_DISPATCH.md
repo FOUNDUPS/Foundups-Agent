@@ -1,3 +1,163 @@
+## Paired local reviewer qualification — 2026-10-13
+
+Source `4848d9ca022df826dbcb50e1258216df65558fd0`; PR2115 open/ready for
+review, exact-head CI38323381660 and all reported checks successful. No merge.
+WSP00/15/48/50/84/97: selected executable14/P1 qualification while native18/P0
+remains blocked. Holo owner retrieval still rejects authority/query-head mismatch
+(freshness UNKNOWN/gap true); exact source is the scoped fallback, not CURRENT Holo.
+
+Reused existing LM Studio lifecycle/transport with installed `qwen-coder-7b`.
+Baseline and quotation-explicit candidate prompts were frozen before a separate
+Codex reviewer prepared four fresh pure-function variants of the existing canary
+environment behavior. The reviewer executed reference outcomes independently.
+Both prompts received identical cases; eight calls were counterbalanced with
+temperature0,512 output-token cap,90s request timeout, no retries/paid fallback.
+The worker received no oracle. Later adjudication was blind to prompt arm.
+
+| Measurement | Baseline /4 | Candidate /4 |
+|---|---:|---:|
+| Valid JSON | 4 | 4 |
+| Correct verdict | 2 | 2 |
+| Exact executable quotation | 2 | 4 |
+| Correct explanation | 2 | 1 |
+| Fully accepted | 0 | 1 |
+
+Decision: NOT QUALIFIED as an approval verifier. The candidate misread setdefault
+and value rebinding despite quoting executable code. The25percentage-point accepted
+fraction difference is only this four-case sample; relative gain is undefined from
+zero baseline. No retained benefit or generalization is demonstrated. Keep model
+output advisory and existing execution checks authoritative for their tested properties.
+
+Model verdicts are learned judgment; executed reference outcomes are execution
+feedback. Exact substring checks do not prove semantics. Independent Codex review
+is unsigned source/execution review, not an authenticated native verifier receipt.
+Usage:3010input/624output tokens,24.624s total request time,0paid calls. Local
+compute/coordinator cost unknown. Owned load/unload confirmed; final inventory0.
+No native author, promotion, production memory write, account effect or deployment.
+
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-review-qualification-20261013/`:
+`contract.json`, `cases.json`, executed `oracle.json`, `execution-plan.json`, raw
+requests/responses, `independent-adjudication.json`, `measured-result.json` and
+lifecycle/inventory. Contract SHA256 `c6534dbdbcab6182b16b43bfe9fbd726d655c9b06ec429ef1ab9935da291b4db`;
+adjudication SHA256 `65653619fc181add5f60cfeb2cefea023acfd382bb9d40ada03a40f54b468406`.
+
+Next18/P0: resolve authentic owner enrollment before one admitted native author
+ticket. The current root-state installer requires an existing authenticated owner
+configuration; it does not establish initial trust. Additional inspected WSL
+`/etc/foundups`, `/var/lib/foundups`, `/var/lib/reddog` roots are absent. These are
+bounded observations, not proof of absence everywhere. No keys/grants fabricated.
+
+## Local review and admission checkpoint — 2026-10-12
+
+Remote main rechecked at `4095ad9ee6042f4e9b5668bf4f6bf50c493c5964`.
+PR #2111 is OPEN/draft at `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` with
+successful reported checks; issue #1522 remains OPEN. These are current GitHub
+observations, not claims that native RSI or this new repair passed CI.
+
+The local repair from checkpoint `144bcebfe` is isolated here against main:
+explicit `reasoning=None` omits that native API field for callers selecting a
+model without the capability. Default `off`, identity checks and byte limits
+remain. No model routing, authority, skill, service or scheduler is added.
+The original regression and actual local Coder transport retest are preserved
+at `O:/RedDog-Builder-Artifacts/rsi-local-audit-20261011/`. Four completed native
+reviews were rejected; one additional request failed with HTTP 400 before repair.
+
+Fresh-main local qualification: 132 tests passed, one skipped across the seven
+documented LM Studio release suites plus manifest tests; all 15 extension
+fast-tier members passed. Independent source review found no blocking issue.
+Runtime manifest regeneration changed only the adapter member hash. Remote CI,
+merge and native author execution require separate evidence.
+
+Follow-up bounded diagnostic at source `144bcebfe`, using existing lifecycle and
+bounded loopback transport: two Qwen Coder 7B requests to `/v1/chat/completions`
+with the existing supported JSON-schema control. Original prompts/case digests
+are unchanged; these are known controls, not held-out generalization evidence.
+Both responses have valid JSON and correct verdicts. Neither provides the
+required exact relevant source quotation: accepted reviews remain 0/2.
+Schema conformance is not factual verification. Native and compatibility
+endpoints differ, so this is not a schema-only causal comparison.
+
+Measured follow-up usage: 3,846 input and 174 output tokens; request time
+4.078s + 6.125s. No retries, paid calls or provider fallback. Existing lifecycle
+records owned load/unload; inventory afterward has no residents. Compatibility
+responses are not the native signed provider receipt path. No native author,
+promotion, retained benefit, hardware-cost or coordinator-cost claim is made.
+Raw contract, prompts, responses and inventory remain at
+`O:/RedDog-Builder-Artifacts/rsi-review-contract-20261012/`.
+
+Independent admission source audit found v7/v8 supplier composition already
+present. The inspected resident roots/services lacked authoritative work
+state, principal/permission records, execution valve, signer configuration and
+run packet, signer socket and declared provider identity. This does not prove
+that enrollment exists nowhere; locate the real owner deployment inputs before
+invoking existing suppliers. Test fixtures, GitHub login or this roadmap cannot
+manufacture principal key custody or an execution grant. Fresh presence-only
+inspection on 2026-10-12 confirms all eight files absent at the resident root
+and `/etc/foundups/reddog-signer-owner.json` absent. Both gateway services are
+running but expose none of the six inspected principal/signer/provider bindings.
+No secret values were printed or service settings changed. The bounded result
+is saved as `admission-presence-current.json` in the follow-up evidence directory.
+
+Holo retrieval rejected authority/query-head mismatch: freshness UNKNOWN,
+gap=true. Exact source/adjacent contracts were the fallback; no query reindex.
+WSP00/15/48/50/84/97/99: retain frozen failures, repair demonstrated defects,
+and keep admission, verifier qualification, promotion and learning distinct.
+
+## Layered-worker qualification — 2026-10-08
+
+Historical record reconciled from PR2111, commit
+`cc32547b9677f2d2a5adf09bb924e52edbe9a4de`, against experiment source
+`0bcae38f3e701d9c13be6cfc749bbb27da7ffe40`. These observations and proposed
+limits belong to October8; the October13 checkpoint and machine current_selection
+remain authoritative. PR2111 closure follows verified integration, not this edit.
+
+The saved production-runner probe used two injected calls: both received the
+original prompt and the second received no prior result. It establishes panel
+dataflow, not real model behavior. Separate Fusion lead/critic/synthesis text
+handoffs already existed; critic quorum did not establish accepted code layers.
+One actual Qwen Coder7B source audit matched three of four independently reviewed
+oracle facts but falsely claimed the panel test proved forwarding: 0/1 accepted,
+24.438s including lifecycle, no retry or paid call, owned load/unload confirmed.
+Usage and finish metadata were unavailable through the then-used compatibility
+projection; unknown is not zero. This denominator is separate from October13's
+four paired cases. Worker source excerpts had no tools or repository write access;
+that does not establish an OS sandbox or autonomous WRE execution.
+
+The public catalog observation returned HTTP200, 368 accepted and 99
+record_invalid rejections from 778,366 bytes. Individual rejection causes were
+not diagnosed. This is dated discovery metadata, not coding quality, license
+approval or execution admission. At that source, configured campaigns were
+declared HALTED; the separate advisory route's retries and unbounded response
+read did not qualify it as benchmark transport. No current provider-state claim
+or paid comparison follows. The prototype roadmap skill's needs_validation and
+empty evals were not used to certify completion.
+
+The unexecuted experiment contract proposed preserving measured SDK usage/finish
+metadata with injected fixtures before a metered comparison: A one worker;
+B two fresh, dependency-ordered contexts receiving only an independently accepted
+artifact; C an exact pinned routed challenger only after configured admission,
+privacy/license checks and a numeric spend reservation. Proposed local aggregate
+caps were 4,096 output tokens, 16,384 input tokens, 300s, zero retries and zero paid
+inference per arm. Unknown usage prevents a budget-matched claim. Rejected,
+crashed, truncated or timed-out layers remain in denominators and stop their arm;
+architect-written replacements cannot count as worker output. Compare acceptance,
+false acceptance, regressions, scope violations, time, measured tokens/spend and
+intervention costs on separate development/held-out cases; require benefit on a
+later invocation before retention. These historical proposals are not selected
+work, validated capacity or grants. WSP15 scores then were local qualification
+14/P1, routed-gate reconciliation15/P1 and default-off scheduling10/P2; native
+retained RSI18/P0 remained blocked.
+
+Evidence remains at `O:/RedDog-Builder-Artifacts/rsi-layered-workers-20261008/`:
+`local-audit-input.json`, `local-audit-oracle.json`, `local-audit-evaluation.json`,
+`local-audit-result.json`, `panel-dataflow-probe.json`, `openrouter-attempt.json`,
+`openrouter-candidate.json` and `roadmap-validation.json`. Preserve the failed
+pre-execution indentation probe and first maintenance dependency failure there.
+The later source-bound owner query was CURRENT/no-gap after governed maintenance;
+that historical result does not clear today's Holo mismatch. PR2111 also recorded
+PR2101 merged at0bcae38f3, owned paths matching reviewed038307295 and passing
+main CI37738302526/CodeQL37738302661; this is its historical publication record.
+
 ## Startup custody lifetime qualification — 2026-10-05
 
 Source4241b10; existing WSP71/97 owners, no replacement orchestrator or vault.
