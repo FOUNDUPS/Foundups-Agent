@@ -7,6 +7,10 @@ bundle retains all owned source checkpoints; unrelated lanes remain untouched.
 PR2129 publishes the remaining29bd provider-selection repair separately:
 133 local passes/2 Windows skips, regenerated1700-test registry, unchanged
 runtime manifest; fresh hosted checks and worktree retirement remain pending.
+Hosted Linux qualification caught a stale linked-path assertion (1 fail/134 pass).
+The existing fail-closed reader is unchanged; the corrected test checks both
+outer error and linked-path cause. Pinned-source Linux rerun:135 pass/no skips.
+See module tests/TestModLog for environment failures and reproduction evidence.
 The one new ModLog security finding was independently proven unchanged prose;
 merge reconciliation retains all159 individually reviewed records. No rules
 or authority were weakened. Native enrollment and retained RSI remain unproven.

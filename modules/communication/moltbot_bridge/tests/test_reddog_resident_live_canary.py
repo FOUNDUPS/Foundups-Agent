@@ -490,9 +490,10 @@ def test_canary_and_evidence_reads_reject_linked_parent(tmp_path: Path) -> None:
     assert _read_json_mapping(
         linked / "artifact.json", allowed_root=tmp_path
     ) == {}
-    assert read_control_receipts(
-        linked / "receipts.jsonl", allowed_root=tmp_path
-    ) == ()
+    with pytest.raises(ValueError, match="^control_receipt_stream_unreadable$") as caught:
+        read_control_receipts(linked / "receipts.jsonl", allowed_root=tmp_path)
+    assert isinstance(caught.value.__cause__, ValueError)
+    assert str(caught.value.__cause__) == "confined_read_path_link_rejected"
 
 
 def test_receipt_path_inside_repo_is_rejected(tmp_path: Path) -> None:
