@@ -103,6 +103,38 @@ gap=true. Exact source/adjacent contracts were the fallback; no query reindex.
 WSP00/15/48/50/84/97/99: retain frozen failures, repair demonstrated defects,
 and keep admission, verifier qualification, promotion and learning distinct.
 
+## Historical isolated runtime qualification — 2026-10-11
+
+Preserved from owned checkpoint `29bd97d44` (base `4095ad9ee`), not current
+service state or upgrade approval. PR2129 publishes the provider-selection
+repair separately; October13 enrollment selection remains authoritative.
+OpenClaw2026.10.1 was installed with checksum-verified Node24.21.0. Hermes0.21.6
+at `818c13be1dc4fd28987e1e881a9408224afd4535` used locked messaging dependencies;
+its skills API initially returned500 because `_find_all_skills` rejected
+`include_editorial`. A candidate-only one-call patch restored that API.
+The patched gateway ran in bubblewrap with private network/PID/mount namespaces,
+read-only candidate, no shared repository/credentials and no-new-privileges.
+External/shared-service probes were blocked; unauthorized request401 and
+health/capabilities/toolsets/skills200 were observed. This is bounded evidence,
+not a universal sandbox proof. Essential `hermes-agent` remained visible despite
+skills disabling; existing zero-skill and version0.20.4 checks rejected promotion.
+No guard was loosened or shared runtime upgraded. Owned gateway ended exit1;
+no graceful-shutdown claim. Driver model calls/native tickets were zero, health
+counters zero, but total runtime inference and coordinator cost were unmeasured.
+Presence/readiness checks found missing/malformed authority artifacts and an
+unavailable signer socket at the inspected resident root;
+GitHub login did not replace principal enrollment. The WSL readiness-only retry
+used existing login PATH and mapped Git metadata without changing the checkout.
+No keys/grants were minted. Historical canary tests133pass/2skip and CURRENT/no-gap
+Holo evidence at the immutable base do not qualify today's source or runtime.
+Evidence remains at `O:/RedDog-Builder-Artifacts/rsi-runtime-qualification-20261011/`:
+`isolated-probe.json`, `probe-launch-receipt.json`, candidate patch/provenance,
+`native-readiness-qualified-host.json`, `service-authority-presence.json` and
+`canary-tests.xml`. Candidate installs remain separately retained under
+`/home/user/rsi-runtime-qualification-20261011`; they are not disposable Git trees.
+The complete historical planning record is preserved in the verified owned Git
+recovery bundle. Do not replay its superseded current-selection fields.
+
 ## Layered-worker qualification — 2026-10-08
 
 Historical record reconciled from PR2111, commit
