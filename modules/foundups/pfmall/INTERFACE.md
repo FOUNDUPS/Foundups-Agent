@@ -144,3 +144,39 @@ they do not fetch, render, or execute content.
 - `modules/foundups/docs/PFMALL_DATA_ISOLATION_MODEL.md`
 - `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
 - `public/member/INTERFACE.md`
+
+## GotJunk public listing discovery (first review slice, 2026-10-12)
+
+`GET /pfmall/listings/search?q=...&category=...&limit=...` is an
+**unauthenticated, public-only** read surface for `gotjunk_001`. The server
+must supply a trusted `app.state.listing_evidence_provider` that independently
+joins an item with a server-owned publication approval. No such production
+provider is installed; unconfigured or failed lookup returns **HTTP 503**.
+Cross-FoundUp and owner-scoped requests return **HTTP 403**. A configured
+provider returns only approved public `source_item_id`, `foundup_id`,
+`source_collection`, `title`, `category`, and `deep_link`; no
+media URLs, private locations or arbitrary captured descriptions.
+
+This endpoint is not the member JavaScript search feature, authenticated
+private search, an upload service, or a deployment claim. Publication approvals
+must not be imported from untrusted legacy client fields. See
+[GOTJUNK_LISTING_READ_SLICE.md](GOTJUNK_LISTING_READ_SLICE.md).
+
+## Server-injected GotJunk publication reader (second review slice)
+
+`FirestoreGotJunkPublicationProvider(client, expected_project_id=...)`
+(`firestore_listing_provider.py`) implements the existing
+`ListingEvidenceProvider` for two **server-controlled** collections:
+`gotjunk_items` and `gotjunk_public_approvals`. The latter is intentionally
+not readable or writable through browser Firebase rules (default catch-all
+deny). It must be independently populated by an authorized reviewer service,
+not a seller-controlled status field. Reviews require matching FoundUp,
+item/owner, reviewer distinct from owner, explicit `privacyReviewed=true`, fixed `fieldAllowlistVersion=public_listing_v1`, and exact source `updatedAt` revision.
+Changes to source items automatically invalidate the approval read.
+
+This adapter **does not** initialize Firebase credentials, create approvals,
+configure `app.state.listing_evidence_provider`, install a production
+publisher, or deploy. A trusted server bootstrap with explicit matching
+project and IAM must inject the client and activate the provider after
+security and deployment gates; otherwise HTTP search remains 503. Firebase
+Admin client libraries and deployment configuration remain external.

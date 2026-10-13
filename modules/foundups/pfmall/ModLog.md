@@ -1,3 +1,42 @@
+## 2026-10-12 — GotJunk privileged publication-evidence adapter (second gated slice)
+
+**WSP:** 00/22/50/84/97/98. **Parent:** implementation PR #2117
+(commit `58321915fa8c4ee5b02371d0e263a5f8711f5cf8`).
+This is a **stacked review**, not a production cutover.
+
+- Added server-injected read-only `FirestoreGotJunkPublicationProvider`,
+  joining independently controlled `gotjunk_public_approvals` to legacy
+  `gotjunk_items` by FoundUp, exact item ID, owner, reviewer, revision and
+  listed status. Invalid records are omitted; provider failures propagate as
+  unavailable without partial results. Privileged Firestore reads validate ID
+  shape before issuing document requests.
+- Extended focused fake-Firestore security tests (no network/credentials).
+  Kept provider disabled until independently authorized reviewer, server IAM,
+  source rule access and separate deployment checks exist.
+- No Firebase API enablement, migration, identity account linking,
+  publication writer, data changes or production exposure.
+
+## 2026-10-12 — GotJunk public-only listing discovery (first gated slice)
+
+**WSP:** 00, 22, 50, 84, 97, 98. **Base:** main
+`4095ad9ee6042f4e9b5668bf4f6bf50c493c5964`.
+**Handoff:** unmerged PR #2116 at
+`3950d45cfdf0edbaf0c80f3c4b28d5dd0db0f550`.
+
+- Added a tenant/owner/approval-joined, allowlisted GotJunk public listing
+  projection in Mall's canonical read service and a read-only HTTP search route.
+  Cross-tenant/owner parameter requests reject with 403; missing/failing
+  trusted provider returns 503, not a false successful catalog.
+- Added focused security/availability regression fixtures (no live data).
+  Production publication approval writer, principal mapping, provider, UI,
+  uploads and cutover **remain absent**.
+- Recorded exact-source owners, Shop/GetK branch evidence, legacy Firebase
+  read-rule risk, storage migration dry-run/idempotency/rollback gates in
+  `GOTJUNK_LISTING_READ_SLICE.md`. Does not change legacy data/rules,
+  security fixes, identity or Cloud Run deployment.
+- CI/test and deployment evidence must be attached to implementation PR;
+  no runtime or production success is asserted by this log.
+
 # p.fMALL ModLog
 
 ## 2026-08-23 — Tier-0 contract and RedDog authority alignment

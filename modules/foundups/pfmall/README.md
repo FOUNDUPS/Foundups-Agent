@@ -94,3 +94,22 @@ the module has no `src/`, `memory/`, or module-local `requirements.txt` yet.
 That WSP 49/60/12 debt is recorded in [ROADMAP.md](ROADMAP.md). It must be
 handled as a separate import-compatible migration, not hidden by this Tier-0
 documentation repair.
+
+## GotJunk listing read slice (2026-10-12)
+
+Mall now contains a independently reviewable public-only GotJunk item projection
+and `GET /pfmall/listings/search`. The endpoint defaults to **503** until
+an independently secured publication-evidence provider is installed server-side;
+it must not read raw legacy captures as public. `gotjunk_001` and
+`/f/gotjunk_001` remain stable. No provider deployment, media storage
+selection, browser search hookup, or production cutover is included.
+See [ownership, tests and migration gates](GOTJUNK_LISTING_READ_SLICE.md).
+
+## Second slice: privileged read adapter (2026-10-12)
+
+`firestore_listing_provider.py` provides an **opt-in** server-injected
+Firestore approval reader. It performs a separate reviewed-approval and
+legacy-item join, checks owner/FoundUp and exact source revision, and returns
+only evidence for the existing Mall public projection. It has no writes,
+automatic SDK startup or deployment. Missing reviewer service, IAM and
+configured provider mean live listings remain unavailable, not published.

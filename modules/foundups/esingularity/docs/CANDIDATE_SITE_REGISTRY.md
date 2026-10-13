@@ -1,6 +1,6 @@
 # YUMORI / eSingularity — Candidate Site Registry
 
-Last audited: 2026-09-29 JST
+Last audited: 2026-10-13 JST (utility procedural delta only; unchanged site rights)
 
 ## Authority and workflow
 
@@ -62,7 +62,7 @@ appointed by the proposal or by automated research.
 - Field evidence on 2026-09-26: major substation/switchyard equipment, multiple high-voltage transmission corridors, and utility telecom/microwave equipment are visible in the immediate landscape.
 - Compute capacity: **UNVERIFIED**. Proximity does not establish deliverable load capacity, connection voltage, redundancy, cost, schedule, or commercial/dark-fiber availability.
 - Sizing basis: customer/service demand -> revenue/resource demand -> GPU/CPU/storage/network requirements -> IT kW -> facility kW -> compare with utility-confirmed capacity.
-- Required next evidence: Hokuriku Electric Power Transmission & Distribution connection response; two-route carrier/fiber study; building/MEP/structural, cooling/water, fire, seismic, flood/landslide, geotechnical, acoustic and access studies; bankable customer/offtake evidence.
+- Required next evidence: demand-derived site load/desired supply date and authorized retail electricity/owner route for an actual connection study; two-route carrier/fiber study; building/MEP/structural, cooling/water, fire, seismic, flood/landslide, geotechnical, acoustic and access studies; bankable customer/offtake evidence. The 2026-10-09 utility reply was **procedural only** (Gmail MID 1a11e5995aa26b04): usual retail-electricity-company channel, or optional preliminary study after demand location, contract load and desired supply date are defined. Grid capacity remains **UNVERIFIED**.
 - Status: pre-feasibility. Priority is conditional and must be revised if the formal grid/fiber/site evidence does not support it.
 - Official asset evidence: the same current Fukui City reuse page lists 旧羽生小学校 and publishes the combined campus/floor-plan set for the school/gym/pool-management buildings. Treat it as feasibility evidence only; it does not establish grid, fiber, legal-use, retrofit or permitting suitability: https://www.city.fukui.lg.jp/kyoiku/school/school/haiko-rikatsuyou.html
 
@@ -126,3 +126,7 @@ The minimum physical first phase still needs a lawful whole-property use plan.
 The portfolio self-funding test in FIN and `run_portfolio_model()` is a hypothesis,
 not a guarantee that a first data center pays for all assets. Current output:
 **INSUFFICIENT EVIDENCE**. No site-specific CapEx or available capacity is invented.
+
+## Regional discovery boundary — 2026-10-13
+
+Regional **research leads**, not newly approved YUMORI portfolio members, are in `AI_KOBAN_REGIONAL_PUBLIC_ASSET_LEADS.json`. A read-only, manual source pulse lives at `../tools/ai_koban_official_asset_scan.py`; decision gates are in `AI_KOBAN_YUMORI_GATES.json`. Neither government policy support nor listed property status establishes entitlement, electrical capacity, operator authority or financial feasibility. The three existing Site IDs and priority rules in this registry remain unchanged.
