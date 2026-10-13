@@ -1,3 +1,9 @@
+## 2026-10-13 — JHR website-first distribution gate
+
+- For Japan Hyperscaler Report only, the canonical published site issue at eSingularity.ai precedes the LinkedIn newsletter. Updated the JHR child, shared editorial handoff and existing LinkedIn publishing skill to demand an independently verified website release, exact canonical article URL, content/revision identity, current publisher/series, approval and duplicate checks.
+- LinkedIn adaptation may reformat website content and link back, but cannot independently change facts. No LinkedIn publishing worker, daemon, browser connection or unattended authorization is implied. On access or submission failure, website state remains truthful and LinkedIn is BLOCKED/SUBMITTED_UNVERIFIED with no blind retry.
+- Extended the existing documentation-contract unit test instead of creating a new test file, avoiding generated test-registry drift. Documentation-only changes; no LinkedIn draft, schedule, edition, account change or post occurred in this patch. WSP00/97 authority and source boundary retained.
+
 ## 2026-09-28: RSI contact-diligence contract and CI repair
 
 - WSP00/15/22/50/95/97; C1/I3/D3/Impact3 = 10/P2. Fresh main inspection found the new offline contract failing despite green PR1927 checks; the CI workflow did not invoke this suite.
