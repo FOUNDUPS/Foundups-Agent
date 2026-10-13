@@ -58,6 +58,14 @@ those six exact current-file fingerprints, retaining146 prior records (152 total
 The introduced-history scan had zero findings. No scanner policy changes.
 Evidence: `O:/RedDog-Builder-Artifacts/rsi-review-qualification-20261013/backlog-metadata-evidence.json`.
 
+Archival reconciliation at `53edf24f6424fefb152431b90a2af81e8c0207b4`
+shifted those same six backlog findings by49 further lines. Independent review
+compared exact committed bytes with `f73e7b712`, rechecked all five installed
+source hashes and the Git blob, and verified all six prior review fingerprints.
+Append only the six new whole-file/rule/line fingerprints; preserve152 existing
+records (158 total). No matched values, exclusions or scanner rules were added.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-review-qualification-20261013/archival-backlog-metadata-evidence.json`.
+
 Local invocation (with the pinned Gitleaks on PATH):
 
 ```
