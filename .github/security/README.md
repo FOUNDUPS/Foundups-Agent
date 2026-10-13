@@ -5,6 +5,33 @@ same workflow scans all retained history on Mondays at 05:20 JST and on manual
 runs. It requires no service token/license and never uploads source to a scan
 service. Gitleaks 8.30.1 is pinned by version and release archive SHA256.
 
+CI accepts PRs targeting any branch, including stacked feature branches, and
+reruns when a PR is retargeted. Use each PR's current head and base when checking
+coverage; a passing descendant is not evidence that the parent head ran. The
+`pull_request` event is retained; no privileged `pull_request_target` execution
+is introduced. Workflow coverage is not GitHub branch-protection enforcement.
+
+## 0102 operating loop
+
+WSP 71 sections 5.4–5.5 govern ownership. 0102 retrieves alerts, verifies source,
+repairs authorized defects, validates, and retains the result in the owning
+module's ModLog/PR. Routine evidence is for 0102 continuity, not a download or
+review assignment for 012. Communicate material outcomes and exact access or
+authority blockers only; keep working on independent repairs.
+
+1. Pin main, PR head/base and deployment source. Collect actual check/run status.
+2. Review changed high-risk boundaries and distinguish scan categories/coverage.
+3. For historical secret candidates, inspect the exact blob without emitting
+   values. Prove fixture/hash/public-identifier classifications individually.
+4. Repair source in an owned lane and test failure behavior. Preserve unresolved
+   history and failed coverage; never auto-regenerate reviewed exceptions.
+5. Record repair revision, validation, residual risk and deployment applicability.
+   Production closure requires separate deployment and configuration evidence.
+
+The current gate does not triage history automatically. WRE `security_scan`
+remains a prototype/manual skill; AI Overseer's skill sentinel is a narrower
+preflight. Neither is evidence of an installed full-repository security daemon.
+
 The gate scans the entire tracked tree (all extensions), then the complete
 introduced commit range, so adding and subsequently removing a secret in the
 same pull request still fails. Scheduled/manual/new-branch scans use `--all`.
