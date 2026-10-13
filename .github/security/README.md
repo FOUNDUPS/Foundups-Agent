@@ -50,6 +50,14 @@ No scanner rule, path exclusion or fingerprint algorithm changes. Any subsequent
 manifest change requires another review. Sanitized per-finding evidence is at
 `O:/RedDog-Builder-Artifacts/rsi-ci-closure-20261013/reviewed-metadata-evidence.json`.
 
+The later canonical backlog update at `f73e7b712` shifted six previously reviewed
+source-digest findings by21 lines. Each unchanged value was independently checked:
+five match the installed `llama_tokenizer.py` SHA256; the sixth resolves to the
+7,701-byte Git source blob for `IndependentSignerSecretGrantProvider`. Append only
+those six exact current-file fingerprints, retaining146 prior records (152 total).
+The introduced-history scan had zero findings. No scanner policy changes.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-review-qualification-20261013/backlog-metadata-evidence.json`.
+
 Local invocation (with the pinned Gitleaks on PATH):
 
 ```
