@@ -1,7 +1,7 @@
 ---
 name: linkedin_publishing
 description: Publish, schedule or maintain exact approved LinkedIn content on a verified profile, page or newsletter
-version: 1.0.1
+version: 1.1.0
 author: 0102
 agents: [qwen]
 intent_type: EXECUTION
@@ -33,6 +33,12 @@ login dependency. Do not run both workers against one publishing transaction.
 
 For other public research, [TinyFish has a separate bounded skill](../../../../infrastructure/browser_actions/skillz/tinyfish_research/SKILLz.md).
 It does not grant LinkedIn publication authority.
+
+## Derived JHR distribution boundary
+
+For the `linkedin_jhr_newsletter` lane, the primary public article is published and independently verified on **eSingularity.ai first**. Receive and validate the upstream `WEBSITE_LIVE_VERIFIED` receipt (exact issue anchor/permalink, source revision, site deployment and live content identity) before opening a LinkedIn submit action. A Google Doc manuscript, Git commit, merged PR, preview site or proposed article alone is not enough. This JHR condition does not impose website-first ordering on unrelated ROC or FoundUps publications.
+
+Treat LinkedIn as a *derived distribution edition*: canonical site backlink required, facts unchanged, independent publisher/series confirmation, exact destination approval and provider duplicate check required. A new website correction should generally be reconciled to the existing LinkedIn edition instead of making another copy. The website publication instruction is **not** unattended sender permission. If the correct LinkedIn session, approval, saved state or exact destination is unavailable, stop at `LINKEDIN_BLOCKED` or `SUBMITTED_UNVERIFIED`. Do not backfill assumed publication timestamps, run a legacy hook, or retry an ambiguous submit.
 
 ## Publication contract
 

@@ -1,3 +1,32 @@
+## 2026-10-13 — 0102 security ownership and stacked-PR CI coverage
+
+- Publication continuation: explicit 012 push authorization received; rebased
+  this lane onto main 39993955 after the concurrent GotJunk/Mall merges. Prior
+  #2118 missing-check observation is historical, not a claim it remains open.
+
+- Root cause: CI's main-only PR base filter excluded stacked PR #2118. Remove
+  the base restriction and include retarget events while retaining unprivileged
+  pull_request execution and the existing read-only reusable secret gate.
+- Enhance WSP 71 sections 5.4–5.5: 0102 owns intake through repair/verification;
+  routine records are internal evidence, not work assigned to 012. Require
+  exact source/deployment binding, explicit coverage failures and evidence-bound
+  candidate triage. Synchronize the governed knowledge mirror under WSP 81.
+- Extend the existing security regression suite for workflow coverage; its
+  runner installs pinned PyYAML for actual YAML parsing. No new audit service.
+- WSP00 attempted: torch unavailable; documented tracker fallback gate passed,
+  detector witness absent. Holo lexical bundle at 4095ad9: UNKNOWN freshness,
+  index gap retained, noisy matches; direct current-owner reads resolved scope.
+- WSP15 priority: restore CI coverage before broader automation (C2/I5/D5/I5,
+  17/P0). Reuse CI/WSP71 rather than creating another scheduler. Local model
+  runtime unavailable; deterministic source/test inspection used. This change
+  does not clear the 145 historical candidates or prove production remediation.
+- Authority: 012 directed codebase repair and security WSP enhancement.
+  WSP22/50/71/81/84/97; main base 4095ad9ee6042f4e9b5668bf4f6bf50c493c5964.
+- Validation: 15 focused security-gate regressions passed; canonical test
+  registry remains current (1697 files, 270 quarantined). WSP71 and master-index
+  mirror parity and whitespace checks passed. Remote CI and merge/deployment
+  are separate release gates, not implied by these local results.
+
 ## 2026-10-10 — Security audit remediation
 
 - Fixed fail-clean scanner/WRE behavior, blocking secret CI, GotJunk rules/API/client boundaries, eSingularity input/admission/privacy boundaries, weak public session IDs and IDE webview interpolation.
