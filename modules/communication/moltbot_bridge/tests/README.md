@@ -1,3 +1,21 @@
+## Initial anchor bootstrap tests — 2026-10-14
+
+Run these together with `python -B -m pytest --noconftest --import-mode=importlib
+-p pytest_asyncio.plugin -p no:cacheprovider -q`:
+
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_signer.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_anchor.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_atomic_signer_runtime_generation_high_water.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_process_isolation_gate.py`
+- `modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py`
+
+The new37 cases use real Ed25519 operations with substituted custody/root-read/
+isolation boundaries. They prove policy scope, immutable state, altered inputs,
+key mismatch, clock rollback/expiry, and permission expiry during resolution and
+policy reads. They do not establish OS confinement or native admission. Separate
+real systemd component evidence is recorded in RSI_SWARM_DISPATCH; it does not
+qualify the full service/package startup. CI explicitly runs the connected suite.
+
 ## Canary provider closure tests — 2026-10-13
 
 Select `test_reddog_resident_live_canary.py`,

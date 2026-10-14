@@ -1,3 +1,33 @@
+## Initial generation anchor bootstrap — 2026-10-14
+
+`load_initial_generation_anchor_signer(*, bootstrap_path, repo_root)` in
+`src/reddog_signer_runtime_generation_bootstrap_signer.py` consumes a Linux
+root-installed `reddog_generation_anchor_bootstrap.v1` policy. The schema pins
+the repository digest, public identity/key epoch, one systemd credential,
+SECRETS_READ permission with purpose `initial_generation_anchor`, consumer UIDs,
+anchor/high-water identities and an exact `SignerRuntimeGenerationBinding` at
+generation 1. Refer to the module's strict field set and tests for all fields.
+No caller-supplied resolver, key or permission backend is accepted by this loader.
+
+The returned frozen signer implements `authenticator_id` and
+`authenticate(payload: bytes) -> str` for that exact canonical initial-anchor
+payload only. It enforces existing process isolation before resolver creation;
+the same bounded resolver re-reads credentials per signature. Root policy and
+permission lifetime are rechecked before/after reads and signing. Wrong records,
+keys, changed policies, expiry and custody failures raise before a signature is
+returned. Ordinary signer-field mutation is prohibited and protected fields are
+re-derived for comparison. This is not isolation against arbitrary Python code
+inside the privileged process; deployment must preserve OS process separation.
+
+Bootstrap policy installation is administrative authority, not worker self-
+authorization. The credential's maximum window is 300 seconds. No private key is
+retained by the adapter; Python memory zeroization is not claimed. Repeated
+identical signatures do not activate state: existing anchor CAS owns replay
+rejection. This slice does **not** sign high-water records, issue writer
+capabilities, verify a work manifest or launch a worker. Receipt-shaped store IDs
+are bindings, not independent durability proofs. Public runtime-owner v1-v8
+schemas and existing startup behavior remain unchanged.
+
 ## Deferred proposal policy activation (implementation checkpoint)
 
 `build_owner_leased_ephemeral_backend` additionally accepts optional

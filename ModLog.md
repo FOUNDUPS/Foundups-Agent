@@ -1,3 +1,16 @@
+## 2026-10-14 — Isolated enrollment authority and initial signer
+
+WSP00/15/22/48/50/71/84/97: 012 superseded the prior blanket no-new restriction
+for isolated owner enrollment. Six separate inactive role keys installed under
+root-only Linux custody; no runtime grants. Real custody/isolation checks passed.
+Added one bounded adapter to the existing generation subsystem, with protected
+root policy and exact initial-anchor signing. Independent review found/repaired
+mutable-scope and expiry gaps. Connected217pass/1platformskip; native component
+signing verified with an explicitly disposable artifact binding. No worker,
+activation, promotion or RSI loop claimed. Reconciled existing roadmap/backlog;
+next is high-water writer/signing and authenticated admission. Publication pending.
+See module ModLog and docs/operations/RSI_SWARM_DISPATCH.md for exact scope/evidence.
+
 ## 2026-10-14 — R15 planning baseline and independent oracle boundary
 
 WSP00/15/48/50/84/97: measured the existing registry dispatcher on exact main `57670f536`.

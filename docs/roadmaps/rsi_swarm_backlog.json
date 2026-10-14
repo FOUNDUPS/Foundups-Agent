@@ -1880,10 +1880,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.local_reviewer_qualification_20261013",
-    "base_commit": "4848d9ca022df826dbcb50e1258216df65558fd0",
+    "observation_path": "current_observation.isolated_enrollment_20261014",
+    "base_commit": "a3f656700c3d4398cfd67ea0ab113613ec4ad25a",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
-    "status": "BLOCKED",
+    "status": "IN_PROGRESS",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
@@ -1893,9 +1893,24 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Existing root-state installer consumes pre-existing authenticated owner configuration; establish real owner enrollment without fixture identities or self-issued grants. Use deterministic execution checks and independent review for one admitted author ticket; local model is advisory, not approval authority. Do not repeat unchanged qualification calls."
+    "next_action": "Complete protected high-water signing/writer authority and genuine store initialization after the exact initial-anchor signer. Then compose authenticated principal/reviewer/work manifest inputs and run one admitted native author ticket. Prior no-new-keys restriction is superseded for isolated owner installation; runtime gates remain."
   },
   "current_observation": {
+    "isolated_enrollment_20261014": {
+      "base_commit": "a3f656700c3d4398cfd67ea0ab113613ec4ad25a",
+      "authority": "012 authorized isolated local owner enrollment; no production or self-issued worker grants",
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014",
+      "custody_probe": "passed_real_systemd",
+      "isolation_probe": "passed_real_systemd_with_negative_controls",
+      "inactive_role_keys_created": 6,
+      "initial_anchor_signer": "component_verified_disposable_fixture_binding",
+      "connected_tests": {"passed": 217, "skipped": 1},
+      "generation_activated": false,
+      "native_worker_admitted": false,
+      "rsi_retained_benefit_demonstrated": false,
+      "hosted_publication": "pending",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#isolated-enrollment-bootstrap--2026-10-14"
+    },
     "layered_worker_qualification_20261008": {
       "base_commit": "0bcae38f3e701d9c13be6cfc749bbb27da7ffe40",
       "wsp15": {

@@ -1,3 +1,10 @@
+## Initial generation bootstrap — 2026-10-14
+
+The generation subsystem now has a root-policy-bound initial-anchor signer.
+Its real systemd component probe passed; complete enrollment and native worker
+admission remain pending. See [the API and scope](INTERFACE.md#initial-generation-anchor-bootstrap--2026-10-14)
+and the existing RSI dispatch runbook. No production service is enabled by this adapter.
+
 ## Current-generation model consumer checkpoint — 2026-10-07
 
 Existing producer/collector/valve wiring is locally qualified with disposable

@@ -1,3 +1,17 @@
+## Initial anchor bootstrap signer — 2026-10-14
+
+WSP00/15/22/48/50/71/84/97; base a3f656700. Audit found only abstract/test
+generation signers and writable-authority implementations; protected public
+reader factories already exist. Added the smallest private administrative adapter
+inside that subsystem: exact initial record signing from root policy and fresh
+systemd custody. No new scheduler or activation route. Independent review found
+scope mutation and policy-read expiry gaps; frozen state/protected comparisons
+and time rechecks close both, with regressions. Focused37pass; connected217pass/
+1Windows skip. Real Linux systemd final component signature verified with a
+disposable binding. Full enrollment, high-water writer and native ticket remain
+pending. Updated canonical planning/dispatch evidence and explicit CI selection;
+publication pending. TestModLog and dispatch runbook hold evidence boundaries.
+
 ## Canary provider publication closure — 2026-10-13
 
 WSP00/10/15/22/97; base `53bb8814494989548fcb3fd65de0f33331a5734f`.

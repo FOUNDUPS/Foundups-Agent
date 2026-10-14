@@ -1,5 +1,17 @@
 # Blocking secret scan
 
+## Isolated enrollment documentation review — 2026-10-14
+
+PR2132 head665011821 produced seven unreviewed whole-file bindings after updates
+to existing backlog and module ModLog. Independent exact-blob review checked each
+finding against main a3f656700: six backlog lines shifted15 and one unchanged
+changelog line shifted14. Five values match the installed tokenizer source SHA256;
+one resolves to its recorded7,701-byte Git blob; the final finding is unchanged
+previously reviewed prose. All seven old fingerprints are among the212 retained
+records. Append only these seven reviewed bindings (219 total); no scanner rule,
+path exclusion or history coverage changed. Failed CI38487655164 is preserved.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014/security-review.json`.
+
 `ci.yml` calls `security-scan.yml` for every pull request and main push. The
 same workflow scans all retained history on Mondays at 05:20 JST and on manual
 runs. It requires no service token/license and never uploads source to a scan
