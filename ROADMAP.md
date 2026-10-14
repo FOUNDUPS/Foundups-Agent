@@ -12,7 +12,29 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — bounded initial high-water signing (2026-10-14):**
+**Current checkpoint — protected initial writer (2026-10-14):**
+PR #2133 merged as `5dd7b7b9f`; reviewed/merged trees match. PR checks and main
+CI38492205671/CodeQL38492205277 passed; its clean owned lane is retired with a
+verified recovery bundle. Reuse-first permits the missing small writer adapter;
+it does not prohibit justified new code or isolated owner installation.
+
+The adapter constructs existing stores from protected owner/bootstrap policy and
+installer-trusted filesystem records. It guards the initial transaction, witness
+updates, expiry and scope. The existing SQLite owner adds non-creating opening
+and checks authority inside its transaction. Connected294pass/1Windows skip;
+independent115pass. A fresh four-process Linux component trial issued this bounded
+writer capability, committed state and verified it without credentials. Initial
+failed adversarial tests and the rejected first candidate remain preserved.
+
+Manifest digests remain fixtures. No generation activation, native author,
+promotion or retained RSI gain is established. WSP15 stays18/P0 (4/5/5/4): next
+compose existing authenticated manifest provisioning with real admitted inputs,
+then run one native author and independent verifier. Source publication is a
+separate gate; see [evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#protected-initial-writer--2026-10-14).
+Holo remains degraded pending governed recovery of its executing maintenance
+lease; direct source retrieval is not CURRENT semantic evidence.
+
+**Historical checkpoint — bounded initial high-water signing (2026-10-14):**
 PR #2132 merged as `1af66972c`; its reviewed tree matches main. PR CI/CodeQL and
 main CI38489173741/CodeQL38489173144 passed. Its owned branch/worktree are retired
 with a verified recovery bundle. The blanket no-new rule is superseded for

@@ -1,3 +1,14 @@
+## Protected writer regression closure — 2026-10-14
+
+Connected294passed/1existingWindows symlink skip (168.43s), including63adapter and
+49SQLite cases plus existing signer/anchor/reader/isolation/provisioning and five
+external held-out cases. Independent115passed (106.20s). Existing vetted Python3.12
+`-S -B -m pytest --noconftest --import-mode=importlib -p pytest_asyncio.plugin
+-p no:cacheprovider -q`; bytecode/dotenv/plugin autoload disabled, vetted dependencies
+and owned checkout in PYTHONPATH. Exact commands/hashes are in the external builder
+receipt; JUnit and failed-before evidence retained. Four-process corrected Linux
+probe passed; component truth only, no native worker admission or power-loss proof.
+
 ## Initial high-water v2 qualification — 2026-10-14
 
 Focused76pass (worker68 plus coordinator-held-out8); connected256pass/1Windows

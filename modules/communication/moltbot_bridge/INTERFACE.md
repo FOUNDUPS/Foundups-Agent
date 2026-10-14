@@ -1,3 +1,40 @@
+## Protected initial writer authority — 2026-10-14
+
+`load_initial_generation_high_water_authority(*, owner_config_path, bootstrap_path,
+high_water_receipt_path, witness_receipt_path, repo_root)` returns an opaque
+authority/boundary pair. `require_initial_generation_high_water_authority(authority,
+boundary)` rejects foreign boundaries and yields a guarded existing-store handle.
+The loader constructs all dependencies; no supplied signer/store/approval callback.
+Root-protected duplicate-free owner configuration, explicit v2 bootstrap policy and
+two distinct external qualification records are mandatory. Existing witness must
+already be provisioned. Missing initial high-water state is allowed only with an
+empty witness; existing signed state must match the approved initial binding.
+
+Receipt schema `reddog_generation_store_qualification.v1` has exact fields:
+`schema_version`, `store_kind`, `repo_root_digest`, `root`, `path`, `store_id`,
+`device`, `root_inode`, `owner_uid`, `owner_gid`, `evidence_scope`, `probe_path`,
+`probe_content_sha256`, `probe_size_bytes`, `file_fsynced`, `directory_fsynced`,
+`reopened_equal`, `power_loss_tested`. Scope is `filesystem_fsync_reopen`; size is
+an integer1..65536. Three observed-success flags must be true and power-loss false.
+Raw record SHA256 binds the owner receipt ID. The installer independently checks
+observations before protected installation; runtime verifies scope, owner/path/
+inode/device/retained-probe identity. Stored Booleans are not independent proof.
+
+Allowed mutations are initial prepare, witness advance to that authenticated
+pending revision, commit after matching witness, and abort before witness advance.
+Direct nontransactional advance rejects. Config replacement, expiry, forged handles,
+scope substitution, malformed receipts, missing witnesses and mismatched witness
+identity/required column layout fail closed. Witness file inodes are not pinned.
+Authority is process-local; full same-process compromise is outside its boundary.
+
+Existing `SqliteMonotonicAuthorityStore` gains optional `require_existing=False`
+and `mutation_guard=None`. With `require_existing=True`, SQLite uses `mode=rw`,
+requires existing metadata/column layout, and never creates missing stores/schema.
+The guard executes after transaction/current-state acquisition, before insertion,
+and before commit; an exception rolls back. Defaults preserve other callers.
+Full SQLite schema-object inventory and power-loss durability are not certified.
+This API issues only initial-writer authority, not manifest or worker admission.
+
 ## Initial high-water bootstrap v2 — 2026-10-14
 
 `load_initial_generation_bootstrap_signer(*, bootstrap_path, repo_root)` extends

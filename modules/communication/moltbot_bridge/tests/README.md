@@ -1,3 +1,12 @@
+## Initial writer qualification
+
+Run `test_reddog_signer_runtime_generation_bootstrap_authority.py` together with
+`test_reddog_sqlite_monotonic_authority_store.py` and the signer/anchor/provisioning
+suites. Fixtures use real disposable storage with explicitly synthetic root policy
+and custody; they do not constitute runtime admission. The existing CI bootstrap
+step includes both files. External Linux probes separately exercise actual systemd
+custody, protected installation and public verification; see the dispatch evidence.
+
 ## Initial anchor and high-water bootstrap tests — 2026-10-14
 
 Run these together with `python -B -m pytest --noconftest --import-mode=importlib

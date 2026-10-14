@@ -1,3 +1,10 @@
+## Protected generation writer — 2026-10-14
+
+The missing initial-writer adapter now composes existing stores with protected
+owner/receipt bindings and per-mutation guards. Real isolated component execution
+and independent validation passed; manifest admission and native workers remain
+open. See [the API and trust limits](INTERFACE.md#protected-initial-writer-authority--2026-10-14).
+
 ## Bounded high-water signing — 2026-10-14
 
 The existing generation bootstrap signer now has a separate explicit v2 interface

@@ -1,5 +1,15 @@
 # Blocking secret scan
 
+## Protected initial writer documentation bindings — 2026-10-14
+
+On base5dd7b7b9f, independent review rechecked the same seven unchanged metadata
+findings against exact staged blobs: six backlog lines shifted37 and one ModLog
+line shifted12. Five tokenizer source digests were recomputed, one Git blob was
+verified (7,701 bytes), and one unchanged prose line was inspected. Add only their
+seven reviewed bindings, retaining all226 prior fingerprints (233 total). No
+scanner rule or coverage changed. Evidence: existing20261014 enrollment directory,
+`writer2/writer-security-review.json`; source blobs are pinned in that review.
+
 ## Initial high-water documentation bindings — 2026-10-14
 
 On base1af66972c, independent review rechecked the same seven unchanged metadata
