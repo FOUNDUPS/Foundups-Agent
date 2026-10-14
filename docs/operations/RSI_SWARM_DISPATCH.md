@@ -1,3 +1,60 @@
+## Protected initial writer — 2026-10-14
+
+Base `5dd7b7b9f569ddaf966a21e9cc95e5a764d29588`; WSP00/5/6/10/11/15/22/48/50/62/71/84/97.
+WSP97 found existing persistence/readers but no protected writable issuer. One
+small sibling adapter composes those owners; no new scheduler, store or roadmap.
+It accepts protected configuration paths, not caller-built stores or approval
+Booleans. Owner, bootstrap, receipt, identity, filesystem and witness bindings
+must agree. The existing v2 signer derives the approved initial revision.
+
+Each writer operation rechecks current policy and lifetime; witness advancement
+requires the authenticated pending transaction. Commit requires matching witness;
+abort after witness advancement rejects. Exact scalar types reject equality
+spoofing. The existing SQLite store has compatible optional `require_existing`
+and `mutation_guard` arguments: non-creating opening on every connection, identity
+and required-column checks, guard after acquiring the transaction/current state
+and before INSERT/COMMIT, explicit rollback on failure. Other callers keep defaults.
+This does not validate all SQLite schema objects or defend compromised same-UID
+code/root administration. Checks are sampled transaction boundaries, not a claim
+of immutable execution or hard real-time expiry during the storage engine commit.
+
+Validation: connected294passed/1existingWindows symlink skip in168.43s; independent
+115passed in106.20s. CI now selects the writer and SQLite suites alongside the
+existing signer/anchor/isolation tests. Registry1702tests/270quarantined; backend
+manifest1426files, with only the existing SQLite source digest changed; generated
+manifest and browser/test pins were synchronized.
+
+Review exposed scope-equality spoofing, expiry after pending reads, database
+recreation and private loader callback exposure. Equality was repaired before the
+first native positive probe; that probe did not close the subsequent expiry and
+recreation failures. Fixes and later SQLite write-boundary expiry tests passed.
+Preserve initial receipts as history; do not promote their acceptance.
+
+Corrected native trial: independent filesystem review precedes root installation
+of receipts for the actual separate store directories. Four isolated processes
+initialize, reopen, exercise the bounded writer and publicly verify persisted state.
+Six wrong-authority/order/revision calls reject. State hash is
+`b511814e39706133461326df7ede047d45097ea1af9eb206915f36da2c0ff05f`.
+Receipts establish observed fsync/process-reopen behavior under trusted installation;
+both directories share a device, and power-loss safety is not established. Manifest
+digests are fixtures, source package initializers are omitted in this component
+probe, and no complete service startup or native author admission is claimed.
+
+Evidence root: `O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014/`.
+`writer-authority-builder-receipt.json` and `writer-authority-connected-final.xml`
+bind local testing. `writer2/` contains source manifest, installed qualification,
+native probe, independent review and persisted-state evidence. The first trial and
+failed tests remain outside that subdirectory. Internal Codex builder/reviewer
+participation is not resident OpenClaw/Hermes authorship. Paid provider calls0;
+coordinator/local-compute cost unknown. No savings claim.
+
+Prior closure: PR2133 head d4fa9f54f merged5dd7b7b9f with identical tree; PR
+CI38491271685/CodeQL38491269838 and mainCI38492205671/CodeQL38492205277 passed.
+Owned lane retired with verified bundle. Current publication follows its own checks.
+Next18/P0: existing authenticated manifest provisioning, then one native author
+ticket; retained later-use benefit and autonomous next-task selection remain open.
+Holo remains STALE; do not reset another claim or shorten its recovery lease.
+
 ## Initial high-water signing — 2026-10-14
 
 Base `1af66972ce90636ac224663d5343bba5d7dbbf50`; WSP00/5/6/10/15/22/48/71/84/97.

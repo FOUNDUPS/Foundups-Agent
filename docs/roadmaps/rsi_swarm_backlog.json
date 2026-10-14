@@ -1880,8 +1880,8 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.initial_high_water_20261014",
-    "base_commit": "1af66972ce90636ac224663d5343bba5d7dbbf50",
+    "observation_path": "current_observation.initial_writer_20261014",
+    "base_commit": "5dd7b7b9f569ddaf966a21e9cc95e5a764d29588",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
     "status": "IN_PROGRESS",
     "wsp15": {
@@ -1893,9 +1893,46 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Construct protected initial writer authority from actual qualified stores; keep manifest validation and activation guards. Then run one admitted native author ticket with independent verification. V2 initial-record signing is component-tested; no native worker or retained benefit yet."
+    "next_action": "Compose existing authenticated manifest provisioning using real admitted inputs, then one native author and independent verifier. Protected initial writer component is validated; fixture manifests do not establish activation, worker admission or retained RSI benefit."
   },
   "current_observation": {
+    "initial_writer_20261014": {
+      "base_commit": "5dd7b7b9f569ddaf966a21e9cc95e5a764d29588",
+      "scope": "root_installed_initial_writer_over_existing_stores",
+      "connected_tests": {
+        "passed": 294,
+        "skipped": 1
+      },
+      "independent_tests": {
+        "passed": 115
+      },
+      "native_component": "four_process_real_installer_qualified_writer_and_public_reopen",
+      "writer_capability_issued": true,
+      "fixture_manifest": true,
+      "generation_activated": false,
+      "native_worker_admitted": false,
+      "retained_rsi_benefit_demonstrated": false,
+      "qualification_scope": "filesystem_fsync_reopen",
+      "power_loss_tested": false,
+      "initial_candidate_review": "rejected_and_repaired_evidence_preserved",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "prior_closure": {
+        "pr": 2133,
+        "merge": "5dd7b7b9f569ddaf966a21e9cc95e5a764d29588",
+        "main_ci": 38492205671,
+        "main_codeql": 38492205277,
+        "result": "success",
+        "owned_lane": "retired_with_verified_bundle"
+      },
+      "holo": {
+        "freshness": "STALE",
+        "retrieval": "explicit_exact_source_fallback",
+        "manual_claim_reset": false
+      },
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#protected-initial-writer--2026-10-14"
+    },
     "initial_high_water_20261014": {
       "base_commit": "1af66972ce90636ac224663d5343bba5d7dbbf50",
       "scope": "explicit_v2_initial_high_water_signing_only",

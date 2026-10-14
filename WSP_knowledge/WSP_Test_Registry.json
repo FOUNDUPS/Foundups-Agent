@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1701,
+  "total_tests": 1702,
   "quarantined_tests": 270,
   "tests": [
     {
@@ -11540,6 +11540,19 @@
       "description": "Adversarial tests for the durable signer runtime generation anchor."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_signer_runtime_generation_bootstrap_authority",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_authority.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Real disposable persistence; synthetic root installation, UID and custody.\n\nThese fixtures do not qualify a production filesystem or issue runtime grants."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_signer_runtime_generation_bootstrap_signer",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_signer.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -12053,7 +12066,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_work_order_signature_verifier.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,

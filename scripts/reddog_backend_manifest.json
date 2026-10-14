@@ -2208,7 +2208,7 @@
     "modules/communication/moltbot_bridge/src/reddog_signer_system_service_owner_inputs.py": "6ec9d7c8555e75ac9d3964af9ec04330f091101ded925b30abef7a01dad6bbc2",
     "modules/communication/moltbot_bridge/src/reddog_signer_system_service_wsp71_resolver_supply.py": "cf6aca143b68dad2b19f38b45fe59d6fb8edac13681fe2fa436b794a62460c31",
     "modules/communication/moltbot_bridge/src/reddog_signer_wsp71_ephemeral_backend_factory.py": "ad373deb2aaec6aca2052b731a1d1d5e0120798d03e5df58b79db4bb63742990",
-    "modules/communication/moltbot_bridge/src/reddog_sqlite_monotonic_authority_store.py": "3376faa886253ed6be6fef4944ccd41f9a9474e61100463172397fe38b7dd4eb",
+    "modules/communication/moltbot_bridge/src/reddog_sqlite_monotonic_authority_store.py": "02f67ccdd8f662228be54bb18051ef93295cbc48235a206c944da8bd7325102c",
     "modules/communication/moltbot_bridge/src/reddog_start_operations_control.py": "b62a177afaf7ddd6917151848020c412011a21eead1c11d6b5b4fa1b62358da7",
     "modules/communication/moltbot_bridge/src/reddog_start_operations_control_actions.py": "20217621551e07d449550fece368f603ebc3b997139424d289e6e8ddd3c7a6dc",
     "modules/communication/moltbot_bridge/src/reddog_start_operations_control_authority.py": "da02003a3b7e5c3ae2ed74aba980586af58f83272a7f8415dbbaff381552a6b7",

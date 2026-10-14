@@ -1,3 +1,11 @@
+## Protected writer checkpoint — 2026-10-14
+
+Initial writer component validated:294pass/1platform skip, independent115pass,
+fresh isolated persistence/public-read trial. Root-installed records qualify only
+observed fsync/process-reopen; manifest values remain fixtures. Next18/P0: existing
+authenticated manifest activation and a native author ticket, independent evaluation
+and retained later-use benefit. Follow root ROADMAP.md for system completion gates.
+
 ## Initial high-water signing checkpoint — 2026-10-14
 
 18/P0 (C4/I5/D5/Impact4): native enrollment remains the critical path. PR2132 is
