@@ -1880,8 +1880,8 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.isolated_enrollment_20261014",
-    "base_commit": "a3f656700c3d4398cfd67ea0ab113613ec4ad25a",
+    "observation_path": "current_observation.initial_high_water_20261014",
+    "base_commit": "1af66972ce90636ac224663d5343bba5d7dbbf50",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
     "status": "IN_PROGRESS",
     "wsp15": {
@@ -1893,9 +1893,45 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Complete protected high-water signing/writer authority and genuine store initialization after the exact initial-anchor signer. Then compose authenticated principal/reviewer/work manifest inputs and run one admitted native author ticket. Prior no-new-keys restriction is superseded for isolated owner installation; runtime gates remain."
+    "next_action": "Construct protected initial writer authority from actual qualified stores; keep manifest validation and activation guards. Then run one admitted native author ticket with independent verification. V2 initial-record signing is component-tested; no native worker or retained benefit yet."
   },
   "current_observation": {
+    "initial_high_water_20261014": {
+      "base_commit": "1af66972ce90636ac224663d5343bba5d7dbbf50",
+      "scope": "explicit_v2_initial_high_water_signing_only",
+      "focused_tests": {
+        "passed": 76
+      },
+      "connected_tests": {
+        "passed": 256,
+        "skipped": 1
+      },
+      "native_component": "real_isolated_custody_and_store_transitions_then_credential_free_public_reopen",
+      "fixture_store_receipt_ids": true,
+      "writer_capability_issued": false,
+      "generation_activated": false,
+      "native_worker_admitted": false,
+      "retained_rsi_benefit_demonstrated": false,
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "prior_closure": {
+        "pr": 2132,
+        "merge": "1af66972ce90636ac224663d5343bba5d7dbbf50",
+        "main_ci": 38489173741,
+        "main_codeql": 38489173144,
+        "result": "success",
+        "owned_lane": "retired_with_verified_bundle"
+      },
+      "holo": {
+        "freshness": "STALE",
+        "index_gap_detected": true,
+        "maintenance": "completion_and_stop_timeouts",
+        "resume": "rejected_task_executing",
+        "manual_claim_reset": false
+      },
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#initial-high-water-signing--2026-10-14"
+    },
     "isolated_enrollment_20261014": {
       "base_commit": "a3f656700c3d4398cfd67ea0ab113613ec4ad25a",
       "authority": "012 authorized isolated local owner enrollment; no production or self-issued worker grants",
@@ -1908,7 +1944,7 @@
       "generation_activated": false,
       "native_worker_admitted": false,
       "rsi_retained_benefit_demonstrated": false,
-      "hosted_publication": "pending",
+      "hosted_publication": "PR2132 merged; exact-main CI and CodeQL passed",
       "details": "docs/operations/RSI_SWARM_DISPATCH.md#isolated-enrollment-bootstrap--2026-10-14"
     },
     "layered_worker_qualification_20261008": {

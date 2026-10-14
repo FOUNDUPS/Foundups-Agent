@@ -1,5 +1,15 @@
 # Blocking secret scan
 
+## Initial high-water documentation bindings — 2026-10-14
+
+On base1af66972c, independent review rechecked the same seven unchanged metadata
+findings against exact staged blobs: six backlog lines shifted36 and one ModLog
+line shifted12. Five tokenizer source digests were recomputed, one Git blob was
+verified (7,701 bytes), and one unchanged prose line was inspected. Add only their
+seven reviewed bindings, retaining all219 prior fingerprints (226 total). No
+scanner rule or coverage changed. Evidence: existing20261014 enrollment directory,
+`high-water-security-review.json`; source blobs are pinned in that review.
+
 ## Isolated enrollment documentation review — 2026-10-14
 
 PR2132 head665011821 produced seven unreviewed whole-file bindings after updates

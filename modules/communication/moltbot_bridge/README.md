@@ -1,3 +1,11 @@
+## Bounded high-water signing — 2026-10-14
+
+The existing generation bootstrap signer now has a separate explicit v2 interface
+for initial high-water contents. V1 stays anchor-only. Actual isolated signing,
+store transitions and a later public-only read passed as component probes;
+protected writer admission and native workers remain pending. See
+[the v2 contract](INTERFACE.md#initial-high-water-bootstrap-v2--2026-10-14).
+
 ## Initial generation bootstrap — 2026-10-14
 
 The generation subsystem now has a root-policy-bound initial-anchor signer.

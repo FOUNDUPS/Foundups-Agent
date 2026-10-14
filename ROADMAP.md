@@ -12,7 +12,27 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — isolated enrollment bootstrap (2026-10-14):**
+**Current checkpoint — bounded initial high-water signing (2026-10-14):**
+PR #2132 merged as `1af66972c`; its reviewed tree matches main. PR CI/CodeQL and
+main CI38489173741/CodeQL38489173144 passed. Its owned branch/worktree are retired
+with a verified recovery bundle. The blanket no-new rule is superseded for
+isolated owner installation; protected runtime admission remains required.
+
+The next slice extends the same signer with an explicit v2 schema/loader for
+initial prepared, committed and abort high-water records. V1 stays anchor-only.
+Local connected validation:256 passed/1 platform skip, including76 focused cases.
+Real isolated Linux signing/persistence and a separate credential-free public
+reader passed with fixture store identities. This proves component behavior,
+not a writer capability, generation activation, native author ticket or RSI.
+WSP15 remains18/P0 (4/5/5/4): next is the protected writer factory and qualified
+store evidence, then existing manifest admission and one native author ticket.
+Current source/review/publication evidence belongs to the associated change;
+[scope, probes and remaining gates](docs/operations/RSI_SWARM_DISPATCH.md#initial-high-water-signing--2026-10-14).
+Holo maintenance timed out; its task remains executing until existing lease
+recovery permits retry. Exact-source lexical retrieval is explicitly degraded,
+not CURRENT semantic evidence. Do not reset claims or shorten leases to proceed.
+
+**Historical checkpoint — isolated enrollment bootstrap (2026-10-14):**
 012 superseded the prior blanket no-new-keys restriction for isolated local RSI
 enrollment. This permits bounded owner installation, not forged grants or wider
 production authority. Six separate inactive role keys now have root-only Linux
@@ -30,7 +50,7 @@ the exact initial-anchor signer. Next: bind high-water signing and its writer
 authority to protected owner policy, initialize/reopen real stores, then complete
 authenticated manifest admission and one native author ticket. Existing runtime
 gates remain enforced. Local connected validation: 217 passed, one platform skip;
-publication and hosted checks pending. See the
+PR #2132 and exact-main hosted checks passed. See the
 [enrollment evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#isolated-enrollment-bootstrap--2026-10-14).
 
 **Historical checkpoint — R15 deterministic planning baseline (2026-10-14):**

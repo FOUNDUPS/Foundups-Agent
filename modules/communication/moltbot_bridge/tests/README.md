@@ -1,4 +1,4 @@
-## Initial anchor bootstrap tests — 2026-10-14
+## Initial anchor and high-water bootstrap tests — 2026-10-14
 
 Run these together with `python -B -m pytest --noconftest --import-mode=importlib
 -p pytest_asyncio.plugin -p no:cacheprovider -q`:
@@ -9,8 +9,10 @@ Run these together with `python -B -m pytest --noconftest --import-mode=importli
 - `modules/communication/moltbot_bridge/tests/test_reddog_signer_process_isolation_gate.py`
 - `modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py`
 
-The new37 cases use real Ed25519 operations with substituted custody/root-read/
-isolation boundaries. They prove policy scope, immutable state, altered inputs,
+The76 cases cover v1 and v2 with real Ed25519 operations with substituted custody/root-read/
+isolation boundaries. V2 adds canonical initial forms, authenticated-revision
+derivation, cross-schema rejection, header mutation and two-signature expiry.
+The real disposable store test covers prepare/abort/witness/commit. They prove policy scope, immutable state, altered inputs,
 key mismatch, clock rollback/expiry, and permission expiry during resolution and
 policy reads. They do not establish OS confinement or native admission. Separate
 real systemd component evidence is recorded in RSI_SWARM_DISPATCH; it does not

@@ -1,3 +1,14 @@
+## Initial high-water v2 qualification — 2026-10-14
+
+Focused76pass (worker68 plus coordinator-held-out8); connected256pass/1Windows
+platform skip in20.84s. Same five-suite command below, using vetted Python3.12
+with `-S -B`, plugin autoload disabled, bytecode/dotenv disabled and shared vetted
+dependencies in PYTHONPATH. JUnit `high-water-connected.xml` in the existing
+20261014 enrollment evidence directory. Real Linux probe confirms custody,
+prepare/abort/witness/commit, stale CAS and separate public-only reopening.
+Fixture store IDs, no writer capability or worker admission. External probe
+packaging failure was retained before successful214-file source sealing.
+
 ## Initial generation signer tests — 2026-10-14
 
 WSP00/5/6/15/22/71/97. New focused suite37pass in2.63s; connected five suites
