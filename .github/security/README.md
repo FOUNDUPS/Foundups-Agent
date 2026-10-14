@@ -1,5 +1,17 @@
 # Blocking secret scan
 
+## Writer manifest metadata re-review — 2026-10-14
+
+PR2134 head `a1b1e92aa` failed security job115629644317: changing the generated
+manifest invalidated37 whole-file bindings. Independent review verified every
+reported line against exact-head source bytes using the generator's CRLF-to-LF
+normalization:35 generic-key and2 Discord-token matches are source SHA256 metadata.
+All37 prior fingerprints and historical source hashes were verified; no unknown
+finding was approved. Retain233 prior entries and add37 exact bindings (270 total).
+No scanner rule, scope or source changed. Failed CI38495316404 is preserved.
+Evidence: existing20261014 enrollment directory,
+`writer2/writer-manifest-security-review.json` (unsigned independent review).
+
 ## Protected initial writer documentation bindings — 2026-10-14
 
 On base5dd7b7b9f, independent review rechecked the same seven unchanged metadata
