@@ -221,3 +221,215 @@ def test_custody_denial_is_not_silently_accepted(installed, monkeypatch):
     monkeypatch.setattr(signer._resolver, "resolve", lambda *a, **k: SimpleNamespace(success=False))
     with pytest.raises(ValueError, match="custody_rejected"):
         signer.authenticate(subject._load(installed.path, installed.repo)[4])
+
+
+@pytest.fixture
+def bootstrap(installed):
+    """Synthetic owner policy and custody; no runtime permission or durability claim."""
+    installed.value.update(schema_version=subject.BOOTSTRAP_SCHEMA_VERSION,
+                           high_water_binding=dict(rollback_domain_digest="sha256:" + "c"*64,
+                           witness_store_id="witness-1", witness_durability_receipt_id="sha256:" + "d"*64,
+                           witness_binding_context_digest="sha256:" + "e"*64))
+    installed.value["permission"]["purpose"] = subject.BOOTSTRAP_PURPOSE
+    installed.path.write_bytes(subject._canonical(installed.value))
+    return installed
+
+
+def _open_bootstrap(state):
+    return subject.load_initial_generation_bootstrap_signer(bootstrap_path=state.path, repo_root=state.repo)
+
+
+def _high_water(state, form="committed"):
+    signer = _open_bootstrap(state)
+    payload = subject._load(state.path, state.repo, bootstrap=True)[4]
+    anchor = json.loads(payload)
+    tag = signer.authenticate(payload)
+    # Independent canonical hash calculation includes the real verified signature.
+    revision = hashlib.sha256(subject._canonical({**anchor, "authentication_tag": tag})).hexdigest()
+    next_value = dict(generation=1, revision=revision)
+    pending = dict(transaction_id="sha256:" + "f"*64, expected=None,
+                   next_value=next_value, previous_anchor_state_json="{}")
+    entries = {} if form == "abort" else {state.value["anchor_id"]: dict(
+        current=next_value if form == "committed" else None,
+        pending=pending if form == "prepared" else None)}
+    value = dict(schema_version="reddog_signer_runtime_generation_high_water.v2",
+                 store_id=state.value["high_water_store_id"],
+                 durability_receipt_id=state.value["high_water_durability_receipt_id"],
+                 authenticator_id=signer.authenticator_id, entries=entries,
+                 **state.value["high_water_binding"])
+    state.resolutions.clear()
+    return signer, value
+
+
+@pytest.mark.parametrize("form", ["prepared", "committed", "abort"])
+def test_v2_exact_high_water_forms_verify_with_fresh_custody(bootstrap, form):
+    signer, value = _high_water(bootstrap, form)
+    payload = subject._canonical(value)
+    signature = signer.authenticate(payload)
+    authority, boundary = create_signer_runtime_generation_verifier_authority(bootstrap.public)
+    assert boundary.require(authority).verify(payload, signature)
+    assert len(bootstrap.resolutions) == (1 if form == "abort" else 2)
+
+
+def test_loaders_reject_cross_schema_and_purpose(installed, bootstrap):
+    with pytest.raises(ValueError, match="shape_invalid"):
+        _open(bootstrap)
+    bootstrap.value["permission"]["purpose"] = subject.PURPOSE
+    bootstrap.path.write_bytes(subject._canonical(bootstrap.value))
+    with pytest.raises(ValueError):
+        _open_bootstrap(bootstrap)
+    bootstrap.value.pop("high_water_binding")
+    bootstrap.value["schema_version"] = subject.SCHEMA_VERSION
+    bootstrap.path.write_bytes(subject._canonical(bootstrap.value))
+    with pytest.raises(ValueError, match="shape_invalid"):
+        _open_bootstrap(bootstrap)
+    assert not installed.resolutions
+
+
+@pytest.mark.parametrize("field", ["schema_version", "store_id", "durability_receipt_id", "authenticator_id",
+                                 "rollback_domain_digest", "witness_store_id",
+                                 "witness_durability_receipt_id", "witness_binding_context_digest", "extra"])
+def test_v2_header_substitution_rejected_before_custody(bootstrap, field):
+    signer, value = _high_water(bootstrap)
+    value[field] = "different"
+    with pytest.raises(ValueError):
+        signer.authenticate(subject._canonical(value))
+    assert not bootstrap.resolutions
+
+
+@pytest.mark.parametrize("mutation", [
+    lambda e: e.update(extra=None), lambda e: e["anchor-1"].update(extra=None),
+    lambda e: e["anchor-1"]["pending"].update(expected=dict(generation=1, revision="a"*64)),
+    lambda e: e["anchor-1"]["pending"].update(previous_anchor_state_json='{"extra":1}'),
+    lambda e: e["anchor-1"]["pending"].update(transaction_id="sha256:" + "0"*64),
+    lambda e: e["anchor-1"]["pending"].update(extra=None),
+    lambda e: e["anchor-1"]["pending"]["next_value"].update(generation=True),
+    lambda e: e["anchor-1"]["pending"]["next_value"].update(generation=2),
+    lambda e: e["anchor-1"].update(pending=None),
+])
+def test_v2_invalid_initial_entry_rejected_before_custody(bootstrap, mutation):
+    signer, value = _high_water(bootstrap, "prepared")
+    mutation(value["entries"])
+    with pytest.raises(ValueError):
+        signer.authenticate(subject._canonical(value))
+    assert not bootstrap.resolutions
+
+
+@pytest.mark.parametrize("change", [lambda b: b+b" ", lambda b: b[:-1]+b',"entries":{}}',
+                                  lambda b: b" "*16385, lambda b: b"[]"])
+def test_v2_noncanonical_duplicate_oversize_or_wrong_shape_rejected(bootstrap, change):
+    signer, value = _high_water(bootstrap)
+    with pytest.raises(ValueError):
+        signer.authenticate(change(subject._canonical(value)))
+    assert not bootstrap.resolutions
+
+
+def test_v2_wrong_revision_does_not_sign_high_water(bootstrap):
+    signer, value = _high_water(bootstrap)
+    value["entries"]["anchor-1"]["current"]["revision"] = "a"*64
+    with pytest.raises(ValueError, match="revision_invalid"):
+        signer.authenticate(subject._canonical(value))
+    assert len(bootstrap.resolutions) == 1  # Only the approved anchor was signed.
+
+
+def test_v2_header_override_and_policy_replacement_rejected(bootstrap):
+    signer, value = _high_water(bootstrap)
+    with pytest.raises(TypeError):
+        signer._high_water_header["store_id"] = "different"
+    object.__setattr__(signer, "_high_water_header", {**signer._high_water_header, "store_id": "different"})
+    value["store_id"] = "different"
+    with pytest.raises(ValueError, match="config_changed"):
+        signer.authenticate(subject._canonical(value))
+    signer, value = _high_water(bootstrap)
+    bootstrap.value["high_water_binding"]["witness_store_id"] = "different"
+    bootstrap.path.write_bytes(subject._canonical(bootstrap.value))
+    with pytest.raises(ValueError, match="config_changed"):
+        signer.authenticate(subject._canonical(value))
+    assert not bootstrap.resolutions
+
+
+@pytest.mark.parametrize("sign_number", [1, 2])
+def test_v2_expiry_during_either_signature_returns_no_high_water(bootstrap, monkeypatch, sign_number):
+    signer, value = _high_water(bootstrap)
+    original = subject.encode_ed25519_signature
+    calls = []
+    def expire(raw):
+        calls.append(1)
+        if len(calls) == sign_number:
+            bootstrap.clock["wall"] = 1100.
+        return original(raw)
+    monkeypatch.setattr(subject, "encode_ed25519_signature", expire)
+    with pytest.raises(ValueError, match="expired"):
+        signer.authenticate(subject._canonical(value))
+    assert len(calls) == sign_number
+
+
+def test_v2_existing_writer_prepares_aborts_and_commits_disposable_state(bootstrap, tmp_path):
+    """Real local persistence, with explicitly synthetic policy and custody."""
+    from modules.communication.moltbot_bridge.src.reddog_atomic_signer_runtime_generation_high_water import AtomicSignerRuntimeGenerationHighWaterStore
+    from modules.communication.moltbot_bridge.src.reddog_sqlite_monotonic_authority_store import SqliteMonotonicAuthorityStore
+    from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_witness_binding import SignerRuntimeGenerationWitnessBinding
+    from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import SignerRuntimeGenerationHighWater
+    high_root, witness_root = tmp_path / "high", tmp_path / "witness"
+    metadata = bootstrap.value["high_water_binding"]
+    witness = SqliteMonotonicAuthorityStore(witness_root / "witness.sqlite", allowed_root=witness_root,
+        repo_root=bootstrap.repo, store_id=metadata["witness_store_id"], durability_receipt_id=metadata["witness_durability_receipt_id"])
+    binding = SignerRuntimeGenerationWitnessBinding(authenticator_id=_open_bootstrap(bootstrap).authenticator_id,
+        signer_public_key_fingerprint="sha256:" + hashlib.sha256(subject.decode_ed25519_public_key(bootstrap.public)).hexdigest(),
+        key_epoch="enrollment-1", runtime_root_digest="sha256:" + "b"*64,
+        high_water_store_id=bootstrap.value["high_water_store_id"], high_water_durability_receipt_id=bootstrap.value["high_water_durability_receipt_id"],
+        witness_store_id=witness.store_id, witness_durability_receipt_id=witness.durability_receipt_id)
+    metadata.update(rollback_domain_digest="sha256:" + hashlib.sha256(str(high_root.resolve()).encode()).hexdigest(),
+                    witness_binding_context_digest=binding.context_digest())
+    bootstrap.path.write_bytes(subject._canonical(bootstrap.value))
+    signer, value = _high_water(bootstrap)
+    authority, boundary = create_signer_runtime_generation_verifier_authority(bootstrap.public)
+    store = AtomicSignerRuntimeGenerationHighWaterStore(high_root / "high.json", allowed_root=high_root,
+        repo_root=bootstrap.repo, store_id=bootstrap.value["high_water_store_id"], durability_receipt_id=bootstrap.value["high_water_durability_receipt_id"],
+        signer=signer, verifier=boundary.require(authority), generation_witness_store=witness, generation_witness_binding=binding)
+    next_value = SignerRuntimeGenerationHighWater(**value["entries"]["anchor-1"]["current"])
+    pending = store.prepare("anchor-1", expected=None, next_value=next_value)
+    store.abort_prepared("anchor-1", pending.transaction_id)
+    assert store.load("anchor-1") is None and store.pending("anchor-1") is None
+    pending = store.prepare("anchor-1", expected=None, next_value=next_value)
+    store.witness_advance("anchor-1", expected=None, next_value=next_value)
+    store.commit_prepared("anchor-1", pending.transaction_id)
+    assert store.load("anchor-1") == store.witness_load("anchor-1") == next_value
+    assert store.pending("anchor-1") is None
+
+
+@pytest.mark.parametrize('value', [True, 1.0, '1'])
+def test_committed_generation_requires_actual_integer(bootstrap, value):
+    signer, record = _high_water(bootstrap)
+    record['entries']['anchor-1']['current']['generation'] = value
+    with pytest.raises(ValueError):
+        signer.authenticate(subject._canonical(record))
+    assert not bootstrap.resolutions
+
+@pytest.mark.parametrize('entries', [[], None, False])
+def test_abort_requires_an_actual_mapping(bootstrap, entries):
+    signer, record = _high_water(bootstrap, 'abort')
+    record['entries'] = entries
+    with pytest.raises(ValueError):
+        signer.authenticate(subject._canonical(record))
+    assert not bootstrap.resolutions
+
+def test_second_resolution_custody_failure_cannot_return_high_water(bootstrap, monkeypatch):
+    signer, record = _high_water(bootstrap)
+    original = signer._resolver.resolve
+    def revoke(reference, requester_id):
+        result = original(reference, requester_id)
+        if len(bootstrap.resolutions) == 2:
+            result.success = False
+        return result
+    monkeypatch.setattr(signer._resolver, 'resolve', revoke)
+    with pytest.raises(ValueError, match='custody_rejected'):
+        signer.authenticate(subject._canonical(record))
+    assert len(bootstrap.resolutions) == 2
+
+def test_v1_cannot_gain_v2_scope_by_header_override(installed):
+    signer = _open(installed)
+    object.__setattr__(signer, '_high_water_header', {'schema_version': 'invented'})
+    with pytest.raises(ValueError, match='config_changed'):
+        signer.authenticate(b'{}')
+    assert not installed.resolutions

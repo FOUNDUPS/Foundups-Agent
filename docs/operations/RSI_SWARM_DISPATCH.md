@@ -1,3 +1,55 @@
+## Initial high-water signing — 2026-10-14
+
+Base `1af66972ce90636ac224663d5343bba5d7dbbf50`; WSP00/5/6/10/15/22/48/71/84/97.
+WSP97 reuse review found no concrete protected generation-writer issuer. Existing
+reader factories and transaction/witness stores remain their respective owners.
+This slice extends the existing bootstrap signer only. Its separate v2 loader
+requires protected high-water header bindings and the existing isolated custody
+gate; v1 cannot acquire v2 scope. Approved revisions are derived from the verified
+signature of the exact protected anchor, including its authentication tag.
+
+Local focused76pass; connected five suites256pass/1Windows skip in20.84s.
+Eight coordinator-held-out cases passed before incorporation into regression
+coverage. The existing CI bootstrap step already selects these tests. A separate
+Codex worker implemented the source; this is not native OpenClaw/Hermes authorship.
+
+Live component probe: real root-installed policy and systemd credential delivery,
+prepare/abort/prepare/witness/commit, stale CAS and work-order rejection. A later
+process with no credential directory used existing public-only readers to verify
+persisted state and matching witness. Store receipt IDs and manifest digests were
+explicit fixtures. No writer capability, generation activation, worker admission,
+retained improvement, power-loss guarantee or complete service startup is claimed.
+The first probe failed before signing because the external namespace-source
+packager missed an import alias; corrected sealing includes214 source files.
+The failed probe and corrected result are both retained.
+
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014/` contains
+`high-water-connected.xml`, `high-water-independent.xml`,
+`high-water-probe-result2.json`, `high-water-source-manifest2.json` and
+`high-water-review.json`. The sealed source uses namespace shells, omitting package
+initializers. Actual local compute/coordination cost is unknown; no paid provider
+calls were made for these deterministic component checks.
+
+Prior slice closure: PR2132 head3f8c2129b merged as1af66972c with identical tree;
+PR CI38488239405/CodeQL38488212491 and main CI38489173741/CodeQL38489173144 passed.
+Owned lane retired; full recovery bundle and GitHub receipts are retained.
+Three-process disposable SQLite qualification and independent persisted-state
+review also passed; they prove fsync/reopen/CAS observations, not power-loss safety.
+
+Holo maintenance failure is preserved in `postmerge-holo-main.json`: completion
+timeout and owned stop timeouts. Subsequent process inspection found no Python
+processes; a source-matched query reports STALE. Resume was rejected because the
+persisted task remains executing. Its existing7500s assignment lease began at
+2026-10-14T00:17:53.432636Z. No manual claim/state reset occurred. Use the existing
+coordinator's expired-lease recovery, then resume the original incident; a resume
+pointer alone does not grant authority. Current work uses exact-source lexical
+reads with missing semantic coverage explicitly recorded.
+
+Next18/P0: root-protected factory constructs the existing concrete writer/witness,
+verifies actual paths and protected store evidence, and binds an opaque writable
+capability. Preserve the atomic provisioner's manifest validation, activation
+lease and commit guards. Header signing authorizes contents, not transition order.
+
 ## Isolated enrollment bootstrap — 2026-10-14
 
 Base `a3f656700c3d4398cfd67ea0ab113613ec4ad25a`; WSP00/15/22/48/50/71/84/97.

@@ -1,3 +1,11 @@
+## Initial high-water signing checkpoint — 2026-10-14
+
+18/P0 (C4/I5/D5/Impact4): native enrollment remains the critical path. PR2132 is
+merged and main-validated. V2 initial-record signing is now component-tested
+through real custody and persisted public verification. Next: protected writer
+factory/qualified store receipts, existing signed manifest admission, native
+author/verifier, governed retention and later-use benefit. No new orchestrator.
+
 ## Isolated enrollment — current checkpoint, 2026-10-14
 
 18/P0 (C4/I5/D5/Impact4): implement the remaining native enrollment path.

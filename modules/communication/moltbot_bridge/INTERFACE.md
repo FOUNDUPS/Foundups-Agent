@@ -1,3 +1,29 @@
+## Initial high-water bootstrap v2 — 2026-10-14
+
+`load_initial_generation_bootstrap_signer(*, bootstrap_path, repo_root)` extends
+the same source owner with explicit schema `reddog_generation_bootstrap.v2` and
+permission purpose `initial_generation_bootstrap`. All v1 identity, isolation,
+custody and expiry checks apply. Neither public loader accepts the other's schema.
+The v2 policy additionally requires `high_water_binding` with exactly
+`rollback_domain_digest`, `witness_store_id`, `witness_durability_receipt_id` and
+`witness_binding_context_digest`. These pin contents, not storage qualification.
+
+Besides the exact anchor, v2 accepts canonical ASCII JSON up to16384 bytes for
+the existing high-water v2 schema. Header fields must match protected policy.
+Entries permit only empty abort state, one initial pending transaction with null
+expected/current and previous snapshot `"{}"`, or one committed generation1 with
+no pending value. The approved revision is SHA256 of the canonical authenticated
+anchor including `authentication_tag`; it is never supplied by the caller.
+Pending IDs use the existing codec. Extra fields, alternate anchors/revisions,
+boolean generations, duplicate keys and noncanonical bytes reject. Prepared and
+committed signatures resolve custody for both anchor derivation and final signing;
+abort requires one resolution. Private keys are not retained between operations.
+
+The frozen header is re-derived from protected policy at every check. Authority is
+rechecked after anchor derivation and final signing. This layer does not establish
+transaction order, writer capability, physical durability, witness provenance or
+work-manifest admission. Existing CAS/witness/atomic provisioning gates own those.
+
 ## Initial generation anchor bootstrap — 2026-10-14
 
 `load_initial_generation_anchor_signer(*, bootstrap_path, repo_root)` in
