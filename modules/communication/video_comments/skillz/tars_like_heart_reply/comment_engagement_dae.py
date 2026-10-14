@@ -698,6 +698,7 @@ class CommentEngagementDAE:
                 mod_lookup=self.mod_lookup,
                 reply_debug_tags=self.reply_debug_tags,
                 video_title=self.video_title,  # NEW (2025-12-30): Video context for alignment detection
+                target_channel_id=self.channel_id,
                 session_id=self.session_id,  # Pre-action snapshots + action switch telemetry
             )
             logger.info("[DAE-CONNECT] Comment processor initialized")
@@ -1024,7 +1025,8 @@ class CommentEngagementDAE:
                         'reply_text_posted': result.get('reply_text_posted', ''),
                         'reply_source': result.get('reply_source', 'bot'),
                         'llm_source': result.get('llm_source', 'unknown'),  # NEW (2026-02-21): Track which LLM/skill generated reply
-                        'video_id': self.video_id,
+                        'video_id': result.get('video_id') or self.video_id,
+                        'video_title': result.get('video_title') or self.video_title,
                         'channel_id': self.channel_id,
                         'timestamp': datetime.now().isoformat(),
                     }
@@ -1113,7 +1115,8 @@ class CommentEngagementDAE:
                                 'llm_source': nested_result.get('llm_source', 'unknown'),  # NEW (2026-02-21): Track LLM source
                                 'is_nested': True,
                                 'parent_comment_idx': total_processed,
-                                'video_id': self.video_id,
+                                'video_id': nested_result.get('video_id') or result.get('video_id') or self.video_id,
+                                'video_title': nested_result.get('video_title') or result.get('video_title') or self.video_title,
                                 'channel_id': self.channel_id,
                                 'timestamp': datetime.now().isoformat(),
                             }
