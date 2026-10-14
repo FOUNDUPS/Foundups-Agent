@@ -1,3 +1,16 @@
+## Initial generation signer tests — 2026-10-14
+
+WSP00/5/6/15/22/71/97. New focused suite37pass in2.63s; connected five suites
+217pass/1Windows platform skip in17.00s. Exact commands/suite paths are in README;
+JUnit: `O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014/connected-tests.xml`.
+Initial32pass preceded independent-review repairs; final37 adds immutable-field,
+protected-field override, expiry-during-read/resolution and custody-denial controls.
+Native Linux systemd component probe used the new protected generation key and
+the existing real credential resolver/isolation gate. Final signature and changed-
+payload verification controls passed. Synthetic artifact binding, no generation
+activation or worker admission. Import-packaging failures before isolation
+qualification are retained in the evidence directory. Hosted results pending.
+
 ## Linux linked-path expectation closure — 2026-10-13
 
 Hosted CI38328790781 on dc5bb86f6 exposed a stale assertion: 1 failed/134 passed.

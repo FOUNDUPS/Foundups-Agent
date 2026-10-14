@@ -1,3 +1,55 @@
+## Isolated enrollment bootstrap — 2026-10-14
+
+Base `a3f656700c3d4398cfd67ea0ab113613ec4ad25a`; WSP00/15/22/48/50/71/84/97.
+012 explicitly superseded the earlier blanket prohibition on new isolated
+enrollment. Root-controlled installation is the initial trust step; it must not
+circularly demand an already-enrolled runtime. Runtime execution still requires
+the existing authenticated work-order, grant, reviewer and budget boundaries.
+
+Observed locally, outside the repository:
+
+- Real systemd credential custody passed delivery and wrong-requester, unlisted
+  credential, wrong-UID and expiry rejection checks under a non-root process.
+- The real signer isolation gate passed; same-UID consumer and wrong signer UID
+  rejected. Probe packaging initially omitted relative and non-module imports;
+  the failed attempts are preserved, followed by a successful exact-source probe.
+- Six unique Ed25519 roles were installed in root-owned mode-0600 files below
+  `/var/lib/foundups-rsi-enrollment/20261014/roles`. No private material entered
+  Git, model prompts or receipts. Keys alone are not grants. The dedicated
+  `rsi-enroll-20261014` Linux account has no login shell.
+- The new initial-anchor adapter uses a root-owned, duplicate-rejecting bootstrap
+  policy with an exact record, credential identity, permission and <=300s custody
+  window. It rechecks policy/expiry around resolution and signing, matches the
+  resolved public key and uses the existing Ed25519 public verifier.
+- A real systemd signing probe passed after independent review repairs. Its
+  artifact binding was explicitly disposable: no manifest, high-water store,
+  activation or native worker is claimed. Namespace package shells were used
+  for component isolation; full package/service startup was not qualified.
+
+Independent source review caught mutable signer scope and expiry during policy
+reads. Both were repaired and regression-tested. Connected local command:
+`python -S -B -m pytest --noconftest --import-mode=importlib -p pytest_asyncio.plugin
+-p no:cacheprovider -q` with the five suites listed in the module tests README:
+217 passed, one Windows platform skip. CI now selects the same suites explicitly.
+Hosted checks/publication remain pending. No model or paid-provider calls occurred.
+
+Evidence root: `O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014/`;
+`custody-probe-run.json`, `isolation-probe-run-attempt3.json`,
+`role-enrollment-receipt.json`, `signing-source-manifest-final.json`,
+`initial-anchor-probe-run-final.json`, `initial-anchor-probe-final.stdout`,
+`connected-tests.xml`. Source manifests distinguish exact base files from the
+uncommitted adapter bytes. Native results are component evidence, not a measured
+RSI improvement or a production receipt. Store receipt hashes are identity
+bindings, not proof of crash or power-loss durability.
+
+WSP97 reconciliation / next18/P0: the native admission dependency is implementable,
+not awaiting another permission answer. Still missing: scoped high-water signer,
+protected writable-store capability and genuine durable initialization, complete
+principal/reviewer/work manifest composition, and the admitted native author.
+Reuse the current anchor/CAS/witness/provisioning path; no replacement scheduler.
+Only after independent verification, authorized retention/rollback and later-use
+benefit may the minimum RSI loop be claimed.
+
 ## R15 registry component baseline — 2026-10-14
 
 Source `57670f536`; base `6c7405988`. Existing

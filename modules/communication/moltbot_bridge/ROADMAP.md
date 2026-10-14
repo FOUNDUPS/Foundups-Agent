@@ -1,4 +1,14 @@
-## Canary provider closure — current checkpoint, 2026-10-13
+## Isolated enrollment — current checkpoint, 2026-10-14
+
+18/P0 (C4/I5/D5/Impact4): implement the remaining native enrollment path.
+Prior permission blocking is superseded by 012's isolated installation authority.
+Exact initial-anchor signer is component-verified, including a real systemd
+credential/signature probe. Connected local217pass/1platformskip; hosted closure
+pending. Next: protected high-water signer/writer capability and durable store
+initialization, then complete authenticated native author admission. No G1–G5
+completion or autonomous improvement is claimed. Root ROADMAP/runbook own sequencing.
+
+## Canary provider closure — historical checkpoint, 2026-10-13
 
 Eligible 14/P1 (C2/I4/D4/Impact4): publish the isolated provider-selection repair
 after fresh-base tests, review and required checks. Configured Hermes/OpenClaw

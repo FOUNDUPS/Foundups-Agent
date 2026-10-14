@@ -12,7 +12,28 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — R15 deterministic planning baseline (2026-10-14):**
+**Current checkpoint — isolated enrollment bootstrap (2026-10-14):**
+012 superseded the prior blanket no-new-keys restriction for isolated local RSI
+enrollment. This permits bounded owner installation, not forged grants or wider
+production authority. Six separate inactive role keys now have root-only Linux
+custody. Live systemd credential and process-isolation probes passed. A new
+adapter inside the existing generation subsystem signs only one root-approved
+initial anchor record; it reuses existing custody, permission, isolation and
+public-verification contracts. The final native component probe passed with a
+disposable fixture binding. No generation, worker, promotion or RSI loop ran.
+
+WSP15 remains 18/P0 (4/5/5/4): enrollment is now implementation work, not a pending
+012 permission question. Source audit found missing custody-backed generation
+signing and writable high-water authority adapters; the earlier assertion that
+no initial-enrollment gap was established is superseded. This slice covers only
+the exact initial-anchor signer. Next: bind high-water signing and its writer
+authority to protected owner policy, initialize/reopen real stores, then complete
+authenticated manifest admission and one native author ticket. Existing runtime
+gates remain enforced. Local connected validation: 217 passed, one platform skip;
+publication and hosted checks pending. See the
+[enrollment evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#isolated-enrollment-bootstrap--2026-10-14).
+
+**Historical checkpoint — R15 deterministic planning baseline (2026-10-14):**
 Main `57670f536` is unchanged. Governed OpenClaw/WRE Holo maintenance completed
 and stopped both owned runtimes; a new October 14 query is CURRENT/no-gap at
 that source. The existing registered audit dispatcher produced identical
