@@ -1,5 +1,20 @@
 ## Initial handshake contract closure — 2026-10-15
 
+First hosted run at385de3a06:841pass/3skip/1failure in100.11s. The connected
+conversation WSP62 test caught config-supply tests growing738lines over675.
+Moved the four initial-config test functions unchanged into the existing
+config-supply-profiles suite; shared helper/import API remains in place. Source
+suite is now647lines and destination319lines. CI explicitly selects both; no
+threshold change or suppression. Production code and security bindings unchanged.
+Rerun: focused Windows extraction checks65passed in9.68s; exact24-suite Linux
+CI signing selection846passed/3platform skips in251.55s. The first local run
+had840pass/3skip/6process failures because its external launcher lacked a main
+guard and spawned children reran pytest; corrected only that external launcher.
+Original failed JUnit remains `next-startup/initial-service-ci-launcher-failure.xml`;
+passing results are `initial-test-split.xml` and `initial-service-ci-selection.xml`.
+Independent AST/source review confirms every moved test/decorator is unchanged,
+all28 combined test functions retained, and no threshold or production edits.
+
 Fourteen connected suites:416passed/1skip in256.88s; four additional E0 socket
 separation cases added after collection pass4/4. Initial connected subset5/5
 verifies helper-signed disposable grants, one consumption, signature/replay and

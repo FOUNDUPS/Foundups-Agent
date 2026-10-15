@@ -1278,6 +1278,7 @@ jobs:
             --import-mode=importlib -p no:cacheprovider \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply_profiles.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_run_packet_supply.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py \
