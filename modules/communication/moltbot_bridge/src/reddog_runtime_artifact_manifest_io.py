@@ -16,6 +16,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     GRANT_AUTHORITY_SERVICE_RUN_PACKET,
     MAX_ARTIFACT_BYTES,
     REQUIRED_RUNTIME_ARTIFACTS,
+    REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS,
     SCHEMA_VERSION_V3,
     RuntimeArtifactDescriptor,
     RuntimeArtifactManifestError,
@@ -72,6 +73,7 @@ def _describe_runtime_artifacts_unlocked(
     runtime = Path(values["runtime_root"]).resolve()
     descriptors: list[RuntimeArtifactDescriptor] = []
     mappings: dict[str, dict[str, Any]] = {}
+    raw_bodies = {}
     for filename in required_artifacts:
         path = _artifact_path(values, filename)
         if path.is_symlink() or not path.is_file():
@@ -83,6 +85,7 @@ def _describe_runtime_artifacts_unlocked(
             allowed_root=runtime,
             max_bytes=runtime_artifact_size_limit(filename),
         )
+        raw_bodies[filename] = raw
         if filename == GRANT_AUTHORITY_SERVICE_ARCHIVE:
             if not git_provenance_archive:
                 from modules.communication.moltbot_bridge.src.reddog_grant_authority_service_archive_validation import (
@@ -92,7 +95,8 @@ def _describe_runtime_artifacts_unlocked(
                 validate_grant_service_archive(raw)
         else:
             mapping = _json_mapping(raw, filename)
-            _validate_bound_artifact(values, filename, mapping)
+            if required_artifacts != REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS:
+                _validate_bound_artifact(values, filename, mapping)
             mappings[filename] = mapping
         descriptors.append(
             RuntimeArtifactDescriptor(
@@ -102,13 +106,36 @@ def _describe_runtime_artifacts_unlocked(
             )
         )
     result = tuple(descriptors)
+    _validate_described_artifact_set(values, required_artifacts, result, mappings, raw_bodies)
+    return result
+
+
+def _validate_described_artifact_set(values, required_artifacts, result, mappings, raw_bodies):
+    """Validate the complete artifact set after each confined file is described."""
     if "initial_manifest" in values:
         approved = values["initial_manifest"]["artifacts"]
         if tuple(item.to_dict() for item in result) != tuple(approved):
             raise RuntimeArtifactManifestError("initial_manifest_artifacts_changed")
     if GRANT_AUTHORITY_SERVICE_ARCHIVE in required_artifacts:
         _validate_grant_artifact_set(result, mappings)
-    return result
+    if required_artifacts == REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS:
+        validate_initial_installed_manifest_artifacts(values.get("initial_manifest", {}), raw_bodies)
+
+
+def validate_initial_installed_manifest_artifacts(manifest, artifacts):
+    """Verify installed bundle semantics against its approved manifest bindings."""
+    from .reddog_grant_authority_service_artifact_contract import validate_installed_grant_service_artifacts
+    if required_runtime_artifacts_for(manifest) != REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS:
+        raise RuntimeArtifactManifestError("initial_installed_manifest_required")
+    bundle = validate_installed_grant_service_artifacts(artifacts)
+    config, descriptor = bundle["config"], bundle["source_descriptor"]
+    if (bundle["config_digest"] != manifest["signer_service_config_digest"]
+            or bundle["installed_runtime_descriptor_digest"] != manifest["grant_authority_installed_runtime_descriptor_digest"]
+            or config["owner_config_id"] != manifest["owner_config_id"]
+            or config["repo_root_digest"] != manifest["repo_root_digest"]
+            or descriptor["source_commit_sha"] != manifest["source_commit_sha"]
+            or config["public_key"] == manifest["signer_public_key"]):
+        raise RuntimeArtifactManifestError("initial_installed_artifact_binding_invalid")
 
 
 def publish_content_addressed_manifest(
@@ -286,4 +313,5 @@ __all__ = [
     "MANIFEST_DIRECTORY_NAME",
     "describe_runtime_artifacts",
     "publish_content_addressed_manifest",
+    "validate_initial_installed_manifest_artifacts",
 ]

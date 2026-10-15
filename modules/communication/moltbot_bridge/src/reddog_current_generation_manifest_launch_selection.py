@@ -16,7 +16,9 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     MAX_ARTIFACT_BYTES,
     DEFAULT_MAX_TTL_SECONDS,
     REQUIRED_RUNTIME_ARTIFACTS,
-    SCHEMA_VERSION_INITIAL,
+    INITIAL_SCHEMAS, SCHEMA_VERSION_INITIAL_V2,
+    REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS, required_runtime_artifacts_for,
+    GRANT_AUTHORITY_SERVICE_CONFIG, GRANT_AUTHORITY_SERVICE_RUN_PACKET,
     RuntimeArtifactManifestError,
     canonical_signing_input,
     is_sha256,
@@ -341,7 +343,7 @@ def _verify_manifest(
     verifier: Ed25519SignatureVerifier,
 ) -> None:
     if (
-        manifest.get("schema_version") == SCHEMA_VERSION_INITIAL
+        manifest.get("schema_version") in INITIAL_SCHEMAS
         and activation.generation != 1
     ):
         raise RuntimeArtifactManifestError("initial_manifest_generation_invalid")
@@ -405,7 +407,7 @@ def _verify_signatures(
     signature = str(manifest["signature"])
     if not verifier.verify(public_key, signing_input, signature):
         raise RuntimeArtifactManifestError("manifest_signature_invalid")
-    if manifest.get("schema_version") == SCHEMA_VERSION_INITIAL:
+    if manifest.get("schema_version") in INITIAL_SCHEMAS:
         # Authority comes from the authenticated generation and owner boundary.
         return
     attestation = canonical_signer_audit_attestation_input(
@@ -434,25 +436,33 @@ def _verify_artifacts(
     activation: SignerRuntimeGenerationActivation,
 ) -> None:
     descriptors = tuple(manifest["artifacts"])
+    installed = manifest.get("schema_version") == SCHEMA_VERSION_INITIAL_V2
+    required = REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS if installed else REQUIRED_RUNTIME_ARTIFACTS
+    bodies = {}
     for descriptor in descriptors:
         filename = str(descriptor["filename"])
         target = validate_runtime_artifact_path(
             runtime / filename, repo_root=repo, allowed_root=runtime
         )
-        if filename not in REQUIRED_RUNTIME_ARTIFACTS or target.is_symlink():
+        if filename not in required or target.is_symlink():
             raise RuntimeArtifactManifestError("manifest_artifact_invalid")
         raw, _ = secure_read_confined_bytes(
             target, allowed_root=runtime, max_bytes=MAX_ARTIFACT_BYTES
         )
+        bodies[filename] = raw
         if (
             len(raw) != descriptor["byte_count"]
             or raw_digest(raw) != descriptor["content_digest"]
         ):
             raise RuntimeArtifactManifestError("manifest_artifacts_changed")
     by_name = {item["filename"]: item for item in descriptors}
+    config_name, packet_name = (required[:2] if installed else (CONFIG_FILENAME, RUN_PACKET_FILENAME))
+    if installed:
+        from .reddog_runtime_artifact_manifest_io import validate_initial_installed_manifest_artifacts
+        validate_initial_installed_manifest_artifacts(manifest, bodies)
     if (
-        by_name[CONFIG_FILENAME]["content_digest"] != activation.config_raw_digest
-        or by_name[RUN_PACKET_FILENAME]["content_digest"]
+        by_name[config_name]["content_digest"] != activation.config_raw_digest
+        or by_name[packet_name]["content_digest"]
         != activation.run_packet_digest
     ):
         raise RuntimeArtifactManifestError(
@@ -473,6 +483,10 @@ def _launch_values(
     descriptors = {
         str(item["filename"]): item for item in manifest["artifacts"]
     }
+    if manifest.get("schema_version") == SCHEMA_VERSION_INITIAL_V2:
+        return _installed_launch_values(manifest, activation, repo, runtime,
+            selected_at=selected_at, owner_config_id=owner_config_id,
+            generation_public_key=generation_public_key)
     principal = descriptors[PRINCIPAL_AUTHORITY_RECORDS_FILENAME]
     return MappingProxyType(
         {
@@ -498,6 +512,26 @@ def _launch_values(
             "principal_authority_records_digest": principal["content_digest"],
         }
     )
+
+
+def _installed_launch_values(manifest, activation, repo, runtime, *, selected_at,
+                             owner_config_id, generation_public_key):
+    if manifest["owner_config_id"] != owner_config_id:
+        raise RuntimeArtifactManifestError("initial_grant_owner_binding_mismatch")
+    return MappingProxyType({
+        "manifest_id": activation.manifest_id, "artifact_generation_digest": activation.artifact_generation_digest,
+        "config_digest": activation.config_digest, "config_raw_digest": activation.config_raw_digest,
+        "run_packet_digest": activation.run_packet_digest, "generation": activation.generation,
+        "generation_revision": activation.revision, "selection_issued_at": selected_at,
+        "selection_expires_at": selected_at + SELECTION_TTL_SECONDS,
+        "manifest_expires_at": manifest["expires_at"], "owner_config_id": owner_config_id,
+        "generation_public_key": generation_public_key, "repo_root": str(repo), "runtime_root": str(runtime),
+        "config_path": str(runtime / GRANT_AUTHORITY_SERVICE_CONFIG),
+        "run_packet_path": str(runtime / GRANT_AUTHORITY_SERVICE_RUN_PACKET),
+        "runtime_profile": manifest["runtime_profile"],
+        "grant_authority_installed_runtime_descriptor_digest": manifest["grant_authority_installed_runtime_descriptor_digest"],
+        "enrollment_approval_digest": manifest["enrollment_approval_digest"],
+    })
 
 
 def _capability_type(seal: object) -> type:

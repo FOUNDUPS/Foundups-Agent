@@ -1889,8 +1889,8 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.grant_issuer_20261015",
-    "base_commit": "57d5cd8e8c9db2179e2761ae59f74a2912b8d168",
+    "observation_path": "current_observation.issuer_custody_20261016",
+    "base_commit": "308d235a29fc9dfc694f075de552fff285981279",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
     "status": "IN_PROGRESS",
     "wsp15": {
@@ -1902,25 +1902,35 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Authenticate initial installed-issuer enrollment and current manifest/E0 consumption; connect target-internal LOW grant acquisition; prove a real grant and handshake before the existing R15 retained-use loop."
+    "next_action": "Install source-pinned native runtime and authenticated protected owner/E0/permission/custody inputs; run one real LOW grant/handshake, then the existing R15 author/verifier/retained-use loop."
   },
   "current_observation": {
     "issuer_custody_20261016": {
-      "source_scope": "merged protected custody plus independently reviewed installed artifact/policy preparation",
+      "source_scope": "PR2142 merged with passing exact-main checks; installed consumer/rate/guard/startup integrated in owned unpublished lane",
       "details": "docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16",
       "custody_validation": "244 author cases; 63 independent cases including 12 held-outs; synthetic installation seams disclosed",
       "combined_validation": "12 connected Linux suites: 328 passed, zero failures/skips, 110.66 seconds",
       "protected_source_validation": "Independent actual F runtime inspection: 1664 files,225 exact source modules,six real initializers,23 observed native mappings; six negative controls pass",
       "runtime_boundary": "Credential-free confined imports and full inventory rechecks; not service execution, immutable future execution or authenticated admission",
-      "source_publication": "PR2139/2140 merged with main checks passed; PR2141 merged e2a280b3848a6e2631cf67e01f4b1c513fc74447. Main CodeQL38764836954 passed; CI38764834966 failed one old-order generation-lock clock-sampling check (1040 passed, 3 skipped). Test-only fixed-clock repair independently reproduced before change and passed37 Linux cases after; production freshness unchanged. Hosted replacement closure open.",
+      "source_publication": "PR2142 merged308d235a29fc9dfc694f075de552fff285981279. Exact-main CI38770382389 and CodeQL38770380737 passed; tested head671684f3d has identical tree. Prior2141 clock-test failure repaired; four completed owned lanes archived and retired.",
       "native_worker_admitted": false,
       "retained_rsi_gain_demonstrated": false,
-      "next_dependency": "Root-approved installed initial manifest and current E0/descriptor consumer plus target-internal grant acquisition",
+      "next_dependency": "Install source-pinned native runtime and authenticated protected owner/E0/permission/custody inputs; run one real LOW grant/handshake, then the existing R15 author/verifier/retained-use loop.",
       "paid_provider_calls": 0,
       "coordinator_cost": null,
       "installed_artifact_validation": "250 independently verified cases; one reviewer harness error retained then corrected",
       "installed_policy_validation": "161 independent Linux cases including30 held-outs; root integration adds golden v9 and hash-order regression",
-      "installed_integration_validation": "413 Linux cases passed, zero failures/skips, eight connected suites; includes bundle-to-policy dependency order and legacy v9 golden vector. No authentic native admission or retained gain."
+      "installed_integration_validation": "413 Linux cases passed, zero failures/skips, eight connected suites; includes bundle-to-policy dependency order and legacy v9 golden vector. No authentic native admission or retained gain.",
+      "installed_enrollment_validation": "259 independent Linux cases, zero failures/skips, source-bound10-file review; synthetic custody/source/lease seams. Integrated with target adapter; combined14-suite Linux validation passed459 cases, zero failures/skips at38c36923b.",
+      "target_grant_adapter_validation": "211 author and67 independent Linux cases; native AF_UNIX two-process check uses one test UID, not two-UID installed authority.",
+      "cross_uid_storage_validation": "13 asserted disposable child-process cases: target-owned shared file causes issuer EPERM; issuer replacement0600 causes target EACCES. Separate private stores each work and reject repeat, but existing rate admission rejects their distinct identities.",
+      "storage_repair": "Reuse existing durable nonce/SQLite owners with separately authenticated issuer rate-store metadata. Signed owner_config_id binds explicit owner v10; target grant replay binding remains unchanged. No broker or shared-UID bypass.",
+      "runtime_gate_dependency": "Generic manifest consumers verify protected approval/artifact/E0 identity; only issuer execution checks its own RootDirectory, inventory and process before custody. Neither descriptor shape nor boolean proof substitutes for native checks.",
+      "installed_consumer_validation": "209 independent Linux cases, zero failures/skips; preserved original legacy missing-archive failure and repaired mandatory evidence lookup.",
+      "issuer_runtime_guard_validation": "62 independent Linux tests; independent full1665file/157directory reopen and actual isolated positive2guard calls; seven author native negative controls reject. Credential-free only.",
+      "installed_startup_validation": "174 connected Linux tests, zero failures/skips;18 independent held-outs after root-LOAD pre-secret runtime guard repair. Permission freshness rechecked after each inventory check. Original synthetic-root fixture failures preserved.",
+      "issuer_rate_storage_validation": "255 independent cases passed, including separate-UID process controls; synthetic admission is not installed authority.",
+      "issuer_socket_layout_validation": "159 independent cases passed including12 adversarial and5 separate-UID tests; exact5-file delta and13 unchanged rate files verified. V10 socket parent distinct; legacy/artifact binding preserved."
     },
     "grant_issuer_20261015": {
       "source_base_commit": "57d5cd8e8c9db2179e2761ae59f74a2912b8d168",

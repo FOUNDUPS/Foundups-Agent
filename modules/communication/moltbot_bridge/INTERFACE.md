@@ -9,7 +9,7 @@ Current permission is rechecked around RPC and fenced action use. See the
 `serve_grant_authority_once(...)` composes one LOW handshake grant request.
 See the [complete signature, dependencies, result fields and transport limits](
 ../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#callable-low-grant-service--2026-10-15).
-The [protected v9 dependency loader](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#protected-issuer-startup-custody--2026-10-16) supplies custody; no CLI or native admission. [Installed artifact/policy preparation](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#installed-issuer-preparation--2026-10-16) remains inert.
+The protected v9/v10 loader supplies custody. [Installed startup and runtime checks](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#installed-issuer-startup--2026-10-16) compose one request; native admission remains unproved.
 
 ## Grant bootstrap binding and LOW RPC — 2026-10-15
 

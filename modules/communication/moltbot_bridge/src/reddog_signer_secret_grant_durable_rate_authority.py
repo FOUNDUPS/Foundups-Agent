@@ -2,11 +2,89 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass, fields
+from pathlib import Path
+from weakref import WeakSet
 
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_durable_nonce_store import (
     DurableSignerSecretGrantNonceStore,
 )
+
+_ISSUED_RATE_BINDINGS = WeakSet()
+
+
+@dataclass(frozen=True, eq=False)
+class _ProtectedIssuerRateBinding:
+    owner_path: Path
+    repo: Path
+    policy_bytes: bytes
+    store: DurableSignerSecretGrantNonceStore
+    expected_policy: tuple
+
+
+def _current_rate_inputs(owner_path, repo, policy_bytes, store):
+    """Re-read protected metadata; the service's current E0 lease stays outermost."""
+    from .foundup_verified_outcome_root_authority_wire_codec import canonical_bytes, decode_message
+    from .reddog_signer_system_service_manifest_selection_loader import (
+        SCHEMA_VERSION_V10, _load_owner_config, _read_root_owned_bytes,
+    )
+    from .reddog_grant_authority_startup_custody import (
+        current_grant_custody, require_private_grant_rate_store,
+        require_grant_rate_target_separation,
+    )
+    owner = _load_owner_config(owner_path, repo=repo)
+    policy = decode_message(_read_root_owned_bytes(Path(owner["startup_custody"]["policy_path"]), owner_path.parent))
+    if (owner["schema_version"] != SCHEMA_VERSION_V10 or owner["config_id"] != policy["owner_config_id"]
+            or canonical_bytes(policy) != policy_bytes):
+        raise ValueError("grant_rate_owner_changed")
+    current_grant_custody(owner, policy)
+    config, target = require_grant_rate_target_separation(owner, policy, repo)
+    if type(store) is not DurableSignerSecretGrantNonceStore or store._config != config:
+        raise ValueError("grant_rate_store_binding_mismatch")
+    require_private_grant_rate_store(owner, config)
+    return policy, target
+
+
+def _authority_values(policy, target):
+    from .reddog_signer_independent_secret_grant_binding import resolve_secret_grant_target_binding_from_config
+    values = asdict(resolve_secret_grant_target_binding_from_config(policy, target))
+    values.update(issuer_key_epoch=policy["grant_authority_key_epoch"],
+        requester_principal_id=policy["grant_requester_principal_id"])
+    for name in ("allowed_operations", "allowed_authority_tiers", "consensus_required_tiers"):
+        values[name] = tuple(policy[name])
+    for name in ("rate_limit_window_seconds", "rate_limit_max_requests"):
+        values[name] = policy[name]
+    return tuple(sorted(values.items()))
+
+
+def bind_protected_issuer_rate_store(*, owner_config_path, repo_root, owner_policy, replay_store):
+    """Mint only from current protected installation, never a caller's rate fields."""
+    from .foundup_verified_outcome_root_authority_wire_codec import canonical_bytes
+    from .reddog_signer_owner_e0_capability_state import thaw_owner_e0_policy
+    path, repo = Path(owner_config_path), Path(repo_root).resolve()
+    if not path.is_absolute():
+        raise ValueError("grant_rate_owner_path_invalid")
+    policy_bytes = canonical_bytes(thaw_owner_e0_policy(owner_policy))
+    policy, target = _current_rate_inputs(path, repo, policy_bytes, replay_store)
+    binding = _ProtectedIssuerRateBinding(path, repo, policy_bytes, replay_store,
+                                         _authority_values(policy, target))
+    _ISSUED_RATE_BINDINGS.add(binding)
+    return binding
+
+
+def protected_issuer_rate_binding_matches(binding, policy, rate_store=None):
+    """Reject forged/copy bindings and drift before any signing-key resolution."""
+    if type(binding) is not _ProtectedIssuerRateBinding or binding not in _ISSUED_RATE_BINDINGS:
+        return False
+    try:
+        current, target = _current_rate_inputs(binding.owner_path, binding.repo,
+                                             binding.policy_bytes, binding.store)
+        expected = tuple(sorted((item.name, getattr(policy, item.name))
+                         for item in fields(policy) if item.name != "issuer_rate_binding"))
+        return (expected == binding.expected_policy == _authority_values(current, target)
+                and (rate_store is None or rate_store is binding.store))
+    except Exception:
+        return False
 
 
 @dataclass(frozen=True, slots=True)

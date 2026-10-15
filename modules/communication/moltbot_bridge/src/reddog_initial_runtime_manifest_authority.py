@@ -17,7 +17,8 @@ from .reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier, decode_ed25519_public_key, encode_ed25519_signature,
 )
 from .reddog_runtime_artifact_manifest_contract import (
-    SCHEMA_VERSION_INITIAL, SIGNER_ROLE_INITIAL, SIGNING_OPERATION_INITIAL,
+    SCHEMA_VERSION_INITIAL, SCHEMA_VERSION_INITIAL_V2, SIGNER_ROLE_INITIAL, SIGNING_OPERATION_INITIAL,
+    REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS, validate_signed_payload,
     canonical_json, canonical_signing_input, digest, is_sha256, manifest_id_for,
     raw_digest, validate_freshness, validate_unsigned_payload,
 )
@@ -41,6 +42,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 )
 
 SCHEMA_VERSION = "reddog_initial_runtime_manifest_approval.v1"
+SCHEMA_VERSION_V2 = "reddog_initial_runtime_manifest_approval.v2"
 PURPOSE = "initial_runtime_manifest"
 AUTHORITY_TIER = "INITIAL_ENROLLMENT"
 _FIELDS = {"schema_version", "repo_root_digest", "runtime_root", "source_commit_sha",
@@ -48,6 +50,8 @@ _FIELDS = {"schema_version", "repo_root_digest", "runtime_root", "source_commit_
 _SPEC_FIELDS = {"issuer_principal_id", "signer_public_key", "key_epoch", "nonce",
                 "issued_at", "expires_at", "authority_profile_digest",
                 "signer_service_config_digest", "artifacts"}
+_SPEC_FIELDS_V2 = _SPEC_FIELDS | {"runtime_profile", "owner_config_id",
+                                "grant_authority_installed_runtime_descriptor_digest"}
 
 
 def _unique(pairs):
@@ -66,7 +70,8 @@ def _read_policy(path, repo):
     target = validate_runtime_artifact_path(path, allowed_root=root, repo_root=repo)
     raw = _read_root_owned_bytes(target, root)
     value = json.loads(raw.decode("ascii"), object_pairs_hook=_unique)
-    if type(value) is not dict or set(value) != _FIELDS or value["schema_version"] != SCHEMA_VERSION:
+    if (type(value) is not dict or set(value) != _FIELDS
+            or value["schema_version"] not in {SCHEMA_VERSION, SCHEMA_VERSION_V2}):
         raise ValueError("initial_manifest_approval_shape_invalid")
     if value["repo_root_digest"] != raw_digest(str(repo).encode()):
         raise ValueError("initial_manifest_repo_mismatch")
@@ -78,9 +83,10 @@ def _read_policy(path, repo):
 
 def _manifest(raw, policy, runtime):
     spec = policy["manifest_spec"]
-    if type(spec) is not dict or set(spec) != _SPEC_FIELDS:
+    installed = policy["schema_version"] == SCHEMA_VERSION_V2
+    if type(spec) is not dict or set(spec) != (_SPEC_FIELDS_V2 if installed else _SPEC_FIELDS):
         raise ValueError("initial_manifest_spec_invalid")
-    payload = dict(spec, schema_version=SCHEMA_VERSION_INITIAL,
+    payload = dict(spec, schema_version=SCHEMA_VERSION_INITIAL_V2 if installed else SCHEMA_VERSION_INITIAL,
                    repo_root_digest=policy["repo_root_digest"],
                    runtime_root_digest=raw_digest(str(runtime).encode()),
                    source_commit_sha=policy["source_commit_sha"],
@@ -94,6 +100,54 @@ def _manifest(raw, policy, runtime):
     if decode_ed25519_public_key(payload["signer_public_key"]) is None:
         raise ValueError("initial_manifest_key_invalid")
     return payload
+
+
+def _check_installed_approval(repo, policy, runtime, payload):
+    """Root approval binds exact installed metadata; it does not prove runtime confinement."""
+    if policy["schema_version"] != SCHEMA_VERSION_V2:
+        return
+    from .reddog_grant_authority_service_artifact_contract import validate_installed_grant_service_artifacts
+    bundle = validate_installed_grant_service_artifacts({name: _read_root_owned_bytes(runtime / name, runtime)
+        for name in REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS})
+    config, descriptor = bundle["config"], bundle["source_descriptor"]
+    if (bundle["config_digest"] != payload["signer_service_config_digest"]
+            or bundle["installed_runtime_descriptor_digest"] != payload["grant_authority_installed_runtime_descriptor_digest"]
+            or config["owner_config_id"] != payload["owner_config_id"]
+            or config["repo_root_digest"] != policy["repo_root_digest"]
+            or descriptor["source_commit_sha"] != policy["source_commit_sha"]
+            or descriptor["source_files"] != policy["source_files"]
+            or config["public_key"] == payload["signer_public_key"]):
+        raise ValueError("initial_installed_approval_binding_invalid")
+
+
+def verify_initial_runtime_manifest_approval(*, approval_path, repo_root,
+                                            expected_approval_digest, manifest):
+    """Verify a caller-pinned protected approval without loading signer custody.
+
+    The owner must select the protected approval path. The expected digest must
+    be authenticated independently, either directly or through the exact
+    manifest ID pinned by current signed owner policy. An unbound manifest's
+    self-reported approval digest is insufficient. No grant is issued.
+    """
+    repo, path = Path(repo_root).resolve(), Path(approval_path)
+    raw, policy, runtime = _read_policy(path, repo)
+    if not is_sha256(expected_approval_digest) or raw_digest(raw) != expected_approval_digest:
+        raise ValueError("initial_manifest_approval_binding_invalid")
+    expected = _manifest(raw, policy, runtime)
+    _custody(policy, expected)  # Validate permission metadata without resolving its credential.
+    checked = validate_signed_payload(manifest)
+    if {k: v for k, v in checked.items() if k != "signature"} != expected:
+        raise ValueError("initial_manifest_binding_mismatch")
+    validate_freshness(expected, now_epoch=int(time.time()), max_ttl_seconds=300)
+    _check_sources(repo, policy["source_files"])
+    _check_installed_approval(repo, policy, runtime, expected)
+    if not Ed25519SignatureVerifier().verify(expected["signer_public_key"],
+            canonical_signing_input(expected), checked["signature"]):
+        raise ValueError("initial_manifest_signature_invalid")
+    if _read_policy(path, repo)[0] != raw:
+        raise ValueError("initial_manifest_approval_changed")
+    validate_freshness(expected, now_epoch=int(time.time()), max_ttl_seconds=300)
+    return MappingProxyType(expected)
 
 
 def _custody(policy, payload):
@@ -159,6 +213,7 @@ class _State:
         self.check_time()
         if _read_policy(self.path, self.repo)[0] != self.raw:
             raise ValueError("initial_manifest_approval_changed")
+        _check_installed_approval(self.repo, self.policy, self.runtime, self.payload)
         self.check_time()
 
     def check_time(self):
@@ -252,6 +307,7 @@ def load_initial_runtime_manifest_signing_context(*, approval_path, repo_root):
     path, repo = Path(approval_path), Path(repo_root).resolve()
     raw, policy, runtime = _read_policy(path, repo)
     payload = _manifest(raw, policy, runtime)
+    _check_installed_approval(repo, policy, runtime, payload)
     binding = _custody(policy, payload)
     validate_freshness(payload, now_epoch=int(time.time()), max_ttl_seconds=300)
     _check_sources(repo, policy["source_files"])

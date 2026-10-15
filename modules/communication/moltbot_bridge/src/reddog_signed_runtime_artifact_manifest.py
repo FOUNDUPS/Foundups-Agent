@@ -337,7 +337,7 @@ def _unsigned_manifest(
 ) -> dict[str, Any]:
     if "initial_manifest" in values:
         payload = dict(values["initial_manifest"])
-        if (runtime_profile is not None or nonce != payload["nonce"]
+        if (runtime_profile not in (None, payload.get("runtime_profile")) or nonce != payload["nonce"]
                 or issued_at != payload["issued_at"] or expires_at != payload["expires_at"]):
             raise RuntimeArtifactManifestError("initial_manifest_scope_mismatch")
         return validate_unsigned_payload(payload)
@@ -460,10 +460,10 @@ def _validate_bindings(
     payload: Mapping[str, Any],
     authority: Mapping[str, Any],
 ) -> None:
-    from .reddog_runtime_artifact_manifest_contract import SCHEMA_VERSION_INITIAL
+    from .reddog_runtime_artifact_manifest_contract import INITIAL_SCHEMAS
 
     initial = authority.get("initial_manifest")
-    if initial is not None or payload.get("schema_version") == SCHEMA_VERSION_INITIAL:
+    if initial is not None or payload.get("schema_version") in INITIAL_SCHEMAS:
         unsigned = {key: value for key, value in payload.items() if key != "signature"}
         if initial is None or unsigned != dict(initial):
             raise RuntimeArtifactManifestError("initial_manifest_binding_mismatch")
@@ -579,8 +579,8 @@ def _verify_signatures(
         authority["signer_public_key"], signing_input, signature
     ):
         raise RuntimeArtifactManifestError("manifest_signature_invalid")
-    from .reddog_runtime_artifact_manifest_contract import SCHEMA_VERSION_INITIAL
-    if payload.get("schema_version") == SCHEMA_VERSION_INITIAL:
+    from .reddog_runtime_artifact_manifest_contract import INITIAL_SCHEMAS
+    if payload.get("schema_version") in INITIAL_SCHEMAS:
         return
     attestation = canonical_signer_audit_attestation_input(
         signing_input=signing_input,

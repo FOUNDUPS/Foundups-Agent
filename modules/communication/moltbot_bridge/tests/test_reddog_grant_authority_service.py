@@ -231,9 +231,69 @@ def test_real_socket_exchange_through_composition_with_synthetic_custody(case, m
     assert case.events.count('authorize') == 2 and case.events.count('new-custody') == 1
 
 
-def test_composition_has_no_cli_installer_or_large_function():
+def test_composition_retains_bounded_source_and_functions():
     source = Path(service.__file__).read_text(encoding='utf-8')
-    assert len(source.splitlines()) <= 300 and 'def main(' not in source
+    assert len(source.splitlines()) <= 300
     for node in ast.walk(ast.parse(source)):
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
             assert node.end_lineno - node.lineno + 1 <= 60
+
+
+def test_installed_runtime_uses_only_authenticated_descriptor(case, monkeypatch):
+    from modules.communication.moltbot_bridge.src import reddog_grant_authority_service_manifest_verifier as verifier
+    from modules.communication.moltbot_bridge.src import reddog_grant_authority_installed_runtime_guard as guard
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import POLICY_SCHEMA_V10
+    policy = dict(case.deps.owner_policy, schema_version=POLICY_SCHEMA_V10)
+    descriptor = {'authenticated-fixture': True}
+    calls = []
+    def verify(**kwargs):
+        assert kwargs['policy'] is policy and kwargs['owner_config_path'] == case.owner_path
+        return {'source_descriptor': descriptor}
+    monkeypatch.setattr(verifier, 'verify_current_grant_service_artifacts', verify)
+    monkeypatch.setattr(guard, 'verify_installed_grant_runtime', lambda value: calls.append(value))
+    service._verify_installed_runtime(case.repo, case.owner_path, policy)
+    assert calls == [descriptor] and calls[0] is descriptor
+    def rejected(**kwargs):
+        raise ValueError('unbound manifest')
+    monkeypatch.setattr(verifier, 'verify_current_grant_service_artifacts', rejected)
+    with pytest.raises(ValueError, match='unbound manifest'):
+        service._verify_installed_runtime(case.repo, case.owner_path, policy)
+    assert calls == [descriptor]
+
+
+def test_runtime_drift_rejects_before_service_custody(case, monkeypatch):
+    def rejected(*args):
+        case.events.append('runtime-rejected')
+        raise ValueError('runtime drift')
+    monkeypatch.setattr(service, '_verify_installed_runtime', rejected)
+    monkeypatch.setattr(service, '_profile_binding', lambda *args: pytest.fail('custody after drift'))
+    result = service.serve_grant_authority_once(repo_root=case.repo,
+        owner_config_path=case.owner_path, dependencies=case.deps)
+    assert not result.accepted and result.requests_handled == 0
+    assert case.events == ['runtime-rejected']
+
+
+@pytest.mark.parametrize('timeout', [0, -1, float('inf'), float('nan'), True, '1'])
+def test_installed_startup_timeout_rejected_without_loading(monkeypatch, tmp_path, timeout):
+    from modules.communication.moltbot_bridge.src import reddog_grant_authority_runtime_dependencies as runtime
+    monkeypatch.setattr(runtime, 'materialize_grant_authority_runtime_dependencies',
+        lambda **kwargs: pytest.fail('invalid timeout loaded credentials'))
+    result = service.serve_installed_grant_authority_once(repo_root=tmp_path,
+        owner_config_path=tmp_path/'owner', expected_owner_config_id='invalid', timeout_s=timeout)
+    assert not result.accepted and result.requests_handled == 0
+
+
+@pytest.mark.parametrize('accepted', [False, True])
+def test_fixed_cli_returns_observed_result_without_overclaim(monkeypatch, tmp_path, capsys, accepted):
+    import json
+    calls = []
+    def serve(**kwargs):
+        calls.append(kwargs)
+        return service.GrantAuthorityServiceResult(accepted=accepted, requests_handled=int(accepted))
+    monkeypatch.setattr(service, 'serve_installed_grant_authority_once', serve)
+    result = service.main(['--repo-root', str(tmp_path), '--owner-authority-config', str(tmp_path/'owner'),
+        '--expected-owner-config-id', 'sha256:'+'1'*64])
+    assert result == (0 if accepted else 2)
+    output = json.loads(capsys.readouterr().out)
+    assert output['accepted'] is accepted and 'grant_accepted' not in output
+    assert len(calls) == 1 and set(calls[0]) == {'repo_root', 'owner_config_path', 'expected_owner_config_id'}

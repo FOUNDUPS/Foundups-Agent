@@ -12,12 +12,15 @@ SCHEMA_VERSION = "reddog_signed_runtime_artifact_manifest.v1"
 SCHEMA_VERSION_V2 = "reddog_signed_runtime_artifact_manifest.v2"
 SCHEMA_VERSION_V3 = "reddog_signed_runtime_artifact_manifest.v3"
 SCHEMA_VERSION_INITIAL = "reddog_initial_runtime_artifact_manifest.v1"
+SCHEMA_VERSION_INITIAL_V2 = "reddog_initial_runtime_artifact_manifest.v2"
+INITIAL_SCHEMAS = frozenset({SCHEMA_VERSION_INITIAL, SCHEMA_VERSION_INITIAL_V2})
 SIGNING_OPERATION = "attest_reddog_runtime_artifact_manifest"
 SIGNING_OPERATION_INITIAL = "attest_reddog_initial_runtime_artifact_manifest"
 SIGNING_PREFIX = "reddog-runtime-artifact-manifest.v1."
 SIGNING_PREFIX_V2 = "reddog-runtime-artifact-manifest.v2."
 SIGNING_PREFIX_V3 = "reddog-runtime-artifact-manifest.v3."
 SIGNING_PREFIX_INITIAL = "reddog-initial-runtime-artifact-manifest.v1."
+SIGNING_PREFIX_INITIAL_V2 = "reddog-initial-runtime-artifact-manifest.v2."
 SIGNER_ROLE = "reddog_runtime_artifact_manifest"
 SIGNER_ROLE_INITIAL = "reddog_initial_runtime_artifact_manifest"
 DEFAULT_MAX_TTL_SECONDS = 300
@@ -43,6 +46,11 @@ REQUIRED_GRANT_AUTHORITY_RUNTIME_ARTIFACTS = (
     GRANT_AUTHORITY_SERVICE_CONFIG,
     GRANT_AUTHORITY_SERVICE_RUN_PACKET,
     GRANT_AUTHORITY_SERVICE_ARCHIVE,
+)
+RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE = "grant_authority_service_installed_source"
+GRANT_AUTHORITY_INSTALLED_SOURCE = "grant_authority_installed_source.json"
+REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS = (
+    GRANT_AUTHORITY_SERVICE_CONFIG, GRANT_AUTHORITY_SERVICE_RUN_PACKET, GRANT_AUTHORITY_INSTALLED_SOURCE,
 )
 SIGNATURE_FIELDS = frozenset(
     {
@@ -105,6 +113,9 @@ _WORK_AUTHORITY_FIELDS = frozenset(
 UNSIGNED_FIELDS_INITIAL = (UNSIGNED_FIELDS - _WORK_AUTHORITY_FIELDS) | {
     "enrollment_approval_digest", "source_commit_sha",
 }
+UNSIGNED_FIELDS_INITIAL_V2 = UNSIGNED_FIELDS_INITIAL | {
+    "runtime_profile", "owner_config_id", "grant_authority_installed_runtime_descriptor_digest",
+}
 
 
 class RuntimeArtifactManifestError(ValueError):
@@ -166,13 +177,13 @@ def validate_unsigned_payload(value: Mapping[str, Any]) -> dict[str, Any]:
     for field in _digest_fields(schema):
         if not is_sha256(payload.get(field)):
             raise RuntimeArtifactManifestError("manifest_digest_invalid")
-    if schema != SCHEMA_VERSION_INITIAL and not is_revision(
+    if schema not in INITIAL_SCHEMAS and not is_revision(
         payload.get("work_state_revision")
     ):
         raise RuntimeArtifactManifestError("manifest_revision_invalid")
     for field in _text_fields(schema):
         require_text(payload.get(field))
-    if schema == SCHEMA_VERSION_INITIAL:
+    if schema in INITIAL_SCHEMAS:
         commit = payload.get("source_commit_sha")
         if (
             not isinstance(commit, str)
@@ -203,6 +214,8 @@ def manifest_id_for(payload: Mapping[str, Any]) -> str:
 
 def signing_prefix_for(payload: Mapping[str, Any]) -> str:
     schema = payload.get("schema_version")
+    if schema == SCHEMA_VERSION_INITIAL_V2:
+        return SIGNING_PREFIX_INITIAL_V2
     if schema == SCHEMA_VERSION_INITIAL:
         return SIGNING_PREFIX_INITIAL
     if schema == SCHEMA_VERSION:
@@ -220,6 +233,10 @@ def required_runtime_artifacts_for(
     schema = payload.get("schema_version")
     if schema in {SCHEMA_VERSION, SCHEMA_VERSION_INITIAL}:
         return REQUIRED_RUNTIME_ARTIFACTS
+    if schema == SCHEMA_VERSION_INITIAL_V2:
+        if payload.get("runtime_profile") != RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE:
+            raise RuntimeArtifactManifestError("manifest_schema_invalid")
+        return REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS
     if (
         schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}
         and payload.get("runtime_profile") in {
@@ -373,10 +390,12 @@ def _digest_fields(schema: object) -> tuple[str, ...]:
         "signer_service_config_digest",
         "artifact_generation_digest",
     )
-    if schema == SCHEMA_VERSION_INITIAL:
+    if schema in INITIAL_SCHEMAS:
         common = tuple(
             field for field in fields if field not in _WORK_AUTHORITY_FIELDS
         )
+        if schema == SCHEMA_VERSION_INITIAL_V2:
+            common += ("owner_config_id", "grant_authority_installed_runtime_descriptor_digest")
         return common + ("enrollment_approval_digest",)
     if schema == SCHEMA_VERSION_V3:
         fields += (
@@ -397,18 +416,20 @@ def _text_fields(schema: object) -> tuple[str, ...]:
         "key_epoch",
         "nonce",
     )
-    if schema == SCHEMA_VERSION_INITIAL:
+    if schema in INITIAL_SCHEMAS:
         return tuple(field for field in fields if field != "queue_item_id")
     return fields
 
 
 def _signature_fields_for(schema: object) -> frozenset[str]:
-    if schema == SCHEMA_VERSION_INITIAL:
+    if schema in INITIAL_SCHEMAS:
         return SIGNATURE_FIELDS_INITIAL
     return SIGNATURE_FIELDS
 
 
 def _unsigned_fields_for(schema: object) -> frozenset[str]:
+    if schema == SCHEMA_VERSION_INITIAL_V2:
+        return UNSIGNED_FIELDS_INITIAL_V2
     if schema == SCHEMA_VERSION_INITIAL:
         return UNSIGNED_FIELDS_INITIAL
     if schema == SCHEMA_VERSION:
@@ -453,7 +474,10 @@ __all__ = [
     "SCHEMA_VERSION",
     "SCHEMA_VERSION_V2",
     "SCHEMA_VERSION_V3",
-    "SCHEMA_VERSION_INITIAL",
+    "SCHEMA_VERSION_INITIAL", "SCHEMA_VERSION_INITIAL_V2", "INITIAL_SCHEMAS",
+    "RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE", "GRANT_AUTHORITY_INSTALLED_SOURCE",
+    "REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS", "UNSIGNED_FIELDS_INITIAL_V2",
+    "SIGNING_PREFIX_INITIAL_V2",
     "SIGNATURE_FIELDS",
     "SIGNATURE_FIELDS_INITIAL",
     "UNSIGNED_FIELDS_INITIAL",

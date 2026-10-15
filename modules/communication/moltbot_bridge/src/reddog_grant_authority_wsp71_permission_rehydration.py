@@ -33,7 +33,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
     lease_validated_owner_e0_current_admission,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_root_protected_use_oracle import (
     RootAuthorizedSignerGrantRevocationOracle,
@@ -85,16 +85,23 @@ def authorize_current_grant_authority_wsp71_use(
 def _permission_state(admission, repo, owner_path, oracle, now_epoch):
     from .reddog_signer_independent_secret_grant_verification import _owner_authority_snapshot
     policy = admission.policy
-    if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
+    if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10}:
         raise RuntimeArtifactManifestError("grant_permission_e0_schema_invalid")
+    if policy["schema_version"] == POLICY_SCHEMA_V10:
+        _require_oracle(admission, oracle)
     root = grant_authority_owner_runtime_root(owner_path, repo, str(policy["owner_config_id"]))
-    verified = verify_current_grant_service_artifacts(repo_root=repo, grant_root=root, policy=policy)
+    extra = {"owner_config_path": owner_path} if policy["schema_version"] == POLICY_SCHEMA_V10 else {}
+    verified = verify_current_grant_service_artifacts(repo_root=repo, grant_root=root, policy=policy, **extra)
     receipt, snapshot_digest = _load_receipt(repo, root)
     _require_receipt(receipt, policy, verified, snapshot_digest, now_epoch)
-    if type(oracle) is not RootAuthorizedSignerGrantRevocationOracle or oracle.binding != admission.revocation_binding:
-        raise RuntimeArtifactManifestError("grant_permission_oracle_mismatch")
+    _require_oracle(admission, oracle)
     return (deepcopy((_owner_authority_snapshot(admission), admission.revocation_binding,
         str(root), dict(verified), receipt, snapshot_digest)), receipt)
+
+
+def _require_oracle(admission, oracle):
+    if type(oracle) is not RootAuthorizedSignerGrantRevocationOracle or oracle.binding != admission.revocation_binding:
+        raise RuntimeArtifactManifestError("grant_permission_oracle_mismatch")
 
 
 def _load_receipt(repo: Path, root: Path) -> tuple[dict[str, Any], str]:

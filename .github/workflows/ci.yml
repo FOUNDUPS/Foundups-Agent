@@ -1096,6 +1096,7 @@ jobs:
           python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib \
             -o pythonpath=. -p no:cacheprovider \
             modules/communication/moltbot_bridge/tests/test_reddog_initial_runtime_manifest_authority.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_initial_installed_manifest_enrollment.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signed_runtime_artifact_manifest.py \
             modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_manifest_authority_freshness.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning.py \
@@ -1302,13 +1303,28 @@ jobs:
               modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_conversation_wiring.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_low_grant_rpc.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_signer_initial_handshake_grant_backend.py \
               modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service.py \
               modules/communication/moltbot_bridge/tests/test_reddog_grant_startup_custody.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_grant_rate_store.py \
               modules/communication/moltbot_bridge/tests/test_reddog_grant_custody_owner_versions.py \
               modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_resident_service.py \
               modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_grant_load.py \
               modules/communication/moltbot_bridge/tests/test_reddog_grant_root_load_rpc.py \
               modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_durable_authentication_wsp62.py
+
+      - name: Run installed runtime and separate grant replay ownership contracts
+        timeout-minutes: 3
+        run: |
+          sudo -- env -i PATH="$PATH" LANG=C.UTF-8 \
+            PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHON_DOTENV_DISABLED=1 \
+            "$(command -v python)" -I -B -c \
+            'import sys; sys.path.insert(0, sys.argv.pop(1)); import pytest; raise SystemExit(pytest.main(sys.argv[1:]))' \
+            "$GITHUB_WORKSPACE" -q --tb=line -c /dev/null --noconftest \
+            --import-mode=importlib -p no:cacheprovider \
+            --basetemp="$RUNNER_TEMP/grant-rate-two-uid-pytest" \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_installed_runtime_guard.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_rate_store_two_uid.py
 
       - name: Run authenticated startup owner and policy compatibility regression
         timeout-minutes: 10
@@ -1330,6 +1346,7 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_startup_owner.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_installed_grant_manifest_consumer.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_healthcheck.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py \

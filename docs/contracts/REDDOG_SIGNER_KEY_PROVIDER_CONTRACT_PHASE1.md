@@ -380,3 +380,37 @@ under the current-generation owner lease with exact peer-instance binding.
 Manifest authenticity, E0 scope and request grants remain independent gates.
 The separate production grant issuer composition and real native admission are
 still required; this schema does not certify their availability.
+
+## Installed issuer startup — 2026-10-16
+
+`serve_installed_grant_authority_once(*, repo_root, owner_config_path,
+expected_owner_config_id, timeout_s=5.0)` uses only the fixed protected dependency
+loader then `serve_grant_authority_once`. Timeout must be a finite numeric value
+in(0,30]; boolean values reject. Old direct calls without dependencies still
+reject. The fixed `main` accepts only repo root, owner-authority-config and exact
+expected-owner-config-id; it prints the existing result and returns0/2. Success
+means bounded transport completion, not grant acceptance or RSI.
+
+Installed E0v10 metadata is authenticated against current owner selection, fixed
+protected approval and exact manifest/artifact/config/source bindings. Only the
+explicit installed binding permits an empty archive field; legacy evidence stays
+mandatory. The issuer guard checks the authenticated descriptor against its
+current Linux3.12 isolated process, read-only root, static inventory and mapped
+files. It runs before replay secrets, service custody and root-LOAD proof keys;
+root-LOAD permission freshness is rechecked after the guard and after signing.
+The generic consumer is usable outside that issuer runtime and claims no local
+confinement. Checks are sampled, trusting host root/kernel, not immutable future
+execution or authentication of seccomp filter rules.
+
+Owner v10 adds an issuer-private `grant_rate_store` with purpose
+`grant-issuer-rate.v1` and distinct nonce/high-water paths, store ID, binding and
+durability receipt. Its integrity permission uses `grant-issuer-rate-integrity.v1`.
+Full signed E0 already binds owner_config_id; its schema staysv10. Target replay
+identity is unchanged and derived from protected metadata without issuer access
+to target-private files. Legacy owner v9 retains its coupled-store behavior.
+
+The installed Python invocation must establish the descriptor's exact sys.path
+through its protected fixed bootstrap before calling main; bare isolated
+`python -m` does not make `/opt/grant-source` importable. Runtime installation,
+credential delivery, permissions, root authority and actual worker admission are
+separate gates. This callable/CLI does not create them.

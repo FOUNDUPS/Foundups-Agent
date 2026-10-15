@@ -1,3 +1,55 @@
+## Native fixture IPC closure — 2026-10-16
+
+GitHub's private checkout also prevented the separate numeric worker UID from
+reading test imports. The fixture now copies exact loaded Python sources and
+real package initializers into a disposable root-owned readable snapshot,
+records their hashes and excludes original checkout paths from the child.
+Original checkout permissions remain unchanged. Actual private-ancestor control
+failed on the prior source and passed all five native cases after repair;
+independent review verified301 files and9 initializers byte-for-byte. Combined
+author IPC/native checks passed12. These remain synthetic authority fixtures,
+not installed worker admission. Original hosted failure evidence is preserved.
+
+The hosted runner also exposed a fixture UID collision: actual issuer UID1001
+equaled its synthetic target. The fixture now selects a distinct target and
+updates both owner and root snapshot consistently. The original failure was
+reproduced under UID1001;70 rate cases passed under each of UID1000 and1001.
+Independent UID1001 controls confirmed distinct roles pass and equal roles
+still fail in production validation. No identity restriction was relaxed.
+
+PR2143 CodeQL flagged the synthetic grant-shaped reply on captured stdout.
+The separate-UID fixture now returns bounded bytes through a private inherited
+pipe, suppresses raw exception text and asserts stdout remains empty. It uses
+the active test interpreter and explicit dependency paths instead of WSL-only
+locations. Five native cases passed; independent review passed12 cases including
+seven IPC failure/cleanup controls. Production source is unchanged. Fresh hosted
+checks remain required; the original CodeQL failure is retained. WSP5/10/22/97.
+
+## Installed consumer and runtime startup integration — 2026-10-16
+
+WSP00/5/10/11/15/22/48/50/62/71/84/97. Reused current enrollment, manifest,
+permission, durable-store and bounded service owners. Added authenticated
+installed consumption, issuer runtime checks and fixed loader-to-service startup.
+Independent review repaired legacy missing evidence and root-LOAD guard gaps;
+consumer209/guard62/wiring18 cases passed, plus174 connected cases. Actual
+guard qualification remains credential-free; native admission and retained RSI
+gain remain open. PR2142 main CI/CodeQL passed and four completed lanes retired.
+Independent rate255/socket159 cases passed. Remaining native installation gates and source-bound evidence are in the
+existing RSI dispatch/backlog; no second orchestrator or roadmap was created.
+
+## Initial enrollment and target grant integration — 2026-10-16
+
+WSP00/5/15/22/48/97. Fourteen connected Linux suites passed459 cases at
+`38c36923b59b8b1165e4f4fe90462cf8183c3c46`, with no failures or skips.
+Independent enrollment259 and target adapter67 cases remain source-bound.
+Two-UID storage experiment separately exposes shared replay ownership failure;
+the passing same-UID process tests do not establish cross-UID deployment.
+Receipts: `next-startup/enrollment-target-integrated-linux.xml`,
+`installed-enrollment-independent-review/independent-review.json`,
+`target-low-grant/independent-review/independent-review.json` and
+`replay-two-uid/replay-ownership-review.json` under the existing evidence root.
+Native worker admission and retained RSI gain remain unverified.
+
 ## Installed issuer artifact and policy preparation — 2026-10-16
 
 Repaired the observed PR2141 main CI clock-sampling race in the generation-lock

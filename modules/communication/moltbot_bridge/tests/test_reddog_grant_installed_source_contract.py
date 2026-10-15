@@ -14,7 +14,7 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     GRANT_AUTHORITY_SERVICE_CONFIG, GRANT_AUTHORITY_SERVICE_RUN_PACKET,
-    RuntimeArtifactManifestError, raw_digest, required_runtime_artifacts_for,
+    RuntimeArtifactManifestError, raw_digest, validate_unsigned_payload,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     public_key_fingerprint,
@@ -83,7 +83,7 @@ def test_inert_new_shapes_are_not_accepted_by_legacy_runtime_admission():
         artifacts.validate_grant_service_run_packet(result["run_packet"],
             config_digest=result["config_digest"], archive_digest=raw_digest(b"archive"))
     with pytest.raises(RuntimeArtifactManifestError):
-        required_runtime_artifacts_for({"schema_version": "reddog_initial_runtime_artifact_manifest.v2",
+        validate_unsigned_payload({"schema_version": "reddog_initial_runtime_artifact_manifest.v2",
             "runtime_profile": "grant_authority_service_installed_source"})
 
 

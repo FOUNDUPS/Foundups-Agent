@@ -116,7 +116,7 @@ def test_shape_support_cannot_enter_legacy_runtime_or_credential_path(tmp_path, 
     with pytest.raises(ValueError, match="grant_installed_profile_not_enrolled"):
         manifest.verify_current_grant_service_artifacts(repo_root=tmp_path,
             grant_root=tmp_path, policy=policy)
-    with pytest.raises(ValueError, match="grant_permission_e0_schema_invalid"):
+    with pytest.raises(ValueError, match="grant_permission_oracle_mismatch"):
         permission._permission_state(SimpleNamespace(policy=policy), tmp_path,
             tmp_path / "owner.json", None, 1100)
 

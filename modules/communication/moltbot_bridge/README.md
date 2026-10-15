@@ -4,7 +4,7 @@
 
 ## Callable LOW grant service — 2026-10-15
 
-[One-request LOW API, protected issuer custody loader and native-admission limits](INTERFACE.md#callable-low-grant-service--2026-10-15).
+[One-request LOW API, protected loader, installed startup and runtime checks](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#installed-issuer-startup--2026-10-16). Native admission remains unproved.
 
 ## Grant bootstrap binding and LOW RPC — 2026-10-15
 

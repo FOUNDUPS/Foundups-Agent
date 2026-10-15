@@ -1,3 +1,12 @@
+## Installed consumer/runtime integration
+
+Run installed-manifest consumer, issuer startup/service, separate rate-store and
+runtime-guard suites together with current enrollment/target regressions. Run
+ordinary positive credential fixtures as a nonroot Linux account; they bind its
+positive UID/GID. Run explicit two-UID native tests and root-owned guard fixtures
+with root separately. Preserve skips/failures; do not weaken production UID checks.
+Synthetic admission and credential-free guard probes are not native worker proof.
+
 ## Installed issuer contract qualification
 
 Run `test_reddog_grant_installed_source_contract.py` and
