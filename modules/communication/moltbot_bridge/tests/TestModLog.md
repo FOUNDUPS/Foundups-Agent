@@ -1,3 +1,20 @@
+## Hosted Linux fixture closure — 2026-10-15
+
+PR2136 at4aae1646: hosted enrollment tests618passed/9skipped/3failed.
+Two recovery fixtures lacked the existing explicit POSIX synthetic lease seam;
+one negative lease fixture overlapped its repository/runtime roots and therefore
+failed before reaching the ownership check. Corrected test setup only; unchanged
+assertions independently reviewed in linux-ci-test-repair-review.json.
+Ubuntu24.04/Python3.12 rerun:29passed/3Windows-only skips in14.46s across
+test_reddog_runtime_artifact_activation_lease.py and
+test_reddog_signer_runtime_atomic_provisioning_recovery.py. External wrapper uses
+pytest --noconftest --import-mode=importlib --confcutdir=<owned-worktree>
+-p no:cacheprovider -q; bytecode/dotenv/plugin autoload disabled. JUnit and command
+are retained in the existing rsi-initial-manifest-20261015 evidence directory.
+Earlier local harness collection failed on a protected drive-root file; scoped
+collection fixed the harness, without changing repository test configuration.
+These unit fixtures do not replace the separately recorded native qualification.
+
 ## Initial manifest and Linux lease review — 2026-10-15
 
 New initial-authority suite38cases includes14 independently held-out regressions.

@@ -80,6 +80,15 @@ model endpoint responded and no production provider route was qualified by that
 inventory. Local proposal inference and authenticated worker execution remain
 separate milestones; no paid fallback is authorized by this planning record.
 
+Actual local diagnosis trial used the existing proposal-only inference owner,
+installed Qwen2.5 Coder7B GGUF and matching Python3.12.10/llama-cpp0.3.20. Raw
+mode returned an instruction echo after51.437s; a single repair using the actual
+embedded chat-template digest timed out at60.031s. Neither produced an accepted
+diagnosis. No paid calls, downloads, model eviction or repository edits occurred;
+tokens are unknown. `next-startup/evidence-index.json` retains both attempts.
+These failures motivate bounded model/task qualification, not claiming that
+installed weights are an admitted or effective worker.
+
 ## Verifier-guided loop audit — 2026-10-15
 
 Scope: source `a6a63b8e9098c5b35629fd76629b96d3089af566`, WSP00/15/48/97,

@@ -1,5 +1,17 @@
 # Blocking secret scan
 
+## Initial manifest binding review — 2026-10-15
+
+PR2136 head4aae1646e failed job116406279370 with44 changed whole-file bindings.
+Independent exact-blob review proved all44 lines unchanged and previously reviewed:
+37 generated source digests, six historical backlog metadata lines and one prior
+authority-boundary prose line. Every manifest digest also recomputes from its
+referenced committed source using the existing generator normalization. Preserve
+all276 historical bindings and append only these44 exact fingerprints (320 total).
+No rule, exclusion, fingerprint algorithm or unknown finding is approved.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/security-review.json`
+and its reproducer; unsigned independent Codex review, not runtime authority.
+
 ## Writer manifest metadata re-review — 2026-10-14
 
 PR2134 head `a1b1e92aa` failed security job115629644317: changing the generated

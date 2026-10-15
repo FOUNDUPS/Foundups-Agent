@@ -107,14 +107,16 @@ def test_path_replacement_cannot_leave_failed_generation_active(
 
 @pytest.mark.skipif(os.name == "nt", reason="POSIX fail-closed contract")
 def test_posix_activation_requires_external_owner(tmp_path: Path) -> None:
-    target = tmp_path / "artifact.json"
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    target = runtime / "artifact.json"
     target.write_text("{}", encoding="utf-8")
 
     with pytest.raises(RuntimeError, match="external_owner_required"):
         with runtime_artifact_activation_lease(
             (target,),
             repo_root=tmp_path / "repo",
-            allowed_root=tmp_path,
+            allowed_root=runtime,
         ):
             raise AssertionError("POSIX activation lease entered")
 
