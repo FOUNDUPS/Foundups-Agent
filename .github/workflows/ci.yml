@@ -1087,7 +1087,7 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_holoindex_preowner_incident_repair.py \
             modules/infrastructure/idle_automation/tests/test_holoindex_postmerge_coordinator.py
 
-      - name: Run initial generation bootstrap signer contracts
+      - name: Run initial enrollment producer and consumer contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1095,6 +1095,16 @@ jobs:
         run: |
           python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib \
             -o pythonpath=. -p no:cacheprovider \
+            modules/communication/moltbot_bridge/tests/test_reddog_initial_runtime_manifest_authority.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signed_runtime_artifact_manifest.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_manifest_authority_freshness.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning_recovery.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_activation_lease.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_current_generation_manifest_launch_selection.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader_linux.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_signer.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_authority.py \
             modules/communication/moltbot_bridge/tests/test_reddog_sqlite_monotonic_authority_store.py \

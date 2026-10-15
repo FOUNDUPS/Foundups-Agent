@@ -16,6 +16,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     MAX_ARTIFACT_BYTES,
     DEFAULT_MAX_TTL_SECONDS,
     REQUIRED_RUNTIME_ARTIFACTS,
+    SCHEMA_VERSION_INITIAL,
     RuntimeArtifactManifestError,
     canonical_signing_input,
     is_sha256,
@@ -339,6 +340,11 @@ def _verify_manifest(
     runtime: Path,
     verifier: Ed25519SignatureVerifier,
 ) -> None:
+    if (
+        manifest.get("schema_version") == SCHEMA_VERSION_INITIAL
+        and activation.generation != 1
+    ):
+        raise RuntimeArtifactManifestError("initial_manifest_generation_invalid")
     expected = {
         "manifest_id": activation.manifest_id,
         "artifact_generation_digest": activation.artifact_generation_digest,
@@ -399,6 +405,9 @@ def _verify_signatures(
     signature = str(manifest["signature"])
     if not verifier.verify(public_key, signing_input, signature):
         raise RuntimeArtifactManifestError("manifest_signature_invalid")
+    if manifest.get("schema_version") == SCHEMA_VERSION_INITIAL:
+        # Authority comes from the authenticated generation and owner boundary.
+        return
     attestation = canonical_signer_audit_attestation_input(
         signing_input=signing_input,
         signature=signature,

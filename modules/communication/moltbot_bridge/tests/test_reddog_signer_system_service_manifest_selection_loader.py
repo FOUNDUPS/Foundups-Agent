@@ -80,11 +80,16 @@ def _trusted_clock(monkeypatch: pytest.MonkeyPatch) -> None:
 def _fixture(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
+    *,
+    separate_anchor: bool = False,
 ) -> tuple[Any, Path, dict[str, Any]]:
     harness = _build_harness(tmp_path)
     assert harness.produce().accepted is True
     values = _legacy_values(harness)
-    owner = _generation_owner_config(harness, values)
+    owner = _generation_owner_config(
+        harness, values,
+        anchor_root=tmp_path / "generation-anchor" if separate_anchor else None,
+    )
     owner_root = tmp_path / "signer-owner"
     owner_root.mkdir()
     owner_path = owner_root / "owner.json"
@@ -101,8 +106,13 @@ def _fixture(
     return harness, owner_path, owner
 
 
-def _generation_owner_config(harness: Any, values: dict[str, Any]) -> dict[str, Any]:
+def _generation_owner_config(
+    harness: Any, values: dict[str, Any], *, anchor_root: Path | None = None,
+) -> dict[str, Any]:
     runtime = harness.runtime_root
+    anchor_root = anchor_root or runtime
+    if anchor_root != runtime:
+        anchor_root.mkdir()
     authority_root = runtime.parent / "signer-authority"
     witness_root = runtime.parent / "signer-generation-witness"
     authority_root.mkdir()
@@ -136,8 +146,8 @@ def _generation_owner_config(harness: Any, values: dict[str, Any]) -> dict[str, 
     )
     high_boundary = HighWaterBoundary(high_water)
     writer = DurableSignerRuntimeGenerationAnchor(
-        runtime / "generation-anchor.json",
-        allowed_root=runtime,
+        anchor_root / "generation-anchor.json",
+        allowed_root=anchor_root,
         repo_root=harness.repo_root,
         anchor_id="reddog-signer:production",
         signer=signing,
@@ -152,6 +162,7 @@ def _generation_owner_config(harness: Any, values: dict[str, Any]) -> dict[str, 
         binding=binding,
         authority_root=authority_root,
         witness_root=witness_root,
+        anchor_root=anchor_root,
     )
 
 
@@ -173,6 +184,7 @@ def _owner_mapping(
     binding: Any,
     authority_root: Path,
     witness_root: Path,
+    anchor_root: Path | None = None,
 ) -> dict[str, Any]:
     runtime = harness.runtime_root.resolve()
     value = {
@@ -182,7 +194,7 @@ def _owner_mapping(
             str(harness.repo_root.resolve()).encode("utf-8")
         ),
         "runtime_root": str(runtime),
-        "anchor_path": str(runtime / "generation-anchor.json"),
+        "anchor_path": str((anchor_root or runtime).resolve() / "generation-anchor.json"),
         "anchor_id": "reddog-signer:production",
         "generation_public_key": signing.public_key,
         "generation_authenticator_id": signing.authenticator_id,
@@ -221,6 +233,84 @@ def test_root_owned_config_reconstructs_current_selection(
     assert selected["owner_config_id"] == owner["config_id"]
     assert selected["generation"] == 1
     assert selected["config_path"].endswith("signer_service_config.json")
+
+
+def test_separate_anchor_root_reconstructs_actual_current_selection(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    harness, owner_path, owner = _fixture(tmp_path, monkeypatch, separate_anchor=True)
+    assert Path(owner["anchor_path"]).is_file()
+    assert not (harness.runtime_root / "generation-anchor.json").exists()
+    capability, boundary = load_system_service_manifest_selection(
+        owner_config_path=owner_path, repo_root=harness.repo_root,
+    )
+    selected = boundary.consume(capability)
+    assert selected["generation"] == 1
+    assert selected["manifest_id"] == harness.read_manifest()["manifest_id"]
+    assert selected["runtime_root"] == str(harness.runtime_root.resolve())
+    # Moving the anchor must not redirect the artifact-bound witness context.
+    binding = loader_module._witness_binding(owner, runtime=harness.runtime_root)
+    assert binding.runtime_root_digest == raw_digest(str(harness.runtime_root.resolve()).encode())
+
+
+@pytest.mark.parametrize("location", (
+    "runtime-child", "high_water", "high_water-child", "witness",
+    "witness-child", "owner", "owner-child", "ancestor", "repo", "repo-ancestor",
+))
+def test_separate_anchor_root_rejects_overlapping_domains(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, location: str,
+) -> None:
+    harness, owner_path, owner = _fixture(tmp_path, monkeypatch, separate_anchor=True)
+    roots = {
+        "runtime-child": harness.runtime_root / "nested",
+        "high_water": Path(owner["high_water_root"]),
+        "high_water-child": Path(owner["high_water_root"]) / "nested",
+        "witness": Path(owner["witness_root"]),
+        "witness-child": Path(owner["witness_root"]) / "nested",
+        "owner": owner_path.parent,
+        "owner-child": owner_path.parent / "nested",
+        "ancestor": harness.runtime_root.parent,
+        "repo": harness.repo_root,
+        "repo-ancestor": harness.repo_root.parent,
+    }
+    owner["anchor_path"] = str(roots[location] / "generation-anchor.json")
+    owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+    with pytest.raises(ValueError):
+        loader_module._validate_owner_config(
+            owner, repo=harness.repo_root, owner_root=owner_path.parent,
+        )
+
+
+@pytest.mark.parametrize("path_kind", ("filename", "traversal", "relative-separated"))
+def test_anchor_path_cannot_change_filename_or_escape(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, path_kind: str,
+) -> None:
+    harness, owner_path, owner = _fixture(tmp_path, monkeypatch, separate_anchor=True)
+    root = Path(owner["anchor_path"]).parent
+    owner["anchor_path"] = {
+        "filename": str(root / "other.json"),
+        "traversal": str(root / ".." / "different" / "generation-anchor.json"),
+        "relative-separated": "nested/generation-anchor.json",
+    }[path_kind]
+    owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+    with pytest.raises(ValueError):
+        loader_module._validate_owner_config(
+            owner, repo=harness.repo_root, owner_root=owner_path.parent,
+        )
+
+
+def test_legacy_relative_colocated_anchor_remains_accepted(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    harness, owner_path, owner = _fixture(tmp_path, monkeypatch)
+    owner["anchor_path"] = "generation-anchor.json"
+    owner["config_id"] = digest({k: v for k, v in owner.items() if k != "config_id"})
+    owner_path.chmod(0o600)
+    owner_path.write_text(json.dumps(owner), encoding="ascii")
+    capability, boundary = load_system_service_manifest_selection(
+        owner_config_path=owner_path, repo_root=harness.repo_root,
+    )
+    assert boundary.consume(capability)["generation"] == 1
 
 
 def test_tampered_owner_config_rejects(

@@ -183,6 +183,12 @@ def signer_runtime_generation_binding_from_manifest(
 ) -> SignerRuntimeGenerationBinding:
     """Project one validated profile's launch digests into generation state."""
 
+    from .reddog_runtime_artifact_manifest_contract import SCHEMA_VERSION_INITIAL
+    if manifest.get("schema_version") == SCHEMA_VERSION_INITIAL and (
+        type(generation) is not int or generation != 1
+    ):
+        raise ValueError("initial_manifest_generation_invalid")
+
     required = required_runtime_artifacts_for(manifest)
     if required == REQUIRED_RUNTIME_ARTIFACTS:
         config_name, run_packet_name = required[-2:]

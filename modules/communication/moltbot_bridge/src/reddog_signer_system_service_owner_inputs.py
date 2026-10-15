@@ -1,15 +1,65 @@
-"""Protected signer owner input snapshots; public APIs re-exported by owner loader.
+"""Protected signer owner input/layout checks; APIs re-exported by owner loader.
 
 Input supply is not a current-generation proof or execution permission.
 """
 from __future__ import annotations
 import json
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable, Mapping
 from .reddog_runtime_artifact_manifest_contract import RuntimeArtifactManifestError, digest, is_sha256, raw_digest
-from modules.infrastructure.shared_utilities.runtime_artifact_safety import validate_runtime_artifact_path, secure_read_confined_bytes
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    validate_runtime_artifact_path, validate_runtime_root_path, secure_read_confined_bytes,
+)
 
 MODEL_VERIFIER_INPUTS = ("catalog", "benchmarks", "promotions", "evidence", "policy", "trusted_keys")
+
+
+def _validate_owner_paths(
+    value: Mapping[str, Any], *, repo: Path, owner_root: Path
+) -> None:
+    runtime = validate_runtime_root_path(value["runtime_root"], repo_root=repo)
+    high_root = validate_runtime_root_path(value["high_water_root"], repo_root=repo)
+    witness_root = validate_runtime_root_path(value["witness_root"], repo_root=repo)
+    anchor_root = _owner_anchor_root(value, repo=repo)
+    roots = (runtime, high_root, witness_root)
+    if anchor_root != runtime:
+        roots += (anchor_root,)
+    if any(
+        first == second or first in second.parents or second in first.parents
+        for first, second in (
+            *((first, second) for index, first in enumerate(roots)
+              for second in roots[index + 1:]),
+            *((owner_root, item) for item in roots),
+        )
+    ):
+        raise RuntimeArtifactManifestError("signer_owner_root_overlap")
+    expected = (
+        (value["anchor_path"], anchor_root, "generation-anchor.json"),
+        (value["high_water_path"], high_root, "high-water.json"),
+        (value["witness_path"], witness_root, "generation.sqlite3"),
+    )
+    for raw_path, root, filename in expected:
+        path = validate_runtime_artifact_path(
+            raw_path, allowed_root=root, repo_root=repo
+        )
+        if path != root / filename:
+            raise RuntimeArtifactManifestError("signer_owner_path_invalid")
+
+
+def _owner_anchor_root(value: Mapping[str, Any], *, repo: Path) -> Path:
+    """Reuse the approved anchor path; relative legacy paths stay colocated."""
+    runtime = validate_runtime_root_path(value["runtime_root"], repo_root=repo)
+    raw = value["anchor_path"]
+    if not isinstance(raw, str):
+        raise RuntimeArtifactManifestError("signer_owner_path_invalid")
+    absolute = Path(raw).is_absolute()
+    anchor = validate_runtime_artifact_path(
+        raw, repo_root=repo, allowed_root=None if absolute else runtime,
+    )
+    root = validate_runtime_root_path(anchor.parent, repo_root=repo)
+    if anchor.name != "generation-anchor.json" or (not absolute and root != runtime):
+        raise RuntimeArtifactManifestError("signer_owner_path_invalid")
+    return root
 
 
 def load_system_service_signer_identity(

@@ -1,3 +1,94 @@
+## Initial manifest activation — 2026-10-15
+
+Source: base `1774d1e8fe6c8270ebe62be1206d2f5cbacb7d3b`, owned lane
+`agent/rsi-initial-manifest-20261015`; WSP00/5/6/10/11/15/22/48/50/62/71/84/97.
+WSP15 remains18/P0 (complexity4, importance5, deferability5, impact4).
+
+Reuse audit first disproved a proposed new activation interface: six disposable
+checks show existing same-nonce publication/recovery works across separate times
+and rejects expired manifests. Legacy work-manifest signing requires committed
+architect work/publication and consensus authority; root key custody is not that
+evidence. Initial enrollment therefore uses an explicit administrative signature
+domain over an approved source/artifact inventory, rather than fabricated legacy
+receipts. It reuses existing publication, generation CAS, high-water/witness,
+custody and credential-free reader owners. This grants no work/publication right.
+
+Independent review reproduced and repaired acceptance of an initial manifest at
+generation2 and publication after approval expired waiting for a lock. A Linux
+lease FIFO race could hang admission; pre-open ancestry and nonblocking open now
+reject it. Held-out14 initial cases and23 Linux lease cases are retained in the
+existing test owners. Final independent40pass/1Windows platform skip includes
+those controls and source hashes. Root-installed immutable files reject writes,
+unlink/replacement and retained writable descriptors; a real preexisting writable
+mmap received SIGBUS without changing bytes. OS-mocked tests remain labeled as such.
+
+Actual component experiment: separate systemd processes UID999 published,
+provisioned generation1 via existing recovery, and selected/consumed the same
+manifest without credential environment or credential mounts. Four seconds of a
+240-second approval window were used. An independent later reader agreed with
+the same manifest and unchanged anchor/high-water/witness hashes. Two initial
+independent-reader attempts used overly restrictive read-only mounts and failed
+on existing lock-file opens; correct bounded writable lock/store roots resolved
+that setup error. Failed attempts remain evidence, not silent successes.
+
+Evidence directory: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015`.
+Key records: `initial-native-component-result.json`,
+`initial-native-component-evidence.json`, `independent-native-reader3.stdout`,
+`writer-filesystem-review.json`, `linux-lease-native-source2.json`,
+`review/final-review-receipt.json`, `review/linux-immutable-mmap.json`.
+The sealed220-module component bundle has explicit candidate overlays and omitted
+package initializers. Seven disabled/empty artifacts are genuinely signed bytes,
+but are not runnable service configuration. Fsync/distinct-process reopen does
+not prove power-loss durability. No worker/provider service, paid call, promotion,
+retained improvement or production RSI is claimed. Native evidence is bound to
+its recorded source inventory; later refactors require requalification.
+
+After moving layout validation into the existing `owner_inputs` module, fresh
+`final-native` roots repeated the full component experiment and independent
+selection. `final-native/parent-independent-review.json` checks all220 current
+source bytes and identical persisted state; the final manifest is
+`sha256:96e06cdc65dae8486a020803100642114456c2cc075116f63e95ea5bd4ec7ead`.
+All owned transient units exited. Source2 remains historical, not silently rebound.
+Changed Python files meet675-line/60-function/200-class limits. Broader WSP62 tests
+also expose unchanged baseline startup-test712-line/89-line-function and runtime
+materializer296-line-class debt; no exemption or weakened threshold was added.
+
+Retrieval: maintenance in the actively edited candidate rejected
+`workspace_changed_during_transaction`. A stationary clean1774 checkout then
+reported OWNER_READY. Its governed query is CURRENT/no-gap; invoking the shared
+checkout's script instead binds the query host to shared0c81418f and correctly
+rejects authority mismatch. Preserve that distinction. Ranking remains noisy
+(unrelated lifecycle/PF Mall hits), so direct canonical owners are mandatory;
+bridge memory/README and requirements.txt are absent. No query reindexed.
+
+Next: publish/close the qualified source, then use existing v7+ startup,
+principal/grant/replay dependencies and canonical provider admission for one
+native author and independent verifier. Empty component artifacts cannot stand
+in for these inputs. The existing R15 later-use/control experiment, governed
+rollback and bounded autonomous selection remain required before RSI completion.
+
+Next-gate execution refined the blocker: the actual config materializer rejects
+missing authentic architect publication and authority-profile consensus/source
+evidence. That requirement also exists in permissioned control/proposal policy,
+not merely its public wrapper. E0 LOW-only policy permits no consensus, but first
+loads that configuration, so it is not an initial configuration issuer. Reconcile
+an explicit protected administrative initial-service policy through existing
+owners before supplying runnable service inputs; do not fabricate earlier work.
+`next-startup/prep-result.json` preserves the genuine no-effect rejection.
+Local Qwen GGUF and a matching llama-cpp interpreter are present, but no queried
+model endpoint responded and no production provider route was qualified by that
+inventory. Local proposal inference and authenticated worker execution remain
+separate milestones; no paid fallback is authorized by this planning record.
+
+Actual local diagnosis trial used the existing proposal-only inference owner,
+installed Qwen2.5 Coder7B GGUF and matching Python3.12.10/llama-cpp0.3.20. Raw
+mode returned an instruction echo after51.437s; a single repair using the actual
+embedded chat-template digest timed out at60.031s. Neither produced an accepted
+diagnosis. No paid calls, downloads, model eviction or repository edits occurred;
+tokens are unknown. `next-startup/evidence-index.json` retains both attempts.
+These failures motivate bounded model/task qualification, not claiming that
+installed weights are an admitted or effective worker.
+
 ## Verifier-guided loop audit — 2026-10-15
 
 Scope: source `a6a63b8e9098c5b35629fd76629b96d3089af566`, WSP00/15/48/97,

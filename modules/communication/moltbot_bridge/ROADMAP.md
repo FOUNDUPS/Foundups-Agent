@@ -1,3 +1,12 @@
+## Initial manifest checkpoint — 2026-10-15
+
+Native isolated component publication -> generation1 activation -> credential-free
+selection passed with actual custody, qualified stores and immutable artifacts.
+Independent repeat selection agrees. Disabled initial configuration does not
+qualify worker admission. Next18/P0: actual service-input/admission composition,
+one native author and independent verifier, retained benefit and rollback under
+root ROADMAP.md. Current source publication remains a separate closure gate.
+
 ## Protected writer checkpoint — 2026-10-14
 
 Initial writer component validated:294pass/1platform skip, independent115pass,

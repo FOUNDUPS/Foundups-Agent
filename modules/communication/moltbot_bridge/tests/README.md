@@ -1,3 +1,21 @@
+## Initial manifest producer-to-consumer qualification
+
+The CI step `Run initial enrollment producer and consumer contracts` selects
+`test_reddog_initial_runtime_manifest_authority.py` with legacy signed manifests,
+authority freshness, atomic provisioning/recovery, activation leases, current
+selection, system-service owner readers, authenticated grant binding and existing
+bootstrap/store/isolation/resolver suites. Run the same paths using the existing
+`python -B -m pytest --noconftest --import-mode=importlib -p pytest_asyncio.plugin
+-p no:cacheprovider -q` command. Do not infer native execution from mocked OS or
+custody seams in these tests.
+
+Retained held-out cases cover expiry while waiting for publication, initial
+manifest rejection at generation2, source/capability mismatch, Linux process and
+inode qualification, FIFO/ancestry ordering and descriptor cleanup. Actual Linux
+systemd/immutable-inode/mmap and separate-process component evidence is recorded
+in the existing RSI dispatch runbook. Windows-specific sharing tests retain
+their explicit platform skips on Linux. Native worker admission is a later gate.
+
 ## Initial writer qualification
 
 Run `test_reddog_signer_runtime_generation_bootstrap_authority.py` together with

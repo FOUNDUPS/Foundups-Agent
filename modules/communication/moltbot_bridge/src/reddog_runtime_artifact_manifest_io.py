@@ -102,6 +102,10 @@ def _describe_runtime_artifacts_unlocked(
             )
         )
     result = tuple(descriptors)
+    if "initial_manifest" in values:
+        approved = values["initial_manifest"]["artifacts"]
+        if tuple(item.to_dict() for item in result) != tuple(approved):
+            raise RuntimeArtifactManifestError("initial_manifest_artifacts_changed")
     if GRANT_AUTHORITY_SERVICE_ARCHIVE in required_artifacts:
         _validate_grant_artifact_set(result, mappings)
     return result
@@ -118,7 +122,8 @@ def publish_content_addressed_manifest(
 
     values = boundary.require(authority)
     target = _manifest_target(manifest_directory, manifest, values)
-    _publish_current_generation(target, manifest, values)
+    _publish_current_generation(target, manifest, values,
+        initial_guard=(lambda: boundary.require(authority)) if "initial_manifest" in values else None)
     return target
 
 
@@ -151,6 +156,7 @@ def _publish_current_generation(
     target: Path,
     manifest: Mapping[str, Any],
     authority: Mapping[str, Any],
+    initial_guard=None,
 ) -> None:
     runtime = Path(authority["runtime_root"]).resolve()
     required_artifacts = required_runtime_artifacts_for(manifest)
@@ -158,6 +164,8 @@ def _publish_current_generation(
         with reddog_runtime_artifact_generation_lock(
             runtime, repo_root=authority["repo_root"]
         ):
+            if initial_guard is not None:
+                initial_guard()
             current = tuple(
                 item.to_dict()
                 for item in _describe_runtime_artifacts_unlocked(
@@ -172,12 +180,16 @@ def _publish_current_generation(
                 raise RuntimeArtifactManifestError(
                     "manifest_artifacts_changed"
                 )
+            if initial_guard is not None:
+                initial_guard()
             atomic_create_confined_mapping(
                 target,
                 manifest,
                 allowed_root=authority["runtime_root"],
                 repo_root=authority["repo_root"],
             )
+            if initial_guard is not None:
+                initial_guard()
     except RuntimeError as exc:
         if str(exc) == "revision_conflict":
             raise RuntimeArtifactManifestError(
@@ -209,6 +221,9 @@ def _validate_bound_artifact(
         if digest(value) != authority["signer_service_config_digest"]:
             raise RuntimeArtifactManifestError("manifest_config_changed")
     elif filename == "authoritative_work_state.json":
+        if "initial_manifest" in authority:
+            # Initial enrollment attests installed bytes, not a work/queue grant.
+            return
         if value.get("revision") != authority["work_state_revision"]:
             raise RuntimeArtifactManifestError("manifest_state_changed")
         matches = [

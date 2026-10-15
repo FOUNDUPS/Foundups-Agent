@@ -1,3 +1,12 @@
+## Initial manifest activation — 2026-10-15
+
+Protected administrative enrollment signs one exact source/artifact inventory in
+an explicit initial-only domain. Existing generation recovery activates it;
+Linux consumes root-installed immutable files and a separate writable anchor.
+Actual isolated publication, activation and credential-free selection passed.
+Disabled component inputs do not qualify worker startup or RSI. See
+[the contract](INTERFACE.md#initial-runtime-manifest-enrollment--2026-10-15).
+
 ## Protected generation writer — 2026-10-14
 
 The missing initial-writer adapter now composes existing stores with protected
