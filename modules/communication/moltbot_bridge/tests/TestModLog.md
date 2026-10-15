@@ -1,3 +1,16 @@
+## Initial enrollment and target grant integration — 2026-10-16
+
+WSP00/5/15/22/48/97. Fourteen connected Linux suites passed459 cases at
+`38c36923b59b8b1165e4f4fe90462cf8183c3c46`, with no failures or skips.
+Independent enrollment259 and target adapter67 cases remain source-bound.
+Two-UID storage experiment separately exposes shared replay ownership failure;
+the passing same-UID process tests do not establish cross-UID deployment.
+Receipts: `next-startup/enrollment-target-integrated-linux.xml`,
+`installed-enrollment-independent-review/independent-review.json`,
+`target-low-grant/independent-review/independent-review.json` and
+`replay-two-uid/replay-ownership-review.json` under the existing evidence root.
+Native worker admission and retained RSI gain remain unverified.
+
 ## Installed issuer artifact and policy preparation — 2026-10-16
 
 Repaired the observed PR2141 main CI clock-sampling race in the generation-lock

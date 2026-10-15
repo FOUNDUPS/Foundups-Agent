@@ -1,3 +1,12 @@
+## Native RSI integration checkpoint — 2026-10-16
+
+WSP00/15/22/48/97. Integrated reviewed initial issuer enrollment and target grant
+acquisition in the owned lane;459 connected Linux cases passed. Re-anchored the
+existing backlog selection to its current observation. A13-case two-UID probe
+demonstrated shared replay ownership failure, directing the next repair toward
+separate authenticated issuer rate storage in existing durable-store owners.
+Installed approval/runtime consumption and actual native admission remain open.
+
 ## Installed issuer artifact and policy preparation — 2026-10-16
 
 WSP00/15/22/48/50/62/71/84/97. Added inert canonical installed-source bundle

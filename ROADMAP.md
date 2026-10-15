@@ -23,14 +23,19 @@ Linux trees then qualified; independent F inspection bound1,664 files,225 exact
 source modules/six real initializers and23 native mappings. Six tamper controls
 reject. These are credential-free import checks, not service admission.
 
-The candidate now prepares a canonical installed-source bundle and explicit E0
-v10 stable descriptor binding. Independent artifact review verified250 cases;
-policy review passed161. Initial-only scope and rejection by old execution paths
-remain enforced. See [current evidence and boundaries](docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16).
+PR2142 carries the installed-source bundle and explicit E0 v10 descriptor binding;
+hosted completion is pending. Independent artifact review verified250 cases and
+policy review passed161. The next local integration adds initial enrollment
+(259 independent Linux cases) and target-internal grant acquisition (67 independent
+Linux cases). These retain synthetic custody/installation boundaries. See
+[current evidence and boundaries](docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16).
 
-Next19/P0 (C4/I5/D5/Impact5): authenticated initial enrollment, current installed
-manifest consumption and target-internal LOW grant acquisition, then a real
-handshake. R15 still requires an admitted author, independent evaluation,
+Next19/P0 (C4/I5/D5/Impact5): current installed manifest consumption and an
+issuer-only runtime check before credentials. A two-UID experiment also exposed
+shared replay-file ownership failure; separate authenticated issuer rate storage
+must preserve target replay semantics before a real handshake. Thirteen disposable
+cases establish the problem and private-store controls, not live admission.
+R15 still requires an admitted author, independent evaluation,
 authorized retention/rollback and measured later-use benefit. No new scheduler.
 
 **Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**

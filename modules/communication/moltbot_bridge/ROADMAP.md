@@ -8,8 +8,11 @@ initializers and1,437 runtime files. It does not prove service execution.
 Installed bundle config v3/run-packet v2 and E0 v10 descriptor binding are now
 component-tested. Old archive paths reject the new initial-only policy.
 
-Next19/P0: protected enrollment and installed manifest/descriptor consumption,
-then target-internal grant acquisition and an authentic LOW handshake. Existing
+Reviewed initial enrollment and target grant acquisition are integrated locally;
+the generic installed consumer and issuer pre-secret runtime guard remain open.
+Thirteen two-UID cases reproduce shared replay ownership failure. Reuse existing
+durable stores with distinct authenticated issuer rate and target replay identities.
+Next19/P0: close those deployment boundaries and prove an authentic LOW handshake. Existing
 UID, credential, permission, revocation and generation boundaries remain intact.
 Reuse the current provider and issuer owners. R15 then requires an admitted
 author, independent held-out evaluation, authorized retention/rollback and later

@@ -1,3 +1,12 @@
+## Initial enrollment and target grant integration — 2026-10-16
+
+WSP00/15/22/48/50/71/97. Integrated independently reviewed initial installed
+manifest enrollment and target-internal LOW grant acquisition. Existing approval,
+generation, grant-provider, revocation and signing owners remain authoritative.
+Fourteen Linux suites passed459 cases. Separate issuer rate storage and installed
+consumer/runtime checks are required before native execution; no live grant or
+retained improvement is claimed. See tests/TestModLog.md and the existing backlog.
+
 ## Installed issuer artifact and policy preparation — 2026-10-16
 
 WSP00/15/22/48/50/62/71/84/97. Added inert canonical installed-source bundle
