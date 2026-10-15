@@ -492,7 +492,7 @@ def test_owner_read_is_descriptor_bound_and_bounded() -> None:
     assert "dir_fd=directory_fd" in function_source
     assert "O_NOFOLLOW" in function_source
     assert "_require_root_file_fd(file_fd)" in function_source
-    assert "_read_bounded_fd(file_fd, allow_empty=allow_empty)" in function_source
+    assert "_read_bounded_fd(file_fd, allow_empty=allow_empty, max_bytes=max_bytes)" in function_source
     assert "read_bytes" not in function_source
 
 

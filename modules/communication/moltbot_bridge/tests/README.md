@@ -90,13 +90,20 @@ Independent held-out cases and commands are retained in the dispatch runbook.
 ## Initial manifest producer-to-consumer qualification
 
 The CI step `Run initial enrollment producer and consumer contracts` selects
-`test_reddog_initial_runtime_manifest_authority.py` with legacy signed manifests,
+`test_reddog_initial_runtime_manifest_authority.py` and
+`test_reddog_initial_enrollment_artifact_bounds.py` with legacy signed manifests,
 authority freshness, atomic provisioning/recovery, activation leases, current
 selection, system-service owner readers, authenticated grant binding and existing
 bootstrap/store/isolation/resolver suites. Run the same paths using the existing
 `python -B -m pytest --noconftest --import-mode=importlib -p pytest_asyncio.plugin
 -p no:cacheprovider -q` command. Do not infer native execution from mocked OS or
 custody seams in these tests.
+
+Artifact-bound regressions cover approval, installed descriptor and source files
+above 64 KiB, reject bytes above 1 MiB, and preserve ordinary owner 64 KiB rejection.
+The existing privileged installed-runtime CI step also runs this suite as Linux
+root, so protected-file cases execute; ordinary nonroot selection skips them.
+Synthetic authority remains explicit.
 
 Retained held-out cases cover expiry while waiting for publication, initial
 manifest rejection at generation2, source/capability mismatch, Linux process and

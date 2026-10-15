@@ -27,16 +27,74 @@ generation qualification records were installed, with no authority stores yet
 initialized. These observations do not prove power-loss or physical rollback
 independence.
 
-Evidence: existing next-startup/ root, initial-control-independent-review/,
-native-installation-inputs/ and installed-execution-qualification/. Source base
-6a9df0ba5ad977c381c57f98adb2234940289c07, rebased onto PR2143 merge
-372d03de59352887928b7afd0204cce483e2c6c6. All11 exact-head checks passed;
-merged tree equals reviewed5b075a920. Main CI/CodeQL remains pending. Paid calls0;
-local/coordinator cost unknown. Native worker
-admission=false and retained RSI gain=false.
+Evidence under the existing `next-startup/` root: PR2143 merged at
+`372d03de59352887928b7afd0204cce483e2c6c6`; PR2144 merged at
+`7772c011b4c92e357839cf27ba900b7304358028`. Both reviewed/main trees match and
+all 10 exact-merge checks passed. Closure receipts are
+`consumer-publication-review/pr2143-merged-main-closure.json` and
+`initial-control-final-publication-review/pr2144-merged-main-closure.json`.
+Paid calls 0; local/coordinator cost unknown. Native worker admission=false
+and retained RSI gain=false.
 
-WSP15 executable prerequisite18/P0 (C3/I5/D5/Impact5): close this independently
-reviewed bootstrap repair and refresh exact installed source. Then19/P0 native
+Disposable installation then rejected a 182,859-byte approval, 685,781-byte
+installed descriptor and 26 source files above the ordinary 64 KiB owner bound.
+The scoped repair uses the existing 1 MiB artifact limit explicitly for these
+reads, preserving owner defaults and protected-file/source checks. Author 131
+and independent 87 Linux cases passed; connected 19-suite CI selection passed
+689 with 3 skips and no failures/errors (157.88s); source hashes remained stable.
+Receipts: `enrollment-artifact-bounds/connected-linux.xml` and
+`enrollment-artifact-bounds/connected-source-binding.json`. Counts overlap.
+See `enrollment-artifact-bounds/author-review.json` and
+`native-installation-inputs/artifact-bounds-independent-review/continuation-review-receipt.json`.
+The unified runtime is now pinned to `34eed594e18f5df5cb77ca85b825ed9fd77ea7f0`:
+2,691 files (1,254 exact Git Python sources and 1,437 runtime files), 362
+directories; descriptor SHA256
+`9be4e61349d301784c2792c61d82205949cd2f7bb88a3c496755bafe48743902`.
+Independent qualification reopened every file/directory and checked actual
+confined Unix transport, IP denial, runtime guards and four CLI rejections of
+absent authority. Evidence: `installed-execution-qualification/all-role-34eed594e-v1/`
+and its `independent-readonly-review/independent-review.json`. Qualification uses
+no credentials and proves no native admission. Later test/doc-only commits do
+not silently change this installed-source binding.
+
+Disposable installation preserves successive failures under
+`native-installation-inputs/disposable-installer-v3`, `-v4` and `-v5`.
+V3 exposed a writable `/run` ancestor; an explicit private `/run:mode=0755`
+passed actual credential-sentinel and guard checks. V4 exposed a root-only
+public run packet; the installer now checks its fixed path, inode type,
+ownership, link count and mode before publishing it read-only and sealing it.
+Sixteen checks cover unchanged bytes/identity, reader access and rejection cases.
+V5 then passed packet and target-manifest publication but rejected activation:
+`grant_authority_socket_path_invalid`. All three owned administrative units were
+observed absent/inactive afterward. No resident service or author ticket ran;
+synthetic authority only, no real credentials, no paid calls, no TTL extension.
+V6 repaired that directory view using read-only socket-parent mounts,
+role-owned0710/group988 transport directories, root-provision-only supplementary
+group988 and issuer/target-only UMask0007. Twenty-three installer checks passed;
+independent native probes cover15 socket cases, two private-store cases, two
+peer-policy cases and two capability-free root cases. Private files remain0600;
+unauthorized peer identity is rejected. Archived-time metadata diagnostics are
+not current admission. Eighteen runner checks passed; exact helper hashes and
+version-only runner delta were independently checked before invocation.
+
+Fresh v6 passed packet, manifest, activation and independent generation selection,
+then rejected `generation_publication_unknown_file` for the existing writer's
+`high-water.bootstrap-authority.lock`. No resident service ran; all administrative
+units were absent/inactive. Preserve v6, reconcile the exact bootstrap lock with
+its source owner and keep it separate from the four mutable coordination locks.
+Next repeat freshly after independent publication review. Evidence:
+`native-installation-inputs/{owner-directory-view-review,socket-transport-review,full-fixture-review,disposable-installer-v6}/`.
+
+PR2145 CI at `34eed594e` passed once, then a repeated run exposed a test fixture
+sampling two different wall-clock seconds. The two-file test/doc repair is
+`8cfb6fb5db87de316130b8cc5e98ac3f1f085efd`: deterministic rollover reproduced the
+failure, 41 focused cases passed and a separate six-case clock boundary review
+passed. Exact-head CI38800396328 and CodeQL38800390317 passed with all11 PR checks;
+later commits require their own publication checks. Production clock checks
+and the qualified installed runtime are unchanged.
+
+WSP15 executable prerequisite 18/P0 (C3/I5/D5/Impact5): close this bounds repair,
+reconcile the publication file inventory and replay disposable installation. Then19/P0 native
 installation/LOW grant-handshake becomes eligible. Continue existing R15 with
 admitted author, fixed independent evaluator, activation/rollback and later-use
 benefit. Holo query rejected authority/head mismatch; governed maintenance also

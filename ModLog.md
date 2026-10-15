@@ -5,6 +5,10 @@ from verified outcome authority; no second orchestrator or roadmap. Independent
 functional review passed, with inherited documentation-size debt explicitly
 retained. Actual isolated runtime and storage qualification advanced, while
 native worker admission, activation and retained benefit remain unproved.
+Unified runtime34eed qualified; disposable v6 passes activation/selection after
+installer socket-directory/transport correction, then rejects the writer's omitted
+bootstrap lock at generation publication. Failed attempts remain preserved;
+no real enrollment credentials or paid model calls were used in these trials.
 See docs/operations/RSI_SWARM_DISPATCH.md and the module ModLog.
 
 ## Installed consumer and runtime startup integration — 2026-10-16

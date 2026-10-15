@@ -1,3 +1,39 @@
+## Enrollment artifact bounds — 2026-10-16
+
+Same-head CI38796717521 passed; repeat38797430079 exposed a fixture clock rollover
+(1 failed, 1338 passed, 3 skipped). Forced rollover reproduced the error; one
+fixture epoch now binds claimed time and injected clock, preserving production
+checks. Full issuer LOAD file plus clock/expiry and boundary controls: 41 passed,
+zero skips (19.43s); registry check current. Receipt: `next-startup/artifact-bounds-publication-review/grant-load-clock-repair-receipt.json`.
+The broader 59-pass/5-failure harness/unchanged-structure result remains preserved.
+
+WSP5/10/22/50/97. E15 `next-startup/enrollment-artifact-bounds/author-review.json`
+binds base 7772c011b and source inventory aa6cce0d790bd489cacf8d29067c6767d90d89d06bc95ec10ac7bb9a40040468.
+Final author Linux run:131 passed, zero failures/errors/skips. Original harness
+cryptography errors and subsequent fixture root-overlap failure are preserved;
+only external harness/fixture setup changed before the passing run. Native
+root-owned reads use synthetic authority; no real credential or admission proof.
+Independent fresh 87 cases passed with no failures/skips (32 held-out, 55 selected);
+all four source/test hashes remained stable. Receipt:
+`next-startup/native-installation-inputs/artifact-bounds-independent-review/continuation-review-receipt.json`
+SHA256 366853b249133f502a43767affffd40ba7b894598c472f5baa6d11868541aa13.
+Connected 19-suite CI selection: 689 passed, 3 skipped, no failures/errors
+in 157.88s; source hashes stable. Receipts: `next-startup/enrollment-artifact-bounds/connected-linux.xml`
+and `connected-source-binding.json`. Counts overlap; do not sum.
+Runtime34eed qualified:2691 files/362 directories independently reopened;
+disposable v6 passed activation/selection after directory/transport repair, then
+rejected the writer's omitted bootstrap lock at generation publication. See
+canonical dispatch for exact test/evidence limits and next installer repair.
+Ordinary 64 KiB default, root/ancestry/no-follow
+checks, exact digests and source membership remain unchanged.
+PR2145 CI exposed two stale manifest digest pins; both now match regenerated `8bb02dbea0b0814bd54487104f517f4c7af4e469463dabb69361ef040efb88d5`: generator check and three frontend compatibility commands pass; Python suite passed 7 with 1 staged-index failure while the repaired pins remained unstaged (72.52s), followed by staged-index verification: 1 passed in 0.56s (`manifest-pin-staged-verification.xml`).
+
+Prior publication closure is verified separately by E15
+`next-startup/consumer-publication-review/pr2143-merged-main-closure.json` and
+`next-startup/initial-control-final-publication-review/pr2144-merged-main-closure.json`.
+Both reviewed/main trees match and all 10 exact-merge checks pass per receipt;
+original failed runs below remain historical. No native worker or retained gain.
+
 ## Initial control identity regressions — 2026-10-16
 
 Source inventory: next-startup/native-installation-inputs/initial-control-source-inventory-v3.json;

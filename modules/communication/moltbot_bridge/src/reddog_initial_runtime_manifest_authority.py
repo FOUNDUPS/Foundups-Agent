@@ -18,7 +18,7 @@ from .reddog_ed25519_signature_verifier_backend import (
 )
 from .reddog_runtime_artifact_manifest_contract import (
     SCHEMA_VERSION_INITIAL, SCHEMA_VERSION_INITIAL_V2, SIGNER_ROLE_INITIAL, SIGNING_OPERATION_INITIAL,
-    REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS, validate_signed_payload,
+    MAX_ARTIFACT_BYTES, REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS, validate_signed_payload,
     canonical_json, canonical_signing_input, digest, is_sha256, manifest_id_for,
     raw_digest, validate_freshness, validate_unsigned_payload,
 )
@@ -68,7 +68,7 @@ def _read_policy(path, repo):
         raise ValueError("initial_manifest_approval_path_invalid")
     root = validate_runtime_root_path(path.parent, repo_root=repo)
     target = validate_runtime_artifact_path(path, allowed_root=root, repo_root=repo)
-    raw = _read_root_owned_bytes(target, root)
+    raw = _read_root_owned_bytes(target, root, max_bytes=MAX_ARTIFACT_BYTES)
     value = json.loads(raw.decode("ascii"), object_pairs_hook=_unique)
     if (type(value) is not dict or set(value) != _FIELDS
             or value["schema_version"] not in {SCHEMA_VERSION, SCHEMA_VERSION_V2}):
@@ -107,7 +107,8 @@ def _check_installed_approval(repo, policy, runtime, payload):
     if policy["schema_version"] != SCHEMA_VERSION_V2:
         return
     from .reddog_grant_authority_service_artifact_contract import validate_installed_grant_service_artifacts
-    bundle = validate_installed_grant_service_artifacts({name: _read_root_owned_bytes(runtime / name, runtime)
+    bundle = validate_installed_grant_service_artifacts({name: _read_root_owned_bytes(
+        runtime / name, runtime, max_bytes=MAX_ARTIFACT_BYTES)
         for name in REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS})
     config, descriptor = bundle["config"], bundle["source_descriptor"]
     if (bundle["config_digest"] != payload["signer_service_config_digest"]
@@ -183,8 +184,10 @@ def _check_sources(repo, sources):
                 or str(relative) != name or "\\" in name or ":" in name or not is_sha256(expected)):
             raise ValueError("initial_manifest_source_path_invalid")
         path = repo.joinpath(*relative.parts)
-        # Empty package initializers are valid source only with an exact digest.
-        if raw_digest(_read_root_owned_bytes(path, path.parent, allow_empty=True)) != expected:
+        # Each source is capped at the existing 1 MiB artifact bound; empty
+        # package initializers remain valid only with their exact digest.
+        if raw_digest(_read_root_owned_bytes(path, path.parent, allow_empty=True,
+                                             max_bytes=MAX_ARTIFACT_BYTES)) != expected:
             raise ValueError("initial_manifest_source_changed")
     own_path = Path(__file__).resolve()
     if not own_path.is_relative_to(repo) or own_path.relative_to(repo).as_posix() not in sources:
