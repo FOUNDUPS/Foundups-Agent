@@ -1,3 +1,33 @@
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+`reddog_signer_owner_e0_policy_contract.py` accepts explicit
+`reddog-signer-owner-e0-policy.v9`. Its field set equals v8 and its signing prefix
+is the exact v9 schema. The default remains v6; v5-v8 canonical bindings, IDs
+and signing inputs retain their recorded values. No installed policy is migrated.
+
+`signer_owner_e0_authority_binding_digest(...)` excludes v8's existing
+`target_signer_generation_id` alias and, only for v9, the future
+`grant_authority_permission_snapshot_digest` and
+`grant_authority_permission_snapshot_receipt_id`. This permits the initial
+configuration/target manifest to be identified before its genuine permission
+receipt exists. Both receipt fields remain required and covered by the full
+policy ID/signature. A partial projection is not an admitted E0 policy. V9 follows
+the same exact-Git v3 grant-manifest, target-generation, permission, revocation
+and expiry checks as v8; it cannot fall into the legacy provenance path.
+
+`IndependentSignerSecretGrantProvider.lease(...)` prepares a LOW request under the
+current owner lease, exits that lease before signer RPC, then reacquires a fresh
+owner lease. It compares the complete policy, target/replay binding and selection
+except `selection_issued_at`/`selection_expires_at`, which are refreshed observation
+windows checked by that lease. It verifies the returned grant at the fresh time.
+Caller use remains inside the second lease; `issue_grant(...)` returns only after
+clean lease exit. Changed authority, expiry, RPC failure or cleanup failure rejects;
+there is no retry. Existing elevated and effect issuance behavior is preserved.
+
+Neither repair creates a permission receipt, enrolls a grant runtime profile or
+provides a production issuer executable. Native handshake and author admission
+still require those independently authorized owners and actual custody.
+
 ## Initial handshake configuration — 2026-10-15
 
 `compose_initial_handshake_service_config(...)` in the existing

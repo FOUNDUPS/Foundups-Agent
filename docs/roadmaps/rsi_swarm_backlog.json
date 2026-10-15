@@ -1889,8 +1889,8 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.initial_handshake_20261015",
-    "base_commit": "1d847ad1f83022f3ace0d4be5f4098ffdb9806e7",
+    "observation_path": "current_observation.grant_bootstrap_20261015",
+    "base_commit": "dcd622557480a953e5ec3a0676d53410769700a0",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
     "status": "IN_PROGRESS",
     "wsp15": {
@@ -1902,9 +1902,33 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close the initial handshake configuration slice; compose the missing independent LOW grant issuer from existing server/backend/policy/rate/custody owners, verify a real grant response, then connect native handshake and R15 author/verifier/retained-use experiment. Existing role keys and offline tests are not admission."
+    "next_action": "Close reviewed E0 v9 bootstrap and LOW RPC repairs; compose existing LOW issuer owners in the protected installed-source runtime, explicitly enroll that deployment with real custody/permission, then prove grant and handshake before R15. Existing zipapp rejects required imports/native dependencies; preserve old contracts rather than weakening archive checks."
   },
   "current_observation": {
+    "grant_bootstrap_20261015": {
+      "source_base_commit": "dcd622557480a953e5ec3a0676d53410769700a0",
+      "source_scope": "reviewed candidate overlay; publication separate",
+      "prior_observation": "current_observation.initial_handshake_20261015",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#grant-bootstrap-and-low-rpc--2026-10-15",
+      "repairs": [
+        "LOW RPC releases shared generation fence then revalidates under caller-use fence",
+        "explicit E0 v9 breaks future-permission prebinding cycle; full signed policy remains mandatory"
+      ],
+      "connected_validation": {
+        "platform": "Linux",
+        "passed": 275,
+        "skipped": 0,
+        "suites": 9
+      },
+      "independent_validation": "19 Linux RPC cases and 85 held-out E0 policy checks; source-bound external receipts",
+      "authorization_limit": "process tests use synthetic policy/key fixtures; no deployed issuer authority",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "source_publication": "pending exact-head CI and authorized closure",
+      "next_dependency": "installed-source grant issuer composition and explicit initial deployment enrollment; authentic policy/custody/rate/replay/revocation required",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null
+    },
     "initial_handshake_20261015": {
       "source_base_commit": "1d847ad1f83022f3ace0d4be5f4098ffdb9806e7",
       "prior_observation": "current_observation.initial_manifest_20261015",
@@ -1914,7 +1938,7 @@
       "native_handshake_verified": false,
       "native_worker_admitted": false,
       "retained_rsi_gain_demonstrated": false,
-      "source_publication": "pending exact-head gates",
+      "source_publication": "PR2137 merged dcd622557480a953e5ec3a0676d53410769700a0; exact-head CI38742773877 and CodeQL38742765283 succeeded; main validation separately tracked",
       "prior_closure": {
         "pr": 2136,
         "merge": "1d847ad1f83022f3ace0d4be5f4098ffdb9806e7",
@@ -17813,7 +17837,7 @@
           "total": 13,
           "priority": "P1",
           "state": "selected",
-          "reason": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+          "reason": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
         },
         {
           "task": "Independent held-out and later-use benefit",
@@ -17851,7 +17875,7 @@
         "total": 13,
         "priority": "P1"
       },
-      "next_rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_rationale": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
       "next_planning": {
         "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
         "wsp15": {
@@ -17862,7 +17886,7 @@
           "total": 13,
           "priority": "P1"
         },
-        "rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "rationale": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
         "prerequisites": [
           "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
           "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
@@ -17888,7 +17912,7 @@
         },
         "acceptance": {
           "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
-          "route": "Trusted constructor values demonstrably reach real helper→adapter→engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "route": "Trusted constructor values demonstrably reach real helper竊誕dapter竊弾ngine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
           "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
           "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
           "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",

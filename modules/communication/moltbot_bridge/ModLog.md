@@ -1,3 +1,18 @@
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Combined two reviewed repairs in
+existing owners: explicit E0 v9 prebinding excludes only the two future permission
+fields in addition to v8 exclusions, while full signed policy and admission retain
+them; LOW issuance releases the generation lock around RPC and rechecks fresh
+owner/binding/expiry under the caller-use fence. Legacy schemas and elevated paths
+remain unchanged. Independent review found and corrected comparison of refreshed
+selection timestamps; every other selection field remains compared.
+
+Added the native two-process RPC suite to the existing CI signing selection.
+[TestModLog](tests/TestModLog.md#grant-bootstrap-and-low-rpc--2026-10-15) records
+source-bound component evidence and synthetic authorization limits. No native
+issuer enrollment, runtime admission, new authority store or paid call occurred.
+
 ## Initial handshake configuration — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Reused existing configuration,

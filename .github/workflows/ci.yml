@@ -1299,6 +1299,7 @@ jobs:
             modules/infrastructure/secrets_mcp/tests/test_op_cli_secret_resolver.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_conversation_wiring.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_signer_low_grant_rpc.py \
               modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_durable_authentication_wsp62.py
 
       - name: Run authenticated startup owner and policy compatibility regression

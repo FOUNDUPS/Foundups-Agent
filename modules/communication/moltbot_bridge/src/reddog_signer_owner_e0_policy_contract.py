@@ -32,6 +32,8 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 POLICY_SCHEMA_V5 = POLICY_PREFIX_V5 = "reddog-signer-owner-e0-policy.v5"
 POLICY_SCHEMA_V8 = POLICY_PREFIX_V8 = "reddog-signer-owner-e0-policy.v8"
 POLICY_FIELDS_V8 = POLICY_FIELDS_V7
+POLICY_SCHEMA_V9 = "reddog-signer-owner-e0-policy.v9"
+POLICY_FIELDS_V9 = POLICY_FIELDS_V8
 POLICY_SCHEMA = POLICY_PREFIX = POLICY_SCHEMA_V6
 MAX_POLICY_TTL_SECONDS = 900
 POLICY_FIELDS_V6 = POLICY_FIELDS_V5 | GRANT_SERVICE_FIELDS
@@ -75,11 +77,16 @@ def signer_owner_e0_authority_binding_digest(value: Mapping[str, Any]) -> str:
     try:
         fields = _policy_fields(value.get("schema_version"))
         included = fields - _AUTHORITY_BINDING_EXCLUDED_FIELDS
-        if value.get("schema_version") == POLICY_SCHEMA_V8:
+        if value.get("schema_version") in {POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
             # This alias of artifact_generation_digest is unknown until after
             # the config containing this binding has been hashed. It remains
             # covered by the final signed policy and current-selection checks.
             included = included - {"target_signer_generation_id"}
+        if value.get("schema_version") == POLICY_SCHEMA_V9:
+            # Permission refers to the completed target manifest. Keep these
+            # authenticated in the full policy, outside its pre-config binding.
+            included -= {"grant_authority_permission_snapshot_digest",
+                         "grant_authority_permission_snapshot_receipt_id"}
         core = {key: value[key] for key in sorted(included)}
         raw = json.dumps(core, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
         encoded = raw.encode("ascii")
@@ -91,15 +98,8 @@ def signer_owner_e0_authority_binding_digest(value: Mapping[str, Any]) -> str:
 def canonical_signer_owner_e0_policy_input(value: Mapping[str, Any]) -> str:
     schema = value.get("schema_version")
     _policy_fields(schema)
-    prefix = {
-        POLICY_SCHEMA_V5: POLICY_PREFIX_V5,
-        POLICY_SCHEMA_V6: POLICY_PREFIX_V6,
-        POLICY_SCHEMA_V7: POLICY_PREFIX_V7,
-        POLICY_SCHEMA_V8: POLICY_PREFIX_V8,
-    }.get(schema)
-    if prefix is None:
-        raise ValueError("signer_owner_e0_policy_schema_invalid")
-    return canonical_signing_input(value, prefix)
+    # Every supported policy's signing prefix is its exact schema identifier.
+    return canonical_signing_input(value, schema)
 
 
 def validated_signer_owner_e0_policy(value: Mapping[str, Any], *, now_epoch: int) -> dict[str, Any]:
@@ -119,6 +119,7 @@ def validated_signer_owner_e0_policy(value: Mapping[str, Any], *, now_epoch: int
         POLICY_SCHEMA_V6: _DIGEST_FIELDS_V6,
         POLICY_SCHEMA_V7: _DIGEST_FIELDS_V7,
         POLICY_SCHEMA_V8: _DIGEST_FIELDS_V7,
+        POLICY_SCHEMA_V9: _DIGEST_FIELDS_V7,
     }[raw["schema_version"]]
     if any(not is_sha256(str(raw[name])) for name in digest_fields):
         raise ValueError("signer_owner_e0_policy_digest_invalid")
@@ -126,9 +127,9 @@ def validated_signer_owner_e0_policy(value: Mapping[str, Any], *, now_epoch: int
         raise ValueError("signer_owner_e0_policy_id_invalid")
     _require_time(raw, now_epoch)
     _require_lists(raw)
-    if raw["schema_version"] in {POLICY_SCHEMA_V6, POLICY_SCHEMA_V7, POLICY_SCHEMA_V8}:
+    if raw["schema_version"] in {POLICY_SCHEMA_V6, POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
         require_grant_service_bindings(raw)
-    if raw["schema_version"] in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8}:
+    if raw["schema_version"] in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
         require_grant_service_git_provenance_bindings(raw)
     return raw
 
@@ -171,6 +172,8 @@ def _policy_fields(schema: object) -> frozenset[str]:
         return POLICY_FIELDS_V7
     if schema == POLICY_SCHEMA_V8:
         return POLICY_FIELDS_V8
+    if schema == POLICY_SCHEMA_V9:
+        return POLICY_FIELDS_V9
     raise ValueError("signer_owner_e0_policy_schema_invalid")
 __all__ = [
     "CANONICAL_AUTHORITY_TIERS",
@@ -179,11 +182,13 @@ __all__ = [
     "POLICY_FIELDS_V6",
     "POLICY_FIELDS_V7",
     "POLICY_FIELDS_V8",
+    "POLICY_FIELDS_V9",
     "POLICY_SCHEMA",
     "POLICY_SCHEMA_V5",
     "POLICY_SCHEMA_V6",
     "POLICY_SCHEMA_V7",
     "POLICY_SCHEMA_V8",
+    "POLICY_SCHEMA_V9",
     "canonical_signer_owner_e0_policy_input",
     "signer_key_reference_digest",
     "signer_owner_e0_authority_binding_digest",

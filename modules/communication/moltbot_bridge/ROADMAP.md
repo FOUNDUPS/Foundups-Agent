@@ -1,3 +1,21 @@
+## Grant bootstrap and LOW RPC checkpoint — 2026-10-15
+
+The v9 pre-configuration projection closes the target-manifest/permission-receipt
+hash dependency without accepting partial authority. The LOW RPC repair closes
+the demonstrated same-file generation-lock deadlock and retains caller fencing.
+Existing source and Linux process tests qualify these bounded changes only.
+
+Next19/P0 remains the independent grant issuer: requalify the existing protected
+installed-source runtime and explicitly enroll that deployment through the
+administrative initial path, then compose the existing bounded signer service
+with protected permission, separate signing/audit custody and durable rate/replay
+state. The current exact-Git zipapp rejects imports/native dependencies required
+by these owners; preserve its legacy contract. The target's initial manifest
+signing context rejects `runtime_profile`; target enrollment is not issuer
+admission. Connect one real LOW grant and native handshake only after these gates,
+then proceed to the author/verifier and retained-use/rollback gates in the root
+roadmap. No native admission or RSI completion is claimed by this checkpoint.
+
 ## Initial handshake composition — 2026-10-15
 
 Reuse the existing service composer, E0 selection and per-request backend for

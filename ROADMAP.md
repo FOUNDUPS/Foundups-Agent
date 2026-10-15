@@ -12,7 +12,26 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — initial handshake composition (2026-10-15):**
+**Current checkpoint — grant bootstrap and LOW RPC (2026-10-15):**
+Two reproduced integration defects are repaired in existing owners: LOW grant
+RPC no longer holds the same generation lock required by its server, and explicit
+E0 v9 removes future permission receipt fields from the pre-config binding while
+retaining them in the complete signed policy and current admission checks.
+Legacy policy hashes and elevated paths are preserved. Nine connected Linux
+suites passed275 cases without skips; separate independent reviews cover the
+real two-process lock behavior and85 held-out policy cases. Authorization in
+those process tests is synthetic: no native worker or retained RSI gain is proved.
+
+The next19/P0 dependency (C4/I5/D5/Impact5) remains the independent grant issuer.
+Source probes show its exact-Git zipapp rejects imports/native dependencies used
+by the existing backend, and initial enrollment does not admit its profile.
+Reuse and requalify the protected installed-source runtime, compose the existing
+issuer owners, explicitly admit that deployment, then prove a real LOW grant and
+handshake before the R15 author/verifier/retained-use experiment. Do not widen
+archive rules or reinterpret initial installation as work authority.
+See [evidence and next gate](docs/operations/RSI_SWARM_DISPATCH.md#grant-bootstrap-and-low-rpc--2026-10-15).
+
+**Historical checkpoint — initial handshake composition (2026-10-15):**
 PR2136 is merged at `1d847ad1f83022f3ace0d4be5f4098ffdb9806e7`; exact-main
 CI38733808172 and CodeQL38733807786 succeeded. Its owned worktree is retired
 with evidence preserved. The current slice reuses the service configuration,

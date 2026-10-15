@@ -1,3 +1,44 @@
+## Grant bootstrap and LOW RPC — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97; isolated
+`agent/rsi-grant-bootstrap-20261015`, prepared on PR2137 source385de3a06.
+PR2137 subsequently merged at `dcd622557480a953e5ec3a0676d53410769700a0`
+after exact-head CI38742773877 and CodeQL38742765283 succeeded. Merge tree
+equals tested head771b91a0f; main-branch validation and owned retirement are
+tracked separately from that PR proof.
+Existing owners now close two reproduced blockers, without changing the queue:
+
+- LOW issuer calls release the current-generation fence during RPC, then acquire
+  a fresh fence, compare complete owner policy and stable selection identity,
+  recheck binding/expiry, and retain that fence during caller use. Only freshly
+  validated selection observation timestamps are excluded from identity equality.
+  Elevated paths retain their existing fence behavior.
+- Explicit E0 v9 excludes future permission receipt ID/digest from pre-config
+  binding, breaking target manifest → permission → config → manifest recursion.
+  Full signed E0 still requires/authenticates those fields; current permission
+  and exact-Git consumers still check them. V5–v8 golden hashes are unchanged.
+
+Evidence in `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015`:
+`next-startup/grant-combined-integration.json` binds copied/preserved source;
+`next-startup/grant-combined-linux.xml` records275 passed/zero skips across nine suites.
+Independent `next-startup/rpc-review/independent-rpc-review.json` covers19 Linux cases,
+including real separate-process socket/lock behavior; `review/e0-v9-independent-review.json`
+records85 held-out policy checks. Native tests use synthetic policy/key fixtures:
+they prove transport/fencing, not deployed issuer authority or worker admission.
+
+Re-observed next dependency remains19/P0 (C4/I5/D5/Impact5): qualify and compose
+the independent LOW grant issuer. `next-startup/probe_grant_enrollment_gates.json`
+binds nine inspected sources. Initial enrollment rejects grant runtime profiles;
+existing grant consumers require v3 target signature plus audit attestation.
+The current zipapp rejects stdlib `from` imports used by existing owners and
+cannot carry their native cryptography dependency. Do not strip those checks or
+relabel initial approval as v3. Reuse the protected installed-source/interpreter
+deployment demonstrated by historical component qualification, requalify current
+imports, and add an explicit administrative deployment contract in existing owners.
+Then complete real permission/custody/E0, prove grant → LOW handshake, and run R15.
+Root installation, runtime authorization and independent verification remain
+separate. No new credentials, runtime grants, paid calls or RSI gain are claimed.
+
 ## Initial handshake composition — 2026-10-15
 
 Base `1d847ad1f83022f3ace0d4be5f4098ffdb9806e7`, isolated lane

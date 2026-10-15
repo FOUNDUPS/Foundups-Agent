@@ -1,3 +1,13 @@
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Reused existing E0/grant owners
+to repair the configuration hash cycle and LOW RPC lock deadlock. Explicit v9
+preserves legacy hashes and full signed-policy checks; fresh caller-use fencing
+preserves owner and expiry validation. Connected Linux275pass/zero skips and
+independent process/policy reviews are recorded in the existing dispatch runbook.
+Reconciled canonical roadmap/backlog with the next19/P0 issuer installation gap.
+No deployed worker, retained gain, production activation or RSI completion claim.
+
 ## Initial handshake composition — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97; base1d847ad1f.

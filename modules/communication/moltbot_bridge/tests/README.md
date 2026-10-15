@@ -1,3 +1,21 @@
+## Grant bootstrap and LOW RPC qualification
+
+The existing CI `Run RedDog grant-aware signing composition regression` includes
+`test_reddog_signer_low_grant_rpc.py` beside the independent provider and E0 static
+contracts. The existing startup-policy selection already includes authenticated
+grant manifest binding and WSP71 permission rehydration. Run these suites together
+for the combined change; retain the effect and elevated provider regressions.
+
+The Linux RPC suite uses two distinct processes, the production AF_UNIX
+server/client and a real same-inode `LOCK_EX`. Its six cases demonstrate bounded
+old-order timeout, successful issuance, caller-use fencing and late policy,
+generation or expiry rejection. Authentication callbacks and keys are explicitly
+synthetic. The tests prove transport/locking behavior, not independently installed
+grant authority. They skip on Windows. Unit regressions also cover refreshed
+selection timestamps, stable identity drift, final expiry and clean lease exits.
+V9 tests retain legacy golden hashes, all retained authority fields, required
+future permission fields, full signatures and exact-Git provenance rejection.
+
 ## Initial handshake producer-to-consumer qualification
 
 The existing CI `Run RedDog grant-aware signing composition regression` now
