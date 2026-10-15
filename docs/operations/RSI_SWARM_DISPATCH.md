@@ -1,3 +1,143 @@
+## Verifier-guided loop audit — 2026-10-15
+
+Scope: source `a6a63b8e9098c5b35629fd76629b96d3089af566`, WSP00/15/48/97,
+root roadmap, R15/R24, WRE registry skill/projection/verifier/retention owners,
+current manifest authority and FoundUp onboarding/FAM contracts. This is a
+targeted architecture audit, not an exhaustive audit of every repository file.
+No external tool installation, native author dispatch or paid model trial ran.
+
+### External evidence and its limits
+
+- [Nigel](https://github.com/cdlewis/nigel) supplies candidates, bounded attempts,
+  verification and resolution rechecks. Its
+  [runner](https://github.com/cdlewis/nigel/blob/30cd0c9823a0e6657d77cbdecb4f8522be96f34a/src/runner.go)
+  permits a missing verifier and optional best-effort retention; its example
+  reset command is unsuitable for a shared checkout. Reuse the loop pattern,
+  not those defaults or a second scheduler. Hash sharding is not a durable lease.
+- The author's [long-tail report](https://blog.chrislewis.au/the-long-tail-of-llm-assisted-decompilation/)
+  describes retrieval of similar solved functions and a failure in which an
+  agent changed the expected ROM hash. Prompt hooks helped but were bypassable.
+  Our judge, candidate enumerator and reference data must be outside author scope.
+- The [84-day report](https://blog.chrislewis.au/decompiling-a-nintendo-64-game-in-84-days/index.html)
+  reports matching machine code, reusable compiler lessons and indispensable
+  human expertise. It is not a controlled demonstration of autonomous RSI.
+- [REA](https://github.com/morluto/rea) connects agents to inspection tools via
+  MCP. It supplies analysis capability, not FoundUps admission, trusted evaluation
+  or autonomous learning. No binary inspection dependency is needed for R15.
+- [ArtCraft's own app list](https://getartcraft.com/apps) describes new Rust
+  implementations; PhotoCraft is early alpha and others remain in development.
+  This does not substantiate the claim that Photoshop was completely recovered.
+
+Exact rebuild comparison is strong execution feedback for artifact equivalence
+under the pinned toolchain/input. It is not a proof of all behavior, product
+quality, safety or useful improvement. FoundUps usually wants a changed artifact
+with preserved required behavior, so use fixed behavioral/differential checks.
+An admitted native task with independently verified artifacts supplies bounded
+execution evidence; RSI additionally requires retained benefit on later tasks.
+A separate model's opinion alone supplies neither.
+
+### Existing owners, not another system
+
+| Loop step | Current owner and next boundary |
+|---|---|
+| Select unfinished work | WSP15/backlog and existing AgentDB claim/lease owner; re-observe after each terminal result. Do not turn Nigel ignore lists into closed tasks. |
+| Bounded attempt | Existing OpenClaw/Hermes dispatch and admitted artifact writer; one author ticket, fixed source/scope/budget, independent verifier capacity. |
+| Enumerate and compare | `wre_core/skillz/auto_test_registry_audit` and `wre_core/src/wre_test_registry_differential_plan_runtime.py`; current executor projects scope only, explicitly not pytest execution. |
+| Accept or reject | `wre_core/src/wre_autonomous_slice_verifier_runtime.py` and `wre_core/src/reddog_held_out_recursive_improvement_regression_gate.py` consume receipts. Their validation does not itself execute tests or authenticate every upstream assertion. |
+| Activate, recover, retain | Existing promotion/rollback, outcome ratchet and PatternMemory owners; preserve rejected evidence and demonstrate a later invocation reads the accepted version. R11–R15 remain the composition path. |
+| Expand to FoundUps | WSP109/onboarding, existing registry/genesis and FAM Task/Proof/Verification/Payout, via R20/R24. Business records do not substitute for runtime or payment authority. |
+
+Paths beginning `wre_core/` above are relative to `modules/infrastructure/`.
+The current `modules/communication/moltbot_bridge/src/reddog_runtime_artifact_manifest_authority.py`
+unconditionally requires committed publication
+evidence in `_verified_values()` → `_verified_publication()`. Initial enrollment
+must have an explicit authenticated path; do not substitute a Git merge receipt
+or fabricate legacy publication fields. The protected initial writer is already
+merged, so recreating it would duplicate completed work.
+
+### R15 acceptance refinement
+
+Keep the selected registry-workflow target. First qualify real initial-manifest
+inputs and the existing isolated runner; then admit one native author ticket.
+Use the existing measured candidate: reduce redundant registry classification
+work while preserving canonical registry bytes, classifications/quarantine and
+complete required plans. Freeze the original generator, classifier, dependencies
+and reference inputs separately; comparing two trees through one mutable
+classifier is self-consistency, not an independent oracle.
+
+1. Before authoring, fix candidate identity, source/runtime, objective, required
+   cases, separate verifier, numeric resource limits and acceptance threshold.
+   Determine the improvement threshold/sample size from baseline variance, then
+   freeze them. Queue removal alone cannot establish completion.
+2. Execute one attempt and at most the repair count admitted by existing policy.
+   Rejected, invalid, crashed, timed-out and unfinished attempts remain distinct.
+   Re-observe and rescore; retry only with a changed premise and remaining budget.
+3. Independently compare fixed outputs and held-out cases. Include an unchanged
+   candidate control, deliberately wrong candidate, oracle mutation, skipped
+   required test, stale receipt and duplicate delivery. No best-effort promotion.
+4. Activate exact accepted bytes through the existing owner, force a regression,
+   and verify recovery. In a fresh invocation compare retained versus disabled
+   improvement on later unseen inputs at equivalent resources. An AB/BA ordering
+   can reduce order bias; keep warm/cold and profiled/unprofiled runs separate.
+5. Record attempted/eligible/accepted counts with denominators, failures/retries,
+   verified output equality, held-out failures, elapsed time, tokens/cost where
+   measured, coordinator interventions, rollback and later-use evidence. Unknown
+   cost stays unknown; zero accepted results has no finite cost-per-acceptance.
+   Success is lower resource use at unchanged correctness, or better correctness
+   at a fixed budget under the frozen rule, not simply more completed loops.
+
+R15 remains18/P0 (4/5/4/5), gated by authentic enrollment18/P0 (4/5/5/4).
+Game expansion remains downstream of that internal proof; R24's existing score
+and dependencies still apply. These are planning priorities, not new grants.
+
+An original or appropriately authorized game can use one existing FoundUp ID,
+onboarding/intake and bounded build tickets. AmIBot already has a registry entry;
+do not register it again. Independent delivery evidence can feed FAM contribution
+and simulated reward accounting, then a separately authorized settlement adapter.
+Recorded verification/payout initiation is not an independent audit or delivered
+tokens. The first game test should use disposable state and fixed rules/simulation
+checks; a new game does not need to reproduce a proprietary ROM. Product/asset
+provenance must be resolved before public distribution or commercial admission.
+
+Source checks: AmIBot is registry ID `detect_ai`, currently `NO_RUNTIME` and
+`TOKEN_DEFERRED`. `ai_overseer/skillz/foundup_genesis_intake/SKILLz.md` remains a
+prototype; `foundup_genesis/intake_packet_builder.py` prepares a dry-run envelope,
+not registry mutation or dispatch. Existing `gamification/games/src/game_manager.py`
+owns chess/checkers mechanics but has no FAM bridge. FAM's
+`modules/foundups/agent_market/src/persistence/verification.py` records supplied decisions, and
+`modules/foundups/agent_market/src/persistence/sqlite_adapter.py` initiates payouts without settlement authority.
+R24 already identifies the missing authorized `proof.verify` issuer. The default
+`modules/foundups/agent_market/src/token_factory.py` backend is mock. Preserve these boundaries when adapting
+a game; simulation must never be relabeled as payment or independently verified work.
+
+### Audit validation and retrieval quality
+
+Existing held-out gate suite plus three manifest-authority negative controls:
+63passed, zero failures/skips, 2.88s; two pytest configuration warnings because the
+asyncio plugin was not loaded. These use synthetic receipts and demonstrate
+contract checks only, not native-worker or cryptographic independence end to end.
+Command: qualified Python `-S -B -m pytest --noconftest --import-mode=importlib
+-p no:cacheprovider -q`, selecting the complete
+`test_reddog_held_out_recursive_improvement_regression_gate.py` and manifest tests
+`test_prepared_publication_cannot_issue_authority`,
+`test_attacker_self_signed_authority_is_rejected`,
+`test_manifest_signing_requires_boundary_and_nonce_store`.
+XML: `O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014/writer2/nigel-audit-contract-tests.xml`.
+Interpreter: `O:/RedDog-Builder-Artifacts/cpython-3.12.10-amd64/runtime/python.exe`.
+Working directory: isolated audit checkout at the pinned source. Environment:
+`PYTHONDONTWRITEBYTECODE=1`, `PYTHON_DOTENV_DISABLED=1`, `PYTHONUTF8=1`,
+`PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`; `PYTHONPATH` contains
+`O:/Foundups-Agent/.venv/Lib/site-packages` and the audit checkout root.
+The held-out suite is under `modules/infrastructure/wre_core/tests/`; the
+three selected tests are under `modules/communication/moltbot_bridge/tests/`
+in `test_reddog_signed_runtime_artifact_manifest.py`. No candidate source changed.
+
+Governed query returned ok/CURRENT/no-gap at the audited source on October15.
+Ranking still returned unrelated security tests and historical MCP/WRE audits;
+the current skill, roadmap and manifest source were mandatory direct reads.
+Freshness is not ranking quality or complete retrieval. No query-side reindex ran.
+Receipt: same evidence directory, `holo-nigel-audit.json`.
+
 ## Protected initial writer — 2026-10-14
 
 Base `5dd7b7b9f569ddaf966a21e9cc95e5a764d29588`; WSP00/5/6/10/11/15/22/48/50/62/71/84/97.
@@ -53,7 +193,12 @@ CI38491271685/CodeQL38491269838 and mainCI38492205671/CodeQL38492205277 passed.
 Owned lane retired with verified bundle. Current publication follows its own checks.
 Next18/P0: existing authenticated manifest provisioning, then one native author
 ticket; retained later-use benefit and autonomous next-task selection remain open.
-Holo remains STALE; do not reset another claim or shorten its recovery lease.
+Closure reconciled2026-10-15: PR2134 merged as `a6a63b8e9`; its PR/main CI and
+CodeQL passed. Governed postmerge maintenance completed, stopped its OpenClaw and
+supervisor, archived its isolated AgentDB and retired its clean owned worktree.
+Fresh-process query was CURRENT/no-gap at the merge; the October15 audit query
+confirms that source. Evidence: `writer2/closure.json`, `postmerge-main-a6.json`,
+`holo-independent-query.json`. Earlier timeout/STALE receipts remain historical.
 
 ## Initial high-water signing — 2026-10-14
 
