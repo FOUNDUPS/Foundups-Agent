@@ -172,19 +172,20 @@ def test_issuer_client_and_oracle_cannot_advance_or_authorize_target_use(tmp_pat
     assert anchor.load().sequence == 1
     with pytest.raises(ValueError, match='load_only'):
         anchor.advance_snapshot(_sha('other'))
+    now = int(time.time())  # Bind the claimed epoch and injected clock to one fixture instant.
     resolver = SimpleNamespace(resolve=lambda principal, provider: values['policy']['revocation_authority_public_key'])
     durable = UncomposedDurableSignerGrantRevocationOracle(binding=values['binding'], policy=values['policy'],
         reader=values['store'].reader(), witness=values['witness'].reader(), anchor=anchor,
-        principal_key_resolver=resolver, signature_verifier=Ed25519SignatureVerifier(), clock=lambda:int(time.time()))
+        principal_key_resolver=resolver, signature_verifier=Ed25519SignatureVerifier(), clock=lambda:now)
     oracle = build_grant_issuer_revocation_oracle(durable=durable, policy=values['policy'], binding=values['binding'])
     assert oracle.matches_owner(policy=values['policy'], binding=values['binding'])
     assert oracle.authorize_key_epoch_use(key_epoch=values['policy']['grant_authority_key_epoch'],
-        at_epoch=int(time.time()), expires_at=int(time.time())+20, action=lambda:'checked') == 'checked'
+        at_epoch=now, expires_at=now+20, action=lambda:'checked') == 'checked'
     with pytest.raises(ValueError, match='cannot_authorize_target_grant'):
         oracle.authorize_grant_use({}, lambda:pytest.fail('no target effect'))
     with pytest.raises(ValueError, match='epoch_invalid'):
-        oracle.authorize_key_epoch_use(key_epoch='target-epoch', at_epoch=int(time.time()),
-            expires_at=int(time.time())+20, action=lambda:pytest.fail('no foreign epoch use'))
+        oracle.authorize_key_epoch_use(key_epoch='target-epoch', at_epoch=now,
+            expires_at=now+20, action=lambda:pytest.fail('no foreign epoch use'))
     durable.anchor = values['client']
     with pytest.raises(ValueError, match='owner_mismatch'):
         build_grant_issuer_revocation_oracle(durable=durable, policy=values['policy'], binding=values['binding'])

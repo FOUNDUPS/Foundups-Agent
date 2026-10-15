@@ -1,5 +1,12 @@
 ## Enrollment artifact bounds — 2026-10-16
 
+Same-head CI38796717521 passed; repeat38797430079 exposed a fixture clock rollover
+(1 failed, 1338 passed, 3 skipped). Forced rollover reproduced the error; one
+fixture epoch now binds claimed time and injected clock, preserving production
+checks. Full issuer LOAD file plus clock/expiry and boundary controls: 41 passed,
+zero skips (19.43s); registry check current. Receipt: `next-startup/artifact-bounds-publication-review/grant-load-clock-repair-receipt.json`.
+The broader 59-pass/5-failure harness/unchanged-structure result remains preserved.
+
 WSP5/10/22/50/97. E15 `next-startup/enrollment-artifact-bounds/author-review.json`
 binds base 7772c011b and source inventory aa6cce0d790bd489cacf8d29067c6767d90d89d06bc95ec10ac7bb9a40040468.
 Final author Linux run:131 passed, zero failures/errors/skips. Original harness
