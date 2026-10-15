@@ -1096,6 +1096,7 @@ jobs:
           python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib \
             -o pythonpath=. -p no:cacheprovider \
             modules/communication/moltbot_bridge/tests/test_reddog_initial_runtime_manifest_authority.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_initial_enrollment_artifact_bounds.py \
             modules/communication/moltbot_bridge/tests/test_reddog_initial_installed_manifest_enrollment.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signed_runtime_artifact_manifest.py \
             modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_manifest_authority_freshness.py \
@@ -1324,6 +1325,7 @@ jobs:
             "$GITHUB_WORKSPACE" -q --tb=line -c /dev/null --noconftest \
             --import-mode=importlib -p no:cacheprovider \
             --basetemp="$RUNNER_TEMP/grant-rate-two-uid-pytest" \
+            modules/communication/moltbot_bridge/tests/test_reddog_initial_enrollment_artifact_bounds.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_installed_runtime_guard.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_rate_store_two_uid.py
 

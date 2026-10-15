@@ -1,12 +1,13 @@
-## Initial control identity prerequisite — 2026-10-16
+## Enrollment artifact bounds prerequisite — 2026-10-16
 
-Close the existing-owner empty-grant/absent-consensus bootstrap repair (18/P0),
-then refresh source-pinned installed runtime and complete authenticated native
-LOW grant/handshake (19/P0). Current independent functional tests pass with one
-unchanged documentation-size failure. Machine credentials/accounts and storage
-qualification exist; no native admission or retained benefit is claimed.
-Continue R15 author/verifier/activation/rollback/later-use gates after admission.
-Current evidence and qualification limits: docs/operations/RSI_SWARM_DISPATCH.md.
+PR 2143/2144 are merged with passing exact-main CI/CodeQL. Disposable installation
+exposed64 KiB rejection of the approval, installed descriptor and 26 source files.
+Reuse the existing 1 MiB artifact limit explicitly; preserve64 KiB owner defaults.
+Author 131 and independent 87 Linux cases pass; connected CI selection passed
+689 with 3 skips. Close this 18/P0 repair, qualify the unified exact-source runtime with
+root/target/protected-installer entrypoints, and replay disposable installation.
+Then 19/P0 authenticated native LOW grant/handshake and existing R15 gates follow.
+No native admission or retained gain; evidence: tests/TestModLog.md and dispatch.
 
 ## Protected issuer custody checkpoint — 2026-10-16
 

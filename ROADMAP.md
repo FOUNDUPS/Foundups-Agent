@@ -12,17 +12,19 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — initial control bootstrap (2026-10-16):**
-The first LOW handshake exposed an empty-outcome-grant bootstrap cycle. Existing
-root/control owners now permit an exact LOW/gen1/v2 identity with empty grants
-and explicit absent consensus. Full outcome signing retains real consensus and
-independent verification requirements. Independent functional review passed;
-one inherited documentation-size failure remains recorded rather than hidden.
+**Current checkpoint — enrollment artifact bounds (2026-10-16):**
+PR 2143 and 2144 are merged at 372d03de5 and 7772c011b; their exact-main CI and
+CodeQL checks passed. The initial LOW control bootstrap repair is published.
+Disposable installation next exposed the 64 KiB owner-read default rejecting a
+182,859-byte approval,685,781-byte descriptor and 26 larger source files. The
+scoped repair explicitly uses the existing 1 MiB artifact bound for those reads;
+ordinary owner reads retain 64 KiB. Author Linux validation passed 131 cases.
+Independent 87 cases passed; connected CI selection passed 689 with 3 skips.
+Refreshed runtime qualification remains pending; prior runtime lacks root/target/protected-installer entrypoints.
 
-Actual isolated runtime execution, separate machine identities and15 private
-storage roots have bounded qualification evidence. None establishes worker
-admission. Close the18/P0 source prerequisite, refresh its exact installed
-runtime, then execute19/P0 authenticated LOW grant/handshake and existing R15.
+Close this 18/P0 prerequisite, qualify the unified exact-source runtime and
+replay disposable installation, then execute 19/P0 authenticated LOW grant/handshake
+and existing R15. Native worker admission and retained RSI gain remain unproved.
 R15 must show independent evaluation, authorized activation/rollback, retained
 later benefit and bounded next selection. [Current evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
 

@@ -1890,8 +1890,8 @@
   },
   "current_selection": {
     "observation_path": "current_observation.issuer_custody_20261016",
-    "base_commit": "372d03de59352887928b7afd0204cce483e2c6c6",
-    "selected_action": "Close initial LOW control bootstrap, then execute authenticated native handshake",
+    "base_commit": "7772c011b4c92e357839cf27ba900b7304358028",
+    "selected_action": "Close enrollment artifact bounds, qualify unified runtime, then execute authenticated native handshake",
     "status": "IN_PROGRESS",
     "wsp15": {
       "complexity": 3,
@@ -1902,20 +1902,20 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Publish independently verified initial-control repair; refresh exact runtime; assemble authentic owner/E0/custody/state; run one LOW grant/handshake before R15 author/verifier/retained-use."
+    "next_action": "Review/publish bounded enrollment reads; qualify unified exact-source runtime including root/target/protected installer; replay disposable installation, then authentic LOW grant/handshake before R15 author/verifier/retained-use."
   },
   "current_observation": {
     "issuer_custody_20261016": {
-      "source_scope": "Initial control repair independently reviewed in isolated lane rebased onto verified PR2143 merge372d03; main CI/CodeQL pending",
+      "source_scope": "Initial control repair published in PR2144 at7772c011b; current candidate repairs artifact read bounds; independent87 cases pass; runtime qualification pending.",
       "details": "docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16",
       "custody_validation": "244 author cases; 63 independent cases including 12 held-outs; synthetic installation seams disclosed",
       "combined_validation": "12 connected Linux suites: 328 passed, zero failures/skips, 110.66 seconds",
       "protected_source_validation": "Independent actual F runtime inspection: 1664 files,225 exact source modules,six real initializers,23 observed native mappings; six negative controls pass",
       "runtime_boundary": "Credential-free confined imports and full inventory rechecks; not service execution, immutable future execution or authenticated admission",
-      "source_publication": "PR2143 merged372d03de59352887928b7afd0204cce483e2c6c6; tested5b075a920 all11checks passed; exact tree8848c5d4fbcbeef6c4c090bcd39bd575dc1b1249 matches. Main CI/CodeQL pending. Prior2142 exact-main closure remains historical.",
+      "source_publication": "PR2143 merge372d03de59352887928b7afd0204cce483e2c6c6 and PR2144 merge7772c011b4c92e357839cf27ba900b7304358028: reviewed/main trees equal; all10 exact-merge checks pass each. Receipts: next-startup/consumer-publication-review/pr2143-merged-main-closure.json and next-startup/initial-control-final-publication-review/pr2144-merged-main-closure.json.",
       "native_worker_admitted": false,
       "retained_rsi_gain_demonstrated": false,
-      "next_dependency": "Publish independently verified initial-control repair; refresh exact runtime; assemble authentic owner/E0/custody/state; run one LOW grant/handshake before R15 author/verifier/retained-use.",
+      "next_dependency": "Review/publish bounded enrollment reads; qualify unified exact-source runtime including root/target/protected installer; replay disposable installation, then authentic LOW grant/handshake before R15 author/verifier/retained-use.",
       "paid_provider_calls": 0,
       "coordinator_cost": null,
       "installed_artifact_validation": "250 independently verified cases; one reviewer harness error retained then corrected",
@@ -1934,7 +1934,9 @@
       "initial_control_validation": "Author377 passed/1 unchanged INTERFACE size failure/1 root skip; separate root socket1 passed. Independent188 passed/1 same inherited failure/0 skipped. Six-file inventory; no outcome authority from null identity.",
       "installed_execution_validation": "Pinned9bee runtime:2677 files,1240 exact Git Python source files,1437 runtime files independently reopened; actual confined Unix echo/IP denial, guard twice, CLI returns2 absent authority. Credential-free; refresh required for repaired source.",
       "machine_inputs": "Root-created distinct control/audit/replay material and installed target999/issuer997/requester995, transport GID988; no runtime grant issued.",
-      "filesystem_validation": "15 private roots,8 actual processes fsync/reopen; independent metadata/hash reopen. Four canonical generation qualification records installed, no authority stores initialized; not power-loss or physical rollback proof."
+      "filesystem_validation": "15 private roots,8 actual processes fsync/reopen; independent metadata/hash reopen. Four canonical generation qualification records installed, no authority stores initialized; not power-loss or physical rollback proof.",
+      "enrollment_artifact_bounds": "Disposable approval182859bytes, descriptor685781bytes and26 sources exceed64KiB; explicit existing1MiB bound for approval/bundle/source reads, ordinary owner64KiB unchanged. Author 131 and independent 87 Linux cases pass; connected 19-suite CI selection 689 passed/3 skipped/no failures or errors,157.88s; source stable. Counts overlap. Receipt: next-startup/enrollment-artifact-bounds/author-review.json.",
+      "runtime_refresh_dependency": "Unified1254 exact-source export against base7772c011b prepared; prior runtime misses root/target/protected-installer entrypoints. Qualification and disposable installation replay pending; export alone is not admission."
     },
     "grant_issuer_20261015": {
       "source_base_commit": "57d5cd8e8c9db2179e2761ae59f74a2912b8d168",

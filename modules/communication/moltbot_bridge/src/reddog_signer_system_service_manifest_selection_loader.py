@@ -35,7 +35,7 @@ from modules.communication.moltbot_bridge.src.reddog_current_generation_manifest
     create_current_generation_manifest_launch_selection_boundary,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
-    RuntimeArtifactManifestError, ascii_deep, digest, is_sha256, raw_digest,
+    MAX_ARTIFACT_BYTES, RuntimeArtifactManifestError, ascii_deep, digest, is_sha256, raw_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_launch_selection import (
     CONFIG_FILENAME, RUN_PACKET_FILENAME,
@@ -354,18 +354,20 @@ def _load_owner_config(path: Path | str, *, repo: Path) -> dict[str, Any]:
     return _validate_owner_config(value, repo=repo, owner_root=root)
 
 
-def _read_root_owned_bytes(target: Path, root: Path, *, allow_empty: bool = False) -> bytes:
+def _read_root_owned_bytes(target: Path, root: Path, *, allow_empty: bool = False,
+                           max_bytes: int = MAX_OWNER_CONFIG_BYTES) -> bytes:
     if not sys.platform.startswith("linux"):
         raise RuntimeArtifactManifestError("signer_owner_linux_service_required")
     try:
-        return _read_root_owned_linux_bytes(target, root, allow_empty=allow_empty)
+        return _read_root_owned_linux_bytes(target, root, allow_empty=allow_empty, max_bytes=max_bytes)
     except OSError as exc:
         raise RuntimeArtifactManifestError(
             "signer_owner_config_descriptor_invalid"
         ) from exc
 
 
-def _read_root_owned_linux_bytes(target: Path, root: Path, *, allow_empty: bool = False) -> bytes:
+def _read_root_owned_linux_bytes(target: Path, root: Path, *, allow_empty: bool = False,
+                                 max_bytes: int = MAX_OWNER_CONFIG_BYTES) -> bytes:
     _require_secure_ancestry(root)
     directory_flags = (
         os.O_RDONLY
@@ -382,7 +384,7 @@ def _read_root_owned_linux_bytes(target: Path, root: Path, *, allow_empty: bool 
         file_fd = os.open(target.name, file_flags, dir_fd=directory_fd)
         try:
             _require_root_file_fd(file_fd)
-            return _read_bounded_fd(file_fd, allow_empty=allow_empty)
+            return _read_bounded_fd(file_fd, allow_empty=allow_empty, max_bytes=max_bytes)
         finally:
             os.close(file_fd)
     finally:
@@ -423,19 +425,23 @@ def _require_root_file_fd(file_descriptor: int) -> None:
         raise RuntimeArtifactManifestError("signer_owner_config_permissions_invalid")
 
 
-def _read_bounded_fd(file_descriptor: int, *, allow_empty: bool = False) -> bytes:
+def _read_bounded_fd(file_descriptor: int, *, allow_empty: bool = False,
+                     max_bytes: int = MAX_OWNER_CONFIG_BYTES) -> bytes:
+    # Enrollment artifacts opt in; ordinary owner configuration remains 64 KiB.
+    if type(max_bytes) is not int or not 0 < max_bytes <= MAX_ARTIFACT_BYTES:
+        raise RuntimeArtifactManifestError("signer_owner_config_read_limit_invalid")
     chunks: list[bytes] = []
     total = 0
-    while total <= MAX_OWNER_CONFIG_BYTES:
+    while total <= max_bytes:
         chunk = os.read(
             file_descriptor,
-            min(8192, MAX_OWNER_CONFIG_BYTES + 1 - total),
+            min(8192, max_bytes + 1 - total),
         )
         if not chunk:
             break
         chunks.append(chunk)
         total += len(chunk)
-    if (total == 0 and allow_empty is not True) or total > MAX_OWNER_CONFIG_BYTES:
+    if (total == 0 and allow_empty is not True) or total > max_bytes:
         raise RuntimeArtifactManifestError("signer_owner_config_size_invalid")
     return b"".join(chunks)
 

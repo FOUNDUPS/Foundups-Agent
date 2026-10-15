@@ -57,8 +57,8 @@ See the [schema, input and rejection contract](
 `source_files`, `manifest_spec`, `credential_binding`, `permission`, `consumer_uids`.
 The specification pins issuer, signer key/epoch, nonce, times, profile/config
 digests and all seven existing artifact descriptors. Source inventory must bind
-every installed local import and this loader; root installation owns Git/source
-provenance. A commit-shaped string alone does not verify provenance.
+every installed local import and this loader; root installation owns Git/source provenance.
+Commit shape alone is not provenance. Approval/bundle/source reads use 1 MiB; ordinary owner reads retain 64 KiB and protection checks.
 
 The existing signing context publishes
 `reddog_initial_runtime_artifact_manifest.v1`, with a distinct signing prefix,

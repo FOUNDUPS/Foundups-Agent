@@ -1,3 +1,27 @@
+## Enrollment artifact bounds — 2026-10-16
+
+WSP5/10/22/50/97. E15 `next-startup/enrollment-artifact-bounds/author-review.json`
+binds base 7772c011b and source inventory aa6cce0d790bd489cacf8d29067c6767d90d89d06bc95ec10ac7bb9a40040468.
+Final author Linux run:131 passed, zero failures/errors/skips. Original harness
+cryptography errors and subsequent fixture root-overlap failure are preserved;
+only external harness/fixture setup changed before the passing run. Native
+root-owned reads use synthetic authority; no real credential or admission proof.
+Independent fresh 87 cases passed with no failures/skips (32 held-out, 55 selected);
+all four source/test hashes remained stable. Receipt:
+`next-startup/native-installation-inputs/artifact-bounds-independent-review/continuation-review-receipt.json`
+SHA256 366853b249133f502a43767affffd40ba7b894598c472f5baa6d11868541aa13.
+Connected 19-suite CI selection: 689 passed, 3 skipped, no failures/errors
+in 157.88s; source hashes stable. Receipts: `next-startup/enrollment-artifact-bounds/connected-linux.xml`
+and `connected-source-binding.json`. Counts overlap; do not sum.
+Refreshed runtime/disposable replay remains pending. Ordinary 64 KiB default, root/ancestry/no-follow
+checks, exact digests and source membership remain unchanged.
+
+Prior publication closure is verified separately by E15
+`next-startup/consumer-publication-review/pr2143-merged-main-closure.json` and
+`next-startup/initial-control-final-publication-review/pr2144-merged-main-closure.json`.
+Both reviewed/main trees match and all 10 exact-merge checks pass per receipt;
+original failed runs below remain historical. No native worker or retained gain.
+
 ## Initial control identity regressions — 2026-10-16
 
 Source inventory: next-startup/native-installation-inputs/initial-control-source-inventory-v3.json;

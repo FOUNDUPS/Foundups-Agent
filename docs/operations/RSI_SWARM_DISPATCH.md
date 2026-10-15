@@ -27,16 +27,31 @@ generation qualification records were installed, with no authority stores yet
 initialized. These observations do not prove power-loss or physical rollback
 independence.
 
-Evidence: existing next-startup/ root, initial-control-independent-review/,
-native-installation-inputs/ and installed-execution-qualification/. Source base
-6a9df0ba5ad977c381c57f98adb2234940289c07, rebased onto PR2143 merge
-372d03de59352887928b7afd0204cce483e2c6c6. All11 exact-head checks passed;
-merged tree equals reviewed5b075a920. Main CI/CodeQL remains pending. Paid calls0;
-local/coordinator cost unknown. Native worker
-admission=false and retained RSI gain=false.
+Evidence under the existing `next-startup/` root: PR2143 merged at
+`372d03de59352887928b7afd0204cce483e2c6c6`; PR2144 merged at
+`7772c011b4c92e357839cf27ba900b7304358028`. Both reviewed/main trees match and
+all 10 exact-merge checks passed. Closure receipts are
+`consumer-publication-review/pr2143-merged-main-closure.json` and
+`initial-control-final-publication-review/pr2144-merged-main-closure.json`.
+Paid calls 0; local/coordinator cost unknown. Native worker admission=false
+and retained RSI gain=false.
 
-WSP15 executable prerequisite18/P0 (C3/I5/D5/Impact5): close this independently
-reviewed bootstrap repair and refresh exact installed source. Then19/P0 native
+Disposable installation then rejected a 182,859-byte approval, 685,781-byte
+installed descriptor and 26 source files above the ordinary 64 KiB owner bound.
+The scoped repair uses the existing 1 MiB artifact limit explicitly for these
+reads, preserving owner defaults and protected-file/source checks. Author 131
+and independent 87 Linux cases passed; connected 19-suite CI selection passed
+689 with 3 skips and no failures/errors (157.88s); source hashes remained stable.
+Receipts: `enrollment-artifact-bounds/connected-linux.xml` and
+`enrollment-artifact-bounds/connected-source-binding.json`. Counts overlap.
+See `enrollment-artifact-bounds/author-review.json` and
+`native-installation-inputs/artifact-bounds-independent-review/continuation-review-receipt.json`.
+The prior runtime lacks root/target/protected-installer entrypoints. A unified
+1,254-source export against base 7772c011b is prepared; fresh qualification and
+disposable installation replay remain pending. Export is not admission.
+
+WSP15 executable prerequisite 18/P0 (C3/I5/D5/Impact5): close this bounds repair,
+qualify its exact installed runtime and replay disposable installation. Then19/P0 native
 installation/LOW grant-handshake becomes eligible. Continue existing R15 with
 admitted author, fixed independent evaluator, activation/rollback and later-use
 benefit. Holo query rejected authority/head mismatch; governed maintenance also
