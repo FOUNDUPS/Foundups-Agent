@@ -1,3 +1,13 @@
+## Protected issuer custody qualification
+
+Run `test_reddog_grant_startup_custody.py` and
+`test_reddog_grant_custody_owner_versions.py` with issuer service, root LOAD,
+permission rehydration, target protected-use, model-verifier and owner-version
+regressions. Existing CI selects these alongside the connected signing owners.
+OS custody/owner/isolation seams are explicit; production E0, signatures,
+credential resolver lifetime, replay stores and protocol routing are exercised.
+These tests do not prove installed credentials, a native service or RSI gain.
+
 ## Issuer-only root LOAD qualification
 
 The signing CI selection includes `test_foundup_verified_outcome_root_grant_load.py`,

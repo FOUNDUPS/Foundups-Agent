@@ -1,3 +1,11 @@
+## Protected custody metadata backend closure — 2026-10-16
+
+Generated membership1428→1429 adds only `reddog_grant_authority_startup_custody.py`
+for explicit owner-v9 validation. Both digest pins and finite count boundary are
+synchronized;1430 rejects and all byte/path/hash checks remain. The callable
+dependency loader is not automatically launched by this extension update. No
+installed extension/runtime or native authority is asserted. WSP6/10/22/97.
+
 ## Issuer composition backend closure — 2026-10-16
 
 The source manifest grows1426→1428 for exactly `foundup_verified_outcome_root_revocation_request_role.py`

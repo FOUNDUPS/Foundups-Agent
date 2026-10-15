@@ -12,7 +12,22 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
+**Current checkpoint — issuer custody and source qualification (2026-10-16):**
+The existing issuer now has a protected dependency loader (owner v9), distinct
+signing/loader credentials, current E0 checks and issuer-only root LOAD. Author
+tests244pass and independent review63pass cover explicit synthetic installation
+seams. The adjacent empty-source repair passed actual confined source admission
+for220 modules/six initializers and19 independent checks. Neither result admits
+a native worker. Publication state and exact evidence remain in the
+[existing dispatch record](docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16).
+
+Next19/P0 (C4/I5/D5/Impact5): qualify a complete Linux runtime using existing
+protected source/sandbox owners, then explicitly enroll the installed issuer and
+prove one real LOW grant/handshake. Preserve archive profiles and initial versus
+work authority. R15 still requires independent evaluation, authorized retention/
+rollback and measured benefit on later unseen work. No new scheduler is needed.
+
+**Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
 The candidate composes the existing LOW issuer, credential resolver, durable
 rate/replay, permission and socket owners. Explicit root LOAD v2 authenticates
 the issuer against current owner/E0/descriptor state; legacy target v1 remains

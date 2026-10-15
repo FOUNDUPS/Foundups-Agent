@@ -1902,9 +1902,23 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close the combined issuer and root LOAD slice, extend existing protected issuer custody/materializer owners, qualify installed-source deployment, then prove an authentic LOW grant and handshake before R15. Preserve legacy archive contracts and separate target/issuer authority."
+    "next_action": "Close the tested protected issuer custody/source-reader integration, qualify the complete Linux runtime, explicitly enroll its initial installed-service profile, then prove an authentic LOW grant and handshake before R15. Preserve legacy archive contracts and separate installation/work and target/issuer authority."
   },
   "current_observation": {
+    "issuer_custody_20261016": {
+      "source_scope": "isolated custody candidate over independently reviewed issuer and empty-source layers",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16",
+      "custody_validation": "244 author cases; 63 independent cases including 12 held-outs; synthetic installation seams disclosed",
+      "combined_validation": "12 connected Linux suites: 328 passed, zero failures/skips, 110.66 seconds",
+      "protected_source_validation": "220 modules/six initializers and 19 independent real-file security checks in actual confined credential-free process",
+      "runtime_boundary": "188 observed external files and 26 native mappings are not complete future runtime closure; complete isolated Linux tree qualification in progress",
+      "source_publication": "PR2139 merged1b299b54f; exact main validation pending. PR2140 source-reader layer is open. Custody candidate not yet published.",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "next_dependency": "qualified Linux runtime and authenticated initial installed-issuer enrollment through existing manifest/E0/publisher/consumer owners",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null
+    },
     "grant_issuer_20261015": {
       "source_base_commit": "57d5cd8e8c9db2179e2761ae59f74a2912b8d168",
       "source_scope": "isolated candidate overlay; publication separate",

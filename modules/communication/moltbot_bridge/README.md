@@ -4,7 +4,7 @@
 
 ## Callable LOW grant service — 2026-10-15
 
-[One-request LOW callable API, component evidence and native-admission limits](INTERFACE.md#callable-low-grant-service--2026-10-15).
+[One-request LOW API, protected issuer custody loader and native-admission limits](INTERFACE.md#callable-low-grant-service--2026-10-15).
 
 ## Grant bootstrap binding and LOW RPC — 2026-10-15
 

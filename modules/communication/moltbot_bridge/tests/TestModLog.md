@@ -1,3 +1,21 @@
+## Protected issuer custody validation — 2026-10-16
+
+Frozen11-source/3-test candidate:244 Linux cases passed in94.99s across9 suites,
+zero failures/skips. Independent63 cases passed in33.42s, including12 held-outs
+for late owner/policy/reference/custody/UID mutation, wrong key/requester/purpose,
+invalid TTL and lease release. Prior v1–v8 field and identifier ASTs are unchanged.
+Root ownership, isolation and credential OS reads use synthetic test seams;
+actual E0/signatures/resolver/replay/protocol behavior is exercised. Evidence:
+E15 `next-startup/grant-custody-linux.xml`, `grant-custody-source-inventory.json`
+and `custody-review/independent-grant-custody-review.json`. Rebased combined
+source verification passed328 cases across12 Linux suites in110.66s with zero
+failures/skips (`grant-custody-combined-linux.xml`), including the exact-hash
+empty-source reader and repaired UID fixture. No native admission claim.
+Generator checks initially passed7 and failed the index-consistency check while
+the regenerated manifest was unstaged; after staging the exact candidate, that
+check passed. Both attempts are retained (`custody-manifest-generator.xml`,
+`custody-manifest-staged.xml`). Node contract/preflight pass; registry1709/270.
+
 ## Root LOAD CI identity fixture repair — 2026-10-16
 
 PR CI38754411047 failed the positive root LOAD process case:989 passed,1 failed,

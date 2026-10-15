@@ -1,3 +1,21 @@
+## Protected independent issuer custody — 2026-10-16
+
+WSP00/5/6/11/15/22/48/50/71/84/97. Explicit owner v9 supplies protected
+issuer signing/audit and separate loader signing/replay bindings. Reused the
+existing systemd resolver, replay materializer, E0 lease and issuer-only LOAD
+oracle. Actual refs match signed hashes; requester roles remain distinct;
+isolation precedes credential resolution. RPC releases the generation lease,
+then owner/policy/custody/time are revalidated. Prior owner schemas and model,
+effect, reviewer and grant consumers retain their checks. No installed authority
+is created. Full contract is in the existing key-provider contract document.
+
+Author9-suite Linux run244pass and independent63pass (12 held-outs) preserve
+explicit synthetic OS custody/owner/isolation boundaries. Source-bound receipts:
+E15 `next-startup/grant-custody-source-inventory.json` and
+`custody-review/independent-grant-custody-review.json`. The integration base also
+contains the independently qualified empty-source reader; native runtime and
+initial installed-issuer enrollment remain the next dependency before R15.
+
 ## Protected empty source qualification — 2026-10-16
 
 WSP00/5/6/15/22/50/71/84/97. A real confined import of the exact grant service
