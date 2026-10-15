@@ -1,3 +1,13 @@
+## Issuer composition backend closure — 2026-10-16
+
+The source manifest grows1426→1428 for exactly `foundup_verified_outcome_root_revocation_request_role.py`
+and `reddog_signer_system_service_runtime_dependencies.py`; no prior member is
+removed. The extension's stale1426-file cap rejected the generated manifest in
+the actual Node consumer. Synchronize the finite cap to1428 and retain explicit
+1429 rejection, pinned digest, path/hash allowlists and all byte bounds. CI now
+runs this consumer contract alongside its existing preflight. WSP00/6/10/22/97.
+No extension installation or worker admission is claimed.
+
 ## Initial enrollment backend binding — 2026-10-15
 
 Regenerated the existing1426-member backend manifest after initial-manifest,

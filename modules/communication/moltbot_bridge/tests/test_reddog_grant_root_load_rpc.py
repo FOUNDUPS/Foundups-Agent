@@ -4,6 +4,7 @@ Uses production permission orchestration, revocation oracle, request/client/rout
 Ed25519 verification and stores. No root service or real credential is installed.
 """
 from contextlib import contextmanager
+from dataclasses import replace
 import json
 import multiprocessing
 import os
@@ -143,6 +144,10 @@ def test_permission_root_load_generation_lock_across_processes(monkeypatch, mode
         with _lock(root):
             pass
         values = _runtime(root/'fixture', monkeypatch)
+        # Keep the synthetic target distinct from the real issuer on UID1001 CI hosts.
+        target_uid = 1002 if os.getuid() == 1001 else 1001
+        values['snapshot'] = replace(values['snapshot'], signer_uid=target_uid)
+        values['owner']['verified_outcome_authority']['signer_uid'] = target_uid
         values['owner']['independent_grant_authority'].update(authority_service_uid=os.getuid(), authority_service_gid=os.getgid())
         lease = _permission_fixture(root, values, monkeypatch)
         oracle = _oracle(root, values, monkeypatch)

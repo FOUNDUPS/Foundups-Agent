@@ -1,3 +1,15 @@
+## Root LOAD CI identity fixture repair — 2026-10-16
+
+PR CI38754411047 failed the positive root LOAD process case:989 passed,1 failed,
+3 skipped. Independent controlled execution as real UID1001 reproduced4/5pass
+with `root_revocation_grant_owner_mismatch`: its synthetic target was also1001.
+The fixture now selects target1002 only for issuer1001, otherwise target1001;
+the authenticated kernel issuer identity and production separation stay intact.
+All assertion ASTs are unchanged. Repaired real UID1001:5 passed; UID0 connected:
+34 passed; separate same-UID negative:1 passed. The hosted UID was not observed.
+Source-bound review: E15 `next-startup/root-load-ci-review/ci-fixture-repair-review.json`.
+These synthetic authority tests do not prove native admission.
+
 ## Issuer root LOAD and permission fence — 2026-10-15
 
 Five selected Linux suites passed98 cases (`grant-root-load-linux-98.xml`).
