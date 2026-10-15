@@ -1889,8 +1889,8 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.grant_bootstrap_20261015",
-    "base_commit": "dcd622557480a953e5ec3a0676d53410769700a0",
+    "observation_path": "current_observation.grant_issuer_20261015",
+    "base_commit": "57d5cd8e8c9db2179e2761ae59f74a2912b8d168",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
     "status": "IN_PROGRESS",
     "wsp15": {
@@ -1902,9 +1902,31 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close reviewed E0 v9 bootstrap and LOW RPC repairs; compose existing LOW issuer owners in the protected installed-source runtime, explicitly enroll that deployment with real custody/permission, then prove grant and handshake before R15. Existing zipapp rejects required imports/native dependencies; preserve old contracts rather than weakening archive checks."
+    "next_action": "Close the combined issuer and root LOAD slice, extend existing protected issuer custody/materializer owners, qualify installed-source deployment, then prove an authentic LOW grant and handshake before R15. Preserve legacy archive contracts and separate target/issuer authority."
   },
   "current_observation": {
+    "grant_issuer_20261015": {
+      "source_base_commit": "57d5cd8e8c9db2179e2761ae59f74a2912b8d168",
+      "source_scope": "isolated candidate overlay; publication separate",
+      "prior_observation": "current_observation.grant_bootstrap_20261015",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#bounded-grant-issuer-and-root-load--2026-10-15",
+      "repairs": [
+        "one-request LOW issuer composition over existing owners",
+        "issuer-only root LOAD v2 with current owner/E0/descriptor checks and legacy v1 preservation",
+        "permission lease capture/release/revalidate around root RPC",
+        "resident POSIX listener retained through owned-path cleanup"
+      ],
+      "component_validation": "combined29-suite Linux signing selection990passed/3skips; independent issuer17, transport17, root LOAD30 including five real process cases; exact-source external receipts",
+      "unresolved_observation": "one earlier issuer socket rejection did not reproduce; exact cause unknown and original receipt preserved",
+      "structural_validation": "startup extraction141pass/1 inherited documentation-cap failure; source/function gates pass; README unchanged1306, INTERFACE reduced3310to3305, no thresholds/exemptions changed",
+      "authorization_limit": "installation/custody/permission seams remain synthetic; no deployed issuer authority",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "source_publication": "pending exact-head CI and authorized closure",
+      "next_dependency": "issuer-specific protected custody/materializer and installed-source deployment admission",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null
+    },
     "grant_bootstrap_20261015": {
       "source_base_commit": "dcd622557480a953e5ec3a0676d53410769700a0",
       "source_scope": "reviewed candidate overlay; publication separate",
@@ -1924,7 +1946,7 @@
       "authorization_limit": "process tests use synthetic policy/key fixtures; no deployed issuer authority",
       "native_worker_admitted": false,
       "retained_rsi_gain_demonstrated": false,
-      "source_publication": "pending exact-head CI and authorized closure",
+      "source_publication": "PR2138 merged57d5cd8e8; exact-main CI38747627946 and CodeQL38747627089 succeeded; owned lanes archived and retired",
       "next_dependency": "installed-source grant issuer composition and explicit initial deployment enrollment; authentic policy/custody/rate/replay/revocation required",
       "paid_provider_calls": 0,
       "coordinator_cost": null

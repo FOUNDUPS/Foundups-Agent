@@ -1,6 +1,9 @@
 # REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1
 
-Status: CONTRACT SPEC, decision-only. No runtime key loading, no key generation,
+Status: The original Phase1 specification below is decision-only. The
+[current composition contracts](#current-composition-contracts--2026-10-15) record
+implemented source interfaces; they do not authorize installation or native use.
+The original specification performed no runtime key loading, no key generation,
 no vault configuration, no signer process launch, no socket binding, no authority
 change, no repository mutation, and no HoloIndex re-index.
 
@@ -227,3 +230,95 @@ RedDog cannot become an autonomous executor until it can obtain authority from a
 signer whose key material is not reachable by RedDog's plugin-loaded runtime.
 This slice defines that boundary and keeps the private-key handling step
 SPECIFIED_NOT_IMPLEMENTED.
+
+## Current composition contracts — 2026-10-15
+
+These active contracts extend the credential and E0 boundary above. Source
+implementation is component-qualified; authenticated deployment and custody
+remain required. The earlier Phase1 sequence and verdict record that phase.
+Return to the [module interface](../../modules/communication/moltbot_bridge/INTERFACE.md)
+for adjacent generation, bootstrap and consumer contracts.
+
+## Issuer-only root LOAD — 2026-10-15
+
+Root revocation wire v2 binds `requester_role=grant_issuer`, requester principal
+and key epoch to the signed LOAD request. The existing v1 target projection and
+signing domain remain unchanged. The issuer-specific anchor factory and
+`RootAuthorizedSignerGrantRevocationOracle` construction permit LOAD and issuer
+key-epoch checks only; target protected-use and revocation mutations reject.
+The installed owner supplies the issuer UID/GID. Root socket transport access
+must also be provisioned; peer authentication does not grant filesystem access.
+
+`authorize_current_grant_authority_wsp71_use` captures authenticated permission
+state under the generation lease, releases it for root LOAD, then reacquires
+and compares authority/receipt/binding state before and after the action.
+Expiry is rechecked at use; refreshed selection timestamps alone are not an
+identity change. Custody and runtime installation remain separate contracts.
+
+
+## Callable LOW grant service — 2026-10-15
+
+`src/reddog_grant_authority_service.py` exports `serve_grant_authority_once(*,
+repo_root, owner_config_path, dependencies=None, timeout_s=5.0,
+ready_callback=None)`. It returns `GrantAuthorityServiceResult` and serves at
+most one request through the existing bounded socket owner after admission.
+There is no CLI, installation path or installed-dependency loader.
+
+`GrantAuthorityServiceDependencies` contains the current `owner_policy`,
+`issuer_profile`, `credential_binding`, durable `replay_store` and root-authorized
+`revocation_oracle`. Construction conveys no authority. The callable freezes
+the policy, checks owner/profile/reference/replay bindings, requires distinct
+signing and audit credential IDs, and applies existing peer/process-isolation
+and current permission gates before listening. Owner scope must be exactly
+`signer_socket_peer_handshake`, LOW, with empty consensus requirements.
+
+Each request must use the existing secret-grant signing operation, LOW tier,
+no consensus proof and the bound requester peer. Permission/revocation are
+renewed around current-input validation, ephemeral custody, signing and return.
+The existing durable rate authority survives fresh per-request backend creation;
+consumer replay enforcement remains in the existing grant-consumption path.
+This service does not bootstrap through the target's grant-required backend.
+
+Result fields are `accepted`, `rejection_reasons`, `requests_handled`,
+`response_digests` and `socket_removed`. `accepted` describes transport completion,
+not grant acceptance, native isolation or RSI. Inspect and independently verify
+the signing response. The wrapper does not propagate the socket owner's
+no-secret flags as claims about this credential-using composition.
+
+The next installation dependency is an independently authorized root LOAD
+request signer with the required identity, followed by protected dependency/
+custody supply and authenticated installed-source deployment. Role-key possession,
+the callable and a successful fixture socket exchange do not establish these gates.
+
+The shared resident socket owner keeps its POSIX listener open through owned-path
+cleanup on both normal and exceptional exits, then closes it. Its private path
+identity also compares change-time nanoseconds to reject stale inode metadata.
+The timestamp is supplemental defense, not an atomic unlink guarantee; cleanup
+still depends on the existing protected-parent trust boundary. Non-POSIX retains
+close-before-unlink behavior. Replacement paths are preserved on identity mismatch.
+
+
+## Initial handshake configuration — 2026-10-15
+
+`compose_initial_handshake_service_config(...)` in the existing
+`reddog_signer_socket_service_config_composition.py` returns a validated public
+`reddog_initial_handshake_service_config.v1` mapping; it does not write files,
+issue grants or resolve credentials. Keyword inputs: repo/runtime/signer roots,
+socket path, one key-provider profile, peer policy, E0 authority binding digest,
+timeout and request/response byte limits. The schema fixes `max_requests=1`,
+WSP71 permissioned provider mode and `allow_test_only_key_material=false`.
+
+The typed `initial_handshake_only` mode admits exactly generation1 and the
+`reddog-work-authority` / `signer:reddog` profile with distinct signing/MAC refs.
+The writable socket parent is separate from immutable artifacts and signer
+state; startup checks also preserve authority/replay/revocation separation.
+Mixed work/control/proposal/outcome/conversation policies are rejected.
+Authenticated E0 scope must be exactly `signer_socket_peer_handshake`, LOW, with
+no consensus authorities. HIGH/ULTRA rules for other configurations are unchanged.
+JSON policy lists become canonical immutable tuples after validation.
+
+Non-handshake requests reject before grant consumption/key resolution and again
+under the current-generation owner lease with exact peer-instance binding.
+Manifest authenticity, E0 scope and request grants remain independent gates.
+The separate production grant issuer composition and real native admission are
+still required; this schema does not certify their availability.

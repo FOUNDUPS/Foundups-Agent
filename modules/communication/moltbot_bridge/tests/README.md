@@ -1,3 +1,35 @@
+## Issuer-only root LOAD qualification
+
+The signing CI selection includes `test_foundup_verified_outcome_root_grant_load.py`,
+`test_reddog_grant_root_load_rpc.py` and the resident socket regression alongside
+the issuer composition. Run current permission rehydration and legacy root
+revocation suites too. The real two-process LOAD tests preserve the old-order
+deadlock control and check policy/generation/expiry drift. Synthetic installation
+seams remain explicit; passing tests do not prove installed worker admission.
+
+## Callable LOW grant service qualification
+
+`test_reddog_grant_authority_service.py` is selected by the existing
+`Run RedDog grant-aware signing composition regression` CI step. Run it with
+current permission rehydration, authenticated manifest binding, independent
+provider, LOW RPC, ephemeral backend and socket protocol/resident/client suites.
+The canonical registry generator owns its classification and shard membership.
+
+Coverage includes missing dependencies, non-LOW/foreign/malformed requests,
+owner/profile/custody substitution, permission failure including fence exit,
+process-isolation rejection and durable rate across fresh backends. The Linux
+positive exchanges an actual AF_UNIX request in a same-process thread and
+verifies disposable signatures and cleanup. Its peer attribution, root ownership,
+current admission, isolation, revocation and custody are synthetic. This is
+transport/composition coverage, not an admitted independent native issuer.
+Windows explicitly skips that Linux-only exchange.
+
+Resident transport regressions additionally use distinct Linux processes and real
+kernel peer attribution to verify listener lifetime, socket cleanup and replacement
+preservation. Passive wrappers observe descriptor lifetime while real cleanup runs.
+The existing closed-listener replacement test remains unchanged. Unsupported native
+platform checks keep explicit skips; no skip replaces a failing Linux assertion.
+
 ## Grant bootstrap and LOW RPC qualification
 
 The existing CI `Run RedDog grant-aware signing composition regression` includes

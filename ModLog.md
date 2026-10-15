@@ -1,3 +1,14 @@
+## Bounded grant issuer and root LOAD — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Connected existing LOW issuer owners
+and introduced a versioned issuer-only root LOAD role without changing legacy
+target wire behavior. Repaired the second generation-lock/RPC conflict in
+permission authorization and a reproduced resident socket replacement-cleanup
+defect. Existing roadmap/runbook/registry/CI locations own the evidence and next
+custody/deployment dependency. Tests preserve synthetic installation limits;
+no native worker, paid inference or retained RSI gain is claimed.
+PR2138 is main-validated and its two owned lanes archived/retired.
+
 ## Grant bootstrap binding and LOW RPC — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Reused existing E0/grant owners

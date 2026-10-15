@@ -1,3 +1,62 @@
+## Bounded grant issuer and root LOAD — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97; source base
+`3d81fee277b8fc1c4ba6f22bd117a0b4772b1128`, tree-identical to main merge
+`57d5cd8e8c9db2179e2761ae59f74a2912b8d168`. PR2138 main CI38747627946
+and CodeQL38747627089 succeeded; both owned worktrees were archived and retired.
+Current changes are isolated in `agent/rsi-grant-issuer-20261015`.
+
+The existing issuer/permission/custody/rate/socket owners now compose one LOW
+handshake-grant service. Root LOAD v2 carries the issuer role/principal/epoch;
+current owner, kernel peer, E0 and target descriptor checks precede reading.
+Legacy target v1 remains byte-compatible. Issuer requests cannot mutate revocation
+state or acquire target protected-use authority. Permission execution releases
+the generation lease across root RPC, then revalidates authority and receipt
+around the action under the reacquired fence. No synthetic callback is installed
+as production authorization.
+
+Evidence root: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`.
+Before integration, issuer connected Linux passed 230 cases, independent shared
+transport review passed 17, and root LOAD selected Linux suites passed 98.
+The final process suite passed five cases including an old-order timeout control.
+Exact source inventories and commands accompany the XML receipts. Installation,
+custody and some permission captures remain explicit test seams. One earlier
+issuer socket rejection has unknown cause; its failed receipt is preserved,
+and the test now reports its safe rejection code if it recurs. Passing later
+runs do not erase that observation. The combined 29-suite Linux signing selection
+passed 990 cases with three inherited skips in293.98s (`issuer-ci-selection.xml`).
+Independent root LOAD review passed30 cases, including25 held-outs and five real
+two-process cases, on all14 source/test hashes (`root-load-review/independent-root-load-review.json`).
+Legacy wire comparison uses exact parent source. The first reviewer run's WSL
+Git-path harness failure is retained; only external source retrieval changed.
+The coherent startup-dependency extraction preserves the public import and all
+ten function bodies except the lazy oracle import. Its seven-suite Linux check
+passed141 and failed one unchanged documentation assertion: INTERFACE3305>1511,
+already3310 at the exact base. All code/function caps passed; original materializer
+is197 versus296 base, new startup owner119. README remains at its1306-line base;
+active contracts moved verbatim to the existing key-provider contract.
+Canonical WSP62 differential attribution and the mirrored violations log retain
+this inherited debt. No threshold or exemption changed and the broad legacy gate
+is not claimed to pass. Registry check:1707 entries,270 quarantined. Publication
+remains subject to generated bindings, security and exact-head CI.
+
+The governed postmerge maintenance refreshed HoloIndex at57d5cd8e8; its query
+receipt is `ok=true`, `freshness=CURRENT`, `index_gap_detected=false`.
+Retrieval evaluation records one tangential hit and missing module docs/candidate
+overlays, supplied through direct source reads. This maintenance run is not
+native author execution. Use the clean control checkout's own query script;
+its file location binds source authority, regardless of the calling directory.
+
+Next WSP15 score remains 19/P0 (C4/I5/D5/Impact5): extend existing protected
+custody/materializer owners for the issuer. The signing binding must contain
+only signing/audit IDs; a separate loader binding covers issuer-key LOAD proof
+and replay integrity. Do not reuse target identity or infer references from
+public digests. Qualify the existing protected installed-source runtime and
+explicit initial deployment before a real grant/handshake. Then execute R15's
+author, independent evaluator, authorized retention/rollback and later-use
+comparison. No paid provider calls, runtime credentials, native admission or
+retained improvement were created by this source integration.
+
 ## Grant bootstrap and LOW RPC — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97; isolated
