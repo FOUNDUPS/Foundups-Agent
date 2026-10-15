@@ -105,3 +105,61 @@ def test_proof_rejects_nonissuer_context_before_secret(case, kind):
     else: request = replace(request, policy_id='sha256:'+'0'*64)
     with pytest.raises(ValueError): signer(root_fixture.wire.canonical_signer_input(request))
     assert case.events == []
+
+
+def test_runtime_rejection_precedes_first_integrity_secret(case, monkeypatch):
+    def reject(*args):
+        assert case.isolated and case.active
+        case.events.append('guard-rejected')
+        raise ValueError('runtime drift')
+    monkeypatch.setattr(runtime, '_verify_installed_runtime', reject)
+    with pytest.raises(ValueError, match='runtime drift'):
+        materialize(case)
+    assert case.events == ['isolate', 'guard-rejected'] and case.active == 0
+
+
+def test_installed_composition_uses_protected_loader_before_service(case, monkeypatch):
+    from modules.communication.moltbot_bridge.src import reddog_grant_authority_service as service
+    def guard(*args):
+        assert case.active and case.isolated
+        case.events.append('guard')
+    monkeypatch.setattr(runtime, '_verify_installed_runtime', guard)
+    def serve(**kwargs):
+        assert type(kwargs['dependencies']) is service.GrantAuthorityServiceDependencies
+        assert case.events.index('guard') < case.events.index('replay')
+        assert case.events.count('guard') >= 2 and case.active == 0
+        return service.GrantAuthorityServiceResult(accepted=True, requests_handled=1)
+    monkeypatch.setattr(service, 'serve_grant_authority_once', serve)
+    result = service.serve_installed_grant_authority_once(repo_root=case.values['repo'],
+        owner_config_path=case.values['owner_config_path'], expected_owner_config_id=case.owner['config_id'])
+    assert result.accepted and result.requests_handled == 1
+
+
+def test_loader_rejection_never_starts_service(case, monkeypatch):
+    from modules.communication.moltbot_bridge.src import reddog_grant_authority_service as service
+    monkeypatch.setattr(service, 'serve_grant_authority_once', lambda **kwargs: pytest.fail('unadmitted service'))
+    result = service.serve_installed_grant_authority_once(repo_root=case.values['repo'],
+        owner_config_path=case.values['owner_config_path'], expected_owner_config_id='sha256:'+'0'*64)
+    assert not result.accepted and case.events == []
+
+
+@pytest.mark.parametrize('rejected_call', [1, 2])
+def test_root_load_proof_checks_runtime_at_credential_use(case, monkeypatch, rejected_call):
+    from modules.communication.moltbot_bridge.src import reddog_grant_authority_service as service
+    _, _, binding, _ = runtime.current_grant_custody(case.owner, case.values['policy'])
+    signer = proof.build_grant_root_request_signer(owner_config_path=case.values['owner_config_path'],
+        repo_root=case.values['repo'], policy=case.values['policy'],
+        descriptor=case.values['snapshot'].descriptor, credential_binding=binding)
+    case.isolated = True
+    calls = []
+    def guard(*args):
+        assert case.active
+        calls.append('guard')
+        if len(calls) == rejected_call:
+            raise ValueError('root proof runtime drift')
+    monkeypatch.setattr(service, '_verify_installed_runtime', guard)
+    request = root_fixture._issuer_request(case.values)
+    with pytest.raises(ValueError, match='root proof runtime drift'):
+        signer(root_fixture.wire.canonical_signer_input(request))
+    assert len(calls) == rejected_call and case.active == 0
+    assert ('grant-signing' in case.events) is (rejected_call == 2)

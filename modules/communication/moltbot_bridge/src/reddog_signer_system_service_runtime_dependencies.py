@@ -65,11 +65,21 @@ def _materialize_startup_replay(repo, custody, policy, resolver):
         replay_store_id=policy["replay_store_id"],
         durability_receipt_id=policy["replay_store_durability_receipt_id"],
     )
-    from .reddog_signer_secret_grant_durable_nonce_store import _validate_config, _require_store_files
+    store = _materialize_provisioned_replay(config, permission, policy["expires_at"], resolver)
+    require_owner_bound_replay_store(policy, store, repo_root=repo)
+    return store
+
+
+def _materialize_provisioned_replay(config, permission, expires_at, resolver):
+    """Open one explicitly configured existing store; never provision implicitly."""
+    from .reddog_signer_secret_grant_durable_nonce_store import (
+        DurableSignerSecretGrantNonceStore, _validate_config, _require_store_files,
+    )
     _validate_config(config)
     _require_store_files(config)
-    _require_provisioned_high_water(repo, raw, config.replay_store_id, config.durability_receipt_id)
-    if not permission["issued_at"] <= time.time() < min(permission["expires_at"], policy["expires_at"]):
+    raw = dict(high_water_path=config.high_water_path, high_water_root=config.high_water_root)
+    _require_provisioned_high_water(config.repo_root, raw, config.replay_store_id, config.durability_receipt_id)
+    if not permission["issued_at"] <= time.time() < min(permission["expires_at"], expires_at):
         raise ValueError("startup_replay_permission_expired")
     result = resolver.resolve(permission["reference"], permission["requester_id"])
     if result.success is not True or result.reference != permission["reference"]:
@@ -78,11 +88,9 @@ def _materialize_startup_replay(repo, custody, policy, resolver):
     if type(secret) is not str or not secret:
         raise ValueError("startup_replay_credential_invalid")
     resolver._remaining()
-    if not permission["issued_at"] <= time.time() < min(permission["expires_at"], policy["expires_at"]):
+    if not permission["issued_at"] <= time.time() < min(permission["expires_at"], expires_at):
         raise ValueError("startup_replay_permission_expired")
-    store = DurableSignerSecretGrantNonceStore(config, integrity_key=secret.encode("utf-8"), clock=time.time)
-    require_owner_bound_replay_store(policy, store, repo_root=repo)
-    return store
+    return DurableSignerSecretGrantNonceStore(config, integrity_key=secret.encode("utf-8"), clock=time.time)
 
 
 def _require_provisioned_high_water(repo, raw, store_id, durability_id):

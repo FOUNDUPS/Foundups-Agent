@@ -10,17 +10,23 @@ from .foundup_verified_outcome_root_revocation_client import _create_root_revoca
 from .foundup_verified_outcome_root_revocation_protocol import GRANT_ROLE
 from .foundup_verified_outcome_root_runtime_materializer import _materialize_durable_revocation_reader
 from .reddog_grant_authority_root_request_signer import build_grant_root_request_signer
-from .reddog_grant_authority_service import GrantAuthorityServiceDependencies, _policy_scope, _profile_binding
-from .reddog_grant_authority_startup_custody import current_grant_custody
+from .reddog_grant_authority_service import (
+    GrantAuthorityServiceDependencies, _policy_scope, _profile_binding, _verify_installed_runtime,
+)
+from .reddog_grant_authority_startup_custody import (
+    current_grant_custody, require_grant_rate_target_separation, require_private_grant_rate_store,
+)
 from .reddog_signer_owner_e0_capability_state import freeze_owner_e0_policy, thaw_owner_e0_policy
 from .reddog_signer_owner_e0_current_selection import lease_validated_owner_e0_current_admission
 from .reddog_signer_process_isolation_gate import enforce_signer_process_isolation
 from .reddog_signer_secret_grant_root_protected_use_oracle import build_grant_issuer_revocation_oracle
 from .reddog_signer_socket_peer_credential_attestor import PeerCredentialPolicy
 from .reddog_signer_system_service_manifest_selection_loader import (
-    SCHEMA_VERSION_V9, _load_owner_config, _read_root_owned_bytes,
+    SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, _load_owner_config, _read_root_owned_bytes,
 )
-from .reddog_signer_system_service_runtime_dependencies import _materialize_startup_replay
+from .reddog_signer_system_service_runtime_dependencies import (
+    _materialize_startup_replay, _materialize_provisioned_replay,
+)
 from modules.infrastructure.secrets_mcp.src.systemd_credential_secret_resolver import SystemdCredentialSecretResolver
 
 
@@ -37,7 +43,7 @@ def _isolate(owner, policy):
 
 def _current_owner(owner_path, repo, owner, policy):
     current = _load_owner_config(owner_path, repo=repo)
-    if (current["schema_version"] != SCHEMA_VERSION_V9
+    if (current["schema_version"] not in {SCHEMA_VERSION_V9, SCHEMA_VERSION_V10}
             or current["config_id"] != policy["owner_config_id"]
             or canonical_bytes(current) != canonical_bytes(owner)):
         raise ValueError("grant_startup_owner_changed")
@@ -72,7 +78,7 @@ def materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_
     if not path.is_absolute():
         raise ValueError("grant_startup_owner_path_not_absolute")
     owner = _load_owner_config(path, repo=repo)
-    if owner["schema_version"] != SCHEMA_VERSION_V9 or owner["config_id"] != expected_owner_config_id:
+    if owner["schema_version"] not in {SCHEMA_VERSION_V9, SCHEMA_VERSION_V10} or owner["config_id"] != expected_owner_config_id:
         raise ValueError("grant_startup_owner_selection_mismatch")
     raw = _read_root_owned_bytes(Path(owner["startup_custody"]["policy_path"]), path.parent)
     policy = freeze_owner_e0_policy(decode_message(raw))
@@ -82,10 +88,9 @@ def materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_
         owner_config_path=path, repo_root=repo, policy=policy,
     ) as current:
         custody, signing, loader, profile = _current_owner(path, repo, owner, current.policy)
-        replay_custody = {**owner["startup_custody"],
-            "replay_integrity_permission": custody["replay_integrity_permission"]}
-        replay = _materialize_startup_replay(repo, replay_custody, current.policy,
-                                            SystemdCredentialSecretResolver(loader))
+        _verify_installed_runtime(repo, path, current.policy)
+        replay = _materialize_issuer_store(repo, owner, custody, current.policy,
+                                          SystemdCredentialSecretResolver(loader))
         _current_owner(path, repo, owner, current.policy)
         signer = build_grant_root_request_signer(owner_config_path=path, repo_root=repo,
             policy=current.policy, descriptor=owner["verified_outcome_authority"]["descriptor"],
@@ -97,6 +102,17 @@ def materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_
     return dependencies
 
 
+def _materialize_issuer_store(repo, owner, custody, policy, resolver):
+    if owner["schema_version"] == SCHEMA_VERSION_V10:
+        config, _ = require_grant_rate_target_separation(owner, policy, repo)
+        require_private_grant_rate_store(owner, config)
+        return _materialize_provisioned_replay(config, custody["replay_integrity_permission"],
+                                              policy["expires_at"], resolver)
+    replay_custody = {**owner["startup_custody"],
+        "replay_integrity_permission": custody["replay_integrity_permission"]}
+    return _materialize_startup_replay(repo, replay_custody, policy, resolver)
+
+
 def _revalidate_dependencies(path, repo, owner, dependencies):
     policy, oracle = dependencies.owner_policy, dependencies.revocation_oracle
     def check_current():
@@ -104,6 +120,7 @@ def _revalidate_dependencies(path, repo, owner, dependencies):
             owner_config_path=path, repo_root=repo, policy=policy,
         ) as current:
             _current_owner(path, repo, owner, current.policy)
+            _verify_installed_runtime(repo, path, current.policy)
             _profile_binding(dependencies, owner)
             if not oracle.matches_owner(policy=current.policy, binding=current.revocation_binding):
                 raise ValueError("grant_startup_revocation_owner_changed")

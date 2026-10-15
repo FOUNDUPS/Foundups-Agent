@@ -14,6 +14,57 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 MODEL_VERIFIER_INPUTS = ("catalog", "benchmarks", "promotions", "evidence", "policy", "trusted_keys")
 
 
+def _require_grant_disjoint_root(
+    value: Mapping[str, Any], *, owner_root: Path, grant_root: Path,
+    policy: Mapping[str, Any] | None = None,
+) -> None:
+    outcome = value["verified_outcome_authority"]
+    existing = [
+        owner_root,
+        *(Path(value[name]).resolve()
+          for name in ("runtime_root", "high_water_root", "witness_root")),
+        *(Path(outcome[name]).resolve()
+          for name in ("state_root", "state_witness_root", "installation_root")),
+    ]
+    if policy is not None:
+        existing.extend(
+            Path(policy[name]).resolve()
+            for name in ("replay_root", "revocation_root", "revocation_witness_root")
+        )
+    _reject_grant_root_overlap(grant_root, existing)
+
+
+def _reject_grant_root_overlap(root: Path, existing) -> None:
+    if any(root == other or root in other.parents or other in root.parents
+           for other in existing):
+        raise RuntimeArtifactManifestError("grant_authority_owner_root_overlap")
+
+
+def _grant_socket_root(value, *, repo, owner_root, grant_root, policy=None):
+    """V10 separates issuer-writable transport from protected artifact ancestry."""
+    from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10
+    raw = value["independent_grant_authority"]["authority_socket_path"]
+    if value.get("schema_version") != SCHEMA_VERSION_V10:
+        path = validate_runtime_artifact_path(raw, allowed_root=grant_root, repo_root=repo)
+        if path != grant_root / "grant-authority.sock":
+            raise RuntimeArtifactManifestError("grant_authority_socket_path_invalid")
+        return grant_root
+    path = validate_runtime_artifact_path(raw, repo_root=repo)
+    root = validate_runtime_root_path(path.parent, repo_root=repo)
+    if (not Path(raw).is_absolute() or Path(raw) != path
+            or path.name != "grant-authority.sock" or not root.is_dir()):
+        raise RuntimeArtifactManifestError("grant_authority_socket_path_invalid")
+    _require_grant_disjoint_root(value, owner_root=owner_root, grant_root=root, policy=policy)
+    _reject_grant_root_overlap(root, [
+        grant_root, _owner_anchor_root(value, repo=repo),
+        Path(value["verified_outcome_authority"]["authority_socket_path"]).resolve().parent,
+        *(Path(value["grant_rate_store"][name]).resolve()
+          for name in ("nonce_root", "high_water_root")),
+        Path(value["startup_custody"]["replay_store"]["high_water_root"]).resolve(),
+    ])
+    return root
+
+
 def _validate_owner_paths(
     value: Mapping[str, Any], *, repo: Path, owner_root: Path
 ) -> None:
@@ -109,7 +160,7 @@ def load_system_service_model_runtime_verifier(
     from . import reddog_model_runtime_verifier_bootstrap as model
     repo = Path(repo_root).resolve()
     owner = owner_loader._load_owner_config(owner_config_path, repo=repo)
-    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9} or owner["config_id"] != expected_owner_config_id:
+    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9, owner_loader.SCHEMA_VERSION_V10} or owner["config_id"] != expected_owner_config_id:
         raise RuntimeArtifactManifestError("model_verifier_owner_binding_invalid")
     authority = owner["model_verifier_authority"]
     payloads, expected_inputs_digest = None, None

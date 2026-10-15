@@ -19,6 +19,7 @@ from .reddog_signer_delegated_authority_runtime import SigningRequest, SigningRe
 from .reddog_signer_independent_secret_grant_binding import (
     build_secret_grant_authority_policy, require_owner_bound_replay_store,
     resolve_secret_grant_target_binding,
+    resolve_secret_grant_target_binding_from_config,
 )
 from .reddog_signer_key_provider_dryrun import SignerKeyProviderProfile
 from .reddog_signer_owner_e0_capability_state import freeze_owner_e0_policy
@@ -30,7 +31,7 @@ from .reddog_signer_secret_grant_durable_rate_authority import DurableSignerSecr
 from .reddog_signer_secret_grant_issuance import validate_secret_grant_signing_request
 from .reddog_signer_secret_grant_root_protected_use_oracle import RootAuthorizedSignerGrantRevocationOracle
 from .reddog_signer_socket_peer_credential_attestor import KernelPeerCredentialAttestor, PeerCredentialPolicy
-from .reddog_signer_system_service_manifest_selection_loader import _load_owner_config
+from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10, _load_owner_config
 from .reddog_signer_wsp71_ephemeral_backend_factory import Wsp71EphemeralSignerBackendFactory
 from modules.infrastructure.secrets_mcp.src.systemd_credential_secret_resolver import (
     SystemdCredentialBinding, SystemdCredentialSecretResolver, parse_systemd_credential_reference,
@@ -104,6 +105,18 @@ def _profile_binding(dependencies, owner):
         raise ValueError("grant_service_custody_scope_mismatch")
 
 
+def _verify_installed_runtime(repo, owner_path, policy):
+    from .reddog_signer_owner_e0_policy_contract import POLICY_SCHEMA_V10
+    if policy.get("schema_version") != POLICY_SCHEMA_V10:
+        return
+    from .reddog_grant_authority_service_manifest_verifier import verify_current_grant_service_artifacts
+    from .reddog_grant_authority_installed_runtime_guard import verify_installed_grant_runtime
+    root = grant_authority_owner_runtime_root(owner_path, repo, policy["owner_config_id"])
+    verified = verify_current_grant_service_artifacts(repo_root=repo, grant_root=root,
+        policy=policy, owner_config_path=owner_path)
+    verify_installed_grant_runtime(verified["source_descriptor"])
+
+
 def _current_inputs(repo, owner_path, dependencies):
     policy = dependencies.owner_policy
     _policy_scope(policy)
@@ -111,16 +124,30 @@ def _current_inputs(repo, owner_path, dependencies):
     if owner["config_id"] != policy["owner_config_id"]:
         raise ValueError("grant_service_owner_changed")
     grant_authority_owner_runtime_root(owner_path, repo, policy["owner_config_id"])
+    _verify_installed_runtime(repo, owner_path, policy)
     _profile_binding(dependencies, owner)
-    require_owner_bound_replay_store(policy, dependencies.replay_store, repo_root=repo)
-    target = resolve_secret_grant_target_binding(policy, dependencies.replay_store)
+    target, rate_binding = _store_bindings(repo, owner_path, owner, dependencies)
     authority = build_secret_grant_authority_policy(policy, target, dependencies.replay_store,
         authority_principal_id=policy["grant_authority_principal_id"],
         authority_principal_provider=policy["grant_authority_principal_provider"],
         authority_public_key=policy["grant_authority_public_key"],
         authority_key_epoch=policy["grant_authority_key_epoch"],
-        requester_principal_id=policy["grant_requester_principal_id"])
+        requester_principal_id=policy["grant_requester_principal_id"], issuer_rate_binding=rate_binding)
     return owner, authority
+
+
+def _store_bindings(repo, owner_path, owner, dependencies):
+    policy, store = dependencies.owner_policy, dependencies.replay_store
+    if owner.get("schema_version") == SCHEMA_VERSION_V10:
+        from .reddog_grant_authority_startup_custody import target_replay_store_config
+        from .reddog_signer_secret_grant_durable_rate_authority import bind_protected_issuer_rate_store
+        binding = bind_protected_issuer_rate_store(owner_config_path=owner_path,
+            repo_root=repo, owner_policy=policy, replay_store=store)
+        target = resolve_secret_grant_target_binding_from_config(policy,
+            target_replay_store_config(owner, policy, repo))
+        return target, binding
+    require_owner_bound_replay_store(policy, store, repo_root=repo)
+    return resolve_secret_grant_target_binding(policy, store), None
 
 
 @dataclass(frozen=True, slots=True)
@@ -170,8 +197,8 @@ def serve_grant_authority_once(*, repo_root, owner_config_path, dependencies=Non
                                timeout_s=5.0, ready_callback=None):
     """Serve at most one LOW grant request after authentic installed admission.
 
-    The caller supplies installed dependency objects. There is deliberately no
-    CLI that invents a grant custody loader or reads target-signer credentials.
+    The caller supplies installed dependency objects. The installed startup
+    composition loads these through the fixed protected dependency loader.
     A transport success does not assert a grant was accepted or RSI occurred.
     """
     try:
@@ -205,4 +232,40 @@ def serve_grant_authority_once(*, repo_root, owner_config_path, dependencies=Non
         result.requests_handled, result.response_digests, result.socket_removed)
 
 
-__all__ = ["GrantAuthorityServiceDependencies", "GrantAuthorityServiceResult", "serve_grant_authority_once"]
+def serve_installed_grant_authority_once(*, repo_root, owner_config_path,
+                                       expected_owner_config_id, timeout_s=5.0):
+    """Join the existing protected loader and one-request issuer; never install."""
+    from .reddog_grant_authority_runtime_dependencies import materialize_grant_authority_runtime_dependencies
+    try:
+        if type(timeout_s) not in (int, float) or not 0 < timeout_s <= 30:
+            raise ValueError("grant_startup_timeout_invalid")
+        dependencies = materialize_grant_authority_runtime_dependencies(
+            repo_root=repo_root, owner_config_path=owner_config_path,
+            expected_owner_config_id=expected_owner_config_id)
+        return serve_grant_authority_once(repo_root=repo_root, owner_config_path=owner_config_path,
+            dependencies=dependencies, timeout_s=timeout_s)
+    except Exception:
+        return GrantAuthorityServiceResult(accepted=False, rejection_reasons=(REJECT,))
+
+
+def main(argv=None):
+    """Fixed bounded issuer startup; input paths confer no execution authority."""
+    import argparse
+    import json
+    parser = argparse.ArgumentParser(description="Run one admitted LOW grant request.")
+    parser.add_argument("--repo-root", required=True)
+    parser.add_argument("--owner-authority-config", required=True)
+    parser.add_argument("--expected-owner-config-id", required=True)
+    args = parser.parse_args(argv)
+    result = serve_installed_grant_authority_once(repo_root=args.repo_root,
+        owner_config_path=args.owner_authority_config, expected_owner_config_id=args.expected_owner_config_id)
+    print(json.dumps(result.to_dict(), sort_keys=True))
+    return 0 if result.accepted else 2
+
+
+if __name__ == "__main__":  # pragma: no cover
+    raise SystemExit(main())
+
+
+__all__ = ["GrantAuthorityServiceDependencies", "GrantAuthorityServiceResult", "serve_grant_authority_once",
+           "serve_installed_grant_authority_once", "main"]

@@ -1,22 +1,17 @@
 ## Protected issuer custody checkpoint — 2026-10-16
 
-Custody is merged in PR2141. Main CodeQL passed; main CI exposed a clock-sampling
-failure in the generation-lock test. A test-only fixed clock repairs the observed
-race;37 Linux cases passed. Hosted replacement closure remains open.
-Independent confined import qualification binds225 source modules, six genuine
-initializers and1,437 runtime files. It does not prove service execution.
-Installed bundle config v3/run-packet v2 and E0 v10 descriptor binding are now
-component-tested. Old archive paths reject the new initial-only policy.
+PR2142 merged308d235a2 with passing exact-main CI and CodeQL, closing the
+previous clock-test failure. Completed owned lanes are archived and retired.
+Current isolated integration adds protected installed-manifest consumption,
+issuer runtime checks before credential use, and fixed one-request startup.
+Independent consumer209, guard62 and wiring18 cases passed; four connected
+suites passed174. Independent actual guard qualification reopened1,665 files
+and launched a credential-free RootDirectory probe. No service admission claim.
 
-Reviewed initial enrollment and target grant acquisition are integrated locally;
-the generic installed consumer and issuer pre-secret runtime guard remain open.
-Thirteen two-UID cases reproduce shared replay ownership failure. Reuse existing
-durable stores with distinct authenticated issuer rate and target replay identities.
-Next19/P0: close those deployment boundaries and prove an authentic LOW handshake. Existing
-UID, credential, permission, revocation and generation boundaries remain intact.
-Reuse the current provider and issuer owners. R15 then requires an admitted
-author, independent held-out evaluation, authorized retention/rollback and later
-measured benefit. See the canonical dispatch record; no RSI gain claimed yet.
+Independent rate-store255 and socket-directory159 cases passed. Next19/P0:
+install authenticated owner/E0/permission/custody inputs; run the real LOW grant
+and target handshake. Then execute the existing R15 author/verifier,
+retention/rollback and later-benefit loop. See the canonical dispatch record.
 
 ## Grant bootstrap and LOW RPC checkpoint — 2026-10-15
 

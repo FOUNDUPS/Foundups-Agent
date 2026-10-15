@@ -124,8 +124,10 @@ def verify_initial_runtime_manifest_approval(*, approval_path, repo_root,
                                             expected_approval_digest, manifest):
     """Verify a caller-pinned protected approval without loading signer custody.
 
-    The caller must obtain the path and expected digest from its authenticated
-    owner contract, never from the manifest being checked. No grant is issued.
+    The owner must select the protected approval path. The expected digest must
+    be authenticated independently, either directly or through the exact
+    manifest ID pinned by current signed owner policy. An unbound manifest's
+    self-reported approval digest is insufficient. No grant is issued.
     """
     repo, path = Path(repo_root).resolve(), Path(approval_path)
     raw, policy, runtime = _read_policy(path, repo)

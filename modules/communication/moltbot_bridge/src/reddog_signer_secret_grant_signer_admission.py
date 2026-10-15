@@ -84,7 +84,11 @@ def _rate_rejection(backend: Any, policy: Any, now_epoch: int) -> str:
         or type(rate.replay_store) is not DurableSignerSecretGrantNonceStore
     ):
         return REJECT_POLICY_MISSING
-    if (
+    if policy.issuer_rate_binding is not None:
+        from .reddog_signer_secret_grant_durable_rate_authority import protected_issuer_rate_binding_matches
+        if not protected_issuer_rate_binding_matches(policy.issuer_rate_binding, policy, rate.replay_store):
+            return REJECT_REQUEST_INVALID
+    elif (
         rate.replay_store_id != policy.replay_store_id
         or rate.durability_receipt_id
         != policy.replay_store_durability_receipt_id

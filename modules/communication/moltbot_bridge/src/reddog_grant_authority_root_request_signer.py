@@ -40,12 +40,15 @@ class _GrantRootRequestSigner:
     mono_start: float
 
     def __call__(self, signing_input):
+        from .reddog_grant_authority_service import _verify_installed_runtime
         request = _canonical_issuer_load(signing_input)
         with lease_validated_owner_e0_current_admission(
             owner_config_path=self.owner_config_path, repo_root=self.repo_root,
             policy=self.policy,
         ) as lease:
             permission = _checked_permission(self, request, lease)
+            _require_root_permission_live(self, permission, lease.policy)
+            _verify_installed_runtime(self.repo_root, self.owner_config_path, lease.policy)
             _require_root_permission_live(self, permission, lease.policy)
             result = self.resolver.resolve(permission["reference"], permission["requester_id"])
             if (result.success is not True or result.reference != permission["reference"]
@@ -54,6 +57,8 @@ class _GrantRootRequestSigner:
             signature = _sign_root_proof(result.get_value(), signing_input, permission, self, lease.policy)
             if _checked_permission(self, request, lease) != permission:
                 raise ValueError("grant_root_proof_permission_changed")
+            _require_root_permission_live(self, permission, lease.policy)
+            _verify_installed_runtime(self.repo_root, self.owner_config_path, lease.policy)
             _require_root_permission_live(self, permission, lease.policy)
         _require_root_permission_live(self, permission, self.policy)
         return signature

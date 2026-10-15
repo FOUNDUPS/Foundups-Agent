@@ -12,31 +12,27 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — installed issuer prerequisites (2026-10-16):**
-PR2139/2140/2141 are merged. Exact-main checks passed for2139/2140;2141
-main CodeQL passed; main CI exposed a clock-sampling race in the generation-lock
-regression (1 failed, 1,040 passed, 3 skipped). This candidate fixes only the test
-clock; 37 Linux cases cover controlled rollover and unchanged stale/future
-rejection. Hosted replacement validation remains open. The protected issuer custody
-loader passed328 connected cases and63 independent cases. Two actual isolated
-Linux trees then qualified; independent F inspection bound1,664 files,225 exact
-source modules/six real initializers and23 native mappings. Six tamper controls
-reject. These are credential-free import checks, not service admission.
+**Current checkpoint — installed issuer integration (2026-10-16):**
+PR2142 merged `308d235a29fc9dfc694f075de552fff285981279`; exact-main
+CI38770382389 and CodeQL38770380737 passed. This closes the prior PR2141
+clock-test failure with its independently verified test-only repair. Four owned
+completed lanes were archived with verified recovery bundles and retired.
 
-PR2142 carries the installed-source bundle and explicit E0 v10 descriptor binding;
-hosted completion is pending. Independent artifact review verified250 cases and
-policy review passed161. The next local integration adds initial enrollment
-(259 independent Linux cases) and target-internal grant acquisition (67 independent
-Linux cases). These retain synthetic custody/installation boundaries. See
-[current evidence and boundaries](docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16).
+The isolated candidate integrates initial enrollment, target-internal grant
+acquisition, authenticated installed-manifest consumption and a sampled issuer
+runtime guard. Consumer review passed209 Linux cases; guard review passed62
+plus an independent actual RootDirectory launch and full1,665-file reopen.
+These runtime checks remain credential-free. Four connected integration suites
+passed174 cases; independent startup wiring passed18 held-outs after repairing
+a reproduced root-LOAD guard omission and checking permission expiry after
+inventory verification. See [evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16).
 
-Next19/P0 (C4/I5/D5/Impact5): current installed manifest consumption and an
-issuer-only runtime check before credentials. A two-UID experiment also exposed
-shared replay-file ownership failure; separate authenticated issuer rate storage
-must preserve target replay semantics before a real handshake. Thirteen disposable
-cases establish the problem and private-store controls, not live admission.
-R15 still requires an admitted author, independent evaluation,
-authorized retention/rollback and measured later-use benefit. No new scheduler.
+Separate issuer rate storage passed255 independent cases; protected-artifact/
+socket path separation passed159. Next19/P0 (C4/I5/D5/Impact5): install the
+authenticated inputs and execute a real LOW grant/handshake. The fixed one-request startup
+joins existing owners; it does not install or grant authority. R15 still requires
+an admitted author, independent evaluation, authorized retention/rollback and
+measured later-use benefit. Native worker admission and RSI remain unproved.
 
 **Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
 The candidate composes the existing LOW issuer, credential resolver, durable

@@ -1,5 +1,50 @@
 ## Protected issuer custody and runtime qualification — 2026-10-16
 
+Current integration update: PR2142 merged308d235a29fc9dfc694f075de552fff285981279;
+main CI38770382389 and CodeQL38770380737 passed. Its tree matches tested head
+671684f3d. This supersedes the PR2141 clock-test failure as an open blocker;
+original failure evidence remains. Custody, installed-contract, policy and
+clock-test lanes were archived with verified recovery bundles and retired.
+
+The installed consumer authenticates the E0-pinned manifest, fixed owner-selected
+`initial-approval.json`, signature, artifact bytes, current owner and source
+policy. Independent review209 cases caught and repaired a legacy missing-archive
+field regression. Installed runtime evidence uses its own explicit binding;
+it never masquerades as an archive digest. Generic consumers do not claim the
+caller is running inside the issuer sandbox.
+
+Issuer-only guard review passed62 tests; independent live inspection reopened
+1,665 files/157 directories then successfully called the guard twice inside the
+qualified RootDirectory. Seven author native negative controls rejected. This is
+sampled integrity of static files/process/mounts, trusting host root/kernel;
+Seccomp2 does not authenticate filter contents. Credential directory name
+allowance does not validate its value. No service, credentials or grant were used.
+
+The fixed startup composes protected materialization with the existing one-request
+service. Guard checks precede replay credential resolution and runtime service
+custody. Independent review reproduced a missing guard at root-LOAD proof use;
+the repair checks runtime and permission expiry immediately before resolution
+and after signing. Eighteen held-outs pass. Four connected suites passed174;
+an earlier root-run rejected18 synthetic rate fixtures because they selected
+UID0; nonroot rerun passed, production positive-UID checks were preserved.
+
+Rate-store separation passed255 independent cases, including actual two-UID
+process tests. They use disposable synthetic admission/keys; actual ownership,
+signing, consumption and duplicate rejection do not establish installed authority.
+The socket-layout repair passed159 independent cases, including12 adversarial
+cases and5 two-UID cases. Explicit owner v10 requires a separate socket parent;
+legacy colocation and the protected artifact authority binding are preserved.
+Both source inventories are frozen. Next install authenticated protected inputs
+and exercise the fixed startup in the source-pinned native runtime.
+
+Evidence under the root below: `installed-consumer-independent-review/`,
+`installed-runtime-guard/root-review/`, `installed-wiring-review/`,
+`grant-rate-store/`, `consumer-wiring-linux.xml`, and `retired-*` recovery records.
+Current native worker admission=false; retained RSI gain=false. Paid calls0;
+coordinator/local compute cost unknown. Historical checkpoints below remain
+historical, not current runtime receipts.
+
+
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97. PR2139 merged1b299b54f,
 PR2140 merged a519f0ad7, PR2141 merged e2a280b38. All exact PR checks passed;
 main checks passed2139/2140. For2141, main CodeQL38764836954 passed; CI38764834966

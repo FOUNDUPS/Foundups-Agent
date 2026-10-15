@@ -22,8 +22,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
     lease_validated_owner_e0_current_admission,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
-    validate_runtime_artifact_path,
     validate_runtime_root_path,
+)
+from .reddog_signer_system_service_owner_inputs import (
+    _require_grant_disjoint_root as _require_disjoint_root,
+    _grant_socket_root,
 )
 GRANT_AUTHORITY_OWNER_FIELDS = frozenset(
     {
@@ -79,11 +82,7 @@ def validate_independent_grant_authority_owner_config(
     ):
         raise RuntimeArtifactManifestError("grant_authority_owner_config_invalid")
     root = validate_runtime_root_path(raw["authority_root"], repo_root=repo)
-    socket_path = validate_runtime_artifact_path(
-        raw["authority_socket_path"], allowed_root=root, repo_root=repo
-    )
-    if socket_path != root / GRANT_AUTHORITY_SOCKET_FILENAME:
-        raise RuntimeArtifactManifestError("grant_authority_socket_path_invalid")
+    _grant_socket_root(value, repo=repo, owner_root=owner_root, grant_root=root)
     _require_disjoint_root(value, owner_root=owner_root, grant_root=root)
 
 
@@ -99,7 +98,7 @@ def load_system_service_independent_grant_authority_client(
         SCHEMA_VERSION_V3,
         SCHEMA_VERSION_V4,
         SCHEMA_VERSION_V5,
-        SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9,
+        SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10,
         _load_owner_config,
     )
 
@@ -112,7 +111,7 @@ def load_system_service_independent_grant_authority_client(
         owner = _load_owner_config(owner_config_path, repo=repo)
         return _build_authenticated_supply(
             owner=owner, policy=admission.policy, owner_config_path=owner_config_path,
-            repo=repo, required_schemas={SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9},
+            repo=repo, required_schemas={SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10},
         )
 
 
@@ -131,9 +130,13 @@ def _build_authenticated_supply(
         owner, owner_root=Path(owner_config_path).resolve().parent,
         grant_root=grant_root, policy=policy,
     )
+    socket_root = _grant_socket_root(
+        owner, repo=repo, owner_root=Path(owner_config_path).resolve().parent,
+        grant_root=grant_root, policy=policy,
+    )
     built = build_reddog_isolated_signer_socket_client(
         repo_root=repo, socket_path=raw["authority_socket_path"],
-        trusted_socket_root=grant_root,
+        trusted_socket_root=socket_root,
         expected_server_uid=int(raw["authority_service_uid"]),
         expected_server_gid=int(raw["authority_service_gid"]),
     )
@@ -153,37 +156,6 @@ def _build_authenticated_supply(
         authority_service_uid=int(raw["authority_service_uid"]),
         authority_service_gid=int(raw["authority_service_gid"]), binding=binding,
     )
-
-
-def _require_disjoint_root(
-    value: Mapping[str, Any],
-    *,
-    owner_root: Path,
-    grant_root: Path,
-    policy: Mapping[str, Any] | None = None,
-) -> None:
-    outcome = value["verified_outcome_authority"]
-    existing = [
-        owner_root,
-        *(
-            Path(value[name]).resolve()
-            for name in ("runtime_root", "high_water_root", "witness_root")
-        ),
-        *(
-            Path(outcome[name]).resolve()
-            for name in ("state_root", "state_witness_root", "installation_root")
-        ),
-    ]
-    if policy is not None:
-        existing.extend(
-            Path(policy[name]).resolve()
-            for name in ("replay_root", "revocation_root", "revocation_witness_root")
-        )
-    if any(
-        grant_root == root or grant_root in root.parents or root in grant_root.parents
-        for root in existing
-    ):
-        raise RuntimeArtifactManifestError("grant_authority_owner_root_overlap")
 
 
 def _require_policy_key(policy: Mapping[str, Any]) -> None:
