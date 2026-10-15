@@ -1,3 +1,16 @@
+## Issuer-only root LOAD — 2026-10-15
+
+Issuer identity permits LOAD only, preserving the legacy target signing domain.
+Current permission is rechecked around RPC and fenced action use. See the
+[identity and lease contract](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#issuer-only-root-load--2026-10-15).
+
+## Callable LOW grant service — 2026-10-15
+
+`serve_grant_authority_once(...)` composes one LOW handshake grant request.
+See the [complete signature, dependencies, result fields and transport limits](
+../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#callable-low-grant-service--2026-10-15).
+It supplies no CLI, installed loader or native admission.
+
 ## Grant bootstrap binding and LOW RPC — 2026-10-15
 
 `reddog_signer_owner_e0_policy_contract.py` accepts explicit
@@ -30,28 +43,10 @@ still require those independently authorized owners and actual custody.
 
 ## Initial handshake configuration — 2026-10-15
 
-`compose_initial_handshake_service_config(...)` in the existing
-`reddog_signer_socket_service_config_composition.py` returns a validated public
-`reddog_initial_handshake_service_config.v1` mapping; it does not write files,
-issue grants or resolve credentials. Keyword inputs: repo/runtime/signer roots,
-socket path, one key-provider profile, peer policy, E0 authority binding digest,
-timeout and request/response byte limits. The schema fixes `max_requests=1`,
-WSP71 permissioned provider mode and `allow_test_only_key_material=false`.
-
-The typed `initial_handshake_only` mode admits exactly generation1 and the
-`reddog-work-authority` / `signer:reddog` profile with distinct signing/MAC refs.
-The writable socket parent is separate from immutable artifacts and signer
-state; startup checks also preserve authority/replay/revocation separation.
-Mixed work/control/proposal/outcome/conversation policies are rejected.
-Authenticated E0 scope must be exactly `signer_socket_peer_handshake`, LOW, with
-no consensus authorities. HIGH/ULTRA rules for other configurations are unchanged.
-JSON policy lists become canonical immutable tuples after validation.
-
-Non-handshake requests reject before grant consumption/key resolution and again
-under the current-generation owner lease with exact peer-instance binding.
-Manifest authenticity, E0 scope and request grants remain independent gates.
-The separate production grant issuer composition and real native admission are
-still required; this schema does not certify their availability.
+`compose_initial_handshake_service_config(...)` creates public generation1
+configuration for one LOW handshake. Manifest, E0 and grant gates remain distinct.
+See the [schema, input and rejection contract](
+../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#initial-handshake-configuration--2026-10-15).
 
 ## Initial runtime manifest enrollment — 2026-10-15
 

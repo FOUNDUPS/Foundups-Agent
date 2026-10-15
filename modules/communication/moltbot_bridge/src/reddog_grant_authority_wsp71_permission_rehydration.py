@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import json
+import time
+from copy import deepcopy
 from pathlib import Path
 from typing import Any, Callable, Mapping, TypeVar
 
@@ -20,6 +22,7 @@ from modules.communication.moltbot_bridge.src.reddog_grant_authority_wsp71_permi
     SECRETS_READ,
     permission_receipt_id,
     validate_permission_receipt,
+    expected_permission_bindings as _expected,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
     RuntimeArtifactManifestError,
@@ -57,32 +60,41 @@ def authorize_current_grant_authority_wsp71_use(
     if not callable(action):
         raise RuntimeArtifactManifestError("grant_permission_action_invalid")
     repo = Path(repo_root).resolve()
-    with lease_validated_owner_e0_current_admission(
-        owner_config_path=owner_config_path, repo_root=repo, policy=owner_policy,
-    ) as admission:
-        policy = admission.policy
-        if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
-            raise RuntimeArtifactManifestError("grant_permission_e0_schema_invalid")
-        root = grant_authority_owner_runtime_root(
-            owner_config_path, repo, str(policy["owner_config_id"])
-        )
-        verified = verify_current_grant_service_artifacts(
-            repo_root=repo, grant_root=root, policy=policy
-        )
-        receipt, snapshot_digest = _load_receipt(repo, root)
-        _require_receipt(receipt, policy, verified, snapshot_digest, now_epoch)
-        if (
-            type(revocation_oracle)
-            is not RootAuthorizedSignerGrantRevocationOracle
-            or revocation_oracle.binding != admission.revocation_binding
-        ):
-            raise RuntimeArtifactManifestError("grant_permission_oracle_mismatch")
-        return revocation_oracle.authorize_key_epoch_use(
-            key_epoch=str(receipt["issuer_key_epoch"]),
-            at_epoch=now_epoch,
-            expires_at=int(receipt["expires_at"]),
-            action=action,
-        )
+    inputs = dict(owner_config_path=owner_config_path, repo_root=repo, policy=owner_policy)
+    with lease_validated_owner_e0_current_admission(**inputs) as admission:
+        before, receipt = _permission_state(admission, repo, owner_config_path, revocation_oracle, now_epoch)
+
+    def guarded_action():
+        # Root LOAD happens outside this lease; caller effects remain fenced.
+        with lease_validated_owner_e0_current_admission(**inputs) as current:
+            after, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, int(time.time()))
+            if before != after:
+                raise RuntimeArtifactManifestError("grant_permission_authority_changed")
+            result = action()
+            final, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, int(time.time()))
+            if before != final:
+                raise RuntimeArtifactManifestError("grant_permission_authority_changed")
+        return result
+
+    return revocation_oracle.authorize_key_epoch_use(
+        key_epoch=str(receipt["issuer_key_epoch"]), at_epoch=now_epoch,
+        expires_at=int(receipt["expires_at"]), action=guarded_action,
+    )
+
+
+def _permission_state(admission, repo, owner_path, oracle, now_epoch):
+    from .reddog_signer_independent_secret_grant_verification import _owner_authority_snapshot
+    policy = admission.policy
+    if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
+        raise RuntimeArtifactManifestError("grant_permission_e0_schema_invalid")
+    root = grant_authority_owner_runtime_root(owner_path, repo, str(policy["owner_config_id"]))
+    verified = verify_current_grant_service_artifacts(repo_root=repo, grant_root=root, policy=policy)
+    receipt, snapshot_digest = _load_receipt(repo, root)
+    _require_receipt(receipt, policy, verified, snapshot_digest, now_epoch)
+    if type(oracle) is not RootAuthorizedSignerGrantRevocationOracle or oracle.binding != admission.revocation_binding:
+        raise RuntimeArtifactManifestError("grant_permission_oracle_mismatch")
+    return (deepcopy((_owner_authority_snapshot(admission), admission.revocation_binding,
+        str(root), dict(verified), receipt, snapshot_digest)), receipt)
 
 
 def _load_receipt(repo: Path, root: Path) -> tuple[dict[str, Any], str]:
@@ -137,24 +149,6 @@ def _require_receipt(
         raise RuntimeArtifactManifestError("grant_permission_receipt_rejected")
 
 
-def _expected(
-    policy: Mapping[str, Any], verified: Mapping[str, Any], config: Mapping[str, Any]
-) -> dict[str, Any]:
-    return {
-        "owner_config_id": policy["owner_config_id"],
-        "e0_manifest_id": policy["manifest_id"],
-        "e0_artifact_generation_digest": policy["artifact_generation_digest"],
-        "e0_generation": policy["generation"],
-        "e0_generation_revision": policy["generation_revision"],
-        "issuer_principal_id": policy["grant_authority_principal_id"],
-        "issuer_principal_provider": policy["grant_authority_principal_provider"],
-        "issuer_public_key": policy["grant_authority_public_key"],
-        "issuer_key_epoch": policy["grant_authority_key_epoch"],
-        "signer_agent_id": config["signer_agent_id"],
-        "signer_profile_id": config["signer_profile_id"],
-        "signing_key_ref_hash": config["signing_key_ref_hash"],
-        "audit_mac_key_ref_hash": config["audit_mac_key_ref_hash"],
-    }
 
 
 __all__ = [

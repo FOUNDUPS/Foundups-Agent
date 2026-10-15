@@ -1,3 +1,41 @@
+## Issuer root LOAD and permission fence — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Added an explicit issuer-only
+root LOAD v2 role using existing signed wire/client/service/oracle owners.
+Legacy v1 bytes and target behavior remain unchanged. Current issuer identity,
+kernel peer, E0 and target descriptor bindings are required; mutation and target
+protected-use operations reject this role. The permission owner releases its
+generation lease for root RPC and revalidates before/after the fenced action.
+
+The two-process regression preserves the old-order timeout control and tests
+repaired operation plus changed policy/generation/expiry rejection. The runtime
+materializer's startup composition moved to a cohesive119-line owner while
+preserving its public import and function behavior; the original owner is197
+lines versus296 at the exact base. No exemption or gate changed. Protected issuer
+custody and installed deployment remain required before native admission.
+
+## Callable LOW grant service — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Documented the independently reviewed
+bounded issuer composition over existing owner, permission, revocation, ephemeral
+custody, durable rate and socket owners. The callable restricts scope to LOW
+handshake grants and rechecks permission/current bindings before secret use.
+Transport completion is explicitly separate from grant acceptance.
+
+Added its focused test to the existing CI signing selection and registered it
+with the canonical test-registry generator. Service bytes remain unchanged;
+the socket test now reports its safe rejection code on failure. [TestModLog](tests/TestModLog.md#callable-low-grant-service--2026-10-15)
+records rebased connected results and synthetic-authority limits. Root LOAD
+identity is covered by the companion slice; installed custody and deployment remain gates;
+no CLI, credentials, runtime installation or paid calls were added here.
+
+Connected validation exposed two parent-base resident transport failures. The
+fixture now uses genuine kernel peer attestation and the current fingerprint
+contract. The resident owner retains the POSIX listener through cleanup and adds
+change-time identity checking. The original replacement test remains unchanged;
+new process tests cover normal/exception cleanup and foreign replacement without
+claiming timestamp-based atomicity. Service composition bytes remain frozen.
+
 ## Grant bootstrap binding and LOW RPC — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Combined two reviewed repairs in

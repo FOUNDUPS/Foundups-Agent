@@ -1,3 +1,65 @@
+## Issuer root LOAD and permission fence — 2026-10-15
+
+Five selected Linux suites passed98 cases (`grant-root-load-linux-98.xml`).
+The final extracted process test file passed5 cases in11.67s
+(`grant-root-load-linux-rpc-final.xml`): old-order timeout control, repaired
+permission ordering, policy drift, generation drift and expiry rejection.
+Actual AF_UNIX, distinct PIDs and the same lock inode are used. Root installation,
+owner custody and permission capture retain explicit synthetic test seams.
+Source inventory: `grant-root-load-source-inventory.json` in the existing E15
+`next-startup` evidence root. Independent review passed30 cases (25 held-outs
+plus five real two-process cases), matching all14 final hashes. Combined29-suite
+Linux signing selection passed990, skipped3 in293.98s; exact commands and XML
+are in `issuer-ci-selection-input.json` and `issuer-ci-selection.xml`.
+After the compatible startup extraction, seven selected Linux suites passed141
+cases and failed one unchanged historical documentation cap: INTERFACE3305>1511,
+with exact base3310. All code/function caps passed. The full10-function AST
+comparison preserves behavior except one lazy import required to avoid a cycle.
+Evidence: `startup-extraction-linux.xml`, `startup-extraction-structural-review.json`
+and `startup-extraction-gate-comparison.json`. No limit was changed; the broad
+legacy test is not reported as passing. Final registry:1707 entries,270 quarantined.
+These results are not native admission.
+
+## Callable LOW grant service — 2026-10-15
+
+Frozen author evidence:24Linux cases passed in11.71s, including actual AF_UNIX
+transport with synthetic authority/custody. Independent17held-out cases passed
+in7.61s on the same service/test hashes. Evidence under E15 `next-startup/`:
+`grant-service-composition-author-evidence.json`, `grant-service-composition-linux.xml`
+and `issuer-review/independent-issuer-review.json` with `heldout-exact.xml`.
+Those receipts bind the earlier771b91 source base; their test counts are not a
+rebased admission claim. Connected validation on3d81fee (including E0 v9) is
+recorded separately in `issuer-docs-validation.json` and its JUnit receipt.
+
+Production service bytes remain identical to the independent review. The socket
+test now separates thread closure from acceptance and reports its safe rejection
+code on failure. No production credential, installed loader, installed root LOAD identity, native
+issuer deployment or RSI gain is established. Existing WSP62 debt elsewhere is
+not waived by this bounded composition or its focused tests.
+
+The first rebased nine-suite run recorded223passed/3failed in73.80s
+(`issuer-connected-linux.xml`). The new service socket failure did not reproduce
+alone or in the diagnostic nine-suite rerun (224passed/2failed in74.89s); its original
+rejection code was not captured, so its cause remains unproven. Both other failures
+reproduced individually on clean parent3d81 under the same UID1000/Python3.12.3.
+The stale resident fixture used a non-kernel peer source and incorrect fingerprint;
+the cleanup owner could unlink a replacement after inode-number reuse.
+
+The original replacement regression is unchanged. The repair keeps the POSIX
+listener alive through cleanup and supplements identity with change-time metadata.
+Three new distinct-process cases cover normal exit, callback failure and replacement,
+with real socket operations and observed descriptor closure. Focused Linux8passed
+in6.91s before a function-preserving cleanup-helper extraction; Windows1passed/
+7platform skips. Exact final-source connected and independent reruns are recorded
+in the external validation receipt; timestamp metadata is not atomicity proof.
+
+Final-source connected Linux:230passed/0skips in76.51s across nine suites,
+`issuer-connected-final-linux.xml`. Independent transport review:17passed
+(9adversarial plus8resident), source unchanged during rerun, recorded in
+`resident-review/independent-resident-review.json`. The canonical registry check
+passes with1705entries/270quarantined. Original intermittent service rejection
+remains retained with unknown cause; no source edit was attributed as its fix.
+
 ## Grant bootstrap and LOW RPC — 2026-10-15
 
 Publication review moved the two new pure LOW RPC tests and their helper into

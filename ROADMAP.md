@@ -12,7 +12,25 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — grant bootstrap and LOW RPC (2026-10-15):**
+**Current checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
+The candidate composes the existing LOW issuer, credential resolver, durable
+rate/replay, permission and socket owners. Explicit root LOAD v2 authenticates
+the issuer against current owner/E0/descriptor state; legacy target v1 remains
+unchanged. The issuer cannot advance revocation or acquire target protected-use
+authority. Permission checks release the generation lock for root RPC, then
+revalidate and fence the action. Tests retain synthetic installation seams.
+
+PR2138 is merged at `57d5cd8e8c9db2179e2761ae59f74a2912b8d168`;
+exact-main CI38747627946 and CodeQL38747627089 passed. Both owned lanes are
+archived and retired. The issuer candidate is a separate unpublished layer.
+
+Next19/P0 (C4/I5/D5/Impact5): extend existing protected custody/materializer
+owners for the independent issuer, qualify its installed-source deployment,
+then obtain a real LOW grant and handshake. R15 remains gated on authentic
+author execution, independent verification, retention/rollback and later
+measured use. See [issuer evidence and next action](docs/operations/RSI_SWARM_DISPATCH.md#bounded-grant-issuer-and-root-load--2026-10-15).
+
+**Historical checkpoint — grant bootstrap and LOW RPC (2026-10-15):**
 Two reproduced integration defects are repaired in existing owners: LOW grant
 RPC no longer holds the same generation lock required by its server, and explicit
 E0 v9 removes future permission receipt fields from the pre-config binding while

@@ -70,6 +70,7 @@ class _BoundSocketIdentity:
     inode: int
     uid: int
     gid: int
+    change_time_ns: int
 
 
 @dataclass(frozen=True)
@@ -162,8 +163,10 @@ def _serve_validated(
             server, backend, peer_attestor, max_requests,
             timeout_s, max_request_bytes, max_response_bytes,
         )
-        server.close()
-        server = None
+        # Keep the listener's bound inode alive until owned-path cleanup.
+        if os.name != "posix":
+            server.close()
+            server = None
         socket_removed = _cleanup_socket(resolved, bound_identity)
         return IsolatedSignerSocketResidentServiceResult(
             accepted=True,
@@ -182,10 +185,20 @@ def _serve_validated(
             response_digests=response_digests,
         )
     finally:
+        _finish_server_cleanup(resolved, bound_identity, server, socket_removed)
+
+
+def _finish_server_cleanup(path, identity, server, socket_removed):
+    """Preserve listener lifetime through POSIX cleanup, including failures."""
+    try:
+        if os.name != "posix" and server is not None:
+            server.close()
+            server = None
+        if not socket_removed and identity is not None:
+            _cleanup_socket(path, identity)
+    finally:
         if server is not None:
             server.close()
-        if not socket_removed and resolved is not None and bound_identity is not None:
-            _cleanup_socket(resolved, bound_identity)
 
 
 def _bound_server(
@@ -373,6 +386,8 @@ def _identity_from_metadata(
         inode=int(current.st_ino),
         uid=int(getattr(current, "st_uid", -1)),
         gid=int(getattr(current, "st_gid", -1)),
+        # Extra stale-identity defense, not an atomic unlink guarantee.
+        change_time_ns=int(current.st_ctime_ns),
     )
 
 
