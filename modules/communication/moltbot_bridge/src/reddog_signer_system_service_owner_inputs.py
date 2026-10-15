@@ -109,7 +109,7 @@ def load_system_service_model_runtime_verifier(
     from . import reddog_model_runtime_verifier_bootstrap as model
     repo = Path(repo_root).resolve()
     owner = owner_loader._load_owner_config(owner_config_path, repo=repo)
-    if owner["schema_version"] != owner_loader.SCHEMA_VERSION_V8 or owner["config_id"] != expected_owner_config_id:
+    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9} or owner["config_id"] != expected_owner_config_id:
         raise RuntimeArtifactManifestError("model_verifier_owner_binding_invalid")
     authority = owner["model_verifier_authority"]
     payloads, expected_inputs_digest = None, None
