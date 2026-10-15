@@ -1281,6 +1281,8 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply_profiles.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_run_packet_supply.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_installed_policy.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_installed_source_contract.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py \

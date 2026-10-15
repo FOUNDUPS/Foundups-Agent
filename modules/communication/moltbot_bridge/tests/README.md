@@ -1,3 +1,10 @@
+## Installed issuer contract qualification
+
+Run `test_reddog_grant_installed_source_contract.py` and
+`test_reddog_signer_installed_policy.py` with existing initial manifest, archive,
+E0 static, authenticated binding and permission suites. The new tests exercise
+inert bundle/hash ordering and rejection boundaries, not native admission.
+
 ## Protected issuer custody qualification
 
 Run `test_reddog_grant_startup_custody.py` and

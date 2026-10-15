@@ -336,6 +336,26 @@ root ancestry, regular-file ownership checks and no-follow descriptor access.
 This does not certify the interpreter/native closure, grant profile enrollment,
 worker admission or retained learning. Those remain distinct gates.
 
+## Installed issuer preparation — 2026-10-16
+
+`compose_installed_grant_service_artifacts(profile, owner_config_id,
+repo_root_digest, source_descriptor)` uses keyword-only inputs and returns
+canonical bytes for config v3, run-packet v2 and installed-source descriptor v1.
+`validate_installed_grant_service_artifacts(artifacts)` checks exact members,
+canonical bytes, identities and cross-digests; it performs no I/O or admission.
+`validate_installed_grant_source(...)` binds declared inventory and fixed Python
+launch/import paths, service and dependency-loader callables. Protected runtime
+inspection and root-approved source provenance must independently validate it.
+
+E0 `reddog-signer-owner-e0-policy.v10` replaces
+`grant_authority_archive_source_descriptor_digest` with
+`grant_authority_installed_runtime_descriptor_digest`. The latter participates
+in the stable pre-config binding. Future permission/manifest/config fields stay
+required and signed in the final policy. V10 requires generation1 and only LOW
+`signer_socket_peer_handshake`, with no consensus tiers. V5–v9 projections and
+signing domains remain unchanged. Current legacy manifest/permission execution
+rejects v10 until its explicit authenticated enrollment/consumer is connected.
+
 ## Initial handshake configuration — 2026-10-15
 
 `compose_initial_handshake_service_config(...)` in the existing

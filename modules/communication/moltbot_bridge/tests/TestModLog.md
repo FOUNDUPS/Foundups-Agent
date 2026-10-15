@@ -1,3 +1,18 @@
+## Installed issuer artifact and policy preparation — 2026-10-16
+
+Repaired the observed PR2141 main CI clock-sampling race in the generation-lock
+test. Fixed wall clock leaves monotonic timeout/lock assertions and production
+freshness unchanged. Controlled pre-repair failure and37 post-repair Linux cases
+are recorded under `next-startup/root-load-clock-review/` in the evidence root.
+
+WSP00/15/22/48/50/62/71/84/97. Added inert canonical installed-source bundle
+validation and explicit initial-only E0 v10 descriptor binding. Preserved legacy
+archive schemas, signing projections and fail-closed runtime rejection. Reused
+existing contract/custody/permission owners; no deployment or grant issued.
+Independent artifact250/policy161 cases and real F runtime qualification support
+only their bounded scopes. Next: authenticated enrollment/consumer and target
+internal grant acquisition before the native R15 experiment.
+
 ## Protected issuer custody validation — 2026-10-16
 
 Frozen11-source/3-test candidate:244 Linux cases passed in94.99s across9 suites,

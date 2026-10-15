@@ -1,3 +1,10 @@
+## Installed issuer contract closure — 2026-10-16
+
+The existing generated closure adds one installed-source descriptor contract:
+1,430 files. Both digest pins match; finite file-count acceptance/rejection
+moves to1,430/1,431. Per-file/total bytes, paths and hashes remain enforced.
+This is backend source compatibility, not installed worker admission.
+
 ## Protected custody metadata backend closure — 2026-10-16
 
 Generated membership1428→1429 adds only `reddog_grant_authority_startup_custody.py`

@@ -1,50 +1,57 @@
 ## Protected issuer custody and runtime qualification — 2026-10-16
 
-WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Existing issuer dependency materialization
-now consumes explicit owner v9 custody. Signing and loader bindings have separate
-two-ID scopes; actual refs, purpose, requester and key/epoch bind current E0.
-Isolation precedes credential resolution. Existing replay and issuer-only root
-LOAD owners are reused; no generation lease spans RPC, and full owner/policy/time
-are checked again. Prior owner schemas and their model/effect/reviewer consumers
-retain their validation. See the existing
-[custody contract](../contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#protected-issuer-startup-custody--2026-10-16).
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. PR2139 merged1b299b54f,
+PR2140 merged a519f0ad7, PR2141 merged e2a280b38. All exact PR checks passed;
+main checks passed2139/2140. For2141, main CodeQL38764836954 passed; CI38764834966
+failed the old-order generation-lock regression with a clock-sampling mismatch
+(1 failed,1,040 passed,3 skipped). This candidate freezes the lock-order fixture's
+wall clock while preserving real monotonic/socket timeouts and all12 original
+assertions. Controlled rollover reproduced the failure before repair;37 Linux
+cases passed after repair, including strict stale/future rejection. Production
+freshness checks are unchanged. Hosted replacement closure is not claimed. Closed
+2139/2140 lanes were archived and retired. Alert288 was independently traced to
+public test verification keys and dismissed as a false positive; no scanner or
+filesystem test was disabled. Custody validation remains328 connected and63
+independent cases, with synthetic installation seams explicitly retained.
 
-Evidence root remains `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`.
-The frozen custody candidate passed244 author cases and63 independent cases,
-including12 held-outs. OS custody/owner/isolation are synthetic; E0, signature,
-resolver lifetime, replay and LOAD routing are exercised. Receipts:
-`grant-custody-source-inventory.json` and
-`custody-review/independent-grant-custody-review.json`.
+Evidence root: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`.
+Under `installed-source-qualification/runtime-tree-20261016/`, persistent G and F
+runtime trees passed independent read-only inspection. F binds1,664 files,
+225 exact source modules/six real initializers,1,437 runtime files and23 observed
+native mappings; six controls reject, including same-size native tampering.
+UID/GID65534, zero capabilities, NoNewPrivileges/seccomp and denied socket/source
+writes were observed. Finite environment names and separate-process reopen
+matched. These are import-only checks: no materializer, credential, service call
+or grant. Host root/kernel and API mounts remain outside the static file proof.
+The original transient-tree and stale-exporter failures remain preserved.
 
-Actual confined source qualification found and repaired rejection of an empty
-tracked package initializer. Its independent rerun binds220 modules/six real
-initializers, passes19 real-file checks and denies network syscalls. Connected
-root Linux suites passed84 cases. Source admission is distinct from the188
-observed external runtime files/26 native mappings: those observations are not
-complete future runtime closure. Preserve the failed control and accepted rerun
-under `installed-source-qualification/empty-source-candidate/`.
+The inert installed-source contract binds complete declared file/directory/source
+maps, exact Python launch/import paths and fixed service/dependency callables.
+Config v3 and run-packet v2 bind the grant config digest and installed descriptor;
+legacy archive consumers reject them. E0 v10 replaces the archive descriptor
+field with a stable installed descriptor digest, requires generation1/LOW
+handshake-only scope, and keeps future permission/artifact fields in the final
+signed policy. It cannot enter the legacy manifest reader or credential path.
+No shape, label or self-signature substitutes for protected enrollment.
 
-PR2139's first CI failed a positive LOAD case (989pass/1fail/3skip). Controlled
-UID1001 execution reproduced an issuer/target test identity collision; the fixture
-now keeps them distinct and the same-UID negative still rejects. The actual backend
-consumer also exposed stale1426 versus1428 closure sizing; finite bounds, digest,
-path/hash and byte limits remain enforced and its contract now runs in CI. PR2140
-contains the independently reviewed empty-source repair. Current publication
-must be checked at exact heads; source qualification is not deployment.
+Independent artifact review verified250 cases (one reviewer Git-path harness
+error was preserved then repaired); policy review passed161 Linux cases including
+30 held-outs. Source inventories and receipts: `installed-issuer-contract-source-inventory.json`,
+`installed-issuer-independent-review/independent-review.json`,
+`installed-policy-independent-review/independent-review.json`. Root integration
+adds the recorded v9 golden vector and bundle-to-policy dependency-order test;
+the combined eight-suite Linux run passed413 cases with no failures or skips.
+Internal Codex author/reviewer work is not native OpenClaw/Hermes execution.
 
-WSP15 remains19/P0 for installed admission. Docker's CLI exists but its engine
-and a pinned image are unavailable; no qualified root image was found. Prefer a
-bounded protected Linux tree and fixed isolated launch over porting the whole
-Windows runtime qualification framework. Qualify interpreter, complete stdlib,
-cryptography/cffi and ELF dependencies; disable implicit site initialization.
-Then add the smallest explicit initial installed-issuer profile through existing
-config/manifest/E0/publisher/consumer owners, preserving archive semantics and
-the acyclic stable-source → target generation → permission → grant-manifest order.
-An imported service, role key or self-signed manifest is not admitted authority.
-Only then run the existing native LOW grant/handshake and R15 retained-use trial.
-
-No paid calls, native worker admission, promotion or retained RSI benefit are
-proved by this checkpoint. No second roadmap, scheduler or authority store exists.
+WSP15 remains19/P0. Next connect root-approved installed manifest enrollment,
+current descriptor/approval/E0 consumption, and target-internal grant acquisition.
+A reproduced bare target handshake currently returns grant-required; reuse its
+existing authenticated client/provider rather than widening UID/socket authority.
+Actual service confinement must permit only designated Unix RPC sockets; the
+import probe's deny-all network filter does not qualify that transport.
+Then prove the LOW grant/handshake and existing R15 author/verifier/retained-use
+loop. Paid provider calls0; local/coordinator cost unknown. No native worker,
+activation or retained RSI benefit is claimed.
 
 ## Bounded grant issuer and root LOAD — 2026-10-15
 

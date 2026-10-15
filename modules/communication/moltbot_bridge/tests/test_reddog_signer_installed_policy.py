@@ -119,3 +119,33 @@ def test_shape_support_cannot_enter_legacy_runtime_or_credential_path(tmp_path, 
     with pytest.raises(ValueError, match="grant_permission_e0_schema_invalid"):
         permission._permission_state(SimpleNamespace(policy=policy), tmp_path,
             tmp_path / "owner.json", None, 1100)
+
+
+def test_installed_bundle_to_policy_hash_order_has_no_future_dependency():
+    from modules.communication.moltbot_bridge.src import reddog_grant_authority_service_artifact_contract as artifacts
+    from modules.communication.moltbot_bridge.src.reddog_grant_authority_installed_source_contract import installed_grant_source_digest
+    from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import digest
+    from modules.communication.moltbot_bridge.tests.test_reddog_grant_installed_source_contract import _descriptor
+    value, descriptor = _installed(), _descriptor()
+    value[INSTALLED] = installed_grant_source_digest(descriptor)
+    stable = pc.signer_owner_e0_authority_binding_digest(value)
+    # Reduced target identity demonstrates dependency order, not a signed manifest.
+    value["config_digest"] = digest({"owner_e0_authority_binding_digest": stable})
+    value["manifest_id"] = digest({"target_config": value["config_digest"]})
+    value["grant_authority_permission_snapshot_digest"] = digest({"target_manifest": value["manifest_id"]})
+    value["grant_authority_permission_snapshot_receipt_id"] = digest({"permission": value["grant_authority_permission_snapshot_digest"]})
+    fields = artifacts.CONFIG_FIELDS - {"schema_version", "service_id", "archive_digest"}
+    profile = {name: value["grant_authority_" + name] for name in fields}
+    bundle = artifacts.compose_installed_grant_service_artifacts(profile=profile,
+        owner_config_id=value["owner_config_id"],
+        repo_root_digest=value["grant_authority_source_repo_root_digest"], source_descriptor=descriptor)
+    checked = artifacts.validate_installed_grant_service_artifacts(bundle)
+    value.update(grant_authority_config_digest=checked["config_digest"],
+                 grant_authority_run_packet_digest=checked["run_packet_digest"])
+    value["grant_authority_manifest_id"] = digest({"grant_config": checked["config_digest"]})
+    value["policy_id"] = pc.signer_owner_e0_policy_id(value)
+    assert pc.validated_signer_owner_e0_policy(value, now_epoch=1100) == value
+    assert checked["installed_runtime_descriptor_digest"] == value[INSTALLED]
+    assert checked["config_digest"] != value["config_digest"]
+    assert checked["run_packet"]["config_digest"] == value["grant_authority_config_digest"]
+    assert pc.signer_owner_e0_authority_binding_digest(value) == stable
