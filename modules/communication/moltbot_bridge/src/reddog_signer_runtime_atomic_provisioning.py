@@ -500,8 +500,8 @@ def _generation_binding(
     manifest: Mapping[str, Any],
     current: SignerRuntimeGenerationActivation | None,
 ) -> SignerRuntimeGenerationBinding:
-    from .reddog_runtime_artifact_manifest_contract import SCHEMA_VERSION_INITIAL
-    if manifest.get("schema_version") == SCHEMA_VERSION_INITIAL and current is not None:
+    from .reddog_runtime_artifact_manifest_contract import INITIAL_SCHEMAS
+    if manifest.get("schema_version") in INITIAL_SCHEMAS and current is not None:
         raise ValueError("initial_manifest_existing_generation")
     if (
         current is not None
@@ -526,7 +526,7 @@ def _recover_existing_activation(
             runtime_root,
             current=None,
             nonce=nonce,
-            runtime_profile=context.runtime_profile,
+            runtime_profile=context.manifest_runtime_profile(),
         )
         if len(paths) != 1:
             return None
