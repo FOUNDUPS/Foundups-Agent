@@ -1,3 +1,13 @@
+## Initial control identity prerequisite — 2026-10-16
+
+Close the existing-owner empty-grant/absent-consensus bootstrap repair (18/P0),
+then refresh source-pinned installed runtime and complete authenticated native
+LOW grant/handshake (19/P0). Current independent functional tests pass with one
+unchanged documentation-size failure. Machine credentials/accounts and storage
+qualification exist; no native admission or retained benefit is claimed.
+Continue R15 author/verifier/activation/rollback/later-use gates after admission.
+Current evidence and qualification limits: docs/operations/RSI_SWARM_DISPATCH.md.
+
 ## Protected issuer custody checkpoint — 2026-10-16
 
 PR2142 merged308d235a2 with passing exact-main CI and CodeQL, closing the

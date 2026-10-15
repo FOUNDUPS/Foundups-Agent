@@ -1,3 +1,12 @@
+## RSI initial control bootstrap — 2026-10-16
+
+WSP00/15/22/48/97. Existing control owners now distinguish first LOW identity
+from verified outcome authority; no second orchestrator or roadmap. Independent
+functional review passed, with inherited documentation-size debt explicitly
+retained. Actual isolated runtime and storage qualification advanced, while
+native worker admission, activation and retained benefit remain unproved.
+See docs/operations/RSI_SWARM_DISPATCH.md and the module ModLog.
+
 ## Installed consumer and runtime startup integration — 2026-10-16
 
 WSP00/5/10/11/15/22/48/50/62/71/84/97. Reused current enrollment, manifest,

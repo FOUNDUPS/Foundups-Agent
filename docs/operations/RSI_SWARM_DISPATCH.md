@@ -1,3 +1,48 @@
+## First LOW control identity and native preparation — 2026-10-16
+
+Current implementation fixes the initial empty-grant bootstrap cycle in existing
+root initialization and target control clients. A real first LOW/gen1 identity
+has no outcome consensus: exact v2 empty grants may carry explicit null through
+identity validation only. Full outcome validation still requires a real digest
+and independently signed grants. E0 v10, current owner/source, distinct control
+key, authenticated peer, signed revocation and witnessed state remain gates.
+Target ADVANCE is preserved for initial anchor establishment; issuer remains
+LOAD-only. Source inventory binds five existing owners and one focused suite.
+
+Independent review188 passed, one inherited INTERFACE3305>1511 failure;
+connected377 passed, one same failure, one root-only skip; separate root socket
+case passed. The existing documentation gate is not represented as green.
+Earlier structural failures and external spawn-runner failures are preserved;
+their repairs do not weaken production admission or file-size limits.
+
+Actual protected machine inputs now contain distinct audit/replay/control
+credentials and separate target999, issuer997 and requester995 identities with
+transport GID988. No private material appears in receipts. Independently checked
+native runtime9bee5ede binds2677 files,1240 exact Git Python sources and1437 runtime
+files. Actual isolated Unix echo, IP denial, two runtime checks and CLI rejection
+of absent owner passed; this credential-free qualification is not admission and
+must be refreshed for the new source. Fifteen fresh private storage roots passed
+eight-process fsync/reopen and independent metadata/hash re-open. Four canonical
+generation qualification records were installed, with no authority stores yet
+initialized. These observations do not prove power-loss or physical rollback
+independence.
+
+Evidence: existing next-startup/ root, initial-control-independent-review/,
+native-installation-inputs/ and installed-execution-qualification/. Source base
+6a9df0ba5ad977c381c57f98adb2234940289c07, rebased onto PR2143 merge
+372d03de59352887928b7afd0204cce483e2c6c6. All11 exact-head checks passed;
+merged tree equals reviewed5b075a920. Main CI/CodeQL remains pending. Paid calls0;
+local/coordinator cost unknown. Native worker
+admission=false and retained RSI gain=false.
+
+WSP15 executable prerequisite18/P0 (C3/I5/D5/Impact5): close this independently
+reviewed bootstrap repair and refresh exact installed source. Then19/P0 native
+installation/LOW grant-handshake becomes eligible. Continue existing R15 with
+admitted author, fixed independent evaluator, activation/rollback and later-use
+benefit. Holo query rejected authority/head mismatch; governed maintenance also
+rejected authority binding. No semantic freshness claim or query-time reindex;
+exact owner reads and source inventories bound this slice. WSP00/15/48/97.
+
 ## Protected issuer custody and runtime qualification — 2026-10-16
 
 Current integration update: PR2142 merged308d235a29fc9dfc694f075de552fff285981279;

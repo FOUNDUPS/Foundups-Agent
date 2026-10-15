@@ -7,8 +7,10 @@ from dataclasses import asdict, dataclass
 from typing import Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    DESCRIPTOR_SCHEMA_V2,
     validate_root_verified_outcome_descriptor,
     validate_root_verified_outcome_descriptor_identity,
+    validate_root_verified_outcome_descriptor_identity_public,
     validate_root_verified_outcome_descriptor_public,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_protocol import (
@@ -65,6 +67,17 @@ class RootAuthoritySnapshot:
 SnapshotSupplier = Callable[[], RootAuthoritySnapshot]
 
 
+def _initialization_descriptor(snapshot: RootAuthoritySnapshot, now_epoch: int):
+    """An empty v2 identity initializes state without granting outcome effects."""
+    validate_descriptor = validate_root_verified_outcome_descriptor_public
+    if (isinstance(snapshot.descriptor, Mapping)
+            and snapshot.descriptor.get("schema_version") == DESCRIPTOR_SCHEMA_V2
+            and type(snapshot.descriptor.get("grants")) is list
+            and snapshot.descriptor["grants"] == []):
+        validate_descriptor = validate_root_verified_outcome_descriptor_identity_public
+    return validate_descriptor(snapshot.descriptor, now_epoch=now_epoch)
+
+
 def initialize_root_authority_state(
     state: RootVerifiedOutcomeAuthorityState,
     snapshot: RootAuthoritySnapshot,
@@ -73,9 +86,7 @@ def initialize_root_authority_state(
 ) -> None:
     """Provision one root-owned generation and replay anchor explicitly."""
 
-    descriptor = validate_root_verified_outcome_descriptor_public(
-        snapshot.descriptor, now_epoch=now_epoch
-    )
+    descriptor = _initialization_descriptor(snapshot, now_epoch)
     _require_snapshot_identity(snapshot, descriptor, state=state)
     if (
         descriptor["replay_store_id"] != state.store_id

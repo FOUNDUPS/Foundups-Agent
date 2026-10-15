@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass, replace
 from typing import Any, Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    DESCRIPTOR_SCHEMA_V2,
     validate_root_verified_outcome_descriptor_public,
     validate_root_verified_outcome_descriptor_identity_public,
 )
@@ -29,6 +30,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_capability_
     freeze_owner_e0_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
+    POLICY_SCHEMA_V10,
     validated_signer_owner_e0_policy,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_runtime_generation_contract import (
@@ -92,6 +94,11 @@ def _create_root_revocation_anchor_authority(
     checked = validated_signer_owner_e0_policy(policy, now_epoch=now_epoch)
     validate_descriptor = (validate_root_verified_outcome_descriptor_identity_public
         if requester_role == GRANT_ROLE else validate_root_verified_outcome_descriptor_public)
+    if (checked["schema_version"] == POLICY_SCHEMA_V10
+            and isinstance(descriptor, Mapping)
+            and descriptor.get("schema_version") == DESCRIPTOR_SCHEMA_V2
+            and type(descriptor.get("grants")) is list and descriptor["grants"] == []):
+        validate_descriptor = validate_root_verified_outcome_descriptor_identity_public
     root_descriptor = validate_descriptor(
         descriptor, now_epoch=now_epoch
     )
