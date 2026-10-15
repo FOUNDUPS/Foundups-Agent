@@ -20,10 +20,30 @@ SHA256 366853b249133f502a43767affffd40ba7b894598c472f5baa6d11868541aa13.
 Connected 19-suite CI selection: 689 passed, 3 skipped, no failures/errors
 in 157.88s; source hashes stable. Receipts: `next-startup/enrollment-artifact-bounds/connected-linux.xml`
 and `connected-source-binding.json`. Counts overlap; do not sum.
-Runtime34eed qualified:2691 files/362 directories independently reopened;
-disposable v6 passed activation/selection after directory/transport repair, then
-rejected the writer's omitted bootstrap lock at generation publication. See
-canonical dispatch for exact test/evidence limits and next installer repair.
+PR 2145 merged at 7a9fe8602; exact-main CI 38804752870/CodeQL 38804751742 passed,
+reviewed/main trees match. Runtime 34eed remains frozen. V18 passed installation
+and revocation after receipt/source-path repairs, then rejected LOW handshake at
+durable `_checked_now` (89.688 seconds). Current-time sampling occurs inside the fence;
+fresh checks follow snapshot/root LOAD and permission verification. Explicit caller
+epochs retain exact matching; rollback/expiry and late authority drift reject. Late
+rejection withholds the result without undoing callback effects. Independent final
+native review: 17 passed. Final author connected suite: 207 passed, zero failures,
+errors or skips in 87.89 seconds; before/after source hashes unchanged. Counts overlap
+and are not additive. Author receipt:
+`next-startup/native-installation-inputs/current-time-authorization-review/author-review-receipt.json`
+SHA256 `2aaac4e0cba6604ae81c435840ec105b0718353268a4e112471cd931935b41dd`.
+Receipt: `next-startup/native-installation-inputs/current-time-independent-review/independent-review-receipt.json`
+SHA256 `1d8eaffb4a69d216e448320184f333dd032c98f8f295c12b3062ec3c502452db`.
+Fixtures use real SQLite/flock/source with synthetic root/signing/clock. Prior 198-pass
+pre-permission-window and 202-pass/5-fixture-failure runs remain evidence. The RPC
+fixture now binds both receipt timestamps; the existing revocation-first ordering
+test alone freezes wall time. Its earlier live-clock root-grant window failure
+preceded the changed path; the clock cause remains unproved. The stdin/spawn runner
+failure is preserved and the final run uses a saved runner. Security
+gate Linux regressions: 17 passed; prior Windows 15-pass/2-platform-failure and
+Linux rootdir correction remain harness evidence. Canonical dispatch retains v16/v17
+failures and separate clock observations; no admission or retained-benefit claim.
+
 Ordinary 64 KiB default, root/ancestry/no-follow
 checks, exact digests and source membership remain unchanged.
 PR2145 CI exposed two stale manifest digest pins; both now match regenerated `8bb02dbea0b0814bd54487104f517f4c7af4e469463dabb69361ef040efb88d5`: generator check and three frontend compatibility commands pass; Python suite passed 7 with 1 staged-index failure while the repaired pins remained unstaged (72.52s), followed by staged-index verification: 1 passed in 0.56s (`manifest-pin-staged-verification.xml`).

@@ -1,8 +1,8 @@
 ## Issuer-only root LOAD — 2026-10-15
 
 Issuer identity permits LOAD only, preserving the legacy target signing domain.
-Current permission is rechecked around RPC and fenced action use. See the
-[identity and lease contract](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#issuer-only-root-load--2026-10-15).
+`authorize_current_key_epoch_use(*, key_epoch, expires_at, action)` on the existing durable/root-authorized oracles samples time after acquiring the durable fence. The explicit `authorize_key_epoch_use(..., at_epoch=...)` signature and exact caller-epoch match remain; both paths freshly check snapshot lifetime, expiry and revocation after snapshot/root LOAD and before action/result release. Observed time rollback rejects. WSP71 rehydration uses the current-time path and refreshes receipt time before/after permission verification and action, retaining authority identity comparison.
+Post-action rejection withholds the result; it does not undo arbitrary callback effects. This is not an atomic rollback guarantee. Installed runtime remains separately pinned; source validation and native admission are distinct. See the [identity and lease contract](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#issuer-only-root-load--2026-10-15).
 
 ## Callable LOW grant service — 2026-10-15
 

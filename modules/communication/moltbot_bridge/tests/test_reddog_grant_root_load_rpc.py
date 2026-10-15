@@ -129,7 +129,9 @@ def _permission_fixture(root, values, monkeypatch):
         current = _current(root)
         if current['expiry'] != 'live':
             raise ValueError('synthetic permission expired')
-        return current, dict(issuer_key_epoch=values['policy']['grant_authority_key_epoch'], expires_at=int(time.time())+30)
+        epoch = int(time.time())
+        return current, dict(issuer_key_epoch=values['policy']['grant_authority_key_epoch'],
+                             issued_at=epoch-1, expires_at=epoch+30)
     monkeypatch.setattr(permission, 'lease_validated_owner_e0_current_admission', lease)
     monkeypatch.setattr(permission, '_permission_state', captured)
     return lease

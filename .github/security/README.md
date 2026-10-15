@@ -1,5 +1,16 @@
 # Blocking secret scan
 
+## Current-time permission source review — 2026-10-16
+
+Independent review of staged tree `5ef8d298fd2b297d07d10f34cbead0ba5babe986`
+against main `7a9fe860298398b86398fbb3f6dad79eca52a075` accepted 45 changed
+whole-file bindings: seven unchanged previously reviewed historical lines and
+38 generated SHA256 values independently recomputed from exact Git source blobs.
+Preserve all 732 prior fingerprints and append these 45 exact bindings (777 total).
+No unknown finding, scanner rule, path exclusion or authority grant is approved.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/native-startup-publication-review/staged-exact-security-review.json`
+and `proposed-fingerprint-additions.json`; unsigned independent Codex review.
+
 ## Initial manifest binding review — 2026-10-15
 
 PR2136 head4aae1646e failed job116406279370 with44 changed whole-file bindings.

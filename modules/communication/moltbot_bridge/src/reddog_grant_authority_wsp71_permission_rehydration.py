@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import math
 import time
 from copy import deepcopy
 from pathlib import Path
@@ -67,19 +68,33 @@ def authorize_current_grant_authority_wsp71_use(
     def guarded_action():
         # Root LOAD happens outside this lease; caller effects remain fenced.
         with lease_validated_owner_e0_current_admission(**inputs) as current:
-            after, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, int(time.time()))
+            checked_at = _current_permission_epoch(receipt, now_epoch)
+            after, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, checked_at)
             if before != after:
                 raise RuntimeArtifactManifestError("grant_permission_authority_changed")
+            used_at = _current_permission_epoch(receipt, checked_at)
             result = action()
-            final, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, int(time.time()))
+            final_at = _current_permission_epoch(receipt, used_at)
+            final, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, final_at)
             if before != final:
                 raise RuntimeArtifactManifestError("grant_permission_authority_changed")
+            _current_permission_epoch(receipt, final_at)
         return result
 
-    return revocation_oracle.authorize_key_epoch_use(
-        key_epoch=str(receipt["issuer_key_epoch"]), at_epoch=now_epoch,
+    return revocation_oracle.authorize_current_key_epoch_use(
+        key_epoch=str(receipt["issuer_key_epoch"]),
         expires_at=int(receipt["expires_at"]), action=guarded_action,
     )
+
+
+def _current_permission_epoch(receipt, not_before):
+    value = time.time()
+    if type(value) not in (int, float) or not math.isfinite(value):
+        raise RuntimeArtifactManifestError("grant_permission_clock_invalid")
+    now = int(value)
+    if now < not_before or not receipt["issued_at"] <= now < receipt["expires_at"]:
+        raise RuntimeArtifactManifestError("grant_permission_receipt_rejected")
+    return now
 
 
 def _permission_state(admission, repo, owner_path, oracle, now_epoch):

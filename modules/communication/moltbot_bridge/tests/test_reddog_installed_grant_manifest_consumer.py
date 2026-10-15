@@ -216,7 +216,7 @@ def test_permission_consumption_rechecks_real_enrollment_around_synthetic_root_r
         finally: lease_depth[0] -= 1
     class SyntheticOracle:
         binding = "synthetic-binding"
-        def authorize_key_epoch_use(self, *, action, **kwargs):
+        def authorize_current_key_epoch_use(self, *, action, **kwargs):
             assert lease_depth[0] == 0
             if mutation == "expiry": current.clock["wall"] += 121
             elif mutation == "permission":

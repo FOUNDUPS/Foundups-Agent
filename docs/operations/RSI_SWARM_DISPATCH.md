@@ -18,10 +18,10 @@ their repairs do not weaken production admission or file-size limits.
 Actual protected machine inputs now contain distinct audit/replay/control
 credentials and separate target999, issuer997 and requester995 identities with
 transport GID988. No private material appears in receipts. Independently checked
-native runtime9bee5ede binds2677 files,1240 exact Git Python sources and1437 runtime
+earlier native runtime9bee5ede bound2677 files,1240 exact Git Python sources and1437 runtime
 files. Actual isolated Unix echo, IP denial, two runtime checks and CLI rejection
 of absent owner passed; this credential-free qualification is not admission and
-must be refreshed for the new source. Fifteen fresh private storage roots passed
+is superseded by the qualified 34eed runtime below. Fifteen fresh private storage roots passed
 eight-process fsync/reopen and independent metadata/hash re-open. Four canonical
 generation qualification records were installed, with no authority stores yet
 initialized. These observations do not prove power-loss or physical rollback
@@ -57,49 +57,79 @@ and its `independent-readonly-review/independent-review.json`. Qualification use
 no credentials and proves no native admission. Later test/doc-only commits do
 not silently change this installed-source binding.
 
-Disposable installation preserves successive failures under
-`native-installation-inputs/disposable-installer-v3`, `-v4` and `-v5`.
-V3 exposed a writable `/run` ancestor; an explicit private `/run:mode=0755`
-passed actual credential-sentinel and guard checks. V4 exposed a root-only
-public run packet; the installer now checks its fixed path, inode type,
-ownership, link count and mode before publishing it read-only and sealing it.
-Sixteen checks cover unchanged bytes/identity, reader access and rejection cases.
-V5 then passed packet and target-manifest publication but rejected activation:
-`grant_authority_socket_path_invalid`. All three owned administrative units were
-observed absent/inactive afterward. No resident service or author ticket ran;
-synthetic authority only, no real credentials, no paid calls, no TTL extension.
-V6 repaired that directory view using read-only socket-parent mounts,
-role-owned0710/group988 transport directories, root-provision-only supplementary
-group988 and issuer/target-only UMask0007. Twenty-three installer checks passed;
-independent native probes cover15 socket cases, two private-store cases, two
-peer-policy cases and two capability-free root cases. Private files remain0600;
-unauthorized peer identity is rejected. Archived-time metadata diagnostics are
-not current admission. Eighteen runner checks passed; exact helper hashes and
-version-only runner delta were independently checked before invocation.
+Disposable v18 passed installation and initial revocation provision after the
+existing installer materialized the assembler's policy-bound permission receipt
+and corrected its canonical source/import path. LOW handshake still failed:
+the actual durable revocation oracle rejected at `_checked_now` line 141, through
+root-protected use and WSP71 permission rehydration (89.688 seconds total).
+The repair adds `authorize_current_key_epoch_use` to the two existing oracles and
+uses it in WSP71 rehydration:
+time is sampled inside the durable fence, then refreshed after snapshot/root LOAD
+and permission verification before action/result release. Explicit caller epochs
+still require an exact current-time match; observed rollback, expiry or authority
+drift rejects. Post-action rejection withholds the result without undoing arbitrary
+callback effects. Independent final review passed 17 native held-outs using real
+SQLite/flock/source and synthetic root/signing/clock fixtures. Final author connected
+validation passed 207, with no failures/errors/skips, in 87.89 seconds; before/after
+source hashes match. Counts overlap and are not additive. Author receipt under
+`native-installation-inputs/current-time-authorization-review/author-review-receipt.json`,
+SHA256 `2aaac4e0cba6604ae81c435840ec105b0718353268a4e112471cd931935b41dd`.
+Earlier fixture/runner failures remain evidence; the live-clock ordering test failed
+root-grant window validation before the changed path, and its clock cause is unproved.
+Independent receipt: `native-installation-inputs/current-time-independent-review/independent-review-receipt.json`,
+SHA256 `1d8eaffb4a69d216e448320184f333dd032c98f8f295c12b3062ec3c502452db`.
+Installed runtime remains frozen at 34eed. Root observed all three administrative and four
+resident units absent/inactive/dead after v18. Synthetic authority only: successful
+LOW handshake, authentic enrollment, native admission, author execution and retained
+benefit remain unproved; paid model calls and real-credential use are zero.
 
-Fresh v6 passed packet, manifest, activation and independent generation selection,
-then rejected `generation_publication_unknown_file` for the existing writer's
-`high-water.bootstrap-authority.lock`. No resident service ran; all administrative
-units were absent/inactive. Preserve v6, reconcile the exact bootstrap lock with
-its source owner and keep it separate from the four mutable coordination locks.
-Next repeat freshly after independent publication review. Evidence:
-`native-installation-inputs/{owner-directory-view-review,socket-transport-review,full-fixture-review,disposable-installer-v6}/`.
+The preceding corrections remain evidence: v13 separated receipt kinds and passed
+eight installation invocations plus revocation; v14 selected supported 30-second
+root/issuer socket timeouts; v15 supplied the exact writable revocation lock.
+V16 diagnosed the missing installed WSP71 receipt; v17 rejected the publisher's
+source identity before receipt write/root provision. Its 14 isolated controls had
+not exercised the actual verifier. V18 closes those two installer dependencies
+without weakening permission/source guards. Earlier v3-v17 failures are retained.
 
-PR2145 CI at `34eed594e` passed once, then a repeated run exposed a test fixture
-sampling two different wall-clock seconds. The two-file test/doc repair is
-`8cfb6fb5db87de316130b8cc5e98ac3f1f085efd`: deterministic rollover reproduced the
-failure, 41 focused cases passed and a separate six-case clock boundary review
-passed. Exact-head CI38800396328 and CodeQL38800390317 passed with all11 PR checks;
-later commits require their own publication checks. Production clock checks
-and the qualified installed runtime are unchanged.
+Installed source remains `34eed594e18f5df5cb77ca85b825ed9fd77ea7f0`. Evidence under
+`native-installation-inputs/`: `disposable-installer-v13/installer-rehearsal.json`
+SHA256 `75703d7de50f6be9fe4c9a84bc190e98a485228edb5eb6518f56960cfd65d224`,
+`disposable-installer-v13/full-fixture-receipt.json` SHA256
+`7266f744326e4f685bf7479ee357263325b195c4044b5aa8621cbb2f00b9a860`,
+and `disposable-installer-v16/issuer-exception-evidence.json` SHA256
+`1e5533bf6718cfaaa4208796b19e900acc9f5fd7f2a012a58bffce8f3d8b297a`.
+Exact helper pins and validation are in `full-fixture-review/v14-refresh-receipt.json`,
+`v15-refresh-receipt.json` and `v16-refresh-receipt.json`; failed trials are retained.
+V17 rejection trace: `disposable-installer-v17/installation-failure-evidence.json`,
+SHA256 `bc2407b0990e71fbd50f4060e63f26a1ffd5186186378f48176899bc40f1b69d`;
+it binds the exact installer receipt, five accepted stages and synthetic scope.
+V18 `issuer-exception-evidence.json` SHA256
+`b96dd64ea74e30a30f82612052ebbca0d90a42509336dbe253f50e80f39789b5`
+and `full-fixture-receipt.json` SHA256
+`d341223065d2bce7f2d48583cde8cf6efab3ad3e53d0661f978b3a8686296220`
+are under `disposable-installer-v18/`.
 
-WSP15 executable prerequisite 18/P0 (C3/I5/D5/Impact5): close this bounds repair,
-reconcile the publication file inventory and replay disposable installation. Then19/P0 native
-installation/LOW grant-handshake becomes eligible. Continue existing R15 with
-admitted author, fixed independent evaluator, activation/rollback and later-use
-benefit. Holo query rejected authority/head mismatch; governed maintenance also
-rejected authority binding. No semantic freshness claim or query-time reindex;
-exact owner reads and source inventories bound this slice. WSP00/15/48/97.
+Separately, v15 wall/monotonic elapsed time differed by 1.933766 seconds. Read-only
+host inspection found Hyper-V implicit sync enabled alongside Ubuntu timesyncd
+reporting a -1.960623-second correction; Windows NTP probes measured about -1.74
+seconds. This supports competing clock sources; it does not establish the cause
+of the v18 epoch mismatch or replace its observed oracle rejection.
+No clock service/configuration change was applied. The existing readiness record
+`local-provider-readiness-20261016.json` preserves observations and official references;
+30 quiet seconds cannot certify future clock stability or UTC accuracy.
+
+PR2145 merged at `7a9fe860298398b86398fbb3f6dad79eca52a075`; reviewed and main
+trees match. Exact-main CI38804752870 and CodeQL38804751742 passed. Receipt:
+`artifact-bounds-publication-review/pr2145-merged-main-closure.json`, SHA256
+`afc8d1822bfe1e25e19fca97f77afeb91cc366c948474fd166fd22149cc747b0`.
+The clock fixture repair retains 41 focused and six independent boundary passes;
+that test-only repair changed neither production clock checks nor installed runtime.
+
+The bounds publication and installer receipt/source-path dependencies are closed.
+Next qualify the validated new source separately before a fresh bounded LOW handshake.
+Authenticated native enrollment and existing R15 author/evaluator, rollback and
+retained-use gates remain separate. Holo owner queries rejected authority/head
+binding; no semantic freshness or query-time reindex claim is added. WSP00/15/22/50/97.
 
 ## Protected issuer custody and runtime qualification — 2026-10-16
 

@@ -33,6 +33,18 @@ revocation suites too. The real two-process LOAD tests preserve the old-order
 deadlock control and check policy/generation/expiry drift. Synthetic installation
 seams remain explicit; passing tests do not prove installed worker admission.
 
+The same grant-aware signing CI selection includes
+`test_reddog_signer_key_epoch_use_durable_authority.py`. Run it with root LOAD,
+root-protected composition, installed grant consumer and permission rehydration.
+Current-time cases sample inside the durable fence and recheck after snapshot/root
+LOAD and permission verification; explicit stale caller epochs must still reject.
+Cover observed rollback, snapshot/receipt expiry, identity drift and post-action
+rejection. A rejected result does not undo arbitrary callback effects. Independent
+native held-outs use real SQLite/flock/source with synthetic root/signing/clock
+fixtures; TestModLog records author 207 and separate independent 17 passes, not an
+additive unique count. Preserve the earlier fixture failures and unproved live-clock
+cause, plus Windows encoding/shell and corrected Linux runner failures as evidence.
+
 ## Callable LOW grant service qualification
 
 `test_reddog_grant_authority_service.py` is selected by the existing

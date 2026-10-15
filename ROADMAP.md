@@ -12,28 +12,23 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — enrollment artifact bounds (2026-10-16):**
-PR 2143 and 2144 are merged at 372d03de5 and 7772c011b; their exact-main CI and
-CodeQL checks passed. The initial LOW control bootstrap repair is published.
-Disposable installation next exposed the 64 KiB owner-read default rejecting a
-182,859-byte approval,685,781-byte descriptor and 26 larger source files. The
-scoped repair explicitly uses the existing 1 MiB artifact bound for those reads;
-ordinary owner reads retain 64 KiB. Author Linux validation passed 131 cases.
-Independent 87 cases passed; connected CI selection passed 689 with 3 skips.
-Unified runtime at `34eed594e` is qualified: 2,691 files (1,254 exact Git Python
-sources), confined Unix transport/IP denial, runtime guards and absent-authority
-CLI rejection independently checked. This credential-free proof is not admission.
-Disposable v6 now passes packet/manifest publication, activation and independent
-generation selection after scoped directory/transport corrections. Generation
-publication rejects the existing writer's omitted bootstrap lock. Reconcile that
-explicit file with its source owner, preserve unknown-file rejection and repeat
-freshly. Prior failures remain evidence; no real enrollment credentials were used.
-
-Close this 18/P0 prerequisite and replay disposable installation, then execute
-19/P0 authenticated LOW grant/handshake
-and existing R15. Native worker admission and retained RSI gain remain unproved.
-R15 must show independent evaluation, authorized activation/rollback, retained
-later benefit and bounded next selection. [Current evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
+**Current checkpoint — native startup integration (2026-10-16):**
+PR2145 merged at `7a9fe8602` with matching reviewed/main trees and passing exact-main
+CI/CodeQL. The artifact-bound and clock-fixture repairs are published; ordinary
+64 KiB owner reads and production clock checks remain unchanged. Installed runtime
+`34eed594e` remains qualified and frozen (2,691 files, 1,254 exact Git Python sources).
+V18 passed installation and revocation after receipt publication/source-path repairs,
+then failed LOW handshake at the durable oracle's `_checked_now`. A current-time
+path in three existing owners now samples within the fence and rechecks after slow
+verification; explicit caller epochs still match exactly, rollback/expiry rejects,
+and post-action rejection withholds results without undoing effects. Independent
+review passed 17; author connected validation passed 207 in 87.89 seconds with stable
+source hashes. Counts are not additive; separate qualification/replay remains.
+Clock-source conflict is observed separately; its causal role remains unproved.
+Synthetic authority only: authentic enrollment, native worker admission, author
+execution and retained RSI gain remain unproved. Existing R15 still requires
+independent evaluation, authorized activation/rollback, later benefit and bounded
+next selection. [Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
 
 **Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
 The candidate composes the existing LOW issuer, credential resolver, durable
