@@ -15,6 +15,7 @@ in 157.88s; source hashes stable. Receipts: `next-startup/enrollment-artifact-bo
 and `connected-source-binding.json`. Counts overlap; do not sum.
 Refreshed runtime/disposable replay remains pending. Ordinary 64 KiB default, root/ancestry/no-follow
 checks, exact digests and source membership remain unchanged.
+PR2145 CI exposed two stale manifest digest pins; both now match regenerated `8bb02dbea0b0814bd54487104f517f4c7af4e469463dabb69361ef040efb88d5`: generator check and three frontend compatibility commands pass; Python suite passed 7 with 1 staged-index failure while the repaired pins remained unstaged (72.52s), followed by staged-index verification: 1 passed in 0.56s (`manifest-pin-staged-verification.xml`).
 
 Prior publication closure is verified separately by E15
 `next-startup/consumer-publication-review/pr2143-merged-main-closure.json` and
