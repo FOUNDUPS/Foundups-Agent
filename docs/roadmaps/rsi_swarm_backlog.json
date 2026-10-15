@@ -1890,24 +1890,24 @@
   },
   "current_selection": {
     "observation_path": "current_observation.issuer_custody_20261016",
-    "base_commit": "308d235a29fc9dfc694f075de552fff285981279",
-    "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
+    "base_commit": "6a9df0ba5ad977c381c57f98adb2234940289c07",
+    "selected_action": "Close initial LOW control bootstrap, then execute authenticated native handshake",
     "status": "IN_PROGRESS",
     "wsp15": {
-      "complexity": 4,
+      "complexity": 3,
       "importance": 5,
       "deferability": 5,
       "impact": 5,
-      "total": 19,
+      "total": 18,
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Install source-pinned native runtime and authenticated protected owner/E0/permission/custody inputs; run one real LOW grant/handshake, then the existing R15 author/verifier/retained-use loop."
+    "next_action": "Publish independently verified initial-control repair; refresh exact runtime; assemble authentic owner/E0/custody/state; run one LOW grant/handshake before R15 author/verifier/retained-use."
   },
   "current_observation": {
     "issuer_custody_20261016": {
-      "source_scope": "PR2142 merged with passing exact-main checks; installed consumer/rate/guard/startup integrated in owned unpublished lane",
-      "details": "docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16",
+      "source_scope": "Initial control repair independently reviewed in isolated lane; PR2143 publication closure still pending",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16",
       "custody_validation": "244 author cases; 63 independent cases including 12 held-outs; synthetic installation seams disclosed",
       "combined_validation": "12 connected Linux suites: 328 passed, zero failures/skips, 110.66 seconds",
       "protected_source_validation": "Independent actual F runtime inspection: 1664 files,225 exact source modules,six real initializers,23 observed native mappings; six negative controls pass",
@@ -1915,7 +1915,7 @@
       "source_publication": "PR2142 merged308d235a29fc9dfc694f075de552fff285981279. Exact-main CI38770382389 and CodeQL38770380737 passed; tested head671684f3d has identical tree. Prior2141 clock-test failure repaired; four completed owned lanes archived and retired.",
       "native_worker_admitted": false,
       "retained_rsi_gain_demonstrated": false,
-      "next_dependency": "Install source-pinned native runtime and authenticated protected owner/E0/permission/custody inputs; run one real LOW grant/handshake, then the existing R15 author/verifier/retained-use loop.",
+      "next_dependency": "Publish independently verified initial-control repair; refresh exact runtime; assemble authentic owner/E0/custody/state; run one LOW grant/handshake before R15 author/verifier/retained-use.",
       "paid_provider_calls": 0,
       "coordinator_cost": null,
       "installed_artifact_validation": "250 independently verified cases; one reviewer harness error retained then corrected",
@@ -1930,7 +1930,11 @@
       "issuer_runtime_guard_validation": "62 independent Linux tests; independent full1665file/157directory reopen and actual isolated positive2guard calls; seven author native negative controls reject. Credential-free only.",
       "installed_startup_validation": "174 connected Linux tests, zero failures/skips;18 independent held-outs after root-LOAD pre-secret runtime guard repair. Permission freshness rechecked after each inventory check. Original synthetic-root fixture failures preserved.",
       "issuer_rate_storage_validation": "255 independent cases passed, including separate-UID process controls; synthetic admission is not installed authority.",
-      "issuer_socket_layout_validation": "159 independent cases passed including12 adversarial and5 separate-UID tests; exact5-file delta and13 unchanged rate files verified. V10 socket parent distinct; legacy/artifact binding preserved."
+      "issuer_socket_layout_validation": "159 independent cases passed including12 adversarial and5 separate-UID tests; exact5-file delta and13 unchanged rate files verified. V10 socket parent distinct; legacy/artifact binding preserved.",
+      "initial_control_validation": "Author377 passed/1 unchanged INTERFACE size failure/1 root skip; separate root socket1 passed. Independent188 passed/1 same inherited failure/0 skipped. Six-file inventory; no outcome authority from null identity.",
+      "installed_execution_validation": "Pinned9bee runtime:2677 files,1240 exact Git Python source files,1437 runtime files independently reopened; actual confined Unix echo/IP denial, guard twice, CLI returns2 absent authority. Credential-free; refresh required for repaired source.",
+      "machine_inputs": "Root-created distinct control/audit/replay material and installed target999/issuer997/requester995, transport GID988; no runtime grant issued.",
+      "filesystem_validation": "15 private roots,8 actual processes fsync/reopen; independent metadata/hash reopen. Four canonical generation qualification records installed, no authority stores initialized; not power-loss or physical rollback proof."
     },
     "grant_issuer_20261015": {
       "source_base_commit": "57d5cd8e8c9db2179e2761ae59f74a2912b8d168",

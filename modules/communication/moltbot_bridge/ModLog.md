@@ -1,3 +1,21 @@
+## Initial control identity bootstrap — 2026-10-16
+
+WSP00/5/10/11/15/22/48/50/62/71/84/97. Fixed a demonstrated bootstrap cycle in
+existing root initialization, revocation and protected-use clients: initial
+control identity may have no outcome grants. Exact descriptor v2, LOW, integer
+generation1 and empty list may explicitly carry null consensus. Full outcome
+validation still requires a consensus digest and independently signed grants.
+E0 v10 gates target control factories; signed revocation advancement remains
+available because protected use requires an established witnessed anchor.
+Issuer role remains LOAD-only. No fabricated outcome or consensus was supplied.
+
+Independent review accepted188 cases with one unchanged documentation-size
+failure (INTERFACE3305>1511). Connected author run:377 passed, one same failure,
+one root-only skip; that socket case separately passed as Linux root. These are
+synthetic authority tests, not native admission. Existing source/test size
+regressions were repaired without changing limits. See the canonical dispatch
+and tests/TestModLog.md for source-bound evidence and remaining execution gates.
+
 ## Installed consumer and runtime startup integration — 2026-10-16
 
 WSP00/5/10/11/15/22/48/50/62/71/84/97. Reused current enrollment, manifest,

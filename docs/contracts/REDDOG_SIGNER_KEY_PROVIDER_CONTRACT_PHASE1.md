@@ -414,3 +414,22 @@ through its protected fixed bootstrap before calling main; bare isolated
 `python -m` does not make `/opt/grant-source` importable. Runtime installation,
 credential delivery, permissions, root authority and actual worker admission are
 separate gates. This callable/CLI does not create them.
+
+## Initial root control identity — 2026-10-16
+
+Root initialization can validate an exact v2 descriptor with an empty grants
+list using the existing identity validator. Target revocation/protected-use
+factories permit that path only with validated installed E0 v10. Initial LOW,
+integer generation1, exact empty-list identity may explicitly set
+`consensus_receipt_digest: null`; missing fields, malformed values, other tiers,
+legacy descriptors and later generations retain their rejection. Existing
+hashed control descriptors remain compatible. Descriptor digest, distinct root
+control key, current owner/source/E0, peer, signature, store and freshness checks
+remain mandatory. Null is absence of consensus, never an installation hash.
+
+Full outcome validation explicitly requires a SHA256 consensus digest before
+independently signed nonempty grants. Reserve/commit, outcome clients and response
+record reconstruction retain that validator. Target signed/witnessed revocation
+ADVANCE is still required to establish the initial protected-use anchor; issuer
+LOAD cannot perform it. This closes a bootstrap dependency, not work admission,
+promotion, rollback or demonstrated RSI learning.

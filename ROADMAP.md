@@ -12,27 +12,19 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — installed issuer integration (2026-10-16):**
-PR2142 merged `308d235a29fc9dfc694f075de552fff285981279`; exact-main
-CI38770382389 and CodeQL38770380737 passed. This closes the prior PR2141
-clock-test failure with its independently verified test-only repair. Four owned
-completed lanes were archived with verified recovery bundles and retired.
+**Current checkpoint — initial control bootstrap (2026-10-16):**
+The first LOW handshake exposed an empty-outcome-grant bootstrap cycle. Existing
+root/control owners now permit an exact LOW/gen1/v2 identity with empty grants
+and explicit absent consensus. Full outcome signing retains real consensus and
+independent verification requirements. Independent functional review passed;
+one inherited documentation-size failure remains recorded rather than hidden.
 
-The isolated candidate integrates initial enrollment, target-internal grant
-acquisition, authenticated installed-manifest consumption and a sampled issuer
-runtime guard. Consumer review passed209 Linux cases; guard review passed62
-plus an independent actual RootDirectory launch and full1,665-file reopen.
-These runtime checks remain credential-free. Four connected integration suites
-passed174 cases; independent startup wiring passed18 held-outs after repairing
-a reproduced root-LOAD guard omission and checking permission expiry after
-inventory verification. See [evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16).
-
-Separate issuer rate storage passed255 independent cases; protected-artifact/
-socket path separation passed159. Next19/P0 (C4/I5/D5/Impact5): install the
-authenticated inputs and execute a real LOW grant/handshake. The fixed one-request startup
-joins existing owners; it does not install or grant authority. R15 still requires
-an admitted author, independent evaluation, authorized retention/rollback and
-measured later-use benefit. Native worker admission and RSI remain unproved.
+Actual isolated runtime execution, separate machine identities and15 private
+storage roots have bounded qualification evidence. None establishes worker
+admission. Close the18/P0 source prerequisite, refresh its exact installed
+runtime, then execute19/P0 authenticated LOW grant/handshake and existing R15.
+R15 must show independent evaluation, authorized activation/rollback, retained
+later benefit and bounded next selection. [Current evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
 
 **Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
 The candidate composes the existing LOW issuer, credential resolver, durable

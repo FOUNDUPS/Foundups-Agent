@@ -1,3 +1,24 @@
+## Initial control identity regressions — 2026-10-16
+
+Source inventory: next-startup/native-installation-inputs/initial-control-source-inventory-v3.json;
+independent final-review.json digest
+80245e4e41989dd0154dc8c204fe36c2d69bcf0bfdfffcd9bf1593b534d4092f.
+Six-file scope: five existing production owners and focused initial-control
+suite. Author focused122 passed; connected377 passed/1 failed/1 skipped;
+root socket1 passed separately. Independent188 passed/1 failed/0 skipped.
+The sole final failure is unchanged INTERFACE3305>1511; it is not a green suite.
+Counts overlap. Legacy capped fixture/suite restored; moved dependency validator
+is AST-identical. Null consensus cannot reach full outcome/signing authority.
+Legacy/hash compatibility, malformed values, identity drift, bad control proofs,
+missing pending revocation and issuer mutation rejection are exercised.
+
+Earlier failed unguarded external runner recursively started spawned pytest
+children; guarded runner resolved six process failures. Original failures and
+two initial source/test size violations remain in evidence. No cap weakened.
+Commands use native Linux Python -I -B and guarded run_initial_control_guarded.py,
+with explicit source root, no conftest/plugin autoload and importlib mode;
+exact selections and XML reside in native-installation-inputs. WSP5/10/22/97.
+
 ## Native fixture IPC closure — 2026-10-16
 
 GitHub's private checkout also prevented the separate numeric worker UID from

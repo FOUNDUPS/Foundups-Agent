@@ -229,6 +229,8 @@ def validate_root_verified_outcome_descriptor_public(
     checked = validate_root_verified_outcome_descriptor_identity_public(
         value, now_epoch=now_epoch
     )
+    if not _sha256(checked.get("consensus_receipt_digest")):
+        raise ValueError("verified_outcome_root_consensus_invalid")
     checked["grants"] = _validate_grants(checked, now_epoch=now_epoch)
     return checked
 
@@ -321,7 +323,7 @@ def _validate_descriptor_header(checked: Mapping[str, Any]) -> None:
         or int(checked["authority_generation_sequence"]) < 1
     ):
         raise ValueError("verified_outcome_root_generation_invalid")
-    if not _sha256(checked.get("consensus_receipt_digest")):
+    if not _sha256(checked.get("consensus_receipt_digest")) and not _initial_identity_without_consensus(checked):
         raise ValueError("verified_outcome_root_consensus_invalid")
     if any(
         not _sha256(checked.get(name))
@@ -335,6 +337,18 @@ def _validate_descriptor_header(checked: Mapping[str, Any]) -> None:
         raise ValueError("verified_outcome_root_signer_runtime_invalid")
     if decode_ed25519_public_key(str(checked["signer_public_key"])) is None:
         raise ValueError("verified_outcome_root_signer_key_invalid")
+
+
+def _initial_identity_without_consensus(value: Mapping[str, Any]) -> bool:
+    """A first LOW control identity has no work consensus or outcome grant."""
+    return bool(
+        value.get("schema_version") == DESCRIPTOR_SCHEMA_V2
+        and value.get("consensus_receipt_digest") is None
+        and value.get("authority_tier") == "LOW"
+        and type(value.get("authority_generation_sequence")) is int
+        and value["authority_generation_sequence"] == 1
+        and type(value.get("grants")) is list and value["grants"] == []
+    )
 
 
 def _validate_grants(
