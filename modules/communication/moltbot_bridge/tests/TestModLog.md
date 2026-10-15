@@ -1,5 +1,15 @@
 ## Native fixture IPC closure — 2026-10-16
 
+GitHub's private checkout also prevented the separate numeric worker UID from
+reading test imports. The fixture now copies exact loaded Python sources and
+real package initializers into a disposable root-owned readable snapshot,
+records their hashes and excludes original checkout paths from the child.
+Original checkout permissions remain unchanged. Actual private-ancestor control
+failed on the prior source and passed all five native cases after repair;
+independent review verified301 files and9 initializers byte-for-byte. Combined
+author IPC/native checks passed12. These remain synthetic authority fixtures,
+not installed worker admission. Original hosted failure evidence is preserved.
+
 The hosted runner also exposed a fixture UID collision: actual issuer UID1001
 equaled its synthetic target. The fixture now selects a distinct target and
 updates both owner and root snapshot consistently. The original failure was

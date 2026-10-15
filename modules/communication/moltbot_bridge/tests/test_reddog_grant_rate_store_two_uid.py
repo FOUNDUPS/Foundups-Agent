@@ -4,6 +4,7 @@ No installed authority or service is invoked. The owner-validation seam supplies
 an explicit test owner from root-owned bytes; protected reads, credential-free
 policy/custody checks, signing, durable rate and target replay owners are real.
 """
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -82,17 +83,54 @@ def _prepare(root, monkeypatch):
     return case
 
 
-def _run(root, uid, operation, grant=None):
+def _worker_source(root):
+    """Copy loaded fixture/import sources; never relax private checkout modes."""
     source = Path(__file__).resolve().parents[4]
+    snapshot = root/'worker-source'
+    if snapshot.exists():
+        return source, snapshot
+    sources = {Path(__file__).resolve()}
+    for module in tuple(sys.modules.values()):
+        filename = getattr(module, '__file__', None)
+        if filename:
+            path = Path(filename).resolve()
+            if path.is_relative_to(source) and path.suffix == '.py':
+                sources.add(path)
+    for path in tuple(sources):
+        for parent in path.parents:
+            if parent == source:
+                break
+            initializer = parent/'__init__.py'
+            if initializer.is_file():
+                sources.add(initializer)
+    inventory = {}
+    for path in sorted(sources):
+        relative = path.relative_to(source)
+        data = path.read_bytes()
+        target = snapshot/relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        target.chmod(0o444)
+        inventory[relative.as_posix()] = hashlib.sha256(data).hexdigest()
+    for path in (snapshot, *(p for p in snapshot.rglob('*') if p.is_dir())):
+        path.chmod(0o755)
+    (root/'worker-source-hashes.json').write_text(json.dumps(inventory, sort_keys=True))
+    return source, snapshot
+
+
+def _run(root, uid, operation, grant=None):
+    source, snapshot = _worker_source(root)
     code = ('import sys,runpy,json;sys.path[:]=json.loads(sys.argv.pop(1));'
             'runpy.run_path(sys.argv[1],run_name="__main__")')
-    paths = [str(source), *(str(Path(p).resolve()) for p in sys.path if p)]
+    paths = [str(snapshot), *(str(Path(p).resolve()) for p in sys.path
+        if p and not Path(p).resolve().is_relative_to(source))]
     read_fd, write_fd = os.pipe()
     try:
         try:
             completed = subprocess.run(['/usr/bin/setpriv', f'--reuid={uid}', f'--regid={GROUP}',
                 '--clear-groups', '--no-new-privs', sys.executable, '-I', '-S', '-B', '-c', code,
-                json.dumps(paths), str(Path(__file__).resolve()), str(write_fd), str(root), operation],
+                json.dumps(paths), str(snapshot/Path(__file__).resolve().relative_to(source)),
+                str(write_fd), str(root), operation],
                 input=json.dumps(grant), text=True, capture_output=True, timeout=30, pass_fds=(write_fd,),
                 env={'PATH':'/usr/bin:/bin', 'PYTHONDONTWRITEBYTECODE':'1', 'PYTHON_DOTENV_DISABLED':'1'})
         finally:
