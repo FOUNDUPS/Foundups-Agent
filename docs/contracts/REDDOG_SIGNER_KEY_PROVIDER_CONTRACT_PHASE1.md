@@ -311,7 +311,8 @@ The v9 `grant_startup_custody` block contains `signing_key_ref`,
 exactly signing/audit IDs; loader custody names exactly signing/replay IDs in
 the same protected directory. The three references must be distinct. Signing
 requester is the current E0 signer-agent ID; loader requester is the current
-issuer principal. Both use its distinct UID/GID and current key/epoch. The
+issuer principal. Both bind its UID/GID and current key/epoch; its UID must differ
+from the target's. The
 issuer's UID, identity and proof key cannot substitute for target authority.
 
 Metadata does not grant permission: current authenticated E0 binds actual refs,
