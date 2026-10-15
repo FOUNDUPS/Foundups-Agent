@@ -1889,22 +1889,45 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.initial_manifest_20261015",
-    "base_commit": "1774d1e8fe6c8270ebe62be1206d2f5cbacb7d3b",
+    "observation_path": "current_observation.initial_handshake_20261015",
+    "base_commit": "1d847ad1f83022f3ace0d4be5f4098ffdb9806e7",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
     "status": "IN_PROGRESS",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
       "deferability": 5,
-      "impact": 4,
-      "total": 18,
+      "impact": 5,
+      "total": 19,
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close qualified source publication, then supply startup-capable v7+ owner/configuration and genuine principal/grant/replay/provider admission through existing owners for one native author and independent verifier. Initial component activation is verified; disabled fixture configuration is not worker startup or retained RSI benefit."
+    "next_action": "Close the initial handshake configuration slice; compose the missing independent LOW grant issuer from existing server/backend/policy/rate/custody owners, verify a real grant response, then connect native handshake and R15 author/verifier/retained-use experiment. Existing role keys and offline tests are not admission."
   },
   "current_observation": {
+    "initial_handshake_20261015": {
+      "source_base_commit": "1d847ad1f83022f3ace0d4be5f4098ffdb9806e7",
+      "prior_observation": "current_observation.initial_manifest_20261015",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#initial-handshake-composition--2026-10-15",
+      "configuration_scope": "generation1, one LOW signer_socket_peer_handshake, existing E0 and per-request grant gates",
+      "independent_contract_tests": {"passed": 74, "failed": 0},
+      "native_handshake_verified": false,
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "source_publication": "pending exact-head gates",
+      "prior_closure": {
+        "pr": 2136,
+        "merge": "1d847ad1f83022f3ace0d4be5f4098ffdb9806e7",
+        "main_ci": 38733808172,
+        "main_codeql": 38733807786,
+        "result": "success",
+        "owned_lane": "retired; ignored evidence archived and hash-verified"
+      },
+      "retrieval": "CURRENT/no-gap at merged-base stationary query host; noisy ranking supplemented with exact owner reads",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "next_dependency": "production independent grant issuer composition with authentic policy, signing/audit-MAC custody, rate/replay/revocation and real response verification"
+    },
     "initial_manifest_20261015": {
       "source_base_commit": "1774d1e8fe6c8270ebe62be1206d2f5cbacb7d3b",
       "source_scope": "candidate overlays; native receipt pins exact component inventory, not complete deployed package",

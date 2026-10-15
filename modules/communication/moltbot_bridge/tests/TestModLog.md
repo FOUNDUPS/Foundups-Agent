@@ -1,3 +1,30 @@
+## Initial handshake contract closure — 2026-10-15
+
+Fourteen connected suites:416passed/1skip in256.88s; four additional E0 socket
+separation cases added after collection pass4/4. Initial connected subset5/5
+verifies helper-signed disposable grants, one consumption, signature/replay and
+rejected operation/instance/consensus cases. Independent74 held-out plus14 direct
+list/frozen-tuple equivalence cases pass with18 source hashes stable. Exact
+commands/JUnit/source inventory remain in the existing20261015 evidence root,
+`next-startup/initial-service-regression.xml` and `review/` receipts.
+Qualified Python3.12 uses `-S -B -m pytest --noconftest --import-mode=importlib
+-p pytest_asyncio.plugin -p no:cacheprovider -q`; bytecode/dotenv/plugin autoload
+disabled. Windows platform skip is explicit, not inferred native coverage.
+
+WSP62 separately11pass/5fail: four inherited expired2026-09-30 exemptions and
+the existing INTERFACE1517-line ceiling (base3255; current documentation also
+exceeds it). Runtime wiring shrinks1148to1127; core203lines unchanged against
+registered201; validator134to105. No waiver, threshold change or clean-gate
+claim. See `next-startup/initial-service-wsp62.xml` and source review receipt.
+Final-source Linux run of the four changed suites:143passed/0skips in29.79s,
+`next-startup/initial-service-linux.xml`; same wrapper with `/dev/null` config
+and explicit owned-root collection. Backend generator8passed in67.73s with two
+unknown-async-config warnings (plugin disabled for synchronous generator tests).
+Generated registry remains1703 and manifest1426 members; both digest pins match.
+Source exports finalized; independent review binds final bytes. Native grant
+issuance/handshake and worker admission remain unproven. Current source
+publication is a separate gate.
+
 ## Hosted Linux fixture closure — 2026-10-15
 
 PR2136 at4aae1646: hosted enrollment tests618passed/9skipped/3failed.

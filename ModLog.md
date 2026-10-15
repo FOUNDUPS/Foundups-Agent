@@ -1,3 +1,12 @@
+## Initial handshake composition — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97; base1d847ad1f.
+Existing signer/E0 owners now represent one initial LOW handshake explicitly,
+without fabricated work policy. Independent contract checks pass; real native
+admission remains pending separate grant issuer composition. Canonical roadmap
+and dispatch reconcile PR2136 merge/main checks/owned cleanup and the next19/P0
+dependency. No new scheduler, paid model call or RSI completion claim.
+
 ## Initial manifest activation — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97; pinned1774d1e8f. Added bounded

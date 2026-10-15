@@ -11,6 +11,7 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     is_sha256,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_v6 import (
+    CANONICAL_AUTHORITY_TIERS, _LIST_FIELDS, require_policy_scope_lists as _require_lists,
     GRANT_SERVICE_DIGEST_FIELDS,
     GRANT_SERVICE_FIELDS,
     GRANT_SERVICE_MANIFEST_FIELDS,
@@ -33,14 +34,12 @@ POLICY_SCHEMA_V8 = POLICY_PREFIX_V8 = "reddog-signer-owner-e0-policy.v8"
 POLICY_FIELDS_V8 = POLICY_FIELDS_V7
 POLICY_SCHEMA = POLICY_PREFIX = POLICY_SCHEMA_V6
 MAX_POLICY_TTL_SECONDS = 900
-CANONICAL_AUTHORITY_TIERS = frozenset({"LOW", "HIGH", "ULTRA"})
 POLICY_FIELDS_V6 = POLICY_FIELDS_V5 | GRANT_SERVICE_FIELDS
 POLICY_FIELDS = POLICY_FIELDS_V6
 _DIGEST_FIELDS_V6 = POLICY_DIGEST_FIELDS_V5 + GRANT_SERVICE_DIGEST_FIELDS
 _DIGEST_FIELDS_V7 = (
     _DIGEST_FIELDS_V6 + GRANT_SERVICE_GIT_PROVENANCE_DIGEST_FIELDS
 )
-_LIST_FIELDS = ("allowed_operations", "allowed_authority_tiers", "consensus_required_tiers")
 _AUTHORITY_BINDING_EXCLUDED_FIELDS = {
     "schema_version",
     "policy_id",
@@ -161,22 +160,6 @@ def _require_time(raw: Mapping[str, Any], now_epoch: int) -> None:
         or not 1 <= raw["rate_limit_max_requests"] <= 1000
     ):
         raise ValueError("signer_owner_e0_policy_time_invalid")
-
-
-def _require_lists(raw: Mapping[str, Any]) -> None:
-    for name in _LIST_FIELDS:
-        values = raw[name]
-        if (
-            not values
-            or len(values) > 64
-            or values != sorted(set(values))
-            or any(type(item) is not str or not item or not item.isascii() for item in values)
-        ):
-            raise ValueError("signer_owner_e0_policy_scope_invalid")
-    if not set(raw["consensus_required_tiers"]).issubset(raw["allowed_authority_tiers"]):
-        raise ValueError("signer_owner_e0_policy_scope_invalid")
-    if not set(raw["allowed_authority_tiers"]).issubset(CANONICAL_AUTHORITY_TIERS):
-        raise ValueError("signer_owner_e0_policy_scope_invalid")
 
 
 def _policy_fields(schema: object) -> frozenset[str]:

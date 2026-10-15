@@ -1,3 +1,59 @@
+## Initial handshake composition — 2026-10-15
+
+Base `1d847ad1f83022f3ace0d4be5f4098ffdb9806e7`, isolated lane
+`agent/rsi-initial-service-20261015`; WSP00/5/6/10/11/15/22/48/50/62/71/84/97.
+PR2136 merged at that base; main CI38733808172 and CodeQL38733807786 passed.
+Its clean owned worktree/branches were retired after preserving nine ignored
+evidence files and verifying archive hashes. Shared work was untouched.
+
+The existing composer now emits a distinct initial-handshake schema, accepted
+only at generation1 with one permissioned RedDog profile and one LOW handshake.
+Its socket has a separate writable parent. Existing E0 current-selection and
+per-request lease gates remain mandatory; non-handshake requests reject before
+grant consumption/key access and under the leased instance. Initial manifest
+authenticity is not E0 or work authorization. Coherent extraction into existing
+policy owners reduces runtime wiring; no new orchestrator or policy store.
+
+Independent74 held-out cases passed with before/after source hashes: malformed
+types, mixed policies, root overlap, generation, scope, instance, expiry and
+HIGH/ULTRA consensus preservation. Existing connected tests exercise real
+disposable signatures, grant consumption and verification with explicit synthetic
+owner-packet/OS seams. These are contract tests, not native handshake receipts.
+Frozen validated E0 policies use tuples; the connected path exposed and repaired
+a list/tuple mismatch while the JSON codec retains strict list validation.
+
+Evidence remains under `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015`:
+`closure-receipt.json`, `review/initial-service-independent-review.json`,
+`review/initial-service-heldout-source-bound.xml`, and
+`next-startup/grant-authority-composition-review.json`. Further source changes
+require rebinding review. Current slice publication is pending exact-head gates.
+
+Retrieval: stationary merged-base maintenance completed through existing
+OpenClaw/WRE and stopped its owned runtimes. Query CURRENT/no-gap at the exact
+base; lower-ranked hits are noisy and omit specific E0/config owners, so direct
+must-include reads supplement retrieval. This maintenance is not native author
+execution. Two bounded local Qwen attempts produced no usable structured output
+(instruction echo, then timeout); no paid calls or automatic retries followed.
+The public CLI import/parser qualified under isolated nonroot/no-network/no-write
+conditions with actual package initializers; service startup was not invoked.
+
+Re-observation selects independent grant issuer composition19/P0
+(C4/I5/D5/Impact5). Existing client, policy validator, signing backend, durable
+rate controls and archive owners are present, but no production server composes
+them. It needs authentic issuer policy, separate signing/audit-MAC custody,
+replay/revocation controls and a real grant-response test. Existing role-key files
+do not establish those authorities; missing MAC custody cannot be replaced by
+reusing signing bytes. Do not bootstrap the issuer through the target's
+grant-required backend. Then connect actual handshake, native author/verifier,
+authorized retention/rollback and controlled later-use benefit under R15.
+
+Executable-seam review also finds the LOW client holds the current-generation
+lock during grant RPC while the server needs that same lock. Reuse the existing
+effect path's release-for-RPC/reacquire-and-revalidate pattern before serving the
+issuer; prove it with two processes on the same lock and reject changed/expired
+authority after RPC. See `next-startup/low-grant-executable-seam-review.json`.
+Do not claim a cancellation hook that the current issue_grant API does not expose.
+
 ## Initial manifest activation — 2026-10-15
 
 Source: base `1774d1e8fe6c8270ebe62be1206d2f5cbacb7d3b`, owned lane

@@ -37,6 +37,64 @@ class _AuthorityResolver:
         return self._values.get((principal_id, principal_provider))
 
 
+@pytest.mark.parametrize("operations,tiers,consensus,accepted", [
+    (["signer_socket_peer_handshake"], ["LOW"], [], True),
+    (["write_repo"], ["LOW"], [], False),
+    (["signer_socket_peer_handshake", "write_repo"], ["LOW"], [], False),
+    (["signer_socket_peer_handshake"], ["HIGH"], [], False),
+    (["signer_socket_peer_handshake"], [], [], False),
+    ([], ["LOW"], [], False),
+    (["write_repo"], ["HIGH"], ["HIGH"], True),
+])
+def test_empty_e0_consensus_is_only_low_handshake(operations, tiers, consensus, accepted):
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import _require_lists
+    scope = {"allowed_operations": operations, "allowed_authority_tiers": tiers,
+             "consensus_required_tiers": consensus}
+    if accepted:
+        _require_lists(scope)
+    else:
+        with pytest.raises(ValueError, match="scope_invalid"):
+            _require_lists(scope)
+
+
+@pytest.mark.parametrize("mutation", ["valid", "generation", "boolean-generation", "work", "tier", "consensus"])
+def test_initial_e0_config_requires_independent_exact_scope(tmp_path, mutation):
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_admission_validation import require_policy_config_binding
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import signer_key_reference_digest
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_rehydration import rehydrate_signer_socket_service_runtime_config
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import canonical_config_digest
+    from modules.communication.moltbot_bridge.tests.test_reddog_signer_socket_service_config_supply import _initial_config
+    repo, payload = _initial_config(tmp_path)
+    config = rehydrate_signer_socket_service_runtime_config(
+        repo, Path(payload["runtime_root"]), payload, expected_config_digest=canonical_config_digest(payload))
+    profile = payload["key_provider_profiles"][0]
+    policy = {
+        "generation": 1, "allowed_operations": ["signer_socket_peer_handshake"],
+        "allowed_authority_tiers": ["LOW"], "consensus_required_tiers": [],
+        "target_signer_agent_id": profile["signer_agent_id"],
+        "target_signer_profile_id": profile["signer_profile_id"],
+        "target_signer_public_key": profile["expected_public_key"],
+        "target_signer_key_fingerprint": profile["expected_key_fingerprint"],
+        "target_signer_key_epoch": profile["expected_key_epoch"],
+        "target_signer_generation_id": "sha256:" + "3" * 64,
+        "artifact_generation_digest": "sha256:" + "3" * 64,
+        "permission_snapshot_digest": profile["permission_snapshot_digest"],
+        "signing_key_ref_hash": signer_key_reference_digest(profile["signing_key_ref"]),
+        "audit_mac_key_ref_hash": signer_key_reference_digest(profile["audit_mac_key_ref"]),
+    }
+    policy.update({
+        "generation": {"generation": 2}, "boolean-generation": {"generation": True},
+        "work": {"allowed_operations": ["write_repo"]},
+        "tier": {"allowed_authority_tiers": ["HIGH"]},
+        "consensus": {"consensus_required_tiers": ["LOW"]},
+    }.get(mutation, {}))
+    if mutation == "valid":
+        assert require_policy_config_binding(policy, config).signer_agent_id == "signer:reddog"
+    else:
+        with pytest.raises(ValueError, match="initial_handshake_scope_invalid"):
+            require_policy_config_binding(policy, config)
+
+
 class _AcceptingSignatureVerifier:
     @staticmethod
     def verify(_public_key: str, _message: str, _signature: str) -> bool:
@@ -166,6 +224,23 @@ def test_runtime_roots_must_be_disjoint(tmp_path: Path) -> None:
     assert fixture["boundary"].admit(
         fixture["owner_config_path"], fixture["policy"]
     ).accepted is False
+
+
+@pytest.mark.parametrize("root_name", ["separate", "replay_root", "revocation_root", "revocation_witness_root"])
+def test_initial_socket_root_is_disjoint_from_e0_stores(tmp_path, root_name):
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_admission_validation import require_policy_runtime_paths
+    fixture = _fixture(tmp_path)
+    policy = fixture["policy"]
+    root = tmp_path / "socket-state" if root_name == "separate" else Path(policy[root_name])
+    config = SimpleNamespace(initial_handshake_only=True, socket_path=root / "signer.sock")
+    kwargs = dict(repo_root=tmp_path / "repo", signer_runtime_root=tmp_path / "signer",
+                  initial_config=config)
+    if root_name == "separate":
+        require_policy_runtime_paths(policy, **kwargs)
+    else:
+        with pytest.raises(ValueError, match="socket_root_not_disjoint"):
+            require_policy_runtime_paths(policy, **kwargs)
 
 
 @pytest.mark.parametrize(

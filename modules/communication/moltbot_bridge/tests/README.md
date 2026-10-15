@@ -1,3 +1,16 @@
+## Initial handshake producer-to-consumer qualification
+
+The existing CI `Run RedDog grant-aware signing composition regression` now
+includes configuration supply, run-packet supply and E0 static contracts beside
+the ephemeral factory, handshake, per-sign backend and protected-use suites.
+Use its exact path list for connected verification. Initial tests cover strict
+schema/type/scope/root separation and reject non-handshake requests before
+grant consumption or key resolution. Connected fixtures verify real disposable
+signatures and durable replay; root selection, packet attachment, OS transport,
+credentials, service loop and clocks are injected. Grants are helper-signed,
+not issued by a live independent grant service. Do not claim native startup.
+Independent held-out cases and commands are retained in the dispatch runbook.
+
 ## Initial manifest producer-to-consumer qualification
 
 The CI step `Run initial enrollment producer and consumer contracts` selects
