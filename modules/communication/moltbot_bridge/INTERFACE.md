@@ -1,3 +1,45 @@
+## Initial runtime manifest enrollment — 2026-10-15
+
+`load_initial_runtime_manifest_signing_context(*, approval_path, repo_root)` in
+`src/reddog_initial_runtime_manifest_authority.py` consumes root-installed
+`reddog_initial_runtime_manifest_approval.v1`. Required exact fields are
+`schema_version`, `repo_root_digest`, `runtime_root`, `source_commit_sha`,
+`source_files`, `manifest_spec`, `credential_binding`, `permission`, `consumer_uids`.
+The specification pins issuer, signer key/epoch, nonce, times, profile/config
+digests and all seven existing artifact descriptors. Source inventory must bind
+every installed local import and this loader; root installation owns Git/source
+provenance. A commit-shaped string alone does not verify provenance.
+
+The existing signing context publishes
+`reddog_initial_runtime_artifact_manifest.v1`, with a distinct signing prefix,
+operation/role, approval digest and source commit. It has one Ed25519 signature;
+it does not invent work/publication/consensus fields or legacy audit-MAC evidence.
+An existing legacy context cannot sign this domain. Permission purpose is
+`initial_runtime_manifest`; one fresh systemd credential and an isolated signer
+UID are required. Expiry is at most300seconds and is rechecked around custody,
+locking, publication and activation. Repeated signatures do not mint work grants.
+
+Existing `provision_signer_runtime_generation` recovers the same published
+manifest with its fixed nonce/times. TTL must match approval. Both new activation
+and recovered/selected bindings restrict this schema to generation1. Legacy
+v1/v2/v3 semantics remain unchanged. Worker startup still requires valid service
+configuration, scoped admission and its existing authenticated dependencies.
+
+Owner configuration now accepts an absolute `anchor_path` whose parent is
+separate from immutable artifact runtime, high-water, witness and owner roots;
+filename stays `generation-anchor.json`. Existing collocated layouts remain
+compatible. The private writer UID owns the actual anchor parent; witness
+binding still includes the artifact runtime. No owner schema field is added.
+
+Linux activation leases consume root-owned regular single-link immutable inodes
+under protected ancestry. The process must be nonroot, NoNewPrivs and have zero
+inherited/permitted/effective/ambient capabilities. Pre-open ancestry checks and
+nonblocking opens prevent FIFO replacement hangs. Descriptor/path/immutable
+checks run before and after activation; every descriptor closes on failure.
+Unsupported filesystems reject. The lease never changes flags/ownership.
+Privileged root/mount changes and same-process compromise are outside this trust
+boundary. Windows sharing-handle behavior is unchanged.
+
 ## Protected initial writer authority — 2026-10-14
 
 `load_initial_generation_high_water_authority(*, owner_config_path, bootstrap_path,

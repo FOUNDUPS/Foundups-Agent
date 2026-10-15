@@ -60,7 +60,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 )
 from .reddog_signer_system_service_owner_inputs import (
     load_system_service_signer_identity, load_system_service_model_runtime_verifier,
-    _validate_model_verifier_authority,
+    _validate_model_verifier_authority, _validate_owner_paths, _owner_anchor_root,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path, validate_runtime_root_path,
@@ -300,7 +300,7 @@ def _build_generation_reader(
     )
     reader = DurableSignerRuntimeGenerationReader(
         owner["anchor_path"],
-        allowed_root=runtime,
+        allowed_root=_owner_anchor_root(owner, repo=repo),
         repo_root=repo,
         anchor_id=str(owner["anchor_id"]),
         verifier_authority=verifier_authority,
@@ -504,36 +504,6 @@ def _validate_owner_text_and_digests(value: Mapping[str, Any]) -> None:
         raise RuntimeArtifactManifestError("signer_owner_config_value_invalid")
 
 
-def _validate_owner_paths(
-    value: Mapping[str, Any], *, repo: Path, owner_root: Path
-) -> None:
-    runtime = validate_runtime_root_path(value["runtime_root"], repo_root=repo)
-    high_root = validate_runtime_root_path(value["high_water_root"], repo_root=repo)
-    witness_root = validate_runtime_root_path(value["witness_root"], repo_root=repo)
-    roots = (runtime, high_root, witness_root)
-    if any(
-        first == second or first in second.parents or second in first.parents
-        for first, second in (
-            (runtime, high_root),
-            (runtime, witness_root),
-            (high_root, witness_root),
-            *((owner_root, item) for item in roots),
-        )
-    ):
-        raise RuntimeArtifactManifestError("signer_owner_root_overlap")
-    expected = (
-        (value["anchor_path"], runtime, "generation-anchor.json"),
-        (value["high_water_path"], high_root, "high-water.json"),
-        (value["witness_path"], witness_root, "generation.sqlite3"),
-    )
-    for raw_path, root, filename in expected:
-        path = validate_runtime_artifact_path(
-            raw_path, allowed_root=root, repo_root=repo
-        )
-        if path != root / filename:
-            raise RuntimeArtifactManifestError("signer_owner_path_invalid")
-
-
 def _validate_outcome_authority_owner_config(
     value: Mapping[str, Any], *, repo: Path, owner_root: Path
 ) -> None:
@@ -612,10 +582,13 @@ def _validate_outcome_authority_root_separation(
     witness_root: Path,
     installation_root: Path,
 ) -> None:
+    anchor = Path(value["anchor_path"])
+    if not anchor.is_absolute():
+        anchor = Path(value["runtime_root"]) / anchor
     existing_roots = tuple(
         Path(value[name]).resolve()
         for name in ("runtime_root", "high_water_root", "witness_root")
-    ) + (owner_root,)
+    ) + (owner_root, anchor.parent.resolve())
     if any(
         first == second or first in second.parents or second in first.parents
         for first, second in (

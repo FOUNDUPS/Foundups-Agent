@@ -138,9 +138,15 @@ def _inputs(owner_path, bootstrap_path, receipt_paths, repo):
         gid=credentials.expected_gid) for p, k in zip(receipt_paths, ("high_water", "witness")))
     paths = (owner_target, boot_target, *(p for p, _ in receipts))
     roots = tuple(Path(owner[name]).resolve() for name in ("runtime_root", "high_water_root", "witness_root"))
+    anchor_root = owner_loader._owner_anchor_root(owner, repo=repo)
+    if anchor_root != roots[0]:
+        roots += (anchor_root,)
+        if any(anchor_root == p.parent or anchor_root in p.parent.parents
+               or p.parent in anchor_root.parents for p in paths):
+            raise ValueError("generation_writer_policy_domain_invalid")
     if len(set(paths)) != 4 or any(p == r or r in p.parents for p in paths for r in roots):
         raise ValueError("generation_writer_policy_domain_invalid")
-    _private_metadata(roots[0], credentials.expected_uid, credentials.expected_gid, directory=True)
+    _private_metadata(anchor_root, credentials.expected_uid, credentials.expected_gid, directory=True)
     return owner, loaded, witness_binding, (owner_raw, boot_raw, *(raw for _, raw in receipts))
 
 

@@ -1,3 +1,27 @@
+## Initial manifest and Linux lease review — 2026-10-15
+
+New initial-authority suite38cases includes14 independently held-out regressions.
+Existing lease suite26pass/1Windows platform skip includes23 new policy/cleanup/
+ordering cases. Independent combined40pass/1skip/0fail13.64s, source hashes stable
+across ten reviewed production files. Before-fix failures are retained externally.
+Actual isolated Linux publication/activation/public read and independent repeat
+selection passed, with real credential custody and immutable inodes. Native
+writable-mmap probe terminated writer with SIGBUS and preserved bytes. These
+component records do not establish runnable service admission or RSI.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015`, including
+`review/final-review-receipt.json` and `initial-native-component-evidence.json`.
+Final-source connected17suite run:621passed/9platform skips,269.48s, no failures.
+Command uses the existing qualified Python3.12 `-S -B -m pytest --noconftest
+--import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -q`; exact
+suite list is the CI initial-enrollment step, with JUnit `connected-final-source.xml`.
+Earlier632case run included two failing WSP62 checks; candidate loader growth
+was extracted into existing owner_inputs. Separate unchanged baseline WSP62 debt
+remains recorded in `review/wsp62-baseline-debt.json`; it is not hidden as a skip.
+All changed Python files pass the existing domain limits independently.
+Fresh final-native component and independent selection requalify that extraction;
+source inventory and unchanged state checks are in final-native/parent-independent-review.json.
+Hosted checks/publication remain separate; no remote success assumed.
+
 ## Protected writer regression closure — 2026-10-14
 
 Connected294passed/1existingWindows symlink skip (168.43s), including63adapter and

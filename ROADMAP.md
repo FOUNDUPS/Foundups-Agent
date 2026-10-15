@@ -12,6 +12,21 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+**Current checkpoint — initial manifest activation (2026-10-15):**
+The isolated Linux component now publishes an authenticated initial manifest,
+activates generation1 through existing atomic recovery, and selects it in a
+separate credential-free reader. Independent repeat selection preserves the
+same manifest and store digests. Source is base1774d1e8f plus explicitly recorded
+candidate overlays; publication remains separate. This closes a component gap,
+not native author admission or production RSI. The seven bound artifacts are
+disabled/empty component configuration, not runnable worker-service inputs.
+
+WSP15 remains18/P0 (4/5/5/4): resolve the protected initial-service policy path,
+qualify real service inputs and admission for one native author, then independent
+evaluation, governed retention/rollback and
+measured benefit on later work. Reuse existing WRE/OpenClaw/Hermes owners.
+See [contracts, failures and evidence](docs/operations/RSI_SWARM_DISPATCH.md#initial-manifest-activation--2026-10-15).
+
 **Verifier-guided loop audit — 2026-10-15:** Nigel's candidate → bounded attempt →
 external verification → re-observe pattern fits existing R15; it does not require
 another orchestrator. Keep the internal registry-workflow canary first, with a

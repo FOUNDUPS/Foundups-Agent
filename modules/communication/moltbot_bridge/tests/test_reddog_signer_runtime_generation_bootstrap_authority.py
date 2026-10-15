@@ -6,6 +6,7 @@ import copy
 import hashlib
 import json
 import stat
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -225,9 +226,67 @@ def test_every_mutation_rechecks_authority(configured, monkeypatch, operation, c
 def _anchor(state, authority, boundary):
     signer = subject.bootstrap.load_initial_generation_bootstrap_signer(bootstrap_path=state.installed.path, repo_root=state.installed.repo)
     va, vb = subject.create_signer_runtime_generation_verifier_authority(state.installed.public)
-    return DurableSignerRuntimeGenerationAnchor(state.owner["anchor_path"], allowed_root=state.runtime,
+    return DurableSignerRuntimeGenerationAnchor(state.owner["anchor_path"],
+        allowed_root=subject.owner_loader._owner_anchor_root(state.owner, repo=state.installed.repo),
         repo_root=state.installed.repo, anchor_id="anchor-1", signer=signer, verifier=vb.require(va),
         high_water_authority=authority, high_water_authority_boundary=boundary)
+
+
+def _separate_anchor(state):
+    root = state.runtime.parent / "anchor"
+    root.mkdir()
+    state.owner["anchor_path"] = str(root / "generation-anchor.json")
+    _refresh(state)
+    return root
+
+
+def test_separate_private_anchor_accepts_protected_artifact_runtime(configured):
+    root = _separate_anchor(configured)
+    configured.overrides[str(configured.runtime)] = {
+        "st_uid": 0, "st_gid": 0, "st_mode": stat.S_IFDIR | 0o755,
+    }
+    authority, boundary, writer = _open(configured)
+    anchor = _anchor(configured, authority, boundary)
+    activation = anchor.activate(
+        SignerRuntimeGenerationBinding(**configured.installed.value["generation_binding"]),
+        expected_revision=None, commit_guard=lambda candidate: None,
+    )
+    assert activation.generation == 1
+    assert (root / "generation-anchor.json").is_file()
+    assert not (configured.runtime / "generation-anchor.json").exists()
+    assert writer.load("anchor-1") == writer.witness_load("anchor-1")
+
+
+@pytest.mark.parametrize("field,value", (
+    ("st_uid", 0), ("st_gid", 0), ("st_mode", stat.S_IFDIR | 0o722),
+))
+def test_separate_anchor_retains_private_ownership_checks(configured, field, value):
+    root = _separate_anchor(configured)
+    configured.overrides[str(root)] = {field: value}
+    with pytest.raises(ValueError, match="path_ownership"):
+        _open(configured)
+
+
+def test_separate_anchor_ownership_rechecked_before_mutation(configured):
+    root = _separate_anchor(configured)
+    _, _, writer = _open(configured)
+    value = _next(configured)
+    configured.overrides[str(root)] = {"st_uid": 0}
+    with pytest.raises(ValueError, match="path_ownership"):
+        writer.prepare("anchor-1", expected=None, next_value=value)
+    assert not (configured.high / "high-water.json").exists()
+
+
+@pytest.mark.parametrize("kind", ("bootstrap", "receipt"))
+def test_separate_anchor_cannot_contain_root_policy_or_receipt(configured, kind):
+    root = _separate_anchor(configured)
+    original = configured.installed.path if kind == "bootstrap" else configured.receipts[0]
+    target = root / original.name
+    target.write_bytes(original.read_bytes())
+    argument = "bootstrap_path" if kind == "bootstrap" else "high_water_receipt_path"
+    configured.arguments[argument] = target
+    with pytest.raises(ValueError, match="policy_domain"):
+        _open(configured)
 
 
 def test_existing_anchor_rolls_back_before_witness_when_guard_rejects(configured):

@@ -1,3 +1,14 @@
+## Initial manifest activation — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97; pinned1774d1e8f. Added bounded
+administrative initial-manifest attestation within existing generation owners;
+preserved work authorization and legacy schemas. Linux immutable activation and
+separate anchor ownership allow real isolated publication/activation/public
+selection. Independent review repaired generation/expiry/FIFO defects. Runtime
+evidence remains component-only with disabled inputs; native author and RSI still
+pending. Existing roadmap/backlog/runbook retain the next18/P0 admission slice.
+See docs/operations/RSI_SWARM_DISPATCH.md#initial-manifest-activation--2026-10-15.
+
 ## Verifier-guided RSI loop audit — 2026-10-15
 
 WSP00/15/22/48/50/97; sourcea6a63b8e9. Researched Nigel/REA/ArtCraft primary

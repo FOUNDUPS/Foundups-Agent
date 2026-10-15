@@ -1889,8 +1889,8 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.verifier_loop_audit_20261015",
-    "base_commit": "a6a63b8e9098c5b35629fd76629b96d3089af566",
+    "observation_path": "current_observation.initial_manifest_20261015",
+    "base_commit": "1774d1e8fe6c8270ebe62be1206d2f5cbacb7d3b",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
     "status": "IN_PROGRESS",
     "wsp15": {
@@ -1902,9 +1902,23 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Compose existing authenticated manifest provisioning using real admitted inputs, then one native author and independent verifier. Protected initial writer component is validated; fixture manifests do not establish activation, worker admission or retained RSI benefit."
+    "next_action": "Close qualified source publication, then supply startup-capable v7+ owner/configuration and genuine principal/grant/replay/provider admission through existing owners for one native author and independent verifier. Initial component activation is verified; disabled fixture configuration is not worker startup or retained RSI benefit."
   },
   "current_observation": {
+    "initial_manifest_20261015": {
+      "source_base_commit": "1774d1e8fe6c8270ebe62be1206d2f5cbacb7d3b",
+      "source_scope": "candidate overlays; native receipt pins exact component inventory, not complete deployed package",
+      "prior_observation": "current_observation.verifier_loop_audit_20261015",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#initial-manifest-activation--2026-10-15",
+      "initial_generation_component": "actual protected publication, generation1 recovery/activation, separate credential-free selection; independent later reader agrees",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "work_authority": "none issued by initial administrative manifest; existing admission still required",
+      "retrieval": "CURRENT/no-gap at clean pinned1774 query host; shared checkout script correctly rejects different HEAD; ranking noisy",
+      "independent_review": "generation2 recovery, publication expiry and FIFO admission defects repaired; retained negative cases; source-bound receipts external",
+      "source_publication": "pending exact-head checks and authorized closure",
+      "next_dependency": "startup-capable owner inputs and authenticated service/grant/provider composition; then R15 retained-use/control experiment"
+    },
     "verifier_loop_audit_20261015": {
       "source_commit": "a6a63b8e9098c5b35629fd76629b96d3089af566",
       "prior_observation": "current_observation.initial_writer_20261014",

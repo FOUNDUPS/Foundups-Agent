@@ -335,6 +335,12 @@ def _unsigned_manifest(
     expires_at: int,
     runtime_profile: str | None = None,
 ) -> dict[str, Any]:
+    if "initial_manifest" in values:
+        payload = dict(values["initial_manifest"])
+        if (runtime_profile is not None or nonce != payload["nonce"]
+                or issued_at != payload["issued_at"] or expires_at != payload["expires_at"]):
+            raise RuntimeArtifactManifestError("initial_manifest_scope_mismatch")
+        return validate_unsigned_payload(payload)
     schema_version, required_artifacts = _manifest_profile(runtime_profile)
     git_provenance = schema_version == SCHEMA_VERSION_V3
     artifacts = _artifact_descriptors(
@@ -454,6 +460,14 @@ def _validate_bindings(
     payload: Mapping[str, Any],
     authority: Mapping[str, Any],
 ) -> None:
+    from .reddog_runtime_artifact_manifest_contract import SCHEMA_VERSION_INITIAL
+
+    initial = authority.get("initial_manifest")
+    if initial is not None or payload.get("schema_version") == SCHEMA_VERSION_INITIAL:
+        unsigned = {key: value for key, value in payload.items() if key != "signature"}
+        if initial is None or unsigned != dict(initial):
+            raise RuntimeArtifactManifestError("initial_manifest_binding_mismatch")
+        return
     expected = {
         "queue_item_id": authority["queue_item_id"],
         "work_state_revision": authority["work_state_revision"],
@@ -499,18 +513,23 @@ def _signing_request(
     signing_input: str,
     context: RuntimeArtifactManifestSigningContext,
 ) -> SigningRequest:
+    from .reddog_runtime_artifact_manifest_contract import (
+        SIGNING_OPERATION_INITIAL, SIGNER_ROLE_INITIAL,
+    )
     authority = context.authority_boundary.require(context.authority)
+    initial = "initial_manifest" in authority
     return SigningRequest(
         signing_input=signing_input,
         payload_digest=digest({"signing_input": signing_input}),
-        signer_role=SIGNER_ROLE,
+        signer_role=SIGNER_ROLE_INITIAL if initial else SIGNER_ROLE,
         signer_public_key=authority["signer_public_key"],
         requester_principal_id=authority["issuer_principal_id"],
         nonce=str(payload["nonce"]),
         key_epoch=authority["key_epoch"],
-        requested_operation=SIGNING_OPERATION,
+        requested_operation=SIGNING_OPERATION_INITIAL if initial else SIGNING_OPERATION,
         authority_tier=context.authority_tier,
-        consensus_receipt_digest=authority["consensus_receipt_digest"],
+        consensus_receipt_digest=(None if "initial_manifest" in authority
+                                  else authority["consensus_receipt_digest"]),
     )
 
 
@@ -529,6 +548,8 @@ def _verified_response(
             response.audit_attestation_signature or ""
         ),
     }
+    if "initial_manifest" in authority:
+        signed = {**payload, "signature": str(response.signature or "")}
     if not all(
         (
             response.accepted,
@@ -558,6 +579,9 @@ def _verify_signatures(
         authority["signer_public_key"], signing_input, signature
     ):
         raise RuntimeArtifactManifestError("manifest_signature_invalid")
+    from .reddog_runtime_artifact_manifest_contract import SCHEMA_VERSION_INITIAL
+    if payload.get("schema_version") == SCHEMA_VERSION_INITIAL:
+        return
     attestation = canonical_signer_audit_attestation_input(
         signing_input=signing_input,
         signature=signature,

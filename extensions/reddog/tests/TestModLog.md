@@ -1,3 +1,12 @@
+## 2026-10-15 — Initial enrollment backend binding
+
+Existing RedDog fast tier15members passed after regenerating the1426-member
+manifest and both consumer/generator pins. Initial generator checks exposed
+stale digest pins; those were updated to generated content rather than removing
+assertions. No member/cap/version relaxation or installed extension change.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/reddog-fast.log`
+and `manifest-tests-final.xml`; hosted checks remain separately verified.
+
 ## 2026-10-05 — WRE measured-zero fidelity binding (P15)
 
 The existing runtime manifest still covers1408 files; the reviewed PatternMemory

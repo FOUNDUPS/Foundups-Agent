@@ -1,3 +1,11 @@
+## Initial enrollment backend binding — 2026-10-15
+
+Regenerated the existing1426-member backend manifest after initial-manifest,
+generation-reader and owner-layout changes; membership and caps are unchanged.
+Both existing digest pins now bind `4fc7653444c12854401a4f5aad6167e2a853c081e51f77a16ade42521c19ef77`.
+Fast tier15members passed. This is repository compatibility binding, not a VSIX
+release, installed-extension update or native worker admission. WSP10/22/97.
+
 ## Effect approval closure count — PR2090, 2026-10-07
 
 Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`
