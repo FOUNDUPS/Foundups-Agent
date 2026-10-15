@@ -181,12 +181,20 @@ def test_issuer_client_and_oracle_cannot_advance_or_authorize_target_use(tmp_pat
     assert oracle.matches_owner(policy=values['policy'], binding=values['binding'])
     assert oracle.authorize_key_epoch_use(key_epoch=values['policy']['grant_authority_key_epoch'],
         at_epoch=now, expires_at=now+20, action=lambda:'checked') == 'checked'
+    assert oracle.authorize_current_key_epoch_use(key_epoch=values['policy']['grant_authority_key_epoch'],
+        expires_at=now+20, action=lambda:'current') == 'current'
     with pytest.raises(ValueError, match='cannot_authorize_target_grant'):
         oracle.authorize_grant_use({}, lambda:pytest.fail('no target effect'))
     with pytest.raises(ValueError, match='epoch_invalid'):
         oracle.authorize_key_epoch_use(key_epoch='target-epoch', at_epoch=now,
             expires_at=now+20, action=lambda:pytest.fail('no foreign epoch use'))
+    with pytest.raises(ValueError, match='epoch_invalid'):
+        oracle.authorize_current_key_epoch_use(key_epoch='target-epoch',
+            expires_at=now+20, action=lambda:pytest.fail('no foreign current epoch use'))
     durable.anchor = values['client']
+    with pytest.raises(ValueError, match='epoch_invalid'):
+        oracle.authorize_current_key_epoch_use(key_epoch=values['policy']['grant_authority_key_epoch'],
+            expires_at=now+20, action=lambda:pytest.fail('no changed owner use'))
     with pytest.raises(ValueError, match='owner_mismatch'):
         build_grant_issuer_revocation_oracle(durable=durable, policy=values['policy'], binding=values['binding'])
 

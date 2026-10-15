@@ -91,16 +91,29 @@ class RootAuthorizedSignerGrantRevocationOracle:
         self, *, key_epoch: str, at_epoch: int, expires_at: int,
         action: Callable[[], _T],
     ) -> _T:
+        self._require_key_epoch_owner(key_epoch)
+        return self._durable.authorize_key_epoch_use(
+            key_epoch=key_epoch, at_epoch=at_epoch,
+            expires_at=expires_at, action=action,
+        )
+
+    def authorize_current_key_epoch_use(
+        self, *, key_epoch: str, expires_at: int, action: Callable[[], _T],
+    ) -> _T:
+        """Use the durable fence's current clock after checking issuer identity."""
+
+        self._require_key_epoch_owner(key_epoch)
+        return self._durable.authorize_current_key_epoch_use(
+            key_epoch=key_epoch, expires_at=expires_at, action=action,
+        )
+
+    def _require_key_epoch_owner(self, key_epoch: str) -> None:
         if self._protected_use is None:
             from .foundup_verified_outcome_root_revocation_client import _lookup_client as lookup_anchor
             anchor = lookup_anchor(self._durable.anchor)
             if (not self.matches_owner(policy=anchor.policy, binding=anchor.binding)
                     or key_epoch != anchor.policy["grant_authority_key_epoch"]):
                 raise ValueError("grant_issuer_oracle_epoch_invalid")
-        return self._durable.authorize_key_epoch_use(
-            key_epoch=key_epoch, at_epoch=at_epoch,
-            expires_at=expires_at, action=action,
-        )
 
     def authorize_grant_use(
         self, grant: Mapping[str, Any], action: Callable[[], _T]
