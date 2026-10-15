@@ -29,8 +29,10 @@ independence.
 
 Evidence: existing next-startup/ root, initial-control-independent-review/,
 native-installation-inputs/ and installed-execution-qualification/. Source base
-6a9df0ba5ad977c381c57f98adb2234940289c07; PR2143 remains subject to verified
-publication closure. Paid calls0; local/coordinator cost unknown. Native worker
+6a9df0ba5ad977c381c57f98adb2234940289c07, rebased onto PR2143 merge
+372d03de59352887928b7afd0204cce483e2c6c6. All11 exact-head checks passed;
+merged tree equals reviewed5b075a920. Main CI/CodeQL remains pending. Paid calls0;
+local/coordinator cost unknown. Native worker
 admission=false and retained RSI gain=false.
 
 WSP15 executable prerequisite18/P0 (C3/I5/D5/Impact5): close this independently

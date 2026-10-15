@@ -1890,7 +1890,7 @@
   },
   "current_selection": {
     "observation_path": "current_observation.issuer_custody_20261016",
-    "base_commit": "6a9df0ba5ad977c381c57f98adb2234940289c07",
+    "base_commit": "372d03de59352887928b7afd0204cce483e2c6c6",
     "selected_action": "Close initial LOW control bootstrap, then execute authenticated native handshake",
     "status": "IN_PROGRESS",
     "wsp15": {
@@ -1906,13 +1906,13 @@
   },
   "current_observation": {
     "issuer_custody_20261016": {
-      "source_scope": "Initial control repair independently reviewed in isolated lane; PR2143 publication closure still pending",
+      "source_scope": "Initial control repair independently reviewed in isolated lane rebased onto verified PR2143 merge372d03; main CI/CodeQL pending",
       "details": "docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16",
       "custody_validation": "244 author cases; 63 independent cases including 12 held-outs; synthetic installation seams disclosed",
       "combined_validation": "12 connected Linux suites: 328 passed, zero failures/skips, 110.66 seconds",
       "protected_source_validation": "Independent actual F runtime inspection: 1664 files,225 exact source modules,six real initializers,23 observed native mappings; six negative controls pass",
       "runtime_boundary": "Credential-free confined imports and full inventory rechecks; not service execution, immutable future execution or authenticated admission",
-      "source_publication": "PR2142 merged308d235a29fc9dfc694f075de552fff285981279. Exact-main CI38770382389 and CodeQL38770380737 passed; tested head671684f3d has identical tree. Prior2141 clock-test failure repaired; four completed owned lanes archived and retired.",
+      "source_publication": "PR2143 merged372d03de59352887928b7afd0204cce483e2c6c6; tested5b075a920 all11checks passed; exact tree8848c5d4fbcbeef6c4c090bcd39bd575dc1b1249 matches. Main CI/CodeQL pending. Prior2142 exact-main closure remains historical.",
       "native_worker_admitted": false,
       "retained_rsi_gain_demonstrated": false,
       "next_dependency": "Publish independently verified initial-control repair; refresh exact runtime; assemble authentic owner/E0/custody/state; run one LOW grant/handshake before R15 author/verifier/retained-use.",
