@@ -10,6 +10,21 @@ All assertion ASTs are unchanged. Repaired real UID1001:5 passed; UID0 connected
 Source-bound review: E15 `next-startup/root-load-ci-review/ci-fixture-repair-review.json`.
 These synthetic authority tests do not prove native admission.
 
+## Protected empty source regression — 2026-10-16
+
+Root Linux reproduced `signer_owner_config_size_invalid` for the actual empty
+source initializer. The5 new privileged cases failed before repair; the existing
+selection test also failed from an unrelated stale synthetic clock. After repair,
+76 passed and only that clock fixture failed. Pinning only its expected clock and
+adding7 portable descriptor cases gives84 passed,0 failed/skipped in25.23s across
+initial authority and both selection-loader suites. Wrong digest, foreign owner,
+writable file, symlink, oversized source, default empty rejection and nonboolean
+opt-in are covered. Root/authority fixtures are synthetic; no native admission.
+
+Exact command and XML: E15 `next-startup/run_linux_empty_source.py` and
+`empty-source-final-84.xml`; prior failures retained as `empty-source-before.xml`
+and `empty-source-after.xml`. Production ownership and size guards are preserved.
+
 ## Issuer root LOAD and permission fence — 2026-10-15
 
 Five selected Linux suites passed98 cases (`grant-root-load-linux-98.xml`).

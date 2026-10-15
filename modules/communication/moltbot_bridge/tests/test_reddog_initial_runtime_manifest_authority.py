@@ -68,7 +68,7 @@ def installed(tmp_path, monkeypatch):
     path.write_text(canonical_json(value), encoding="ascii")
     monkeypatch.setattr(subject.time, "time", lambda: clock["wall"])
     monkeypatch.setattr(subject.time, "monotonic", lambda: clock["mono"])
-    monkeypatch.setattr(subject, "_read_root_owned_bytes", lambda target, root: target.read_bytes())
+    monkeypatch.setattr(subject, "_read_root_owned_bytes", lambda target, root, **kwargs: target.read_bytes())
     monkeypatch.setattr(subject, "_check_sources", lambda *args: None)
     monkeypatch.setattr(subject, "enforce_signer_process_isolation", lambda *a, **k: SimpleNamespace(accepted=True))
     if os.name != "nt":
@@ -195,7 +195,7 @@ def test_source_inventory_requires_current_authority_and_rejects_drift(tmp_path,
     path.write_bytes(b"approved")
     monkeypatch.setattr(subject, "__file__", str(path))
     monkeypatch.setattr(subject, "sys", SimpleNamespace(modules={"modules.authority": SimpleNamespace(__file__=str(path))}))
-    monkeypatch.setattr(subject, "_read_root_owned_bytes", lambda target, root: target.read_bytes())
+    monkeypatch.setattr(subject, "_read_root_owned_bytes", lambda target, root, **kwargs: target.read_bytes())
     sources = {"authority.py": raw_digest(b"approved")}
     subject._check_sources(repo, sources)
     path.write_bytes(b"changed")
@@ -367,6 +367,6 @@ def test_real_inventory_rejects_missing_or_wrong_source(tmp_path, monkeypatch, k
         sources['../outside.py'] = raw_digest(b'other')
     monkeypatch.setattr(subject, '__file__', str(own))
     monkeypatch.setattr(subject, 'sys', SimpleNamespace(modules=modules))
-    monkeypatch.setattr(subject, '_read_root_owned_bytes', lambda path, root: path.read_bytes())
+    monkeypatch.setattr(subject, '_read_root_owned_bytes', lambda path, root, **kwargs: path.read_bytes())
     with pytest.raises(ValueError):
         SOURCE_CHECK(repo, sources)

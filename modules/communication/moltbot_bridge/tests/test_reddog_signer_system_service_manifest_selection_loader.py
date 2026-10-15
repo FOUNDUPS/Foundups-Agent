@@ -492,8 +492,28 @@ def test_owner_read_is_descriptor_bound_and_bounded() -> None:
     assert "dir_fd=directory_fd" in function_source
     assert "O_NOFOLLOW" in function_source
     assert "_require_root_file_fd(file_fd)" in function_source
-    assert "_read_bounded_fd(file_fd)" in function_source
+    assert "_read_bounded_fd(file_fd, allow_empty=allow_empty)" in function_source
     assert "read_bytes" not in function_source
+
+
+@pytest.mark.parametrize("allow_empty", [False, None, 0, 1, "true", True])
+def test_empty_descriptor_requires_literal_source_opt_in(tmp_path, allow_empty):
+    target = tmp_path / "empty.py"
+    target.write_bytes(b"")
+    with target.open("rb") as handle:
+        if allow_empty is True:
+            assert loader_module._read_bounded_fd(handle.fileno(), allow_empty=allow_empty) == b""
+        else:
+            with pytest.raises(RuntimeArtifactManifestError, match="size_invalid"):
+                loader_module._read_bounded_fd(handle.fileno(), allow_empty=allow_empty)
+
+
+def test_source_opt_in_does_not_remove_descriptor_size_bound(tmp_path):
+    target = tmp_path / "oversize.py"
+    target.write_bytes(b"x" * (loader_module.MAX_OWNER_CONFIG_BYTES + 1))
+    with target.open("rb") as handle:
+        with pytest.raises(RuntimeArtifactManifestError, match="size_invalid"):
+            loader_module._read_bounded_fd(handle.fileno(), allow_empty=True)
 
 
 def _prepare_real_cli_owner(

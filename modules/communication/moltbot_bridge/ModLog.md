@@ -1,3 +1,24 @@
+## Protected empty source qualification — 2026-10-16
+
+WSP00/5/6/15/22/50/71/84/97. A real confined import of the exact grant service
+loaded220 repository modules with all six package initializers. Source admission
+then rejected the tracked zero-byte `modules/__init__.py`: the shared protected
+reader required nonempty owner JSON for every source file. The source inventory
+now explicitly permits empty bytes while requiring the exact approved digest.
+The reader remains nonempty by default; ownership, ancestry, descriptor binding,
+symlink rejection and64KiB bound are unchanged. Literal `True` is required.
+
+Three connected Linux suites passed84 cases. The existing privileged selection
+fixture now pins its signed test clock, retaining real ownership checks; its
+previous stale clock failure is preserved in evidence. Independent confined
+qualification remains separate from runtime enrollment and native admission.
+Evidence: E15 `next-startup/empty-source-before.xml`, `empty-source-after.xml`,
+and `empty-source-final-84.xml`. Independent confined rerun accepted the220-module
+source inventory and passed19 real-file security controls; network syscalls were
+denied. See `installed-source-qualification/empty-source-candidate/independent-qualification-receipt.json`.
+The188 observed runtime files and26 native mappings are not a complete future
+Linux runtime binding. This is a dependency repair, not retained RSI gain.
+
 ## Issuer root LOAD and permission fence — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Added an explicit issuer-only
