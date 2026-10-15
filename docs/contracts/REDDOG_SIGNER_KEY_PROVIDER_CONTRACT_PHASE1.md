@@ -298,6 +298,16 @@ still depends on the existing protected-parent trust boundary. Non-POSIX retains
 close-before-unlink behavior. Replacement paths are preserved on identity mismatch.
 
 
+## Installed source empty-file semantics — 2026-10-16
+
+The initial enrollment authority's protected source inventory permits zero-byte
+files, including package initializers, only with their exact approved SHA256.
+Its existing root-owned descriptor reader opts in explicitly; authority/config
+reads retain nonempty defaults. Source reads retain the64KiB maximum, protected
+root ancestry, regular-file ownership checks and no-follow descriptor access.
+This does not certify the interpreter/native closure, grant profile enrollment,
+worker admission or retained learning. Those remain distinct gates.
+
 ## Initial handshake configuration — 2026-10-15
 
 `compose_initial_handshake_service_config(...)` in the existing

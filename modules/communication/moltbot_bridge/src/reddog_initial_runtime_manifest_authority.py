@@ -129,7 +129,8 @@ def _check_sources(repo, sources):
                 or str(relative) != name or "\\" in name or ":" in name or not is_sha256(expected)):
             raise ValueError("initial_manifest_source_path_invalid")
         path = repo.joinpath(*relative.parts)
-        if raw_digest(_read_root_owned_bytes(path, path.parent)) != expected:
+        # Empty package initializers are valid source only with an exact digest.
+        if raw_digest(_read_root_owned_bytes(path, path.parent, allow_empty=True)) != expected:
             raise ValueError("initial_manifest_source_changed")
     own_path = Path(__file__).resolve()
     if not own_path.is_relative_to(repo) or own_path.relative_to(repo).as_posix() not in sources:
