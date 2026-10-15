@@ -47,7 +47,7 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
     PermissionSnapshot,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9,
 )
 
 
@@ -574,9 +574,9 @@ class _RevocationOracle:
         return result
 
 
-@pytest.mark.parametrize("schema", [POLICY_SCHEMA_V7, POLICY_SCHEMA_V8])
+@pytest.mark.parametrize("schema", [POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9])
 @pytest.mark.parametrize("case", ["valid", "missing", "inconsistent", "archive", "oracle"])
-def test_v7_v8_permission_preserves_provenance_and_oracle(tmp_path, monkeypatch, schema, case):
+def test_provenance_policy_versions_preserve_permission_and_oracle(tmp_path, monkeypatch, schema, case):
     setup, _ = _permission_setup(tmp_path, monkeypatch)
     grant_fixture._use_provenance_policy_schema(setup, schema)
     with permission_module.lease_validated_owner_e0_current_admission(

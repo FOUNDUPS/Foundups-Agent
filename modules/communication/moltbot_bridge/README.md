@@ -1,3 +1,13 @@
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+E0 v9 removes the future grant-permission receipt from the pre-configuration
+binding while retaining it in the full signed policy and current admission checks.
+LOW grant requests release the generation lock during signer RPC and revalidate
+under a fresh lease before returning. These repairs have component and Linux
+transport/locking tests; native issuer enrollment and admission remain open.
+See [the contract](INTERFACE.md#grant-bootstrap-binding-and-low-rpc--2026-10-15)
+and [test evidence](tests/TestModLog.md#grant-bootstrap-and-low-rpc--2026-10-15).
+
 ## Initial handshake configuration — 2026-10-15
 
 The existing signer composer now supports one explicitly scoped initial LOW

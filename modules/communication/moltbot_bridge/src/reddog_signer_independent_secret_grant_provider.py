@@ -20,6 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_g
     require_final_secret_grant,
     require_secret_grant_signer_response,
     issue_effect_secret_grant,
+    lease_independent_secret_grant,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_selection import (
     lease_validated_owner_e0_current_admission,
@@ -52,7 +53,7 @@ from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensu
 )
 @dataclass(frozen=True, slots=True)
 class IndependentSignerSecretGrantProvider:
-    """Issue grants with current-owner checks; effect RPC runs outside its fence."""
+    """Issue grants with current-owner checks; LOW/effect RPC releases its fence."""
     repo_root: Path
     owner_config_path: Path
     owner_policy: Mapping[str, Any]
@@ -93,12 +94,7 @@ class IndependentSignerSecretGrantProvider:
         consensus_proof = admit_secret_grant_consensus(
             request, elevated_consensus_signing_permit, now=self._now()
         )
-        with lease_validated_owner_e0_current_admission(
-            owner_config_path=self.owner_config_path,
-            repo_root=self.repo_root.resolve(),
-            policy=self.owner_policy,
-        ) as owner:
-            grant = self._issue(request, owner, consensus_proof)
+        with lease_independent_secret_grant(self, request, consensus_proof) as grant:
             yield grant
     def _issue(self, request: SigningRequest, owner: Any, consensus_proof: Mapping[str, Any] | None) -> Mapping[str, Any]:
         grant, sign_request, binding = self._prepare_issue(request, owner, consensus_proof)

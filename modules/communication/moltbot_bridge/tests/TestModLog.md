@@ -1,3 +1,32 @@
+## Grant bootstrap and LOW RPC — 2026-10-15
+
+Publication review moved the two new pure LOW RPC tests and their helper into
+the existing RPC suite, preserving function/decorator ASTs and all assertions.
+Linux skip now decorates only the six native process cases. Provider suite stays
+below1000lines; the new51-line test is50lines after a spacing-only change.
+Final relocation checks: Windows41passed/6Linux skips in12.96s; Linux47passed
+in17.20s. Evidence: `next-startup/grant-test-relocation-{windows,linux}.xml`.
+Backend generator8passed in62.67s; manifest1426members, registry1704suites.
+
+Retained E15 `next-startup/` receipts: `bootstrap-first.xml` records140passed/1skip
+in105.75s; `bootstrap-retained.xml` records101passed in3.46s. LOW RPC final source:
+`grant-rpc-linux-reviewed.xml` records55passed in22.58s, including six native process
+cases; `grant-rpc-windows-reviewed.xml` records71passed/6Linux-only skips in29.72s.
+These are separate source-bound runs, not one combined count. Independent
+`rpc-review/linux-independent-exact.xml` records19passed (13 held-out plus six
+native cases), bound by `rpc-review/independent-rpc-review.json` to exact source.
+
+The retained `rpc-review/before.xml` reproduced rejection after a valid one-second
+RPC because selection observation timestamps refresh. The repair excludes only
+those two fields, preserving all authority comparisons and current freshness.
+The old-order deadlock control still times out as expected. Fixtures use synthetic
+authority and test keys; no production grant, credential installation or native
+admission is established. Existing WSP62 expiry/documentation debt recorded below
+is not waived by these focused tests. Combined Linux integration:275passed/0skips in69.17s across nine suites,
+`next-startup/grant-combined-linux.xml`. All four frozen RPC file LF hashes match;
+all seven pre-existing v9 edits remain byte-for-byte unchanged. The external
+`grant-combined-integration.json` records exact selection and source inventory.
+
 ## Initial handshake contract closure — 2026-10-15
 
 First hosted run at385de3a06:841pass/3skip/1failure in100.11s. The connected
