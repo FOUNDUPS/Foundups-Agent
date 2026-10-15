@@ -20,7 +20,11 @@ SHA256 366853b249133f502a43767affffd40ba7b894598c472f5baa6d11868541aa13.
 Connected 19-suite CI selection: 689 passed, 3 skipped, no failures/errors
 in 157.88s; source hashes stable. Receipts: `next-startup/enrollment-artifact-bounds/connected-linux.xml`
 and `connected-source-binding.json`. Counts overlap; do not sum.
-Refreshed runtime/disposable replay remains pending. Ordinary 64 KiB default, root/ancestry/no-follow
+Runtime34eed qualified:2691 files/362 directories independently reopened;
+disposable v6 passed activation/selection after directory/transport repair, then
+rejected the writer's omitted bootstrap lock at generation publication. See
+canonical dispatch for exact test/evidence limits and next installer repair.
+Ordinary 64 KiB default, root/ancestry/no-follow
 checks, exact digests and source membership remain unchanged.
 PR2145 CI exposed two stale manifest digest pins; both now match regenerated `8bb02dbea0b0814bd54487104f517f4c7af4e469463dabb69361ef040efb88d5`: generator check and three frontend compatibility commands pass; Python suite passed 7 with 1 staged-index failure while the repaired pins remained unstaged (72.52s), followed by staged-index verification: 1 passed in 0.56s (`manifest-pin-staged-verification.xml`).
 

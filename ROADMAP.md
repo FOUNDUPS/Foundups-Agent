@@ -20,10 +20,17 @@ Disposable installation next exposed the 64 KiB owner-read default rejecting a
 scoped repair explicitly uses the existing 1 MiB artifact bound for those reads;
 ordinary owner reads retain 64 KiB. Author Linux validation passed 131 cases.
 Independent 87 cases passed; connected CI selection passed 689 with 3 skips.
-Refreshed runtime qualification remains pending; prior runtime lacks root/target/protected-installer entrypoints.
+Unified runtime at `34eed594e` is qualified: 2,691 files (1,254 exact Git Python
+sources), confined Unix transport/IP denial, runtime guards and absent-authority
+CLI rejection independently checked. This credential-free proof is not admission.
+Disposable v6 now passes packet/manifest publication, activation and independent
+generation selection after scoped directory/transport corrections. Generation
+publication rejects the existing writer's omitted bootstrap lock. Reconcile that
+explicit file with its source owner, preserve unknown-file rejection and repeat
+freshly. Prior failures remain evidence; no real enrollment credentials were used.
 
-Close this 18/P0 prerequisite, qualify the unified exact-source runtime and
-replay disposable installation, then execute 19/P0 authenticated LOW grant/handshake
+Close this 18/P0 prerequisite and replay disposable installation, then execute
+19/P0 authenticated LOW grant/handshake
 and existing R15. Native worker admission and retained RSI gain remain unproved.
 R15 must show independent evaluation, authorized activation/rollback, retained
 later benefit and bounded next selection. [Current evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).

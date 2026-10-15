@@ -5,7 +5,11 @@ WSP00/5/11/15/22/50/62/84/97. Actual disposable installation rejected approval
 approval, installed-bundle and source reads now explicitly select the existing
 1 MiB artifact limit; generic owner reads retain 64 KiB and all protection checks.
 Author 131 and independent 87 Linux cases pass; connected CI selection passed
-689 with 3 skips. Refreshed runtime qualification remains pending. CI selects the focused
+689 with 3 skips. Unified runtime34eed now qualified and independently reopened
+(2691 files/362 directories); disposable v6 passes activation/selection after
+directory/transport repair, then rejects an omitted bootstrap lock at generation
+publication. Exact inventory reconciliation is next; no native admission or
+retained benefit. CI selects the focused
 regression and existing generators refresh backend pins/test registry. Prior
 PR 2143/2144 exact-main checks passed; no native admission or retained RSI gain.
 Source-bound receipts and preserved failures: tests/TestModLog.md.

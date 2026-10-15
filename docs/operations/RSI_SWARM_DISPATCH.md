@@ -46,12 +46,55 @@ Receipts: `enrollment-artifact-bounds/connected-linux.xml` and
 `enrollment-artifact-bounds/connected-source-binding.json`. Counts overlap.
 See `enrollment-artifact-bounds/author-review.json` and
 `native-installation-inputs/artifact-bounds-independent-review/continuation-review-receipt.json`.
-The prior runtime lacks root/target/protected-installer entrypoints. A unified
-1,254-source export against base 7772c011b is prepared; fresh qualification and
-disposable installation replay remain pending. Export is not admission.
+The unified runtime is now pinned to `34eed594e18f5df5cb77ca85b825ed9fd77ea7f0`:
+2,691 files (1,254 exact Git Python sources and 1,437 runtime files), 362
+directories; descriptor SHA256
+`9be4e61349d301784c2792c61d82205949cd2f7bb88a3c496755bafe48743902`.
+Independent qualification reopened every file/directory and checked actual
+confined Unix transport, IP denial, runtime guards and four CLI rejections of
+absent authority. Evidence: `installed-execution-qualification/all-role-34eed594e-v1/`
+and its `independent-readonly-review/independent-review.json`. Qualification uses
+no credentials and proves no native admission. Later test/doc-only commits do
+not silently change this installed-source binding.
+
+Disposable installation preserves successive failures under
+`native-installation-inputs/disposable-installer-v3`, `-v4` and `-v5`.
+V3 exposed a writable `/run` ancestor; an explicit private `/run:mode=0755`
+passed actual credential-sentinel and guard checks. V4 exposed a root-only
+public run packet; the installer now checks its fixed path, inode type,
+ownership, link count and mode before publishing it read-only and sealing it.
+Sixteen checks cover unchanged bytes/identity, reader access and rejection cases.
+V5 then passed packet and target-manifest publication but rejected activation:
+`grant_authority_socket_path_invalid`. All three owned administrative units were
+observed absent/inactive afterward. No resident service or author ticket ran;
+synthetic authority only, no real credentials, no paid calls, no TTL extension.
+V6 repaired that directory view using read-only socket-parent mounts,
+role-owned0710/group988 transport directories, root-provision-only supplementary
+group988 and issuer/target-only UMask0007. Twenty-three installer checks passed;
+independent native probes cover15 socket cases, two private-store cases, two
+peer-policy cases and two capability-free root cases. Private files remain0600;
+unauthorized peer identity is rejected. Archived-time metadata diagnostics are
+not current admission. Eighteen runner checks passed; exact helper hashes and
+version-only runner delta were independently checked before invocation.
+
+Fresh v6 passed packet, manifest, activation and independent generation selection,
+then rejected `generation_publication_unknown_file` for the existing writer's
+`high-water.bootstrap-authority.lock`. No resident service ran; all administrative
+units were absent/inactive. Preserve v6, reconcile the exact bootstrap lock with
+its source owner and keep it separate from the four mutable coordination locks.
+Next repeat freshly after independent publication review. Evidence:
+`native-installation-inputs/{owner-directory-view-review,socket-transport-review,full-fixture-review,disposable-installer-v6}/`.
+
+PR2145 CI at `34eed594e` passed once, then a repeated run exposed a test fixture
+sampling two different wall-clock seconds. The two-file test/doc repair is
+`8cfb6fb5db87de316130b8cc5e98ac3f1f085efd`: deterministic rollover reproduced the
+failure, 41 focused cases passed and a separate six-case clock boundary review
+passed. Exact-head CI38800396328 and CodeQL38800390317 passed with all11 PR checks;
+later commits require their own publication checks. Production clock checks
+and the qualified installed runtime are unchanged.
 
 WSP15 executable prerequisite 18/P0 (C3/I5/D5/Impact5): close this bounds repair,
-qualify its exact installed runtime and replay disposable installation. Then19/P0 native
+reconcile the publication file inventory and replay disposable installation. Then19/P0 native
 installation/LOW grant-handshake becomes eligible. Continue existing R15 with
 admitted author, fixed independent evaluator, activation/rollback and later-use
 benefit. Holo query rejected authority/head mismatch; governed maintenance also

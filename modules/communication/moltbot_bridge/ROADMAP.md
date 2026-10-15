@@ -4,8 +4,11 @@ PR 2143/2144 are merged with passing exact-main CI/CodeQL. Disposable installati
 exposed64 KiB rejection of the approval, installed descriptor and 26 source files.
 Reuse the existing 1 MiB artifact limit explicitly; preserve64 KiB owner defaults.
 Author 131 and independent 87 Linux cases pass; connected CI selection passed
-689 with 3 skips. Close this 18/P0 repair, qualify the unified exact-source runtime with
-root/target/protected-installer entrypoints, and replay disposable installation.
+689 with 3 skips. Unified runtime34eed qualified:2691 files/362 directories,
+1254 exact Git Python sources. Disposable v6 passes activation/selection after
+directory/transport correction, then rejects an omitted bootstrap lock at
+generation publication. Close this18/P0 repair and reconcile the exact writer
+file inventory before fresh replay; preserve unknown-file rejection.
 Then 19/P0 authenticated native LOW grant/handshake and existing R15 gates follow.
 No native admission or retained gain; evidence: tests/TestModLog.md and dispatch.
 
