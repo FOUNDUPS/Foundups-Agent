@@ -84,16 +84,24 @@ def _prepare(root, monkeypatch):
 
 def _run(root, uid, operation, grant=None):
     source = Path(__file__).resolve().parents[4]
-    code = ('import sys,runpy;sys.path.extend(["/usr/lib/python3/dist-packages",'
-            '"/mnt/o/Foundups-Agent/.venv/Lib/site-packages",sys.argv.pop(1)]);'
+    code = ('import sys,runpy,json;sys.path[:]=json.loads(sys.argv.pop(1));'
             'runpy.run_path(sys.argv[1],run_name="__main__")')
-    completed = subprocess.run(['/usr/bin/setpriv', f'--reuid={uid}', f'--regid={GROUP}',
-        '--clear-groups', '--no-new-privs', '/usr/bin/python3', '-I', '-S', '-B', '-c', code,
-        str(source), str(Path(__file__).resolve()), str(root), operation],
-        input=json.dumps(grant), text=True, capture_output=True, timeout=30,
-        env={'PATH':'/usr/bin:/bin', 'PYTHONDONTWRITEBYTECODE':'1', 'PYTHON_DOTENV_DISABLED':'1'})
-    assert completed.returncode == 0, completed.stderr
-    return json.loads(completed.stdout)
+    paths = [str(source), *(str(Path(p).resolve()) for p in sys.path if p)]
+    read_fd, write_fd = os.pipe()
+    try:
+        try:
+            completed = subprocess.run(['/usr/bin/setpriv', f'--reuid={uid}', f'--regid={GROUP}',
+                '--clear-groups', '--no-new-privs', sys.executable, '-I', '-S', '-B', '-c', code,
+                json.dumps(paths), str(Path(__file__).resolve()), str(write_fd), str(root), operation],
+                input=json.dumps(grant), text=True, capture_output=True, timeout=30, pass_fds=(write_fd,),
+                env={'PATH':'/usr/bin:/bin', 'PYTHONDONTWRITEBYTECODE':'1', 'PYTHON_DOTENV_DISABLED':'1'})
+        finally:
+            os.close(write_fd)
+        assert completed.returncode == 0, completed.stderr
+        assert completed.stdout == ''
+        return json.loads(os.read(read_fd, os.fpathconf(read_fd, 'PC_PIPE_BUF') + 1))
+    finally:
+        os.close(read_fd)
 
 
 def _public_inputs(root):
@@ -176,9 +184,14 @@ def _worker():
     try:
         value = _issuer(root) if operation == 'issue' else _target(root, json.load(sys.stdin))
     except Exception as exc:
-        value = dict(accepted=False, error_type=type(exc).__name__, error=str(exc))
+        value = dict(accepted=False, error_type=type(exc).__name__)
     value.update(uid=os.geteuid(), gid=os.getegid(), key_started=KEY_STARTED)
-    print(json.dumps(value))
+    # Grant-shaped replies are private IPC, never stdout/stderr diagnostics.
+    reply_fd = int(sys.argv[-3])
+    payload = json.dumps(value).encode('utf-8')
+    assert len(payload) <= os.fpathconf(reply_fd, 'PC_PIPE_BUF')
+    assert os.write(reply_fd, payload) == len(payload)
+    os.close(reply_fd)
 
 
 def test_separate_uid_issuer_then_target_and_restart_rejections(monkeypatch):

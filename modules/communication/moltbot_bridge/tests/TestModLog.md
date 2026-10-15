@@ -1,3 +1,13 @@
+## Native fixture IPC closure — 2026-10-16
+
+PR2143 CodeQL flagged the synthetic grant-shaped reply on captured stdout.
+The separate-UID fixture now returns bounded bytes through a private inherited
+pipe, suppresses raw exception text and asserts stdout remains empty. It uses
+the active test interpreter and explicit dependency paths instead of WSL-only
+locations. Five native cases passed; independent review passed12 cases including
+seven IPC failure/cleanup controls. Production source is unchanged. Fresh hosted
+checks remain required; the original CodeQL failure is retained. WSP5/10/22/97.
+
 ## Installed consumer and runtime startup integration — 2026-10-16
 
 WSP00/5/10/11/15/22/48/50/62/71/84/97. Reused current enrollment, manifest,
