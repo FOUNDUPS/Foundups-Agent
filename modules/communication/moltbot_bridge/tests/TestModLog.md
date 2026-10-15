@@ -1,5 +1,12 @@
 ## Native fixture IPC closure — 2026-10-16
 
+The hosted runner also exposed a fixture UID collision: actual issuer UID1001
+equaled its synthetic target. The fixture now selects a distinct target and
+updates both owner and root snapshot consistently. The original failure was
+reproduced under UID1001;70 rate cases passed under each of UID1000 and1001.
+Independent UID1001 controls confirmed distinct roles pass and equal roles
+still fail in production validation. No identity restriction was relaxed.
+
 PR2143 CodeQL flagged the synthetic grant-shaped reply on captured stdout.
 The separate-UID fixture now returns bounded bytes through a private inherited
 pipe, suppresses raw exception text and asserts stdout remains empty. It uses

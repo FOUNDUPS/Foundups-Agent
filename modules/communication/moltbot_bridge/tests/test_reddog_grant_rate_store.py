@@ -120,6 +120,9 @@ def _runtime_case(tmp_path, monkeypatch):
     from modules.communication.moltbot_bridge.src import reddog_grant_authority_runtime_dependencies as runtime
     value = fixtures.build_case(tmp_path, monkeypatch)
     uid, gid = (os.geteuid(), os.getegid()) if os.name == 'posix' else (997, 997)
+    target_uid = 1002 if uid == 1001 else 1001
+    value.owner['verified_outcome_authority']['signer_uid'] = target_uid
+    value.values['snapshot'] = replace(value.values['snapshot'], signer_uid=target_uid)
     value.owner['independent_grant_authority'].update(authority_service_uid=uid, authority_service_gid=gid)
     original_peer = fixtures.root_fixture._grant_peer
     monkeypatch.setattr(fixtures.root_fixture, '_grant_peer',
