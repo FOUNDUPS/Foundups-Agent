@@ -8,6 +8,7 @@ from typing import Any, Mapping
 
 
 CANONICAL_AUTHORITY_TIERS = frozenset({"LOW", "HIGH", "ULTRA"})
+MAX_POLICY_TTL_SECONDS = 900
 _LIST_FIELDS = ("allowed_operations", "allowed_authority_tiers", "consensus_required_tiers")
 
 
@@ -155,6 +156,19 @@ def require_grant_service_bindings(raw: Mapping[str, Any]) -> None:
         or len(key_references) != 4
     ):
         raise ValueError("signer_owner_e0_grant_service_binding_invalid")
+
+
+def require_policy_time(raw: Mapping[str, Any], now_epoch: int) -> None:
+    issued = raw["issued_at"]
+    expires = raw["expires_at"]
+    if (
+        raw["generation"] < 1
+        or not 0 <= issued <= now_epoch < expires
+        or not 0 < expires - issued <= MAX_POLICY_TTL_SECONDS
+        or not 1 <= raw["rate_limit_window_seconds"] <= 3600
+        or not 1 <= raw["rate_limit_max_requests"] <= 1000
+    ):
+        raise ValueError("signer_owner_e0_policy_time_invalid")
 
 
 __all__ = [

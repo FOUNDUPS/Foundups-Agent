@@ -12,20 +12,26 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — issuer custody and source qualification (2026-10-16):**
-The existing issuer now has a protected dependency loader (owner v9), distinct
-signing/loader credentials, current E0 checks and issuer-only root LOAD. Author
-tests244pass and independent review63pass cover explicit synthetic installation
-seams. The adjacent empty-source repair passed actual confined source admission
-for220 modules/six initializers and19 independent checks. Neither result admits
-a native worker. Publication state and exact evidence remain in the
-[existing dispatch record](docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16).
+**Current checkpoint — installed issuer prerequisites (2026-10-16):**
+PR2139/2140/2141 are merged. Exact-main checks passed for2139/2140;2141
+main CodeQL passed; main CI exposed a clock-sampling race in the generation-lock
+regression (1 failed, 1,040 passed, 3 skipped). This candidate fixes only the test
+clock; 37 Linux cases cover controlled rollover and unchanged stale/future
+rejection. Hosted replacement validation remains open. The protected issuer custody
+loader passed328 connected cases and63 independent cases. Two actual isolated
+Linux trees then qualified; independent F inspection bound1,664 files,225 exact
+source modules/six real initializers and23 native mappings. Six tamper controls
+reject. These are credential-free import checks, not service admission.
 
-Next19/P0 (C4/I5/D5/Impact5): qualify a complete Linux runtime using existing
-protected source/sandbox owners, then explicitly enroll the installed issuer and
-prove one real LOW grant/handshake. Preserve archive profiles and initial versus
-work authority. R15 still requires independent evaluation, authorized retention/
-rollback and measured benefit on later unseen work. No new scheduler is needed.
+The candidate now prepares a canonical installed-source bundle and explicit E0
+v10 stable descriptor binding. Independent artifact review verified250 cases;
+policy review passed161. Initial-only scope and rejection by old execution paths
+remain enforced. See [current evidence and boundaries](docs/operations/RSI_SWARM_DISPATCH.md#protected-issuer-custody-and-runtime-qualification--2026-10-16).
+
+Next19/P0 (C4/I5/D5/Impact5): authenticated initial enrollment, current installed
+manifest consumption and target-internal LOW grant acquisition, then a real
+handshake. R15 still requires an admitted author, independent evaluation,
+authorized retention/rollback and measured later-use benefit. No new scheduler.
 
 **Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
 The candidate composes the existing LOW issuer, credential resolver, durable

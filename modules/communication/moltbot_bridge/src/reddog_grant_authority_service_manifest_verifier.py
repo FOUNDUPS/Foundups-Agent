@@ -51,7 +51,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10,
 )
 
 
@@ -60,6 +60,10 @@ def verify_current_grant_service_artifacts(
 ) -> Mapping[str, Any]:
     """Verify the exact E0-named manifest and all three grant artifacts."""
 
+    if policy.get("schema_version") == POLICY_SCHEMA_V10:
+        # Shape/hash support does not enroll an installed deployment. Do not
+        # interpret its runtime descriptor as a legacy archive policy.
+        raise RuntimeArtifactManifestError("grant_installed_profile_not_enrolled")
     with reddog_runtime_artifact_generation_lock(
         grant_root, repo_root=repo_root, allow_sealed=True
     ):

@@ -1,3 +1,13 @@
+## Installed issuer artifact and policy preparation — 2026-10-16
+
+WSP00/15/22/48/50/62/71/84/97. Added inert canonical installed-source bundle
+validation and explicit initial-only E0 v10 descriptor binding. Preserved legacy
+archive schemas, signing projections and fail-closed runtime rejection. Reused
+existing contract/custody/permission owners; no deployment or grant issued.
+Independent artifact250/policy161 cases and real F runtime qualification support
+only their bounded scopes. Next: authenticated enrollment/consumer and target
+internal grant acquisition before the native R15 experiment.
+
 ## Protected independent issuer custody — 2026-10-16
 
 WSP00/5/6/11/15/22/48/50/71/84/97. Explicit owner v9 supplies protected

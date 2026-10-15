@@ -423,7 +423,11 @@ _LEGACY_PROJECTION_VECTORS = [('reddog-signer-owner-e0-policy.v5',
  ('reddog-signer-owner-e0-policy.v8',
   'sha256:706348da87f7f27f50641d11075465f28cb891ef0f8de8a1219330538cb36112',
   'sha256:9875e7ee69615c59e70e0b8ae05f970c69236b04dad045da596cc901539c4d24',
-  'e94f017991d2cdd1609f162b2cabac9acdcb5594b9e65bff987ab9aa5d622827')]
+  'e94f017991d2cdd1609f162b2cabac9acdcb5594b9e65bff987ab9aa5d622827'),
+ ('reddog-signer-owner-e0-policy.v9',
+  'sha256:60e3f2ff72cf34a46f099b16716d1b714a11fee5903058d280f34fc64338f5cd',
+  'sha256:251f85ff3fbb55a5d0256bf3f6b7a6ccacd63bf1b447f4586eaf55b7c7f2c1d8',
+  '02cf9a58d6c58ca812a6bbd74d23520721432663e3ac27ede5cf04474d6f758b')]
 _V9_STABLE_FIELDS = ['allowed_authority_tiers',
  'allowed_operations',
  'audit_mac_key_ref_hash',
@@ -561,6 +565,6 @@ def test_v9_partial_projection_is_not_full_authority_and_cannot_downgrade():
     changed = dict(value, schema_version=pc.POLICY_SCHEMA_V8)
     assert not Ed25519SignatureVerifier().verify(value["grant_authority_public_key"], pc.canonical_signer_owner_e0_policy_input(changed), value["signature"])
     assert pc.POLICY_SCHEMA == pc.POLICY_SCHEMA_V6
-    for schema in ("reddog-signer-owner-e0-policy.v10", None, True, 9):
+    for schema in ("reddog-signer-owner-e0-policy.v11", None, True, 9):
         with pytest.raises(ValueError):
             pc.canonical_signer_owner_e0_policy_input(dict(value, schema_version=schema))

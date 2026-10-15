@@ -135,6 +135,13 @@ def _permission_fixture(root, values, monkeypatch):
     return lease
 
 
+def _fixed_epoch_runtime(root, monkeypatch):
+    # Lock ordering uses a fixed wall clock; real monotonic time still bounds RPCs.
+    epoch = int(time.time())
+    monkeypatch.setattr(time, 'time', lambda: epoch)
+    return _runtime(root, monkeypatch)
+
+
 @pytest.mark.parametrize('mode', ['old-order','current','policy','generation','expiry'])
 def test_permission_root_load_generation_lock_across_processes(monkeypatch, mode):
     with tempfile.TemporaryDirectory(prefix='issuer-load-') as directory:
@@ -143,7 +150,7 @@ def test_permission_root_load_generation_lock_across_processes(monkeypatch, mode
         (root/'owner'/'current.json').write_text(json.dumps(dict(policy='original', generation=1, expiry='live')))
         with _lock(root):
             pass
-        values = _runtime(root/'fixture', monkeypatch)
+        values = _fixed_epoch_runtime(root/'fixture', monkeypatch)
         # Keep the synthetic target distinct from the real issuer on UID1001 CI hosts.
         target_uid = 1002 if os.getuid() == 1001 else 1001
         values['snapshot'] = replace(values['snapshot'], signer_uid=target_uid)
