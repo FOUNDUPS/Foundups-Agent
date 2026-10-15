@@ -1,3 +1,15 @@
+## Verifier-guided RSI loop audit — 2026-10-15
+
+WSP00/15/22/48/50/97; sourcea6a63b8e9. Researched Nigel/REA/ArtCraft primary
+sources and mapped the bounded attempt/verifier/re-observe pattern into existing
+R15. Recorded fixed-oracle, later-use/control, rejection and cost denominators;
+kept native admission first and FoundUp/game rewards under existing R20/R24.
+No new scheduler, runtime implementation, product or token activation. Existing
+63 contract cases pass; synthetic evidence is not native RSI. Governed Holo
+query is CURRENT/no-gap but noisy. Reconciled PR2134 merge/maintenance closure
+from exact receipts; retained historical failures. See
+docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15.
+
 ## Protected initial writer — 2026-10-14
 
 Added the missing bounded issuer over existing generation/witness stores; guarded

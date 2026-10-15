@@ -1218,6 +1218,15 @@
         "basis": "Complete observed-to-retained cycle; actual subsequent benefit; unchanged independent oracle; one forced regression and rollback"
       },
       "research_harness_boundary": "WRE Auto Researcher is a reuse candidate only where its literal ROC-target contract fits; keep the registry-workflow oracle separate and fixed",
+      "verifier_loop_research": {
+        "audited_on": "2026-10-15",
+        "source_commit": "a6a63b8e9098c5b35629fd76629b96d3089af566",
+        "details": "docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15",
+        "decision": "Reuse Nigel's candidate/attempt/external-check/re-observe pattern through existing WRE owners; no second scheduler or best-effort promotion",
+        "oracle_boundary": "Freeze generator, classifier, dependencies, candidate enumerator and required cases outside author scope; compare retained versus disabled improvement on later unseen inputs",
+        "acceptance_satisfied": false,
+        "execution_authority": "none; planning only"
+      },
       "preparatory_evidence": {
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
         "observed_on": "2026-09-13",
@@ -1880,8 +1889,8 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.initial_writer_20261014",
-    "base_commit": "5dd7b7b9f569ddaf966a21e9cc95e5a764d29588",
+    "observation_path": "current_observation.verifier_loop_audit_20261015",
+    "base_commit": "a6a63b8e9098c5b35629fd76629b96d3089af566",
     "selected_action": "Resolve authentic owner enrollment for one admitted native author ticket",
     "status": "IN_PROGRESS",
     "wsp15": {
@@ -1896,6 +1905,19 @@
     "next_action": "Compose existing authenticated manifest provisioning using real admitted inputs, then one native author and independent verifier. Protected initial writer component is validated; fixture manifests do not establish activation, worker admission or retained RSI benefit."
   },
   "current_observation": {
+    "verifier_loop_audit_20261015": {
+      "source_commit": "a6a63b8e9098c5b35629fd76629b96d3089af566",
+      "prior_observation": "current_observation.initial_writer_20261014",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15",
+      "writer_publication": "PR2134 merged; exact-main CI and CodeQL passed",
+      "governed_holo_query": "CURRENT; no index gap; source-bound; ranking noisy",
+      "existing_contract_tests": {"passed": 63, "failed": 0, "skipped": 0, "warnings": 2},
+      "test_truth_boundary": "synthetic receipts and negative contracts, not native execution or authenticated end-to-end independence",
+      "native_author_admissions_in_this_audit": 0,
+      "retained_rsi_benefit_demonstrated": false,
+      "production_rsi_complete": false,
+      "selection_change": "none; explicit authenticated first-manifest admission remains next, R15 verifier loop then R20/R24 game and simulated reward expansion"
+    },
     "initial_writer_20261014": {
       "base_commit": "5dd7b7b9f569ddaf966a21e9cc95e5a764d29588",
       "scope": "root_installed_initial_writer_over_existing_stores",

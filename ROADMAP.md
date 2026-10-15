@@ -12,6 +12,15 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+**Verifier-guided loop audit — 2026-10-15:** Nigel's candidate → bounded attempt →
+external verification → re-observe pattern fits existing R15; it does not require
+another orchestrator. Keep the internal registry-workflow canary first, with a
+frozen independent oracle and later-use/control comparison. Games and simulated
+contribution rewards follow existing R20/R24 after native admission, not before it.
+See [research, owner mapping and measurable acceptance](docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15).
+WSP15 remains18/P0 for authentic first-manifest admission; R15 also18/P0 remains
+dependency-gated. This audit grants no execution or token authority.
+
 **Current checkpoint — protected initial writer (2026-10-14):**
 PR #2133 merged as `5dd7b7b9f`; reviewed/merged trees match. PR checks and main
 CI38492205671/CodeQL38492205277 passed; its clean owned lane is retired with a
@@ -31,8 +40,11 @@ promotion or retained RSI gain is established. WSP15 stays18/P0 (4/5/5/4): next
 compose existing authenticated manifest provisioning with real admitted inputs,
 then run one native author and independent verifier. Source publication is a
 separate gate; see [evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#protected-initial-writer--2026-10-14).
-Holo remains degraded pending governed recovery of its executing maintenance
-lease; direct source retrieval is not CURRENT semantic evidence.
+Closure verified2026-10-15: this writer shipped in PR2134, merged `a6a63b8e9`;
+PR/main CI and CodeQL passed. The subsequent governed maintenance completed,
+stopped both owned runtimes, and restored CURRENT/no-gap retrieval at that exact
+source. A new October15 query confirms it; noisy ranking still requires direct
+canonical reads. These receipts do not establish freshness at future revisions.
 
 **Historical checkpoint — bounded initial high-water signing (2026-10-14):**
 PR #2132 merged as `1af66972c`; its reviewed tree matches main. PR CI/CodeQL and
