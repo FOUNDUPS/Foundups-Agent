@@ -1,3 +1,28 @@
+## Initial handshake configuration — 2026-10-15
+
+`compose_initial_handshake_service_config(...)` in the existing
+`reddog_signer_socket_service_config_composition.py` returns a validated public
+`reddog_initial_handshake_service_config.v1` mapping; it does not write files,
+issue grants or resolve credentials. Keyword inputs: repo/runtime/signer roots,
+socket path, one key-provider profile, peer policy, E0 authority binding digest,
+timeout and request/response byte limits. The schema fixes `max_requests=1`,
+WSP71 permissioned provider mode and `allow_test_only_key_material=false`.
+
+The typed `initial_handshake_only` mode admits exactly generation1 and the
+`reddog-work-authority` / `signer:reddog` profile with distinct signing/MAC refs.
+The writable socket parent is separate from immutable artifacts and signer
+state; startup checks also preserve authority/replay/revocation separation.
+Mixed work/control/proposal/outcome/conversation policies are rejected.
+Authenticated E0 scope must be exactly `signer_socket_peer_handshake`, LOW, with
+no consensus authorities. HIGH/ULTRA rules for other configurations are unchanged.
+JSON policy lists become canonical immutable tuples after validation.
+
+Non-handshake requests reject before grant consumption/key resolution and again
+under the current-generation owner lease with exact peer-instance binding.
+Manifest authenticity, E0 scope and request grants remain independent gates.
+The separate production grant issuer composition and real native admission are
+still required; this schema does not certify their availability.
+
 ## Initial runtime manifest enrollment — 2026-10-15
 
 `load_initial_runtime_manifest_signing_context(*, approval_path, repo_root)` in

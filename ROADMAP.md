@@ -12,7 +12,24 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — initial manifest activation (2026-10-15):**
+**Current checkpoint — initial handshake composition (2026-10-15):**
+PR2136 is merged at `1d847ad1f83022f3ace0d4be5f4098ffdb9806e7`; exact-main
+CI38733808172 and CodeQL38733807786 succeeded. Its owned worktree is retired
+with evidence preserved. The current slice reuses the service configuration,
+E0 admission and per-request owners for one LOW handshake at generation1.
+Independent held-out contract checks passed74 cases; native handshake and author
+execution remain unproven. Initial manifests authenticate bytes, E0 authorizes
+scope, and a separate request grant authorizes use; none substitutes for another.
+
+The next executable dependency is the existing independent grant issuer's
+missing production server composition (WSP15: C4/I5/D5/Impact5 =19/P0).
+Its client, validators, signing backend and durable rate controls exist. Compose
+those owners, qualify authentic policy/custody and a real grant response, then
+connect the handshake and R15 author/verifier/retained-use experiment. Do not add
+another scheduler or treat possession of a role key as admission.
+See [current evidence and scope](docs/operations/RSI_SWARM_DISPATCH.md#initial-handshake-composition--2026-10-15).
+
+**Historical checkpoint — initial manifest activation (2026-10-15):**
 The isolated Linux component now publishes an authenticated initial manifest,
 activates generation1 through existing atomic recovery, and selects it in a
 separate credential-free reader. Independent repeat selection preserves the

@@ -1,3 +1,14 @@
+## Initial handshake configuration — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Reused existing configuration,
+E0 selection and per-request backend for one initial LOW handshake. Distinct
+schema prevents mixed policy admission; separate socket root preserves immutable
+artifacts. Scope rejects before grants/keys and during current owner lease.
+Connected testing repaired frozen-policy tuple comparison. Independent74 held-out
+cases passed; no native handshake/worker/RSI claim. Production grant issuer
+composition is the next19/P0 dependency. Existing runbook holds exact evidence
+and prior PR2136 merged/main-validated/owned-cleanup closure.
+
 ## Initial manifest and Linux activation — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Reused same-nonce atomic recovery;

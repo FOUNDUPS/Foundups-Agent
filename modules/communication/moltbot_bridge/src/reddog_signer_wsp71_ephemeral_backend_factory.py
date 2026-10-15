@@ -8,6 +8,7 @@ from threading import RLock
 import time
 from typing import Any
 
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_authority_policy_runtime import initial_handshake_request_allowed
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     ControlLoopAuthorityPolicy,
 )
@@ -153,13 +154,15 @@ class Wsp71EphemeralSignerBackendFactory:
 
 
 @contextmanager
-def _lease_authenticated_factory(factory: Any, expected_binding: Any, boundary: Any):
+def _lease_authenticated_factory(factory: Any, expected_binding: Any, boundary: Any, request: Any = None):
     """Require a real owner lease matching the consuming backend's binding."""
     from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import ResolvePerSignBinding
     from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant import SignerSecretAccessGrantBoundary
     if type(factory) is not Wsp71EphemeralSignerBackendFactory:
         raise ValueError("signer_grant_factory_unverified")
     with Wsp71EphemeralSignerBackendFactory.signing_authority_lease(factory) as binding:
+        if not initial_handshake_request_allowed(factory, request):
+            raise ValueError("signer_initial_handshake_request_invalid")
         if not (type(binding) is type(expected_binding) is ResolvePerSignBinding
                 and binding == expected_binding and type(boundary) is SignerSecretAccessGrantBoundary
                 and boundary._nonce_store is factory.owner_context[1].replay_store

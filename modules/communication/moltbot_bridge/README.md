@@ -1,3 +1,11 @@
+## Initial handshake configuration — 2026-10-15
+
+The existing signer composer now supports one explicitly scoped initial LOW
+handshake under E0 and per-request grants. It creates public configuration only;
+native startup still needs the independent grant issuer and authentic custody.
+See [the interface](INTERFACE.md#initial-handshake-configuration--2026-10-15)
+and the current RSI dispatch evidence before attempting runtime activation.
+
 ## Initial manifest activation — 2026-10-15
 
 Protected administrative enrollment signs one exact source/artifact inventory in

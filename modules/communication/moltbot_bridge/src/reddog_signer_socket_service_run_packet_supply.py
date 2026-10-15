@@ -22,6 +22,9 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import (
+    INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_WSP71_PERMISSIONED,
 )
@@ -232,7 +235,7 @@ def _config_reasons(
     expected_runtime_root: Path,
     payload: Mapping[str, Any],
 ) -> tuple[str, ...]:
-    if payload.get("schema_version") != SIGNER_SERVICE_CONFIG_SCHEMA_VERSION:
+    if payload.get("schema_version") not in (SIGNER_SERVICE_CONFIG_SCHEMA_VERSION, INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION):
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)
     if payload.get("provider_mode") != PROVIDER_MODE_WSP71_PERMISSIONED:
         return (FAIL_SIGNER_RUN_PACKET_CONFIG_MALFORMED,)

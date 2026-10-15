@@ -1,3 +1,15 @@
+## Initial handshake composition — 2026-10-15
+
+Reuse the existing service composer, E0 selection and per-request backend for
+generation1, one LOW handshake, no work policies. Independent74 held-out checks
+passed; native service/admission remains unproven. PR2136 initial-manifest source
+is merged/main-validated and its lane retired. Next19/P0 (C4/I5/D5/Impact5):
+compose the existing independent grant issuer server, authentic policy/custody,
+durable rate and one real grant response. Preserve independent authorization;
+never bootstrap that issuer through the target's grant-required backend.
+Then connect native handshake, author/verifier and retained-use/rollback gates.
+Detailed current evidence remains in the existing RSI dispatch runbook.
+
 ## Initial manifest checkpoint — 2026-10-15
 
 Native isolated component publication -> generation1 activation -> credential-free
