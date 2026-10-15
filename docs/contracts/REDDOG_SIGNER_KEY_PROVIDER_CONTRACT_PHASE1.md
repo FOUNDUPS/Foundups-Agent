@@ -298,6 +298,34 @@ still depends on the existing protected-parent trust boundary. Non-POSIX retains
 close-before-unlink behavior. Replacement paths are preserved on identity mismatch.
 
 
+## Protected issuer startup custody — 2026-10-16
+
+`materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_root,
+expected_owner_config_id)` loads protected owner v9 and returns the existing
+`GrantAuthorityServiceDependencies` for `serve_grant_authority_once`. It installs
+nothing and does not issue grants. Owner v1–v8 schemas retain their old fields.
+
+The v9 `grant_startup_custody` block contains `signing_key_ref`,
+`audit_mac_key_ref`, `credential_binding`, `loader_credential_binding`,
+`root_load_permission` and `replay_integrity_permission`. Signing custody names
+exactly signing/audit IDs; loader custody names exactly signing/replay IDs in
+the same protected directory. The three references must be distinct. Signing
+requester is the current E0 signer-agent ID; loader requester is the current
+issuer principal. Both bind its UID/GID and current key/epoch; its UID must differ
+from the target's. The
+issuer's UID, identity and proof key cannot substitute for target authority.
+
+Metadata does not grant permission: current authenticated E0 binds actual refs,
+profile, receipt, key and scope. Isolation precedes replay credential access.
+The existing resolver, durable replay owner and issuer-only root LOAD oracle
+are reused. No E0 generation lease spans root RPC; owner/full-policy/custody/time
+are revalidated after RPC and before returning. Each proof signing operation
+rechecks purpose, requester, identity and expiry through existing custody.
+
+The loader remains a callable with tested synthetic installation boundaries.
+Authenticated installed-runtime deployment, real custody provisioning and a
+native LOW request remain prerequisites; this is not a new service launcher.
+
 ## Installed source empty-file semantics — 2026-10-16
 
 The initial enrollment authority's protected source inventory permits zero-byte

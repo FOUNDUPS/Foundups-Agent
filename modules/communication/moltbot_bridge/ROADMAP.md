@@ -1,14 +1,14 @@
-## Callable grant issuer checkpoint — 2026-10-15
+## Protected issuer custody checkpoint — 2026-10-16
 
 The one-request LOW issuer composition is implemented and independently reviewed.
-Its Linux socket qualification uses synthetic authority and custody. It does not
-provide a CLI or load installed dependencies. E0 v9 and the LOW RPC lock repair
-are present in the connected validation base.
+Owner v9 now supplies distinct protected signing/loader custody through existing
+E0, systemd resolver, durable replay and issuer-only LOAD owners. Tests preserve
+synthetic installation seams; there is no native CLI or admitted worker yet.
 
 The companion issuer-only root LOAD slice binds current identity and releases
-the permission generation fence around its RPC. Next19/P0: supply protected
-issuer custody/dependencies through existing owners and authenticate the issuer's
-installed-source deployment. Preserve separate signing/audit/replay credentials
+the permission generation fence around its RPC. Next19/P0: qualify the complete
+Linux runtime and authenticate the issuer's initial installed-source deployment.
+Preserve archive profiles and separate signing/audit/replay credentials
 and genuine permission/state evidence. Only then prove a real grant and native
 LOW handshake before the existing R15 author/verifier/retained-use experiment.
 No native admission or measured RSI benefit is established by this checkpoint.

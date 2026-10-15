@@ -1,3 +1,14 @@
+## Protected issuer custody and runtime prerequisite — 2026-10-16
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Added explicit owner-v9 issuer
+custody through existing resolver/replay/E0/root-LOAD owners. Preserved old schema
+and identity separation; no generation lease spans RPC. Combined12-suite Linux
+validation passed328 cases; independent custody review passed63. The adjacent
+empty-source reader qualified220 source modules in actual credential-free
+confinement. Root roadmap, existing backlog/runbook/contracts and generated
+registry/manifest bind this checkpoint. Next: qualify the complete Linux runtime
+and initial installed-issuer enrollment; no native admission or RSI gain claimed.
+
 ## Bounded grant issuer and root LOAD — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Connected existing LOW issuer owners

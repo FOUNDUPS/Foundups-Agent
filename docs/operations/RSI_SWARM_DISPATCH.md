@@ -1,3 +1,51 @@
+## Protected issuer custody and runtime qualification — 2026-10-16
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Existing issuer dependency materialization
+now consumes explicit owner v9 custody. Signing and loader bindings have separate
+two-ID scopes; actual refs, purpose, requester and key/epoch bind current E0.
+Isolation precedes credential resolution. Existing replay and issuer-only root
+LOAD owners are reused; no generation lease spans RPC, and full owner/policy/time
+are checked again. Prior owner schemas and their model/effect/reviewer consumers
+retain their validation. See the existing
+[custody contract](../contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#protected-issuer-startup-custody--2026-10-16).
+
+Evidence root remains `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`.
+The frozen custody candidate passed244 author cases and63 independent cases,
+including12 held-outs. OS custody/owner/isolation are synthetic; E0, signature,
+resolver lifetime, replay and LOAD routing are exercised. Receipts:
+`grant-custody-source-inventory.json` and
+`custody-review/independent-grant-custody-review.json`.
+
+Actual confined source qualification found and repaired rejection of an empty
+tracked package initializer. Its independent rerun binds220 modules/six real
+initializers, passes19 real-file checks and denies network syscalls. Connected
+root Linux suites passed84 cases. Source admission is distinct from the188
+observed external runtime files/26 native mappings: those observations are not
+complete future runtime closure. Preserve the failed control and accepted rerun
+under `installed-source-qualification/empty-source-candidate/`.
+
+PR2139's first CI failed a positive LOAD case (989pass/1fail/3skip). Controlled
+UID1001 execution reproduced an issuer/target test identity collision; the fixture
+now keeps them distinct and the same-UID negative still rejects. The actual backend
+consumer also exposed stale1426 versus1428 closure sizing; finite bounds, digest,
+path/hash and byte limits remain enforced and its contract now runs in CI. PR2140
+contains the independently reviewed empty-source repair. Current publication
+must be checked at exact heads; source qualification is not deployment.
+
+WSP15 remains19/P0 for installed admission. Docker's CLI exists but its engine
+and a pinned image are unavailable; no qualified root image was found. Prefer a
+bounded protected Linux tree and fixed isolated launch over porting the whole
+Windows runtime qualification framework. Qualify interpreter, complete stdlib,
+cryptography/cffi and ELF dependencies; disable implicit site initialization.
+Then add the smallest explicit initial installed-issuer profile through existing
+config/manifest/E0/publisher/consumer owners, preserving archive semantics and
+the acyclic stable-source → target generation → permission → grant-manifest order.
+An imported service, role key or self-signed manifest is not admitted authority.
+Only then run the existing native LOW grant/handshake and R15 retained-use trial.
+
+No paid calls, native worker admission, promotion or retained RSI benefit are
+proved by this checkpoint. No second roadmap, scheduler or authority store exists.
+
 ## Bounded grant issuer and root LOAD — 2026-10-15
 
 WSP00/5/6/10/11/15/22/48/50/62/71/84/97; source base
