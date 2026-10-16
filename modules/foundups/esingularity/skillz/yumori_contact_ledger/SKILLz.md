@@ -141,6 +141,32 @@ Example opening: `旧羽生小学校・旧下宇坂小学校の事前相談に�
 Example closing: `お手数ですが、ご確認のほどよろしくお願いいたします。` followed by
 `YUMORI.me設立準備委員会`.
 
+### Website-first publication links and clean external email (2026-10-16)
+
+- Apply the generic Red Dog `reddog_correspondence_state` **Recipient-facing
+  link/source and HOLD-content gate** before every external send or send-ready
+  draft; this rule also applies when the Gmail tool can be called directly.
+- For **Japan Hyperscaler Report (JHR)**, the primary owned publication is the
+  eSingularity.ai website, with the publicly observed archive at
+  `https://www.esingularity.ai/reports/jhr`. LinkedIn newsletters are
+  secondary syndication, not the source link for YUMORI government email.
+- Check the live archive for the exact issue before naming it. On 2026-10-16,
+  the website page displayed **JHR #002** as the newest edition, although an
+  archived draft referred to LinkedIn's **#003**; do not assert that #003
+  exists on the website until verified. Prefer the neutral label
+  `Japan Hyperscaler Report（eSingularity.ai掲載記事）` meanwhile.
+- No full percent-encoded LinkedIn `/pulse/` link or tracking URL in the
+  visible email. Cite a short verified first-party URL or a descriptive link.
+  Omit JHR altogether from a procedural joint-application question unless
+  the reader actually needs the report.
+- Internal archival drafts marked `内部保管・このまま送信しない` or `HOLD`
+  remain **unsent**. Never copy their internal header, expired deadlines,
+  recipient instructions or raw historical body into a send-ready message.
+  Recompose a new, concise letter if a future send is independently authorized.
+- Audit actual Gmail draft rendering, not only input Markdown or composer text.
+  If a provider-added quoted thread exposes an unwanted oversized URL,
+  revise/hold rather than claiming the message is clean.
+
 ### Existing drafts and other channels
 
 Apply this policy to newly authored external text and authorized edits of existing
