@@ -549,16 +549,16 @@ def test_reddog_email_link_source_quality_policy() -> None:
     assert "Gmail provider success or a" in generic
 
     assert "Website-first publication links" in yumori
-    assert "https://www.esingularity.ai/reports/jhr" in yumori
+    assert "https://esingularity.ai/reports/jhr" in yumori
     assert "LinkedIn newsletters are" in yumori
     assert "secondary syndication" in yumori
-    assert "the website page displayed **JHR #002**" in yumori
-    assert "do not assert that #003" in yumori
+    assert "the production website served **JHR #001 only**" in yumori
+    assert "Do not assert that #003" in yumori
     assert "内部保管・このまま送信しない" in yumori
     assert "unrelated" in yumori
 
     assert "publisher-owned" in document_audit
     assert "long," in document_audit
     assert "percent-encoded bare URLs" in document_audit
-    assert "never cite it as #003" in document_audit
+    assert "never\n  cite the live website as #003" in document_audit
     assert "SUPERSEDED／送信禁止" in document_audit
