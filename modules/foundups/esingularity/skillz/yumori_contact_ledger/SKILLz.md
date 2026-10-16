@@ -148,13 +148,16 @@ Example closing: `お手数ですが、ご確認のほどよろしくお願い�
   draft; this rule also applies when the Gmail tool can be called directly.
 - For **Japan Hyperscaler Report (JHR)**, the primary owned publication is the
   eSingularity.ai website, with the publicly observed archive at
-  `https://www.esingularity.ai/reports/jhr`. LinkedIn newsletters are
+  `https://esingularity.ai/reports/jhr`. LinkedIn newsletters are
   secondary syndication, not the source link for YUMORI government email.
 - Check the live archive for the exact issue before naming it. On 2026-10-16,
-  the website page displayed **JHR #002** as the newest edition, although an
-  archived draft referred to LinkedIn's **#003**; do not assert that #003
-  exists on the website until verified. Prefer the neutral label
-  `Japan Hyperscaler Report（eSingularity.ai掲載記事）` meanwhile.
+  the production website served **JHR #001 only**, while GitHub already
+  contained **#003** and a prior Sites deployment had verified **#002**.
+  This is a live publication regression, not permission to cite a repository
+  issue as published. LinkedIn #003 is not proof of eSingularity.ai #003.
+  Do not assert that #003 exists on the website until the actual public issue
+  is independently verified; otherwise cite only the verified archive and
+  describe its displayed issue truthfully.
 - No full percent-encoded LinkedIn `/pulse/` link or tracking URL in the
   visible email. Cite a short verified first-party URL or a descriptive link.
   Omit JHR altogether from a procedural joint-application question unless
