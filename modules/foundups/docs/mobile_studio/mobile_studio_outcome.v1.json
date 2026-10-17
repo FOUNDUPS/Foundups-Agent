@@ -1,0 +1,377 @@
+{
+  "schema_version": "pfmall.mobile_studio.outcome.v1",
+  "status": "SPECIFIED_NOT_IMPLEMENTED",
+  "execution_admission": "NOT_GRANTED",
+  "artifact_role": "Planning input; not an executable work order, identity manifest, accepted allocation or runtime registration",
+  "checked_at": "2026-10-17",
+  "source": {
+    "repository": "FOUNDUPS/Foundups-Agent",
+    "branch": "main",
+    "commit": "407292aa754a88143796163581b67ca6679eac29"
+  },
+  "owner": "modules/foundups/pfmall",
+  "normative_documents": [
+    "modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md",
+    "modules/foundups/docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md",
+    "modules/foundups/pfmall/INTERFACE.md",
+    "modules/foundups/pfmall/ROADMAP.md"
+  ],
+  "consumption_order": [
+    "Read current owner Tier-0 documents and current main",
+    "Revalidate provider constraints and actual project/channel capabilities",
+    "Resolve one bounded slice through the existing FoundUp build-plan and execution-admission contracts",
+    "Update affected documentation before implementation",
+    "Implement and verify only the admitted slice; report observed results and unresolved blockers"
+  ],
+  "pain": [
+    "Phone production, YouTube event setup and Play discovery are disconnected",
+    "Manual stream-key handling and recovery can target the wrong channel or duplicate a show",
+    "The current Mall presentation layer cannot establish creator OAuth authority or public live state"
+  ],
+  "desired_outcome": "An authorized creator previews a phone scene, explicitly publishes to the intended YouTube channel, appears in Play from provider-confirmed evidence, recovers from tested interruptions, explicitly ends, and starts a later event reusing a valid input without duplicating broadcasts",
+  "solution": {
+    "native_media": "One native platform first; camera, microphone, scene composition, hardware encoding and local recording",
+    "creator_control": "A separately authenticated backend with scoped channel OAuth, durable request reconciliation, quota budgets and observed lifecycle",
+    "initial_media_transport": "Phone RTMPS directly to YouTube ingest",
+    "play_surface": "Public-safe live catalog projection plus permitted embed or approved watch-link fallback",
+    "future_agent_role": "Admitted intent translation through existing RedDog/OpenClaw/WRE boundaries; no browser-derived worker or channel authority"
+  },
+  "existing_reuse": [
+    {
+      "path": "modules/foundups/pfmall",
+      "capability": "Shell, catalog, routes and advisory presentation",
+      "required_change": "New authenticated creator service and authoritative live read projection"
+    },
+    {
+      "path": "public/member",
+      "capability": "Video tiles, creator filters, queue playback and presentation dispatcher",
+      "required_change": "Fresh live-state display and visibility/embed fallback; no credential storage"
+    },
+    {
+      "path": "modules/platform_integration/antifafm_broadcaster/src/youtube_broadcast_manager.py",
+      "capability": "YouTube broadcast/input/bind/transition patterns",
+      "required_change": "Audit channel fallbacks, defaults, audience, token scope and key logging before extracting general adapter"
+    },
+    {
+      "path": "modules/platform_integration/antifafm_broadcaster/src/youtube_ingest_resolver.py",
+      "capability": "Fetch bound ingest configuration after heuristic broadcast selection",
+      "required_change": "Require exact session/channel/broadcast binding and RTMPS; reject mismatches instead of warning or choosing the first show; authenticated secret transfer and redacted receipts"
+    }
+  ],
+  "unresolved_inputs": [
+    {
+      "id": "U1",
+      "name": "Initial iOS or Android device and OS",
+      "status": "UNSELECTED"
+    },
+    {
+      "id": "U2",
+      "name": "Google Cloud project, OAuth clients, quota allocation and verification",
+      "status": "UNVERIFIED"
+    },
+    {
+      "id": "U3",
+      "name": "Actual creator channel, ownership, live and embed capability",
+      "status": "UNVERIFIED"
+    },
+    {
+      "id": "U4",
+      "name": "Secure service host, token storage and operational owner",
+      "status": "UNSELECTED"
+    },
+    {
+      "id": "U5",
+      "name": "Pinned native dependency revisions and license/asset inventory",
+      "status": "UNVERIFIED"
+    }
+  ],
+  "obstacles": [
+    {
+      "id": "O1",
+      "problem": "Channel eligibility and embedding differ",
+      "resolution": "Probe the authorized channel and preserve a watch-link fallback",
+      "acceptance": [
+        "AC01",
+        "AC08"
+      ]
+    },
+    {
+      "id": "O2",
+      "problem": "YouTube OAuth testing expires and does not establish production readiness",
+      "resolution": "Separate test authorization, production verification and channel consent evidence",
+      "acceptance": [
+        "AC01",
+        "AC09"
+      ]
+    },
+    {
+      "id": "O3",
+      "problem": "External writes can succeed without a received response",
+      "resolution": "Persist intent, serialize controllers and reconcile ambiguity without blind recreation",
+      "acceptance": [
+        "AC02",
+        "AC03",
+        "AC04"
+      ]
+    },
+    {
+      "id": "O4",
+      "problem": "Mobile backgrounding, heat, audio routes and networks disrupt media",
+      "resolution": "Device-specific recording and recovery trials with explicit support boundaries",
+      "acceptance": [
+        "AC05",
+        "AC06"
+      ]
+    },
+    {
+      "id": "O5",
+      "problem": "Chat/read traffic can exhaust shared quota",
+      "resolution": "Centralize observations, prefer server streaming, honor polling interval, budget per project and creator",
+      "acceptance": [
+        "AC09"
+      ]
+    },
+    {
+      "id": "O6",
+      "problem": "Catalog/UI state can falsely imply a publicly live show",
+      "resolution": "Publish permitted provider observations with timestamps and an unknown state",
+      "acceptance": [
+        "AC07",
+        "AC08"
+      ]
+    },
+    {
+      "id": "O7",
+      "problem": "Playback monetization, membership and provider data have distinct rules",
+      "resolution": "Keep independent paid benefits and data retention explicit; no implied payout or video entitlement",
+      "acceptance": [
+        "AC09"
+      ]
+    }
+  ],
+  "proposed_mutation_envelope": {
+    "required_fields": [
+      "request_id",
+      "principal_id",
+      "youtube_channel_id",
+      "intent_digest",
+      "consent_ref",
+      "expires_at"
+    ],
+    "rules": [
+      "Independently authenticate principal, channel and consent at the backend",
+      "Reject changed intent under a reused request ID",
+      "Serialize writes per session and reject stale revisions",
+      "Persist intent before provider write and provider identity after observation",
+      "Treat unresolved create response as uncertain; never assume provider-side idempotency",
+      "Credential references require independent authorization and are never public bearer grants"
+    ],
+    "existing_session_required_fields": [
+      "session_id",
+      "expected_revision"
+    ],
+    "prepare_session": "Uses common required fields; returns server-issued session_id and initial revision; matching authenticated request_id and intent digest replay the same session"
+  },
+  "proposed_observation": {
+    "fields": [
+      "session_id",
+      "revision",
+      "transport_state",
+      "ingest_state",
+      "broadcast_state",
+      "playback_state",
+      "observed_at",
+      "source",
+      "error_category",
+      "retry_after"
+    ],
+    "public_projection_allowlist": [
+      "creator_identity",
+      "broadcast_id",
+      "title",
+      "watch_url",
+      "approved_embed_url",
+      "broadcast_state",
+      "observed_at",
+      "source",
+      "archive_state"
+    ],
+    "forbidden_public_data": [
+      "oauth_tokens",
+      "stream_keys",
+      "ingest_credentials",
+      "private_account_details",
+      "raw_provider_payloads"
+    ],
+    "stale_evidence_result": "unknown",
+    "terminal_provider_states": [
+      "complete",
+      "revoked"
+    ]
+  },
+  "slices": [
+    {
+      "id": "MS0",
+      "status": "DOCUMENTATION_ONLY",
+      "depends_on": [],
+      "deliverable": "Evidence register, reuse map, machine outcome and roadmap"
+    },
+    {
+      "id": "MS1",
+      "status": "PLANNED",
+      "depends_on": [
+        "MS0"
+      ],
+      "deliverable": "Scoped creator API adapter and one explicitly authorized channel spike",
+      "acceptance": [
+        "AC01",
+        "AC02",
+        "AC03",
+        "AC04"
+      ],
+      "blocked_on": [
+        "U2",
+        "U3",
+        "U4"
+      ]
+    },
+    {
+      "id": "MS2",
+      "status": "PLANNED",
+      "depends_on": [
+        "MS1"
+      ],
+      "deliverable": "One-platform native media spike",
+      "acceptance": [
+        "AC05",
+        "AC06"
+      ],
+      "blocked_on": [
+        "U1",
+        "U5"
+      ]
+    },
+    {
+      "id": "MS3",
+      "status": "PLANNED",
+      "depends_on": [
+        "MS1",
+        "MS2"
+      ],
+      "deliverable": "Play provider-confirmed live projection and playback fallback",
+      "acceptance": [
+        "AC07",
+        "AC08"
+      ],
+      "blocked_on": [
+        "U4"
+      ]
+    },
+    {
+      "id": "MS4",
+      "status": "PLANNED",
+      "depends_on": [
+        "MS3"
+      ],
+      "deliverable": "Production authorization, recovery, retention and support evidence",
+      "acceptance": [
+        "AC04",
+        "AC06",
+        "AC09"
+      ],
+      "blocked_on": [
+        "U2",
+        "U3",
+        "U4"
+      ]
+    },
+    {
+      "id": "MS5",
+      "status": "DEFERRED",
+      "depends_on": [
+        "MS4"
+      ],
+      "deliverable": "Individually justified second OS, richer scenes, relay, guests and independent paid services"
+    }
+  ],
+  "acceptance": [
+    {
+      "id": "AC01",
+      "required_result": "Wrong channel/principal, expired consent and browser identity claims cause zero provider writes; creator privacy/audience are preserved",
+      "evidence": "Provider fakes plus separately authorized channel round trip"
+    },
+    {
+      "id": "AC02",
+      "required_result": "Create, bind, start and end are observed on the selected channel with intermediate states recorded",
+      "evidence": "Redacted provider IDs and timestamped observations"
+    },
+    {
+      "id": "AC03",
+      "required_result": "Second show has a new broadcast ID and reuses the valid original input ID; duplicate requests create no duplicate event",
+      "evidence": "Two-event trace and duplicate-command checks"
+    },
+    {
+      "id": "AC04",
+      "required_result": "Response loss, restart, stale controller and repeated end reconcile; unresolved creation stays uncertain",
+      "evidence": "Deterministic fault cases and durable state before/after"
+    },
+    {
+      "id": "AC05",
+      "required_result": "Run proposed portrait 720p30 camera/mic/graphic/local-recording workload for 30 minutes; record drops, A/V sync, heat, battery and file integrity",
+      "evidence": "Device/OS/build/dependency IDs and measurements; release thresholds set before promotion"
+    },
+    {
+      "id": "AC06",
+      "required_result": "Exercise handover, 10/30/90-second outages, lock/background, calls, denied permissions and headphone/external-mic alert audio; support only passed cases",
+      "evidence": "Measured recovery times and final local/provider/recording state per case"
+    },
+    {
+      "id": "AC07",
+      "required_result": "Only fresh permitted provider evidence projects a public live show; stale/private/terminal evidence never asserts live",
+      "evidence": "Projection visibility and freshness checks"
+    },
+    {
+      "id": "AC08",
+      "required_result": "Embed-denied/player-failure cases produce a working approved watch link; UI-open is not playback proof",
+      "evidence": "Actual player/watch-link observation"
+    },
+    {
+      "id": "AC09",
+      "required_result": "Quota, rate/permission error classes, revoke/deletion and secret redaction are exercised",
+      "evidence": "Budget/error/revocation/deletion/redaction receipts"
+    }
+  ],
+  "current_verification": {
+    "source_inspection": "COMPLETED_AT_BASELINE",
+    "provider_documentation": "CHECKED_2026_10_17",
+    "actual_account_or_project_calls": "NOT_PERFORMED",
+    "mobile_build_or_device_tests": "NOT_PERFORMED",
+    "live_broadcast_or_deployment": "NOT_PERFORMED",
+    "runtime_admission": "NOT_GRANTED"
+  },
+  "delivery_evidence_requirements": [
+    "Exact reviewed commit and source hashes",
+    "Accepted slice and authorization reference",
+    "Scope-bound verification results with failures and unknowns",
+    "Updated README, INTERFACE, ROADMAP and ModLog at each affected owner",
+    "PR checks, squash merge and exact main readback"
+  ],
+  "stop_conditions": [
+    "Authorization or channel identity cannot be resolved",
+    "External write outcome is ambiguous and cannot be reconciled safely",
+    "Quota or provider permission denies the next action",
+    "Requested action exceeds the admitted slice",
+    "Required mobile scenario has no supporting device evidence"
+  ],
+  "deferred": [
+    "Full OBS desktop plugin compatibility",
+    "Always-on background claims",
+    "Cloud relay or guest mixer",
+    "Multi-platform simultaneous launch",
+    "Payment settlement or creator payout ledger"
+  ],
+  "current_policy_exclusions": [
+    "Rewards or incentives for YouTube engagement",
+    "Charging for embedded YouTube playback"
+  ]
+}

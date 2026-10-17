@@ -9,6 +9,8 @@ implementation sources of truth:
 - `modules/foundups/agent_market/ROADMAP.md`
 - `modules/foundups/simulator/ROADMAP.md`
 - `modules/foundups/agent/ROADMAP.md`
+- [p.fMALL roadmap](pfmall/ROADMAP.md) — discovery/presentation and the proposed
+  mobile creator live-studio sequence.
 - `modules/foundups/docs/FOUNDUPS_PAVS_IRONCLAW_AGENT_BUILDER_DIGITAL_TWIN_ROADMAP.md`
 - `modules/foundups/social_twin/ROADMAP.md`
 - `modules/foundups/detect_ai/ROADMAP.md` - AmIBot: registered, hidden and specified;
@@ -20,6 +22,22 @@ implementation sources of truth:
 3. No member-only surface without fail-closed access gating at API/SSE layer.
 4. No UI promise without read models fed by canonical events.
 5. No phase promotion without concatenated tests and updated module docs.
+
+## Mobile Creator Studio Planning (2026-10-17)
+
+The current Mall owner is `modules/foundups/pfmall`, with the member UI in
+`public/member/`. The [mobile studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
+extends that ownership with a proposed native media client and separately
+authenticated creator-session adapter. Existing catalog/player and AntifaFM
+YouTube code are reuse candidates; a general creator publisher is not implemented.
+
+The [API register](docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+records current broadcast/input reuse, quota, OAuth, channel/embed eligibility
+and recovery constraints. The [machine outcome](docs/mobile_studio/mobile_studio_outcome.v1.json)
+defines MS0–MS5 and measurable acceptance. MS0 is documentation; implementation
+starts only through a separately admitted MS1 slice. This is a P1 planning item
+(WSP 15 score 14), with no change to existing P0 work, registry identities,
+execution authority, payment systems or deployed behavior.
 
 ## Layered Delivery Model (Occam Cake)
 

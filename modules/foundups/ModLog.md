@@ -2,6 +2,25 @@
 
 ## Chronological Change Log
 
+### 2026-10-17 - Play mobile creator studio documentation and roadmap
+
+- Extended the existing p.fMALL planning owner after inspecting main at
+  `407292aa754a88143796163581b67ca6679eac29`; no parallel application repository
+  or new FoundUp identity was created.
+- Added the [mobile studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+  [dated YouTube API evidence](docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+  and [M2M outcome](docs/mobile_studio/mobile_studio_outcome.v1.json). The bounded
+  collection has its own [manifest](docs/mobile_studio/doc_index.json) and
+  [execution receipt](docs/mobile_studio/wsp97_execution_receipt.json).
+- Updated p.fMALL README/INTERFACE/ROADMAP/ModLog, the domain roadmap and the
+  member roadmap's current-state pointer before implementation. Recorded current
+  reuse, API limits, eligibility, recovery, explicit unknowns and acceptance gates.
+- Documentation-only scope; current provider/channel/device verification and
+  creator-runtime admission remain absent. The PR owns validation and merge
+  evidence. WSP 00/10/15/22/50/57/83/84/97; planning score 14/P1.
+
+---
+
 ### 2026-09-15 - AmIBot declarative registry onboarding
 
 - Continued the existing `detect_ai` intake in PR #1751. Added its single canonical
