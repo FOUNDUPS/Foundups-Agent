@@ -3,6 +3,29 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Current Runtime and Creator Studio Direction (2026-10-17)
+
+The current implementation has Clerk admission, a video Mall, creator/category
+filtering, queue playback and bounded presentation controls. Source contracts are
+[README.md](README.md) and [INTERFACE.md](INTERFACE.md). The original dashboard,
+wallet and marketplace plan below is historical; its Firebase-auth checkbox and
+layer labels do not describe the complete current runtime.
+
+The proposed mobile creator studio is owned by the
+[p.fMALL roadmap](../../modules/foundups/pfmall/ROADMAP.md). Consume its
+[build contract](../../modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+[API constraints](../../modules/foundups/docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+and [machine outcome](../../modules/foundups/docs/mobile_studio/mobile_studio_outcome.v1.json)
+before any implementation. The browser remains a discovery/playback surface;
+native capture, creator OAuth, live-session control and provider-confirmed live
+projection are specified or planned, not implemented by this update. Existing
+presentation messages and player-open events confer no publishing authority or
+proof of live playback.
+
+## Historical Layer Plan
+
+Retained for lineage. Use the current contracts above for implementation truth.
+
 ## Layer Progression
 
 ```
