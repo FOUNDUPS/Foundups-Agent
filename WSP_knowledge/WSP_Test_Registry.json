@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1719,
+  "total_tests": 1720,
   "quarantined_tests": 270,
   "tests": [
     {
@@ -14867,6 +14867,21 @@
       "description": "Tests for Move2Japan Stakeholder Database (WSP 34)\n===================================================\n\nCovers: create, get, update, get_or_create, stats"
     },
     {
+      "id": "test::modules::foundups::move2japan::tests::test_property_search",
+      "path": "modules/foundups/move2japan/tests/test_property_search.py",
+      "owner": "modules/foundups/move2japan",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-move2japan-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Run the actual browser-independent search adapter through the Node harness."
+    },
+    {
       "id": "test::modules::foundups::pfmall::tests::test_api",
       "path": "modules/foundups/pfmall/tests/test_api.py",
       "owner": "modules/foundups/pfmall",
@@ -23371,7 +23386,9 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

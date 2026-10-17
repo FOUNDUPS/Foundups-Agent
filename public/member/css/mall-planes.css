@@ -218,6 +218,81 @@
   background: rgba(0, 212, 170, 0.18);
 }
 
+/* Property detail stays inside the existing Mall plane and navigation. */
+.foundup-view-plane[data-content-type="property"] {
+  color: #f3f1f8;
+  max-width: 48rem;
+  margin: 0 auto;
+}
+.fv-property-header {
+  padding: 2.5rem 0 0.75rem;
+}
+.fv-property-location,
+.fv-property-note {
+  color: rgba(243, 241, 248, 0.72);
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.fv-property-price {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin: 1rem 0 0;
+}
+.fv-property-price span {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: rgba(243, 241, 248, 0.72);
+  margin-top: 0.2rem;
+}
+.fv-property-summary,
+.fv-property-source {
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.fv-property-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+.fv-property-facts dt {
+  color: rgba(243, 241, 248, 0.72);
+  font-size: 0.76rem;
+  margin-bottom: 0.3rem;
+}
+.fv-property-facts dd {
+  margin: 0;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.fv-property-source {
+  margin: 1.25rem 0;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.85rem;
+}
+.fv-property-source h3 {
+  font-size: 1rem;
+  margin: 0 0 0.5rem;
+}
+.fv-property-source p {
+  margin: 0.4rem 0;
+}
+.foundup-view-plane[data-content-type="property"] .fv-primary-cta {
+  min-height: 44px;
+  box-sizing: border-box;
+  text-align: center;
+}
+@media (max-width: 380px) {
+  .fv-property-facts { grid-template-columns: 1fr; }
+}
+
 .fv-open-link {
   display: inline-flex;
   align-items: center;

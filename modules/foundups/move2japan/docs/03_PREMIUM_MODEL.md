@@ -1,97 +1,109 @@
-# Move2Japan FoundUp — Premium Model (012 Architecture Vision)
+# Move2Japan membership and premium model
 
-_Source: 012 voice-mode conversation, captured 2026-03-07_
+Rebaseline: 2026-10-17 JST. Authority: 012's house-discovery instruction and
+paying-customer definition of MVP. The March 2026 premium/concierge concept is
+retained below as future service scope, not an implemented subscription catalog.
 
-## Tier Structure
+## Current offering and next benefits
 
-### Free Tier
+The POC offers public English discovery of attributed house records using
+Foundups Mall. It does not sell a membership or serve private early listings.
 
-**Best for**: Early curiosity, first-time exploration, low-friction capture
+| Surface or benefit | State |
+| --- | --- |
+| Public property search and original-source links | POC implementation slice |
+| Shared Foundups account | Existing Clerk/invite/username flow at `https://foundups.com/member/` |
+| Owner/realtor publication | Prototype target; account and publisher authority pending |
+| Basic/member earlier discovery or alerts | Proposed benefit; plan mapping, price and delay unconfigured |
+| Partner-authorized exclusive offers | Future, only where an actual partner grants the offer |
+| Paid Move2Japan subscription and delivered benefit | Required for MVP; not established |
 
-**Includes**:
+The monk's "Basic member" wording is a product requirement. It must map to the
+verified shared Foundups membership service when implemented. Do not copy a
+price from the simulator or infer that a shared invite grants paid access.
 
-- Live chat guidance
-- Basic roadmap
-- Limited checklist
-- Update/news signup
-- Return-and-resume support
-- Basic handbook access after key readiness milestones
+## Reuse boundaries
 
-### Premium Tier
+`public/member/index.html` checks Clerk identity and Firestore invite/username
+state. It does not verify a settled subscription. Move2Japan should reuse that
+account entry and establish a verified principal binding for protected services.
 
-**Best for**: Serious movers, 3–12 month planners, stakeholders who want active help
+The existing systems have distinct roles:
 
-**Includes**:
+- `modules/foundups/simulator/economics/subscription_tiers.py` models economics;
+  its tier names, allowances and prices are not live billing evidence.
+- FAM's `ComputeAccessService` and persistence ledger meter build execution.
+  They are not a house-listing subscription or payment-provider verifier.
+- `modules/communication/chat_rules/src/membership_manager.py` handles YouTube
+  memberships, including estimated/default fallback tiers. Those estimates
+  cannot grant paid website benefits.
+- The canonical FoundUps entitlement documents describe a target wallet/stake
+  gate and explicitly distinguish it from current public/community access.
 
-- Persistent dashboard
-- Personalized roadmap
-- Deeper job guidance
-- Deeper location matching
-- Curated checklists
-- Reminder automation
-- Expanded handbook/library
-- Document preparation guidance
-- Limited agent planning sessions
+The YouTube stakeholder ID, Clerk account ID and GotJunk/Firebase UID are not
+interchangeable. Link them only through a verified account flow; a matching name
+or email text does not prove they belong to the same principal.
 
-### Concierge Tier
+## MVP payment and benefit contract
 
-**Best for**: High-intent movers, premium white-glove support
+Before charging for restricted access, establish:
 
-**Includes**:
+1. A configured plan, price, scope and clear service description.
+2. A verified billing event tied to the shared account and service period.
+3. Idempotent processing and reconciliation of settled payment state.
+4. Server-derived current entitlement before data is released.
+5. Recorded delivery of the promised benefit.
+6. Refund, cancellation, expiry and revocation behavior.
 
-- Dedicated personal move agent
-- Job support workflows
-- Housing assistance workflows
-- Form drafting and translation support
-- Broker introductions
-- Execution tracking
-- Fast escalation to human partner network
+MVP is reached only when actual customers pay and receive the configured
+offering. Account creation, a trial, a checkout page, premium interest or a
+simulated credit balance cannot substitute for that evidence.
 
-### Enterprise/Partner Tier (Future)
+## Earlier discovery and exclusive offers
 
-- Universities
-- Employers
-- Relocation agencies
-- Municipalities
-- Real estate networks
+The proposed delay model must retain separate timestamps for source publication,
+first discovery, verification, member release and public release. Missing source
+times remain unknown. No release delay is chosen in this document.
 
----
+Early access must be enforced before restricted records leave the service.
+Do not put early listings into public JSON, browser storage or a public
+service-worker cache and hide them with CSS or a membership flag.
 
-## Revenue Streams
+A publicly available akiya-bank listing is public inventory. A paid service may
+deliver earlier curated discovery, translation or alerts. The word "exclusive"
+requires an actual partner-authorized offer, not a claim over public information.
 
-- Subscription (premium/concierge)
-- One-time concierge fee
-- Brokerage referral share
-- Recruiter referral share
-- Partner commissions
-- Premium document automation
-- Relocation service bundles
+## Tokenization
 
----
+Preserve `foundup_id=move2japan` and the existing `TOKEN_DEFERRED` registry state.
+This slice creates no token symbol, supply, distribution, staking or wallet
+entitlement. Future integration follows WSP 26 and the existing FoundUps owners.
 
-## Soft-Sell Moments
+Keep these concepts distinct:
 
-### In Live Chat
+- Service membership grants a configured service benefit when verified.
+- Compute credits account for metered work under their existing policy.
+- FoundUp tokens concern the venture's defined economic participation.
+- A property listing does not convey ownership or an interest in the property.
 
-> "Want progress tracking and a personal roadmap? Sign up at movetojapan.foundups.com"
+A token balance or browser claim must not be treated as a paid service
+entitlement. Existing token factory adapters and simulation output are not proof
+of Move2Japan token issuance.
 
-### After Passport Completion
+## Retained March service concepts
 
-> "Want help finding the best work path for your move? Unlock the job agent."
+Future premium guidance can include a persistent roadmap, location/job support,
+checklists, reminders and document preparation. Future concierge can include a
+personal move agent, translation, housing assistance, broker introductions and
+human escalation. Enterprise/partner services may support employers,
+universities, municipalities and relocation agencies.
 
-### After Move Intent Becomes Serious
+Subscription, one-time service fees and referral arrangements remain candidate
+revenue streams. Any brokerage/partner share requires its own verified authority
+and agreement; this document does not establish one.
 
-> "Want a personal assistant to guide your move one-on-one?"
-
-### Near Housing Stage
-
-> "Want us to connect you with English-speaking housing/broker partners?"
-
----
-
-## What Not to Do
-
-- Do not hard-sell too early
-- Do not expose the entire process immediately
-- Do not ask for too much personal data up front
-- Do not position premium before trust is built
+Sources within the repository:
+[current audit](08_HOUSING_DISCOVERY_REBASELINE.md),
+[roadmap](../ROADMAP.md),
+[FoundUps architecture](../../docs/FOUNDUPS_MASTER_ARCHITECTURE.md),
+[entitlement tiers](../../docs/FOUNDUPS_ENTITLEMENT_TIERS.md).

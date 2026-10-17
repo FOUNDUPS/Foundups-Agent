@@ -1,5 +1,35 @@
 # Move2Japan FoundUp — ModLog (WSP 22)
 
+## V0.2.0 — English house-discovery rebaseline (2026-10-17 JST)
+
+**Authority:** 012's current website instruction; canonical spelling Move2Japan
+and move2japan.info. **WSP:** 11, 22, 50, 60, 84, 97 and existing 104 namespace.
+
+**Changes:** Rebased README, roadmap, interface, module metadata, premium model,
+stage definitions and funnel architecture around real house search. The public
+POC source lives in `public/move2japan/` and composes shared Mall tiles, detail
+planes and gestures with five attributed Fukui observations. Source photos stay
+at the original page; broker availability and media reuse remain unconfirmed.
+
+**Stage decisions:** Prototype requires real account-linked, authorized and
+reviewed property publication with durable upload. MVP requires actual settled
+customer payment and delivered configured benefits, including expiry/refund
+revocation. Shared Foundups account admission is not paid membership; no price,
+release delay or token issuance was invented. Existing `move2japan` identity,
+registry classification and `TOKEN_DEFERRED` are preserved.
+
+**History retained:** BC0 conversation handling and SQLite memory are implemented
+and remain unchanged. The wider BC1-BC7 relocation vision remains a later layer.
+Historical docs 02/05 now flag planned surfaces and correct numeral-2 URL
+spellings; old livechat runtime strings are a separately tracked follow-up.
+
+**Evidence/validation:** See `docs/08_HOUSING_DISCOVERY_REBASELINE.md` and the
+module test records for source and behavioral validation. Documentation was
+checked for local link/metadata consistency. This entry does not claim custom
+domain deployment, continuous listing refresh, publisher signup or paid users.
+
+---
+
 ## V0.1.0 — Module Inception (2026-03-07)
 
 **What**: Created Move2Japan FoundUp module scaffold under `modules/foundups/move2japan/`
