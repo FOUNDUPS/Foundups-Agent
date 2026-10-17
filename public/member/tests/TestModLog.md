@@ -1,3 +1,36 @@
+## 2026-10-17 | Property tiles and shared quick-view runtime
+
+Extended `test_non_video_quickview_actions.py` with a Node runtime check using
+`mall_property_listing_vm.mjs`. Existing dispatcher VM tests stub the render
+APIs and cannot cover this seam; the new fixture executes the actual shared
+gesture/tile/plane scripts with a bounded DOM. It requires only Node built-ins.
+
+Covered: two properties under one FoundUp; separate selection/focus keys;
+wrong-tenant/missing/duplicate identity rejection; tap/Enter/Space/pinch detail;
+arrow navigation; repeated filter/reorder/empty updates without added page
+listeners; inert state and Tab wrapping; HTTPS/no-userinfo source URLs; escaped
+hostile text; ignored property video/token/poster fields; and retained video
+Enter/fullscreen dispatch. Source checks and existing quick-view fixtures are
+retained. First adversarial execution failed on raw angle brackets in an
+attribute; escaping was fixed and the complete runtime replay passed.
+
+Independent review exposed detached focus after detail replacement and vertical
+scroll gestures closing long property details. The DOM fixture now models focus
+loss when innerHTML removes its target; that regression failed before the repair.
+Real gesture-engine touch events verify property scrolling remains open, lateral
+navigation still works, and non-property swipe-up still closes. Outside-dialog
+Tab/Shift-Tab recovery and the property-specific hint are checked as well.
+
+Command: `node public/member/tests/mall_property_listing_vm.mjs`.
+Focused pytest replay: **277 passed** across `test_non_video_quickview_actions.py`
+(including the Node runtime), `test_video_mall_field_runtime.py`,
+`test_tile_keyboard_a11y.py`, and `test_non_video_action_surfaces.py`.
+Two initial source-window regressions were resolved by keeping Enter on the
+existing fullscreen dispatch function and putting preview cleanup first;
+the original assertions were retained.
+Scope: local JavaScript behavior, no network, browser layout, live listings,
+authentication, payment, production deployment or media permission proof.
+
 ## 2026-09-21 | Optional public discovery alias behavior (local and independent replay passed)
 
 Extend test_route_contract_bridge.py with the actual inline JavaScript in an isolated Node VM,

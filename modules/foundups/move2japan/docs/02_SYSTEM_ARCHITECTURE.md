@@ -2,6 +2,12 @@
 
 _Source: 012 voice-mode conversation, captured 2026-03-07_
 
+> Historical March architecture. The current house-first build order and
+> implementation boundaries are in [the roadmap](../ROADMAP.md) and
+> [housing audit](08_HOUSING_DISCOVERY_REBASELINE.md). URL spellings below were
+> corrected on 2026-10-17; the proposed secondary PWA is not a verified deployed
+> service. The full journey/profile remains planned beyond implemented BC0.
+
 ## Primary Surfaces
 
 ### 1. YouTube Live Chat
@@ -10,7 +16,7 @@ _Source: 012 voice-mode conversation, captured 2026-03-07_
 - **Trigger**: `!move2japan`
 - **Integration**: YT DAE (Domain Autonomous Agent)
 
-### 2. Move2Japan Web Hub — `movetojapan.foundups.com`
+### 2. Proposed Move2Japan Web Hub — `move2japan.foundups.com`
 
 - **Purpose**: Persistent stakeholder account, roadmap tracking, checklists, content hub, updates, premium upsells, agent interaction history
 - **Type**: Progressive Web App (PWA)

@@ -902,6 +902,53 @@
   background-color: #102a3a;
 }
 
+/* Public property records use the same field, with readable factual metadata. */
+.mall-tile.property-listing {
+  min-height: 19rem;
+  color: #f3f1f8;
+}
+.property-listing .mall-tile-inner {
+  padding: 3rem 1.1rem 1.1rem;
+  gap: 0.3rem;
+  box-sizing: border-box;
+}
+.mall-property-photo-note {
+  position: absolute;
+  top: 1rem;
+  left: 1.1rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.76);
+}
+.mall-property-location {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.76);
+}
+.property-listing .mall-tile-name {
+  font-size: 1.05rem;
+  line-height: 1.3;
+  white-space: normal;
+  color: #fff;
+}
+.mall-property-price {
+  margin: 0.45rem 0 0.2rem;
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+}
+.mall-property-area,
+.mall-property-condition {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.82);
+}
+.mall-property-condition {
+  margin-top: 0.35rem;
+}
+.mall-property-open {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .mall-tile.theme-undaodu {
   background: linear-gradient(145deg, rgba(38, 18, 52, 0.96), rgba(80, 40, 110, 0.72) 60%, rgba(18, 10, 28, 0.98));
   background-color: #261234;

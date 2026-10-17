@@ -1,5 +1,39 @@
 # Member Area Module Change Log
 
+## 2026-10-17 — Shared Mall property discovery presentation
+
+Move2Japan's public house-search PoC reuses the existing tile field, detail
+plane, gestures, and styles. `source_type=property_listing` renders asking
+price, location, source area figures, and repair status. It ignores video,
+token, readiness and poster fields; source photographs remain at their origin.
+The existing member video catalog and account gate are unchanged.
+
+- Added `mallTileField.updateCatalog(catalog)` for result changes without
+  reinstalling page event listeners. Updating closes stale detail and syncs
+  the plane catalog. Initialization remains compatible with existing callers.
+- Added `mallPlanes.openListingById(foundupId, listingId)`: a listing retains
+  its FoundUp identity, with a separate key for selection and focus return.
+  Duplicate tuple identities are rejected rather than selecting the first.
+- Property tap, Enter, Space and pinch open detail; video controls retain
+  their existing paths. Details preserve source references/observation date
+  and unknown values; source-listed does not mean confirmed available.
+- Property source links require HTTPS and reject URL credentials/control
+  characters. Text/attributes are escaped. Closed planes are inert; opening
+  restores interaction, and property Tab/Shift-Tab stays inside the plane.
+- Independent review found detached source-link focus after navigation and
+  upward scrolling dismissing long property details. Navigation now focuses
+  the stable close button, Tab recovers outside focus, and property vertical
+  gestures retain native scrolling. Horizontal navigation and existing video
+  close gestures are preserved; the property hint matches its controls.
+- Extended the existing nonvideo quick-view test file with a dependency-free
+  Node VM runtime fixture. Focused execution passed. The first hostile-text
+  case exposed missing angle-bracket attribute escaping; corrected and
+  replayed. VM evidence is not browser layout or production deployment proof.
+
+WSP 00/22/50/84/97: current-source retrieval and existing test inventory preceded
+this bounded extension; property audit is owned by the Move2Japan module.
+No new auth, listing provider, upload, payment, token, global route or daemon.
+
 ## 2026-09-21: Reconcile public-route validation with existing access boundary
 
 The existing route suite expected public tenant iframe launch after the public

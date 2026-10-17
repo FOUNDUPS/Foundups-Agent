@@ -1,5 +1,5 @@
 /**
- * Mall Tile Field — Video-backed discovery surface
+ * Mall Tile Field — shared video and property discovery surface
  *
  * Portrait-first 9:16 video wall (Shorts-style)
  * SoftProto mount point: #mallTileField[data-softproto-mount="tile-field"]
@@ -32,6 +32,7 @@
   var tileField = null;
   var collapseHint = null;
   var mallCatalog = [];
+  var escapeKeyBound = false;
 
   // Projection state
   var currentProjection = 'default';
@@ -276,7 +277,7 @@
   function getTilePreviewVideo(index) {
     var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
     var item = items[index];
-    if (!item) return null;
+    if (!item || isPropertyListing(item)) return null;
     // In expanded mode or single video_data, use direct reference
     if (item.video_data) return item.video_data;
     // In lane mode, use current lane video index
@@ -295,7 +296,7 @@
    */
   function getLaneVideo(foundupIndex, videoIndex) {
     var item = mallCatalog[foundupIndex];
-    if (!item || !item.videos || !item.videos.length) return null;
+    if (!item || isPropertyListing(item) || !item.videos || !item.videos.length) return null;
     return item.videos[videoIndex] || null;
   }
 
@@ -326,7 +327,7 @@
    */
   function startLanePreview(foundupIndex, videoIndex, muted) {
     var item = mallCatalog[foundupIndex];
-    if (!item || !item.videos || !item.videos.length) return;
+    if (!item || isPropertyListing(item) || !item.videos || !item.videos.length) return;
 
     var video = item.videos[videoIndex];
     if (!video) return;
@@ -639,6 +640,11 @@
    * @param {Array} catalog - Array of FoundUp objects (with video data)
    */
   function initialize(catalog) {
+    // Search consumers replace their result set without reinstalling page listeners.
+    if (tileField) {
+      updateCatalog(catalog);
+      return;
+    }
     fullCatalog = catalog || [];
     mallCatalog = fullCatalog.slice();
     originalOrder = mallCatalog.slice();  // Preserve original order
@@ -685,6 +691,33 @@
 
     // Initialize viewport-aware grid loading (PFM11B)
     initTileObserver();
+  }
+
+  /** Replace a public result set. This is presentation, not an access-control gate. */
+  function updateCatalog(catalog) {
+    if (!tileField) {
+      initialize(catalog);
+      return;
+    }
+    stopInlinePreview();
+    if (window.mallPlanes && typeof window.mallPlanes.closeView === 'function') {
+      window.mallPlanes.closeView();
+    }
+    expandedFoundUp = null;
+    if (collapseHint) collapseHint.classList.remove('visible');
+    fullCatalog = Array.isArray(catalog) ? catalog.slice() : [];
+    mallCatalog = fullCatalog.slice();
+    originalOrder = mallCatalog.slice();
+    currentFieldScope = null;
+    currentProjection = 'default';
+    tileLoadStates = {};
+    if (window.mallPlanes && typeof window.mallPlanes.setCatalog === 'function') {
+      window.mallPlanes.setCatalog(mallCatalog);
+    }
+    renderTiles();
+    bindInteractions();
+    initTileObserver();
+    updateProjectionChips();
   }
 
   /**
@@ -791,17 +824,52 @@
   }
 
   /**
-   * Render tiles from catalog (video-backed)
+   * Render the existing Mall tile interaction for a public property record.
+   * Property identity belongs to a FoundUp; it is not a synthetic FoundUp ID.
    */
+  function isPropertyListing(item) {
+    return !!item && item.source_type === 'property_listing';
+  }
+
+  function propertyArea(value) {
+    return typeof value === 'number' && Number.isFinite(value) && value > 0
+      ? value.toLocaleString('en-US') + ' m\u00b2' : 'Not stated';
+  }
+
+  function renderPropertyTile(item, index) {
+    var name = item.name || item.title || 'House listing';
+    var location = [item.municipality, item.prefecture].filter(Boolean).join(' \u00b7 ');
+    var price = typeof item.price_jpy === 'number' && Number.isFinite(item.price_jpy) && item.price_jpy >= 0
+      ? '\u00a5' + item.price_jpy.toLocaleString('en-US') : 'Price on request';
+    var condition = item.repair_level === 'major' ? 'Major repairs required' : 'Repair needs not stated';
+    var theme = /^[a-z0-9_-]+$/i.test(item.theme || '') ? item.theme : 'default';
+    // Source photographs remain on their original listing. Ignore supplied video,
+    // token, readiness, avatar and poster fields on property records.
+    return '<article class="mall-tile non-video property-listing theme-' + theme + '" data-index="' + index +
+      '" data-foundup-id="' + escapeAttr(item.foundup_id || '') + '" data-listing-id="' + escapeAttr(item.listing_id || '') +
+      '" data-tile-type="property" tabindex="0" role="button" aria-haspopup="dialog" aria-label="' + escapeAttr(name + ', ' + price + ', ' + location) + '">' +
+      '<span class="mall-property-photo-note">Photos at source</span>' +
+      '<div class="mall-tile-inner">' +
+        '<span class="mall-property-location">' + escapeHtml(location) + '</span>' +
+        '<p class="mall-tile-name">' + escapeHtml(name) + '</p>' +
+        '<strong class="mall-property-price">' + escapeHtml(price) + '</strong>' +
+        '<span class="mall-property-area">Land ' + escapeHtml(propertyArea(item.land_area_m2)) + '</span>' +
+        '<span class="mall-property-area">Building ' + escapeHtml(propertyArea(item.building_area_m2)) + '</span>' +
+        '<span class="mall-property-condition">' + escapeHtml(condition) + '</span>' +
+        '<span class="mall-property-open">View house details \u2197</span>' +
+      '</div></article>';
+  }
+
   function renderTiles() {
     var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
 
     if (!itemsToRender.length) {
-      tileField.innerHTML = '<div class="mall-tile-field-empty"><span class="mall-tile-field-empty-icon">&#x1F6D2;</span><span>No FoundUps visible</span></div>';
+      tileField.innerHTML = '<div class="mall-tile-field-empty"><span class="mall-tile-field-empty-icon">&#x1F6D2;</span><span>No results match these filters</span></div>';
       return;
     }
 
     tileField.innerHTML = itemsToRender.map(function(item, index) {
+      if (isPropertyListing(item)) return renderPropertyTile(item, index);
       var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
       var readiness = item.launch_readiness || item.status || 'discoverable_only';
       var badgeClass = readiness === 'ready' ? 'ready' : (readiness === 'conditional' ? 'conditional' : '');
@@ -952,6 +1020,10 @@
         window.gestureZone(tile, {
           onPinchOut: function() {
             var index = Number(tile.dataset.index || 0);
+            if (isPropertyListing(mallCatalog[index])) {
+              togglePlay(index);
+              return;
+            }
             expandFoundUp(index);
           },
           onPinchIn: function() {
@@ -1021,7 +1093,7 @@
     });
 
     // Global escape handler - collapse expanded view or stop preview
-    document.addEventListener('keydown', function(e) {
+    if (!escapeKeyBound) document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && expandedFoundUp !== null) {
         e.stopPropagation();
         collapseFoundUp();
@@ -1030,6 +1102,7 @@
         stopInlinePreview();
       }
     });
+    escapeKeyBound = true;
   }
 
   /**
@@ -1053,6 +1126,14 @@
     // Get item to check if it has videos (includes expanded video tiles with video_data)
     var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
     var item = items[index];
+    if (isPropertyListing(item)) {
+      stopInlinePreview();
+      if (window.mallPlanes && typeof window.mallPlanes.openListingById === 'function') {
+        window.mallPlanes.setCatalog(mallCatalog);
+        window.mallPlanes.openListingById(item.foundup_id, item.listing_id);
+      }
+      return;
+    }
     var hasVideos = item && ((item.videos && item.videos.length) || item.video_count || item.video_data);
 
     // Non-video tiles: open quick-view instead of trying inline preview
@@ -1087,9 +1168,12 @@
    * @param {number} index - Tile index
    */
   function openFullscreenFromTile(index) {
-    if (!window.mallVideoPlayer) return;
-
     stopInlinePreview();
+    if (expandedFoundUp === null && isPropertyListing(mallCatalog[index])) {
+      togglePlay(index);
+      return;
+    }
+    if (!window.mallVideoPlayer) return;
 
     if (expandedFoundUp !== null) {
       // Expanded mode: tiles are individual videos from one FoundUp
@@ -1165,6 +1249,10 @@
    * @param {number} index - FoundUp index in catalog
    */
   function expandFoundUp(index) {
+    if (isPropertyListing(mallCatalog[index])) {
+      togglePlay(index);
+      return;
+    }
     if (expandedFoundUp === index) return; // Already expanded
     stopInlinePreview();
 
@@ -1600,7 +1688,9 @@
     return String(str)
       .replace(/&/g, '&amp;')
       .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   // ========== Projection System ==========
@@ -1885,6 +1975,7 @@
   window.mallTileField = {
     // Core
     initialize: initialize,
+    updateCatalog: updateCatalog,
     enterFoundUp: enterFoundUp,
     navigateToFoundUp: navigateToFoundUp,
 

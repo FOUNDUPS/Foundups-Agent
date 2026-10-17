@@ -2,16 +2,25 @@
   "name": "move2japan",
   "type": "foundup",
   "domain": "foundups",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "status": "poc",
-  "description": "Agent-driven relocation system — guided ascent from intent to settlement in Japan",
+  "description": "English discovery of real Japanese homes, with existing YouTube relocation intake and staged publisher/paid-service development",
   "surfaces": {
-    "funnel": "movetojapan.info",
-    "pwa": "movetojapan.foundups.com"
+    "funnel": "move2japan.info",
+    "pwa": "move2japan.foundups.com",
+    "public_poc_path": "/move2japan/",
+    "shared_account_entry": "https://foundups.com/member/",
+    "private_review": "https://move2japan.undaodu.chatgpt.site"
   },
   "wsp_compliance": [
-    "WSP 3", "WSP 11", "WSP 22", "WSP 27",
-    "WSP 49", "WSP 60", "WSP 80", "WSP 95"
+    "WSP 3",
+    "WSP 11",
+    "WSP 22",
+    "WSP 27",
+    "WSP 49",
+    "WSP 60",
+    "WSP 80",
+    "WSP 95"
   ],
   "integration_points": {
     "livechat_skill": "communication/livechat/skillz/persona_move2japan.json",
@@ -30,5 +39,20 @@
       "BC6_PaperworkExecution",
       "BC7_LandingSettlement"
     ]
+  },
+  "surface_notes": {
+    "funnel": "Primary domain; hosting/forwarding requires separate live verification",
+    "pwa": "Proposed secondary domain; provisioning and authentication configuration unverified",
+    "public_poc_path": "Source at public/move2japan/; validation and deployment tracked separately",
+    "shared_account_entry": "Existing invite-account admission, not paid Move2Japan entitlement",
+    "private_review": "Owner-private POC publication confirmed 2026-10-17 JST; browser rendering and primary-domain cutover unverified"
+  },
+  "housing_discovery": {
+    "primary_language": "en",
+    "catalog_kind": "curated_public_source_observations",
+    "roadmap": "ROADMAP.md",
+    "evidence": "docs/08_HOUSING_DISCOVERY_REBASELINE.md",
+    "token_status": "TOKEN_DEFERRED",
+    "registry_boundary": "Existing move2japan access-service entry is not promoted by this slice"
   }
 }
