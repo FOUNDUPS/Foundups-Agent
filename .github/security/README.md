@@ -1,5 +1,45 @@
 # Blocking secret scan
 
+## AntifaFM startup manifest re-review — 2026-10-18
+
+The resident-chain CI failure required moving the Shorts launcher's existing
+peak-window import into the scheduler function that uses it. Regeneration keeps
+all 1,439 runtime members and changes only that launcher's source digest.
+This alters the manifest's whole-file hash and invalidates 38 exact bindings.
+
+Independent redacted scans compared accepted PR head
+`c7b3c6f9ff76bb6953aa82b313a2c7aafd905dfb` with the staged candidate. Every
+finding-bearing line and source-hash value is unchanged; each accepted binding
+is in the existing 867-entry ledger. All 1,439 current runtime digests were
+recomputed, and each flagged source was also verified against its staged and
+accepted bytes using the unchanged generator normalization. Preserve all 867
+entries and append only these 38 independently proved bindings (905 total).
+
+The changed launcher hash is not a flagged candidate. No scanner, rule,
+exclusion, version or fingerprint policy changes. Sanitized per-finding proof:
+`reviewed-antifafm-startup-evidence.json`. This bounded provenance review does
+not replace the final full-tree and introduced-history security gate.
+
+## AntifaFM integration metadata review — 2026-10-18
+
+PR2156 head `f90417d3fa53b965e6bd0ccab7c94e246b3d1280` failed security
+job117798014049 after changing two files with previously reviewed metadata.
+Independent review checked every finding against exact accepted base blobs:
+38 unchanged manifest values were recomputed from their referenced source bytes
+using the unchanged generator normalization; one unchanged bridge ModLog line
+names a documented Python identifier, also verified in argument/variable syntax.
+The current file hashes and line positions require 39 new exact fingerprints.
+Preserve all 828 entries from main `b9051be28be1d55908b05c65fcb7ba8766edb577`
+and append only these 39 individually proved bindings (867 total).
+
+Two newly introduced example environment-variable names were also mistaken for
+credentials by the scanner. Shorten those references within the owned commit;
+their configuration fields and host-supplied credential mapping are unchanged.
+They receive no reviewed exception. Preserve the failed scan as prior evidence.
+No rule, path exclusion, version, fingerprint algorithm or scan coverage changes.
+Sanitized per-finding proof, exact source bindings and classifications are in
+`reviewed-antifafm-metadata-evidence.json`; candidate values are not included.
+
 ## Current-time permission source review — 2026-10-16
 
 Independent review of staged tree `5ef8d298fd2b297d07d10f34cbead0ba5babe986`

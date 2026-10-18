@@ -10,6 +10,17 @@ Unified orchestration layer for social media platforms (X/Twitter and LinkedIn) 
 
 **Digital Twin POC**: This is the execution layer for the 012 Digital Twin comment pipeline (LinkedIn-first), including comment scheduling and cross-platform routing.
 
+## AntifaFM contextual pilot
+
+The existing SOCIAL route accepts `social campaign antifafm ...` for account
+verification, context-aware listener drafts and verified own-account X updates.
+The default preview loads no model, credentials, provider or publication ledger;
+the outer CLI retains its existing audit behavior. The station drafter reuses
+Digital Twin's local model, with explicit draft/skip/review outcomes and no mock
+fallback. Replies are draft-only. The prototype starts no service or schedule.
+See [the host runbook](docs/ANTIFAFM_CAMPAIGN.md) and
+[the API contract](INTERFACE.md#antifafm-campaign-pilot).
+
 ## Rotation Flow (YouTube → Scheduling → LinkedIn)
 
 This module sits in the post-YouTube rotation:

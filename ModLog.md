@@ -12,6 +12,25 @@
   source digests recomputed. Safe decisions live with the existing security
   owner in `.github/security/reviewed-history-triage-evidence.json`.
 
+## AntifaFM contextual promotion prototype — 2026-10-18
+
+WSP00/5/11/15/22/50/62/84/97. Reused SOCIAL routing, Digital Twin drafting and
+UnifiedX publication owners for listener-initiated music context and own-account
+station links. Real model JSON is required for drafts; API identity and durable
+readback are required for posting success. Prototype OpenClaw/Codex prompts add
+no daemon, production executor or cadence. Independent review repaired import,
+cancellation, context and error-reporting boundaries before offline qualification.
+Current receipts and host activation limits are in the social orchestrator
+ModLog, tests/TestModLog and docs/ANTIFAFM_CAMPAIGN.md. No live account/model,
+external posting, targeted political persuasion or native worker activation is
+claimed from the coding environment.
+
+Generated integration keeps the current test registry and backend source/digest
+pins aligned. The existing JHR skill had only a Codex projection on current main;
+a byte-identical canonical-source backfill preserves its content and publication
+policy while allowing the unchanged exact-set projection generator to pass.
+The OpenClaw workspace manifest is regenerated from its actual nine skill docs.
+
 ## RSI initial control bootstrap — 2026-10-16
 
 WSP00/15/22/48/97. Existing control owners now distinguish first LOW identity

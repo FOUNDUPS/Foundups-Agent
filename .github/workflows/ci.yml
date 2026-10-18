@@ -179,6 +179,20 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence TestCallerPersistenceEvidence -v
 
+      - name: Run AntifaFM contextual campaign contracts
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -B scripts/generate_codex_tooling_projection.py --check
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib \
+            -o pythonpath=. -p no:cacheprovider \
+            modules/platform_integration/social_media_orchestrator/tests/test_antifafm_campaign.py \
+            modules/platform_integration/social_media_orchestrator/tests/test_verified_x_publication.py \
+            modules/ai_intelligence/digital_twin/tests/test_comment_drafter.py \
+            modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py \
+            tests/test_codex_tooling_projection.py
+
       - name: Run post-commit runner entrypoint evidence
         env:
           PYTHONDONTWRITEBYTECODE: '1'
@@ -1433,6 +1447,7 @@ jobs:
       - name: Run RedDog bounded resident-chain regression
         run: |
           python -m pip install "chromadb==1.5.5" "pytz>=2023.3" "psutil>=5.9.6"
+          python -m pytest modules/platform_integration/youtube_shorts_scheduler/tests/test_launch_import.py -q --tb=short
           python -m pytest \
             modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py \
             modules/communication/moltbot_bridge/tests/test_reddog_governed_execution_valve_production_wiring.py \
