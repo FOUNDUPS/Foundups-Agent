@@ -110,6 +110,7 @@
     var tf = (typeof window !== 'undefined') ? window.mallTileField : null;
     if (!tf) return null;
     return {
+      layout_mode: safeCall(function() { return typeof tf.getLayoutMode === 'function' ? tf.getLayoutMode() : null; }),
       density: safeCall(function() { return typeof tf.getDensity === 'function' ? tf.getDensity() : null; }),
       device_policy: safeCall(function() { return typeof tf.getDevicePolicy === 'function' ? tf.getDevicePolicy() : null; }),
       expanded: safeCall(function() { return typeof tf.isExpanded === 'function' ? tf.isExpanded() : null; }),
@@ -614,7 +615,23 @@
     };
   }
 
+  // Presentation-only local search; origin policy and admission remain unchanged.
+  function cmdSearchCatalog(payload) {
+    var tf = window.mallTileField;
+    if (!payload || typeof payload.query !== 'string' || payload.query.length > 300) {
+      return { status: 'error', error: { code: 'invalid_payload', message: 'query must be a string of at most 300 characters' } };
+    }
+    if (!tf || typeof tf.searchCatalog !== 'function') {
+      return { status: 'error', error: { code: 'api_unavailable', message: 'Catalog search unavailable' } };
+    }
+    tf.searchCatalog(payload.query);
+    var state = readTileFieldState();
+    emitEvent('state_changed', { reason: 'search_catalog', state: state });
+    return { status: 'ok', result: { scope: 'local_catalog', state: state } };
+  }
+
   var HANDLERS = {
+    search_catalog: cmdSearchCatalog,
     inspect_state: cmdInspectState,
     set_layout: cmdSetLayout,
     load_videos: cmdLoadVideos,

@@ -51,6 +51,29 @@ public/member/
 
 ## Current UX
 
+### Shared responsive discovery (2026-10-18)
+
+The default Mall uses vertical category groups with independently scrollable
+horizontal tracks. Card width adapts to available viewport space; there is no
+fixed count of visible rows and no six-tile cap. Resize/rotation uses CSS without
+rebuilding the catalog. Explicit density controls still select the legacy grid;
+**Adaptive category rows** returns to the shared browse mode. Pinch-out expands
+one channel into its video field; pinch-in returns to the category rows.
+
+Search Mall accepts short requests such as “show me videos on Fukui”, “show me
+houses”, “show me cars” and “show me clothes”. It searches only loaded catalog
+metadata and video metadata, with a small explicit English phrase/alias vocabulary.
+Missing catalog content returns no results. It is not web search, a semantic model,
+a voice service, a recommendation engine, or a new tenant app. Device keyboard
+dictation can supply text; an authenticated future RedDog adapter can call the
+same presentation API. No microphone or external AI endpoint is introduced.
+
+Catalog entries remain the source of channel identity and capabilities. Native
+cards, RedDog search and the bounded dispatcher share `mallTileField`; FoundUps
+must supply catalog metadata and reuse this surface instead of copying it.
+Categories are rendered from data, including future housing/product/creator entries.
+Row offsets are saved locally alongside the existing outer scroll position.
+
 ### Mall Navigation
 - swipe or scroll horizontally through FoundUps (desktop: mouse drag on carousel track)
 - tap a tile to start lane autoplay through its video queue (Shorts-style)
@@ -68,7 +91,7 @@ public/member/
 - Red Dog plane combines: identity, AI tools, channels, context briefing
 - **AI Tools**: projection sort, density presets, motion mode
 - **Channels**: "Populate My Mall", "Personal Mall", "Search Mall"
-- **Search Mall**: text input for creator search (shell-local, dev/testing shim)
+- **Search Mall**: text input for local catalog discovery (topic, location, category, creator, video metadata)
 
 ### Other
 - first-time visitors see a gesture discovery overlay (auto-dismisses, shown once)
@@ -125,3 +148,5 @@ Do not hand-edit either catalog — edit source manifests, then regenerate.
 ---
 
 *Last Updated: 2026-04-03*
+
+Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.

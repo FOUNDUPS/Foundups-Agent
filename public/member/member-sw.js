@@ -9,7 +9,7 @@
 // Auth flows (Clerk, Firebase) are NEVER cached.
 // Catalog is network-first with cache fallback.
 
-const CACHE_NAME = 'pfmall-member-v2';
+const CACHE_NAME = 'pfmall-member-v3';
 const POSTER_CACHE_NAME = 'pfmall-posters-v1';
 const MAX_POSTER_ENTRIES = 60;
 
@@ -25,6 +25,7 @@ const SHELL_ASSETS = [
   '/member/js/gesture-engine.js',
   '/member/js/shell-bridge-interceptor.js',
   '/member/js/mall-planes.js',
+  '/member/js/mall-tile-field.js',
   '/member/js/mall-video-player.js',
   '/member/js/account-concierge.js',
   '/member/js/red-dog-concierge.js',

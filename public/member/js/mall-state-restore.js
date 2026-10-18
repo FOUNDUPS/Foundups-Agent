@@ -60,6 +60,9 @@
       state.projection = tf.getProjection();
     }
 
+    if (typeof tf.getLayoutMode === 'function') state.layoutMode = tf.getLayoutMode();
+    if (typeof tf.getRowOffsets === 'function') state.rowOffsets = tf.getRowOffsets();
+
     // Field scope
     if (typeof tf.getFieldScope === 'function') {
       var scope = tf.getFieldScope();
@@ -113,11 +116,17 @@
     if (!tf) return false;
 
     var restored = false;
+    if (state.layoutMode && typeof tf.setLayoutMode === 'function') tf.setLayoutMode(state.layoutMode);
+    if (state.rowOffsets && typeof tf.restoreRowOffsets === 'function') {
+      requestAnimationFrame(function() { tf.restoreRowOffsets(state.rowOffsets); });
+    }
 
     // Restore field scope first (it resets projection to default)
     if (state.fieldScope && typeof tf.setFieldScope === 'function') {
       tf.setFieldScope(state.fieldScope);
       restored = true;
+    } else if (!state.fieldScope && typeof tf.clearFieldScope === 'function') {
+      tf.clearFieldScope();
     }
 
     // Restore projection (after scope, since scope may reset it to default)
@@ -194,7 +203,7 @@
       wrapper.addEventListener('scroll', function() {
         clearTimeout(scrollTimer);
         scrollTimer = setTimeout(save, SCROLL_DEBOUNCE_MS);
-      }, { passive: true });
+      }, { passive: true, capture: true });
     }
 
     // Save on visibility change (user leaves tab or locks phone)

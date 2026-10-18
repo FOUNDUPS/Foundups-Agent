@@ -588,7 +588,8 @@
 
     // Density presets
     html += '<div class="reddog-tools-group">';
-    html += '<div class="reddog-tools-label">Density</div>';
+    html += '<div class="reddog-tools-label">Layout</div>';
+    html += '<button class="reddog-tool-pill" data-reddog-browse-rows type="button">Adaptive category rows</button>';
     html += '<div class="reddog-tools-row reddog-tools-row-wrap">';
     for (var j = 0; j < DENSITY_PRESETS.length; j++) {
       var d = DENSITY_PRESETS[j];
@@ -622,6 +623,11 @@
       var catBtn = e.target.closest('[data-reddog-category]');
       if (catBtn) {
         setCategory(catBtn.getAttribute('data-reddog-category'));
+        return;
+      }
+
+      if (e.target.closest('[data-reddog-browse-rows]')) {
+        if (window.mallTileField) window.mallTileField.setLayoutMode('rows');
         return;
       }
 
@@ -743,16 +749,16 @@
     // Search input (hidden by default)
     html += '<div class="reddog-search-container" data-reddog-search-container style="display:none;">';
     html += '<div class="reddog-search-row">';
-    html += '<input type="text" class="reddog-search-input" data-reddog-search-input placeholder="Search by creator..." autocomplete="off">';
+    html += '<input type="text" class="reddog-search-input" data-reddog-search-input placeholder="Show me videos on Fukui, houses, cars…" aria-label="Search the Mall catalog" maxlength="300" autocomplete="off">';
     html += '<button class="reddog-search-clear" data-reddog-search-clear type="button">&times;</button>';
     html += '</div>';
 
     // Category filter pills
     html += '<div class="reddog-filter-row" data-reddog-category-filters>';
     html += '<span class="reddog-filter-label">Category:</span>';
-    var categories = ['travel', 'music', 'media', 'startup', 'ai-education', 'ai-research', 'thought-leadership'];
+    var categories = Array.from(new Set(storedCatalog.map(function(item) { return item.category; }).filter(Boolean))).sort();
     for (var i = 0; i < categories.length; i++) {
-      html += '<button class="reddog-filter-pill" data-reddog-category="' + categories[i] + '" type="button">' + categories[i] + '</button>';
+      html += '<button class="reddog-filter-pill" data-reddog-category="' + esc(categories[i]).replace(/"/g, '&quot;') + '" type="button">' + esc(categories[i]) + '</button>';
     }
     html += '</div>';
 
@@ -824,9 +830,9 @@
     if (searchInput) {
       searchInput.addEventListener('input', function (e) {
         var query = e.target.value.trim();
-        if (window.mallTileField && typeof window.mallTileField.searchByCreator === 'function') {
+        if (window.mallTileField && typeof window.mallTileField.searchCatalog === 'function') {
           if (query.length > 0) {
-            window.mallTileField.searchByCreator(query);
+            window.mallTileField.searchCatalog(query);
           } else {
             window.mallTileField.clearFieldScope();
           }
@@ -1544,6 +1550,12 @@
     openHistory: function () { injectWatchHistory(); executeMode('history'); },
     refreshHistory: function () { renderWatchHistory(); },
     clearHistory: function () { clearWatchHistory(); },
+
+    searchCatalog: function(query) {
+      if (window.mallTileField && typeof window.mallTileField.searchCatalog === 'function') {
+        window.mallTileField.searchCatalog(query);
+      }
+    },
 
     searchByCreator: function (query) {
       emitRedDogCommand('search_creator', { query: query });

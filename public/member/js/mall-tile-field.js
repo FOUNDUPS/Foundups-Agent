@@ -35,6 +35,9 @@
 
   // Projection state
   var currentProjection = 'default';
+  var layoutMode = 'rows';
+  var rowOffsets = Object.create(null);
+  var escapeBound = false;
   var originalOrder = [];  // Preserve original catalog order
 
   // Field scope state (filter before projection)
@@ -57,6 +60,7 @@
   var currentDensity = '3x5';
   var densityManuallySet = false; // Whether user has manually overridden density
   var expandedFoundUp = null; // Index of expanded FoundUp, or null
+  var browseScrollTop = 0;
   var expandSourceIndex = null; // Original tile index for collapse animation
   var expandSourceVisual = null; // { bgImage, bgColor } for collapse continuity
   var playingIndex = null; // Index of currently playing tile
@@ -129,6 +133,7 @@
     // Observe all tiles
     var tiles = tileField ? tileField.querySelectorAll('.mall-tile') : [];
     tiles.forEach(function(tile, index) {
+      index = Number(tile.dataset.index);
       tile.dataset.tileIndex = index;
       tileLoadStates[index] = 'pending';
       tileObserver.observe(tile);
@@ -181,6 +186,7 @@
   function markAllTilesLoaded() {
     var tiles = tileField ? tileField.querySelectorAll('.mall-tile') : [];
     tiles.forEach(function(tile, index) {
+      index = Number(tile.dataset.index);
       tile.dataset.tileIndex = index;
       tileLoadStates[index] = 'loaded';
     });
@@ -432,7 +438,7 @@
       if (btn) btn.classList.remove('is-active', 'is-muted');
     });
     if (index === null || index === undefined || !state) return;
-    var tile = allTiles[index];
+    var tile = getTileElement(index);
     if (!tile) return;
     if (state.previewing) {
       tile.classList.add('is-previewing', 'has-video-controls');
@@ -707,17 +713,19 @@
       var scrollStartX = 0;
       var scrollStartY = 0;
       var dragMoved = false;
+      var horizontalTarget = null;
 
       function onMouseDown(e) {
         // Ignore if on interactive elements
-        if (e.target.closest('button, a, [tabindex]')) return;
+        if (e.target.closest('button, a, input, select, textarea')) return;
         if (e.button !== 0) return;
 
         isDragging = true;
         dragMoved = false;
         startX = e.clientX;
         startY = e.clientY;
-        scrollStartX = tileFieldWrapper.scrollLeft;
+        horizontalTarget = e.target.closest('.mall-category-track') || tileFieldWrapper;
+        scrollStartX = horizontalTarget.scrollLeft;
         scrollStartY = tileFieldWrapper.scrollTop;
         tileFieldWrapper.classList.add('is-dragging');
         e.preventDefault();
@@ -731,7 +739,7 @@
           dragMoved = true;
           tapGuardActive = true;
         }
-        tileFieldWrapper.scrollLeft = scrollStartX - dx;
+        horizontalTarget.scrollLeft = scrollStartX - dx;
         tileFieldWrapper.scrollTop = scrollStartY - dy;
       }
 
@@ -797,11 +805,18 @@
     var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
 
     if (!itemsToRender.length) {
+      captureRowOffsets();
+      if (tileObserver) tileObserver.disconnect();
+      tileLoadStates = {};
+      tileField.classList.remove('expanded-mode');
       tileField.innerHTML = '<div class="mall-tile-field-empty"><span class="mall-tile-field-empty-icon">&#x1F6D2;</span><span>No FoundUps visible</span></div>';
       return;
     }
 
-    tileField.innerHTML = itemsToRender.map(function(item, index) {
+    captureRowOffsets();
+    tileField.dataset.layout = layoutMode;
+    tileFieldWrapper.classList.toggle('browse-rows', layoutMode === 'rows');
+    var tileMarkup = itemsToRender.map(function(item, index) {
       var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
       var readiness = item.launch_readiness || item.status || 'discoverable_only';
       var badgeClass = readiness === 'ready' ? 'ready' : (readiness === 'conditional' ? 'conditional' : '');
@@ -864,10 +879,40 @@
           '<p class="mall-tile-name">' + escapeHtml(item.name || item.title || '') + '</p>' +
         '</div>' +
       '</article>';
-    }).join('');
+    });
+
+    if (layoutMode === 'rows' && expandedFoundUp === null) {
+      var groups = new Map();
+      itemsToRender.forEach(function(item, index) {
+        var key = item.category || 'Other';
+        if (!groups.has(key)) groups.set(key, []);
+        groups.get(key).push(tileMarkup[index]);
+      });
+      var rows = [];
+      groups.forEach(function(markup, key) {
+        rows.push('<section class="mall-category-row"><h2 class="mall-category-title">' + escapeHtml(key) + '</h2>' +
+          '<div class="mall-row-controls"><button type="button" data-row-step="-1" aria-label="Previous in ' + escapeAttr(key) + '">←</button>' +
+          '<button type="button" data-row-step="1" aria-label="Next in ' + escapeAttr(key) + '">→</button></div>' +
+          '<div class="mall-category-track" data-row-key="' + escapeAttr(key) + '" tabindex="0" role="region" aria-label="' + escapeAttr(key) + '">' + markup.join('') + '</div></section>');
+      });
+      tileField.innerHTML = rows.join('');
+      tileField.querySelectorAll('[data-row-step]').forEach(function(button) {
+        button.addEventListener('click', function() {
+          var track = button.closest('.mall-category-row').querySelector('.mall-category-track');
+          track.scrollBy({ left: Number(button.dataset.rowStep) * track.clientWidth * 0.8,
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+        });
+      });
+      restoreRowOffsets(rowOffsets);
+    } else {
+      tileField.innerHTML = tileMarkup.join('');
+    }
 
     // Update expanded mode class
     tileField.classList.toggle('expanded-mode', expandedFoundUp !== null);
+
+    tileLoadStates = {};
+    initTileObserver();
 
     // Detect thumbnail load and remove shimmer
     var tiles = tileField.querySelectorAll('.mall-tile');
@@ -1020,7 +1065,9 @@
       });
     });
 
-    // Global escape handler - collapse expanded view or stop preview
+    // Bind once: rerendering rows must not accumulate document listeners.
+    if (escapeBound) return;
+    escapeBound = true;
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape' && expandedFoundUp !== null) {
         e.stopPropagation();
@@ -1040,7 +1087,7 @@
    */
   function togglePlay(index) {
     var tiles = tileField.querySelectorAll('.mall-tile');
-    var targetTile = tiles[index];
+    var targetTile = getTileElement(index);
 
     // Immediate visual feedback: tap pulse
     if (targetTile) {
@@ -1178,6 +1225,8 @@
     var sourceRect = sourceTile ? sourceTile.getBoundingClientRect() : null;
     var reducedMotion = prefersReducedMotion();
 
+    if (expandedFoundUp === null) browseScrollTop = tileFieldWrapper.scrollTop;
+
     // Store source index and visual for collapse animation continuity
     expandSourceIndex = index;
     var bgImage = sourceTile ? sourceTile.style.backgroundImage || '' : '';
@@ -1218,7 +1267,7 @@
       setTimeout(function() {
         cleanupFlipLayer(flipLayer);
         tileField.classList.remove('transitioning');
-        if (collapseHint) {
+        if (collapseHint && expandedFoundUp === index) {
           collapseHint.classList.add('visible');
         }
       }, 300);
@@ -1226,16 +1275,16 @@
       // Reduced motion or no source: instant transition
       tileField.classList.add('transitioning');
 
-      setTimeout(function() {
+      {
         expandedFoundUp = index;
         playingIndex = null;
         renderTiles();
         bindInteractions();
         tileField.classList.remove('transitioning');
-        if (collapseHint) {
+        if (collapseHint && expandedFoundUp === index) {
           collapseHint.classList.add('visible');
         }
-      }, 60);
+      }
     }
   }
 
@@ -1268,6 +1317,7 @@
       expandedFoundUp = null;
       playingIndex = null;
       renderTiles();
+      tileFieldWrapper.scrollTop = browseScrollTop;
       bindInteractions();
 
       // Find target tile position
@@ -1309,16 +1359,78 @@
       // Reduced motion: instant transition
       tileField.classList.add('transitioning');
 
-      setTimeout(function() {
+      {
         expandedFoundUp = null;
         playingIndex = null;
         renderTiles();
+        tileFieldWrapper.scrollTop = browseScrollTop;
         bindInteractions();
         tileField.classList.remove('transitioning');
         expandSourceIndex = null;
         expandSourceVisual = null;
-      }, 60);
+      }
     }
+  }
+
+  // Shared browsing layout. Catalog indexes remain stable inside grouped DOM rows.
+  function captureRowOffsets() {
+    if (tileField) tileField.querySelectorAll('[data-row-key]').forEach(function(row) {
+      rowOffsets[row.dataset.rowKey] = row.scrollLeft;
+    });
+    return Object.assign({}, rowOffsets);
+  }
+
+  function restoreRowOffsets(offsets) {
+    if (!offsets || typeof offsets !== 'object') return;
+    Object.keys(offsets).forEach(function(key) {
+      if (Number.isFinite(offsets[key]) && offsets[key] >= 0) rowOffsets[key] = offsets[key];
+    });
+    if (tileField) tileField.querySelectorAll('[data-row-key]').forEach(function(row) {
+      row.scrollLeft = rowOffsets[row.dataset.rowKey] || 0;
+    });
+  }
+
+  function setLayoutMode(mode) {
+    if (mode !== 'rows' && mode !== 'grid') return false;
+    stopInlinePreview();
+    layoutMode = mode;
+    if (tileField) { renderTiles(); bindInteractions(); }
+    return true;
+  }
+
+  // Projection changes invalidate index-based media state.
+  function resetMediaScope() {
+    stopInlinePreview();
+    expandedFoundUp = null;
+    expandSourceIndex = null;
+    if (collapseHint) collapseHint.classList.remove('visible');
+  }
+
+  // Bounded local catalog search, not semantic ranking or a conversation runtime.
+  function searchCatalog(query) {
+    if (typeof query !== 'string') return;
+    query = query.trim().slice(0, 300);
+    if (!query) { clearFieldScope(); return; }
+    setFieldScope({ type: 'query', query: query });
+  }
+
+  function matchesCatalogQuery(item, query) {
+    var normalized = query.toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, ' ');
+    var words = normalized.split(/\s+/).filter(function(word) {
+      return word && !['hey', 'please', 'show', 'me', 'find', 'browse', 'on', 'in', 'about', 'the', 'some', 'red', 'dog'].includes(word);
+    });
+    var wantsVideos = words.some(function(word) { return word === 'videos' || word === 'video'; });
+    if (wantsVideos && !(item.videos && item.videos.length)) return false;
+    words = words.filter(function(word) { return word !== 'videos' && word !== 'video'; });
+    var aliases = { houses: 'house housing homes property real-estate', house: 'house housing homes property real-estate',
+      cars: 'car cars automotive vehicles', clothes: 'clothes clothing apparel fashion' };
+    var metadata = [item.name, item.title, item.description, item.tagline, item.creator, item.creator_display,
+      item.entity, item.category, item.topic_family, item.geo, item.tags].concat((item.videos || []).map(function(video) {
+        return [video.title, video.description, video.tags, video.geo].join(' ');
+      })).join(' ').toLowerCase();
+    return words.every(function(word) {
+      return (aliases[word] || word).split(' ').some(function(term) { return metadata.indexOf(term) !== -1; });
+    });
   }
 
   // ========== Motion Mode Control ==========
@@ -1460,6 +1572,7 @@
     // Track manual override (defaults to true for API calls)
     if (isManual !== false) {
       densityManuallySet = true;
+      if (layoutMode !== 'grid') setLayoutMode('grid');
     }
 
     if (tileField) {
@@ -1497,7 +1610,8 @@
       return '4x6';
     }
 
-    // Phone or portrait: safe mobile default
+    if (info.deviceClass === 'tablet') return '4x6';
+    // Phone: safe mobile default
     return '3x5';
   }
 
@@ -1505,7 +1619,8 @@
    * Auto-select density based on viewport (only if not manually set)
    */
   function autoSelectDensity() {
-    if (densityManuallySet) return;
+    if (densityManuallySet && getDevicePolicy().allowed.includes(currentDensity)) return;
+    densityManuallySet = false;
     var optimal = detectOptimalDensity();
     setDensity(optimal, false); // false = not manual
   }
@@ -1664,7 +1779,7 @@
    * @param {string} projection - Projection name: default, alpha, readiness, category
    */
   function setProjection(projection) {
-    stopInlinePreview();
+    resetMediaScope();
     if (!['default', 'alpha', 'readiness', 'category'].includes(projection)) {
       projection = 'default';
     }
@@ -1728,6 +1843,10 @@
     // Legacy string support
     if (scope === 'personal') {
       scope = { type: 'personal' };
+    }
+
+    if (scope.type === 'query' && typeof scope.query === 'string') {
+      return sortScopedResults(fullCatalog.filter(function(item) { return matchesCatalogQuery(item, scope.query); }));
     }
 
     if (scope.type === 'personal') {
@@ -1805,6 +1924,7 @@
       return;
     }
 
+    resetMediaScope();
     currentFieldScope = options;
     mallCatalog = filterByScope(options);
     originalOrder = mallCatalog.slice();
@@ -1863,7 +1983,7 @@
    */
   function clearFieldScope() {
     if (currentFieldScope === null) return;
-    stopInlinePreview();
+    resetMediaScope();
     currentFieldScope = null;
     mallCatalog = fullCatalog.slice();
     originalOrder = mallCatalog.slice();
@@ -1883,6 +2003,13 @@
 
   // Expose public API
   window.mallTileField = {
+    // Shared responsive browse and local discovery
+    setLayoutMode: setLayoutMode,
+    getLayoutMode: function() { return layoutMode; },
+    getRowOffsets: captureRowOffsets,
+    restoreRowOffsets: restoreRowOffsets,
+    searchCatalog: searchCatalog,
+
     // Core
     initialize: initialize,
     enterFoundUp: enterFoundUp,
