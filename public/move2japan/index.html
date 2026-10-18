@@ -3,123 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#15151b">
-  <meta name="description" content="Explore real Japanese akiya listings in English. Search a curated Fukui collection by location and budget, understand the essentials, and open the original listing.">
-  <title>Move2Japan — Find a home in Japan</title>
-  <link rel="stylesheet" href="/member/css/mall-tile-field.css">
-  <link rel="stylesheet" href="/member/css/mall-planes.css">
-  <link rel="stylesheet" href="/move2japan/move2japan.css">
-  <script defer src="/member/js/gesture-engine.js"></script>
-  <script defer src="/member/js/mall-planes.js"></script>
-  <script defer src="/member/js/mall-tile-field.js"></script>
-  <script defer src="/move2japan/property-search.js"></script>
+  <meta name="description" content="Move2Japan house discovery in the Foundups Mall.">
+  <link rel="canonical" href="https://foundups.com/f/move2japan">
+  <title>Move2Japan · Foundups Mall</title>
+  <script>
+    // Legacy entry only. The existing member page owns the shell and all controls.
+    (function () {
+      var incoming = new URLSearchParams(window.location.search);
+      var selected = new URLSearchParams({ foundup: 'move2japan' });
+      ['q', 'country', 'prefecture', 'city', 'locality', 'max', 'land', 'sort', 'group', 'large', 'tour'].forEach(function (key) {
+        var values = incoming.getAll(key);
+        if (values.length === 1 && values[0].length <= 80) selected.set(key, values[0]);
+      });
+      if (!selected.has('city') && incoming.getAll('area').length === 1 && incoming.get('area').length <= 80) {
+        selected.set('city', incoming.get('area'));
+      }
+      window.location.replace('/member/?' + selected.toString());
+    })();
+  </script>
 </head>
-<body class="m2j-site">
-  <a class="skip-link" href="#homes">Skip to homes</a>
-  <header class="site-header" data-anchor="top">
-    <a class="brand" href="/move2japan/" aria-label="Move2Japan home">Move<span>2</span>Japan<small>BY FOUNDUPS</small></a>
-    <nav aria-label="Main navigation">
-      <a class="current" href="#homes" aria-current="page">Find a home</a>
-      <a href="#how-it-works">How it works</a>
-      <a class="account-link" href="https://foundups.com/member/">Foundups account <span aria-hidden="true">↗</span></a>
-    </nav>
-  </header>
-
-  <main>
-    <section class="intro" aria-labelledby="page-title">
-      <div>
-        <p class="eyebrow"><span class="status-dot" aria-hidden="true"></span> THE FUKUI COLLECTION</p>
-        <h1 id="page-title">A place in Japan.<br><em>A starting point for you.</em></h1>
-        <p class="intro-copy">Find an <span lang="ja">空き家</span> — an unoccupied home — and understand the essentials in English. Start with a place. Explore what comes next.</p>
-      </div>
-      <aside class="collection-note" aria-label="Collection coverage">
-        <span class="japanese-place" lang="ja">福井</span>
-        <p>Fukui Prefecture</p>
-        <small>A small, curated collection<br>from Japan’s local akiya bank.</small>
-      </aside>
-    </section>
-
-    <section id="homes" class="discovery" data-anchor="middle" aria-labelledby="homes-heading">
-      <div class="section-heading">
-        <h2 id="homes-heading">Find your starting point</h2>
-        <span class="collection-label">HOMES FOR SALE</span>
-      </div>
-      <form id="propertySearch" class="search-form" role="search" aria-label="Search homes">
-        <label class="keyword-field">Search the collection
-          <input id="propertyQuery" name="q" type="search" maxlength="80" placeholder="Town, feature, or Japanese address" autocomplete="off">
-        </label>
-        <label>Area
-          <select id="propertyArea" name="area"><option value="">All of Fukui</option></select>
-        </label>
-        <label>Asking price
-          <select id="propertyBudget" name="max">
-            <option value="">Any budget</option>
-            <option value="1000000">Up to ¥1 million</option>
-            <option value="3000000">Up to ¥3 million</option>
-            <option value="5000000">Up to ¥5 million</option>
-            <option value="10000000">Up to ¥10 million</option>
-          </select>
-        </label>
-        <label>Sort by
-          <select id="propertySort" name="sort">
-            <option value="price_asc">Lowest price</option>
-            <option value="price_desc">Highest price</option>
-            <option value="land_desc">Largest plot</option>
-            <option value="town">Town A–Z</option>
-          </select>
-        </label>
-      </form>
-      <div class="filter-row">
-        <label class="toggle-filter"><input id="largePlots" type="checkbox"> Plots of 500 m² or more</label>
-        <label class="toggle-filter"><input id="virtualTours" type="checkbox"> Virtual tour at source</label>
-        <button id="resetSearch" type="button" class="text-button">Reset filters</button>
-      </div>
-      <div class="results-heading">
-        <p id="resultCount" role="status" aria-live="polite">Loading source listings…</p>
-        <p id="checkedDate" class="checked-date"></p>
-      </div>
-      <div id="listingError" class="empty-state" role="alert" hidden>
-        <h3>The collection could not load.</h3>
-        <p>Reload this page, or visit the <a href="https://akiya.pref.fukui.lg.jp/" target="_blank" rel="noopener noreferrer">Fukui akiya bank</a>.</p>
-        <button id="retryListings" type="button" class="secondary-button">Try again</button>
-      </div>
-      <div id="noResults" class="empty-state" hidden>
-        <h3>No homes match those filters.</h3>
-        <p>This is a small Fukui collection. Try another town or a wider budget.</p>
-        <button id="clearEmptySearch" type="button" class="secondary-button">Show all homes</button>
-      </div>
-      <div id="propertyFieldWrapper" class="mall-tile-field-wrapper motion-glide" hidden>
-        <div id="mallTileField" class="mall-tile-field" data-softproto-mount="tile-field" aria-label="Homes"></div>
-      </div>
-      <noscript><p class="empty-state">Enable JavaScript to filter homes here. You can also <a href="https://akiya.pref.fukui.lg.jp/">browse the original Fukui akiya bank</a>.</p></noscript>
-      <p class="source-note">Source-listed homes, with asking prices shown in yen. Open a home for English notes, then view the original photos and contact the listing broker to confirm availability and terms.</p>
-    </section>
-
-    <section id="how-it-works" class="how-section" aria-labelledby="how-heading">
-      <div class="section-heading"><h2 id="how-heading">From finding to understanding</h2><span class="collection-label">ONE STEP AT A TIME</span></div>
-      <div class="steps">
-        <article><span class="step-number">01</span><h3>Explore in English</h3><p>Compare locations, asking prices, plot sizes and the repair notes available at the source.</p></article>
-        <article><span class="step-number">02</span><h3>See the original</h3><p>Every home links to its Japanese listing, photographs and any available tour or assessment.</p></article>
-        <article><span class="step-number">03</span><h3>Speak with the broker</h3><p>Use the contact on the original listing to ask about availability, viewing and the purchase process.</p></article>
-      </div>
-      <div class="more-info">
-        <details><summary>What is included in this collection?</summary><p>Five manually reviewed homes from Fukui Prefecture’s akiya bank, with source pages checked on 17 October 2026. This is an initial collection, not a live feed or a complete inventory. Photographs and tours are available on the original pages. The source’s building-area label is retained in the details; it should not be assumed to mean total usable floor area.</p></details>
-        <details><summary>For property owners and real estate agencies</summary><p>Owner and agency registration is the next planned step. Public submissions are not open here yet. The publishing service will need account verification, authority to advertise the property, permission to use photographs, and a review before a listing appears.</p></details>
-        <details><summary>Foundups membership and early access</summary><p>The Foundups account link opens the existing shared account entry. Paid housing plans are not available on this page yet. Planned benefits include earlier curated alerts and partner offers. Publicly listed homes remain available at their original sources.</p></details>
-      </div>
-    </section>
-  </main>
-
-  <footer data-anchor="bottom">
-    <div><strong>Move<span>2</span>Japan</strong><p>A home is a beginning.</p></div>
-    <div class="footer-links"><a href="https://www.youtube.com/@MOVE2JAPAN" target="_blank" rel="noopener noreferrer">Life in Japan on YouTube ↗</a><a href="https://www.mlit.go.jp/totikensangyo/const/sosei_const_tk3_000131.html" target="_blank" rel="noopener noreferrer">Nationwide akiya sources ↗</a><a href="https://foundups.com/">Foundups ↗</a></div>
-  </footer>
-
-  <div id="foundupViewScrim" class="foundup-view-scrim" aria-hidden="true"></div>
-  <section id="foundupViewPlane" class="foundup-view-plane" role="dialog" aria-modal="true" aria-label="Home details" inert>
-    <div class="fv-handle" aria-hidden="true"></div>
-    <button id="foundupViewClose" class="fv-close-btn" type="button" aria-label="Close home details">×</button>
-    <div id="foundupViewBody"></div>
-  </section>
-</body>
+<body><p><a href="/member/?foundup=move2japan">Browse Move2Japan houses in the Foundups Mall</a></p></body>
 </html>

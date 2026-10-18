@@ -1,5 +1,52 @@
 # Member Area Module Change Log
 
+## 2026-10-18 — Move2Japan selects houses inside the actual member shell
+
+Correct the prior separate-page composition. The registered product opens
+`/member/?foundup=move2japan`; the existing page, field, detail plane, Red Dog,
+account owner, service worker and persistence remain shared. `/move2japan/` is a
+fixed alias. Templates supply the product form/toolbar and move the existing
+field node; they do not create another shell. Eight dated Fukui observations
+form five area rows, with combined geography/land/price filters.
+
+Preserve concurrent main's responsive category rows and global catalog queries.
+Explicit geographic groups take precedence; global video controls cannot mutate
+house results. Keep separate video/product state and a bounded account return.
+SW cache v4 serves only explicit public assets and validated public catalogs.
+Product account enrichment is read-only after the normal stored admission checks;
+generation guards prevent stale responses after sign-out/account switching.
+Guests do not depend on Firebase. Full shared member panels are visible after
+admission; the video-only guide stays hidden. A peer caught and verified the fix
+for briefing/recommendations accidentally nested under that hidden guide.
+
+WSP 00/22/50/84/97: recover exact retained source where available, rebuild missing
+segments against actual owners, and rerun tests. The remote PR remained at its
+original head during the stalled upload/executor interruption. No cause is
+invented for the executor state loss. Actual bootstrap and registry evidence are
+recorded in the [domain rebaseline](../../modules/foundups/move2japan/docs/08_HOUSING_DISCOVERY_REBASELINE.md).
+Fresh integrated execution: 1698 passed and the four independently confirmed
+pre-existing failures, no skips. Runtime/CI/deployment receipts remain distinct.
+No publisher, paid plan, token issuance, tenant admission or production cutover is
+implied by this public discovery change.
+
+## 2026-10-18 — Shared responsive rows and RedDog catalog search
+
+Extend existing Mall renderer rather than duplicate tenant apps. Default category
+tracks adapt card width to the viewport and preserve independent horizontal
+positions; vertical browsing has no fixed row cap. Keep explicit legacy grid,
+channel pinch/queue behavior and canonical entry. Repair drag-on-card exclusion,
+reobserve rerenders and clear stale media indexes on scope/projection changes.
+RedDog text and dispatcher share bounded metadata search; categories come from
+catalog data. Service-worker shell version advanced for updated assets.
+
+WSP 00: canonical bootstrap attempted; torch absent. Documented tracker fallback
+opened gate; detector witness absent. WSP 50/87: exact-head lexical bundle read,
+freshness UNKNOWN/index gap true; noisy retrieval supplemented by direct owner
+reads. No semantic freshness or reindex claimed. WSP 84/97: shared-owner reuse;
+voice, personalized mapping, payments and live ingestion remain future work.
+Validation details are recorded in public/member/tests/TestModLog.md.
+
+
 ## 2026-10-17 — Shared Mall property discovery presentation
 
 Move2Japan's public house-search PoC reuses the existing tile field, detail

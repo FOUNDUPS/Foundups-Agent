@@ -55,6 +55,7 @@
     returnFocusListingId = item.source_type === 'property_listing' ? item.listing_id : null;
     activeIndex = index;
     renderView(item);
+    if (item.source_type === 'property_listing') plane.scrollTop = 0;
     plane.removeAttribute('inert');
     plane.classList.add('open');
     if (scrim) scrim.classList.add('open');
@@ -110,7 +111,10 @@
     // Sync Mall carousel position
     if (window.mallPlanesSync) window.mallPlanesSync(next);
     // renderView replaces the source link. Keep property focus on a live control.
-    if (navItem.source_type === 'property_listing' && closeBtn) closeBtn.focus();
+    if (navItem.source_type === 'property_listing') {
+      plane.scrollTop = 0;
+      if (closeBtn) closeBtn.focus();
+    }
   }
 
   // ---- render ----
@@ -189,7 +193,7 @@
   }
 
   function propertyMeasurement(value) {
-    return typeof value === 'number' && Number.isFinite(value) && value > 0
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0
       ? value.toLocaleString('en-US') + ' m\u00b2' : 'Not stated';
   }
 
@@ -205,9 +209,12 @@
   function renderPropertyView(item) {
     var sourceUrl = propertySourceUrl(item.source_url);
     var price = typeof item.price_jpy === 'number' && Number.isFinite(item.price_jpy) && item.price_jpy >= 0
-      ? '\u00a5' + item.price_jpy.toLocaleString('en-US') : 'Price on request';
-    var location = [item.municipality, item.prefecture].filter(Boolean).join(' \u00b7 ');
-    var condition = item.repair_level === 'major' ? 'Major repairs required' : 'Repair needs not stated';
+      ? '\u00a5' + item.price_jpy.toLocaleString('en-US') : item.price_status === 'negotiable' ? 'Price negotiable' : 'Price not stated';
+    var location = [item.locality || item.locality_ja, item.municipality, item.prefecture, item.country].filter(Boolean).join(' \u00b7 ');
+    var condition = item.repair_level === 'major' ? 'Major repairs required' :
+      item.repair_level === 'some' ? 'Some repairs required' :
+      item.repair_level === 'none_reported' ? 'No repairs reported at source' : 'Repair needs not stated';
+    var sourceNotes = Array.isArray(item.source_notes) ? item.source_notes.filter(function(note) { return typeof note === 'string' && note.trim(); }) : [];
     var status = item.availability === 'source_listed' ? 'Listed at source when checked' : 'Status not confirmed';
     plane.setAttribute('data-content-type', 'property');
     plane.setAttribute('role', 'dialog');
@@ -224,6 +231,8 @@
       '<p class="fv-property-summary">' + esc(item.summary || 'Read the original listing for property details.') + '</p>' +
       '<dl class="fv-property-facts">' +
         propertyFact('Location', location) +
+        (item.locality_ja ? propertyFact('Locality at source', item.locality_ja) : '') +
+        (item.country ? propertyFact('Country', item.country) : '') +
         propertyFact('Address at source', item.address_ja) +
         propertyFact('Land area', propertyMeasurement(item.land_area_m2)) +
         propertyFact('Building area (' + (item.building_area_label_ja || 'source measurement') + ')', propertyMeasurement(item.building_area_m2)) +
@@ -232,6 +241,7 @@
         propertyFact('Repair needs', condition) +
       '</dl>' +
       '<p class="fv-property-note">The source building-area figure is not a verified measurement of usable floor space.</p>' +
+      (sourceNotes.length ? '<section class="fv-property-source-notes" aria-label="Notes from the source"><h3>Source notes</h3><ul>' + sourceNotes.map(function(note) { return '<li>' + esc(note) + '</li>'; }).join('') + '</ul></section>' : '') +
       '<div class="fv-property-source">' +
         '<h3>Original listing</h3>' +
         '<p>' + esc(item.source_name || 'Property source') + ' \u00b7 Record ' + esc(item.source_item_id || 'not stated') + '</p>' +

@@ -1,3 +1,17 @@
+## 2026-10-18 — Security: triage the 91 historical secret candidates
+
+- WSP 50/71/97: pinned main `1c80f15ae2eee0f78300f297fb3e386275bc0aab`,
+  retrieved the existing security owner and reviewed exact historical blobs.
+- Classified all 91; accepted 52 verified non-secret occurrences with 51 exact
+  fingerprint additions. Preserved 39 blockers: 16 unverified digest entries
+  and 23 occurrences of five credential candidates. No scanner weakening.
+- Reproduced baseline and complete current-main ancestry scans; current tree
+  has no unreviewed matches. Five candidate values absent from current tracked
+  files; revocation and deployment applicability remain unverified.
+- Validation: 17 security-gate regressions passed; exact-blob fingerprints and
+  source digests recomputed. Safe decisions live with the existing security
+  owner in `.github/security/reviewed-history-triage-evidence.json`.
+
 ## RSI initial control bootstrap — 2026-10-16
 
 WSP00/15/22/48/97. Existing control owners now distinguish first LOW identity

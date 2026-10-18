@@ -6,9 +6,17 @@ _Source: 012 voice-mode conversation, captured 2026-03-07_
 > to optional relocation intake; it does not gate the current public house search.
 > URL spellings in the retained sample copy were corrected on 2026-10-17. These
 > samples are not evidence of deployed newsletter, roadmap-account or paid
-> services. The secondary `move2japan.foundups.com` domain remains proposed only.
+> services. The earlier separate `move2japan.foundups.com` PWA plan is superseded
+> by the product inside the existing Play Foundups Mall.
 > Current routes/status: [funnel architecture](07_FUNNEL_ARCHITECTURE.md).
 > Existing livechat code/skill responses were not changed by this documentation edit.
+> The current public POC selects eight-house discovery inside
+> `/member/?foundup=move2japan`, registered through `/f/move2japan`.
+> `/move2japan/` is a redirect alias. The shared account owner reads existing
+> Clerk/invite/username admission without blocking guest browse. BC0 passport or
+> signup prompts are not inserted before the houses. Production hosting, browser
+> checks and domain forwarding remain separate gates. The prior private Site
+> publication is superseded review history; it does not deploy the BC0 journey.
 
 ## Purpose
 
@@ -52,7 +60,13 @@ BC0 is a **triage and routing layer**. Not the handbook. Not the visa engine. No
 
 ---
 
-## BC0 Canonical Flow
+## Retained BC0 conversation flow
+
+The following samples preserve the March service proposal. Before using them in
+live responses, verify the destination and offered capability. House discovery
+uses the registered Mall product; shared account entry uses the existing
+Foundups flow. Newsletter capture, personal roadmap accounts and the old
+secondary-domain CTA are not implemented by the housing POC.
 
 ### Step 1 — Trigger Received
 

@@ -9,4 +9,4 @@ def test_public_property_search_contract():
         text=True, capture_output=True, timeout=20, check=False,
     )
     assert result.returncode == 0, result.stdout + result.stderr
-    assert "12 property-search checks passed" in result.stdout
+    assert "28 property-search checks passed" in result.stdout

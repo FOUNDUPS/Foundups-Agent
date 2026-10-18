@@ -1,3 +1,65 @@
+## 2026-10-18 | Recovered actual Mall product integration
+
+Fresh final recovered-source command:
+
+```bash
+/tmp/move2japan-tests/bin/python -B -m pytest --import-mode=importlib \
+  public/member/tests modules/foundups/move2japan/tests \
+  modules/foundups/public_catalog_projector/tests/test_projector.py \
+  modules/foundups/tests/test_foundup_registry_schema.py -q
+```
+
+Result: **1698 passed, 4 failed, 0 skipped in 11.52 seconds**. The four failures
+are unchanged baseline expectations: navigation's `fv-open-link`,
+`routing_prefix`, obsolete `Tap to play/pause`, and BC0 intent classification of
+“is it expensive to live there”. The original tests and BC0 handler remain
+unchanged from main. No suppression or unrelated repair was added.
+
+Actual source VM receipts (counts overlap with Python wrappers):
+
+- `member_product_boot_vm.mjs`: 21 checks, complete `memberRuntime` inline script
+  with only dynamic imports routed to controlled test modules. Guest startup,
+  Clerk failure/timeout, actual stored admission, no public account writes,
+  missing invite status, sign-out and reversed account reads, same-account
+  generation races, ordinary gate, account return and explicit video entry.
+  Executed from the existing `test_localhost_dev_harness.py` owner.
+- `public_discovery_concierge_vm.mjs`: 21 checks against the actual member plane
+  and product template, real concierge and gestures. Includes visible shared
+  briefing/recommendations, invite action, focus/profile handoff, strict guest
+  revocation, captured callbacks and independent product filters.
+- `mall_product_state_vm.mjs`: 17 checks on actual state/SW source. Separate
+  namespaces, loading captures, bounded returns, deferred video restoration,
+  explicit public caching, network fallback and HTML rejection.
+- `mall_property_listing_vm.mjs`: actual field/plane/gesture behavior, both axes,
+  stable listing identity, empty filters, source safety, modal scroll/focus,
+  restored offsets and preserved ordinary category/grid behavior.
+- Dispatcher VM and independent actual-field/dispatcher composition: geography
+  refuses populated/empty global queries without mutation or success event;
+  shared density and ordinary queries remain functional.
+- Domain `property_search.cjs`: 28 factual catalog, geography, land, price, route
+  and alias checks.
+
+Independent reviewers replayed the field/state, concierge, boot and dispatcher
+boundaries and found no remaining material blocker. The restored field is exact
+blob `966e59f748422a5aed2cf24694d01c6fe6636626`; regenerated harness/account segments
+have fresh receipts, not claims of identical lost bytes. Canonical registry:
+1722 test files, 270 quarantined; generator output matches the previously uploaded
+blob `1af2a9330d932d9d121331152f0d1ac3ddc1e03c`. No registry gate is weakened.
+
+Browser layout, production auth, source availability, payments, live playback and
+real offline browser operation remain outside these VM receipts. The historical
+records below retain their original stage/source scope.
+
+## 2026-10-18 | Responsive shared Mall discovery
+
+Validation on the proposed branch:
+- 251 passed across test_video_mall_field_runtime.py, test_search_mall_concierge_wiring_phase1.py and test_mobile_blockers.py. Two environment config warnings for unavailable asyncio plugin options.
+- Existing pfmall_control_dispatcher_vm.mjs passed.
+- New mall_responsive_browse.mjs passed in headless Chromium: 390/768/1024/1440 viewport widths, both scroll axes, stable grouped indexes, desktop card dragging, query aliases/location, truthful empty results, search during expansion, vertical collapse restoration, saved horizontal position, dispatcher payload validation and legacy grid switching.
+- JavaScript syntax and git diff whitespace checks passed. Independent read-only review found no remaining material regressions after stable-index, category attribute and vertical restoration fixes.
+
+Browser fixture uses 60 synthetic channels and intercepts network requests. This does not establish real authentication, provider playback, Safari/iPad hardware behavior, voice conversation, or personalized ranking. Runtime-owned browser dependencies were used; repository dependencies unchanged.
+
 ## 2026-10-17 | Property tiles and shared quick-view runtime
 
 Extended `test_non_video_quickview_actions.py` with a Node runtime check using

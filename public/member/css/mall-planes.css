@@ -284,6 +284,15 @@
 .fv-property-source p {
   margin: 0.4rem 0;
 }
+.fv-property-source-notes {
+  margin: 1rem 0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.fv-property-source-notes h3 { margin: 0 0 0.4rem; font-size: 0.95rem; }
+.fv-property-source-notes ul { padding-left: 1.2rem; }
+.fv-property-source-notes li + li { margin-top: 0.4rem; }
 .foundup-view-plane[data-content-type="property"] .fv-primary-cta {
   min-height: 44px;
   box-sizing: border-box;

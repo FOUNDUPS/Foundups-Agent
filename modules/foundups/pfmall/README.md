@@ -28,7 +28,7 @@ execution, or FoundUp business logic.
   not load content.
 - `verification_gap_guard.py` allows advisory anomaly surfacing and blocks AI
   finality for protected decisions.
-- `public/member/` is the admitted-user Firebase/PWA surface. Its detailed
+- `public/member/` is the Clerk-admitted member PWA. Its detailed
   browser contract remains in `public/member/INTERFACE.md`.
 
 ## RedDog, OpenClaw, and Hermes boundary
@@ -56,6 +56,8 @@ admitted leaf jobs. The browser remains an untrusted thin client. No text or
 | Member Mall UI and browser control dispatcher | Implemented | Presentation only |
 | Shell-local RedDog FAQ concierge | Implemented legacy shim | Static guidance only |
 | Authenticated resident RedDog conversation adapter | Specified, not implemented in p.fMALL | RedDog backend |
+| AutoPost Live mode and creator live-session service | Specified, not implemented | External AutoPost product/media adapter; separately authenticated durable creator backend |
+| Provider-confirmed live catalog projection | Planned | Scoped backend observation; public-safe fields only |
 | OpenClaw policy or worker authority in browser | Prohibited | Backend control plane |
 | Hermes execution in browser | Prohibited | Governed worker plane |
 | Protected decision finality by AI | Prohibited | Human review |
@@ -64,6 +66,35 @@ admitted leaf jobs. The browser remains an untrusted thin client. No text or
 
 See [INTERFACE.md](INTERFACE.md) for Python exports, HTTP routes, mutation
 boundaries, and the RedDog integration seam.
+
+## Mobile creator studio planning (updated 2026-10-18)
+
+The intended outcome is a creator selecting Live in AutoPost, appearing in Play,
+recovering from tested network interruptions and reusing a valid input for the
+next show. [AutoPost](https://github.com/FOUNDUPS/autopost) already owns browser
+camera/mic capture, local recording, review and operator-owned YouTube file upload.
+Its proposed Live mode needs a continuous media adapter. The first proof evaluates
+foreground WebRTC through an authenticated relay; native media integration follows
+if device evidence justifies it. Mall owns discovery/playback projection, not the
+camera. Existing upload and channel-specific automation do not establish a general
+durable creator live service.
+
+0102 consumes this bounded documentation collection before proposing a build:
+
+- [Mobile studio contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md):
+  pain, AutoPost reuse/ownership, logical operations and acceptance criteria.
+- [AutoPost Live audit and roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md#phase-4b--autopost-live-mode-planned):
+  product-owned mode, capture/transport gaps and staged phone proof.
+- [YouTube API constraints](../docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md):
+  dated quota, input reuse, OAuth, eligibility, recovery and playback constraints.
+- [Machine outcome](../docs/mobile_studio/mobile_studio_outcome.v1.json): proposed
+  slices, obstacles, unknowns and measurable results; no runtime admission.
+- [Document manifest](../docs/mobile_studio/doc_index.json) and
+  [documentation execution receipt](../docs/mobile_studio/wsp97_execution_receipt.json).
+
+The phase sequence is in [ROADMAP.md](ROADMAP.md). Actual creator/channel access,
+mobile behavior and provider calls remain unverified. No route, FoundUp identity,
+payment system or deployed service is added by these documents.
 
 Canonical architecture documents remain under `modules/foundups/docs/`:
 

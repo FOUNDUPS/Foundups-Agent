@@ -1,6 +1,7 @@
 # Move2Japan: POC, prototype and MVP
 
-Current authority: 012's 2026-10-17 JST website instruction. This updates the
+Current authority: 012's website instruction and 2026-10-18 shared-Mall
+integration correction. This updates the
 build order captured in the 2026-03-07 voice conversation while retaining the
 broader relocation vision. The current primary domain is **move2japan.info**.
 
@@ -9,16 +10,43 @@ broader relocation vision. The current primary domain is **move2japan.info**.
 **Proof sought:** People who do not read Japanese can find actual houses,
 understand the available facts and reach the original listing/contact.
 
-The first slice is a public English property catalog at `/move2japan/` with five
-attributed Fukui observations. The page reuses Foundups Mall's tile field,
-detail planes and gesture code. Houses are records within Move2Japan, not new
-FoundUps, and opening a house does not start a video.
+The current public English catalog mounts inside the existing
+`/member/?foundup=move2japan` shell with eight attributed Fukui observations.
+`/f/move2japan` and the public portfolio link to this product; `/move2japan/`
+only redirects. Account access, the middle house field, bottom RedDog anchor,
+state and PWA service worker belong to the existing Mall. Both the first
+five-house grid and the subsequent separate page importing Mall components are
+superseded by this integration.
 
-Acceptance requires useful search/filtering, the correct selected detail,
-original-source links, observation dates, clear unknowns and source-listed
-availability boundaries. Source photographs stay at the source until media
-reuse is authorized. Source implementation, validation and live deployment are
-recorded separately.
+Acceptance requires:
+
+- Registered public discovery inside the actual Mall boot, preserving the
+  separate protected-app gate. Guest browsing remains available without Clerk
+  or Firestore; existing account admission is read through the shared owner.
+- Houses visible immediately, with left/right within an area and up/down between
+  areas. Multiple source houses in Wakasa, Sakai and Eiheiji make within-area
+  browsing concrete.
+- Country, prefecture, city/town, suburb/locality, land-status and price filters
+  in the same public RedDog plane. City/locality rows are projections of the
+  shared field, not separate FoundUps or replacement channel identities.
+- Correct selected detail and adjacent navigation within its area, with touch,
+  desktop drag, visible controls and keyboard access.
+- Stable row/listing focus through result updates and modal search that preserves
+  form scrolling, Escape and focus return.
+- Separate product/video state, bounded account return and public-only PWA
+  caching that preserves source observation dates. Account changes clear stale
+  identity without granting publisher or paid-service rights.
+- Original-source links, observation dates, clear unknowns and source-listed
+  availability boundaries. A negotiable price stays null; unknown land stays
+  unknown. Source photographs remain at the source until reuse is authorized.
+
+**Status:** Integration implemented in source, with focused independent reviews.
+The audit and test log own revision-specific verification and any concurrent-main
+reconciliation. Firebase production hosting, browser interaction/visual checks
+and primary-domain forwarding remain separate open gates. The 2026-10-17 private
+Site publication, historical PR #2151 and 696-pass/one-BC0-failure receipt belong
+to the superseded separate composition. The private Site is a review mirror;
+its publication does not establish a production release or paying-customer MVP.
 
 The existing BC0 chat and SQLite memory are completed groundwork. They remain
 available for optional relocation guidance and do not gate public house search.

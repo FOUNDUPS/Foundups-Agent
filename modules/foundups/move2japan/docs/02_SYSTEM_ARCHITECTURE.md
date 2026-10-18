@@ -1,14 +1,44 @@
-# Move2Japan FoundUp — System Architecture (012 Architecture Vision)
+# Move2Japan FoundUp — System Architecture
 
-_Source: 012 voice-mode conversation, captured 2026-03-07_
+_Current source boundary: 2026-10-18 UTC. The March 2026 architecture vision is
+retained below as historical planning._
 
-> Historical March architecture. The current house-first build order and
-> implementation boundaries are in [the roadmap](../ROADMAP.md) and
-> [housing audit](08_HOUSING_DISCOVERY_REBASELINE.md). URL spellings below were
-> corrected on 2026-10-17; the proposed secondary PWA is not a verified deployed
-> service. The full journey/profile remains planned beyond implemented BC0.
+## Current shared-Mall product
 
-## Primary Surfaces
+Move2Japan is selected inside `public/member/index.html` by
+`/member/?foundup=move2japan`. The existing Mall owns boot, account/RedDog,
+geographic field/detail planes, gestures, state and the `/member/` PWA. The
+housing adapter supplies the domain templates, filters and eight public Fukui
+source observations. `/move2japan/` now redirects into that shell.
+
+| Boundary | Current implementation |
+| --- | --- |
+| Public registration | Same `move2japan` tenant, discoverable incubating FoundUp, declarative manifest; `/f/move2japan` and public portfolio link to Browse houses |
+| Product selection | Exactly one `foundup=move2japan` selects public housing inside `/member/`; no independent application boot |
+| Guest discovery | Public catalog and filters load independently of Clerk/Firebase availability |
+| Existing account | Read-only Clerk plus invite and username admission; existing RedDog member presentation, cleared on sign-out/account changes |
+| Account return | Explicit existing account flow, then one-use 15-minute return to fixed public product and safe filters |
+| State and cache | Separate video/product positions; fixed public shell/catalog cache paths retain original source dates |
+| Protected app | `/f/move2japan/app` participation gate remains; publisher service is a prototype target |
+| Paid service and tokens | Actual paid benefit delivery remains the MVP gate; `TOKEN_DEFERRED`, no issuance or paid entitlement |
+
+The earlier separate PWA at `move2japan.foundups.com` is superseded as the product
+architecture. `move2japan.info` is the intended public brand/domain and requires
+verified forwarding to the shared product. The same private Site is a review
+mirror only. Its successful 2026-10-17 publication belongs to the superseded
+standalone composition, not this source revision.
+
+Production Firebase Hosting has not been deployed in this session. The target is
+project `gen-lang-client-0061781628`, site `foundupscom`; authenticated hosting
+access is unavailable here. Browser and served-page receipts remain separate.
+Current build order and evidence: [roadmap](../ROADMAP.md),
+[interface](../INTERFACE.md), [housing audit](08_HOUSING_DISCOVERY_REBASELINE.md).
+
+## Historical March surface plan — superseded
+
+Source: 012 voice-mode conversation, captured 2026-03-07. The full journey and
+expanded profile remain planned beyond implemented BC0. These surface and
+service descriptions are retained as history, not current deployment claims.
 
 ### 1. YouTube Live Chat
 
@@ -31,7 +61,7 @@ _Source: 012 voice-mode conversation, captured 2026-03-07_
 
 ---
 
-## Core Modules
+## Retained future journey modules
 
 ### A. Intent Capture Module
 
@@ -96,9 +126,9 @@ _Source: 012 voice-mode conversation, captured 2026-03-07_
 
 ---
 
-## State Model
+## Planned full-journey state model
 
-Canonical stakeholder states:
+Target stakeholder states beyond the current BC0 persistence:
 
 ```
 Intent → Passport → Pathway Discovery → Income Plan → Visa Plan
@@ -108,7 +138,7 @@ Intent → Passport → Pathway Discovery → Income Plan → Visa Plan
 
 ---
 
-## Minimum Required Profile Fields
+## Planned expanded profile fields
 
 | Field             | Description                                                  |
 | ----------------- | ------------------------------------------------------------ |
@@ -128,7 +158,9 @@ Intent → Passport → Pathway Discovery → Income Plan → Visa Plan
 
 ---
 
-## Gating Logic
+## Optional personal-journey gating
+
+These guidance gates do not block public house discovery.
 
 | Condition                  | System Behavior                       |
 | -------------------------- | ------------------------------------- |
@@ -140,6 +172,6 @@ Intent → Passport → Pathway Discovery → Income Plan → Visa Plan
 
 ---
 
-## Architecture Principle
+## Historical March architecture principle
 
 > The chat is not the product. The chat is the top of funnel plus continuity layer. The roadmap engine plus memory layer is the product core.

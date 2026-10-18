@@ -1,18 +1,24 @@
 # Move2Japan membership and premium model
 
-Rebaseline: 2026-10-17 JST. Authority: 012's house-discovery instruction and
+Rebaseline: 2026-10-18 UTC. Authority: 012's shared-Mall house-discovery instruction and
 paying-customer definition of MVP. The March 2026 premium/concierge concept is
 retained below as future service scope, not an implemented subscription catalog.
 
 ## Current offering and next benefits
 
-The POC offers public English discovery of attributed house records using
-Foundups Mall. It does not sell a membership or serve private early listings.
+The POC source offers eight attributed house records inside the existing
+`/member/?foundup=move2japan` Mall shell: geographic rows, location/land filters
+and the shared RedDog plane. The canonical `/f/move2japan` public entry links
+there. `/move2japan/` is now an alias; the former independent composition and
+its 2026-10-17 private publication are superseded history. Production hosting
+and browser validation remain separate gates. The public product reads existing
+shared-account admission and does not sell a membership or serve private early
+listings.
 
 | Surface or benefit | State |
 | --- | --- |
-| Public property search and original-source links | POC implementation slice |
-| Shared Foundups account | Existing Clerk/invite/username flow at `https://foundups.com/member/` |
+| Public geographic house discovery and original-source links | Registered POC in the actual Mall shell; guest browse does not require account services |
+| Shared Foundups account | Existing Clerk/invite/username admission, read without account/invite writes in the product; explicit account handoff reuses `/member/?account=1` |
 | Owner/realtor publication | Prototype target; account and publisher authority pending |
 | Basic/member earlier discovery or alerts | Proposed benefit; plan mapping, price and delay unconfigured |
 | Partner-authorized exclusive offers | Future, only where an actual partner grants the offer |
@@ -24,9 +30,19 @@ price from the simulator or infer that a shared invite grants paid access.
 
 ## Reuse boundaries
 
-`public/member/index.html` checks Clerk identity and Firestore invite/username
-state. It does not verify a settled subscription. Move2Japan should reuse that
-account entry and establish a verified principal binding for protected services.
+`public/member/index.html` owns both public product selection and the existing
+member flow. Guest housing data loads independently. For an existing session,
+the product reads Clerk identity and Firestore invite/username state, clears
+stale identity on sign-out/account changes, and enables the existing shared
+RedDog account presentation only after that admission. It does not create a
+waitlist record, consume an invite or verify a settled subscription. A bounded,
+one-use return restores safe housing filters after explicit account admission.
+
+`registerDiscoveryAdapter({element, focusElement})` mounts the domain-owned form
+in the same RedDog plane. Dialog state, filters, recorded land/price facts and
+the public `foundup` query confer no account, purchase or service entitlement.
+Protected publisher and billing services still require a verified principal
+binding and their own server-derived authority.
 
 The existing systems have distinct roles:
 
@@ -75,7 +91,9 @@ requires an actual partner-authorized offer, not a claim over public information
 
 ## Tokenization
 
-Preserve `foundup_id=move2japan` and the existing `TOKEN_DEFERRED` registry state.
+Preserve `foundup_id=move2japan` and `TOKEN_DEFERRED`. Reclassifying the same
+registry record as a discoverable, incubating FoundUp with a public POC does not
+issue a token or admit its protected `/f/move2japan/app` interior.
 This slice creates no token symbol, supply, distribution, staking or wallet
 entitlement. Future integration follows WSP 26 and the existing FoundUps owners.
 

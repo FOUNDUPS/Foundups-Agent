@@ -1,173 +1,255 @@
-# Move2Japan housing discovery: evidence and implementation boundary
+# Move2Japan housing discovery: shared Mall integration and evidence
 
-Date: 2026-10-17 JST. Research base: `407292aa754a88143796163581b67ca6679eac29`.
-Owner: 0102, architect/implementer. Authority: 012's direct request to inspect and
-develop Move2Japan, corrected to the numeral 2, using Foundups Mall and shared
-membership. This is an ordinary repository/web development slice, not an
-admitted WRE runtime job, financial transaction, or autonomous crawler launch.
+Updated: 2026-10-18 UTC. Owner: 0102, under 012's direct development instruction.
+Brand and primary domain: **Move2Japan**, **move2japan.info** (numeral 2).
+Repository delivery: [PR #2151](https://github.com/FOUNDUPS/Foundups-Agent/pull/2151).
 
-## Problem and selected layer
+## Decision and corrected structure
 
-The existing module implements YouTube intake and SQLite stakeholder memory.
-Its roadmap still prioritizes that intake and uses `movetojapan` domain strings.
-The requested public product now leads with English discovery of real akiya
-houses. Existing Mall video tiles must support property records without treating
-each property as a new FoundUp or forcing a video playback flow.
+Move2Japan is a registered product in the existing Play Foundups Mall. The public
+entry opens the actual `public/member/index.html` with houses selected. That page
+owns the shell, field, Red Dog, account integration, gestures, detail planes,
+service worker and view persistence. The domain adapter supplies factual house
+records, geographic grouping and English filter controls.
 
-Closed groundwork: `m2j_stakeholder_db.py`, livechat's M2J handler, Mall tile field,
-detail planes and gestures, and the Foundups account entry already exist.
-Open target: public house search, property-specific detail, accurate website
-roadmap and a concrete next gate for publisher accounts and paid membership.
-Chosen slice: five attributed factual source observations in a searchable public
-catalog at `/move2japan/`, with shared Mall rendering and source inquiry links.
-The existing YouTube journey, shared account authorization, GotJunk publication
-provider and token issuance retain their owners.
+The initial 2026-10-17 implementation imported shared scripts into a separate
+Move2Japan page. Shared assets alone did not satisfy 012's instruction that the
+product operate *inside* the Mall. The subsequent geographic preview demonstrated
+horizontal houses and vertical areas, but still had a separate HTML shell and a
+reduced public-only Red Dog. Both were architectural gaps. The current correction
+moves the product into the actual Mall boot and composes its search form with the
+full shared account controller. `/move2japan/` is now only a redirect alias.
 
-## Retrieval and reuse
+| Route | Ownership and behavior |
+| --- | --- |
+| `/f/move2japan` | Existing registered FoundUp discovery entry; Browse houses follows its exact public POC URL |
+| `/member/?foundup=move2japan` | Actual shared Mall page, public houses selected |
+| `/member/?creator=move2japan` | Ordinary admitted Mall with the existing Move2Japan video channel expanded |
+| `/member/` | Ordinary admitted Mall; responsive category rows and explicit grid remain available |
+| `/move2japan/` | Fixed same-site redirect with bounded house filters |
+| `/f/move2japan/app` | Existing protected participation handoff; public discovery does not authorize it |
 
-- Read `AGENTS.md`, WSP 00/97, the root roadmap, historical briefing boundaries,
-  module README/INTERFACE/ROADMAP/ModLog/tests and `NAVIGATION.py`.
-- The canonical WSP 00 V2 bootstrap was attempted; `torch` was unavailable.
-  The documented section 3.3.1 tracker fallback opened the local gate with
-  `execution_method=mathematical_formulas`; detector witness is absent.
-- The source-bound Holo owner helper ran its documented lexical fallback:
-  `bundle_ok=true`, `workspace_head` at the research base, zero owner attempts,
-  `freshness=UNKNOWN`, `index_gap_detected=true`. No semantic freshness claim.
-- Search initially returned many YouTube hits. Exact module artifacts and shared
-  Mall files were must-included and read directly, removing irrelevant results.
-  The module roadmap is stale relative to implemented BC0; no house UI existed
-  at this base. No reindex, authority reset, or broad runtime setup was used.
-- Reuse `public/member/js/mall-tile-field.js`, `mall-planes.js`,
-  `gesture-engine.js` and their styles. Properties have a separate `listing_id`
-  inside the existing `move2japan` context. The main video catalog is unchanged.
-- `modules/foundups/pfmall/listing_discovery.py` is a GotJunk-only public approval
-  projection, with no production provider by default. Do not relabel it as a
-  working universal inventory or upload service.
+Only one exact `foundup=move2japan` selection enables the public product boot.
+Unknown and duplicate selections retain ordinary admission. The adapter moves the
+existing field node; it creates no second field, account owner or tenant runtime.
+The registered public POC does not make the product portfolio-ready or launch an
+autonomous FoundUp worker.
 
-## Assumptions and evidence
+## WSP 00 / WSP 97 recovery discipline
 
-| Assumption | Evidence | Confidence |
+This is an ordinary repository and website development slice. It is not a WRE
+worker-admission receipt, production crawler launch, financial transaction, or
+payment/token authorization.
+
+- Root `AGENTS.md`, WSP 00/97, navigation, module docs, roadmap, test inventory,
+  Mall navigation contracts, account owner, registry and projector were read.
+- The canonical WSP 00 V2 bootstrap was attempted. `torch` was unavailable. The
+  documented section 3.3.1 tracker fallback opened the local strict gate with
+  `execution_method=mathematical_formulas`; the detector witness remains absent.
+- The source-bound Holo owner helper used its documented lexical fallback:
+  `bundle_ok=true`, workspace source selected explicitly, zero owner attempts,
+  `freshness=UNKNOWN`, `index_gap_detected=true`. No semantic freshness or reindex
+  is claimed. Direct current-source reads resolved the task owners.
+- Retrieval had excessive YouTube matches, stale domain/stage documentation and
+  missing website-specific owners. Exact Mall, property and account files were
+  must-included; duplicated and unrelated hits were excluded before edits.
+- Main's parallel responsive category/query work (#2155), AutoPost Live direction
+  (#2154) and subsequent security documentation (#2153) are preserved. Integration
+  review reconciles product geography with the same field and dispatcher APIs.
+- No `main.py`, daemon, Holo reindex, authority reset or runtime worker was started.
+
+## Interruption and recoverable evidence
+
+A GitHub content upload stalled for an extended period. After it returned, the
+local task checkout, Site checkout and temporary test environment were absent.
+The available evidence does not establish why the executor state disappeared.
+The remote PR was still at `db1442ae5d5c8856a9a15ef8cdd96362c824c03e`; no incomplete
+replacement was written to its ref.
+
+Recovery used that original PR, current main, the existing private Site's source
+commit `77db7957ce7527a0f614de545317ac03842c876b`, and retained exact tool outputs and
+patches. All 13 files in the published Site provenance manifest were checked
+against their SHA-256 values. The final reviewed field patch restores Git blob
+`966e59f748422a5aed2cf24694d01c6fe6636626` exactly. Missing account/boot and harness
+segments were rebuilt from current owners and the reviewed contracts, and freshly
+executed; historical passing checks are not presented as proof of those new bytes.
+Owned source and recovery metadata were checkpointed in retained session stores.
+
+The correction did not reset or overwrite 012's concurrent Mall work. The recovered
+branch was reconciled with main `b9051be2` (which contains Mall commit `6ad7cf09`).
+The delivery commit and its actual checks are recorded separately below.
+
+## Shared runtime contract
+
+### Geographic field
+
+The field immediately presents houses. Each horizontal row contains houses from
+one area; vertical movement changes areas. City/town and locality grouping are
+supported. Country, prefecture, city, locality, land status, budget, large plot
+and source-tour filters combine. Empty or unsupported geography yields an honest
+empty result, not a widened search. Each house retains a stable `listing_id`
+inside the existing `move2japan` FoundUp context.
+
+Explicit geographic groups take precedence over normal category rows, even when
+empty. `getLayoutMode()` reports `grouped` for the product. Global video category,
+query, scope, channel and rows/grid controls cannot mutate geographic results.
+Dispatcher `search_catalog` reports `incompatible_projection` on refusal and emits
+no state-change event. Normal Mall catalog search and responsive category browsing
+retain their current owner behavior.
+
+### Shared account and Red Dog
+
+`product-discovery` mode uses the existing full Red Dog controller plus accessible
+modal handling. The native product form stays usable for guests. Existing members
+can see their identity, canonical FoundUp entries, invitations and applicable
+shared tools after the existing Clerk/invite/username admission checks.
+
+Public browsing starts synchronously and does not wait for Firebase. A bounded
+Clerk connection optionally reads an already-present account. This product path
+never creates profiles, validates cached invitations, mints invite codes or writes
+member records. Signup remains in the normal gateway. Missing invitation records
+are displayed as unknown rather than active access.
+
+Every account synchronization starts by revoking the previous displayed context.
+A generation token plus the current Clerk account ID guards each asynchronous
+read and error path. Late user, catalog or invitation responses cannot restore a
+signed-out or previously selected account. The same-ID refresh race is guarded.
+Revocation clears both avatars and private account sections. Account and video
+links use the canonical Foundups host, including from a private review mirror.
+
+### View persistence and caching
+
+Video state stays at `pfmall_mall_state_v1`. Move2Japan uses
+`pfmall_product_move2japan_state_v1`, with stable row/listing anchors and offsets.
+Product restoration never applies video scope/layout; deferred video callbacks
+recheck the active product. A loading product cannot erase its saved position.
+A bounded, one-use, 15-minute session return preserves house filters through the
+normal account gateway and is consumed only after actual admission.
+
+The existing `/member/manifest.json` retains its member app identity and scope.
+The combined service-worker cache is `pfmall-member-v4`. Member query navigations
+share one cached shell; property JSON is network-first with JSON validation and a
+dated cached fallback. Only explicit public assets are eligible. Auth, account,
+dynamic, cross-origin and non-GET requests are not cached. This is a code contract;
+real offline browser behavior still requires a served-browser receipt.
+
+## Source collection and uncertainty
+
+The POC contains **eight dated public source observations across five Fukui
+municipalities**. Seven record a plot area, one has unknown land, and none is
+classified as confirmed no-land. One asking price is negotiable and remains null;
+unpriced homes are excluded under a budget filter and sort after known prices.
+A recorded plot area does not establish ownership/title conditions.
+
+The observations were checked on 2026-10-17 JST. They are not a live or nationwide
+feed and do not confirm current availability. Inquiry and transaction details stay
+with the source and broker. Photos, full descriptions and tours are linked at the
+source rather than republished. No bulk media or commercial feed permission is
+assumed. `建築面積` remains the source's building-area label, not an invented total
+usable-floor-area interpretation. Address localities retain Japanese source text;
+checked Latin forms are provided for English discovery. Conflicting source details
+remain visible in `source_notes`; parcel coordinates are not fabricated.
+
+| Source record | Municipality | Land / price qualification |
 | --- | --- | --- |
-| The brand and primary domain use numeral 2 | 012's current correction; prior domain record | High |
-| Mall presentation can be extended for properties | Current tile/plane/gesture source and non-video tests | High |
-| Five public source records can ground a small discovery demonstration | Individual Fukui bank pages read on 2026-10-17 JST | High for displayed facts; availability unconfirmed |
-| A public bank page grants bulk media/translation reuse | No verified grant; explicitly not assumed | Unestablished |
-| Foundups account admission is paid membership | Current member page checks Clerk/invite/username, not settled subscription | False |
-| A token or client flag proves early-listing access | No housing entitlement adapter exists | False |
-| Move2Japan.info is already serving this work | Domain currently described by 012 as Patreon forwarding; deployment requires separate evidence | Unverified |
+| [87](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/87) | Wakasa | Recorded plot; asking price |
+| [85](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/85) | Fukui City | Recorded plot; construction/condition unknown where source lacks facts |
+| [83](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/83) | Sakai | Recorded plot; asking price |
+| [77](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/77) | Awara | Recorded plot; source conflicts retained |
+| [76](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/76) | Eiheiji | Recorded plot; asking price |
+| [25](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/25) | Sakai | Unknown land area, not no-land |
+| [79](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/79) | Eiheiji | Recorded plot; asking price |
+| [88](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/88) | Wakasa | Recorded plot; negotiable price remains null |
 
-## Failure modes and controls
+Additional grounding: [Fukui bank](https://akiya.pref.fukui.lg.jp/),
+[MLIT nationwide bank operators](https://www.mlit.go.jp/totikensangyo/const/sosei_const_tk3_000131.html),
+[brokerage lookup](https://etsuran2.mlit.go.jp/TAKKEN/),
+[LIFULL terms](https://www.homes.co.jp/kiyaku/), and
+[At Home municipal API example](https://www.athome.co.jp/corporate/news/release/services/akiyabank-chiba-202604/).
+These are research references, not evidence that a production feed or license was obtained.
 
-| Failure | Impact | Control |
+## Roadmap gates and membership/token boundary
+
+| Stage | Required evidence | Status in this slice |
 | --- | --- | --- |
-| Multiple houses share a FoundUp ID and open the first record | High | Key listing selection and focus by listing ID; behavioral regression checks |
-| Source text/URLs inject markup or unsafe navigation | High | Allowlisted fields, escaped text/attributes, HTTPS source URLs without credentials |
-| Old/withdrawn listings appear as confirmed available | High | Display observation date and source-listed status; link original and broker inquiry; no availability guarantee |
-| Source photos/narratives republished without a grant | High | Original short factual summaries only; photographs and tours stay at the source |
-| Static paid catalog exposes early records | High | No paid/early inventory included; prototype requires server-side entitlement filtering before data release |
-| Account creation or a free trial is counted as MVP | High | MVP requires recorded customer payment and delivered benefit; refund/expiry handling required |
-| Unrelated concurrent work is overwritten | High | Isolated branch at exact base, explicit path ownership, review current main before merge |
-| New deployment silently replaces another Foundups service | High | Separate `/move2japan/` source; existing host/domain changes only against verified ownership and configuration |
+| POC | A person can search and inspect sourced houses | Implemented in the actual shared Mall; publication receipts below |
+| Prototype | An authorized broker/owner can publish via a shared account | Pending verified authority, consent/media permission, durable storage/provider, review and listing lifecycle |
+| MVP | Actual paying customers receive the promised benefit | Pending shared billing/entitlement integration, settled payment and delivered benefit, expiry/refund handling |
 
-## Alternatives and decision
+Existing BC0 YouTube intake and SQLite stakeholder memory remain under their
+current owners. GotJunk's approved public-listing projection and upload work can
+inform the next layer; they are not a working universal house publisher. An
+account, invite, wallet balance, token label, waitlist or free trial is not a paid
+housing entitlement. Earlier curated alerts are a possible future benefit; public
+bank listings are not described as exclusive inventory.
 
-Extending the existing Mall field and detail plane preserves the requested
-interaction and lets the same presentation handle houses. An unrelated template
-would duplicate navigation. Widening the GotJunk provider in this slice would
-couple discovery to unverified publication, identity and upload infrastructure.
-Building payment flows first would skip the requested proof-of-concept gate.
+Move2Japan retains its existing registry identity and is now registered as an
+incubating FoundUp at F0, reflecting 012's expanded housing-product scope.
+The manifest is declarative, with autonomous routes/build authorization absent.
+Token status remains deferred and the token symbol is null. No payment, premium
+inventory release, token issuance or publisher authority is granted by client state.
+The [module roadmap](../ROADMAP.md), [premium model](03_PREMIUM_MODEL.md) and
+[stage definitions](04_POC_PROTOTYPE_MVP.md) govern the next slices.
 
-Decision: **PROCEED** with the bounded public factual catalog and shared Mall
-extension; 0102, 2026-10-17 JST. Independent code review and focused behavioral
-checks are required before merging. Actual domain deployment, payments,
-publisher signup, feed permission and runtime automation remain separately
-evidenced milestones in the module roadmap.
+## Validation receipts
 
-## Source registry
+Fresh recovered-source execution has passed the actual complete member inline
+script harness (21 cases), the domain search/route harness (28 cases), the shared
+property runtime, the state/SW VM (17 cases) and the concierge VM (21 cases).
+The dispatcher VM retains its original cases plus the incompatible-projection
+checks. The integrated result is **1698 passed, 4 baseline failures, 0 skipped in 11.52 seconds**. Independent review is recorded in
+[shared TestModLog](../../../../public/member/tests/TestModLog.md) and
+[domain TestModLog](../tests/TestModLog.md). Counts overlap and should not be added.
 
-Checked 2026-10-17 JST. These pages support discovery and displayed source facts;
-they do not establish a commercial data license or confirmed availability.
+Known pre-existing full-suite failures are the three unchanged navigation string
+expectations (`fv-open-link`, `routing_prefix`, `Tap to play/pause`) and BC0's
+`TestIntentBucketDetection.test_cost` (housing's `live` precedes cost's `expensive`).
+Their original handlers/tests are unchanged from the base. They are not suppressed
+or repaired as part of this product integration.
 
-- [Fukui prefecture bank](https://akiya.pref.fukui.lg.jp/)
-- [Wakasa, record 87](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/87)
-- [Fukui City, record 85](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/85)
-- [Sakai, record 83](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/83)
-- [Awara, record 77](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/77)
-- [Eiheiji, record 76](https://akiya.pref.fukui.lg.jp/webroot/public/estate/detail/76)
-- [MLIT nationwide bank operators](https://www.mlit.go.jp/totikensangyo/const/sosei_const_tk3_000131.html)
-- [LIFULL service terms](https://www.homes.co.jp/kiyaku/)
-- [At Home municipal API integration example](https://www.athome.co.jp/corporate/news/release/services/akiyabank-chiba-202604/)
-- [MLIT brokerage lookup](https://etsuran2.mlit.go.jp/TAKKEN/)
+These local VMs execute real source with bounded DOM and network doubles. They do
+not establish production authentication, provider playback, Safari/iPad hardware,
+listing availability, payments or real offline browser behavior. The available
+Browser connector lacked its originating browser context; the documented preview
+supervisor also could not mount its required proc namespace. No alternate browser,
+replacement server or infrastructure bypass was used. Browser QA remains unverified.
 
-The source field `建築面積` is retained as a building-area label, not silently
-reinterpreted as total usable floor area. Missing construction or condition data
-remain unknown. Source map markers may represent an area center; this slice does
-not invent parcel coordinates. Early discovery/alerts are future platform
-benefits; publicly listed properties are not described as exclusive inventory.
+## Delivery and deployment status
 
-## Final validation and review evidence
+The existing owner-private review Site is
+https://move2japan.undaodu.chatgpt.site, project
+`appgprj_6ad2b62b4724819186cf254ae67fc866`. Its audience remains owner-private.
+The recovered prior version used source commit `77db7957ce7527a0f614de545317ac03842c876b`
+and deployment `appgdep_6ad2c99dae548191b4b4458ef66b7307` (succeeded
+2026-10-17T01:04:36.202292Z). That historical publication demonstrated geography in
+a separate page; it is not proof of this corrected actual-Mall publication.
+The corrected existing Site publication succeeded on 2026-10-18T22:23:47.078004Z:
 
-The final integrated command in [TestModLog](../tests/TestModLog.md) produced
-**412 passed, 1 failed in 1.13 seconds**. The single failure is the unchanged
-BC0 `TestIntentBucketDetection.test_cost` expectation: the existing classifier
-matches housing's `live` before cost's `expensive`. Neither its handler nor its
-test changed from the research base. It remains open and is not suppressed.
+- Source commit: `8578da1d4238f7bf7bedb72222ef853494d4e0d8`.
+- Saved version: `appgprj_6ad2b62b4724819186cf254ae67fc866~appgver_848f463799148191b2b46e24ee4f0e66`.
+- Deployment: `appgdep_6ad546e498c4819194efa0d9b0944cef`; native result `succeeded`.
+- URL: https://move2japan.undaodu.chatgpt.site.
 
-The shared Mall owner replay passed 277 selected checks. Independent review
-passed 188 selected checks and the actual-script VM. Counts overlap. Review
-found and resolved two property-modal defects before publication:
+The mirror contains 30 byte-verified canonical runtime files, including the actual
+member index, all shared controllers/styles, state/SW/manifest, public catalogs and
+domain adapter. Its root reuses the canonical Move2Japan redirect alias. Static
+`/f/` route copies execute the unchanged shared route owner with their own path;
+no separate house renderer or account implementation is introduced. Per-file
+SHA-256 provenance is committed in the Site source repository. Account/video links
+target the canonical Foundups host. The owner-private audience is unchanged.
+Native publication success establishes this private deployment, not browser layout,
+shared production authentication or a primary-domain cutover.
 
-- Replacing a focused source link while navigating houses could release focus
-  behind the dialog. Property navigation now focuses the stable close control,
-  and Tab/Shift-Tab recovers focus if it starts outside the dialog.
-- A normal upward content scroll could close long property details. The real
-  gesture-engine reproducer now verifies vertical property scrolling stays open,
-  with horizontal navigation and existing video swipe dismissal retained.
+Production is a separate owner: tracked `firebase.json` publishes `public/` to
+Firebase Hosting site `foundupscom`; the verified public Firebase project is
+`gen-lang-client-0061781628`. The documented command is
+`firebase deploy --only hosting --project gen-lang-client-0061781628`.
+The execution environment has no Firebase CLI/authentication context or configured
+production-deploy connector. A GitHub merge alone does not deploy that site.
 
-Independent review confirmed the five source records, stable listing identity,
-filter intersections, unknown-value handling, safe markup/source navigation and
-accurate membership/media boundaries. No remaining scoped code blocker was found.
-Three old string-contract failures in `test_navigation_planes.py` were separately
-confirmed unchanged at the research base (`fv-open-link`, `routing_prefix`, and
-the obsolete `Tap to play/pause` hint).
-
-The canonical test registry check is current: 1720 tracked Python test files,
-270 quarantined. The bounded generated change is one new property wrapper and
-process-capability metadata for the existing shared VM wrapper. The README
-contract passed (1 selected, 14 deselected). HTML structural checks found 25
-unique IDs, seven resolving local assets, and valid fragment destinations.
-`git diff --check` passed.
-
-## Publication receipt and remaining domain gate
-
-The following is an **owner-private review publication**, separate from
-`move2japan.info` and the existing Foundups production account host:
-
-- Review URL: https://move2japan.undaodu.chatgpt.site
-- Site project: `appgprj_6ad2b62b4724819186cf254ae67fc866`
-- Site source commit: `a8f977a32df6dfda40a4e1617fce944e39b56c3d`
-- Saved version: `appgprj_6ad2b62b4724819186cf254ae67fc866~appgver_16eada42fe3c819198d28f3a660f3b96`
-- Deployment: `appgdep_6ad2b963a5108191923158ccf22a0d31`
-- Service result: `succeeded`, 2026-10-16 23:55:22 UTC (2026-10-17 JST).
-
-The published source is a static mirror of the four files in
-`public/move2japan/`, the three shared Mall JavaScript files listed above, and
-the two shared Mall CSS files. Its root entry duplicates the Move2Japan index;
-`/move2japan/` also resolves. The Site source repository includes a per-file
-SHA-256 provenance manifest. There is no independent renderer or copied account
-authorization implementation. The supported Site source helper pushed the exact
-source commit and packaged its configured static directory before publication.
-
-Actual browser rendering remains **unverified**. The local Browser connector
-required an unavailable originating browser context. The documented managed
-preview supervisor failed with `bwrap: Can't mount proc on /newroot/proc:
-Operation not permitted`, including a retry outside the command sandbox. No
-replacement server or infrastructure modification was used. Behavioral and
-structural checks above are not represented as browser QA.
-
-The primary domain check was inconclusive: the retrieval proxy returned HTTP
-502, so no origin response or redirect was verified. Registrar/DNS access and a
-verified primary-host binding are still needed for cutover. No DNS, forwarding,
-Firebase production deployment, account gate or audience setting was changed.
-Before public rollout, complete the served-page interaction review and primary
-domain verification, then record the actual route and audience in this module.
+Earlier anonymous HTTP checks returned a real member page but an HTML fallback at
+`/f/public_catalog.json` and the homepage at `/move2japan/`. The primary
+`move2japan.info` check returned a proxy 502, which proves neither an origin response
+nor the forwarding configuration. Final served-state checks must remain distinct
+from source merge and private Site publication. No Firebase production deploy,
+DNS/registrar cutover, forwarding or audience change is claimed here.
