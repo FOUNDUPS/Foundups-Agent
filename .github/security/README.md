@@ -198,3 +198,32 @@ Only those 53 exact fingerprints were added; safe per-finding proof metadata
 is retained in `reviewed-history-manifest-evidence.json`. The other 91 remain
 unreviewed and blocking. This is neither a full retained-ref scan nor evidence
 of credential revocation or secure deployed configuration.
+
+
+## Historical triage continuation — 2026-10-18
+
+At main `1c80f15ae2eee0f78300f297fb3e386275bc0aab`, reproduced the original
+91 unreviewed findings and reviewed all exact historical blobs. Complete main
+ancestry (3,031 commits) returned 170 candidates; the current tracked tree
+returned 109, all already individually reviewed. Both scans exited 1 for
+findings with zero stderr bytes; these results are not a clean whole-repository
+security audit or full retained-ref scan.
+
+- Cleared 52 historical occurrences through 51 new exact fingerprints: five
+  recomputed source digests and 47 individually reviewed test fixtures, public
+  client identifiers, type/class names, enum labels, routing names and prose.
+- Kept 16 digest metadata entries blocking because the original referenced
+  artifacts or matching source revision were not independently recovered.
+  A prior current-tree exception does not substitute for that missing proof.
+- Kept 23 credential-candidate occurrences blocking, deduplicated to five
+  values (Cesium, LinkedIn, and three Google API keys). No occurrences of these
+  values remain in the reviewed current tracked tree. Validity, revocation,
+  restrictions and deployed copies remain UNKNOWN. No provider probing occurred.
+
+Safe per-finding decisions and next actions are retained in
+`reviewed-history-triage-evidence.json` for agent continuity. No matched values
+are retained there. The blocking gate, rules, scan scope and failure handling
+are unchanged. WSP 71 sections 5.4–5.5 already govern this work; no new protocol
+or WRE scheduler is introduced. Remaining work belongs to the reviewing agent:
+recover the original digest artifacts and obtain authorized provider-owner
+revocation/restriction evidence. Do not treat source removal as revocation.
