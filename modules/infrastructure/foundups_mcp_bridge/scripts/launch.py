@@ -86,7 +86,7 @@ FORBIDDEN_CANARY_TOOLS: Set[str] = {
 
 MCP_RUNTIME_VERSIONS = {
     "fastmcp": "3.2.0",
-    "mcp": "1.28.1",
+    "mcp": "1.30.0",
     "pydantic": "2.12.3",
     "uvicorn": "0.38.0",
 }

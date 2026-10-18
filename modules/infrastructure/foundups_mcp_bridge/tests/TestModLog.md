@@ -1,5 +1,24 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-10-19] MCP 1.30.0 coordinated dependency contract
+
+- Updated the existing exact launcher dependency assertion to MCP 1.30.0;
+  the inert query candidate still admits only packaging 26.0, disjoint from
+  the launcher quartet. Existing version-drift rejection remains intact.
+- Fresh external CPython 3.12.14 copy-based venv with the declared quartet and
+  pytest 9.0.3: launcher, HTTP server and candidate-binding selection yielded
+  **28 passed, 19 skipped, 2 deselected in 3.00s**. The two deselected owned HTTP
+  cases and 19 skipped platform cases require Windows; this is partial coverage.
+  Used `-B`, disabled plugin autoload/cacheprovider, `--noconftest`, importlib
+  mode and an external basetemp. The real candidate version probe also passed.
+- Initial full-selection attempts: **28 passed, 19 skipped, 2 errors**, first
+  because uv's symlink interpreter was rejected, then because Linux lacks the
+  required System32 observer. No production service was launched. Do not count
+  these as passing lifecycle tests or aggregate repeated counts.
+- The unchanged Windows CI gate still requires all **49** cases without skips,
+  including real authentication, allowlist, concurrency and owned cleanup.
+  Hosted verification remains pending at this source checkpoint. WSP22/50/71/97.
+
 ## [2026-10-04] Hosted observer correction
 
 First PR2057 head9f74a627 passed46 controls but failed both live cases: fixed

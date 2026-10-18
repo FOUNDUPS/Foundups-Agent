@@ -7,7 +7,7 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 ## MCP runtime compatibility
 
 The HTTP launcher requires the exact quartet in `requirements.txt`: FastMCP
-3.2.0, MCP 1.28.1, Pydantic 2.12.3 and Uvicorn 0.38.0. Update these declarations
+3.2.0, MCP 1.30.0, Pydantic 2.12.3 and Uvicorn 0.38.0. Update these declarations
 and `scripts/launch.py:MCP_RUNTIME_VERSIONS` together. Older environments fail
 the capability gate; changing source does not upgrade or activate an installed
 service.
