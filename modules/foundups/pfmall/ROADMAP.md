@@ -83,3 +83,22 @@ priorities and active member-runtime PRs intact.
 - [ ] Add module-local dependency and memory contracts per WSP 12/60.
 - [ ] Run FMAS and complete dependency/import analysis before any move. No
   deletion or broad restructuring is part of the Tier-0 repair.
+
+
+## Shared responsive discovery — 2026-10-18
+
+- Implemented in this PR: responsive category tracks, vertical category browsing,
+  horizontal touch/drag/button navigation, local row position restore, and one
+  catalog query API shared by RedDog text controls and the existing dispatcher.
+- Preserve the common shell for creator, housing, vehicle, clothing and other
+  catalog projections. Add real metadata/adapters under existing catalog ownership;
+  no independent per-FoundUp browsing app is required.
+- Next: paged catalog provider and DOM virtualization with measured large-catalog
+  performance; current rows render the loaded catalog and are not infinite ingestion.
+- Next: authenticated resident RedDog conversation/voice adapter (existing admission
+  plan above), calling the same bounded search/projection APIs.
+- Next: explicit, revocable principal-scoped preferences and transparent ranking;
+  `creator === '012'` personal scope is not digital mapping or recommendation.
+- Next: device Safari/pinch/accessibility verification, provider-confirmed live tiles,
+  independent supporter benefits/follow persistence and controlled muted previews.
+  Six simultaneous autoplay streams are not required for responsive browsing.

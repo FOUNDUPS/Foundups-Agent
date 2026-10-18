@@ -1,3 +1,13 @@
+## 2026-10-18 | Responsive shared Mall discovery
+
+Validation on the proposed branch:
+- 251 passed across test_video_mall_field_runtime.py, test_search_mall_concierge_wiring_phase1.py and test_mobile_blockers.py. Two environment config warnings for unavailable asyncio plugin options.
+- Existing pfmall_control_dispatcher_vm.mjs passed.
+- New mall_responsive_browse.mjs passed in headless Chromium: 390/768/1024/1440 viewport widths, both scroll axes, stable grouped indexes, desktop card dragging, query aliases/location, truthful empty results, search during expansion, vertical collapse restoration, saved horizontal position, dispatcher payload validation and legacy grid switching.
+- JavaScript syntax and git diff whitespace checks passed. Independent read-only review found no remaining material regressions after stable-index, category attribute and vertical restoration fixes.
+
+Browser fixture uses 60 synthetic channels and intercepts network requests. This does not establish real authentication, provider playback, Safari/iPad hardware behavior, voice conversation, or personalized ranking. Runtime-owned browser dependencies were used; repository dependencies unchanged.
+
 ## 2026-09-21 | Optional public discovery alias behavior (local and independent replay passed)
 
 Extend test_route_contract_bridge.py with the actual inline JavaScript in an isolated Node VM,

@@ -1,5 +1,23 @@
 # Member Area Module Change Log
 
+## 2026-10-18 — Shared responsive rows and RedDog catalog search
+
+Extend existing Mall renderer rather than duplicate tenant apps. Default category
+tracks adapt card width to the viewport and preserve independent horizontal
+positions; vertical browsing has no fixed row cap. Keep explicit legacy grid,
+channel pinch/queue behavior and canonical entry. Repair drag-on-card exclusion,
+reobserve rerenders and clear stale media indexes on scope/projection changes.
+RedDog text and dispatcher share bounded metadata search; categories come from
+catalog data. Service-worker shell version advanced for updated assets.
+
+WSP 00: canonical bootstrap attempted; torch absent. Documented tracker fallback
+opened gate; detector witness absent. WSP 50/87: exact-head lexical bundle read,
+freshness UNKNOWN/index gap true; noisy retrieval supplemented by direct owner
+reads. No semantic freshness or reindex claimed. WSP 84/97: shared-owner reuse;
+voice, personalized mapping, payments and live ingestion remain future work.
+Validation details are recorded in public/member/tests/TestModLog.md.
+
+
 ## 2026-09-21: Reconcile public-route validation with existing access boundary
 
 The existing route suite expected public tenant iframe launch after the public

@@ -1276,3 +1276,47 @@
   font-size: 2rem;
   opacity: 0.5;
 }
+
+/* Shared responsive browse: vertical groups, independent horizontal tracks.
+   Density presets remain an explicit grid option; rows have no item/row cap. */
+.mall-tile-field-wrapper.browse-rows {
+  overflow-x: hidden;
+  scroll-snap-type: y proximity;
+}
+.mall-tile-field[data-layout="rows"] {
+  display: block;
+  min-width: 0;
+}
+.mall-category-row { position: relative; min-width: 0; margin-bottom: 1.25rem; }
+.mall-category-title { margin: 0; padding: .6rem 6rem .6rem .25rem; font-size: 1rem; text-transform: capitalize; }
+.mall-category-track {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(148px, 22vw, 240px);
+  gap: .65rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: .25rem;
+  overscroll-behavior-x: contain;
+  touch-action: pan-x pan-y;
+  padding: .25rem .25rem .75rem;
+}
+.mall-tile-field[data-layout="rows"] .mall-tile {
+  aspect-ratio: 16 / 9;
+  min-width: 0;
+  border-radius: .6rem;
+  scroll-snap-align: start;
+}
+.mall-tile-field[data-layout="rows"] .mall-tile-name { font-size: .85rem; }
+.mall-row-controls { position: absolute; right: .25rem; top: 0; display: flex; gap: .25rem; }
+.mall-row-controls button { min-width: 44px; min-height: 44px; border-radius: .5rem; color: inherit; background: #252532; border: 1px solid #555; cursor: pointer; }
+.mall-category-track:focus-visible, .mall-row-controls button:focus-visible { outline: 2px solid #b8a4ff; outline-offset: -2px; }
+.mall-tile-field[data-layout="rows"].expanded-mode {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+  gap: .65rem;
+}
+.motion-glide .mall-category-track, .is-dragging .mall-category-track { scroll-snap-type: none; }
+@media (prefers-reduced-motion: reduce) {
+  .mall-tile-field-wrapper, .mall-category-track { scroll-behavior: auto; }
+}

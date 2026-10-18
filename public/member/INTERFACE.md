@@ -503,3 +503,30 @@ The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideApplie
 ---
 
 *Last Updated: 2026-04-20*
+
+
+## Responsive browse and local query API — 2026-10-18
+
+- `mallTileField.setLayoutMode('rows'|'grid') -> boolean`: rows are default;
+  legacy density requests explicitly select grid. Both reuse the same tile/player API.
+- `getLayoutMode()`, `getRowOffsets()`, `restoreRowOffsets(offsets)` expose
+  presentation state; row keys are category strings, offsets nonnegative finite numbers.
+- `searchCatalog(query)` and `redDog.searchCatalog(query)` apply the same
+  `{type:'query', query}` field scope. Input is bounded to 300 characters.
+  AND-match search terms against lane/video metadata; `video(s)` requires a video
+  queue; small house/car/clothing aliases are explicit, not AI inference.
+- `pfmallControlDispatcher.dispatch('search_catalog', {query})` exposes that same
+  local presentation operation, returns `scope: local_catalog` plus observed state,
+  and emits `state_changed`. Existing origin checks are unchanged. It is not a
+  resident conversation transport or a grant of backend/worker authority.
+- State inspection includes `tile_field.layout_mode` where the field API exists.
+- Row movement preserves catalog-wide `data-index`; grouping never renumbers queues.
+- Scope/projection changes stop inline media and clear expanded index state before
+  filtering/reordering. Pinch gestures and canonical `/f/{foundup_id}` entry remain.
+
+Rows continue through the loaded catalog. Server pagination, virtualization,
+provider-confirmed live discovery, follow/payment persistence, consented preference
+mapping and authenticated speech/conversation are future slices, not implied by
+this presentation interface.
+
+Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.
