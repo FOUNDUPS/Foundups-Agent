@@ -247,9 +247,22 @@ Firebase Hosting site `foundupscom`; the verified public Firebase project is
 The execution environment has no Firebase CLI/authentication context or configured
 production-deploy connector. A GitHub merge alone does not deploy that site.
 
-Earlier anonymous HTTP checks returned a real member page but an HTML fallback at
-`/f/public_catalog.json` and the homepage at `/move2japan/`. The primary
-`move2japan.info` check returned a proxy 502, which proves neither an origin response
-nor the forwarding configuration. Final served-state checks must remain distinct
-from source merge and private Site publication. No Firebase production deploy,
-DNS/registrar cutover, forwarding or audience change is claimed here.
+Fresh anonymous HTTP checks at **2026-10-18 22:32:22 UTC**, through the available
+network transport with cache revalidation requested, confirmed the production
+release is still outstanding:
+
+| URL | Received result |
+| --- | --- |
+| `https://foundups.com/member/` | 200 HTML, 50,610 bytes; missing the current product boot, field template and adapter script |
+| `https://foundups.com/member/js/mall-tile-field.js` | 200 JavaScript, 55,067 bytes; missing property/group/state/query APIs present in source |
+| `https://foundups.com/member/js/account-concierge.js` | 200 JavaScript, 59,879 bytes; missing the product discovery/admission APIs |
+| `https://foundups.com/f/public_catalog.json` | 200 HTML, 38,426 bytes; not a valid JSON catalog |
+| `https://foundups.com/move2japan/` | 200 HTML, 98,748 bytes; exactly the homepage bytes, without the source alias redirect |
+| `https://move2japan.info/` | 301 to `https://www.patreon.com/move2japan`, then 308 to `https://www.patreon.com/MOVE2JAPAN`, then 200 |
+
+An earlier proxy 502 was inconclusive and is superseded by this successful
+received redirect chain. These responses do not prove direct origin access or
+browser authentication. No root Firebase Hosting release workflow or dedicated
+deployment capability is available in this session. Source merge, private Site
+publication and production delivery remain separate receipts. No Firebase
+production deploy, DNS/registrar cutover, forwarding or audience change is claimed.
