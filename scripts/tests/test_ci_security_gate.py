@@ -104,6 +104,17 @@ def test_gotjunk_missing_headers_and_http_error_fail(tmp_path):
     # Execute the actual post-deployment shell check against a bounded curl stub.
     workflow = (Path(__file__).resolve().parents[2] /
                 '.github/workflows/deploy-gotjunk.yml').read_text()
+    # Backend-only repairs must not roll out unrelated frontend/rule state.
+    from fnmatch import fnmatchcase
+    push_paths = yaml.load(workflow, Loader=yaml.BaseLoader)['on']['push']['paths']
+    for path, should_deploy in [
+        ('modules/foundups/gotjunk/backend/requirements.txt', False),
+        ('modules/foundups/gotjunk/tests/test_backend_security.py', False),
+        ('modules/foundups/gotjunk/frontend/App.tsx', True),
+        ('modules/foundups/gotjunk/firestore.rules', True),
+        ('modules/foundups/gotjunk/storage.rules', True),
+    ]:
+        assert any(fnmatchcase(path, pattern) for pattern in push_paths) == should_deploy
     command = workflow.split('          set -euo pipefail\n', 1)[1]
     command = 'set -euo pipefail\n' + '\n'.join(line[10:] for line in command.splitlines())
     for headers, status, expected in [

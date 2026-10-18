@@ -3,12 +3,13 @@ name: Deploy GotJunk
 on:
   push:
     branches: [main]
+    # This workflow deploys the frontend and Firebase rules only.
+    # The separate Python backend is tested in CI and has no deployment here.
     # Production release only when deployable GotJunk surfaces change.
     # Docs, tests, offline inventory and migration planning must never
     # trigger Firebase rule deployment or Cloud Build automatically.
     paths:
       - 'modules/foundups/gotjunk/frontend/**'
-      - 'modules/foundups/gotjunk/backend/**'
       - 'modules/foundups/gotjunk/deployment/**'
       - 'modules/foundups/gotjunk/firestore.rules'
       - 'modules/foundups/gotjunk/storage.rules'
