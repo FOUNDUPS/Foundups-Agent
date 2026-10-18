@@ -2895,7 +2895,7 @@
     "modules/platform_integration/youtube_live_audio/src/__init__.py": "5e8a23d5cb8a8c2757066e06ce7bd5a5abf5fda797f58784b029200830981871",
     "modules/platform_integration/youtube_live_audio/src/youtube_live_audio.py": "7a08c60b7c990de893d1019a726f81b7e0cf9d8218042e81f92ba9e5bff56f1b",
     "modules/platform_integration/youtube_shorts_scheduler/scripts/__init__.py": "6cbe75d1c29523ae68d35d5561eadb8a03c9e50cc2cfb9ae645222ee21d2ef48",
-    "modules/platform_integration/youtube_shorts_scheduler/scripts/launch.py": "73fe66f571efffe47085cd87a2097273a943617a87b77b081fcbdba73ac63c68",
+    "modules/platform_integration/youtube_shorts_scheduler/scripts/launch.py": "f3a1910d597e0345ab20309b8012f4ea1181da2a4c1e4a9cd4b5d72e5c9bd834",
     "modules/platform_integration/youtube_shorts_scheduler/skillz/__init__.py": "690359dea94fb7055475fa823165e84d882a50c518377e8797f3e1812838f6df",
     "modules/platform_integration/youtube_shorts_scheduler/skillz/ffcpln_title_enhance/__init__.py": "e753f55d232914905975c7457f7e3f9e0815a3407a28cc201b603a69957f7a26",
     "modules/platform_integration/youtube_shorts_scheduler/skillz/ffcpln_title_enhance/executor.py": "d0db1910e4916e85713bf3063922f7ccea0f06271f809a0c1d90dd61cdb4d3d3",

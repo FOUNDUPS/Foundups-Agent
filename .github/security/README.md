@@ -1,5 +1,25 @@
 # Blocking secret scan
 
+## AntifaFM startup manifest re-review — 2026-10-18
+
+The resident-chain CI failure required moving the Shorts launcher's existing
+peak-window import into the scheduler function that uses it. Regeneration keeps
+all 1,439 runtime members and changes only that launcher's source digest.
+This alters the manifest's whole-file hash and invalidates 38 exact bindings.
+
+Independent redacted scans compared accepted PR head
+`c7b3c6f9ff76bb6953aa82b313a2c7aafd905dfb` with the staged candidate. Every
+finding-bearing line and source-hash value is unchanged; each accepted binding
+is in the existing 867-entry ledger. All 1,439 current runtime digests were
+recomputed, and each flagged source was also verified against its staged and
+accepted bytes using the unchanged generator normalization. Preserve all 867
+entries and append only these 38 independently proved bindings (905 total).
+
+The changed launcher hash is not a flagged candidate. No scanner, rule,
+exclusion, version or fingerprint policy changes. Sanitized per-finding proof:
+`reviewed-antifafm-startup-evidence.json`. This bounded provenance review does
+not replace the final full-tree and introduced-history security gate.
+
 ## AntifaFM integration metadata review — 2026-10-18
 
 PR2156 head `f90417d3fa53b965e6bd0ccab7c94e246b3d1280` failed security

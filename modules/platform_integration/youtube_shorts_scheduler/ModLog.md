@@ -1,5 +1,23 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-10-18 - Defer browser-only peak helper to scheduler execution
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 84 (reuse), WSP 97 (evidence)
+
+- Moved the existing `get_peak_slots_et` import from `scripts/launch.py` module
+  scope into `run_multi_channel_scheduler`'s initial local imports, before any
+  browser connection. Its sole call remains unchanged in that function.
+- Importing general launcher entry points no longer loads `src.__init__`, the
+  browser scheduler, or Selenium for this helper. This fixes an inherited
+  dependency coupling exposed when social imports stopped eagerly reaching an
+  incidental Selenium installer. Package exports, scheduling behavior and guards
+  are unchanged.
+- Added an isolated real-launcher import regression with browser imports and
+  external actions denied. Old source failed; repaired source passed. One
+  formerly failing resident-chain main-import test also passed without Selenium.
+  See `tests/TestModLog.md`; no browser or scheduler execution was tested.
+
 ## 2026-06-20 - Unified Shorts+Videos live priority signal (flag-gated, fallback-safe)
 
 **By:** 0102 (Worker-Lane: UNIFIED-PRIORITY)

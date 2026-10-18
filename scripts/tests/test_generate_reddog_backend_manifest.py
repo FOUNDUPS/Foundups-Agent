@@ -271,7 +271,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "c2219590f31845dab1e1b9c296959d0906ff970727cd0c95c09ed9b6cc0227bc"
+    assert digest == "78c64e1455599478d3dbea29387289b33ba9cb88be5c9d31527339b4ba39895b"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")
