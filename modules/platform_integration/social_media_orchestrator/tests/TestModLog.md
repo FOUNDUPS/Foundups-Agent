@@ -1,3 +1,24 @@
+## 2026-10-18: AntifaFM listener context and verified X pilot
+
+- New bounded contract: default preview cannot reach configuration, credentials,
+  a provider, the local model or the publication ledger. Existing CLI gate/audit
+  behavior remains outside this leaf guarantee.
+- Separate `test_antifafm_campaign.py` covers the new campaign and conversation
+  reader, using provider/model doubles and inline thread dispatch. It does not
+  duplicate scheduler or publication-store tests. Cases cover account identity,
+  listener initiation, parent/quote relationships, incomplete/error responses,
+  command validation, and uncertain publication outcomes.
+- `test_verified_x_publication.py` independently exercises actual disposable
+  SQLite claims/readback and denied-I/O real-package imports. No live provider,
+  account, model, browser, message, or daemon is exercised.
+- Final connected selection passed **86 tests and 32 subtests** with
+  `--import-mode=importlib --noconftest -c /dev/null`, plugin autoload/cache/bytecode
+  disabled; exact four-file command is in tests/README.md. An initial combined
+  collection without importlib mode hit duplicate `tests` package names and ran
+  no tests; corrected collection passed. The skill validator and diff check pass.
+  Prior scheduler evidence below is unchanged. No actual model quality or live
+  delivery is inferred from these provider/model doubles.
+
 ## 2026-09-28: Verify scheduler caller/reload characterization
 
 - Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.

@@ -14,6 +14,28 @@
 - evidence location (log file, screenshot)
 
 ## Entries
+
+- 2026-10-18 (recorded 12:31 UTC)
+  - Command: `PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -B -m pytest -q -p no:cacheprovider modules/ai_intelligence/digital_twin/tests/test_comment_drafter.py`
+  - Result: PASS (39/39); console evidence: `39 passed, 2 warnings in 0.15s`.
+  - Coverage: three existing drafter tests plus station factory isolation,
+    system-policy/untrusted-source separation, caller initiation and source
+    bindings, a 2,400-character context cap, exact 280/281-character draft bounds,
+    structured decisions, disclosure, unsupported claims/links, and no-publication
+    metadata. Missing-model, mock-mode, inference-failure, and malformed-output
+    cases return no draft.
+  - Environment: Python 3.12; bytecode and pytest cache writes disabled; plugin
+    autoload disabled. The two warnings concern the existing async configuration
+    options without the async plugin. No test failed or was skipped.
+  - Evidence scope: an injected offline backend returns controlled JSON through
+    the real chat wrapper; a nonexistent GGUF path exercises model unavailability.
+    This is not live-model semantic, factuality, or prompt-injection quality
+    evaluation. No live inference, network use, or publication was performed.
+  - Separate smoke: fresh `python -B` process imported the real
+    `CommentDrafter` package with guards against network/subprocess actions,
+    filesystem writes, SQLite/`.env` reads, and legacy constructors. PASS: none
+    attempted; `llama_cpp`, `chromadb`, `sqlite3`, and `selenium` were not loaded.
+    No Digital Twin package-init change was required.
 - 2026-08-22
   - Command: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest -q -p pytest_cov modules/ai_intelligence/digital_twin/tests/test_resident_conversation_transport_contract.py --cov=modules.ai_intelligence.digital_twin.src.resident_conversation_transport_contract --cov-report=term-missing --cov-fail-under=100`
   - Result: PASS (36/36); 100% statement and branch coverage for the new contract.

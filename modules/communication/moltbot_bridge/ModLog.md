@@ -1,3 +1,15 @@
+## AntifaFM SOCIAL campaign routing — 2026-10-18
+
+Reuse the explicit campaign adapter for `antifafm`, delegating to the social
+orchestrator owner. The new campaign rejects unknown keys, duplicate parameters,
+stray tokens and malformed quoting before effects. Existing research-campaign
+behavior is preserved. The OpenClaw workspace prompt points to the canonical
+prototype/runbook; manifest verification and existing permission routing remain
+in force. No new daemon, native executor or production registration was added.
+Default adapter CLI retains scan/audit; `--via-dae` selects DAE permission routing.
+Offline command-route coverage is in `tests/test_social_campaign_adapter.py`;
+the connected selection is documented in the social orchestrator tests README.
+
 ## Enrollment artifact read bounds — 2026-10-16
 
 WSP00/5/11/15/22/50/62/84/97. Actual disposable installation rejected approval

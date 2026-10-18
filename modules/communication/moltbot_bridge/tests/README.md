@@ -1,3 +1,12 @@
+## AntifaFM campaign route — 2026-10-18
+
+`test_social_campaign_adapter.py` preserves the research route and checks the
+real AntifaFM default preview, rejected targeting parameters and malformed or
+duplicate command tokens. The connected offline campaign/drafter/publisher
+selection and its importlib-mode command are documented in
+`modules/platform_integration/social_media_orchestrator/tests/README.md`.
+No action CLI loop, live DAE, provider or messaging operation is invoked.
+
 ## Installed consumer/runtime integration
 
 Run installed-manifest consumer, issuer startup/service, separate rate-store and

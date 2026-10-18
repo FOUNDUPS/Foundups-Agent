@@ -159,6 +159,20 @@ jobs:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence TestCallerPersistenceEvidence -v
 
+      - name: Run AntifaFM contextual campaign contracts
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -B scripts/generate_codex_tooling_projection.py --check
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib \
+            -o pythonpath=. -p no:cacheprovider \
+            modules/platform_integration/social_media_orchestrator/tests/test_antifafm_campaign.py \
+            modules/platform_integration/social_media_orchestrator/tests/test_verified_x_publication.py \
+            modules/ai_intelligence/digital_twin/tests/test_comment_drafter.py \
+            modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py \
+            tests/test_codex_tooling_projection.py
+
       - name: Run post-commit runner entrypoint evidence
         env:
           PYTHONDONTWRITEBYTECODE: '1'

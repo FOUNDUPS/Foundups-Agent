@@ -458,6 +458,9 @@ modules/infrastructure/wre_core/reports/
 # AntifaFM telemetry (runtime event streams)
 modules/platform_integration/antifafm_broadcaster/telemetry/
 
+# Host account bindings; committed campaign example contains names only
+modules/platform_integration/social_media_orchestrator/config/antifafm_campaign.local.json
+
 # RedDog Fusion extension VSIX (build artifact — package with vsce, do not commit)
 extensions/foundups_advisory_workers/*.vsix
 extensions/reddog/*.vsix

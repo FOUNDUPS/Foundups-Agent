@@ -1,3 +1,12 @@
+## AntifaFM campaign adapter — 2026-10-18
+
+Preserved five research/parser cases and added three real AntifaFM route cases:
+no-effect default preview, unsupported targeting key, and malformed/duplicate
+tokens. The connected four-file selection passed 86 tests and 32 subtests using
+importlib collection with conftest/plugin autoload disabled. Exact command and
+scope live in social_media_orchestrator/tests/README.md and TestModLog.md.
+No provider, DAE loop, model inference or external message was run here.
+
 ## Enrollment artifact bounds — 2026-10-16
 
 Same-head CI38796717521 passed; repeat38797430079 exposed a fixture clock rollover

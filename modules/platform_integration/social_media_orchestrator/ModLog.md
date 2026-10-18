@@ -1,3 +1,24 @@
+## 2026-10-18: Contextual AntifaFM promotion pilot
+
+- WSP00/5/11/15/22/50/62/84/97; source-bound lexical social/comment retrieval,
+  UNKNOWN freshness/index gap, followed by direct current-owner inspection.
+  Historical templates/designs were noise; current interfaces took precedence.
+  No absent memory evidence or live authentication was invented. The documented
+  WSP00 tracker fallback passed with detector witness ABSENT after missing torch.
+- WSP15 C3/I4/D4/Impact4=15/P1: reuse the existing SOCIAL router, CommentDrafter,
+  UnifiedX owner and module database. Add explicit preview/account/listener-draft/
+  own-post operations, connected reply/quote context and durable API readback.
+  Prototype wrappers have no native executor, production registration or cadence.
+- Model decisions are draft/skip/review, with real local generation required and
+  no mock fallback. Listener contact derives from provider metadata, not inferred
+  politics. Account binding, disabled publication and source-linked decisions
+  are explicit. No automated reply publication or external outreach was run.
+- Independent review corrected eager import effects, blocking cancellation,
+  test classification, preview job binding, graph context and error truthfulness.
+  Package exports are lazy and retain compatibility. Provider details are redacted.
+- Offline validation and host limits: [tests/TestModLog.md](tests/TestModLog.md).
+  Host API/model qualification remains separate; [runbook](docs/ANTIFAFM_CAMPAIGN.md).
+
 ## 2026-09-28: Verify scheduler caller/reload characterization
 
 - Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
