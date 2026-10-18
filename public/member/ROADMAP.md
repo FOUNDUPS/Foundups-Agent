@@ -3,7 +3,7 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
-## Current Runtime and Creator Studio Direction (2026-10-17)
+## Current Runtime and Creator Studio Direction (updated 2026-10-18)
 
 The current implementation has Clerk admission, a video Mall, creator/category
 filtering, queue playback and bounded presentation controls. Source contracts are
@@ -11,14 +11,19 @@ filtering, queue playback and bounded presentation controls. Source contracts ar
 wallet and marketplace plan below is historical; its Firebase-auth checkbox and
 layer labels do not describe the complete current runtime.
 
-The proposed mobile creator studio is owned by the
-[p.fMALL roadmap](../../modules/foundups/pfmall/ROADMAP.md). Consume its
+The proposed creator-facing Live mode belongs to external
+[AutoPost](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md#phase-4b--autopost-live-mode-planned).
+The [p.fMALL roadmap](../../modules/foundups/pfmall/ROADMAP.md) owns shared
+integration and presentation planning. Consume its
 [build contract](../../modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
 [API constraints](../../modules/foundups/docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
 and [machine outcome](../../modules/foundups/docs/mobile_studio/mobile_studio_outcome.v1.json)
-before any implementation. The browser remains a discovery/playback surface;
-native capture, creator OAuth, live-session control and provider-confirmed live
-projection are specified or planned, not implemented by this update. Existing
+before any implementation. This member browser remains a discovery/playback
+surface. AutoPost already implements browser capture and recorded-file YouTube
+upload; its continuous Live transport, durable creator service and shared live
+projection are specified or planned, not implemented by this update. The first
+AutoPost media proof is foreground WebRTC/relay, with native adoption based on
+device evidence. Existing
 presentation messages and player-open events confer no publishing authority or
 proof of live playback.
 
