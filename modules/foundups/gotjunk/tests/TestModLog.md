@@ -13,6 +13,9 @@
 - `security_rules.mjs`: Firestore/Storage emulator authorization, concurrent
   message/vote synchronization, and reservations; requires the isolated tools
   installation described in `../SECURITY.md`.
+- `scripts/tests/test_ci_security_gate.py`: existing deployment regression also
+  verifies backend/test-only changes do not trigger frontend/rule production
+  rollout, while frontend and authorization-rule changes retain that trigger.
 
 The existing backend test file was extended; no duplicate suite was introduced.
 Run Python tests with the backend requirements, pytest and httpx, using

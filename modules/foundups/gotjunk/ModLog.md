@@ -27,6 +27,13 @@ environment with both imported code and package metadata verified at 0.0.31.
 This supersedes the preliminary shared environment, which the reviewer found
 had inconsistent package metadata and source after the negative-control swap.
 
+Release-boundary follow-up: Cloud Build uses only `frontend/Dockerfile` with the
+frontend build context. Removed the separate backend from this frontend/rules
+workflow's production push filter, retaining PR emulator checks and backend CI.
+Extended the existing deployment security regression to enforce that boundary.
+No backend deployment is fabricated and no unrelated Firebase/frontend rollout
+is required to merge this parser repair.
+
 ## 2026-10-12 — Metadata-only Mall migration dry-run slice
 
 **WSP:** 00, 22, 50, 84, 97, 98.
