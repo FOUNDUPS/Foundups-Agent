@@ -1,3 +1,21 @@
+## 2026-10-18 — AutoPost Live-mode owner audit and contract correction
+
+- Audited external AutoPost main `4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147`
+  against this repository at `1c80f15ae2eee0f78300f297fb3e386275bc0aab`.
+  Corrected the mobile-studio plan to extend AutoPost's existing camera/publishing
+  product; pfMALL remains the integration/presentation owner.
+- Updated the [contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+  [machine outcome](../docs/mobile_studio/mobile_studio_outcome.v1.json), owner and
+  member/domain roadmaps. Added explicit Live-mode and foreground-route acceptance
+  before a measured browser/native decision. Existing API constraints are retained.
+- Distinguished completed recording/upload, continuous media, attended browser
+  OAuth, durable backend control, OBS contribution and OBS remote commands.
+  Preserved separate unmerged AutoPost #12 and Foundups-Agent #1689/#1886 work.
+- Refreshed the bounded document index and WSP 97 receipt. Verification is
+  documentation/source review, reference/hash checks and PR CI; no runtime code,
+  credentials, provider call, device test, deployment or live show was changed.
+  WSP 00/10/15/22/50/57/83/84/97; documentation priority remains 14/P1.
+
 ## 2026-10-17 — Mobile creator studio research and machine outcome
 
 **WSP:** 00/10/15/22/50/57/83/84/97. **Agent:** 0102.

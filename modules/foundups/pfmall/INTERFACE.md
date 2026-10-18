@@ -1,7 +1,7 @@
 # p.fMALL Interface
 
 **Contract status**: Implemented shell interfaces with later dated slices;
-mobile creator seam below is specified only (2026-10-17).
+mobile creator seam below is specified only (updated 2026-10-18).
 **Boundary**: p.fMALL is a platform/presentation layer, not a FoundUp, model
 host, OpenClaw instance, or Hermes worker.
 
@@ -106,11 +106,18 @@ The following rules are mandatory:
 - Local/browser models may advise or surface anomalies but cannot finalize a
   protected decision.
 
-## Proposed mobile creator seam (2026-10-17)
+## Proposed mobile creator seam (updated 2026-10-18)
 
 **SPECIFIED_NOT_IMPLEMENTED.** This section adds no callable endpoint or browser
 command. The unauthenticated read API and presentation dispatcher cannot accept
 creator credentials or perform broadcast writes.
+
+The creator-facing Live mode belongs to external
+[AutoPost](https://github.com/FOUNDUPS/autopost), which already owns capture and
+recorded-file publishing. AutoPost composes the selected browser/native media
+adapter; this Mall interface consumes the permitted observation/projection.
+The foreground browser/relay proof and optional OBS contribution do not move
+camera code, provider tokens or relay credentials into the Mall browser.
 
 The [mobile studio contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
 defines logical `PrepareSession`, `CreateBroadcast`, `ResolveInput`, `BindInput`,
@@ -118,6 +125,12 @@ defines logical `PrepareSession`, `CreateBroadcast`, `ResolveInput`, `BindInput`
 adapter. It also specifies request identity, principal/channel scope, consent,
 revision checks, durable reconciliation and uncertainty handling. Implementations
 must independently verify every claim at the backend boundary.
+
+An attended AutoPost browser can use a valid Google grant for a bounded REST
+lifecycle proof. That proof has explicit expiry/reload limits and is not the
+durable shared backend specified here. AutoPost's local author signature or Lick
+receipt is not creator/channel authorization. Media export requires explicit
+creator intent; local End remains effective if provider control is unreachable.
 
 Play receives only an admitted public projection: creator identity, broadcast
 ID, title, approved watch/embed URLs, observed lifecycle, freshness and archive

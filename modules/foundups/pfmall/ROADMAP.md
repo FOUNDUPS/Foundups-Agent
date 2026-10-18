@@ -10,9 +10,10 @@
   shell-local FAQ concierge, and bounded browser control dispatcher.
 - Not implemented: authenticated resident RedDog conversation adapter,
   browser-to-OpenClaw policy admission, or browser-to-Hermes execution.
-- Specified only (2026-10-17): mobile creator studio, general creator live-session
-  adapter and provider-confirmed live catalog projection. The existing YouTube
-  broadcaster remains channel-specific; no native phone media engine was added.
+- Specified only (updated 2026-10-18): AutoPost Live mode, general creator
+  live-session adapter and provider-confirmed live catalog projection. External
+  AutoPost already implements browser capture/recorded-file upload; continuous
+  streaming and durable live control remain unimplemented.
 
 ## P1 — Mobile creator studio: evidence before implementation
 
@@ -20,7 +21,7 @@
 4 + impact 4 = **14 / P1**. This is a bounded planning priority, not a runtime
 allocation or a reprioritization of the existing P0 repair.
 
-Goal: one authorized creator starts a phone-produced YouTube show, appears in
+Goal: one authorized creator selects Live in AutoPost, starts a YouTube show, appears in
 Play from provider-confirmed evidence, recovers from tested interruptions, ends
 explicitly and starts a later event with the same valid input. The next agent
 must consume the [contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
@@ -29,15 +30,27 @@ must consume the [contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.
 
 | Slice | Work and promotion evidence | Status |
 |---|---|---|
-| MS0 | Research current source/API constraints; record pain, reuse, obstacles and AC01–AC09 | Documentation delivered by this slice |
+| MS0 | Research source/API constraints and AutoPost ownership; record pain, reuse, obstacles and AC01–AC11 | Documentation delivered; 2026-10-18 external-owner correction |
 | MS1 | Scope creator/channel OAuth; create/bind/start/end and reusable-input adapter; prove AC01–AC04 | Planned; actual project/channel checks and admission required |
-| MS2 | Select one phone platform; preview/capture/encode/record/direct RTMPS; prove AC05–AC06 | Planned; device and native dependency decision required |
+| MS2 | AutoPost media adapter: MS2A foreground WebRTC/relay proof (AC10–AC11); MS2B measured continuity and browser/native choice (AC05–AC06) | Planned; phone, control profile, relay, codec and lifecycle evidence required |
 | MS3 | Project fresh permitted live state into Play; test embed/watch fallback and AC07–AC08 | Planned; depends on secure service and mobile spike |
 | MS4 | Production OAuth/quota, data retention, reconnect/runbook and AC09 | Planned; release and operational evidence required |
-| MS5 | Second OS, richer scenes, relay, guests and independent paid services | Deferred; each needs its own measured case and contract |
+| MS5 | Second OS, richer scenes, OBS integration, multistream, guests and independent paid services | Deferred; each needs its own measured case and contract |
 
-Start with a separately admitted MS1 slice after rechecking current main and
-related PRs. Documentation completion is not live-streaming, device, deployment,
+The [external AutoPost Phase 4B](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md#phase-4b--autopost-live-mode-planned)
+owns the product increments. MS2A proves one foreground camera/mic route for
+10 minutes with AI disabled and A/V observed in remote YouTube playback. It may
+be separately admitted after MS0 and verified attended-control, exact destination
+and relay-admission checks, before durable MS1 completion. Integrated MS2
+promotion requires completed MS1, MS2A and MS2B; MS3 retains its MS1/MS2 gates.
+The current browser OAuth can support that bounded proof, but durable
+machine-to-machine recovery still needs the shared service.
+Preserve ordinary capture gestures and four primary Options tabs. Basic Live
+does not depend on Lick enrollment, receipt accounting or memberships.
+
+Start with a separately admitted MS1 control slice or MS2A attended feasibility
+slice after rechecking current main, related PRs and the selected prerequisites.
+Documentation completion is not live-streaming, device, deployment,
 membership or payout evidence. Each implementation PR updates the affected
 README, INTERFACE, ROADMAP and ModLog before promotion. Keep unrelated roadmap
 priorities and active member-runtime PRs intact.

@@ -2,6 +2,22 @@
 
 ## Chronological Change Log
 
+### 2026-10-18 - AutoPost as the mobile Live product vehicle
+
+- Corrected the [mobile-studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
+  after auditing canonical AutoPost source. AutoPost owns capture/Live mode;
+  shared creator control and pfMALL discovery keep their separate boundaries.
+- Updated the [M2M outcome](docs/mobile_studio/mobile_studio_outcome.v1.json),
+  pfMALL/member/domain roadmaps and owner references. The first media proof is
+  foreground WebRTC through an authenticated relay; native adoption is based
+  on measured requirements. OBS camera contribution and remote control differ.
+- Preserved the API evidence register and unrelated open PRs. Only existing
+  documentation changed; device, channel, streaming and deployed behavior remain
+  unverified. WSP 00/10/15/22/50/57/83/84/97; priority 14/P1. The owning PRs record
+  validation, squash-merge and main readback for each repository.
+
+---
+
 ### 2026-10-17 - Play mobile creator studio documentation and roadmap
 
 - Extended the existing p.fMALL planning owner after inspecting main at

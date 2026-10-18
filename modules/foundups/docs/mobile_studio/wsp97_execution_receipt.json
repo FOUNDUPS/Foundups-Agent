@@ -1,11 +1,11 @@
 {
   "schema_version": "wsp97_execution_receipt.v1.1",
-  "execution_id": "pfmall-mobile-studio-documentation-20261017",
+  "execution_id": "autopost-live-mode-documentation-20261018",
   "execution_plane": "documentation",
   "outcome": "completed",
-  "scope": "Research and documentation preparation only. PR checks, squash merge and main readback are recorded in the owning PR; this is not a runtime or deployment receipt.",
+  "scope": "AutoPost vehicle audit and existing documentation correction only. Separate repository PRs own checks, squash merge, main readback and cleanup; this is not runtime or deployment evidence.",
   "repository_context": {
-    "base_commit": "407292aa754a88143796163581b67ca6679eac29"
+    "base_commit": "1c80f15ae2eee0f78300f297fb3e386275bc0aab"
   },
   "wsps_applied": [
     "WSP_00",
@@ -42,37 +42,43 @@
       "public/member/README.md",
       "public/member/INTERFACE.md",
       "modules/platform_integration/antifafm_broadcaster/src/youtube_broadcast_manager.py",
-      "modules/platform_integration/antifafm_broadcaster/src/youtube_ingest_resolver.py"
+      "modules/platform_integration/antifafm_broadcaster/src/youtube_ingest_resolver.py",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/README.md",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/ROADMAP.md",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/modules/MODULE_REGISTRY.md",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/modules/capture/captureController.ts",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/modules/capture/recordingSession.ts",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/components/shell/hooks/useCameraSession.ts",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/modules/integrations/youtube/youtubeOAuthSession.ts",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/modules/integrations/youtube/youtubeApiClient.ts",
+      "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/docs/architecture/YOUTUBE_PUBLISHING_BOUNDARIES.md"
     ],
     "research": [
-      "modules/foundups/docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md",
-      "Primary Google/YouTube and upstream repository sources linked in the two contract documents; checked 2026-10-17"
+      "Existing AutoPost Live audit/publishing boundary and shared mobile-studio contract; pinned current source in both repositories",
+      "Google token/code model, live insertion/reusable input and encoder references; MediaMTX browser publishing/re-encoding/OBS input and OBS WebSocket primary sources, checked 2026-10-18"
     ],
     "micro_pass": [
-      "modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md#2-source-backed-reuse-map",
-      "Inspected channel defaults, permissive channel fallback, audience default and stream-key logging before proposing reuse"
+      "AutoPost capture/recording/visibility/auth/upload source at 4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147",
+      "Recorded hidden-page track stop, flip audio interruption, completed-Blob recording, transient grants, granted-scope gap and first-active-channel selection"
     ],
     "macro_pass": [
-      "modules/foundups/ROADMAP.md",
-      "public/member/ROADMAP.md",
-      "Preserved pfmall presentation ownership and separate native media, authenticated creator control and governed worker boundaries"
+      "modules/foundups/docs/FOUNDUPS_DOMAIN_CANONICAL_INDEX.md",
+      "AutoPost owns capture/product; shared creator backend owns durable control; pfMALL owns permitted discovery/playback; existing separate PRs retain unique work"
     ],
     "hard_think": [
       "modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md#4-proposed-machine-contract",
-      "Separate local transport, provider input health, broadcast lifecycle and playback evidence; durable reconciliation for lost responses"
+      "Separate local media stop, provider completion, requested versus granted scope and attended proof versus durable M2M authority"
     ],
     "dialectic_sweep": [
-      "modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md#5-provider-limits-that-shape-the-build",
-      "Compared direct RTMPS versus relay-first scope; checked quota/documentation conflicts, live versus embed access and existing code versus general creator service"
+      "Compared browser relay, OBS camera contribution, OBS remote control and AutoPost native media integration",
+      "Corrected prior standalone/native-first plan after source audit; foreground proof reuses current product; production media choice requires measurements"
     ],
     "first_principles": [
-      "modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md#1-pain-outcome-and-decision",
       "modules/foundups/docs/mobile_studio/mobile_studio_outcome.v1.json",
-      "Minimum desired outcome uses one authorized channel and one phone platform; each promotion requires explicit evidence"
+      "One AutoPost creator, one phone, explicit export and one destination; retain all existing full-outcome gates beyond the first 10-minute proof"
     ],
     "execute": [
       "modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md",
-      "modules/foundups/docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md",
       "modules/foundups/docs/mobile_studio/mobile_studio_outcome.v1.json",
       "modules/foundups/pfmall/README.md",
       "modules/foundups/pfmall/INTERFACE.md",
@@ -80,7 +86,11 @@
       "modules/foundups/pfmall/ModLog.md",
       "modules/foundups/ROADMAP.md",
       "modules/foundups/ModLog.md",
-      "public/member/ROADMAP.md"
+      "public/member/ROADMAP.md",
+      "FOUNDUPS/autopost:README.md",
+      "FOUNDUPS/autopost:ROADMAP.md",
+      "FOUNDUPS/autopost:ModLog.md",
+      "FOUNDUPS/autopost:docs/architecture/YOUTUBE_PUBLISHING_BOUNDARIES.md"
     ]
   },
   "compliance_evidence": [
@@ -92,8 +102,8 @@
     "No runtime code, credentials, catalog, provider calls, account linking, live stream, deployment or payout changes"
   ],
   "economy": {
-    "need": "The monk requested source-backed constraints and a machine-consumable outcome before implementation.",
-    "affordability": "Bounded documentation slice using current code and official sources; no dependency installation, device build or service provisioning.",
+    "need": "012 requested a source audit determining whether existing AutoPost should be the mobile Live vehicle.",
+    "affordability": "Reuse existing owner documents in two repositories; source/API review and documentation checks only, no provider/device/deployment work.",
     "deferability": "Planning needed before implementation; existing P0 work remains unchanged.",
     "scores": {
       "complexity": 2,
@@ -117,20 +127,21 @@
   },
   "retrieval_evidence": {
     "command": "python -B scripts/reddog_holoindex_owner_query_once.py",
-    "query": "pfmall creator mobile studio YouTube live broadcast membership overlay catalog",
+    "query": "AutoPost mobile creator Live mode YouTube capture publishing pfmall ownership",
     "retrieval_mode": "lexical",
     "include_bundle": true,
     "module_hint": "modules/foundups/pfmall",
     "bundle_ok": true,
     "bundle_authority": "workspace_head",
-    "source_commit": "407292aa754a88143796163581b67ca6679eac29",
+    "source_commit": "1c80f15ae2eee0f78300f297fb3e386275bc0aab",
     "freshness": "UNKNOWN",
     "index_gap_detected": true,
     "owner_attempts": 0,
     "mandatory_docs": "Present: README, INTERFACE, ROADMAP, ModLog, tests/README, tests/TestModLog",
     "known_optional_debt": "Module-local memory and requirements are absent as already recorded in the existing owner roadmap",
-    "evaluation": "Current owner docs and direct source outrank historical member-layer plans. This fallback provides retrieval, not semantic generation activation.",
-    "index_or_authority_mutation": false
+    "evaluation": "Owner must-include documents were retrieved before edits. Lexical path noise included unrelated audio/simulator hits; pinned external AutoPost code and current canonical ownership outrank historical audits. External semantic corpus/freshness remain unverified.",
+    "index_or_authority_mutation": false,
+    "bootstrap_limit": "Sparse checkout initially lacked tracked shared query utilities; retrieved them without dependency installation or source changes, then lexical bridge completed."
   },
   "verification_scope": {
     "documentation_checks": [
@@ -147,9 +158,14 @@
     "validator_truth_boundary": "WSP 97 v1.1 validates structural completeness and repository-bound retrieved WSP evidence; other references remain opaque."
   },
   "independent_review": {
-    "source_and_scope": "No remaining blocking findings after session-creation and policy-exclusion fixes",
-    "provider_and_policy": "No blocking findings; current primary quota/lifecycle/revocation sources rechecked",
-    "reuse_clarification": "Recorded ingest resolver heuristic broadcast selection, warning-only mismatch and RTMP fallback as gaps to replace",
-    "review_boundary": "Agent-assisted document review; not a GitHub approval or runtime qualification"
+    "status": "COMPLETED_NO_REMAINING_BLOCKERS",
+    "research_consensus": "Three independent read-only source audits agree AutoPost is the product vehicle and current recording/upload is not continuous streaming",
+    "review_boundary": "Agent-assisted document review; not a GitHub approval or runtime qualification",
+    "resolved_findings": [
+      "Separated MS2A attended feasibility admission from full MS1/integrated MS2 promotion across both repository roadmaps and machine fields",
+      "Scoped durable mutation/session requirements to integrated_m2m and defined independently admitted proof-profile binding",
+      "Made exact relay credential provisioning, remote YouTube playback and End-then-reconnect evidence explicit"
+    ],
+    "final_verification": "Source/media, ownership/handoff and OAuth/relay reviews; ownership and OAuth reviewers verified the corrections after edits"
   }
 }

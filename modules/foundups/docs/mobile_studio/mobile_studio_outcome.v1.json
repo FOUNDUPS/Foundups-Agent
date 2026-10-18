@@ -3,11 +3,11 @@
   "status": "SPECIFIED_NOT_IMPLEMENTED",
   "execution_admission": "NOT_GRANTED",
   "artifact_role": "Planning input; not an executable work order, identity manifest, accepted allocation or runtime registration",
-  "checked_at": "2026-10-17",
+  "checked_at": "2026-10-18",
   "source": {
     "repository": "FOUNDUPS/Foundups-Agent",
     "branch": "main",
-    "commit": "407292aa754a88143796163581b67ca6679eac29"
+    "commit": "1c80f15ae2eee0f78300f297fb3e386275bc0aab"
   },
   "owner": "modules/foundups/pfmall",
   "normative_documents": [
@@ -17,26 +17,74 @@
     "modules/foundups/pfmall/ROADMAP.md"
   ],
   "consumption_order": [
-    "Read current owner Tier-0 documents and current main",
+    "Read current AutoPost README/ROADMAP/module registry/publishing boundary and pfMALL Tier-0 documents; pin both main revisions and inspect related open PRs",
     "Revalidate provider constraints and actual project/channel capabilities",
     "Resolve one bounded slice through the existing FoundUp build-plan and execution-admission contracts",
     "Update affected documentation before implementation",
     "Implement and verify only the admitted slice; report observed results and unresolved blockers"
   ],
   "pain": [
+    "AutoPost already owns phone capture and recorded-file upload, but has no selectable continuous Live mode",
     "Phone production, YouTube event setup and Play discovery are disconnected",
     "Manual stream-key handling and recovery can target the wrong channel or duplicate a show",
     "The current Mall presentation layer cannot establish creator OAuth authority or public live state"
   ],
-  "desired_outcome": "An authorized creator previews a phone scene, explicitly publishes to the intended YouTube channel, appears in Play from provider-confirmed evidence, recovers from tested interruptions, explicitly ends, and starts a later event reusing a valid input without duplicating broadcasts",
+  "desired_outcome": "An authorized creator opens AutoPost, selects Live and the intended YouTube channel, previews locally, explicitly exports a phone scene, appears in Play from provider-confirmed evidence, recovers from tested interruptions, explicitly ends, and starts a later event reusing a valid input without duplicating broadcasts",
   "solution": {
-    "native_media": "One native platform first; camera, microphone, scene composition, hardware encoding and local recording",
+    "native_media": "Conditional AutoPost media adapter if measured camera/audio/encoder/lifecycle requirements justify it; no separate camera product or capability claim from a WebView wrapper",
     "creator_control": "A separately authenticated backend with scoped channel OAuth, durable request reconciliation, quota budgets and observed lifecycle",
-    "initial_media_transport": "Phone RTMPS directly to YouTube ingest",
+    "initial_media_transport": "AutoPost browser WebRTC to authenticated relay; codec-compatible RTMPS output to the selected YouTube input",
     "play_surface": "Public-safe live catalog projection plus permitted embed or approved watch-link fallback",
-    "future_agent_role": "Admitted intent translation through existing RedDog/OpenClaw/WRE boundaries; no browser-derived worker or channel authority"
+    "future_agent_role": "Admitted intent translation through existing RedDog/OpenClaw/WRE boundaries; no browser-derived worker or channel authority",
+    "product_surface": "AutoPost Live mode with explicit destination/channel/privacy review, local preview, Go Live, End and DAEmon; preserve ordinary capture interactions",
+    "browser_media": "First foreground camera/mic proof via a new WebRTC sender and authenticated relay; current MediaRecorder file upload is not a live sender",
+    "initial_proof": "One phone, one camera/mic, AI disabled, one destination, foreground 10-minute A/V observed in remote YouTube playback",
+    "relay_status": "PLANNED_NOT_IMPLEMENTED; select/pin implementation, codec handling, admission, NAT/TURN, supervision and operational owner",
+    "control_profiles": {
+      "attended_browser_proof": "Existing Google token model can support new REST lifecycle methods after granted-scope and exact-channel checks; expiry/reload limits remain, no unattended/durable-backend claim",
+      "integrated_m2m": "Separately authenticated durable creator backend under the shared contract; managed credentials remain server-side"
+    },
+    "obs_boundary": "Contribution is a media source consumed by desktop OBS; OBS WebSocket is separate remote control and carries no camera feed",
+    "local_stop": "Stop media locally even when provider control is offline or expired; report provider completion only after observation",
+    "ai_boundary": "Liquid may sample outside the media path; slow, unavailable or loading inference cannot block capture/start/stop"
   },
   "existing_reuse": [
+    {
+      "repository": "FOUNDUPS/autopost",
+      "path": "src/components/shell/AppShell.tsx",
+      "capability": "Camera, capture, vision, feed, account and publishing composition",
+      "required_change": "Selectable Live workflow and separate media/session state; preserve four primary tabs and ordinary photo/record gestures"
+    },
+    {
+      "repository": "FOUNDUPS/autopost",
+      "path": "src/modules/capture/captureController.ts",
+      "capability": "Browser camera/mic acquisition and camera-device checks",
+      "required_change": "Live track replacement and deliberate audio continuity; existing flips stop all old tracks"
+    },
+    {
+      "repository": "FOUNDUPS/autopost",
+      "path": "src/components/shell/hooks/useCameraSession.ts",
+      "capability": "Visibility and interruption handling",
+      "required_change": "Live-specific supported lifecycle policy; current hidden-page handler stops capture; removing it does not prove background support"
+    },
+    {
+      "repository": "FOUNDUPS/autopost",
+      "path": "src/modules/capture/recordingSession.ts",
+      "capability": "Browser MediaRecorder and completed segment ownership",
+      "required_change": "Continuous sender, bounded queues/recording and actual program output; completed Blob upload is a separate workflow"
+    },
+    {
+      "repository": "FOUNDUPS/autopost",
+      "path": "src/modules/integrations/youtube/youtubeOAuthSession.ts",
+      "capability": "Memory-only browser grant requesting youtube.upload and youtube.force-ssl; one resolved channel",
+      "required_change": "Verify actual granted scope/selected channel/eligibility; explicit expiry/reconnect; durable backend auth is separate"
+    },
+    {
+      "repository": "FOUNDUPS/autopost",
+      "path": "src/modules/integrations/youtube/youtubeApiClient.ts",
+      "capability": "Recorded-file upload, channel/playlists and provider IDs",
+      "required_change": "Live broadcast/input/bind/transition methods and authoritative observations; do not reuse upload completion states as live state"
+    },
     {
       "path": "modules/foundups/pfmall",
       "capability": "Shell, catalog, routes and advisory presentation",
@@ -61,7 +109,7 @@
   "unresolved_inputs": [
     {
       "id": "U1",
-      "name": "Initial iOS or Android device and OS",
+      "name": "Initial phone, OS and browser/native build",
       "status": "UNSELECTED"
     },
     {
@@ -81,8 +129,18 @@
     },
     {
       "id": "U5",
-      "name": "Pinned native dependency revisions and license/asset inventory",
+      "name": "Pinned media/relay/native revisions and complete license/dependency inventory",
       "status": "UNVERIFIED"
+    },
+    {
+      "id": "U6",
+      "name": "Authenticated relay host, exact-input credential provisioning and scoped publisher admission for the chosen control profile, negotiated codecs, NAT/TURN, supervision and measured operating cost",
+      "status": "UNSELECTED"
+    },
+    {
+      "id": "U7",
+      "name": "Initial attended-browser proof versus durable-service control profile and authorization scope",
+      "status": "UNSELECTED"
     }
   ],
   "obstacles": [
@@ -147,9 +205,54 @@
       "acceptance": [
         "AC09"
       ]
+    },
+    {
+      "id": "O8",
+      "problem": "Current AutoPost hidden-page and camera-flip behavior interrupts capture and audio",
+      "resolution": "Separate Live lifecycle/track policy, local emergency stop and measured phone support matrix",
+      "acceptance": [
+        "AC05",
+        "AC06",
+        "AC10"
+      ]
+    },
+    {
+      "id": "O9",
+      "problem": "Recorded Blobs, portrait CSS and DOM overlays are not a compatible continuous program feed",
+      "resolution": "WebRTC sender/relay, negotiated codec verification, composition and bounded recording; H.264/AAC initial target with conversion as needed",
+      "acceptance": [
+        "AC05",
+        "AC11"
+      ]
+    },
+    {
+      "id": "O10",
+      "problem": "Attended token state, first-active account selection and local attribution do not establish durable live authority",
+      "resolution": "Pin the chosen channel/session, check granted scopes and consent, separate browser proof from backend recovery and preserve truthful unknown/failed states",
+      "acceptance": [
+        "AC01",
+        "AC04",
+        "AC09",
+        "AC10"
+      ]
     }
   ],
+  "attended_proof_plan": {
+    "status": "PLANNED_NOT_ADMITTED",
+    "applies_to": "MS2A / AutoPost L1 feasibility only",
+    "entry_rule": "May be separately admitted after MS0 and scoped attended-control checks, before completed durable MS1; does not establish MS1 or integrated MS2 promotion",
+    "prerequisites": [
+      "Verified actual OAuth grant, exact authorized channel/broadcast/input, live eligibility and explicit bounded creator consent",
+      "Selected phone/browser, media formats and foreground support limits",
+      "Documented exact-input credential provisioning at an authenticated relay and independently verified scoped short-lived publisher admission",
+      "Local proof ID and media generation for observations and stale-work rejection; browser IDs alone grant no provider or relay authority",
+      "Explicit local stop, separately observed relay/provider completion and operator reconciliation of ambiguous writes; no automatic restart after End"
+    ],
+    "credential_provisioning": "Select a deliberately preconfigured exact relay/input or bounded authenticated provisioning mechanism; browser OAuth alone does not provision relay custody or publisher admission",
+    "durability_boundary": "Memory-only attended control retains expiry/reload limits; no server session, unattended refresh, durable restart recovery or Play projection is established"
+  },
   "proposed_mutation_envelope": {
+    "applies_to": "integrated_m2m creator service; attended feasibility uses attended_proof_plan and does not claim these durable guarantees",
     "required_fields": [
       "request_id",
       "principal_id",
@@ -214,7 +317,7 @@
       "id": "MS0",
       "status": "DOCUMENTATION_ONLY",
       "depends_on": [],
-      "deliverable": "Evidence register, reuse map, machine outcome and roadmap"
+      "deliverable": "AutoPost vehicle audit, evidence register, reuse map, machine outcome and roadmap"
     },
     {
       "id": "MS1",
@@ -222,7 +325,7 @@
       "depends_on": [
         "MS0"
       ],
-      "deliverable": "Scoped creator API adapter and one explicitly authorized channel spike",
+      "deliverable": "Scoped creator API adapter and authorized channel; attended-browser learning proof is optional and cannot alone satisfy full durable recovery gates",
       "acceptance": [
         "AC01",
         "AC02",
@@ -239,17 +342,62 @@
       "id": "MS2",
       "status": "PLANNED",
       "depends_on": [
-        "MS1"
+        "MS0"
       ],
-      "deliverable": "One-platform native media spike",
+      "integrated_promotion_requires": [
+        "MS1",
+        "MS2A",
+        "MS2B"
+      ],
+      "deliverable": "AutoPost Live media spike with foreground proof then measured continuity/browser-native decision",
       "acceptance": [
         "AC05",
-        "AC06"
+        "AC06",
+        "AC10",
+        "AC11"
       ],
       "blocked_on": [
         "U1",
-        "U5"
-      ]
+        "U5",
+        "U6",
+        "U7"
+      ],
+      "stages": [
+        {
+          "id": "MS2A",
+          "status": "PLANNED",
+          "depends_on": [
+            "MS0"
+          ],
+          "entry_rule": "Separately admit under attended_proof_plan or an admitted integrated_m2m profile; completed durable MS1 is not required for feasibility evidence",
+          "blocked_on": [
+            "U1",
+            "U2",
+            "U3",
+            "U5",
+            "U6",
+            "U7"
+          ],
+          "deliverable": "Foreground 10-minute browser WebRTC/relay camera/mic proof with remote YouTube playback observed, AI disabled",
+          "acceptance": [
+            "AC10",
+            "AC11"
+          ]
+        },
+        {
+          "id": "MS2B",
+          "status": "PLANNED",
+          "deliverable": "Measured portrait/composition/audio/recording/recovery workload and browser/native adapter decision",
+          "depends_on": [
+            "MS2A"
+          ],
+          "acceptance": [
+            "AC05",
+            "AC06"
+          ]
+        }
+      ],
+      "promotion_boundary": "MS2 exploration may precede full MS1; integrated MS2 promotion requires completed MS1, MS2A and MS2B with all assigned evidence. MS2A alone does not complete MS2 or the integrated M2M service"
     },
     {
       "id": "MS3",
@@ -291,7 +439,7 @@
       "depends_on": [
         "MS4"
       ],
-      "deliverable": "Individually justified second OS, richer scenes, relay, guests and independent paid services"
+      "deliverable": "Individually justified second OS, richer scenes, OBS integration, multistream, guests and independent paid services"
     }
   ],
   "acceptance": [
@@ -339,6 +487,16 @@
       "id": "AC09",
       "required_result": "Quota, rate/permission error classes, revoke/deletion and secret redaction are exercised",
       "evidence": "Budget/error/revocation/deletion/redaction receipts"
+    },
+    {
+      "id": "AC10",
+      "required_result": "AutoPost Live selection/preview does not publish; explicit channel/privacy/audience review and Go Live authorize export; End stops local sending even if controller fails and stale reconnect work cannot restart it; ordinary photo/record gestures and four primary tabs remain intact",
+      "evidence": "UI/state/authorization checks plus actual local-stop and ordinary-capture observations"
+    },
+    {
+      "id": "AC11",
+      "required_result": "One foreground 10-minute camera/mic feed is observed in remote YouTube playback through the selected browser-relay-YouTube route with exact channel/input binding and negotiated formats; preview or relay ingress alone never proves the route or asserts provider live",
+      "evidence": "Phone/browser/app/relay revisions, remote YouTube A/V observation, local/relay/ingest/provider state and explicit-end-then-reconnect trace; feasibility only"
     }
   ],
   "current_verification": {
@@ -347,7 +505,9 @@
     "actual_account_or_project_calls": "NOT_PERFORMED",
     "mobile_build_or_device_tests": "NOT_PERFORMED",
     "live_broadcast_or_deployment": "NOT_PERFORMED",
-    "runtime_admission": "NOT_GRANTED"
+    "runtime_admission": "NOT_GRANTED",
+    "external_autopost_source_inspection": "COMPLETED_AT_4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147",
+    "targeted_oauth_relay_and_live_references": "CHECKED_2026_10_18; dated quota register remains its 2026-10-17 evidence"
   },
   "delivery_evidence_requirements": [
     "Exact reviewed commit and source hashes",
@@ -366,12 +526,101 @@
   "deferred": [
     "Full OBS desktop plugin compatibility",
     "Always-on background claims",
-    "Cloud relay or guest mixer",
+    "Relay fan-out and guest mixer",
     "Multi-platform simultaneous launch",
     "Payment settlement or creator payout ledger"
   ],
   "current_policy_exclusions": [
     "Rewards or incentives for YouTube engagement",
     "Charging for embedded YouTube playback"
-  ]
+  ],
+  "owner_role": "SHARED_INTEGRATION_PLANNING_AND_PLAY_PROJECTION",
+  "product_owner": {
+    "repository": "FOUNDUPS/autopost",
+    "responsibility": "Existing capture/publishing product and proposed selectable Live mode; keep product code external",
+    "live_status": "SPECIFIED_NOT_IMPLEMENTED"
+  },
+  "external_sources": [
+    {
+      "repository": "FOUNDUPS/autopost",
+      "branch": "main",
+      "commit": "4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147",
+      "visibility": "private",
+      "evidence": "Current source/docs; deployment parity and physical-phone behavior unverified"
+    }
+  ],
+  "external_normative_documents": [
+    "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/README.md",
+    "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/ROADMAP.md",
+    "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/src/modules/MODULE_REGISTRY.md",
+    "https://github.com/FOUNDUPS/autopost/blob/4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147/docs/architecture/YOUTUBE_PUBLISHING_BOUNDARIES.md"
+  ],
+  "external_planning_document": "https://github.com/FOUNDUPS/autopost/blob/main/docs/architecture/YOUTUBE_PUBLISHING_BOUNDARIES.md#planned-live-mode--source-audit-2026-10-18",
+  "proposed_media_adapter": {
+    "status": "LOGICAL_CONTRACT_NOT_IMPLEMENTED",
+    "owner": "FOUNDUPS/autopost",
+    "operations": [
+      "PrepareMedia",
+      "StartMedia",
+      "InspectMedia",
+      "StopMedia"
+    ],
+    "binding": [
+      "session_id",
+      "revision",
+      "selected_control_profile",
+      "authorized_destination",
+      "selected_media_profile"
+    ],
+    "binding_applies_to": "integrated_m2m",
+    "attended_proof_binding": [
+      "local_proof_id",
+      "media_generation",
+      "independently_verified_relay_admission_ref",
+      "exact_authorized_channel_broadcast_input",
+      "selected_control_and_media_profiles",
+      "bounded_consent_ref"
+    ],
+    "rules": [
+      "Selecting Live or previewing does not authorize media export",
+      "Start requires explicit creator intent, active profile binding and independently authorized destination; local proof IDs are not authority",
+      "Browser relay publisher grants are short lived and scoped; provider ingest keys remain at the relay",
+      "Transport, ingest, broadcast and playback observations remain separate",
+      "Stop local sending without requiring a reachable controller or fresh provider token",
+      "End invalidates pending reconnect work; relay forwarding/lease termination and provider completion are separately observed",
+      "Finished-file author manifests do not prove a live subject or every stream frame",
+      "Lick enrollment, membership and receipt accounting are not basic Live prerequisites"
+    ]
+  },
+  "work_overlap": [
+    {
+      "repository": "FOUNDUPS/autopost",
+      "pr": 12,
+      "head": "70eb45e743a8ac986388a2cb65300dab6ec1a709",
+      "classification": "OPEN_UNMERGED_DISTINCT_WORK",
+      "scope": "Lick/lens/OAuth; no Live implementation assumed"
+    },
+    {
+      "repository": "FOUNDUPS/Foundups-Agent",
+      "pr": 1689,
+      "head": "e7d88a8b6e7afa0e1a0ae09d27610bf5cfb0ed32",
+      "classification": "OPEN_UNMERGED_DISTINCT_WORK",
+      "scope": "Continuous Lick design; not a prerequisite"
+    },
+    {
+      "repository": "FOUNDUPS/Foundups-Agent",
+      "pr": 1886,
+      "head": "3aa71a0786b9202062e01beb84769c9ba0e7950e",
+      "classification": "OPEN_UNMERGED_DISTINCT_WORK",
+      "scope": "Receipt accounting; not a prerequisite"
+    }
+  ],
+  "audit_determination": {
+    "product_vehicle": "AUTOPOST_RECOMMENDED",
+    "current_live_capability": "NOT_IMPLEMENTED",
+    "standalone_camera_product": "NOT_REQUIRED",
+    "first_proof": "FOREGROUND_WEBRTC_RELAY",
+    "production_media_selection": "MEASURE_BEFORE_BROWSER_OR_NATIVE_PROMOTION",
+    "prior_plan_correction": "2026-10-17 standalone/native-first language omitted the canonical AutoPost owner"
+  }
 }
