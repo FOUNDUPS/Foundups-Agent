@@ -1,3 +1,125 @@
+## Qualified runtime and v29 handshake — 2026-10-19
+
+PR2160 merged `358fb2e34e34bb01342bd92ff80d3ceda413334c`; reviewed head
+`ec7a0e438ae18ef5d1088cd890d126a19b8b95f1` and merged main share tree
+`afeadba93021def81ba576626d2dfa3cc90d2f53`. Exact-head CI39238676964 and
+CodeQL39238674221 passed; merged-main CI39240425401 and CodeQL39240425222 also
+passed. The clean source checkout is retained because active
+native preparation imports its pinned source. Publication closure is verified;
+passing CI is not evidence that the handshake succeeded.
+
+The new runtime independently qualifies 2,683 files/358 directories, including
+1,246 exact Git sources and 1,437 runtime files. Both deny/Unix profiles pass;
+four absent-owner entrypoints reject. Descriptor SHA256
+`fe195a4f4dace47b4f6f3236dbee2848fb11711fe88f8b54c3a2278a296c2640`.
+Optional deferred imports remain outside the selected qualification scope.
+
+One same-boot, unprofiled ABBA block measured full guard means 2.957392s baseline
+and 2.196585s candidate, descriptively 25.73% lower. Each build has two process
+invocations with two guards each. Profile-total means were 8.316657s and
+6.301675s. Cache/warmup/order effects and within-invocation dependence remain;
+these samples do not prove causal gain, request latency or retained RSI benefit.
+All four observation units were independently absent afterward.
+
+Fresh v28 preserves authority, deadlines and no-observer configuration.
+Installation passed in 37.496s, revocation in 1.988s; handshake exited2 in
+120.255s. Root/issuer/target reached readiness. Requester rejected after5.741641s;
+target handled1/exited0, issuer handled0/exited2 with the generic resident error,
+and root handled6/exited2. Issuer elapsed/CPU60.728467s/56.832826s; root
+elapsed/CPU91.701923s/1.900514s. Compared with v27, different boots and one pair
+do not establish causal performance improvement. No inner exception is observed.
+Observation completion remains false, cleanup-loop completion true. Preserve the
+historical target reset-failed_exit_1; all seven units are independently absent.
+Independent review binds25 sources,12 refreshed outputs,9 pins and4 invocations.
+
+Micro reconciliation: resident `requests_handled` changes only when the complete
+serving function returns. Zero therefore does not mean no backend processing.
+A rejected backend response alone does not produce the resident runtime-error
+code. Source shows two full runtime guards per completed root LOAD proof, plus
+startup/current-input checks; no request-time count was measured in v28.
+
+Fresh v29 preserves exact ec7a source/runtime and existing bounds. Installation
+and revocation pass; handshake rejects, with no outer stage timeout. The local
+observer records30 callbacks without exhausting its cap. Exact `SigningResponse`
+public status is `accepted=false`, `grant_service_not_admitted`; subsequently
+resident `_serve_requests` line239 emits C_RAISE at `connection.sendall`.
+This connects the generic resident error to the send operation, but does not
+identify exception type/errno or the earlier backend rejection branch. The sign
+return record has no timestamp: the protocol-dispatch region is bounded by
+160.823410063s and179.236623857s; it is not an exact backend-return measurement.
+Requester exit is165.868243s and send C_RAISE is179.236663079s. No causal clock,
+client-disconnect or observer-overhead claim follows. Observation completion is
+false, cleanup-loop completion true; all seven units are independently absent.
+The historical `reset-failed_exit_1` remains evidence. Review binds25 sources,
+12 helper outputs,9 pins and4 invocations.
+
+A separate harmless native control proves a launcher lifecycle defect:
+`Type=oneshot` with `RemainAfterExit=yes` leaves a successful process
+`active/exited`, while `systemd-run --wait` waits for deactivation. The pre-v30
+launcher waits for that parent process before its owned stop. In two confined
+`/usr/bin/true` cases, yes stayed pending until owned stop, then returned0;
+no returned0 without a stop. Both units are independently absent. This proves
+a harness wait cycle, not the issuer's backend rejection.
+
+WSP15 retains dependency19/P0 and next executable slice18/P0 (C3/I5/D5/Impact5):
+localize the actual backend rejection branch through the existing bounded
+observer, then repair the demonstrated cause. The lifecycle slice is now evidenced. The accepted v30 package changes only
+`RemainAfterExit=no`, exact already-absent cleanup recognition, identity/absence
+recheck before reset and separate post-cleanup launcher status, plus fresh fixture
+names/pins. It preserves the v29 observer, source/runtime, authority, deadlines
+and handshake/closure acceptance. Independent offline review passes41 grouped
+checks (14 package/rebased lifecycle,5 held-out lifecycle,1 context proof,
+21 unchanged-observer CPython checks); these are reruns, not additive unique
+coverage. Root applied the exact package. Fresh v30 installation passes in39.353s
+and revocation in2.447s; handshake exits2 in98.031s, full139.941s. Observation
+completion and cleanup-loop completion are both true, with no nested timeout or
+cleanup errors. The target launcher exits0 before and after cleanup and its unit
+is already absent; its ready InvocationID and exact attempt description match
+independent journal metadata. All seven units are independently absent afterward.
+Root/issuer/requester exits remain2 and clean_service_closure remains false.
+Thus the wait-cycle correction is evidenced without converting rejection to success.
+
+The unchanged v30 local observer again records30 callbacks, exact rejected backend
+status and sendall line239/offset266 C_RAISE. Backend branch/exception type remain
+unobserved. Issuer elapsed/CPU66.403149s/61.799752s, root97.680435s/2.248435s;
+requester5.794445s. These are descriptive unit timings, not causal gain. Review
+verifies25 exact sources,12 outputs,9 pins,6 refreshed files and4 invocations.
+No author/provider admission or retained RSI benefit is established.
+
+Macro reconciliation: no installed trusted parent policy/sovereign provider was
+found in the scoped source search or92 open PR titles; nearest candidate PRs do
+not own that composition. Existing callable supplier injection is not an
+authenticated provider. Final-effect consent cannot substitute for parent
+approval. The post-valve lease issuer is already wired and must not be duplicated.
+The October16 public provider receipt names OpenRouter-backed OpenClaw/Hermes
+routes, with no zero-paid local route established; it is historical configuration,
+not current health or admission. AgentDB assurance reservation exists, but no
+current public distinct-verifier reservation was found. Its getter can expire
+leases and was not used as a passive read probe. Actual parent/work/model evidence,
+budget, independent verifier and qualified effect-capable composition remain gates.
+
+All paths below are relative to the existing evidence root
+`O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`:
+
+| Evidence | SHA256 |
+| --- | --- |
+| `installed-execution-qualification/all-role-ec7a0e438-v1/independent-readonly-review/independent-review.json` | `6a6dee7cded7f5b3c46f2a5b127d231d0151b6535c7e0072e717dc530bded3aa` |
+| `installed-execution-qualification/guard-cost-abba-ec7a0e438-20261019/independent-measurement-review.json` | `a15c0bea40ec0a945bc6b83a21fb28e944e05732322d0332ab91a6c122bd7abe` |
+| `native-installation-inputs/current-time-independent-review/v28-independent-review.json` | `837c89b528fc9a46d348b2d2908869472d4700ddcc1a6e1fe8a6036d4371c10d` |
+| `native-installation-inputs/current-time-independent-review/v29-independent-review.json` | `042b39cdd206afcf741c1a7d2c7f82d09b80552fee8b62625b3befb0b513eb79` |
+| `native-installation-inputs/current-time-independent-review/v29-local-transport.json` | `e1285c0476c675e37879e8f10349b4129f12da04809a32be4ae9e19b5c20bab1` |
+| `native-installation-inputs/current-time-independent-review/oneshot-wait-observation-5dcbda0a32ed421cbc5194a0d3592c71/independent-review.json` | `66404fb7aba6c41fc8c1ccf7bf53761f259b484c75d9d8639d4a707d8fd94333` |
+| `native-installation-inputs/unified-independent-review/v30-candidate/independent-review.json` | `c7fcea4286cefbf6f56877b22597b34c0556019810ec2e941171f788233e9efb` |
+| `native-installation-inputs/current-time-independent-review/v30-independent-review.json` | `d9c28e065098fc55447b18f739249fb75c8d96bc3a0abe4c5fd99281f672b710` |
+| `r15-admission-prerequisites-ec7a0e438-readonly.json` | `45d7cdf94f7e50916373571c012bc8dc85eda4b6d3c5455dad15ffe7a59fb546` |
+| `native-installation-inputs/current-time-independent-review/authentic-admission-owner-pr-audit-ec7a0e438.json` | `96eab2cac69e7ca28f3bd0a93471e7b25712f4144cdd02648aa9a8a3f9998681` |
+| `native-installation-inputs/local-provider-readiness-20261016.json` | `21a01e3ff8e793e2c875055dc3e69926858ecb384486afccc9ccb8b3456e5719` |
+
+Synthetic authority only; native author tickets0, paid model calls0, coordinator
+cost unknown. Codex review is independent source review, not resident worker
+provenance. No completion gate advances. Historical checkpoints below retain
+what was known then; this section supersedes their pending-qualification status.
+
 ## Native requester rejection and source publication — 2026-10-19
 
 PR2159 head `1e203d5de9bb8c6ee17f2f5e0d52bffb2317272d` merged as

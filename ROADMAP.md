@@ -12,7 +12,38 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — native requester rejection (2026-10-19):**
+**Current checkpoint — qualified runtime, blocked native handshake (2026-10-19):**
+PR2160 merged as `358fb2e34`; its tree equals independently reviewed `ec7a0e438`.
+Exact-head and merged-main CI/CodeQL passed. The new installed runtime independently qualifies
+2,683 files and both confined profiles. One same-boot ABBA comparison measures
+mean full guard time 2.957s → 2.197s (25.73% lower); this small component sample
+does not establish end-to-end improvement, autonomous repair or retained RSI benefit.
+
+Historical v28 passes installation/revocation but rejects the requester. Fresh
+v29 confirms an exact rejected backend response (`grant_service_not_admitted`)
+followed by a C send failure at resident `sendall`, line239. The backend rejection
+branch and exception type remain unknown. All seven services are independently
+absent; observation completion is false and the historical reset error is retained.
+
+Next 18/P0 (C3/I5/D5/Impact5): identify the actual backend rejection branch
+through the existing bounded observer, then repair the demonstrated cause. A harmless two-unit
+control proves `RemainAfterExit=yes` keeps `systemd-run --wait` pending after a
+successful oneshot. The v30 package uses `RemainAfterExit=no` and exact absent-unit
+cleanup recognition. Fresh v30 completes observation and cleanup without the old
+wait timeout/reset error; target exits zero before cleanup and all seven units are
+independently absent. Installation/revocation pass, but handshake still rejects.
+Authority, signed lifetimes, deadlines and acceptance remain unchanged. The
+lifecycle correction does not resolve the backend admission rejection.
+
+Authentic author admission remains a separate dependency: the existing parent
+consensus verifier lacks a discovered installed trusted provider/composition;
+signed work/model inputs, budget and distinct verifier reservation are unproved.
+The post-valve lease issuer is already connected. LOW handshake authority stays
+LOW. R15 still requires author execution, independent evaluation, activation and
+rollback, later retained benefit and bounded next selection.
+[Current execution evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+**Historical checkpoint — native requester rejection (2026-10-19):**
 PR2159 merged at `bb9d3f802`; all 19 recorded exact-head check runs passed
 (12 distinct check names), as did exact-main CI/CodeQL. Reviewed head `1e203d5de`
 and merged main have identical trees. The
