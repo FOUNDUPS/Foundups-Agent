@@ -1,21 +1,29 @@
-## Protected consensus nonce qualification
+## Live generation scope and protected consensus nonce qualification
 
 Retain the full legacy current-generation model-pair regression and the
 actual signed-model gate for both v12 and full v13 owners. A nonce-only
 test selection misses compatibility at this consumer boundary.
 
-Exercise the v13 nonce/custody suites with existing state, current owner/E0,
-parent/effect, model, issuer custody and legacy LOW regressions. Use real
-disposable MAC/SQLite files and signed model/policy inputs; label OS/installation
-seams. Require restart/replay, cross-instance handle rejection, corrupt or absent
-state, one-step recovery, withdrawal, expiry and failed commit/cleanup controls.
-Pin an explicit pytest repository root and independent temporary databases.
-Connected 437/3 platform skips and independent 21 controls exercise this source
-component. Current generated runtime includes custody only; authority/current
-owner are not yet imported or qualified installed runtime.
-Installed HIGH acceptance additionally requires a real Linux same-inode locking
-test across reserve, pre-sign validation, commit and rollback under the actual
-permission wrapper. Passing the adapter tests alone does not meet that gate.
+Run the five `test_reddog_live_lease_{scope,composition,current_use,generation,process}.py`
+suites alongside the six existing nonce and connected parent/effect/model/factory
+suites. Keep explicit pytest root/confcutdir and independent temporary databases.
+Use actual signed files and MAC/SQLite transactions; label synthetic OS, owner,
+permission and credential seams. Exercise foreign/stale scopes, bad clocks,
+proof/model tampering with unchanged owner, withdrawal and post-commit rejection.
+The Linux process suite proves actual same-inode blocking/release with a bounded
+test-only watchdog; it does not provision installed HIGH authority.
+
+Connected Windows validation: 390 passed, 9 platform skips, zero failures/errors
+across 25 suites in 389.797s. Separate Linux process controls: 2 passed without
+skips in 29.394s, using the actual same-inode generation lock and signed files
+with synthetic admission/installation seams. Independent core review: 16 unique
+held-outs passed. Counts overlap and are not additive. Original fixture failures
+and the bounded nested-lock red control remain in external evidence.
+
+The existing authenticated startup CI selection includes all five suites. Native
+installed HIGH acceptance still requires protected policy/source and model data
+composition plus genuine admission inputs. See TestModLog for preserved nonce
+history and dispatch for exact frozen receipts and generated inventory.
 
 ## Exact parent-consent connection
 

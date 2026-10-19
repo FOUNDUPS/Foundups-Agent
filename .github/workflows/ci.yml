@@ -1414,6 +1414,11 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_failures.py \
             modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_compatibility.py \
             modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_signed_policy.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_live_lease_scope.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_live_lease_composition.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_live_lease_current_use.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_live_lease_generation.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_live_lease_process.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
             modules/communication/moltbot_bridge/tests/test_reddog_installed_grant_manifest_consumer.py \

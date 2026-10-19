@@ -1,3 +1,20 @@
+## Live generation scope backend byte contract — 2026-10-20
+
+The required 1,451-member closure adds nonce authority/current-owner imports.
+Two-space JSON remains 327,910 bytes with LF and 330,885 with CRLF; the former
+crossed the unchanged 320 KiB bound by 230 bytes. The paired consumer/test bound
+is now 324 KiB (331,776 bytes), the smallest whole-KiB bound covering both: an
+explicit 4,096-byte (1.25%) increase with 891 bytes beyond the CRLF artifact.
+Exact canonical digest/member bindings and finite 1,451/1,452 count boundary
+remain. Per-file 2 MiB, runtime-total 32 MiB, independent Python readers' 4 MiB,
+source-line/component limits and all authority checks are unchanged. This is a
+serialized-byte resource contract change, not packing or a size exemption.
+The byte check follows readFileSync and precedes JSON parsing; it is not a
+preallocation memory bound.
+Both generator checks pass; 36 binding tests pass without skips and all three
+Node checks exit 0. Original 35-pass/1-failure evidence is retained.
+WSP00/5/6/11/22/50/62/97; no installed HIGH or native author claim.
+
 ## Windows manifest byte compatibility — 2026-10-20
 
 Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows

@@ -1,11 +1,17 @@
 ## Installed HIGH connection in progress — 2026-10-20
 
-The v13 candidate supplies protected, current-owner consensus nonces using the
-existing atomic MAC state and SQLite high-water store. It preserves legacy owner
-versions and the LOW service. See the [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
-Connected 437/3 platform skips and independent 21 controls pass. The installed HIGH
-issuer join remains pending; a
-callable adapter is not native author admission or retained RSI benefit.
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+The live-lease core passes connected 390/9 platform skips, separate Linux 2/0
+and independent 16 controls. Installed HIGH source/policy selection and model
+artifact ingestion remain separate gates; no native author is admitted.
+[API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
 
 ## Parent-consent prerequisite — 2026-10-19
 

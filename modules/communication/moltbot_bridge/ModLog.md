@@ -1,3 +1,18 @@
+## Live authenticated generation scope — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Reused nine existing owners to avoid
+nested generation flock while repeating actual current parent/effect/model and
+nonce checks. Public self-leasing and LOW remain unchanged. Connected 390/9
+platform skips, Linux process 2/0 and independent 16 controls validate the core
+with synthetic admission seams. Failed exit withholds the result; durable effects
+are not rolled back by that claim. Installed HIGH selection/model ingestion and
+genuine admission remain next. Historical checkpoints below retain their tested
+source and publication state. Integration base 6dd48a5a inherits the corrected
+nonce compatibility history and byte contract; all 17 core Git-LF blobs match.
+Generated runtime 1,451; registry 1,742/270; both generators check clean. Binding
+36 tests pass without skips and all three Node checks exit 0.
+[Receipts and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
+
 ## Consensus nonce publication compatibility repair — 2026-10-20
 
 Hosted PR2165 CI39289991059 found a real regression: a trailing comma made

@@ -1,3 +1,79 @@
+## Live authenticated generation scope — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97; current selection 19/P0.
+Source base 5820daf8; nine existing production owners and eight test/support files.
+Integration base 6dd48a5a inherits the independently reviewed legacy-owner
+tuple repair, complete v13 signed-model regression and 324 KiB byte contract.
+All 17 live source/test canonical Git-LF blobs remain exact. The 390/9,
+Linux 2/0 and independent 16 counts below retain source base 5820 evidence;
+Combined-source checks now pass: both generators, 36 binding tests with no
+skips/failures/errors in 96.046s, and all three Node commands. Inventory
+remains 1,451, registry 1,742/270; only the inherited runtime-binding repair
+changes a member hash relative to the prior live manifest. Current digest:
+`fd0969d46a01870d8bfaeaf5f78299be2f66467d32a11035f19936f92921b318`. Rebase binding receipt:
+`high-live-lease-author-review/nonce-base-integration/bindings/review.json`,
+SHA256 `1870bb658dbb15e13959deee41ecca63caae6414a551003169918b873c0d7ed4`. No core runtime suite was rerun.
+The bounded same-inode red proves nested public leasing blocks while the outer
+fence is held and succeeds after release. The private live-scope connection reuses
+the existing permission and manifest-selection owners without nested locking.
+
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+Connected Windows validation: 390 passed, 9 platform skips, zero failures/errors
+across 25 suites in 389.797s. Separate Linux process controls: 2 passed without
+skips in 29.394s, using the actual same-inode generation lock and signed files
+with synthetic admission/installation seams. Independent core review: 16 unique
+held-outs passed. Counts overlap and are not additive. Original fixture failures
+and the bounded nested-lock red control remain in external evidence.
+
+Final production bytes equal the connected tested freeze. Only the Linux test
+gained a bounded watchdog before its two passing final controls. The independent
+core review binds those production bytes; no independent publication or hosted
+CI acceptance is claimed here. Evidence paths are relative to existing
+`native-installation-inputs/current-time-independent-review/`:
+
+| Receipt | SHA256 | Scope |
+| --- | --- | --- |
+| `high-live-lease-author-review/source-freeze-final.json` | `f5853a3d39461c1ee4ac5859883580765693dbfeccccc4422887a1e51e1cf20e` | Exact 17-file final freeze |
+| `high-live-lease-author-review/author-review-final.json` | `3d7e49d5c139aa9720d463f6636e06f57c463ed73989ba8bbb3d48bf7356aa76` | Commands, preserved failures and truth limits |
+| `high-live-lease-author-review/connected-review.json` | `e057d20e8e3dcec3511bf3aae383781bc1a5d76d57736221dd7b943400ebbdf2` | 25 suites, 390 passed and 9 platform skips |
+| `high-live-lease-author-review/process-final.json` | `04935721e4a43dae2965453bdb9be8d1b7dd6ebf66930af110336cdef5e9f2ea` | Two actual Linux lock/process controls; synthetic admission |
+| `high-live-lease-author-review/nested-lock-red.json` | `3c110e3e56b7a4577774b65588fc3918cee6dc87e911d799eb44016f588e2f57` | Bounded same-inode nested-lock red and released control |
+| `high-live-lease-independent-review/independent-core-review.json` | `9f465821601dcf58689d16c89b15ff851281d576a44486c5ccc8ec8399824bbe` | 16 unique independent core held-outs |
+
+Before rebase, generated closure contained 1,451 files, adding the nonce authority
+and current-owner modules through existing imports. This is source closure,
+not installed qualification. Registry 1,742/270 adds exactly five suites and
+35 shard-only moves; existing classifications/quarantines remain unchanged.
+The original binding checks passed 36 manifest/registry tests without skips in
+80.266s, including staged-index binding. Node contract/preflight/async
+each exit 0. Exact inventory bounds and cap+1 checks follow this inventory;
+structural ceilings are unchanged. All 17 frozen source/test hashes remain exact.
+The serialized-manifest byte contract explicitly evolves from 320 to 324 KiB
+(+4,096 bytes/1.25%): pretty LF 327,910 and CRLF 330,885 fit 331,776,
+leaving 891 bytes above CRLF. The original 35-pass/1-failure receipt is
+retained; formatting stays indent=2. Actual LF/CRLF, exact-max acceptance
+and max+1 rejection are tested; independent 4 MiB readers are unchanged.
+This is a post-read, pre-parse accepted-input bound, not a preallocation
+memory guarantee.
+Binding receipt: `high-live-lease-author-review/publication-bindings/review.json`,
+SHA256 `e6ab727aa667a1dc134b6748feeff87f2799ff1a9566209f27f928bb5cd81d29`.
+
+Next 19/P0 (C4/I5/D5/Impact5): connect protected non-initial installed policy/source
+admission, authenticated author/reviewer model-artifact loading and the existing
+HIGH issuer factory path. This core does not select or install HIGH service.
+Genuine work/model/reviewer/budget inputs, native qualification and author
+admission remain required. Frozen runtime 294195cdb is unchanged; native author
+tickets 0, paid model calls 0, no retained RSI gain.
+
+The following nonce and parent checkpoints are historical source-bound evidence.
+
 ## Windows manifest byte contract — 2026-10-20
 
 Actual readManifest independently accepts the current 1,449-member LF

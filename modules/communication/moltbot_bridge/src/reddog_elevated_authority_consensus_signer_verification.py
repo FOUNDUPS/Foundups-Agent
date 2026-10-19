@@ -3,11 +3,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, fields
+from functools import partial
 from typing import Any, Mapping
 
-from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
-    ConsensusNonceAuthority,
-)
+from .reddog_elevated_authority_consensus_capability import ConsensusNonceAuthority
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_contract import (
     ElevatedAuthorityConsensusReceipt,
     canonical_authority_request_digest,
@@ -26,15 +25,11 @@ from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensu
     ReviewerRuntimeEvidenceResolver,
     SovereignAuthorizationEvidenceResolver,
 )
-from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_rehydration import (
-    rehydrate_consensus_receipt,
-)
+from .reddog_elevated_authority_consensus_rehydration import rehydrate_consensus_receipt
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_reviewer_evidence import (
     consensus_decisions_verify,
 )
-from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
-    SignatureVerifier,
-)
+from .reddog_work_order_signature_verifier import SignatureVerifier
 from modules.communication.moltbot_bridge.src.reddog_elevated_consensus_signer_reservation import (
     VerifiedElevatedConsensusSignerReservation,
     reserve_elevated_consensus_nonce,
@@ -55,6 +50,7 @@ class ElevatedConsensusSignerAuthority:
     revoked_key_epochs: frozenset[str] = frozenset()
     effect_authority: Any = None
     parent_authority: Any = None
+    _live_scope: Any = None
 
     def reserve(
         self, proof: Mapping[str, Any], *, signing_request_digest: str, now: int, grant_expires_at=None
@@ -66,13 +62,17 @@ class ElevatedConsensusSignerAuthority:
         if type(proof) is dict and proof.get("schema_version") == PARENT_SCHEMA:
             if type(self.parent_authority) is not CurrentParentConsensusAuthority:
                 return None
-            return self.parent_authority.reserve(proof, signing_request_digest=signing_request_digest,
+            reserve = self.parent_authority.reserve if self._live_scope is None else partial(self.parent_authority._reserve, _scope=self._live_scope)
+            return reserve(proof, signing_request_digest=signing_request_digest,
                 now=now, grant_expires_at=grant_expires_at, nonce_authority=self.nonce_authority)
         if isinstance(proof, Mapping) and proof.get("schema_version") in {SCHEMA, SCHEMA_V2}:
             if type(self.effect_authority) is not CurrentEffectSigningAuthority:
                 return None
-            return self.effect_authority.reserve(proof, signing_request_digest=signing_request_digest,
+            reserve = self.effect_authority.reserve if self._live_scope is None else partial(self.effect_authority._reserve, _scope=self._live_scope)
+            return reserve(proof, signing_request_digest=signing_request_digest,
                 now=now, grant_expires_at=grant_expires_at)
+        if self._live_scope is not None:
+            return None
         return self._reserve_delegated(proof, signing_request_digest=signing_request_digest, now=now)
 
     def _reserve_delegated(self, proof, *, signing_request_digest, now):

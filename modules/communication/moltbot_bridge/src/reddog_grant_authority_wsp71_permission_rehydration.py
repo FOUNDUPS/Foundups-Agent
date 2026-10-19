@@ -57,6 +57,17 @@ def authorize_current_grant_authority_wsp71_use(
     action: Callable[[], _T],
 ) -> _T:
     """Execute one operation while E0 and revocation authority remain current."""
+    return _authorize_permission_use(owner_config_path=owner_config_path, repo_root=repo_root,
+        owner_policy=owner_policy, now_epoch=now_epoch, revocation_oracle=revocation_oracle,
+        action=action, scoped=False)
+
+
+def _authorize_current_grant_authority_scoped_use(**inputs):
+    return _authorize_permission_use(**inputs, scoped=True)
+
+
+def _authorize_permission_use(*, owner_config_path, repo_root, owner_policy, now_epoch,
+                              revocation_oracle, action, scoped):
 
     if not callable(action):
         raise RuntimeArtifactManifestError("grant_permission_action_invalid")
@@ -65,15 +76,18 @@ def authorize_current_grant_authority_wsp71_use(
     with lease_validated_owner_e0_current_admission(**inputs) as admission:
         before, receipt = _permission_state(admission, repo, owner_config_path, revocation_oracle, now_epoch)
 
+    from .reddog_signer_owner_e0_current_selection import _lease_validated_owner_e0_current_scope, _scope_admission
+    lease = _lease_validated_owner_e0_current_scope if scoped else lease_validated_owner_e0_current_admission
     def guarded_action():
         # Root LOAD happens outside this lease; caller effects remain fenced.
-        with lease_validated_owner_e0_current_admission(**inputs) as current:
+        with lease(**inputs) as held:
+            current = _scope_admission(held, owner_config_path=owner_config_path, repo_root=repo)[1] if scoped else held
             checked_at = _current_permission_epoch(receipt, now_epoch)
             after, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, checked_at)
             if before != after:
                 raise RuntimeArtifactManifestError("grant_permission_authority_changed")
             used_at = _current_permission_epoch(receipt, checked_at)
-            result = action()
+            result = action(held) if scoped else action()
             final_at = _current_permission_epoch(receipt, used_at)
             final, _ = _permission_state(current, repo, owner_config_path, revocation_oracle, final_at)
             if before != final:

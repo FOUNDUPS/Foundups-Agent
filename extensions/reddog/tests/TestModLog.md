@@ -1,3 +1,15 @@
+## Live generation scope manifest boundary — 2026-10-20
+
+The initial binding run passed 35 tests and failed one: pretty generated JSON
+was 327,910 bytes against the unchanged 327,680-byte cap. Preserve that receipt.
+The reviewed capacity proposal pairs a 324 KiB consumer/Python bound with actual
+LF/CRLF acceptance, valid JSON padded to exactly 331,776 bytes, and unchanged
+maximum-plus-one rejection. Canonical digest, runtime count/hash/path guards,
+other byte limits and generator indent=2 remain unchanged. No source17 changes.
+Affected binding tests pass 36/0 skips in 80.266s; all three Node commands
+exit 0. No runtime suite rerun or admission
+claim follows from this resource-contract revision (WSP00/5/6/11/22/62/97).
+
 ## Windows manifest byte compatibility — 2026-10-20
 
 Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows

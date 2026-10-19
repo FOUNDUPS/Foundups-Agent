@@ -1,12 +1,23 @@
-## Protected consensus nonce checkpoint — 2026-10-20
+## Live authenticated generation scope — 2026-10-20
 
-Current 19/P0 reuses protected owner v13, current E0 and existing MAC/SQLite nonce
-state. Connected 437 passed/3 platform skips; independent 21 passed. The reviewed
-helper move preserves semantics and existing caps; unchanged startup-test size
-debt is recorded. Next connect one live authenticated parent/effect/nonce lease
-through the existing factory, then protected HIGH service composition and genuine
-admission inputs. LOW and frozen 294 runtime stay unchanged; native author 0.
-[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+Connected 390/9 platform skips, Linux process 2/0 and independent 16 controls
+validate this core, not installed HIGH admission.
+
+Next 19/P0 (C4/I5/D5/Impact5): connect protected non-initial installed policy/source
+admission, authenticated author/reviewer model-artifact loading and the existing
+HIGH issuer factory path. This core does not select or install HIGH service.
+Genuine work/model/reviewer/budget inputs, native qualification and author
+admission remain required. Frozen runtime 294195cdb is unchanged; native author
+tickets 0, paid model calls 0, no retained RSI gain.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
 
 ## Parent admission checkpoint — 2026-10-20
 

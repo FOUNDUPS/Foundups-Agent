@@ -22,16 +22,25 @@ Cleanup failures remain errors rather than claims of successful rollback.
 or unauthenticated state and retains the existing one-step high-water crash
 recovery; it is not a promise of read-only IO.
 
-The generated 1,449-file runtime currently includes only the new custody leaf;
-the public nonce authority/current-owner leaves remain source/test validated,
-not imported or qualified installed runtime until the HIGH join.
+Private `_authorize_current_grant_authority_scoped_use` passes the existing
+permission action an opaque scope created under the canonical generation lease.
+Current parent/effect and nonce private variants consume that exact live scope;
+public methods still acquire their own leases. No public trusted boolean or
+global reentrancy bypass is introduced. The scope binds thread/process, exact
+owner-config path/repo, owner/policy/selection snapshots and nondecreasing clocks.
+The manifest-selection owner performs its nonlocking current check only while
+the authenticated fence is held. Reserve, pre-sign validation and commit repeat
+actual proof/model verification; withdrawal allows only confined owned rollback.
+Failed lease exit withholds results without undoing side effects or consumption.
 
-This adapter does not install HIGH signing. The existing LOW service remains
-LOW-only. HIGH composition must avoid nesting these public self-leasing methods
-inside the permission owner's generation lease; the next join requires one live
-authenticated scope for verification, secret use and nonce callbacks. Reuse the
-existing supplied-grant target transport. Native qualification/admission,
-authentic work/model/reviewer/budget inputs and retained RSI benefit remain open.
+The generated 1,451-file closure now includes nonce authority/current-owner
+modules through existing imports; exact binding checks are recorded in dispatch.
+Inclusion in that import closure is not installed qualification.
+This core does not install HIGH signing or widen LOW. Protected non-initial
+policy/source selection and authenticated author/reviewer model-artifact loading
+remain required before the existing HIGH factory can be served. Reuse supplied-
+grant target transport; authentic work/model/reviewer/budget inputs, native
+qualification/admission and retained RSI benefit remain open.
 
 ## Exact parent-consent connection — 2026-10-19
 

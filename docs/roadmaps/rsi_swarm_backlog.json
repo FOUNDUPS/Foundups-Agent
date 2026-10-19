@@ -1889,10 +1889,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.parent_consensus_join_20261020.nonce_custody",
-    "base_commit": "51f9edcec322288635a39b7c99540cf05d5d8007",
-    "selected_action": "Connect protected consensus nonce custody and the existing single-lease HIGH issuer path",
-    "status": "NONCE_COMPONENT_VALIDATED_HIGH_COMPOSITION_PENDING",
+    "observation_path": "current_observation.parent_consensus_join_20261020.live_lease",
+    "base_commit": "6dd48a5aa0267118cd1d600eb3708937837ce098",
+    "selected_action": "Connect protected installed HIGH policy/source admission and authenticated model artifacts through the existing issuer factory",
+    "status": "LIVE_LEASE_CORE_VALIDATED_INSTALLED_HIGH_PENDING",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
@@ -1902,7 +1902,7 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close nonce source checkpoint, then connect one live authenticated lease through existing parent/effect/nonce/factory owners; prove no nested generation lock. Installed HIGH policy/service and genuine work/model/reviewer/budget inputs remain required; preserve LOW."
+    "next_action": "Preserve the validated private live generation scope; connect protected non-initial installed policy/source and author/reviewer model-artifact inputs. LOW remains unchanged; genuine work/model/reviewer/budget authority and native qualification remain required."
   },
   "current_observation": {
     "parent_consensus_join_20261020": {
@@ -1936,6 +1936,67 @@
         "receipt_sha256": "03f1b8f78e4613a9e12ffbda9c71bb85611480dc872fa7416e4951c56573267e",
         "post_format_freeze_sha256": "e4cbec996e46ae1c23c306146c4577572f223aed27d13fc071ea54ae52117a06",
         "limits": "Windows platform skips preserved; four EOF bytes removed after run with AST identical. No native admission."
+      },
+      "live_lease": {
+        "source_base": "5820daf8d4ac08376c7fc5671c17292482bf4913",
+        "status": "CORE_VALIDATED_NOT_INSTALLED",
+        "production_owners": 9,
+        "frozen_files": 17,
+        "connected": "390 passed,9 platform skips,0 failures/errors;25 suites;389.797s",
+        "linux_process": "2 passed,0 skips/failures/errors;29.394s;real same-inode lock, synthetic admission",
+        "independent": "16 unique held-outs passed; actual crypto/model tamper; synthetic owner/installation seams",
+        "final_delta": "Test-only 30s watchdog after connected run; native two cases rerun; production unchanged",
+        "receipts": {
+          "high-live-lease-author-review/source-freeze-final.json": "f5853a3d39461c1ee4ac5859883580765693dbfeccccc4422887a1e51e1cf20e",
+          "high-live-lease-author-review/author-review-final.json": "3d7e49d5c139aa9720d463f6636e06f57c463ed73989ba8bbb3d48bf7356aa76",
+          "high-live-lease-author-review/connected-review.json": "e057d20e8e3dcec3511bf3aae383781bc1a5d76d57736221dd7b943400ebbdf2",
+          "high-live-lease-author-review/process-final.json": "04935721e4a43dae2965453bdb9be8d1b7dd6ebf66930af110336cdef5e9f2ea",
+          "high-live-lease-author-review/nested-lock-red.json": "3c110e3e56b7a4577774b65588fc3918cee6dc87e911d799eb44016f588e2f57",
+          "high-live-lease-independent-review/independent-core-review.json": "9f465821601dcf58689d16c89b15ff851281d576a44486c5ccc8ec8399824bbe"
+        },
+        "limits": "Public self-leasing and LOW unchanged; failed exit withholds results but cannot undo callback effects or durable nonce consumption. Installed HIGH source/policy/model-data loading remains unconnected.",
+        "installed_high": false,
+        "native_author_tickets": 0,
+        "paid_model_calls": 0,
+        "retained_gain": false,
+        "generated_binding": {
+          "runtime_files": 1451,
+          "manifest_digest": "4461d7a0a5e576e025baa746872c24db8dadd9c32f8220b9f24f6ad2cdc2e5a4",
+          "registry_total": 1742,
+          "quarantined": 270,
+          "shard_only_moves": 35,
+          "binding_tests": 36,
+          "skipped": 0,
+          "failures": 0,
+          "errors": 0,
+          "node_checks": 3,
+          "receipt_sha256": "e6ab727aa667a1dc134b6748feeff87f2799ff1a9566209f27f928bb5cd81d29",
+          "serialized_manifest_max_bytes": 331776,
+          "pretty_lf_bytes": 327910,
+          "pretty_crlf_bytes": 330885,
+          "installed_qualification": false
+        },
+        "integration": {
+          "base_commit": "6dd48a5aa0267118cd1d600eb3708937837ce098",
+          "canonical_core_17_unchanged": true,
+          "inherited": "Reviewed legacy owner tuple repair, complete v13 signed-model test and 324 KiB reader contract.",
+          "binding_validation": {
+            "tests": 36,
+            "failures": 0,
+            "errors": 0,
+            "skipped": 0,
+            "seconds": 96.046,
+            "generator_checks": 2,
+            "node_checks": 3,
+            "runtime_files": 1451,
+            "registry_total": 1742,
+            "quarantined": 270,
+            "manifest_digest": "fd0969d46a01870d8bfaeaf5f78299be2f66467d32a11035f19936f92921b318",
+            "receipt_sha256": "1870bb658dbb15e13959deee41ecca63caae6414a551003169918b873c0d7ed4",
+            "inherited_runtime_member": "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py"
+          },
+          "core_counts": "Historical tested source base5820; no broad rerun claimed."
+        }
       },
       "nonce_custody": {
         "source_base": "51f9edcec322288635a39b7c99540cf05d5d8007",

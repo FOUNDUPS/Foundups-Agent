@@ -7,6 +7,7 @@ No default runtime, policy, nonce authority, or signing credentials are minted.
 from dataclasses import asdict, dataclass
 from pathlib import Path
 import time
+from contextlib import nullcontext
 
 from . import reddog_current_effect_consent_verification as consent
 from . import reddog_current_effect_reviewer_verification as reviews
@@ -42,9 +43,13 @@ class CurrentEffectSigningAuthority:
         return _mint_effect_signing_permit(frozen, expires_at=expires)
 
     def reserve(self, proof, *, signing_request_digest, now, grant_expires_at=None):
+        return self._reserve(proof, signing_request_digest=signing_request_digest, now=now,
+                             grant_expires_at=grant_expires_at)
+
+    def _reserve(self, proof, *, signing_request_digest, now, grant_expires_at=None, _scope=None):
         if type(now) is not int or now < 0:
             return None
-        checked = self._verify(proof)
+        checked = self._verify(proof, _scope=_scope)
         if checked is None:
             return None
         frozen, context, target, expires, current = checked
@@ -58,28 +63,39 @@ class CurrentEffectSigningAuthority:
             return reserve_elevated_consensus_nonce(
                 self.nonce_authority, nonce, expires_at=expires,
                 subject="effect-consensus:" + frozen["consensus_receipt"]["receipt_id"],
-                validity_check=current,
+                validity_check=current, _scope=_scope,
             )
         except Exception:
             return None
 
-    def _verify(self, proof, *, _final_use=False):
+    def _verify(self, proof, *, _final_use=False, _scope=None):
         try:
             frozen, context, parent, target = snapshot_effect_consensus_proof(proof)
             repo = Path(self.repo_root).resolve()
-            owner = reviews.loader._load_owner_config(self.owner_config_path, repo=repo)
-            if owner["schema_version"] not in {reviews.loader.SCHEMA_VERSION_V7, reviews.loader.SCHEMA_VERSION_V8, reviews.loader.SCHEMA_VERSION_V9, reviews.loader.SCHEMA_VERSION_V10, reviews.loader.SCHEMA_VERSION_V11, reviews.loader.SCHEMA_VERSION_V12, reviews.loader.SCHEMA_VERSION_V13}:
-                return None
-            selected, boundary = reviews.loader._manifest_selection_from_owner(owner, repo=repo)
-            with boundary._lease_current(selected) as selection:
+            from .reddog_signer_owner_e0_current_selection import _scope_admission
+            if _scope is None:
+                owner = reviews.loader._load_owner_config(self.owner_config_path, repo=repo)
+                if owner["schema_version"] not in {reviews.loader.SCHEMA_VERSION_V7, reviews.loader.SCHEMA_VERSION_V8, reviews.loader.SCHEMA_VERSION_V9, reviews.loader.SCHEMA_VERSION_V10, reviews.loader.SCHEMA_VERSION_V11, reviews.loader.SCHEMA_VERSION_V12, reviews.loader.SCHEMA_VERSION_V13}:
+                    return None
+                selected, boundary = reviews.loader._manifest_selection_from_owner(owner, repo=repo)
+                lease = boundary._lease_current(selected)
+            else:
+                owner, current = _scope_admission(_scope, owner_config_path=self.owner_config_path, repo_root=repo)
+                lease = nullcontext(current.selection)
+            with lease as selection:
                 from .reddog_effect_consensus_proof import SCHEMA_V2
                 if frozen["schema_version"] == SCHEMA_V2:
                     from .reddog_parent_bound_effect_verification import verify_parent_bound_effect_leased
                     interval = verify_parent_bound_effect_leased(self, owner, repo, selection, frozen, context, parent, target)
-                else:
+                elif _scope is None:
                     interval = self._verify_leased(owner, repo, selection, frozen, context, parent, target)
+                else:
+                    return None
             if interval is None or (not _final_use and frozen["schema_version"] != SCHEMA_V2 and not interval[2]()):
                 return None
+            if _scope is not None:
+                _scope_admission(_scope, owner_config_path=self.owner_config_path, repo_root=repo)
+                interval = (interval[0], interval[1], lambda: self._verify(frozen, _final_use=True, _scope=_scope) is not None)
             snapshot_effect_consensus_proof(frozen)
             return frozen, context, target, interval[1], interval[2]
         except Exception:

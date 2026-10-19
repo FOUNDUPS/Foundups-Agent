@@ -12,13 +12,15 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — protected consensus nonce component (2026-10-20 JST):**
-Owner v13 supplies separately bound protected consensus nonce custody while
-preserving v1–v12 and LOW. Connected Windows tests pass 437 with 3 platform skips;
-independent 21 controls pass on the same 26-file freeze. Real signed files and
-MAC/SQLite transactions use explicit synthetic installation seams. A reviewed
-two-file helper extraction preserves AST behavior and restores the loader below
-its existing cap; two unchanged historical startup-test size failures remain.
+**Current checkpoint — live authenticated generation scope (2026-10-20 JST):**
+Nine existing owners share the authenticated fence across parent/effect checks,
+nonce reserve, pre-sign validation, commit and rollback without nested flock.
+Connected 390/9 platform skips, separate Linux process 2/0 and independent 16
+held-outs validate the source core with explicit synthetic admission seams.
+Public self-leasing and LOW remain unchanged; failed exit withholds results but
+does not reverse callback effects or durable consumption.
+Integration now uses corrected nonce base 6dd48a5a with the 17 live core blobs
+unchanged; original core counts retain their tested source base 5820.
 
 Hosted startup CI subsequently caught a legacy-owner tuple predicate defect.
 The repair passes the full local startup selection (901 passed, 5 platform skips, zero failures/errors)
@@ -30,13 +32,13 @@ The explicit 324 KiB paired byte contract now passes LF/CRLF and exact
 boundary checks; pretty JSON, digest/member bounds and source limits stay.
 See [byte evidence](docs/operations/RSI_SWARM_DISPATCH.md#windows-manifest-byte-contract--2026-10-20).
 
-Next 19/P0 (C4/I5/D5/Impact5): connect current parent/effect and nonce operations
-under one live authenticated lease through the existing signer factory, avoiding
-nested generation locks. Installed HIGH policy/service composition and authentic
-work, reviewer/model and budget inputs remain open. The LOW service and frozen
-runtime294195cdb stay unchanged. Earlier parent-consensus evidence and publication
-receipts are preserved in [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
-This checkpoint is component validation, not installed HIGH or author admission.
+Next 19/P0 (C4/I5/D5/Impact5): connect protected non-initial installed policy/source
+admission, authenticated author/reviewer model-artifact loading and the existing
+HIGH issuer factory path. This core does not select or install HIGH service.
+Genuine work/model/reviewer/budget inputs, native qualification and author
+admission remain required. Frozen runtime 294195cdb is unchanged; native author
+tickets 0, paid model calls 0, no retained RSI gain.
+Current and historical evidence: [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
 
 R15 still requires one admitted author, independent evaluation, authorized
 activation/rollback, a later invocation benefiting from retained evidence and

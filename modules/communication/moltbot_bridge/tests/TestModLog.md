@@ -1,3 +1,47 @@
+## Live authenticated generation scope — 2026-10-20
+
+Base 5820daf8; WSP00/5/6/11/15/22/62/71/77/97. Nine production owners and eight
+test/support files form the final 17-file freeze. The final delta from the
+connected tested freeze is a Linux test-only 30s watchdog, rerun in the two
+native process controls; production hashes remain unchanged.
+
+Integration base 6dd48a5a preserves all 17 canonical Git-LF blobs. Both
+generators and 36 binding tests pass (zero skips, 96.046s); all three Node
+commands exit 0. The following original source5820 counts and byte-contract
+failure history are retained; no broad core rerun is claimed. Dispatch binds
+the new manifest digest and exact integration receipt.
+
+Connected Windows validation: 390 passed, 9 platform skips, zero failures/errors
+across 25 suites in 389.797s. Separate Linux process controls: 2 passed without
+skips in 29.394s, using the actual same-inode generation lock and signed files
+with synthetic admission/installation seams. Independent core review: 16 unique
+held-outs passed. Counts overlap and are not additive. Original fixture failures
+and the bounded nested-lock red control remain in external evidence.
+
+Independent controls include actual Ed25519 rejection and model-file tamper at
+commit without owner mutation, failed-exit durable replay and stale reservations.
+The first independent run's eight Windows path-length setup failures were retained;
+only its temporary root changed for the eight passing retries. Canonical structure
+coverage remains 33 production components and now 69 tests/helpers, with unchanged
+200/50 ceilings. Five suites join existing startup CI; hosted results remain
+unobserved for this checkpoint.
+Generated closure contains 1,451 files, adding the nonce authority
+and current-owner modules through existing imports. This is source closure,
+not installed qualification. Registry 1,742/270 adds exactly five suites and
+35 shard-only moves; existing classifications/quarantines remain unchanged.
+Both generator checks pass; 36 manifest/registry tests pass without skips in
+80.266s, including staged-index binding. Node contract/preflight/async
+each exit 0. Exact inventory bounds and cap+1 checks follow this inventory;
+structural ceilings are unchanged. All 17 frozen source/test hashes remain exact.
+The serialized-manifest byte contract explicitly evolves from 320 to 324 KiB
+(+4,096 bytes/1.25%): pretty LF 327,910 and CRLF 330,885 fit 331,776,
+leaving 891 bytes above CRLF. The original 35-pass/1-failure receipt is
+retained; formatting stays indent=2. Actual LF/CRLF, exact-max acceptance
+and max+1 rejection are tested; independent 4 MiB readers are unchanged.
+This is a post-read, pre-parse accepted-input bound, not a preallocation
+memory guarantee.
+No installed HIGH/native author claim follows.
+
 ## Consensus nonce publication compatibility repair — 2026-10-20
 
 Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
