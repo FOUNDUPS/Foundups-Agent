@@ -1,4 +1,25 @@
-## Native qualification and v21 handshake evidence — 2026-10-19
+## Native qualification and requester evidence — 2026-10-19
+
+V27 disables issuer/target observers with 5 author and 12 independent offline
+controls. Native installation/revocation pass; requester rejects, observation
+completion is false and cleanup-loop completion true. Independent review binds
+25 sources, 9 pins, 6 helpers, 4 invocations and all seven units absent. Issuer
+elapsed/CPU 70.046140s/66.242630s versus v26 75.128049s/71.128310s is a single
+different-boot pair, not causal gain. Root elapsed 101.027161s; v27 captures no
+inner socket operation. Receipt/hash are in the existing dispatch checkpoint.
+Containment candidate connected validation: 111 passed/8 Windows skips. Native
+qualification and full native cost measurement remain pending; no admission.
+
+V25 adds only the exact socket function to the existing RAISE selector. Author
+actual-event test covers three timeout sites; separate independent actual-event
+control covers recv OSError and excluded pairs. Fresh native execution observes
+client304/offset434 recv TimeoutError then unwind628, accepted=false exact
+SigningResponse/CONNECT_FAILED, and issuer root-client412 response-size OSError.
+Zero versus over-limit bytes and causal ordering remain unknown. Installation
+and revocation pass; requester exits2 after101.505s post-readiness. Independent
+receipt68b4c15b verifies23 exact sources,8 offsets,13 issuer frames,9 pins,
+6 applied/archived files,4 invocation pairs and all7 units absent. This remains
+a failed synthetic handshake; no native author or retained benefit is claimed.
 
 Exact head1e203d5; identical merged treec7045432 atbb9d3f802. All 19 recorded
 exact-head check runs passed (12 distinct check names), as did main CI39222572582
@@ -24,6 +45,40 @@ target handles1/exits0, requester exits2 with backend/runtime rejection. The
 underlying target exception is not captured. Independent source binding covers19
 relevant files. All7 units absent afterward; retain target reset-failed_exit_1 and
 later root timeout rather than describing launcher closure as successful.
+
+V22 target diagnostics passed40 independent offline controls and4 native adapter
+controls, but the actual run exposed a coverage gap:4096 routine RAISE callbacks
+exhausted the monitor before the rejection's cause. The sole retained ValueError
+is handled containment control flow. Installation/revocation pass; handshake2
+after101.628s; no author execution. Independent review verifies17 relevant source
+files,9 helper pins,6 refreshed helper bytes, four invocation bindings and current
+absence of all7 owned units. Offline controls did not establish useful native
+diagnostic coverage; add a real-interpreter noise-flood control before retrying.
+
+V23 survives the native noise but drops an unlined context-manager unwind.
+V24 retains that offset and one fixed-enum client return. Author53 checks pass
+(22 monitor,3 real-event,7 client-event,18 runner,3 Windows-safe adapter);
+POSIX-only adapter case was excluded, not run on Windows. Separate independent
+real CPython3.12.10 held-outs pass7 cases including31 enum subcases, reusing the
+author's descriptor/import/connector fixture. Prior coverage overlaps.
+An initial independent AST-harness lookup error is retained before correction.
+The exact six-file refresh/nine pins and31 public enums were independently checked.
+
+`run_full_fixture.py --execute-fresh-v24` passes readiness30.067556s and
+installation/revocation, then rejects after100.683s post-readiness. It captures
+TimeoutError at socket-client unwind offset628/line null and a valid response
+type with accepted=false/CONNECT_FAILED. This is not the originating socket
+operation. Monitor7 scoped/185771 total callbacks, no cap exhaustion. Independent
+review binds17 exact Git/descriptor sources, four InvocationIDs, six applied and
+archived helper files, nine pins and all7 absent units. Offset inspection using
+hostCPython3.12.3 matches all7 locations but is not identical compiler provenance;
+the runtime's own co_lines membership remains the location source.
+
+The existing credential-free qualification owner separately measured two full
+runtime guards at3.768633s and2.705737s, with both passing and its unit absent.
+No target monitor or issuer request ran in that observation. It establishes
+component cost only; native diagnostic overhead and causal request latency remain
+unmeasured. No production guards, timeouts or authority changed.
 
 Separate clock experiment:1800 guest/180 host samples, service restored;
 predeclared final60s stability FAIL54.391405ms>50ms. No threshold or clock change.

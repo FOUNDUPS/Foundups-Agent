@@ -22,16 +22,30 @@ The fresh runtime independently qualifies 2,683 files, including 1,246 exact Git
 Python sources; optional deferred imports outside the selected entrypoints remain
 untested. No authenticated author admission follows from qualification.
 
-Synthetic v21 passed installation/revocation and reached root, issuer and target
-socket readiness. Target served one request and exited0; requester exited2 with
-`REJECT_SIGNER_RESPONSE_INVALID`. Its underlying backend exception is not yet
-observed. Root timeout followed requester rejection; a target cleanup-reset error
+Synthetic v25 passed installation/revocation and reached root, issuer and target
+socket readiness. The diagnostic now locates `TimeoutError` at the inner client's
+`recv(4096)`, returning `REJECT_SIGNER_SOCKET_CONNECT_FAILED` and the target's
+generic rejection. The issuer separately rejects a root-authority response at
+the zero-or-over-limit size check; that observation does not identify which
+branch or prove that root termination caused it. V22's noise-cap failure and
+v23's dropped unknown-line location remain preserved.
+Root timeout followed requester rejection; a target cleanup-reset error
 is retained even though all seven owned units were independently absent afterward.
-The separate clock experiment restored the service but failed its fixed 50ms
+V26 separates service lifetime from the observed failure: issuer and root exit2
+normally before the120s service limit. Issuer fails17.34s after the requester;
+its broad socket-service catch still hides the operation. V27 disabled issuer
+and target observers but still rejected the requester; installation/revocation
+passed and all seven units are independently absent. Issuer elapsed/CPU time was
+70.046140s/66.242630s versus v26 75.128049s/71.128310s. Different boots and one
+pair do not establish causal gain; v27 proves no inner socket operation. The separate
+clock experiment restored the service but failed its fixed 50ms
 host/guest stability criterion (minimum54.39ms); no clock-policy change was admitted.
 
-Next18/P0: use bounded target exception-location evidence to identify the actual
-rejection before repairing or retrying. The post-valve lease issuer connection
+Next18/P0: qualify the exact-source containment candidate and measure full native
+validation cost without loosening timeouts or authority. Independent cross-platform
+parity and 111 connected passes/8 Windows skips support the candidate; its native
+runtime remains unqualified and native benefit unverified.
+The post-valve lease issuer connection
 already exists; authenticated parent consensus/sovereign evidence and a qualified
 effect-capable native composition remain distinct later gaps. LOW handshake
 authority must stay LOW. R15 still needs real author execution, independent

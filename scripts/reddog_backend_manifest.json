@@ -2675,7 +2675,7 @@
     "modules/infrastructure/shared_utilities/local_model_selection.py": "6031a4881177f1484d6a9f4cccd649c623206df85743eccef5c77a0f147b1c7b",
     "modules/infrastructure/shared_utilities/reddog_runtime_artifact_generation.py": "94c400e8896ca1289b3d343c5a3e941319cd4cad9ba5deb27d5c3162bf7e3c35",
     "modules/infrastructure/shared_utilities/runtime_artifact_confined_byte_reader.py": "231364d3cc0d7738de186463fca27dc07359a4dc37fde2a213834bb135495658",
-    "modules/infrastructure/shared_utilities/runtime_artifact_safety.py": "01431ffa97538d79d4de7fe1586094edb58fb06d021d44ed734b3030db079f37",
+    "modules/infrastructure/shared_utilities/runtime_artifact_safety.py": "04cc95567159d6be0d3cd15998014bb1f0ffeca58148d0f9aebce7666271ac5b",
     "modules/infrastructure/shared_utilities/runtime_artifact_windows_streams.py": "d8e3769a042e8a270c5357351d8dae9ea6a491ebf33f79b2ad47ec391529da56",
     "modules/infrastructure/shared_utilities/runtime_atomic_replace.py": "65d59a3fb50b0ece5f3633b60824004c09750e0abd3e9d2af7660359bfaa2e17",
     "modules/infrastructure/shared_utilities/runtime_operation_locking.py": "364fb19f7050d0829c0e6dd0a91f76b502cc5e78f02f3875c09b674f0c116168",
