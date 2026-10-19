@@ -12,8 +12,10 @@ fell back to client5. The two-owner forwarding repair passes166 Windows tests
 with2 Linux-dependent skips. Source294195cdb now independently qualifies in the
 installed runtime; v34 receives accepted inner signing, but the outer handshake
 still rejects. Both issuer and target exit0; all7 services absent and cleanup
-complete. Next18/P0: localize the exact target rejection, preserving authority
-and expiry. Current local catalog
+complete. V35 then localizes target rejection to the factory returned-result
+type/ok gate. Offline controls reproduce profile60 versus custody-window300;
+actual native provider code remains unobserved. Next18/P0: reconcile that fixture
+lifetime contract and run a fresh independently verified connection. Current local catalog
 availability and prior failed verifier qualification remain distinct.
 [Evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
 

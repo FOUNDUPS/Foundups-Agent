@@ -162,11 +162,30 @@ observation/cleanup complete and no cleanup errors. Root handled10 counts return
 connection handlers, including rejected/error responses, not successful LOADs.
 Its later generic error is not a demonstrated cause of the target rejection.
 
-Current WSP15 next18/P0 (C3/I5/D5/Impact5): localize the target backend rejection
-using bounded return-site evidence, then repair the demonstrated cause. The
-protocol can sanitize fixed backend rejection codes to the same public
-RESPONSE_INVALID; that code alone does not establish a parser fault. No authority,
-signed lifetime or acceptance relaxation follows. PR2161 merged122fec8c6 after exact-head
+V35 install38.965s/revocation2.093s pass; handshake exits2 after94.125s,
+full135.297s. Local target observations identify `_resolve_and_sign_current`
+line152/offset126 returning `REJECT_SIGNER_SECRET_RESOLUTION_FAILED`, propagated
+through all four observed backend returns. The exact branch is the returned
+object type/`ok` gate at151, not the exception catch at150; an early reviewer
+interpretation was corrected against exact source. Inner client returns accepted;
+the requester still receives sanitized RESPONSE_INVALID. All seven units are
+independently absent, observation/cleanup complete, no cleanup errors. Review
+binds26 sources, six refreshed outputs/nine pins, unchanged inputs and four
+invocations. The32 target callbacks include newly observed returns and are not
+comparable with v34's28 as a performance measure.
+
+An offline public-input probe reproduces a separate configuration mismatch:
+actual v35 target profile60 versus credential window300. Exact resolver lifetime
+calculation at synthetic elapsed1/100/239 returns299/200/61; the existing factory
+rejects all three with FAIL_PROVIDER_TTL_EXPIRED before secret value access.
+Remaining59/60 passes the TTL predicate;61 rejects. This does not observe the
+v35 factory's actual rejection code or clock. The existing issuer instead derives
+its profile from authenticated remaining custody/policy lifetime. Current WSP15
+next18/P0 (C3/I5/D5/Impact5): reconcile the target fixture with that lifetime
+contract and independently test a fresh connection with fixed provider-result
+observation. Explicitly distinguish any profile-ceiling correction from absolute
+credential/policy expiry and signed request/grant lifetime; do not weaken those
+limits or claim author admission. PR2161 merged122fec8c6 after exact-head
 checks and independent review; merge tree equals reviewed8b473f. Exact merged-main
 CI39249090093 passes7/7 and CodeQL39249089610 passes4/4.
 
@@ -208,6 +227,9 @@ All paths below are relative to the existing evidence root
 
 | Evidence | SHA256 |
 | --- | --- |
+| `native-installation-inputs/current-time-independent-review/v35-independent-review.json` | `9683122c7f1ae4e99f05a4e06311ae6428e2b0e6cda393e8a321fca35a0f212d` |
+| `native-installation-inputs/current-time-independent-review/v35-target-local-transport.json` | `3af4c65d46f3105d2f508c9df7f3b575933e5a50ded085ee64af0e4de002b692` |
+| `native-installation-inputs/current-time-independent-review/v35-target-provider-ttl-probe.json` | `2b5c79bfd8ac66e77aa54d34d6d27ef2286517c14705cbbfc8bf22c905e6edcc` |
 | `installed-execution-qualification/all-role-294195cdb-v1/independent-readonly-review/independent-review.json` | `101f45f8997a14698bdd921b1463c3345d94b8214d2404a6137eeb40311d2116` |
 | `native-installation-inputs/current-time-independent-review/v34-independent-review.json` | `7ebf08818f885e867d9d0a7db38423eae587372fc3180fca630327132f22efc4` |
 | `native-installation-inputs/current-time-independent-review/v34-target-local-transport.json` | `542d0df516c4e871effd02acc25b4ed5d483d6104e27cade07f65261058cd628` |

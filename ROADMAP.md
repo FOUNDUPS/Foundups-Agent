@@ -54,9 +54,15 @@ response and both issuer and target exit zero. The requester still rejects with
 exhausted diagnostic cap explains this rejection. All seven services are absent;
 observation and cleanup complete. Fixed backend rejections can be sanitized to
 that same public code, so it does not by itself prove malformed response data.
-Next 18/P0 (C3/I5/D5/Impact5): identify the exact target backend rejection through
-bounded local return evidence, then repair the demonstrated cause. Keep authority,
-signed expiry and acceptance unchanged. Signing is not author admission.
+V35 localizes the rejection to the returned key-provider result: its exact type
+or `ok` check fails at line152; the factory-exception branch is not observed.
+Independent offline controls reproduce a fixture mismatch: target profile60
+rejects successful credential results from the already configured300-second
+custody window. The actual v35 provider code remains unobserved.
+Next 18/P0 (C3/I5/D5/Impact5): reconcile the fixture profile with its existing
+authenticated lifetime and independently test one fresh connection with fixed
+provider-result diagnostics. Preserve absolute expiry and signed request/grant
+lifetimes. Signing is not author admission.
 
 The current effectful integrated author path has a separate dependency: its parent
 consensus verifier lacks a discovered installed trusted provider/composition;

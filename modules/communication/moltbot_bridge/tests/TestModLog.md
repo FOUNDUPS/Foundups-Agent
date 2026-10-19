@@ -23,6 +23,22 @@ observation/cleanup complete. This is a controlled failure, not author execution
 Root handled10 counts completed connection handlers, including rejections; it
 does not prove10 successful LOADs or a causal root failure.
 
+V35 install/revocation pass, handshake2/94.125s, full135.297s. Exact factory-result
+type/ok rejection at152 is observed; an early exception-branch interpretation was
+corrected (catch is150). All7 units absent and cleanup complete. Public-input
+offline controls reproduce profile60 rejecting remaining299/200/61 from custody300;
+they do not establish the actual v35 provider code or native clock.
+
+PR2162 CI39257095414 failed collection in the Linux reviewer runner: timeout
+parametrization changed three schema-only IDs into nine cases. The runner now
+selects all three timeout options across all three schemas, retaining the five
+reviewer cases and exact expected count/set checks. Old IDs reproduce exit4; all
+nine corrected transport IDs collect independently. Local Linux execution ran no
+intended cases: setup limitations were retained, then pytest collection failed on
+`/mnt/c/hiberfil.sys` with PermissionError. Source hashes stayed stable and the
+audit guard recorded no blocked operations. Full 14-case remote CI is still
+required; no local execution pass or guard relaxation is claimed. WSP 5/10/22/97.
+
 V31 exact local returns identify factory rejection at line192. Canonical audit
 decoder controls independently reject the preparer's prior plain hex. V32 repair
 has nine codec controls (six author plus three held-out); final-byte author

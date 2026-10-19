@@ -14,9 +14,17 @@ its authenticated setting. Default5 and signed expiry remain unchanged. Windows
 validation166 passed/2 skips. Exact294195cdb runtime independently qualifies;
 v34 receives accepted inner signing with issuer/target exit0. Outer handshake
 rejects RESPONSE_INVALID; all7 services absent, observation/cleanup complete.
-Next18/P0 localizes the target backend return before any further repair. LOW
+V35 localizes the target factory result type/ok gate; no factory exception is
+observed. Offline profile60/custody300 mismatch is reproduced, but the actual
+native provider code remains unknown. Next18/P0 reconciles that fixture lifetime
+contract and tests a fresh connection. LOW
 no-effect review remains distinct from upstream author
 and elevated materialization. [Receipts](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+PR2162 CI39257095414 stopped before the signing suite because the Linux reviewer
+runner selected obsolete schema-only test IDs. Its selector now includes all nine
+timeout/schema cases plus the five reviewer cases; exact count/set checks remain.
+Independent collection passes; full 14-case remote execution remains required.
 
 ## Exact runtime and v29 lifecycle reconciliation — 2026-10-19
 

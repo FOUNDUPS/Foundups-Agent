@@ -1891,7 +1891,7 @@
   "current_selection": {
     "observation_path": "current_observation.native_requester_20261019",
     "base_commit": "294195cdb96e1ef70d146bb3e6b3fa16ea71e37e",
-    "selected_action": "Localize the target backend rejection after the accepted inner signing response, then repair its demonstrated cause",
+    "selected_action": "Reconcile the target fixture key-provider profile with its authenticated custody lifetime and test a fresh connection",
     "status": "IN_PROGRESS",
     "wsp15": {
       "complexity": 3,
@@ -1902,7 +1902,7 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Exact294 runtime independently qualified; v34 inner client accepted, issuer/target exit0, requester RESPONSE_INVALID. All7 services absent, observation/cleanup complete. Fixed target backend rejections can be sanitized to this public code. Observe exact bounded return sites before repair; no timeout, expiry or authority relaxation. Native author admission and retained RSI benefit remain unproved."
+    "next_action": "V35 observes returned factory type/ok failure at152, not exception catch150. Offline public-input controls reproduce profile60 rejecting remaining299/200/61 from custody300; actual v35 provider code remains unobserved. Independently review the smallest fixture lifetime correction plus fixed provider-result diagnostic, then run one fresh connection. Preserve absolute expiry and signed request/grant30. Author admission/retained benefit unproved."
   },
   "current_observation": {
     "native_requester_20261019": {
@@ -1934,7 +1934,7 @@
       "retained_rsi_gain_demonstrated": false,
       "paid_provider_calls": 0,
       "coordinator_cost": null,
-      "next_dependency": "Localize exact target backend rejection through existing bounded local return evidence, repair demonstrated cause, and re-test. Authentic work/model/budget/distinct-verifier inputs and admitted worker execution remain separate gates.",
+      "next_dependency": "Reconcile the fixture profile with its existing authenticated lifetime, independently review and test the fresh connection. Do not extend absolute credential/policy expiry or signed request/grant lifetime. Actual work/model/budget/distinct-verifier admission remains separate.",
       "v33_response_followup": "Native install38.391s/revocation2.063s pass; handshake2/93.383s,full133.943s. Inner/outer accepted, later send C_RAISE. Target observer setup_failed because canonical Protocol metaclass was rejected;0callbacks, no timeout/errno established. All7absent,cleanup complete. Review81931278a0755550d3b14d40e200235f589fcf12c8d5e09a89effaf95271fc10. Candidate monitor24author/4independent controls and actual installed-module setup comparison; source repair separately reproduced config30 fallback5. Exact source independent review0c29a5f54fb1502eee93fbe6492cedf2cd9ef189b14ac319d53fb280c2d049c8; runtime not yet qualified.",
       "pr2161_publication": "Merged122fec8c6 tree8b473f equal reviewed; exact-main CI39249090093 7/7 and CodeQL39249089610 4/4 pass. Closure8812f8f1ef40409461783fea3499c0c3c9357efc89d5b1015f434d42f6274512.",
       "v34_response_followup": {
@@ -1949,6 +1949,14 @@
         "production_rsi": false,
         "paid_model_calls": 0,
         "coordinator_cost": null
+      },
+      "v35_provider_followup": {
+        "trial": "Install0/38.965s,revocation0/2.093s,handshake2/94.125s,total135.297s. Target inner client accepted; factory returned then type/ok gate151 returned SECRET_RESOLUTION_FAILED at152/126. No factory exception established. All7 units absent; observation/cleanup complete.",
+        "review_sha256": "9683122c7f1ae4e99f05a4e06311ae6428e2b0e6cda393e8a321fca35a0f212d",
+        "offline_reproduction": "Actual public v35 profile60/custody300. Exact resolver lifetime at synthetic elapsed1/100/239 yields299/200/61; exact factory returns FAIL_PROVIDER_TTL_EXPIRED before secret access. Actual native provider code/clock not observed.",
+        "probe_sha256": "2b5c79bfd8ac66e77aa54d34d6d27ef2286517c14705cbbfc8bf22c905e6edcc",
+        "native_author_ticket": false,
+        "retained_benefit_demonstrated": false
       }
     },
     "issuer_custody_20261016": {
