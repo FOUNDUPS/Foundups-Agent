@@ -180,12 +180,25 @@ calculation at synthetic elapsed1/100/239 returns299/200/61; the existing factor
 rejects all three with FAIL_PROVIDER_TTL_EXPIRED before secret value access.
 Remaining59/60 passes the TTL predicate;61 rejects. This does not observe the
 v35 factory's actual rejection code or clock. The existing issuer instead derives
-its profile from authenticated remaining custody/policy lifetime. Current WSP15
-next18/P0 (C3/I5/D5/Impact5): reconcile the target fixture with that lifetime
-contract and independently test a fresh connection with fixed provider-result
-observation. Explicitly distinguish any profile-ceiling correction from absolute
-credential/policy expiry and signed request/grant lifetime; do not weaken those
-limits or claim author admission. PR2161 merged122fec8c6 after exact-head
+its profile from authenticated remaining custody/policy lifetime.
+
+V36 install0/39.146s, revocation0/2.076s and handshake0/94.111s; total135.444s,
+without timeout or retry. Independent archival verification checks both Ed25519
+signatures and exact request/response binding against the live accepted record.
+The target factory now returns ok=true/NONE and all observed backend returns
+accept. The fixture explicitly changes target profile ceiling60 to validated
+`args.ttl` (300); absolute credential/policy expiry and signed request/grant30
+remain unchanged. This does not establish the actual v35 provider rejection code.
+Target, issuer and requester exit0; root exits2 with its generic runtime error.
+Therefore `clean_service_closure=false` remains a failed criterion even though
+all seven units are absent, four invocations bind and cleanup reports no errors.
+Root handled10 counts returned handlers, not successful LOADs; an idle-timeout
+cause remains unobserved. This proves a synthetic LOW prerequisite, not real
+author admission, paid provider execution or retained RSI benefit.
+
+Current WSP15 next18/P0 (C4/I5/D5/Impact4): resolve the existing parent/work/model/
+verifier/budget admission path from authentic inputs. Do not repeat the accepted
+handshake or widen LOW authority. PR2161 merged122fec8c6 after exact-head
 checks and independent review; merge tree equals reviewed8b473f. Exact merged-main
 CI39249090093 passes7/7 and CodeQL39249089610 passes4/4.
 
@@ -227,6 +240,10 @@ All paths below are relative to the existing evidence root
 
 | Evidence | SHA256 |
 | --- | --- |
+| `native-installation-inputs/current-time-independent-review/v36-independent-review.json` | `36615a9c5d3f64734321b2fbabeb66f18a95709d1443c5abb2f1b9bd8c56dd3c` |
+| `native-installation-inputs/current-time-independent-review/v36-target-local-transport.json` | `36cb7ec4334b3d396c0a220d4a68fd7c2ad674ea96532b85fdd2d3fc06dfe12f` |
+| `native-installation-inputs/unified-independent-review/v36-target-provider-ttl/independent-review.json` | `db85183d6487bdea7748b6f33b09dd4d55d641a148f848cadd6ce4d242a02fb5` |
+| `native-installation-inputs/unified-independent-review/v36-candidate/independent-package-review.json` | `6fd90d56fec9ec1603857460e465b90fa343da13dc93400bb56ca0a7fbe9d901` |
 | `native-installation-inputs/current-time-independent-review/v35-independent-review.json` | `9683122c7f1ae4e99f05a4e06311ae6428e2b0e6cda393e8a321fca35a0f212d` |
 | `native-installation-inputs/current-time-independent-review/v35-target-local-transport.json` | `3af4c65d46f3105d2f508c9df7f3b575933e5a50ded085ee64af0e4de002b692` |
 | `native-installation-inputs/current-time-independent-review/v35-target-provider-ttl-probe.json` | `2b5c79bfd8ac66e77aa54d34d6d27ef2286517c14705cbbfc8bf22c905e6edcc` |

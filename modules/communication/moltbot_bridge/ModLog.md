@@ -16,8 +16,12 @@ v34 receives accepted inner signing with issuer/target exit0. Outer handshake
 rejects RESPONSE_INVALID; all7 services absent, observation/cleanup complete.
 V35 localizes the target factory result type/ok gate; no factory exception is
 observed. Offline profile60/custody300 mismatch is reproduced, but the actual
-native provider code remains unknown. Next18/P0 reconciles that fixture lifetime
-contract and tests a fresh connection. LOW
+v35 provider code remains unknown. V36 accepts the synthetic LOW handshake and
+independently verifies both signatures; target factory returns ok=true/NONE.
+Profile ceiling60 becomes validated args.ttl300, with absolute expiry/signed30
+unchanged. All7 units absent/no cleanup errors, but root2 leaves clean service
+closure false. Next18/P0 resolves authentic parent/work/model/verifier/budget
+admission through existing owners; no author execution or retained gain. LOW
 no-effect review remains distinct from upstream author
 and elevated materialization. [Receipts](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
 

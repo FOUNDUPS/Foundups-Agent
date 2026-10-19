@@ -1891,18 +1891,18 @@
   "current_selection": {
     "observation_path": "current_observation.native_requester_20261019",
     "base_commit": "294195cdb96e1ef70d146bb3e6b3fa16ea71e37e",
-    "selected_action": "Reconcile the target fixture key-provider profile with its authenticated custody lifetime and test a fresh connection",
+    "selected_action": "Resolve existing parent/work/model/verifier/budget admission from authentic inputs after the accepted synthetic LOW prerequisite",
     "status": "IN_PROGRESS",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 4,
       "importance": 5,
       "deferability": 5,
-      "impact": 5,
+      "impact": 4,
       "total": 18,
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "V35 observes returned factory type/ok failure at152, not exception catch150. Offline public-input controls reproduce profile60 rejecting remaining299/200/61 from custody300; actual v35 provider code remains unobserved. Independently review the smallest fixture lifetime correction plus fixed provider-result diagnostic, then run one fresh connection. Preserve absolute expiry and signed request/grant30. Author admission/retained benefit unproved."
+    "next_action": "V36 synthetic LOW handshake accepted with both signatures/request-response binding verified; factory ok=true/NONE. All7 units absent/no cleanup errors but root2 leaves clean_service_closure=false; exact root cause unknown. Resolve authentic parent/work/model/verifier/budget admission through existing owners; no repeated handshake or widened LOW. Author admission/retained benefit remain unproved."
   },
   "current_observation": {
     "native_requester_20261019": {
@@ -1934,7 +1934,7 @@
       "retained_rsi_gain_demonstrated": false,
       "paid_provider_calls": 0,
       "coordinator_cost": null,
-      "next_dependency": "Reconcile the fixture profile with its existing authenticated lifetime, independently review and test the fresh connection. Do not extend absolute credential/policy expiry or signed request/grant lifetime. Actual work/model/budget/distinct-verifier admission remains separate.",
+      "next_dependency": "Existing authentic parent/work/model/verifier/budget admission path; synthetic LOW prerequisite now accepted, not real author admission. Root nonzero clean-closure criterion remains separately failed; cause unobserved.",
       "v33_response_followup": "Native install38.391s/revocation2.063s pass; handshake2/93.383s,full133.943s. Inner/outer accepted, later send C_RAISE. Target observer setup_failed because canonical Protocol metaclass was rejected;0callbacks, no timeout/errno established. All7absent,cleanup complete. Review81931278a0755550d3b14d40e200235f589fcf12c8d5e09a89effaf95271fc10. Candidate monitor24author/4independent controls and actual installed-module setup comparison; source repair separately reproduced config30 fallback5. Exact source independent review0c29a5f54fb1502eee93fbe6492cedf2cd9ef189b14ac319d53fb280c2d049c8; runtime not yet qualified.",
       "pr2161_publication": "Merged122fec8c6 tree8b473f equal reviewed; exact-main CI39249090093 7/7 and CodeQL39249089610 4/4 pass. Closure8812f8f1ef40409461783fea3499c0c3c9357efc89d5b1015f434d42f6274512.",
       "v34_response_followup": {
@@ -1957,6 +1957,17 @@
         "probe_sha256": "2b5c79bfd8ac66e77aa54d34d6d27ef2286517c14705cbbfc8bf22c905e6edcc",
         "native_author_ticket": false,
         "retained_benefit_demonstrated": false
+      },
+      "v36_synthetic_handshake": {
+        "trial": "Install0/39.146s, revocation0/2.076s, handshake0/94.111s,total135.444s; no timeout/retry. Both Ed25519 signatures and exact request/response binding independently verified.",
+        "review_sha256": "36615a9c5d3f64734321b2fbabeb66f18a95709d1443c5abb2f1b9bd8c56dd3c",
+        "target_factory": "Actual ok=true/NONE; all observed backend returns accepted. V35 actual provider code remains unobserved.",
+        "fixture_delta": "Target profile ceiling60 -> validated args.ttl300; absolute credential/policy expiry and signed request/grant30 unchanged.",
+        "closure": "Issuer/target/requester0; root2/generic runtime error. clean_service_closure=false despite all7 absent, four invocations bound and zero cleanup errors. Root idle cause unobserved.",
+        "native_author_ticket": false,
+        "real_admission": false,
+        "retained_rsi_gain": false,
+        "paid_provider_calls": 0
       }
     },
     "issuer_custody_20261016": {

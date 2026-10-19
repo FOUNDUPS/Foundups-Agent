@@ -14,8 +14,11 @@ installed runtime; v34 receives accepted inner signing, but the outer handshake
 still rejects. Both issuer and target exit0; all7 services absent and cleanup
 complete. V35 then localizes target rejection to the factory returned-result
 type/ok gate. Offline controls reproduce profile60 versus custody-window300;
-actual native provider code remains unobserved. Next18/P0: reconcile that fixture
-lifetime contract and run a fresh independently verified connection. Current local catalog
+actual v35 provider code remains unobserved. V36 accepts the synthetic LOW
+handshake with both signatures independently verified; root exit2 leaves clean
+service closure false despite all7 units absent and no cleanup errors. No author
+admission or retained gain. Next18/P0 resolves authentic parent/work/model/verifier/
+budget admission through existing owners. Current local catalog
 availability and prior failed verifier qualification remain distinct.
 [Evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
 

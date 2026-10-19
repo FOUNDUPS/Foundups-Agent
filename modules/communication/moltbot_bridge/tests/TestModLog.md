@@ -29,6 +29,14 @@ corrected (catch is150). All7 units absent and cleanup complete. Public-input
 offline controls reproduce profile60 rejecting remaining299/200/61 from custody300;
 they do not establish the actual v35 provider code or native clock.
 
+V36 install0/39.146s, revocation0/2.076s and handshake0/94.111s; total135.444s.
+Independent archival verification checks both Ed25519 signatures and exact
+request/response binding. Target factory returns ok=true/NONE; target, issuer and
+requester exit0. Root exit2 leaves clean_service_closure=false; exact root cause
+unknown. All7 units absent, four invocations bound, no cleanup errors. Target
+profile ceiling60 becomes validated args.ttl300; absolute expiry/signed30 stay
+unchanged. This synthetic success does not establish real admission or author gain.
+
 PR2162 CI39257095414 failed collection in the Linux reviewer runner: timeout
 parametrization changed three schema-only IDs into nine cases. The runner now
 selects all three timeout options across all three schemas, retaining the five

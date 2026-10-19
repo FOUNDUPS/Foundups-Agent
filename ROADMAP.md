@@ -59,10 +59,15 @@ or `ok` check fails at line152; the factory-exception branch is not observed.
 Independent offline controls reproduce a fixture mismatch: target profile60
 rejects successful credential results from the already configured300-second
 custody window. The actual v35 provider code remains unobserved.
-Next 18/P0 (C3/I5/D5/Impact5): reconcile the fixture profile with its existing
-authenticated lifetime and independently test one fresh connection with fixed
-provider-result diagnostics. Preserve absolute expiry and signed request/grant
-lifetimes. Signing is not author admission.
+V36 accepts the synthetic LOW handshake; both signatures and exact request/response
+binding verify independently. The target factory returns `ok=true/NONE` after the
+fixture profile ceiling changes from60 to validated `args.ttl` (300). Absolute
+expiry and signed30 lifetimes remain unchanged. All seven units are absent with
+no cleanup errors, but root exit2 leaves `clean_service_closure=false`; its exact
+error is unknown. This is not author admission or retained RSI benefit.
+Next 18/P0 (C4/I5/D5/Impact4): resolve the existing parent/work/model/verifier/budget
+admission path from authentic inputs. Do not repeat the accepted handshake or
+widen LOW authority.
 
 The current effectful integrated author path has a separate dependency: its parent
 consensus verifier lacks a discovered installed trusted provider/composition;
