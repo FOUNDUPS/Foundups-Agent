@@ -1,3 +1,20 @@
+## Parent-consent connection — 2026-10-19
+
+WSP00/11/15/22/48/50/77/97. Existing parent resolution lacked an authenticated
+consent provider. Added two narrow leaves for the distinct parent privilege and
+connected them through the existing current-principal facade and owner loader.
+Opt-in v11 preserves v1-v10 contracts, including v10 socket ancestry and separate
+rate stores. Detached signatures bind the canonical parent, policy, owner and
+generation; principal/owner/time changes and failed lease exit reject.
+
+Independent review reproduced policy loss in the draft legacy result. The final
+`ParentConsentEvidence` retains the policy and existing execution consumers reject
+it. Its data still requires trusted current-use composition. Connected512 passed,
+2 existing Windows skips; independent37 passed. See tests/TestModLog and the
+existing RSI dispatch receipts. Runtime manifest now includes the two leaves
+(1441 total), with an exact cap and cap+1 rejection. No native service, grant,
+provider call, route promotion or frozen-runtime change occurred.
+
 ## Native audit codec correction and response-path evidence — 2026-10-19
 
 WSP00/5/10/15/22/48/71/97. Existing disposable preparation incorrectly encoded

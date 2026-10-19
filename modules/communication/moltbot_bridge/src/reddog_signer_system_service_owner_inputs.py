@@ -42,9 +42,9 @@ def _reject_grant_root_overlap(root: Path, existing) -> None:
 
 def _grant_socket_root(value, *, repo, owner_root, grant_root, policy=None):
     """V10 separates issuer-writable transport from protected artifact ancestry."""
-    from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10
+    from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10, SCHEMA_VERSION_V11
     raw = value["independent_grant_authority"]["authority_socket_path"]
-    if value.get("schema_version") != SCHEMA_VERSION_V10:
+    if value.get("schema_version") not in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11}:
         path = validate_runtime_artifact_path(raw, allowed_root=grant_root, repo_root=repo)
         if path != grant_root / "grant-authority.sock":
             raise RuntimeArtifactManifestError("grant_authority_socket_path_invalid")
@@ -160,7 +160,7 @@ def load_system_service_model_runtime_verifier(
     from . import reddog_model_runtime_verifier_bootstrap as model
     repo = Path(repo_root).resolve()
     owner = owner_loader._load_owner_config(owner_config_path, repo=repo)
-    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9, owner_loader.SCHEMA_VERSION_V10} or owner["config_id"] != expected_owner_config_id:
+    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9, owner_loader.SCHEMA_VERSION_V10, owner_loader.SCHEMA_VERSION_V11} or owner["config_id"] != expected_owner_config_id:
         raise RuntimeArtifactManifestError("model_verifier_owner_binding_invalid")
     authority = owner["model_verifier_authority"]
     payloads, expected_inputs_digest = None, None

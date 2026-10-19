@@ -1,3 +1,21 @@
+## Parent admission checkpoint — 2026-10-19
+
+The v36 synthetic LOW handshake is independently accepted; all seven owned
+units are absent, but root exit2 leaves clean service closure false. PR2162
+closed the nested timeout forwarding defect and passed exact-head/main CI.
+This does not admit an author. The next local prerequisite now verifies exact
+parent consent through opt-in owner v11 and preserves policy in distinct evidence.
+Connected512 passed/2 existing Windows skips; independent37 passed, frozen source
+unchanged. No production consent was installed and the execution valve stays closed.
+
+Next18/P0 (C4/I5/D5/Impact4): connect the trusted parent-policy/consensus owner to
+this evidence under current-use checks, with real reviewer/model/budget inputs.
+Then run one admitted author and independent verifier before activation/rollback,
+later retained benefit and autonomous next selection. Reuse the existing owners;
+do not convert consent-only verification into a work grant or repeat the already
+accepted synthetic handshake as if it advanced author admission.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19).
+
 ## Native startup integration checkpoint — 2026-10-16
 
 PR2147 merged at `6fb93580c`; all 11 exact-head checks and exact-main CI/push

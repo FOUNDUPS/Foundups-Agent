@@ -31,7 +31,7 @@ from .reddog_signer_secret_grant_durable_rate_authority import DurableSignerSecr
 from .reddog_signer_secret_grant_issuance import validate_secret_grant_signing_request
 from .reddog_signer_secret_grant_root_protected_use_oracle import RootAuthorizedSignerGrantRevocationOracle
 from .reddog_signer_socket_peer_credential_attestor import KernelPeerCredentialAttestor, PeerCredentialPolicy
-from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10, _load_owner_config
+from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, _load_owner_config
 from .reddog_signer_wsp71_ephemeral_backend_factory import Wsp71EphemeralSignerBackendFactory
 from modules.infrastructure.secrets_mcp.src.systemd_credential_secret_resolver import (
     SystemdCredentialBinding, SystemdCredentialSecretResolver, parse_systemd_credential_reference,
@@ -138,7 +138,7 @@ def _current_inputs(repo, owner_path, dependencies):
 
 def _store_bindings(repo, owner_path, owner, dependencies):
     policy, store = dependencies.owner_policy, dependencies.replay_store
-    if owner.get("schema_version") == SCHEMA_VERSION_V10:
+    if owner.get("schema_version") in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11}:
         from .reddog_grant_authority_startup_custody import target_replay_store_config
         from .reddog_signer_secret_grant_durable_rate_authority import bind_protected_issuer_rate_store
         binding = bind_protected_issuer_rate_store(owner_config_path=owner_path,

@@ -12,7 +12,20 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — accepted grant signing, blocked native handshake (2026-10-19):**
+**Current checkpoint — synthetic handshake accepted; real work admission incomplete (2026-10-19):**
+PR2162 merged as `58f4599d3f89620b0c12178a027a4bfbb8795ca1`; its tree exactly
+matches reviewed head `f461210dc1f53aaed16cc86cb5a1c11388fdd853`. All12 final
+PR checks passed; merged-main CI39264967497 and CodeQL39264966452 also passed.
+Independent CI artifact review verifies14 cases with no
+failures/errors/skips and4,787 recorded source hashes matching that head.
+This closes the earlier collection-only limitation, not native author admission.
+
+The next prerequisite extends the existing principal/owner machinery with
+explicit, generation-bound parent consent. Registered identity, later effect
+consent and downstream signed work authority cannot supply that missing
+approval. Policy scope must survive the returned evidence. Production remains
+closed pending current policy/reviewer/model/budget composition and real inputs.
+
 PR2160 merged as `358fb2e34`; its tree equals independently reviewed `ec7a0e438`.
 Exact-head and merged-main CI/CodeQL passed. The new installed runtime independently qualifies
 2,683 files and both confined profiles. One same-boot ABBA comparison measures

@@ -1,3 +1,54 @@
+## Policy-bound parent-consent prerequisite — 2026-10-19
+
+Source base58f4599d3f89620b0c12178a027a4bfbb8795ca1. PR2162 is merged; its tree
+matches reviewed f461210dc1f53aaed16cc86cb5a1c11388fdd853. All12 final PR checks
+and merged-main CI39264967497/CodeQL39264966452 passed. Independent artifact
+review validates14 cases and4,787 exact Git source hashes. This closes source
+publication/collection coverage, not real work admission.
+
+WSP15 selects18/P0 (complexity4, importance5, deferability5, impact4). After
+accepted synthetic v36, the smallest reusable missing connection is distinct
+parent consent. Registered identity, later effect consent and downstream work
+authority cannot approve their own parent. Source lookup used exact files after
+the existing governed Holo query rejected authority-root HEAD mismatch; freshness
+is UNKNOWN with a coverage gap. No reindex or fabricated retrieval receipt.
+
+Opt-in owner v11 now supplies a narrow parent registration. Its detached signature
+binds the exact HIGH/worktree_create parent, canonical policy digest, beneficiary,
+consenting issuer, RedDog, owner and current generation. Existing principal,
+lease, crypto and artifact owners perform verification. V1-v10 remain compatible.
+Independent review found and repaired policy loss through the old sovereign result:
+the final distinct `ParentConsentEvidence` retains policy and is rejected by
+legacy execution consumers. It is data requiring deliberate trusted current-use
+composition, not a grant. Policy validity alone does not attest policy provenance,
+reviewer/model independence or budget. Withdrawal/rotation uses existing owner and
+generation replacement; no new per-assertion revocation store or continuous
+immutability claim is introduced.
+
+Connected18-suite validation passes512/2 existing Windows skips, no failures or
+errors. Focused96 is included, not additive. Independent37 passes without skips;
+all18 frozen source hashes agree. Real signatures/artifact IO are exercised with
+synthetic OS owner/lease seams. Native author tickets0, paid model calls0;
+coordinator cost unknown. No native execution, runtime deployment or admission
+is established by this slice. Frozen runtime294195cdb is unchanged.
+
+Evidence root: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`.
+Receipts are immutable; SHA256 identifies exact bytes, not authority by itself.
+
+| Receipt relative to evidence root | SHA256 | Result |
+| --- | --- | --- |
+| `native-installation-inputs/current-time-independent-review/parent-consent-author-review/connected-review.json` | `a28fb90487e56c1113aa7f8c8ca8ba80130168b8cd35e6653bb74b8fd1416e66` | exact command,512 pass/2 skip,18 hashes |
+| `native-installation-inputs/current-time-independent-review/parent-consent-independent-heldouts/independent-review.json` | `fbcf763b983943a7304d5747c04e32205b504e7f8ea9c85ffcc78725fabeb99c` | independent37 pass,source unchanged |
+| `descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/response-slice/v36-publication/pr2162-merged-independent-closure.json` | `fa8b32b95ae56e5b50203a9bfb6f8937bf5b6ac92e5c03657709b6d389c8d843` | reviewed/merged tree equality |
+| `descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/response-slice/v36-publication/pr2162-main-validation.json` | `c9063baaee7e7367e77f3b0880f011cf61608d479e05c74891ac997fae829143` | exact merged-main CI/CodeQL success |
+
+Re-observe after publication. Next eligible18/P0: reuse the trusted parent-policy
+and consensus owners to consume policy-bound consent with current reviewer/model
+and budget inputs. Keep the two unresolved canonical verifier gates closed until
+that composition is independently demonstrated. Then one admitted author ticket,
+independent verification, authorized activation/rollback, later retained benefit
+and bounded next selection remain the root roadmap acceptance sequence.
+
 ## Qualified runtime and v29 handshake — 2026-10-19
 
 PR2160 merged `358fb2e34e34bb01342bd92ff80d3ceda413334c`; reviewed head

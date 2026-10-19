@@ -1,3 +1,15 @@
+## Exact parent-consent connection
+
+Run `test_reddog_parent_consent_contract.py`,
+`test_reddog_parent_consent_composition.py` and
+`test_reddog_parent_consent_owner_versions.py` with the existing effect consent,
+owner/startup, model-verifier, grant-custody/rate and elevated-consensus suites.
+The existing authenticated startup CI selection includes the three new suites.
+Check exact signing bytes, cross-policy misuse, generation and principal changes,
+withdrawal/rotation, expiry, clock rollback and failed lease exit. Fixture crypto
+is real; substituted owner/OS selection remains synthetic. Passing tests do not
+establish installed consent, reviewer independence or an admitted native author.
+
 ## AntifaFM campaign route — 2026-10-18
 
 `test_social_campaign_adapter.py` preserves the research route and checks the

@@ -1,3 +1,28 @@
+## Exact parent-consent connection — 2026-10-19
+
+The opt-in owner v11 adds `parent_consent_authority`; v1-v10 keep their existing
+field sets and privileges. The new registration grants only the distinct
+`authorize_exact_high_delegated_request` scope for `HIGH/worktree_create`.
+It names the consenting issuer, beneficiary, RedDog identity/key epoch,
+repository, FoundUp, canonical policy digest and validity interval.
+
+`resolve_current_parent_sovereign_authorization` in the existing current-principal
+resolver accepts the owner path, repository, detached assertion, exact parent
+request and policy. The assertion signs the complete canonical parent request
+digest, registration digest and current-generation identity in the distinct
+`reddog-parent-consent.v1.` domain. The existing projection excludes exactly its
+two proof backreferences; no downstream work signature bootstraps its own consent.
+
+The result is immutable, policy-bound `ParentConsentEvidence`, not the legacy
+sovereign record or an execution capability. Legacy consumers reject it until
+deliberate current-use composition checks its policy restriction. Canonical
+policy shape/digest agreement does not attest reviewer or model independence.
+Current owner replacement/removal, key rotation, generation changes and expiry
+invalidate subsequent resolutions; there is no new per-assertion revocation store.
+Owner, input, principal records, generation and time are rechecked inside the
+lease, whose successful exit is required. These sampled checks are not continuous
+immutability or permission to issue a lease, dispatch, promote or merge.
+
 ## Issuer-only root LOAD — 2026-10-15
 
 Issuer identity permits LOAD only, preserving the legacy target signing domain.

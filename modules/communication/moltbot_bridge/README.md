@@ -1,3 +1,12 @@
+## Parent-consent prerequisite — 2026-10-19
+
+The existing current-principal resolver now verifies opt-in owner v11 parent
+consent for one exact HIGH/worktree_create request. Its distinct policy-bound
+evidence cannot directly authorize execution. [Contract and current-use limits](INTERFACE.md#exact-parent-consent-connection--2026-10-19),
+[tests](tests/TestModLog.md#parent-consent-connection--2026-10-19) and
+[RSI sequencing](../../../docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19).
+Trusted parent-policy/reviewer/model/budget composition remains the next gate.
+
 ## Issuer-only root LOAD — 2026-10-15
 
 [LOAD-only identity, permission fencing and custody requirements](INTERFACE.md#issuer-only-root-load--2026-10-15).
