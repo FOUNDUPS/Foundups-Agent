@@ -1,3 +1,16 @@
+## Policy-bound parent consent prerequisite — 2026-10-19
+
+WSP00/15/48/50/77/97: selected18/P0 (C4/I5/D5/Impact4) after the accepted
+synthetic LOW handshake. Reused existing owner/principal, generation lease and
+signature machinery. Owner v11 opts into exact HIGH/worktree_create consent;
+the returned evidence retains its policy restriction and grants no execution.
+Independent review caught and corrected a legacy evidence projection that lost
+that restriction. Connected512 passed/2 existing Windows skips; independent37
+passed. These are component results, not native author or retained RSI evidence.
+See the [canonical dispatch checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19).
+PR2162 is merged and exact-main CI/CodeQL verified; this new source slice still
+requires its own publication checks. Protected runtime294195cdb remains unchanged.
+
 ## RSI fixture codec repair and accepted grant signing — 2026-10-19
 
 WSP00/5/10/15/22/48/71/97. PR2161 merged122fec8c6 after independent exact-head

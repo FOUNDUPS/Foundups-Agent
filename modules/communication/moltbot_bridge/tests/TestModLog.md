@@ -1,3 +1,27 @@
+## Parent-consent connection — 2026-10-19
+
+Base58f4599d3f89620b0c12178a027a4bfbb8795ca1; WSP00/5/6/11/15/22/77/97.
+Focused96 cases passed; the connected18-suite run includes those cases and
+passes512 with2 skips, no failures/errors. Exact invocation and18 frozen source
+hashes are in the linked dispatch receipt. Both skips are existing Windows
+limitations: v10 socket-symlink ancestry and real Unix descriptor exchange.
+Independent review passes37 cases without skips (34 parent controls and3 actual
+v11 owner/model snapshot controls); do not add overlapping suites as unique cases.
+
+Tests exercise real Ed25519 signatures and artifact IO with synthetic OS owner
+and generation-lease seams. Coverage includes policy substitution, invalid types,
+wrong parent/generation/issuer/beneficiary, registration withdrawal/rotation,
+expiry, clock rollback, final input/principal/owner drift and failed lease exit.
+The legacy policy-A to policy-B counterexample reproduces the draft defect;
+distinct policy-bound evidence now rejects at the legacy consumer. Source hashes
+remain identical across author and independent runs. Initial missing-API failure
+and intermediate fixture failures are preserved in external evidence.
+
+Manifest generator8 cases passed. Backend contract, preflight and async commands
+are recorded separately in publication evidence; runtime cap grows by exactly
+the two new leaves and still rejects cap+1. Native authority, provider execution,
+retained benefit and deployment are outside this validation scope.
+
 ## V31 factory localization and v32 codec repair — 2026-10-19
 
 Follow-up v33 retains accepted signing but handshake failure. Target diagnostic

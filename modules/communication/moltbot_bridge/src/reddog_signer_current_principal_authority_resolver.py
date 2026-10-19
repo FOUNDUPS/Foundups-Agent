@@ -126,4 +126,7 @@ def _project_reviewer_entry(entry, records, policy, authority, now, expiry):
 from .reddog_current_effect_consent_verification import resolve_current_effect_sovereign_authorization
 
 
-__all__ = ["ManifestBoundCurrentPrincipalAuthorityResolver", "resolve_current_effect_sovereign_authorization"]
+from .reddog_current_parent_consent_verification import resolve_current_parent_sovereign_authorization
+
+
+__all__ = ["resolve_current_parent_sovereign_authorization", "ManifestBoundCurrentPrincipalAuthorityResolver", "resolve_current_effect_sovereign_authorization"]

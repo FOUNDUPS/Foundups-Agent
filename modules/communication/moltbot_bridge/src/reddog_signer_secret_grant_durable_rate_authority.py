@@ -26,7 +26,7 @@ def _current_rate_inputs(owner_path, repo, policy_bytes, store):
     """Re-read protected metadata; the service's current E0 lease stays outermost."""
     from .foundup_verified_outcome_root_authority_wire_codec import canonical_bytes, decode_message
     from .reddog_signer_system_service_manifest_selection_loader import (
-        SCHEMA_VERSION_V10, _load_owner_config, _read_root_owned_bytes,
+        SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, _load_owner_config, _read_root_owned_bytes,
     )
     from .reddog_grant_authority_startup_custody import (
         current_grant_custody, require_private_grant_rate_store,
@@ -34,7 +34,7 @@ def _current_rate_inputs(owner_path, repo, policy_bytes, store):
     )
     owner = _load_owner_config(owner_path, repo=repo)
     policy = decode_message(_read_root_owned_bytes(Path(owner["startup_custody"]["policy_path"]), owner_path.parent))
-    if (owner["schema_version"] != SCHEMA_VERSION_V10 or owner["config_id"] != policy["owner_config_id"]
+    if (owner["schema_version"] not in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11} or owner["config_id"] != policy["owner_config_id"]
             or canonical_bytes(policy) != policy_bytes):
         raise ValueError("grant_rate_owner_changed")
     current_grant_custody(owner, policy)
