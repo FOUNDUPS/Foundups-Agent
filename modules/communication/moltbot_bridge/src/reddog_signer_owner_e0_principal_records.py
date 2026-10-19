@@ -14,11 +14,12 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     canonical_json,
     is_sha256,
 )
-from .reddog_reviewer_designation_contract import validate_reviewer_designation
+from .reddog_reviewer_designation_contract import validate_reviewer_designations
 
 
 SCHEMA_VERSION = "reddog_authority_runtime_resolver_supply.v1"
 SCHEMA_VERSION_V2 = "reddog_authority_runtime_resolver_supply.v2"
+SCHEMA_VERSION_V3 = "reddog_authority_runtime_resolver_supply.v3"
 TOP_LEVEL_FIELDS = frozenset(
     {
         "schema_version",
@@ -96,17 +97,17 @@ def parse_principal_artifact(
         raise ValueError("e0_principal_authority_malformed") from exc
     if type(payload) is not dict:
         raise ValueError("e0_principal_authority_shape_invalid")
-    if payload.get("schema_version") != SCHEMA_VERSION_V2:
+    if payload.get("schema_version") not in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}:
         return parse_principal_records(raw), ()
     if set(payload) != TOP_LEVEL_FIELDS | {"reviewer_authorizations"}:
         raise ValueError("e0_principal_authority_shape_invalid")
     authorizations = payload.pop("reviewer_authorizations")
-    if type(authorizations) is not list or len(authorizations) != 1:
+    if payload["schema_version"] == SCHEMA_VERSION_V2 and (type(authorizations) is not list or len(authorizations) != 1):
         raise ValueError("e0_reviewer_authorizations_invalid")
-    designation = validate_reviewer_designation(authorizations[0])
+    designations = validate_reviewer_designations(authorizations, dual=payload["schema_version"] == SCHEMA_VERSION_V3)
     payload["schema_version"] = SCHEMA_VERSION
     records = parse_principal_records(canonical_json(payload).encode("ascii"))
-    return records, (designation,)
+    return records, designations
 
 
 def _record(value: Mapping[str, Any]) -> PrincipalAuthorityRecord:

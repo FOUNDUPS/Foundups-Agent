@@ -46,7 +46,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authori
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
     VerifiedElevatedAuthoritySigningPermit,
 )
-from .reddog_effect_consensus_proof import SCHEMA as EFFECT_PROOF_SCHEMA, VerifiedEffectSigningPermit
+from .reddog_effect_consensus_proof import SCHEMA as EFFECT_PROOF_SCHEMA, SCHEMA_V2 as EFFECT_PROOF_SCHEMA_V2, VerifiedEffectSigningPermit
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_client import (
     ElevatedConsensusGrantProviderIdentity,
     admit_secret_grant_consensus,
@@ -91,10 +91,10 @@ class IndependentSignerSecretGrantProvider:
             raise ValueError("secret_grant_request_invalid")
         if type(elevated_consensus_signing_permit) is VerifiedEffectSigningPermit:
             raise ValueError("effect_grant_requires_unfenced_issue")
-        consensus_proof = admit_secret_grant_consensus(
-            request, elevated_consensus_signing_permit, now=self._now()
+        consensus_proof, approval_expires = admit_secret_grant_consensus(
+            request, elevated_consensus_signing_permit, now=self._now(), include_expiry=True
         )
-        with lease_independent_secret_grant(self, request, consensus_proof) as grant:
+        with lease_independent_secret_grant(self, request, consensus_proof, approval_expires=approval_expires) as grant:
             yield grant
     def _issue(self, request: SigningRequest, owner: Any, consensus_proof: Mapping[str, Any] | None) -> Mapping[str, Any]:
         grant, sign_request, binding = self._prepare_issue(request, owner, consensus_proof)
@@ -110,7 +110,7 @@ class IndependentSignerSecretGrantProvider:
             grant,
             policy=policy,
             consensus_receipt_digest=(consensus_proof["consensus_receipt"]["receipt_id"]
-                if consensus_proof is not None and consensus_proof.get("schema_version") == EFFECT_PROOF_SCHEMA
+                if consensus_proof is not None and consensus_proof.get("schema_version") in {EFFECT_PROOF_SCHEMA, EFFECT_PROOF_SCHEMA_V2}
                 else request.consensus_receipt_digest),
             elevated_consensus_proof=consensus_proof,
         )

@@ -1889,22 +1889,55 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.parent_consent_20261019",
-    "base_commit": "58f4599d3f89620b0c12178a027a4bfbb8795ca1",
-    "selected_action": "Close the tested parent-consent prerequisite, then connect its policy-bound evidence through existing trusted parent consensus owners",
-    "status": "IN_PROGRESS",
+    "observation_path": "current_observation.parent_consensus_join_20261020",
+    "base_commit": "824d0f71dade7dabc25afa1b778f8e3eb099a1e1",
+    "selected_action": "Complete parent-to-effect consensus composition through existing signer and current-use owners",
+    "status": "COMPONENT_VALIDATED_SOURCE_CLOSURE_IN_PROGRESS",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
       "deferability": 5,
-      "impact": 4,
-      "total": 18,
+      "impact": 5,
+      "total": 19,
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Publish the independently tested parent-consent connection; then re-observe trusted parent-policy/reviewer/model/budget composition. Distinct evidence retains policy and legacy execution consumers reject it; neither unresolved canonical verifier gate is removed. Authentic author admission, activation/rollback, later retained benefit and bounded next selection remain unproved."
+    "next_action": "Close exact-source publication, then qualify protected HIGH runtime custody/nonce composition through existing startup/factory owners. Authentic inputs remain required; no LOW expansion or native RSI claim."
   },
   "current_observation": {
+    "parent_consensus_join_20261020": {
+      "source_base": "5862eea0ef49d950674a6509c3dd2a20771a6be2",
+      "current_main": "824d0f71dade7dabc25afa1b778f8e3eb099a1e1",
+      "status": "COMPONENT_VALIDATED_INSTALLED_HIGH_PENDING",
+      "objective": "Connect protected parent consent, distinct reviewer/model evidence, effect approval, signer and current-use verification.",
+      "demonstrated_gap": "Historical single-selection model input could not supply distinct reviewer bindings; candidate v12 supplies bounded exact selections. Installed LOW service still has no protected HIGH consensus nonce composition.",
+      "decision": "Reuse existing owners with explicit parent/effect domains and bounded per-selection inputs; preserve LOW, legacy schemas, proof cap and independent verification.",
+      "native_author_tickets": 0,
+      "paid_model_calls": 0,
+      "coordinator_cost": "unknown",
+      "remaining": "Protected installed HIGH custody/nonce composition and authentic inputs; admitted author, independent evaluation, activation/rollback and later retained benefit.",
+      "independent_validation": {
+        "model_current_use": "20 passed,0 failures/errors/skips",
+        "linux_rpc_nonce": "17 passed,0 failures/errors/skips",
+        "source_files": 44,
+        "model_receipt_sha256": "ae86f0e5439a609cdca50d68aff1f30902a37b951723e610393b77ff33487f92",
+        "rpc_receipt_sha256": "4fe9917bcead45b5125276225eea3cb5491984c0776b74616ec2a682d146a04f",
+        "limits": "Synthetic owner/lease/admission seams; no installed HIGH or durable crash-recovery proof."
+      },
+      "connected_initial": "1539 passed,6 failed,22 skipped. One stale schema-negative fixture; five startup failures traced to pytest fixture scope under -c NUL without explicit root. All failures retained.",
+      "connected_final": {
+        "selected_suites": 59,
+        "passed": 1545,
+        "skipped": 22,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 533.14,
+        "tested_files": 45,
+        "receipt_sha256": "03f1b8f78e4613a9e12ffbda9c71bb85611480dc872fa7416e4951c56573267e",
+        "post_format_freeze_sha256": "e4cbec996e46ae1c23c306146c4577572f223aed27d13fc071ea54ae52117a06",
+        "limits": "Windows platform skips preserved; four EOF bytes removed after run with AST identical. No native admission."
+      }
+    },
     "parent_consent_20261019": {
       "source_base": "58f4599d3f89620b0c12178a027a4bfbb8795ca1",
       "details": "docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19",
@@ -1913,13 +1946,30 @@
       "validation": "Connected18 suites:512 passed/2 existing Windows skips/0 failures/errors; focused96 included. Independent37 passed/0 skips; all18 frozen source hashes unchanged. Real crypto/artifact IO with synthetic OS owner/lease seams; not native authority.",
       "author_receipt_sha256": "a28fb90487e56c1113aa7f8c8ca8ba80130168b8cd35e6653bb74b8fd1416e66",
       "independent_receipt_sha256": "fbcf763b983943a7304d5747c04e32205b504e7f8ea9c85ffcc78725fabeb99c",
-      "publication_state": "LOCAL_VALIDATED_PUBLICATION_PENDING",
+      "publication_state": "MERGED_MAIN_VERIFIED",
       "production_admission": false,
       "native_author_tickets": 0,
       "paid_model_calls": 0,
       "coordinator_cost": "unknown",
       "limits": "No real registration installed, native services invoked or frozen294195cdb runtime modified. Policy shape/digest alone does not attest policy provenance or independent reviewer/model execution. No per-assertion revocation store; current owner/generation withdrawal applies to subsequent resolution.",
-      "next_gate": "Current-use trusted parent-policy/consensus composition with authentic reviewer/model/budget inputs; preserve canonical missing-verifier rejection until independently validated."
+      "next_gate": "Current-use trusted parent-policy/consensus composition with authentic reviewer/model/budget inputs; preserve canonical missing-verifier rejection until independently validated.",
+      "publication": {
+        "pr": 2163,
+        "reviewed_head": "f9ed1661833566121af1cd4c9fc32460192e9280",
+        "merge": "824d0f71dade7dabc25afa1b778f8e3eb099a1e1",
+        "equal_tree": "096306cdbff713be600c7986d0abfc04aa4c6af0",
+        "latest_pr_checks": 12,
+        "connected_linux": "775 passed,1 skipped,0 failures/errors",
+        "independent_ci_artifact": "14 passed;4793 exact Git source hashes",
+        "main_ci": 39272664400,
+        "main_codeql": 39272667724,
+        "main_checks_success": 11,
+        "merge_receipt_sha256": "86367416016eda1c30de2bcc2cc965d3494dd745719ce6257a5ef4a6890e9362",
+        "main_receipt_sha256": "119d75095a4288901344e0477b80595943e9973f6bf35f4f1b17c4a441ec072c",
+        "owned_publication_worktree": "ARCHIVED",
+        "runtime_294195cdb": "retained and unchanged",
+        "superseded_draft_ci": "39269955484 cancelled by coordinator; not passing evidence"
+      }
     },
     "native_requester_20261019": {
       "historical_baseline_scope": "Unversioned source, publication, qualification, native_trial and cleanup fields retain the initial PR2159/v21 checkpoint and pre-v30 failures. Versioned v28 and v29_lifecycle_followup fields record later PR2160/ec7a qualification and v30 lifecycle evidence; current_selection defines the next action. Historical pending/checkout statements are not current runtime assertions.",

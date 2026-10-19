@@ -1,14 +1,15 @@
 ## Exact parent-consent connection
 
-Run `test_reddog_parent_consent_contract.py`,
-`test_reddog_parent_consent_composition.py` and
-`test_reddog_parent_consent_owner_versions.py` with the existing effect consent,
-owner/startup, model-verifier, grant-custody/rate and elevated-consensus suites.
-The existing authenticated startup CI selection includes the three new suites.
-Check exact signing bytes, cross-policy misuse, generation and principal changes,
-withdrawal/rotation, expiry, clock rollback and failed lease exit. Fixture crypto
-is real; substituted owner/OS selection remains synthetic. Passing tests do not
-establish installed consent, reviewer independence or an admitted native author.
+Run the three parent-consent suites with the six parent-consensus/model suites:
+`test_reddog_parent_consensus_{domains,composition,transport,signer,use_time}.py`
+and `test_reddog_parent_model_inputs.py`. The existing authenticated startup CI
+selection includes all nine; retain connected effect, generation, custody/rate
+and elevated-consensus regressions. Structure checks include the new helpers.
+Exercise real signed artifacts, separate reviewer domains and model selections,
+proof bounds, failed lease exit, current-use expiry/clock drift and reservation
+failure. Linux lock tests require actual separate processes; preserve platform
+skips. Synthetic owner/lease fixtures cannot prove installed custody, durable
+recovery, authentic author execution or retained RSI benefit.
 
 ## AntifaFM campaign route — 2026-10-18
 

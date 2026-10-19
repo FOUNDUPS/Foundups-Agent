@@ -1,3 +1,13 @@
+## Parent-consensus connection — 2026-10-20
+
+WSP00/15/48/50/77/97 selects19/P0 to join existing parent/reviewer/model, effect,
+signer and current-use owners. Independent20 model/current-use and17 Linux RPC/
+nonce controls pass against44 frozen files; connected59 suites pass1,545/22 skips.
+Explicit test roots fix fixture interference; production authority checks remain.
+Updated existing roadmap/backlog, interface, tests and generated bindings. No
+second orchestrator, native author admission or retained RSI gain is claimed.
+[Current source, evidence and remaining HIGH connection](docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+
 ## Policy-bound parent consent prerequisite — 2026-10-19
 
 WSP00/15/48/50/77/97: selected18/P0 (C4/I5/D5/Impact4) after the accepted
@@ -8,8 +18,11 @@ Independent review caught and corrected a legacy evidence projection that lost
 that restriction. Connected512 passed/2 existing Windows skips; independent37
 passed. These are component results, not native author or retained RSI evidence.
 See the [canonical dispatch checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19).
-PR2162 is merged and exact-main CI/CodeQL verified; this new source slice still
-requires its own publication checks. Protected runtime294195cdb remains unchanged.
+Publication closed on 2026-10-20 JST: PR2163 merged824d0f71 with exact reviewed
+tree equality, all12 latest PR checks and exact-main CI/CodeQL success. Connected
+Linux775 passed/1 skipped; independent artifact14 passed and4,793 source hashes
+matched. The clean publication worktree is archived. Protected runtime294195cdb
+remains unchanged; no native author admission or retained gain is established.
 
 ## RSI fixture codec repair and accepted grant signing — 2026-10-19
 

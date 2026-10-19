@@ -62,18 +62,20 @@ def issue_effect_secret_grant(provider, request, permit):
 
 
 @contextmanager
-def lease_independent_secret_grant(provider, request, consensus_proof):
+def lease_independent_secret_grant(provider, request, consensus_proof, *, approval_expires=None):
     """Release LOW RPC fencing, then fence validated caller use with fresh state."""
     from . import reddog_signer_independent_secret_grant_provider as owner
     lease = owner.lease_validated_owner_e0_current_admission
     inputs = dict(owner_config_path=provider.owner_config_path,
                   repo_root=provider.repo_root.resolve(), policy=provider.owner_policy)
     with lease(**inputs) as selected:
-        if request.authority_tier != "LOW":
+        from .reddog_parent_consensus_proof import SCHEMA as PARENT_PROOF_SCHEMA
+        parent_proof = type(consensus_proof) is dict and consensus_proof.get("schema_version") == PARENT_PROOF_SCHEMA
+        if request.authority_tier != "LOW" and not parent_proof:
             yield provider._issue(request, selected, consensus_proof)
             return
         before = _owner_authority_snapshot(selected)
-        grant, signing_request, binding = provider._prepare_issue(request, selected, consensus_proof)
+        grant, signing_request, binding = provider._prepare_issue(request, selected, consensus_proof, approval_expires if parent_proof else None)
     signed = provider._sign_grant(grant, signing_request)
     with lease(**inputs) as selected:
         current = _owner_authority_snapshot(selected)

@@ -8,6 +8,8 @@ from .reddog_runtime_artifact_manifest_contract import canonical_json, is_sha256
 
 AUTHORITY_SCHEMA = "reddog_effect_consent_authority.v1"
 ASSERTION_SCHEMA = "reddog_effect_consent.v1"
+ASSERTION_SCHEMA_V2 = "reddog_effect_consent.v2"
+SIGNING_PREFIX_V2 = "reddog-effect-consent.v2."
 PRIVILEGE = "authorize_exact_high_worktree_effect"
 SIGNING_PREFIX = "reddog-effect-consent.v1."
 _COMMON = frozenset({
@@ -81,11 +83,14 @@ def validate_effect_consent_authority(value):
 
 
 def _body(value):
-    copied = _common(value, _BODY, ASSERTION_SCHEMA)
+    modern = type(value) is dict and value.get("schema_version") == ASSERTION_SCHEMA_V2
+    copied = _common(value, _BODY, ASSERTION_SCHEMA_V2 if modern else ASSERTION_SCHEMA)
     _fields({key: copied[key] for key in _BINDINGS}, times=set(), digests=_BINDINGS, keys=set())
-    parent = _shape(copied["parent_authorization"], _PARENT)
-    _fields(parent, times={"expires_at"}, digests={"authorization_digest", "authority_request_digest"},
+    parent = _shape(copied["parent_authorization"], _PARENT | {"consensus_policy_digest"} if modern else _PARENT)
+    _fields(parent, times={"expires_at"}, digests={"authorization_digest", "authority_request_digest", "consensus_policy_digest"},
             keys={"principal_public_key", "reddog_public_key"})
+    if modern and parent["consensus_policy_digest"] != copied["policy_digest"]:
+        _invalid()
     copied["parent_authorization"] = parent
     return copied
 
@@ -98,7 +103,9 @@ def _bounded(encoded):
 
 def canonical_effect_consent_signing_input(body):
     """Encode the exact unsigned body, excluding neither context nor scope fields."""
-    return _bounded(SIGNING_PREFIX + canonical_json(_body(body)))
+    checked = _body(body)
+    prefix = SIGNING_PREFIX_V2 if checked["schema_version"] == ASSERTION_SCHEMA_V2 else SIGNING_PREFIX
+    return _bounded(prefix + canonical_json(checked))
 
 
 def validate_effect_consent_assertion(value):
@@ -108,7 +115,7 @@ def validate_effect_consent_assertion(value):
     if not _text(signature) or decode_ed25519_signature(signature) is None:
         _invalid()
     copied = _body(copied)
-    _bounded(SIGNING_PREFIX + canonical_json(copied))
+    canonical_effect_consent_signing_input(copied)
     copied["signature"] = signature
     _bounded(canonical_json(copied))
     return copied

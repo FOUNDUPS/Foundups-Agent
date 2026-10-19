@@ -1,20 +1,24 @@
-## Parent admission checkpoint — 2026-10-19
+## Parent admission checkpoint — 2026-10-20
 
-The v36 synthetic LOW handshake is independently accepted; all seven owned
-units are absent, but root exit2 leaves clean service closure false. PR2162
-closed the nested timeout forwarding defect and passed exact-head/main CI.
-This does not admit an author. The next local prerequisite now verifies exact
-parent consent through opt-in owner v11 and preserves policy in distinct evidence.
-Connected512 passed/2 existing Windows skips; independent37 passed, frozen source
-unchanged. No production consent was installed and the execution valve stays closed.
+PR2163 merged824d0f71 with reviewed tree equality and passing PR/main checks.
+Its publication worktree is archived; frozen qualified runtime294195cdb is retained.
+The v36 synthetic LOW handshake passed, with all seven units absent; root exit2
+still leaves clean service closure false. Neither result admits a real author.
 
-Next18/P0 (C4/I5/D5/Impact4): connect the trusted parent-policy/consensus owner to
-this evidence under current-use checks, with real reviewer/model/budget inputs.
-Then run one admitted author and independent verifier before activation/rollback,
-later retained benefit and autonomous next selection. Reuse the existing owners;
-do not convert consent-only verification into a work grant or repeat the already
-accepted synthetic handshake as if it advanced author admission.
-[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19).
+Current19/P0 (C4/I5/D5/Impact5) connects parent consent, separate parent/effect
+reviewer domains, bounded per-selection model inputs, effect proof and the existing
+signer/current-use owners. Independent20 model/current-use and17 Linux RPC/nonce
+controls pass against44 frozen files. Connected59 suites pass1,545/22 platform
+skips with explicit repository test root; the original failures remain recorded.
+Final45-file source adds a test-only unknown-schema update and EOF-only cleanup.
+
+After exact-source validation/publication, qualify and connect installed HIGH
+custody/nonce supply through existing startup/factory owners. Preserve LOW;
+require authentic work/reviewer/model/budget evidence before a native author.
+Then independently verify, activate/roll back, measure later retained benefit and
+select the next bounded task. No second orchestrator or repeated LOW-handshake
+trial substitutes for this sequence.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
 
 ## Native startup integration checkpoint — 2026-10-16
 
