@@ -1,3 +1,22 @@
+## Qualified ec7a runtime and v29/v30 evidence — 2026-10-19
+
+Independent qualification still binds2,683 files/358 directories and both profiles.
+Historical v28 and ABBA timings remain in the current dispatch. V29 records30
+local callbacks, exact rejected backend status and subsequent sendall C_RAISE;
+no exception type or exact sign-return time is observed. All seven units are
+independently absent;25 sources/12 helper outputs/9 pins/4 invocations verified.
+V29 observer acceptance includes26 actual CPython controls and4 package controls;
+the descriptor-dispatch finding and failed test harness remain preserved.
+V30 lifecycle package independent review passes41 grouped offline checks, including
+21 unchanged-observer CPython reruns. Native v30 installation39.353s/revocation2.447s
+pass; handshake exits2 in98.031s (full139.941s). Observation and cleanup complete
+without timeout/reset error; target launcher0 before/after, all seven units absent.
+The unchanged observer again records30 callbacks, backend denial then sendall239
+C_RAISE. Exact25 sources/12 outputs/9 pins/6 refreshed files/4 invocations verified.
+No admission, retained gain or deadline/authority relaxation is established.
+[Exact receipts](../../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+Prior checkpoints below retain what was known then.
+
 ## Native qualification and requester evidence — 2026-10-19
 
 V27 disables issuer/target observers with 5 author and 12 independent offline

@@ -1,3 +1,18 @@
+## RSI qualification and admission reconciliation — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. PR2160 merged358fb2e34 with exact-head/main CI/CodeQL
+passing and reviewed/main trees equal. Independent exact-source qualification,
+same-boot ABBA guard measurements and historical v28 remain in the existing
+dispatch. V29 observes backend rejection before a resident sendall C failure;
+its hidden rejection branch remains unresolved. All seven units are independently
+absent. A separate harmless control proves the oneshot wait-cycle defect; the
+reviewed v30 lifecycle correction now completes observation and cleanup without
+the old timeout/reset error; all seven units are absent, handshake still rejected.
+No authority/deadline or acceptance change, author admission or retained RSI gain.
+Parent/work/model/budget/verifier inputs remain separate; post-valve issuance is
+already wired. Next: locate the actual backend rejection branch, then repair it.
+Exact receipts: [current dispatch](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
 ## RSI native requester evidence and publication — 2026-10-19
 
 WSP00/5/10/15/22/48/97. PR2159 mergedbb9d3f802; all 19 recorded exact-head
