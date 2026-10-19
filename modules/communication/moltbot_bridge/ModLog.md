@@ -1,3 +1,35 @@
+## Native audit codec correction and response-path evidence — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. Existing disposable preparation incorrectly encoded
+two audit credentials as hex. Canonical decoder controls reproduce rejection;
+the reviewed fixture-only repair preserves integrity formats and all authority
+limits. V32 now observes accepted inner signing and outer authorization. Later
+sendall fails and the requester rejects; timeout/errno remain unobserved.
+All seven units absent, observation/cleanup complete. No worker admission or RSI
+gain. V33's canonical Protocol class was rejected by the observer setup; a
+candidate correction passes actual installed-module setup controls. Separately,
+authenticated timeout30 silently used nested-client default5. The existing supply
+loader now accepts a bounded timeout keyword and the initial backend forwards
+its authenticated setting. Default5 and signed expiry remain unchanged. Windows
+validation166 passed/2 skips. Exact294195cdb runtime independently qualifies;
+v34 receives accepted inner signing with issuer/target exit0. Outer handshake
+rejects RESPONSE_INVALID; all7 services absent, observation/cleanup complete.
+V35 localizes the target factory result type/ok gate; no factory exception is
+observed. Offline profile60/custody300 mismatch is reproduced, but the actual
+v35 provider code remains unknown. V36 accepts the synthetic LOW handshake and
+independently verifies both signatures; target factory returns ok=true/NONE.
+Profile ceiling60 becomes validated args.ttl300, with absolute expiry/signed30
+unchanged. All7 units absent/no cleanup errors, but root2 leaves clean service
+closure false. Next18/P0 resolves authentic parent/work/model/verifier/budget
+admission through existing owners; no author execution or retained gain. LOW
+no-effect review remains distinct from upstream author
+and elevated materialization. [Receipts](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+PR2162 CI39257095414 stopped before the signing suite because the Linux reviewer
+runner selected obsolete schema-only test IDs. Its selector now includes all nine
+timeout/schema cases plus the five reviewer cases; exact count/set checks remain.
+Independent collection passes; full 14-case remote execution remains required.
+
 ## Exact runtime and v29 lifecycle reconciliation — 2026-10-19
 
 WSP00/5/10/15/22/48/71/97. Published ec7a source/runtime remains independently

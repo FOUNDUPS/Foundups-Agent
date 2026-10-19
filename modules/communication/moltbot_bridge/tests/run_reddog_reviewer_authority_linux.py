@@ -163,7 +163,9 @@ def _run(repo, base, output):
     stem = "modules/communication/moltbot_bridge/tests/test_reddog_reviewer_authority_composition_linux.py::test_real_linux_reviewer_authority"
     nodes = [stem + "[" + case + "]" for case in ("positive", "wrong_uid", "writable_owner", "symlink_owner", "stale_generation")]
     transport = "modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_grant_authority_client_supply.py::test_supply_binds_root_transport_to_signed_policy"
-    nodes += [transport + "[reddog_signer_system_service_owner_config." + version + "]" for version in ("v3", "v4", "v5")]
+    nodes += [transport + "[timeout_options" + str(option) +
+              "-reddog_signer_system_service_owner_config." + version + "]"
+              for option in range(3) for version in ("v3", "v4", "v5")]
     config = output / "pytest.ini"
     config.write_text("[pytest]\n", encoding="utf-8")
     args = nodes + ["-c", str(config), "--rootdir=" + str(repo), "--noconftest", "--import-mode=importlib",

@@ -1890,19 +1890,19 @@
   },
   "current_selection": {
     "observation_path": "current_observation.native_requester_20261019",
-    "base_commit": "358fb2e34e34bb01342bd92ff80d3ceda413334c",
-    "selected_action": "Identify the actual backend rejection branch through the existing bounded observer, then repair the demonstrated cause",
+    "base_commit": "294195cdb96e1ef70d146bb3e6b3fa16ea71e37e",
+    "selected_action": "Resolve existing parent/work/model/verifier/budget admission from authentic inputs after the accepted synthetic LOW prerequisite",
     "status": "IN_PROGRESS",
     "wsp15": {
-      "complexity": 3,
+      "complexity": 4,
       "importance": 5,
       "deferability": 5,
-      "impact": 5,
+      "impact": 4,
       "total": 18,
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "V30 independently evidences the lifecycle correction: observation/cleanup complete, no nested timeout or cleanup errors, target launcher0 before/after and all seven units absent. Installation/revocation pass; handshake still rejects with exact backend false/grant_service_not_admitted then sendall239 C_RAISE. Next identify the actual backend rejection branch using the existing bounded observer, then repair the demonstrated cause. Preserve source/runtime, authority, signed lifetimes, deadlines and acceptance; no native author admission or retained RSI benefit."
+    "next_action": "V36 synthetic LOW handshake accepted with both signatures/request-response binding verified; factory ok=true/NONE. All7 units absent/no cleanup errors but root2 leaves clean_service_closure=false; exact root cause unknown. Resolve authentic parent/work/model/verifier/budget admission through existing owners; no repeated handshake or widened LOW. Author admission/retained benefit remain unproved."
   },
   "current_observation": {
     "native_requester_20261019": {
@@ -1922,6 +1922,9 @@
       "v27_followup": "V27 no-observer control: install/revocation pass; requester rejects; issuer70.046140s/CPU66.242630s versus v26 75.128049s/CPU71.128310s, root101.027161s. Different boots/single pair: no causal gain. Observation=false, cleanup-loop=true, no outer timeout; all7 units absent. No inner socket operation proved. Review acf51eaba54b984a8cc07833b75b6e156b64566d2b642ce02de35dc6f9fe5f3a; binding fa8d5e2d067ce4109b6ff7fef5554e5d7bd7f03b685428c08fb65e502340044b verifies25 sources/9 pins/6 helpers/4 invocations. No author or retained RSI benefit.",
       "v28_followup": "PR2160 reviewed ec7a0e438 merged358fb2e34 with equal treeafeadba93021def81ba576626d2dfa3cc90d2f53 and exact-head CI/CodeQL passing. Exact runtime fe195a4f4dace47b4f6f3236dbee2848fb11711fe88f8b54c3a2278a296c2640 independently qualifies2683 files/358directories. V28 install37.496s/revocation1.988s accepted; handshake2/120.255s. Issuer60.728467s/CPU56.832826s; root91.701923s/CPU1.900514s; requester5.741641s. Generic rejection, no inner operation measured; handled0 does not prove no processing. All7units absent, historical reset error retained. Review837c89b528fc9a46d348b2d2908869472d4700ddcc1a6e1fe8a6036d4371c10d binds25sources/12outputs/9pins/4invocations. Current detail: docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19.",
       "v29_lifecycle_followup": "V29 installation/revocation pass, handshake rejects; local observer30 callbacks captures exact SigningResponse accepted=false/grant_service_not_admitted before sendall line239 C_RAISE. No exception type, backend branch or exact sign-return timestamp. All7 units absent; observation false/cleanup-loop true. Review042b39cdd206afcf741c1a7d2c7f82d09b80552fee8b62625b3befb0b513eb79; local evidencee1285c0476c675e37879e8f10349b4129f12da04809a32be4ae9e19b5c20bab1. Harmless oneshot review66404fb7aba6c41fc8c1ccf7bf53761f259b484c75d9d8639d4a707d8fd94333 proves separate wait-cycle defect. V30 install39.353s/revocation2.447s pass, handshake2/98.031s, full139.941s. Observation/cleanup complete without nested timeout or cleanup errors; target launcher0 before/after and all7 units absent. Exact25sources/12outputs/9pins/6files/4invocations verified. Same30callbacks show backend denial then sendall239 C_RAISE, hidden branch unresolved. Native reviewd9c28e065098fc55447b18f739249fb75c8d96bc3a0abe4c5fd99281f672b710 evidences lifecycle correction only, not successful handshake. Independent41 grouped offline checks, receiptc7fcea4286cefbf6f56877b22597b34c0556019810ec2e941171f788233e9efb. No authority/deadline/acceptance change or RSI gain.",
+      "v31_v32_codec_followup": "V31 factory return192 rejects. Canonical decoder controls prove preparer's plain-hex audit bytes incompatible. V32 corrects two audit roles only; integrity formats, source/runtime, launcher/observer, authority/lifetimes/deadlines unchanged. Nine codec controls,12 author final-package controls and6 independent package controls pass with overlapping coverage. Native install39.025s/revocation2.132s pass; handshake2/94.009s,full135.281s. Inner return193 and outer175 now accepted, followed by sendall239 C_RAISE. Requester exit13.700883756s earlier; dispatch-to-response18.750249198s. Current timeout/errno unobserved.25sources/12outputs/9pins/4invocations verified,all7absent,cleanup complete. Review327d9a8f69d2d724167c8e7d50848939ff5357631eed1335c78109df08efbb48. Accepted signing is not author admission or RSI gain.",
+      "low_proposal_route_reconciliation": "Authenticated signed_0102_readonly_review/AUDIT_NO_EFFECT/dryrun route exists but canonical dispatch is0102/Fusion review, not OpenClaw/Hermes author. LOW snapshots still require write/admin; attest_architect_proposal isHIGH/ULTRA. No private capability bypass; a no-effect upstream binding would reuse existing owners and genuine work/model/budget/verifier admission. Source audit437aab39758573249b1ede2e7bde46a936ab02306e209695897117a8d655bbe9.",
+      "local_provider_20261019": "Read-only catalog probes: LMStudio reachable9models,0resident;Ollama0catalog/loaded. No inference/load/configchange. Prior8-call Qwen trial remains NOT_QUALIFIED_AS_APPROVAL_VERIFIER (baseline2/4correct,0/4accepted;candidate2/4correct,1/4accepted); no unchanged repeat. Existing owned lifecycle may support fresh bounded transport qualification only, not quality/admission. Readiness9e850d75ae4481ea8a3dac6671cc898642a777f8992b6acebf1e3c978641487d;history5c63b0fe7336d1e4ff5f497655ea8f0e45d6badfb9b1fe9a3360a7998d53b0d0.",
       "qualified_guard_comparison": "One same-boot ABBA block, two invocations per build/two guards per invocation: baseline mean2.957392215s, candidate2.196584841s (25.73% lower). Profile means8.316656634s/6.301674921s. All4units absent. Cache/warmup/order and within-invocation dependence limit inference; no causal request gain or retained benefit. Independent review a15c0bea40ec0a945bc6b83a21fb28e944e05732322d0332ab91a6c122bd7abe.",
       "guard_cost_observation": "Two credential-free full guard calls in the exact runtime passed in3.768633s and2.705737s. Existing qualification owner reused, unit absent. Separate profiled pair7.934643s/5.925629s includes overhead and records33628 relative_to calls. No target monitor/issuer request; not causal request timing or retained RSI gain. Raw-parts optimization rejected after6 WindowsUnicode mismatches among12717 cases; Linux12717 matched. Revised WindowsPath/POSIXprefix candidate matches12717 cases each,111 connectedLinuxpasses/8Windowsskips,49Windows/1symlinkskip,8manifest/3Node entrypoints pass. Purepredicate ratios1.61Windows/5.44Linux are not nativeguard gains.",
       "cleanup": "Launcher closure TimeoutExpired and target reset-failed_exit_1 retained. V24 root timeout followed requester rejection by3.453879s. All7 owned units independently not-found/inactive/dead afterward; no identity skip or surviving unit.",
@@ -1931,7 +1934,41 @@
       "retained_rsi_gain_demonstrated": false,
       "paid_provider_calls": 0,
       "coordinator_cost": null,
-      "next_dependency": "Lifecycle correction evidenced in v30; identify and repair the actual backend rejection branch without weakening LOW authority/deadlines. Authentic parent/work/model/budget/distinct-verifier inputs remain unproved; existing post-valve issuance stays connected."
+      "next_dependency": "Existing authentic parent/work/model/verifier/budget admission path; synthetic LOW prerequisite now accepted, not real author admission. Root nonzero clean-closure criterion remains separately failed; cause unobserved.",
+      "v33_response_followup": "Native install38.391s/revocation2.063s pass; handshake2/93.383s,full133.943s. Inner/outer accepted, later send C_RAISE. Target observer setup_failed because canonical Protocol metaclass was rejected;0callbacks, no timeout/errno established. All7absent,cleanup complete. Review81931278a0755550d3b14d40e200235f589fcf12c8d5e09a89effaf95271fc10. Candidate monitor24author/4independent controls and actual installed-module setup comparison; source repair separately reproduced config30 fallback5. Exact source independent review0c29a5f54fb1502eee93fbe6492cedf2cd9ef189b14ac319d53fb280c2d049c8; runtime not yet qualified.",
+      "pr2161_publication": "Merged122fec8c6 tree8b473f equal reviewed; exact-main CI39249090093 7/7 and CodeQL39249089610 4/4 pass. Closure8812f8f1ef40409461783fea3499c0c3c9357efc89d5b1015f434d42f6274512.",
+      "v34_response_followup": {
+        "source_commit": "294195cdb96e1ef70d146bb3e6b3fa16ea71e37e",
+        "descriptor_sha256": "6ab8c14fb905666d1f5d04252dec0234747c2a9b1529657d95ffaba8fc70d950",
+        "qualification": "Independent review verifies2683 files/358 directories, both confined profiles and four absent-owner entrypoints; optional deferred imports unqualified.",
+        "qualification_review_sha256": "101f45f8997a14698bdd921b1463c3345d94b8214d2404a6137eeb40311d2116",
+        "trial": "Installation0/37.769s and revocation0/2.046s; handshake2/93.705s,full133.632s. Issuer inner/outer and target-client responses accepted; issuer/target exit0. Requester RESPONSE_INVALID. Target28/issuer41 callbacks; no cap exhaustion or observed C_RAISE. All7 absent, observation/cleanup complete, no cleanup errors.",
+        "independent_review_sha256": "7ebf08818f885e867d9d0a7db38423eae587372fc3180fca630327132f22efc4",
+        "interpretation": "Public response code can sanitize a target backend rejection, not necessarily malformed transport data. Root handled10 counts returned handlers including rejections; no causal root failure established.",
+        "native_author_ticket": false,
+        "production_rsi": false,
+        "paid_model_calls": 0,
+        "coordinator_cost": null
+      },
+      "v35_provider_followup": {
+        "trial": "Install0/38.965s,revocation0/2.093s,handshake2/94.125s,total135.297s. Target inner client accepted; factory returned then type/ok gate151 returned SECRET_RESOLUTION_FAILED at152/126. No factory exception established. All7 units absent; observation/cleanup complete.",
+        "review_sha256": "9683122c7f1ae4e99f05a4e06311ae6428e2b0e6cda393e8a321fca35a0f212d",
+        "offline_reproduction": "Actual public v35 profile60/custody300. Exact resolver lifetime at synthetic elapsed1/100/239 yields299/200/61; exact factory returns FAIL_PROVIDER_TTL_EXPIRED before secret access. Actual native provider code/clock not observed.",
+        "probe_sha256": "2b5c79bfd8ac66e77aa54d34d6d27ef2286517c14705cbbfc8bf22c905e6edcc",
+        "native_author_ticket": false,
+        "retained_benefit_demonstrated": false
+      },
+      "v36_synthetic_handshake": {
+        "trial": "Install0/39.146s, revocation0/2.076s, handshake0/94.111s,total135.444s; no timeout/retry. Both Ed25519 signatures and exact request/response binding independently verified.",
+        "review_sha256": "36615a9c5d3f64734321b2fbabeb66f18a95709d1443c5abb2f1b9bd8c56dd3c",
+        "target_factory": "Actual ok=true/NONE; all observed backend returns accepted. V35 actual provider code remains unobserved.",
+        "fixture_delta": "Target profile ceiling60 -> validated args.ttl300; absolute credential/policy expiry and signed request/grant30 unchanged.",
+        "closure": "Issuer/target/requester0; root2/generic runtime error. clean_service_closure=false despite all7 absent, four invocations bound and zero cleanup errors. Root idle cause unobserved.",
+        "native_author_ticket": false,
+        "real_admission": false,
+        "retained_rsi_gain": false,
+        "paid_provider_calls": 0
+      }
     },
     "issuer_custody_20261016": {
       "source_scope": "PR2147 merged6fb93580c with exact-head11 and exact-main CI/push checks passing; reviewed/main trees match. Frozen runtime88690 independently qualified. V19 issuer readiness timed out; v20 rejected before action at permission epoch check. No native author or retained gain.",

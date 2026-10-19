@@ -1,3 +1,65 @@
+## V31 factory localization and v32 codec repair — 2026-10-19
+
+Follow-up v33 retains accepted signing but handshake failure. Target diagnostic
+setup fails before any callback because its class check misses Protocol inheritance.
+Candidate observer controls:24 author,4 independent held-outs, plus actual installed
+import/setup comparison. Original harness errors are retained; no native cause is
+inferred. Separate test-first source repair reproduces config30 falling back to5,
+then forwards the authenticated setting through the existing client supply.
+Connected Windows suite166 passed/2 Linux-dependent skips, including invalid
+numeric/bool bounds and late/failed RPC rejection at5 and30. These test results do
+not qualify the changed installed runtime or establish native handshake success.
+Independent Linux validation73 passed with no failures/skips, including the
+Windows-skipped process-lock/AF_UNIX and symlink controls. Existing signing CI
+now explicitly includes both changed suites; no new workflow or relaxed gate.
+
+Exact source294195cdb independently passes installed qualification for both
+confined profiles,2,683 files/358 directories and four absent-owner entrypoints.
+Fresh v34 install37.769s/revocation2.046s pass; handshake exits2 after93.705s,
+full133.632s. Target observer enabled28callbacks, issuer41, caps not exhausted.
+Issuer inner/outer and target-client return accepted; issuer/target exit0.
+Requester rejects RESPONSE_INVALID. All7 services independently absent,
+observation/cleanup complete. This is a controlled failure, not author execution.
+Root handled10 counts completed connection handlers, including rejections; it
+does not prove10 successful LOADs or a causal root failure.
+
+V35 install/revocation pass, handshake2/94.125s, full135.297s. Exact factory-result
+type/ok rejection at152 is observed; an early exception-branch interpretation was
+corrected (catch is150). All7 units absent and cleanup complete. Public-input
+offline controls reproduce profile60 rejecting remaining299/200/61 from custody300;
+they do not establish the actual v35 provider code or native clock.
+
+V36 install0/39.146s, revocation0/2.076s and handshake0/94.111s; total135.444s.
+Independent archival verification checks both Ed25519 signatures and exact
+request/response binding. Target factory returns ok=true/NONE; target, issuer and
+requester exit0. Root exit2 leaves clean_service_closure=false; exact root cause
+unknown. All7 units absent, four invocations bound, no cleanup errors. Target
+profile ceiling60 becomes validated args.ttl300; absolute expiry/signed30 stay
+unchanged. This synthetic success does not establish real admission or author gain.
+
+PR2162 CI39257095414 failed collection in the Linux reviewer runner: timeout
+parametrization changed three schema-only IDs into nine cases. The runner now
+selects all three timeout options across all three schemas, retaining the five
+reviewer cases and exact expected count/set checks. Old IDs reproduce exit4; all
+nine corrected transport IDs collect independently. Local Linux execution ran no
+intended cases: setup limitations were retained, then pytest collection failed on
+`/mnt/c/hiberfil.sys` with PermissionError. Source hashes stayed stable and the
+audit guard recorded no blocked operations. Full 14-case remote CI is still
+required; no local execution pass or guard relaxation is claimed. WSP 5/10/22/97.
+
+V31 exact local returns identify factory rejection at line192. Canonical audit
+decoder controls independently reject the preparer's prior plain hex. V32 repair
+has nine codec controls (six author plus three held-out); final-byte author
+package controls12 and independent package controls6 are overlapping reruns,
+not additive unique coverage. The independent harness's initial pin-set mistake
+is preserved and corrected without changing the candidate.
+Fresh v32 install39.025s/revocation2.132s pass; handshake2/94.009s, full135.281s.
+Inner return542/193 and outer348/175 are accepted; later sendall239 C_RAISE.
+Requester exits13.700884s before that send failure. No current timeout/errno is
+observed. Exact25 sources/12 helper bindings/9 pins/4 invocations verified; all
+seven units absent and cleanup complete. Source/runtime/authority/deadlines
+unchanged. [Receipts and limits](../../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
 ## Qualified ec7a runtime and v29/v30 evidence — 2026-10-19
 
 Independent qualification still binds2,683 files/358 directories and both profiles.

@@ -12,7 +12,7 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — qualified runtime, blocked native handshake (2026-10-19):**
+**Current checkpoint — accepted grant signing, blocked native handshake (2026-10-19):**
 PR2160 merged as `358fb2e34`; its tree equals independently reviewed `ec7a0e438`.
 Exact-head and merged-main CI/CodeQL passed. The new installed runtime independently qualifies
 2,683 files and both confined profiles. One same-boot ABBA comparison measures
@@ -25,8 +25,7 @@ followed by a C send failure at resident `sendall`, line239. The backend rejecti
 branch and exception type remain unknown. All seven services are independently
 absent; observation completion is false and the historical reset error is retained.
 
-Next 18/P0 (C3/I5/D5/Impact5): identify the actual backend rejection branch
-through the existing bounded observer, then repair the demonstrated cause. A harmless two-unit
+Historical next action was to identify the backend rejection branch. A harmless two-unit
 control proves `RemainAfterExit=yes` keeps `systemd-run --wait` pending after a
 successful oneshot. The v30 package uses `RemainAfterExit=no` and exact absent-unit
 cleanup recognition. Fresh v30 completes observation and cleanup without the old
@@ -35,11 +34,50 @@ independently absent. Installation/revocation pass, but handshake still rejects.
 Authority, signed lifetimes, deadlines and acceptance remain unchanged. The
 lifecycle correction does not resolve the backend admission rejection.
 
-Authentic author admission remains a separate dependency: the existing parent
+V31 localizes that rejection to the backend factory. Independent source/codec
+checks then reproduce a fixture defect: both audit keys used plain hex where the
+existing consumer requires its canonical encoding. The v32 fixture correction
+passes independent controls; its native grant backend and outer authorization now
+return accepted responses. Installation/revocation pass, but the later socket send
+fails and the requester rejects. All seven services are independently absent;
+observation/cleanup complete. A timeout is not yet observed in this trial.
+V33 also reaches accepted signing, but its target observer fails setup because
+it rejects the canonical Protocol metaclass; zero callbacks establish no transport
+cause. A narrowly repaired observer passes an actual installed-module setup probe.
+Separately, a source regression proves the authenticated 30-second setting was
+not forwarded to the nested client, which used its 5-second default. The focused
+repair forwards the setting and preserves strict bounds and signed expiry.
+Exact source `294195cdb` now passes independent installed qualification. V34
+installation/revocation pass; the target receives an accepted inner signing
+response and both issuer and target exit zero. The requester still rejects with
+`REJECT_SIGNER_SOCKET_RESPONSE_INVALID`. No observed C send/receive failure or
+exhausted diagnostic cap explains this rejection. All seven services are absent;
+observation and cleanup complete. Fixed backend rejections can be sanitized to
+that same public code, so it does not by itself prove malformed response data.
+V35 localizes the rejection to the returned key-provider result: its exact type
+or `ok` check fails at line152; the factory-exception branch is not observed.
+Independent offline controls reproduce a fixture mismatch: target profile60
+rejects successful credential results from the already configured300-second
+custody window. The actual v35 provider code remains unobserved.
+V36 accepts the synthetic LOW handshake; both signatures and exact request/response
+binding verify independently. The target factory returns `ok=true/NONE` after the
+fixture profile ceiling changes from60 to validated `args.ttl` (300). Absolute
+expiry and signed30 lifetimes remain unchanged. All seven units are absent with
+no cleanup errors, but root exit2 leaves `clean_service_closure=false`; its exact
+error is unknown. This is not author admission or retained RSI benefit.
+Next 18/P0 (C4/I5/D5/Impact4): resolve the existing parent/work/model/verifier/budget
+admission path from authentic inputs. Do not repeat the accepted handshake or
+widen LOW authority.
+
+The current effectful integrated author path has a separate dependency: its parent
 consensus verifier lacks a discovered installed trusted provider/composition;
 signed work/model inputs, budget and distinct verifier reservation are unproved.
 The post-valve lease issuer is already connected. LOW handshake authority stays
-LOW. R15 still requires author execution, independent evaluation, activation and
+LOW. The separate LOW no-effect queue is wired to 0102/Fusion review, with no
+existing OpenClaw/Hermes author binding found. Local LM Studio is reachable with
+nine catalog models and zero loaded instances; the earlier Qwen verifier trial
+remains unqualified. Catalog presence does not establish worker readiness.
+R15 still requires author execution, independent evaluation, activation and
 rollback, later retained benefit and bounded next selection.
 [Current execution evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
 
