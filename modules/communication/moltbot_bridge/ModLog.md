@@ -1,3 +1,28 @@
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+WSP00/5/6/11/22/50/62/71/77/97. Seven existing production owners and four
+test/support files provide distinct v11 signed policy and generic work-manifest
+installed-source metadata binding. Existing v10 initial LOW restrictions retain
+their AST. Real fixture signatures, audit attestation and artifact hashes are
+checked; OS provenance/current selection seams remain synthetic. No native HIGH
+activation or work authority is established. Permission/live-lease integration,
+parent/model ingestion and service dispatch remain closed pending composition.
+
+Original connected run: 450 passed/3 failed, zero skips. One stale unsupported-v11
+fixture now uses unsupported v12; its affected suite passes 102. The two remaining
+failures are unchanged baseline startup-test size debts (712>675 and 89>60), with
+no cap changes. Eight independent controls passed on the production freeze;
+counts overlap and must not be summed. Exact receipts are under the existing
+external `current-time-independent-review/high-installed-admission-author-review`
+and `high-installed-admission-independent-review` evidence directories.
+
+This is an unpublished recoverable checkpoint. Generated integrity, registry and
+runtime qualification remain pending after root-owned base/live-lease integration.
+Metadata-only inspection found the known real owner/E0/target/issuer input files
+absent at `/var/lib/foundups-rsi-handshake/20261016`; the Windows preparation draft
+is expired initial LOW with no queued work. This is not a global absence claim or
+proof about unread budgets, parent evidence or credential availability.
+
 ## Live authenticated generation scope — 2026-10-20
 
 WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Reused nine existing owners to avoid

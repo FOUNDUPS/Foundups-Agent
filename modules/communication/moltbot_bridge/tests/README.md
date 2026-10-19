@@ -1,3 +1,20 @@
+## Non-initial installed metadata qualification
+
+`test_reddog_installed_work_admission.py` reuses real signed manifest/E0 and
+filesystem artifact owners with explicit synthetic OS/current-selection seams.
+Retain initial installed-manifest, static E0, archive, authenticated binding,
+permission and startup compatibility suites. Require generation-1/v10 rejection
+for work scope, cross-domain signature rejection, swapped issuer/target binding,
+artifact/source/repo substitution, current-owner/time drift and failed lease exit.
+The static contract unknown-version fixture now uses v12 because v11 is supported.
+
+Run with an explicit checkout `--rootdir`, `--noconftest`, `-p no:cacheprovider`
+and bytecode disabled; preserve raw failures and exact source bindings externally.
+The existing connected run retains two unchanged startup-test size failures.
+Source metadata tests and independent controls do not establish installed HIGH
+activation, authentic input supply or native admission. Generated integrity is
+pending root-owned integration; this checkpoint does not claim a publication gate.
+
 ## Live generation scope and protected consensus nonce qualification
 
 Retain the full legacy current-generation model-pair regression and the

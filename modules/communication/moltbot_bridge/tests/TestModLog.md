@@ -1,3 +1,29 @@
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+Base c5dc5b7a; final freeze contains seven production and four test/support files.
+WSP00/5/6/11/22/50/62/71/77/97. Focused compatibility passed 106/0/0 in61.167s.
+Original connected 11-suite run retained 450 passed/3 failed/0 skipped in108.413s.
+One failure was the now-supported v11 unknown-version fixture; its single literal
+became v12, retaining rejection, and the entire affected suite passed102/0/0 in3.637s.
+Two failures remain exact-base debt in the unchanged startup-authority test file:
+712 lines against675, and its public-v7 startup test89 lines against60. No source
+guard, size cap or exclusion was changed. No broad rerun is claimed after the
+fixture correction. Earlier focused fixture failures are also retained externally.
+
+Independent review passed eight controls in5.6s: real signed positive, duplicate
+scope rejection, v10/v11 signature-domain separation, re-signed root substitution
+rejection and failed enclosing-lease exit. Counts overlap, not additive unique
+coverage. Real signatures/audit/hash readers are exercised; owner/OS/current
+selection seams remain synthetic. No native activation, provider call or grant.
+
+Final author receipt SHA256
+`d0f979b0d7722e5fc1cf0c3763088f1700178555bfabceca256c813428752c93`;
+11-file freeze `293d41b48404c2acd81ce0d798fa1156f22aec72c0ca26959d81b76b254d7671`.
+Both are in the existing external high-installed-admission author-review area;
+the sibling independent-review receipt retains its own pre-fixture-change binding.
+This local checkpoint intentionally leaves generated integrity bindings pending
+until the corrected base and live-lease integration are combined once.
+
 ## Live authenticated generation scope — 2026-10-20
 
 Base 5820daf8; WSP00/5/6/11/15/22/62/71/77/97. Nine production owners and eight

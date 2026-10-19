@@ -28,8 +28,8 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_v7 i
     POLICY_PREFIX_V7,
     POLICY_SCHEMA_V7,
     require_grant_service_git_provenance_bindings,
-    POLICY_SCHEMA_V10, POLICY_FIELDS_V10, GRANT_SERVICE_INSTALLED_DIGEST_FIELDS,
-    require_grant_service_installed_source_bindings,
+    POLICY_SCHEMA_V10, POLICY_SCHEMA_V11, POLICY_FIELDS_V10, GRANT_SERVICE_INSTALLED_DIGEST_FIELDS,
+    require_grant_service_installed_source_bindings, require_grant_service_installed_work_bindings,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import canonical_signing_input
 POLICY_SCHEMA_V5 = POLICY_PREFIX_V5 = "reddog-signer-owner-e0-policy.v5"
@@ -79,12 +79,12 @@ def signer_owner_e0_authority_binding_digest(value: Mapping[str, Any]) -> str:
     try:
         fields = _policy_fields(value.get("schema_version"))
         included = fields - _AUTHORITY_BINDING_EXCLUDED_FIELDS
-        if value.get("schema_version") in {POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10}:
+        if value.get("schema_version") in {POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
             # This alias of artifact_generation_digest is unknown until after
             # the config containing this binding has been hashed. It remains
             # covered by the final signed policy and current-selection checks.
             included = included - {"target_signer_generation_id"}
-        if value.get("schema_version") in {POLICY_SCHEMA_V9, POLICY_SCHEMA_V10}:
+        if value.get("schema_version") in {POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
             # Permission refers to the completed target manifest. Keep these
             # authenticated in the full policy, outside its pre-config binding.
             included -= {"grant_authority_permission_snapshot_digest",
@@ -123,6 +123,7 @@ def validated_signer_owner_e0_policy(value: Mapping[str, Any], *, now_epoch: int
         POLICY_SCHEMA_V8: _DIGEST_FIELDS_V7,
         POLICY_SCHEMA_V9: _DIGEST_FIELDS_V7,
         POLICY_SCHEMA_V10: _DIGEST_FIELDS_V6 + GRANT_SERVICE_INSTALLED_DIGEST_FIELDS,
+        POLICY_SCHEMA_V11: _DIGEST_FIELDS_V6 + GRANT_SERVICE_INSTALLED_DIGEST_FIELDS,
     }[raw["schema_version"]]
     if any(not is_sha256(str(raw[name])) for name in digest_fields):
         raise ValueError("signer_owner_e0_policy_digest_invalid")
@@ -130,12 +131,14 @@ def validated_signer_owner_e0_policy(value: Mapping[str, Any], *, now_epoch: int
         raise ValueError("signer_owner_e0_policy_id_invalid")
     _require_time(raw, now_epoch)
     _require_lists(raw)
-    if raw["schema_version"] in {POLICY_SCHEMA_V6, POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10}:
+    if raw["schema_version"] in {POLICY_SCHEMA_V6, POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
         require_grant_service_bindings(raw)
     if raw["schema_version"] in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
         require_grant_service_git_provenance_bindings(raw)
     if raw["schema_version"] == POLICY_SCHEMA_V10:
         require_grant_service_installed_source_bindings(raw)
+    if raw["schema_version"] == POLICY_SCHEMA_V11:
+        require_grant_service_installed_work_bindings(raw)
     return raw
 
 
@@ -166,7 +169,7 @@ def _policy_fields(schema: object) -> frozenset[str]:
         return POLICY_FIELDS_V8
     if schema == POLICY_SCHEMA_V9:
         return POLICY_FIELDS_V9
-    if schema == POLICY_SCHEMA_V10:
+    if schema in {POLICY_SCHEMA_V10, POLICY_SCHEMA_V11}:
         return POLICY_FIELDS_V10
     raise ValueError("signer_owner_e0_policy_schema_invalid")
 __all__ = [
@@ -185,6 +188,7 @@ __all__ = [
     "POLICY_SCHEMA_V8",
     "POLICY_SCHEMA_V9",
     "POLICY_SCHEMA_V10",
+    "POLICY_SCHEMA_V11",
     "canonical_signer_owner_e0_policy_input",
     "signer_key_reference_digest",
     "signer_owner_e0_authority_binding_digest",

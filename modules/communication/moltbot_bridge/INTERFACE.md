@@ -1,3 +1,24 @@
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+Source-level preparation only; unpublished integration checkpoint. Distinct signed
+E0 policy v11 requires generation >=2, HIGH/worktree_create and HIGH consensus.
+The existing generic signed work manifest v2 can describe the installed-source
+artifact family through existing signature, audit-attestation and work-authority
+owners. Initial policy v10 remains generation-1 LOW handshake enrollment; its
+restrictions and initial-approval checks are unchanged.
+
+`bind_grant_authority_service_manifest` verifies this separate issuer bundle under
+the current target E0 lease. The manifest's authorizing signer configuration is
+the target configuration; the issuer artifact/configuration digest is separately
+bound. The returned metadata binding does not activate HIGH service dispatch.
+The ordinary target generation and independent issuer artifact root remain
+distinct; this layer adds no issuer generation store or activation framework.
+
+Permission/live-lease integration, protected parent/model input ingestion, full
+installed runtime guarding and HIGH dispatch remain follow-on composition.
+Generated manifest/registry bindings are deliberately pending integration onto
+the corrected base. No installed runtime, authority, service or provider changed.
+
 ## Protected consensus nonce supply — 2026-10-20
 
 Opt-in owner v13 adds `consensus_nonce_authority` with a purpose-bound store,
