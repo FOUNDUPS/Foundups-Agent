@@ -48,6 +48,16 @@ configuration for one LOW handshake. Manifest, E0 and grant gates remain distinc
 See the [schema, input and rejection contract](
 ../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#initial-handshake-configuration--2026-10-15).
 
+`load_system_service_independent_grant_authority_client(...)` accepts the keyword
+`timeout_s`, defaulting to the existing 5 seconds. It requires an exact `int` or
+`float`, finite and in `(0, 30]`; Boolean values and numeric subclasses reject
+before admission or client construction. Initial LOW handshake composition
+forwards its authenticated service configuration's `timeout_s` to this client.
+Other callers retain the default. This is a per-socket-operation transport wait,
+not an authority lifetime or an end-to-end deadline. Signed request/grant expiry,
+current-generation, revocation and post-RPC checks remain unchanged; a longer
+transport wait does not authorize an expired response or prove native admission.
+
 ## Initial runtime manifest enrollment — 2026-10-15
 
 `load_initial_runtime_manifest_signing_context(*, approval_path, repo_root)` in

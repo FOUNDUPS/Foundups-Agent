@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -10,6 +11,7 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_
     decode_ed25519_public_key,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_client import (
+    DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
     build_reddog_isolated_signer_socket_client,
 )
 from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import (
@@ -91,8 +93,13 @@ def load_system_service_independent_grant_authority_client(
     owner_config_path: Path | str,
     repo_root: Path,
     owner_policy: Mapping[str, Any],
+    timeout_s: float = DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
 ) -> IndependentGrantAuthorityClientSupply:
     """Load one peer-authenticated grant signer client from root-owned state."""
+
+    if (type(timeout_s) not in (int, float)
+            or not 0 < timeout_s <= 30 or not math.isfinite(timeout_s)):
+        raise RuntimeArtifactManifestError("grant_authority_socket_timeout_invalid")
 
     from modules.communication.moltbot_bridge.src.reddog_signer_system_service_manifest_selection_loader import (
         SCHEMA_VERSION_V3,
@@ -111,6 +118,7 @@ def load_system_service_independent_grant_authority_client(
         owner = _load_owner_config(owner_config_path, repo=repo)
         return _build_authenticated_supply(
             owner=owner, policy=admission.policy, owner_config_path=owner_config_path,
+            timeout_s=timeout_s,
             repo=repo, required_schemas={SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10},
         )
 
@@ -118,6 +126,7 @@ def load_system_service_independent_grant_authority_client(
 def _build_authenticated_supply(
     *, owner: Mapping[str, Any], policy: Mapping[str, Any],
     owner_config_path: Path | str, repo: Path, required_schemas: set[str],
+    timeout_s: float = DEFAULT_SIGNER_SOCKET_TIMEOUT_S,
 ) -> IndependentGrantAuthorityClientSupply:
     if owner.get("schema_version") not in required_schemas:
         raise RuntimeArtifactManifestError("signer_owner_config_grant_authority_required")
@@ -139,6 +148,7 @@ def _build_authenticated_supply(
         trusted_socket_root=socket_root,
         expected_server_uid=int(raw["authority_service_uid"]),
         expected_server_gid=int(raw["authority_service_gid"]),
+        timeout_s=timeout_s,
     )
     if built.accepted is not True or built.client is None:
         raise RuntimeArtifactManifestError("grant_authority_socket_client_invalid")

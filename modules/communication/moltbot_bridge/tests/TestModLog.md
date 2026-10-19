@@ -1,3 +1,31 @@
+## V31 factory localization and v32 codec repair — 2026-10-19
+
+Follow-up v33 retains accepted signing but handshake failure. Target diagnostic
+setup fails before any callback because its class check misses Protocol inheritance.
+Candidate observer controls:24 author,4 independent held-outs, plus actual installed
+import/setup comparison. Original harness errors are retained; no native cause is
+inferred. Separate test-first source repair reproduces config30 falling back to5,
+then forwards the authenticated setting through the existing client supply.
+Connected Windows suite166 passed/2 Linux-dependent skips, including invalid
+numeric/bool bounds and late/failed RPC rejection at5 and30. These test results do
+not qualify the changed installed runtime or establish native handshake success.
+Independent Linux validation73 passed with no failures/skips, including the
+Windows-skipped process-lock/AF_UNIX and symlink controls. Existing signing CI
+now explicitly includes both changed suites; no new workflow or relaxed gate.
+
+V31 exact local returns identify factory rejection at line192. Canonical audit
+decoder controls independently reject the preparer's prior plain hex. V32 repair
+has nine codec controls (six author plus three held-out); final-byte author
+package controls12 and independent package controls6 are overlapping reruns,
+not additive unique coverage. The independent harness's initial pin-set mistake
+is preserved and corrected without changing the candidate.
+Fresh v32 install39.025s/revocation2.132s pass; handshake2/94.009s, full135.281s.
+Inner return542/193 and outer348/175 are accepted; later sendall239 C_RAISE.
+Requester exits13.700884s before that send failure. No current timeout/errno is
+observed. Exact25 sources/12 helper bindings/9 pins/4 invocations verified; all
+seven units absent and cleanup complete. Source/runtime/authority/deadlines
+unchanged. [Receipts and limits](../../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
 ## Qualified ec7a runtime and v29/v30 evidence — 2026-10-19
 
 Independent qualification still binds2,683 files/358 directories and both profiles.

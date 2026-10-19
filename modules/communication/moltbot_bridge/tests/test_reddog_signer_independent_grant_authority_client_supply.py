@@ -126,8 +126,9 @@ def _policy_value(tmp_path: Path, *, owner_config_id: str, grant_public: str) ->
 
 
 @pytest.mark.parametrize("owner_schema", [SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5])
+@pytest.mark.parametrize("timeout_options", [{}, {"timeout_s": 0.25}, {"timeout_s": 30}])
 def test_supply_binds_root_transport_to_signed_policy(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, owner_schema: str
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, owner_schema: str, timeout_options: dict
 ) -> None:
     admission_root = tmp_path / "admission"
     admission_root.mkdir()
@@ -166,6 +167,7 @@ def test_supply_binds_root_transport_to_signed_policy(
         owner_config_path=tmp_path / "owner" / "owner.json",
         repo_root=Path(fixture["selection"]["repo_root"]),
         owner_policy=policy,
+        **timeout_options,
     )
 
     assert supplied.owner_config_id == owner_id
@@ -173,7 +175,27 @@ def test_supply_binds_root_transport_to_signed_policy(
     assert supplied.binding.key_epoch == "grant-epoch-1"
     assert observed["expected_server_uid"] == 1202
     assert observed["expected_server_gid"] == 1203
+    assert observed["timeout_s"] == timeout_options.get("timeout_s", 5.0)
     assert client.calls == 0
+
+
+@pytest.mark.parametrize("timeout_s", [
+    0, -1, 30.001, float("nan"), float("inf"), float("-inf"),
+    True, False, "30", None, 10 ** 400,
+    type("FloatSubclass", (float,), {})(5),
+    type("IntSubclass", (int,), {})(5),
+])
+def test_supply_rejects_invalid_timeout_before_admission_or_client(tmp_path, monkeypatch, timeout_s):
+    def forbidden(**_kwargs):
+        pytest.fail("invalid transport timeout reached admission or client")
+
+    monkeypatch.setattr(supply_module, "lease_validated_owner_e0_current_admission", forbidden)
+    monkeypatch.setattr(supply_module, "build_reddog_isolated_signer_socket_client", forbidden)
+    with pytest.raises(RuntimeArtifactManifestError, match="^grant_authority_socket_timeout_invalid$"):
+        load_system_service_independent_grant_authority_client(
+            owner_config_path=tmp_path / "owner.json", repo_root=tmp_path,
+            owner_policy={}, timeout_s=timeout_s,
+        )
 
 
 def test_supply_rejects_owner_or_key_substitution_before_socket(

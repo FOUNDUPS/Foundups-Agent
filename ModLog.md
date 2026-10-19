@@ -1,3 +1,19 @@
+## RSI fixture codec repair and accepted grant signing — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. PR2161 merged122fec8c6 after independent exact-head
+review and passing checks; reviewed/main trees equal. V31 localizes factory
+rejection. The independently reviewed v32 fixture audit-key codec correction
+advances native grant signing to accepted, while the handshake still rejects
+after a later send failure. All seven units are absent; cleanup complete.
+Those v32 source/runtime, authority, signed lifetime and timeout limits were
+unchanged. V33 then exposed a target observer setup defect; its repair passes
+installed-module setup controls. A separate source regression proves config30
+fell back to client5. The two-owner forwarding repair passes166 Windows tests
+with2 Linux-dependent skips; exact runtime qualification remains pending.
+Next18/P0: independently qualify and test the repaired connection. Current local catalog
+availability and prior failed verifier qualification remain distinct.
+[Evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
 ## RSI qualification and admission reconciliation — 2026-10-19
 
 WSP00/5/10/15/22/48/71/97. PR2160 merged358fb2e34 with exact-head/main CI/CodeQL

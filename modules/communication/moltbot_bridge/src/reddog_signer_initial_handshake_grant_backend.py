@@ -45,6 +45,7 @@ class InitialHandshakeGrantBackend:
             supply = load_system_service_independent_grant_authority_client(
                 owner_config_path=admission.owner_config_path,
                 repo_root=Path(config.repo_root), owner_policy=policy,
+                timeout_s=config.timeout_s,
             )
             provider = IndependentSignerSecretGrantProvider(
                 Path(config.repo_root), Path(admission.owner_config_path),

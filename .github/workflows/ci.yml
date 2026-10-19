@@ -1357,6 +1357,7 @@ jobs:
               modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_low_grant_rpc.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_initial_handshake_grant_backend.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_grant_authority_client_supply.py \
               modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service.py \
               modules/communication/moltbot_bridge/tests/test_reddog_grant_startup_custody.py \
               modules/communication/moltbot_bridge/tests/test_reddog_grant_rate_store.py \

@@ -1,3 +1,20 @@
+## Native audit codec correction and response-path evidence — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. Existing disposable preparation incorrectly encoded
+two audit credentials as hex. Canonical decoder controls reproduce rejection;
+the reviewed fixture-only repair preserves integrity formats and all authority
+limits. V32 now observes accepted inner signing and outer authorization. Later
+sendall fails and the requester rejects; timeout/errno remain unobserved.
+All seven units absent, observation/cleanup complete. No worker admission or RSI
+gain. V33's canonical Protocol class was rejected by the observer setup; a
+candidate correction passes actual installed-module setup controls. Separately,
+authenticated timeout30 silently used nested-client default5. The existing supply
+loader now accepts a bounded timeout keyword and the initial backend forwards
+its authenticated setting. Default5 and signed expiry remain unchanged. Windows
+validation166 passed/2 skips; native qualification is pending. Next18/P0 is exact
+runtime qualification and a fresh connection trial. LOW no-effect review remains distinct from upstream author
+and elevated materialization. [Receipts](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
 ## Exact runtime and v29 lifecycle reconciliation — 2026-10-19
 
 WSP00/5/10/15/22/48/71/97. Published ec7a source/runtime remains independently

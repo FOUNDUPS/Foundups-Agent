@@ -61,7 +61,7 @@ launcher waits for that parent process before its owned stop. In two confined
 no returned0 without a stop. Both units are independently absent. This proves
 a harness wait cycle, not the issuer's backend rejection.
 
-WSP15 retains dependency19/P0 and next executable slice18/P0 (C3/I5/D5/Impact5):
+At the v30 checkpoint, WSP15 retained dependency19/P0 and executable slice18/P0 (C3/I5/D5/Impact5):
 localize the actual backend rejection branch through the existing bounded
 observer, then repair the demonstrated cause. The lifecycle slice is now evidenced. The accepted v30 package changes only
 `RemainAfterExit=no`, exact already-absent cleanup recognition, identity/absence
@@ -86,6 +86,70 @@ requester5.794445s. These are descriptive unit timings, not causal gain. Review
 verifies25 exact sources,12 outputs,9 pins,6 refreshed files and4 invocations.
 No author/provider admission or retained RSI benefit is established.
 
+V31 local PY_START/PY_RETURN observations identify the normal rejected return
+at `_CurrentLowGrantBackend._sign_current` line192/offset486: the factory did
+not produce an accepted backend. Its internal rejection code was not observed.
+The fixed30-second-profile hypothesis is false: issuer custody derives its
+profile from the current credential/policy expiry. Actual clock samples inside
+the factory remain unobserved.
+
+Independent source and exact-decoder controls find a concrete fixture defect:
+the preparer writes plain hex for target/issuer audit credentials, while the
+canonical decoder requires `AUDIT_KEY_PREFIX` and validated base64. Assembly,
+credential mounting and UTF-8 resolution do not transform those bytes. V32
+changes only those two fixture roles to the canonical codec with a decoder
+self-check; integrity-role bytes/modes remain unchanged. Nine codec controls,
+12 final-byte author package controls and six independent package controls pass;
+these overlapping runs must not be summed as unique coverage. The independent
+pin-set test correction is preserved; candidate bytes were unchanged. Six managed
+files/five changed include fresh identities/pins; launcher/observer/lifecycle,
+source/runtime, authority, lifetimes and deadlines are unchanged.
+
+Fresh v32 installs in39.025s, revocation passes in2.132s, and handshake exits2
+after94.009s; full post-readiness execution135.281s. Inner signing now returns
+accepted at line193/offset542 (168.647847016s), and outer authorization returns
+accepted at line175/offset348 (175.709961977s). Later `sendall` line239 raises
+at175.710145756s. Requester exit162.009262s precedes that send by13.700883756s.
+Inner entry-to-return is3.189762773s; entry-to-outer-return10.251877734s excludes
+unobserved earlier work and is not full sign duration. Dispatch-to-response is
+18.750249198s. The target has no active observer in this trial: its only exposed
+failure is invalid signer response. Timeout/errno remain unobserved; v25 does
+not supply v32's cause. All seven units are independently absent, observation
+and cleanup complete, original rejection preserved. Review binds25 exact sources,
+12 helper outputs,9 pins and4 invocations. This validates the fixture repair's
+advance to accepted signing, not a completed handshake or author ticket.
+
+V33 install38.391s/revocation2.063s pass; handshake exits2 after93.383s and full
+execution takes133.943s. Inner/outer signing again returns accepted before a
+later send failure. Target monitoring is `setup_failed`, zero callbacks: its
+exact built-in metaclass check incorrectly rejects the canonical Protocol class.
+Original component fixtures omitted that inheritance and missed the setup defect.
+All seven units are independently absent, observation/cleanup complete. No current
+target timeout or errno is established. The candidate observer repair retains
+exact source/code/base checks, local masks and cleanup, with24 author controls,
+four independent held-outs and an actual installed-module import/setup probe.
+The independent metaclass control initially failed while constructing its fixture;
+that record is retained, then corrected without changing the candidate.
+
+A separate exact-source regression proves authenticated config30 reached the
+nested client without its timeout keyword, using the existing default5. The
+two-owner repair forwards `config.timeout_s` through the existing supply loader
+and socket builder. The public keyword retains default5, requires exact finite
+non-Boolean int/float in(0,30], and does not change signed request/grant expiry,
+generation/revocation checks or acceptance. This is a per-operation wait, not an
+end-to-end deadline. Windows connected validation:166 passed,2 Linux-dependent
+skips. Independent Linux validation73 passes with no skips, including real
+temporary AF_UNIX/process-lock and symlink controls. Both changed suites are in
+the existing signing-composition CI step. Runtime qualification and native benefit
+for this source are pending.
+
+Current WSP15 next18/P0 (C3/I5/D5/Impact5): independently review and qualify the
+exact repaired source, then execute a fresh disposable connection with the
+corrected observer and explicit bounded wait configuration. Do not repeat the
+unchanged diagnosis or widen authority. PR2161 merged122fec8c6 after exact-head
+checks and independent review; merge tree equals reviewed8b473f. Exact merged-main
+CI39249090093 passes7/7 and CodeQL39249089610 passes4/4.
+
 Macro reconciliation: no installed trusted parent policy/sovereign provider was
 found in the scoped source search or92 open PR titles; nearest candidate PRs do
 not own that composition. Existing callable supplier injection is not an
@@ -96,7 +160,28 @@ routes, with no zero-paid local route established; it is historical configuratio
 not current health or admission. AgentDB assurance reservation exists, but no
 current public distinct-verifier reservation was found. Its getter can expire
 leases and was not used as a passive read probe. Actual parent/work/model evidence,
-budget, independent verifier and qualified effect-capable composition remain gates.
+budget, independent verifier and qualified effect-capable composition remain gates
+for that current effectful integrated path; this is not a universal requirement
+for every no-effect provider proposal.
+
+Additional reconciliation separates LOW proposals from effectful writing. The
+existing `signed_0102_readonly_review:*` / `AUDIT_NO_EFFECT` / dry-run-valve path
+uses authenticated AgentDB admission, but selects 0102/Fusion review. No existing
+upstream OpenClaw/Hermes author binding was found there. LOW is not a permission
+bypass: current snapshots still require write/admin permission. The separate
+`attest_architect_proposal` operation requires HIGH/ULTRA. Reuse these owners if
+an upstream no-effect binding is admitted; do not invoke a private capability
+issuer or import elevated writing prerequisites solely from the current pipeline.
+
+October19 read-only Windows probes supersede old reachability only: LM Studio
+lists nine models with zero resident instances; Ollama lists/loads none. No
+inference, loading or configuration change occurred. The prior eight-call Qwen
+experiment remains NOT_QUALIFIED_AS_APPROVAL_VERIFIER: baseline2/4 verdicts
+correct and0/4 accepted; candidate2/4 correct and1/4 accepted. Do not repeat the
+unchanged trial or promote from catalog presence. The existing owned model
+lifecycle supports a future fresh bounded transport canary; occupancy/context
+limits are not a hard RAM/VRAM reservation, and such a canary would not establish
+quality or admitted author execution.
 
 All paths below are relative to the existing evidence root
 `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`:
@@ -114,6 +199,22 @@ All paths below are relative to the existing evidence root
 | `r15-admission-prerequisites-ec7a0e438-readonly.json` | `45d7cdf94f7e50916373571c012bc8dc85eda4b6d3c5455dad15ffe7a59fb546` |
 | `native-installation-inputs/current-time-independent-review/authentic-admission-owner-pr-audit-ec7a0e438.json` | `96eab2cac69e7ca28f3bd0a93471e7b25712f4144cdd02648aa9a8a3f9998681` |
 | `native-installation-inputs/local-provider-readiness-20261016.json` | `21a01e3ff8e793e2c875055dc3e69926858ecb384486afccc9ccb8b3456e5719` |
+| `native-installation-inputs/current-time-independent-review/v31-independent-review.json` | `7bff0fc62152681d2ad9c09dc5ce67282edda7d65533894c98035861936f6734` |
+| `native-installation-inputs/current-time-independent-review/v31-audit-key-format-independent-probe.json` | `230117351d1f8731298e8b5306839db51e9e8350e4628a7d3bf7486b7d4de1a2` |
+| `native-installation-inputs/unified-independent-review/v32-audit-codec/independent-codec-review.json` | `0cbd2605bd8946a74e331361167bed8dbadd9469612f380664fca1b5252fe40b` |
+| `native-installation-inputs/unified-independent-review/v32-candidate/independent-package-review.json` | `257d3f5ae5e10b4ef69bfd40e2d0f425f64ea3b86617368aeb7c7708eb6e3b7a` |
+| `native-installation-inputs/current-time-independent-review/v32-independent-review.json` | `327d9a8f69d2d724167c8e7d50848939ff5357631eed1335c78109df08efbb48` |
+| `native-installation-inputs/current-time-independent-review/v32-temporal-outcome-review.json` | `c6d1d4917700c621e8f5207b8d8b4bb6ab90708259ab2005af13aa627c2f8075` |
+| `native-installation-inputs/current-time-independent-review/low-readonly-provider-authority-audit-20261019.json` | `437aab39758573249b1ede2e7bde46a936ab02306e209695897117a8d655bbe9` |
+| `native-installation-inputs/local-provider-readiness-20261019.json` | `9e850d75ae4481ea8a3dac6671cc898642a777f8992b6acebf1e3c978641487d` |
+| `native-installation-inputs/local-provider-qualification-history-20261019.json` | `5c63b0fe7336d1e4ff5f497655ea8f0e45d6badfb9b1fe9a3360a7998d53b0d0` |
+| `native-installation-inputs/current-time-independent-review/v33-independent-review.json` | `81931278a0755550d3b14d40e200235f589fcf12c8d5e09a89effaf95271fc10` |
+| `native-installation-inputs/unified-independent-review/v33-protocol-repair/frozen-author-review.json` | `ae3fa21848af6c7c8f51d15404177a8da2a0fdf4568e0d9852869112386207b4` |
+| `native-installation-inputs/unified-independent-review/v33-protocol-repair/root-independent-review-corrected.json` | `9555d19638e7f3ff157e39962992ff30e9629e98ffbae62bd91258ca145cfeea` |
+| `native-installation-inputs/unified-independent-review/v33-protocol-repair/installed-setup-probe.json` | `f81faa3ffae4c9b6740e620e2bf1b5a367ece2bd019239d8dd702e738a3c80af` |
+| `native-installation-inputs/current-time-independent-review/timeout-propagation-author-review.json` | `c7fb46581782bae4fdb130d5f1eaf670c4f66b303be695c1329da9b956d0275e` |
+| `native-installation-inputs/current-time-independent-review/timeout-propagation-independent-review.json` | `0c29a5f54fb1502eee93fbe6492cedf2cd9ef189b14ac319d53fb280c2d049c8` |
+| `descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/pr2161-merged-main-closure.json` | `8812f8f1ef40409461783fea3499c0c3c9357efc89d5b1015f434d42f6274512` |
 
 Synthetic authority only; native author tickets0, paid model calls0, coordinator
 cost unknown. Codex review is independent source review, not resident worker
