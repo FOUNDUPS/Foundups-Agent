@@ -13,22 +13,23 @@ Status: canonical **system planning and completion-gate authority** in this repo
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
 **Current checkpoint — native startup integration (2026-10-16):**
-PR2145 merged at `7a9fe8602` with matching reviewed/main trees and passing exact-main
-CI/CodeQL. The artifact-bound and clock-fixture repairs are published; ordinary
-64 KiB owner reads and production clock checks remain unchanged. Installed runtime
-`34eed594e` remains qualified and frozen (2,691 files, 1,254 exact Git Python sources).
-V18 passed installation and revocation after receipt publication/source-path repairs,
-then failed LOW handshake at the durable oracle's `_checked_now`. A current-time
-path in three existing owners now samples within the fence and rechecks after slow
-verification; explicit caller epochs still match exactly, rollback/expiry rejects,
-and post-action rejection withholds results without undoing effects. Independent
-review passed 17; author connected validation passed 207 in 87.89 seconds with stable
-source hashes. Counts are not additive; separate qualification/replay remains.
-Clock-source conflict is observed separately; its causal role remains unproved.
-Synthetic authority only: authentic enrollment, native worker admission, author
-execution and retained RSI gain remain unproved. Existing R15 still requires
-independent evaluation, authorized activation/rollback, later benefit and bounded
-next selection. [Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
+PR2147 merged at `6fb93580c`; all 11 exact-head checks and exact-main CI/push
+checks passed, with identical reviewed/main trees. Its current-time authorization
+repair is published. Runtime `88690a4f5` is independently qualified and frozen
+(2,691 files, 1,254 exact Git Python sources); qualification is not admission.
+Fresh synthetic v19 passed installation/revocation but timed out awaiting issuer
+readiness. V20 rejected before its caller action in the permission-time guard;
+issuer elapsed 44.97 monotonic versus 40.98 wall seconds. Clock regression is
+supported, but exact guard values and the responsible synchronization mechanism
+were not captured. All seven owned units were absent/inactive/dead afterward.
+Bounded samples identify repeated descriptor/runtime validation. The next layer
+reduces pure descriptor computation while retaining fresh filesystem and authority
+checks; a separate reversible clock-source experiment is under review. Neither
+work changes expiry, grants, process timeouts or production clock checks.
+Existing R15 still requires authentic worker admission, independent evaluation,
+authorized activation/rollback, later retained benefit and bounded next selection.
+No native author or retained RSI gain is demonstrated.
+[Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
 
 **Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
 The candidate composes the existing LOW issuer, credential resolver, durable

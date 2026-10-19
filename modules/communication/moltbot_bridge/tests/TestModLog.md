@@ -1,3 +1,36 @@
+## Installed descriptor validation cost — 2026-10-16
+
+Author focused native suite:128 passed, zero failures/skips,7.51s. Paired public
+descriptor benchmark: baseline0.181579s mean, candidate0.101624s mean across3pairs;
+canonical output unchanged. This measures pure validation only. Source/test hashes
+stable through execution. Receipt under existing E15 next-startup evidence root:
+`native-installation-inputs/descriptor-path-cost-review/author-review-receipt.json`
+SHA256 `6c8bb1c86dd7be7ef326abbedf42f5427991d6a0622bd22cd435af237d144470`.
+Independent275 differential controls matched exact baseline6fb93580:88 accepted,
+187 rejected, with identical canonical serialization/digests and detached output.
+Only _directories/_sources AST changed. Independent receipt:
+`native-installation-inputs/descriptor-path-cost-review/independent-differential-receipt.json`
+SHA256 `e31c232cf214449f3febf9a28f090495aed12bd5d4faabbd5da00943f4dc7d4d`.
+Connected selection:217 distinct cases eventually passed (55 root guard,161
+ordinary,1 targeted socket rerun). Initial ready.wait(5) failure is preserved;
+short temporary path rerun passed with observed68-byte socket path. Original
+110-byte path is reconstructed, not a captured first exception. Two collection
+harness failures are also preserved. Source hashes remained stable. Receipt:
+`native-installation-inputs/descriptor-path-cost-review/connected-review-receipt.json`
+SHA256 `c1e12eab0efc98932380c36cb3f594f18c020d0c1d689397b810f9777f765573`.
+Counts overlap focused tests; do not sum. Eight backend-manifest tests passed;
+three extension compatibility commands passed; registry current1719/quarantined270.
+The initially attempted root scripts/generate_test_registry.py path was absent;
+the existing wre_core/scripts owner supplied the successful registry check.
+Reconciled onto main ed6da441f on2026-10-19: all13 recorded connected source/test
+hashes remain unchanged; preserve the historical run rather than claim a fresh
+217-case run. Both main log histories and905 reviewed security fingerprints
+remain. Regenerated backend manifest retains main1439 runtime members; both
+pins updated. Extension compatibility commands passed; registry current1722,
+quarantined270. Reconciled manifest suite:8 passed in71.54s; receipt
+`next-startup/descriptor-path-publication-review/reconciled-manifest-tests.xml`.
+No native runtime substitution or admission proof.
+
 ## AntifaFM campaign adapter — 2026-10-18
 
 Preserved five research/parser cases and added three real AntifaFM route cases:

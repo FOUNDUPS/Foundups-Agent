@@ -1890,8 +1890,8 @@
   },
   "current_selection": {
     "observation_path": "current_observation.issuer_custody_20261016",
-    "base_commit": "7772c011b4c92e357839cf27ba900b7304358028",
-    "selected_action": "Separately qualify validated current-time authorization source, then replay",
+    "base_commit": "ed6da441f26a9847a539fb4dbe6315b0701cdedf",
+    "selected_action": "Reduce measured descriptor overhead and qualify clock stability before fresh native handshake",
     "status": "IN_PROGRESS",
     "wsp15": {
       "complexity": 3,
@@ -1902,11 +1902,11 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "PR2145 merged; installed runtime 34eed frozen. V18 installation/revocation pass; LOW handshake rejects at durable _checked_now141. Current-time repair samples inside the fence and refreshes checks after snapshot/root LOAD and permission verification; explicit stale epochs, observed rollback and expiry reject. Author 207 passed in 87.89s with stable source hashes; independent 17 passed separately, not an additive unique count. Separate source qualification/replay remains. Late rejection withholds results without undoing callback effects."
+    "next_action": "PR2147 merged and exact-main checks passed; runtime88690 independently qualified. V19 issuer-readiness timeout and v20 pre-action permission-time rejection preserved. Reduce pure descriptor computation without filesystem caching; separately test clock-source stability with restoration. No native author or retained benefit."
   },
   "current_observation": {
     "issuer_custody_20261016": {
-      "source_scope": "PR2145 merged at7a9fe860298398b86398fbb3f6dad79eca52a075 with exact-main CI/CodeQL green. Runtime 34eed remains frozen. V18 closes external installer receipt/source-path repairs, then durable oracle rejects LOW handshake. Three-owner current-time repair passed 207 author native cases and separate 17 independent held-outs; counts overlap. Native admission unproved.",
+      "source_scope": "PR2147 merged6fb93580c with exact-head11 and exact-main CI/push checks passing; reviewed/main trees match. Frozen runtime88690 independently qualified. V19 issuer readiness timed out; v20 rejected before action at permission epoch check. No native author or retained gain.",
       "details": "docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16",
       "custody_validation": "244 author cases; 63 independent cases including 12 held-outs; synthetic installation seams disclosed",
       "combined_validation": "12 connected Linux suites: 328 passed, zero failures/skips, 110.66 seconds",
@@ -1915,7 +1915,7 @@
       "source_publication": "PR2143 merge372d03de59352887928b7afd0204cce483e2c6c6 and PR2144 merge7772c011b4c92e357839cf27ba900b7304358028: reviewed/main trees equal; all10 exact-merge checks pass each. Receipts: next-startup/consumer-publication-review/pr2143-merged-main-closure.json and next-startup/initial-control-final-publication-review/pr2144-merged-main-closure.json. PR2145 merge7a9fe860298398b86398fbb3f6dad79eca52a075: reviewed/main trees equal; exact-main CI38804752870 and CodeQL38804751742 pass. Receipt: next-startup/artifact-bounds-publication-review/pr2145-merged-main-closure.json.",
       "native_worker_admitted": false,
       "retained_rsi_gain_demonstrated": false,
-      "next_dependency": "Preserve exact explicit caller-epoch matching and fresh pre/post-action checks in the validated durable oracle, root-protected oracle and WSP71 rehydration current-time path. New source requires separate qualification before fresh bounded LOW handshake. Clock-source conflict is observed but not proven to cause the epoch mismatch; authentic enrollment, author execution and retained gain remain unproved.",
+      "next_dependency": "Retain published current-time and rollback checks. V20 wall/monotonic divergence supports rollback but exact cause is unproved. Qualify a behavior-preserving descriptor optimization and reversible clock-source experiment before fresh bounded LOW handshake; authentic author admission and R15 retained gain remain open.",
       "paid_provider_calls": 0,
       "coordinator_cost": null,
       "installed_artifact_validation": "250 independently verified cases; one reviewer harness error retained then corrected",
@@ -1936,8 +1936,8 @@
       "machine_inputs": "Root-created distinct control/audit/replay material and installed target999/issuer997/requester995, transport GID988; no runtime grant issued.",
       "filesystem_validation": "15 private roots,8 actual processes fsync/reopen; independent metadata/hash reopen. Four canonical generation qualification records installed, no authority stores initialized; not power-loss or physical rollback proof.",
       "enrollment_artifact_bounds": "Disposable approval182859bytes, descriptor685781bytes and26 sources exceed64KiB; explicit existing1MiB bound for approval/bundle/source reads, ordinary owner64KiB unchanged. Author 131 and independent 87 Linux cases pass; connected 19-suite CI selection 689 passed/3 skipped/no failures or errors,157.88s; source stable. Counts overlap. Receipt: next-startup/enrollment-artifact-bounds/author-review.json.",
-      "runtime_refresh_dependency": "Unified34eed594e runtime qualified:2691 files/362 directories,1254 exact Git Python sources; independent reopen, confined Unix/IP denial, runtime guards and absent-authority CLI checks passed. Descriptor9be4e61349d301784c2792c61d82205949cd2f7bb88a3c496755bafe48743902. Credential-free qualification is not admission; test/doc-only commits do not change this binding.",
-      "disposable_installation_checkpoint": "V18 installation and initial revocation accepted after receipt publication/source-path repairs; LOW handshake rejected at durable _checked_now141 (89.688s). Prior v16 missing receipt/v17 source-unbound failures preserved. Root observed all3 administrative and4 resident units absent/inactive/dead. Synthetic authority only; no real credentials, paid calls, authentic enrollment, author or retained gain. Exact evidence and clock distinction: canonical dispatch.",
+      "runtime_refresh_dependency": "Runtime88690a4f5 independently qualified:2691files/362directories,1254exact Git Python sources. Descriptor d5fa191de7059cd3b0c3935eecc9442fff45e90a8c99c6db28812d29ecca28d9. Reopened inventory, confined Unix/IP denial, guards and absent-authority CLI checks passed. Next source optimization needs fresh exact export; no in-place mutation.",
+      "disposable_installation_checkpoint": "V19/v20 installation and revocation passed. V19 issuer readiness timed out; v20 permission epoch rejected before caller action at44.970364monotonic/40.980371wall seconds. Divergence supports rollback; exact guard values/cause unobserved. All7units independently absent/inactive/dead. Synthetic authority only; paidcalls0, authorfalse, retainedgainfalse.",
       "clock_fixture_publication": "PR2145 head8cfb6fb5db87de316130b8cc5e98ac3f1f085efd fixes two wall-clock samples in existing test; deterministic reproduction,41 focused and6 separate boundary cases passed. Exact-head CI38800396328/CodeQL38800390317 and all11PRchecks passed; production clocks/runtime34eed unchanged. Published via PR2145 merge7a9fe8602; exact-main checks passed. Separate native clock conflict is observed, not the demonstrated v16 rejection."
     },
     "grant_issuer_20261015": {

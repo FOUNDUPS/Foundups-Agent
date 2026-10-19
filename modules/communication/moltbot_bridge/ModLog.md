@@ -1,3 +1,19 @@
+## Installed descriptor validation cost — 2026-10-16
+
+WSP00/5/15/22/48/50/71/84/97. Existing descriptor owner now checks immediate
+parent closure for validated paths and reuses validated installed-source suffixes,
+retaining exact-string rejection. Full ancestor closure, detached output, digest,
+ordering and caps are preserved; filesystem verification is not cached or removed.
+Author native focused suite:128 passed. Three paired public-descriptor measurements
+averaged0.18158s baseline versus0.10162s candidate (44% reduction for this pure
+function). Independent275 differential controls passed;217 connected cases eventually passed
+with an initial socket-path harness failure preserved. See TestModLog;
+this is not evidence of faster native admission or retained RSI benefit.
+
+PR2147 is merged with passing exact-main checks. Frozen88690 qualification and
+v19/v20 failures are reconciled in the existing dispatch/roadmap. Native author,
+activation/rollback and later measured retained use remain open.
+
 ## AntifaFM SOCIAL campaign routing — 2026-10-18
 
 Reuse the explicit campaign adapter for `antifafm`, delegating to the social
