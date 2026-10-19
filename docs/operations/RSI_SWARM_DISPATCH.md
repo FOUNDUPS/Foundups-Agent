@@ -1,5 +1,39 @@
 ## First LOW control identity and native preparation — 2026-10-16
 
+Latest closure: PR2147 head `88690a4f5180e7224096d40afcc95a7efeac9b6d`
+merged as `6fb93580cab7bff034970f5fdf02cd29a6653027`; all11 exact-head checks
+and main CI38822943270/push38822942278 succeeded. Reviewed/main tree is
+`f69d83f24236a95ad4bbf140a32df3632bf4ad29`. Existing evidence root below contains
+`native-startup-publication-review/pr2147-merged-main-closure.json`
+(SHA256 `50eec303a003d874a484834263d0daf2a5f5904f1277e3bf75b491389ef27473`).
+
+Runtime `all-role-88690a4f5-v1` independently qualifies2691 installed files,
+1254 exact-source files and362 directories. Descriptor SHA256
+`d5fa191de7059cd3b0c3935eecc9442fff45e90a8c99c6db28812d29ecca28d9`;
+independent review receipt SHA256
+`1f3f71bada17733630a7b2fbd35955001057c2a906f4c461b6fc8fbf9ad490a9`.
+It supersedes34eed qualification, not its preserved failure evidence.
+
+Fresh disposable v19 accepted installation/revocation, then failed issuer
+readiness within the existing60-second process bound. V20 added bounded external
+CPU-stack diagnostics only: six samples, no local values or private data.
+It rejected before action at permission `_current_permission_epoch:96` via
+`guarded_action:75`, after44.970364 monotonic/40.980371 wall seconds. Root stayed
+alive; no timeout expansion. Independent review SHA256
+`583e0fedee59e74da26b2de1a1767d851e675fa8116fe19ca117ef41436ed1c7`
+is in `native-installation-inputs/current-time-independent-review/v20-independent-review.json`.
+The3.989993-second divergence supports rollback; exact guard-local values and
+causal clock mechanism remain unobserved. All16 sampled/exception source files match the
+pinned commit. All7 owned units were independently absent/inactive/dead afterward.
+Synthetic authority only; authentic admission, native author execution and retained
+benefit remain unproved. No paid provider calls occurred; coordinator cost unknown.
+
+WSP15 selects the existing native-handshake dependency19/P0(C4/I5/D5/Impact5).
+Measured pure descriptor overhead can be reduced independently of investigating
+clock-source conflict. Keep current filesystem observations, expiry/revocation
+and explicit caller-time checks. A diagnostic source-switch proposal is not an
+executed experiment or authority to relax readiness. Historical checkpoints follow.
+
 Current implementation fixes the initial empty-grant bootstrap cycle in existing
 root initialization and target control clients. A real first LOW/gen1 identity
 has no outcome consensus: exact v2 empty grants may carry explicit null through

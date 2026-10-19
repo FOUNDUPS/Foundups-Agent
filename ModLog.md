@@ -1,3 +1,12 @@
+## RSI native startup evidence and descriptor cost — 2026-10-16
+
+WSP00/15/22/48/97. PR2147 merged6fb93580c with passing exact-head/main checks.
+Independent frozen88690 runtime qualification is complete; synthetic v19/v20
+handshakes still failed. Current work reduces pure descriptor overhead without
+removing runtime observations or changing authority. Clock-source experiment is
+separate and has not run. Native author and retained RSI remain unproved.
+See existing dispatch and moltbot_bridge ModLog for exact evidence and limitations.
+
 ## 2026-10-18 — Security: triage the 91 historical secret candidates
 
 - WSP 50/71/97: pinned main `1c80f15ae2eee0f78300f297fb3e386275bc0aab`,

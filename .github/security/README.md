@@ -1,5 +1,18 @@
 # Blocking secret scan
 
+## Descriptor path-cost binding review — 2026-10-19
+
+Independent exact-tree review of81e2a305582d974d54c0e4318d57d9c170b6d8bc
+against main ed6da441f26a9847a539fb4dbe6315b0701cdedf accepted45 changed
+whole-file bindings:7 unchanged historical lines and38 generated source hashes.
+All1456 manifest mappings were independently recomputed from exact Git blobs.
+Preserve all905 prior entries and add only45 reviewed fingerprints (950total).
+No unknown finding, scanner rule, exclusion or runtime authority is approved.
+Evidence: existing `next-startup/descriptor-path-publication-review/`
+`staged-exact-security-review.json`, SHA256
+`7eeac52371ba7f8c0964dcc353a8fee59f20859891e78b48fba834ff34e01f83`.
+Review is unsigned independent Codex evidence, not native worker provenance.
+
 ## AntifaFM startup manifest re-review — 2026-10-18
 
 The resident-chain CI failure required moving the Shorts launcher's existing

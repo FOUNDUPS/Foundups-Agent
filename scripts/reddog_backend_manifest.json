@@ -2012,7 +2012,7 @@
     "modules/communication/moltbot_bridge/src/reddog_generation_bound_holoindex_query_adapter.py": "4c5d3c84b468192b08dfc23eb93fbb2ffd767d42c3af773fe426ab54961d795e",
     "modules/communication/moltbot_bridge/src/reddog_generic_agent_worktree_writer_dryrun.py": "9b8638e8c6dad059f81872fdfe29d7931d474e702e684d14c558b60a8eb2156f",
     "modules/communication/moltbot_bridge/src/reddog_governed_work_order_dryrun.py": "91e7c70934a9872b585499d2f740c69f69b64ef481026caf82047ba2cec05dd2",
-    "modules/communication/moltbot_bridge/src/reddog_grant_authority_installed_source_contract.py": "89ad8b897c5b6478116a82fe8180a7f27a746edc97d66109e59165974fee52be",
+    "modules/communication/moltbot_bridge/src/reddog_grant_authority_installed_source_contract.py": "ebb99b5604291af9b5ed3fe3feafeaf5bf9f3a468dcccc1081ea9b4a882b5fa9",
     "modules/communication/moltbot_bridge/src/reddog_grant_authority_service_archive_contract.py": "6d7aa604b7a44cd9a1a4c7424cc0bf4e7133e3a24450a9e1dfcb89b4ffc17b41",
     "modules/communication/moltbot_bridge/src/reddog_grant_authority_service_archive_validation.py": "794e8d2b741878355cc43259d138fb7417057bd92c101e8df94f42f36456bb48",
     "modules/communication/moltbot_bridge/src/reddog_grant_authority_service_artifact_contract.py": "40f7676c10996858cab431f810a5078d627c8c7a999cdc0fdf6ae13dfcd6f3eb",
