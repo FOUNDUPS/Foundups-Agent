@@ -1408,6 +1408,12 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_signer.py \
             modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_use_time.py \
             modules/communication/moltbot_bridge/tests/test_reddog_parent_model_inputs.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_existing_state.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_custody.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_authority.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_failures.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_compatibility.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_signed_policy.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
             modules/communication/moltbot_bridge/tests/test_reddog_installed_grant_manifest_consumer.py \

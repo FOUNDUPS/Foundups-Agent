@@ -1,3 +1,130 @@
+## Windows manifest byte contract — 2026-10-20
+
+Actual readManifest independently accepts the current 1,449-member LF
+manifest (327,430 bytes) but rejects its fresh Windows CRLF representation
+(330,401 bytes) at the prior 320 KiB/327,680-byte boundary. Generated LF
+checks alone missed this. The paired Node consumer/Python contract now
+accepts at most 324 KiB/331,776 bytes, an explicit 4,096-byte/1.25% change.
+This is the smallest whole-KiB bound also covering the independently
+measured pending live-scope 1,451-member CRLF closure (330,885 bytes),
+with 891 bytes remaining; 323 KiB would be 133 bytes short.
+
+JSON retains two-space formatting. The current canonical digest and 1,449
+member bound remain unchanged; this does not import the pending live-scope
+runtime. Existing digest, shape, path and member checks, 2 MiB per-file,
+32 MiB total, independent 4 MiB readers and WSP62 source limits remain.
+The byte check follows readFileSync and precedes parsing; it is not a
+preallocation memory guarantee.
+
+Current-source validation: 36 binding tests pass, zero failures/errors/
+skips; three Node compatibility commands exit zero. The actual reader
+accepts LF, CRLF and exact-maximum valid JSON and rejects maximum+1.
+Original failed byte evidence remains; no JSON packing or exemption.
+Runtime Python files and manifest bytes are unchanged from the 901/5
+startup run. Those startup counts are retained, not represented as rerun.
+No native worker or installed HIGH authority is claimed.
+
+Evidence in the existing next-startup artifact root:
+`consensus-nonce-publication-20261020/compatibility-repair/`.
+
+| Receipt | SHA256 |
+| --- | --- |
+| `independent/byte-contract-red/receipt.json` | `1903e132b50300774f8d0135eb09e2b5283ad2e3652ceb653784f1803d592945` |
+| `byte-contract/receipt.json` | `9f4fdfa440b4068efd77726082a5199985c5ecac126cfacef125ae5a4e501d37` |
+
+WSP00/5/6/10/11/15/22/50/62/97. Corrected-head CI and independent
+publication review remain required; older 6d0686c41 CI is historical.
+
+## Consensus nonce publication compatibility repair — 2026-10-20
+
+Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
+the modern-owner version predicate an always-truthy tuple. Legacy owners
+entered per-selection validation. The unchanged 10-case model-pair family
+reproduces seven failures; removing the tuple tail makes all 10 pass.
+The existing signed-model gate now covers both v12 and complete v13 owners.
+The full hosted-startup selection runs locally: 901 passed, 5 platform skips, zero failures/errors.
+Source hashes remain stable.
+Independent review passes three legacy/v12/v13 behavior controls and
+verifies the one-source-digest change with unchanged pins policy.
+Regenerated digest pins retain the 1,449-file inventory and unchanged limits.
+Both generators check current, 36 binding tests pass without skips, and
+the three backend compatibility Node checks exit zero.
+These synthetic fixture checks
+do not establish installed HIGH authority or native worker execution.
+WSP00/5/6/10/15/22/50/62/71/97. Exact receipts and commands are in dispatch.
+
+Evidence: existing next-startup artifact root,
+`consensus-nonce-publication-20261020/compatibility-repair/`.
+
+| Receipt | SHA256 |
+| --- | --- |
+| `targeted-red/receipt.json` | `272ba282fda0cbf56462fc26f6d7758e424672b2860e6bef94478a06f7db0683` |
+| `targeted-green/receipt.json` | `0d72763235a3af8e89e0f071e9558101b36792869b31d79c8eaa52838f745fcc` |
+| `connected-green/receipt.json` | `9621d574d78e362599564050f41db8dd1c7bad64acbbb092ff5620de09e763a7` |
+| `bindings/receipt.json` | `44bec7603d4cde9bace8899cad13346b915731d34c519ce8ca1a02acb063a3f3` |
+| `independent/independent-repair-review.json` | `1ef5fda92ec2c97a29d434b8cfb7265b5fc6ef469280a5c706ccc9fb522a3e3b` |
+| `independent/independent-integrity-review.json` | `70c6fc70052cc4ce4964a7a5b776930d36d824b13aade9ebe731c739730b2aec` |
+
+The failed hosted run reported 894 passed/7 failed/1 skipped; it remains
+failed evidence. Previous publication acceptance was withdrawn. Earlier
+437/3 and 21-control results below remain historical component coverage,
+not coverage of the missed legacy branch. New-head CI and independent
+publication review must pass before merge. No threshold was weakened.
+
+## Protected consensus nonce checkpoint — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97; selected 19/P0 (C4/I5/D5/Impact5).
+Opt-in owner v13 adds a separately bound consensus nonce store and integrity
+credential. Canonical owner, signed E0/current generation, custody and existing
+MAC/SQLite state are checked; startup never provisions missing authority. V1–v12
+and the LOW service remain unchanged. Instance-owned reservation handles prevent
+cross-instance rollback; withdrawal still permits confined owned cleanup. The
+existing authenticated one-step high-water recovery may write durable state.
+
+Connected Windows evidence: 437 passed, 3 platform skips, no failures/errors in
+351.02s, with 26 source hashes unchanged. Independent 21 controls pass on that
+freeze; counts overlap and are not added as unique tests. Actual signed files,
+MAC/SQLite transactions, restart/replay and concurrency are exercised with
+explicit synthetic OS/installation/credential seams, not genuine admission.
+
+The reviewed helper extraction moves only root-separation validation into the
+existing owner-input module and re-exports it. Function and remaining module ASTs
+match; the other 24 frozen files are unchanged. Loader 658 and owner inputs 263
+lines satisfy the unchanged 675 limit; both cold import orders pass. Seven
+consensus structure tests pass. Two additional atomic-provisioning size checks
+still fail on the byte-identical baseline startup test file (712 lines; one
+89-line test). These inherited debts are retained, not exempted or repaired here.
+
+Evidence under `native-installation-inputs/current-time-independent-review/`
+within the existing next-startup artifact root:
+
+| Receipt | SHA256 | Scope |
+| --- | --- | --- |
+| `high-consensus-author-review/connected-review.json` | `0bb2d10d1b7b6f5d8c518210dd5f0db808ec2ab7ccb6103be032de5d9c695edc` | Exact command, JUnit and three platform skips |
+| `high-consensus-independent-review/independent-review.json` | `faea322408e64d4981a1e049c3a27c4483003e17a148c5cb41ed87c20de5e15b` | Independent synthetic component held-outs |
+| `high-consensus-author-review/loader-extraction/source-freeze-final.json` | `fabad5e075c8884f18e0379de927c0bd2621f5b93e1df5495144f4210aec7f6f` | 26-file post-extraction freeze |
+| `high-consensus-author-review/loader-extraction/final-review.json` | `8c8cd177e8112bc385a8866b084bf6d2604419f5bf128da6754e2c0d38ec0da4` | Two-file AST proof, imports and preserved baseline size failures |
+| `high-consensus-independent-review/loader-extraction-independent-review.json` | `f1b63914f1ac457af764b9e3efd433134ad5e8dc2352b4f5ee394f2de528468b` | Independent exact extraction; prior 21 held-outs retained |
+| `high-consensus-author-review/publication-bindings/review.json` | `dc7f47d22af1f90c5b871bf5a1da08eefbafe72f4af5aef629eb0551b5a3b063` | Exact generator, 36-test and three Node results |
+
+Generated runtime inventory is 1,449 files: only the new imported custody leaf is
+included. The public nonce authority and current-owner leaves are source/test
+validated, but are not imported or qualified installed runtime until the HIGH
+join. Exact digest/cap bindings and registry 1,737/270 retain existing validation;
+no quarantine or structural ceiling changes. Both generator checks pass; 36
+manifest/registry tests pass without skips in 90.295s. Node contract, preflight
+and async commands each exit 0; final 26 source hashes remain stable.
+
+Next 19/P0: reuse one live authenticated WSP71/generation lease across current
+parent/effect verification, nonce reserve, pre-sign checks, commit and rollback;
+prove the existing same-inode lock path with bounded processes before installed
+HIGH composition. Public self-leasing methods must not nest under that fence.
+The existing installed LOW service remains LOW-only. Protected HIGH policy and
+service composition, genuine work/reviewer/model/budget inputs, qualification and
+native admission remain required. Frozen runtime 294195cdb is unchanged; native
+author tickets 0, paid model calls 0, no retained RSI gain. PR2164 publication
+closure is tracked separately; no pending remote check is counted as passing.
+
 ## Parent-consensus publication gate repair — 2026-10-20
 
 PR2164 head51f9edce failed the hosted signing regression:1,467 passed/1 failed/

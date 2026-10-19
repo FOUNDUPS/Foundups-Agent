@@ -74,9 +74,9 @@ def _reject_grant_root_overlap(root: Path, existing) -> None:
 
 def _grant_socket_root(value, *, repo, owner_root, grant_root, policy=None):
     """V10 separates issuer-writable transport from protected artifact ancestry."""
-    from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12
+    from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13
     raw = value["independent_grant_authority"]["authority_socket_path"]
-    if value.get("schema_version") not in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12}:
+    if value.get("schema_version") not in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}:
         path = validate_runtime_artifact_path(raw, allowed_root=grant_root, repo_root=repo)
         if path != grant_root / "grant-authority.sock":
             raise RuntimeArtifactManifestError("grant_authority_socket_path_invalid")
@@ -160,7 +160,7 @@ def load_system_service_signer_identity(
 
 def _validate_model_verifier_authority(owner, *, repo):
     value = owner.get("model_verifier_authority")
-    if owner['schema_version'] == 'reddog_signer_system_service_owner_config.v12':
+    if owner['schema_version'] in {'reddog_signer_system_service_owner_config.v12', 'reddog_signer_system_service_owner_config.v13'}:
         from .reddog_model_verifier_selection_inputs import validate_selection_authority
         validate_selection_authority(value, validate_bundle=lambda bundle:
             _validate_model_verifier_bundle(bundle, owner=owner, repo=repo))
@@ -202,11 +202,11 @@ def load_system_service_model_runtime_verifier(
     from . import reddog_model_runtime_verifier_bootstrap as model
     repo = Path(repo_root).resolve()
     owner = owner_loader._load_owner_config(owner_config_path, repo=repo)
-    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9, owner_loader.SCHEMA_VERSION_V10, owner_loader.SCHEMA_VERSION_V11, owner_loader.SCHEMA_VERSION_V12} or owner["config_id"] != expected_owner_config_id:
+    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9, owner_loader.SCHEMA_VERSION_V10, owner_loader.SCHEMA_VERSION_V11, owner_loader.SCHEMA_VERSION_V12, owner_loader.SCHEMA_VERSION_V13} or owner["config_id"] != expected_owner_config_id:
         raise RuntimeArtifactManifestError("model_verifier_owner_binding_invalid")
     authority = owner["model_verifier_authority"]
     selected_owner = owner
-    if owner['schema_version'] == owner_loader.SCHEMA_VERSION_V12:
+    if owner['schema_version'] in {owner_loader.SCHEMA_VERSION_V12, owner_loader.SCHEMA_VERSION_V13}:
         from .reddog_model_verifier_selection_inputs import select_bundle, SelectionReadBudget
         if type(_read_budget) is not SelectionReadBudget:
             raise RuntimeArtifactManifestError('model_selection_read_budget_required')

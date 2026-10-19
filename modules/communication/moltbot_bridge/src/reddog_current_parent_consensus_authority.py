@@ -45,7 +45,7 @@ class CurrentParentConsensusAuthority:
             models = snapshot_model_artifacts(self.model_artifacts)
             repo = Path(self.repo_root).resolve()
             owner = consent.loader._load_owner_config(self.owner_config_path, repo=repo)
-            if owner["schema_version"] != consent.loader.SCHEMA_VERSION_V12:
+            if owner["schema_version"] not in {consent.loader.SCHEMA_VERSION_V12, consent.loader.SCHEMA_VERSION_V13}:
                 return None
             selected, boundary = consent.loader._manifest_selection_from_owner(owner, repo=repo)
             with boundary._lease_current(selected) as selection:
@@ -91,7 +91,7 @@ class CurrentParentConsensusAuthority:
 
     def _verify_leased(self, owner, repo, selection, proof, models):
         frozen, receipt, parent, policy = snapshot_parent_consensus_proof(proof)
-        if owner["schema_version"] != consent.loader.SCHEMA_VERSION_V12 or selection["owner_config_id"] != owner["config_id"]:
+        if owner["schema_version"] not in {consent.loader.SCHEMA_VERSION_V12, consent.loader.SCHEMA_VERSION_V13} or selection["owner_config_id"] != owner["config_id"]:
             return None
         owner_before, selection_before = consent.canonical_json(owner), consent.canonical_json(dict(selection))
         started = consent._now_epoch()

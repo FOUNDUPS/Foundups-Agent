@@ -83,11 +83,16 @@ def test_shared_budget_never_resets_between_selected_records(limit):
 
 
 @pytest.mark.parametrize('fault', [None, 'selection_digest', 'owner', 'expiry'])
-def test_actual_v12_current_generation_model_gate(monkeypatch, tmp_path, fault):
+@pytest.mark.parametrize('schema', [loader.SCHEMA_VERSION_V12, loader.SCHEMA_VERSION_V13])
+def test_actual_current_generation_model_gate(monkeypatch, tmp_path, fault, schema):
     from modules.communication.moltbot_bridge.src import reddog_signer_current_generation_runtime_binding as gate
     from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import digest
     from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import canonical_model_runtime_binding_digest
     values, owner, records, now = fixture(monkeypatch, tmp_path)
+    if schema == loader.SCHEMA_VERSION_V13:
+        from .consensus_nonce_test_support import metadata
+        owner.update(schema_version=schema, consensus_nonce_authority=metadata(owner, tmp_path))
+        legacy._write(values, owner)
     pair = records['author']
     fields = dict(model_selection_receipt_id=pair['selection']['receipt_id'],
         model_selection_digest=digest(pair['selection']),

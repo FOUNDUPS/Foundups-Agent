@@ -1,3 +1,38 @@
+## Protected consensus nonce supply — 2026-10-20
+
+Opt-in owner v13 adds `consensus_nonce_authority` with a purpose-bound store,
+separate integrity credential binding and permission. V1-v12 retain their exact
+shapes. The descriptor reuses the existing confined replay-store configuration,
+MAC-protected atomic state and provisioned SQLite high-water owner; startup does
+not provision credentials or create an empty authority store.
+
+`load_protected_consensus_nonce_authority(owner_config_path=..., repo_root=...,
+expected_owner_config_id=...)` returns the existing reserve/commit/rollback
+interface only after canonical owner, signed E0/current generation, private
+custody and existing-state checks. Its E0 scope requires HIGH worktree creation;
+the canonical identity child `delegate_reddog_identity` is the only optional
+additional operation. LOW, ULTRA and unrelated operations reject.
+
+Each public operation owns its current-generation lease. Reservations receive
+instance-owned handles; another instance cannot commit or roll them back.
+Withdrawal withholds further authorization but permits confined cleanup of an
+owned reservation. A post-commit rejection does not undo durable consumption.
+Cleanup failures remain errors rather than claims of successful rollback.
+`AtomicProposalAuthenticityNonceStore.validate_existing_state()` rejects absent
+or unauthenticated state and retains the existing one-step high-water crash
+recovery; it is not a promise of read-only IO.
+
+The generated 1,449-file runtime currently includes only the new custody leaf;
+the public nonce authority/current-owner leaves remain source/test validated,
+not imported or qualified installed runtime until the HIGH join.
+
+This adapter does not install HIGH signing. The existing LOW service remains
+LOW-only. HIGH composition must avoid nesting these public self-leasing methods
+inside the permission owner's generation lease; the next join requires one live
+authenticated scope for verification, secret use and nonce callbacks. Reuse the
+existing supplied-grant target transport. Native qualification/admission,
+authentic work/model/reviewer/budget inputs and retained RSI benefit remain open.
+
 ## Exact parent-consent connection — 2026-10-19
 
 Owner v11 supplies consent for an exact HIGH/worktree_create parent. Signatures bind

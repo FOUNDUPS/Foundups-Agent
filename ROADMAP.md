@@ -12,38 +12,31 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — parent consensus component validation complete (2026-10-20 JST):**
-PR2163 merged as `824d0f71dade7dabc25afa1b778f8e3eb099a1e1`, with reviewed/main
-tree equality, all12 latest PR checks and merged-main CI39272664400 /
-CodeQL39272667724 passing. Its connected Linux step passed775/1 skip; the separate
-reviewer artifact verified14 cases and4,793 exact Git hashes. Its clean publication
-worktree is archived; qualified runtime294195cdb is retained unchanged.
+**Current checkpoint — protected consensus nonce component (2026-10-20 JST):**
+Owner v13 supplies separately bound protected consensus nonce custody while
+preserving v1–v12 and LOW. Connected Windows tests pass 437 with 3 platform skips;
+independent 21 controls pass on the same 26-file freeze. Real signed files and
+MAC/SQLite transactions use explicit synthetic installation seams. A reviewed
+two-file helper extraction preserves AST behavior and restores the loader below
+its existing cap; two unchanged historical startup-test size failures remain.
 
-The next19/P0 connection (C4/I5/D5/Impact5) reuses current parent consent, reviewer
-and model verification, effect proof, signer and valve owners. Candidate owner v12
-and principal v3 separate parent/effect reviewer domains. The previously single
-model bundle becomes an explicit bounded set of independently verified selections.
-Parent/effect proof v2 preserves the existing16-KiB cap and policy restriction.
-Parent-v2 RPC releases the generation fence only during the existing signer call,
-then reacquires and reverifies. Current-use checks recheck generation, peer and
-clock after verification. Legacy versions and the LOW service boundary remain.
+Hosted startup CI subsequently caught a legacy-owner tuple predicate defect.
+The repair passes the full local startup selection (901 passed, 5 platform skips, zero failures/errors)
+including v12/v13 signed-model gates; new-head CI and independent
+publication review remain required. Earlier component runs are historical.
 
-Independent review passed20 signed-model/current-use controls and17 Linux RPC/
-nonce controls against44 frozen source files. It reproduced and repaired late
-expiry/clock-rollback defects. The connected59-suite Windows run passes1,545/22 platform skips, no failures or
-errors. Explicit repository test roots repaired cross-module fixture interference;
-production guards stayed intact. Final45-file freeze adds one schema-negative
-fixture correction and an independently reviewed EOF-only change. Exact-source
-publication is recorded separately; installed HIGH qualification remains pending.
+A subsequent actual-reader check exposed fresh Windows CRLF rejection.
+The explicit 324 KiB paired byte contract now passes LF/CRLF and exact
+boundary checks; pretty JSON, digest/member bounds and source limits stay.
+See [byte evidence](docs/operations/RSI_SWARM_DISPATCH.md#windows-manifest-byte-contract--2026-10-20).
 
-The installed HIGH service still needs protected custody/consensus nonce
-composition and authentic work, reviewer/model and budget inputs. The existing
-factory/signer/socket owners provide the extension points; do not create a second
-orchestrator or silently widen LOW. The v36 accepted synthetic handshake remains
-a prerequisite result, not author execution; all seven owned units were absent,
-while root exit2 left clean service closure false. Earlier native attempts,
-component performance samples and source closures remain historical in the
-[canonical dispatch evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+Next 19/P0 (C4/I5/D5/Impact5): connect current parent/effect and nonce operations
+under one live authenticated lease through the existing signer factory, avoiding
+nested generation locks. Installed HIGH policy/service composition and authentic
+work, reviewer/model and budget inputs remain open. The LOW service and frozen
+runtime294195cdb stay unchanged. Earlier parent-consensus evidence and publication
+receipts are preserved in [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+This checkpoint is component validation, not installed HIGH or author admission.
 
 R15 still requires one admitted author, independent evaluation, authorized
 activation/rollback, a later invocation benefiting from retained evidence and
