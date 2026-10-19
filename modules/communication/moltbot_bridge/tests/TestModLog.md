@@ -1,3 +1,14 @@
+## Parent-consensus publication structural repair — 2026-10-20
+
+Hosted CI39281556290: signing composition1,467 passed/1 failed/3 skipped; failure
+was the682-line owner loader exceeding675. The later startup step was skipped.
+Local single-case red reproduces the exact bound. Focused six-suite rerun passes
+249/2 platform skips in288.54s. All8 manifest tests pass in87.22s; three JS
+compatibility commands exit0. Unchanged helper extraction
+has independent57 differential cases, two cold imports and AST equivalence;
+no guard increase or validation removal. Exact follow-up runs and source binding
+are recorded in the canonical dispatch evidence. WSP00/5/6/22/62/71/97.
+
 ## Parent-consensus connection — 2026-10-20
 
 Base5862eea0; WSP00/5/6/11/15/22/62/77/97. Independent signed-model/current-use

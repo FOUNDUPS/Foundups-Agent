@@ -1,3 +1,21 @@
+## Parent-consensus publication gate repair — 2026-10-20
+
+PR2164 head51f9edce failed the hosted signing regression:1,467 passed/1 failed/
+3 skipped,119.95s. Loader682 exceeded the unchanged675-line WSP62 guard; the
+subsequent startup step did not run. Local single-case red reproduces it.
+The exact existing root-separation helper now lives in the owner-input module,
+re-exported at its original import path. Helper and remaining module ASTs are
+unchanged; loader652/owner263. Independent57 differential cases and two cold
+import orders pass. This adds no module and changes no runtime authority or cap.
+
+Evidence under `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/parent-consensus-publication-20261020/`:
+`loader-size-red.xml`/`.log` preserve the reproduced failure;
+`loader-size-review/independent-review.json` SHA256
+`8b2ec137e42131fdb03b8e4e11f1eeafd231153ac2c3fb05eadc42d6da5e560e`
+binds the accepted extraction. Runtime manifest inventory remains1,448; source
+hashes and two exact digest pins are regenerated. Validation/publication receipts
+remain separate from native execution. No worker admission or retained gain.
+
 ## Parent-consensus connection — 2026-10-20
 
 WSP00/5/6/10/11/15/22/48/50/62/71/77/97; selected19/P0 (C4/I5/D5/Impact5).

@@ -1,3 +1,13 @@
+## Parent-consensus publication structural repair — 2026-10-20
+
+PR2164 CI39281556290 exposed the owner loader at682 lines against its unchanged
+675-line guard. Moved the existing outcome-authority root-separation helper into
+the existing owner-input module; loader import preserves its original access path.
+The helper and remaining module ASTs are unchanged. Independent review passes57
+before/after cases and both cold import orders; loader652/owner263. Runtime1448
+inventory/caps stay fixed; regenerate source digest pins. This repairs a structural
+publication gate, not installed HIGH admission. WSP00/5/6/10/22/50/62/71/97.
+
 ## Parent-consensus connection — 2026-10-20
 
 WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Extended existing owner/principal,

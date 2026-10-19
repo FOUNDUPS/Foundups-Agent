@@ -61,6 +61,7 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 from .reddog_signer_system_service_owner_inputs import (
     load_system_service_signer_identity, load_system_service_model_runtime_verifier,
     _validate_model_verifier_authority, _validate_owner_paths, _owner_anchor_root,
+    _validate_outcome_authority_root_separation,
 )
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path, validate_runtime_root_path,
@@ -613,37 +614,6 @@ def _validated_outcome_owner_paths(
         if path != root / expected[prefix]:
             raise RuntimeArtifactManifestError("verified_outcome_owner_state_invalid")
     return roots
-
-
-def _validate_outcome_authority_root_separation(
-    value: Mapping[str, Any],
-    *,
-    owner_root: Path,
-    state_root: Path,
-    witness_root: Path,
-    installation_root: Path,
-) -> None:
-    anchor = Path(value["anchor_path"])
-    if not anchor.is_absolute():
-        anchor = Path(value["runtime_root"]) / anchor
-    existing_roots = tuple(
-        Path(value[name]).resolve()
-        for name in ("runtime_root", "high_water_root", "witness_root")
-    ) + (owner_root, anchor.parent.resolve())
-    if any(
-        first == second or first in second.parents or second in first.parents
-        for first, second in (
-            (state_root, witness_root),
-            (state_root, installation_root),
-            (witness_root, installation_root),
-            *(
-                (root, other)
-                for root in (state_root, witness_root, installation_root)
-                for other in existing_roots
-            ),
-        )
-    ):
-        raise RuntimeArtifactManifestError("verified_outcome_owner_root_overlap")
 
 
 def _require_cli_paths(
