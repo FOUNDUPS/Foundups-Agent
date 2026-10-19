@@ -1,3 +1,17 @@
+## RSI native requester evidence and publication — 2026-10-19
+
+WSP00/5/10/15/22/48/97. PR2159 mergedbb9d3f802; all 19 recorded exact-head
+check runs passed (12 distinct check names), as did main CI39222572582/
+CodeQL39222573026; reviewed/main trees identical. Runtime
+1e203d5 qualifies2683 files independently. Synthetic v21 advances through
+installation/revocation and root/issuer/target readiness, but requester rejects;
+the hidden backend exception remains the next diagnostic target. All7 owned
+units absent after independently checked cleanup; historical reset error retained.
+Clock experiment restored the service but failed its fixed stability criterion.
+Existing post-valve lease issuance is connected in source; trusted parent evidence
+and native elevated authority remain separate gaps. No worker/retained RSI claim.
+Existing roadmap, backlog, dispatch and module logs carry the current evidence.
+
 ## RSI native startup evidence and descriptor cost — 2026-10-16
 
 WSP00/15/22/48/97. PR2147 merged6fb93580c with passing exact-head/main checks.

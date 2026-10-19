@@ -1,3 +1,71 @@
+## Native requester rejection and source publication — 2026-10-19
+
+PR2159 head `1e203d5de9bb8c6ee17f2f5e0d52bffb2317272d` merged as
+`bb9d3f802fc3f9283c5f7b611f444dce0e56470e`. All 19 recorded exact-head check
+runs passed (12 distinct check names); main CI39222572582/CodeQL39222573026
+also succeeded. Both trees are
+`c7045432ea7a2e065e6de5ca0f9d711e947354e5`. The owned source checkout is clean
+and retained because the active native preparation still references it.
+
+The independently checked fresh runtime has2683 files/358 directories:1246 exact
+Git sources and1437 pinned runtime files. Both confined profiles pass; all four
+absent-owner entrypoints return2. This is negative qualification, not authenticated
+startup. Deferred optional imports are not qualified by these selected paths.
+Descriptor SHA256 `86472215f3ddea3eca8cd4625d321e65372d9b3ef0526606777b9746dd829d4a`.
+
+V21 uses synthetic authority only. Installation and revocation pass. Root, issuer
+and target reach socket readiness; target serves one request and exits0. Requester
+exits2, preserving backend/runtime `REJECT_SIGNER_RESPONSE_INVALID`; the outer
+handshake-verifier reason is `signer_peer_handshake_response_rejected`. Client
+transport/JSON failures have distinct SOCKET codes. The target's caught exception
+is unobserved: do not assert which backend check failed from this generic code.
+Root start-timeout follows requester exit by3.58855s and is not established as
+the cause. The launcher reports TimeoutExpired during closure and target
+reset-failed_exit_1; all7 owned units are independently not-found/inactive/dead
+afterward. Preserve both the historical cleanup error and later absence.
+
+The reversible clock experiment collected1800 guest samples/180 host pairs and
+restored the service. Its fixed final60s host-interval criterion failed:
+minimum54.391405ms variation exceeds50ms even after round-trip uncertainty.
+Later service restarts have unknown initiator. No synchronization setting,
+readiness policy, production clock guard or threshold was changed. V21 separately
+passed the existing NTP/readiness gate for30.099512s; neither observation predicts
+future stability or establishes the v20 clock-regression cause.
+
+Current source reconciliation: `GovernedValveUseTimeAuthorityResolver` deliberately
+returns no lease. `ResidentQueueExecutionValveStageHandler` already calls the
+injected `ExternalSignerAuthoritativeUseLeaseIssuer` after accepted valve checks
+and rechecks current inputs. Do not duplicate this connection. Parent consensus
+and sovereign-verifier reasons remain unresolved by the current collector; the
+native grant service deliberately permits only LOW handshake scope while effect
+leases require HIGH/ULTRA. Generic elevated hooks exist, but no installed native
+effect composition was found in the scoped audit. Trusted parent evidence and
+qualified effect service composition remain later gates; LOW must not be widened.
+
+WSP15 selects the existing handshake dependency19/P0; its next bounded diagnostic
+slice is18/P0(C3/I5/D5/Impact5). Reuse the launcher's bounded exception-location
+mechanism for the target, with independent review before another disposable run.
+No local source repair is justified until the hidden exception is observed.
+R15 author/verifier, activation/rollback, retained use and autonomous selection
+remain open. Paid provider calls0; coordinator cost unknown. Codex independent
+review is not OpenClaw/Hermes worker provenance.
+
+Evidence root remains `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`:
+
+| Existing evidence | SHA256 |
+| --- | --- |
+| `installed-execution-qualification/all-role-1e203d5de-v1/independent-readonly-review/independent-review.json` | `4b046d603ee420d790e891aa7beb0654883c690bf422b8c18a82acabe7846efc` |
+| `native-installation-inputs/current-time-independent-review/v21-independent-review.json` | `2374d38884615ea2a77383a171ddfa7d19e3dfbbf24cdb19d79419b4961f9460` |
+| `native-installation-inputs/full-fixture-review/host-sync-experiment-2026101901/independent-experiment-verdict.json` | `eb407c0bf840a7afd4449d8641f7072f3c83d01274a90032fbe3ee70949934d0` |
+| `r15-post-handshake-dependency-audit.json` (historical audit preserved; current-source correction appended) | `2454f0a7824b49f56873f74a27ca5dc39452dbd659cdfe0afe4ecd21db96e9da` |
+
+Publication receipt: `descriptor-path-publication-review/pr2159-main-ci-closure.json`.
+Exact-head rollup: `descriptor-path-publication-review/pr2159-exact-head-checks.json`,
+SHA256 `6dd11eb2fb2dbebb579ae4c6454d0c987e21f0801cdc73d4ac36efa3c0b61a26`.
+Holo owner query remains rejected with HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH;
+freshness UNKNOWN/index gap true. Direct exact-source retrieval supplies this
+scope; no authority reindex or shared checkout mutation was performed.
+
 ## First LOW control identity and native preparation — 2026-10-16
 
 Latest closure: PR2147 head `88690a4f5180e7224096d40afcc95a7efeac9b6d`

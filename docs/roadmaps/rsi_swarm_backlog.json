@@ -1889,9 +1889,9 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.issuer_custody_20261016",
-    "base_commit": "ed6da441f26a9847a539fb4dbe6315b0701cdedf",
-    "selected_action": "Reduce measured descriptor overhead and qualify clock stability before fresh native handshake",
+    "observation_path": "current_observation.native_requester_20261019",
+    "base_commit": "bb9d3f802fc3f9283c5f7b611f444dce0e56470e",
+    "selected_action": "Observe the hidden target backend exception with bounded diagnostics before repairing the native requester rejection",
     "status": "IN_PROGRESS",
     "wsp15": {
       "complexity": 3,
@@ -1902,9 +1902,26 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "PR2147 merged and exact-main checks passed; runtime88690 independently qualified. V19 issuer-readiness timeout and v20 pre-action permission-time rejection preserved. Reduce pure descriptor computation without filesystem caching; separately test clock-source stability with restoration. No native author or retained benefit."
+    "next_action": "PR2159 merged with passing exact-head/main checks; runtime1e203 independently qualified. Synthetic v21 passes installation/revocation and root/issuer/target readiness, then requester rejects. Preserve cleanup and clock-experiment failures. Independently review bounded target diagnostics before one fresh attempt; no guard/TTL relaxation or automatic retry."
   },
   "current_observation": {
+    "native_requester_20261019": {
+      "source_commit": "1e203d5de9bb8c6ee17f2f5e0d52bffb2317272d",
+      "merged_main_commit": "bb9d3f802fc3f9283c5f7b611f444dce0e56470e",
+      "reviewed_and_merged_tree": "c7045432ea7a2e065e6de5ca0f9d711e947354e5",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#native-requester-rejection-and-source-publication--2026-10-19",
+      "publication": "PR2159 all 19 recorded exact-head check runs passed (12 distinct check names), as did exact-main CI39222572582 and CodeQL39222573026; owned source checkout clean and still required by active pinned preparation.",
+      "qualification": "2683 files/358 directories,1246 exact Git sources and1437 runtime files independently verified. Deny/Unix profiles and four absent-owner exit2 checks passed. Selected entrypoints only; optional deferred imports untested.",
+      "native_trial": "Synthetic v21 installation/revocation passed. Root/issuer/target sockets ready; target served1/exited0; requester exited2 with propagated REJECT_SIGNER_RESPONSE_INVALID. Underlying target exception unobserved. Total post-readiness execution101.6s; not a comparable startup-gain experiment.",
+      "cleanup": "Launcher closure TimeoutExpired and target reset-failed_exit_1 retained. Root timeout followed requester rejection by3.58855s. All7 owned units independently not-found/inactive/dead afterward; no identity skip or surviving unit.",
+      "clock_experiment": "Completed/restored; fixed final60s host-interval criterion failed54.391405ms>50ms. Later restarts have unknown initiator. No readiness promotion or permanent configuration change. V21 separately passed existing30.099512s NTP readiness.",
+      "admission_reconciliation": "Existing post-valve lease issuer connection confirmed. Resolver None is intentional. Authenticated parent consensus/sovereign evidence and qualified effect-capable native composition remain later gaps; native LOW handshake service must stay restricted.",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "next_dependency": "Capture bounded target exception locations under independent review; fix demonstrated cause only. Then re-observe actual authority/provider/parent-evidence state before R15 dispatch."
+    },
     "issuer_custody_20261016": {
       "source_scope": "PR2147 merged6fb93580c with exact-head11 and exact-main CI/push checks passing; reviewed/main trees match. Frozen runtime88690 independently qualified. V19 issuer readiness timed out; v20 rejected before action at permission epoch check. No native author or retained gain.",
       "details": "docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16",

@@ -12,24 +12,31 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — native startup integration (2026-10-16):**
-PR2147 merged at `6fb93580c`; all 11 exact-head checks and exact-main CI/push
-checks passed, with identical reviewed/main trees. Its current-time authorization
-repair is published. Runtime `88690a4f5` is independently qualified and frozen
-(2,691 files, 1,254 exact Git Python sources); qualification is not admission.
-Fresh synthetic v19 passed installation/revocation but timed out awaiting issuer
-readiness. V20 rejected before its caller action in the permission-time guard;
-issuer elapsed 44.97 monotonic versus 40.98 wall seconds. Clock regression is
-supported, but exact guard values and the responsible synchronization mechanism
-were not captured. All seven owned units were absent/inactive/dead afterward.
-Bounded samples identify repeated descriptor/runtime validation. The next layer
-reduces pure descriptor computation while retaining fresh filesystem and authority
-checks; a separate reversible clock-source experiment is under review. Neither
-work changes expiry, grants, process timeouts or production clock checks.
-Existing R15 still requires authentic worker admission, independent evaluation,
-authorized activation/rollback, later retained benefit and bounded next selection.
-No native author or retained RSI gain is demonstrated.
-[Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
+**Current checkpoint — native requester rejection (2026-10-19):**
+PR2159 merged at `bb9d3f802`; all 19 recorded exact-head check runs passed
+(12 distinct check names), as did exact-main CI/CodeQL. Reviewed head `1e203d5de`
+and merged main have identical trees. The
+descriptor repair preserves current filesystem, authority, expiry and clock
+checks. Its 44% measured improvement applies to pure descriptor computation only.
+The fresh runtime independently qualifies 2,683 files, including 1,246 exact Git
+Python sources; optional deferred imports outside the selected entrypoints remain
+untested. No authenticated author admission follows from qualification.
+
+Synthetic v21 passed installation/revocation and reached root, issuer and target
+socket readiness. Target served one request and exited0; requester exited2 with
+`REJECT_SIGNER_RESPONSE_INVALID`. Its underlying backend exception is not yet
+observed. Root timeout followed requester rejection; a target cleanup-reset error
+is retained even though all seven owned units were independently absent afterward.
+The separate clock experiment restored the service but failed its fixed 50ms
+host/guest stability criterion (minimum54.39ms); no clock-policy change was admitted.
+
+Next18/P0: use bounded target exception-location evidence to identify the actual
+rejection before repairing or retrying. The post-valve lease issuer connection
+already exists; authenticated parent consensus/sovereign evidence and a qualified
+effect-capable native composition remain distinct later gaps. LOW handshake
+authority must stay LOW. R15 still needs real author execution, independent
+evaluation, activation/rollback, later retained benefit and bounded next selection.
+[Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#native-requester-rejection-and-source-publication--2026-10-19).
 
 **Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
 The candidate composes the existing LOW issuer, credential resolver, durable

@@ -1,3 +1,20 @@
+## Native requester rejection after descriptor publication — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. PR2159 mergedbb9d3f802 with all 19 recorded exact-head
+check runs passing (12 distinct check names), plus main CI/CodeQL; treec7045432
+equals reviewed1e203d5. Independent
+qualification verifies2683 files/358 directories,1246 exact Git sources and1437
+runtime files; deny/Unix profiles preserve confinement and four absent-owner
+entrypoints reject. Optional lazy imports are explicitly outside this proof.
+
+Synthetic v21 passes installation/revocation. Root/issuer/target reach readiness;
+target serves1/exits0 and requester exits2 with REJECT_SIGNER_RESPONSE_INVALID.
+No underlying target exception is captured. Root timeout is later; target
+reset-failed_exit_1 remains failure evidence, while current7-unit absence is
+independently verified. No author ticket or retained gain. Existing launcher
+diagnostics are the next18/P0 slice; guards and timeout limits stay fixed.
+See existing dispatch and tests/TestModLog for source-bound evidence.
+
 ## Installed descriptor validation cost — 2026-10-16
 
 WSP00/5/15/22/48/50/71/84/97. Existing descriptor owner now checks immediate

@@ -1,3 +1,35 @@
+## Native qualification and v21 handshake evidence — 2026-10-19
+
+Exact head1e203d5; identical merged treec7045432 atbb9d3f802. All 19 recorded
+exact-head check runs passed (12 distinct check names), as did main CI39222572582
+and CodeQL39222573026. This is publication
+validation, not a production RSI proof. Existing external qualification owner
+`next-startup/installed-execution-qualification/qualify_all_role_runtime.py`
+ran deny/Unix profiles on fresh20261019-1e203d5de-all-role-v1: both exit0.
+Independent reopen verifies2683 files/358 directories,1246 Git sources,1437 runtime
+files,408 inventory-bound loaded modules, two guards and four absent-owner mains
+returning2 in each profile. Optional imports and writable API/scratch mounts remain
+explicit limits. No credentials, work authority or real author execution proved.
+
+V21 refresh controls:14 refresh,18 runner,6 binding and4 native adapter pass.
+Independent6 binding and8 path-predicate controls pass. Counts overlap; do not sum.
+Earlier Windows POSIX-path error, native stale fixture-date error and missing
+archive-harness input are preserved before successful corrected reruns. Four
+generation receipt checks pass and a wrong digest rejects in a private namespace.
+
+Actual existing runner `run_full_fixture.py --execute-fresh-v21`, in a private
+mount namespace, passes NTP readiness30.099512s, installation and revocation;
+handshake exits2 after101.6s post-readiness. Root/issuer/target reach readiness;
+target handles1/exits0, requester exits2 with backend/runtime rejection. The
+underlying target exception is not captured. Independent source binding covers19
+relevant files. All7 units absent afterward; retain target reset-failed_exit_1 and
+later root timeout rather than describing launcher closure as successful.
+
+Separate clock experiment:1800 guest/180 host samples, service restored;
+predeclared final60s stability FAIL54.391405ms>50ms. No threshold or clock change.
+Exact receipt paths/hashes and native limits are in the existing dispatch section
+`native-requester-rejection-and-source-publication--2026-10-19`.
+
 ## Installed descriptor validation cost — 2026-10-16
 
 Author focused native suite:128 passed, zero failures/skips,7.51s. Paired public
