@@ -1890,8 +1890,8 @@
   },
   "current_selection": {
     "observation_path": "current_observation.native_requester_20261019",
-    "base_commit": "122fec8c6d8961cb422eca6f8cd014caa899e7bd",
-    "selected_action": "Independently qualify the timeout-forwarding source repair and execute a fresh disposable connection with working target diagnostics",
+    "base_commit": "294195cdb96e1ef70d146bb3e6b3fa16ea71e37e",
+    "selected_action": "Localize the target backend rejection after the accepted inner signing response, then repair its demonstrated cause",
     "status": "IN_PROGRESS",
     "wsp15": {
       "complexity": 3,
@@ -1902,7 +1902,7 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "V33 accepted grant signing but handshake failed and target observer setup_failed (zero callbacks); no current transport cause. Protocol observer candidate passes actual installed setup. Separate source regression config30 -> omitted client5 repaired; Windows166pass/2skip, independent Linux73pass/0skip. Qualify exact committed runtime, then use explicitly bounded waits and fresh source-bound trial. Signed TTL30 and authority unchanged; no author admission or RSI gain."
+    "next_action": "Exact294 runtime independently qualified; v34 inner client accepted, issuer/target exit0, requester RESPONSE_INVALID. All7 services absent, observation/cleanup complete. Fixed target backend rejections can be sanitized to this public code. Observe exact bounded return sites before repair; no timeout, expiry or authority relaxation. Native author admission and retained RSI benefit remain unproved."
   },
   "current_observation": {
     "native_requester_20261019": {
@@ -1934,9 +1934,22 @@
       "retained_rsi_gain_demonstrated": false,
       "paid_provider_calls": 0,
       "coordinator_cost": null,
-      "next_dependency": "Lifecycle correction evidenced in v30; identify and repair the actual backend rejection branch without weakening LOW authority/deadlines. Authentic parent/work/model/budget/distinct-verifier inputs remain unproved; existing post-valve issuance stays connected.",
+      "next_dependency": "Localize exact target backend rejection through existing bounded local return evidence, repair demonstrated cause, and re-test. Authentic work/model/budget/distinct-verifier inputs and admitted worker execution remain separate gates.",
       "v33_response_followup": "Native install38.391s/revocation2.063s pass; handshake2/93.383s,full133.943s. Inner/outer accepted, later send C_RAISE. Target observer setup_failed because canonical Protocol metaclass was rejected;0callbacks, no timeout/errno established. All7absent,cleanup complete. Review81931278a0755550d3b14d40e200235f589fcf12c8d5e09a89effaf95271fc10. Candidate monitor24author/4independent controls and actual installed-module setup comparison; source repair separately reproduced config30 fallback5. Exact source independent review0c29a5f54fb1502eee93fbe6492cedf2cd9ef189b14ac319d53fb280c2d049c8; runtime not yet qualified.",
-      "pr2161_publication": "Merged122fec8c6 tree8b473f equal reviewed; exact-main CI39249090093 7/7 and CodeQL39249089610 4/4 pass. Closure8812f8f1ef40409461783fea3499c0c3c9357efc89d5b1015f434d42f6274512."
+      "pr2161_publication": "Merged122fec8c6 tree8b473f equal reviewed; exact-main CI39249090093 7/7 and CodeQL39249089610 4/4 pass. Closure8812f8f1ef40409461783fea3499c0c3c9357efc89d5b1015f434d42f6274512.",
+      "v34_response_followup": {
+        "source_commit": "294195cdb96e1ef70d146bb3e6b3fa16ea71e37e",
+        "descriptor_sha256": "6ab8c14fb905666d1f5d04252dec0234747c2a9b1529657d95ffaba8fc70d950",
+        "qualification": "Independent review verifies2683 files/358 directories, both confined profiles and four absent-owner entrypoints; optional deferred imports unqualified.",
+        "qualification_review_sha256": "101f45f8997a14698bdd921b1463c3345d94b8214d2404a6137eeb40311d2116",
+        "trial": "Installation0/37.769s and revocation0/2.046s; handshake2/93.705s,full133.632s. Issuer inner/outer and target-client responses accepted; issuer/target exit0. Requester RESPONSE_INVALID. Target28/issuer41 callbacks; no cap exhaustion or observed C_RAISE. All7 absent, observation/cleanup complete, no cleanup errors.",
+        "independent_review_sha256": "7ebf08818f885e867d9d0a7db38423eae587372fc3180fca630327132f22efc4",
+        "interpretation": "Public response code can sanitize a target backend rejection, not necessarily malformed transport data. Root handled10 counts returned handlers including rejections; no causal root failure established.",
+        "native_author_ticket": false,
+        "production_rsi": false,
+        "paid_model_calls": 0,
+        "coordinator_cost": null
+      }
     },
     "issuer_custody_20261016": {
       "source_scope": "PR2147 merged6fb93580c with exact-head11 and exact-main CI/push checks passing; reviewed/main trees match. Frozen runtime88690 independently qualified. V19 issuer readiness timed out; v20 rejected before action at permission epoch check. No native author or retained gain.",

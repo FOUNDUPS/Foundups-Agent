@@ -11,8 +11,11 @@ candidate correction passes actual installed-module setup controls. Separately,
 authenticated timeout30 silently used nested-client default5. The existing supply
 loader now accepts a bounded timeout keyword and the initial backend forwards
 its authenticated setting. Default5 and signed expiry remain unchanged. Windows
-validation166 passed/2 skips; native qualification is pending. Next18/P0 is exact
-runtime qualification and a fresh connection trial. LOW no-effect review remains distinct from upstream author
+validation166 passed/2 skips. Exact294195cdb runtime independently qualifies;
+v34 receives accepted inner signing with issuer/target exit0. Outer handshake
+rejects RESPONSE_INVALID; all7 services absent, observation/cleanup complete.
+Next18/P0 localizes the target backend return before any further repair. LOW
+no-effect review remains distinct from upstream author
 and elevated materialization. [Receipts](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
 
 ## Exact runtime and v29 lifecycle reconciliation — 2026-10-19

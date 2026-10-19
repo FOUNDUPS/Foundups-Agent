@@ -140,13 +140,33 @@ generation/revocation checks or acceptance. This is a per-operation wait, not an
 end-to-end deadline. Windows connected validation:166 passed,2 Linux-dependent
 skips. Independent Linux validation73 passes with no skips, including real
 temporary AF_UNIX/process-lock and symlink controls. Both changed suites are in
-the existing signing-composition CI step. Runtime qualification and native benefit
-for this source are pending.
+the existing signing-composition CI step. Those source tests alone do not prove
+native benefit; the later qualification and trial are recorded below.
 
-Current WSP15 next18/P0 (C3/I5/D5/Impact5): independently review and qualify the
-exact repaired source, then execute a fresh disposable connection with the
-corrected observer and explicit bounded wait configuration. Do not repeat the
-unchanged diagnosis or widen authority. PR2161 merged122fec8c6 after exact-head
+Exact source `294195cdb96e1ef70d146bb3e6b3fa16ea71e37e` independently qualifies
+2,683 files/358 directories under descriptor
+`6ab8c14fb905666d1f5d04252dec0234747c2a9b1529657d95ffaba8fc70d950`.
+Both confined profiles pass, four absent-owner entrypoints reject, and all nine
+qualification units are absent. Optional deferred imports remain unqualified.
+The runtime/source delta contains only the two timeout-forwarding owners.
+
+Fresh v34 install37.769s/revocation2.046s pass; handshake exits2 after93.705s,
+full133.632s. Issuer inner/outer signing returns accepted at monotonic194.301334642
+and201.218207854. The target client returns accepted at201.218680125. Issuer and
+target exit0; requester exits2 with `REJECT_SIGNER_SOCKET_RESPONSE_INVALID`.
+Target observer is enabled28callbacks and issuer41; neither cap is exhausted and
+neither records C_RAISE. These local observations do not prove every downstream
+operation succeeded. Independent review verifies25 source bindings,12 refreshed
+outputs/9 pins and four invocation identities; all seven units are absent,
+observation/cleanup complete and no cleanup errors. Root handled10 counts returned
+connection handlers, including rejected/error responses, not successful LOADs.
+Its later generic error is not a demonstrated cause of the target rejection.
+
+Current WSP15 next18/P0 (C3/I5/D5/Impact5): localize the target backend rejection
+using bounded return-site evidence, then repair the demonstrated cause. The
+protocol can sanitize fixed backend rejection codes to the same public
+RESPONSE_INVALID; that code alone does not establish a parser fault. No authority,
+signed lifetime or acceptance relaxation follows. PR2161 merged122fec8c6 after exact-head
 checks and independent review; merge tree equals reviewed8b473f. Exact merged-main
 CI39249090093 passes7/7 and CodeQL39249089610 passes4/4.
 
@@ -188,6 +208,10 @@ All paths below are relative to the existing evidence root
 
 | Evidence | SHA256 |
 | --- | --- |
+| `installed-execution-qualification/all-role-294195cdb-v1/independent-readonly-review/independent-review.json` | `101f45f8997a14698bdd921b1463c3345d94b8214d2404a6137eeb40311d2116` |
+| `native-installation-inputs/current-time-independent-review/v34-independent-review.json` | `7ebf08818f885e867d9d0a7db38423eae587372fc3180fca630327132f22efc4` |
+| `native-installation-inputs/current-time-independent-review/v34-target-local-transport.json` | `542d0df516c4e871effd02acc25b4ed5d483d6104e27cade07f65261058cd628` |
+| `native-installation-inputs/current-time-independent-review/v34-root-service-interpretation.json` | `94bf193fc7580306332ac3aefa2fdfbc27b69f00927fe1555209c7490a971f68` |
 | `installed-execution-qualification/all-role-ec7a0e438-v1/independent-readonly-review/independent-review.json` | `6a6dee7cded7f5b3c46f2a5b127d231d0151b6535c7e0072e717dc530bded3aa` |
 | `installed-execution-qualification/guard-cost-abba-ec7a0e438-20261019/independent-measurement-review.json` | `a15c0bea40ec0a945bc6b83a21fb28e944e05732322d0332ab91a6c122bd7abe` |
 | `native-installation-inputs/current-time-independent-review/v28-independent-review.json` | `837c89b528fc9a46d348b2d2908869472d4700ddcc1a6e1fe8a6036d4371c10d` |

@@ -47,9 +47,16 @@ cause. A narrowly repaired observer passes an actual installed-module setup prob
 Separately, a source regression proves the authenticated 30-second setting was
 not forwarded to the nested client, which used its 5-second default. The focused
 repair forwards the setting and preserves strict bounds and signed expiry.
-Next 18/P0 (C3/I5/D5/Impact5): independently review and qualify that exact source,
-then test a fresh disposable connection with working diagnostics and explicit
-bounded waits. Native success remains unproved; signing is not author admission.
+Exact source `294195cdb` now passes independent installed qualification. V34
+installation/revocation pass; the target receives an accepted inner signing
+response and both issuer and target exit zero. The requester still rejects with
+`REJECT_SIGNER_SOCKET_RESPONSE_INVALID`. No observed C send/receive failure or
+exhausted diagnostic cap explains this rejection. All seven services are absent;
+observation and cleanup complete. Fixed backend rejections can be sanitized to
+that same public code, so it does not by itself prove malformed response data.
+Next 18/P0 (C3/I5/D5/Impact5): identify the exact target backend rejection through
+bounded local return evidence, then repair the demonstrated cause. Keep authority,
+signed expiry and acceptance unchanged. Signing is not author admission.
 
 The current effectful integrated author path has a separate dependency: its parent
 consensus verifier lacks a discovered installed trusted provider/composition;

@@ -13,6 +13,16 @@ Independent Linux validation73 passed with no failures/skips, including the
 Windows-skipped process-lock/AF_UNIX and symlink controls. Existing signing CI
 now explicitly includes both changed suites; no new workflow or relaxed gate.
 
+Exact source294195cdb independently passes installed qualification for both
+confined profiles,2,683 files/358 directories and four absent-owner entrypoints.
+Fresh v34 install37.769s/revocation2.046s pass; handshake exits2 after93.705s,
+full133.632s. Target observer enabled28callbacks, issuer41, caps not exhausted.
+Issuer inner/outer and target-client return accepted; issuer/target exit0.
+Requester rejects RESPONSE_INVALID. All7 services independently absent,
+observation/cleanup complete. This is a controlled failure, not author execution.
+Root handled10 counts completed connection handlers, including rejections; it
+does not prove10 successful LOADs or a causal root failure.
+
 V31 exact local returns identify factory rejection at line192. Canonical audit
 decoder controls independently reject the preparer's prior plain hex. V32 repair
 has nine codec controls (six author plus three held-out); final-byte author
