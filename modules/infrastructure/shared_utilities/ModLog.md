@@ -1,6 +1,25 @@
 # WSP Module ModLog: Shared Utilities
 **WSP Compliance**: WSP 22 (Module ModLog and Roadmap Protocol)
 
+## 2026-10-19 - Preserve path semantics while removing POSIX containment exceptions
+
+WSP5/6/15/22/50/62/84/97. Existing runtime guard profiling identified repeated
+lexical containment exceptions. Reuse the same normalization; compare POSIX
+anchors and component prefixes directly, and retain Windows `pathlib`
+comparison through `is_relative_to`. Surrounding filesystem, link, descriptor,
+authority and expiry checks remain in place. No validation cache or new owner.
+
+Independent review rejected an initial raw-parts variant for six Windows
+Unicode mismatches. Revised production bytes match the original in12,717 cases
+on each Windows3.12.10/Linux3.12.3. Focused Windows tests49pass/1skip (symlink
+creation unavailable). Pure predicate timings do not establish guard latency,
+native admission or retained RSI gain. Connected Linux safety/lock/runtime-guard/
+isolation tests111pass/8Windows skips, manifest8pass and three Node entrypoints
+pass. Installed process observations in unit tests remain synthetic. Existing
+Windows/Linux CI jobs now run the related path tests. No native qualification
+or publication of this production candidate is claimed by those results.
+
+
 ## 2026-10-13 - Close optional SDK assumption exposed by remote CI
 
 WSP6/22/50/97: remote CI failed three offline residency tests because their mock

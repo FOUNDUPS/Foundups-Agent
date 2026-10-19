@@ -1,3 +1,36 @@
+## Native requester rejection after descriptor publication — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. PR2159 mergedbb9d3f802 with all 19 recorded exact-head
+check runs passing (12 distinct check names), plus main CI/CodeQL; treec7045432
+equals reviewed1e203d5. Independent
+qualification verifies2683 files/358 directories,1246 exact Git sources and1437
+runtime files; deny/Unix profiles preserve confinement and four absent-owner
+entrypoints reject. Optional lazy imports are explicitly outside this proof.
+
+Synthetic v21 passes installation/revocation. Root/issuer/target reach readiness;
+target serves1/exits0 and requester exits2 with REJECT_SIGNER_RESPONSE_INVALID.
+No underlying target exception is captured. Root timeout is later; target
+reset-failed_exit_1 remains failure evidence, while current7-unit absence is
+independently verified. No author ticket or retained gain. Existing launcher
+diagnostics are the next18/P0 slice; guards and timeout limits stay fixed.
+V22 repeats rejection and exposes observer coverage debt: its event cap was
+consumed by handled containment checks. Revised actual-interpreter controls
+cover noise, null-line offsets and exact client return observations. V24 records
+TimeoutError -> CONNECT_FAILED -> inner verification rejection. Its unwind
+offset does not establish the socket operation or issuer cause. All7 units are
+independently absent. The separate credential-free runtime guard observation
+measures3.769s/2.706s; it is not a request-latency or retained-benefit measurement.
+See existing dispatch and tests/TestModLog for source-bound evidence.
+V25 retains the originating RAISE at client304 (`recv`), then observes issuer
+root-client412 rejecting zero-or-over-limit response bytes. The branch and
+causality are unknown. All7 units are independently absent. V26 extended only
+diagnostic observation; v27 disabled issuer/target observers and still rejected
+the requester after installation/revocation pass. All seven v27 units are absent;
+no inner socket operation is proved by v27 and the different-boot pair establishes
+no causal gain. Next: qualify the independently reviewed containment candidate
+and measure full native cost. Connected 111 passed/8 Windows skips; candidate
+native runtime remains unqualified. Signed lifetimes and authority stay fixed.
+
 ## Installed descriptor validation cost — 2026-10-16
 
 WSP00/5/15/22/48/50/71/84/97. Existing descriptor owner now checks immediate

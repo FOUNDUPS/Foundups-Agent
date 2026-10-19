@@ -1,3 +1,33 @@
+## RSI native requester evidence and publication — 2026-10-19
+
+WSP00/5/10/15/22/48/97. PR2159 mergedbb9d3f802; all 19 recorded exact-head
+check runs passed (12 distinct check names), as did main CI39222572582/
+CodeQL39222573026; reviewed/main trees identical. Runtime
+1e203d5 qualifies2683 files independently. Synthetic v21 advances through
+installation/revocation and root/issuer/target readiness, but requester rejects;
+the hidden backend exception remains the next diagnostic target. All7 owned
+units absent after independently checked cleanup; historical reset error retained.
+V22 reproduced the rejection but exhausted its diagnostic cap on handled path
+checks. Actual-interpreter controls then qualified revised diagnostics: v23
+localized inner-response rejection; v24 captured a socket TimeoutError and
+CONNECT_FAILED. V25 locates the originating timeout at inner `recv(4096)` and
+issuer root-response size rejection (zero or over-limit, branch unknown).
+All7 v25 units are independently absent. No signed lifetime or guard changed.
+Clock experiment restored the service but failed its fixed stability criterion.
+Existing post-valve lease issuance is connected in source; trusted parent evidence
+and native elevated authority remain separate gaps. No worker/retained RSI claim.
+Existing roadmap, backlog, dispatch and module logs carry the current evidence.
+The existing shared containment predicate now avoids POSIX exception control
+flow while retaining Windows path comparison. Independent review rejected an
+initial Unicode regression; revised12,717-case comparisons pass per platform.
+Pure predicate speed is not native request gain. Baseline symlink-test drift is
+corrected and Windows/Linux CI coverage added. Connected validation passed 111
+with 8 Windows skips; publication and native qualification remain pending.
+V27 no-observer control still rejects the requester after installation/revocation
+pass; all seven units are absent. Different boots and one v26/v27 pair establish
+no causal gain. Next: exact-source containment qualification and full native cost
+measurement, with timeouts and authority unchanged. Exact evidence is in dispatch.
+
 ## RSI native startup evidence and descriptor cost — 2026-10-16
 
 WSP00/15/22/48/97. PR2147 merged6fb93580c with passing exact-head/main checks.
