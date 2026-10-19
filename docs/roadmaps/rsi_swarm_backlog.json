@@ -1964,6 +1964,18 @@
           "publication": "Pending new-head independent review and CI",
           "native_admission": false
         },
+        "windows_byte_contract": {
+          "source_base": "6d0686c415cbc8c04c2f056e2d0b4cc2cc1c2d48",
+          "actual_reader_red": "LF327430 accepted;CRLF330401 rejected at327680",
+          "accepted_bytes": 331776,
+          "delta_bytes": 4096,
+          "delta_percent": 1.25,
+          "justification": "Minimum wholeKiB for independently verified pending1451-member CRLF330885; current1449 pins retained",
+          "validation": "36 binding tests passed;three Node commands exit0;actual LF/CRLF/exactmax/max+1",
+          "receipt_sha256": "9f4fdfa440b4068efd77726082a5199985c5ecac126cfacef125ae5a4e501d37",
+          "formatting": "indent2 unchanged",
+          "native_admission": false
+        },
         "installed_high": false,
         "native_author_tickets": 0,
         "paid_model_calls": 0,

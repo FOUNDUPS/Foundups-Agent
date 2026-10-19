@@ -1,3 +1,40 @@
+## Windows manifest byte contract — 2026-10-20
+
+Actual readManifest independently accepts the current 1,449-member LF
+manifest (327,430 bytes) but rejects its fresh Windows CRLF representation
+(330,401 bytes) at the prior 320 KiB/327,680-byte boundary. Generated LF
+checks alone missed this. The paired Node consumer/Python contract now
+accepts at most 324 KiB/331,776 bytes, an explicit 4,096-byte/1.25% change.
+This is the smallest whole-KiB bound also covering the independently
+measured pending live-scope 1,451-member CRLF closure (330,885 bytes),
+with 891 bytes remaining; 323 KiB would be 133 bytes short.
+
+JSON retains two-space formatting. The current canonical digest and 1,449
+member bound remain unchanged; this does not import the pending live-scope
+runtime. Existing digest, shape, path and member checks, 2 MiB per-file,
+32 MiB total, independent 4 MiB readers and WSP62 source limits remain.
+The byte check follows readFileSync and precedes parsing; it is not a
+preallocation memory guarantee.
+
+Current-source validation: 36 binding tests pass, zero failures/errors/
+skips; three Node compatibility commands exit zero. The actual reader
+accepts LF, CRLF and exact-maximum valid JSON and rejects maximum+1.
+Original failed byte evidence remains; no JSON packing or exemption.
+Runtime Python files and manifest bytes are unchanged from the 901/5
+startup run. Those startup counts are retained, not represented as rerun.
+No native worker or installed HIGH authority is claimed.
+
+Evidence in the existing next-startup artifact root:
+`consensus-nonce-publication-20261020/compatibility-repair/`.
+
+| Receipt | SHA256 |
+| --- | --- |
+| `independent/byte-contract-red/receipt.json` | `1903e132b50300774f8d0135eb09e2b5283ad2e3652ceb653784f1803d592945` |
+| `byte-contract/receipt.json` | `9f4fdfa440b4068efd77726082a5199985c5ecac126cfacef125ae5a4e501d37` |
+
+WSP00/5/6/10/11/15/22/50/62/97. Corrected-head CI and independent
+publication review remain required; older 6d0686c41 CI is historical.
+
 ## Consensus nonce publication compatibility repair — 2026-10-20
 
 Hosted PR2165 CI39289991059 found a real regression: a trailing comma made

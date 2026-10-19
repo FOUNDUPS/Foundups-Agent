@@ -257,7 +257,9 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 320 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 324 * 1024
+    lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 324 * 1024
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
     result_module = (

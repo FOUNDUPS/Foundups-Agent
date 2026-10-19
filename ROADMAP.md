@@ -25,6 +25,11 @@ The repair passes the full local startup selection (901 passed, 5 platform skips
 including v12/v13 signed-model gates; new-head CI and independent
 publication review remain required. Earlier component runs are historical.
 
+A subsequent actual-reader check exposed fresh Windows CRLF rejection.
+The explicit 324 KiB paired byte contract now passes LF/CRLF and exact
+boundary checks; pretty JSON, digest/member bounds and source limits stay.
+See [byte evidence](docs/operations/RSI_SWARM_DISPATCH.md#windows-manifest-byte-contract--2026-10-20).
+
 Next 19/P0 (C4/I5/D5/Impact5): connect current parent/effect and nonce operations
 under one live authenticated lease through the existing signer factory, avoiding
 nested generation locks. Installed HIGH policy/service composition and authentic
