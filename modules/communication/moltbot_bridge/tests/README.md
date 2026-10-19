@@ -1,5 +1,9 @@
 ## Protected consensus nonce qualification
 
+Retain the full legacy current-generation model-pair regression and the
+actual signed-model gate for both v12 and full v13 owners. A nonce-only
+test selection misses compatibility at this consumer boundary.
+
 Exercise the v13 nonce/custody suites with existing state, current owner/E0,
 parent/effect, model, issuer custody and legacy LOW regressions. Use real
 disposable MAC/SQLite files and signed model/policy inputs; label OS/installation

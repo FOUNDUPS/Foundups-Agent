@@ -20,6 +20,11 @@ MAC/SQLite transactions use explicit synthetic installation seams. A reviewed
 two-file helper extraction preserves AST behavior and restores the loader below
 its existing cap; two unchanged historical startup-test size failures remain.
 
+Hosted startup CI subsequently caught a legacy-owner tuple predicate defect.
+The repair passes the full local startup selection (901 passed, 5 platform skips, zero failures/errors)
+including v12/v13 signed-model gates; new-head CI and independent
+publication review remain required. Earlier component runs are historical.
+
 Next 19/P0 (C4/I5/D5/Impact5): connect current parent/effect and nonce operations
 under one live authenticated lease through the existing signer factory, avoiding
 nested generation locks. Installed HIGH policy/service composition and authentic

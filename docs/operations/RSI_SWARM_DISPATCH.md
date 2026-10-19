@@ -1,3 +1,39 @@
+## Consensus nonce publication compatibility repair — 2026-10-20
+
+Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
+the modern-owner version predicate an always-truthy tuple. Legacy owners
+entered per-selection validation. The unchanged 10-case model-pair family
+reproduces seven failures; removing the tuple tail makes all 10 pass.
+The existing signed-model gate now covers both v12 and complete v13 owners.
+The full hosted-startup selection runs locally: 901 passed, 5 platform skips, zero failures/errors.
+Source hashes remain stable.
+Independent review passes three legacy/v12/v13 behavior controls and
+verifies the one-source-digest change with unchanged pins policy.
+Regenerated digest pins retain the 1,449-file inventory and unchanged limits.
+Both generators check current, 36 binding tests pass without skips, and
+the three backend compatibility Node checks exit zero.
+These synthetic fixture checks
+do not establish installed HIGH authority or native worker execution.
+WSP00/5/6/10/15/22/50/62/71/97. Exact receipts and commands are in dispatch.
+
+Evidence: existing next-startup artifact root,
+`consensus-nonce-publication-20261020/compatibility-repair/`.
+
+| Receipt | SHA256 |
+| --- | --- |
+| `targeted-red/receipt.json` | `272ba282fda0cbf56462fc26f6d7758e424672b2860e6bef94478a06f7db0683` |
+| `targeted-green/receipt.json` | `0d72763235a3af8e89e0f071e9558101b36792869b31d79c8eaa52838f745fcc` |
+| `connected-green/receipt.json` | `9621d574d78e362599564050f41db8dd1c7bad64acbbb092ff5620de09e763a7` |
+| `bindings/receipt.json` | `44bec7603d4cde9bace8899cad13346b915731d34c519ce8ca1a02acb063a3f3` |
+| `independent/independent-repair-review.json` | `1ef5fda92ec2c97a29d434b8cfb7265b5fc6ef469280a5c706ccc9fb522a3e3b` |
+| `independent/independent-integrity-review.json` | `70c6fc70052cc4ce4964a7a5b776930d36d824b13aade9ebe731c739730b2aec` |
+
+The failed hosted run reported 894 passed/7 failed/1 skipped; it remains
+failed evidence. Previous publication acceptance was withdrawn. Earlier
+437/3 and 21-control results below remain historical component coverage,
+not coverage of the missed legacy branch. New-head CI and independent
+publication review must pass before merge. No threshold was weakened.
+
 ## Protected consensus nonce checkpoint — 2026-10-20
 
 WSP00/5/6/10/11/15/22/48/50/62/71/77/97; selected 19/P0 (C4/I5/D5/Impact5).

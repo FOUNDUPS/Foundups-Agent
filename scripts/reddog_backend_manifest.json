@@ -2178,7 +2178,7 @@
     "modules/communication/moltbot_bridge/src/reddog_signer_control_loop_anchor.py": "af1ef0e2ddd7b910ffaeedffa8cf128e686177803bcb3919f36fe1558b3500df",
     "modules/communication/moltbot_bridge/src/reddog_signer_conversation_scope_anchor.py": "511efa016d8d7aab39fe0aee83bcb7145ee9ab975ecb8b45882435a3f84374a1",
     "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_config_loader.py": "934f1cdf026cc023362f9b74a182ecb7ef41212e3a500317e785e49941fad17c",
-    "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py": "90232fdbb7da39489472270d5f59f8e083ff40db00b6eb5239d5ee67059c934c",
+    "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_runtime_binding.py": "5f152beaf2ba397b71f42c1c1236a72a3491207c4158a704887fdea7e563a4ae",
     "modules/communication/moltbot_bridge/src/reddog_signer_current_generation_use_time_gate.py": "62c6f4befb62ebcc552f26aed49dd859aa64c1a79cd74cda98ccad840200b03c",
     "modules/communication/moltbot_bridge/src/reddog_signer_current_principal_authority_resolver.py": "dcb53d42745c008419ec713d034934a708b5a1c0e6eb94925b08e7f924ca695b",
     "modules/communication/moltbot_bridge/src/reddog_signer_delegated_authority_runtime.py": "1253392c674e8ffbb87b1cb1c764d622665fd0f54dc8548a7e8f7ac13ef734fa",

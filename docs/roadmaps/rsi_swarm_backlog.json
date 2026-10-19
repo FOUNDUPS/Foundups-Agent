@@ -1951,6 +1951,19 @@
           "high-consensus-author-review/loader-extraction/source-freeze-final.json": "fabad5e075c8884f18e0379de927c0bd2621f5b93e1df5495144f4210aec7f6f",
           "high-consensus-author-review/loader-extraction/final-review.json": "8c8cd177e8112bc385a8866b084bf6d2604419f5bf128da6754e2c0d38ec0da4"
         },
+        "compatibility_repair": {
+          "source_base": "c5dc5b7a2572f6eca0d381b8bcc80de1a3f855de",
+          "failed_hosted_run": 39289991059,
+          "failed_hosted_result": "894 passed,7 failed,1 skipped",
+          "cause": "Always-truthy tuple version predicate routes legacy owners into modern selection validation",
+          "targeted_red": "3 passed,7 failed",
+          "targeted_green": "10 passed",
+          "connected_local": "901 passed, 5 platform skips, zero failures/errors",
+          "connected_receipt_sha256": "9621d574d78e362599564050f41db8dd1c7bad64acbbb092ff5620de09e763a7",
+          "modern_coverage": "Existing real signed-model gate parameterized for v12 and full v13 owner",
+          "publication": "Pending new-head independent review and CI",
+          "native_admission": false
+        },
         "installed_high": false,
         "native_author_tickets": 0,
         "paid_model_calls": 0,

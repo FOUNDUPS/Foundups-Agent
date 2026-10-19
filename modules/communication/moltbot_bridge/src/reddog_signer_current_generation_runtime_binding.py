@@ -269,7 +269,7 @@ def _validated_model_values(repo, packet, selected, work, authority, clock, star
         owner = owner_loader._load_owner_config(owner_path, repo=repo)
         if owner["config_id"] != selected["owner_config_id"]:
             raise ValueError("model_selected_owner_mismatch")
-        modern = owner['schema_version'] in {owner_loader.SCHEMA_VERSION_V12, owner_loader.SCHEMA_VERSION_V13}, owner_loader.SCHEMA_VERSION_V13
+        modern = owner['schema_version'] in {owner_loader.SCHEMA_VERSION_V12, owner_loader.SCHEMA_VERSION_V13}
         work_digest, pair = _model_work_snapshot(work, authority, canonical_selection=modern)
         model_selection, model_binding = pair.values()
         model_options = {}
