@@ -1889,10 +1889,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.parent_consensus_join_20261020",
-    "base_commit": "824d0f71dade7dabc25afa1b778f8e3eb099a1e1",
-    "selected_action": "Complete parent-to-effect consensus composition through existing signer and current-use owners",
-    "status": "COMPONENT_VALIDATED_SOURCE_CLOSURE_IN_PROGRESS",
+    "observation_path": "current_observation.parent_consensus_join_20261020.nonce_custody",
+    "base_commit": "51f9edcec322288635a39b7c99540cf05d5d8007",
+    "selected_action": "Connect protected consensus nonce custody and the existing single-lease HIGH issuer path",
+    "status": "NONCE_COMPONENT_VALIDATED_HIGH_COMPOSITION_PENDING",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
@@ -1902,7 +1902,7 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close exact-source publication, then qualify protected HIGH runtime custody/nonce composition through existing startup/factory owners. Authentic inputs remain required; no LOW expansion or native RSI claim."
+    "next_action": "Close nonce source checkpoint, then connect one live authenticated lease through existing parent/effect/nonce/factory owners; prove no nested generation lock. Installed HIGH policy/service and genuine work/model/reviewer/budget inputs remain required; preserve LOW."
   },
   "current_observation": {
     "parent_consensus_join_20261020": {
@@ -1936,6 +1936,25 @@
         "receipt_sha256": "03f1b8f78e4613a9e12ffbda9c71bb85611480dc872fa7416e4951c56573267e",
         "post_format_freeze_sha256": "e4cbec996e46ae1c23c306146c4577572f223aed27d13fc071ea54ae52117a06",
         "limits": "Windows platform skips preserved; four EOF bytes removed after run with AST identical. No native admission."
+      },
+      "nonce_custody": {
+        "source_base": "51f9edcec322288635a39b7c99540cf05d5d8007",
+        "status": "COMPONENT_VALIDATED_NOT_INSTALLED",
+        "owner_version": 13,
+        "connected": "437 passed,3 platform skips,0 failures/errors;351.02s;26 frozen hashes",
+        "independent": "21 passed; synthetic OS/installation seams, actual signed files and MAC/SQLite",
+        "extraction": "Two-file AST-identical move; loader658/owner263; other24 unchanged;2imports pass;7structure pass",
+        "unchanged_debt": "Two atomic structure failures: baseline startup test712lines and function89lines; no exemptions/caps changed",
+        "receipts": {
+          "high-consensus-author-review/connected-review.json": "0bb2d10d1b7b6f5d8c518210dd5f0db808ec2ab7ccb6103be032de5d9c695edc",
+          "high-consensus-independent-review/independent-review.json": "faea322408e64d4981a1e049c3a27c4483003e17a148c5cb41ed87c20de5e15b",
+          "high-consensus-author-review/loader-extraction/source-freeze-final.json": "fabad5e075c8884f18e0379de927c0bd2621f5b93e1df5495144f4210aec7f6f",
+          "high-consensus-author-review/loader-extraction/final-review.json": "8c8cd177e8112bc385a8866b084bf6d2604419f5bf128da6754e2c0d38ec0da4"
+        },
+        "installed_high": false,
+        "native_author_tickets": 0,
+        "paid_model_calls": 0,
+        "retained_gain": false
       }
     },
     "parent_consent_20261019": {

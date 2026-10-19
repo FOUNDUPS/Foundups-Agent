@@ -1,3 +1,12 @@
+## Installed HIGH connection in progress — 2026-10-20
+
+The v13 candidate supplies protected, current-owner consensus nonces using the
+existing atomic MAC state and SQLite high-water store. It preserves legacy owner
+versions and the LOW service. See the [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+Connected 437/3 platform skips and independent 21 controls pass. The installed HIGH
+issuer join remains pending; a
+callable adapter is not native author admission or retained RSI benefit.
+
 ## Parent-consent prerequisite — 2026-10-19
 
 PR2163 closed policy-bound parent consent on main824d0f71. The current v12/v3

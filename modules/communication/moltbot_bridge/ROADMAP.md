@@ -1,3 +1,13 @@
+## Protected consensus nonce checkpoint — 2026-10-20
+
+Current 19/P0 reuses protected owner v13, current E0 and existing MAC/SQLite nonce
+state. Connected 437 passed/3 platform skips; independent 21 passed. The reviewed
+helper move preserves semantics and existing caps; unchanged startup-test size
+debt is recorded. Next connect one live authenticated parent/effect/nonce lease
+through the existing factory, then protected HIGH service composition and genuine
+admission inputs. LOW and frozen 294 runtime stay unchanged; native author 0.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+
 ## Parent admission checkpoint — 2026-10-20
 
 PR2163 merged824d0f71 with reviewed tree equality and passing PR/main checks.

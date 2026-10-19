@@ -1,3 +1,27 @@
+## Protected consensus nonce prerequisite — 2026-10-20
+
+Base 51f9edce; WSP00/5/6/11/15/22/62/71/77/97. Connected 437 passed, 3 platform
+skips, zero failures/errors in 351.02s with 26 hashes stable; independent 21 passed
+on the same source. Real signed policy/model files, MAC/SQLite transactions,
+restart/replay/concurrency, corruption, withdrawal and owned rollback are tested;
+OS/current-generation/credential seams are synthetic. Original fixture failures
+remain in the author receipt. Counts overlap and are not additive unique tests.
+
+Post-run reviewed extraction changes two files only: identical helper/rest ASTs,
+other 24 hashes unchanged, two cold import orders pass. Loader 658/owner inputs 263 remain
+below 675. Consensus structure 7 passes; broader atomic structure 2 fails unchanged
+baseline startup tests (file 712>675 and one function 89>60). No cap/exemption was
+changed. Final freeze and exact command/JUnit/skip details are in
+[dispatch](../../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+Six nonce suites join existing startup CI with explicit repository root.
+Generated inventory 1,449 includes only the custody leaf; nonce authority/current
+owner are not yet installed runtime. Registry 1,737/270 adds only six suites with
+54 shard moves and no classification/quarantine changes. Both canonical generator
+checks pass; 36 manifest/registry tests pass with zero skips in 90.295s, including
+the staged-index check. Node contract/preflight/async commands each exit 0.
+The binding receipt records exact commands and stable final 26 hashes. Installed
+HIGH/native author admission is not established.
+
 ## Parent-consensus publication structural repair — 2026-10-20
 
 Hosted CI39281556290: signing composition1,467 passed/1 failed/3 skipped; failure

@@ -1,3 +1,18 @@
+## Protected consensus nonce qualification
+
+Exercise the v13 nonce/custody suites with existing state, current owner/E0,
+parent/effect, model, issuer custody and legacy LOW regressions. Use real
+disposable MAC/SQLite files and signed model/policy inputs; label OS/installation
+seams. Require restart/replay, cross-instance handle rejection, corrupt or absent
+state, one-step recovery, withdrawal, expiry and failed commit/cleanup controls.
+Pin an explicit pytest repository root and independent temporary databases.
+Connected 437/3 platform skips and independent 21 controls exercise this source
+component. Current generated runtime includes custody only; authority/current
+owner are not yet imported or qualified installed runtime.
+Installed HIGH acceptance additionally requires a real Linux same-inode locking
+test across reserve, pre-sign validation, commit and rollback under the actual
+permission wrapper. Passing the adapter tests alone does not meet that gate.
+
 ## Exact parent-consent connection
 
 Run the three parent-consent suites with the six parent-consensus/model suites:

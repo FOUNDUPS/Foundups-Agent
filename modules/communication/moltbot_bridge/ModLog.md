@@ -1,3 +1,14 @@
+## Protected consensus nonce prerequisite — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Opt-in v13 reuses protected custody,
+current E0 and provisioned MAC/SQLite stores; no service is activated. Connected
+437/3 platform skips and independent 21 controls validate the synthetic component.
+Reviewed helper extraction preserves behavior and original caps; inherited test
+size debt remains explicit. Next is the existing single-lease HIGH composition,
+with genuine admission still required. Runtime inventory 1,449 includes custody
+only; registry 1,737/270 and both generators check clean. Binding tests 36 pass
+without skips and three Node checks exit 0. See [dispatch](../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+
 ## Parent-consensus publication structural repair — 2026-10-20
 
 PR2164 CI39281556290 exposed the owner loader at682 lines against its unchanged

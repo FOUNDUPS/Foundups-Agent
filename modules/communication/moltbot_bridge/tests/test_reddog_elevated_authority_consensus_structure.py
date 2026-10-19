@@ -37,6 +37,9 @@ MODULES = tuple(
             "reddog_parent_bound_effect_verification.py",
             "reddog_parent_consensus_use_time.py",
             "reddog_model_verifier_selection_inputs.py",
+            "reddog_consensus_nonce_custody.py",
+            "reddog_consensus_nonce_current_owner.py",
+            "reddog_consensus_nonce_authority.py",
         )]
     )
 )
@@ -58,6 +61,8 @@ TEST_MODULES = tuple(
     + sorted(Path(__file__).parent.glob("test_reddog_effect_signing_*.py"))
     + sorted(Path(__file__).parent.glob("reddog_parent_*.py"))
     + sorted(Path(__file__).parent.glob("test_reddog_parent_*.py"))
+    + sorted(Path(__file__).parent.glob("test_reddog_consensus_nonce_*.py"))
+    + [Path(__file__).parent / "consensus_nonce_test_support.py"]
 )
 LEGACY_RUNTIME_HOST_LIMITS = {
     "reddog_resident_queue_stage_handler_registry.py": (
@@ -94,7 +99,7 @@ def test_modules_have_no_shell_network_or_key_generation_imports() -> None:
 
 
 def test_consensus_modules_remain_bounded_lego_components() -> None:
-    assert len(MODULES) == 30
+    assert len(MODULES) == 33
     for path in MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name
@@ -112,7 +117,7 @@ def test_consensus_modules_remain_bounded_lego_components() -> None:
 
 
 def test_consensus_test_modules_are_bounded_lego_components() -> None:
-    assert len(TEST_MODULES) == 55
+    assert len(TEST_MODULES) == 62
     for path in TEST_MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name

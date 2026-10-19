@@ -1,3 +1,57 @@
+## Protected consensus nonce checkpoint — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97; selected 19/P0 (C4/I5/D5/Impact5).
+Opt-in owner v13 adds a separately bound consensus nonce store and integrity
+credential. Canonical owner, signed E0/current generation, custody and existing
+MAC/SQLite state are checked; startup never provisions missing authority. V1–v12
+and the LOW service remain unchanged. Instance-owned reservation handles prevent
+cross-instance rollback; withdrawal still permits confined owned cleanup. The
+existing authenticated one-step high-water recovery may write durable state.
+
+Connected Windows evidence: 437 passed, 3 platform skips, no failures/errors in
+351.02s, with 26 source hashes unchanged. Independent 21 controls pass on that
+freeze; counts overlap and are not added as unique tests. Actual signed files,
+MAC/SQLite transactions, restart/replay and concurrency are exercised with
+explicit synthetic OS/installation/credential seams, not genuine admission.
+
+The reviewed helper extraction moves only root-separation validation into the
+existing owner-input module and re-exports it. Function and remaining module ASTs
+match; the other 24 frozen files are unchanged. Loader 658 and owner inputs 263
+lines satisfy the unchanged 675 limit; both cold import orders pass. Seven
+consensus structure tests pass. Two additional atomic-provisioning size checks
+still fail on the byte-identical baseline startup test file (712 lines; one
+89-line test). These inherited debts are retained, not exempted or repaired here.
+
+Evidence under `native-installation-inputs/current-time-independent-review/`
+within the existing next-startup artifact root:
+
+| Receipt | SHA256 | Scope |
+| --- | --- | --- |
+| `high-consensus-author-review/connected-review.json` | `0bb2d10d1b7b6f5d8c518210dd5f0db808ec2ab7ccb6103be032de5d9c695edc` | Exact command, JUnit and three platform skips |
+| `high-consensus-independent-review/independent-review.json` | `faea322408e64d4981a1e049c3a27c4483003e17a148c5cb41ed87c20de5e15b` | Independent synthetic component held-outs |
+| `high-consensus-author-review/loader-extraction/source-freeze-final.json` | `fabad5e075c8884f18e0379de927c0bd2621f5b93e1df5495144f4210aec7f6f` | 26-file post-extraction freeze |
+| `high-consensus-author-review/loader-extraction/final-review.json` | `8c8cd177e8112bc385a8866b084bf6d2604419f5bf128da6754e2c0d38ec0da4` | Two-file AST proof, imports and preserved baseline size failures |
+| `high-consensus-independent-review/loader-extraction-independent-review.json` | `f1b63914f1ac457af764b9e3efd433134ad5e8dc2352b4f5ee394f2de528468b` | Independent exact extraction; prior 21 held-outs retained |
+| `high-consensus-author-review/publication-bindings/review.json` | `dc7f47d22af1f90c5b871bf5a1da08eefbafe72f4af5aef629eb0551b5a3b063` | Exact generator, 36-test and three Node results |
+
+Generated runtime inventory is 1,449 files: only the new imported custody leaf is
+included. The public nonce authority and current-owner leaves are source/test
+validated, but are not imported or qualified installed runtime until the HIGH
+join. Exact digest/cap bindings and registry 1,737/270 retain existing validation;
+no quarantine or structural ceiling changes. Both generator checks pass; 36
+manifest/registry tests pass without skips in 90.295s. Node contract, preflight
+and async commands each exit 0; final 26 source hashes remain stable.
+
+Next 19/P0: reuse one live authenticated WSP71/generation lease across current
+parent/effect verification, nonce reserve, pre-sign checks, commit and rollback;
+prove the existing same-inode lock path with bounded processes before installed
+HIGH composition. Public self-leasing methods must not nest under that fence.
+The existing installed LOW service remains LOW-only. Protected HIGH policy and
+service composition, genuine work/reviewer/model/budget inputs, qualification and
+native admission remain required. Frozen runtime 294195cdb is unchanged; native
+author tickets 0, paid model calls 0, no retained RSI gain. PR2164 publication
+closure is tracked separately; no pending remote check is counted as passing.
+
 ## Parent-consensus publication gate repair — 2026-10-20
 
 PR2164 head51f9edce failed the hosted signing regression:1,467 passed/1 failed/
