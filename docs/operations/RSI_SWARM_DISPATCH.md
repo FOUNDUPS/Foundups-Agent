@@ -1,4 +1,85 @@
+## Parent-consensus connection — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97; selected19/P0 (C4/I5/D5/Impact5).
+Source base5862eea0; publication base main824d0f71 differs only in the previously
+reviewed security ledger. Retrieve exact owners after the recorded Holo authority
+HEAD mismatch; freshness UNKNOWN/gap true, no unchanged retry or reindex.
+Historical checkpoints below are evidence, not current runtime authority.
+
+The candidate extends existing parent/effect, principal, model, signer and valve
+owners. Owner v12 separates reviewer designation domains; principal v3 admits one
+per domain. Exact model-selection ID/digest entries retain protected signed input
+verification, with1–9 entries and shared54-read/8-MiB bounds per verification pass.
+Repeated passes consume that budget again; this is not a total request budget.
+Model membership does not prove actual author execution. No model promotion occurs.
+Parent/effect proof v2 preserves policy without legacy projection and removes only
+a duplicated parent to remain within the unchanged16,384-byte limit. Parent-v2
+RPC releases/reacquires the existing generation fence and revalidates; legacy HIGH
+and LOW are preserved. Grant expiry cannot exceed approval. Reservation failure
+attempts rollback; durable restart recovery is not established by synthetic tests.
+
+Independent review reproduced generation expiry and clock rollback during parent
+verification. Final current-use checks enforce nondecreasing time and recheck
+both generation and shorter peer expiry after verification at collection and use.
+No evidence boolean or serialization substitutes for current verification.
+Both independent lanes accepted the same44 frozen Python files:20 signed-model/
+current-use cases and17 Linux RPC/nonce cases, no failures/errors/skips. The Linux
+control uses a real second process and same-inode lock; owner/model/nonce admission
+seams remain synthetic. Final59-suite Windows run passes1,545/22 platform skips,
+zero failures/errors in533.14s with all45 tested hashes stable. Preserve the initial
+1,539/6/22 result: one stale schema-negative fixture and five startup failures from
+pytest fixture-boundary collapse under -c NUL. The same collection/five selected
+tests passes with explicit repository root; CI also pins its root. Production
+guards remain intact. Post-run EOF cleanup removes four bytes, AST unchanged.
+Final45-file freeze separately binds that formatting and test-only correction.
+The existing startup CI selects the six new suites; installed proof is still absent.
+
+Evidence root: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`.
+Under `native-installation-inputs/current-time-independent-review/`:
+
+| Receipt | SHA256 | Scope |
+| --- | --- | --- |
+| `parent-consensus-author-review/connected-review.json` | `03f1b8f78e4613a9e12ffbda9c71bb85611480dc872fa7416e4951c56573267e` |exact argv/JUnit/skips;1,545 pass/22 skip;45 tested hashes |
+| `parent-consensus-author-review/source-freeze-post-format.json` | `e4cbec996e46ae1c23c306146c4577572f223aed27d13fc071ea54ae52117a06` |45 publication source files |
+| `parent-consensus-author-review/eof-format-equivalence.json` | `91a1ec6135114f7315141ed0ca506d7bf1384ce7f6513a8d969ba31cedf83737` |only four EOF bytes removed; identical AST |
+| `parent-consensus-author-review/source-freeze.json` | `06c5f13ece9925dc8051a097d7a4919b3e4066889504951144a7c93fe06fd721` |44 frozen Python paths |
+| `parent-model-independent/independent-final-review.json` | `ae86f0e5439a609cdca50d68aff1f30902a37b951723e610393b77ff33487f92` |20 held-outs; original red controls retained |
+| `parent-consensus-independent-review/independent-rpc-nonce-review.json` | `4fe9917bcead45b5125276225eea3cb5491984c0776b74616ec2a682d146a04f` |17 Linux controls; original harness failures retained |
+| `high-installed-composition-readonly-5862-parent-candidate.json` | `2fa859b4a8c9a2b762ce254aa1f628721b3c02376262d3460275a56124599992` |next connection audit, not runtime readiness |
+
+Publication binding evidence is under `parent-consensus-publication-20261020/`:
+`publication-source-binding.json` (SHA256 `db24db50a2b8af797c5b6402bc471aac7e03089d99a9e394eb45edbd55eb3b1d`)
+binds all45 reviewed sources to staged canonical bytes; normalization is CRLF to LF
+only. `incremental-independent-review.json` checks manifest/CI/registry scope;
+`independent-harness-review.json` independently verifies the pytest root mechanism.
+Final manifest has1,448 files, exact cap/cap+1 checks and regenerated digest; all8
+manifest tests and three JS compatibility commands pass. Registry1,731/270 remains
+current; existing quarantine policy is unchanged. Security/remote publication
+receipts remain separate from component execution and native readiness.
+
+Current component evidence does not install HIGH custody, prove durable recovery,
+or admit a real author. Native author tickets0; paid model calls0; coordinator
+cost unknown. Frozen qualified294195cdb is unchanged. The installed LOW service
+continues rejecting HIGH. Next after exact-source closure: supply a separately
+bound durable consensus nonce and protected HIGH composition through existing
+startup, signer factory and bounded socket owners. Authentic work, reviewer/model
+and budget inputs, then native qualification/admission, independent evaluation,
+authorized activation/rollback and later retained benefit remain required.
+
 ## Policy-bound parent-consent prerequisite — 2026-10-19
+
+Publication closure (2026-10-20 JST): PR2163 merged824d0f71dade7dabc25afa1b778f8e3eb099a1e1.
+Its tree096306cdbff713be600c7986d0abfc04aa4c6af0 equals reviewed
+f9ed1661833566121af1cd4c9fc32460192e9280. All12 latest PR checks passed;
+superseded draft CI39269955484 was deliberately cancelled, not passed.
+Final CI39270617128 reports775 passed/1 skipped in the connected startup step.
+The separate reviewer artifact verifies14 cases and4,793 exact Git source hashes.
+Merged-main CI39272664400 and CodeQL39272667724 passed; all11 main checks passed.
+Independent merge receipt SHA256 `86367416016eda1c30de2bcc2cc965d3494dd745719ce6257a5ef4a6890e9362`
+and main-validation receipt `119d75095a4288901344e0477b80595943e9973f6bf35f4f1b17c4a441ec072c`
+are under the evidence root below at
+`descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/response-slice/v36-publication/parent-consent-publication/main-824d0f71-independent/`.
+The clean publication worktree was archived; pinned runtime294195cdb is retained.
 
 Source base58f4599d3f89620b0c12178a027a4bfbb8795ca1. PR2162 is merged; its tree
 matches reviewed f461210dc1f53aaed16cc86cb5a1c11388fdd853. All12 final PR checks
@@ -42,7 +123,7 @@ Receipts are immutable; SHA256 identifies exact bytes, not authority by itself.
 | `descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/response-slice/v36-publication/pr2162-merged-independent-closure.json` | `fa8b32b95ae56e5b50203a9bfb6f8937bf5b6ac92e5c03657709b6d389c8d843` | reviewed/merged tree equality |
 | `descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/response-slice/v36-publication/pr2162-main-validation.json` | `c9063baaee7e7367e77f3b0880f011cf61608d479e05c74891ac997fae829143` | exact merged-main CI/CodeQL success |
 
-Re-observe after publication. Next eligible18/P0: reuse the trusted parent-policy
+Re-observed after publication. Next eligible19/P0 (C4/I5/D5/Impact5): reuse the trusted parent-policy
 and consensus owners to consume policy-bound consent with current reviewer/model
 and budget inputs. Keep the two unresolved canonical verifier gates closed until
 that composition is independently demonstrated. Then one admitted author ticket,

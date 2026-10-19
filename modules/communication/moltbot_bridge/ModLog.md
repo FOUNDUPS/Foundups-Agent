@@ -1,3 +1,18 @@
+## Parent-consensus connection — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Extended existing owner/principal,
+model-verifier, parent/effect, signer and current-use contracts; no new orchestrator.
+V12/v3 separate reviewer domains and exact model selections. Proof v2 retains the
+16-KiB cap and policy; parent-v2 RPC avoids same-lock recursion then reverifies.
+Independent review caught and repaired late expiry/rollback gaps in the collector.
+Twenty model/current-use and17 Linux RPC/nonce held-outs pass on44 frozen files;
+connected59 suites pass1,545/22 platform skips after fixing pytest root isolation.
+Production guards are unchanged; original failures are retained. Six suites join
+existing CI; generated runtime1448 and registry1731/270 retain exact checks.
+Installed HIGH custody/nonce supply and authentic inputs remain open; LOW and
+qualified runtime294195cdb stay unchanged. See tests/TestModLog and the current
+[dispatch evidence](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+
 ## Parent-consent connection — 2026-10-19
 
 WSP00/11/15/22/48/50/77/97. Existing parent resolution lacked an authenticated

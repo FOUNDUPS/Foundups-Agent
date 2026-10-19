@@ -53,16 +53,17 @@ class _LeasedReviewerKeys:
         self._records.clear()
 
 
-def _project_reviewer_keys(*, authority, designation, records, policy, selection, parent, now):
+def _project_reviewer_keys(*, authority, designation, records, policy, selection, parent, now, _parent=False):
     from .reddog_reviewer_designation_contract import (
         reviewer_designation_authority_digest, reviewer_designation_signing_input,
         validate_reviewer_designation, validate_reviewer_designation_authority,
+        validate_parent_reviewer_designation_authority,
     )
     from .reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
     from .reddog_elevated_authority_consensus_policy import elevated_consensus_policy_valid
 
-    authority = validate_reviewer_designation_authority(authority)
-    designation = validate_reviewer_designation(designation)
+    authority = (validate_parent_reviewer_designation_authority if _parent else validate_reviewer_designation_authority)(authority)
+    designation = validate_reviewer_designation(designation, _parent=_parent)
     shared = ("privilege", "issuer_principal_id", "issuer_principal_provider",
               "issuer_key_epoch", "repo_full_name", "foundup_id", "policy_digest",
               "decision_schema_version")
@@ -74,6 +75,14 @@ def _project_reviewer_keys(*, authority, designation, records, policy, selection
             or authority["repo_full_name"] != parent.repo_full_name
             or authority["foundup_id"] != parent.foundup_id):
         raise ValueError("reviewer_designation_scope_mismatch")
+    if _parent:
+        issuer = records.get(authority["issuer_principal_provider"] + "|" + authority["issuer_principal_id"])
+        if (issuer is None or issuer.principal_id != authority["issuer_principal_id"]
+                or issuer.principal_provider != authority["issuer_principal_provider"]
+                or issuer.principal_public_key != authority["issuer_public_key"]
+                or authority["repo_full_name"] not in issuer.repo_scope
+                or authority["foundup_id"] not in issuer.foundup_scope):
+            raise ValueError("parent_reviewer_issuer_not_current")
     expiry = _reviewer_lifetime(authority, designation, selection, now)
     if Ed25519SignatureVerifier().verify(
         authority["issuer_public_key"], reviewer_designation_signing_input(designation),

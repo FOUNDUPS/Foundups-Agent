@@ -1,27 +1,27 @@
 ## Exact parent-consent connection — 2026-10-19
 
-The opt-in owner v11 adds `parent_consent_authority`; v1-v10 keep their existing
-field sets and privileges. The new registration grants only the distinct
-`authorize_exact_high_delegated_request` scope for `HIGH/worktree_create`.
-It names the consenting issuer, beneficiary, RedDog identity/key epoch,
-repository, FoundUp, canonical policy digest and validity interval.
+Owner v11 supplies consent for an exact HIGH/worktree_create parent. Signatures bind
+request, policy, registration, principals, repo/FoundUp and current generation.
+The facade returns `ParentConsentEvidence`; construction is not authentication.
+V12 adds `parent_reviewer_designation_authority` alongside the effect domain.
+Principal artifact v3 permits one designation per domain (two maximum); legacy
+schemas remain intact. Cross-domain privilege/schema fallback rejects.
+`CurrentParentConsensusAuthority(repo_root, owner_config_path, model_artifacts, proof)`
+reverifies through `verify`, `prepare`, its exact-parent callable supplier and signer
+`reserve`. Parent-to-effect proof preserves policy/consent without legacy projection.
 
-`resolve_current_parent_sovereign_authorization` in the existing current-principal
-resolver accepts the owner path, repository, detached assertion, exact parent
-request and policy. The assertion signs the complete canonical parent request
-digest, registration digest and current-generation identity in the distinct
-`reddog-parent-consent.v1.` domain. The existing projection excludes exactly its
-two proof backreferences; no downstream work signature bootstraps its own consent.
-
-The result is immutable, policy-bound `ParentConsentEvidence`, not the legacy
-sovereign record or an execution capability. Legacy consumers reject it until
-deliberate current-use composition checks its policy restriction. Canonical
-policy shape/digest agreement does not attest reviewer or model independence.
-Current owner replacement/removal, key rotation, generation changes and expiry
-invalidate subsequent resolutions; there is no new per-assertion revocation store.
-Owner, input, principal records, generation and time are rechecked inside the
-lease, whose successful exit is required. These sampled checks are not continuous
-immutability or permission to issue a lease, dispatch, promote or merge.
+V12 binds 1–9 exact model selection ID/digest entries with six protected inputs each.
+Each author/reviewer pass shares 54 reads and 8 MiB; repeated passes reread/reverify.
+Missing, duplicate or substituted selections reject. Existing qualification and
+independence checks remain; selected membership does not prove actual authorship.
+Parent/effect proof v2 retains the 16,384-byte effect cap by reconstructing one parent;
+conflicting/duplicate parents reject. V1 transport stays intact. Parent v2 grant RPC
+releases then reacquires/revalidates the generation fence; legacy HIGH is unchanged.
+Grants cannot outlive approval. Reserve/commit reverify; rollback attempts do not prove recovery.
+The use-time collector binds exact work/identity/model/generation and rechecks clock
+and generation/peer expiry after parent verification and reason use; missing evidence
+keeps gates closed. Installed HIGH custody/nonce supply and authentic inputs remain
+separate. LOW stays LOW. Sampled checks do not establish continuous immutability.
 
 ## Issuer-only root LOAD — 2026-10-15
 

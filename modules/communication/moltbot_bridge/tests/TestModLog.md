@@ -1,3 +1,30 @@
+## Parent-consensus connection — 2026-10-20
+
+Base5862eea0; WSP00/5/6/11/15/22/62/77/97. Independent signed-model/current-use
+20 cases and Linux RPC/nonce17 cases pass with zero failures/errors/skips against
+44 frozen files. The latter includes real process/lock controls; both retain
+synthetic owner/admission seams. Independent red tests exposed delayed generation
+expiry and clock rollback; final controls also cover shorter peer expiry.
+Final59-suite Windows run:1,545 passed/22 platform skips, zero failures/errors in
+533.14s; all45 tested hashes stable. Original1,539/6/22 remains failure evidence.
+One stale negative v3 fixture became v4. Five startup failures were test isolation:
+-c NUL without an explicit root collapsed module fixture boundaries. The same
+59-file collection/five selected tests passes with --rootdir; CI now pins root too.
+Dedicated root/Linux collection refused Windows and executed zero tests. Final
+EOF-only cleanup removes four bytes with identical AST; its receipt binds the
+post-format source separately. No semantic production change followed the run.
+
+Manifest/registry checks:35 passed; staged-index test initially failed because the
+new generated manifest was not yet staged, then passed after staging. JS exact
+cap+1 fixture initially retained1442; corrected to1449 for the generated1448-file
+inventory. Contract, preflight and async commands then exit0. Runtime limits are
+exact inventory bounds, not relaxed budgets; registry1731 tests/270 quarantined.
+After EOF-only normalization, all8 manifest tests pass in71.50s and all three JS
+commands exit0 again against the final digest. Registry28 cases already passed.
+Independent receipts, commands, source hashes and preserved failures are linked in
+[dispatch](../../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+No native author, durable crash recovery or retained gain is established.
+
 ## Parent-consent connection — 2026-10-19
 
 Base58f4599d3f89620b0c12178a027a4bfbb8795ca1; WSP00/5/6/11/15/22/77/97.

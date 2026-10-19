@@ -22,7 +22,7 @@ from .reddog_signer_process_isolation_gate import enforce_signer_process_isolati
 from .reddog_signer_secret_grant_root_protected_use_oracle import build_grant_issuer_revocation_oracle
 from .reddog_signer_socket_peer_credential_attestor import PeerCredentialPolicy
 from .reddog_signer_system_service_manifest_selection_loader import (
-    SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, _load_owner_config, _read_root_owned_bytes,
+    SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, _load_owner_config, _read_root_owned_bytes,
 )
 from .reddog_signer_system_service_runtime_dependencies import (
     _materialize_startup_replay, _materialize_provisioned_replay,
@@ -43,7 +43,7 @@ def _isolate(owner, policy):
 
 def _current_owner(owner_path, repo, owner, policy):
     current = _load_owner_config(owner_path, repo=repo)
-    if (current["schema_version"] not in {SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11}
+    if (current["schema_version"] not in {SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12}
             or current["config_id"] != policy["owner_config_id"]
             or canonical_bytes(current) != canonical_bytes(owner)):
         raise ValueError("grant_startup_owner_changed")
@@ -78,7 +78,7 @@ def materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_
     if not path.is_absolute():
         raise ValueError("grant_startup_owner_path_not_absolute")
     owner = _load_owner_config(path, repo=repo)
-    if owner["schema_version"] not in {SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11} or owner["config_id"] != expected_owner_config_id:
+    if owner["schema_version"] not in {SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12} or owner["config_id"] != expected_owner_config_id:
         raise ValueError("grant_startup_owner_selection_mismatch")
     raw = _read_root_owned_bytes(Path(owner["startup_custody"]["policy_path"]), path.parent)
     policy = freeze_owner_e0_policy(decode_message(raw))
@@ -103,7 +103,7 @@ def materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_
 
 
 def _materialize_issuer_store(repo, owner, custody, policy, resolver):
-    if owner["schema_version"] in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11}:
+    if owner["schema_version"] in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12}:
         config, _ = require_grant_rate_target_separation(owner, policy, repo)
         require_private_grant_rate_store(owner, config)
         return _materialize_provisioned_replay(config, custody["replay_integrity_permission"],

@@ -12,87 +12,43 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — synthetic handshake accepted; real work admission incomplete (2026-10-19):**
-PR2162 merged as `58f4599d3f89620b0c12178a027a4bfbb8795ca1`; its tree exactly
-matches reviewed head `f461210dc1f53aaed16cc86cb5a1c11388fdd853`. All12 final
-PR checks passed; merged-main CI39264967497 and CodeQL39264966452 also passed.
-Independent CI artifact review verifies14 cases with no
-failures/errors/skips and4,787 recorded source hashes matching that head.
-This closes the earlier collection-only limitation, not native author admission.
+**Current checkpoint — parent consensus component validation complete (2026-10-20 JST):**
+PR2163 merged as `824d0f71dade7dabc25afa1b778f8e3eb099a1e1`, with reviewed/main
+tree equality, all12 latest PR checks and merged-main CI39272664400 /
+CodeQL39272667724 passing. Its connected Linux step passed775/1 skip; the separate
+reviewer artifact verified14 cases and4,793 exact Git hashes. Its clean publication
+worktree is archived; qualified runtime294195cdb is retained unchanged.
 
-The next prerequisite extends the existing principal/owner machinery with
-explicit, generation-bound parent consent. Registered identity, later effect
-consent and downstream signed work authority cannot supply that missing
-approval. Policy scope must survive the returned evidence. Production remains
-closed pending current policy/reviewer/model/budget composition and real inputs.
+The next19/P0 connection (C4/I5/D5/Impact5) reuses current parent consent, reviewer
+and model verification, effect proof, signer and valve owners. Candidate owner v12
+and principal v3 separate parent/effect reviewer domains. The previously single
+model bundle becomes an explicit bounded set of independently verified selections.
+Parent/effect proof v2 preserves the existing16-KiB cap and policy restriction.
+Parent-v2 RPC releases the generation fence only during the existing signer call,
+then reacquires and reverifies. Current-use checks recheck generation, peer and
+clock after verification. Legacy versions and the LOW service boundary remain.
 
-PR2160 merged as `358fb2e34`; its tree equals independently reviewed `ec7a0e438`.
-Exact-head and merged-main CI/CodeQL passed. The new installed runtime independently qualifies
-2,683 files and both confined profiles. One same-boot ABBA comparison measures
-mean full guard time 2.957s → 2.197s (25.73% lower); this small component sample
-does not establish end-to-end improvement, autonomous repair or retained RSI benefit.
+Independent review passed20 signed-model/current-use controls and17 Linux RPC/
+nonce controls against44 frozen source files. It reproduced and repaired late
+expiry/clock-rollback defects. The connected59-suite Windows run passes1,545/22 platform skips, no failures or
+errors. Explicit repository test roots repaired cross-module fixture interference;
+production guards stayed intact. Final45-file freeze adds one schema-negative
+fixture correction and an independently reviewed EOF-only change. Exact-source
+publication is recorded separately; installed HIGH qualification remains pending.
 
-Historical v28 passes installation/revocation but rejects the requester. Fresh
-v29 confirms an exact rejected backend response (`grant_service_not_admitted`)
-followed by a C send failure at resident `sendall`, line239. The backend rejection
-branch and exception type remain unknown. All seven services are independently
-absent; observation completion is false and the historical reset error is retained.
+The installed HIGH service still needs protected custody/consensus nonce
+composition and authentic work, reviewer/model and budget inputs. The existing
+factory/signer/socket owners provide the extension points; do not create a second
+orchestrator or silently widen LOW. The v36 accepted synthetic handshake remains
+a prerequisite result, not author execution; all seven owned units were absent,
+while root exit2 left clean service closure false. Earlier native attempts,
+component performance samples and source closures remain historical in the
+[canonical dispatch evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
 
-Historical next action was to identify the backend rejection branch. A harmless two-unit
-control proves `RemainAfterExit=yes` keeps `systemd-run --wait` pending after a
-successful oneshot. The v30 package uses `RemainAfterExit=no` and exact absent-unit
-cleanup recognition. Fresh v30 completes observation and cleanup without the old
-wait timeout/reset error; target exits zero before cleanup and all seven units are
-independently absent. Installation/revocation pass, but handshake still rejects.
-Authority, signed lifetimes, deadlines and acceptance remain unchanged. The
-lifecycle correction does not resolve the backend admission rejection.
-
-V31 localizes that rejection to the backend factory. Independent source/codec
-checks then reproduce a fixture defect: both audit keys used plain hex where the
-existing consumer requires its canonical encoding. The v32 fixture correction
-passes independent controls; its native grant backend and outer authorization now
-return accepted responses. Installation/revocation pass, but the later socket send
-fails and the requester rejects. All seven services are independently absent;
-observation/cleanup complete. A timeout is not yet observed in this trial.
-V33 also reaches accepted signing, but its target observer fails setup because
-it rejects the canonical Protocol metaclass; zero callbacks establish no transport
-cause. A narrowly repaired observer passes an actual installed-module setup probe.
-Separately, a source regression proves the authenticated 30-second setting was
-not forwarded to the nested client, which used its 5-second default. The focused
-repair forwards the setting and preserves strict bounds and signed expiry.
-Exact source `294195cdb` now passes independent installed qualification. V34
-installation/revocation pass; the target receives an accepted inner signing
-response and both issuer and target exit zero. The requester still rejects with
-`REJECT_SIGNER_SOCKET_RESPONSE_INVALID`. No observed C send/receive failure or
-exhausted diagnostic cap explains this rejection. All seven services are absent;
-observation and cleanup complete. Fixed backend rejections can be sanitized to
-that same public code, so it does not by itself prove malformed response data.
-V35 localizes the rejection to the returned key-provider result: its exact type
-or `ok` check fails at line152; the factory-exception branch is not observed.
-Independent offline controls reproduce a fixture mismatch: target profile60
-rejects successful credential results from the already configured300-second
-custody window. The actual v35 provider code remains unobserved.
-V36 accepts the synthetic LOW handshake; both signatures and exact request/response
-binding verify independently. The target factory returns `ok=true/NONE` after the
-fixture profile ceiling changes from60 to validated `args.ttl` (300). Absolute
-expiry and signed30 lifetimes remain unchanged. All seven units are absent with
-no cleanup errors, but root exit2 leaves `clean_service_closure=false`; its exact
-error is unknown. This is not author admission or retained RSI benefit.
-Next 18/P0 (C4/I5/D5/Impact4): resolve the existing parent/work/model/verifier/budget
-admission path from authentic inputs. Do not repeat the accepted handshake or
-widen LOW authority.
-
-The current effectful integrated author path has a separate dependency: its parent
-consensus verifier lacks a discovered installed trusted provider/composition;
-signed work/model inputs, budget and distinct verifier reservation are unproved.
-The post-valve lease issuer is already connected. LOW handshake authority stays
-LOW. The separate LOW no-effect queue is wired to 0102/Fusion review, with no
-existing OpenClaw/Hermes author binding found. Local LM Studio is reachable with
-nine catalog models and zero loaded instances; the earlier Qwen verifier trial
-remains unqualified. Catalog presence does not establish worker readiness.
-R15 still requires author execution, independent evaluation, activation and
-rollback, later retained benefit and bounded next selection.
-[Current execution evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+R15 still requires one admitted author, independent evaluation, authorized
+activation/rollback, a later invocation benefiting from retained evidence and
+bounded autonomous next selection. Native author tickets0; paid model calls0;
+coordinator cost unknown. No whole-system completion percentage is justified.
 
 **Historical checkpoint — native requester rejection (2026-10-19):**
 PR2159 merged at `bb9d3f802`; all 19 recorded exact-head check runs passed

@@ -46,7 +46,7 @@ def resolve_current_parent_sovereign_authorization(*, owner_config_path, repo_ro
             return None
         repo = Path(repo_root).resolve()
         owner = loader._load_owner_config(owner_config_path, repo=repo)
-        if owner["schema_version"] != loader.SCHEMA_VERSION_V11:
+        if owner["schema_version"] not in {loader.SCHEMA_VERSION_V11, loader.SCHEMA_VERSION_V12}:
             return None
         owner_before = canonical_json(owner)
         selected, boundary = loader._manifest_selection_from_owner(owner, repo=repo)

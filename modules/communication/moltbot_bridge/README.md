@@ -1,11 +1,12 @@
 ## Parent-consent prerequisite — 2026-10-19
 
-The existing current-principal resolver now verifies opt-in owner v11 parent
-consent for one exact HIGH/worktree_create request. Its distinct policy-bound
-evidence cannot directly authorize execution. [Contract and current-use limits](INTERFACE.md#exact-parent-consent-connection--2026-10-19),
-[tests](tests/TestModLog.md#parent-consent-connection--2026-10-19) and
-[RSI sequencing](../../../docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19).
-Trusted parent-policy/reviewer/model/budget composition remains the next gate.
+PR2163 closed policy-bound parent consent on main824d0f71. The current v12/v3
+candidate composes parent/reviewer/model evidence through effect, signer and
+current-use owners. [Contract and limits](INTERFACE.md#exact-parent-consent-connection--2026-10-19),
+[test evidence](tests/TestModLog.md#parent-consensus-connection--2026-10-20) and
+[RSI sequencing](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+The candidate is not installed HIGH admission; protected nonce/custody and genuine
+work/model/reviewer/budget inputs remain separate gates. LOW stays LOW.
 
 ## Issuer-only root LOAD — 2026-10-15
 

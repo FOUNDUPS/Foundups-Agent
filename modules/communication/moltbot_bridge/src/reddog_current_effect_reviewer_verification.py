@@ -59,7 +59,7 @@ def verify_current_effect_review(*, owner_config_path, repo_root, **inputs):
         before = _input_snapshot(inputs)
         repo = Path(repo_root).resolve()
         owner = loader._load_owner_config(owner_config_path, repo=repo)
-        if owner["schema_version"] not in {loader.SCHEMA_VERSION_V5, loader.SCHEMA_VERSION_V6, loader.SCHEMA_VERSION_V7, loader.SCHEMA_VERSION_V8, loader.SCHEMA_VERSION_V9, loader.SCHEMA_VERSION_V10, loader.SCHEMA_VERSION_V11}:
+        if owner["schema_version"] not in {loader.SCHEMA_VERSION_V5, loader.SCHEMA_VERSION_V6, loader.SCHEMA_VERSION_V7, loader.SCHEMA_VERSION_V8, loader.SCHEMA_VERSION_V9, loader.SCHEMA_VERSION_V10, loader.SCHEMA_VERSION_V11, loader.SCHEMA_VERSION_V12}:
             return False
         selected, boundary = loader._manifest_selection_from_owner(owner, repo=repo)
         with boundary._lease_current(selected) as selection:
@@ -76,11 +76,11 @@ def _verify_leased(owner, owner_path, repo, selection, inputs, before, *, valid_
     records, grants = principals.load_current_generation_principal_artifact(
         repo_root=repo, selection=selection,
     )
-    if len(grants) != 1:
-        return False
+    from .reddog_reviewer_designation_contract import select_reviewer_designation, PRIVILEGE
+    designation = select_reviewer_designation(grants, PRIVILEGE)
     now = _now_epoch()
     keys = _project_reviewer_keys(
-        authority=owner["reviewer_designation_authority"], designation=grants[0],
+        authority=owner["reviewer_designation_authority"], designation=designation,
         records=records, policy=inputs["policy"], selection=selection,
         parent=inputs["authority_request"], now=now,
     )

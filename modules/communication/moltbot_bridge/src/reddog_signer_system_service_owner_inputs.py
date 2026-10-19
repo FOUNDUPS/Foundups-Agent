@@ -42,9 +42,9 @@ def _reject_grant_root_overlap(root: Path, existing) -> None:
 
 def _grant_socket_root(value, *, repo, owner_root, grant_root, policy=None):
     """V10 separates issuer-writable transport from protected artifact ancestry."""
-    from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10, SCHEMA_VERSION_V11
+    from .reddog_signer_system_service_manifest_selection_loader import SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12
     raw = value["independent_grant_authority"]["authority_socket_path"]
-    if value.get("schema_version") not in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11}:
+    if value.get("schema_version") not in {SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12}:
         path = validate_runtime_artifact_path(raw, allowed_root=grant_root, repo_root=repo)
         if path != grant_root / "grant-authority.sock":
             raise RuntimeArtifactManifestError("grant_authority_socket_path_invalid")
@@ -128,6 +128,15 @@ def load_system_service_signer_identity(
 
 def _validate_model_verifier_authority(owner, *, repo):
     value = owner.get("model_verifier_authority")
+    if owner['schema_version'] == 'reddog_signer_system_service_owner_config.v12':
+        from .reddog_model_verifier_selection_inputs import validate_selection_authority
+        validate_selection_authority(value, validate_bundle=lambda bundle:
+            _validate_model_verifier_bundle(bundle, owner=owner, repo=repo))
+        return
+    _validate_model_verifier_bundle(value, owner=owner, repo=repo)
+
+
+def _validate_model_verifier_bundle(value, *, owner, repo):
     if (type(value) is not dict or set(value) != {"issued_at", "expires_at", "inputs"}
             or any(type(value[key]) is not int for key in ("issued_at", "expires_at"))
             or not 0 < value["issued_at"] < value["expires_at"]
@@ -150,6 +159,7 @@ def _validate_model_verifier_authority(owner, *, repo):
 def load_system_service_model_runtime_verifier(
     *, owner_config_path: Path | str, repo_root: Path,
     expected_owner_config_id: str, trusted_now_epoch: Callable[[], int],
+    selection_receipt_id=None, selection_receipt_digest=None, _read_budget=None,
 ):
     """Snapshot protected inputs; caller must bind the owner to a current generation.
 
@@ -160,9 +170,18 @@ def load_system_service_model_runtime_verifier(
     from . import reddog_model_runtime_verifier_bootstrap as model
     repo = Path(repo_root).resolve()
     owner = owner_loader._load_owner_config(owner_config_path, repo=repo)
-    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9, owner_loader.SCHEMA_VERSION_V10, owner_loader.SCHEMA_VERSION_V11} or owner["config_id"] != expected_owner_config_id:
+    if owner["schema_version"] not in {owner_loader.SCHEMA_VERSION_V8, owner_loader.SCHEMA_VERSION_V9, owner_loader.SCHEMA_VERSION_V10, owner_loader.SCHEMA_VERSION_V11, owner_loader.SCHEMA_VERSION_V12} or owner["config_id"] != expected_owner_config_id:
         raise RuntimeArtifactManifestError("model_verifier_owner_binding_invalid")
     authority = owner["model_verifier_authority"]
+    selected_owner = owner
+    if owner['schema_version'] == owner_loader.SCHEMA_VERSION_V12:
+        from .reddog_model_verifier_selection_inputs import select_bundle, SelectionReadBudget
+        if type(_read_budget) is not SelectionReadBudget:
+            raise RuntimeArtifactManifestError('model_selection_read_budget_required')
+        authority = select_bundle(authority, selection_receipt_id, selection_receipt_digest)
+        selected_owner = dict(owner, model_verifier_authority=authority)
+    elif selection_receipt_id is not None or selection_receipt_digest is not None or _read_budget is not None:
+        raise RuntimeArtifactManifestError('model_selection_owner_version_invalid')
     payloads, expected_inputs_digest = None, None
     def current_clock():
         started = trusted_now_epoch()
@@ -170,13 +189,13 @@ def load_system_service_model_runtime_verifier(
         now = trusted_now_epoch()
         if (type(started) is not int or type(now) is not int or now < started
                 or not authority["issued_at"] <= started <= now < authority["expires_at"]
-                or current["config_id"] != expected_owner_config_id):
+                or current["config_id"] != expected_owner_config_id or current != owner):
             raise RuntimeArtifactManifestError("model_verifier_owner_not_current")
         if payloads is not None and digest(payloads) != expected_inputs_digest:
             raise RuntimeArtifactManifestError("model_verifier_snapshot_changed")
         return now
     current_clock()
-    payloads = _read_model_verifier_snapshots(owner)
+    payloads = _read_model_verifier_snapshots(selected_owner, _read_budget=_read_budget)
     expected_inputs_digest = digest(payloads)
     resolver, reasons = model._key_resolver(payloads["trusted_keys"])
     backend, errors = model._signature_verifier("ed25519")
@@ -188,7 +207,7 @@ def load_system_service_model_runtime_verifier(
     return model._verifier(payloads, benchmarks, promotions, resolver, backend, current_clock)
 
 
-def _read_model_verifier_snapshots(owner):
+def _read_model_verifier_snapshots(owner, *, _read_budget=None):
     payloads = {}
     def unique_object(pairs):
         result = {}
@@ -199,7 +218,10 @@ def _read_model_verifier_snapshots(owner):
         return result
     for name, descriptor in owner["model_verifier_authority"]["inputs"].items():
         raw, _ = secure_read_confined_bytes(Path(descriptor["path"]),
-            allowed_root=Path(owner["runtime_root"]), max_bytes=1024 * 1024)
+            allowed_root=Path(owner["runtime_root"]),
+            max_bytes=_read_budget.begin() if _read_budget is not None else 1024 * 1024)
+        if _read_budget is not None:
+            _read_budget.finish(raw)
         if raw_digest(raw) != descriptor["raw_digest"]:
             raise RuntimeArtifactManifestError("model_verifier_input_digest_mismatch")
         payload = json.loads(raw.decode("utf-8"), object_pairs_hook=unique_object)

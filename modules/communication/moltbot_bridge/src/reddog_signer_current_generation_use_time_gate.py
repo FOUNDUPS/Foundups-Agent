@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Callable, Iterable
 
@@ -26,6 +26,9 @@ class SignerCurrentGenerationUseTimeEvidence:
 
     binding: SignerCurrentGenerationRuntimeBinding | None
     peer_receipt_id: str | None = None
+    parent_consensus: object = None
+    peer_valid_until: int | None = None
+    observation_clock: object = None
 
     @property
     def peer_verified(self) -> bool:
@@ -59,9 +62,26 @@ class SignerCurrentGenerationUseTimeEvidence:
             if self.model_matches(work_order):
                 reasons += ("canonical_model_signed_evidence_trust_anchor_incomplete",
                             "canonical_model_selection_signed_evidence_verifier_missing")
+                from .reddog_parent_consensus_use_time import ParentConsensusUseTimeEvidence
+                if (type(self.parent_consensus) is ParentConsensusUseTimeEvidence
+                        and self.parent_consensus.generation_binding == self.binding
+                        and self.parent_consensus.matches(identity, authority, work_order)):
+                    reasons += ('canonical_consensus_receipt_verifier_missing',
+                                'canonical_sovereign_authorization_verifier_missing')
         if self.peer_verified:
             reasons += ("canonical_signer_client_peer_handshake_verifier_missing",)
-        return reasons
+        return reasons if self._current_after_parent() else ()
+
+    def _current_after_parent(self):
+        if self.observation_clock is None:
+            return True
+        try:
+            now = self.observation_clock()
+            return (_generation_fresh(self.binding, now)
+                    and (self.peer_receipt_id is None or
+                         (type(self.peer_valid_until) is int and now < self.peer_valid_until)))
+        except Exception:
+            return False
 
     def memex_matches(self, work_order, bundle) -> bool:
         from .reddog_work_order_binding import canonical_full_work_order_digest
@@ -104,6 +124,7 @@ def collect_signer_current_generation_use_time_evidence(
     peer_secret_access_grant_supplier=None,
     model_work_order=None,
     retained_proposal_inputs=None, revoked_key_epochs=frozenset(),
+    parent_consensus_authority=None,
 ) -> SignerCurrentGenerationUseTimeEvidence:
     """Collect current-generation evidence without minting a capability."""
 
@@ -112,9 +133,11 @@ def collect_signer_current_generation_use_time_evidence(
     trusted_now_epoch = _nondecreasing_clock(trusted_now_epoch)
     try:
         if peer_secret_access_grant_supplier is not None:
-            return _collect_fresh_peer(repo_root, runtime_root, trusted_now_epoch,
+            evidence = _collect_fresh_peer(repo_root, runtime_root, trusted_now_epoch,
                 principal_identity, principal_work_authority, peer_secret_access_grant_supplier, model_work_order,
                 retained_proposal_inputs, revoked_key_epochs)
+            return _with_parent(evidence, parent_consensus_authority, repo_root,
+                                principal_identity, principal_work_authority, model_work_order, trusted_now_epoch)
         now_epoch = trusted_now_epoch()
         binding = verify_signer_current_generation_runtime_binding(
             repo_root=repo_root,
@@ -131,7 +154,18 @@ def collect_signer_current_generation_use_time_evidence(
                 return SignerCurrentGenerationUseTimeEvidence(None)
     except Exception:
         return SignerCurrentGenerationUseTimeEvidence(None)
-    return SignerCurrentGenerationUseTimeEvidence(binding)
+    return _with_parent(SignerCurrentGenerationUseTimeEvidence(binding), parent_consensus_authority,
+                        repo_root, principal_identity, principal_work_authority, model_work_order, trusted_now_epoch)
+
+
+def _with_parent(evidence, authority, repo, identity, work_authority, work, clock):
+    from .reddog_parent_consensus_use_time import collect_parent_use_time
+    if authority is None or not evidence.principal_matches(identity, work_authority) or not evidence.model_matches(work):
+        return evidence
+    parent = collect_parent_use_time(authority, evidence.binding, identity, work_authority, work,
+                                    repo_root=repo, clock=clock)
+    current = replace(evidence, parent_consensus=parent, observation_clock=clock)
+    return current if current._current_after_parent() else SignerCurrentGenerationUseTimeEvidence(None)
 
 
 def _nondecreasing_clock(clock):
@@ -190,7 +224,7 @@ def _collect_fresh_peer(repo, runtime, clock, identity, authority, grant_supplie
         return SignerCurrentGenerationUseTimeEvidence(None)
     receipt = _digest({"generation": after.receipt_id, "request": peer.request_digest,
         "response": peer.response_digest, "requester": requester})
-    return SignerCurrentGenerationUseTimeEvidence(after, receipt)
+    return SignerCurrentGenerationUseTimeEvidence(after, receipt, peer_valid_until=peer.peer_handshake_expires_at)
 
 
 def _same_peer_identity(before, after):

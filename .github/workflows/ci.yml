@@ -1390,7 +1390,7 @@ jobs:
           FOUNDUPS_DB_PATH: ${{ runner.temp }}/startup-policy-foundups.db
           WRE_PATTERN_MEMORY_DB: ${{ runner.temp }}/startup-policy-pattern.db
         run: |
-          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+          python -B -m pytest -q --tb=short -c /dev/null --rootdir=. --noconftest \
             --import-mode=importlib -p no:cacheprovider \
             modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_publication.py \
             modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py \
@@ -1402,6 +1402,12 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_contract.py \
             modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_composition.py \
             modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_owner_versions.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_domains.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_composition.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_transport.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_signer.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_use_time.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_model_inputs.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
             modules/communication/moltbot_bridge/tests/test_reddog_installed_grant_manifest_consumer.py \
