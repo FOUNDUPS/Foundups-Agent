@@ -1,3 +1,12 @@
+## Grant startup time sampled inside revocation fence — 2026-10-21
+
+Reused `authorize_current_key_epoch_use` during installed dependency revalidation
+to avoid rejecting valid startup when the wall clock crosses a second between
+caller sampling and durable lock admission. Existing expiry/revocation/rollback
+checks and explicit-epoch equality remain intact. Deterministic regression
+extends the existing custody composition test; no native deployment is claimed.
+See tests/TestModLog.md for WSP97 research, allocation and validation evidence.
+
 ## Consensus nonce publication compatibility repair — 2026-10-20
 
 Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
