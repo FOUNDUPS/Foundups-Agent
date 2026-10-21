@@ -47,8 +47,23 @@ jobs:
           python-version: '3.12'
       - name: Type-check the changed Python verifier
         run: |
+          python - <<'PYCODE'
+          import json
+          import os
+          from pathlib import Path
+          root = Path.cwd()
+          # Preserve type rules; explicitly include only this previously excluded file.
+          config = {
+              'extends': str(root / 'pyrightconfig.json'),
+              'include': [str(root / '.github/scripts/check_docker_context.py')],
+              'exclude': [],
+          }
+          path = Path(os.environ['RUNNER_TEMP']) / 'docker-context-pyrightconfig.json'
+          with path.open('x', encoding='utf-8') as stream:
+              json.dump(config, stream)
+          PYCODE
           npx --yes pyright@1.1.414 --pythonversion 3.12 --outputjson \
-            .github/scripts/check_docker_context.py > docker-context-pyright.json
+            --project "$RUNNER_TEMP/docker-context-pyrightconfig.json" > docker-context-pyright.json
           python - <<'PYCODE'
           import json
           from pathlib import Path
