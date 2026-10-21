@@ -1,0 +1,55 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "execution_id": "gemini-audit-docker-context-20261021",
+  "execution_plane": "local_ci_docs",
+  "repository_context": {
+    "base_commit": "a6b5efa2c83da31712df6d00540a773daa8748b3"
+  },
+  "outcome": "blocked",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "Dockerfile",
+      ".gitignore",
+      ".github/workflows/ci.yml",
+      "requirements.txt",
+      "pyrightconfig.json",
+      ".github/security/DOCKER_CONTEXT.md"
+    ],
+    "research": [
+      "https://docs.docker.com/build/concepts/context/#dockerignore-files",
+      ".github/security/DOCKER_CONTEXT.md"
+    ],
+    "micro_pass": [
+      ".github/security/DOCKER_CONTEXT.md#verified-defect-and-bounded-repair"
+    ],
+    "macro_pass": [
+      ".github/security/DOCKER_CONTEXT.md#external-directive-corrections-and-remaining-work"
+    ],
+    "hard_think": [
+      ".github/security/DOCKER_CONTEXT.md#alternatives-and-sequencing"
+    ],
+    "dialectic_sweep": [
+      ".github/security/DOCKER_CONTEXT.md#alternatives-and-sequencing"
+    ],
+    "first_principles": [
+      ".github/security/DOCKER_CONTEXT.md#alternatives-and-sequencing"
+    ],
+    "execute": [
+      ".dockerignore",
+      ".github/scripts/check_docker_context.py",
+      ".github/workflows/docker-context-security.yml"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    ".github/security/DOCKER_CONTEXT.md#verification-and-truthful-limits",
+    ".github/scripts/README.md",
+    ".github/security/DOCKER_CONTEXT.md#closure-requirements"
+  ]
+}

@@ -1,0 +1,160 @@
+name: Docker context security
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.dockerignore'
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - 'pyrightconfig.json'
+      - 'Dockerfile.dockerignore'
+      - '.github/scripts/check_docker_context.py'
+      - '.github/workflows/docker-context-security.yml'
+      - '.github/security/docker-context-receipt.json'
+      - 'tools/wsp97_execution_validator.py'
+      - 'tools/wsp97_repository_evidence.py'
+      - 'WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.*'
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - '.dockerignore'
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - 'pyrightconfig.json'
+      - 'Dockerfile.dockerignore'
+      - '.github/scripts/check_docker_context.py'
+      - '.github/workflows/docker-context-security.yml'
+      - '.github/security/docker-context-receipt.json'
+      - 'tools/wsp97_execution_validator.py'
+      - 'tools/wsp97_repository_evidence.py'
+      - 'WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.*'
+
+permissions:
+  contents: read
+
+jobs:
+  native-context-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Type-check an exact-byte snapshot of the changed verifier
+        run: |
+          python - <<'PYCODE'
+          import hashlib
+          import json
+          import os
+          from pathlib import Path
+          root = Path.cwd()
+          work = Path(os.environ['RUNNER_TEMP']) / 'docker-context-typecheck'
+          work.mkdir(exist_ok=False)
+          source = root / '.github/scripts/check_docker_context.py'
+          snapshot = work / 'check_docker_context.py'
+          snapshot.write_bytes(source.read_bytes())
+          if snapshot.read_bytes() != source.read_bytes():
+              raise SystemExit('Static-analysis snapshot differs from candidate')
+          config = {
+              'extends': str(root / 'pyrightconfig.json'),
+              'include': ['check_docker_context.py'],
+              'exclude': [],
+          }
+          (work / 'pyrightconfig.json').write_text(json.dumps(config), encoding='utf-8')
+          binding = {'source': source.relative_to(root).as_posix(),
+                     'sha256': hashlib.sha256(snapshot.read_bytes()).hexdigest()}
+          Path('docker-context-typecheck-source.json').write_text(json.dumps(binding), encoding='utf-8')
+          PYCODE
+          # A non-hidden exact-byte snapshot avoids dot-directory enumeration bugs.
+          npx --yes pyright@1.1.414 --pythonversion 3.12 --outputjson \
+            --project "$RUNNER_TEMP/docker-context-typecheck/pyrightconfig.json" > docker-context-pyright.json
+          python - <<'PYCODE'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('docker-context-pyright.json').read_text())
+          summary = report['summary']
+          if summary['filesAnalyzed'] != 1 or summary['errorCount'] != 0:
+              raise SystemExit('Changed-file type-check did not qualify exactly one file')
+          print(json.dumps(summary, sort_keys=True))
+          PYCODE
+      - name: Verify exclusions and source retention with native Docker
+        run: |
+          python .github/scripts/check_docker_context.py > docker-context-report.json
+          cat docker-context-report.json
+      - name: Validate repository-bound WSP 97 audit receipt
+        run: |
+          python tools/wsp97_execution_validator.py \
+            .github/security/docker-context-receipt.json --repo-root . \
+            --expected-base a6b5efa2c83da31712df6d00540a773daa8748b3 \
+            > docker-context-receipt-validation.json
+          cat docker-context-receipt-validation.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docker-context-security
+          path: |
+            docker-context-report.json
+            docker-context-pyright.json
+            docker-context-typecheck-source.json
+            docker-context-receipt-validation.json
+          if-no-files-found: error
+          retention-days: 30
+
+  application-image:
+    needs: native-context-boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Add synthetic context canaries without replacing source
+        run: |
+          python - <<'PYCODE'
+          from pathlib import Path
+          root = Path('.docker-context-canary')
+          root.mkdir(exist_ok=False)
+          (root / 'credentials').mkdir()
+          for name in ('.env', 'credentials/probe.json', 'source.py'):
+              (root / name).write_text('synthetic-context-probe\n', encoding='utf-8')
+          PYCODE
+      - name: Build the actual root application image
+        run: docker build --progress=plain --tag foundups-context-audit .
+      - name: Inspect image without starting the application or network
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --entrypoint python \
+            foundups-context-audit -c '
+          import importlib
+          import shutil
+          from pathlib import Path
+          root = Path("/app")
+          required = ("main.py", "requirements.txt", ".docker-context-canary/source.py")
+          forbidden = (".git", ".docker-context-canary/.env", ".docker-context-canary/credentials")
+          missing = [p for p in required if not (root / p).is_file()]
+          leaked = [p for p in forbidden if (root / p).exists()]
+          if missing or leaked:
+              raise SystemExit(f"Image boundary failed: missing={missing}; leaked={leaked}")
+          compilers = [p for p in ("gcc", "g++", "cc", "c++", "make") if shutil.which(p)]
+          if compilers:
+              raise SystemExit(f"Build tools remain in runtime image: {compilers}")
+          for name in ("llama_cpp", "whisper", "fastapi", "sqlalchemy"):
+              importlib.import_module(name)
+          print("Application image built; imports passed; source retained; canaries, Git history and compilers absent")
+          '
+      - name: Verify installed dependency consistency
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --entrypoint python \
+            foundups-context-audit -m pip check
+      - name: Remove only the owned local image
+        if: always()
+        run: |
+          if docker image inspect foundups-context-audit >/dev/null 2>&1; then
+            docker image rm foundups-context-audit
+          fi
