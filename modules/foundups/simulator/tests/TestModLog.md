@@ -2,6 +2,23 @@
 
 ## Test Modification Log (WSP 22 Compliance)
 
+### 2026-10-21 — Genesis denomination and floating reserve regression
+
+**Command**:
+- `python -B -m pytest -q -o addopts= -p no:cacheprovider modules/foundups/simulator/tests/test_btc_reserve_semantics.py modules/foundups/simulator/tests/test_docs_contract_alignment.py`
+- `python -B modules/infrastructure/wre_core/scripts/generate_test_registry.py --check`
+
+**Status**:
+- `12/12 PASSED` in the owned checkout, including all existing legacy API cases; canonical registry current (1,740 test files, 270 quarantined).
+- Negative controls: forcing the circulating BTC value to the genesis ratio failed only `test_ups_value_btc_floats_after_circulation_exists`; restoring the incorrect one-sat architecture statement failed only `test_tokenomics_genesis_example_matches_btc_reserve_constant`. Both runs had 11 passes and one expected failure, with zero errors/skips.
+- Restored both mutated files to their exact prior bytes, then reran the focused suite: `12/12 PASSED`. No negative-control mutation remains.
+
+**Coverage**:
+- Reused the existing reserve-semantics and docs-alignment files. Preserved the original genesis ratio/value and legacy alias cases; added non-genesis reserve-growth assertions and a direct architecture denomination comparison.
+- Canonical registry regeneration changed only the reserve test's module-docstring description. Tests use existing dependencies and do not validate live finance, deployment or the entire simulator suite. WSP 22/50/97.
+
+---
+
 ### 2026-02-22 - Submission checklist determinism verification
 **Command**:
 - `$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'; python -m pytest modules/foundups/simulator/tests/test_scenario_runner_determinism.py -q`
