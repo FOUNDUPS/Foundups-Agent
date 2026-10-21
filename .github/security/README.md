@@ -1,5 +1,25 @@
 # Blocking secret scan
 
+## Signing CI coverage budget — 2026-10-21
+
+The grant-aware signing regression's three-minute step limit interrupted job
+119109373540 at83% while tests were still progressing, without a failing
+assertion or final result. Duplicate job119109577954 checked out the identical
+merge16b8a01 and finished1469 passed/3 skipped in97.32seconds. The interrupted
+run remains incomplete coverage; the successful duplicate does not erase it.
+
+Raise only that CI step's bounded budget from3 to5minutes to accommodate the
+observed slower runner. Test selection, commands, per-test/runtime deadlines,
+job limits and failure enforcement remain unchanged. This is CI configuration,
+not a production timeout or security-policy change.
+
+WSP97 research compared both hosted logs and the exact workflow against main
+da3a39e32. WSP15 allocation: C1/I3/D3/Impact3 =10; existing-owner maintenance.
+Configuration validation compares parsed YAML against main after restoring only
+this timeout field, requiring full structural equality. Existing17 secret-gate
+regressions remain the test owner; no timing-sensitive duplicate test is added.
+Hosted exact-head CI remains required; no service or credential is exercised.
+
 ## Grant startup changelog prose re-review — 2026-10-21
 
 PR2167 security job119107129537 reported one `generic-api-key` finding in

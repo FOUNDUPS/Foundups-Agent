@@ -1317,7 +1317,7 @@ jobs:
           if-no-files-found: error
 
       - name: Run RedDog grant-aware signing composition regression
-        timeout-minutes: 3
+        timeout-minutes: 5
         env:
           PYTHONDONTWRITEBYTECODE: '1'
           PYTHON_DOTENV_DISABLED: '1'
