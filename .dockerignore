@@ -1,0 +1,66 @@
+# Root Docker build-context boundary. Git ignores do not constrain COPY.
+# Runtime credentials/state must be supplied at runtime, never baked into layers.
+**/.git
+**/.env
+**/.env.*
+**/credentials
+**/client_secret*.json
+**/oauth_token*.json
+**/token*.json
+**/service_account*.json
+**/*service-account*.json
+**/*firebase-adminsdk*.json
+**/*.pem
+**/*.key
+**/*.p12
+**/*.pfx
+**/.ssh
+**/.aws
+**/.config/gcloud
+**/.docker/config.json
+**/.npmrc
+**/.netrc
+**/.pypirc
+
+# Browser authentication, private working lanes and local runtime artifacts.
+**/browser_profiles
+**/*chrome_profile*
+**/*edge_profile*
+**/.runtime
+.reddog
+.worktrees
+.claude/worktrees
+.m2m
+012.txt
+012.longlines.txt
+012.txt.bak_*
+
+# Root memory contains two source modules; keep code, omit local state.
+memory/*
+!memory/__init__.py
+!memory/memory_manager.py
+**/*.db
+**/*.db-*
+**/*.sqlite
+**/*.sqlite3
+**/*.sqlite3-*
+**/*.log
+logs
+02_logs
+
+# Installed dependencies, caches and local model/index bytes are not source.
+**/.venv
+**/venv
+**/node_modules
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/.cache
+**/*.gguf
+**/*.safetensors
+holo_index/models
+holo_index_data
+# Historical malformed Windows-drive directory; preserve Git data, omit image.
+E

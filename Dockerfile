@@ -15,17 +15,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY . .
 
-# --- Security Note ---
-# The 'credentials' directory containing sensitive OAuth tokens
-# SHOULD NOT be copied into the image in production.
-# Mount it as a volume or use Docker secrets instead.
-# For local dev, ensure credentials dir exists before building or running.
-# Example: docker run -v $(pwd)/credentials:/app/credentials ...
-# Ensure the 'memory' directory is also mounted as a volume to persist logs.
-# Example: docker run -v $(pwd)/memory:/app/memory ...
-
-# Ensure credentials and memory directories exist in the container context
-# These will be mount points for volumes
+# The root .dockerignore excludes local credentials and runtime state before COPY.
+# Supply credentials at runtime using a read-only mount or Docker secrets.
+# Example: docker run -v "$(pwd)/credentials:/app/credentials:ro" ...
+# Mount writable memory separately when persistence is required.
+# These directories are mount points, not permission to bake secrets into layers.
 RUN mkdir -p /app/credentials && mkdir -p /app/memory
 
 # Command to run the application

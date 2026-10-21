@@ -1,0 +1,60 @@
+name: Docker context security
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.dockerignore'
+      - 'Dockerfile'
+      - 'Dockerfile.dockerignore'
+      - '.github/scripts/check_docker_context.py'
+      - '.github/workflows/docker-context-security.yml'
+      - '.github/security/docker-context-receipt.json'
+      - 'tools/wsp97_execution_validator.py'
+      - 'tools/wsp97_repository_evidence.py'
+      - 'WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.*'
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+    paths:
+      - '.dockerignore'
+      - 'Dockerfile'
+      - 'Dockerfile.dockerignore'
+      - '.github/scripts/check_docker_context.py'
+      - '.github/workflows/docker-context-security.yml'
+      - '.github/security/docker-context-receipt.json'
+      - 'tools/wsp97_execution_validator.py'
+      - 'tools/wsp97_repository_evidence.py'
+      - 'WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.*'
+
+permissions:
+  contents: read
+
+jobs:
+  native-context-boundary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify exclusions and source retention with native Docker
+        run: python .github/scripts/check_docker_context.py > docker-context-report.json
+      - name: Validate repository-bound WSP 97 audit receipt
+        run: >-
+          python tools/wsp97_execution_validator.py
+          .github/security/docker-context-receipt.json --repo-root .
+          --expected-base a6b5efa2c83da31712df6d00540a773daa8748b3
+          > docker-context-receipt-validation.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docker-context-security
+          path: |
+            docker-context-report.json
+            docker-context-receipt-validation.json
+          if-no-files-found: error
+          retention-days: 30
