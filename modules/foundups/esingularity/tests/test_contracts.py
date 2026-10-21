@@ -86,6 +86,19 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     assert "Branch-protection “required” status alone is never sufficient evidence." in skill
     assert "Never merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed." in skill
 
+    # These protect the operator policy; they do not execute live Docs ordering.
+    ordering = skill.split("## Ordering rule", 1)[1].split("\n## ", 1)[0]
+    assert "**end/completion time**" in ordering
+    assert "Do not sort from times merely mentioned inside the body" in ordering
+    assert "If an event's own time is unknown, do not invent one" in ordering
+    assert "every moved event has an established effective event time" in ordering
+    write_procedure = skill.split("## Write procedure", 1)[1].split("\n## ", 1)[0]
+    assert "standalone `HEADING_2` paragraph" in write_procedure
+    assert "standalone `NORMAL_TEXT` paragraph beginning with `•`" in write_procedure
+    assert "no paragraph contains multiple activity bullets" in write_procedure
+    assert "verify the whole current-day block after mutation" in write_procedure
+    assert "Do not rewrite or reorder historical event text" in write_procedure
+
     for projection in (
         REPOSITORY_ROOT / ".agents" / "skills" / "yumori-moshpit" / "SKILL.md",
         REPOSITORY_ROOT / ".claude" / "skills" / "yumori-moshpit" / "SKILL.md",

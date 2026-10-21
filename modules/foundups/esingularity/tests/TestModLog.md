@@ -1,3 +1,9 @@
+## 2026-10-21 — Moshpit event-time and paragraph policy contracts
+
+- Extended `test_yumori_moshpit_skill_is_wre_registered_and_projected` in the existing suite. Assertions bind ordering rules to their section: completion time, exclusion of body-only timestamps, unknown-time preservation and evidence for every historical move.
+- Write-procedure assertions retain standalone heading/activity paragraphs, one activity per paragraph, whole-current-day readback and protection against rewriting historical text for a chronology check. Existing private-log parity and projection assertions remain intact.
+- Validation: `python -B -m pytest -q -o addopts= -p no:cacheprovider modules/foundups/esingularity/tests/test_contracts.py` passed all 21 cases, with zero failures or skips. These are source-policy contracts, not live Google Docs ordering tests or runtime automation evidence. WSP 22/50/97.
+
 ## 2026-10-21 — Private Moshpit native-write parity reconciliation
 
 - PR #2110 extends the existing `test_yumori_moshpit_skill_is_wre_registered_and_projected` contract with private-log native writes, exact errors, one pending delta and no parallel log.

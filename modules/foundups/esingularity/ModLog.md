@@ -1,3 +1,9 @@
+## 2026-10-21 — Reconcile Moshpit event ordering policy PR #2007
+
+- Preserved the original event-owned timestamp, unknown-time placement, evidence-led historical repair and whole-day paragraph readback rules alongside PR #2110's private native-Docs safeguards.
+- Extended the existing Moshpit contract assertions; all 21 cases in `test_contracts.py` pass. Canonical agent projections still resolve the existing skill. Registry metadata is unchanged; its pre-existing 0.1.0 version versus canonical 0.1.2 is deferred from this policy slice.
+- This validates repository policy text, not live Docs mutation, automated ordering or end-to-end RSI. No correspondence, document or deployment effects. WSP 00/15/22/50/95/97; exact-head hosted checks and main readback remain publication gates.
+
 ## 2026-10-21 — Close private Moshpit native-write policy PR #2110
 
 - Reconciled the existing private-log policy onto main a41a76053. Both canonical Google Docs require native content writes, exact error preservation, deduplication and readback; one pending learning delta must not replay a Gmail/CRM action.
