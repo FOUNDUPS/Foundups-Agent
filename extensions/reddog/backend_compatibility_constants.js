@@ -8,7 +8,7 @@ const EXPECTED_MANIFEST_SHA256 = 'dbe7bb22b3c4bc2d2244d00b1ca80ae0cf35fea9dab8ba
 const RUNTIME_DEPENDENCY_GRAPH_VERSION = 2;
 const MAX_MANIFEST_BYTES = 324 * 1024;
 const MAX_RUNTIME_FILE_BYTES = 2 * 1024 * 1024;
-const MAX_RUNTIME_FILES = 1449;
+const MAX_RUNTIME_FILES = 1450;
 const MAX_RUNTIME_TOTAL_BYTES = 32 * 1024 * 1024;
 const REQUIRED_BRIDGE_FILES = Object.freeze([
   'scripts/advisory_model_once.py',
