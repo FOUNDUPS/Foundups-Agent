@@ -1,3 +1,11 @@
+## 2026-10-22 — PR1860 selected-clip closure
+
+WSP 00/6/10/11/15/22/50/84/97; 16/P0. Reconcile the existing scheduler,
+RedDog adapter and transcript evidence on current main, preserving source audits.
+Scope guards, preview isolation, receipt truth, `.en` compatibility and connected
+CI are detailed in the scheduler ModLog/TestModLog. No live scheduling or native
+RSI execution claimed. Shared checkout and reserved lanes remain untouched.
+
 ## Functions Express query-array compatibility — 2026-10-21
 
 WSP00/5/15/22/50/71/97; C3/I4/D4/Impact4=15/P1. Reconcile existing PR1369
@@ -2796,6 +2804,18 @@ remaining native-admission gates and fresh next selection. No production RSI cla
 - Prior PR #1761 merged as 8da0551f after 10 exact-head checks; main CI/CodeQL passed. Next 18/P0: retrieve the real normalized-plan producer/caller contract; main startup still omits it. Scope/evidence: `docs/roadmaps/rsi_swarm_backlog.json#current_observation`, artifact ID `m2m_seed_input_continuation_20260915`. No live AmIBot build, promotion or retained-learning claim.
 
 # FoundUps Agent - Development Log
+
+## 2026-09-22 - Isolated YouTube remote command repair and prior Work audit
+
+Repaired the existing CLI/adapter, nonpersistent previews, exact-ID batch
+selection and Japanese batch transcript evidence. Focused regressions: 85
+passed. Unqualified remote requests stop before selecting old backlog.
+Retrieved the prior Work 21-clip receipt and `publish_daily_clips` provenance;
+excluded the proposed parallel publisher registration. Source export, recent
+discovery and live apply/readback integration remain pending. No YouTube
+mutations or RSI changes. See the scheduler
+[Work audit](modules/platform_integration/youtube_shorts_scheduler/docs/PRIOR_WORK_AUDIT_2026-09-22.md).
+WSP 00/11/22/50/84/95/97.
 
 ## 2026-09-15: Preserve canonical M2M instructions through local provider delivery
 

@@ -1,5 +1,28 @@
 # Blocking secret scan
 
+## PR1860 selected-scheduling binding review — 2026-10-22
+
+Security job119408805011 on head `dfdbf27b02149b71e13ca65d2a8467bb0768b5ea`
+flagged39 changed whole-file bindings:38 generated source digests and one
+unchanged bridge changelog passage. CI merge `007b1cd96b68c91540a531c59058a04eeca3ee0a`
+has identical finding-bearing blobs. Introduced-history scan reported zero
+unreviewed findings (eight previously reviewed occurrences).
+
+Root and independent reviewer recomputed all1449 runtime source hashes from
+exact Git blobs with the unchanged CRLF-to-LF normalization; the independent
+review also recomputed17 bridge mappings. Each flagged line is unchanged from
+main `be7ce629b5f36382466432987eaf279b0e5bbc5c` and has a unique exact reviewed
+prior binding. The prose's surrounding five lines also match. None of the six
+changed manifest values is flagged.
+
+Preserve all1332 existing bindings and append only these39 independently
+proved whole-file/rule/line fingerprints (1371 total). No scanner rule, scan
+scope, fingerprint algorithm, unknown finding or credential is approved.
+Five fingerprint/history/error-handling regressions passed locally; require
+fresh hosted gate regressions and tree/introduced-history scans before merge.
+Sanitized root/peer evidence: `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1860-qualification/`.
+WSP00/10/15/22/50/71/97; unsigned source review, no runtime authority or provider probe.
+
 ## PR2150 operations policy binding review — 2026-10-21
 
 The exact repair head `4cabbbb873958bf22e3d830d4c8328727f0d2610` failed

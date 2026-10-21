@@ -1,5 +1,13 @@
 # YouTube Shorts Scheduler - ROADMAP
 
+## Current reconciliation — 2026-10-22
+
+PR1860: qualify the existing selected-batch route and connected offline CI,
+then converge to main. Preserve dated audits as historical evidence. Remaining
+operational acceptance: authorized host/browser qualification, independently
+verified saved schedules, and the existing recent-clip discovery owner.
+Offline source tests do not establish live scheduling or native RSI.
+
 > **0102 Pickup Point**: Full WRE stack validated manually. Ready for Selenium automation.
 
 ## Current Status: V0.8.9 (2026-01-18)
