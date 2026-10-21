@@ -73,7 +73,17 @@ class TestIsLMStudioAvailable:
 class TestLMStudioNativeResidency:
     """Backend initialization must use native loaded-instance truth."""
 
-    @patch("openai.OpenAI")
+    @pytest.fixture
+    def openai(self, monkeypatch):
+        """Mock the optional SDK without requiring it in the offline test host."""
+        import sys
+        from types import ModuleType
+
+        sdk = ModuleType("openai")
+        sdk.OpenAI = MagicMock()
+        monkeypatch.setitem(sys.modules, "openai", sdk)
+        return sdk.OpenAI
+
     @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
     def test_installed_but_not_resident_is_not_initialized(self, urlopen, openai):
         from modules.infrastructure.shared_utilities.local_llm_backends import (
@@ -119,7 +129,6 @@ class TestLMStudioNativeResidency:
             assert isinstance(proxy, urllib.request.ProxyHandler)
             assert proxy.proxies == {}
 
-    @patch("openai.OpenAI")
     @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
     def test_exact_native_instance_initializes_backend(self, urlopen, openai):
         from modules.infrastructure.shared_utilities.local_llm_backends import (
@@ -152,7 +161,6 @@ class TestLMStudioNativeResidency:
         assert backend.expected_instance_id == "nemotron-owned"
         assert openai.call_args.kwargs["api_key"] == "test-token"
 
-    @patch("openai.OpenAI")
     @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
     def test_unexpected_instance_identity_fails_closed(self, urlopen, openai):
         from modules.infrastructure.shared_utilities.local_llm_backends import (
@@ -548,10 +556,11 @@ class TestCompatibilityMethods:
         }
         assert "unauthorized_control" not in call
 
+    @pytest.mark.parametrize("reasoning", ["off", None])
     @patch(
         "modules.infrastructure.shared_utilities.local_llm_backends._open_lm_studio_request"
     )
-    def test_lm_studio_native_chat_uses_reasoning_off_and_bounded_read(self, urlopen):
+    def test_lm_studio_native_chat_uses_explicit_reasoning_and_bounded_read(self, urlopen, reasoning):
         from modules.infrastructure.shared_utilities.local_llm_backends import (
             LMStudioBackend,
         )
@@ -576,7 +585,7 @@ class TestCompatibilityMethods:
             input_text="Return JSON",
             system_prompt="JSON only",
             max_output_tokens=128,
-            reasoning="off",
+            reasoning=reasoning,
             max_response_bytes=4096,
         )
 
@@ -586,7 +595,10 @@ class TestCompatibilityMethods:
         assert request.full_url == "http://localhost:1234/api/v1/chat"
         assert request.get_header("Authorization") == "Bearer test-token"
         assert payload["model"] == "test-instance"
-        assert payload["reasoning"] == "off"
+        if reasoning is None:
+            assert "reasoning" not in payload
+        else:
+            assert payload["reasoning"] == reasoning
         assert payload["store"] is False
         assert payload["stream"] is False
         response.read.assert_called_once_with(4097)
@@ -661,26 +673,33 @@ class TestCompatibilityMethods:
 class TestLlamaCppFallbackPath:
     """Test the llama_cpp fallback path works correctly."""
 
-    def test_llama_cpp_backend_initializes_with_valid_model(self):
+    def test_llama_cpp_backend_initializes_with_valid_model(self, monkeypatch):
         """LlamaCppBackend.initialize() succeeds with valid model path."""
+        import sys
+        from types import ModuleType
+
         from modules.infrastructure.shared_utilities.local_llm_backends import (
             LlamaCppBackend,
         )
 
-        # Llama is imported inside initialize(), so patch at llama_cpp module
-        with patch("llama_cpp.Llama") as mock_llama:
-            mock_llama.return_value = MagicMock()
+        # Replace the import boundary before resolving Llama. Importing the real
+        # optional package can load a CPU-incompatible native library in CI.
+        sdk = ModuleType("llama_cpp")
+        sdk.Llama = MagicMock()
+        monkeypatch.setitem(sys.modules, "llama_cpp", sdk)
 
-            backend = LlamaCppBackend(
-                model_path=Path("E:/models/test.gguf"), n_ctx=1024
-            )
+        backend = LlamaCppBackend(
+            model_path=Path("E:/models/test.gguf"), n_ctx=1024
+        )
 
-            # Mock path.exists()
-            with patch.object(Path, "exists", return_value=True):
-                result = backend.initialize()
+        with patch.object(Path, "exists", return_value=True):
+            result = backend.initialize()
 
-            assert result is True
-            assert backend._llm is not None
+        assert result is True
+        assert backend._llm is sdk.Llama.return_value
+        sdk.Llama.assert_called_once()
+        assert sdk.Llama.call_args.kwargs["model_path"] == str(backend.model_path)
+        assert sdk.Llama.call_args.kwargs["n_ctx"] == 1024
 
     def test_llama_cpp_backend_fails_with_missing_model(self):
         """LlamaCppBackend.initialize() fails if model file doesn't exist."""

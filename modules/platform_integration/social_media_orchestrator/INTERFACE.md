@@ -7,6 +7,44 @@
 
 ## Public API
 
+### AntifaFM campaign pilot
+
+```python
+async def execute_antifafm_campaign(
+    params: dict[str, str], *, settings=None, client=None, drafter=None, db_path=None
+) -> dict
+
+async def post_verified_x(
+    content: str, account: XAccount, campaign_id: str, job_id: str, *,
+    client, expected_user_id: str, db_path, dry_run: bool = True
+) -> dict
+```
+
+The campaign entry is `src/antifafm_campaign.py`; the existing SOCIAL router
+delegates to it. Actions: `preview`, `check_account`, `review_mentions`,
+`draft_reply`, `publish`. Accepted string parameters: `action`, `account`,
+`dry_run`, `post_id`, `limit`, `job_id`, `content`. Unknown keys, malformed
+AntifaFM command tokens and duplicate parameters reject. The default account is
+`move2japan`, default dry-run is true, and publishing requires an explicit stable
+job ID plus enabled private configuration. The other account labels are
+`foundups` and `antifafm`, each explicitly provider-ID-bound.
+
+Preview returns before host configuration, model, API or ledger access. Read
+operations require `dry_run=false` but can run with publication disabled. They
+verify account identity and return source-linked `draft_reply`, `skip` or
+`review_required` decisions; `review_complete` does not prove a usable draft.
+Context is at most five connected posts and 2,400 serialized characters; drafts
+are at most 280 characters. There is no reply publication action.
+
+`post_verified_x` is an API-only method and module helper in
+`src/unified_x_interface.py`. Live success requires durable `verified` or
+`already_verified` provider readback. Known IDs retry retrieval only; uncertain
+creates remain claimed. The campaign returns `publication_verified`; its
+`no_publication_performed` field is nullable after entering a live publisher.
+One new job per provider account/campaign per 24 hours is allowed; unresolved
+claims hold new jobs. Existing stream rows are unchanged. See the
+[runbook](docs/ANTIFAFM_CAMPAIGN.md) for configuration, status and recovery details.
+
 ### Core Classes
 - `SocialMediaOrchestrator`: Main orchestration service for unified social media management
 - `OAuthCoordinator`: Centralized OAuth management for all social platforms

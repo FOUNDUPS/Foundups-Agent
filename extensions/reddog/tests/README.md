@@ -1,3 +1,12 @@
+## Issuer composition closure count — 2026-10-16
+
+`node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduced
+the generated1428-member manifest versus stale1426-member consumer cap. The
+updated boundary accepts1428 and rejects1429; digest, paths, hashes and byte
+limits remain enforced. CI now invokes this contract before existing preflight.
+Membership adds only the root request-role and extracted startup dependency owners.
+This verifies repository compatibility, not installed extension/runtime state.
+
 ## Effect approval closure count — PR2090, 2026-10-07
 
 Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`

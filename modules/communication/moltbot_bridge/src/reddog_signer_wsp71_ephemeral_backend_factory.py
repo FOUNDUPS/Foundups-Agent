@@ -8,6 +8,7 @@ from threading import RLock
 import time
 from typing import Any
 
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_authority_policy_runtime import initial_handshake_request_allowed
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     ControlLoopAuthorityPolicy,
 )
@@ -153,13 +154,15 @@ class Wsp71EphemeralSignerBackendFactory:
 
 
 @contextmanager
-def _lease_authenticated_factory(factory: Any, expected_binding: Any, boundary: Any):
+def _lease_authenticated_factory(factory: Any, expected_binding: Any, boundary: Any, request: Any = None):
     """Require a real owner lease matching the consuming backend's binding."""
     from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import ResolvePerSignBinding
     from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant import SignerSecretAccessGrantBoundary
     if type(factory) is not Wsp71EphemeralSignerBackendFactory:
         raise ValueError("signer_grant_factory_unverified")
     with Wsp71EphemeralSignerBackendFactory.signing_authority_lease(factory) as binding:
+        if not initial_handshake_request_allowed(factory, request):
+            raise ValueError("signer_initial_handshake_request_invalid")
         if not (type(binding) is type(expected_binding) is ResolvePerSignBinding
                 and binding == expected_binding and type(boundary) is SignerSecretAccessGrantBoundary
                 and boundary._nonce_store is factory.owner_context[1].replay_store
@@ -172,25 +175,13 @@ def build_owner_leased_ephemeral_backend(
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None,
     proposal_replay_high_water_store: Any | None = None,
 ) -> Any:
-    """Compose existing one-use owners without resolving any signing material."""
-    from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import Ed25519SignatureVerifier
-    from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant import SignerSecretAccessGrantBoundary
-    from modules.communication.moltbot_bridge.src.reddog_signer_resolve_per_sign_backend import ResolvePerSignSignerBackend
-    profile, binding = _owner_ephemeral_binding(config, admission, owner)
-    if config.proposal_authority_policy is not None:
-        _verified_proposal_inputs(config, owner, proposal_replay_high_water_store)
-    factory = Wsp71EphemeralSignerBackendFactory(
-        profile, resolver, control_loop_anchor_store=control_loop_anchor_store,
+    """Compose one-use owners, preserving the public factory/patching seam."""
+    from .reddog_signer_initial_handshake_grant_backend import build_owner_backend
+    return build_owner_backend(
+        config, resolver, admission, owner,
+        control_loop_anchor_store=control_loop_anchor_store,
         control_loop_authority_policy=control_loop_authority_policy,
-        signer_peer_instance_binding=config.signer_peer_instance_binding,
-        owner_context=(config, admission, binding),
         proposal_replay_high_water_store=proposal_replay_high_water_store,
-    )
-    return ResolvePerSignSignerBackend(
-        binding, SignerSecretAccessGrantBoundary(
-            nonce_store=admission.replay_store, revocation_oracle=admission.revocation_oracle,
-            clock=lambda: int(time.time()),
-        ), Ed25519SignatureVerifier(), owner.resolver, factory,
     )
 
 

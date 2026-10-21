@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from .reddog_effect_sovereign_contract import _effect_sovereign_lifetime_matches
 
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_contract import (
     CONSENSUS_SCHEMA_VERSION, EFFECT_TARGET_BINDING_SCHEMA_VERSION,
@@ -55,11 +56,15 @@ def author_runtime_evidence_matches(evidence: object, request: Any, now: int) ->
 
 def consensus_receipt_matches(
     receipt: ElevatedAuthorityConsensusReceipt, request: Any, request_digest: str,
-    policy: Any, sovereign: Any, now: int,
+    policy: Any, sovereign: Any, now: int, *, _parent=False,
 ) -> bool:
     if not elevated_consensus_policy_valid(policy):
         return False
-    if type(sovereign) is not SovereignAuthorizationEvidence:
+    from .reddog_parent_consent_contract import ParentConsentEvidence
+    if _parent:
+        if type(sovereign) is not ParentConsentEvidence or sovereign.consensus_policy_digest != policy.policy_digest:
+            return False
+    elif type(sovereign) is not SovereignAuthorizationEvidence:
         return False
     context = receipt.context
     expected_roles = tuple(dict.fromkeys(policy.required_roles))
@@ -156,12 +161,6 @@ def effect_target_binding_matches(binding, *, parent, target, expected_target, n
         parent=parent, target=target, expected_target=expected_target, now=now,
     )
     return expected is not None and binding == expected
-
-
-def _effect_sovereign_lifetime_matches(evidence, context, parent, target_payload, now) -> bool:
-    return (0 <= evidence.issued_at <= context.issued_at <= now < context.expires_at
-            <= evidence.expires_at <= min(evidence.parent_authorization.expires_at,
-                parent.identity_expires_at, parent.work_authority_expires_at, target_payload['expires_at']))
 
 
 def effect_sovereign_authorization_matches(

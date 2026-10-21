@@ -56,6 +56,13 @@ action must be understandable without opening a technical dossier.
 
 ## 3. Apply WSP 97 at sentence and package level
 
+- Preserve the principal's latest scope, site hierarchy, conditional options and
+  requested deliverable before simplifying for the reader. A new-project overview
+  must not become a summary of an older petition; school-focused does not mean
+  deleting a retained optional third site. Audit titles, body, diagrams, appendices
+  and conclusions against the same scope, including every priority-change rule.
+- Repair one issue class at a time, read back and challenge that repair, then move
+  to the next. Keep the canonical source and its derived overview consistent.
 - Lead with the requested action and only the facts needed to decide it.
 - For an unsolicited official briefing, default to one readable A4 page. This is
   an editorial default, not a legal rule: preserve official templates and every
@@ -63,6 +70,22 @@ action must be understandable without opening a technical dossier.
   report with a concise executive entry and a documented reason.
 - Apply the three questions to every section, claim, image and link: Do we need
   it for this decision? Can the reader afford the attention? Can we omit it now?
+- For each outbound article/report citation, validate the **publisher-owned
+  canonical page** and exact issue/version. A LinkedIn republication is not
+  a substitute for eSingularity.ai as the primary JHR source. If the live
+  website still serves JHR #001 while repository code contains #003, never
+  cite the live website as #003; omit the issue-specific claim or HOLD until
+  the exact first-party issue is deployed and read back. Recheck every run:
+  old source, publication receipts and homepage links are not live evidence.
+- Inspect the recipient-visible MIME (including quoted thread) for long,
+  percent-encoded bare URLs or hidden tracking/share slugs. Replace with a
+  verified short canonical destination and intelligible label, use a
+  descriptive HTML hyperlink when necessary, or omit unrelated links.
+  Preserve a genuinely required long official evidence URL with clear context.
+- Reject external release of internal archival labels such as
+  `内部保管・このまま送信しない`, `HOLD` or `SUPERSEDED／送信禁止`.
+  An old unsent HOLD document remains historical evidence, not a reusable
+  outbound template. Check expiry dates and receiving office before reuse.
 - Remove repetition within and across documents; retain unique required facts,
   assumptions, material risks, sources and uncertainty. Do not meet a page limit
   by shrinking text or deleting inconvenient qualifications.

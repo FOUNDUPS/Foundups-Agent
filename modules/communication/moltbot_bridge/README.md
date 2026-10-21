@@ -1,3 +1,79 @@
+## Installed HIGH connection in progress — 2026-10-20
+
+The v13 candidate supplies protected, current-owner consensus nonces using the
+existing atomic MAC state and SQLite high-water store. It preserves legacy owner
+versions and the LOW service. See the [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+Connected 437/3 platform skips and independent 21 controls pass. The installed HIGH
+issuer join remains pending; a
+callable adapter is not native author admission or retained RSI benefit.
+
+## Parent-consent prerequisite — 2026-10-19
+
+PR2163 closed policy-bound parent consent on main824d0f71. The current v12/v3
+candidate composes parent/reviewer/model evidence through effect, signer and
+current-use owners. [Contract and limits](INTERFACE.md#exact-parent-consent-connection--2026-10-19),
+[test evidence](tests/TestModLog.md#parent-consensus-connection--2026-10-20) and
+[RSI sequencing](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+The candidate is not installed HIGH admission; protected nonce/custody and genuine
+work/model/reviewer/budget inputs remain separate gates. LOW stays LOW.
+
+## Issuer-only root LOAD — 2026-10-15
+
+[LOAD-only identity, permission fencing and custody requirements](INTERFACE.md#issuer-only-root-load--2026-10-15).
+
+## Callable LOW grant service — 2026-10-15
+
+[One-request LOW API, protected loader, installed startup and runtime checks](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#installed-issuer-startup--2026-10-16). Native admission remains unproved.
+
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+E0 v9 removes the future grant-permission receipt from the pre-configuration
+binding while retaining it in the full signed policy and current admission checks.
+LOW grant requests release the generation lock during signer RPC and revalidate
+under a fresh lease before returning. These repairs have component and Linux
+transport/locking tests; native issuer enrollment and admission remain open.
+See [the contract](INTERFACE.md#grant-bootstrap-binding-and-low-rpc--2026-10-15)
+and [test evidence](tests/TestModLog.md#grant-bootstrap-and-low-rpc--2026-10-15).
+
+## Initial handshake configuration — 2026-10-15
+
+The existing signer composer now supports one explicitly scoped initial LOW
+handshake under E0 and per-request grants. It creates public configuration only;
+native startup still needs the independent grant issuer and authentic custody.
+See [the interface](INTERFACE.md#initial-handshake-configuration--2026-10-15)
+and the current RSI dispatch evidence before attempting runtime activation.
+
+## Initial manifest activation — 2026-10-15
+
+Protected administrative enrollment signs one exact source/artifact inventory in
+an explicit initial-only domain. Existing generation recovery activates it;
+Linux consumes root-installed immutable files and a separate writable anchor.
+Actual isolated publication, activation and credential-free selection passed.
+Disabled component inputs do not qualify worker startup or RSI. See
+[the contract](INTERFACE.md#initial-runtime-manifest-enrollment--2026-10-15).
+
+## Protected generation writer — 2026-10-14
+
+The missing initial-writer adapter now composes existing stores with protected
+owner/receipt bindings and per-mutation guards. Real isolated component execution
+and independent validation passed; manifest admission and native workers remain
+open. See [the API and trust limits](INTERFACE.md#protected-initial-writer-authority--2026-10-14).
+
+## Bounded high-water signing — 2026-10-14
+
+The existing generation bootstrap signer now has a separate explicit v2 interface
+for initial high-water contents. V1 stays anchor-only. Actual isolated signing,
+store transitions and a later public-only read passed as component probes;
+protected writer admission and native workers remain pending. See
+[the v2 contract](INTERFACE.md#initial-high-water-bootstrap-v2--2026-10-14).
+
+## Initial generation bootstrap — 2026-10-14
+
+The generation subsystem now has a root-policy-bound initial-anchor signer.
+Its real systemd component probe passed; complete enrollment and native worker
+admission remain pending. See [the API and scope](INTERFACE.md#initial-generation-anchor-bootstrap--2026-10-14)
+and the existing RSI dispatch runbook. No production service is enabled by this adapter.
+
 ## Current-generation model consumer checkpoint — 2026-10-07
 
 Existing producer/collector/valve wiring is locally qualified with disposable
@@ -31,17 +107,9 @@ production reviewer execution and native RSI are not established.
 
 ## Separate protected-use control proof — 2026-10-05
 
-**Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.
-Hosted474:471pass/3skip; exact-main CI37254048948 and CodeQL37254048507 succeeded.
-Later merged-source19/19 passed. Governed OpenClaw/WRE refresh completed442.5s;
-CURRENT/no-gap query took44.615s, one attempt/no retry. Historical6task/18event
-rows are unchanged, now7/21. Independent maintenance review and normal owned-lane
-retirement are complete; branch, bundle and ignored-file archive are preserved.
-This closes source/retrieval retention, not native worker admission or key custody.
-
-Earlier source-qualification record (historical):
-
-The optional v2 root descriptor separates ACQUIRE/FINISH control authentication from work signing. Existing v1 callers are unchanged. Synthetic source qualification passes (connected467pass/7platform skips); production credential supply and public startup are not activated. See INTERFACE, module ModLog and the canonical RSI backlog.
+V2 separates ACQUIRE/FINISH control authentication from work signing; v1 is unchanged.
+[PR2068 source/retrieval closure](ModLog.md#separate-protected-use-control-proof--2026-10-05)
+does not establish native admission or key custody.
 
 ## Recover an admitted HoloIndex refresh — 2026-10-05
 
@@ -1073,7 +1141,17 @@ Execution additionally requires `--execute --confirm
 REDDOG_RESIDENT_LIVE_CANARY_PHASE1`. The runtime root must be outside the
 repository and already contain the authority, permission, execution-valve,
 signer config/run-packet, and live signer socket artifacts named by the CLI
-receipt. The harness never starts the signer or resolves secret values.
+receipt. The harness never starts the signer or resolves principal signing keys.
+Select an existing author adapter with `--artifact-generator-mode` (or
+`REDDOG_ARTIFACT_GENERATOR_MODE`): `foundups_fusion` (default),
+`openclaw_gateway`, or `hermes_api`. Unsupported or explicitly empty modes reject.
+All modes require declared model-provider identity; this declaration does not
+replace signed model admission. Fusion additionally requires OpenRouter presence.
+Hermes readiness reads and discards the existing confined service credential
+through `RuntimeHermesApiKeyProvider`; no credential value enters the receipt.
+OpenClaw checks executable availability. These checks do not establish service
+health, sandbox confinement, model authority, budget, or worker execution.
+The receipt's `artifact_generator_mode` records selected configuration only.
 The signed runtime-artifact manifest producer is available as a
 content-addressed foundation. Canonical artifact writers and publication share
 a runtime-generation fence, and final publication uses OS-level no-replace

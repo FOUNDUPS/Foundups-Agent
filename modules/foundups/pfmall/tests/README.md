@@ -51,3 +51,23 @@ one hard-coded `O:/Foundups-Agent` fixture, and missing tracked media
 directories. They are not quarantined or claimed clean by this Tier-0 repair.
 The exact post-#1538 Git parent is `69b7f073`; the focused Holo Tier-0 suite is
 the acceptance surface for this slice.
+
+## GotJunk public listing read slice (2026-10-12)
+
+`test_listing_discovery.py` covers the server-side public projection,
+approval/owner/FoundUp joins, private-data field exclusion, preserved Mall
+deep-link path, unavailable-provider 503 and owner/tenant 403. Tests inject
+fake server-owned approval evidence; **they do not represent a working
+publication store or deployment**.
+
+```bash
+python -m pytest modules/foundups/pfmall/tests/test_listing_discovery.py -q
+```
+
+### Server-injected Firestore provider regression
+
+The same `test_listing_discovery.py` adds mocked source/approval collection
+scenarios: independently reviewed revision, cross-tenant and cross-owner
+denials, draft/revoked/stale item rejection, wrong-project constructor denial,
+failed provider => 503 at the HTTP boundary. No network or SDK credentials.
+The production reviewer, Firestore rules and deployment are **not tested**.

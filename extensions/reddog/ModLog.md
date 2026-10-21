@@ -1,3 +1,49 @@
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
+## Installed issuer contract closure — 2026-10-16
+
+The existing generated closure adds one installed-source descriptor contract:
+1,430 files. Both digest pins match; finite file-count acceptance/rejection
+moves to1,430/1,431. Per-file/total bytes, paths and hashes remain enforced.
+This is backend source compatibility, not installed worker admission.
+
+## Protected custody metadata backend closure — 2026-10-16
+
+Generated membership1428→1429 adds only `reddog_grant_authority_startup_custody.py`
+for explicit owner-v9 validation. Both digest pins and finite count boundary are
+synchronized;1430 rejects and all byte/path/hash checks remain. The callable
+dependency loader is not automatically launched by this extension update. No
+installed extension/runtime or native authority is asserted. WSP6/10/22/97.
+
+## Issuer composition backend closure — 2026-10-16
+
+The source manifest grows1426→1428 for exactly `foundup_verified_outcome_root_revocation_request_role.py`
+and `reddog_signer_system_service_runtime_dependencies.py`; no prior member is
+removed. The extension's stale1426-file cap rejected the generated manifest in
+the actual Node consumer. Synchronize the finite cap to1428 and retain explicit
+1429 rejection, pinned digest, path/hash allowlists and all byte bounds. CI now
+runs this consumer contract alongside its existing preflight. WSP00/6/10/22/97.
+No extension installation or worker admission is claimed.
+
+## Initial enrollment backend binding — 2026-10-15
+
+Regenerated the existing1426-member backend manifest after initial-manifest,
+generation-reader and owner-layout changes; membership and caps are unchanged.
+Both existing digest pins now bind `4fc7653444c12854401a4f5aad6167e2a853c081e51f77a16ade42521c19ef77`.
+Fast tier15members passed. This is repository compatibility binding, not a VSIX
+release, installed-extension update or native worker admission. WSP10/22/97.
+
 ## Effect approval closure count — PR2090, 2026-10-07
 
 Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`

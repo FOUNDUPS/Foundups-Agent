@@ -1,3 +1,24 @@
+## 2026-10-13 — JHR website-first downstream newsletter contract (instruction-only)
+
+- 012 clarified: eSingularity.ai is the primary public publication for the Japan Hyperscaler Report. LinkedIn JHR is a **derived newsletter edition**, distributed after the exact site issue passes verified production deployment and live issue-anchor readback.
+- Updated the site workflow, JHR entrypoint and JHR README to require an explicit site release receipt before handing a source issue to the existing LinkedIn publishing skill. CSS, ticker, non-JHR site changes and NO_REPORT do not trigger social publication.
+- The upstream artifact identity and published permalink must survive the handoff; LinkedIn editorial copy cannot invent additional facts or preempt the site. No site content or website deployment changed in this slice; existing live articles retain their status. WSP00/97 evidence and exact-action approval remain required.
+
+## 2026-10-10 — Security audit remediation
+
+- Bound interest request bodies before JSON parsing, retained field/consent validation, rejected cross-origin requests, added transactional D1 client/global quotas and daily email deduplication. No existing submissions deleted.
+- Removed unpublished portraits and unused original group imagery from the static public root while preserving approved published profile images.
+- Corrected pre-existing PWA purpose typing and duplicate translation keys, retaining last-key-wins displayed copy, so type verification can run.
+- Added real SQLite admission tests and streamed request tests, including a midnight rotation regression found in independent review. Eight security tests, 18 domain-routing tests, and 82 existing module tests passed before integration. Deployment receipt is recorded separately; this entry alone is not proof of publication.
+- WSP00 documented torch-free bootstrap; source-bound lexical retrieval UNKNOWN freshness/index gap, direct file inspection at main b4f1a97 and Sites 90e539f. Manual review because no available verified production security overseer covers this repository. WSP22/50/77/97.
+
+## 2026-10-08 — Three-site scope and incremental recipient audit
+
+- Retain the three-site program while making the two schools the current feasibility focus; keep Sukatto conditional on public decisions, lawful procedures and independent feasibility. School investigation does not depend on Sukatto participation.
+- Separate the immediate request for municipal interest and a coordination contact from later governance, funding and property decisions. Reconcile the combined school consultation filing status without implying acceptance or eligibility approval.
+- Strengthen the recipient-document subskill: preserve the principal's current scope before compression, compare title/body/appendices and priority-change rules, and fix/read back one issue class at a time.
+- Validation: independent forward review passed four scope/cost/send-hold scenarios. Canonical Drive documents received sequential text readbacks and rendered-layout review; detailed source references remain technical annexes, not a required outbound package. No stakeholder email or attachment sent by this repair.
+
 ## 2026-10-08 — Recipient document audit before correspondence release
 
 - Added a subordinate audience/document audit to the existing correspondence and City procedure owners: whole-package reading burden, purpose-first compression, first-use terminology, exact export/page/hash binding, all-page rendering and hidden-artifact checks.

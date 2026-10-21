@@ -1,3 +1,258 @@
+## Protected consensus nonce supply — 2026-10-20
+
+Opt-in owner v13 adds `consensus_nonce_authority` with a purpose-bound store,
+separate integrity credential binding and permission. V1-v12 retain their exact
+shapes. The descriptor reuses the existing confined replay-store configuration,
+MAC-protected atomic state and provisioned SQLite high-water owner; startup does
+not provision credentials or create an empty authority store.
+
+`load_protected_consensus_nonce_authority(owner_config_path=..., repo_root=...,
+expected_owner_config_id=...)` returns the existing reserve/commit/rollback
+interface only after canonical owner, signed E0/current generation, private
+custody and existing-state checks. Its E0 scope requires HIGH worktree creation;
+the canonical identity child `delegate_reddog_identity` is the only optional
+additional operation. LOW, ULTRA and unrelated operations reject.
+
+Each public operation owns its current-generation lease. Reservations receive
+instance-owned handles; another instance cannot commit or roll them back.
+Withdrawal withholds further authorization but permits confined cleanup of an
+owned reservation. A post-commit rejection does not undo durable consumption.
+Cleanup failures remain errors rather than claims of successful rollback.
+`AtomicProposalAuthenticityNonceStore.validate_existing_state()` rejects absent
+or unauthenticated state and retains the existing one-step high-water crash
+recovery; it is not a promise of read-only IO.
+
+The generated 1,449-file runtime currently includes only the new custody leaf;
+the public nonce authority/current-owner leaves remain source/test validated,
+not imported or qualified installed runtime until the HIGH join.
+
+This adapter does not install HIGH signing. The existing LOW service remains
+LOW-only. HIGH composition must avoid nesting these public self-leasing methods
+inside the permission owner's generation lease; the next join requires one live
+authenticated scope for verification, secret use and nonce callbacks. Reuse the
+existing supplied-grant target transport. Native qualification/admission,
+authentic work/model/reviewer/budget inputs and retained RSI benefit remain open.
+
+## Exact parent-consent connection — 2026-10-19
+
+Owner v11 supplies consent for an exact HIGH/worktree_create parent. Signatures bind
+request, policy, registration, principals, repo/FoundUp and current generation.
+The facade returns `ParentConsentEvidence`; construction is not authentication.
+V12 adds `parent_reviewer_designation_authority` alongside the effect domain.
+Principal artifact v3 permits one designation per domain (two maximum); legacy
+schemas remain intact. Cross-domain privilege/schema fallback rejects.
+`CurrentParentConsensusAuthority(repo_root, owner_config_path, model_artifacts, proof)`
+reverifies through `verify`, `prepare`, its exact-parent callable supplier and signer
+`reserve`. Parent-to-effect proof preserves policy/consent without legacy projection.
+
+V12 binds 1–9 exact model selection ID/digest entries with six protected inputs each.
+Each author/reviewer pass shares 54 reads and 8 MiB; repeated passes reread/reverify.
+Missing, duplicate or substituted selections reject. Existing qualification and
+independence checks remain; selected membership does not prove actual authorship.
+Parent/effect proof v2 retains the 16,384-byte effect cap by reconstructing one parent;
+conflicting/duplicate parents reject. V1 transport stays intact. Parent v2 grant RPC
+releases then reacquires/revalidates the generation fence; legacy HIGH is unchanged.
+Grants cannot outlive approval. Reserve/commit reverify; rollback attempts do not prove recovery.
+The use-time collector binds exact work/identity/model/generation and rechecks clock
+and generation/peer expiry after parent verification and reason use; missing evidence
+keeps gates closed. Installed HIGH custody/nonce supply and authentic inputs remain
+separate. LOW stays LOW. Sampled checks do not establish continuous immutability.
+
+## Issuer-only root LOAD — 2026-10-15
+
+Issuer identity permits LOAD only, preserving the legacy target signing domain.
+`authorize_current_key_epoch_use(*, key_epoch, expires_at, action)` on the existing durable/root-authorized oracles samples time after acquiring the durable fence. The explicit `authorize_key_epoch_use(..., at_epoch=...)` signature and exact caller-epoch match remain; both paths freshly check snapshot lifetime, expiry and revocation after snapshot/root LOAD and before action/result release. Observed time rollback rejects. WSP71 rehydration uses the current-time path and refreshes receipt time before/after permission verification and action, retaining authority identity comparison.
+Post-action rejection withholds the result; it does not undo arbitrary callback effects. This is not an atomic rollback guarantee. Installed runtime remains separately pinned; source validation and native admission are distinct. See the [identity and lease contract](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#issuer-only-root-load--2026-10-15).
+
+## Callable LOW grant service — 2026-10-15
+
+`serve_grant_authority_once(...)` composes one LOW handshake grant request.
+See the [complete signature, dependencies, result fields and transport limits](
+../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#callable-low-grant-service--2026-10-15).
+The protected v9/v10 loader supplies custody. [Installed startup and runtime checks](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#installed-issuer-startup--2026-10-16) compose one request; native admission remains unproved.
+
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+`reddog_signer_owner_e0_policy_contract.py` accepts explicit
+`reddog-signer-owner-e0-policy.v9`. Its field set equals v8 and its signing prefix
+is the exact v9 schema. The default remains v6; v5-v8 canonical bindings, IDs
+and signing inputs retain their recorded values. No installed policy is migrated.
+
+`signer_owner_e0_authority_binding_digest(...)` excludes v8's existing
+`target_signer_generation_id` alias and, only for v9, the future
+`grant_authority_permission_snapshot_digest` and
+`grant_authority_permission_snapshot_receipt_id`. This permits the initial
+configuration/target manifest to be identified before its genuine permission
+receipt exists. Both receipt fields remain required and covered by the full
+policy ID/signature. A partial projection is not an admitted E0 policy. V9 follows
+the same exact-Git v3 grant-manifest, target-generation, permission, revocation
+and expiry checks as v8; it cannot fall into the legacy provenance path.
+
+`IndependentSignerSecretGrantProvider.lease(...)` prepares a LOW request under the
+current owner lease, exits that lease before signer RPC, then reacquires a fresh
+owner lease. It compares the complete policy, target/replay binding and selection
+except `selection_issued_at`/`selection_expires_at`, which are refreshed observation
+windows checked by that lease. It verifies the returned grant at the fresh time.
+Caller use remains inside the second lease; `issue_grant(...)` returns only after
+clean lease exit. Changed authority, expiry, RPC failure or cleanup failure rejects;
+there is no retry. Existing elevated and effect issuance behavior is preserved.
+
+Neither repair creates a permission receipt, enrolls a grant runtime profile or
+provides a production issuer executable. Native handshake and author admission
+still require those independently authorized owners and actual custody.
+
+## Initial handshake configuration — 2026-10-15
+
+`compose_initial_handshake_service_config(...)` creates public generation1
+configuration for one LOW handshake. Manifest, E0 and grant gates remain distinct.
+See the [schema, input and rejection contract](
+../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#initial-handshake-configuration--2026-10-15).
+
+`load_system_service_independent_grant_authority_client(...)` accepts the keyword
+`timeout_s`, defaulting to the existing 5 seconds. It requires an exact `int` or
+`float`, finite and in `(0, 30]`; Boolean values and numeric subclasses reject
+before admission or client construction. Initial LOW handshake composition
+forwards its authenticated service configuration's `timeout_s` to this client.
+Other callers retain the default. This is a per-socket-operation transport wait,
+not an authority lifetime or an end-to-end deadline. Signed request/grant expiry,
+current-generation, revocation and post-RPC checks remain unchanged; a longer
+transport wait does not authorize an expired response or prove native admission.
+
+## Initial runtime manifest enrollment — 2026-10-15
+
+`load_initial_runtime_manifest_signing_context(*, approval_path, repo_root)` in
+`src/reddog_initial_runtime_manifest_authority.py` consumes root-installed
+`reddog_initial_runtime_manifest_approval.v1`. Required exact fields are
+`schema_version`, `repo_root_digest`, `runtime_root`, `source_commit_sha`,
+`source_files`, `manifest_spec`, `credential_binding`, `permission`, `consumer_uids`.
+The specification pins issuer, signer key/epoch, nonce, times, profile/config
+digests and all seven existing artifact descriptors. Source inventory must bind
+every installed local import and this loader; root installation owns Git/source provenance.
+Commit shape alone is not provenance. Approval/bundle/source reads use 1 MiB; ordinary owner reads retain 64 KiB and protection checks.
+
+The existing signing context publishes
+`reddog_initial_runtime_artifact_manifest.v1`, with a distinct signing prefix,
+operation/role, approval digest and source commit. It has one Ed25519 signature;
+it does not invent work/publication/consensus fields or legacy audit-MAC evidence.
+An existing legacy context cannot sign this domain. Permission purpose is
+`initial_runtime_manifest`; one fresh systemd credential and an isolated signer
+UID are required. Expiry is at most300seconds and is rechecked around custody,
+locking, publication and activation. Repeated signatures do not mint work grants.
+
+Existing `provision_signer_runtime_generation` recovers the same published
+manifest with its fixed nonce/times. TTL must match approval. Both new activation
+and recovered/selected bindings restrict this schema to generation1. Legacy
+v1/v2/v3 semantics remain unchanged. Worker startup still requires valid service
+configuration, scoped admission and its existing authenticated dependencies.
+
+Owner configuration now accepts an absolute `anchor_path` whose parent is
+separate from immutable artifact runtime, high-water, witness and owner roots;
+filename stays `generation-anchor.json`. Existing collocated layouts remain
+compatible. The private writer UID owns the actual anchor parent; witness
+binding still includes the artifact runtime. No owner schema field is added.
+
+Linux activation leases consume root-owned regular single-link immutable inodes
+under protected ancestry. The process must be nonroot, NoNewPrivs and have zero
+inherited/permitted/effective/ambient capabilities. Pre-open ancestry checks and
+nonblocking opens prevent FIFO replacement hangs. Descriptor/path/immutable
+checks run before and after activation; every descriptor closes on failure.
+Unsupported filesystems reject. The lease never changes flags/ownership.
+Privileged root/mount changes and same-process compromise are outside this trust
+boundary. Windows sharing-handle behavior is unchanged.
+
+## Protected initial writer authority — 2026-10-14
+
+`load_initial_generation_high_water_authority(*, owner_config_path, bootstrap_path,
+high_water_receipt_path, witness_receipt_path, repo_root)` returns an opaque
+authority/boundary pair. `require_initial_generation_high_water_authority(authority,
+boundary)` rejects foreign boundaries and yields a guarded existing-store handle.
+The loader constructs all dependencies; no supplied signer/store/approval callback.
+Root-protected duplicate-free owner configuration, explicit v2 bootstrap policy and
+two distinct external qualification records are mandatory. Existing witness must
+already be provisioned. Missing initial high-water state is allowed only with an
+empty witness; existing signed state must match the approved initial binding.
+
+Receipt schema `reddog_generation_store_qualification.v1` has exact fields:
+`schema_version`, `store_kind`, `repo_root_digest`, `root`, `path`, `store_id`,
+`device`, `root_inode`, `owner_uid`, `owner_gid`, `evidence_scope`, `probe_path`,
+`probe_content_sha256`, `probe_size_bytes`, `file_fsynced`, `directory_fsynced`,
+`reopened_equal`, `power_loss_tested`. Scope is `filesystem_fsync_reopen`; size is
+an integer1..65536. Three observed-success flags must be true and power-loss false.
+Raw record SHA256 binds the owner receipt ID. The installer independently checks
+observations before protected installation; runtime verifies scope, owner/path/
+inode/device/retained-probe identity. Stored Booleans are not independent proof.
+
+Allowed mutations are initial prepare, witness advance to that authenticated
+pending revision, commit after matching witness, and abort before witness advance.
+Direct nontransactional advance rejects. Config replacement, expiry, forged handles,
+scope substitution, malformed receipts, missing witnesses and mismatched witness
+identity/required column layout fail closed. Witness file inodes are not pinned.
+Authority is process-local; full same-process compromise is outside its boundary.
+
+Existing `SqliteMonotonicAuthorityStore` gains optional `require_existing=False`
+and `mutation_guard=None`. With `require_existing=True`, SQLite uses `mode=rw`,
+requires existing metadata/column layout, and never creates missing stores/schema.
+The guard executes after transaction/current-state acquisition, before insertion,
+and before commit; an exception rolls back. Defaults preserve other callers.
+Full SQLite schema-object inventory and power-loss durability are not certified.
+This API issues only initial-writer authority, not manifest or worker admission.
+
+## Initial high-water bootstrap v2 — 2026-10-14
+
+`load_initial_generation_bootstrap_signer(*, bootstrap_path, repo_root)` extends
+the same source owner with explicit schema `reddog_generation_bootstrap.v2` and
+permission purpose `initial_generation_bootstrap`. All v1 identity, isolation,
+custody and expiry checks apply. Neither public loader accepts the other's schema.
+The v2 policy additionally requires `high_water_binding` with exactly
+`rollback_domain_digest`, `witness_store_id`, `witness_durability_receipt_id` and
+`witness_binding_context_digest`. These pin contents, not storage qualification.
+
+Besides the exact anchor, v2 accepts canonical ASCII JSON up to16384 bytes for
+the existing high-water v2 schema. Header fields must match protected policy.
+Entries permit only empty abort state, one initial pending transaction with null
+expected/current and previous snapshot `"{}"`, or one committed generation1 with
+no pending value. The approved revision is SHA256 of the canonical authenticated
+anchor including `authentication_tag`; it is never supplied by the caller.
+Pending IDs use the existing codec. Extra fields, alternate anchors/revisions,
+boolean generations, duplicate keys and noncanonical bytes reject. Prepared and
+committed signatures resolve custody for both anchor derivation and final signing;
+abort requires one resolution. Private keys are not retained between operations.
+
+The frozen header is re-derived from protected policy at every check. Authority is
+rechecked after anchor derivation and final signing. This layer does not establish
+transaction order, writer capability, physical durability, witness provenance or
+work-manifest admission. Existing CAS/witness/atomic provisioning gates own those.
+
+## Initial generation anchor bootstrap — 2026-10-14
+
+`load_initial_generation_anchor_signer(*, bootstrap_path, repo_root)` in
+`src/reddog_signer_runtime_generation_bootstrap_signer.py` consumes a Linux
+root-installed `reddog_generation_anchor_bootstrap.v1` policy. The schema pins
+the repository digest, public identity/key epoch, one systemd credential,
+SECRETS_READ permission with purpose `initial_generation_anchor`, consumer UIDs,
+anchor/high-water identities and an exact `SignerRuntimeGenerationBinding` at
+generation 1. Refer to the module's strict field set and tests for all fields.
+No caller-supplied resolver, key or permission backend is accepted by this loader.
+
+The returned frozen signer implements `authenticator_id` and
+`authenticate(payload: bytes) -> str` for that exact canonical initial-anchor
+payload only. It enforces existing process isolation before resolver creation;
+the same bounded resolver re-reads credentials per signature. Root policy and
+permission lifetime are rechecked before/after reads and signing. Wrong records,
+keys, changed policies, expiry and custody failures raise before a signature is
+returned. Ordinary signer-field mutation is prohibited and protected fields are
+re-derived for comparison. This is not isolation against arbitrary Python code
+inside the privileged process; deployment must preserve OS process separation.
+
+Bootstrap policy installation is administrative authority, not worker self-
+authorization. The credential's maximum window is 300 seconds. No private key is
+retained by the adapter; Python memory zeroization is not claimed. Repeated
+identical signatures do not activate state: existing anchor CAS owns replay
+rejection. This slice does **not** sign high-water records, issue writer
+capabilities, verify a work manifest or launch a worker. Receipt-shaped store IDs
+are bindings, not independent durability proofs. Public runtime-owner v1-v8
+schemas and existing startup behavior remain unchanged.
+
 ## Deferred proposal policy activation (implementation checkpoint)
 
 `build_owner_leased_ephemeral_backend` additionally accepts optional
@@ -2483,8 +2738,10 @@ Resident RedDog live-canary contract:
 - The harness delegates to `main.run_reddog_resident_queue_control_loop_preflight`; it does not duplicate queue stages.
 - `LIVE_PROOF_COMPLETE` requires a shared-lock-proven, newly persisted `reddog_resident_control_loop_receipt.v1` with accepted PASS, matching repository digest, and positive serial progress; changed pre/post chain revisions; a canonically recomputable chain revision and new persisted final-revision receipt witness; matching queue/slice and work-order/slice/head lineage; accepted verified draft-PR evidence; an external Git worktree present in the repository worktree registry with accepted invoke/create decisions and matching `HEAD`; and PatternMemory admission/record/digest identities recomputed from the canonical SQLite row.
 - `--receipt-path` may name only canonical `live_canary_receipt.json` inside the runtime root. Any alternate receipt must resolve outside both repository and runtime roots; reserved runtime artifacts and nested collisions fail before execution.
-- `READY_FOR_EXECUTION` does not claim that a live canary ran. Missing authority artifacts, signer socket, Git/GitHub readiness, or OpenRouter key presence returns `BLOCKED` without exposing values.
-- The surface has no signer launch, secret resolution, PR-ready, merge, reward, or HoloIndex re-index authority.
+- An explicit `artifact_generator_mode` / `--artifact-generator-mode` overrides `REDDOG_ARTIFACT_GENERATOR_MODE`; `foundups_fusion` is the default only when both are absent. Canonical alternatives are `openclaw_gateway` and `hermes_api`; explicit empty or unsupported values reject. The additive receipt field binds the selected mode into its identity, not proof of provider execution.
+- `READY_FOR_EXECUTION` does not claim that a live canary ran. Missing authority artifacts, signer socket, Git/GitHub readiness, or declared model-provider identity returns `BLOCKED`. Fusion additionally checks OpenRouter identity/key presence; Hermes reads and discards its existing confined service credential; OpenClaw checks executable availability. No credential values are serialized.
+- Provider-specific readiness does not replace invocation-time signed topology, capability, budget, service-identity, or confinement checks. The guarded profile and confirmation remain unchanged.
+- The surface has no signer launch, principal signing-key resolution, PR-ready, merge, reward, or HoloIndex re-index authority. Readiness acquires the existing lock and writes its receipt; it is not an effect-free pure function.
 
 Transport-neutral grounding runs at most two deterministic HoloIndex owner
 queries per semantic target under one shared 16-query, 30-second budget.

@@ -1218,6 +1218,15 @@
         "basis": "Complete observed-to-retained cycle; actual subsequent benefit; unchanged independent oracle; one forced regression and rollback"
       },
       "research_harness_boundary": "WRE Auto Researcher is a reuse candidate only where its literal ROC-target contract fits; keep the registry-workflow oracle separate and fixed",
+      "verifier_loop_research": {
+        "audited_on": "2026-10-15",
+        "source_commit": "a6a63b8e9098c5b35629fd76629b96d3089af566",
+        "details": "docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15",
+        "decision": "Reuse Nigel's candidate/attempt/external-check/re-observe pattern through existing WRE owners; no second scheduler or best-effort promotion",
+        "oracle_boundary": "Freeze generator, classifier, dependencies, candidate enumerator and required cases outside author scope; compare retained versus disabled improvement on later unseen inputs",
+        "acceptance_satisfied": false,
+        "execution_authority": "none; planning only"
+      },
       "preparatory_evidence": {
         "path": "docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json",
         "observed_on": "2026-09-13",
@@ -1880,22 +1889,524 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.internal_audit_status_20261007",
-    "base_commit": "453f6c3570f980a7c30364ca3727084754ff9f55",
-    "selected_action": "Preserve measured internal-audit coverage in existing research reports",
-    "status": "IMPLEMENTED_NOT_VALIDATED",
+    "observation_path": "current_observation.parent_consensus_join_20261020.nonce_custody",
+    "base_commit": "51f9edcec322288635a39b7c99540cf05d5d8007",
+    "selected_action": "Connect protected consensus nonce custody and the existing single-lease HIGH issuer path",
+    "status": "NONCE_COMPONENT_VALIDATED_HIGH_COMPOSITION_PENDING",
     "wsp15": {
-      "complexity": 2,
-      "importance": 4,
-      "deferability": 4,
-      "impact": 4,
-      "total": 14,
-      "priority": "P1"
+      "complexity": 4,
+      "importance": 5,
+      "deferability": 5,
+      "impact": 5,
+      "total": 19,
+      "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Close source publication, resolve one current finding to actual module scope, then a bounded existing local-worker/evaluator trial. Read-only audit readiness does not require new production enrollment; autonomous effects still require admission."
+    "next_action": "Close nonce source checkpoint, then connect one live authenticated lease through existing parent/effect/nonce/factory owners; prove no nested generation lock. Installed HIGH policy/service and genuine work/model/reviewer/budget inputs remain required; preserve LOW."
   },
   "current_observation": {
+    "parent_consensus_join_20261020": {
+      "source_base": "5862eea0ef49d950674a6509c3dd2a20771a6be2",
+      "current_main": "824d0f71dade7dabc25afa1b778f8e3eb099a1e1",
+      "status": "COMPONENT_VALIDATED_INSTALLED_HIGH_PENDING",
+      "objective": "Connect protected parent consent, distinct reviewer/model evidence, effect approval, signer and current-use verification.",
+      "demonstrated_gap": "Historical single-selection model input could not supply distinct reviewer bindings; candidate v12 supplies bounded exact selections. Installed LOW service still has no protected HIGH consensus nonce composition.",
+      "decision": "Reuse existing owners with explicit parent/effect domains and bounded per-selection inputs; preserve LOW, legacy schemas, proof cap and independent verification.",
+      "native_author_tickets": 0,
+      "paid_model_calls": 0,
+      "coordinator_cost": "unknown",
+      "remaining": "Protected installed HIGH custody/nonce composition and authentic inputs; admitted author, independent evaluation, activation/rollback and later retained benefit.",
+      "independent_validation": {
+        "model_current_use": "20 passed,0 failures/errors/skips",
+        "linux_rpc_nonce": "17 passed,0 failures/errors/skips",
+        "source_files": 44,
+        "model_receipt_sha256": "ae86f0e5439a609cdca50d68aff1f30902a37b951723e610393b77ff33487f92",
+        "rpc_receipt_sha256": "4fe9917bcead45b5125276225eea3cb5491984c0776b74616ec2a682d146a04f",
+        "limits": "Synthetic owner/lease/admission seams; no installed HIGH or durable crash-recovery proof."
+      },
+      "connected_initial": "1539 passed,6 failed,22 skipped. One stale schema-negative fixture; five startup failures traced to pytest fixture scope under -c NUL without explicit root. All failures retained.",
+      "connected_final": {
+        "selected_suites": 59,
+        "passed": 1545,
+        "skipped": 22,
+        "failures": 0,
+        "errors": 0,
+        "seconds": 533.14,
+        "tested_files": 45,
+        "receipt_sha256": "03f1b8f78e4613a9e12ffbda9c71bb85611480dc872fa7416e4951c56573267e",
+        "post_format_freeze_sha256": "e4cbec996e46ae1c23c306146c4577572f223aed27d13fc071ea54ae52117a06",
+        "limits": "Windows platform skips preserved; four EOF bytes removed after run with AST identical. No native admission."
+      },
+      "nonce_custody": {
+        "source_base": "51f9edcec322288635a39b7c99540cf05d5d8007",
+        "status": "COMPONENT_VALIDATED_NOT_INSTALLED",
+        "owner_version": 13,
+        "connected": "437 passed,3 platform skips,0 failures/errors;351.02s;26 frozen hashes",
+        "independent": "21 passed; synthetic OS/installation seams, actual signed files and MAC/SQLite",
+        "extraction": "Two-file AST-identical move; loader658/owner263; other24 unchanged;2imports pass;7structure pass",
+        "unchanged_debt": "Two atomic structure failures: baseline startup test712lines and function89lines; no exemptions/caps changed",
+        "receipts": {
+          "high-consensus-author-review/connected-review.json": "0bb2d10d1b7b6f5d8c518210dd5f0db808ec2ab7ccb6103be032de5d9c695edc",
+          "high-consensus-independent-review/independent-review.json": "faea322408e64d4981a1e049c3a27c4483003e17a148c5cb41ed87c20de5e15b",
+          "high-consensus-author-review/loader-extraction/source-freeze-final.json": "fabad5e075c8884f18e0379de927c0bd2621f5b93e1df5495144f4210aec7f6f",
+          "high-consensus-author-review/loader-extraction/final-review.json": "8c8cd177e8112bc385a8866b084bf6d2604419f5bf128da6754e2c0d38ec0da4"
+        },
+        "compatibility_repair": {
+          "source_base": "c5dc5b7a2572f6eca0d381b8bcc80de1a3f855de",
+          "failed_hosted_run": 39289991059,
+          "failed_hosted_result": "894 passed,7 failed,1 skipped",
+          "cause": "Always-truthy tuple version predicate routes legacy owners into modern selection validation",
+          "targeted_red": "3 passed,7 failed",
+          "targeted_green": "10 passed",
+          "connected_local": "901 passed, 5 platform skips, zero failures/errors",
+          "connected_receipt_sha256": "9621d574d78e362599564050f41db8dd1c7bad64acbbb092ff5620de09e763a7",
+          "modern_coverage": "Existing real signed-model gate parameterized for v12 and full v13 owner",
+          "publication": "Pending new-head independent review and CI",
+          "native_admission": false
+        },
+        "windows_byte_contract": {
+          "source_base": "6d0686c415cbc8c04c2f056e2d0b4cc2cc1c2d48",
+          "actual_reader_red": "LF327430 accepted;CRLF330401 rejected at327680",
+          "accepted_bytes": 331776,
+          "delta_bytes": 4096,
+          "delta_percent": 1.25,
+          "justification": "Minimum wholeKiB for independently verified pending1451-member CRLF330885; current1449 pins retained",
+          "validation": "36 binding tests passed;three Node commands exit0;actual LF/CRLF/exactmax/max+1",
+          "receipt_sha256": "9f4fdfa440b4068efd77726082a5199985c5ecac126cfacef125ae5a4e501d37",
+          "formatting": "indent2 unchanged",
+          "native_admission": false
+        },
+        "installed_high": false,
+        "native_author_tickets": 0,
+        "paid_model_calls": 0,
+        "retained_gain": false
+      }
+    },
+    "parent_consent_20261019": {
+      "source_base": "58f4599d3f89620b0c12178a027a4bfbb8795ca1",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19",
+      "prior_publication": "PR2162 merged58f4599d3f89620b0c12178a027a4bfbb8795ca1 with reviewed tree equality; all12 final PR checks and merged-main CI39264967497/CodeQL39264966452 passed. Independent CI review verifies14 cases and4787 exact Git source hashes.",
+      "implementation": "Opt-in owner v11 verifies detached exact HIGH/worktree_create parent consent through existing current-principal, crypto, artifact and generation-lease owners. V1-v10 compatibility preserved. New ParentConsentEvidence retains policy scope and does not satisfy legacy execution consumers.",
+      "validation": "Connected18 suites:512 passed/2 existing Windows skips/0 failures/errors; focused96 included. Independent37 passed/0 skips; all18 frozen source hashes unchanged. Real crypto/artifact IO with synthetic OS owner/lease seams; not native authority.",
+      "author_receipt_sha256": "a28fb90487e56c1113aa7f8c8ca8ba80130168b8cd35e6653bb74b8fd1416e66",
+      "independent_receipt_sha256": "fbcf763b983943a7304d5747c04e32205b504e7f8ea9c85ffcc78725fabeb99c",
+      "publication_state": "MERGED_MAIN_VERIFIED",
+      "production_admission": false,
+      "native_author_tickets": 0,
+      "paid_model_calls": 0,
+      "coordinator_cost": "unknown",
+      "limits": "No real registration installed, native services invoked or frozen294195cdb runtime modified. Policy shape/digest alone does not attest policy provenance or independent reviewer/model execution. No per-assertion revocation store; current owner/generation withdrawal applies to subsequent resolution.",
+      "next_gate": "Current-use trusted parent-policy/consensus composition with authentic reviewer/model/budget inputs; preserve canonical missing-verifier rejection until independently validated.",
+      "publication": {
+        "pr": 2163,
+        "reviewed_head": "f9ed1661833566121af1cd4c9fc32460192e9280",
+        "merge": "824d0f71dade7dabc25afa1b778f8e3eb099a1e1",
+        "equal_tree": "096306cdbff713be600c7986d0abfc04aa4c6af0",
+        "latest_pr_checks": 12,
+        "connected_linux": "775 passed,1 skipped,0 failures/errors",
+        "independent_ci_artifact": "14 passed;4793 exact Git source hashes",
+        "main_ci": 39272664400,
+        "main_codeql": 39272667724,
+        "main_checks_success": 11,
+        "merge_receipt_sha256": "86367416016eda1c30de2bcc2cc965d3494dd745719ce6257a5ef4a6890e9362",
+        "main_receipt_sha256": "119d75095a4288901344e0477b80595943e9973f6bf35f4f1b17c4a441ec072c",
+        "owned_publication_worktree": "ARCHIVED",
+        "runtime_294195cdb": "retained and unchanged",
+        "superseded_draft_ci": "39269955484 cancelled by coordinator; not passing evidence"
+      }
+    },
+    "native_requester_20261019": {
+      "historical_baseline_scope": "Unversioned source, publication, qualification, native_trial and cleanup fields retain the initial PR2159/v21 checkpoint and pre-v30 failures. Versioned v28 and v29_lifecycle_followup fields record later PR2160/ec7a qualification and v30 lifecycle evidence; current_selection defines the next action. Historical pending/checkout statements are not current runtime assertions.",
+      "source_commit": "1e203d5de9bb8c6ee17f2f5e0d52bffb2317272d",
+      "merged_main_commit": "bb9d3f802fc3f9283c5f7b611f444dce0e56470e",
+      "reviewed_and_merged_tree": "c7045432ea7a2e065e6de5ca0f9d711e947354e5",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#native-requester-rejection-and-source-publication--2026-10-19",
+      "publication": "PR2159 all 19 recorded exact-head check runs passed (12 distinct check names), as did exact-main CI39222572582 and CodeQL39222573026; owned source checkout clean and still required by active pinned preparation.",
+      "qualification": "2683 files/358 directories,1246 exact Git sources and1437 runtime files independently verified. Deny/Unix profiles and four absent-owner exit2 checks passed. Selected entrypoints only; optional deferred imports untested.",
+      "native_trial": "Synthetic v21 installation/revocation passed. Root/issuer/target sockets ready; target served1/exited0; requester exited2 with propagated REJECT_SIGNER_RESPONSE_INVALID. Underlying target exception unobserved. Total post-readiness execution101.6s; not a comparable startup-gain experiment.",
+      "v22_followup": "Synthetic v22 repeats installation/revocation acceptance and requester rejection in101.628s after readiness. Target monitor exhausted4096 RAISE callbacks; its only retained ValueError is handled _is_relative_to control flow, not a cause. Independent source/helper/invocation checks pass; all7 units absent. Review SHA256687b2dd511ca7ab2bc4f22f0a153033a9992cb5bf36feda78a9c1d3fd5e906be. Next: test noise-resistant diagnostics without changing authority or original outcomes.",
+      "v23_followup": "Revised monitor captures inner grant-signer response rejection: require_secret_grant_signer_response103 -> _sign_grant120 -> issue_grant76 -> initial sign54.7 scoped/185787 total callbacks; cap not exhausted. Wrong response type or accepted-not-true; exact inner code still unknown. Installation/revocation pass, handshake2 after101.313s; all7units absent; no issuer final outcome. Review SHAb026ea50d752e959bfa38897f15721011bf50a4d5ec61463766d67efdce50812. Next: fixed-enum response observation and unknown-line preservation; no timeout inference or authority relaxation.",
+      "v24_followup": "Exact response type valid, accepted=false/REJECT_SIGNER_SOCKET_CONNECT_FAILED. TimeoutError unwinds _unix_socket_roundtrip at null-line offset628; origin operation unresolved. Monitor7/185771, cap not exhausted. Installation/revocation pass; handshake2 after100.683s. All7 units absent;17 exact source bindings,9 pins,6 applied/archived files and4 InvocationIDs verified. Review SHAcda26be63361110c3fe7ad9ae722f46cb698eb17a4de27f0017ee13698886446. Author53/independent7 actual-event checks are diagnostic coverage, not admission.",
+      "v25_followup": "Inner recv(4096) at304/offset434 raises TimeoutError, followed by cleanup628; exact SigningResponse is rejected with CONNECT_FAILED. Monitor8/185771; install/revocation pass; handshake2 after101.505s post-readiness. Issuer accepted=false/handled0 and root_authority_client412 OSError: zero OR over-limit response, branch/timing unknown. Root timeout3.198823s after requester; all7 units absent. Independent review68b4c15bdc092af9f0c697eb8b06a097bfedd4c789f227bcf88d8983cf4b6ad1 binds23 sources/8 target offsets/13 issuer frames/9 pins/6 helper files/4 invocations.",
+      "v26_followup": "Diagnostic lifetime/drain120, outerstage150/minremaining175, original60s initial deadline and signed30/overall300 preserved. Initial90s outercap rejected before execution; author9/independent11 harnesscontrols. Install0/40.147s revocation0/2.110s handshake2/120.253s (notoutertimeout), postreadiness162.623s. Observationfalse/cleanup-looptrue; originalTimeoutExpired/reseterror retained. Issuer75.128049s/CPU71.12831 exits2/handled0 with broad FAIL_SIGNER_SERVICE_RUNTIME_ERROR; failureoperation unobserved. Root6requests/exits2 at106.122652s; neither hitservice120limit. All7units absent;25source/9pin/6helper/4invocation bindings. ReviewSHA3d5fd75f364413d951353bce0f68a0063f49d3a546e71cc2edcd4b7b797010cd. No nativeauthor/RSIgain.",
+      "v27_followup": "V27 no-observer control: install/revocation pass; requester rejects; issuer70.046140s/CPU66.242630s versus v26 75.128049s/CPU71.128310s, root101.027161s. Different boots/single pair: no causal gain. Observation=false, cleanup-loop=true, no outer timeout; all7 units absent. No inner socket operation proved. Review acf51eaba54b984a8cc07833b75b6e156b64566d2b642ce02de35dc6f9fe5f3a; binding fa8d5e2d067ce4109b6ff7fef5554e5d7bd7f03b685428c08fb65e502340044b verifies25 sources/9 pins/6 helpers/4 invocations. No author or retained RSI benefit.",
+      "v28_followup": "PR2160 reviewed ec7a0e438 merged358fb2e34 with equal treeafeadba93021def81ba576626d2dfa3cc90d2f53 and exact-head CI/CodeQL passing. Exact runtime fe195a4f4dace47b4f6f3236dbee2848fb11711fe88f8b54c3a2278a296c2640 independently qualifies2683 files/358directories. V28 install37.496s/revocation1.988s accepted; handshake2/120.255s. Issuer60.728467s/CPU56.832826s; root91.701923s/CPU1.900514s; requester5.741641s. Generic rejection, no inner operation measured; handled0 does not prove no processing. All7units absent, historical reset error retained. Review837c89b528fc9a46d348b2d2908869472d4700ddcc1a6e1fe8a6036d4371c10d binds25sources/12outputs/9pins/4invocations. Current detail: docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19.",
+      "v29_lifecycle_followup": "V29 installation/revocation pass, handshake rejects; local observer30 callbacks captures exact SigningResponse accepted=false/grant_service_not_admitted before sendall line239 C_RAISE. No exception type, backend branch or exact sign-return timestamp. All7 units absent; observation false/cleanup-loop true. Review042b39cdd206afcf741c1a7d2c7f82d09b80552fee8b62625b3befb0b513eb79; local evidencee1285c0476c675e37879e8f10349b4129f12da04809a32be4ae9e19b5c20bab1. Harmless oneshot review66404fb7aba6c41fc8c1ccf7bf53761f259b484c75d9d8639d4a707d8fd94333 proves separate wait-cycle defect. V30 install39.353s/revocation2.447s pass, handshake2/98.031s, full139.941s. Observation/cleanup complete without nested timeout or cleanup errors; target launcher0 before/after and all7 units absent. Exact25sources/12outputs/9pins/6files/4invocations verified. Same30callbacks show backend denial then sendall239 C_RAISE, hidden branch unresolved. Native reviewd9c28e065098fc55447b18f739249fb75c8d96bc3a0abe4c5fd99281f672b710 evidences lifecycle correction only, not successful handshake. Independent41 grouped offline checks, receiptc7fcea4286cefbf6f56877b22597b34c0556019810ec2e941171f788233e9efb. No authority/deadline/acceptance change or RSI gain.",
+      "v31_v32_codec_followup": "V31 factory return192 rejects. Canonical decoder controls prove preparer's plain-hex audit bytes incompatible. V32 corrects two audit roles only; integrity formats, source/runtime, launcher/observer, authority/lifetimes/deadlines unchanged. Nine codec controls,12 author final-package controls and6 independent package controls pass with overlapping coverage. Native install39.025s/revocation2.132s pass; handshake2/94.009s,full135.281s. Inner return193 and outer175 now accepted, followed by sendall239 C_RAISE. Requester exit13.700883756s earlier; dispatch-to-response18.750249198s. Current timeout/errno unobserved.25sources/12outputs/9pins/4invocations verified,all7absent,cleanup complete. Review327d9a8f69d2d724167c8e7d50848939ff5357631eed1335c78109df08efbb48. Accepted signing is not author admission or RSI gain.",
+      "low_proposal_route_reconciliation": "Authenticated signed_0102_readonly_review/AUDIT_NO_EFFECT/dryrun route exists but canonical dispatch is0102/Fusion review, not OpenClaw/Hermes author. LOW snapshots still require write/admin; attest_architect_proposal isHIGH/ULTRA. No private capability bypass; a no-effect upstream binding would reuse existing owners and genuine work/model/budget/verifier admission. Source audit437aab39758573249b1ede2e7bde46a936ab02306e209695897117a8d655bbe9.",
+      "local_provider_20261019": "Read-only catalog probes: LMStudio reachable9models,0resident;Ollama0catalog/loaded. No inference/load/configchange. Prior8-call Qwen trial remains NOT_QUALIFIED_AS_APPROVAL_VERIFIER (baseline2/4correct,0/4accepted;candidate2/4correct,1/4accepted); no unchanged repeat. Existing owned lifecycle may support fresh bounded transport qualification only, not quality/admission. Readiness9e850d75ae4481ea8a3dac6671cc898642a777f8992b6acebf1e3c978641487d;history5c63b0fe7336d1e4ff5f497655ea8f0e45d6badfb9b1fe9a3360a7998d53b0d0.",
+      "qualified_guard_comparison": "One same-boot ABBA block, two invocations per build/two guards per invocation: baseline mean2.957392215s, candidate2.196584841s (25.73% lower). Profile means8.316656634s/6.301674921s. All4units absent. Cache/warmup/order and within-invocation dependence limit inference; no causal request gain or retained benefit. Independent review a15c0bea40ec0a945bc6b83a21fb28e944e05732322d0332ab91a6c122bd7abe.",
+      "guard_cost_observation": "Two credential-free full guard calls in the exact runtime passed in3.768633s and2.705737s. Existing qualification owner reused, unit absent. Separate profiled pair7.934643s/5.925629s includes overhead and records33628 relative_to calls. No target monitor/issuer request; not causal request timing or retained RSI gain. Raw-parts optimization rejected after6 WindowsUnicode mismatches among12717 cases; Linux12717 matched. Revised WindowsPath/POSIXprefix candidate matches12717 cases each,111 connectedLinuxpasses/8Windowsskips,49Windows/1symlinkskip,8manifest/3Node entrypoints pass. Purepredicate ratios1.61Windows/5.44Linux are not nativeguard gains.",
+      "cleanup": "Launcher closure TimeoutExpired and target reset-failed_exit_1 retained. V24 root timeout followed requester rejection by3.453879s. All7 owned units independently not-found/inactive/dead afterward; no identity skip or surviving unit.",
+      "clock_experiment": "Completed/restored; fixed final60s host-interval criterion failed54.391405ms>50ms. Later restarts have unknown initiator. No readiness promotion or permanent configuration change. V21 separately passed existing30.099512s NTP readiness.",
+      "admission_reconciliation": "Existing post-valve lease issuer connection confirmed. Resolver None is intentional. Authenticated parent consensus/sovereign evidence and qualified effect-capable native composition remain later gaps; native LOW handshake service must stay restricted.",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "next_dependency": "Existing authentic parent/work/model/verifier/budget admission path; synthetic LOW prerequisite now accepted, not real author admission. Root nonzero clean-closure criterion remains separately failed; cause unobserved.",
+      "v33_response_followup": "Native install38.391s/revocation2.063s pass; handshake2/93.383s,full133.943s. Inner/outer accepted, later send C_RAISE. Target observer setup_failed because canonical Protocol metaclass was rejected;0callbacks, no timeout/errno established. All7absent,cleanup complete. Review81931278a0755550d3b14d40e200235f589fcf12c8d5e09a89effaf95271fc10. Candidate monitor24author/4independent controls and actual installed-module setup comparison; source repair separately reproduced config30 fallback5. Exact source independent review0c29a5f54fb1502eee93fbe6492cedf2cd9ef189b14ac319d53fb280c2d049c8; runtime not yet qualified.",
+      "pr2161_publication": "Merged122fec8c6 tree8b473f equal reviewed; exact-main CI39249090093 7/7 and CodeQL39249089610 4/4 pass. Closure8812f8f1ef40409461783fea3499c0c3c9357efc89d5b1015f434d42f6274512.",
+      "v34_response_followup": {
+        "source_commit": "294195cdb96e1ef70d146bb3e6b3fa16ea71e37e",
+        "descriptor_sha256": "6ab8c14fb905666d1f5d04252dec0234747c2a9b1529657d95ffaba8fc70d950",
+        "qualification": "Independent review verifies2683 files/358 directories, both confined profiles and four absent-owner entrypoints; optional deferred imports unqualified.",
+        "qualification_review_sha256": "101f45f8997a14698bdd921b1463c3345d94b8214d2404a6137eeb40311d2116",
+        "trial": "Installation0/37.769s and revocation0/2.046s; handshake2/93.705s,full133.632s. Issuer inner/outer and target-client responses accepted; issuer/target exit0. Requester RESPONSE_INVALID. Target28/issuer41 callbacks; no cap exhaustion or observed C_RAISE. All7 absent, observation/cleanup complete, no cleanup errors.",
+        "independent_review_sha256": "7ebf08818f885e867d9d0a7db38423eae587372fc3180fca630327132f22efc4",
+        "interpretation": "Public response code can sanitize a target backend rejection, not necessarily malformed transport data. Root handled10 counts returned handlers including rejections; no causal root failure established.",
+        "native_author_ticket": false,
+        "production_rsi": false,
+        "paid_model_calls": 0,
+        "coordinator_cost": null
+      },
+      "v35_provider_followup": {
+        "trial": "Install0/38.965s,revocation0/2.093s,handshake2/94.125s,total135.297s. Target inner client accepted; factory returned then type/ok gate151 returned SECRET_RESOLUTION_FAILED at152/126. No factory exception established. All7 units absent; observation/cleanup complete.",
+        "review_sha256": "9683122c7f1ae4e99f05a4e06311ae6428e2b0e6cda393e8a321fca35a0f212d",
+        "offline_reproduction": "Actual public v35 profile60/custody300. Exact resolver lifetime at synthetic elapsed1/100/239 yields299/200/61; exact factory returns FAIL_PROVIDER_TTL_EXPIRED before secret access. Actual native provider code/clock not observed.",
+        "probe_sha256": "2b5c79bfd8ac66e77aa54d34d6d27ef2286517c14705cbbfc8bf22c905e6edcc",
+        "native_author_ticket": false,
+        "retained_benefit_demonstrated": false
+      },
+      "v36_synthetic_handshake": {
+        "trial": "Install0/39.146s, revocation0/2.076s, handshake0/94.111s,total135.444s; no timeout/retry. Both Ed25519 signatures and exact request/response binding independently verified.",
+        "review_sha256": "36615a9c5d3f64734321b2fbabeb66f18a95709d1443c5abb2f1b9bd8c56dd3c",
+        "target_factory": "Actual ok=true/NONE; all observed backend returns accepted. V35 actual provider code remains unobserved.",
+        "fixture_delta": "Target profile ceiling60 -> validated args.ttl300; absolute credential/policy expiry and signed request/grant30 unchanged.",
+        "closure": "Issuer/target/requester0; root2/generic runtime error. clean_service_closure=false despite all7 absent, four invocations bound and zero cleanup errors. Root idle cause unobserved.",
+        "native_author_ticket": false,
+        "real_admission": false,
+        "retained_rsi_gain": false,
+        "paid_provider_calls": 0
+      }
+    },
+    "issuer_custody_20261016": {
+      "source_scope": "PR2147 merged6fb93580c with exact-head11 and exact-main CI/push checks passing; reviewed/main trees match. Frozen runtime88690 independently qualified. V19 issuer readiness timed out; v20 rejected before action at permission epoch check. No native author or retained gain.",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16",
+      "custody_validation": "244 author cases; 63 independent cases including 12 held-outs; synthetic installation seams disclosed",
+      "combined_validation": "12 connected Linux suites: 328 passed, zero failures/skips, 110.66 seconds",
+      "protected_source_validation": "Independent actual F runtime inspection: 1664 files,225 exact source modules,six real initializers,23 observed native mappings; six negative controls pass",
+      "runtime_boundary": "Credential-free confined imports and full inventory rechecks; not service execution, immutable future execution or authenticated admission",
+      "source_publication": "PR2143 merge372d03de59352887928b7afd0204cce483e2c6c6 and PR2144 merge7772c011b4c92e357839cf27ba900b7304358028: reviewed/main trees equal; all10 exact-merge checks pass each. Receipts: next-startup/consumer-publication-review/pr2143-merged-main-closure.json and next-startup/initial-control-final-publication-review/pr2144-merged-main-closure.json. PR2145 merge7a9fe860298398b86398fbb3f6dad79eca52a075: reviewed/main trees equal; exact-main CI38804752870 and CodeQL38804751742 pass. Receipt: next-startup/artifact-bounds-publication-review/pr2145-merged-main-closure.json.",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "next_dependency": "Retain published current-time and rollback checks. V20 wall/monotonic divergence supports rollback but exact cause is unproved. Qualify a behavior-preserving descriptor optimization and reversible clock-source experiment before fresh bounded LOW handshake; authentic author admission and R15 retained gain remain open.",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "installed_artifact_validation": "250 independently verified cases; one reviewer harness error retained then corrected",
+      "installed_policy_validation": "161 independent Linux cases including30 held-outs; root integration adds golden v9 and hash-order regression",
+      "installed_integration_validation": "413 Linux cases passed, zero failures/skips, eight connected suites; includes bundle-to-policy dependency order and legacy v9 golden vector. No authentic native admission or retained gain.",
+      "installed_enrollment_validation": "259 independent Linux cases, zero failures/skips, source-bound10-file review; synthetic custody/source/lease seams. Integrated with target adapter; combined14-suite Linux validation passed459 cases, zero failures/skips at38c36923b.",
+      "target_grant_adapter_validation": "211 author and67 independent Linux cases; native AF_UNIX two-process check uses one test UID, not two-UID installed authority.",
+      "cross_uid_storage_validation": "13 asserted disposable child-process cases: target-owned shared file causes issuer EPERM; issuer replacement0600 causes target EACCES. Separate private stores each work and reject repeat, but existing rate admission rejects their distinct identities.",
+      "storage_repair": "Reuse existing durable nonce/SQLite owners with separately authenticated issuer rate-store metadata. Signed owner_config_id binds explicit owner v10; target grant replay binding remains unchanged. No broker or shared-UID bypass.",
+      "runtime_gate_dependency": "Generic manifest consumers verify protected approval/artifact/E0 identity; only issuer execution checks its own RootDirectory, inventory and process before custody. Neither descriptor shape nor boolean proof substitutes for native checks.",
+      "installed_consumer_validation": "209 independent Linux cases, zero failures/skips; preserved original legacy missing-archive failure and repaired mandatory evidence lookup.",
+      "issuer_runtime_guard_validation": "62 independent Linux tests; independent full1665file/157directory reopen and actual isolated positive2guard calls; seven author native negative controls reject. Credential-free only.",
+      "installed_startup_validation": "174 connected Linux tests, zero failures/skips;18 independent held-outs after root-LOAD pre-secret runtime guard repair. Permission freshness rechecked after each inventory check. Original synthetic-root fixture failures preserved.",
+      "issuer_rate_storage_validation": "255 independent cases passed, including separate-UID process controls; synthetic admission is not installed authority.",
+      "issuer_socket_layout_validation": "159 independent cases passed including12 adversarial and5 separate-UID tests; exact5-file delta and13 unchanged rate files verified. V10 socket parent distinct; legacy/artifact binding preserved.",
+      "initial_control_validation": "Author377 passed/1 unchanged INTERFACE size failure/1 root skip; separate root socket1 passed. Independent188 passed/1 same inherited failure/0 skipped. Six-file inventory; no outcome authority from null identity.",
+      "installed_execution_validation": "Pinned9bee runtime:2677 files,1240 exact Git Python source files,1437 runtime files independently reopened; actual confined Unix echo/IP denial, guard twice, CLI returns2 absent authority. Credential-free; refresh required for repaired source.",
+      "machine_inputs": "Root-created distinct control/audit/replay material and installed target999/issuer997/requester995, transport GID988; no runtime grant issued.",
+      "filesystem_validation": "15 private roots,8 actual processes fsync/reopen; independent metadata/hash reopen. Four canonical generation qualification records installed, no authority stores initialized; not power-loss or physical rollback proof.",
+      "enrollment_artifact_bounds": "Disposable approval182859bytes, descriptor685781bytes and26 sources exceed64KiB; explicit existing1MiB bound for approval/bundle/source reads, ordinary owner64KiB unchanged. Author 131 and independent 87 Linux cases pass; connected 19-suite CI selection 689 passed/3 skipped/no failures or errors,157.88s; source stable. Counts overlap. Receipt: next-startup/enrollment-artifact-bounds/author-review.json.",
+      "runtime_refresh_dependency": "Runtime88690a4f5 independently qualified:2691files/362directories,1254exact Git Python sources. Descriptor d5fa191de7059cd3b0c3935eecc9442fff45e90a8c99c6db28812d29ecca28d9. Reopened inventory, confined Unix/IP denial, guards and absent-authority CLI checks passed. Next source optimization needs fresh exact export; no in-place mutation.",
+      "disposable_installation_checkpoint": "V19/v20 installation and revocation passed. V19 issuer readiness timed out; v20 permission epoch rejected before caller action at44.970364monotonic/40.980371wall seconds. Divergence supports rollback; exact guard values/cause unobserved. All7units independently absent/inactive/dead. Synthetic authority only; paidcalls0, authorfalse, retainedgainfalse.",
+      "clock_fixture_publication": "PR2145 head8cfb6fb5db87de316130b8cc5e98ac3f1f085efd fixes two wall-clock samples in existing test; deterministic reproduction,41 focused and6 separate boundary cases passed. Exact-head CI38800396328/CodeQL38800390317 and all11PRchecks passed; production clocks/runtime34eed unchanged. Published via PR2145 merge7a9fe8602; exact-main checks passed. Separate native clock conflict is observed, not the demonstrated v16 rejection."
+    },
+    "grant_issuer_20261015": {
+      "source_base_commit": "57d5cd8e8c9db2179e2761ae59f74a2912b8d168",
+      "source_scope": "isolated candidate overlay; publication separate",
+      "prior_observation": "current_observation.grant_bootstrap_20261015",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#bounded-grant-issuer-and-root-load--2026-10-15",
+      "repairs": [
+        "one-request LOW issuer composition over existing owners",
+        "issuer-only root LOAD v2 with current owner/E0/descriptor checks and legacy v1 preservation",
+        "permission lease capture/release/revalidate around root RPC",
+        "resident POSIX listener retained through owned-path cleanup"
+      ],
+      "component_validation": "combined29-suite Linux signing selection990passed/3skips; independent issuer17, transport17, root LOAD30 including five real process cases; exact-source external receipts",
+      "unresolved_observation": "one earlier issuer socket rejection did not reproduce; exact cause unknown and original receipt preserved",
+      "structural_validation": "startup extraction141pass/1 inherited documentation-cap failure; source/function gates pass; README unchanged1306, INTERFACE reduced3310to3305, no thresholds/exemptions changed",
+      "authorization_limit": "installation/custody/permission seams remain synthetic; no deployed issuer authority",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "source_publication": "pending exact-head CI and authorized closure",
+      "next_dependency": "issuer-specific protected custody/materializer and installed-source deployment admission",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null
+    },
+    "grant_bootstrap_20261015": {
+      "source_base_commit": "dcd622557480a953e5ec3a0676d53410769700a0",
+      "source_scope": "reviewed candidate overlay; publication separate",
+      "prior_observation": "current_observation.initial_handshake_20261015",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#grant-bootstrap-and-low-rpc--2026-10-15",
+      "repairs": [
+        "LOW RPC releases shared generation fence then revalidates under caller-use fence",
+        "explicit E0 v9 breaks future-permission prebinding cycle; full signed policy remains mandatory"
+      ],
+      "connected_validation": {
+        "platform": "Linux",
+        "passed": 275,
+        "skipped": 0,
+        "suites": 9
+      },
+      "independent_validation": "19 Linux RPC cases and 85 held-out E0 policy checks; source-bound external receipts",
+      "authorization_limit": "process tests use synthetic policy/key fixtures; no deployed issuer authority",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "source_publication": "PR2138 merged57d5cd8e8; exact-main CI38747627946 and CodeQL38747627089 succeeded; owned lanes archived and retired",
+      "next_dependency": "installed-source grant issuer composition and explicit initial deployment enrollment; authentic policy/custody/rate/replay/revocation required",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null
+    },
+    "initial_handshake_20261015": {
+      "source_base_commit": "1d847ad1f83022f3ace0d4be5f4098ffdb9806e7",
+      "prior_observation": "current_observation.initial_manifest_20261015",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#initial-handshake-composition--2026-10-15",
+      "configuration_scope": "generation1, one LOW signer_socket_peer_handshake, existing E0 and per-request grant gates",
+      "independent_contract_tests": {
+        "passed": 74,
+        "failed": 0
+      },
+      "native_handshake_verified": false,
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "source_publication": "PR2137 merged dcd622557480a953e5ec3a0676d53410769700a0; exact-head CI38742773877 and CodeQL38742765283 succeeded; main validation separately tracked",
+      "prior_closure": {
+        "pr": 2136,
+        "merge": "1d847ad1f83022f3ace0d4be5f4098ffdb9806e7",
+        "main_ci": 38733808172,
+        "main_codeql": 38733807786,
+        "result": "success",
+        "owned_lane": "retired; ignored evidence archived and hash-verified"
+      },
+      "retrieval": "CURRENT/no-gap at merged-base stationary query host; noisy ranking supplemented with exact owner reads",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "next_dependency": "production independent grant issuer composition with authentic policy, signing/audit-MAC custody, rate/replay/revocation and real response verification"
+    },
+    "initial_manifest_20261015": {
+      "source_base_commit": "1774d1e8fe6c8270ebe62be1206d2f5cbacb7d3b",
+      "source_scope": "candidate overlays; native receipt pins exact component inventory, not complete deployed package",
+      "prior_observation": "current_observation.verifier_loop_audit_20261015",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#initial-manifest-activation--2026-10-15",
+      "initial_generation_component": "actual protected publication, generation1 recovery/activation, separate credential-free selection; independent later reader agrees",
+      "native_worker_admitted": false,
+      "retained_rsi_gain_demonstrated": false,
+      "work_authority": "none issued by initial administrative manifest; existing admission still required",
+      "retrieval": "CURRENT/no-gap at clean pinned1774 query host; shared checkout script correctly rejects different HEAD; ranking noisy",
+      "independent_review": "generation2 recovery, publication expiry and FIFO admission defects repaired; retained negative cases; source-bound receipts external",
+      "source_publication": "pending exact-head checks and authorized closure",
+      "next_dependency": "startup-capable owner inputs and authenticated service/grant/provider composition; then R15 retained-use/control experiment"
+    },
+    "verifier_loop_audit_20261015": {
+      "source_commit": "a6a63b8e9098c5b35629fd76629b96d3089af566",
+      "prior_observation": "current_observation.initial_writer_20261014",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15",
+      "writer_publication": "PR2134 merged; exact-main CI and CodeQL passed",
+      "governed_holo_query": "CURRENT; no index gap; source-bound; ranking noisy",
+      "existing_contract_tests": {
+        "passed": 63,
+        "failed": 0,
+        "skipped": 0,
+        "warnings": 2
+      },
+      "test_truth_boundary": "synthetic receipts and negative contracts, not native execution or authenticated end-to-end independence",
+      "native_author_admissions_in_this_audit": 0,
+      "retained_rsi_benefit_demonstrated": false,
+      "production_rsi_complete": false,
+      "selection_change": "none; explicit authenticated first-manifest admission remains next, R15 verifier loop then R20/R24 game and simulated reward expansion"
+    },
+    "initial_writer_20261014": {
+      "base_commit": "5dd7b7b9f569ddaf966a21e9cc95e5a764d29588",
+      "scope": "root_installed_initial_writer_over_existing_stores",
+      "connected_tests": {
+        "passed": 294,
+        "skipped": 1
+      },
+      "independent_tests": {
+        "passed": 115
+      },
+      "native_component": "four_process_real_installer_qualified_writer_and_public_reopen",
+      "writer_capability_issued": true,
+      "fixture_manifest": true,
+      "generation_activated": false,
+      "native_worker_admitted": false,
+      "retained_rsi_benefit_demonstrated": false,
+      "qualification_scope": "filesystem_fsync_reopen",
+      "power_loss_tested": false,
+      "initial_candidate_review": "rejected_and_repaired_evidence_preserved",
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "prior_closure": {
+        "pr": 2133,
+        "merge": "5dd7b7b9f569ddaf966a21e9cc95e5a764d29588",
+        "main_ci": 38492205671,
+        "main_codeql": 38492205277,
+        "result": "success",
+        "owned_lane": "retired_with_verified_bundle"
+      },
+      "holo": {
+        "freshness": "STALE",
+        "retrieval": "explicit_exact_source_fallback",
+        "manual_claim_reset": false
+      },
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#protected-initial-writer--2026-10-14"
+    },
+    "initial_high_water_20261014": {
+      "base_commit": "1af66972ce90636ac224663d5343bba5d7dbbf50",
+      "scope": "explicit_v2_initial_high_water_signing_only",
+      "focused_tests": {
+        "passed": 76
+      },
+      "connected_tests": {
+        "passed": 256,
+        "skipped": 1
+      },
+      "native_component": "real_isolated_custody_and_store_transitions_then_credential_free_public_reopen",
+      "fixture_store_receipt_ids": true,
+      "writer_capability_issued": false,
+      "generation_activated": false,
+      "native_worker_admitted": false,
+      "retained_rsi_benefit_demonstrated": false,
+      "paid_provider_calls": 0,
+      "coordinator_cost": null,
+      "prior_closure": {
+        "pr": 2132,
+        "merge": "1af66972ce90636ac224663d5343bba5d7dbbf50",
+        "main_ci": 38489173741,
+        "main_codeql": 38489173144,
+        "result": "success",
+        "owned_lane": "retired_with_verified_bundle"
+      },
+      "holo": {
+        "freshness": "STALE",
+        "index_gap_detected": true,
+        "maintenance": "completion_and_stop_timeouts",
+        "resume": "rejected_task_executing",
+        "manual_claim_reset": false
+      },
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#initial-high-water-signing--2026-10-14"
+    },
+    "isolated_enrollment_20261014": {
+      "base_commit": "a3f656700c3d4398cfd67ea0ab113613ec4ad25a",
+      "authority": "012 authorized isolated local owner enrollment; no production or self-issued worker grants",
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-enrollment-20261014",
+      "custody_probe": "passed_real_systemd",
+      "isolation_probe": "passed_real_systemd_with_negative_controls",
+      "inactive_role_keys_created": 6,
+      "initial_anchor_signer": "component_verified_disposable_fixture_binding",
+      "connected_tests": {
+        "passed": 217,
+        "skipped": 1
+      },
+      "generation_activated": false,
+      "native_worker_admitted": false,
+      "rsi_retained_benefit_demonstrated": false,
+      "hosted_publication": "PR2132 merged; exact-main CI and CodeQL passed",
+      "details": "docs/operations/RSI_SWARM_DISPATCH.md#isolated-enrollment-bootstrap--2026-10-14"
+    },
+    "layered_worker_qualification_20261008": {
+      "base_commit": "0bcae38f3e701d9c13be6cfc749bbb27da7ffe40",
+      "wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "evidence_root": "O:/RedDog-Builder-Artifacts/rsi-layered-workers-20261008",
+      "panel_dataflow": {
+        "synthetic_calls": 2,
+        "prior_output_forwarded": false,
+        "real_model_calls": 0
+      },
+      "local_audit": {
+        "model": "qwen-coder-7b",
+        "attempted": 1,
+        "accepted": 0,
+        "facts_correct": 3,
+        "facts_total": 4,
+        "failure": "panel_test_proves_forwarding falsely true",
+        "seconds": 24.438,
+        "load_confirmed": true,
+        "unload_confirmed": true,
+        "paid_provider_calls": 0,
+        "token_usage": null,
+        "architect_cost": null,
+        "independent_source_oracle_review": true,
+        "independent_model_execution": false,
+        "retries": 0
+      },
+      "catalog": {
+        "outcome": "COMPLETED",
+        "http_status": 200,
+        "accepted_records": 368,
+        "rejected_records": 99,
+        "rejection_counts": {
+          "record_invalid": 99
+        },
+        "response_bytes": 778366,
+        "candidate_only": true
+      },
+      "configured_campaign": "HALTED declaration retained pending source/gate reconciliation; no remote inference attempted",
+      "layered_comparison_executed": false,
+      "native_rsi_complete": false,
+      "next_packet": "docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08"
+    },
+    "local_reviewer_qualification_20261013": {
+      "source": "4848d9ca022df826dbcb50e1258216df65558fd0",
+      "pr": 2115,
+      "publication": "OPEN_READY_FOR_REVIEW_NOT_MERGED",
+      "source_ci": {
+        "run": 38323381660,
+        "conclusion": "success"
+      },
+      "trial_wsp15": {
+        "complexity": 2,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 14,
+        "priority": "P1"
+      },
+      "model": "qwen-coder-7b",
+      "fresh_cases": 4,
+      "calls": 8,
+      "baseline": {
+        "correct_verdicts": 2,
+        "exact_quotes": 2,
+        "accepted": 0,
+        "denominator": 4
+      },
+      "candidate": {
+        "correct_verdicts": 2,
+        "exact_quotes": 4,
+        "accepted": 1,
+        "denominator": 4
+      },
+      "decision": "NOT_QUALIFIED_AS_APPROVAL_VERIFIER",
+      "independent_review": "Separate Codex adjudicator blinded to arms; independently executed reference outcomes; unsigned, not runtime admission",
+      "usage": {
+        "input_tokens": 3010,
+        "output_tokens": 624,
+        "request_seconds": 24.624,
+        "paid_calls": 0,
+        "local_compute_cost": null,
+        "coordinator_cost": null
+      },
+      "cleanup": "Owned load/unload confirmed; final model inventory empty",
+      "evidence": "O:/RedDog-Builder-Artifacts/rsi-review-qualification-20261013/measured-result.json",
+      "runbook": "docs/operations/RSI_SWARM_DISPATCH.md#paired-local-reviewer-qualification--2026-10-13",
+      "native_author_tickets": 0,
+      "promotion_performed": false,
+      "retained_rsi_benefit": false
+    },
     "internal_audit_status_20261007": {
       "base": "453f6c3570f980a7c30364ca3727084754ff9f55",
       "wsp15": {
@@ -2350,13 +2861,13 @@
       "closure_evidence": "outputs/rsi-permission-evidence-20261006/effect-signing-2090-merge-closure.json"
     },
     "grant_consensus_digest_20261007": {
-    "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",
-    "finding": "Unchanged valid proof plus substituted outer consensus digest accepted and consumed nonce; existing independent grant signer did not bind those fields",
-    "baseline": {
+      "base_commit": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",
+      "finding": "Unchanged valid proof plus substituted outer consensus digest accepted and consumed nonce; existing independent grant signer did not bind those fields",
+      "baseline": {
         "passed": 4,
         "failed": 1
-    },
-    "local_worker": {
+      },
+      "local_worker": {
         "model": "qwen-coder-7b",
         "calls": 1,
         "paid_provider_calls": 0,
@@ -2367,80 +2878,80 @@
         "retry": false,
         "unload_confirmed": true,
         "token_usage": "unavailable"
-    },
-    "coordinator_repair": {
+      },
+      "coordinator_repair": {
         "connected_passed": 63,
         "seconds": 15.16,
         "review": "No concrete blocker; grant-digest-independent-review.json SHA256 8fa883a1f9571f6b55893ff2efa7519bf341952c0fb1589e6b3afb47e5831a56",
         "publication": "PR2089 merged ac645be6a6a30913381edc97ef93595ee20af76e; exact-main CI37498282161 and CodeQL37498284318 success"
-    },
-    "closure_pr2088": {
+      },
+      "closure_pr2088": {
         "merge": "91ba0bd05c5327ffd971e34a3750fedc3466dc2e",
         "main_ci": 37494466573,
         "main_codeql": 37494466969,
         "result": "success",
         "equal_tree": "b2cf3e62eba02e81e7e49e51c1798c4f8bcf3202"
+      },
+      "evidence_directory": "outputs/rsi-permission-evidence-20261006",
+      "next_dependency": "Preserve exact target consensus=None, but route a distinct effect proof/digest through provider and independent signer; do not weaken existing grant or two-child permission checks",
+      "native_rsi_complete": false
     },
-    "evidence_directory": "outputs/rsi-permission-evidence-20261006",
-    "next_dependency": "Preserve exact target consensus=None, but route a distinct effect proof/digest through provider and independent signer; do not weaken existing grant or two-child permission checks",
-    "native_rsi_complete": false
-},
     "reviewer_artifact_composition_20261007": {
-    "base_commit": "a503f6615ba6f9cec2898c8fb275a384ca0bcce8",
-    "truth": "Local composition validated; synthetic model authority, not native admission or execution provenance",
-    "tests": {
+      "base_commit": "a503f6615ba6f9cec2898c8fb275a384ca0bcce8",
+      "truth": "Local composition validated; synthetic model authority, not native admission or execution provenance",
+      "tests": {
         "passed": 502,
         "new_cases": 24,
         "seconds": 17.85,
         "report": "outputs/rsi-permission-evidence-20261006/reviewer-artifacts-connected2.xml"
+      },
+      "paid_model_calls": 0,
+      "architect_token_cost": "not measured",
+      "review": "No concrete blocker; reviewer-artifact-independent-review.json SHA256 aaa7185e968a9ff91ec0cdbba538e4d732cd158ea538fa5af97404ce7976fc64",
+      "publication": "pending",
+      "next_gate": "Separate single-target effect permission; authentic enrollment/resident wiring outstanding",
+      "native_rsi_complete": false
     },
-    "paid_model_calls": 0,
-    "architect_token_cost": "not measured",
-    "review": "No concrete blocker; reviewer-artifact-independent-review.json SHA256 aaa7185e968a9ff91ec0cdbba538e4d732cd158ea538fa5af97404ce7976fc64",
-    "publication": "pending",
-    "next_gate": "Separate single-target effect permission; authentic enrollment/resident wiring outstanding",
-    "native_rsi_complete": false
-},
     "effect_runtime_provenance_20261007": {
-    "source": "bbb975b4f20fec5981a85a971f55fd26e3c7c6e8",
-    "wsp15": {
+      "source": "bbb975b4f20fec5981a85a971f55fd26e3c7c6e8",
+      "wsp15": {
         "complexity": 3,
         "importance": 4,
         "deferability": 4,
         "impact": 4,
         "total": 15,
         "priority": "P1"
-    },
-    "previous_closure": "PR2087 merged atbbb975b4f; reviewed/merged tree d10f4e91051009d5eb025ac80499a65ac58f5888 matches; exact-head CI37485625238 and CodeQL37485619460 success; exact-main CI37486916613 and CodeQL37486916968 success",
-    "independent_design_check": "effect-review-runtime-design-check.json SHA256 0ed41a465b1c85e2f72ef1de78c1ad2e8d35440e4b632a459603623bd06f6223: signed reviewer decision already binds principal/provider to model and receipt IDs/digests; no separate designation schema required",
-    "finding": "Effect reviewer verifier accepts a caller-supplied runtime resolver; production search found protocols and verification consumers, not an authenticated concrete reviewer runtime resolver",
-    "reuse": [
+      },
+      "previous_closure": "PR2087 merged atbbb975b4f; reviewed/merged tree d10f4e91051009d5eb025ac80499a65ac58f5888 matches; exact-head CI37485625238 and CodeQL37485619460 success; exact-main CI37486916613 and CodeQL37486916968 success",
+      "independent_design_check": "effect-review-runtime-design-check.json SHA256 0ed41a465b1c85e2f72ef1de78c1ad2e8d35440e4b632a459603623bd06f6223: signed reviewer decision already binds principal/provider to model and receipt IDs/digests; no separate designation schema required",
+      "finding": "Effect reviewer verifier accepts a caller-supplied runtime resolver; production search found protocols and verification consumers, not an authenticated concrete reviewer runtime resolver",
+      "reuse": [
         "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_use_time_verifier.py",
         "modules/communication/moltbot_bridge/src/reddog_model_runtime_verifier_bootstrap.py",
         "modules/ai_intelligence/ai_gateway/src/model_runtime_binding_evidence_verifier.py",
         "modules/communication/moltbot_bridge/src/reddog_current_effect_reviewer_verification.py"
-    ],
-    "constraint": "Verify cited runtime evidence independently; the signed review supplies identity/model association. Do not use architect display-query output as admission, broaden the delegated two-child permit, or mint authority from booleans. Qualified model artifacts do not prove that model generated a review; execution provenance requires runner/custody evidence.",
-    "native_rsi_complete": false
-},
+      ],
+      "constraint": "Verify cited runtime evidence independently; the signed review supplies identity/model association. Do not use architect display-query output as admission, broaden the delegated two-child permit, or mint authority from booleans. Qualified model artifacts do not prove that model generated a review; execution provenance requires runner/custody evidence.",
+      "native_rsi_complete": false
+    },
     "local_first_admission_20261006": {
-    "local_repair_experiment": {
+      "local_repair_experiment": {
         "source": "2837b0db389c567de9a5402e22fa711affcf176d",
         "task": "Existing external effect-lease issuer must release provider admission before target dispatch",
         "wsp15": {
-            "complexity": 3,
-            "importance": 4,
-            "deferability": 4,
-            "impact": 4,
-            "total": 15,
-            "priority": "P1"
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4,
+          "total": 15,
+          "priority": "P1"
         },
         "local_model": "qwen-coder-7b",
         "local_calls": 2,
         "paid_provider_calls": 0,
         "model_transaction_seconds": [
-            9.843,
-            45.64
+          9.843,
+          45.64
         ],
         "baseline": "Three failures and one pass in the four frozen ordering/failure controls",
         "candidate": "Three failures and six passes; same three controls fail; 4.70 seconds",
@@ -2451,27 +2962,34 @@
         "independent_review": "not performed",
         "native_admission": false,
         "next": "Qualify existing local worker instruction/API contract with the same fixed task before repeated jobs; no paid fallback or live-authority bypass"
-    },
-    "source": "2837b0db389c567de9a5402e22fa711affcf176d",
-    "previous_closure": "PR2084 merged; exact-main CI attempt2 and CodeQL passed; first pip index-parse failure preserved; branch retired",
-    "local_runtime": "One existing managed-lifecycle Qwen Coder7B call10.672s; unloaded independently verified; localhost server retained; exact READY response failed punctuation; token values are word-count estimates",
-    "blockers": [
+      },
+      "source": "2837b0db389c567de9a5402e22fa711affcf176d",
+      "previous_closure": "PR2084 merged; exact-main CI attempt2 and CodeQL passed; first pip index-parse failure preserved; branch retired",
+      "local_runtime": "One existing managed-lifecycle Qwen Coder7B call10.672s; unloaded independently verified; localhost server retained; exact READY response failed punctuation; token values are word-count estimates",
+      "blockers": [
         "Resident resolver returns no use lease",
         "Effect-specific HIGH/ULTRA permit absent from real provider path",
         "Authentic runtime/trust inputs unverified"
-    ],
-    "budget_owner": "docs/operations/RSI_SWARM_DISPATCH.md#local-first-operating-budget--2026-10-06",
-    "budget_scope": "Planning instruction, not implemented global limiter or runtime grant",
-    "default_paid_worker_calls": 0,
-    "initial_local_candidates": 1,
-    "max_diagnosed_retries": 1,
-    "review": "Historical initial audit review unavailable; subsequent issuer source review completed separately",
-    "native_rsi_complete": false
-},
+      ],
+      "budget_owner": "docs/operations/RSI_SWARM_DISPATCH.md#local-first-operating-budget--2026-10-06",
+      "budget_scope": "Planning instruction, not implemented global limiter or runtime grant",
+      "default_paid_worker_calls": 0,
+      "initial_local_candidates": 1,
+      "max_diagnosed_retries": 1,
+      "review": "Historical initial audit review unavailable; subsequent issuer source review completed separately",
+      "native_rsi_complete": false
+    },
     "effect_issuer_handoff_20261006": {
       "source": "2837b0db389c567de9a5402e22fa711affcf176d",
       "branch": "agent/rsi-effect-issuer-handoff-20261006",
-      "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
       "status": "merged_exact_tree_verified_main_checks_passed",
       "independent_review": "46e9eb816 reviewed, no concrete blocker; effect-issuer-independent-review.json SHA256 da3f2520f817854bcd1c04b8654ab37d2a58576bbe3abb0a70dda07d726a3874",
       "hosted_validation": "Reviewed head46e9eb816: CI37483954789 and CodeQL37483627186 success. Mainb91823b28 arrived via PR2086; refresh after preserving both ModLog entries. No native RSI claim.",
@@ -2486,39 +3004,39 @@
       "retained_autonomous_improvement": false
     },
     "provider_issuance_handoff_20261006": {
-        "source": "4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708",
-        "branch": "codex/rsi-provider-handoff-20261006",
-        "previous_closure": "PR2083 merged; exact-main CI37401710455 and CodeQL37401710274 success; old branch archived and retired",
-        "runtime_inventory": "Known resident root lacks eight standard model evidence files; architect query UNCONFIGURED; WSL gateways active but Hermes API status0. Scoped observations do not prove whole-machine absence.",
-        "selection_reason": "Target-owner prerequisite closed; provider handoff is a bounded executable source dependency while native runtime inputs remain unverified",
-        "baseline": "Independent frozen1intended failure/1structure pass; both target calls held provider lease",
-        "candidate": "Connected94pass in26.13s; independent production source review found no concrete defect; integrity8/8 passed in63.61s; publication pending",
-        "runtime_closure": "Existing generator unchanged: provider/client are outside current executable dependency closure. Exact-source tests do not prove native wiring or admitted runtime consumption.",
-        "evidence_root": "outputs/rsi-permission-evidence-20261006",
-        "native_rsi_complete": false,
-        "remaining": "Grant-authority RPC topology, HIGH/effect admission, legitimate model binding, admitted worker, independent evaluator and later retained benefit"
+      "source": "4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708",
+      "branch": "codex/rsi-provider-handoff-20261006",
+      "previous_closure": "PR2083 merged; exact-main CI37401710455 and CodeQL37401710274 success; old branch archived and retired",
+      "runtime_inventory": "Known resident root lacks eight standard model evidence files; architect query UNCONFIGURED; WSL gateways active but Hermes API status0. Scoped observations do not prove whole-machine absence.",
+      "selection_reason": "Target-owner prerequisite closed; provider handoff is a bounded executable source dependency while native runtime inputs remain unverified",
+      "baseline": "Independent frozen1intended failure/1structure pass; both target calls held provider lease",
+      "candidate": "Connected94pass in26.13s; independent production source review found no concrete defect; integrity8/8 passed in63.61s; publication pending",
+      "runtime_closure": "Existing generator unchanged: provider/client are outside current executable dependency closure. Exact-source tests do not prove native wiring or admitted runtime consumption.",
+      "evidence_root": "outputs/rsi-permission-evidence-20261006",
+      "native_rsi_complete": false,
+      "remaining": "Grant-authority RPC topology, HIGH/effect admission, legitimate model binding, admitted worker, independent evaluator and later retained benefit"
     },
     "authenticated_target_owner_20261006": {
-        "source": "5420b85a02a76efe21947a5dc00c8aecb854e5d3",
-        "branch": "codex/rsi-provider-issuance-handoff-20261006",
-        "baseline": "2 intended unsafe-factory failures; 2 controls pass",
-        "candidate": "Final connected134pass/1skip in70.46s, target-owner-connected-final.xml. Prior assertion failure preserved. Explicit HIGH/effect unit acceptance is distinct from exact production rejection; real LOW/root paths admitted in fixture.",
-        "evidence": "outputs/rsi-permission-evidence-20261006/target-owner-lease-baseline-review.json",
-        "selection_reason": "Unsafe target fallback blocks provider handoff; extend existing factory and backend, no new authority or orchestrator",
-        "publication": "PR2083 merged4e00032cf; reviewed/merged trees equal; exact-main CI37401710455 and CodeQL37401710274 success",
-        "native_rsi_complete": false,
-        "remaining": "Final connected/integrity validation and publication, provider handoff, actual HIGH/effect admission, admitted local worker, independent evaluator and later retained benefit"
+      "source": "5420b85a02a76efe21947a5dc00c8aecb854e5d3",
+      "branch": "codex/rsi-provider-issuance-handoff-20261006",
+      "baseline": "2 intended unsafe-factory failures; 2 controls pass",
+      "candidate": "Final connected134pass/1skip in70.46s, target-owner-connected-final.xml. Prior assertion failure preserved. Explicit HIGH/effect unit acceptance is distinct from exact production rejection; real LOW/root paths admitted in fixture.",
+      "evidence": "outputs/rsi-permission-evidence-20261006/target-owner-lease-baseline-review.json",
+      "selection_reason": "Unsafe target fallback blocks provider handoff; extend existing factory and backend, no new authority or orchestrator",
+      "publication": "PR2083 merged4e00032cf; reviewed/merged trees equal; exact-main CI37401710455 and CodeQL37401710274 success",
+      "native_rsi_complete": false,
+      "remaining": "Final connected/integrity validation and publication, provider handoff, actual HIGH/effect admission, admitted local worker, independent evaluator and later retained benefit"
     },
     "generation_commit_fence_20261006": {
-        "source": "a2a45ddecfa762de85cda5ca826992e337c0b9f7",
-        "branch": "codex/rsi-generation-commit-fence-20261006",
-        "baseline": "1pass/1intended expiry failure",
-        "candidate": "frozen2/2; connected56/56",
-        "evidence": "outputs/rsi-permission-evidence-20261006/generation-commit-connected3.xml",
-        "source_review": "generation-commit-final-source-review.json; bounded source approved",
-        "publication": "PR2082 merged at5420b85a02a76efe21947a5dc00c8aecb854e5d3; exact-main CI37397915051 success",
-        "native_rsi_complete": false,
-        "remaining": "provider outer-fence composition, effect permit, admitted worker, independent held-out evaluation and later retained benefit"
+      "source": "a2a45ddecfa762de85cda5ca826992e337c0b9f7",
+      "branch": "codex/rsi-generation-commit-fence-20261006",
+      "baseline": "1pass/1intended expiry failure",
+      "candidate": "frozen2/2; connected56/56",
+      "evidence": "outputs/rsi-permission-evidence-20261006/generation-commit-connected3.xml",
+      "source_review": "generation-commit-final-source-review.json; bounded source approved",
+      "publication": "PR2082 merged at5420b85a02a76efe21947a5dc00c8aecb854e5d3; exact-main CI37397915051 success",
+      "native_rsi_complete": false,
+      "remaining": "provider outer-fence composition, effect permit, admitted worker, independent held-out evaluation and later retained benefit"
     },
     "observation_id": "measurement-seam-20260929",
     "base": "7c2e0b6f4d8dd2a37b5fdcadec1c844d9360e4a6",
@@ -17596,7 +18114,7 @@
           "total": 13,
           "priority": "P1",
           "state": "selected",
-          "reason": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+          "reason": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
         },
         {
           "task": "Independent held-out and later-use benefit",
@@ -17634,7 +18152,7 @@
         "total": 13,
         "priority": "P1"
       },
-      "next_rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_rationale": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
       "next_planning": {
         "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
         "wsp15": {
@@ -17645,7 +18163,7 @@
           "total": 13,
           "priority": "P1"
         },
-        "rationale": "The implemented trusted master-helper→adapter→Qwen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "rationale": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
         "prerequisites": [
           "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
           "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
@@ -17671,7 +18189,7 @@
         },
         "acceptance": {
           "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
-          "route": "Trusted constructor values demonstrably reach real helper→adapter→engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "route": "Trusted constructor values demonstrably reach real helper\u7aca\u8a95dapter\u7aca\u5f3engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
           "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
           "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
           "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",
@@ -31782,7 +32300,14 @@
       },
       "construction_blocker": "Legacy E0 generation digest cycle reproduced. Explicit v8 repair passes constructive, downstream consumer and public source integration checks while preserving legacy semantics; actual OS public startup remains unverified.",
       "public_projection_prerequisite": {
-        "wsp15": {"complexity": 1, "importance": 5, "deferability": 5, "impact": 4, "total": 15, "priority": "P1"},
+        "wsp15": {
+          "complexity": 1,
+          "importance": 5,
+          "deferability": 5,
+          "impact": 4,
+          "total": 15,
+          "priority": "P1"
+        },
         "observed": "Real public startup reaches E0 lease, then strict peer binding rejects four lease-only selection fields",
         "repair": "Reuse existing launch projection at peer attachment; preserve full E0 lease and strict validator",
         "state": "public_source_integration_passed_not_live_admission",
@@ -31825,12 +32350,22 @@
         "combined_failed": 1,
         "combined_evidence": "outputs/rsi-permission-evidence-20261006/startup-merged-connected.xml",
         "closure_blocker": "Original replay-credential failure remains unreproduced and unexplained; full diagnostic and exact-bootstrap runs each pass275/skip3 with unchanged source. No correction claimed. Independent review and hosted validation required before merge.",
-        "reproduction_evidence": ["outputs/rsi-permission-evidence-20261006/materializer-clock-baseline5.json", "outputs/rsi-permission-evidence-20261006/materializer-clock-baseline6.json"],
+        "reproduction_evidence": [
+          "outputs/rsi-permission-evidence-20261006/materializer-clock-baseline5.json",
+          "outputs/rsi-permission-evidence-20261006/materializer-clock-baseline6.json"
+        ],
         "publication": "not_pushed_no_pr_not_merged"
       },
       "publication_validation_debt": {
         "task": "Reconcile expired WSP62 exemptions and stale interface-document ceiling under existing owners",
-        "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 3, "total": 14, "priority": "P1"},
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 3,
+          "total": 14,
+          "priority": "P1"
+        },
         "state": "observed_inherited_debt_not_repaired",
         "local_passed": 11,
         "local_failed": 5,
@@ -31841,7 +32376,14 @@
       },
       "post_startup_candidate": {
         "task": "Connect existing external authoritative-use lease issuer to existing governed valve consumer",
-        "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 4, "total": 15, "priority": "P1"},
+        "wsp15": {
+          "complexity": 3,
+          "importance": 4,
+          "deferability": 4,
+          "impact": 4,
+          "total": 15,
+          "priority": "P1"
+        },
         "state": "blocked_on_effect_permit_compatibility_and_generation_lock_composition_after_source_closure",
         "observation": "Existing issuer contract/adversarial baseline23/23; current resolver retains seven blocker reasons and hardcodes a null lease; no production issuer caller found",
         "composition_dependency": "Source audit at438a20113 finds no production construction of IndependentSignerSecretGrantProvider or ExternalSignerAuthoritativeUseLeaseIssuer in modules/scripts. Resident queue bootstrap constructs the resolver without an issuer; runtime dependency bundle exposes neither issuer nor grant provider. Existing lease tests use _LeasedGrantProvider. Reuse the real grant provider and existing client supply, qualify their composition with the issuer, and preserve all missing-authority rejections before queue admission.",
@@ -31849,8 +32391,30 @@
         "evidence": "outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json",
         "followup_evidence": "outputs/rsi-permission-evidence-20261006/native-admission-issuer-valve-followup-20261006.json",
         "followup_findings": "HIGH/ULTRA effect requests lack the typed consumed elevated permit required by the real grant provider; existing rejection coverage already demonstrates this. Windows real-lock synthetic topology supports the synchronous wait-cycle risk; actual permit-qualified issuer and same-process rehydration remain unexecuted. Release-before-call is a diagnostic control, not an approved authority relaxation.",
-        "lock_topology_diagnostic": {"source": "19ddae32620af3b05b1154b29893bcc90aaf08f6", "evidence": "outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json", "sha256": "d491a984f3d659f74cff14667b7ee6d9df3c004d6e17ee1a9aeb551436800bf4", "held_wait": "diagnostic_deadline_then_consumer_completion_after_release", "release_before_call_control": "completed_without_wait_deadline", "seconds": 1.140, "children_exited_and_reaped": 4, "cleanup_complete": true, "source_pins_stable": true, "native_admission": false},
-        "next_eligible_prerequisite": {"task": "Reconcile existing generation-lock ownership and elevated-permit contracts before issuer composition", "wsp15": {"complexity": 3, "importance": 4, "deferability": 4, "impact": 3, "total": 14, "priority": "P1"}, "limits": "Completed Windows topology diagnostic is historical evidence, not a task to repeat. Reuse existing owners; preserve generation freshness and elevated admission; no permit bypass or native admission claim"},
+        "lock_topology_diagnostic": {
+          "source": "19ddae32620af3b05b1154b29893bcc90aaf08f6",
+          "evidence": "outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json",
+          "sha256": "d491a984f3d659f74cff14667b7ee6d9df3c004d6e17ee1a9aeb551436800bf4",
+          "held_wait": "diagnostic_deadline_then_consumer_completion_after_release",
+          "release_before_call_control": "completed_without_wait_deadline",
+          "seconds": 1.14,
+          "children_exited_and_reaped": 4,
+          "cleanup_complete": true,
+          "source_pins_stable": true,
+          "native_admission": false
+        },
+        "next_eligible_prerequisite": {
+          "task": "Reconcile existing generation-lock ownership and elevated-permit contracts before issuer composition",
+          "wsp15": {
+            "complexity": 3,
+            "importance": 4,
+            "deferability": 4,
+            "impact": 3,
+            "total": 14,
+            "priority": "P1"
+          },
+          "limits": "Completed Windows topology diagnostic is historical evidence, not a task to repeat. Reuse existing owners; preserve generation freshness and elevated admission; no permit bypass or native admission claim"
+        },
         "limits": "No authentic enrollment or native G1 admission established; this connection alone does not satisfy every capability prerequisite"
       },
       "native_rsi_complete": false

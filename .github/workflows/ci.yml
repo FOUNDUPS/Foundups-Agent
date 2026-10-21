@@ -4,7 +4,9 @@ on:
   push:
     branches: [main]
   pull_request:
-    branches: [main]
+    # Stacked PRs need their own checks even when their base is a feature branch.
+    # Retargeting a PR must also produce fresh evidence for its new base.
+    types: [opened, synchronize, reopened, edited, ready_for_review]
 
 jobs:
   mcp-runtime-compatibility:
@@ -87,6 +89,19 @@ jobs:
           print('MCP compatibility: 49 passed; owned Windows lifecycle included')
           '@ | python -I -B -
           if ($LASTEXITCODE -ne 0) { throw 'MCP qualification failed' }
+      - name: Verify shared runtime path and Windows stream contracts
+        shell: pwsh
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+        run: |
+          & "$env:RUNNER_TEMP/mcp-candidate/Scripts/python.exe" -B -m pytest -q `
+            -c O:/evidence/pytest.ini --noconftest --import-mode=importlib `
+            -p no:cacheprovider -o "pythonpath=$env:GITHUB_WORKSPACE" --basetemp=O:/shared-path-tests `
+            --junitxml=O:/evidence/shared-path-tests.xml `
+            modules/infrastructure/shared_utilities/tests/test_runtime_artifact_safety.py `
+            modules/infrastructure/shared_utilities/tests/test_runtime_artifact_windows_safety.py
+          if ($LASTEXITCODE -ne 0) { throw 'Shared runtime path contracts failed' }
       - uses: actions/upload-artifact@v4
         if: always() && env.MCP_TEST_VOLUME_OWNED == '1'
         with:
@@ -103,6 +118,26 @@ jobs:
             if ($disk.Attached) { Dismount-DiskImage -ImagePath $expected -ErrorAction Stop }
             if ((Get-DiskImage -ImagePath $expected).Attached) { throw 'VHD still attached' }
           }
+
+  gotjunk-backend-security:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install separate backend dependencies
+        run: python -m pip install -r modules/foundups/gotjunk/backend/requirements.txt pytest httpx
+      - name: Verify parser and API admission
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest
+          -o pythonpath=. -p no:cacheprovider
+          modules/foundups/gotjunk/tests/test_backend_security.py
 
   test:
     runs-on: ubuntu-latest
@@ -136,6 +171,16 @@ jobs:
         run: |
           python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
 
+      - name: Run Mall GotJunk public listing acceptance
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -B -m pytest -q -c /dev/null --noconftest \
+            -o pythonpath=. -p no:cacheprovider \
+            modules/foundups/pfmall/tests/test_listing_discovery.py \
+            modules/foundups/gotjunk/tests/test_migration_inventory.py
+
       - name: Run LinkedIn offline activity contracts
         run: python -I -B modules/platform_integration/linkedin_agent/tests/test_activity_skill_contracts.py -v
 
@@ -146,6 +191,20 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: '1'
         run: python -I -B modules/platform_integration/social_media_orchestrator/tests/test_autonomous_scheduler.py TestExecutionEvidence TestPersistenceEvidence TestPublicationEvidence TestCallerPersistenceEvidence -v
+
+      - name: Run AntifaFM contextual campaign contracts
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+        run: |
+          python -B scripts/generate_codex_tooling_projection.py --check
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib \
+            -o pythonpath=. -p no:cacheprovider \
+            modules/platform_integration/social_media_orchestrator/tests/test_antifafm_campaign.py \
+            modules/platform_integration/social_media_orchestrator/tests/test_verified_x_publication.py \
+            modules/ai_intelligence/digital_twin/tests/test_comment_drafter.py \
+            modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py \
+            tests/test_codex_tooling_projection.py
 
       - name: Run post-commit runner entrypoint evidence
         env:
@@ -1051,8 +1110,11 @@ jobs:
           python -B -m pytest -q --tb=short -c /dev/null --noconftest \
             -o pythonpath=. -p no:cacheprovider \
             --basetemp="$RUNNER_TEMP/bounded-worker-pytest" \
+            --rootdir="$GITHUB_WORKSPACE" --confcutdir="$GITHUB_WORKSPACE" \
             modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_bounded_child_process.py \
             modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_maintenance_diagnostics.py::test_default_refresh_runner_bounds_retained_stdout \
+            modules/infrastructure/shared_utilities/tests/test_runtime_artifact_safety.py \
+            modules/infrastructure/shared_utilities/tests/test_runtime_operation_locking_posix.py \
             scripts/tests/test_generate_reddog_backend_manifest.py
 
       - name: Run HoloIndex admitted recovery and lifecycle contracts
@@ -1074,6 +1136,34 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_holoindex_incident_repair_runtime.py \
             modules/communication/moltbot_bridge/tests/test_reddog_holoindex_preowner_incident_repair.py \
             modules/infrastructure/idle_automation/tests/test_holoindex_postmerge_coordinator.py
+
+      - name: Run initial enrollment producer and consumer contracts
+        env:
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: |
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib \
+            -o pythonpath=. -p no:cacheprovider \
+            modules/communication/moltbot_bridge/tests/test_reddog_initial_runtime_manifest_authority.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_initial_enrollment_artifact_bounds.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_initial_installed_manifest_enrollment.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signed_runtime_artifact_manifest.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_manifest_authority_freshness.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning_recovery.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_runtime_artifact_activation_lease.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_current_generation_manifest_launch_selection.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_manifest_selection_loader_linux.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_signer.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_authority.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_sqlite_monotonic_authority_store.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_anchor.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_atomic_signer_runtime_generation_high_water.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_process_isolation_gate.py \
+            modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py
 
       - name: Run scanner environment and WRE admission contracts
         timeout-minutes: 5
@@ -1227,7 +1317,9 @@ jobs:
           if-no-files-found: error
 
       - name: Run RedDog grant-aware signing composition regression
-        timeout-minutes: 3
+        # Same-checkout jobs119109373540/119109577954: 3m timeout versus 97s pass.
+        # Allow runner variation; individual test/runtime deadlines stay intact.
+        timeout-minutes: 5
         env:
           PYTHONDONTWRITEBYTECODE: '1'
           PYTHON_DOTENV_DISABLED: '1'
@@ -1239,6 +1331,12 @@ jobs:
           python -B -m pytest -q --tb=short -c /dev/null --noconftest \
             --import-mode=importlib -p no:cacheprovider \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_config_supply_profiles.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_run_packet_supply.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_installed_policy.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_installed_source_contract.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_mutual_peer_handshake.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py \
@@ -1246,8 +1344,10 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_runtime_wiring.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_runtime_bootstrap.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_signer_key_epoch_use_durable_authority.py \
             modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority.py \
             modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_authority_service.py \
+            modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_initial_control.py \
             modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_protected_use_linux.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_entrypoint.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_system_service_startup_authority.py \
@@ -1257,7 +1357,31 @@ jobs:
             modules/infrastructure/secrets_mcp/tests/test_op_cli_secret_resolver.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_conversation_wiring.py \
               modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_secret_grant_provider.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_signer_low_grant_rpc.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_signer_initial_handshake_grant_backend.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_signer_independent_grant_authority_client_supply.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_grant_startup_custody.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_grant_rate_store.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_grant_custody_owner_versions.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_resident_service.py \
+              modules/communication/moltbot_bridge/tests/test_foundup_verified_outcome_root_grant_load.py \
+              modules/communication/moltbot_bridge/tests/test_reddog_grant_root_load_rpc.py \
               modules/communication/moltbot_bridge/tests/test_reddog_conversation_scope_durable_authentication_wsp62.py
+
+      - name: Run installed runtime and separate grant replay ownership contracts
+        timeout-minutes: 3
+        run: |
+          sudo -- env -i PATH="$PATH" LANG=C.UTF-8 \
+            PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHON_DOTENV_DISABLED=1 \
+            "$(command -v python)" -I -B -c \
+            'import sys; sys.path.insert(0, sys.argv.pop(1)); import pytest; raise SystemExit(pytest.main(sys.argv[1:]))' \
+            "$GITHUB_WORKSPACE" -q --tb=line -c /dev/null --noconftest \
+            --import-mode=importlib -p no:cacheprovider \
+            --basetemp="$RUNNER_TEMP/grant-rate-two-uid-pytest" \
+            modules/communication/moltbot_bridge/tests/test_reddog_initial_enrollment_artifact_bounds.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_installed_runtime_guard.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_rate_store_two_uid.py
 
       - name: Run authenticated startup owner and policy compatibility regression
         timeout-minutes: 10
@@ -1268,7 +1392,7 @@ jobs:
           FOUNDUPS_DB_PATH: ${{ runner.temp }}/startup-policy-foundups.db
           WRE_PATTERN_MEMORY_DB: ${{ runner.temp }}/startup-policy-pattern.db
         run: |
-          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+          python -B -m pytest -q --tb=short -c /dev/null --rootdir=. --noconftest \
             --import-mode=importlib -p no:cacheprovider \
             modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_promotion_publication.py \
             modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_signed_wsp15_work_order_promotion.py \
@@ -1277,8 +1401,24 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_architect_fix_model_runtime_promotion.py \
             modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_owner_versions.py \
             modules/communication/moltbot_bridge/tests/test_reddog_effect_consent_startup_owner.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_contract.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_composition.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_owner_versions.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_domains.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_composition.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_transport.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_signer.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_use_time.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_parent_model_inputs.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_existing_state.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_custody.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_authority.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_failures.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_compatibility.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_consensus_nonce_signed_policy.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_installed_grant_manifest_consumer.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_healthcheck.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py \
@@ -1298,6 +1438,18 @@ jobs:
         working-directory: extensions/reddog
         run: npm test
 
+      - name: Run local model adapter and lifecycle contracts
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+        run: |
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+            --import-mode=importlib -p no:cacheprovider \
+            modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py \
+            modules/infrastructure/shared_utilities/tests/test_lm_studio_model_lifecycle.py \
+            modules/ai_intelligence/ai_gateway/tests/test_model_topology_proposal_lm_studio.py
+
       - name: Run simulator tests
         run: |
           python -m pytest modules/foundups/simulator/tests/ -v --tb=short --ignore=modules/foundups/simulator/tests/test_sse_server.py
@@ -1308,6 +1460,7 @@ jobs:
 
       - name: Run RedDog local diagnostic security gates
         run: |
+          node extensions/reddog/tests/test_backend_compatibility_contract.js
           node extensions/reddog/tests/test_backend_compatibility_preflight.js
           node extensions/reddog/tests/test_holoindex_blocked_request_recovery.js
           python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_holoindex_blocked_request_recovery.py -v --tb=short
@@ -1328,6 +1481,7 @@ jobs:
       - name: Run RedDog bounded resident-chain regression
         run: |
           python -m pip install "chromadb==1.5.5" "pytz>=2023.3" "psutil>=5.9.6"
+          python -m pytest modules/platform_integration/youtube_shorts_scheduler/tests/test_launch_import.py -q --tb=short
           python -m pytest \
             modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py \
             modules/communication/moltbot_bridge/tests/test_reddog_governed_execution_valve_production_wiring.py \
@@ -1358,6 +1512,18 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_executor_plan_handler.py \
             -q --tb=short
 
+      - name: Run RedDog provider-specific canary admission contracts
+        env:
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+        run: |
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest \
+            --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_integration.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_provider_readiness.py
+
   lint:
     runs-on: ubuntu-latest
     steps:
@@ -1375,18 +1541,9 @@ jobs:
         run: ruff check modules/ --ignore E501,F401 --exit-zero
 
   security:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Check for secrets
-        run: |
-          # Check for common secret patterns in tracked files
-          ! git grep -l "AIza\|sk-\|ghp_\|gho_\|AKIA" -- "*.py" "*.json" | grep -v node_modules | grep -v ".example" || echo "Warning: Possible secrets found"
-
-      - name: Verify .env not tracked
-        run: |
-          ! git ls-files | grep "^\.env$" || (echo "ERROR: .env is tracked!" && exit 1)
+    uses: ./.github/workflows/security-scan.yml
+    permissions:
+      contents: read
 
   holoindex_freshness:
     runs-on: ubuntu-latest

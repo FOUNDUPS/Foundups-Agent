@@ -537,3 +537,36 @@ def test_phone_skill_is_human_led_plain_and_truthful_with_identical_projection()
     assert "YUMORI.me設立準備委員会です。" in spoken
     for label in ("0102", "AI", "代理", "digital twin"):
         assert label not in spoken
+
+
+
+def test_reddog_email_link_source_quality_policy() -> None:
+    """Regression: social syndication, giant URLs and HOLD archive text stay out of mail."""
+    generic = REDDOG_CORRESPONDENCE_SKILL_PATH.read_text(encoding="utf-8")
+    yumori = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
+    document_audit = (
+        MODULE_ROOT / "skillz" / "recipient_document_audit" / "SKILLz.md"
+    ).read_text(encoding="utf-8")
+
+    # This checks the documented operator policy, not a deployed Gmail interceptor.
+    assert "Recipient-facing link/source and HOLD-content gate" in generic
+    assert "No giant naked links" in generic
+    assert "percent-encoded URLs" in generic
+    assert "Internal-only text never escapes" in generic
+    assert "final rendered plain-text/HTML MIME" in generic
+    assert "Gmail provider success or a" in generic
+
+    assert "Website-first publication links" in yumori
+    assert "https://esingularity.ai/reports/jhr" in yumori
+    assert "LinkedIn newsletters are" in yumori
+    assert "secondary syndication" in yumori
+    assert "the production website served **JHR #001 only**" in yumori
+    assert "Do not assert that #003" in yumori
+    assert "内部保管・このまま送信しない" in yumori
+    assert "unrelated" in yumori
+
+    assert "publisher-owned" in document_audit
+    assert "long," in document_audit
+    assert "percent-encoded bare URLs" in document_audit
+    assert "never\n  cite the live website as #003" in document_audit
+    assert "SUPERSEDED／送信禁止" in document_audit

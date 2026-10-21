@@ -51,15 +51,18 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10,
 )
 
 
 def verify_current_grant_service_artifacts(
-    *, repo_root: Path, grant_root: Path, policy: Mapping[str, Any]
+    *, repo_root: Path, grant_root: Path, policy: Mapping[str, Any],
+    owner_config_path: Path | str | None = None,
 ) -> Mapping[str, Any]:
     """Verify the exact E0-named manifest and all three grant artifacts."""
 
+    if policy.get("schema_version") == POLICY_SCHEMA_V10:
+        return _verify_installed_current(repo_root, grant_root, policy, owner_config_path)
     with reddog_runtime_artifact_generation_lock(
         grant_root, repo_root=repo_root, allow_sealed=True
     ):
@@ -70,6 +73,98 @@ def verify_current_grant_service_artifacts(
             manifest, repo_root, grant_root, policy
         )
         return MappingProxyType(_verified_values(manifest, artifacts, policy))
+
+
+def _verify_installed_current(repo, root, policy, owner_path):
+    """Verify protected enrollment metadata, not this caller's runtime confinement."""
+    from .reddog_initial_runtime_manifest_authority import verify_initial_runtime_manifest_approval
+    from .reddog_grant_authority_service_owner_binding import grant_authority_owner_runtime_root
+    from .reddog_signer_system_service_manifest_selection_loader import _load_owner_config
+    if owner_path is None:
+        raise RuntimeArtifactManifestError("grant_installed_profile_not_enrolled")
+    if grant_authority_owner_runtime_root(owner_path, repo, policy["owner_config_id"]) != root:
+        raise RuntimeArtifactManifestError("grant_installed_owner_root_mismatch")
+    owner = _load_owner_config(owner_path, repo=repo)
+    with reddog_runtime_artifact_generation_lock(root, repo_root=repo, allow_sealed=True):
+        manifest = _read_manifest(repo, root, policy)
+        _installed_manifest_bindings(manifest, repo, root, policy)
+        # The owner selects this fixed path; candidate manifests cannot choose a trust file.
+        approval_inputs = dict(approval_path=root / "initial-approval.json",
+            repo_root=repo, expected_approval_digest=manifest["enrollment_approval_digest"], manifest=manifest)
+        verify_initial_runtime_manifest_approval(**approval_inputs)
+        artifacts = _read_installed_artifacts(manifest, repo, root)
+        _installed_config_bindings(artifacts["config"], policy)
+        source = _installed_source_policy(owner, repo, policy, artifacts["source_descriptor"])
+        if (artifacts["config_digest"] != policy["grant_authority_config_digest"]
+                or artifacts["run_packet_digest"] != policy["grant_authority_run_packet_digest"]):
+            raise RuntimeArtifactManifestError("grant_service_policy_artifact_mismatch")
+        if _load_owner_config(owner_path, repo=repo) != owner:
+            raise RuntimeArtifactManifestError("grant_installed_owner_changed")
+        verify_initial_runtime_manifest_approval(**approval_inputs)
+        validate_freshness(manifest, now_epoch=_now_epoch(), max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS)
+        return MappingProxyType({"manifest_id": manifest["manifest_id"],
+            "artifact_generation_digest": manifest["artifact_generation_digest"],
+            **artifacts, **source})
+
+
+def _installed_manifest_bindings(manifest, repo, root, policy):
+    from .reddog_runtime_artifact_manifest_contract import (
+        SCHEMA_VERSION_INITIAL_V2, RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE,
+    )
+    expected = {"schema_version": SCHEMA_VERSION_INITIAL_V2,
+        "runtime_profile": RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE,
+        "manifest_id": policy["grant_authority_manifest_id"],
+        "artifact_generation_digest": policy["grant_authority_artifact_generation_digest"],
+        "repo_root_digest": raw_digest(str(repo.resolve()).encode()),
+        "runtime_root_digest": raw_digest(str(root).encode()),
+        "owner_config_id": policy["owner_config_id"],
+        "signer_service_config_digest": policy["grant_authority_config_digest"],
+        "source_commit_sha": policy["grant_authority_source_commit_sha"],
+        "grant_authority_installed_runtime_descriptor_digest": policy["grant_authority_installed_runtime_descriptor_digest"]}
+    if (any(manifest.get(k) != v for k,v in expected.items())
+            or type(policy.get("generation")) is not int or policy["generation"] != 1
+            or tuple(policy.get("allowed_operations", ())) != ("signer_socket_peer_handshake",)
+            or tuple(policy.get("allowed_authority_tiers", ())) != ("LOW",)
+            or tuple(policy.get("consensus_required_tiers", ())) != ()):
+        raise RuntimeArtifactManifestError("grant_installed_manifest_binding_mismatch")
+    validate_freshness(manifest, now_epoch=_now_epoch(), max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS)
+
+
+def _read_installed_artifacts(manifest, repo, root):
+    from .reddog_grant_authority_service_artifact_contract import validate_installed_grant_service_artifacts
+    from .reddog_runtime_artifact_manifest_io import validate_initial_installed_manifest_artifacts
+    raw = {item["filename"]: _read_bytes(root / item["filename"], repo, root,
+        runtime_artifact_size_limit(item["filename"])) for item in manifest["artifacts"]}
+    if any(len(raw[item["filename"]]) != item["byte_count"]
+           or raw_digest(raw[item["filename"]]) != item["content_digest"] for item in manifest["artifacts"]):
+        raise RuntimeArtifactManifestError("grant_service_artifact_changed")
+    validate_initial_installed_manifest_artifacts(manifest, raw)
+    return validate_installed_grant_service_artifacts(raw)
+
+
+def _installed_source_policy(owner, repo, policy, descriptor):
+    from .reddog_grant_authority_source_policy_authority import validate_grant_authority_source_policy_owner_config
+    from .reddog_grant_authority_installed_source_contract import installed_grant_source_digest
+    source = validate_grant_authority_source_policy_owner_config(owner, repo=repo)
+    expected = {"grant_authority_source_repo_root_digest": source["repo_root_digest"],
+        "grant_authority_source_commit_sha": descriptor["source_commit_sha"],
+        "grant_authority_source_object_format": descriptor["source_object_format"],
+        "grant_authority_source_policy_digest": source["source_policy_digest"],
+        "grant_authority_installed_runtime_descriptor_digest": installed_grant_source_digest(descriptor)}
+    if (owner["config_id"] != policy["owner_config_id"]
+            or any(policy[k] != v for k,v in expected.items())
+            or not set(source["sources"].values()) <= set(descriptor["source_files"])
+            or source["sources"]["reddog_grant_authority_service.py"] !=
+               "modules/communication/moltbot_bridge/src/reddog_grant_authority_service.py"):
+        raise RuntimeArtifactManifestError("grant_installed_source_policy_mismatch")
+    return expected
+
+
+def _installed_config_bindings(config, policy):
+    fields = ("signer_agent_id", "signer_profile_id", "public_key", "key_fingerprint", "key_epoch",
+        "signing_key_ref_hash", "audit_mac_key_ref_hash", "permission_snapshot_digest", "permission_snapshot_receipt_id")
+    if any(config[name] != policy["grant_authority_" + name] for name in fields):
+        raise RuntimeArtifactManifestError("grant_installed_config_identity_mismatch")
 def _read_manifest(
     repo: Path, root: Path, policy: Mapping[str, Any]
 ) -> dict[str, Any]:
@@ -91,7 +186,7 @@ def _verify_manifest_bindings(
     manifest: Mapping[str, Any], repo: Path, root: Path,
     policy: Mapping[str, Any],
 ) -> None:
-    provenance = policy.get("schema_version") in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8}
+    provenance = policy.get("schema_version") in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}
     expected = {
         "schema_version": (
             SCHEMA_VERSION_V3 if provenance else SCHEMA_VERSION_V2
@@ -175,7 +270,7 @@ def _read_artifacts(
 def _verify_archive_provenance(
     raw: bytes, repo: Path, policy: Mapping[str, Any]
 ) -> Mapping[str, Any]:
-    if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8}:
+    if policy.get("schema_version") not in {POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9}:
         validate_grant_service_archive(raw)
         return {}
     provenance = derive_grant_service_git_provenance(

@@ -105,7 +105,7 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
             request, asdict(self.binding)
         ):
             return _reject(REJECT_SECRET_GRANT_INVALID)
-        if not factory_binding_matches(self.backend_factory, self.binding):
+        if not factory_binding_matches(self.backend_factory, self.binding, request=request):
             return _reject(REJECT_EPHEMERAL_BACKEND_INVALID)
         expected = self._expected(request, peer)
         if not (
@@ -131,7 +131,7 @@ class ResolvePerSignSignerBackend(IsolatedSignerBackend):
     ) -> SigningResponse:
         def protected_action():
             from modules.communication.moltbot_bridge.src.reddog_signer_wsp71_ephemeral_backend_factory import _lease_authenticated_factory
-            with _lease_authenticated_factory(self.backend_factory, self.binding, self.grant_boundary):
+            with _lease_authenticated_factory(self.backend_factory, self.binding, self.grant_boundary, request=request):
                 return self._resolve_and_sign_current(request, peer, consumed_grant)
         try:
             return SignerSecretAccessGrantBoundary.authorize_consumed_use(self.grant_boundary, consumed_grant, protected_action)

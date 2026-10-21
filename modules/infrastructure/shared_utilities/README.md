@@ -15,6 +15,11 @@
 - YouTube channel registry (shared rotation + scheduling metadata)
 - Cross-cutting concerns for infrastructure layer
 
+The native local chat adapter preserves explicit reasoning controls by default;
+callers selecting a model without that capability may pass `reasoning=None`
+to omit the optional field. This delegates to the server default, not a promise
+that reasoning is disabled. Existing defaults and exact instance checks remain.
+
 The local LLM adapter distinguishes installed models from exact resident
 instances through native `/api/v1/models`. Generic resolution remains
 probe/borrow-only. Explicit callers may use one node/port-wide, bounded-lock

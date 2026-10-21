@@ -41,7 +41,7 @@ def resolve_current_effect_sovereign_authorization(
             return None
         repo = Path(repo_root).resolve()
         owner = loader._load_owner_config(owner_config_path, repo=repo)
-        if owner["schema_version"] not in {loader.SCHEMA_VERSION_V6, loader.SCHEMA_VERSION_V7, loader.SCHEMA_VERSION_V8}:
+        if owner["schema_version"] not in {loader.SCHEMA_VERSION_V6, loader.SCHEMA_VERSION_V7, loader.SCHEMA_VERSION_V8, loader.SCHEMA_VERSION_V9, loader.SCHEMA_VERSION_V10, loader.SCHEMA_VERSION_V11, loader.SCHEMA_VERSION_V12, loader.SCHEMA_VERSION_V13}:
             return None
         selected, boundary = loader._manifest_selection_from_owner(owner, repo=repo)
         with boundary._lease_current(selected) as selection:
@@ -70,9 +70,15 @@ def _snapshot(assertion, inputs):
 
 
 def _evidence(assertion, message):
-    return EffectSovereignAuthorizationEvidence(
+    from .reddog_effect_consent_contract import ASSERTION_SCHEMA_V2
+    from .reddog_parent_consent_contract import ParentConsentEvidence
+    from .reddog_elevated_authority_consensus_policy import ParentBoundEffectSovereignAuthorizationEvidence
+    modern = assertion["schema_version"] == ASSERTION_SCHEMA_V2
+    kind = ParentBoundEffectSovereignAuthorizationEvidence if modern else EffectSovereignAuthorizationEvidence
+    parent_kind = ParentConsentEvidence if modern else SovereignAuthorizationEvidence
+    return kind(
         authorization_digest=raw_digest(message.encode("ascii")),
-        parent_authorization=SovereignAuthorizationEvidence(**assertion["parent_authorization"]),
+        parent_authorization=parent_kind(**assertion["parent_authorization"]),
         parent_authority_request_digest=assertion["parent_authority_request_digest"],
         target_signing_request_digest=assertion["target_signing_request_digest"],
         effect_request_digest=assertion["effect_request_digest"],
@@ -82,6 +88,7 @@ def _evidence(assertion, message):
 
 
 def _scope_matches(authority, assertion, inputs, payload, selection):
+    from .reddog_effect_consent_contract import ASSERTION_SCHEMA_V2
     shared = set(authority) - {"schema_version", "issuer_public_key", "issued_at", "expires_at"}
     if any(authority[key] != assertion[key] for key in shared):
         return False
@@ -147,7 +154,10 @@ def _current(authority, assertion, evidence, inputs, selection, records, now):
 
 
 def _verify_leased(owner, owner_path, repo, selection, checked, assertion, inputs, before, evidence, message, now):
-    """Private already-leased check, for future composition under the same owner."""
+    """Private already-leased check, for composition under the same owner."""
+    from .reddog_effect_consent_contract import ASSERTION_SCHEMA_V2
+    if checked["schema_version"] == ASSERTION_SCHEMA_V2 and owner["schema_version"] not in {loader.SCHEMA_VERSION_V12, loader.SCHEMA_VERSION_V13}:
+        return None
     authority = validate_effect_consent_authority(owner["effect_consent_authority"])
     selected_before = canonical_json(dict(selection))
     records, _ = principals.load_current_generation_principal_artifact(repo_root=repo, selection=selection)

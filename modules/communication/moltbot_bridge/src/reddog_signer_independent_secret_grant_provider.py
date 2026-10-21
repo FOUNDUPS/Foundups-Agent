@@ -20,6 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_independent_secret_g
     require_final_secret_grant,
     require_secret_grant_signer_response,
     issue_effect_secret_grant,
+    lease_independent_secret_grant,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_selection import (
     lease_validated_owner_e0_current_admission,
@@ -45,14 +46,14 @@ from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_authori
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
     VerifiedElevatedAuthoritySigningPermit,
 )
-from .reddog_effect_consensus_proof import SCHEMA as EFFECT_PROOF_SCHEMA, VerifiedEffectSigningPermit
+from .reddog_effect_consensus_proof import SCHEMA as EFFECT_PROOF_SCHEMA, SCHEMA_V2 as EFFECT_PROOF_SCHEMA_V2, VerifiedEffectSigningPermit
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_signer_client import (
     ElevatedConsensusGrantProviderIdentity,
     admit_secret_grant_consensus,
 )
 @dataclass(frozen=True, slots=True)
 class IndependentSignerSecretGrantProvider:
-    """Issue grants with current-owner checks; effect RPC runs outside its fence."""
+    """Issue grants with current-owner checks; LOW/effect RPC releases its fence."""
     repo_root: Path
     owner_config_path: Path
     owner_policy: Mapping[str, Any]
@@ -90,15 +91,10 @@ class IndependentSignerSecretGrantProvider:
             raise ValueError("secret_grant_request_invalid")
         if type(elevated_consensus_signing_permit) is VerifiedEffectSigningPermit:
             raise ValueError("effect_grant_requires_unfenced_issue")
-        consensus_proof = admit_secret_grant_consensus(
-            request, elevated_consensus_signing_permit, now=self._now()
+        consensus_proof, approval_expires = admit_secret_grant_consensus(
+            request, elevated_consensus_signing_permit, now=self._now(), include_expiry=True
         )
-        with lease_validated_owner_e0_current_admission(
-            owner_config_path=self.owner_config_path,
-            repo_root=self.repo_root.resolve(),
-            policy=self.owner_policy,
-        ) as owner:
-            grant = self._issue(request, owner, consensus_proof)
+        with lease_independent_secret_grant(self, request, consensus_proof, approval_expires=approval_expires) as grant:
             yield grant
     def _issue(self, request: SigningRequest, owner: Any, consensus_proof: Mapping[str, Any] | None) -> Mapping[str, Any]:
         grant, sign_request, binding = self._prepare_issue(request, owner, consensus_proof)
@@ -114,7 +110,7 @@ class IndependentSignerSecretGrantProvider:
             grant,
             policy=policy,
             consensus_receipt_digest=(consensus_proof["consensus_receipt"]["receipt_id"]
-                if consensus_proof is not None and consensus_proof.get("schema_version") == EFFECT_PROOF_SCHEMA
+                if consensus_proof is not None and consensus_proof.get("schema_version") in {EFFECT_PROOF_SCHEMA, EFFECT_PROOF_SCHEMA_V2}
                 else request.consensus_receipt_digest),
             elevated_consensus_proof=consensus_proof,
         )

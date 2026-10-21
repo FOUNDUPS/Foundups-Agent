@@ -59,3 +59,23 @@ pending or rejected, and becomes the validated canonical ID before landing
 rendering. This intentionally withholds speculative IDs for canonical requests
 too; successful legacy canonical context stays unchanged. Alias requests must
 replace the URL successfully before exposing identity or rendering.
+
+### Registered shell housing POC
+
+The existing `poc_url` field carries the Move2Japan public discovery entry;
+`app_url` remains null. Optional `token_symbol` is omitted by the generator when
+the registry value is null. Consumers must not derive a token symbol from the ID.
+
+`public/f/index.html` maps only the pair
+`foundup_id=move2japan` and
+`poc_url=https://foundups.com/member/?foundup=move2japan` to the fixed same-tab
+`/member/?foundup=move2japan` **Browse houses** action. All other public URL fields
+retain the existing validated outbound-link behavior. Request queries cannot
+change the mapping. This action selects a public discovery projection in the
+shared shell; it is not app admission or an arbitrary runtime URL.
+
+Canonical `/f/{id}/app` and app deep links retain the existing `/member/` handoff
+before fetching any catalog. The declarative Move2Japan manifest has the same
+tenant, `/f/move2japan` routing prefix and `idb_move2japan` namespace, with
+`discoverable_only` readiness, no agent routes, no token and no self-authorized
+execution. No private member runtime fields are added to this projection.

@@ -1,3 +1,14 @@
+## 2026-10-13: WSP71 security review ownership and candidate triage
+
+Added sections 5.4–5.5 under 012's explicit direction to repair security gaps
+and enhance the existing WSP. 0102 owns routine evidence and remediation;
+012 receives material decisions, not a report-download task. Require source,
+PR base/head and deployment binding, truthful coverage, bounded exceptions,
+and credential-safe historical triage. Framework/knowledge copies synchronized
+per WSP81; pre-change content remains recoverable from main 4095ad9. Existing
+permission/production boundaries remain in force. Related implementation:
+CI stacked-branch trigger and existing secret-gate regression suite. WSP22/71/81/97.
+
 ## 2026-09-29: WSP48 measurement scalar and provenance clarification
 
 Synchronize both existing WSP48 copies: typed finite metrics, integer counts,

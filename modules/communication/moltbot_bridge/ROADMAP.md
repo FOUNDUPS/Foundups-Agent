@@ -1,3 +1,145 @@
+## Protected consensus nonce checkpoint — 2026-10-20
+
+Current 19/P0 reuses protected owner v13, current E0 and existing MAC/SQLite nonce
+state. Connected 437 passed/3 platform skips; independent 21 passed. The reviewed
+helper move preserves semantics and existing caps; unchanged startup-test size
+debt is recorded. Next connect one live authenticated parent/effect/nonce lease
+through the existing factory, then protected HIGH service composition and genuine
+admission inputs. LOW and frozen 294 runtime stay unchanged; native author 0.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+
+## Parent admission checkpoint — 2026-10-20
+
+PR2163 merged824d0f71 with reviewed tree equality and passing PR/main checks.
+Its publication worktree is archived; frozen qualified runtime294195cdb is retained.
+The v36 synthetic LOW handshake passed, with all seven units absent; root exit2
+still leaves clean service closure false. Neither result admits a real author.
+
+Current19/P0 (C4/I5/D5/Impact5) connects parent consent, separate parent/effect
+reviewer domains, bounded per-selection model inputs, effect proof and the existing
+signer/current-use owners. Independent20 model/current-use and17 Linux RPC/nonce
+controls pass against44 frozen files. Connected59 suites pass1,545/22 platform
+skips with explicit repository test root; the original failures remain recorded.
+Final45-file source adds a test-only unknown-schema update and EOF-only cleanup.
+
+After exact-source validation/publication, qualify and connect installed HIGH
+custody/nonce supply through existing startup/factory owners. Preserve LOW;
+require authentic work/reviewer/model/budget evidence before a native author.
+Then independently verify, activate/roll back, measure later retained benefit and
+select the next bounded task. No second orchestrator or repeated LOW-handshake
+trial substitutes for this sequence.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+
+## Native startup integration checkpoint — 2026-10-16
+
+PR2147 merged at `6fb93580c`; all 11 exact-head checks and exact-main CI/push
+checks passed, with identical reviewed/main trees. Its current-time authorization
+repair is published. Runtime `88690a4f5` is independently qualified and frozen
+(2,691 files, 1,254 exact Git Python sources); qualification is not admission.
+Fresh synthetic v19 passed installation/revocation but timed out awaiting issuer
+readiness. V20 rejected before its caller action in the permission-time guard;
+issuer elapsed 44.97 monotonic versus 40.98 wall seconds. Clock regression is
+supported, but exact guard values and the responsible synchronization mechanism
+were not captured. All seven owned units were absent/inactive/dead afterward.
+Bounded samples identify repeated descriptor/runtime validation. The next layer
+reduces pure descriptor computation while retaining fresh filesystem and authority
+checks; a separate reversible clock-source experiment is under review. Neither
+work changes expiry, grants, process timeouts or production clock checks.
+Existing R15 still requires authentic worker admission, independent evaluation,
+authorized activation/rollback, later retained benefit and bounded next selection.
+No native author or retained RSI gain is demonstrated.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
+
+## Protected issuer custody checkpoint — 2026-10-16
+
+PR2142 merged308d235a2 with passing exact-main CI and CodeQL, closing the
+previous clock-test failure. Completed owned lanes are archived and retired.
+Current isolated integration adds protected installed-manifest consumption,
+issuer runtime checks before credential use, and fixed one-request startup.
+Independent consumer209, guard62 and wiring18 cases passed; four connected
+suites passed174. Independent actual guard qualification reopened1,665 files
+and launched a credential-free RootDirectory probe. No service admission claim.
+
+Independent rate-store255 and socket-directory159 cases passed. Next19/P0:
+install authenticated owner/E0/permission/custody inputs; run the real LOW grant
+and target handshake. Then execute the existing R15 author/verifier,
+retention/rollback and later-benefit loop. See the canonical dispatch record.
+
+## Grant bootstrap and LOW RPC checkpoint — 2026-10-15
+
+The v9 pre-configuration projection closes the target-manifest/permission-receipt
+hash dependency without accepting partial authority. The LOW RPC repair closes
+the demonstrated same-file generation-lock deadlock and retains caller fencing.
+Existing source and Linux process tests qualify these bounded changes only.
+
+Next19/P0 remains the independent grant issuer: requalify the existing protected
+installed-source runtime and explicitly enroll that deployment through the
+administrative initial path, then compose the existing bounded signer service
+with protected permission, separate signing/audit custody and durable rate/replay
+state. The current exact-Git zipapp rejects imports/native dependencies required
+by these owners; preserve its legacy contract. The target's initial manifest
+signing context rejects `runtime_profile`; target enrollment is not issuer
+admission. Connect one real LOW grant and native handshake only after these gates,
+then proceed to the author/verifier and retained-use/rollback gates in the root
+roadmap. No native admission or RSI completion is claimed by this checkpoint.
+
+## Initial handshake composition — 2026-10-15
+
+Reuse the existing service composer, E0 selection and per-request backend for
+generation1, one LOW handshake, no work policies. Independent74 held-out checks
+passed; native service/admission remains unproven. PR2136 initial-manifest source
+is merged/main-validated and its lane retired. Next19/P0 (C4/I5/D5/Impact5):
+compose the existing independent grant issuer server, authentic policy/custody,
+durable rate and one real grant response. Preserve independent authorization;
+never bootstrap that issuer through the target's grant-required backend.
+Then connect native handshake, author/verifier and retained-use/rollback gates.
+Detailed current evidence remains in the existing RSI dispatch runbook.
+
+## Initial manifest checkpoint — 2026-10-15
+
+Native isolated component publication -> generation1 activation -> credential-free
+selection passed with actual custody, qualified stores and immutable artifacts.
+Independent repeat selection agrees. Disabled initial configuration does not
+qualify worker admission. Next18/P0: actual service-input/admission composition,
+one native author and independent verifier, retained benefit and rollback under
+root ROADMAP.md. Current source publication remains a separate closure gate.
+
+## Protected writer checkpoint — 2026-10-14
+
+Initial writer component validated:294pass/1platform skip, independent115pass,
+fresh isolated persistence/public-read trial. Root-installed records qualify only
+observed fsync/process-reopen; manifest values remain fixtures. Next18/P0: existing
+authenticated manifest activation and a native author ticket, independent evaluation
+and retained later-use benefit. Follow root ROADMAP.md for system completion gates.
+
+## Initial high-water signing checkpoint — 2026-10-14
+
+18/P0 (C4/I5/D5/Impact4): native enrollment remains the critical path. PR2132 is
+merged and main-validated. V2 initial-record signing is now component-tested
+through real custody and persisted public verification. Next: protected writer
+factory/qualified store receipts, existing signed manifest admission, native
+author/verifier, governed retention and later-use benefit. No new orchestrator.
+
+## Isolated enrollment — current checkpoint, 2026-10-14
+
+18/P0 (C4/I5/D5/Impact4): implement the remaining native enrollment path.
+Prior permission blocking is superseded by 012's isolated installation authority.
+Exact initial-anchor signer is component-verified, including a real systemd
+credential/signature probe. Connected local217pass/1platformskip; hosted closure
+pending. Next: protected high-water signer/writer capability and durable store
+initialization, then complete authenticated native author admission. No G1–G5
+completion or autonomous improvement is claimed. Root ROADMAP/runbook own sequencing.
+
+## Canary provider closure — historical checkpoint, 2026-10-13
+
+Eligible 14/P1 (C2/I4/D4/Impact4): publish the isolated provider-selection repair
+after fresh-base tests, review and required checks. Configured Hermes/OpenClaw
+selection is preserved; readiness does not supply execution authority.
+Native enrollment remains blocked 18/P0 and is a separate gate. Historical
+`29bd97d44` is retained as a checkpoint, not replayed as current planning.
+Local contracts: 133 passed, 2 Windows skips; hosted checks/publication pending.
+No native ticket or retained benefit claim.
+
 ## Proposal startup connection — current checkpoint, 2026-10-07
 
 Existing materializer/adapters reused; real proposal packet supply and public

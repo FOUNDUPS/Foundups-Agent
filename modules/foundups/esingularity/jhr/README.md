@@ -43,6 +43,12 @@ A report is publishable when at least one high-signal event is verified, for exa
 
 Routine repetition, vendor marketing, duplicate stories, and weakly sourced claims do not pass the gate.
 
+## Primary website and derived social editions (2026-10-13)
+
+The **eSingularity.ai JHR website article** is the primary public edition. The JHR repository report and rendered frontend route must be reconciled as one source change; the live website issue (currently a `/reports/jhr#jhr-NNN` anchor) becomes downstream publication authority **only after** the existing deployment succeeds and the actual public issue is independently read back. LinkedIn's Japan Hyperscaler Report newsletter is a **secondary derived edition** of that live website piece, not an independent authoritative original. Newsletter edition numbering may differ from site issue numbers.
+
+Publication path: evidence and significance -> website content and review -> production source/release and live URL verification -> bounded handoff through `../skills/website-update/SKILL.md` and `modules/platform_integration/linkedin_agent/skillz/linkedin_jhr_newsletter/SKILLz.md` -> exact authorized LinkedIn publication -> permalink readback. A site layout/ticker/SEO-only update or `NO_REPORT` triggers **no newsletter**. Missing authentication, publishing approval or uncertain delivery stops only the downstream stage, not the already verified website article. No unattended LinkedIn publisher is claimed to be installed.
+
 ## Runtime contract
 
 `run_jhr_cycle()` returns a structured result with:

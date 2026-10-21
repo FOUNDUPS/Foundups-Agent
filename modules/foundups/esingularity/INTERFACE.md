@@ -145,3 +145,11 @@ and legacy five-year parity outputs remain unchanged.
 ## Costed planning API
 
 `load_planning_assumptions()` reads the versioned planning data; `run_planning_scenario(name="base", data=None)` returns demand-derived design, independent cost lines, debt/cash driver schedules, later-site standalone cash and the canonical portfolio result. Evidence readiness remains separate from numeric scenario results. `yumori_fin_projection.build_projection()` emits bounded native FIN batches and performs no network mutation.
+
+## Community interest security contract — 2026-10-10
+
+POST `/api/interest` accepts JSON only, streams at most 8 KiB before parsing, rejects cross-origin browser requests, and preserves the existing consent/field validation and honeypot. Responses are noncacheable. Invalid JSON/fields return 400, oversized input 413, wrong content type 415, origin rejection 403, durable admission rejection 429 with Retry-After, and storage failure 503.
+
+D1 admits at most five submissions per ingress client in a rolling hour and 100 globally per hour, and one normalized email per 24 hours. The guarded insert and admission receipt run in one transaction. Current/previous daily client digests preserve the rolling window across UTC midnight; no raw IP is stored and stale admission metadata is pruned. These application limits bound stored submissions, not volumetric traffic or D1 request charges; edge-level abuse controls remain an operations concern. Missing Cloudflare ingress metadata shares a conservative quota; forwarded headers are not trusted. Existing interest records are preserved.
+
+Unpublished portraits and unused unblurred originals are staged outside `public/`. This stops new static serving but does not erase Git history or previously fetched copies. Approved 012/0102 profile imagery stays published.

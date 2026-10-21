@@ -1,3 +1,400 @@
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
+## Consensus nonce publication compatibility repair — 2026-10-20
+
+Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
+the modern-owner version predicate an always-truthy tuple. Legacy owners
+entered per-selection validation. The unchanged 10-case model-pair family
+reproduces seven failures; removing the tuple tail makes all 10 pass.
+The existing signed-model gate now covers both v12 and complete v13 owners.
+The full hosted-startup selection runs locally: 901 passed, 5 platform skips, zero failures/errors.
+Source hashes remain stable.
+Independent review passes three legacy/v12/v13 behavior controls and
+verifies the one-source-digest change with unchanged pins policy.
+Regenerated digest pins retain the 1,449-file inventory and unchanged limits.
+Both generators check current, 36 binding tests pass without skips, and
+the three backend compatibility Node checks exit zero.
+These synthetic fixture checks
+do not establish installed HIGH authority or native worker execution.
+WSP00/5/6/10/15/22/50/62/71/97. Exact receipts and commands are in dispatch.
+
+## Protected consensus nonce prerequisite — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Opt-in v13 reuses protected custody,
+current E0 and provisioned MAC/SQLite stores; no service is activated. Connected
+437/3 platform skips and independent 21 controls validate the synthetic component.
+Reviewed helper extraction preserves behavior and original caps; inherited test
+size debt remains explicit. Next is the existing single-lease HIGH composition,
+with genuine admission still required. See [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+
+## Parent-consensus connection — 2026-10-20
+
+WSP00/15/48/50/77/97 selects19/P0 to join existing parent/reviewer/model, effect,
+signer and current-use owners. Independent20 model/current-use and17 Linux RPC/
+nonce controls pass against44 frozen files; connected59 suites pass1,545/22 skips.
+Explicit test roots fix fixture interference; production authority checks remain.
+Updated existing roadmap/backlog, interface, tests and generated bindings. No
+second orchestrator, native author admission or retained RSI gain is claimed.
+[Current source, evidence and remaining HIGH connection](docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+
+## Policy-bound parent consent prerequisite — 2026-10-19
+
+WSP00/15/48/50/77/97: selected18/P0 (C4/I5/D5/Impact4) after the accepted
+synthetic LOW handshake. Reused existing owner/principal, generation lease and
+signature machinery. Owner v11 opts into exact HIGH/worktree_create consent;
+the returned evidence retains its policy restriction and grants no execution.
+Independent review caught and corrected a legacy evidence projection that lost
+that restriction. Connected512 passed/2 existing Windows skips; independent37
+passed. These are component results, not native author or retained RSI evidence.
+See the [canonical dispatch checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#policy-bound-parent-consent-prerequisite--2026-10-19).
+Publication closed on 2026-10-20 JST: PR2163 merged824d0f71 with exact reviewed
+tree equality, all12 latest PR checks and exact-main CI/CodeQL success. Connected
+Linux775 passed/1 skipped; independent artifact14 passed and4,793 source hashes
+matched. The clean publication worktree is archived. Protected runtime294195cdb
+remains unchanged; no native author admission or retained gain is established.
+
+## RSI fixture codec repair and accepted grant signing — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. PR2161 merged122fec8c6 after independent exact-head
+review and passing checks; reviewed/main trees equal. V31 localizes factory
+rejection. The independently reviewed v32 fixture audit-key codec correction
+advances native grant signing to accepted, while the handshake still rejects
+after a later send failure. All seven units are absent; cleanup complete.
+Those v32 source/runtime, authority, signed lifetime and timeout limits were
+unchanged. V33 then exposed a target observer setup defect; its repair passes
+installed-module setup controls. A separate source regression proves config30
+fell back to client5. The two-owner forwarding repair passes166 Windows tests
+with2 Linux-dependent skips. Source294195cdb now independently qualifies in the
+installed runtime; v34 receives accepted inner signing, but the outer handshake
+still rejects. Both issuer and target exit0; all7 services absent and cleanup
+complete. V35 then localizes target rejection to the factory returned-result
+type/ok gate. Offline controls reproduce profile60 versus custody-window300;
+actual v35 provider code remains unobserved. V36 accepts the synthetic LOW
+handshake with both signatures independently verified; root exit2 leaves clean
+service closure false despite all7 units absent and no cleanup errors. No author
+admission or retained gain. Next18/P0 resolves authentic parent/work/model/verifier/
+budget admission through existing owners. Current local catalog
+availability and prior failed verifier qualification remain distinct.
+[Evidence](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+## RSI qualification and admission reconciliation — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. PR2160 merged358fb2e34 with exact-head/main CI/CodeQL
+passing and reviewed/main trees equal. Independent exact-source qualification,
+same-boot ABBA guard measurements and historical v28 remain in the existing
+dispatch. V29 observes backend rejection before a resident sendall C failure;
+its hidden rejection branch remains unresolved. All seven units are independently
+absent. A separate harmless control proves the oneshot wait-cycle defect; the
+reviewed v30 lifecycle correction now completes observation and cleanup without
+the old timeout/reset error; all seven units are absent, handshake still rejected.
+No authority/deadline or acceptance change, author admission or retained RSI gain.
+Parent/work/model/budget/verifier inputs remain separate; post-valve issuance is
+already wired. Next: locate the actual backend rejection branch, then repair it.
+Exact receipts: [current dispatch](docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+## RSI native requester evidence and publication — 2026-10-19
+
+WSP00/5/10/15/22/48/97. PR2159 mergedbb9d3f802; all 19 recorded exact-head
+check runs passed (12 distinct check names), as did main CI39222572582/
+CodeQL39222573026; reviewed/main trees identical. Runtime
+1e203d5 qualifies2683 files independently. Synthetic v21 advances through
+installation/revocation and root/issuer/target readiness, but requester rejects;
+the hidden backend exception remains the next diagnostic target. All7 owned
+units absent after independently checked cleanup; historical reset error retained.
+V22 reproduced the rejection but exhausted its diagnostic cap on handled path
+checks. Actual-interpreter controls then qualified revised diagnostics: v23
+localized inner-response rejection; v24 captured a socket TimeoutError and
+CONNECT_FAILED. V25 locates the originating timeout at inner `recv(4096)` and
+issuer root-response size rejection (zero or over-limit, branch unknown).
+All7 v25 units are independently absent. No signed lifetime or guard changed.
+Clock experiment restored the service but failed its fixed stability criterion.
+Existing post-valve lease issuance is connected in source; trusted parent evidence
+and native elevated authority remain separate gaps. No worker/retained RSI claim.
+Existing roadmap, backlog, dispatch and module logs carry the current evidence.
+The existing shared containment predicate now avoids POSIX exception control
+flow while retaining Windows path comparison. Independent review rejected an
+initial Unicode regression; revised12,717-case comparisons pass per platform.
+Pure predicate speed is not native request gain. Baseline symlink-test drift is
+corrected and Windows/Linux CI coverage added. Connected validation passed 111
+with 8 Windows skips; publication and native qualification remain pending.
+V27 no-observer control still rejects the requester after installation/revocation
+pass; all seven units are absent. Different boots and one v26/v27 pair establish
+no causal gain. Next: exact-source containment qualification and full native cost
+measurement, with timeouts and authority unchanged. Exact evidence is in dispatch.
+
+## RSI native startup evidence and descriptor cost — 2026-10-16
+
+WSP00/15/22/48/97. PR2147 merged6fb93580c with passing exact-head/main checks.
+Independent frozen88690 runtime qualification is complete; synthetic v19/v20
+handshakes still failed. Current work reduces pure descriptor overhead without
+removing runtime observations or changing authority. Clock-source experiment is
+separate and has not run. Native author and retained RSI remain unproved.
+See existing dispatch and moltbot_bridge ModLog for exact evidence and limitations.
+
+## 2026-10-18 — Security: triage the 91 historical secret candidates
+
+- WSP 50/71/97: pinned main `1c80f15ae2eee0f78300f297fb3e386275bc0aab`,
+  retrieved the existing security owner and reviewed exact historical blobs.
+- Classified all 91; accepted 52 verified non-secret occurrences with 51 exact
+  fingerprint additions. Preserved 39 blockers: 16 unverified digest entries
+  and 23 occurrences of five credential candidates. No scanner weakening.
+- Reproduced baseline and complete current-main ancestry scans; current tree
+  has no unreviewed matches. Five candidate values absent from current tracked
+  files; revocation and deployment applicability remain unverified.
+- Validation: 17 security-gate regressions passed; exact-blob fingerprints and
+  source digests recomputed. Safe decisions live with the existing security
+  owner in `.github/security/reviewed-history-triage-evidence.json`.
+
+## AntifaFM contextual promotion prototype — 2026-10-18
+
+WSP00/5/11/15/22/50/62/84/97. Reused SOCIAL routing, Digital Twin drafting and
+UnifiedX publication owners for listener-initiated music context and own-account
+station links. Real model JSON is required for drafts; API identity and durable
+readback are required for posting success. Prototype OpenClaw/Codex prompts add
+no daemon, production executor or cadence. Independent review repaired import,
+cancellation, context and error-reporting boundaries before offline qualification.
+Current receipts and host activation limits are in the social orchestrator
+ModLog, tests/TestModLog and docs/ANTIFAFM_CAMPAIGN.md. No live account/model,
+external posting, targeted political persuasion or native worker activation is
+claimed from the coding environment.
+
+Generated integration keeps the current test registry and backend source/digest
+pins aligned. The existing JHR skill had only a Codex projection on current main;
+a byte-identical canonical-source backfill preserves its content and publication
+policy while allowing the unchanged exact-set projection generator to pass.
+The OpenClaw workspace manifest is regenerated from its actual nine skill docs.
+
+## RSI initial control bootstrap — 2026-10-16
+
+WSP00/15/22/48/97. Existing control owners now distinguish first LOW identity
+from verified outcome authority; no second orchestrator or roadmap. Independent
+functional review passed, with inherited documentation-size debt explicitly
+retained. Actual isolated runtime and storage qualification advanced, while
+native worker admission, activation and retained benefit remain unproved.
+PR 2145 merged with passing exact-main checks; runtime 34eed remains frozen.
+V18 passed installer receipt/source-path repairs and revocation, then rejected LOW
+handshake at durable `_checked_now`. Current-time sampling/rechecks now remain fenced;
+explicit stale epochs still reject, and late rejection cannot undo callback effects.
+Author 207 and separate independent 17 passed; counts are not additive. No native admission or retained gain.
+
+See docs/operations/RSI_SWARM_DISPATCH.md and the module ModLog.
+
+## Installed consumer and runtime startup integration — 2026-10-16
+
+WSP00/5/10/11/15/22/48/50/62/71/84/97. Reused current enrollment, manifest,
+permission, durable-store and bounded service owners. Added authenticated
+installed consumption, issuer runtime checks and fixed loader-to-service startup.
+Independent review repaired legacy missing evidence and root-LOAD guard gaps;
+consumer209/guard62/wiring18 cases passed, plus174 connected cases. Actual
+guard qualification remains credential-free; native admission and retained RSI
+gain remain open. PR2142 main CI/CodeQL passed and four completed lanes retired.
+Independent rate255/socket159 cases passed. Remaining native installation gates and source-bound evidence are in the
+existing RSI dispatch/backlog; no second orchestrator or roadmap was created.
+
+## Native RSI integration checkpoint — 2026-10-16
+
+WSP00/15/22/48/97. Integrated reviewed initial issuer enrollment and target grant
+acquisition in the owned lane;459 connected Linux cases passed. Re-anchored the
+existing backlog selection to its current observation. A13-case two-UID probe
+demonstrated shared replay ownership failure, directing the next repair toward
+separate authenticated issuer rate storage in existing durable-store owners.
+Installed approval/runtime consumption and actual native admission remain open.
+
+## Installed issuer artifact and policy preparation — 2026-10-16
+
+WSP00/15/22/48/50/62/71/84/97. Added inert canonical installed-source bundle
+validation and explicit initial-only E0 v10 descriptor binding. Preserved legacy
+archive schemas, signing projections and fail-closed runtime rejection. Reused
+existing contract/custody/permission owners; no deployment or grant issued.
+Independent artifact250/policy161 cases and real F runtime qualification support
+only their bounded scopes. Next: authenticated enrollment/consumer and target
+internal grant acquisition before the native R15 experiment.
+
+## Protected issuer custody and runtime prerequisite — 2026-10-16
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Added explicit owner-v9 issuer
+custody through existing resolver/replay/E0/root-LOAD owners. Preserved old schema
+and identity separation; no generation lease spans RPC. Combined12-suite Linux
+validation passed328 cases; independent custody review passed63. The adjacent
+empty-source reader qualified220 source modules in actual credential-free
+confinement. Root roadmap, existing backlog/runbook/contracts and generated
+registry/manifest bind this checkpoint. Next: qualify the complete Linux runtime
+and initial installed-issuer enrollment; no native admission or RSI gain claimed.
+
+## Bounded grant issuer and root LOAD — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Connected existing LOW issuer owners
+and introduced a versioned issuer-only root LOAD role without changing legacy
+target wire behavior. Repaired the second generation-lock/RPC conflict in
+permission authorization and a reproduced resident socket replacement-cleanup
+defect. Existing roadmap/runbook/registry/CI locations own the evidence and next
+custody/deployment dependency. Tests preserve synthetic installation limits;
+no native worker, paid inference or retained RSI gain is claimed.
+PR2138 is main-validated and its two owned lanes archived/retired.
+
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Reused existing E0/grant owners
+to repair the configuration hash cycle and LOW RPC lock deadlock. Explicit v9
+preserves legacy hashes and full signed-policy checks; fresh caller-use fencing
+preserves owner and expiry validation. Connected Linux275pass/zero skips and
+independent process/policy reviews are recorded in the existing dispatch runbook.
+Reconciled canonical roadmap/backlog with the next19/P0 issuer installation gap.
+No deployed worker, retained gain, production activation or RSI completion claim.
+
+## Initial handshake composition — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97; base1d847ad1f.
+Existing signer/E0 owners now represent one initial LOW handshake explicitly,
+without fabricated work policy. Independent contract checks pass; real native
+admission remains pending separate grant issuer composition. Canonical roadmap
+and dispatch reconcile PR2136 merge/main checks/owned cleanup and the next19/P0
+dependency. No new scheduler, paid model call or RSI completion claim.
+
+## Initial manifest activation — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97; pinned1774d1e8f. Added bounded
+administrative initial-manifest attestation within existing generation owners;
+preserved work authorization and legacy schemas. Linux immutable activation and
+separate anchor ownership allow real isolated publication/activation/public
+selection. Independent review repaired generation/expiry/FIFO defects. Runtime
+evidence remains component-only with disabled inputs; native author and RSI still
+pending. Existing roadmap/backlog/runbook retain the next18/P0 admission slice.
+See docs/operations/RSI_SWARM_DISPATCH.md#initial-manifest-activation--2026-10-15.
+
+## Verifier-guided RSI loop audit — 2026-10-15
+
+WSP00/15/22/48/50/97; sourcea6a63b8e9. Researched Nigel/REA/ArtCraft primary
+sources and mapped the bounded attempt/verifier/re-observe pattern into existing
+R15. Recorded fixed-oracle, later-use/control, rejection and cost denominators;
+kept native admission first and FoundUp/game rewards under existing R20/R24.
+No new scheduler, runtime implementation, product or token activation. Existing
+63 contract cases pass; synthetic evidence is not native RSI. Governed Holo
+query is CURRENT/no-gap but noisy. Reconciled PR2134 merge/maintenance closure
+from exact receipts; retained historical failures. See
+docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15.
+
+## Protected initial writer — 2026-10-14
+
+Added the missing bounded issuer over existing generation/witness stores; guarded
+scope/expiry/order and extended existing SQLite opening/transaction guards. Repaired
+held-out equality, expiry, recreation and callback-exposure failures before acceptance.
+Connected294pass/1Windows skip; independent115pass; corrected isolated four-process
+writer/persistence/public-reader trial passed. Real fsync/reopen qualification,
+fixture manifest, no generation activation/native author/retained benefit. Prior
+PR2133 merged5dd7b7b9f with exact-main checks and owned cleanup verified. Current
+publication is separate. WSP00/5/6/10/11/15/22/48/50/62/71/84/97.
+Details: docs/operations/RSI_SWARM_DISPATCH.md#protected-initial-writer--2026-10-14.
+
+## Initial high-water signing — 2026-10-14
+
+WSP00/5/6/10/15/22/48/71/84/97; base1af66972c. Reused existing bootstrap signer,
+pending codec and transaction/witness stores. Separate v2 schema/purpose/loader
+bind initial record contents while v1 stays anchor-only. Worker source review plus
+eight held-out negative checks found no blocker; cases retained in the same suite.
+Focused76pass; connected256pass/1platformskip. Real systemd prepare/abort/commit
+and separate credential-free public reader passed after correcting external probe
+import packaging. No capability, native ticket or retained RSI benefit claimed.
+Prior PR2132 closure and current Holo timeout/lease-recovery limits are preserved
+in the existing RSI dispatch runbook; protected writer issuance is the next layer.
+
+## 2026-10-14 — Isolated enrollment authority and initial signer
+
+WSP00/15/22/48/50/71/84/97: 012 superseded the prior blanket no-new restriction
+for isolated owner enrollment. Six separate inactive role keys installed under
+root-only Linux custody; no runtime grants. Real custody/isolation checks passed.
+Added one bounded adapter to the existing generation subsystem, with protected
+root policy and exact initial-anchor signing. Independent review found/repaired
+mutable-scope and expiry gaps. Connected217pass/1platformskip; native component
+signing verified with an explicitly disposable artifact binding. No worker,
+activation, promotion or RSI loop claimed. Reconciled existing roadmap/backlog;
+next is high-water writer/signing and authenticated admission. Publication pending.
+See module ModLog and docs/operations/RSI_SWARM_DISPATCH.md for exact scope/evidence.
+
+## 2026-10-14 — R15 planning baseline and independent oracle boundary
+
+WSP00/15/48/50/84/97: measured the existing registry dispatcher on exact main `57670f536`.
+Two complete projections agree; two malformed-input controls reject. No source
+implementation changed or native worker was admitted. Recorded timings distinguish
+profiled/unprofiled conditions; no speedup or learning claim. Current classification
+is shared across historical tree checks, so the next candidate must use a separate
+frozen baseline oracle. Reconciled verified PR #2115/#2129 closure in the existing
+roadmap; enrollment remains the critical pending decision. Evidence and measured
+bounds: docs/operations/RSI_SWARM_DISPATCH.md, R15 October 14 checkpoint.
+
+## 2026-10-13 — Owned RSI publication closure
+
+WSP10/15/22/50/71/97: PR2115 merged at62abfec9f after exact-head
+CI38327520174 and CodeQL passed; fetched main equals the reviewed tree.
+PR2111 closed after its unique observations were preserved. Verified recovery
+bundle retains all owned source checkpoints; unrelated lanes remain untouched.
+PR2129 publishes the remaining29bd provider-selection repair separately:
+133 local passes/2 Windows skips, regenerated1700-test registry, unchanged
+runtime manifest; fresh hosted checks and worktree retirement remain pending.
+Hosted Linux qualification caught a stale linked-path assertion (1 fail/134 pass).
+The existing fail-closed reader is unchanged; the corrected test checks both
+outer error and linked-path cause. Pinned-source Linux rerun:135 pass/no skips.
+See module tests/TestModLog for environment failures and reproduction evidence.
+The one new ModLog security finding was independently proven unchanged prose;
+merge reconciliation retains all212 individually reviewed records. No rules
+or authority were weakened. Native enrollment and retained RSI remain unproven.
+
+
+## 2026-10-13 — Security history coverage and exact manifest triage (0102)
+
+- Closed PR #2128 by squash merge `0bb7e6c68f05dd82dd69579ae5d81b93b55871c7` after all 11 exact-head checks passed. The prior draft-only stop was premature; 012's completion authorization includes the ordinary repository closure loop.
+- Reproduced a false-clean coverage gap: a real depth-1 checkout passed the old security gate while older commits were absent. The gate now rejects shallow history before either scan. Baseline regression: 1 failed/1 passed; repaired focused suite: 17 passed.
+- Retrieved complete main ancestry (3001 commits) and ran checksum-verified Gitleaks 8.30.1 at the merged SHA: 168 findings, 24 already reviewed, no scanner stderr. Recomputed 53 historical manifest entries against their referenced source bytes at the same commits; all 53 matched. Added only those exact content/rule/line fingerprints, preserving prior records. Evidence: `.github/security/reviewed-history-manifest-evidence.json`.
+- Remaining 91 historical candidates stay blocking. No literal values, blanket exceptions, credential testing/revocation, history rewrite, or new external scanner transmission. Complete main ancestry is not coverage of unfetched branch histories or deployed configuration.
+- WSP 00 tracker passed using the documented fallback; torch detector unavailable. Source-bound Holo bundle used direct owner files with UNKNOWN semantic freshness. WSP 10/22/50/71/97; no services or production deployments started.
+
+## 2026-10-13 — 0102 security ownership and stacked-PR CI coverage
+
+- Publication continuation: explicit 012 push authorization received; rebased
+  this lane onto main 39993955 after the concurrent GotJunk/Mall merges. Prior
+  #2118 missing-check observation is historical, not a claim it remains open.
+
+- Root cause: CI's main-only PR base filter excluded stacked PR #2118. Remove
+  the base restriction and include retarget events while retaining unprivileged
+  pull_request execution and the existing read-only reusable secret gate.
+- Enhance WSP 71 sections 5.4–5.5: 0102 owns intake through repair/verification;
+  routine records are internal evidence, not work assigned to 012. Require
+  exact source/deployment binding, explicit coverage failures and evidence-bound
+  candidate triage. Synchronize the governed knowledge mirror under WSP 81.
+- Extend the existing security regression suite for workflow coverage; its
+  runner installs pinned PyYAML for actual YAML parsing. No new audit service.
+- WSP00 attempted: torch unavailable; documented tracker fallback gate passed,
+  detector witness absent. Holo lexical bundle at 4095ad9: UNKNOWN freshness,
+  index gap retained, noisy matches; direct current-owner reads resolved scope.
+- WSP15 priority: restore CI coverage before broader automation (C2/I5/D5/I5,
+  17/P0). Reuse CI/WSP71 rather than creating another scheduler. Local model
+  runtime unavailable; deterministic source/test inspection used. This change
+  does not clear the 145 historical candidates or prove production remediation.
+- Authority: 012 directed codebase repair and security WSP enhancement.
+  WSP22/50/71/81/84/97; main base 4095ad9ee6042f4e9b5668bf4f6bf50c493c5964.
+- Validation: 15 focused security-gate regressions passed; canonical test
+  registry remains current (1697 files, 270 quarantined). WSP71 and master-index
+  mirror parity and whitespace checks passed. Remote CI and merge/deployment
+  are separate release gates, not implied by these local results.
+
+## 2026-10-10 — Security audit remediation
+
+- Fixed fail-clean scanner/WRE behavior, blocking secret CI, GotJunk rules/API/client boundaries, eSingularity input/admission/privacy boundaries, weak public session IDs and IDE webview interpolation.
+- Seven npm lockfile audits reduced 137 dependency findings to 46 with no critical findings remaining; residual unpatched/dependency-migration and missing-source blockers are explicit.
+- Detailed source evidence and release boundaries: [security remediation](docs/security/SECURITY_AUDIT_REMEDIATION_2026_10_10.md). Local tests are not claims of live rules/IAM or daemon activation.
+- WSP00 documented fallback, lexical Holo freshness UNKNOWN; WSP22/50/77/97. No correspondence or alert-dismissal action.
+
 ## RSI proposal startup connection — 2026-10-07
 
 ## 2026-10-07 — Execute internal audits and retain scan diagnostics
@@ -61516,3 +61913,38 @@ exact-head CI/CodeQL. Exact-main CI37486916613/CodeQL37486916968 passed. Reconci
 PR with main while preserving both the rejected local experiment and completed
 repair. Next15/P1: authenticated reviewer runtime evidence before effect permit
 issuance; native18/P0 remains blocked. No new model retries or runtime grants.
+## 2026-10-13 — Preserve PR2111 evidence before owned-lane closure
+
+WSP10/15/22/48/50/77/97/99: retain unique October8 observations from
+PR2111 `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` as historical evidence.
+The one-call failed audit, injected panel probe, catalog snapshot and unexecuted
+comparison contract remain distinct from October13 qualification. Preserve the
+current checkpoint/selection and every newer observation. No runtime changes;
+PR2111 closure and branch cleanup follow verified integration, not this edit.
+
+## 2026-10-13 — Follow through on RSI repair CI failures
+
+Exact source4848d9ca0 CI38323381660 passed; PR2115 ready for review, unmerged.
+Follow-on local reviewer qualification executed eight calls with independent
+blinded adjudication and executed reference outcomes. Both prompts were correct
+on2/4cases; acceptance0/4 versus1/4 does not qualify the model as an approval
+verifier. Owned model unloaded; no paid calls, promotion or native admission.
+Reconciled root roadmap, dispatch evidence and stale machine current-selection
+pointer. Next18/P0 is authentic owner enrollment; unchanged model retries are not
+selected. WSP00/15/22/48/50/84/97; see RSI dispatch for measured denominators.
+
+PR #2115 remote test and secret jobs failed after the original local checkpoint.
+Reproduce and fix the offline test's optional SDK assumption (61 passes both
+with SDK absent and normally). Independently re-review 37 unchanged generated
+manifest checksum findings and append only exact current-file fingerprints;
+preserve historical reviews and all scanner checks. These close publication
+dependencies, not native worker admission or retained RSI. WSP6/15/22/50/97.
+
+## 2026-10-12 — Isolate local worker transport repair for review
+
+WSP00/6/11/15/22/48/50/84/97: bring the measured native reasoning-control repair
+onto fresh main without unrelated canary or runtime-upgrade changes. Reuse the
+shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
+local schema-constrained reviews produced valid JSON but insufficient quotations,
+so no worker qualification, native admission or retained RSI gain is claimed.
+See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.

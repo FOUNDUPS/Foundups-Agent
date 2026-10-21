@@ -12,7 +12,292 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current selection — measured internal audits (2026-10-07):**
+**Current checkpoint — protected consensus nonce component (2026-10-20 JST):**
+Owner v13 supplies separately bound protected consensus nonce custody while
+preserving v1–v12 and LOW. Connected Windows tests pass 437 with 3 platform skips;
+independent 21 controls pass on the same 26-file freeze. Real signed files and
+MAC/SQLite transactions use explicit synthetic installation seams. A reviewed
+two-file helper extraction preserves AST behavior and restores the loader below
+its existing cap; two unchanged historical startup-test size failures remain.
+
+Hosted startup CI subsequently caught a legacy-owner tuple predicate defect.
+The repair passes the full local startup selection (901 passed, 5 platform skips, zero failures/errors)
+including v12/v13 signed-model gates; new-head CI and independent
+publication review remain required. Earlier component runs are historical.
+
+A subsequent actual-reader check exposed fresh Windows CRLF rejection.
+The explicit 324 KiB paired byte contract now passes LF/CRLF and exact
+boundary checks; pretty JSON, digest/member bounds and source limits stay.
+See [byte evidence](docs/operations/RSI_SWARM_DISPATCH.md#windows-manifest-byte-contract--2026-10-20).
+
+Next 19/P0 (C4/I5/D5/Impact5): connect current parent/effect and nonce operations
+under one live authenticated lease through the existing signer factory, avoiding
+nested generation locks. Installed HIGH policy/service composition and authentic
+work, reviewer/model and budget inputs remain open. The LOW service and frozen
+runtime294195cdb stay unchanged. Earlier parent-consensus evidence and publication
+receipts are preserved in [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+This checkpoint is component validation, not installed HIGH or author admission.
+
+R15 still requires one admitted author, independent evaluation, authorized
+activation/rollback, a later invocation benefiting from retained evidence and
+bounded autonomous next selection. Native author tickets0; paid model calls0;
+coordinator cost unknown. No whole-system completion percentage is justified.
+
+**Historical checkpoint — native requester rejection (2026-10-19):**
+PR2159 merged at `bb9d3f802`; all 19 recorded exact-head check runs passed
+(12 distinct check names), as did exact-main CI/CodeQL. Reviewed head `1e203d5de`
+and merged main have identical trees. The
+descriptor repair preserves current filesystem, authority, expiry and clock
+checks. Its 44% measured improvement applies to pure descriptor computation only.
+The fresh runtime independently qualifies 2,683 files, including 1,246 exact Git
+Python sources; optional deferred imports outside the selected entrypoints remain
+untested. No authenticated author admission follows from qualification.
+
+Synthetic v25 passed installation/revocation and reached root, issuer and target
+socket readiness. The diagnostic now locates `TimeoutError` at the inner client's
+`recv(4096)`, returning `REJECT_SIGNER_SOCKET_CONNECT_FAILED` and the target's
+generic rejection. The issuer separately rejects a root-authority response at
+the zero-or-over-limit size check; that observation does not identify which
+branch or prove that root termination caused it. V22's noise-cap failure and
+v23's dropped unknown-line location remain preserved.
+Root timeout followed requester rejection; a target cleanup-reset error
+is retained even though all seven owned units were independently absent afterward.
+V26 separates service lifetime from the observed failure: issuer and root exit2
+normally before the120s service limit. Issuer fails17.34s after the requester;
+its broad socket-service catch still hides the operation. V27 disabled issuer
+and target observers but still rejected the requester; installation/revocation
+passed and all seven units are independently absent. Issuer elapsed/CPU time was
+70.046140s/66.242630s versus v26 75.128049s/71.128310s. Different boots and one
+pair do not establish causal gain; v27 proves no inner socket operation. The separate
+clock experiment restored the service but failed its fixed 50ms
+host/guest stability criterion (minimum54.39ms); no clock-policy change was admitted.
+
+Next18/P0: qualify the exact-source containment candidate and measure full native
+validation cost without loosening timeouts or authority. Independent cross-platform
+parity and 111 connected passes/8 Windows skips support the candidate; its native
+runtime remains unqualified and native benefit unverified.
+The post-valve lease issuer connection
+already exists; authenticated parent consensus/sovereign evidence and a qualified
+effect-capable native composition remain distinct later gaps. LOW handshake
+authority must stay LOW. R15 still needs real author execution, independent
+evaluation, activation/rollback, later retained benefit and bounded next selection.
+[Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#native-requester-rejection-and-source-publication--2026-10-19).
+
+**Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
+The candidate composes the existing LOW issuer, credential resolver, durable
+rate/replay, permission and socket owners. Explicit root LOAD v2 authenticates
+the issuer against current owner/E0/descriptor state; legacy target v1 remains
+unchanged. The issuer cannot advance revocation or acquire target protected-use
+authority. Permission checks release the generation lock for root RPC, then
+revalidate and fence the action. Tests retain synthetic installation seams.
+
+PR2138 is merged at `57d5cd8e8c9db2179e2761ae59f74a2912b8d168`;
+exact-main CI38747627946 and CodeQL38747627089 passed. Both owned lanes are
+archived and retired. The issuer candidate is a separate unpublished layer.
+
+Next19/P0 (C4/I5/D5/Impact5): extend existing protected custody/materializer
+owners for the independent issuer, qualify its installed-source deployment,
+then obtain a real LOW grant and handshake. R15 remains gated on authentic
+author execution, independent verification, retention/rollback and later
+measured use. See [issuer evidence and next action](docs/operations/RSI_SWARM_DISPATCH.md#bounded-grant-issuer-and-root-load--2026-10-15).
+
+**Historical checkpoint — grant bootstrap and LOW RPC (2026-10-15):**
+Two reproduced integration defects are repaired in existing owners: LOW grant
+RPC no longer holds the same generation lock required by its server, and explicit
+E0 v9 removes future permission receipt fields from the pre-config binding while
+retaining them in the complete signed policy and current admission checks.
+Legacy policy hashes and elevated paths are preserved. Nine connected Linux
+suites passed275 cases without skips; separate independent reviews cover the
+real two-process lock behavior and85 held-out policy cases. Authorization in
+those process tests is synthetic: no native worker or retained RSI gain is proved.
+
+The next19/P0 dependency (C4/I5/D5/Impact5) remains the independent grant issuer.
+Source probes show its exact-Git zipapp rejects imports/native dependencies used
+by the existing backend, and initial enrollment does not admit its profile.
+Reuse and requalify the protected installed-source runtime, compose the existing
+issuer owners, explicitly admit that deployment, then prove a real LOW grant and
+handshake before the R15 author/verifier/retained-use experiment. Do not widen
+archive rules or reinterpret initial installation as work authority.
+See [evidence and next gate](docs/operations/RSI_SWARM_DISPATCH.md#grant-bootstrap-and-low-rpc--2026-10-15).
+
+**Historical checkpoint — initial handshake composition (2026-10-15):**
+PR2136 is merged at `1d847ad1f83022f3ace0d4be5f4098ffdb9806e7`; exact-main
+CI38733808172 and CodeQL38733807786 succeeded. Its owned worktree is retired
+with evidence preserved. The current slice reuses the service configuration,
+E0 admission and per-request owners for one LOW handshake at generation1.
+Independent held-out contract checks passed74 cases; native handshake and author
+execution remain unproven. Initial manifests authenticate bytes, E0 authorizes
+scope, and a separate request grant authorizes use; none substitutes for another.
+
+The next executable dependency is the existing independent grant issuer's
+missing production server composition (WSP15: C4/I5/D5/Impact5 =19/P0).
+Its client, validators, signing backend and durable rate controls exist. Compose
+those owners, qualify authentic policy/custody and a real grant response, then
+connect the handshake and R15 author/verifier/retained-use experiment. Do not add
+another scheduler or treat possession of a role key as admission.
+See [current evidence and scope](docs/operations/RSI_SWARM_DISPATCH.md#initial-handshake-composition--2026-10-15).
+
+**Historical checkpoint — initial manifest activation (2026-10-15):**
+The isolated Linux component now publishes an authenticated initial manifest,
+activates generation1 through existing atomic recovery, and selects it in a
+separate credential-free reader. Independent repeat selection preserves the
+same manifest and store digests. Source is base1774d1e8f plus explicitly recorded
+candidate overlays; publication remains separate. This closes a component gap,
+not native author admission or production RSI. The seven bound artifacts are
+disabled/empty component configuration, not runnable worker-service inputs.
+
+WSP15 remains18/P0 (4/5/5/4): resolve the protected initial-service policy path,
+qualify real service inputs and admission for one native author, then independent
+evaluation, governed retention/rollback and
+measured benefit on later work. Reuse existing WRE/OpenClaw/Hermes owners.
+See [contracts, failures and evidence](docs/operations/RSI_SWARM_DISPATCH.md#initial-manifest-activation--2026-10-15).
+
+**Verifier-guided loop audit — 2026-10-15:** Nigel's candidate → bounded attempt →
+external verification → re-observe pattern fits existing R15; it does not require
+another orchestrator. Keep the internal registry-workflow canary first, with a
+frozen independent oracle and later-use/control comparison. Games and simulated
+contribution rewards follow existing R20/R24 after native admission, not before it.
+See [research, owner mapping and measurable acceptance](docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15).
+WSP15 remains18/P0 for authentic first-manifest admission; R15 also18/P0 remains
+dependency-gated. This audit grants no execution or token authority.
+
+**Current checkpoint — protected initial writer (2026-10-14):**
+PR #2133 merged as `5dd7b7b9f`; reviewed/merged trees match. PR checks and main
+CI38492205671/CodeQL38492205277 passed; its clean owned lane is retired with a
+verified recovery bundle. Reuse-first permits the missing small writer adapter;
+it does not prohibit justified new code or isolated owner installation.
+
+The adapter constructs existing stores from protected owner/bootstrap policy and
+installer-trusted filesystem records. It guards the initial transaction, witness
+updates, expiry and scope. The existing SQLite owner adds non-creating opening
+and checks authority inside its transaction. Connected294pass/1Windows skip;
+independent115pass. A fresh four-process Linux component trial issued this bounded
+writer capability, committed state and verified it without credentials. Initial
+failed adversarial tests and the rejected first candidate remain preserved.
+
+Manifest digests remain fixtures. No generation activation, native author,
+promotion or retained RSI gain is established. WSP15 stays18/P0 (4/5/5/4): next
+compose existing authenticated manifest provisioning with real admitted inputs,
+then run one native author and independent verifier. Source publication is a
+separate gate; see [evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#protected-initial-writer--2026-10-14).
+Closure verified2026-10-15: this writer shipped in PR2134, merged `a6a63b8e9`;
+PR/main CI and CodeQL passed. The subsequent governed maintenance completed,
+stopped both owned runtimes, and restored CURRENT/no-gap retrieval at that exact
+source. A new October15 query confirms it; noisy ranking still requires direct
+canonical reads. These receipts do not establish freshness at future revisions.
+
+**Historical checkpoint — bounded initial high-water signing (2026-10-14):**
+PR #2132 merged as `1af66972c`; its reviewed tree matches main. PR CI/CodeQL and
+main CI38489173741/CodeQL38489173144 passed. Its owned branch/worktree are retired
+with a verified recovery bundle. The blanket no-new rule is superseded for
+isolated owner installation; protected runtime admission remains required.
+
+The next slice extends the same signer with an explicit v2 schema/loader for
+initial prepared, committed and abort high-water records. V1 stays anchor-only.
+Local connected validation:256 passed/1 platform skip, including76 focused cases.
+Real isolated Linux signing/persistence and a separate credential-free public
+reader passed with fixture store identities. This proves component behavior,
+not a writer capability, generation activation, native author ticket or RSI.
+WSP15 remains18/P0 (4/5/5/4): next is the protected writer factory and qualified
+store evidence, then existing manifest admission and one native author ticket.
+Current source/review/publication evidence belongs to the associated change;
+[scope, probes and remaining gates](docs/operations/RSI_SWARM_DISPATCH.md#initial-high-water-signing--2026-10-14).
+Holo maintenance timed out; its task remains executing until existing lease
+recovery permits retry. Exact-source lexical retrieval is explicitly degraded,
+not CURRENT semantic evidence. Do not reset claims or shorten leases to proceed.
+
+**Historical checkpoint — isolated enrollment bootstrap (2026-10-14):**
+012 superseded the prior blanket no-new-keys restriction for isolated local RSI
+enrollment. This permits bounded owner installation, not forged grants or wider
+production authority. Six separate inactive role keys now have root-only Linux
+custody. Live systemd credential and process-isolation probes passed. A new
+adapter inside the existing generation subsystem signs only one root-approved
+initial anchor record; it reuses existing custody, permission, isolation and
+public-verification contracts. The final native component probe passed with a
+disposable fixture binding. No generation, worker, promotion or RSI loop ran.
+
+WSP15 remains 18/P0 (4/5/5/4): enrollment is now implementation work, not a pending
+012 permission question. Source audit found missing custody-backed generation
+signing and writable high-water authority adapters; the earlier assertion that
+no initial-enrollment gap was established is superseded. This slice covers only
+the exact initial-anchor signer. Next: bind high-water signing and its writer
+authority to protected owner policy, initialize/reopen real stores, then complete
+authenticated manifest admission and one native author ticket. Existing runtime
+gates remain enforced. Local connected validation: 217 passed, one platform skip;
+PR #2132 and exact-main hosted checks passed. See the
+[enrollment evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#isolated-enrollment-bootstrap--2026-10-14).
+
+**Historical checkpoint — R15 deterministic planning baseline (2026-10-14):**
+Main `57670f536` is unchanged. Governed OpenClaw/WRE Holo maintenance completed
+and stopped both owned runtimes; a new October 14 query is CURRENT/no-gap at
+that source. The existing registered audit dispatcher produced identical
+SYSTEMIC plans twice for `6c7405988` → `57670f536`: 155 shards/five batches per side,
+1,429 → 1,430 collectable test paths. Changed-path substitution and a Boolean file
+bound rejected. This is direct component telemetry, not native worker admission,
+scanner/master-orchestrator qualification, executed tests or retained learning.
+The profiled initial 140.443s and unprofiled repeat 77.843s are not a speedup pair.
+
+WSP15: baseline preparation 14/P1 (2/4/4/4) is complete; native enrollment 18/P0
+(4/5/5/4) remains blocked on the pending isolated-enrollment decision under the
+prior no-new-signing-keys restriction. Do not retry unchanged qualification calls.
+The measured optimization candidate is redundant static classification work.
+Before admitting it, freeze the original generator/classifier/dependencies at
+57670f536 as a separate oracle: the current planner uses its active classifier
+for both historical trees, so self-consistency cannot prove unchanged semantics.
+Require identical canonical bytes, classifications/quarantine and complete plans;
+measure performance separately with matched unprofiled baseline/candidate runs.
+No code defect, accepted improvement or G1–G5 advance is established. See the
+[component baseline and next gate](docs/operations/RSI_SWARM_DISPATCH.md#r15-registry-component-baseline--2026-10-14).
+
+**Historical checkpoint — local reviewer qualification (2026-10-13):**
+PR #2115 merged at `62abfec9f9d720f88fe7f1e7877960ea88fa8477` after
+exact-head CI 38327520174 and all reported checks passed at `69111a905`.
+Fetched main matches the reviewed integration tree. PR #2111 is closed with
+its unique evidence preserved below. Main CI 38328147555 and CodeQL 38328146970
+passed. Provider-selection PR #2129 merged at `57670f536`; exact-head checks and
+main CI 38331796107/CodeQL 38331795483 passed. Owned worktrees/branches were
+retired with verified recovery archives. No native RSI completion is claimed.
+Eight real local Qwen Coder 7B calls compared frozen prompts on four fresh,
+independently executed source variants. Baseline and candidate each got only
+2/4 verdicts correct. Exact quotes increased from2/4 to4/4, but full acceptance
+was0/4 versus1/4: the model is not qualified to approve changes. No promotion.
+
+WSP97 reconciliation: the machine backlog's older current selection is superseded
+by this measured result. Native admission remains18/P0 (4/5/5/4), blocked on
+authentic owner enrollment. The existing root-state installer consumes an already
+authenticated configuration; no production initial-enrollment command was
+established by the audit. Do not substitute fixtures or self-issued authority.
+Next: resolve that owner bootstrap, then use existing deterministic execution
+checks plus independent review for one admitted author ticket. Do not repeat the
+unchanged model trial or treat source quotations as semantic proof. See the
+[qualification evidence](docs/operations/RSI_SWARM_DISPATCH.md#paired-local-reviewer-qualification--2026-10-13).
+
+**Historical checkpoint — local worker transport (2026-10-12):**
+Fresh remote main is `4095ad9ee`; PR #2111 remains an open draft and issue #1522
+remains open. One local-model transport defect has a bounded shared-adapter
+repair: explicit `reasoning=None` omits an unsupported control, while the existing
+default and runtime checks remain. This is a coordinator repair, not autonomous
+RSI. Native admission still needs authentic owner/principal deployment inputs;
+source inspection found its v7/v8 startup suppliers already connected.
+
+WSP15: admission is blocked 18/P0 (4/5/5/4); qualifying the local review contract
+is executable 14/P1 (2/4/4/4). Schema-constrained local reviews now satisfy JSON
+shape and verdict on two known controls, but neither supplies adequate exact
+source quotations. No reviewer promotion or G2–G5 completion follows. Next:
+verify source-bound evidence on fresh cases using existing audit owners, while
+locating authentic enrollment through the existing authority owner. See the
+[measured checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#local-review-and-admission-checkpoint--2026-10-12).
+
+**Historical evidence — layered-worker qualification (2026-10-08):**
+PR2111 source `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` retained a distinct
+one-call audit (0/1 accepted; unknown tokens), panel dataflow probe and public
+catalog snapshot. Its proposed comparison was not executed. Its former current
+selection is superseded by the October13 checkpoint above; preserving this
+history neither selects another trial nor admits a worker. See the
+[archived evidence and experiment contract](docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08).
+PR2111 closure follows verified integration of this historical record.
+
+**Historical selection — measured internal audits (2026-10-07):**
 PR2100 merged/main-verified at453f6c357; CI37559426252 and CodeQL37559426685
 passed, reviewed/main trees equal, owned branch retired with recovery bundle.
 Internal read-only audits do not require new production signer enrollment.

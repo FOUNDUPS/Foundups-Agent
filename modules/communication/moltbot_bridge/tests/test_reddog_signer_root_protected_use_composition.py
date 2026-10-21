@@ -315,6 +315,9 @@ def test_acquire_first_blocks_revocation_until_finish(tmp_path, monkeypatch) -> 
 
 
 def test_revocation_first_rejects_before_callback(tmp_path, monkeypatch) -> None:
+    # This control isolates revocation ordering from host wall-clock movement.
+    epoch = int(time.time())
+    monkeypatch.setattr(time, "time", lambda: epoch)
     values = runtime(tmp_path, monkeypatch)
     grant_id = _sha("grant")
     _install_current(values, signed_snapshot(values))
@@ -522,6 +525,10 @@ def test_root_composed_oracle_is_the_only_new_atomic_boundary(
         expires_at=int(time.time()) + 120,
         action=lambda: "permissioned",
     ) == "permissioned"
+    assert composed.authorize_current_key_epoch_use(
+        key_epoch="epoch-not-revoked", expires_at=int(time.time()) + 120,
+        action=lambda: "current-permissioned",
+    ) == "current-permissioned"
 
     class FakeComposed(RootAuthorizedSignerGrantRevocationOracle):
         pass

@@ -20,7 +20,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_current_sel
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
     POLICY_SCHEMA_V6,
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     constant_time_compare,
@@ -54,6 +54,13 @@ class GrantAuthorityServiceManifestBinding:
         return asdict(self)
 
 
+@dataclass(frozen=True, slots=True)
+class InstalledGrantAuthorityServiceManifestBinding(GrantAuthorityServiceManifestBinding):
+    """Explicit installed metadata binding; empty archive fields confer no proof."""
+
+    installed_runtime_descriptor_digest: str
+
+
 def bind_grant_authority_service_manifest(
     *,
     owner_config_path: Path | str,
@@ -73,6 +80,8 @@ def bind_grant_authority_service_manifest(
             POLICY_SCHEMA_V6,
             POLICY_SCHEMA_V7,
             POLICY_SCHEMA_V8,
+            POLICY_SCHEMA_V9,
+            POLICY_SCHEMA_V10,
         }:
             raise RuntimeArtifactManifestError(
                 "grant_authority_service_binding_invalid"
@@ -80,9 +89,9 @@ def bind_grant_authority_service_manifest(
         grant_root = grant_authority_owner_runtime_root(
             owner_config_path, repo, str(policy["owner_config_id"])
         )
+        extra = {"owner_config_path": owner_config_path} if policy["schema_version"] == POLICY_SCHEMA_V10 else {}
         verified = verify_current_grant_service_artifacts(
-            repo_root=repo, grant_root=grant_root, policy=policy
-        )
+            repo_root=repo, grant_root=grant_root, policy=policy, **extra)
         return _binding(policy, verified)
 
 
@@ -98,7 +107,8 @@ def _binding(
         raise RuntimeArtifactManifestError(
             "grant_authority_service_binding_mismatch"
         )
-    return GrantAuthorityServiceManifestBinding(
+    binding_type, extra = _binding_type(policy, verified)
+    return binding_type(
         owner_policy_id=str(policy["policy_id"]),
         manifest_id=str(verified["manifest_id"]),
         artifact_generation_digest=str(
@@ -106,7 +116,8 @@ def _binding(
         ),
         config_digest=str(policy["grant_authority_config_digest"]),
         run_packet_digest=str(policy["grant_authority_run_packet_digest"]),
-        service_archive_digest=str(verified["service_archive_digest"]),
+        service_archive_digest=("" if binding_type is InstalledGrantAuthorityServiceManifestBinding
+                                else str(verified["service_archive_digest"])),
         signer_agent_id=str(config["signer_agent_id"]),
         signer_profile_id=str(config["signer_profile_id"]),
         public_key=str(config["public_key"]),
@@ -133,7 +144,17 @@ def _binding(
                 "grant_authority_archive_source_descriptor_digest"
             ) or ""
         ),
+        **extra,
     )
+
+
+def _binding_type(policy, verified):
+    if policy["schema_version"] == POLICY_SCHEMA_V10:
+        descriptor = verified["installed_runtime_descriptor_digest"]
+        if descriptor != policy["grant_authority_installed_runtime_descriptor_digest"]:
+            raise RuntimeArtifactManifestError("grant_installed_descriptor_binding_mismatch")
+        return InstalledGrantAuthorityServiceManifestBinding, {"installed_runtime_descriptor_digest": descriptor}
+    return GrantAuthorityServiceManifestBinding, {}
 
 
 def _expected_bindings(
@@ -178,6 +199,7 @@ def _expected_bindings(
                 "grant_authority_source_object_format",
                 "grant_authority_source_policy_digest",
                 "grant_authority_archive_source_descriptor_digest",
+                "grant_authority_installed_runtime_descriptor_digest",
             )
             if name in verified or name in policy
         ),
@@ -186,5 +208,6 @@ def _expected_bindings(
 
 __all__ = [
     "GrantAuthorityServiceManifestBinding",
+    "InstalledGrantAuthorityServiceManifestBinding",
     "bind_grant_authority_service_manifest",
 ]
