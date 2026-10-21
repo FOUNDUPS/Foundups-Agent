@@ -7,6 +7,7 @@ on:
       - '.dockerignore'
       - 'Dockerfile'
       - 'requirements.txt'
+      - 'pyrightconfig.json'
       - 'Dockerfile.dockerignore'
       - '.github/scripts/check_docker_context.py'
       - '.github/workflows/docker-context-security.yml'
@@ -20,6 +21,7 @@ on:
       - '.dockerignore'
       - 'Dockerfile'
       - 'requirements.txt'
+      - 'pyrightconfig.json'
       - 'Dockerfile.dockerignore'
       - '.github/scripts/check_docker_context.py'
       - '.github/workflows/docker-context-security.yml'
@@ -43,6 +45,19 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Type-check the changed Python verifier
+        run: |
+          npx --yes pyright@1.1.414 --pythonversion 3.12 --outputjson \
+            .github/scripts/check_docker_context.py > docker-context-pyright.json
+          python - <<'PYCODE'
+          import json
+          from pathlib import Path
+          report = json.loads(Path('docker-context-pyright.json').read_text())
+          summary = report['summary']
+          if summary['filesAnalyzed'] < 1 or summary['errorCount'] != 0:
+              raise SystemExit('Changed-file type-check did not qualify')
+          print(json.dumps(summary, sort_keys=True))
+          PYCODE
       - name: Verify exclusions and source retention with native Docker
         run: |
           python .github/scripts/check_docker_context.py > docker-context-report.json
@@ -60,6 +75,7 @@ jobs:
           name: docker-context-security
           path: |
             docker-context-report.json
+            docker-context-pyright.json
             docker-context-receipt-validation.json
           if-no-files-found: error
           retention-days: 30
@@ -89,6 +105,8 @@ jobs:
           docker run --rm --network=none --read-only --cap-drop=ALL \
             --security-opt=no-new-privileges --entrypoint python \
             foundups-context-audit -c '
+          import importlib
+          import shutil
           from pathlib import Path
           root = Path("/app")
           required = ("main.py", "requirements.txt", ".docker-context-canary/source.py")
@@ -97,8 +115,18 @@ jobs:
           leaked = [p for p in forbidden if (root / p).exists()]
           if missing or leaked:
               raise SystemExit(f"Image boundary failed: missing={missing}; leaked={leaked}")
-          print("Application image built; source retained; synthetic credentials and Git history absent")
+          compilers = [p for p in ("gcc", "g++", "cc", "c++", "make") if shutil.which(p)]
+          if compilers:
+              raise SystemExit(f"Build tools remain in runtime image: {compilers}")
+          for name in ("llama_cpp", "whisper", "fastapi", "sqlalchemy"):
+              importlib.import_module(name)
+          print("Application image built; imports passed; source retained; canaries, Git history and compilers absent")
           '
+      - name: Verify installed dependency consistency
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --entrypoint python \
+            foundups-context-audit -m pip check
       - name: Remove only the owned local image
         if: always()
         run: |
