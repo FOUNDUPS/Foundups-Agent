@@ -19,15 +19,47 @@ from modules.infrastructure.wre_core.src.registered_skill_executor import (
     skill_bundle_fingerprint,
 )
 from modules.infrastructure.wre_core.src.skill_execution_truth import (
+    bind_skill_execution_result,
+    loaded_skill_digest,
+    serialize_bound_skill_result,
     stable_json_record,
     structural_step_output,
 )
+
 from modules.infrastructure.wre_core.src.skill_manifest_guard import (
     generate_skill_manifest,
 )
 from modules.infrastructure.wre_core.wre_master_orchestrator.src.wre_master_orchestrator import (
     WREMasterOrchestrator,
 )
+
+
+@pytest.mark.parametrize("fingerprint", [None, "", "forged", "x" * 64, True])
+def test_feedback_binding_keeps_unknown_admission_separate(fingerprint):
+    result = bind_skill_execution_result(
+        {"success": False, "_effect_evidence": False, "_skill_binding": "forged"},
+        skill_content="# Skill 日本語\n", execution_id="execution-1",
+        admission_fingerprint=fingerprint,
+    )
+    assert result["success"] is False and result["_effect_evidence"] is False
+    binding = result["_skill_binding"]
+    assert binding["scanner_admission_fingerprint"] is None
+    assert binding["loaded_skill_sha256"] == loaded_skill_digest("# Skill 日本語\n")
+    assert binding["execution_id"] == "execution-1"
+    assert loaded_skill_digest("# Skill 日本語\n") != loaded_skill_digest("# Skill 日本語")
+
+
+def test_feedback_lineage_survives_nonserializable_result():
+    import json
+
+    result = bind_skill_execution_result(
+        {"success": False, "output": object(), "_skill_binding": "forged"},
+        skill_content="# Failed Skill", execution_id="failed-1", admission_fingerprint=None,
+    )
+    stored = json.loads(serialize_bound_skill_result(result))
+    assert stored["record_unavailable"] == "non_json_value"
+    assert stored["_skill_binding"] == result["_skill_binding"]
+    assert stored["_skill_binding"]["execution_id"] == "failed-1"
 
 
 def _minimal_orchestrator(monkeypatch, tmp_path):
