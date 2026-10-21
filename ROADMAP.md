@@ -12,23 +12,76 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — native startup integration (2026-10-16):**
-PR2145 merged at `7a9fe8602` with matching reviewed/main trees and passing exact-main
-CI/CodeQL. The artifact-bound and clock-fixture repairs are published; ordinary
-64 KiB owner reads and production clock checks remain unchanged. Installed runtime
-`34eed594e` remains qualified and frozen (2,691 files, 1,254 exact Git Python sources).
-V18 passed installation and revocation after receipt publication/source-path repairs,
-then failed LOW handshake at the durable oracle's `_checked_now`. A current-time
-path in three existing owners now samples within the fence and rechecks after slow
-verification; explicit caller epochs still match exactly, rollback/expiry rejects,
-and post-action rejection withholds results without undoing effects. Independent
-review passed 17; author connected validation passed 207 in 87.89 seconds with stable
-source hashes. Counts are not additive; separate qualification/replay remains.
-Clock-source conflict is observed separately; its causal role remains unproved.
-Synthetic authority only: authentic enrollment, native worker admission, author
-execution and retained RSI gain remain unproved. Existing R15 still requires
-independent evaluation, authorized activation/rollback, later benefit and bounded
-next selection. [Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
+**Current checkpoint — protected consensus nonce component (2026-10-20 JST):**
+Owner v13 supplies separately bound protected consensus nonce custody while
+preserving v1–v12 and LOW. Connected Windows tests pass 437 with 3 platform skips;
+independent 21 controls pass on the same 26-file freeze. Real signed files and
+MAC/SQLite transactions use explicit synthetic installation seams. A reviewed
+two-file helper extraction preserves AST behavior and restores the loader below
+its existing cap; two unchanged historical startup-test size failures remain.
+
+Hosted startup CI subsequently caught a legacy-owner tuple predicate defect.
+The repair passes the full local startup selection (901 passed, 5 platform skips, zero failures/errors)
+including v12/v13 signed-model gates; new-head CI and independent
+publication review remain required. Earlier component runs are historical.
+
+A subsequent actual-reader check exposed fresh Windows CRLF rejection.
+The explicit 324 KiB paired byte contract now passes LF/CRLF and exact
+boundary checks; pretty JSON, digest/member bounds and source limits stay.
+See [byte evidence](docs/operations/RSI_SWARM_DISPATCH.md#windows-manifest-byte-contract--2026-10-20).
+
+Next 19/P0 (C4/I5/D5/Impact5): connect current parent/effect and nonce operations
+under one live authenticated lease through the existing signer factory, avoiding
+nested generation locks. Installed HIGH policy/service composition and authentic
+work, reviewer/model and budget inputs remain open. The LOW service and frozen
+runtime294195cdb stay unchanged. Earlier parent-consensus evidence and publication
+receipts are preserved in [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+This checkpoint is component validation, not installed HIGH or author admission.
+
+R15 still requires one admitted author, independent evaluation, authorized
+activation/rollback, a later invocation benefiting from retained evidence and
+bounded autonomous next selection. Native author tickets0; paid model calls0;
+coordinator cost unknown. No whole-system completion percentage is justified.
+
+**Historical checkpoint — native requester rejection (2026-10-19):**
+PR2159 merged at `bb9d3f802`; all 19 recorded exact-head check runs passed
+(12 distinct check names), as did exact-main CI/CodeQL. Reviewed head `1e203d5de`
+and merged main have identical trees. The
+descriptor repair preserves current filesystem, authority, expiry and clock
+checks. Its 44% measured improvement applies to pure descriptor computation only.
+The fresh runtime independently qualifies 2,683 files, including 1,246 exact Git
+Python sources; optional deferred imports outside the selected entrypoints remain
+untested. No authenticated author admission follows from qualification.
+
+Synthetic v25 passed installation/revocation and reached root, issuer and target
+socket readiness. The diagnostic now locates `TimeoutError` at the inner client's
+`recv(4096)`, returning `REJECT_SIGNER_SOCKET_CONNECT_FAILED` and the target's
+generic rejection. The issuer separately rejects a root-authority response at
+the zero-or-over-limit size check; that observation does not identify which
+branch or prove that root termination caused it. V22's noise-cap failure and
+v23's dropped unknown-line location remain preserved.
+Root timeout followed requester rejection; a target cleanup-reset error
+is retained even though all seven owned units were independently absent afterward.
+V26 separates service lifetime from the observed failure: issuer and root exit2
+normally before the120s service limit. Issuer fails17.34s after the requester;
+its broad socket-service catch still hides the operation. V27 disabled issuer
+and target observers but still rejected the requester; installation/revocation
+passed and all seven units are independently absent. Issuer elapsed/CPU time was
+70.046140s/66.242630s versus v26 75.128049s/71.128310s. Different boots and one
+pair do not establish causal gain; v27 proves no inner socket operation. The separate
+clock experiment restored the service but failed its fixed 50ms
+host/guest stability criterion (minimum54.39ms); no clock-policy change was admitted.
+
+Next18/P0: qualify the exact-source containment candidate and measure full native
+validation cost without loosening timeouts or authority. Independent cross-platform
+parity and 111 connected passes/8 Windows skips support the candidate; its native
+runtime remains unqualified and native benefit unverified.
+The post-valve lease issuer connection
+already exists; authenticated parent consensus/sovereign evidence and a qualified
+effect-capable native composition remain distinct later gaps. LOW handshake
+authority must stay LOW. R15 still needs real author execution, independent
+evaluation, activation/rollback, later retained benefit and bounded next selection.
+[Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#native-requester-rejection-and-source-publication--2026-10-19).
 
 **Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
 The candidate composes the existing LOW issuer, credential resolver, durable

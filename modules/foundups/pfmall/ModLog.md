@@ -1,3 +1,62 @@
+## 2026-10-18 — AutoPost Live-mode owner audit and contract correction
+
+- Audited external AutoPost main `4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147`
+  against this repository at `1c80f15ae2eee0f78300f297fb3e386275bc0aab`.
+  Corrected the mobile-studio plan to extend AutoPost's existing camera/publishing
+  product; pfMALL remains the integration/presentation owner.
+- Updated the [contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+  [machine outcome](../docs/mobile_studio/mobile_studio_outcome.v1.json), owner and
+  member/domain roadmaps. Added explicit Live-mode and foreground-route acceptance
+  before a measured browser/native decision. Existing API constraints are retained.
+- Distinguished completed recording/upload, continuous media, attended browser
+  OAuth, durable backend control, OBS contribution and OBS remote commands.
+  Preserved separate unmerged AutoPost #12 and Foundups-Agent #1689/#1886 work.
+- Refreshed the bounded document index and WSP 97 receipt. Verification is
+  documentation/source review, reference/hash checks and PR CI; no runtime code,
+  credentials, provider call, device test, deployment or live show was changed.
+  WSP 00/10/15/22/50/57/83/84/97; documentation priority remains 14/P1.
+
+## 2026-10-17 — Mobile creator studio research and machine outcome
+
+## 2026-10-18 — Shared responsive rows and RedDog catalog search
+
+Extend existing Mall renderer rather than duplicate tenant apps. Default category
+tracks adapt card width to the viewport and preserve independent horizontal
+positions; vertical browsing has no fixed row cap. Keep explicit legacy grid,
+channel pinch/queue behavior and canonical entry. Repair drag-on-card exclusion,
+reobserve rerenders and clear stale media indexes on scope/projection changes.
+RedDog text and dispatcher share bounded metadata search; categories come from
+catalog data. Service-worker shell version advanced for updated assets.
+
+WSP 00: canonical bootstrap attempted; torch absent. Documented tracker fallback
+opened gate; detector witness absent. WSP 50/87: exact-head lexical bundle read,
+freshness UNKNOWN/index gap true; noisy retrieval supplemented by direct owner
+reads. No semantic freshness or reindex claimed. WSP 84/97: shared-owner reuse;
+voice, personalized mapping, payments and live ingestion remain future work.
+Validation details are recorded in public/member/tests/TestModLog.md.
+
+
+**WSP:** 00/10/15/22/50/57/83/84/97. **Agent:** 0102.
+**Source baseline:** `407292aa754a88143796163581b67ca6679eac29`.
+**Scope:** Documentation only; no native, API, catalog or deployment mutation.
+
+- Added the [mobile studio contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+  [YouTube API register](../docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+  and [machine outcome](../docs/mobile_studio/mobile_studio_outcome.v1.json).
+  They record current reuse, pain, proposed ownership, obstacles, staged delivery
+  and AC01–AC09 without granting executable admission.
+- Updated owner README/INTERFACE/ROADMAP, the FoundUps domain roadmap and the
+  member roadmap's current-state pointer. Kept existing active runtime PRs and
+  historical roadmap evidence separate from this main baseline.
+- Added a bounded [doc_index.json](../docs/mobile_studio/doc_index.json) and
+  [WSP 97 receipt](../docs/mobile_studio/wsp97_execution_receipt.json) for 0102
+  retrieval and structural/repository validation. No Holo generation activation
+  or current semantic-index claim is made.
+- Verification scope: JSON and document attachment/hash checks, relative source
+  references, WSP 97 receipt validation, diff review and PR checks. Actual account,
+  provider, mobile/device, streaming and production checks were not performed;
+  their required evidence remains explicit in the handoff and PR.
+
 ## 2026-10-12 — GotJunk privileged publication-evidence adapter (second gated slice)
 
 **WSP:** 00/22/50/84/97/98. **Parent:** implementation PR #2117

@@ -104,12 +104,15 @@ def _directories(value, files):
         _invalid()
     if any(not _relative(path) for path in value) or value != sorted(set(value)):
         _invalid()
-    expected = {str(parent) for path in files for parent in PurePosixPath(path).parents
-                if str(parent) != "."}
-    # Empty installed directories are part of the declared inventory as well.
-    expected.update(str(parent) for path in value for parent in PurePosixPath(path).parents
-                    if str(parent) != ".")
-    if not expected <= set(value) or set(value) & set(files):
+    directories = set(value)
+    # Paths are canonical relative strings. Requiring each immediate parent,
+    # including parents of empty directories, establishes full ancestor closure.
+    for paths in (files, value):
+        for path in paths:
+            parent = path.rpartition("/")[0]
+            if parent and parent not in directories:
+                _invalid()
+    if directories & files.keys():
         _invalid()
 
 
@@ -121,7 +124,9 @@ def _sources(value, files):
     if set(value) != set(installed):
         _invalid()
     for path, hash_value in value.items():
-        if (not _relative(path) or not path.endswith(".py") or not is_sha256(hash_value)
+        # Exact-string keys equal the suffixes of paths already checked by _files;
+        # removing the fixed portable prefix preserves every _relative constraint.
+        if (type(path) is not str or not path.endswith(".py") or not is_sha256(hash_value)
                 or hash_value != "sha256:" + installed[path]["sha256"]
                 or installed[path]["mode"] != 0o444):
             _invalid()

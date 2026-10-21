@@ -16,6 +16,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="/move2japan/move2japan.css">
+
   <!-- Clerk Authentication SDK -->
   <script
     async
@@ -232,6 +234,15 @@
       </div>
     </div>
 
+    <!-- Product discovery stays in the existing account plane. -->
+    <section data-reddog-discovery hidden>
+      <div class="m2j-search-heading">
+        <div><span class="m2j-eyebrow">RED DOG · MOVE2JAPAN</span><h2 id="searchHeading">Find your place</h2></div>
+        <button type="button" data-reddog-close class="m2j-close" aria-label="Close search">×</button>
+      </div>
+      <a class="m2j-account" data-reddog-discovery-account href="https://foundups.com/member/?account=1">Foundups account</a>
+    </section>
+
     <!-- Red Dog concierge guidance -->
     <div class="account-section" data-reddog-concierge>
       <div class="account-section-label">Red Dog</div>
@@ -307,11 +318,60 @@
     </div>
   </div>
 
+  <template id="move2japanFieldTemplate">
+        <div class="m2j-field-toolbar">
+          <div><p id="resultCount" role="status" aria-live="polite">Loading homes…</p><span id="areaGrouping">Cities &amp; towns</span></div>
+          <button class="mall-projection-chip" type="button" data-reddog-open-discovery aria-controls="accountPlane" aria-expanded="false"><span id="filterButtonLabel">Filters</span><span aria-hidden="true"> ⌕</span></button>
+        </div>
+        <p class="m2j-field-directions" id="fieldDirections"><span>← → Houses in the same area</span><span>↑ ↓ Different areas</span></p>
+        <div id="listingError" class="m2j-empty-state" role="alert" hidden>
+          <h2>The collection could not load.</h2><p>Try again, or <a href="https://akiya.pref.fukui.lg.jp/" target="_blank" rel="noopener noreferrer">open the Fukui akiya bank</a>.</p>
+          <button id="retryListings" type="button" class="m2j-button">Try again</button>
+        </div>
+        <div id="noResults" class="m2j-empty-state" hidden>
+          <h2>No homes match those filters.</h2><p>This collection currently covers Fukui, Japan. Try a wider area or price range.</p>
+          <button id="clearEmptySearch" type="button" class="m2j-button">Show all homes</button>
+          <button type="button" class="m2j-text-button" data-reddog-open-discovery>Edit filters</button>
+        </div>
+        <div id="propertyFieldWrapper" class="mall-tile-field-wrapper motion-snap" hidden>
+        </div>
+        <noscript><p class="m2j-empty-state">Enable JavaScript to browse houses here, or <a href="https://akiya.pref.fukui.lg.jp/">open the original Fukui akiya bank</a>.</p></noscript>
+        <p class="m2j-source-line">Fukui, Japan <span aria-hidden="true">·</span> Source-listed homes <span aria-hidden="true">·</span> Photos &amp; inquiry at source</p>
+        </template>
+
+  <template id="move2japanSearchTemplate">
+      <div id="propertySearchPanel">
+        <form id="propertySearch" class="m2j-search-form" role="search" aria-label="Search houses">
+          <label class="m2j-full-width">Search houses<input id="propertyQuery" name="q" type="search" maxlength="80" placeholder="Town, feature, or Japanese address" autocomplete="off"></label>
+          <label>Country<select id="propertyCountry" name="country"><option value="">All available</option></select></label>
+          <label>Prefecture / region<select id="propertyPrefecture" name="prefecture"><option value="">All available</option></select></label>
+          <label>City / town<select id="propertyCity" name="city"><option value="">All available</option></select></label>
+          <label>Suburb / locality<select id="propertyLocality" name="locality"><option value="">All available</option></select></label>
+          <label>Land<select id="propertyLand" name="land"><option value="">Any land status</option><option value="with_land">With land recorded</option><option value="no_land">No land recorded</option><option value="unknown">Land unknown</option></select></label>
+          <label>Maximum asking price (¥)<input id="propertyBudget" name="max" type="number" min="0" max="1000000000000" step="1" inputmode="numeric" placeholder="Any price"></label>
+          <label>Sort houses<select id="propertySort" name="sort"><option value="price_asc">Lowest price first</option><option value="price_desc">Highest price first</option><option value="land_desc">Largest plot first</option><option value="town">Town A–Z</option></select></label>
+          <label>Each row is a…<select id="propertyGroup" name="group"><option value="city">City / town</option><option value="locality">Suburb / locality</option></select></label>
+          <div class="m2j-filter-toggles m2j-full-width"><label><input id="largePlots" name="large" type="checkbox"> Plot of at least 500 m²</label><label><input id="virtualTours" name="tour" type="checkbox"> Virtual tour at source</label></div>
+          <p class="m2j-filter-help m2j-full-width">Current coverage: Fukui, Japan. Localities follow the source address. A stated plot area does not establish ownership terms. Homes with a negotiable or unknown price are excluded when you set a budget.</p>
+          <div class="m2j-search-actions m2j-full-width"><button id="resetSearch" type="button" class="m2j-text-button">Reset filters</button><button id="showHomes" type="submit" class="m2j-button">View homes</button></div>
+          <p id="filterResultCount" class="m2j-full-width" role="status" aria-live="polite">Loading homes…</p>
+        </form>
+        <div class="m2j-collection-info">
+          <details><summary>About this collection</summary><p>Eight manually reviewed public akiya listings in Fukui. Browse houses in English, then open the original listing for photos, tours and the broker’s contact. This is an initial collection, not a live feed; confirm current availability and terms with the listing broker.</p><p id="checkedDate"></p><p>The source’s building-area label is retained in the details. Construction and floor-count conflicts are shown where present.</p><a href="https://www.mlit.go.jp/totikensangyo/const/sosei_const_tk3_000131.html" target="_blank" rel="noopener noreferrer">Nationwide akiya sources ↗</a></details>
+          <details><summary>Owners &amp; real estate agencies</summary><p>Registration and property publishing are the next planned step. Submissions are not open yet. The publishing service will use Foundups accounts, verified authority to advertise, media permission and listing review.</p></details>
+          <details><summary>Membership &amp; life in Japan</summary><p>Use your shared Foundups account. Paid housing plans and earlier curated alerts are planned; they are not available here yet.</p><a href="https://www.youtube.com/@MOVE2JAPAN" target="_blank" rel="noopener noreferrer">Move2Japan on YouTube ↗</a></details>
+        </div>
+      </div>
+  </template>
+
   <!-- Firebase SDK (for Firestore data) + Clerk Auth -->
-  <script type="module">
-    import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js';
-    import { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } from 'https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js';
-    import { loadFirebaseRuntimeConfig } from '/js/firebase-runtime-config.js';
+  <script type="module" id="memberRuntime">
+    const publicProduct = !!window.Move2JapanSearch && window.Move2JapanSearch.isShellProductRoute(window.location);
+
+    async function initializeMemberRuntime() {
+    const { initializeApp } = await import('https://www.gstatic.com/firebasejs/11.4.0/firebase-app.js');
+    const { getFirestore, doc, getDoc, setDoc, collection, query, where, getDocs } = await import('https://www.gstatic.com/firebasejs/11.4.0/firebase-firestore.js');
+    const { loadFirebaseRuntimeConfig } = await import('/js/firebase-runtime-config.js');
 
     // Initialize Firebase (for Firestore data storage only - auth is via Clerk)
     const firebaseConfig = await loadFirebaseRuntimeConfig();
@@ -517,6 +577,12 @@
     }
 
     async function initializeMall(clerkUserId, userData, clerkUser) {
+      // The existing account gate consumes this only after actual admission.
+      const productReturn = window.mallStateRestore?.consumeProductReturn();
+      if (productReturn) {
+        window.location.replace(productReturn);
+        return;
+      }
       const handle = userData.username ? '@' + userData.username : (clerkUser.firstName || clerkUser.primaryEmailAddress?.emailAddress || 'member');
       mallUserHandle.textContent = handle;
 
@@ -539,6 +605,15 @@
       // Restore saved mall state (projection, scope, scroll)
       if (window.mallStateRestore) {
         window.mallStateRestore.restore();
+      }
+
+      const creator = new URLSearchParams(window.location.search).getAll('creator');
+      if (creator.length === 1 && creator[0] === 'move2japan') {
+        const creatorIndex = mallCatalog.findIndex(item => item.foundup_id === 'move2japan');
+        if (creatorIndex !== -1) window.mallTileField?.expandFoundUp(creatorIndex);
+      }
+      if (new URLSearchParams(window.location.search).get('account') === '1' || window.location.hash === '#account') {
+        window.redDog?.open();
       }
 
       // Stub for carousel sync (tile field doesn't need index-based scrolling)
@@ -761,6 +836,52 @@
       }
 
       console.log('[DevHarness] Mall initialized with', mallCatalog.length, 'FoundUps');
+    }
+
+    // Public products reuse the same identity owner, but never run invite writes.
+    if (publicProduct) {
+      let productIdentityGeneration = 0;
+      async function syncProductIdentity(user) {
+        const generation = ++productIdentityGeneration;
+        const isCurrent = () => generation === productIdentityGeneration && window.Clerk.user?.id === user?.id;
+        window.redDog?.setDiscoveryAdmission(false);
+        currentClerkUser = null;
+        mallUserHandle.textContent = 'Foundups account';
+        if (!user) return;
+        try {
+          const userDoc = await getDoc(doc(db, 'users', user.id));
+          if (!isCurrent()) return;
+          const userData = userDoc.exists() ? userDoc.data() : {};
+          const admitted = userDoc.exists() &&
+            (userData.inviteValidated === true || !!userData.usedInviteCode) &&
+            typeof userData.username === 'string' && userData.username.trim().length > 0;
+          if (!admitted) return;
+          await loadMallCatalog();
+          if (!isCurrent()) return;
+          currentClerkUser = user;
+          window.redDog?.setDiscoveryAdmission(true);
+          window.redDog?.setIdentity(user, userData);
+          window.redDog?.setFoundUps(mallCatalog);
+          mallUserHandle.textContent = '@' + userData.username;
+          if (window.location.hash === '#account') window.redDog?.open();
+          const codes = Array.isArray(userData.inviteCodes) ? userData.inviteCodes.filter(code => typeof code === 'string') : [];
+          const statuses = await loadInviteCodeStatuses(codes, 'unknown');
+          if (isCurrent()) window.redDog?.setInvites(statuses);
+        } catch (error) {
+          if (isCurrent()) {
+            window.redDog?.setDiscoveryAdmission(false);
+            currentClerkUser = null;
+            mallUserHandle.textContent = 'Foundups account';
+          }
+          console.warn('[Move2Japan] Existing account context unavailable:', error);
+        }
+      }
+      window.Clerk.addListener(({ user }) => { void syncProductIdentity(user); });
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') void syncProductIdentity(window.Clerk.user);
+      });
+      await syncProductIdentity(window.Clerk.user);
+      return;
     }
 
     // Entry point: dev harness or production auth
@@ -1061,7 +1182,7 @@
       }
     }
 
-    async function loadInviteCodeStatuses(codes) {
+    async function loadInviteCodeStatuses(codes, missingStatus = 'active') {
       const codesWithStatus = [];
 
       for (const code of codes) {
@@ -1074,7 +1195,7 @@
             const isActive = inviteData.status === 'active' && !inviteData.usedBy;
             codesWithStatus.push({ code, status: isActive ? 'active' : 'used' });
           } else {
-            codesWithStatus.push({ code, status: 'active' });
+            codesWithStatus.push({ code, status: missingStatus });
           }
         } catch (err) {
           console.error('[Member] Error checking code status:', code, err);
@@ -1111,6 +1232,34 @@
         return '';
       }
     }
+    }
+
+    // House discovery is already mounted by the synchronous shared-shell boot.
+    // Missing Clerk/Firebase must not prevent a guest from browsing public facts.
+    async function connectExistingProductAccount() {
+      for (let attempt = 0; !window.Clerk && attempt < 50; attempt++) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      if (!window.Clerk) return;
+      await Promise.race([
+        window.Clerk.load({ appearance: window.FOUNDUPS_CLERK_APPEARANCE }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Account load timed out')), 8000))
+      ]);
+      if (window.Clerk.user) await initializeMemberRuntime();
+    }
+
+    if (publicProduct) {
+      connectExistingProductAccount().catch(error => {
+        console.warn('[Move2Japan] Account connection unavailable:', error);
+      });
+    } else {
+      initializeMemberRuntime().catch(error => {
+        console.error('Failed to initialize member runtime:', error);
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('inviteGate').style.display = 'flex';
+        document.getElementById('gateInviteStatus').textContent = 'Unable to initialize the Mall right now.';
+      });
+    }
   </script>
   <!-- Gesture hints (shown once on first visit) -->
   <div id="gestureHints" class="gesture-hints" style="display:none;">
@@ -1120,6 +1269,7 @@
     <p class="gesture-hint-dismiss">Tap anywhere to dismiss</p>
   </div>
 
+  <script src="/move2japan/property-search.js"></script>
   <script src="js/gesture-engine.js"></script>
   <script src="js/gesture-hints.js"></script>
   <script src="js/shell-bridge-interceptor.js"></script>
@@ -1129,6 +1279,13 @@
   <script src="js/account-concierge.js"></script>
   <script src="js/red-dog-concierge.js"></script>
   <script src="js/mall-state-restore.js"></script>
+
+  <script id="productDiscoveryBoot">
+    if (window.Move2JapanSearch && window.Move2JapanSearch.isShellProductRoute(window.location)) {
+      window.mallStateRestore.selectProduct('move2japan');
+      window.Move2JapanSearch.mount(window, '/move2japan/properties.json');
+    }
+  </script>
 
   <!-- Member Service Worker registration -->
   <script>

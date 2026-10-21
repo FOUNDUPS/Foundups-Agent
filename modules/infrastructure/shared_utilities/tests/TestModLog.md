@@ -1,5 +1,38 @@
 # TestModLog
 
+## 2026-10-19 - Lexical containment and Windows Unicode regression controls
+
+Added14 lexical containment cases and6 Windows Unicode cases. Independent
+differential testing rejected the initial tuple-only implementation:6/12,717
+Windows mismatches (`\u0130` versus `i\u0307`); Linux had no mismatch. Preserve
+Windows `pathlib` comparison and use the tuple prefix only on POSIX. Revised
+candidate matches all12,717 cases on each platform. Windows focused command:
+`python -B -m pytest -q -rs --import-mode=importlib --basetemp O:/RedDog-Builder-Artifacts/rsi-containment-win-repair-20261019 modules/infrastructure/shared_utilities/tests/test_runtime_artifact_safety.py modules/infrastructure/shared_utilities/tests/test_runtime_artifact_windows_safety.py`
+passes49/skips1 (symlink creation unavailable), with2 existing config warnings
+under disabled plugin autoload. Earlier invalid nested basetemp caused23 setup
+errors; corrected output directory only. Independent Linux connected run found
+a symlink rejection-message mismatch, reproduced with the exact baseline
+predicate. Correct only the test name and exact expected existing link rejection;
+the no-follow guard and fixture remain unchanged. Linux rerun38pass/8Windows
+skips. Connected safety/POSIX-lock/installed-guard/isolation suites111pass/
+8Windows skips; installed process observations are synthetic test fixtures.
+The external broader harness first lacked an explicit root (collection error),
+then a main guard (spawn re-entered pytest); both failures are retained. Fix only
+the harness and preserve the production/test assertions. Commands, exact hashes
+and XML are in `next-startup/descriptor-path-publication-review/native-handshake-20261019/connected-linux-guarded-binding.json`.
+Manifest tests8pass; three Node entrypoints pass with expected negative bootstrap
+traces. Independent manifest review verifies1439 unchanged paths, one source
+digest change and both consumer pins. CI adds the connected Windows/Linux
+path suites to existing jobs; remote execution remains unverified here.
+
+The broader historical WSP62 exemption suite fails5/passes11 on both candidate
+and unchanged1e203 baseline because its September30 expiries are past. Retain
+those failures; no expiry or ceiling was changed. Current canonical WSP62§5.1.2
+classifies unchanged expiry debt as a remediation warning, while candidate
+growth remains governed by its exact base/ceiling. This owner shrinks704 to703
+physical lines. Do not report the historical suite as passing.
+
+
 ## 2026-10-13 - Reproduce and repair minimal CI host dependency
 
 PR #2115 exposed three `openai.OpenAI` patch decorators that require the optional

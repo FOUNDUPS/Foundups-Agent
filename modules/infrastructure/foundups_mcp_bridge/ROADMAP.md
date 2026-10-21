@@ -1,5 +1,16 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-10-19: MCP security dependency coordination
+
+MCP 1.30.0 is now declared consistently in requirements, the launcher's strict
+runtime contract, and the existing candidate-binding regression. Current docs
+reflect the quartet; historical qualification records below remain unchanged.
+Local Linux coverage is 28 passing cases plus a successful real runtime version
+probe. The 19 Windows-only cases and two owned HTTP cases still require the
+unchanged 49-case Windows CI gate. Installed environments require their existing
+governed upgrade and qualification procedure before activation; source acceptance
+does not establish deployment or native execution authority.
+
 ## 2026-10-04: Paired MCP compatibility layer
 
 The existing launcher now pins FastMCP3.2.0/MCP1.28.1 with unchanged

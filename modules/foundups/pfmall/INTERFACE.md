@@ -1,6 +1,7 @@
 # p.fMALL Interface
 
-**Contract status**: Current implementation truth as of 2026-08-23.
+**Contract status**: Implemented shell interfaces with later dated slices;
+mobile creator seam below is specified only (updated 2026-10-18).
 **Boundary**: p.fMALL is a platform/presentation layer, not a FoundUp, model
 host, OpenClaw instance, or Hermes worker.
 
@@ -104,6 +105,45 @@ The following rules are mandatory:
   boundary; PFMall receives only the least-authority projection it needs.
 - Local/browser models may advise or surface anomalies but cannot finalize a
   protected decision.
+
+## Proposed mobile creator seam (updated 2026-10-18)
+
+**SPECIFIED_NOT_IMPLEMENTED.** This section adds no callable endpoint or browser
+command. The unauthenticated read API and presentation dispatcher cannot accept
+creator credentials or perform broadcast writes.
+
+The creator-facing Live mode belongs to external
+[AutoPost](https://github.com/FOUNDUPS/autopost), which already owns capture and
+recorded-file publishing. AutoPost composes the selected browser/native media
+adapter; this Mall interface consumes the permitted observation/projection.
+The foreground browser/relay proof and optional OBS contribution do not move
+camera code, provider tokens or relay credentials into the Mall browser.
+
+The [mobile studio contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
+defines logical `PrepareSession`, `CreateBroadcast`, `ResolveInput`, `BindInput`,
+`StartLive`, `InspectSession` and `EndLive` operations for a future authenticated
+adapter. It also specifies request identity, principal/channel scope, consent,
+revision checks, durable reconciliation and uncertainty handling. Implementations
+must independently verify every claim at the backend boundary.
+
+An attended AutoPost browser can use a valid Google grant for a bounded REST
+lifecycle proof. That proof has explicit expiry/reload limits and is not the
+durable shared backend specified here. AutoPost's local author signature or Lick
+receipt is not creator/channel authorization. Media export requires explicit
+creator intent; local End remains effective if provider control is unreachable.
+
+Play receives only an admitted public projection: creator identity, broadcast
+ID, title, approved watch/embed URLs, observed lifecycle, freshness and archive
+state. Tokens, ingest secrets and raw provider responses are excluded. Encoder
+connectivity, active ingest, a live broadcast and successful player playback are
+separate observations. Missing/stale evidence is unknown; a player-open event is
+not proof of a publicly live show.
+
+See the [API constraints register](../docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+for channel/embedding eligibility and service limits, and the
+[machine outcome](../docs/mobile_studio/mobile_studio_outcome.v1.json) for the
+proposed handoff. A future implementation must update this interface with its
+actual authentication, schema and transport after a bounded slice is admitted.
 
 ## Verification-gap guard
 

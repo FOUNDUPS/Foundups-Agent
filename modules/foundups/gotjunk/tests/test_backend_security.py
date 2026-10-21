@@ -1,7 +1,7 @@
 """Offline regression: no credential, network or production service required."""
 import asyncio
 import pytest
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, Form, File, UploadFile
 from fastapi.testclient import TestClient
 from modules.foundups.gotjunk.backend import security
 
@@ -84,3 +84,34 @@ def test_chunked_body_limit():
     async def send(event): sent.append(event)
     asyncio.run(security.BodyLimitMiddleware(app, max_bytes=8)({'type':'http','method':'POST'}, receive, send))
     assert not called and sent[0]['status'] == 413
+
+
+def test_patched_form_parser_and_multipart_upload():
+    """Exercise the patched separator behavior and FastAPI upload compatibility.
+
+    A tiny semicolon fixture distinguishes the fixed parser without sending a
+    resource-exhaustion payload or relying on machine-dependent timing.
+    """
+    app = FastAPI()
+    app.add_middleware(security.BodyLimitMiddleware, max_bytes=1024)
+
+    @app.post('/form')
+    def form(value: str = Form(...)):
+        return {'value': value}
+
+    @app.post('/upload')
+    async def upload(file: UploadFile = File(...)):
+        return {'filename': file.filename, 'content': (await file.read()).decode()}
+
+    with TestClient(app) as parser_client:
+        response = parser_client.post(
+            '/form', content='value=a;b;c',
+            headers={'Content-Type': 'application/x-www-form-urlencoded'},
+        )
+        assert response.status_code == 200
+        assert response.json() == {'value': 'a;b;c'}
+        response = parser_client.post(
+            '/upload', files={'file': ('fixture.txt', b'offline fixture', 'text/plain')},
+        )
+        assert response.status_code == 200
+        assert response.json() == {'filename': 'fixture.txt', 'content': 'offline fixture'}

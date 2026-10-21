@@ -1,16 +1,54 @@
+## Protected consensus nonce checkpoint — 2026-10-20
+
+Current 19/P0 reuses protected owner v13, current E0 and existing MAC/SQLite nonce
+state. Connected 437 passed/3 platform skips; independent 21 passed. The reviewed
+helper move preserves semantics and existing caps; unchanged startup-test size
+debt is recorded. Next connect one live authenticated parent/effect/nonce lease
+through the existing factory, then protected HIGH service composition and genuine
+admission inputs. LOW and frozen 294 runtime stay unchanged; native author 0.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+
+## Parent admission checkpoint — 2026-10-20
+
+PR2163 merged824d0f71 with reviewed tree equality and passing PR/main checks.
+Its publication worktree is archived; frozen qualified runtime294195cdb is retained.
+The v36 synthetic LOW handshake passed, with all seven units absent; root exit2
+still leaves clean service closure false. Neither result admits a real author.
+
+Current19/P0 (C4/I5/D5/Impact5) connects parent consent, separate parent/effect
+reviewer domains, bounded per-selection model inputs, effect proof and the existing
+signer/current-use owners. Independent20 model/current-use and17 Linux RPC/nonce
+controls pass against44 frozen files. Connected59 suites pass1,545/22 platform
+skips with explicit repository test root; the original failures remain recorded.
+Final45-file source adds a test-only unknown-schema update and EOF-only cleanup.
+
+After exact-source validation/publication, qualify and connect installed HIGH
+custody/nonce supply through existing startup/factory owners. Preserve LOW;
+require authentic work/reviewer/model/budget evidence before a native author.
+Then independently verify, activate/roll back, measure later retained benefit and
+select the next bounded task. No second orchestrator or repeated LOW-handshake
+trial substitutes for this sequence.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+
 ## Native startup integration checkpoint — 2026-10-16
 
-PR2145 merged at `7a9fe8602`; exact-main CI/CodeQL passed and reviewed/main trees
-match. Runtime `34eed594e` stays frozen. V18 passed installer receipt/source-path
-repairs and revocation, then LOW handshake failed at durable `_checked_now`.
-Current-time use samples within the fence and rechecks after verification; explicit
-stale epochs, observed rollback and expiry reject. A late rejection withholds results
-without undoing callback effects. Author 207 and separate independent 17 passed;
-counts are not additive. Separate source qualification remains before replay. Clock conflict is
-separately observed; its causal role remains unproved. Authentic enrollment,
-native admission, author execution and retained gain remain unproved.
-Current evidence and limits: `docs/operations/RSI_SWARM_DISPATCH.md`; test evidence:
-`tests/TestModLog.md`. Existing R15 gates remain unchanged.
+PR2147 merged at `6fb93580c`; all 11 exact-head checks and exact-main CI/push
+checks passed, with identical reviewed/main trees. Its current-time authorization
+repair is published. Runtime `88690a4f5` is independently qualified and frozen
+(2,691 files, 1,254 exact Git Python sources); qualification is not admission.
+Fresh synthetic v19 passed installation/revocation but timed out awaiting issuer
+readiness. V20 rejected before its caller action in the permission-time guard;
+issuer elapsed 44.97 monotonic versus 40.98 wall seconds. Clock regression is
+supported, but exact guard values and the responsible synchronization mechanism
+were not captured. All seven owned units were absent/inactive/dead afterward.
+Bounded samples identify repeated descriptor/runtime validation. The next layer
+reduces pure descriptor computation while retaining fresh filesystem and authority
+checks; a separate reversible clock-source experiment is under review. Neither
+work changes expiry, grants, process timeouts or production clock checks.
+Existing R15 still requires authentic worker admission, independent evaluation,
+authorized activation/rollback, later retained benefit and bounded next selection.
+No native author or retained RSI gain is demonstrated.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#first-low-control-identity-and-native-preparation--2026-10-16).
 
 ## Protected issuer custody checkpoint — 2026-10-16
 

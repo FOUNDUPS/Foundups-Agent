@@ -1,3 +1,63 @@
+## Protected consensus nonce supply — 2026-10-20
+
+Opt-in owner v13 adds `consensus_nonce_authority` with a purpose-bound store,
+separate integrity credential binding and permission. V1-v12 retain their exact
+shapes. The descriptor reuses the existing confined replay-store configuration,
+MAC-protected atomic state and provisioned SQLite high-water owner; startup does
+not provision credentials or create an empty authority store.
+
+`load_protected_consensus_nonce_authority(owner_config_path=..., repo_root=...,
+expected_owner_config_id=...)` returns the existing reserve/commit/rollback
+interface only after canonical owner, signed E0/current generation, private
+custody and existing-state checks. Its E0 scope requires HIGH worktree creation;
+the canonical identity child `delegate_reddog_identity` is the only optional
+additional operation. LOW, ULTRA and unrelated operations reject.
+
+Each public operation owns its current-generation lease. Reservations receive
+instance-owned handles; another instance cannot commit or roll them back.
+Withdrawal withholds further authorization but permits confined cleanup of an
+owned reservation. A post-commit rejection does not undo durable consumption.
+Cleanup failures remain errors rather than claims of successful rollback.
+`AtomicProposalAuthenticityNonceStore.validate_existing_state()` rejects absent
+or unauthenticated state and retains the existing one-step high-water crash
+recovery; it is not a promise of read-only IO.
+
+The generated 1,449-file runtime currently includes only the new custody leaf;
+the public nonce authority/current-owner leaves remain source/test validated,
+not imported or qualified installed runtime until the HIGH join.
+
+This adapter does not install HIGH signing. The existing LOW service remains
+LOW-only. HIGH composition must avoid nesting these public self-leasing methods
+inside the permission owner's generation lease; the next join requires one live
+authenticated scope for verification, secret use and nonce callbacks. Reuse the
+existing supplied-grant target transport. Native qualification/admission,
+authentic work/model/reviewer/budget inputs and retained RSI benefit remain open.
+
+## Exact parent-consent connection — 2026-10-19
+
+Owner v11 supplies consent for an exact HIGH/worktree_create parent. Signatures bind
+request, policy, registration, principals, repo/FoundUp and current generation.
+The facade returns `ParentConsentEvidence`; construction is not authentication.
+V12 adds `parent_reviewer_designation_authority` alongside the effect domain.
+Principal artifact v3 permits one designation per domain (two maximum); legacy
+schemas remain intact. Cross-domain privilege/schema fallback rejects.
+`CurrentParentConsensusAuthority(repo_root, owner_config_path, model_artifacts, proof)`
+reverifies through `verify`, `prepare`, its exact-parent callable supplier and signer
+`reserve`. Parent-to-effect proof preserves policy/consent without legacy projection.
+
+V12 binds 1–9 exact model selection ID/digest entries with six protected inputs each.
+Each author/reviewer pass shares 54 reads and 8 MiB; repeated passes reread/reverify.
+Missing, duplicate or substituted selections reject. Existing qualification and
+independence checks remain; selected membership does not prove actual authorship.
+Parent/effect proof v2 retains the 16,384-byte effect cap by reconstructing one parent;
+conflicting/duplicate parents reject. V1 transport stays intact. Parent v2 grant RPC
+releases then reacquires/revalidates the generation fence; legacy HIGH is unchanged.
+Grants cannot outlive approval. Reserve/commit reverify; rollback attempts do not prove recovery.
+The use-time collector binds exact work/identity/model/generation and rechecks clock
+and generation/peer expiry after parent verification and reason use; missing evidence
+keeps gates closed. Installed HIGH custody/nonce supply and authentic inputs remain
+separate. LOW stays LOW. Sampled checks do not establish continuous immutability.
+
 ## Issuer-only root LOAD — 2026-10-15
 
 Issuer identity permits LOAD only, preserving the legacy target signing domain.
@@ -47,6 +107,16 @@ still require those independently authorized owners and actual custody.
 configuration for one LOW handshake. Manifest, E0 and grant gates remain distinct.
 See the [schema, input and rejection contract](
 ../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#initial-handshake-configuration--2026-10-15).
+
+`load_system_service_independent_grant_authority_client(...)` accepts the keyword
+`timeout_s`, defaulting to the existing 5 seconds. It requires an exact `int` or
+`float`, finite and in `(0, 30]`; Boolean values and numeric subclasses reject
+before admission or client construction. Initial LOW handshake composition
+forwards its authenticated service configuration's `timeout_s` to this client.
+Other callers retain the default. This is a per-socket-operation transport wait,
+not an authority lifetime or an end-to-end deadline. Signed request/grant expiry,
+current-generation, revocation and post-RPC checks remain unchanged; a longer
+transport wait does not authorize an expired response or prove native admission.
 
 ## Initial runtime manifest enrollment — 2026-10-15
 

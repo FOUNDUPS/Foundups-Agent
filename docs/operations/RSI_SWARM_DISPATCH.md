@@ -1,4 +1,801 @@
+## Windows manifest byte contract — 2026-10-20
+
+Actual readManifest independently accepts the current 1,449-member LF
+manifest (327,430 bytes) but rejects its fresh Windows CRLF representation
+(330,401 bytes) at the prior 320 KiB/327,680-byte boundary. Generated LF
+checks alone missed this. The paired Node consumer/Python contract now
+accepts at most 324 KiB/331,776 bytes, an explicit 4,096-byte/1.25% change.
+This is the smallest whole-KiB bound also covering the independently
+measured pending live-scope 1,451-member CRLF closure (330,885 bytes),
+with 891 bytes remaining; 323 KiB would be 133 bytes short.
+
+JSON retains two-space formatting. The current canonical digest and 1,449
+member bound remain unchanged; this does not import the pending live-scope
+runtime. Existing digest, shape, path and member checks, 2 MiB per-file,
+32 MiB total, independent 4 MiB readers and WSP62 source limits remain.
+The byte check follows readFileSync and precedes parsing; it is not a
+preallocation memory guarantee.
+
+Current-source validation: 36 binding tests pass, zero failures/errors/
+skips; three Node compatibility commands exit zero. The actual reader
+accepts LF, CRLF and exact-maximum valid JSON and rejects maximum+1.
+Original failed byte evidence remains; no JSON packing or exemption.
+Runtime Python files and manifest bytes are unchanged from the 901/5
+startup run. Those startup counts are retained, not represented as rerun.
+No native worker or installed HIGH authority is claimed.
+
+Evidence in the existing next-startup artifact root:
+`consensus-nonce-publication-20261020/compatibility-repair/`.
+
+| Receipt | SHA256 |
+| --- | --- |
+| `independent/byte-contract-red/receipt.json` | `1903e132b50300774f8d0135eb09e2b5283ad2e3652ceb653784f1803d592945` |
+| `byte-contract/receipt.json` | `9f4fdfa440b4068efd77726082a5199985c5ecac126cfacef125ae5a4e501d37` |
+
+WSP00/5/6/10/11/15/22/50/62/97. Corrected-head CI and independent
+publication review remain required; older 6d0686c41 CI is historical.
+
+## Consensus nonce publication compatibility repair — 2026-10-20
+
+Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
+the modern-owner version predicate an always-truthy tuple. Legacy owners
+entered per-selection validation. The unchanged 10-case model-pair family
+reproduces seven failures; removing the tuple tail makes all 10 pass.
+The existing signed-model gate now covers both v12 and complete v13 owners.
+The full hosted-startup selection runs locally: 901 passed, 5 platform skips, zero failures/errors.
+Source hashes remain stable.
+Independent review passes three legacy/v12/v13 behavior controls and
+verifies the one-source-digest change with unchanged pins policy.
+Regenerated digest pins retain the 1,449-file inventory and unchanged limits.
+Both generators check current, 36 binding tests pass without skips, and
+the three backend compatibility Node checks exit zero.
+These synthetic fixture checks
+do not establish installed HIGH authority or native worker execution.
+WSP00/5/6/10/15/22/50/62/71/97. Exact receipts and commands are in dispatch.
+
+Evidence: existing next-startup artifact root,
+`consensus-nonce-publication-20261020/compatibility-repair/`.
+
+| Receipt | SHA256 |
+| --- | --- |
+| `targeted-red/receipt.json` | `272ba282fda0cbf56462fc26f6d7758e424672b2860e6bef94478a06f7db0683` |
+| `targeted-green/receipt.json` | `0d72763235a3af8e89e0f071e9558101b36792869b31d79c8eaa52838f745fcc` |
+| `connected-green/receipt.json` | `9621d574d78e362599564050f41db8dd1c7bad64acbbb092ff5620de09e763a7` |
+| `bindings/receipt.json` | `44bec7603d4cde9bace8899cad13346b915731d34c519ce8ca1a02acb063a3f3` |
+| `independent/independent-repair-review.json` | `1ef5fda92ec2c97a29d434b8cfb7265b5fc6ef469280a5c706ccc9fb522a3e3b` |
+| `independent/independent-integrity-review.json` | `70c6fc70052cc4ce4964a7a5b776930d36d824b13aade9ebe731c739730b2aec` |
+
+The failed hosted run reported 894 passed/7 failed/1 skipped; it remains
+failed evidence. Previous publication acceptance was withdrawn. Earlier
+437/3 and 21-control results below remain historical component coverage,
+not coverage of the missed legacy branch. New-head CI and independent
+publication review must pass before merge. No threshold was weakened.
+
+## Protected consensus nonce checkpoint — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97; selected 19/P0 (C4/I5/D5/Impact5).
+Opt-in owner v13 adds a separately bound consensus nonce store and integrity
+credential. Canonical owner, signed E0/current generation, custody and existing
+MAC/SQLite state are checked; startup never provisions missing authority. V1–v12
+and the LOW service remain unchanged. Instance-owned reservation handles prevent
+cross-instance rollback; withdrawal still permits confined owned cleanup. The
+existing authenticated one-step high-water recovery may write durable state.
+
+Connected Windows evidence: 437 passed, 3 platform skips, no failures/errors in
+351.02s, with 26 source hashes unchanged. Independent 21 controls pass on that
+freeze; counts overlap and are not added as unique tests. Actual signed files,
+MAC/SQLite transactions, restart/replay and concurrency are exercised with
+explicit synthetic OS/installation/credential seams, not genuine admission.
+
+The reviewed helper extraction moves only root-separation validation into the
+existing owner-input module and re-exports it. Function and remaining module ASTs
+match; the other 24 frozen files are unchanged. Loader 658 and owner inputs 263
+lines satisfy the unchanged 675 limit; both cold import orders pass. Seven
+consensus structure tests pass. Two additional atomic-provisioning size checks
+still fail on the byte-identical baseline startup test file (712 lines; one
+89-line test). These inherited debts are retained, not exempted or repaired here.
+
+Evidence under `native-installation-inputs/current-time-independent-review/`
+within the existing next-startup artifact root:
+
+| Receipt | SHA256 | Scope |
+| --- | --- | --- |
+| `high-consensus-author-review/connected-review.json` | `0bb2d10d1b7b6f5d8c518210dd5f0db808ec2ab7ccb6103be032de5d9c695edc` | Exact command, JUnit and three platform skips |
+| `high-consensus-independent-review/independent-review.json` | `faea322408e64d4981a1e049c3a27c4483003e17a148c5cb41ed87c20de5e15b` | Independent synthetic component held-outs |
+| `high-consensus-author-review/loader-extraction/source-freeze-final.json` | `fabad5e075c8884f18e0379de927c0bd2621f5b93e1df5495144f4210aec7f6f` | 26-file post-extraction freeze |
+| `high-consensus-author-review/loader-extraction/final-review.json` | `8c8cd177e8112bc385a8866b084bf6d2604419f5bf128da6754e2c0d38ec0da4` | Two-file AST proof, imports and preserved baseline size failures |
+| `high-consensus-independent-review/loader-extraction-independent-review.json` | `f1b63914f1ac457af764b9e3efd433134ad5e8dc2352b4f5ee394f2de528468b` | Independent exact extraction; prior 21 held-outs retained |
+| `high-consensus-author-review/publication-bindings/review.json` | `dc7f47d22af1f90c5b871bf5a1da08eefbafe72f4af5aef629eb0551b5a3b063` | Exact generator, 36-test and three Node results |
+
+Generated runtime inventory is 1,449 files: only the new imported custody leaf is
+included. The public nonce authority and current-owner leaves are source/test
+validated, but are not imported or qualified installed runtime until the HIGH
+join. Exact digest/cap bindings and registry 1,737/270 retain existing validation;
+no quarantine or structural ceiling changes. Both generator checks pass; 36
+manifest/registry tests pass without skips in 90.295s. Node contract, preflight
+and async commands each exit 0; final 26 source hashes remain stable.
+
+Next 19/P0: reuse one live authenticated WSP71/generation lease across current
+parent/effect verification, nonce reserve, pre-sign checks, commit and rollback;
+prove the existing same-inode lock path with bounded processes before installed
+HIGH composition. Public self-leasing methods must not nest under that fence.
+The existing installed LOW service remains LOW-only. Protected HIGH policy and
+service composition, genuine work/reviewer/model/budget inputs, qualification and
+native admission remain required. Frozen runtime 294195cdb is unchanged; native
+author tickets 0, paid model calls 0, no retained RSI gain. PR2164 publication
+closure is tracked separately; no pending remote check is counted as passing.
+
+## Parent-consensus publication gate repair — 2026-10-20
+
+PR2164 head51f9edce failed the hosted signing regression:1,467 passed/1 failed/
+3 skipped,119.95s. Loader682 exceeded the unchanged675-line WSP62 guard; the
+subsequent startup step did not run. Local single-case red reproduces it.
+The exact existing root-separation helper now lives in the owner-input module,
+re-exported at its original import path. Helper and remaining module ASTs are
+unchanged; loader652/owner263. Independent57 differential cases and two cold
+import orders pass. This adds no module and changes no runtime authority or cap.
+
+Evidence under `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/parent-consensus-publication-20261020/`:
+`loader-size-red.xml`/`.log` preserve the reproduced failure;
+`loader-size-review/independent-review.json` SHA256
+`8b2ec137e42131fdb03b8e4e11f1eeafd231153ac2c3fb05eadc42d6da5e560e`
+binds the accepted extraction. Runtime manifest inventory remains1,448; source
+hashes and two exact digest pins are regenerated. Validation/publication receipts
+remain separate from native execution. No worker admission or retained gain.
+
+## Parent-consensus connection — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97; selected19/P0 (C4/I5/D5/Impact5).
+Source base5862eea0; publication base main824d0f71 differs only in the previously
+reviewed security ledger. Retrieve exact owners after the recorded Holo authority
+HEAD mismatch; freshness UNKNOWN/gap true, no unchanged retry or reindex.
+Historical checkpoints below are evidence, not current runtime authority.
+
+The candidate extends existing parent/effect, principal, model, signer and valve
+owners. Owner v12 separates reviewer designation domains; principal v3 admits one
+per domain. Exact model-selection ID/digest entries retain protected signed input
+verification, with1–9 entries and shared54-read/8-MiB bounds per verification pass.
+Repeated passes consume that budget again; this is not a total request budget.
+Model membership does not prove actual author execution. No model promotion occurs.
+Parent/effect proof v2 preserves policy without legacy projection and removes only
+a duplicated parent to remain within the unchanged16,384-byte limit. Parent-v2
+RPC releases/reacquires the existing generation fence and revalidates; legacy HIGH
+and LOW are preserved. Grant expiry cannot exceed approval. Reservation failure
+attempts rollback; durable restart recovery is not established by synthetic tests.
+
+Independent review reproduced generation expiry and clock rollback during parent
+verification. Final current-use checks enforce nondecreasing time and recheck
+both generation and shorter peer expiry after verification at collection and use.
+No evidence boolean or serialization substitutes for current verification.
+Both independent lanes accepted the same44 frozen Python files:20 signed-model/
+current-use cases and17 Linux RPC/nonce cases, no failures/errors/skips. The Linux
+control uses a real second process and same-inode lock; owner/model/nonce admission
+seams remain synthetic. Final59-suite Windows run passes1,545/22 platform skips,
+zero failures/errors in533.14s with all45 tested hashes stable. Preserve the initial
+1,539/6/22 result: one stale schema-negative fixture and five startup failures from
+pytest fixture-boundary collapse under -c NUL. The same collection/five selected
+tests passes with explicit repository root; CI also pins its root. Production
+guards remain intact. Post-run EOF cleanup removes four bytes, AST unchanged.
+Final45-file freeze separately binds that formatting and test-only correction.
+The existing startup CI selects the six new suites; installed proof is still absent.
+
+Evidence root: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`.
+Under `native-installation-inputs/current-time-independent-review/`:
+
+| Receipt | SHA256 | Scope |
+| --- | --- | --- |
+| `parent-consensus-author-review/connected-review.json` | `03f1b8f78e4613a9e12ffbda9c71bb85611480dc872fa7416e4951c56573267e` |exact argv/JUnit/skips;1,545 pass/22 skip;45 tested hashes |
+| `parent-consensus-author-review/source-freeze-post-format.json` | `e4cbec996e46ae1c23c306146c4577572f223aed27d13fc071ea54ae52117a06` |45 publication source files |
+| `parent-consensus-author-review/eof-format-equivalence.json` | `91a1ec6135114f7315141ed0ca506d7bf1384ce7f6513a8d969ba31cedf83737` |only four EOF bytes removed; identical AST |
+| `parent-consensus-author-review/source-freeze.json` | `06c5f13ece9925dc8051a097d7a4919b3e4066889504951144a7c93fe06fd721` |44 frozen Python paths |
+| `parent-model-independent/independent-final-review.json` | `ae86f0e5439a609cdca50d68aff1f30902a37b951723e610393b77ff33487f92` |20 held-outs; original red controls retained |
+| `parent-consensus-independent-review/independent-rpc-nonce-review.json` | `4fe9917bcead45b5125276225eea3cb5491984c0776b74616ec2a682d146a04f` |17 Linux controls; original harness failures retained |
+| `high-installed-composition-readonly-5862-parent-candidate.json` | `2fa859b4a8c9a2b762ce254aa1f628721b3c02376262d3460275a56124599992` |next connection audit, not runtime readiness |
+
+Publication binding evidence is under `parent-consensus-publication-20261020/`:
+`publication-source-binding.json` (SHA256 `db24db50a2b8af797c5b6402bc471aac7e03089d99a9e394eb45edbd55eb3b1d`)
+binds all45 reviewed sources to staged canonical bytes; normalization is CRLF to LF
+only. `incremental-independent-review.json` checks manifest/CI/registry scope;
+`independent-harness-review.json` independently verifies the pytest root mechanism.
+Final manifest has1,448 files, exact cap/cap+1 checks and regenerated digest; all8
+manifest tests and three JS compatibility commands pass. Registry1,731/270 remains
+current; existing quarantine policy is unchanged. Security/remote publication
+receipts remain separate from component execution and native readiness.
+
+Current component evidence does not install HIGH custody, prove durable recovery,
+or admit a real author. Native author tickets0; paid model calls0; coordinator
+cost unknown. Frozen qualified294195cdb is unchanged. The installed LOW service
+continues rejecting HIGH. Next after exact-source closure: supply a separately
+bound durable consensus nonce and protected HIGH composition through existing
+startup, signer factory and bounded socket owners. Authentic work, reviewer/model
+and budget inputs, then native qualification/admission, independent evaluation,
+authorized activation/rollback and later retained benefit remain required.
+
+## Policy-bound parent-consent prerequisite — 2026-10-19
+
+Publication closure (2026-10-20 JST): PR2163 merged824d0f71dade7dabc25afa1b778f8e3eb099a1e1.
+Its tree096306cdbff713be600c7986d0abfc04aa4c6af0 equals reviewed
+f9ed1661833566121af1cd4c9fc32460192e9280. All12 latest PR checks passed;
+superseded draft CI39269955484 was deliberately cancelled, not passed.
+Final CI39270617128 reports775 passed/1 skipped in the connected startup step.
+The separate reviewer artifact verifies14 cases and4,793 exact Git source hashes.
+Merged-main CI39272664400 and CodeQL39272667724 passed; all11 main checks passed.
+Independent merge receipt SHA256 `86367416016eda1c30de2bcc2cc965d3494dd745719ce6257a5ef4a6890e9362`
+and main-validation receipt `119d75095a4288901344e0477b80595943e9973f6bf35f4f1b17c4a441ec072c`
+are under the evidence root below at
+`descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/response-slice/v36-publication/parent-consent-publication/main-824d0f71-independent/`.
+The clean publication worktree was archived; pinned runtime294195cdb is retained.
+
+Source base58f4599d3f89620b0c12178a027a4bfbb8795ca1. PR2162 is merged; its tree
+matches reviewed f461210dc1f53aaed16cc86cb5a1c11388fdd853. All12 final PR checks
+and merged-main CI39264967497/CodeQL39264966452 passed. Independent artifact
+review validates14 cases and4,787 exact Git source hashes. This closes source
+publication/collection coverage, not real work admission.
+
+WSP15 selects18/P0 (complexity4, importance5, deferability5, impact4). After
+accepted synthetic v36, the smallest reusable missing connection is distinct
+parent consent. Registered identity, later effect consent and downstream work
+authority cannot approve their own parent. Source lookup used exact files after
+the existing governed Holo query rejected authority-root HEAD mismatch; freshness
+is UNKNOWN with a coverage gap. No reindex or fabricated retrieval receipt.
+
+Opt-in owner v11 now supplies a narrow parent registration. Its detached signature
+binds the exact HIGH/worktree_create parent, canonical policy digest, beneficiary,
+consenting issuer, RedDog, owner and current generation. Existing principal,
+lease, crypto and artifact owners perform verification. V1-v10 remain compatible.
+Independent review found and repaired policy loss through the old sovereign result:
+the final distinct `ParentConsentEvidence` retains policy and is rejected by
+legacy execution consumers. It is data requiring deliberate trusted current-use
+composition, not a grant. Policy validity alone does not attest policy provenance,
+reviewer/model independence or budget. Withdrawal/rotation uses existing owner and
+generation replacement; no new per-assertion revocation store or continuous
+immutability claim is introduced.
+
+Connected18-suite validation passes512/2 existing Windows skips, no failures or
+errors. Focused96 is included, not additive. Independent37 passes without skips;
+all18 frozen source hashes agree. Real signatures/artifact IO are exercised with
+synthetic OS owner/lease seams. Native author tickets0, paid model calls0;
+coordinator cost unknown. No native execution, runtime deployment or admission
+is established by this slice. Frozen runtime294195cdb is unchanged.
+
+Evidence root: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`.
+Receipts are immutable; SHA256 identifies exact bytes, not authority by itself.
+
+| Receipt relative to evidence root | SHA256 | Result |
+| --- | --- | --- |
+| `native-installation-inputs/current-time-independent-review/parent-consent-author-review/connected-review.json` | `a28fb90487e56c1113aa7f8c8ca8ba80130168b8cd35e6653bb74b8fd1416e66` | exact command,512 pass/2 skip,18 hashes |
+| `native-installation-inputs/current-time-independent-review/parent-consent-independent-heldouts/independent-review.json` | `fbcf763b983943a7304d5747c04e32205b504e7f8ea9c85ffcc78725fabeb99c` | independent37 pass,source unchanged |
+| `descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/response-slice/v36-publication/pr2162-merged-independent-closure.json` | `fa8b32b95ae56e5b50203a9bfb6f8937bf5b6ac92e5c03657709b6d389c8d843` | reviewed/merged tree equality |
+| `descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/response-slice/v36-publication/pr2162-main-validation.json` | `c9063baaee7e7367e77f3b0880f011cf61608d479e05c74891ac997fae829143` | exact merged-main CI/CodeQL success |
+
+Re-observed after publication. Next eligible19/P0 (C4/I5/D5/Impact5): reuse the trusted parent-policy
+and consensus owners to consume policy-bound consent with current reviewer/model
+and budget inputs. Keep the two unresolved canonical verifier gates closed until
+that composition is independently demonstrated. Then one admitted author ticket,
+independent verification, authorized activation/rollback, later retained benefit
+and bounded next selection remain the root roadmap acceptance sequence.
+
+## Qualified runtime and v29 handshake — 2026-10-19
+
+PR2160 merged `358fb2e34e34bb01342bd92ff80d3ceda413334c`; reviewed head
+`ec7a0e438ae18ef5d1088cd890d126a19b8b95f1` and merged main share tree
+`afeadba93021def81ba576626d2dfa3cc90d2f53`. Exact-head CI39238676964 and
+CodeQL39238674221 passed; merged-main CI39240425401 and CodeQL39240425222 also
+passed. The clean source checkout is retained because active
+native preparation imports its pinned source. Publication closure is verified;
+passing CI is not evidence that the handshake succeeded.
+
+The new runtime independently qualifies 2,683 files/358 directories, including
+1,246 exact Git sources and 1,437 runtime files. Both deny/Unix profiles pass;
+four absent-owner entrypoints reject. Descriptor SHA256
+`fe195a4f4dace47b4f6f3236dbee2848fb11711fe88f8b54c3a2278a296c2640`.
+Optional deferred imports remain outside the selected qualification scope.
+
+One same-boot, unprofiled ABBA block measured full guard means 2.957392s baseline
+and 2.196585s candidate, descriptively 25.73% lower. Each build has two process
+invocations with two guards each. Profile-total means were 8.316657s and
+6.301675s. Cache/warmup/order effects and within-invocation dependence remain;
+these samples do not prove causal gain, request latency or retained RSI benefit.
+All four observation units were independently absent afterward.
+
+Fresh v28 preserves authority, deadlines and no-observer configuration.
+Installation passed in 37.496s, revocation in 1.988s; handshake exited2 in
+120.255s. Root/issuer/target reached readiness. Requester rejected after5.741641s;
+target handled1/exited0, issuer handled0/exited2 with the generic resident error,
+and root handled6/exited2. Issuer elapsed/CPU60.728467s/56.832826s; root
+elapsed/CPU91.701923s/1.900514s. Compared with v27, different boots and one pair
+do not establish causal performance improvement. No inner exception is observed.
+Observation completion remains false, cleanup-loop completion true. Preserve the
+historical target reset-failed_exit_1; all seven units are independently absent.
+Independent review binds25 sources,12 refreshed outputs,9 pins and4 invocations.
+
+Micro reconciliation: resident `requests_handled` changes only when the complete
+serving function returns. Zero therefore does not mean no backend processing.
+A rejected backend response alone does not produce the resident runtime-error
+code. Source shows two full runtime guards per completed root LOAD proof, plus
+startup/current-input checks; no request-time count was measured in v28.
+
+Fresh v29 preserves exact ec7a source/runtime and existing bounds. Installation
+and revocation pass; handshake rejects, with no outer stage timeout. The local
+observer records30 callbacks without exhausting its cap. Exact `SigningResponse`
+public status is `accepted=false`, `grant_service_not_admitted`; subsequently
+resident `_serve_requests` line239 emits C_RAISE at `connection.sendall`.
+This connects the generic resident error to the send operation, but does not
+identify exception type/errno or the earlier backend rejection branch. The sign
+return record has no timestamp: the protocol-dispatch region is bounded by
+160.823410063s and179.236623857s; it is not an exact backend-return measurement.
+Requester exit is165.868243s and send C_RAISE is179.236663079s. No causal clock,
+client-disconnect or observer-overhead claim follows. Observation completion is
+false, cleanup-loop completion true; all seven units are independently absent.
+The historical `reset-failed_exit_1` remains evidence. Review binds25 sources,
+12 helper outputs,9 pins and4 invocations.
+
+A separate harmless native control proves a launcher lifecycle defect:
+`Type=oneshot` with `RemainAfterExit=yes` leaves a successful process
+`active/exited`, while `systemd-run --wait` waits for deactivation. The pre-v30
+launcher waits for that parent process before its owned stop. In two confined
+`/usr/bin/true` cases, yes stayed pending until owned stop, then returned0;
+no returned0 without a stop. Both units are independently absent. This proves
+a harness wait cycle, not the issuer's backend rejection.
+
+At the v30 checkpoint, WSP15 retained dependency19/P0 and executable slice18/P0 (C3/I5/D5/Impact5):
+localize the actual backend rejection branch through the existing bounded
+observer, then repair the demonstrated cause. The lifecycle slice is now evidenced. The accepted v30 package changes only
+`RemainAfterExit=no`, exact already-absent cleanup recognition, identity/absence
+recheck before reset and separate post-cleanup launcher status, plus fresh fixture
+names/pins. It preserves the v29 observer, source/runtime, authority, deadlines
+and handshake/closure acceptance. Independent offline review passes41 grouped
+checks (14 package/rebased lifecycle,5 held-out lifecycle,1 context proof,
+21 unchanged-observer CPython checks); these are reruns, not additive unique
+coverage. Root applied the exact package. Fresh v30 installation passes in39.353s
+and revocation in2.447s; handshake exits2 in98.031s, full139.941s. Observation
+completion and cleanup-loop completion are both true, with no nested timeout or
+cleanup errors. The target launcher exits0 before and after cleanup and its unit
+is already absent; its ready InvocationID and exact attempt description match
+independent journal metadata. All seven units are independently absent afterward.
+Root/issuer/requester exits remain2 and clean_service_closure remains false.
+Thus the wait-cycle correction is evidenced without converting rejection to success.
+
+The unchanged v30 local observer again records30 callbacks, exact rejected backend
+status and sendall line239/offset266 C_RAISE. Backend branch/exception type remain
+unobserved. Issuer elapsed/CPU66.403149s/61.799752s, root97.680435s/2.248435s;
+requester5.794445s. These are descriptive unit timings, not causal gain. Review
+verifies25 exact sources,12 outputs,9 pins,6 refreshed files and4 invocations.
+No author/provider admission or retained RSI benefit is established.
+
+V31 local PY_START/PY_RETURN observations identify the normal rejected return
+at `_CurrentLowGrantBackend._sign_current` line192/offset486: the factory did
+not produce an accepted backend. Its internal rejection code was not observed.
+The fixed30-second-profile hypothesis is false: issuer custody derives its
+profile from the current credential/policy expiry. Actual clock samples inside
+the factory remain unobserved.
+
+Independent source and exact-decoder controls find a concrete fixture defect:
+the preparer writes plain hex for target/issuer audit credentials, while the
+canonical decoder requires `AUDIT_KEY_PREFIX` and validated base64. Assembly,
+credential mounting and UTF-8 resolution do not transform those bytes. V32
+changes only those two fixture roles to the canonical codec with a decoder
+self-check; integrity-role bytes/modes remain unchanged. Nine codec controls,
+12 final-byte author package controls and six independent package controls pass;
+these overlapping runs must not be summed as unique coverage. The independent
+pin-set test correction is preserved; candidate bytes were unchanged. Six managed
+files/five changed include fresh identities/pins; launcher/observer/lifecycle,
+source/runtime, authority, lifetimes and deadlines are unchanged.
+
+Fresh v32 installs in39.025s, revocation passes in2.132s, and handshake exits2
+after94.009s; full post-readiness execution135.281s. Inner signing now returns
+accepted at line193/offset542 (168.647847016s), and outer authorization returns
+accepted at line175/offset348 (175.709961977s). Later `sendall` line239 raises
+at175.710145756s. Requester exit162.009262s precedes that send by13.700883756s.
+Inner entry-to-return is3.189762773s; entry-to-outer-return10.251877734s excludes
+unobserved earlier work and is not full sign duration. Dispatch-to-response is
+18.750249198s. The target has no active observer in this trial: its only exposed
+failure is invalid signer response. Timeout/errno remain unobserved; v25 does
+not supply v32's cause. All seven units are independently absent, observation
+and cleanup complete, original rejection preserved. Review binds25 exact sources,
+12 helper outputs,9 pins and4 invocations. This validates the fixture repair's
+advance to accepted signing, not a completed handshake or author ticket.
+
+V33 install38.391s/revocation2.063s pass; handshake exits2 after93.383s and full
+execution takes133.943s. Inner/outer signing again returns accepted before a
+later send failure. Target monitoring is `setup_failed`, zero callbacks: its
+exact built-in metaclass check incorrectly rejects the canonical Protocol class.
+Original component fixtures omitted that inheritance and missed the setup defect.
+All seven units are independently absent, observation/cleanup complete. No current
+target timeout or errno is established. The candidate observer repair retains
+exact source/code/base checks, local masks and cleanup, with24 author controls,
+four independent held-outs and an actual installed-module import/setup probe.
+The independent metaclass control initially failed while constructing its fixture;
+that record is retained, then corrected without changing the candidate.
+
+A separate exact-source regression proves authenticated config30 reached the
+nested client without its timeout keyword, using the existing default5. The
+two-owner repair forwards `config.timeout_s` through the existing supply loader
+and socket builder. The public keyword retains default5, requires exact finite
+non-Boolean int/float in(0,30], and does not change signed request/grant expiry,
+generation/revocation checks or acceptance. This is a per-operation wait, not an
+end-to-end deadline. Windows connected validation:166 passed,2 Linux-dependent
+skips. Independent Linux validation73 passes with no skips, including real
+temporary AF_UNIX/process-lock and symlink controls. Both changed suites are in
+the existing signing-composition CI step. Those source tests alone do not prove
+native benefit; the later qualification and trial are recorded below.
+
+Exact source `294195cdb96e1ef70d146bb3e6b3fa16ea71e37e` independently qualifies
+2,683 files/358 directories under descriptor
+`6ab8c14fb905666d1f5d04252dec0234747c2a9b1529657d95ffaba8fc70d950`.
+Both confined profiles pass, four absent-owner entrypoints reject, and all nine
+qualification units are absent. Optional deferred imports remain unqualified.
+The runtime/source delta contains only the two timeout-forwarding owners.
+
+Fresh v34 install37.769s/revocation2.046s pass; handshake exits2 after93.705s,
+full133.632s. Issuer inner/outer signing returns accepted at monotonic194.301334642
+and201.218207854. The target client returns accepted at201.218680125. Issuer and
+target exit0; requester exits2 with `REJECT_SIGNER_SOCKET_RESPONSE_INVALID`.
+Target observer is enabled28callbacks and issuer41; neither cap is exhausted and
+neither records C_RAISE. These local observations do not prove every downstream
+operation succeeded. Independent review verifies25 source bindings,12 refreshed
+outputs/9 pins and four invocation identities; all seven units are absent,
+observation/cleanup complete and no cleanup errors. Root handled10 counts returned
+connection handlers, including rejected/error responses, not successful LOADs.
+Its later generic error is not a demonstrated cause of the target rejection.
+
+V35 install38.965s/revocation2.093s pass; handshake exits2 after94.125s,
+full135.297s. Local target observations identify `_resolve_and_sign_current`
+line152/offset126 returning `REJECT_SIGNER_SECRET_RESOLUTION_FAILED`, propagated
+through all four observed backend returns. The exact branch is the returned
+object type/`ok` gate at151, not the exception catch at150; an early reviewer
+interpretation was corrected against exact source. Inner client returns accepted;
+the requester still receives sanitized RESPONSE_INVALID. All seven units are
+independently absent, observation/cleanup complete, no cleanup errors. Review
+binds26 sources, six refreshed outputs/nine pins, unchanged inputs and four
+invocations. The32 target callbacks include newly observed returns and are not
+comparable with v34's28 as a performance measure.
+
+An offline public-input probe reproduces a separate configuration mismatch:
+actual v35 target profile60 versus credential window300. Exact resolver lifetime
+calculation at synthetic elapsed1/100/239 returns299/200/61; the existing factory
+rejects all three with FAIL_PROVIDER_TTL_EXPIRED before secret value access.
+Remaining59/60 passes the TTL predicate;61 rejects. This does not observe the
+v35 factory's actual rejection code or clock. The existing issuer instead derives
+its profile from authenticated remaining custody/policy lifetime.
+
+V36 install0/39.146s, revocation0/2.076s and handshake0/94.111s; total135.444s,
+without timeout or retry. Independent archival verification checks both Ed25519
+signatures and exact request/response binding against the live accepted record.
+The target factory now returns ok=true/NONE and all observed backend returns
+accept. The fixture explicitly changes target profile ceiling60 to validated
+`args.ttl` (300); absolute credential/policy expiry and signed request/grant30
+remain unchanged. This does not establish the actual v35 provider rejection code.
+Target, issuer and requester exit0; root exits2 with its generic runtime error.
+Therefore `clean_service_closure=false` remains a failed criterion even though
+all seven units are absent, four invocations bind and cleanup reports no errors.
+Root handled10 counts returned handlers, not successful LOADs; an idle-timeout
+cause remains unobserved. This proves a synthetic LOW prerequisite, not real
+author admission, paid provider execution or retained RSI benefit.
+
+Current WSP15 next18/P0 (C4/I5/D5/Impact4): resolve the existing parent/work/model/
+verifier/budget admission path from authentic inputs. Do not repeat the accepted
+handshake or widen LOW authority. PR2161 merged122fec8c6 after exact-head
+checks and independent review; merge tree equals reviewed8b473f. Exact merged-main
+CI39249090093 passes7/7 and CodeQL39249089610 passes4/4.
+
+Macro reconciliation: no installed trusted parent policy/sovereign provider was
+found in the scoped source search or92 open PR titles; nearest candidate PRs do
+not own that composition. Existing callable supplier injection is not an
+authenticated provider. Final-effect consent cannot substitute for parent
+approval. The post-valve lease issuer is already wired and must not be duplicated.
+The October16 public provider receipt names OpenRouter-backed OpenClaw/Hermes
+routes, with no zero-paid local route established; it is historical configuration,
+not current health or admission. AgentDB assurance reservation exists, but no
+current public distinct-verifier reservation was found. Its getter can expire
+leases and was not used as a passive read probe. Actual parent/work/model evidence,
+budget, independent verifier and qualified effect-capable composition remain gates
+for that current effectful integrated path; this is not a universal requirement
+for every no-effect provider proposal.
+
+Additional reconciliation separates LOW proposals from effectful writing. The
+existing `signed_0102_readonly_review:*` / `AUDIT_NO_EFFECT` / dry-run-valve path
+uses authenticated AgentDB admission, but selects 0102/Fusion review. No existing
+upstream OpenClaw/Hermes author binding was found there. LOW is not a permission
+bypass: current snapshots still require write/admin permission. The separate
+`attest_architect_proposal` operation requires HIGH/ULTRA. Reuse these owners if
+an upstream no-effect binding is admitted; do not invoke a private capability
+issuer or import elevated writing prerequisites solely from the current pipeline.
+
+October19 read-only Windows probes supersede old reachability only: LM Studio
+lists nine models with zero resident instances; Ollama lists/loads none. No
+inference, loading or configuration change occurred. The prior eight-call Qwen
+experiment remains NOT_QUALIFIED_AS_APPROVAL_VERIFIER: baseline2/4 verdicts
+correct and0/4 accepted; candidate2/4 correct and1/4 accepted. Do not repeat the
+unchanged trial or promote from catalog presence. The existing owned model
+lifecycle supports a future fresh bounded transport canary; occupancy/context
+limits are not a hard RAM/VRAM reservation, and such a canary would not establish
+quality or admitted author execution.
+
+All paths below are relative to the existing evidence root
+`O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`:
+
+| Evidence | SHA256 |
+| --- | --- |
+| `native-installation-inputs/current-time-independent-review/v36-independent-review.json` | `36615a9c5d3f64734321b2fbabeb66f18a95709d1443c5abb2f1b9bd8c56dd3c` |
+| `native-installation-inputs/current-time-independent-review/v36-target-local-transport.json` | `36cb7ec4334b3d396c0a220d4a68fd7c2ad674ea96532b85fdd2d3fc06dfe12f` |
+| `native-installation-inputs/unified-independent-review/v36-target-provider-ttl/independent-review.json` | `db85183d6487bdea7748b6f33b09dd4d55d641a148f848cadd6ce4d242a02fb5` |
+| `native-installation-inputs/unified-independent-review/v36-candidate/independent-package-review.json` | `6fd90d56fec9ec1603857460e465b90fa343da13dc93400bb56ca0a7fbe9d901` |
+| `native-installation-inputs/current-time-independent-review/v35-independent-review.json` | `9683122c7f1ae4e99f05a4e06311ae6428e2b0e6cda393e8a321fca35a0f212d` |
+| `native-installation-inputs/current-time-independent-review/v35-target-local-transport.json` | `3af4c65d46f3105d2f508c9df7f3b575933e5a50ded085ee64af0e4de002b692` |
+| `native-installation-inputs/current-time-independent-review/v35-target-provider-ttl-probe.json` | `2b5c79bfd8ac66e77aa54d34d6d27ef2286517c14705cbbfc8bf22c905e6edcc` |
+| `installed-execution-qualification/all-role-294195cdb-v1/independent-readonly-review/independent-review.json` | `101f45f8997a14698bdd921b1463c3345d94b8214d2404a6137eeb40311d2116` |
+| `native-installation-inputs/current-time-independent-review/v34-independent-review.json` | `7ebf08818f885e867d9d0a7db38423eae587372fc3180fca630327132f22efc4` |
+| `native-installation-inputs/current-time-independent-review/v34-target-local-transport.json` | `542d0df516c4e871effd02acc25b4ed5d483d6104e27cade07f65261058cd628` |
+| `native-installation-inputs/current-time-independent-review/v34-root-service-interpretation.json` | `94bf193fc7580306332ac3aefa2fdfbc27b69f00927fe1555209c7490a971f68` |
+| `installed-execution-qualification/all-role-ec7a0e438-v1/independent-readonly-review/independent-review.json` | `6a6dee7cded7f5b3c46f2a5b127d231d0151b6535c7e0072e717dc530bded3aa` |
+| `installed-execution-qualification/guard-cost-abba-ec7a0e438-20261019/independent-measurement-review.json` | `a15c0bea40ec0a945bc6b83a21fb28e944e05732322d0332ab91a6c122bd7abe` |
+| `native-installation-inputs/current-time-independent-review/v28-independent-review.json` | `837c89b528fc9a46d348b2d2908869472d4700ddcc1a6e1fe8a6036d4371c10d` |
+| `native-installation-inputs/current-time-independent-review/v29-independent-review.json` | `042b39cdd206afcf741c1a7d2c7f82d09b80552fee8b62625b3befb0b513eb79` |
+| `native-installation-inputs/current-time-independent-review/v29-local-transport.json` | `e1285c0476c675e37879e8f10349b4129f12da04809a32be4ae9e19b5c20bab1` |
+| `native-installation-inputs/current-time-independent-review/oneshot-wait-observation-5dcbda0a32ed421cbc5194a0d3592c71/independent-review.json` | `66404fb7aba6c41fc8c1ccf7bf53761f259b484c75d9d8639d4a707d8fd94333` |
+| `native-installation-inputs/unified-independent-review/v30-candidate/independent-review.json` | `c7fcea4286cefbf6f56877b22597b34c0556019810ec2e941171f788233e9efb` |
+| `native-installation-inputs/current-time-independent-review/v30-independent-review.json` | `d9c28e065098fc55447b18f739249fb75c8d96bc3a0abe4c5fd99281f672b710` |
+| `r15-admission-prerequisites-ec7a0e438-readonly.json` | `45d7cdf94f7e50916373571c012bc8dc85eda4b6d3c5455dad15ffe7a59fb546` |
+| `native-installation-inputs/current-time-independent-review/authentic-admission-owner-pr-audit-ec7a0e438.json` | `96eab2cac69e7ca28f3bd0a93471e7b25712f4144cdd02648aa9a8a3f9998681` |
+| `native-installation-inputs/local-provider-readiness-20261016.json` | `21a01e3ff8e793e2c875055dc3e69926858ecb384486afccc9ccb8b3456e5719` |
+| `native-installation-inputs/current-time-independent-review/v31-independent-review.json` | `7bff0fc62152681d2ad9c09dc5ce67282edda7d65533894c98035861936f6734` |
+| `native-installation-inputs/current-time-independent-review/v31-audit-key-format-independent-probe.json` | `230117351d1f8731298e8b5306839db51e9e8350e4628a7d3bf7486b7d4de1a2` |
+| `native-installation-inputs/unified-independent-review/v32-audit-codec/independent-codec-review.json` | `0cbd2605bd8946a74e331361167bed8dbadd9469612f380664fca1b5252fe40b` |
+| `native-installation-inputs/unified-independent-review/v32-candidate/independent-package-review.json` | `257d3f5ae5e10b4ef69bfd40e2d0f425f64ea3b86617368aeb7c7708eb6e3b7a` |
+| `native-installation-inputs/current-time-independent-review/v32-independent-review.json` | `327d9a8f69d2d724167c8e7d50848939ff5357631eed1335c78109df08efbb48` |
+| `native-installation-inputs/current-time-independent-review/v32-temporal-outcome-review.json` | `c6d1d4917700c621e8f5207b8d8b4bb6ab90708259ab2005af13aa627c2f8075` |
+| `native-installation-inputs/current-time-independent-review/low-readonly-provider-authority-audit-20261019.json` | `437aab39758573249b1ede2e7bde46a936ab02306e209695897117a8d655bbe9` |
+| `native-installation-inputs/local-provider-readiness-20261019.json` | `9e850d75ae4481ea8a3dac6671cc898642a777f8992b6acebf1e3c978641487d` |
+| `native-installation-inputs/local-provider-qualification-history-20261019.json` | `5c63b0fe7336d1e4ff5f497655ea8f0e45d6badfb9b1fe9a3360a7998d53b0d0` |
+| `native-installation-inputs/current-time-independent-review/v33-independent-review.json` | `81931278a0755550d3b14d40e200235f589fcf12c8d5e09a89effaf95271fc10` |
+| `native-installation-inputs/unified-independent-review/v33-protocol-repair/frozen-author-review.json` | `ae3fa21848af6c7c8f51d15404177a8da2a0fdf4568e0d9852869112386207b4` |
+| `native-installation-inputs/unified-independent-review/v33-protocol-repair/root-independent-review-corrected.json` | `9555d19638e7f3ff157e39962992ff30e9629e98ffbae62bd91258ca145cfeea` |
+| `native-installation-inputs/unified-independent-review/v33-protocol-repair/installed-setup-probe.json` | `f81faa3ffae4c9b6740e620e2bf1b5a367ece2bd019239d8dd702e738a3c80af` |
+| `native-installation-inputs/current-time-independent-review/timeout-propagation-author-review.json` | `c7fb46581782bae4fdb130d5f1eaf670c4f66b303be695c1329da9b956d0275e` |
+| `native-installation-inputs/current-time-independent-review/timeout-propagation-independent-review.json` | `0c29a5f54fb1502eee93fbe6492cedf2cd9ef189b14ac319d53fb280c2d049c8` |
+| `descriptor-path-publication-review/native-handshake-20261019/admission-closure-20261019/pr2161-merged-main-closure.json` | `8812f8f1ef40409461783fea3499c0c3c9357efc89d5b1015f434d42f6274512` |
+
+Synthetic authority only; native author tickets0, paid model calls0, coordinator
+cost unknown. Codex review is independent source review, not resident worker
+provenance. No completion gate advances. Historical checkpoints below retain
+what was known then; this section supersedes their pending-qualification status.
+
+## Native requester rejection and source publication — 2026-10-19
+
+PR2159 head `1e203d5de9bb8c6ee17f2f5e0d52bffb2317272d` merged as
+`bb9d3f802fc3f9283c5f7b611f444dce0e56470e`. All 19 recorded exact-head check
+runs passed (12 distinct check names); main CI39222572582/CodeQL39222573026
+also succeeded. Both trees are
+`c7045432ea7a2e065e6de5ca0f9d711e947354e5`. The owned source checkout is clean
+and retained because the active native preparation still references it.
+
+The independently checked fresh runtime has2683 files/358 directories:1246 exact
+Git sources and1437 pinned runtime files. Both confined profiles pass; all four
+absent-owner entrypoints return2. This is negative qualification, not authenticated
+startup. Deferred optional imports are not qualified by these selected paths.
+Descriptor SHA256 `86472215f3ddea3eca8cd4625d321e65372d9b3ef0526606777b9746dd829d4a`.
+
+V21 uses synthetic authority only. Installation and revocation pass. Root, issuer
+and target reach socket readiness; target serves one request and exits0. Requester
+exits2, preserving backend/runtime `REJECT_SIGNER_RESPONSE_INVALID`; the outer
+handshake-verifier reason is `signer_peer_handshake_response_rejected`. Client
+transport/JSON failures have distinct SOCKET codes. The target's caught exception
+is unobserved: do not assert which backend check failed from this generic code.
+Root start-timeout follows requester exit by3.58855s and is not established as
+the cause. The launcher reports TimeoutExpired during closure and target
+reset-failed_exit_1; all7 owned units are independently not-found/inactive/dead
+afterward. Preserve both the historical cleanup error and later absence.
+
+V22 reproduced installation/revocation acceptance and requester rejection in
+101.628s after readiness. Its target diagnostic exhausted4096 RAISE callbacks;
+the only retained location was `runtime_artifact_safety._is_relative_to:525`,
+where the ValueError is handled and returns False. This is diagnostic noise,
+not evidence of the request's cause. All7 units are independently absent; exact
+source/descriptor bindings, helper pins and attempt/InvocationIDs match. The
+next diagnostic must survive that handled-exception flood while preserving
+same-frame and propagated failures, source confinement and original outcomes.
+V22 review SHA256 `687b2dd511ca7ab2bc4f22f0a153033a9992cb5bf36feda78a9c1d3fd5e906be`,
+at `native-installation-inputs/current-time-independent-review/v22-independent-review.json`.
+
+V23's revised observer passed actual CPython noise/late-failure controls and
+captured the native chain without exhausting its cap:7 scoped/185787 total
+callbacks. `require_secret_grant_signer_response:103` rejected the inner response,
+propagating through `_sign_grant:120`, `issue_grant:76` and initial `sign:54`.
+That check establishes wrong response type or accepted-not-true; it does not
+identify the inner rejection code. Target signing was not reached. Installation
+and revocation pass; handshake rejects after101.313s post-readiness. All7 units
+are independently absent. No issuer final outcome was emitted. The client has
+a5s default, but timing alone does not prove a timeout. Observe only its fixed
+public status code before selecting a repair; preserve unknown source locations.
+V23 review SHA256 `b026ea50d752e959bfa38897f15721011bf50a4d5ec61463766d67efdce50812`,
+at `native-installation-inputs/current-time-independent-review/v23-independent-review.json`.
+
+V24 closes the diagnostic coverage gap: actual CPython tests retain unlined
+context-manager unwinds and observe only the exact client's fixed public return
+codes. Author53 checks and independent7 actual-event held-outs pass, with shared
+fixture and overlapping prior coverage disclosed. Independent package review
+binds six changed helpers, nine pins and31 source-defined public enum literals.
+No production source, authority, timeout, TTL or isolation setting changed.
+
+The fresh native trial passes readiness30.067556s, installation and revocation;
+handshake rejects after100.683s post-readiness. The inner exact SigningResponse
+has accepted=false and `REJECT_SIGNER_SOCKET_CONNECT_FAILED`; socket-client
+`_unix_socket_roundtrip` unwinds with TimeoutError at offset628/line null.
+That cleanup offset does not identify connect versus send/receive. The issuer
+emits no final handled/outcome record. Monitor7 scoped/185771 total events; cap
+not exhausted. Root timeout occurs3.453879s after requester exit. All7 units
+are independently absent; historical closure errors remain. Review SHA256
+`cda26be63361110c3fe7ad9ae722f46cb698eb17a4de27f0017ee13698886446`, at
+`native-installation-inputs/current-time-independent-review/v24-independent-review.json`.
+
+A separate credential-free observation reuses the existing qualification runner
+and exact runtime: two full inventory guards pass in3.768633s and2.705737s; its
+unit is absent afterward. No target observer, issuer request or authority was
+used. These are component samples, not a causal request-latency experiment or
+RSI gain. Evidence: `installed-execution-qualification/all-role-1e203d5de-v1/guard-cost-observation-20261019/observation.json`.
+
+V25 localizes the timeout to `_unix_socket_roundtrip:304`, offset434:
+`handle.recv(4096)`. The unlined cleanup unwind628 follows. The exact response
+type is valid, accepted=false with `REJECT_SIGNER_SOCKET_CONNECT_FAILED`;
+8 scoped/185771 total monitor callbacks do not exhaust the cap. Installation
+and revocation pass; requester rejects and post-readiness elapsed is101.505s.
+Whether prior receive chunks arrived is unknown. The issuer emits accepted=false,
+requests_handled0 and an OSError at
+`foundup_verified_outcome_root_authority_client.py:412`; this check rejects zero
+OR over-limit bytes. Neither branch nor timing is observed. Root timeout follows
+requester exit by3.198823s; causal attribution remains unproved. All7 owned units
+are independently absent. Independent review binds23 exact sources,8 target
+offsets,13 issuer frames,9 pins,6 applied/archived files and4 invocation pairs.
+Receipt `native-installation-inputs/current-time-independent-review/v25-independent-review.json`,
+SHA256 `68b4c15bdc092af9f0c697eb8b06a097bfedd4c789f227bcf88d8983cf4b6ad1`.
+
+V26 changes the external diagnostic lifetime/drain120s, runner handshake150s
+and minimum remaining175s; signed30s lifetimes, original launch/readiness/
+requester60s deadline, overall300s and all production bytes remain unchanged.
+Independent review caught the first candidate's90s outer cap and rejected it
+before execution. Revised9 author/11 independent focused controls pass; these
+are harness checks, not native admission. The30s nominal setup/cleanup allowance
+does not guarantee the88s worst-case cleanup path. TERM invokes the child error/
+finally handling, but the20s grace can still truncate cleanup before KILL.
+
+Actual install0/40.147s, revocation0/2.110s, handshake2/120.253s; total after
+readiness162.623s. Runner did not time out. Nested observation_completed=false,
+cleanup_loop_completed=true, with original TimeoutExpired/reset error retained.
+Issuer exits2 after75.128049s (71.12831 CPU s),17.340820s after requester
+rejection; final public code `FAIL_SIGNER_SERVICE_RUNTIME_ERROR` maps the broad
+resident socket catch180-186. That owner is outside the issuer monitor's prefix
+coverage, so its failing operation is unknown. Root handles6 requests, exits2
+after106.122652s with a generic runtime error. Both exit before the120s service
+limit; no systemd lifetime timeout occurs. Idle root timeout is compatible with
+these observations, not proved. All7 units are independently absent. Review
+binds25 exact sources,9 pins,6 applied/archive files and4 invocation pairs.
+Receipt `native-installation-inputs/current-time-independent-review/v26-independent-review.json`,
+SHA256 `3d5fd75f364413d951353bce0f68a0063f49d3a546e71cc2edcd4b7b797010cd`.
+
+V27 disables issuer RAISE/SIGPROF and target observers, preserving v26 budgets,
+source/runtime, authority and raw outcomes. Five author and 12 independent offline
+controls pass. Actual installation/revocation pass; requester still rejects.
+Issuer exits2 after70.046140s (66.242630 CPU s), versus v26 75.128049s
+(71.128310 CPU s); root exits2 after101.027161s. Different boots and this single
+pair do not establish observer overhead, causal gain or retained benefit. No
+inner socket operation is observed in v27; do not inherit v26 recv attribution.
+Observation completion is false, cleanup-loop completion true, and the original
+TimeoutExpired remains; no outer-stage timeout. All seven units are independently
+absent. Review binds25 exact sources,9 pins,6 helpers and4 invocation identities.
+Receipt `native-installation-inputs/current-time-independent-review/v27-independent-review.json`,
+SHA256 `acf51eaba54b984a8cc07833b75b6e156b64566d2b642ce02de35dc6f9fe5f3a`;
+source/helper binding SHA256 `fa8d5e2d067ce4109b6ff7fef5554e5d7bd7f03b685428c08fb65e502340044b`.
+
+A separate credential-free profiled guard pair finds33,628 `Path.relative_to`
+calls among523,262 path constructions. Profiled guard times7.934643s/5.925629s
+include instrumentation overhead and must not be compared as latency gains to
+the unprofiled pair. Reuse the existing lexical predicate for a narrow cost
+repair; preserve all surrounding descriptor, filesystem and authority checks.
+Independent differential review rejected a raw path-parts candidate: six of
+12,717 Windows cases changed Unicode case behavior. Linux's12,717 cases matched.
+That rejected candidate is preserved and not promoted. Windows must retain
+`pathlib` case semantics. This is coordinator-authored optimization research,
+not evidence of autonomous repair or retained RSI benefit.
+
+The corrected shared predicate preserves Windows `Path.is_relative_to` and uses
+anchor/component comparison on POSIX. Both platforms match all12,717 differential
+cases. Alternating4x18,000-call samples give median baseline/candidate ratios
+1.61 Windows/5.44 Linux; these are pure predicate ratios, not whole-runtime gains.
+Existing manifest paths remain1439; only this owner's source digest changes.
+Independent manifest/pin review confirms canonical digest
+`c038d2427999deb925872fcce6967065b4ddb1b1ed31ed1a94877563649d0e21`.
+Windows49pass/1symlink-permission skip; Linux shared suite38pass/8Windows skips;
+final connected selection111pass/8Windows skips. Candidate native runtime remains
+unqualified; full native cost is unmeasured. Manifest8pass; three existing Node entrypoints pass, including expected negative
+bootstrap rejection traces. Five historical expiry tests fail identically on
+baseline/current source; canonical WSP62 treats unchanged expiry debt as advisory
+and this host shrinks704 to703 lines. No exemption or ceiling was changed.
+
+The reversible clock experiment collected1800 guest samples/180 host pairs and
+restored the service. Its fixed final60s host-interval criterion failed:
+minimum54.391405ms variation exceeds50ms even after round-trip uncertainty.
+Later service restarts have unknown initiator. No synchronization setting,
+readiness policy, production clock guard or threshold was changed. V21 separately
+passed the existing NTP/readiness gate for30.099512s; neither observation predicts
+future stability or establishes the v20 clock-regression cause.
+
+Current source reconciliation: `GovernedValveUseTimeAuthorityResolver` deliberately
+returns no lease. `ResidentQueueExecutionValveStageHandler` already calls the
+injected `ExternalSignerAuthoritativeUseLeaseIssuer` after accepted valve checks
+and rechecks current inputs. Do not duplicate this connection. Parent consensus
+and sovereign-verifier reasons remain unresolved by the current collector; the
+native grant service deliberately permits only LOW handshake scope while effect
+leases require HIGH/ULTRA. Generic elevated hooks exist, but no installed native
+effect composition was found in the scoped audit. Trusted parent evidence and
+qualified effect service composition remain later gates; LOW must not be widened.
+The parent consensus verifier currently has test callers only. Its sovereign and
+policy resolvers are protocols without an installed authenticated provider in
+the inspected scope. Matching supplied digests is not authenticating approval.
+Initial-signing capabilities are consumed, and final-effect consent cannot serve
+as pre-valve parent approval. A consumer hook alone would not close this gap.
+
+WSP15 selects the existing handshake dependency19/P0; its next bounded diagnostic
+slice is18/P0(C3/I5/D5/Impact5): qualify the independently reviewed containment
+candidate at its exact source, then measure full native cost. Preserve production
+timeouts, signed grant/handshake30s lifetimes and all authority checks. V27 does
+not establish a causal observer cost or successful handshake; do not loosen
+timeouts from these observations. Diagnostic progress is not worker admission.
+R15 author/verifier, activation/rollback, retained use and autonomous selection
+remain open. Paid provider calls0; coordinator cost unknown. Codex independent
+review is not OpenClaw/Hermes worker provenance.
+
+Evidence root remains `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/next-startup/`:
+
+| Existing evidence | SHA256 |
+| --- | --- |
+| `installed-execution-qualification/all-role-1e203d5de-v1/independent-readonly-review/independent-review.json` | `4b046d603ee420d790e891aa7beb0654883c690bf422b8c18a82acabe7846efc` |
+| `native-installation-inputs/current-time-independent-review/v21-independent-review.json` | `2374d38884615ea2a77383a171ddfa7d19e3dfbbf24cdb19d79419b4961f9460` |
+| `native-installation-inputs/full-fixture-review/host-sync-experiment-2026101901/independent-experiment-verdict.json` | `eb407c0bf840a7afd4449d8641f7072f3c83d01274a90032fbe3ee70949934d0` |
+| `r15-post-handshake-dependency-audit.json` (historical audit preserved; current-source and authenticated-provider corrections appended) | `52b0e3848760d7b4545c9ccc9d58b0e428e436fbeb4f85570465aecf58244741` |
+
+Publication receipt: `descriptor-path-publication-review/pr2159-main-ci-closure.json`.
+Exact-head rollup: `descriptor-path-publication-review/pr2159-exact-head-checks.json`,
+SHA256 `6dd11eb2fb2dbebb579ae4c6454d0c987e21f0801cdc73d4ac36efa3c0b61a26`.
+Holo owner query remains rejected with HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH;
+freshness UNKNOWN/index gap true. Direct exact-source retrieval supplies this
+scope; no authority reindex or shared checkout mutation was performed.
+
 ## First LOW control identity and native preparation — 2026-10-16
+
+Latest closure: PR2147 head `88690a4f5180e7224096d40afcc95a7efeac9b6d`
+merged as `6fb93580cab7bff034970f5fdf02cd29a6653027`; all11 exact-head checks
+and main CI38822943270/push38822942278 succeeded. Reviewed/main tree is
+`f69d83f24236a95ad4bbf140a32df3632bf4ad29`. Existing evidence root below contains
+`native-startup-publication-review/pr2147-merged-main-closure.json`
+(SHA256 `50eec303a003d874a484834263d0daf2a5f5904f1277e3bf75b491389ef27473`).
+
+Runtime `all-role-88690a4f5-v1` independently qualifies2691 installed files,
+1254 exact-source files and362 directories. Descriptor SHA256
+`d5fa191de7059cd3b0c3935eecc9442fff45e90a8c99c6db28812d29ecca28d9`;
+independent review receipt SHA256
+`1f3f71bada17733630a7b2fbd35955001057c2a906f4c461b6fc8fbf9ad490a9`.
+It supersedes34eed qualification, not its preserved failure evidence.
+
+Fresh disposable v19 accepted installation/revocation, then failed issuer
+readiness within the existing60-second process bound. V20 added bounded external
+CPU-stack diagnostics only: six samples, no local values or private data.
+It rejected before action at permission `_current_permission_epoch:96` via
+`guarded_action:75`, after44.970364 monotonic/40.980371 wall seconds. Root stayed
+alive; no timeout expansion. Independent review SHA256
+`583e0fedee59e74da26b2de1a1767d851e675fa8116fe19ca117ef41436ed1c7`
+is in `native-installation-inputs/current-time-independent-review/v20-independent-review.json`.
+The3.989993-second divergence supports rollback; exact guard-local values and
+causal clock mechanism remain unobserved. All16 sampled/exception source files match the
+pinned commit. All7 owned units were independently absent/inactive/dead afterward.
+Synthetic authority only; authentic admission, native author execution and retained
+benefit remain unproved. No paid provider calls occurred; coordinator cost unknown.
+
+WSP15 selects the existing native-handshake dependency19/P0(C4/I5/D5/Impact5).
+Measured pure descriptor overhead can be reduced independently of investigating
+clock-source conflict. Keep current filesystem observations, expiry/revocation
+and explicit caller-time checks. A diagnostic source-switch proposal is not an
+executed experiment or authority to relax readiness. Historical checkpoints follow.
 
 Current implementation fixes the initial empty-grant bootstrap cycle in existing
 root initialization and target control clients. A real first LOW/gen1 identity

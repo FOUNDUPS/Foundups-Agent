@@ -1,3 +1,202 @@
+## PR2150 operations policy binding repair — 2026-10-21
+
+Preserve the exact sender/receipt policy and version1.1.1 from PR2150 head
+`4ec562fd669e63dc3c53f97ec625d2dd256b4c15` while reconciling main `a41a76053`.
+Align the existing registry/runtime version pins and regenerate the skill and
+backend manifests with their existing generators. The 1,449-member backend
+inventory is unchanged; only the policy, loader version and registry hashes
+change. Both existing consumer/test digest pins follow generated content.
+Strict version, receipt, tamper and manifest checks remain intact. Reused suites
+pass101/2 platform skips; three Node compatibility commands exit0. Full evidence
+and earlier failures are in tests/TestModLog.md. No Gmail action, installed
+runtime qualification or deployment is claimed. WSP00/15/22/50/71/95/97.
+
+## Grant startup time sampled inside revocation fence — 2026-10-21
+
+Reused `authorize_current_key_epoch_use` during installed dependency revalidation
+to avoid rejecting valid startup when the wall clock crosses a second between
+caller sampling and durable lock admission. Existing expiry/revocation/rollback
+checks and explicit-epoch equality remain intact. Deterministic regression
+extends the existing custody composition test; no native deployment is claimed.
+See tests/TestModLog.md for WSP97 research, allocation and validation evidence.
+
+## Consensus nonce publication compatibility repair — 2026-10-20
+
+Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
+the modern-owner version predicate an always-truthy tuple. Legacy owners
+entered per-selection validation. The unchanged 10-case model-pair family
+reproduces seven failures; removing the tuple tail makes all 10 pass.
+The existing signed-model gate now covers both v12 and complete v13 owners.
+The full hosted-startup selection runs locally: 901 passed, 5 platform skips, zero failures/errors.
+Source hashes remain stable.
+Independent review passes three legacy/v12/v13 behavior controls and
+verifies the one-source-digest change with unchanged pins policy.
+Regenerated digest pins retain the 1,449-file inventory and unchanged limits.
+Both generators check current, 36 binding tests pass without skips, and
+the three backend compatibility Node checks exit zero.
+These synthetic fixture checks
+do not establish installed HIGH authority or native worker execution.
+WSP00/5/6/10/15/22/50/62/71/97. Exact receipts and commands are in dispatch.
+
+## Protected consensus nonce prerequisite — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Opt-in v13 reuses protected custody,
+current E0 and provisioned MAC/SQLite stores; no service is activated. Connected
+437/3 platform skips and independent 21 controls validate the synthetic component.
+Reviewed helper extraction preserves behavior and original caps; inherited test
+size debt remains explicit. Next is the existing single-lease HIGH composition,
+with genuine admission still required. Runtime inventory 1,449 includes custody
+only; registry 1,737/270 and both generators check clean. Binding tests 36 pass
+without skips and three Node checks exit 0. See [dispatch](../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+
+## Parent-consensus publication structural repair — 2026-10-20
+
+PR2164 CI39281556290 exposed the owner loader at682 lines against its unchanged
+675-line guard. Moved the existing outcome-authority root-separation helper into
+the existing owner-input module; loader import preserves its original access path.
+The helper and remaining module ASTs are unchanged. Independent review passes57
+before/after cases and both cold import orders; loader652/owner263. Runtime1448
+inventory/caps stay fixed; regenerate source digest pins. This repairs a structural
+publication gate, not installed HIGH admission. WSP00/5/6/10/22/50/62/71/97.
+
+## Parent-consensus connection — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Extended existing owner/principal,
+model-verifier, parent/effect, signer and current-use contracts; no new orchestrator.
+V12/v3 separate reviewer domains and exact model selections. Proof v2 retains the
+16-KiB cap and policy; parent-v2 RPC avoids same-lock recursion then reverifies.
+Independent review caught and repaired late expiry/rollback gaps in the collector.
+Twenty model/current-use and17 Linux RPC/nonce held-outs pass on44 frozen files;
+connected59 suites pass1,545/22 platform skips after fixing pytest root isolation.
+Production guards are unchanged; original failures are retained. Six suites join
+existing CI; generated runtime1448 and registry1731/270 retain exact checks.
+Installed HIGH custody/nonce supply and authentic inputs remain open; LOW and
+qualified runtime294195cdb stay unchanged. See tests/TestModLog and the current
+[dispatch evidence](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+
+## Parent-consent connection — 2026-10-19
+
+WSP00/11/15/22/48/50/77/97. Existing parent resolution lacked an authenticated
+consent provider. Added two narrow leaves for the distinct parent privilege and
+connected them through the existing current-principal facade and owner loader.
+Opt-in v11 preserves v1-v10 contracts, including v10 socket ancestry and separate
+rate stores. Detached signatures bind the canonical parent, policy, owner and
+generation; principal/owner/time changes and failed lease exit reject.
+
+Independent review reproduced policy loss in the draft legacy result. The final
+`ParentConsentEvidence` retains the policy and existing execution consumers reject
+it. Its data still requires trusted current-use composition. Connected512 passed,
+2 existing Windows skips; independent37 passed. See tests/TestModLog and the
+existing RSI dispatch receipts. Runtime manifest now includes the two leaves
+(1441 total), with an exact cap and cap+1 rejection. No native service, grant,
+provider call, route promotion or frozen-runtime change occurred.
+
+## Native audit codec correction and response-path evidence — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. Existing disposable preparation incorrectly encoded
+two audit credentials as hex. Canonical decoder controls reproduce rejection;
+the reviewed fixture-only repair preserves integrity formats and all authority
+limits. V32 now observes accepted inner signing and outer authorization. Later
+sendall fails and the requester rejects; timeout/errno remain unobserved.
+All seven units absent, observation/cleanup complete. No worker admission or RSI
+gain. V33's canonical Protocol class was rejected by the observer setup; a
+candidate correction passes actual installed-module setup controls. Separately,
+authenticated timeout30 silently used nested-client default5. The existing supply
+loader now accepts a bounded timeout keyword and the initial backend forwards
+its authenticated setting. Default5 and signed expiry remain unchanged. Windows
+validation166 passed/2 skips. Exact294195cdb runtime independently qualifies;
+v34 receives accepted inner signing with issuer/target exit0. Outer handshake
+rejects RESPONSE_INVALID; all7 services absent, observation/cleanup complete.
+V35 localizes the target factory result type/ok gate; no factory exception is
+observed. Offline profile60/custody300 mismatch is reproduced, but the actual
+v35 provider code remains unknown. V36 accepts the synthetic LOW handshake and
+independently verifies both signatures; target factory returns ok=true/NONE.
+Profile ceiling60 becomes validated args.ttl300, with absolute expiry/signed30
+unchanged. All7 units absent/no cleanup errors, but root2 leaves clean service
+closure false. Next18/P0 resolves authentic parent/work/model/verifier/budget
+admission through existing owners; no author execution or retained gain. LOW
+no-effect review remains distinct from upstream author
+and elevated materialization. [Receipts](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+PR2162 CI39257095414 stopped before the signing suite because the Linux reviewer
+runner selected obsolete schema-only test IDs. Its selector now includes all nine
+timeout/schema cases plus the five reviewer cases; exact count/set checks remain.
+Independent collection passes; full 14-case remote execution remains required.
+
+## Exact runtime and v29 lifecycle reconciliation — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. Published ec7a source/runtime remains independently
+qualified; exact-main CI/CodeQL passed. Preserve historical v28 and component-only
+ABBA measurements. V29 confirms rejected backend status before resident sendall
+C_RAISE; the rejection branch remains unknown. All seven units are independently
+absent. The harmless oneshot control separately proves a launcher wait cycle.
+V30 independently evidences the lifecycle correction: observation/cleanup complete,
+target exits zero before cleanup, no cleanup errors and all seven units absent.
+Handshake still rejects; no timeout, authority, observer or acceptance change.
+Next: identify then repair the backend rejection branch. Author admission remains unproved.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+## Native requester rejection after descriptor publication — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. PR2159 mergedbb9d3f802 with all 19 recorded exact-head
+check runs passing (12 distinct check names), plus main CI/CodeQL; treec7045432
+equals reviewed1e203d5. Independent
+qualification verifies2683 files/358 directories,1246 exact Git sources and1437
+runtime files; deny/Unix profiles preserve confinement and four absent-owner
+entrypoints reject. Optional lazy imports are explicitly outside this proof.
+
+Synthetic v21 passes installation/revocation. Root/issuer/target reach readiness;
+target serves1/exits0 and requester exits2 with REJECT_SIGNER_RESPONSE_INVALID.
+No underlying target exception is captured. Root timeout is later; target
+reset-failed_exit_1 remains failure evidence, while current7-unit absence is
+independently verified. No author ticket or retained gain. Existing launcher
+diagnostics are the next18/P0 slice; guards and timeout limits stay fixed.
+V22 repeats rejection and exposes observer coverage debt: its event cap was
+consumed by handled containment checks. Revised actual-interpreter controls
+cover noise, null-line offsets and exact client return observations. V24 records
+TimeoutError -> CONNECT_FAILED -> inner verification rejection. Its unwind
+offset does not establish the socket operation or issuer cause. All7 units are
+independently absent. The separate credential-free runtime guard observation
+measures3.769s/2.706s; it is not a request-latency or retained-benefit measurement.
+See existing dispatch and tests/TestModLog for source-bound evidence.
+V25 retains the originating RAISE at client304 (`recv`), then observes issuer
+root-client412 rejecting zero-or-over-limit response bytes. The branch and
+causality are unknown. All7 units are independently absent. V26 extended only
+diagnostic observation; v27 disabled issuer/target observers and still rejected
+the requester after installation/revocation pass. All seven v27 units are absent;
+no inner socket operation is proved by v27 and the different-boot pair establishes
+no causal gain. Next: qualify the independently reviewed containment candidate
+and measure full native cost. Connected 111 passed/8 Windows skips; candidate
+native runtime remains unqualified. Signed lifetimes and authority stay fixed.
+
+## Installed descriptor validation cost — 2026-10-16
+
+WSP00/5/15/22/48/50/71/84/97. Existing descriptor owner now checks immediate
+parent closure for validated paths and reuses validated installed-source suffixes,
+retaining exact-string rejection. Full ancestor closure, detached output, digest,
+ordering and caps are preserved; filesystem verification is not cached or removed.
+Author native focused suite:128 passed. Three paired public-descriptor measurements
+averaged0.18158s baseline versus0.10162s candidate (44% reduction for this pure
+function). Independent275 differential controls passed;217 connected cases eventually passed
+with an initial socket-path harness failure preserved. See TestModLog;
+this is not evidence of faster native admission or retained RSI benefit.
+
+PR2147 is merged with passing exact-main checks. Frozen88690 qualification and
+v19/v20 failures are reconciled in the existing dispatch/roadmap. Native author,
+activation/rollback and later measured retained use remain open.
+
+## AntifaFM SOCIAL campaign routing — 2026-10-18
+
+Reuse the explicit campaign adapter for `antifafm`, delegating to the social
+orchestrator owner. The new campaign rejects unknown keys, duplicate parameters,
+stray tokens and malformed quoting before effects. Existing research-campaign
+behavior is preserved. The OpenClaw workspace prompt points to the canonical
+prototype/runbook; manifest verification and existing permission routing remain
+in force. No new daemon, native executor or production registration was added.
+Default adapter CLI retains scan/audit; `--via-dae` selects DAE permission routing.
+Offline command-route coverage is in `tests/test_social_campaign_adapter.py`;
+the connected selection is documented in the social orchestrator tests README.
+
 ## Enrollment artifact read bounds — 2026-10-16
 
 WSP00/5/11/15/22/50/62/84/97. Actual disposable installation rejected approval

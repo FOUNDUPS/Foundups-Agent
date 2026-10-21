@@ -1,3 +1,44 @@
+## Protected consensus nonce qualification
+
+Retain the full legacy current-generation model-pair regression and the
+actual signed-model gate for both v12 and full v13 owners. A nonce-only
+test selection misses compatibility at this consumer boundary.
+
+Exercise the v13 nonce/custody suites with existing state, current owner/E0,
+parent/effect, model, issuer custody and legacy LOW regressions. Use real
+disposable MAC/SQLite files and signed model/policy inputs; label OS/installation
+seams. Require restart/replay, cross-instance handle rejection, corrupt or absent
+state, one-step recovery, withdrawal, expiry and failed commit/cleanup controls.
+Pin an explicit pytest repository root and independent temporary databases.
+Connected 437/3 platform skips and independent 21 controls exercise this source
+component. Current generated runtime includes custody only; authority/current
+owner are not yet imported or qualified installed runtime.
+Installed HIGH acceptance additionally requires a real Linux same-inode locking
+test across reserve, pre-sign validation, commit and rollback under the actual
+permission wrapper. Passing the adapter tests alone does not meet that gate.
+
+## Exact parent-consent connection
+
+Run the three parent-consent suites with the six parent-consensus/model suites:
+`test_reddog_parent_consensus_{domains,composition,transport,signer,use_time}.py`
+and `test_reddog_parent_model_inputs.py`. The existing authenticated startup CI
+selection includes all nine; retain connected effect, generation, custody/rate
+and elevated-consensus regressions. Structure checks include the new helpers.
+Exercise real signed artifacts, separate reviewer domains and model selections,
+proof bounds, failed lease exit, current-use expiry/clock drift and reservation
+failure. Linux lock tests require actual separate processes; preserve platform
+skips. Synthetic owner/lease fixtures cannot prove installed custody, durable
+recovery, authentic author execution or retained RSI benefit.
+
+## AntifaFM campaign route — 2026-10-18
+
+`test_social_campaign_adapter.py` preserves the research route and checks the
+real AntifaFM default preview, rejected targeting parameters and malformed or
+duplicate command tokens. The connected offline campaign/drafter/publisher
+selection and its importlib-mode command are documented in
+`modules/platform_integration/social_media_orchestrator/tests/README.md`.
+No action CLI loop, live DAE, provider or messaging operation is invoked.
+
 ## Installed consumer/runtime integration
 
 Run installed-manifest consumer, issuer startup/service, separate rate-store and

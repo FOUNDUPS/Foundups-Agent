@@ -415,7 +415,7 @@
         "verifier"
       ],
       "intent_type": "DECISION",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "promotion_state": "production",
       "domain": "operations",
       "wsp_chain": [

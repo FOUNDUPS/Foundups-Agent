@@ -1,3 +1,12 @@
+## 2026-10-21 — Operations Skillz version and manifest integrity
+
+Reused role-loader, skill-loader hygiene and skill-manifest guards alongside
+bridge operations/start-control and backend manifest suites:101 pass/2 platform
+skips across the six suites. The unchanged hygiene guard caught the stale
+operations SKILL_MANIFEST after version pins were aligned; its existing generator
+repaired that binding. No test inventory or guard relaxation. Exact commands,
+earlier failures and limits are in the bridge TestModLog PR2150 entry.
+
 ## 2026-10-10 — Scanner coverage failure regressions
 
 - Confirmed failed exits/payloads never become successful zero-finding scans;

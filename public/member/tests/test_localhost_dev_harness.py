@@ -225,3 +225,15 @@ class TestNoRegression:
         """gestureZone is exposed on window."""
         js = _read("js/gesture-engine.js")
         assert "window.gestureZone" in js
+
+
+def test_actual_member_product_boot_and_account_transitions():
+    from pathlib import Path
+    import subprocess
+
+    result = subprocess.run(
+        ["node", str(Path(__file__).with_name("member_product_boot_vm.mjs"))],
+        text=True, capture_output=True, timeout=20, check=False,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "21 actual member boot checks passed" in result.stdout

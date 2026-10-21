@@ -1,3 +1,26 @@
+## Operations policy manifest binding — 2026-10-21
+
+PR2150 preserves policy1.1.1 while synchronizing its existing registry/runtime
+versions and generated manifests. Backend membership remains1,449; exactly the
+policy, loader and registry hashes change. Existing JavaScript and Python pins
+now bind `ff912d79e080aa5003f18a4d31489d5c9a98ecf516015f882202b2b352b6973c`.
+No cap/API/authority changes. Three existing Node compatibility/recovery commands
+exit0; bridge TestModLog records generator and skill evidence. No installation.
+WSP22/50/71/95/97.
+
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
 ## Installed issuer contract closure — 2026-10-16
 
 The existing generated closure adds one installed-source descriptor contract:

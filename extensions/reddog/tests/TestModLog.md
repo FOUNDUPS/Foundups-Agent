@@ -1,3 +1,26 @@
+## PR2150 policy manifest compatibility — 2026-10-21
+
+Reused `test_backend_compatibility_contract.js`,
+`test_backend_compatibility_preflight.js` and
+`test_holoindex_blocked_request_recovery.js`; all exit0. Independent-generation
+and staged-index binding checks pass within the six Python suites (101 pass,
+2 platform skips). Same1,449-member closure and unchanged caps/checks; only
+three member digests and existing pins change. Bridge TestModLog owns the full
+baseline/final receipt. No installed-runtime or Gmail behavior claim.
+
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
 ## 2026-10-15 — Initial enrollment backend binding
 
 Existing RedDog fast tier15members passed after regenerating the1426-member

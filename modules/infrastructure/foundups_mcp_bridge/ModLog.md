@@ -1,5 +1,29 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-10-19: Coordinated MCP 1.30.0 security upgrade
+
+Upgraded the MCP dependency, launcher exact-version gate, and isolated query
+candidate's disjoint-dependency regression together to 1.30.0. FastMCP 3.2.0,
+Pydantic 2.12.3 and Uvicorn 0.38.0 remain pinned. The requirement-only update in
+PR2146 failed two version contracts and two HTTP startup cases in hosted CI
+38804918263 (45 passed, 4 failed). The launcher correctly refused the changed
+runtime; this repair updates its reviewed version contract rather than removing
+the check. Authentication, remote tool allowlist, child environment closure,
+process ownership, and cleanup gates are unchanged.
+
+Local isolated Python 3.12.14 validation: 28 passed, 19 Windows-only skipped,
+two Windows HTTP cases deselected; the real candidate capability probe passed.
+Earlier whole-selection attempts failed at fixture setup (symlink interpreter,
+then missing Windows observer); neither is accepted lifecycle evidence. Hosted
+Windows CI must still pass all 49 criteria without skips. This source upgrade
+does not upgrade or activate any installed service or grant native execution.
+
+WSP00 detector bootstrap lacked torch; the documented tracker fallback reported
+gate_passed=true, with no detector witness claimed. Source-bound lexical Holo
+retrieval reported UNKNOWN freshness/index gap; direct source checks confirmed
+all three executable version declarations. Manual bounded maintenance follows
+WSP50/71/97; no new WRE orchestration or model runtime was started.
+
 ## 2026-10-04: Paired MCP runtime and startup ownership qualification
 
 The existing launcher now pins FastMCP3.2.0/MCP1.28.1 with unchanged

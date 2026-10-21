@@ -32,6 +32,7 @@ class CurrentEffectSigningAuthority:
     sovereign_authorization_resolver: object
     nonce_authority: object
     revoked_key_epochs: frozenset[str] = frozenset()
+    parent_authority: object = None
 
     def prepare_permit(self, proof):
         checked = self._verify(proof)
@@ -62,17 +63,22 @@ class CurrentEffectSigningAuthority:
         except Exception:
             return None
 
-    def _verify(self, proof):
+    def _verify(self, proof, *, _final_use=False):
         try:
             frozen, context, parent, target = snapshot_effect_consensus_proof(proof)
             repo = Path(self.repo_root).resolve()
             owner = reviews.loader._load_owner_config(self.owner_config_path, repo=repo)
-            if owner["schema_version"] not in {reviews.loader.SCHEMA_VERSION_V7, reviews.loader.SCHEMA_VERSION_V8, reviews.loader.SCHEMA_VERSION_V9, reviews.loader.SCHEMA_VERSION_V10}:
+            if owner["schema_version"] not in {reviews.loader.SCHEMA_VERSION_V7, reviews.loader.SCHEMA_VERSION_V8, reviews.loader.SCHEMA_VERSION_V9, reviews.loader.SCHEMA_VERSION_V10, reviews.loader.SCHEMA_VERSION_V11, reviews.loader.SCHEMA_VERSION_V12, reviews.loader.SCHEMA_VERSION_V13}:
                 return None
             selected, boundary = reviews.loader._manifest_selection_from_owner(owner, repo=repo)
             with boundary._lease_current(selected) as selection:
-                interval = self._verify_leased(owner, repo, selection, frozen, context, parent, target)
-            if interval is None or not interval[2]():
+                from .reddog_effect_consensus_proof import SCHEMA_V2
+                if frozen["schema_version"] == SCHEMA_V2:
+                    from .reddog_parent_bound_effect_verification import verify_parent_bound_effect_leased
+                    interval = verify_parent_bound_effect_leased(self, owner, repo, selection, frozen, context, parent, target)
+                else:
+                    interval = self._verify_leased(owner, repo, selection, frozen, context, parent, target)
+            if interval is None or (not _final_use and frozen["schema_version"] != SCHEMA_V2 and not interval[2]()):
                 return None
             snapshot_effect_consensus_proof(frozen)
             return frozen, context, target, interval[1], interval[2]
