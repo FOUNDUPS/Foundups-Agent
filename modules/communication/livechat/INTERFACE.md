@@ -11,6 +11,45 @@ This module exports:
 
 ## Classes
 
+## Operator command inbox (Phase 1)
+
+`OperatorCommandQueue` polls the trusted-local `memory/012_manifest.json` once
+per minute. `AutoModeratorDAE.run()` owns and awaits its watcher on every exit.
+Allowlisted actions: `status`, gated `announce`, gated `set_context`, and local
+`clear_context`. No arbitrary prompt, shell, browser or code execution exists.
+
+`YT_012_MANIFEST_FILE`, `YT_012_MANIFEST_ACK_FILE` and
+`YT_012_MANIFEST_STATE_FILE` override the three distinct paths. Relative paths
+are rooted in the actual checkout, independent of process working directory.
+`resolve_manifest_state_path()` is shared with the stored-comment reader.
+
+The version-1 acknowledgement ledger claims each immutable ID and payload
+digest **before** any effect. The existing runtime OS lock plus an in-process
+guard serialize one canonical ledger. `unknown` outcomes (including crashes,
+cancellation, timeouts and ambiguous sender results) are terminal and require
+operator reconciliation; they are never automatically retried. Legacy terminal
+receipts remain terminal. This is duplicate-attempt prevention, not exactly-once
+delivery, authentication, or power-loss durability on every filesystem.
+
+Only `deferred` work may retry, using its persisted first-observation time.
+TTL defaults to 3,600 seconds; integer values 60–86,400 are accepted. Deferred
+context waits for every requested surface before activation; newer context/clear
+commands supersede older pending context. `clear_context` clears the shared
+context, not legacy module-local broadcast configuration. Live-chat messages
+are limited to 200 characters; comment-only context allows 500. Existing STOP,
+automation, announcement, send and comment-engagement gates remain authoritative.
+Live-chat dry-run is `simulated` without activating shared context or calling a sender.
+
+Accepted sender results report `sender_accepted=true, delivery_verified=false`
+and amber health. Local status/context acknowledgements can be green. Receipts
+and optional heartbeat telemetry do not authenticate delivery. Malformed state
+blocks the poll without resetting the ledger; the watcher retries later. Each
+JSON file is bounded to 4 MiB and an inbox to 100 entries. Ledgers are not pruned
+automatically: capacity requires supervised archival preserving replay history.
+The sender deadline defaults to 30 seconds (maximum 300), relying on cooperative
+async cancellation. See [the existing contract](docs/clarity/YOUTUBE_DAE_OPERATOR_COMMAND_PLANE_PHASE1.md)
+for authority and validation limits.
+
 ### `QwenYouTubeIntegration`
 QWEN intelligence layer providing smart decision-making for YouTube DAE channel rotation.
 

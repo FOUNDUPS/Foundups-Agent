@@ -1,5 +1,24 @@
 # TestModLog
 
+## 2026-10-22 — PR1759 integration and negative controls
+
+116 combined cases pass: 49 queue/heartbeat, 14 lifecycle, 53 shared reader.
+Queue tests include actual child-process lock contention/crash/restart, failed
+preclaim/final writes, corrupt ledger preservation, uncertain outcomes,
+same-thread concurrency, fixed expiry, supersession, closed gates, dry-run and
+real queue-to-source-bound heartbeat serialization. Lifecycle tests execute
+actual methods with external integrations replaced; two original-source
+controls reproduce leaked watchers. Reader tests consume the real queue's
+configured path and reject four reproduced malformed original inputs.
+No browser, account, model, full-DAE startup or native worker was exercised.
+Exact source/command/XML evidence: external PR reconciliation 1759-qualification.
+
+## 2026-09-15 - Operator Command Plane Phase 1
+
+- Added `test_operator_command_queue.py` covering one-time announcement dispatch/acknowledgement and rejection of non-allowlisted actions.
+- Added deferred-delivery coverage for a manifest command received before
+  LiveChat connects.
+
 - Initialize test change log per WSP 34.
 
 ## 2025-08-24 - Comprehensive Test Fixes Following WSP

@@ -1,3 +1,12 @@
+## 2026-10-22 — PR1759 bounded operator command reconciliation
+
+WSP 00/5/6/10/11/15/22/50/84/91/97; 16/P0. Preserve the original proposal,
+repair demonstrated crash replay, expiry/supersession, reader path/type and
+watcher lifecycle gaps in their existing owners. Reuse the runtime operation
+lock; no new dispatcher/store. 116 offline cases pass; details and validation
+limits in LiveChat and Video Comments interfaces/ModLogs. No account/model
+effects, native RSI or authenticated worker completion claimed.
+
 ## 2026-10-22 — PR1860 selected-clip closure
 
 WSP 00/6/10/11/15/22/50/84/97; 16/P0. Reconcile the existing scheduler,

@@ -1,5 +1,15 @@
 # Livechat Module - Roadmap
 
+## 2026-10-22 current operator-command checkpoint
+
+PR1759 closes bounded trusted-local queue, context-consumer and watcher-lifetime
+contracts (116 offline cases; see INTERFACE and tests/README). Current acceptance
+is source/contract validation, not the broader historical production claims below.
+Remaining operational gate: run the full DAE through its existing authenticated
+owner, prove real sender/readback behavior and clean shutdown, then use those
+receipts in the governing RSI roadmap. Do not infer native author admission,
+independent outcome evaluation or retained benefit from this local inbox.
+
 ## Overview
 This module operates within the **communication** enterprise domain following WSP protocols for modular architecture, testing, and documentation compliance.
 
