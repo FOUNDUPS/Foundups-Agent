@@ -6,6 +6,7 @@ on:
     paths:
       - '.dockerignore'
       - 'Dockerfile'
+      - 'requirements.txt'
       - 'Dockerfile.dockerignore'
       - '.github/scripts/check_docker_context.py'
       - '.github/workflows/docker-context-security.yml'
@@ -18,6 +19,7 @@ on:
     paths:
       - '.dockerignore'
       - 'Dockerfile'
+      - 'requirements.txt'
       - 'Dockerfile.dockerignore'
       - '.github/scripts/check_docker_context.py'
       - '.github/workflows/docker-context-security.yml'
@@ -42,13 +44,16 @@ jobs:
         with:
           python-version: '3.12'
       - name: Verify exclusions and source retention with native Docker
-        run: python .github/scripts/check_docker_context.py > docker-context-report.json
+        run: |
+          python .github/scripts/check_docker_context.py > docker-context-report.json
+          cat docker-context-report.json
       - name: Validate repository-bound WSP 97 audit receipt
-        run: >-
-          python tools/wsp97_execution_validator.py
-          .github/security/docker-context-receipt.json --repo-root .
-          --expected-base a6b5efa2c83da31712df6d00540a773daa8748b3
-          > docker-context-receipt-validation.json
+        run: |
+          python tools/wsp97_execution_validator.py \
+            .github/security/docker-context-receipt.json --repo-root . \
+            --expected-base a6b5efa2c83da31712df6d00540a773daa8748b3 \
+            > docker-context-receipt-validation.json
+          cat docker-context-receipt-validation.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -58,3 +63,45 @@ jobs:
             docker-context-receipt-validation.json
           if-no-files-found: error
           retention-days: 30
+
+  application-image:
+    needs: native-context-boundary
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Add synthetic context canaries without replacing source
+        run: |
+          python - <<'PYCODE'
+          from pathlib import Path
+          root = Path('.docker-context-canary')
+          root.mkdir(exist_ok=False)
+          (root / 'credentials').mkdir()
+          for name in ('.env', 'credentials/probe.json', 'source.py'):
+              (root / name).write_text('synthetic-context-probe\n', encoding='utf-8')
+          PYCODE
+      - name: Build the actual root application image
+        run: docker build --progress=plain --tag foundups-context-audit .
+      - name: Inspect image without starting the application or network
+        run: |
+          docker run --rm --network=none --read-only --cap-drop=ALL \
+            --security-opt=no-new-privileges --entrypoint python \
+            foundups-context-audit -c '
+          from pathlib import Path
+          root = Path("/app")
+          required = ("main.py", "requirements.txt", ".docker-context-canary/source.py")
+          forbidden = (".git", ".docker-context-canary/.env", ".docker-context-canary/credentials")
+          missing = [p for p in required if not (root / p).is_file()]
+          leaked = [p for p in forbidden if (root / p).exists()]
+          if missing or leaked:
+              raise SystemExit(f"Image boundary failed: missing={missing}; leaked={leaked}")
+          print("Application image built; source retained; synthetic credentials and Git history absent")
+          '
+      - name: Remove only the owned local image
+        if: always()
+        run: |
+          if docker image inspect foundups-context-audit >/dev/null 2>&1; then
+            docker image rm foundups-context-audit
+          fi
