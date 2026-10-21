@@ -1,3 +1,24 @@
+## PR2150 exact operations policy bindings — 2026-10-21
+
+WSP00/15/22/50/71/95/97; C2/I4/D4/Impact3=13/P1. Reuse existing operations,
+start-control, role-loader, hygiene, skill-manifest and backend-generator suites;
+no duplicate tests or weakened guards. Source: PR2150 `4ec562fd6`, main `a41a76053`.
+Holo owner query reports authority-head mismatch, freshness UNKNOWN/index gap;
+source-bound lexical bundle and direct module/registry/generator reads supplement
+it. Retrieval noise was reduced to the changed policy's exact bindings; module
+requirements and memory README are absent. No semantic freshness claim.
+
+Before repair, the operations suite fails5/passes2 because frontmatter1.1.1
+disagrees with registry/runtime1.1.0. Aligning those existing pins exposes the
+separate skill-manifest mismatch:87 pass/1 fail/1 platform skip. Existing
+generators repair the one-file skill manifest and three backend member hashes.
+The six existing suites then pass101 with2 platform skips in86.24s; staged-index
+and independently generated manifest equality both pass. Three existing Node
+backend/recovery commands exit0. The complete original policy remains byte-equal
+to PRhead. Receipts/logs/XML are under
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/pr2150-repair/`.
+This is source/binding qualification, not Gmail delivery or installed authority.
+
 ## Installed grant startup second-boundary repair — 2026-10-21
 
 WSP 00/15/22/50/71/97. CI on documentation-only PR2166 exposed the existing
