@@ -1,5 +1,34 @@
 # Blocking secret scan
 
+## PR2150 operations policy binding review — 2026-10-21
+
+The exact repair head `4cabbbb873958bf22e3d830d4c8328727f0d2610` failed
+security job119133711355 on39 changed whole-file bindings:38 generated source
+digests and one unchanged bridge changelog sentence. The actual CI merge was
+`757219add14b8cd8adbc194bad5f72a92753bd55`; its two finding-bearing files match
+the repair head exactly. Introduced-history scanning reported zero findings.
+
+Independent reviewer and coordinating root each recomputed all1449 manifest
+source digests from exact Git blobs using the unchanged CRLF-to-LF normalization.
+Every flagged line/value is unchanged from main `a41a76053`; all39 prior exact
+bindings are in its1293-entry ledger. The only three changed manifest mappings
+are the operations skill, operations version binding and skills registry; none
+of these changed values is flagged. The unchanged prose moves3612 to3625.
+
+Retain all1293 reviewed records and append only these39 individually proved
+whole-file/rule/line bindings (1332 total). Scanner rules, configuration, scan
+scope, fingerprint algorithm and fail-closed behavior remain unchanged. No
+unknown historical finding or credential is approved. Sanitized peer/root proof:
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/pr2150-repair/security-review/`.
+This is unsigned source review, not native worker provenance or runtime authority.
+Local gate regressions with UTF-8:16 passed, one Windows `bash` lookup failure
+(the test resolves the unavailable WSL launcher). The same four actual-workflow
+curl-stub controls pass4/4 with explicit Git Bash, without network invocation.
+The unmodified local suite is not reported all-green; initial encoding/launcher
+failures are retained. Require the existing Linux gate-regression job and fresh
+exact-head full-tree/introduced-history scans before merge.
+WSP00/15/22/50/71/97; no provider validity probes or deployment.
+
 ## Historical source digest recovery — 2026-10-21
 
 Continue the existing 91-candidate triage without changing its historical
