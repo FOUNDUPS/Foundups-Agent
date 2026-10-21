@@ -22,8 +22,7 @@ Educational web application that teaches acoustic triangulation and audio signat
 
 - **Python 3.11+**
 - **Flask** - Web framework
-- **Librosa** - Audio processing and MFCC fingerprinting
-- **setuptools 81.0.0** - Supplies `pkg_resources` required by pinned Librosa 0.10.1
+- **Librosa 0.10.2** - Audio processing and MFCC fingerprinting using standard-library package resources; no setuptools runtime pin
 - **NumPy** - Mathematical computations for triangulation
 - **yt-dlp** - X video download and processing
 - **Requests** - IP geolocation API calls
@@ -31,6 +30,8 @@ Educational web application that teaches acoustic triangulation and audio signat
 - **Pillow 13.0.0** - Declared image dependency; current map rendering uses browser JavaScript, with no Python image adapter
 
 Install the complete pinned requirements after environment bootstrap. See [installation qualification](./INSTALL.md#dependency-qualification-2026-10-21) for the security update, startup checks, and remaining test limitations.
+
+Removing the setuptools requirement does not uninstall an existing 81.0.0 installation. Qualification used a fresh environment; existing deployments need a clean environment replacement or a separately qualified build-tool upgrade. This PR does not modify live runtimes.
 
 ## Documentation
 
