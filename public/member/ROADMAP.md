@@ -3,6 +3,28 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Move2Japan Product Integration (2026-10-18)
+
+The registered Move2Japan entry now targets the actual member page with houses
+selected. The shared field owns geographic navigation and detail planes; Red Dog,
+identity, account return, view persistence and the service worker retain their
+existing Mall owners. New responsive category browsing from the parallel Mall
+change remains the ordinary Mall default. House controls cannot mutate its video
+scope or overwrite its saved position.
+
+| Stage | Acceptance gate | Current implementation |
+| --- | --- | --- |
+| POC | People can search sourced houses | Eight dated Fukui observations, five area rows, combined location/land/price filters in the actual Mall |
+| Prototype | Brokers/owners publish through the shared account system | Pending: authority verification, listing lifecycle, consent/media rights, review and a durable provider |
+| MVP | Actual paying customers receive the promised benefit | Pending: shared server-side entitlement checks, settled payment evidence, delivery, expiry/refund handling |
+
+Account admission is not a housing subscription or publishing permission. No paid
+inventory, subscription issuer or token issuance is introduced. The module's
+[roadmap](../../modules/foundups/move2japan/ROADMAP.md) owns publisher and membership
+work. Repository merge, private review publication, production Firebase deployment
+and primary-domain cutover require separate receipts; see the
+[rebaseline](../../modules/foundups/move2japan/docs/08_HOUSING_DISCOVERY_REBASELINE.md).
+
 ## Current Runtime and Creator Studio Direction (updated 2026-10-18)
 
 The current implementation has Clerk admission, a video Mall, creator/category

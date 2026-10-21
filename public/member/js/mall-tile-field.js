@@ -1,5 +1,5 @@
 /**
- * Mall Tile Field — Video-backed discovery surface
+ * Mall Tile Field — shared video and property discovery surface
  *
  * Portrait-first 9:16 video wall (Shorts-style)
  * SoftProto mount point: #mallTileField[data-softproto-mount="tile-field"]
@@ -43,6 +43,16 @@
   // Field scope state (filter before projection)
   var currentFieldScope = null;  // null = all, 'personal' = 012 lanes only
   var fullCatalog = [];  // Unscoped catalog reference
+
+  // Optional spatial projection. The catalog still has one owner; rows contain
+  // stable listing IDs, never independent Mall instances or synthetic FoundUps.
+  var groupDefinitions = null;
+  var visibleGroups = [];
+  var groupPositions = Object.create(null);
+  var activeGroupKey = null;
+  var groupScrollTop = 0;
+  var groupScrollOffset = 0;
+  var restoringGroups = false;
 
   // Category → theme fallback (used when item.theme and item.foundup_id have no CSS match)
   var CATEGORY_THEME = {
@@ -282,7 +292,7 @@
   function getTilePreviewVideo(index) {
     var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
     var item = items[index];
-    if (!item) return null;
+    if (!item || isPropertyListing(item)) return null;
     // In expanded mode or single video_data, use direct reference
     if (item.video_data) return item.video_data;
     // In lane mode, use current lane video index
@@ -301,7 +311,7 @@
    */
   function getLaneVideo(foundupIndex, videoIndex) {
     var item = mallCatalog[foundupIndex];
-    if (!item || !item.videos || !item.videos.length) return null;
+    if (!item || isPropertyListing(item) || !item.videos || !item.videos.length) return null;
     return item.videos[videoIndex] || null;
   }
 
@@ -332,7 +342,7 @@
    */
   function startLanePreview(foundupIndex, videoIndex, muted) {
     var item = mallCatalog[foundupIndex];
-    if (!item || !item.videos || !item.videos.length) return;
+    if (!item || isPropertyListing(item) || !item.videos || !item.videos.length) return;
 
     var video = item.videos[videoIndex];
     if (!video) return;
@@ -644,7 +654,12 @@
    * Initialize tile field with catalog data
    * @param {Array} catalog - Array of FoundUp objects (with video data)
    */
-  function initialize(catalog) {
+  function initialize(catalog, options) {
+    // Search consumers replace their result set without reinstalling page listeners.
+    if (tileField) {
+      updateCatalog(catalog, options);
+      return;
+    }
     fullCatalog = catalog || [];
     mallCatalog = fullCatalog.slice();
     originalOrder = mallCatalog.slice();  // Preserve original order
@@ -666,6 +681,8 @@
       wrapper.appendChild(tileField);
       tileFieldWrapper = wrapper;
     }
+
+    configureGroups(options);
 
     // Create collapse hint
     createCollapseHint();
@@ -693,6 +710,341 @@
     initTileObserver();
   }
 
+  /** Replace a public result set. This is presentation, not an access-control gate. */
+  function updateCatalog(catalog, options) {
+    if (!tileField) {
+      initialize(catalog, options);
+      return;
+    }
+    stopInlinePreview();
+    if (window.mallPlanes && typeof window.mallPlanes.closeView === 'function') {
+      window.mallPlanes.closeView();
+    }
+    expandedFoundUp = null;
+    if (collapseHint) collapseHint.classList.remove('visible');
+    fullCatalog = Array.isArray(catalog) ? catalog.slice() : [];
+    mallCatalog = fullCatalog.slice();
+    originalOrder = mallCatalog.slice();
+    currentFieldScope = null;
+    currentProjection = 'default';
+    tileLoadStates = {};
+    configureGroups(options);
+    if (window.mallPlanes && typeof window.mallPlanes.setCatalog === 'function') {
+      window.mallPlanes.setCatalog(mallCatalog);
+    }
+    renderTiles();
+    bindInteractions();
+    initTileObserver();
+    updateProjectionChips();
+  }
+
+  /** Opt in atomically with initialize/updateCatalog(catalog, {groups}). */
+  function configureGroups(options) {
+    var entering = groupDefinitions === null;
+    groupDefinitions = options && Array.isArray(options.groups) ? options.groups.map(function(group) {
+      return group && typeof group.key === 'string' && group.key ? {
+        key: group.key,
+        label: typeof group.label === 'string' ? group.label : group.key,
+        subtitle: typeof group.subtitle === 'string' ? group.subtitle : '',
+        itemIds: Array.isArray(group.itemIds) ? group.itemIds.slice() : []
+      } : null;
+    }).filter(Boolean) : null;
+    if (groupDefinitions !== null && entering) setMotionMode('snap');
+  }
+
+  function resolveGroups() {
+    var itemIndices = Object.create(null);
+    mallCatalog.forEach(function(item, index) {
+      if (typeof item.listing_id !== 'string' || !item.listing_id) return;
+      // An ambiguous listing ID cannot establish row membership.
+      itemIndices[item.listing_id] = Object.prototype.hasOwnProperty.call(itemIndices, item.listing_id) ? -1 : index;
+    });
+    var seenGroups = Object.create(null);
+    var seenItems = Object.create(null);
+    return groupDefinitions.filter(function(group) {
+      if (seenGroups[group.key]) return false;
+      seenGroups[group.key] = true;
+      return true;
+    }).map(function(group) {
+      var indices = [];
+      group.itemIds.forEach(function(id) {
+        if (typeof id !== 'string' || seenItems[id] || !Object.prototype.hasOwnProperty.call(itemIndices, id) || itemIndices[id] < 0) return;
+        seenItems[id] = true;
+        indices.push(itemIndices[id]);
+      });
+      return { key: group.key, label: group.label, subtitle: group.subtitle, indices: indices };
+    }).filter(function(group) { return group.indices.length > 0; });
+  }
+
+  function groupForIndex(index) {
+    for (var i = 0; i < visibleGroups.length; i++) {
+      if (visibleGroups[i].indices.indexOf(index) !== -1) return visibleGroups[i];
+    }
+    return null;
+  }
+
+  function groupElement(key) {
+    var rows = tileField.querySelectorAll('.mall-field-group');
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i].dataset.groupKey === key) return rows[i];
+    }
+    return null;
+  }
+
+  function rowPosition(key) {
+    if (!groupPositions[key]) groupPositions[key] = { left: 0, activeId: null, activeIndex: 0, anchorId: null, anchorOffset: 0 };
+    return groupPositions[key];
+  }
+
+  function clampScroll(value, extent, viewport) {
+    return Math.max(0, Math.min(Number.isFinite(value) ? value : 0, Math.max(0, extent - viewport)));
+  }
+
+  function rememberTrack(track, selectVisible) {
+    if (restoringGroups) return;
+    var tiles = track.querySelectorAll('.mall-tile');
+    if (!tiles.length) return; // Keep a temporarily empty area's last position.
+    var state = rowPosition(track.dataset.groupKey);
+    state.left = track.scrollLeft;
+    var anchor = tiles[0];
+    tiles.forEach(function(tile) {
+      if (tile.offsetLeft <= track.scrollLeft + 1) anchor = tile;
+    });
+    state.anchorId = anchor.dataset.listingId;
+    state.anchorOffset = track.scrollLeft - anchor.offsetLeft;
+    if (selectVisible) {
+      var center = track.scrollLeft + track.clientWidth / 2;
+      var nearest = tiles[0];
+      tiles.forEach(function(tile) {
+        if (Math.abs(tile.offsetLeft + tile.offsetWidth / 2 - center) < Math.abs(nearest.offsetLeft + nearest.offsetWidth / 2 - center)) nearest = tile;
+      });
+      state.activeId = nearest.dataset.listingId;
+      state.activeIndex = Array.prototype.indexOf.call(tiles, nearest);
+      updateGroupButtons(track.closest('.mall-field-group'));
+    }
+  }
+
+  function setTrackScroll(track, left) {
+    // A queued native scroll event from restoration/keyboard movement must not
+    // replace the explicitly selected listing with a different visible card.
+    if (track.scrollLeft !== left) track._mallScrollTarget = left;
+    track.scrollLeft = left;
+  }
+
+  function rememberGroupScroll() {
+    if (restoringGroups) return;
+    var rows = tileField.querySelectorAll('.mall-field-group');
+    if (!rows.length) return;
+    groupScrollTop = tileFieldWrapper.scrollTop;
+    var nearest = rows[0];
+    rows.forEach(function(row) {
+      if (Math.abs(row.offsetTop - groupScrollTop) < Math.abs(nearest.offsetTop - groupScrollTop)) nearest = row;
+    });
+    activeGroupKey = nearest.dataset.groupKey;
+    groupScrollOffset = groupScrollTop - nearest.offsetTop;
+  }
+
+  function captureGroupState() {
+    tileField.querySelectorAll('.mall-field-group-track').forEach(function(track) { rememberTrack(track); });
+    rememberGroupScroll();
+    var focused = document.activeElement;
+    if (!focused || !tileField.contains(focused)) return null;
+    var tile = focused.closest('.mall-tile');
+    var row = focused.closest('.mall-field-group');
+    return {
+      id: tile && tile.dataset.listingId, foundupId: tile && tile.dataset.foundupId,
+      groupKey: row && row.dataset.groupKey,
+      groupIndex: row ? Array.prototype.indexOf.call(tileField.querySelectorAll('.mall-field-group'), row) : 0,
+      itemIndex: tile && row ? Array.prototype.indexOf.call(row.querySelectorAll('.mall-tile'), tile) : 0
+    };
+  }
+
+  function restoreGroupState(focus) {
+    restoringGroups = true;
+    visibleGroups.forEach(function(group) {
+      var row = groupElement(group.key);
+      var track = row.querySelector('.mall-field-group-track');
+      var tiles = track.querySelectorAll('.mall-tile');
+      var state = rowPosition(group.key);
+      var anchor = null;
+      tiles.forEach(function(tile) { if (tile.dataset.listingId === state.anchorId) anchor = tile; });
+      setTrackScroll(track, clampScroll(anchor ? anchor.offsetLeft + state.anchorOffset : state.left, track.scrollWidth, track.clientWidth));
+      updateGroupButtons(row);
+    });
+    var activeRow = groupElement(activeGroupKey);
+    tileFieldWrapper.scrollTop = clampScroll(activeRow ? activeRow.offsetTop + groupScrollOffset : groupScrollTop, tileFieldWrapper.scrollHeight, tileFieldWrapper.clientHeight);
+    restoringGroups = false;
+
+    // Do not steal focus from an open search plane or from a filter input.
+    if (!focus || tileField.closest('[inert]')) return;
+    var target = null;
+    tileField.querySelectorAll('.mall-tile').forEach(function(tile) {
+      if (tile.dataset.listingId === focus.id && tile.dataset.foundupId === focus.foundupId) target = tile;
+    });
+    if (!target && visibleGroups.length) {
+      var row = groupElement(focus.groupKey) || groupElement(visibleGroups[Math.min(Math.max(focus.groupIndex, 0), visibleGroups.length - 1)].key);
+      var candidates = row.querySelectorAll('.mall-tile');
+      target = candidates[Math.min(Math.max(focus.itemIndex, 0), candidates.length - 1)] || tileField.querySelector('.mall-tile');
+    }
+    if (target) {
+      target.focus({ preventScroll: true });
+      rememberActiveTile(target);
+    }
+    else {
+      tileField.setAttribute('tabindex', '-1');
+      tileField.focus({ preventScroll: true });
+    }
+  }
+
+  function geographicTenant() {
+    if (!tileField || groupDefinitions === null || !visibleGroups.length) return null;
+    var tenant = null;
+    for (var i = 0; i < mallCatalog.length; i++) {
+      var id = mallCatalog[i] && mallCatalog[i].foundup_id;
+      if (typeof id !== 'string' || !id || (tenant !== null && id !== tenant)) return null;
+      tenant = id;
+    }
+    return tenant;
+  }
+
+  /** Public presentation state only: stable area/listing IDs, never user data. */
+  function getGeographicState() {
+    var tenant = geographicTenant();
+    if (!tenant) return null;
+    captureGroupState();
+    return {
+      version: 1, foundup_id: tenant, activeGroupKey: activeGroupKey,
+      scrollTop: groupScrollTop, groupOffset: groupScrollOffset,
+      rows: visibleGroups.map(function(group) {
+        var state = rowPosition(group.key);
+        return { key: group.key, activeId: state.activeId, activeIndex: state.activeIndex,
+          anchorId: state.anchorId, anchorOffset: state.anchorOffset, left: state.left };
+      })
+    };
+  }
+
+  /** Restore only known groups and members, clamped to this rendered catalog. */
+  function restoreGeographicState(state) {
+    var tenant = geographicTenant();
+    function boundedNumber(value, signed) {
+      return typeof value === 'number' && Number.isFinite(value) &&
+        value >= (signed ? -1e7 : 0) && value <= 1e7;
+    }
+    function validId(value, limit, nullable) {
+      return nullable && value === null || typeof value === 'string' && value.length > 0 &&
+        value.length <= limit && !/[\u0000-\u001f\u007f]/.test(value);
+    }
+    if (!tenant || !state || typeof state !== 'object' || Array.isArray(state) ||
+        state.version !== 1 || state.foundup_id !== tenant ||
+        !validId(state.activeGroupKey, 1024, true) ||
+        !boundedNumber(state.scrollTop, false) || !boundedNumber(state.groupOffset, true) ||
+        !Array.isArray(state.rows) || state.rows.length > 500) return false;
+    var seen = Object.create(null);
+    for (var i = 0; i < state.rows.length; i++) {
+      var record = state.rows[i];
+      if (!record || typeof record !== 'object' || Array.isArray(record) ||
+          !validId(record.key, 1024, false) || seen[record.key] ||
+          !validId(record.activeId, 160, true) || !validId(record.anchorId, 160, true) ||
+          !Number.isInteger(record.activeIndex) || record.activeIndex < 0 || record.activeIndex > 500 ||
+          !boundedNumber(record.left, false) || !boundedNumber(record.anchorOffset, true)) return false;
+      seen[record.key] = true;
+    }
+    state.rows.forEach(function(record) {
+      var group = visibleGroups.find(function(candidate) { return candidate.key === record.key; });
+      if (!group) return;
+      var ids = group.indices.map(function(index) { return mallCatalog[index].listing_id; });
+      groupPositions[group.key] = {
+        activeId: ids.indexOf(record.activeId) !== -1 ? record.activeId : null,
+        activeIndex: Math.min(record.activeIndex, ids.length - 1),
+        anchorId: ids.indexOf(record.anchorId) !== -1 ? record.anchorId : null,
+        anchorOffset: record.anchorOffset, left: record.left
+      };
+    });
+    activeGroupKey = visibleGroups.some(function(group) { return group.key === state.activeGroupKey; }) ? state.activeGroupKey : null;
+    groupScrollTop = state.scrollTop;
+    groupScrollOffset = state.groupOffset;
+    restoreGroupState(null);
+    return true;
+  }
+
+  function activeRowIndex(group) {
+    var state = rowPosition(group.key);
+    var selected = group.indices.findIndex(function(index) { return mallCatalog[index].listing_id === state.activeId; });
+    return selected >= 0 ? selected : Math.min(state.activeIndex, group.indices.length - 1);
+  }
+
+  function updateGroupButtons(row) {
+    var group = visibleGroups.find(function(item) { return item.key === row.dataset.groupKey; });
+    if (!group) return;
+    var selected = activeRowIndex(group);
+    row.querySelectorAll('.mall-group-nav').forEach(function(button) {
+      button.disabled = selected < 0 || (button.dataset.groupStep === '-1' ? selected <= 0 : selected >= group.indices.length - 1);
+    });
+  }
+
+  function rememberActiveTile(tile) {
+    var track = tile.closest('.mall-field-group-track');
+    if (!track) return;
+    var state = rowPosition(track.dataset.groupKey);
+    state.activeId = tile.dataset.listingId;
+    state.activeIndex = Array.prototype.indexOf.call(track.querySelectorAll('.mall-tile'), tile);
+    updateGroupButtons(track.closest('.mall-field-group'));
+  }
+
+  function focusGroupedTile(tile, alignRow) {
+    if (!tile || tileField.closest('[inert]')) return;
+    var track = tile.closest('.mall-field-group-track');
+    var row = track.closest('.mall-field-group');
+    tile.focus({ preventScroll: true });
+    rememberActiveTile(tile);
+    setTrackScroll(track, clampScroll(tile.offsetLeft, track.scrollWidth, track.clientWidth));
+    rememberTrack(track);
+    if (alignRow) {
+      tileFieldWrapper.scrollTop = clampScroll(row.offsetTop, tileFieldWrapper.scrollHeight, tileFieldWrapper.clientHeight);
+      rememberGroupScroll();
+    }
+  }
+
+  function navigateGroupedTile(tile, key) {
+    var group = groupForIndex(Number(tile.dataset.index));
+    if (!group) return;
+    var groupIndex = visibleGroups.indexOf(group);
+    var itemIndex = group.indices.indexOf(Number(tile.dataset.index));
+    var vertical = key === 'ArrowUp' || key === 'ArrowDown';
+    if (vertical) {
+      var step = key === 'ArrowDown' ? 1 : -1;
+      do { groupIndex += step; } while (visibleGroups[groupIndex] && !visibleGroups[groupIndex].indices.length);
+      group = visibleGroups[groupIndex];
+      if (!group) return;
+      itemIndex = Math.max(0, activeRowIndex(group));
+    } else {
+      itemIndex += key === 'ArrowRight' ? 1 : -1;
+      if (itemIndex < 0 || itemIndex >= group.indices.length) return;
+    }
+    var row = groupElement(group.key);
+    var target = row.querySelectorAll('.mall-tile')[itemIndex];
+    focusGroupedTile(target, vertical);
+  }
+
+  function bindGroupedRows() {
+    tileField.querySelectorAll('.mall-field-group-track').forEach(function(track) {
+      track.addEventListener('scroll', function() {
+        var programmatic = Number.isFinite(track._mallScrollTarget) && Math.abs(track.scrollLeft - track._mallScrollTarget) < 1;
+        delete track._mallScrollTarget;
+        rememberTrack(track, !programmatic);
+      }, { passive: true });
+    });
+    tileField.querySelectorAll('.mall-group-nav').forEach(function(button) {
+      button.addEventListener('click', function() {
+        var row = button.closest('.mall-field-group');
+        var group = visibleGroups.find(function(item) { return item.key === row.dataset.groupKey; });
+        if (!group) return;
+        var index = activeRowIndex(group) + Number(button.dataset.groupStep);
+        if (index >= 0 && index < group.indices.length) focusGroupedTile(row.querySelectorAll('.mall-tile')[index], false);
+      });
+    });
+  }
+
   /**
    * Enable drag-to-scroll on desktop for the wrapper
    * Uses custom implementation with tap guard (gesture-engine lacks 2D + guard)
@@ -713,22 +1065,36 @@
       var scrollStartX = 0;
       var scrollStartY = 0;
       var dragMoved = false;
+      var dragTrack = null;
+      var dragAxis = null;
       var horizontalTarget = null;
 
       function onMouseDown(e) {
-        // Ignore if on interactive elements
-        if (e.target.closest('button, a, input, select, textarea')) return;
+        // Each row uses its own horizontal track. Geographic rows retain their
+        // axis lock; ordinary category browsing keeps the shared two-axis drag.
+        if (groupDefinitions !== null) {
+          if (tileField.closest('[inert]') || e.target.closest('button, a, input, select, textarea, [contenteditable]')) return;
+          dragTrack = e.target.closest('.mall-field-group-track');
+        } else {
+          if (e.target.closest('button, a, input, select, textarea')) return;
+          dragTrack = null;
+        }
         if (e.button !== 0) return;
 
         isDragging = true;
         dragMoved = false;
+        dragAxis = null;
         startX = e.clientX;
         startY = e.clientY;
-        horizontalTarget = e.target.closest('.mall-category-track') || tileFieldWrapper;
+        horizontalTarget = groupDefinitions !== null
+          ? (dragTrack || tileFieldWrapper)
+          : (e.target.closest('.mall-category-track') || tileFieldWrapper);
         scrollStartX = horizontalTarget.scrollLeft;
         scrollStartY = tileFieldWrapper.scrollTop;
-        tileFieldWrapper.classList.add('is-dragging');
-        e.preventDefault();
+        if (groupDefinitions === null) {
+          tileFieldWrapper.classList.add('is-dragging');
+          e.preventDefault();
+        }
       }
 
       function onMouseMove(e) {
@@ -738,9 +1104,22 @@
         if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
           dragMoved = true;
           tapGuardActive = true;
+          tileFieldWrapper.classList.add('is-dragging');
+          if (!dragAxis) dragAxis = dragTrack && Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
         }
-        horizontalTarget.scrollLeft = scrollStartX - dx;
-        tileFieldWrapper.scrollTop = scrollStartY - dy;
+        if (groupDefinitions === null) {
+          horizontalTarget.scrollLeft = scrollStartX - dx;
+          tileFieldWrapper.scrollTop = scrollStartY - dy;
+        } else if (dragMoved) {
+          e.preventDefault();
+          if (dragAxis === 'x') {
+            dragTrack.scrollLeft = clampScroll(scrollStartX - dx, dragTrack.scrollWidth, dragTrack.clientWidth);
+            rememberTrack(dragTrack, true);
+          } else {
+            tileFieldWrapper.scrollTop = clampScroll(scrollStartY - dy, tileFieldWrapper.scrollHeight, tileFieldWrapper.clientHeight);
+            rememberGroupScroll();
+          }
+        }
       }
 
       function onMouseUp() {
@@ -753,6 +1132,9 @@
         } else {
           tapGuardActive = false;
         }
+        dragTrack = null;
+        dragAxis = null;
+        horizontalTarget = null;
       }
 
       tileFieldWrapper.addEventListener('mousedown', onMouseDown);
@@ -780,6 +1162,7 @@
       var canScrollDown = tileFieldWrapper.scrollTop < (tileFieldWrapper.scrollHeight - tileFieldWrapper.clientHeight - 10);
       tileFieldWrapper.classList.toggle('can-scroll-up', canScrollUp);
       tileFieldWrapper.classList.toggle('can-scroll-down', canScrollDown);
+      if (groupDefinitions !== null) rememberGroupScroll();
     }
 
     tileFieldWrapper.addEventListener('scroll', updateScrollState, { passive: true });
@@ -799,24 +1182,65 @@
   }
 
   /**
-   * Render tiles from catalog (video-backed)
+   * Render the existing Mall tile interaction for a public property record.
+   * Property identity belongs to a FoundUp; it is not a synthetic FoundUp ID.
    */
-  function renderTiles() {
-    var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
+  function isPropertyListing(item) {
+    return !!item && item.source_type === 'property_listing';
+  }
 
-    if (!itemsToRender.length) {
-      captureRowOffsets();
+  function propertyArea(value) {
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0
+      ? value.toLocaleString('en-US') + ' m\u00b2' : 'Not stated';
+  }
+
+  function renderPropertyTile(item, index) {
+    var name = item.name || item.title || 'House listing';
+    var location = [item.locality || item.locality_ja, item.municipality, item.prefecture, item.country].filter(Boolean).join(' \u00b7 ');
+    var price = typeof item.price_jpy === 'number' && Number.isFinite(item.price_jpy) && item.price_jpy >= 0
+      ? '\u00a5' + item.price_jpy.toLocaleString('en-US') : item.price_status === 'negotiable' ? 'Price negotiable' : 'Price not stated';
+    var condition = item.repair_level === 'major' ? 'Major repairs required' :
+      item.repair_level === 'some' ? 'Some repairs required' :
+      item.repair_level === 'none_reported' ? 'No repairs reported at source' : 'Repair needs not stated';
+    var theme = /^[a-z0-9_-]+$/i.test(item.theme || '') ? item.theme : 'default';
+    // Source photographs remain on their original listing. Ignore supplied video,
+    // token, readiness, avatar and poster fields on property records.
+    return '<article class="mall-tile non-video property-listing theme-' + theme + '" data-index="' + index +
+      '" data-foundup-id="' + escapeAttr(item.foundup_id || '') + '" data-listing-id="' + escapeAttr(item.listing_id || '') +
+      '" data-tile-type="property" tabindex="0" role="button" aria-haspopup="dialog" aria-label="' + escapeAttr(name + ', ' + price + ', ' + location) + '">' +
+      '<span class="mall-property-photo-note">Photos at source</span>' +
+      '<div class="mall-tile-inner">' +
+        '<span class="mall-property-location">' + escapeHtml(location) + '</span>' +
+        '<p class="mall-tile-name">' + escapeHtml(name) + '</p>' +
+        '<strong class="mall-property-price">' + escapeHtml(price) + '</strong>' +
+        '<span class="mall-property-area">Land ' + escapeHtml(propertyArea(item.land_area_m2)) + '</span>' +
+        '<span class="mall-property-area">Building ' + escapeHtml(propertyArea(item.building_area_m2)) + '</span>' +
+        '<span class="mall-property-condition">' + escapeHtml(condition) + '</span>' +
+        '<span class="mall-property-open">View house details \u2197</span>' +
+      '</div></article>';
+  }
+
+  function renderTiles() {
+    var groupedFocus = captureGroupState();
+    captureRowOffsets();
+    var itemsToRender = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
+    var grouped = groupDefinitions !== null && expandedFoundUp === null;
+    visibleGroups = grouped ? resolveGroups() : [];
+    tileField.setAttribute('data-layout', grouped ? 'grouped' : layoutMode);
+    tileFieldWrapper.classList.toggle('mall-field-grouped-wrapper', grouped);
+    tileFieldWrapper.classList.toggle('browse-rows', !grouped && layoutMode === 'rows');
+
+    if ((!grouped && !itemsToRender.length) || (grouped && !visibleGroups.length)) {
       if (tileObserver) tileObserver.disconnect();
       tileLoadStates = {};
       tileField.classList.remove('expanded-mode');
-      tileField.innerHTML = '<div class="mall-tile-field-empty"><span class="mall-tile-field-empty-icon">&#x1F6D2;</span><span>No FoundUps visible</span></div>';
+      tileField.innerHTML = '<div class="mall-tile-field-empty"><span class="mall-tile-field-empty-icon">&#x1F6D2;</span><span>No results match these filters</span></div>';
+      if (grouped) restoreGroupState(groupedFocus);
       return;
     }
 
-    captureRowOffsets();
-    tileField.dataset.layout = layoutMode;
-    tileFieldWrapper.classList.toggle('browse-rows', layoutMode === 'rows');
     var tileMarkup = itemsToRender.map(function(item, index) {
+      if (isPropertyListing(item)) return renderPropertyTile(item, index);
       var theme = escapeAttr(item.theme || item.foundup_id || CATEGORY_THEME[item.category] || 'default');
       var readiness = item.launch_readiness || item.status || 'discoverable_only';
       var badgeClass = readiness === 'ready' ? 'ready' : (readiness === 'conditional' ? 'conditional' : '');
@@ -881,7 +1305,25 @@
       '</article>';
     });
 
-    if (layoutMode === 'rows' && expandedFoundUp === null) {
+    if (grouped) {
+      tileField.innerHTML = visibleGroups.map(function(group, groupIndex) {
+        var headingId = 'mallGroupHeading-' + groupIndex;
+        var trackId = 'mallGroupTrack-' + groupIndex;
+        return '<section class="mall-field-group" data-group-key="' + escapeAttr(group.key) + '" aria-labelledby="' + headingId + '">' +
+          '<header class="mall-field-group-header"><div>' +
+            '<h2 class="mall-field-group-heading" id="' + headingId + '">' + escapeHtml(group.label) + '</h2>' +
+            (group.subtitle ? '<p class="mall-field-group-subtitle">' + escapeHtml(group.subtitle) + '</p>' : '') +
+          '</div><div class="mall-field-group-controls">' +
+            '<button class="mall-group-nav" data-group-step="-1" type="button" aria-label="' + escapeAttr('Previous home in ' + group.label) + '" aria-controls="' + trackId + '">\u2190</button>' +
+            '<button class="mall-group-nav" data-group-step="1" type="button" aria-label="' + escapeAttr('Next home in ' + group.label) + '" aria-controls="' + trackId + '">\u2192</button>' +
+          '</div></header>' +
+          '<div class="mall-field-group-track" id="' + trackId + '" data-group-key="' + escapeAttr(group.key) + '" role="group" aria-labelledby="' + headingId + '">' +
+            (group.indices.length ? group.indices.map(function(index) { return tileMarkup[index]; }).join('') : '<p class="mall-field-group-empty">No homes match in this area.</p>') +
+          '</div></section>';
+      }).join('');
+      bindGroupedRows();
+      restoreGroupState(groupedFocus);
+    } else if (layoutMode === 'rows' && expandedFoundUp === null) {
       var groups = new Map();
       itemsToRender.forEach(function(item, index) {
         var key = item.category || 'Other';
@@ -972,8 +1414,10 @@
       tile.addEventListener('click', function(e) {
         // Ignore tap if guard is active (just finished dragging)
         if (tapGuardActive) return;
+        if (groupDefinitions !== null && tileField.closest('[inert]')) return;
 
         var index = Number(tile.dataset.index || 0);
+        if (groupDefinitions !== null) rememberActiveTile(tile);
         // Single tap: start/toggle lane autoplay
         togglePlay(index);
       });
@@ -982,7 +1426,11 @@
       // Space = lane autoplay, Enter = expand to fullscreen (where Enter FoundUp lives)
       tile.addEventListener('keydown', function(e) {
         var index = Number(tile.dataset.index || 0);
-        if (e.key === ' ') {
+        if (groupDefinitions !== null && tileField.closest('[inert]')) return;
+        if (groupDefinitions !== null && /^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
+          e.preventDefault();
+          navigateGroupedTile(tile, e.key);
+        } else if (e.key === ' ') {
           e.preventDefault();
           togglePlay(index);
         } else if (e.key === 'Enter') {
@@ -992,11 +1440,19 @@
         }
       });
 
+      if (groupDefinitions !== null) {
+        tile.addEventListener('focus', function() { rememberActiveTile(tile); });
+      }
+
       // Pinch support via gesture engine (if available)
       if (window.gestureZone) {
         window.gestureZone(tile, {
           onPinchOut: function() {
             var index = Number(tile.dataset.index || 0);
+            if (isPropertyListing(mallCatalog[index])) {
+              togglePlay(index);
+              return;
+            }
             expandFoundUp(index);
           },
           onPinchIn: function() {
@@ -1100,6 +1556,15 @@
     // Get item to check if it has videos (includes expanded video tiles with video_data)
     var items = expandedFoundUp !== null ? getExpandedVideos() : mallCatalog;
     var item = items[index];
+    if (isPropertyListing(item)) {
+      stopInlinePreview();
+      if (window.mallPlanes && typeof window.mallPlanes.openListingById === 'function') {
+        var group = groupForIndex(index);
+        window.mallPlanes.setCatalog(group ? group.indices.map(function(itemIndex) { return mallCatalog[itemIndex]; }) : mallCatalog);
+        window.mallPlanes.openListingById(item.foundup_id, item.listing_id);
+      }
+      return;
+    }
     var hasVideos = item && ((item.videos && item.videos.length) || item.video_count || item.video_data);
 
     // Non-video tiles: open quick-view instead of trying inline preview
@@ -1134,9 +1599,12 @@
    * @param {number} index - Tile index
    */
   function openFullscreenFromTile(index) {
-    if (!window.mallVideoPlayer) return;
-
     stopInlinePreview();
+    if (expandedFoundUp === null && isPropertyListing(mallCatalog[index])) {
+      togglePlay(index);
+      return;
+    }
+    if (!window.mallVideoPlayer) return;
 
     if (expandedFoundUp !== null) {
       // Expanded mode: tiles are individual videos from one FoundUp
@@ -1162,7 +1630,9 @@
    */
   function getTileElement(index) {
     if (!tileField) return null;
-    return tileField.querySelector('.mall-tile[data-index="' + index + '"]');
+    var numericIndex = Number(index);
+    if (!Number.isInteger(numericIndex) || numericIndex < 0) return null;
+    return tileField.querySelector('.mall-tile[data-index="' + numericIndex + '"]');
   }
 
   /**
@@ -1212,6 +1682,10 @@
    * @param {number} index - FoundUp index in catalog
    */
   function expandFoundUp(index) {
+    if (isPropertyListing(mallCatalog[index])) {
+      togglePlay(index);
+      return;
+    }
     if (expandedFoundUp === index) return; // Already expanded
     stopInlinePreview();
 
@@ -1392,6 +1866,9 @@
 
   function setLayoutMode(mode) {
     if (mode !== 'rows' && mode !== 'grid') return false;
+    // A product adapter owns its geographic projection. Category/grid controls
+    // cannot silently replace that declaration or report an unapplied change.
+    if (groupDefinitions !== null) return false;
     stopInlinePreview();
     layoutMode = mode;
     if (tileField) { renderTiles(); bindInteractions(); }
@@ -1408,6 +1885,9 @@
 
   // Bounded local catalog search, not semantic ranking or a conversation runtime.
   function searchCatalog(query) {
+    // Geographic filters belong to the registered domain adapter, including
+    // clearing a query. Preserve its form, URL and catalog as one state owner.
+    if (groupDefinitions !== null) return false;
     if (typeof query !== 'string') return;
     query = query.trim().slice(0, 300);
     if (!query) { clearFieldScope(); return; }
@@ -1447,6 +1927,7 @@
 
     if (tileFieldWrapper) {
       tileFieldWrapper.classList.toggle('motion-glide', mode === 'glide');
+      tileFieldWrapper.classList.toggle('motion-snap', mode === 'snap');
     }
   }
 
@@ -1572,7 +2053,7 @@
     // Track manual override (defaults to true for API calls)
     if (isManual !== false) {
       densityManuallySet = true;
-      if (layoutMode !== 'grid') setLayoutMode('grid');
+      if (groupDefinitions === null && layoutMode !== 'grid') setLayoutMode('grid');
     }
 
     if (tileField) {
@@ -1715,7 +2196,9 @@
     return String(str)
       .replace(/&/g, '&amp;')
       .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
+      .replace(/'/g, '&#39;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
   }
 
   // ========== Projection System ==========
@@ -2005,13 +2488,16 @@
   window.mallTileField = {
     // Shared responsive browse and local discovery
     setLayoutMode: setLayoutMode,
-    getLayoutMode: function() { return layoutMode; },
+    getLayoutMode: function() { return groupDefinitions !== null ? 'grouped' : layoutMode; },
     getRowOffsets: captureRowOffsets,
     restoreRowOffsets: restoreRowOffsets,
     searchCatalog: searchCatalog,
 
     // Core
     initialize: initialize,
+    updateCatalog: updateCatalog,
+    getGeographicState: getGeographicState,
+    restoreGeographicState: restoreGeographicState,
     enterFoundUp: enterFoundUp,
     navigateToFoundUp: navigateToFoundUp,
 

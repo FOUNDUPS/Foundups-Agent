@@ -1,5 +1,25 @@
 # Blocking secret scan
 
+## Move2Japan shared member page review — 2026-10-18
+
+PR #2151 head `57a2a7a3e3b4fb41b7562585966e11b7d5384033` failed security
+job `117808506171` on one current-tree finding in `public/member/index.html`.
+Independent review compared the exact committed HTML with main `b9051be2`:
+the Clerk publishable identifier and complete SDK script block are unchanged.
+Clerk documents this identifier and SDK attribute for public frontend use.
+The page changes invalidated its whole-file binding and moved the line from
+23 to 25; the prior exact binding is already reviewed.
+
+A checksum-verified Gitleaks 8.30.1 replay of the exact committed HTML produced
+only that one `generic-api-key` finding at line 25, with zero stderr bytes.
+Preserve all 828 existing records and append only its independently recomputed
+whole-file/rule/line fingerprint (829 total). Runtime source, scanner rules,
+scan scope, fingerprint calculation and failure behavior are unchanged.
+Sanitized evidence: `reviewed-move2japan-member-evidence.json`. No matched value
+is retained in the evidence. This review does not grant account or provider
+authority and does not approve any other occurrence.
+The existing `scripts/tests/test_ci_security_gate.py` regressions passed:
+**17 passed in 0.33 seconds**, with plugin auto-loading disabled and no skips.
 ## Descriptor path-cost binding review — 2026-10-19
 
 Independent exact-tree review of81e2a305582d974d54c0e4318d57d9c170b6d8bc

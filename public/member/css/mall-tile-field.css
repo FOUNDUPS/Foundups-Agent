@@ -902,6 +902,201 @@
   background-color: #102a3a;
 }
 
+/* Public property records use the same field, with readable factual metadata. */
+.mall-tile.property-listing {
+  min-height: 19rem;
+  color: #f3f1f8;
+}
+.property-listing .mall-tile-inner {
+  padding: 3rem 1.1rem 1.1rem;
+  gap: 0.3rem;
+  box-sizing: border-box;
+}
+.mall-property-photo-note {
+  position: absolute;
+  top: 1rem;
+  left: 1.1rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.76);
+}
+.mall-property-location {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.76);
+}
+.property-listing .mall-tile-name {
+  font-size: 1.05rem;
+  line-height: 1.3;
+  white-space: normal;
+  color: #fff;
+}
+.mall-property-price {
+  margin: 0.45rem 0 0.2rem;
+  font-size: 1.5rem;
+  letter-spacing: -0.025em;
+}
+.mall-property-area,
+.mall-property-condition {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: rgba(255, 255, 255, 0.82);
+}
+.mall-property-condition {
+  margin-top: 0.35rem;
+}
+.mall-property-open {
+  margin-top: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Opt-in grouped projection: one vertical field, horizontal sequences per area.
+   These rules are content-neutral; the adapter supplies names and membership. */
+.mall-tile-field-wrapper.mall-field-grouped-wrapper {
+  min-height: 0;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  scroll-padding-block: 0.25rem;
+  overscroll-behavior-y: contain;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.mall-tile-field[data-layout="grouped"] {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+  padding: 0.25rem 0.25rem 1rem;
+}
+
+.mall-field-group {
+  min-width: 0;
+  scroll-snap-align: start;
+  scroll-margin-block-start: 0.25rem;
+}
+
+.mall-field-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-height: 2.75rem;
+  padding: 0 0.15rem 0.4rem;
+}
+
+.mall-field-group-heading {
+  margin: 0;
+  color: var(--text, #f3f1f8);
+  font-size: 1rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.mall-field-group-subtitle {
+  margin: 0.15rem 0 0;
+  color: var(--text-dim, #b5b4c0);
+  font-size: 0.73rem;
+  line-height: 1.35;
+}
+
+.mall-field-group-controls {
+  display: flex;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.mall-group-nav {
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.04);
+  color: #f3f1f8;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.mall-group-nav:disabled { opacity: 0.3; cursor: default; }
+.mall-group-nav:focus-visible { outline: 2px solid #b5a0ff; outline-offset: 2px; }
+
+.mall-field-group-track {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: clamp(14rem, 28vw, 18rem);
+  gap: 0.6rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-width: 0;
+  padding: 0.2rem 0.15rem 0.65rem;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0.15rem;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: auto;
+  touch-action: pan-x pan-y pinch-zoom;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+.mall-tile-field[data-layout="grouped"] .mall-tile {
+  aspect-ratio: auto;
+  min-width: 0;
+  min-height: 16rem;
+  scroll-snap-align: start;
+  touch-action: pan-x pan-y pinch-zoom;
+}
+
+.mall-tile-field[data-layout="grouped"] .property-listing .mall-tile-inner {
+  justify-content: flex-start;
+  height: auto;
+  min-height: 100%;
+  padding: 2.15rem 0.85rem 0.85rem;
+  gap: 0.2rem;
+}
+
+.mall-tile-field[data-layout="grouped"] .mall-property-photo-note {
+  top: 0.75rem;
+  left: 0.85rem;
+  font-size: 0.69rem;
+}
+
+.mall-tile-field[data-layout="grouped"] .mall-property-location {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 0.72rem;
+}
+
+.mall-tile-field[data-layout="grouped"] .mall-tile-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  font-size: 0.94rem;
+  line-height: 1.3;
+}
+
+.mall-tile-field[data-layout="grouped"] .mall-property-price {
+  margin: 0.3rem 0 0.15rem;
+  font-size: 1.35rem;
+}
+
+.mall-tile-field[data-layout="grouped"] .mall-property-condition { margin-top: 0.2rem; }
+.mall-tile-field[data-layout="grouped"] .mall-property-open { margin-top: 0.3rem; }
+.mall-field-group-empty { color: var(--text-dim, #b5b4c0); font-size: 0.85rem; }
+
+.mall-field-grouped-wrapper.is-dragging,
+.mall-field-grouped-wrapper.motion-glide,
+.mall-field-grouped-wrapper.is-dragging .mall-field-group-track,
+.mall-field-grouped-wrapper.motion-glide .mall-field-group-track {
+  scroll-snap-type: none;
+}
+
+@media (max-width: 600px) {
+  .mall-field-group-track { grid-auto-columns: min(82%, 18rem); }
+}
+
 .mall-tile.theme-undaodu {
   background: linear-gradient(145deg, rgba(38, 18, 52, 0.96), rgba(80, 40, 110, 0.72) 60%, rgba(18, 10, 28, 0.98));
   background-color: #261234;

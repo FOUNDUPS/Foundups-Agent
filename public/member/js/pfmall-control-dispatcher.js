@@ -624,7 +624,11 @@
     if (!tf || typeof tf.searchCatalog !== 'function') {
       return { status: 'error', error: { code: 'api_unavailable', message: 'Catalog search unavailable' } };
     }
-    tf.searchCatalog(payload.query);
+    // The selected product can reserve its projection for a domain query
+    // owner. A refused operation must not be reported as a catalog change.
+    if (tf.searchCatalog(payload.query) === false) {
+      return { status: 'error', error: { code: 'incompatible_projection', message: 'Use the selected product search controls' } };
+    }
     var state = readTileFieldState();
     emitEvent('state_changed', { reason: 'search_catalog', state: state });
     return { status: 'ok', result: { scope: 'local_catalog', state: state } };

@@ -1,6 +1,6 @@
 # FoundUPS Member Mall
 
-**Status**: Invite-gated p.fMALL shell live
+**Status**: Shared p.fMALL shell; ordinary Mall admission plus registered public product discovery
 **Location**: `public/member/`
 
 ## Overview
@@ -13,7 +13,39 @@ It is now the admitted-user Mall experience that sits behind the existing FoundU
 - username claim
 - then swipe into the Mall
 
-The gateway is preserved. The change is the admitted state.
+The gateway remains the admission owner. The registered public product route
+below selects a public catalog in this same page before account initialization.
+
+### Move2Japan in the actual Mall shell
+
+| Entry | Selected behavior |
+| --- | --- |
+| `/f/move2japan` | Registered FoundUp entry with **Browse houses** |
+| `/member/?foundup=move2japan` | Public houses in this actual `index.html` shell |
+| `/member/?creator=move2japan` | Existing Move2Japan video channel after ordinary admission |
+| `/move2japan/` | Fixed redirect to the selected member page; no separate shell |
+| `/f/move2japan/app` | Existing protected participation handoff |
+
+The product adapter supplies English filters and dated public facts. The existing
+Mall field owns horizontal houses within each area and vertical area rows, shared
+detail planes, gestures and the full Red Dog controller. Country, prefecture,
+city/town, locality, price, land status, plot size and source-tour filters combine.
+The initial collection is eight source observations across five Fukui municipalities;
+it is not a live or nationwide inventory. Photos, tours and broker inquiry remain
+at the linked source. See the [domain evidence and roadmap](../../modules/foundups/move2japan/docs/08_HOUSING_DISCOVERY_REBASELINE.md).
+
+`product-discovery` mode composes the public search form with the existing account
+controller. Guests browse without Firebase. Existing accounts must satisfy the
+same Clerk, invite and username checks before identity, FoundUps and invites are
+shown. This path only reads existing account records; signup and invitation writes
+stay in the normal gateway. Generation checks after asynchronous reads prevent
+sign-out or account switching from restoring stale identity. Account and video
+links target the canonical Foundups host, including from a private review mirror.
+
+Geographic browsing uses `pfmall_product_move2japan_state_v1`; video browsing keeps
+`pfmall_mall_state_v1`. Returning from the account gateway consumes a bounded,
+single-use session record only after actual admission. The shared service worker
+uses `pfmall-member-v4` and explicit public assets; it never caches account data.
 
 ## Runtime Shape
 
@@ -44,7 +76,7 @@ public/member/
 | File | Role |
 |------|------|
 | `account-concierge.js` | Unified Red Dog plane. Exposes `window.redDog` API. |
-| `mall-tile-field.js` | Video Mall tile grid. Exposes `window.mallTileField` API. |
+| `mall-tile-field.js` | Shared category rows, explicit grid and geographic property rows. Exposes `window.mallTileField` API. |
 | `mall-planes.js` | FoundUp view planes. Exposes `window.mallPlanes` API. |
 | `gesture-engine.js` | Touch/mouse gesture detection. |
 | `red-dog-concierge.js` | Legacy FAQ topics. Will be removed when OpenClaw lands. |
@@ -102,7 +134,7 @@ Row offsets are saved locally alongside the existing outer scroll position.
 
 | Feature | Current (Shell-Local) | Future (Resident RedDog/OpenClaw) |
 |---------|----------------------|-------------------|
-| Search Mall | Text input filters by creator name | AI-powered semantic search |
+| Search Mall | Loaded catalog metadata search; product-specific house filters | AI-powered semantic search |
 | Personal Mall | Filters by `creator === '012'` | Personalized recommendations |
 | Projections | Client-side sort | AI-ranked projections |
 | Density | Manual preset selection | AI-controlled adaptive density |
