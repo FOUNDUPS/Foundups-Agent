@@ -1,3 +1,33 @@
+## 2026-10-22 — Selected-batch regression and closure evidence
+
+WSP 6/15/22/50/84/97. Reuse `test_remote_cli.py` and existing adapter,
+visibility, tracker, peak-window, rotation, metadata-decoupling and language tests.
+The original PR focused selection passed 65 cases on current main. Added
+wrong-page/unknown-visibility, sync and malformed-receipt probes reproduced
+8 failures (55 passing test cases); focused repair passed 63 cases plus
+9 subtests. Later focused+private-visibility selection passed 78 plus 9 subtests.
+These are successive overlapping runs, not additive completion metrics.
+
+Connected selection initially passed 91/skipped 2/failed 4. All four failure IDs
+are rotation-fairness tests stopped by the same obsolete test-double signature:
+`_prioritize_channels` now receives `driver`. Match the actual interface; keep
+budget and must-fail assertions. Two browser-connection skips are intentional;
+no live browser/channel action is authorized in this closure.
+
+Final local acceptance: the exact nine-file `youtube-selected-batch` CI selection
+passed **147 tests and 9 subtests**, zero skips/failures, in a fresh disposable
+Python 3.12 environment (116.62s). Invocation: `python -B -m pytest
+--import-mode=importlib -p pytest_asyncio.plugin -q --tb=short` followed by the
+explicit paths in `.github/workflows/ci.yml`; dotenv/plugin autoload and bytecode
+were disabled. The rotation fixture repair passed all four retained assertions.
+Independent execution of the earlier 144-case source passed, followed by all
+three diagnostic-preview probes; 23 additional independent source probes passed.
+These are source review and test execution, not live outcome acceptance.
+Generated binding checks and remote/main results remain separate PR1860 receipts.
+External local evidence: `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1860-qualification/`.
+Historical September counts below remain historical. No native admission,
+actual upload, independent saved-state readback or retained RSI benefit claimed.
+
 ## PR2150 exact operations policy bindings — 2026-10-21
 
 WSP00/15/22/50/71/95/97; C2/I4/D4/Impact3=13/P1. Reuse existing operations,

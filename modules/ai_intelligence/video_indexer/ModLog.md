@@ -1,5 +1,26 @@
 # Video Indexer Module - Modification Log
 
+## 2026-10-22 - Retain omitted-language compatibility for English-only models
+
+A private omission sentinel distinguishes legacy callers from explicit `None`
+auto-detection. Omitted language resolves to `en` for `.en` models and to
+auto-detection for multilingual models; explicit values still reach the existing
+batch factory's validation unchanged. This preserves callers using
+`VIDEO_INDEXER_WHISPER_MODEL=base.en` without weakening the English-only guard.
+Real factory construction with temporary output directories reproduced two
+omitted-language failures before the fix. The focused analyzer/voice language
+selection now passes 21 tests, including all prior language and offset cases.
+No models loaded, external requests or native-worker validation. WSP00/5/11/22/77/84/97.
+
+## 2026-09-21 - Preserve Japanese transcript language and chunk positions
+
+AudioAnalyzer now passes explicit/automatic language and output directory to
+the existing batch transcriber, and language to local-file Whisper. Result
+language comes from evidence instead of a hard-coded English label. Converted
+segments use the actual `timestamp_sec` field, correcting later chunks that
+previously started at zero. Offline fakes cover Japanese/mixed/unknown labels,
+factory forwarding and offsets; real clip ASR remains unverified. WSP 11/22/84/97.
+
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
 ## 2026-09-22 - Pre-merge integrity audit

@@ -1,3 +1,10 @@
+## Selected-clip adapter receipts — 2026-10-22
+
+The scheduling action requires process success and a parsed receipt with boolean
+`success=true`, no error(s), and no incomplete batch. Empty/truncated output,
+truthy strings/numbers and contradictory partial results fail closed. This is
+local result interpretation, not authenticated execution or saved-state proof.
+
 ## Protected consensus nonce supply — 2026-10-20
 
 Opt-in owner v13 adds `consensus_nonce_authority` with a purpose-bound store,
@@ -1618,6 +1625,16 @@ skip the injected trusted clock and generation verifier, retain all missing-anch
 diagnostics, and return no generation receipt. `signed_authority_reverified` still
 reports the signature result independently. Generation evidence never supplies an
 authoritative effect-use lease. See the existing execution-valve roadmap section.
+
+## YouTube scheduling command repair (2026-09-22)
+
+`youtube action scheduling channel=move2japan preflight=true` checks transport
+without launching or changing YouTube. Preview/apply requires `video_ids`;
+the default `max_videos=0` includes all selected clips. Pass
+`preserve_metadata=true` to retain prepared metadata. Structured CLI failure
+remains failure even with subprocess exit zero. See the scheduler
+[runbook](../../platform_integration/youtube_shorts_scheduler/docs/REMOTE_SCHEDULING.md)
+and existing Work prototype boundary before enabling recent discovery.
 
 ## Public RedDog Lick PoC
 

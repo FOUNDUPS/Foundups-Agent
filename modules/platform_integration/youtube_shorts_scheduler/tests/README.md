@@ -1,4 +1,20 @@
+## Offline selected-batch closure (2026-10-22)
+
+The CI job `youtube-selected-batch` runs explicit mocked scheduler/adapter and
+transcript-language cases using `--import-mode=importlib -p pytest_asyncio.plugin`
+with dotenv loading and plugin autoload disabled. No browser/model is started.
+`test_remote_cli.py` covers edit identity and visibility, malformed receipts,
+partial results, attempted-write budgets, bounded pagination, repeatable preview,
+channel-sync suppression and honest description-sync evidence. Other manual
+browser suites below are not substituted by these offline checks.
+
 # YouTube Shorts Scheduler - Test Documentation
+
+Remote regression coverage: `test_remote_cli.py` exercises host preflight,
+nonpersistent previews, exact recording batches (3/8/13 and 61 across pages),
+whole-batch defaults, incomplete receipts and optional limits. It uses fake
+browser/model boundaries; no live publication. For combined module runs use
+`--import-mode=importlib` to avoid colliding `tests` package names.
 
 > **WSP 34 Compliance**: Test documentation for the youtube_shorts_scheduler module.
 
