@@ -3,6 +3,7 @@ name: Validate eSingularity
 on:
   pull_request:
     paths:
+      - 'requirements-trust-bootstrap.txt'
       - 'modules/foundups/esingularity/**'
       - 'modules/foundups/foundup_registry.json'
       - 'public/f/public_catalog.json'
@@ -10,6 +11,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'requirements-trust-bootstrap.txt'
       - 'modules/foundups/esingularity/**'
       - 'modules/foundups/foundup_registry.json'
       - 'public/f/public_catalog.json'
@@ -30,6 +32,8 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install Python test dependency
         run: python -m pip install pytest
 

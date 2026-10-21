@@ -170,3 +170,40 @@ def test_partial_reviewed_report_cannot_mask_scanner_error(tmp_path, monkeypatch
                         SimpleNamespace(returncode=1, stderr=b'error: sensitive diagnostic'))
     assert gate.scan(['dir', str(tmp_path)], report) == 1
     assert 'sensitive diagnostic' not in capsys.readouterr().out
+
+
+def test_python_download_jobs_bootstrap_trust_before_dependencies():
+    root = Path(__file__).resolve().parents[2]
+    for path in (root / '.github/workflows').glob('*.yml'):
+        workflow = yaml.load(path.read_text(), Loader=yaml.BaseLoader)
+        for job in workflow.get('jobs', {}).values():
+            bootstrapped = False
+            for step in job.get('steps', []):
+                command = step.get('run', '')
+                if 'requirements-trust-bootstrap.txt' in command:
+                    assert '--require-hashes' in command and '--no-deps' in command
+                    bootstrapped = True
+                if 'pip install' in command or 'pip3 install' in command:
+                    assert bootstrapped, (path.name, step.get('name'))
+    windows = yaml.load((root / '.github/workflows/ci.yml').read_text(),
+                        Loader=yaml.BaseLoader)['jobs']['mcp-runtime-compatibility']
+    prepare = next(s['run'] for s in windows['steps'] if s.get('name') == 'Prepare isolated MCP candidate')
+    assert prepare.index('Candidate venv creation failed') < prepare.index('Candidate trust bootstrap failed') < prepare.index('Candidate dependency installation failed')
+
+
+def test_trust_bootstrap_is_hash_bound_and_precedes_docker_downloads():
+    root = Path(__file__).resolve().parents[2]
+    entries = [line for line in (root / 'requirements-trust-bootstrap.txt').read_text().splitlines()
+               if line and not line.startswith('#')]
+    assert len(entries) == 2
+    assert {line.split(' @ ')[0] for line in entries} == {'pip', 'certifi'}
+    for line in entries:
+        url, digest = line.split(' @ ')[1].split(' --hash=sha256:')
+        assert url.startswith('https://files.pythonhosted.org/packages/')
+        assert url.endswith('.whl') and len(digest) == 64
+        assert all(c in '0123456789abcdef' for c in digest)
+    assert 'pip-26.2.2-' in entries[0]
+    assert 'certifi-2026.10.19-' in entries[1]
+    assert 'certifi==2026.10.19' in (root / 'requirements.txt').read_text()
+    docker = (root / 'Dockerfile').read_text()
+    assert docker.index('--require-hashes -r requirements-trust-bootstrap.txt') < docker.index('-r requirements.txt')

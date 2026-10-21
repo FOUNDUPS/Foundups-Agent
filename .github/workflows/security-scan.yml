@@ -21,6 +21,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Validate security gate regressions
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
