@@ -8,6 +8,8 @@ gunicorn==21.2.0
 
 # Audio Processing
 librosa==0.10.1
+# Librosa 0.10.1 imports pkg_resources; setuptools 82 removed that runtime API.
+setuptools==81.0.0
 numpy==1.26.0
 scipy==1.11.3
 soundfile==0.12.1
