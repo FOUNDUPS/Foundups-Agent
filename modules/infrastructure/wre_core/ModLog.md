@@ -1,3 +1,11 @@
+## 2026-10-21 — PR2150 operations registry version closure
+
+Align only the existing reddog_operations registry version to the preserved
+Skillz1.1.1 and strict runtime pin. Existing metadata equality and hygiene guards
+remain unchanged. Reused six-suite binding selection passes101/2 platform skips;
+bridge TestModLog records baseline failures and exact source/evidence. No model,
+scanner bypass, new authority or installed execution. WSP15/22/50/95/97.
+
 ## 2026-10-10 — Security audit: fail closed on missing scan coverage
 
 - Repaired scanner exit/schema validation, including authentication/configuration

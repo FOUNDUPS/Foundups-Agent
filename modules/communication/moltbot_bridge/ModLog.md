@@ -1,3 +1,16 @@
+## PR2150 operations policy binding repair — 2026-10-21
+
+Preserve the exact sender/receipt policy and version1.1.1 from PR2150 head
+`4ec562fd669e63dc3c53f97ec625d2dd256b4c15` while reconciling main `a41a76053`.
+Align the existing registry/runtime version pins and regenerate the skill and
+backend manifests with their existing generators. The 1,449-member backend
+inventory is unchanged; only the policy, loader version and registry hashes
+change. Both existing consumer/test digest pins follow generated content.
+Strict version, receipt, tamper and manifest checks remain intact. Reused suites
+pass101/2 platform skips; three Node compatibility commands exit0. Full evidence
+and earlier failures are in tests/TestModLog.md. No Gmail action, installed
+runtime qualification or deployment is claimed. WSP00/15/22/50/71/95/97.
+
 ## Grant startup time sampled inside revocation fence — 2026-10-21
 
 Reused `authorize_current_key_epoch_use` during installed dependency revalidation

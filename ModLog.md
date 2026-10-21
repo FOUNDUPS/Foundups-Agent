@@ -1,3 +1,19 @@
+## Open-PR reconciliation checkpoint — 2026-10-21
+
+WSP00/10/15/22/50/71/97. Reused the existing
+[disposition audit](docs/audits/architecture/OPEN_PR_BACKLOG_DISPOSITION_AUDIT_PHASE1.md)
+for92 initial PRs plus2 arrivals. Independently reviewed all-delta supersession
+proofs closed33 dependency PRs; branches retained. PR2110,2171,1577 merged with
+exact artifact readback on main; per-head CI and source-review receipts retained.
+The94-row snapshot identifies58 remaining open items, unique deltas, owners,
+WSP15 scores and acceptance steps. PR2150's binding repair and PR2007's policy
+closure are published for fresh checks; security findings remain gated pending
+individual source review. Active security/product lanes and unrelated dirty work
+are preserved. The owned merged consensus-runtime checkout was recoverably
+archived after exact-tree verification. No live account, deployment, paid-model
+or native RSI completion is claimed. Historical June audit retained verbatim;
+nonempty three-dot differences alone prove neither novelty nor supersession.
+
 ## Windows manifest byte compatibility — 2026-10-20
 
 Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows

@@ -1,3 +1,13 @@
+## PR2150 policy manifest compatibility — 2026-10-21
+
+Reused `test_backend_compatibility_contract.js`,
+`test_backend_compatibility_preflight.js` and
+`test_holoindex_blocked_request_recovery.js`; all exit0. Independent-generation
+and staged-index binding checks pass within the six Python suites (101 pass,
+2 platform skips). Same1,449-member closure and unchanged caps/checks; only
+three member digests and existing pins change. Bridge TestModLog owns the full
+baseline/final receipt. No installed-runtime or Gmail behavior claim.
+
 ## Windows manifest byte compatibility — 2026-10-20
 
 Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
