@@ -23,11 +23,14 @@ Educational web application that teaches acoustic triangulation and audio signat
 - **Python 3.11+**
 - **Flask** - Web framework
 - **Librosa** - Audio processing and MFCC fingerprinting
+- **setuptools 81.0.0** - Supplies `pkg_resources` required by pinned Librosa 0.10.1
 - **NumPy** - Mathematical computations for triangulation
 - **yt-dlp** - X video download and processing
 - **Requests** - IP geolocation API calls
 - **Web3.py** - Ethereum testnet interaction
-- **Pillow** - Image processing for map visualization
+- **Pillow 13.0.0** - Declared image dependency; current map rendering uses browser JavaScript, with no Python image adapter
+
+Install the complete pinned requirements after environment bootstrap. See [installation qualification](./INSTALL.md#dependency-qualification-2026-10-21) for the security update, startup checks, and remaining test limitations.
 
 ## Documentation
 

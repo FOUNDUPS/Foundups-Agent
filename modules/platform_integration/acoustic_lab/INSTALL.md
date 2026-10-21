@@ -44,11 +44,24 @@ pip install -r requirements.txt
 **What gets installed:**
 - **Flask** - Web framework
 - **Librosa** - Audio processing (MFCC fingerprinting)
+- **setuptools 81.0.0** - Runtime `pkg_resources` provider for Librosa 0.10.1
 - **NumPy** - Mathematical computations
 - **SciPy** - Advanced mathematics
 - **Web3.py** - Ethereum integration
 - **Pillow** - Image processing
 - **Requests** - HTTP client for IP geofencing
+
+### Dependency qualification (2026-10-21)
+
+`Pillow==13.0.0` addresses [GHSA-8g5g-8vmr-9782 / CVE-2026-112403](https://github.com/advisories/GHSA-8g5g-8vmr-9782). Pillow 13 requires Python 3.11+, matching this module's declared minimum. Qualification ran on Windows AMD64 CPython 3.12.10; Linux deployment and Python 3.11 execution remain unverified.
+
+Keep `setuptools==81.0.0` in the runtime requirements while Librosa is pinned to 0.10.1. A fresh requirements-only environment previously failed application startup because Librosa imports `pkg_resources`; [setuptools 82 removed that API](https://setuptools.pypa.io/en/latest/history.html#v82-0-0). The existing deployment bootstrap installs setuptools before the requirements file. Install the full requirements afterward to apply the compatible pin, and do not independently upgrade setuptools without qualifying Librosa's replacement API.
+
+This is a temporary compatibility pin. [Setuptools 84.1 release notes](https://setuptools.pypa.io/en/latest/history.html#v84-1-0) describe later security hardening of legacy archive extraction and egg installation that 81.0.0 lacks. Acoustic Lab does not call those APIs, and Librosa uses `pkg_resources.resource_filename` for installed package data; that source review is not proof that the environment is free of vulnerabilities. Follow-up qualification must retire the `pkg_resources` dependency and this older provider.
+
+Full dependency resolution, installation, and `pip check` passed. Network-denied local checks passed for application creation, `/`, `/health`, and three invalid-upload cases. Seven generated-image checks passed for Pillow codecs, resizing, invalid input, and the NumPy bridge. These are package checks: no Python image adapter exists in the application. No successful audio upload, Ethereum RPC, X download, live service, or deployment was exercised.
+
+The unchanged 15-test unit suite has identical results with Pillow 12.3.0 and 13.0.0 when both environments include setuptools 81.0.0: 11 pass and four fail under pytest; native unittest classifies the same four as two failures and two errors. Remaining cases are an ISO timestamp used in numeric triangulation, a stale index-page literal, a multipart bytes fixture rejected as a missing file, and a geolocation mock raising plain `Exception`. No tests were changed or weakened. Pytest used the repository's `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` convention because these unittest-based files need no Web3 plugin; normal autoload separately fails on Web3's `ContractName` import from `eth_typing`. Full application validation remains incomplete. See [ModLog](./ModLog.md) for source and evidence bindings.
 
 ### Step 3: Run the Application
 ```bash
