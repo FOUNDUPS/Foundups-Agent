@@ -1,3 +1,21 @@
+## Functions Express query-array compatibility — 2026-10-21
+
+WSP00/5/15/22/50/71/97; C3/I4/D4/Impact4=15/P1. Reconcile existing PR1369
+against current main: Express 4.22.1 -> 4.22.2 restores 25-value repeated,
+bracket and indexed query arrays with the retained qs 6.16.0 override.
+Only the Express lock entry changes; all other 301 entries, body-parser 1.20.8
+and the Functions manifest remain unchanged. Official Node 20.20.2/npm 10.8.2
+on Windows: isolated full installs and dependency-tree checks pass. The same
+23 in-memory parser/SDK checks give candidate23 pass; baseline19 pass/4 fail
+at the three array forms and the SDK discovery parser. Malformed JSON,
+byte/parameter/depth limits and normal parsing retain their observed behavior.
+The actual Firebase SDK discovery handlers run with captured listen/close;
+no network listener or outbound call occurs. This validates bounded dependency
+compatibility only: tracked functions/index.js and application tests are absent,
+and discovery still returns400 for missing source. No application, deployment,
+production-runtime or overall-security acceptance is claimed. Recover the
+existing Functions owner source before application acceptance or major migration.
+
 ## Reconcile 0102 Moshpit candidate lessons — 2026-10-21
 
 WSP00/15/22/48/50/83/97. Retain existing PR1772's seven sanitized JSONL
