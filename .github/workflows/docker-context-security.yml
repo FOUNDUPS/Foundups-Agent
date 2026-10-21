@@ -62,7 +62,8 @@ jobs:
           with path.open('x', encoding='utf-8') as stream:
               json.dump(config, stream)
           PYCODE
-          npx --yes pyright@1.1.414 --pythonversion 3.12 --outputjson \
+          # 1.1.414 silently drops explicit dot-directory inputs: microsoft/pyright#11861.
+          npx --yes pyright@1.1.413 --pythonversion 3.12 --outputjson \
             --project "$RUNNER_TEMP/docker-context-pyrightconfig.json" > docker-context-pyright.json
           python - <<'PYCODE'
           import json
