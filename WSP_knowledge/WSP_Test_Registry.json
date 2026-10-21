@@ -15390,7 +15390,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "BTC reserve semantics regression tests.\n\nEnsures canonical UPS naming/behavior:\n- total_ups_circulating is canonical\n- total_ups_minted remains a backward-compatible alias\n- route_ups_from_treasury is canonical routing API"
+      "description": "BTC reserve semantics regression tests.\n\nEnsures canonical UPS naming/behavior:\n- total_ups_circulating is canonical\n- total_ups_minted remains a backward-compatible alias\n- route_ups_from_treasury is canonical routing API\n- genesis UPS denomination remains 1,000 sats per UPS"
     },
     {
       "id": "test::modules::foundups::simulator::tests::test_cabr_flow_router",
