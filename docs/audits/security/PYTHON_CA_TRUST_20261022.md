@@ -32,7 +32,7 @@ A newly created isolated Linux Python3.12 venv upgraded from pip25.0.1 to
 pip26.2.2 and certifi2026.10.19 through the real checksum-enforcing command.
 Both application certifi and pip's vendored certifi contain120 roots and lack
 `emSign Root TLS CA - G3`. The existing security-gate suite plus bootstrap
-configuration cases passes19 tests. YAML parsed and `git diff --check` passed.
+configuration cases passes20 tests. YAML parsed and `git diff --check` passed.
 This is local installation/configuration evidence, not a live forged-chain test,
 Docker image build, Windows runtime result or production fleet remediation.
 Hosted exact-head checks and independent review remain convergence gates.
@@ -72,3 +72,28 @@ Current open-PR inventory returned37 items. PR2168 owns Docker context exclusion
 PR1762 owns frontend dependencies. Neither branch is changed by this slice.
 Root requirements/CI changes can conflict with future lanes: re-read current main
 and exact diff before landing. No claim of another instance's local cleanliness.
+
+## Additional build inventory
+
+Exact Docker inventory found two other Python recipes: simulator SSE and the
+NanoClaw template. Both now inline the same hash-bound wheels, preserving their
+module-local contexts (no extra context file dependency). The test compares these
+URLs/digests with the canonical bootstrap. GotJunk's Node20 builder is now22.23.4,
+aligned with its existing Node22 CI family; eSingularity's CI24.19.0 is24.22.1.
+Node's official October21 advisory identifies22.23.4/24.22.1 as security releases:
+https://nodejs.org/en/blog/vulnerability/october-2026-security-releases
+The existing floating Node22 setup actions resolve a supported current22 release.
+Docker daemon is unavailable here; actual image builds/rollout remain unverified.
+The isolated tampered-wheel negative control also rejected altered bytes before
+installation. No unrelated application dependency lockfile was rewritten.
+
+Pre-publication compatibility check: downloaded official Node22.23.4 Linux x64
+archive, verified SHA256 against its published SHASUMS
+(`1805bcd35e6815559bd2eb97db438d3fdb0eb3a5e6a977b7c1badca76337e9ce`),
+and confirmed Docker Hub's22.23.4-alpine manifest includes linux/amd64.
+GotJunk `npm ci --ignore-scripts --no-audit --no-fund` and `npm run build` passed
+using that exact Node binary (226 packages;470 modules transformed). Existing
+large-chunk/deprecated-package warnings remain. This verifies the application
+build on Linux; it does not verify Alpine container startup or live Cloud Run.
+Merging the Dockerfile change triggers the repository's existing GotJunk deployment
+workflow; its remote deployment outcome must be checked separately.

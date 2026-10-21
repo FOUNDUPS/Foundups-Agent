@@ -207,3 +207,23 @@ def test_trust_bootstrap_is_hash_bound_and_precedes_docker_downloads():
     assert 'certifi==2026.10.19' in (root / 'requirements.txt').read_text()
     docker = (root / 'Dockerfile').read_text()
     assert docker.index('--require-hashes -r requirements-trust-bootstrap.txt') < docker.index('-r requirements.txt')
+
+
+def test_module_container_bootstraps_match_reviewed_wheel_hashes():
+    root = Path(__file__).resolve().parents[2]
+    entries = [line for line in (root / 'requirements-trust-bootstrap.txt').read_text().splitlines()
+               if line and not line.startswith('#')]
+    urls = [line.split(' @ ')[1].replace(' --hash=sha256:', '#sha256=') for line in entries]
+    for path in ['modules/foundups/simulator/Dockerfile',
+                 'modules/communication/moltbot_bridge/Dockerfile.nanoclaw']:
+        docker = (root / path).read_text()
+        for url in urls:
+            assert url in docker
+            assert docker.index(url) < docker.index('&& python -m pip install')
+        assert '--require-hashes' in docker and '--no-deps' in docker
+    node = (root / 'modules/foundups/gotjunk/frontend/Dockerfile').read_text()
+    assert 'FROM node:22.23.4-alpine AS builder' in node
+    workflow = yaml.load((root / '.github/workflows/validate-esingularity.yml').read_text(), Loader=yaml.BaseLoader)
+    versions = [s.get('with', {}).get('node-version') for j in workflow['jobs'].values()
+                for s in j.get('steps', []) if 'actions/setup-node@' in s.get('uses', '')]
+    assert versions == ['24.22.1']

@@ -16,3 +16,5 @@ Existing suites inventoried before extending the security workflow contract (WSP
 ## 2026-10-22 — Python trust bootstrap
 
 Extend `test_ci_security_gate.py` to require a checksum-bound pip/certifi bootstrap before workflow dependency downloads, including the separately created Windows venv, and preserve Docker ordering. These configuration checks are distinct from a live TLS rejection test.
+
+Module-local Docker hash bootstrap parity and Node security-release pins are covered in the same security suite.
