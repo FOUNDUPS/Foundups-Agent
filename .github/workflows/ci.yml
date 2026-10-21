@@ -1317,6 +1317,8 @@ jobs:
           if-no-files-found: error
 
       - name: Run RedDog grant-aware signing composition regression
+        # Same-checkout jobs119109373540/119109577954: 3m timeout versus 97s pass.
+        # Allow runner variation; individual test/runtime deadlines stay intact.
         timeout-minutes: 5
         env:
           PYTHONDONTWRITEBYTECODE: '1'
