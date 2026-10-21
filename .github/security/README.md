@@ -1,5 +1,27 @@
 # Blocking secret scan
 
+## Grant startup changelog prose re-review — 2026-10-21
+
+PR2167 security job119107129537 reported one `generic-api-key` finding in
+`modules/communication/moltbot_bridge/ModLog.md` at line3612. Independent review
+compared the full finding span against line3603 on main `a6b5efa2`: identical
+ordinary committed-profile key-resolution prose, with no credential assignment
+or literal. The nine-line changelog addition changed its whole-file binding.
+
+Replayed both exact committed files with Gitleaks8.30.1 after verifying the release
+archive against the workflow's SHA256 pin. Each scan returned exactly one finding,
+exit1, and zero stderr bytes, with full redaction, the existing config, inline
+allowances ignored and implicit ignore disabled. Sanitized binding evidence:
+
+- Prior file SHA256: `a69ac33da83ce48ac53fc8743c738acb42885a63f3c1327c105da8996be41c69`.
+- Prior exact reviewed binding: `e9a4a29140a6ec5052f328c50d4ef2872734699d814c107c69287f5bbd3539ef`.
+- Current file SHA256: `a95a097d38132d4bf5712543e8f0ccf45fc3f60a5fc585f14fd36064be880a78`.
+- Current exact binding: `2902fa07012568ff448d61c33fb6f823df973f1b111e17545f805d159c758f9a`.
+
+Preserve all1291 existing records and add only this binding, for1292 total.
+No matched value, scanner rule, exclusion, fingerprint algorithm or failure
+behavior changed. Temporary redacted scan reports were removed after review.
+
 ## Move2Japan shared member page review — 2026-10-18
 
 PR #2151 head `57a2a7a3e3b4fb41b7562585966e11b7d5384033` failed security
