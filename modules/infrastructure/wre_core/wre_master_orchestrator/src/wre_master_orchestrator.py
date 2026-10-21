@@ -39,20 +39,21 @@ from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
+from modules.infrastructure.wre_core.src.local_skill_inference import (
+    execute_local_skill_inference,
+    validate_local_proposal_config,
+)
+
 # WSP 96 v1.3: Libido Monitor and Pattern Memory integration
 try:
     from modules.infrastructure.wre_core.src.libido_monitor import GemmaLibidoMonitor, LibidoSignal
     from modules.infrastructure.wre_core.src.pattern_memory import PatternMemory as SQLitePatternMemory, SkillOutcome
-    from modules.infrastructure.wre_core.src.local_skill_inference import (
-        execute_local_skill_inference,
-    )
     from modules.infrastructure.wre_core.src.registered_skill_executor import (
         dispatch_registered_skill_executor,
         resolve_registered_skill_executor,
     )
     from modules.infrastructure.wre_core.src.skill_runtime_admission import (
-        admitted_runtime_fingerprint,
-        ensure_runtime_skill_safety,
+        admit_runtime_skill,
     )
     from modules.infrastructure.wre_core.src.skill_execution_truth import (
         stable_json_record,
@@ -109,10 +110,15 @@ class WREMasterOrchestrator:
     efficiency gains.
     """
 
-    def __init__(self):
+    def __init__(self, *, local_proposal_mode="raw", local_native_chat_profile=None):
         """
         Initialize per WSP 1 (Foundation) and WSP 13 (Agentic System)
         """
+        # Trusted construction only; skill content/input_context cannot select a mode.
+        self.local_native_chat_profile = validate_local_proposal_config(
+            local_proposal_mode, local_native_chat_profile
+        )
+        self.local_proposal_mode = local_proposal_mode
         self.repo_root = Path(__file__).resolve().parents[5]
         # Core components per WSP architecture
         self.pattern_memory = PatternMemory()  # WSP 60 (original in-memory patterns)
@@ -182,7 +188,6 @@ class WREMasterOrchestrator:
             "WRE_SKILL_SCAN_MAX_SEVERITY", "medium"
         ).strip().lower() or "medium"
         self._wre_skill_scan_cache: Dict[str, Dict[str, Any]] = {}
-        self._wre_skill_admission_fingerprints: Dict[str, str] = {}
 
         # Initialize Sprint 3 components
         if SPRINT3_AVAILABLE and WRE_SKILLS_AVAILABLE:
@@ -417,7 +422,7 @@ class WREMasterOrchestrator:
         }
 
     def _try_executor_dispatch(
-        self, skill_name: str, input_context: Dict, agent: str
+        self, skill_name: str, input_context: Dict, agent: str, admission_fingerprint: Optional[str] = None
     ) -> Optional[Dict]:
         """Dispatch the exact registry-adjacent executor when one exists."""
         executor_path = self._find_skill_executor(skill_name)
@@ -428,9 +433,7 @@ class WREMasterOrchestrator:
             skill_name=skill_name,
             input_context=input_context,
             agent=agent,
-            admission_fingerprint=self._wre_skill_admission_fingerprints.get(
-                skill_name
-            ),
+            admission_fingerprint=admission_fingerprint,
         )
 
     def _find_skill_executor(self, skill_name: str) -> Optional[str]:
@@ -454,9 +457,9 @@ class WREMasterOrchestrator:
         except Exception:
             return None
 
-    def _ensure_wre_skill_safety(self, skill_name: str, force: bool = False) -> tuple[bool, str]:
+    def _ensure_wre_skill_safety(self, skill_name: str, force: bool = False) -> tuple[bool, str, str | None]:
         """Run exact production admission and content-bound scanner gating."""
-        result = ensure_runtime_skill_safety(
+        return admit_runtime_skill(
             skills_loader=self.skills_loader,
             skill_name=skill_name,
             repo_root=self.repo_root,
@@ -468,19 +471,7 @@ class WREMasterOrchestrator:
             max_severity=self.wre_skill_scan_max_severity,
             force=force,
         )
-        if result[0] is True:
-            fingerprint = admitted_runtime_fingerprint(
-                skills_loader=self.skills_loader,
-                skill_name=skill_name,
-                cache=self._wre_skill_scan_cache,
-            )
-            if fingerprint is None:
-                result = (False, "production Skillz admission receipt is unavailable")
-            else:
-                self._wre_skill_admission_fingerprints[skill_name] = fingerprint
-        if result[0] is not True:
-            self._wre_skill_admission_fingerprints.pop(skill_name, None)
-        return result
+
 
     def _execute_skill_with_qwen(
         self,
@@ -499,10 +490,16 @@ class WREMasterOrchestrator:
         Returns:
             Dict with execution results
         """
+        options = {}
+        mode = getattr(self, "local_proposal_mode", "raw")
+        profile = getattr(self, "local_native_chat_profile", None)
+        if mode != "raw" or profile is not None:
+            options = {"proposal_mode": mode, "native_chat_profile": profile}
         return execute_local_skill_inference(
             skill_content=skill_content,
             input_context=input_context,
             agent=agent,
+            **options,
         )
     
     def execute_skill(
@@ -534,6 +531,49 @@ class WREMasterOrchestrator:
             force=force,
             evolve_on_low_fidelity=True,
         )
+
+    def _registry_projection_result(self, result, execution_id, agent, request):
+        """Persist a planning observation without effect/fidelity training."""
+        result = dict(result) if result is not None else {
+            "error": "registered registry projection executor is unavailable",
+            "blocked_by": "registry_projection_executor",
+        }
+        output = {
+            **result, "execution_id": execution_id,
+            "skill_name": "auto_test_registry_audit", "agent": agent,
+            "success": False, "execution_success": False, "_effect_evidence": False,
+            "telemetry_completed": result.get("telemetry_completed") is True,
+            "telemetry_status": result.get("telemetry_status", "unavailable"),
+            "observation_persisted": False,
+        }
+        projection = result.get("projection")
+        if projection is None:
+            return output
+        evidence = projection["evidence"]
+        description = {
+            "execution_id": execution_id, "projection_id": evidence.get("projection_id"),
+            "status": output["telemetry_status"],
+            "rejection_reasons": projection["rejection_reasons"],
+        }
+        for field in ("base_sha", "head_sha"):
+            value = request.get(field) if type(request) is dict else None
+            description[field] = value if (
+                type(value) is str and len(value) in (40, 64)
+                and all(c in "0123456789abcdef" for c in value)
+            ) else None
+        if self.sqlite_memory is None:
+            output["observation_error"] = "telemetry_memory_unavailable"
+            return output
+        try:
+            self.sqlite_memory.record_learning_event(
+                event_id=str(uuid.uuid4()), skill_name="auto_test_registry_audit",
+                event_type="telemetry_projection", description=stable_json_record(description),
+                execution_id=execution_id,
+            )
+            output["observation_persisted"] = True
+        except Exception:
+            output["observation_error"] = "telemetry_observation_write_failed"
+        return output
 
     def _execute_skill_once(
         self,
@@ -589,7 +629,7 @@ class WREMasterOrchestrator:
             }
 
         # Step 1.5: Per-skill supply-chain gate (Cisco scanner).
-        scan_ok, scan_message = self._ensure_wre_skill_safety(skill_name, force=force)
+        scan_ok, scan_message, fingerprint = self._ensure_wre_skill_safety(skill_name, force=force)
         if self.sqlite_memory:
             self.sqlite_memory.increment_counter("wre_skill_scan_checks")
         if not scan_ok:
@@ -642,9 +682,12 @@ class WREMasterOrchestrator:
         if os.getenv("WRE_AGENTIC_RAG", "0").strip() == "1":
             logger.warning("[WRE-RAG] BLOCKED: governed Holo owner adapter is not bound")
 
-        # Step 3: Check for programmatic executor (executor.py alongside SKILLz.md)
         # Captured executor bytes must match the exact scanner admission receipt.
-        executor_result = self._try_executor_dispatch(skill_name, input_context, agent)
+        executor_result = self._try_executor_dispatch(skill_name, input_context, agent, fingerprint)
+        if skill_name == "auto_test_registry_audit":
+            return self._registry_projection_result(
+                executor_result, execution_id, agent, input_context.get("request"),
+            )
         if executor_result is not None:
             execution_result = executor_result
         else:
@@ -655,11 +698,7 @@ class WREMasterOrchestrator:
                 agent=agent
             )
 
-        # Step 4: Calculate execution time
         execution_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-
-        # Step 5: Validate with Gemma (pattern fidelity check)
-        # Convert output string to dict for Gemma validation
         step_output_dict = structural_step_output(execution_result)
         expected_patterns = ["output", "steps_completed"]  # Required fields
 
@@ -842,13 +881,14 @@ class WREMasterOrchestrator:
             )
             results.append(result)
 
-            # Telemetry: count retries
+            if skill_name == "auto_test_registry_audit":
+                return {**result, "execution_success": False, "_react_metadata": {
+                    "iterations": 1, "max_iterations": max_iterations,
+                    "all_attempts": [{"success": False}], "early_success": False,
+                }}
             if iteration > 1 and self.sqlite_memory:
                 self.sqlite_memory.increment_counter("react_retry_count")
-
-            # Observation: Check fidelity
             fidelity = result.get("pattern_fidelity", 0)
-
             if result.get("success") is True and fidelity >= fidelity_threshold:
                 logger.info(
                     f"[WRE-REACT] Success on iteration {iteration} - "
@@ -869,7 +909,6 @@ class WREMasterOrchestrator:
                 f"[WRE-REACT] Exhausted {max_iterations} iterations for {skill_name}"
             )
 
-        # Record telemetry
         if self.sqlite_memory:
             self.sqlite_memory.record_learning_event(
                 event_id=str(uuid.uuid4()),
@@ -1060,7 +1099,7 @@ class WREMasterOrchestrator:
             f"{skill_content[:1500]}\n"
             f"\n"
             f"## Last Execution (fidelity={current_fidelity:.2f})\n"
-            f"Input: {json.dumps(input_context)[:500]}\n"
+            f"Input: {json.dumps({k: v for k, v in input_context.items() if k != 'parent_continuity_context'})[:500]}\n"
             f"Output: {json.dumps(failed_output)[:500]}\n"
             f"\n"
             f"## Past Failures\n"

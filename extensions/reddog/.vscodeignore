@@ -1,5 +1,7 @@
 tests/**
 docs/**
+.gitignore
+ARCHITECTURE.md
 *.vsix
 node_modules/**
 .vscode/**

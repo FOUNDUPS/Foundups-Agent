@@ -8,7 +8,38 @@ Owner health/query success includes a canonical `runtime_environment_digest`
 computed in the authenticated child from its executable, ABI/platform,
 backend/distribution records, replica/model closure, and allowlisted controls.
 Only the digest crosses the trust boundary. Exact closure remains a separate
-false-by-default predicate rejected until every payload byte/control is proven.
+false-by-default predicate rejected until every payload byte/control is proven. `reddog_holoindex_owner_acquisition` exports the shared two-attempt, 300-second, fixed-transient policy plus 32 deterministic acquisition cycles over the 64-port shard set. The root one-shot validates the controller-selected cycle and integrity-binds it in the query receipt. These values grant no query, retry, route, maintenance, or repository authority.
+
+### `materialize_base_runtime(...) -> BaseRuntimeMaterializationResult`
+
+Creates or reproves one Windows-specific, content-addressed, inert Python
+base-prefix generation. The preserved runnable topology admits exact root
+interpreter/runtime DLLs plus `DLLs`, `Lib`, and `tcl`; it excludes development,
+documentation, scripts, and `Lib/site-packages`. Inventory identity covers file
+bytes, sizes, roles, policy roots, and complete directory topology. Publication
+uses the existing proved store, bounded handle copy, staging proof, atomic
+no-replace transition, canonical reproof, quarantine, and per-store operation
+lock. Protected installed-Python sources use a read-only lease mode that
+does not require DELETE authority. Native-loader closure, deterministic
+effects, signature, write denial, activation eligibility, and exact runtime
+closure remain false. The API never launches Python or changes a route/owner.
+
+### `materialize_runtime_composition(...) -> RuntimeCompositionMaterializationResult`
+
+Creates a path-free descriptor-only base/dependency pairing without recopying payloads.
+Both full-byte verifiers run `B1 -> D1 -> D2 -> B2` and must return identical
+complete bindings. Confined JSON, serialization, no-replace publication, and
+quarantine apply. ABI, loader, determinism, bootstrap, signing, write denial,
+activation, and exact closure remain false; reverse reproof is not immutability. The evidence-only `run_builder_process_once(...)` API is specified in the focused [Phase 2C3c interface](docs/clarity/REDDOG_BUILDER_PROCESS_CHILD_INTERFACE_PHASE2C3C.md).
+
+### `materialize_runtime_abi_attestation(...) -> RuntimeAbiMaterializationResult`
+
+Reproves one composition and publishes path-free AMD64 PE32+/wheel/RECORD/
+CPython-link evidence in a disjoint store. Parsing is inert and bounded; delay
+tables and forwarded exports are explicit. The graph is not loader routing. Dynamic loads,
+API-set/SxS/KnownDLL resolution, determinism, bootstrap, signing, write denial,
+activation, and exact closure remain false. No owner, route, Skill, manifest,
+extension, or VSIX state changes.
 
 ### `materialize_dependency_runtime(...) -> DependencyRuntimeMaterializationResult`
 
@@ -17,6 +48,20 @@ Identity covers NFC paths, every file byte/size, and complete directory topology
 Publication is fully reverified, atomic no-replace, and serialized by store identity.
 Windows copying is O(depth), ADS-aware, and extended-path safe for payloads.
 Unsafe topology rejects; activation, signing, routes, and write denial stay false.
+
+### `admit_pinned_builder_packaging_wheel(...) -> BuilderPackagingWheelAdmission`
+
+Windows-only inert admission for the exact repository-reviewed
+`packaging-26.0-py3-none-any.whl` pin (74,366 bytes,
+`sha256:b36f1fef...37529`) from one immediate child of a dedicated O:/E: source
+store. The source directory and regular single-link file remain leased across a
+single bounded descriptor read, strict non-ZIP64 raw archive proof, exact
+METADATA/WHEEL/RECORD ownership, and final identity/path reproof. The result is
+path-free and explicitly keeps official provenance, signature, builder-runtime
+authentication, loader/native/subprocess/exact-runtime closure, network,
+download, extraction, installation, publication, import, execution,
+determinism, write denial, activation, A-grade, and retrieval RSI false. It
+does not materialize `site-packages`; the focused [Phase 2C2a source contract](docs/clarity/REDDOG_BUILDER_PACKAGING_SOURCE_INTERFACE_PHASE2C2A.md) owns that API.
 
 ### `holo_query_bundle(...) -> Dict[str, Any]`
 
@@ -102,7 +147,7 @@ Canonical bounded JSON, copied immutable binding maps, duplicate/type/path/link/
 ### `build_query_replica_owner_route(...) -> QueryReplicaOwnerRoute`
 
 Health transport requires exact built-ins: literal `127.0.0.1`, port 1..65535, printable token >=32, and finite positive timeout <=300.
-JSON is an exact dict with unique keys at every depth and no NaN/Infinity; parse, Unicode, recursion, primitive, and oversize failures return unavailable. Bindings are exact four-tuples; only expected canonical fields may be empty wildcards.
+JSON is an exact dict with unique keys at every depth and no NaN/Infinity. A string-aware pre-parse scan admits at most 128 structural nesting levels independently of the process recursion limit; parse, Unicode, depth, recursion, primitive, and oversize failures return unavailable. Bindings are exact four-tuples; only expected canonical fields may be empty wildcards.
 Exchange parses canonical then mandatory replica expectation before transport/HTTP. Binding malformation returns mismatch; HTTP/OSError failures return unavailable, and targeted close failures preserve the proof. Context entry calls `start()`, so a complete route remains mandatory.
 `ensure_reddog_holoindex_owner(..., query_replica_route=route)` passes split roots,
 reproves before spawn/health, and denies ambient/public paths or reuse drift.
@@ -163,8 +208,8 @@ mappings, and digest-shaped embedding fingerprints.
 Unknown or nested evidence fields reject the complete response.
 
 `flatten_hits(result, limit, query=...)` returns no hits when `limit <= 0`.
-For a positive limit and one explicit module, it reserves exact module-root
-README/INTERFACE evidence before filling remaining slots by global score.
+For one explicit module it reserves exact root README/INTERFACE evidence. Broad current-status queries preserve current-contract and implementation authority over historical/vision records across typed buckets.
+Exact PR/slice and historical queries retain score order; paths deduplicate by normalized case. This policy neither proves prose nor promotes a ranker.
 
 ### FoundUpsMCPBridge (local/internal only)
 
@@ -195,6 +240,10 @@ the verified replica generation. It
 supports only the Chroma-shaped read subset used by HoloIndex. Backend creation
 fails closed when the snapshot generation differs from the active replica;
 query startup/search never starts Chroma or opens replica SQLite/HNSW files.
+`query(where=...)` supports only exact string equality for `record_kind`; all
+other query-filter shapes fail closed. This bounded filter is part of the
+twelve-module retrieval-ranker identity and supplies the current-truth summary
+stream without admitting a general metadata query language.
 The owner performs one complete replica admission, then uses the retained
 bounded proof above before and after semantic retrieval. Runtime proof never
 substitutes for initial complete narrow-manifest admission.
@@ -212,11 +261,15 @@ Consumers evaluating a candidate must additionally compare this value with
 the digest of the clean authority candidate; repository identity alone does
 not prove which ranker bytes executed the query.
 
-This value binds source only. A future separately sealed
-`runtime_environment_digest` must bind the owner executable, ABI/platform,
-exact dependency/build identities, and deterministic execution knobs before
-independent A-grade evaluation is reproducible.
+The separately emitted `runtime_environment_digest` now binds the source closure, owner executable, ABI/platform,
+distribution build-record metadata, replica/model identities, declared runtime knobs, and required environment checks
+without exposing paths or secrets. Its `runtime_environment_exact_closure_verified` flag remains false because exact
+installed-distribution payload bytes and all deterministic runtime effects are not yet proven. Independent A-grade evaluation is therefore not reproducible at exact runtime-byte closure yet.
 
+Phase 2A appends inert graph/inventory/descriptor and private diagnostic seams. Public build/reproof fail with `QUERY_RUNTIME_CANDIDATE_BUILDER_RUNTIME_UNBOUND`; a parser pin
+is not execution provenance. Diagnostics bind the dependency tree, selected RECORD bytes, declarations, target markers, clean-HEAD repository, and
+declared Phase-2A modules/origins. Transitive builder/parser/stdlib execution, excluded
+bytes, topology, materialization, loader, activation, A-grade, and RSI remain unproved. Phase 2B structurally exposes `prove_builder_process_authority`, `prove_builder_packaging_authority`, `prove_pinned_git_authority`, `prove_builder_source_authority`, and `builder_authority_receipt`; the components cross-bind source/dependency identities and compare two exact bound HEAD/source observations without worktree porcelain/global-clean claims, but same-interpreter wrappers are unauthenticated, the O:/E: live-Git gate skips, public build/reproof stays runtime-unbound, and every operational field remains false (see [roadmap](ROADMAP.md) and [assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md)).
 Query requires `query` and `expected_repo_head_sha`; `limit` and
 `doc_type_filter` are optional. Success requires semantic retrieval, exact
 repository SHA, stable generation/receipt digest, seven verified baseline
@@ -376,12 +429,28 @@ active caller worktree is invalid. Child stdout is drained to at most 16 KiB
 in memory; stderr and disk capture are disabled. Only an explicitly
 allowlisted stable code from the final JSON line crosses the boundary; detail,
 forged/malformed/oversized output, paths, and logs reduce to
-`HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. Windows timeout makes a bounded exact-PID
-`taskkill /T /F` attempt; missing, denied, or timed-out `taskkill` falls back to bounded direct-child kill/wait. POSIX signals the exact new process group but cannot
-contain a descendant that starts a new session. Such an escaped descendant may retain
-stdout and the daemon reader until it exits. This is cooperative trusted-host
-best-effort containment, not a hostile-process or OS-privilege guarantee; never
-assume the whole tree is gone.
+`HOLOINDEX_MAINTENANCE_REFRESH_FAILED`. Windows starts the child suspended,
+assigns it to a private kill-on-close Job Object, then resumes it. Closing that
+guard explicitly terminates the full descendant tree even after direct-parent
+exit, then releases the handle; no PATH-resolved external executable is used.
+Job setup, assignment, resume, terminate, or close failure fails the operation.
+POSIX signals the exact new process group but
+cannot contain a descendant that starts a new session. This is a trusted-host
+containment boundary, not an OS-privilege or hostile-kernel guarantee.
+
+The shared `bounded_child_runner(command, *, job_memory_limit_bytes=None,
+**kwargs)` accepts an optional Windows aggregate committed-memory limit in
+bytes. `None` preserves existing behavior and call shapes. An explicit value
+must be an exact positive `int` no larger than platform `SIZE_T_MAX`; booleans,
+other types, zero, negatives, overflow, and unsupported non-Windows requests
+raise `ValueError` before `Popen`. `validate_job_memory_limit` owns this rule;
+the Job attachment/configuration helpers also validate before native setup.
+The configured Job combines `JOB_OBJECT_LIMIT_JOB_MEMORY` (`0x200`) with
+kill-on-close (`0x2000`), sets `JobMemoryLimit`, and leaves
+`ProcessMemoryLimit` zero. Configuration and assignment precede child resume;
+failed setup follows existing suspended-child cleanup. This bounds Job commit,
+not working set/RSS, native file reads, every resource, or model admission.
+Existing maintenance and builder callers acquire no memory limit by default.
 
 Optional `owner_runtime_root` supplies the trusted `.venv` for nonsealed
 refresh/start; inherited `PYTHONPATH` and user-site packages stay disabled.
@@ -1113,6 +1182,14 @@ from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
 ```
 
 #### FastMCP lifecycle API
+
+The exact dependency contract is FastMCP3.2.0/MCP1.30.0/Pydantic2.12.3/
+Uvicorn0.38.0. On Windows, `_mcp_child_env` supplies the selected site-packages
+path from the resolved venv; an ambient `FOUNDUPS_MCP_SITE_PACKAGES` value is
+not inherited. The private command builder accepts only the existing server
+and readiness entrypoints and performs that venv's normal `.pth` startup before
+module execution. This is compatibility behavior for the selected environment,
+not authentication of installed packages or a runtime execution grant.
 
 - `build_mcp_server(repo_root=None)` registers only the remote read allowlist
   and removes internal `repo_root` parameters from published tool schemas.

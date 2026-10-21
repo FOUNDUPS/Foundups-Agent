@@ -16,9 +16,11 @@ from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_auth
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_authority import (
     lease_root_revocation_policy,
     root_revocation_authority_repo,
+    root_revocation_grant_identity, _require_grant_load, _require_issuer_epoch_current,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_revocation_protocol import (
     OP_ADVANCE,
+    GRANT_ROLE,
     RootRevocationRequest,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
@@ -55,13 +57,25 @@ class ValidatedRootRevocationOperation:
 def validate_root_revocation_operation(
     request: RootRevocationRequest, *, snapshot: RootAuthoritySnapshot,
     state: RootVerifiedOutcomeAuthorityState, authority: object,
-    now_epoch: int,
+    now_epoch: int, peer: Any = None,
 ) -> Iterator[ValidatedRootRevocationOperation]:
     with lease_root_revocation_policy(authority, request.policy) as lease:
         binding = lease.revocation_binding
         require_root_revocation_context(
             request, snapshot, state, lease.policy, binding
         )
+        if request.requester_role == GRANT_ROLE:
+            identity = root_revocation_grant_identity(authority, lease.policy, snapshot)
+            _require_grant_load(request, peer, identity, lease.policy)
+            _require_issuer_epoch_current(request, state, lease,
+                root_revocation_authority_repo(authority), now_epoch)
+            yield ValidatedRootRevocationOperation(binding.anchor_binding_digest(), None, None)
+            if root_revocation_grant_identity(authority, lease.policy, snapshot) != identity:
+                raise ValueError("root_revocation_grant_owner_changed")
+            import time
+            _require_issuer_epoch_current(request, state, lease,
+                root_revocation_authority_repo(authority), int(time.time()))
+            return
         if request.operation != OP_ADVANCE:
             yield ValidatedRootRevocationOperation(
                 binding.anchor_binding_digest(), None, None

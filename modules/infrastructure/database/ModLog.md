@@ -1,5 +1,22 @@
 # Database Module - ModLog
 
+## Entry: HoloIndex Post-Merge v2 Claim Integrity and Completion Fence
+**Date**: 2026-08-28
+**What Changed**: Extracted a bounded claim-contract module, bound claim ID,
+issued time, expiry, assignee, and full context into one v2 digest, aligned the
+canonical 7,500-second default, required exact assignment-time equality, and
+enforced active expiry inside first completion. Reclaim now proves expiry;
+exact completed replay proves the stored completion preceded expiry.
+**Why**: The previous digest excluded claim identity/expiry, reclaim trusted its
+caller timestamp, and a late first completion could commit after the advertised
+lease boundary.
+**Impact**: Weak assigned/executing v1 rows fail closed. AgentDB shrank from
+3,129 to 3,080 lines and its WSP_62 ceiling ratcheted down; the claim module is
+200 lines with every function below 50. SQLite obtains `BEGIN IMMEDIATE` and
+PostgreSQL uses `FOR UPDATE` before evaluating the lease clock. External
+authority-effect cancellation remains a separate A-grade blocker.
+**WSP References**: WSP 00, WSP 05, WSP 06, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 97
+
 ## Entry: HoloIndex Post-Merge Task Namespace Isolation
 **Date**: 2026-08-01
 **What Changed**: Reserved `holoindex_postmerge_refresh:*` across generic task

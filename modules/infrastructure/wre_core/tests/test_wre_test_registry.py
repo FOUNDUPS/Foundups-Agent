@@ -279,6 +279,7 @@ def test_new_registry_runtime_respects_wsp62_limits() -> None:
         ROOT / "modules/infrastructure/wre_core/src/wre_test_registry_classification.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_git_commit_archive.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_git_bounded_io.py",
+        ROOT / "modules/infrastructure/wre_core/src/wre_git_process_io.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_git_tree_manifest.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_pytest_collection_collector.py",
         ROOT / "modules/infrastructure/wre_core/src/wre_python_environment_fingerprint.py",

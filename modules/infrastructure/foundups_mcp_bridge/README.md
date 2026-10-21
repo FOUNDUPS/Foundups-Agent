@@ -4,7 +4,98 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+## MCP runtime compatibility
+
+The HTTP launcher requires the exact quartet in `requirements.txt`: FastMCP
+3.2.0, MCP 1.30.0, Pydantic 2.12.3 and Uvicorn 0.38.0. Update these declarations
+and `scripts/launch.py:MCP_RUNTIME_VERSIONS` together. Older environments fail
+the capability gate; changing source does not upgrade or activate an installed
+service.
+
+On Windows, server and readiness children use the direct base interpreter for
+process ownership and explicitly process the selected virtual environment's
+site-packages startup hooks. This preserves dependencies such as PyWin32 that
+`PYTHONPATH` alone cannot initialize. The capability probe suppresses bytecode
+explicitly with `-B`, including when Python's isolated mode ignores environment
+settings. See [test setup and scope](tests/README.md#mcp-runtime-compatibility)
+and the existing [runtime assumption audit](docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md).
+
+## Governed Holo evidence and clean-runtime boundary
+
+Static documentation is not live route authority. Consult generation-bound
+query, activation, and WSP_97 receipts for the current head. Retrieval and
+maintenance-replica RSI are usable, but A-grade and retrieval-quality RSI stay
+false until quality floors, independent promotion/rollback, candidate-bound
+learning, and exact runtime closure all pass.
+
+Phase 2A defines an inert clean query-runtime candidate schema and positive
+distribution graph over one composition, exact dependency bytes, declarations,
+clean exact-HEAD source identity, and selected modules/origins. Identity,
+markers, wheels, executable roles, and subprocess declarations fail closed.
+Public build/reproof reject until a sealed builder is bound. Phase 2B adds inert
+process/packaging/pinned-Git/source/receipt components but still supplies no
+authenticated producer; see the [roadmap](ROADMAP.md) and [assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md).
+
+Phase 2C1 adds only an inert source-wheel admission prerequisite. On Windows,
+`admit_pinned_builder_packaging_wheel(...)` holds the exact O:/E: source parent
+and file from before its single bounded read through raw ZIP/distribution proof
+and final identity reproof. It accepts only the repository-reviewed filename,
+74,366-byte size, and SHA-256 for `packaging==26.0`; the exact member set,
+deflate streams, Windows-safe names, METADATA, WHEEL, and RECORD must agree.
+The production API performs no network access, download, extraction,
+installation, publication, import, or execution. The PyPI comparison is not a
+signature or durable authenticated upstream-provenance proof. Builder-runtime,
+loader/native/subprocess/exact-runtime, write-denial, activation, A-grade, and
+retrieval-RSI authority remain false. Persistent source generation is the
+separate [Phase 2C2a interface gate](docs/clarity/REDDOG_BUILDER_PACKAGING_SOURCE_INTERFACE_PHASE2C2A.md); see the
+[Phase 2C1 assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md).
+
+Phase 2C2a now persists the exact retained-handle-read wheel bytes and only the
+already-admitted member bytes as one wheel-bound, content-addressed inert
+source generation. The generation identity cross-binds the reviewed wheel,
+strict archive/distribution digests, and the exact extracted dependency-tree
+digest, so a different wheel encoding cannot alias an identical tree. Windows
+writes use create-new files and O(depth) directory leases; staging and the
+atomic no-replace target each receive two consecutive complete full-byte
+wheel-to-tree passes. During pass two, bounded raw handles retain every admitted
+file and child directory; exit reproves each handle and complete live topology
+before release. Owned failures are preserved by no-delete quarantine.
+Public verification independently requires the fixed reviewed wheel bytes but
+never trusts a persisted lease boolean. Durable reproof returns both lease
+claims false. The live public materializer reports current-verification lease
+authority on every call and publication-time authority only for a generation
+that call actually publishes; reuse cannot inherit the historical claim.
+The private synthetic seam remains explicitly non-authoritative.
+Public bindings are path-free and expose every authority/nonclaim field. The
+destination is restricted to O:/E: before mutation. The exact O: artifact
+passed first publication plus 200 full reuses
+in 105.09 seconds with unchanged source bytes and bounded handles/RSS.
+
+Phase 2C2b sequentially proves source S1, its inert dependency, then source S2
+with durable S1/S2 identity and exact tree-generation equality; it adds no
+cross-store lock or rollback. Phase 2C3a now passes that exact dependency into
+the existing base/runtime-composition materializer and cross-binds all durable
+dependency fields. The [focused interface](docs/clarity/REDDOG_BUILDER_RUNTIME_COMPOSITION_INTERFACE_PHASE2C3A.md)
+keeps the result path-free and does not carry source live-proof truth forward.
+The join launches nothing and creates no artifact beyond the existing
+descriptor-only composition. Real base layouts use
+`<generation>/python-runtime/python.exe`; Phase 2C3b makes both older
+process/candidate consumers use the exact `base_prefix_root` and rejects the
+obsolete topology. Phase 2C3c adds one held, isolated, fixed-path, bounded child with full surrounding reproof.
+Its result is evidence, not authority; 3.12.10 patch debt, provenance, closure, effects, write denial, activation, A-grade, and RSI remain false.
+
 ## Holo retrieval runtime identity
+
+The shared owner-acquisition policy owns the two-attempt ceiling, 300-second
+operation ceiling, PID-sharded ports, and exact transient allowlist. Policy is
+no longer duplicated in the root script. Thirty-two bounded acquisition cycles
+form one deterministic 64-port permutation per process; cycle zero preserves
+the original pair. The one-shot binds a caller-selected cycle into its result
+and query receipt. The activation controller still calls the default cycle for
+candidate and immediate post-commit proofs, so disjoint post-completion cycle
+allocation remains a focused reliability repair. No arbitrary invalid result
+is retryable: only independently verified exhausted allowlisted transients may
+enter the bounded second proof.
 
 The private query owner emits a secret-free
 `runtime_environment_digest` computed inside the authenticated child. It binds
@@ -18,9 +109,10 @@ interpreters.
 This is not yet exact dependency-byte assurance. Installed package payload
 files are not all rehashed, so queries explicitly report
 `runtime_environment_exact_closure_verified=false` and A-grade admission
-rejects. Current cold one-shot semantic startup also exceeds 180 seconds after
-restart; resident authenticated owner activation and dependency-byte sealing
-remain P0. Query-time reindex and environment repair remain forbidden.
+rejects. Earlier post-restart diagnostics exceeded 60/180 seconds; the latest
+base-bound governed query passed on attempt one inside the 300-second CLI wall.
+Resident exact-current-main owner activation and dependency-byte sealing remain
+P0. Query-time reindex and environment repair remain forbidden.
 
 The first dependency-byte layer now exists as an inert, content-addressed
 materializer. It hashes every admitted `site-packages` file and every directory
@@ -41,6 +133,69 @@ secrets. Interpreter/standard-library/native-library closure, signing,
 write-denial, resident-owner binding, and retrieval-quality promotion remain
 separate P0 layers. Therefore the exact-closure and A-grade statements above
 remain unchanged.
+
+The next inert prerequisite now also exists for the Windows Python base
+runtime. `materialize_base_runtime(...)` preserves the runnable base-prefix
+topology for the interpreter, Python/VCRuntime libraries, `Lib`, `DLLs`, and
+`tcl`, while excluding development/documentation roots and
+`Lib/site-packages`. Every admitted file byte, file role, directory (including
+empty directories), and policy root is content-addressed and fully reproved.
+It reuses the hardened bounded tree-copy primitives and a read-only source
+lease mode that does not demand DELETE authority from protected installed-Python
+roots. Production shape passed 4,068 files / 372 child directories /
+81,515,843 bytes as generation `sha256:3efe4fba...`, including exact reuse.
+
+This base-runtime generation is also intentionally inert. Its descriptor
+reports native-loader closure, deterministic effects, signature, write denial,
+activation eligibility, and exact runtime closure as false. It does not change
+the owner, supervisor, route, replica, VSIX, or query-time behavior. A protected
+stage-zero admission must compose this generation with the exact dependency
+generation and independently prove external loader closure, deterministic
+controls, signing, and empirical write denial before route-v2 can exist.
+
+The first inert composition prerequisite now exists as a third, tiny
+content-addressed generation. It contains only a canonical path-free descriptor
+and independently reruns both full-byte component verifiers. Its identity binds
+both generation, descriptor, inventory, and tree digests; file/directory/byte
+counts; the Windows platform; the exact `python.exe` row, bytes, and size; the
+separate `site-packages` role; and fixed `-I -S -B` isolation topology. It does
+not copy either payload. Reuse fully reproves the selected component roots, so
+base/dependency substitution fails closed. ABI/native-loader compatibility,
+deterministic effects, pre-import safety, signature, empirical write denial,
+activation eligibility, and exact closure remain false. The composition is a
+future proof/signing target, not an owner or route.
+
+Canonical verification uses a bounded reverse-order `B1 -> D1 -> D2 -> B2`
+full reproof and requires exact equality of both component bindings. This
+detects one-shot cross-pass mutation but does not prove ABA resistance,
+immutability, or durable write denial.
+
+The O:-local production shape passed: 72,261 dependency files / 11,639
+directories / 1,853,891,335 bytes materialized in 2,856.73 seconds; composition
+publication took 588.32 seconds. A fresh repaired-verifier process then accepted
+generation `sha256:44e21db7...` / descriptor `sha256:cbbfe268...` in 579.54
+seconds with the descriptor unchanged and every activation-grade flag false.
+This full-tree proof is an offline release gate and never query-time work.
+
+The next inert prerequisite is a composition-bound Windows/CPython ABI attestation.
+`materialize_runtime_abi_attestation(...)` reproves the composition, parses every
+admitted `.exe`, `.dll`, and `.pyd` without loading it, and publishes path-free
+evidence in a separate store. It admits only AMD64 PE32+ and modern RVA delay
+descriptors, validates loader-table structure and forwarders, and enforces
+per-image/aggregate bounds. Compatible wheel tags and unique RECORD rows bind
+each admitted dependency-native byte by exact SHA-256 and size.
+
+This earns only declared PE/machine, wheel/RECORD, and reachable non-forwarded
+CPython export facts. Its basename graph is not Windows loader resolution.
+Search order, API sets, KnownDLLs, SxS, loaded modules, dynamic loading,
+signatures, determinism, bootstrap, write denial, activation, and exact closure
+remain schema-forced false.
+
+A read-only production scan found 396 native-suffix artifacts: 384 AMD64
+PE32+, four ARM64 PE32+, eight PE32, and one duplicate RECORD path. Phase 2A
+can exclude them only from a physically separate positive candidate, never by
+logical filename rules over the broad tree. Import, DLL, subprocess, loader,
+determinism, signing, write-denial, activation, and exact closure remain open.
 
 ## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
 
@@ -203,7 +358,7 @@ ID, and path-identity digest); any missing field or drift fails closed and a
 changed exact binding cannot hot-swap a live owner. Absolute replica paths are
 not returned in public responses.
 
-Every owner process also imports and hashes one fixed ten-module retrieval
+Every owner process also imports and hashes one fixed twelve-module retrieval
 policy closure. Query and health responses expose only its SHA-256 manifest
 digest as `retrieval_runtime_ranker_digest`. Health and the loopback client
 reject a missing or malformed digest; retrieval evaluation additionally
@@ -232,6 +387,9 @@ selected model and sealed snapshots. After that admission, route reuse,
 startup health, and queries revalidate the unchanged descriptor, canonical
 repository/receipt/leases, and the same runtime closure. The sealed backend has
 no Chroma/SQLite/HNSW path. The 15-second query deadline is unchanged. The
+adapter's only query metadata filter is exact string equality on `record_kind`;
+unsupported keys, values, and compound expressions fail closed. The adapter is
+included in the owner-emitted twelve-module retrieval-ranker digest. The
 previous full-tree live replica demonstrated why this narrowing is necessary:
 its 8.33 GB closure produced 122--153 second cold owner queries. The narrow
 materializer is synthetically verified and has completed live exact-main
@@ -258,8 +416,10 @@ values fail before connection, hashing, route validation, verifier, stop,
 spawn, health, or handoff; malformed actual JSON/proof returns not-ready with
 `HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH`. R22 makes JSON representation
 unambiguous: duplicate member names at any nesting level and NaN/Infinity
-constants reject, while unique exact dictionaries remain valid. Parse,
-Unicode, recursion, primitive, and bounded-size failures return unavailable;
+constants reject, while unique exact dictionaries remain valid. A byte-level
+string-aware structural guard caps JSON nesting at 128 before parsing, so an
+ambiently raised Python recursion limit cannot weaken admission. Parse,
+Unicode, depth, recursion, primitive, and bounded-size failures return unavailable;
 the 65,537-byte read and close contract is unchanged. Repeated exact values
 across distinct binding fields remain allowed. R23 contains stdlib HTTP
 protocol failures from request, response acquisition, and bounded read as
@@ -524,14 +684,22 @@ refresh and final receipt publication. The parent retains at most 16 KiB of
 child stdout in memory, writes no capture file, discards stderr and diagnostic
 detail, and propagates only an allowlisted stable error from the final JSON
 line; every untrusted shape falls back to the generic refresh-failed code.
-On Windows, timeout makes a bounded exact-PID `taskkill /T /F` attempt. If
-`taskkill` is missing, denied, or times out, bounded direct-child kill/wait is
-the fallback; an escaped descendant can retain stdout and the daemon reader
-until that descendant exits. POSIX signals the exact isolated process group,
-but a descendant that starts a new session escapes it. The reader exclusively
-owns pipe closure. This is cooperative trusted-host best-effort containment,
-not a hostile-process or OS-privilege guarantee; never assume the whole tree is
-gone.
+On Windows, the child starts suspended, is assigned to a private kill-on-close
+Job Object, and is resumed only after assignment. Closing the final job handle
+explicitly terminates the direct child and every descendant even if the parent
+already exited, then releases the handle; no PATH-resolved external executable
+participates. Guard creation, assignment, resume, termination, or close failure
+stops the operation. POSIX
+signals the exact isolated process group, but a descendant that starts a new
+session escapes it. The reader exclusively owns pipe closure. This remains a
+trusted-host containment boundary, not an OS-privilege or hostile-kernel claim.
+
+Direct shared-runner callers may set `job_memory_limit_bytes` to a positive
+exact integer within `SIZE_T_MAX` on Windows. The limit applies to aggregate
+Job committed memory and is configured before the suspended child resumes.
+Invalid or unsupported explicit requests fail before process creation; omitted
+or `None` keeps existing behavior. It does not bound RSS or native file reads,
+and grants no model execution authority; see [the API contract](INTERFACE.md).
 
 For manual diagnostics only, set a strong shared token outside the repository,
 then launch the host-owned process:

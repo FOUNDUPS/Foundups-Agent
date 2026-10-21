@@ -9,6 +9,7 @@ import time
 from typing import Any, Mapping, Sequence
 
 from holo_index.query_result_contract import validate_search_result
+from holo_index.document_truth import current_truth_rank
 from holo_index.retrieval_runtime_binding import (
     retrieval_ranker_binding,
     runtime_environment_binding,
@@ -89,8 +90,8 @@ def flatten_hits(
     *,
     query: str = "",
 ) -> list[Mapping[str, Any]]:
-    """Flatten typed buckets into one deterministic global score order."""
-    candidates: list[tuple[float, int, int, str, Mapping[str, Any]]] = []
+    """Merge producer-ranked typed streams into one deterministic order."""
+    streams: list[list[tuple[float, int, int, str, Mapping[str, Any]]]] = []
     buckets = (
         ("code_hits", "code"),
         ("wsp_hits", "wsp"),
@@ -105,6 +106,7 @@ def flatten_hits(
         values = result.get(key)
         if not isinstance(values, Sequence) or isinstance(values, (str, bytes)):
             continue
+        stream: list[tuple[float, int, int, str, Mapping[str, Any]]] = []
         for item_index, item in enumerate(values):
             if not isinstance(item, Mapping):
                 continue
@@ -114,10 +116,18 @@ def flatten_hits(
             identity = path or json.dumps(item, sort_keys=True, default=str)
             normalized = dict(item)
             normalized.setdefault("type", kind)
-            candidates.append(
-                (_hit_score(item), bucket_index, item_index, identity, normalized)
+            stream.append(
+                (
+                    _hit_score(item) + 10.0 * current_truth_rank(query, normalized),
+                    bucket_index, item_index, identity, normalized,
+                )
             )
-    candidates.sort(key=lambda value: (-value[0], value[1], value[2], value[3]))
+        stream.sort(
+            key=lambda value: -current_truth_rank(query, value[4])
+        )
+        if stream:
+            streams.append(stream)
+    candidates = _merge_ranked_streams(streams)
     metadata = result.get("metadata")
     attested_target = (
         metadata.get("tier0_module_target")
@@ -125,6 +135,35 @@ def flatten_hits(
     )
     candidates = _reserve_module_tier0(candidates, query, attested_target)
     return _deduplicated_hits(candidates, limit)
+
+
+def _merge_ranked_streams(
+    streams: Sequence[
+        Sequence[tuple[float, int, int, str, Mapping[str, Any]]]
+    ],
+) -> list[tuple[float, int, int, str, Mapping[str, Any]]]:
+    """Globally score stream heads without reversing producer rank."""
+    offsets = [0] * len(streams)
+    merged: list[tuple[float, int, int, str, Mapping[str, Any]]] = []
+    while True:
+        available = [
+            index for index, stream in enumerate(streams)
+            if offsets[index] < len(stream)
+        ]
+        if not available:
+            return merged
+        selected = min(
+            available,
+            key=lambda index: _candidate_order(streams[index][offsets[index]]),
+        )
+        merged.append(streams[selected][offsets[selected]])
+        offsets[selected] += 1
+
+
+def _candidate_order(
+    value: tuple[float, int, int, str, Mapping[str, Any]],
+) -> tuple[float, int, int, str]:
+    return -value[0], value[1], value[2], value[3]
 
 
 def _reserve_module_tier0(
@@ -192,9 +231,10 @@ def _deduplicated_hits(
     hits: list[Mapping[str, Any]] = []
     seen: set[str] = set()
     for _score, _bucket, _position, identity, normalized in candidates:
-        if identity in seen:
+        normalized_identity = identity.replace("\\", "/").casefold()
+        if normalized_identity in seen:
             continue
-        seen.add(identity)
+        seen.add(normalized_identity)
         hits.append(normalized)
         if len(hits) >= limit:
             break

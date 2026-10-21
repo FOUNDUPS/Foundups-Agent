@@ -5,6 +5,13 @@ catalog evidence, AutoResearch admission, runtime binding, and request safety.
 Provider transports are injected or mocked; the suite must not require live
 credentials or make provider calls.
 
+## Model binding clock regression
+
+Existing `test_model_runtime_binding_security.py` exercises a valid integer and
+eight invalid clock cases alongside expiry/revocation checks. The corresponding
+artifact-supply, PANEL and WSP62 suites pass55 cases together. These are offline
+fixtures, not production authority or native RSI evidence.
+
 ## Nemotron routing coverage
 
 `test_model_topology_proposal_lm_studio.py` verifies the local reasoning-off

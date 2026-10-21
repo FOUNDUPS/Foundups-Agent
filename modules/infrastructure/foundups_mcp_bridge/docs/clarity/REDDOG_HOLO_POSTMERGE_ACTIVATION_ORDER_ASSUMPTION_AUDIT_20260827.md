@@ -1,6 +1,6 @@
 # Assumption Audit: RedDog Holo Post-Merge Activation Order
 
-- Status: ACCEPTED_AT_EXACT_MAIN_CFD1E0051
+- Status: HISTORICAL_ACCEPTANCE_PLUS_CURRENT_CANDIDATE_REPLAY_REQUIRED
 - Base commit: `a7302344424615dc9d061ef408c2de2508660b81`
 - Execution plane: OpenClaw/AgentDB task -> Holo authority -> replica activation
 - WSP_15: C4 / I5 / D5 / Impact5 = 19 (P0)
@@ -127,3 +127,30 @@
   inputs with the single committed route-file capability. This closes A7/F7
   at the actual callback boundary and adds no route-publication, maintenance,
   retry, or mutation authority.
+
+## 10. Exact-Task Runtime/Liveness Falsification Addendum (2026-08-28)
+
+The exact-`db44f8be` transaction completed maintenance and atomic AgentDB
+publication at generation `sha256:b5a138e0...`, while the controller rejected
+its immediate owner proof. A later fresh governed query returned CURRENT with
+the same binding in 3.812 seconds. This proves a controller false negative; it
+does **not** prove that process-port reuse caused the transient. Distinct
+receipt-bound acquisition cycles harden that previously untested assumption.
+
+| ID | High-risk assumption / interleaving | Falsification and decision |
+|---|---|---|
+| A8 | A syntactically valid AgentDB authority digest is the admitted digest. | False when liveness self-validates task context. Thread the sealed deferred-receipt digest into every binding/liveness read and reject a different valid digest immediately. |
+| A9 | Releasing a controller-owned binding before stop is harmless. | False: the Holo-only poller could schedule its periodic coordinator in the release-to-stop window. Owned supervisors remain bound until proven stopped; only pre-existing supervisors use exact release. |
+| A10 | A live thread proves task progress for the four-hour transaction. | False. Pending and assigned phases now have 60-second unchanged-state bounds. Executing observation retains the canonical 7,500-second v2 integrity-bound claim lease because measured healthy materialization reached 2,250.675 seconds. First completion after expiry rejects atomically. |
+| A11 | A restarted supervisor can safely adopt any assigned/executing row. | Unproven. Active rows require exact v2 claim ID/issued-time/expiry/assignee/context integrity and are observed only until their lease/progress bound; no reassignment or lease bypass is authorized. |
+| A12 | One bounded proof may reacquire the same process shards without affecting evidence. | Causation is unproven. Cycle zero preserves compatibility; proof two uses cycle one, and the selected 0..31 cycle is bound into result and receipt. |
+| A13 | Passing unit tests means the VSIX ships this operator chain. | False unless the CLI is an executable manifest root. The post-merge CLI plus controller, launch, liveness, supervisor, executor, and shared owner-cycle contract must remain explicit closure sentinels. |
+| A14 | A SHA-256 claim digest is authenticated authority against an arbitrary AgentDB writer. | False. The v2 digest plus exact-row CAS provides deterministic integrity inside the trusted AgentDB boundary; it is not a keyed MAC or signature. Documentation and tests must not call it cryptographically authenticated. |
+| A15 | Expiry of the AgentDB claim cancels all external Holo effects. | False. It fences admission, liveness, reclaim, and first completion, but an already-started authority call has no renewable heartbeat/cancellation or lease check at every activation/route CAS. A-grade remains blocked on that separate effect-fencing layer. |
+
+WSP_15 remains C4 / I5 / D5 / Impact5 = 19 (P0). Focused candidate
+counterexamples cover consecutive pre-existing tasks, owned bound-through-stop,
+interruption release, runtime crash during acknowledgment, authority-digest
+substitution, invalid acquisition cycle 32, and a healthy 2,400-second
+execution. Acceptance still requires squash merge, current exact-main live
+OpenClaw/AgentDB replay, CURRENT owner proof, and immutable replica verification.

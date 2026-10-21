@@ -1,4 +1,87 @@
+## Explicit local-model ownership — 2026-10-01
+
+`QwenInferenceEngine.close() -> None` detaches its model and clears initialized
+state before invoking the captured model's `close()`. No model is a safe no-op;
+an owned model is closed even when initialized is false. Repeated/reentrant
+explicit close does not retry the captured resource, including after failure.
+Native cleanup `Exception` logs only its type and raises stable
+`RuntimeError("Qwen model cleanup failed")` with suppressed exception context.
+Generation itself retains the engine for direct callers; those callers own
+explicit close. Concurrent ownership and native partial-constructor cleanup
+are not qualified by this contract.
+
+The existing WRE local adapter closes every successfully constructed per-call
+engine in `finally`, in raw and native-chat modes. Rejected configuration or
+construction creates no ownership. Cleanup `Exception` invalidates a proposal
+as `local_model_unavailable`; primary failures keep their existing result.
+A primary interruption propagates while cleanup is attempted. A `BaseException`
+raised by cleanup itself is not normalized. Generated text remains
+`success=False`, `_effect_evidence=False`; cleanup confers no execution authority.
+
+## Opt-in local native-chat proposals
+
+`WREMasterOrchestrator(*, local_proposal_mode="raw",
+local_native_chat_profile=None)` validates configuration before constructing
+collaborators. `execute_local_skill_inference` accepts corresponding keyword-only
+`proposal_mode` and `native_chat_profile` arguments. Raw mode requires no profile.
+Native mode requires exactly `runtime_version="0.3.20"` and `template_sha256`
+(64 lowercase hexadecimal characters). Configuration is copied, never taken
+from skill text or input context, and does not confer runtime authority.
+
+The engine's `generate_chat_response(prompt, system_prompt=None, *,
+runtime_version, template_sha256)` checks observed runtime, required formatter
+capabilities and actual model template digest. It renders system/user messages
+once with `enable_thinking=False`, then verifies positive integer limits and
+`input_tokens + max_tokens <= min(actual_context, configured_context)`.
+The per-call handler uses that same rendering and the qualified formatter's
+EOS text/token criteria, with an empty caller stop list (`stop=[]`). Markdown
+`###` content is not a native stop delimiter. The output cap remains in force;
+the default raw route keeps its existing stop list. The call does not replace
+persistent model handlers. This is a qualified optional
+profile, not a promise for every GGUF/template or the declared0.2.72 runtime.
+
+Master configuration errors raise a stable `ValueError` before collaborators;
+adapter failures preserve existing structured failure output. Engine exceptions
+return `Error: Qwen chat response generation failed` and log only exception type.
+Text remains `success=False`, `_effect_evidence=False`: admission, execution,
+acceptance and retention remain separate existing gates. No automatic activation.
+
 # HoloIndex Public Interface
+
+## Current-truth retrieval contract
+
+The canonical docs source set explicitly admits HoloIndex's root `README.md`,
+`INTERFACE.md`, `ROADMAP.md`, `CLI_REFERENCE.md`, test contracts, and memory
+boundary. Current root/test contracts receive bounded heading-scoped vector
+records; generic module docs and historical audits/ModLogs retain one summary
+record per source. Stored records carry low-cardinality truth and record-kind
+metadata. This changes retrieval evidence shape, not factual authority.
+
+Broad status queries such as "current", "working", or "missing" oversample a
+bounded docs candidate set, deduplicate repository paths case-insensitively,
+and globally order current contracts before implementation evidence, unknown
+records, vision, and historical records. Exact PR/slice queries and explicitly
+historical/baseline queries preserve ordinary semantic score ordering. Exact
+module Tier-0 reservation remains stronger and unchanged.
+
+This policy prevents stale audit prose from becoming the default answer to a
+current-state question. It does not prove that a document is true, change the
+ranker automatically, authorize reindexing, or constitute retrieval RSI.
+
+## Owner entry and local-context evidence
+
+The existing one-shot owner adapter selects workspace source from its script
+checkout. A primary checkout is not inherently current main. Configured
+authority selection requires a clean same-repository, same-HEAD worktree;
+the owner also validates the published generation and runtime bindings.
+See [source-bound owner queries](CLI_REFERENCE.md#source-bound-owner-queries)
+for supported JSON requests and the qualification matrix.
+
+`retrieval_mode="lexical"`/`bundle_only=true` uses the existing local bundle
+path without semantic owner/store access. Its `bundle_authority` separates
+`workspace_head` from `workspace_overlay`; UNKNOWN freshness and index-gap
+labels remain visible. Bundle success does not satisfy semantic admission.
+These are existing contracts, not new API fields or a new MCP service.
 
 ## Package import boundary
 
@@ -73,15 +156,21 @@ by `holo_index.retrieval_autoresearch`. They perform no ranker change or
 promotion. The independent A-grade composition gate is owned by AI Overseer;
 its accepted receipt is evidence only and still requires a separate external
 promotion authority.
-`holo_index.retrieval_runtime_binding` defines the fixed ten-module ranker
+`holo_index.retrieval_runtime_binding` defines the fixed twelve-module ranker
 closure. `retrieval_ranker_digest_for_root(root)` computes the clean candidate
 digest; `loaded_retrieval_ranker_digest()` computes the digest from module
 origins actually imported by the owner. Retrieval benchmark query receipts
 must carry the latter and equal the former.
-This contract binds source bytes only. It does not yet identify the owner
-executable or exact SentenceTransformers/Transformers/Torch/NumPy/backend
-environment, so accepted source identity is not complete reproducibility or
-production A-grade evidence.
+Owner-service receipts additionally bind exact acquisition attempt/retry
+telemetry when valid; consumers reject malformed, missing, or top-level-only
+telemetry before it can authorize a second post-completion proof.
+The owner now emits a secret-free `runtime_environment_digest` over its source
+closure, executable identity, platform ABI, installed-distribution build-record
+metadata, replica/model bindings, declared runtime knobs, and required
+environment checks. Exact runtime byte closure remains false because installed
+distribution payload bytes and all deterministic runtime effects are not yet
+verified. The digest is therefore useful identity evidence, but not complete
+reproducibility or production A-grade evidence.
 
 ## Programmatic API
 
@@ -129,7 +218,7 @@ exists. The resolver never checks out, updates, or indexes either worktree.
 Search response contract:
 
 For an exact module basename that resolves uniquely against the complete,
-HEAD-pinned Git module-directory catalog, or one validated full
+HEAD-pinned Git module-evidence catalog, or one validated full
 `modules/<domain>/<module>` query path, docs
 retrieval performs zero-to-two exact metadata gets for module-root `README.md`
 and `INTERFACE.md`. Their Tier-0 order is README then INTERFACE. Exact rows use
@@ -151,12 +240,16 @@ singularity. Full paths do not require the catalog. Stable producer errors are
 `HOLOINDEX_TIER0_INCOMPLETE`, and `HOLOINDEX_TIER0_LOOKUP_FAILED`; all other
 exception text is reduced to `HOLOINDEX_SEARCH_FAILED` before leaving HoloIndex.
 Ambiguous or implicit module intent preserves ordinary score ordering.
-The catalog requires a final NUL and validates every record before depth
-filtering. Every path rejects Unicode `Cc`, `Cf`, and `Cs` categories, and
-duplicate identity is `NFC(path).casefold()` without changing the returned
-original spelling. Visible non-control Unicode remains valid. Cache identity
-is platform-aware and access is locked; Git remains outside the lock, so
-duplicate cold loads are allowed but bounded.
+The catalog uses a NUL-framed recursive directory projection plus one
+`cat-file --batch` over the immediate immutable trees of exact depth-three
+candidates. A root qualifies only through a direct `src/tests` tree or a
+regular root README/INTERFACE blob; directory depth alone is not evidence.
+Every directory and immediate entry rejects invalid mode/type/framing, Unicode
+`Cc`/`Cf`/`Cs`, and `NFC(value).casefold()` duplicates without changing valid
+spelling. Both Git outputs, batch input, runtime, module count, and cache size
+are bounded. Cache identity is platform-aware and locked; Git calls remain
+outside the lock, so duplicate cold loads are allowed but bounded. Full-path
+intent remains catalog-independent.
 
 The JSON machine specification is authoritative. Its complete response schema
 is structurally compiled by `holo_index.query_result_contract_schema` and

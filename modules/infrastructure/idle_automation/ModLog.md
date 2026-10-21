@@ -2,6 +2,53 @@
 
 This log tracks changes specific to the **idle_automation** module in the **infrastructure** enterprise domain.
 
+### 2026-10-07 — Preserve internal-audit measurement status
+
+WSP 00/5/11/15/22/48/50/97. Selected14/P1 (C2/I4/D4/impact4).
+The existing research consumer dropped scanner coverage and failure diagnostics.
+Six regressions failed before repair. It now preserves `scan_status` and unknown
+event counts; malformed historical summaries remain separately unavailable.
+Independent source review found numeric-history overflow; reproduced1fail/2pass,
+then repaired. Connected final140pass; no worker inference or paid provider call.
+CI now includes the producer/consumer regressions. Local tests are not native RSI.
+
+Live observation at base453f6c357: existing scanner read3193log files, produced20
+dry-run proposals, and emitted0new events on its second pass. All20 requested scope
+context; none were executable tickets. Existing OpenClaw/WRE exact-main maintenance
+completed and stopped its owned runtimes. Hermes0.20.4 passed authenticated
+read-only preflight after bounded startup readiness; initial connection refusal
+was not evidence of missing enrollment. Patched report persistence retained the
+scan snapshot,20historical signatures and3ranked candidates;0tasks published.
+Evidence: `outputs/rsi-permission-evidence-20261006/internal-audit-*` and
+`O:/RedDog-Builder-Artifacts/rsi-internal-audit-20261007/`.
+Coordinator-authored repair; independent source review is not independent execution.
+
+### 2026-08-29 - Pre-owner exact-main live acceptance
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- PR #1591 merged as exact main `09e98fff`; the existing one-task-per-SHA
+  coordinator accepted the independently reproduced pre-owner stale-HEAD
+  incident and completed the real OpenClaw/WRE transaction at generation
+  `sha256:7869f238...`.
+- A fresh governed owner query returned CURRENT/no-gap/no-reindex on attempt
+  one. Production verification retained 33 artifacts / 222,719,702 bytes and
+  unchanged descriptor, replica, and path identities.
+- This closes only the exact-commit maintenance ingress. Runtime exact closure,
+  A-grade, retrieval RSI, and horizontal scale remain unproven.
+
+### 2026-08-29 - Pre-owner exact-HEAD incident kind
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- Added `REPO_HEAD_MISMATCH` to the immutable incident contract so the
+  communication bridge can route an independently reproduced pre-owner
+  exact-main freshness transition into the existing task.
+- Durable normalization treats it like other non-authority-root incidents:
+  observed authority HEAD must equal target HEAD. No new task family or
+  maintenance authority was introduced.
+- Shared focused incident/root/coordinator result: 75 passed.
+
 ## WSP 22 ModLog Protocol
 - **Purpose**: Track module-specific changes and evolution per WSP 22
 - **Format**: Reverse chronological order (newest first)
@@ -11,6 +58,27 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 ---
 
 ## MODLOG ENTRIES
+
+### 2026-08-28 - Linked control checkout resolves canonical dependency runtime
+
+**WSP Protocol:** WSP 00, WSP 6, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 87, WSP 97
+
+- Reproduced the exact-main OpenClaw repair from a clean linked control
+  checkout. The sealed executor failed before maintenance because that checkout
+  had no `.venv`; the dedicated authority checkout still advanced, but the
+  isolated final snapshot probe correctly rejected the missing runtime.
+- Reused `resolve_holoindex_runtime_root()` in the existing post-merge executor
+  so the same-repository primary checkout supplies dependencies while the
+  dedicated clean authority checkout remains the only indexed source.
+- The manual recovery transaction then refreshed exact main `8842cbcd...` to
+  generation `sha256:cd6a5c41...`; an independent owner query returned CURRENT,
+  no gap, no reindex, first attempt, and post-query verification retained all
+  33 artifacts / 222,595,640 bytes unchanged. This proves recovery and the
+  resolver inputs separately; the new automatic executor wiring remains
+  focused-test evidence until another stale-main event exercises it live.
+- Added a bounded executor-runtime-root regression module covering argument
+  separation, resolver-failure finalization, and five pre-transaction no-effect
+  gates. No production module or authority API was created.
 
 ### 2026-08-27 - Exact-main OpenClaw acceptance completed
 

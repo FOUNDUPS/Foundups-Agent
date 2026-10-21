@@ -1,4 +1,454 @@
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
+## 2026-10-15 — Initial enrollment backend binding
+
+Existing RedDog fast tier15members passed after regenerating the1426-member
+manifest and both consumer/generator pins. Initial generator checks exposed
+stale digest pins; those were updated to generated content rather than removing
+assertions. No member/cap/version relaxation or installed extension change.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/reddog-fast.log`
+and `manifest-tests-final.xml`; hosted checks remain separately verified.
+
+## 2026-10-05 — WRE measured-zero fidelity binding (P15)
+
+The existing runtime manifest still covers1408 files; the reviewed PatternMemory
+repair changes its content digest to
+`3938f30d19cd46ecc909fc429fad9f2e967a1beb5709d7e75dc69965ff84d183`.
+Both existing consumer/generator pins are refreshed, with unchanged member and
+byte limits. Eight generator contracts pass (63.719s); the RedDog fast tier
+passes all15 members (10.000s parent), with stable named source pins. Hosted
+publication is verified: PR2062 and exact-main CI/CodeQL passed at `6efbc3ac1`.
+Hosted 340 WRE and 675 effect selections are recorded separately, not added to
+these integrity counts. P15 retained/control/recovery confirms the repaired
+consumer on unchanged saved rows; no model-learning or worker repair claim.
+See the canonical P15 RSI checkpoint. WSP5/22/50/97.
+
+## 2026-10-05 — WRE telemetry manifest boundary
+
+The existing compatibility boundary fixture now admits1408 members/rejects1409
+for the two declared audit-skill runtime additions. The generator test pins
+canonical digest `1cae5e88497899ef4021912002b85ad495cdb172196cc72a9dc9f46c58d59428`.
+No other assertions or byte limits changed. Exact consumer validation is
+recorded in the existing P14 RSI checkpoint; no installation/deployment implied.
+WSP5/6/22/50/95/97.
+
+## 2026-10-04 — Consent manifest consumer boundary
+
+`node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduces
+the1406-versus1404 assertion failure on the original PR2060 head. Production
+MAX_RUNTIME_FILES and its exact boundary fixture now admit1406/reject1407;
+the strict digest, byte caps and all other assertions are unchanged.
+`node extensions/reddog/tests/run_reddog_test_tier.js fast` passes15 members
+locally (Node24.11.1,13.142s). Hosted Node22.23.3 failed on the historical head;
+replacement-head CI remains required. Package projection remains67 files and
+950438 bytes; refreshed content digest
+`0a928318bc551f96dcae974c72d36cccde28fb1f994c0d619057476929d3b8bd`.
+No packaging, installation or deployment is implied by the projection test.
+WSP5/6/22/50/97.
+
+## 2026-09-28 - Correspondence-state Skillz backend manifest reconciliation
+
+- RedDog fast tier initially failed the existing backend compatibility preflight after `skills_registry_v2.json` changed.
+- Reused the canonical generator contract: the runtime closure remains 1,401 files; only the registry runtime SHA changed. Refreshed `scripts/reddog_backend_manifest.json`, `extensions/reddog/backend_compatibility_constants.js`, and the existing generator-test digest pin together.
+- Expected manifest digest after repair: `663ec92531dda7c601bfdd269659b6984e72500b5f793f31b993dc5d4255dc60`. No compatibility assertion was weakened or removed.
+
 # Foundups(R)Agent TestModLog
+
+## 2026-09-24 - Research-display manifest validation
+
+- First PR1899 CI run35889528743 failed the unchanged backend compatibility contract: the dashboard source was a missed manifest dependency. The failure is retained in the canonical RSI backlog.
+- Regenerated the existing manifest and refreshed both digest pins to `3094aeb031a7f2917afe18f19a61e254fcfa6110528c286f2191ad00ad872618`. Exactly one member hash changed: `modules/infrastructure/wre_core/src/dashboard_alerts.py`. All1,401 members, API/version, caps and other hashes remain unchanged.
+- Local manifest check, eight existing generator tests and the unchanged Node backend contract pass. The67 display/wiring cases and their independent replay remain byte-bound and unchanged. Fresh exact-head CI is required; no installed extension/runtime or live RSI claim. WSP15/22/50/84/97.
+
+
+## 2026-09-20 - Hermes rejection-evidence package validation
+
+- One existing runtime member changed; the 1,400-member manifest and both digest pins now bind `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. Membership, API/version, package caps and safeguard assertions stay unchanged.
+- Manifest check/eight generator tests pass with two pytest configuration warnings; existing fast tier passes 15 groups and deterministic packaging passes 67 files/950,440 bytes. Test registry remains 1,651 entries/269 quarantined; exact-head closure is recorded separately in the RSI backlog.
+- Bridge evidence is fake-only: qualified 10-failure red baseline, 108 focused passes and 114 connected passes after an external guard correction. Independent 117 repeats the 108 and adds nine controls; do not sum repeats. No installation, service, provider or real detached-child stop was tested. WSP 15/22/50/62/84/97.
+
+## 2026-09-20 - Prepared-context backend manifest binding
+
+- Updated five existing runtime member hashes; unchanged1,400-member manifest/API/version and extension behavior. Both digest pins now match `cbd1292a4857bf071ab2d8807114c7a03932f98f2e3dc1535bac4b09884469ef`.
+- Reproduced inherited generator-test pin mismatch before edits; retained it separately, then refreshed both pins together. Eight generator tests/check pass;15 fast groups and67-file/950,440-byte package pass.
+- No installed extension/provider/runtime updated. Source repair and exact publication evidence belong to the current RSI backlog. WSP15/22/50/84/97.
+
+
+## 2026-09-20 - Daemon counter manifest and package validation
+
+- Refreshed the existing daemon member digest and its JavaScript/Python manifest pins to 0f65af35cfd806cc1cdc22fc3f4654e5090a8d27dc47b605831af7cc2069b60c.
+- All 1,400 members, manifest API/version, package caps and safeguard assertions remain unchanged. No installed extension, provider or runtime is updated.
+- Generator 8 tests, existing RedDog 15 fast groups and deterministic 67-file/950,440-byte package pass. Source repair is owned by WRE Core; exact-head CI remains required. WSP15/22/50/84/97.
+
+## 2026-09-20 - WSL source and backend compatibility closure
+
+- PR1806 candidate2033939 failed the unchanged backend compatibility gate.
+  Independent diagnostics identify the changed WSL adapter as the sole stale
+  member. The original failure is retained in the canonical RSI backlog.
+- Regenerated the existing1,400-file manifest and refreshed its extension and
+  Python test digest pins to `11b2a45c0feca2b3c53372b0c07f22788091edf89fef91555142325f560a24f1`. The member set, API, version, caps and
+  all safeguard assertions are unchanged. No installed extension is updated.
+- Local generator8 tests, RedDog15 fast groups, exact backend contract and
+  package67 files/950,440 bytes pass; backend contract overlaps the fast tier.
+  Fresh exact-head CI is still required. WSP15/22/50/84/97; no runtime effects.
+
+## 2026-09-19 - Backend inventory after Skillz registry registration
+
+- `runBackendCompatibilityPreflight(repoRoot)` reproduced the exact fail-closed reason from issue #1784: `required_runtime_file_integrity_mismatch:modules/infrastructure/wre_core/skillz/skills_registry_v2.json`.
+- Regenerated the canonical 1,400-file inventory after the WRE Skillz registry changes, refreshed the manifest pin, and kept `test_backend_compatibility_contract.js` unchanged. The focused backend compatibility test and generator `--check` must pass before this repair can commit.
+
+## 2026-09-14 - 0.4.141 release identity reconciliation
+
+- Reproduced the exhaustive core failure against exact current main: the
+  package exposes `RedDog - FoundUps Interface` while the authenticated shard
+  still required the superseded architect display name.
+- Rebound the three stale package/README/ROADMAP assertions to the canonical
+  identity and extended the focused active-document negative set to reject the
+  surviving README wording that collapsed RedDog into 0102.
+- Reproduced `npm test` failing before its first tier member in a linked Windows
+  worktree because it assumed a worktree-local `.venv`. The runner now derives
+  the primary checkout through governed `--git-common-dir`, validates the
+  resulting O:/E: topology, and uses its validated venv defaults. The executable
+  is identity-bound and Git runs with the existing closed environment. Hostile
+  Git controls and foreign common-directory cases are executable regressions.
+- Removed the second undocumented prerequisite: Windows test temp now defaults
+  to `.tmp\\reddog-tests` inside the isolated task worktree, with cleanup of the
+  per-run pytest base and an explicit validated O:/E: override when needed.
+- Regenerated the authenticated contract as 18 shards / 6,942 lines / 492
+  assertions at
+  `sha256:e653fd5c3cbe0de8e6a235939d0531bb213748d6fa7c9a750f903c1aacc81f2e`.
+- Final local evidence: focused identity PASS; shard integrity PASS;
+  candidate WSP-62 PASS; backend manifest PASS at 1,400 files and
+  `sha256:68b038e9ec86967c8e9a426e2fe9fa5e798a717966852466167fe8434a935c02`;
+  fast tier 15/15 PASS in 5.394 seconds; conversation 32 Python tests and 15
+  JavaScript vectors PASS; contract 3/3 PASS; package PASS at 67 files / 950,440
+  raw bytes / `sha256:aeace93f0386c549ac6c70e6aae25ba6aaac10738ea76ee76585735668135773`.
+- Independent hostile review found the first common-directory resolver used
+  ambient Git authority. Added a governed executable/closed-environment path,
+  exact primary-versus-linked topology validation, and regressions for hostile
+  `GIT_DIR`, `GIT_WORK_TREE`, injected config and a valid-looking foreign O:/E:
+  repository. Focused tiering and candidate WSP-62 checks pass. The complete
+  four-group release gate passes in 229.074 seconds with no timeout (`core`
+  228.988 seconds, `governed_git` 143.794 seconds,
+  `git_formats_environment` 85.472 seconds, `bridge_wsp62` 7.174 seconds).
+  Hostile fixture stderr is expected evidence from passing groups. The two
+  Python warnings report unavailable pytest-asyncio configuration under the
+  deliberately sealed plugin environment; no test was skipped or failed.
+  WSP 15, 22, 50, 62, 97.
+
+## 2026-09-13 - Backend inventory versus current main
+
+- Remote roadmap CI failed `test_backend_compatibility_contract.js` because two already-merged phone/voice files differed from their stale inventory hashes. Local preflight reproduced exactly those two paths.
+- Regeneration changes only those hashes in the unchanged 1,400-file closure. The pinned canonical digest and existing generator-test expectation now match the generated inventory; no assertion or boundary was removed.
+- RedDog fast tier: all 15 groups pass with the documented Windows interpreter/dependency-root overrides and isolated temporary/database paths. The initial local attempt lacked a worktree-local dependency directory and stopped before its first test; using the supported existing dependency-root override resolves that setup issue.
+- Hostile backend-preflight runner and its imported checks pass. Generator selection: seven tests passed before staging; the eighth correctly rejected the old staged inventory, then passed after the regenerated inventory and digest pins were staged. No test implementation changed between those runs; two async-plugin configuration warnings were emitted.
+
+## 2026-09-05 - Identity / merged builder reconciliation (0.4.141 candidate)
+
+- Applied the RedDog/0102 identity contract above the already merged `0.4.140`
+  builder evidence; the corrected identity first lands in `0.4.141`.
+- Preserved executable negatives for missing, relative, wrong-volume, and
+  reparse-backed runtimes; suspended Job containment; closed environment;
+  bounded output; composition reproof; and authority nonclaims.
+- Reverified the merged package-surface expectations and exact order for the
+  repository-only `.gitignore` and `ARCHITECTURE.md` exclusions.
+- Focused identity, conversation, shard, Holo incident, tiering, and manifest
+  checks pass. Contract shards are 18 / 6,942 lines / 492 assertions at
+  `sha256:10b5118a5c9c...e32ad247`; the package is 67 files / 950,193 bytes at
+  `sha256:cb6e5d4bb38d...15b281b8`; the registry is current at 1,641 / 269.
+- Prior physical and full-release results remain exact-commit historical
+  evidence. Fresh 0.4.141 aggregate release and VSIX inspection are required.
+
+## 2026-08-30 - Held builder child evidence release (0.4.140)
+
+- Authentic RED collection preceded implementation. Focused falsifiers now
+  cover held launch, isolation flags, closed environment/path, bounded output,
+  canonical serialization, exact identity, surrounding composition stability,
+  protected-root aliasing, and explicit authority nonclaims.
+- Maintenance child behavior is replayed after shared-runner extraction; the
+  physical Windows integration launches the actual O:-materialized runtime.
+- Corrected the conversation test harness to honor `REDDOG_TEST_PYTHON` after
+  validation exposed an ambient non-O:/E: interpreter selection despite O:
+  temp roots. A later real failure proved that an O: interpreter could still
+  discover per-user packages elsewhere; the harness now uses `-B -s`, disables
+  user-site discovery, erases every case-insensitive ambient `PYTHON*` and
+  `PYTEST*` control before installing six exact values, and validates its O:/E:
+  dependency, repository, and temporary roots.
+- Replaced source-text-only confinement assertions with executable negative
+  tests for missing/relative/wrong-volume Python, false-green pytest controls,
+  E: admission, absent absolute files, and intermediate junction/reparse paths.
+  The full conversation tier remains 32 Python tests plus 15 shared JavaScript
+  vectors.
+- Hostile audit reproduced writable-runtime pollution. The 21-directory/181-pyc
+  and 6-directory/32-pyc generations are preserved in O: quarantine; exact
+  source rematerialization restored the same sealed identities. Final physical,
+  adjacent, conversation, and release runs leave both active/source trees at
+  zero pycache/pyc.
+- Backend is 1,398 files at `700d50f84e12...86e09ed`; contract is 18 shards /
+  6,942 lines / 492 assertions. Runner unit evidence is 22/22; focused physical
+  adjacency is 70/two capability skips in 108.06 seconds and includes the child;
+  registry is 1,640/269 and conversation is 32 Python plus 15 JS. Complete
+  bridge replay is 1,694/23 capability skips in 638.81 seconds after closing
+  recursion-limit-dependent health JSON depth admission.
+- Final release is four groups PASS in 214.279 seconds. Package surface is 67
+  files / 948,410 bytes. Exact package and inspected VSIX identities are
+  retained externally so packaged documentation is not a self-referential
+  content-digest claim.
+- Final source-runtime hygiene retained two additional four-pyc images in O:
+  quarantine, rematerialized 3,845/3,845 archive members byte-exact each time, and
+  hardened the canonical Holo query host with `-B` plus bytecode suppression.
+
+## 2026-08-29 - Declared Windows/CPython ABI evidence release (0.4.139)
+
+- Hostile WSP_00/WSP_97 review rejected the first candidate for delay-table,
+  forwarder, aggregate-bound, RECORD ownership, exception-leakage, Windows
+  long-path, and WSP_62 defects. Each reproduced defect now has a focused
+  fail-closed regression.
+- Final ABI/PE evidence is **67 passed / one capability skip**; explicit
+  non-scale adjacency is **259 passed / seven expected capability skips**.
+  New infrastructure sources are 485/456/267/360/247/534/40 lines and no new
+  function exceeds the inclusive 50-line ceiling.
+- Backend manifest is 1,366 files at `4e634b8c7b99...8b37`; all eight generator
+  tests pass. Contract identity is `d68f91db0908...cce6` / 18 shards / 6,942
+  lines / 492 assertions. Package identity is 67 files / 948,777 bytes at
+  `44272f6f1e8f...06ed3`.
+- Final release replay passes fast 14-member, O:-venv conversation 32-Python /
+  15-JavaScript-vector, contract 3-member, deterministic package, and all four
+  exhaustive groups in 173.373 seconds without timeout.
+- VSIX inspection proves version 0.4.139, 276,340 bytes,
+  `sha256:5deb3c4df7ac...15ec`, 69 safe unique entries, 67 exact mapped source
+  members, and zero archive, path, byte, sensitive-name, or credential-pattern
+  defect.
+- ABI source remains inert and outside the executable backend manifest. No test
+  or package action changed Holo maintenance, owner, route, queue, ACL,
+  activation, external loader, signing, write denial, A-grade, or retrieval RSI.
+
+## 2026-08-29 - Inert exact runtime composition release (0.4.138)
+
+- Added strict composition contract/materializer/verifier falsifiers and an
+  independent hostile review. The review reproduced a stale first-component
+  proof; exact-equality `B1 -> D1 -> D2 -> B2` reproof plus one-shot base and
+  dependency mutation cases closes that bounded race without claiming ABA
+  resistance or write denial.
+- Focused result is **24 passed / 1 capability skip**. The exact bounded
+  non-scale adjacent selection is **159 passed / 6 expected skips**. WSP_62
+  remains green at 324/519/486 source lines with no function above 50 lines.
+- Registry is 1,618/268; backend is `fccaca219ac3...0713be`; contract is
+  `0362913b7a2b...b4d05`; deterministic package is 67 files / 949,053 bytes at
+  `a655ffe69f1f...f4ea`.
+- VSIX inspection proves version 0.4.138, 276,441 bytes,
+  `sha256:f68a9cae2b1c...c1c47`, 69 safe unique entries, 67 exact source
+  members, and zero credential-value-pattern or source-byte mismatch findings.
+- Tests and packaging change no owner, route, replica, ACL, queue, maintenance,
+  execution, activation, A-grade, or retrieval-RSI state.
+- O:-local production evidence materialized the exact 72,261-file dependency
+  tree, published descriptor-only composition `sha256:44e21db7...`, and passed
+  the fresh repaired reverse reproof in 579.54 seconds with unchanged descriptor
+  identity and all activation-grade flags false.
+- Fast 14-member, O:-venv conversation (32 Python / 15 shared JavaScript
+  vectors), contract 3-member, package, and all four exhaustive release groups
+  pass. Exhaustive release completed in 170.331 seconds with no timeout.
+
+## 2026-08-29 - Inert base-runtime backend binding (0.4.137)
+
+- Added strict and adversarial base-runtime coverage: **55 passed / 1 opt-in
+  skip**. Adjacent dependency/runtime-environment/sealed-runtime/process-image
+  coverage is **82 passed / 5 expected skips**.
+- Production materialization/reuse passed 4,068 files / 372 directories /
+  81,515,843 bytes as `sha256:3efe4fba...` in 239.94 seconds after two real
+  fail-closed discoveries corrected file roles and protected-source lease access.
+- Registry is 1,616/268. Backend is `fccaca219ac3...0713be`; contract shards are
+  `bc04f3fedd2a...a519a4`; deterministic package is 67 files / 948,887 bytes at
+  `3db698e1ff22...b652d1`.
+- VSIX inspection proves version 0.4.137, 69 safe ZIP entries / 67 exact source
+  members, 276,358 bytes, `sha256:c4961ce5b543...6ef1c`, and zero byte mismatch
+  or credential-value-pattern hit.
+- Tests and packaging change no live Holo owner, route, replica, maintenance,
+  activation, A-grade, or RSI state.
+
+## 2026-08-29 - Pre-owner exact-main repair ingress (0.4.136)
+
+- Added thin-client falsifiers for wrong outer query, owner attempts, bounded
+  stale reasons, and any query-receipt property; compact forwarding retains
+  only the authenticated pre-owner closure.
+- Added Python falsifiers for shared-classifier leakage, different repairable
+  error, receipt-bound same error, changed stale HEAD/generation/freshness/
+  reasons, explicit null receipt, and forged coordinator task. Focused result
+  is **75 passed**.
+- Final affected Python is **283 passed**; registry is 1,612/268. Fast,
+  conversation (32 Python passes), package, contract, and all four exhaustive
+  release groups pass in 180.005 seconds. Backend is `9c34a61bfeb4...db7039`,
+  contract `6a3cf131fc90...adb273`, and package `33a4a7bb09a6...be4754`.
+- VSIX inspection proves 0.4.136, 69 safe ZIP files / 67 exact source members,
+  276,366 bytes, `sha256:ccf65001c726...ced3f8`, and zero credential-value
+  patterns. PR #1591 merged as exact main `09e98fff`; its real OpenClaw/WRE
+  replay completed at generation `sha256:7869f238...`, the governed query was
+  CURRENT/no-gap/no-reindex on attempt one, and all 33 replica artifacts
+  reverified unchanged. Runtime exact closure remains false, so A-grade and
+  retrieval RSI are still NO-GO.
+
+## 2026-08-28 - Evidence-qualified Holo module intent (0.4.135)
+
+- Added no new extension behavior island: the release binds RedDog to the
+  repaired Holo backend and advances every current version fixture.
+- Fast, conversation (32 Python passes), deterministic 67-file package,
+  contract, and four-group exhaustive release tiers pass. The affected Python
+  owner/query/Tier-0 matrix is 334/334; the eight closure-generator tests pass.
+- Independent WSP_97 reproduced the exact suite, hostile Git environment,
+  false-container exclusion, realistic bounds, WSP_62 limits, and original
+  query inference, returning GO before packaging.
+- VSIX inspection proves version 0.4.135, 69 ZIP files / 67 extension members,
+  275,792 bytes, `sha256:b1b9e203dcab...b22a55a`, zero source mismatches, and
+  zero credential-value patterns. Post-merge live acceptance remains separate.
+
+## 2026-08-28 - Holo owner-query root separation release (0.4.134)
+
+- RED reproduced `HOLOINDEX_AUTHORITY_ROOT_INVALID` when the completed
+  controller passed its selected authority back as the workspace query root.
+  GREEN carries the original root through four production caller paths while
+  preserving independent authority classification and same-root rejection.
+- New/selector result is **21 passed**; expanded controller, postcompletion,
+  incident, recovery, one-shot, and authority result is **190 passed**.
+- Registry generation is current at 1,610 tests / 268 quarantined and the
+  registry/indexing surface is **52 passed**. Backend identity is
+  `bacffc8e18b4...a8076645`; contract identity is
+  `3c951718cb13...e14a7f1f`. Merged exact-main replay remains required.
+- Backend generator is **8 passed**; fast 14-member, conversation 32-test,
+  contract 3-member, deterministic package, candidate WSP_62, and exhaustive
+  four-group gates pass in 184.6 seconds. Package identity is 946,244 bytes at
+  `e8e2329154f5...1852246e`. Read-only VSIX inspection found 69 safe entries,
+  67 exact source members, zero credential-value patterns, and version 0.4.134;
+  the artifact is 275,758 bytes at `sha256:0bd21de0974b...a2a37e23`.
+
+## 2026-08-28 - Linked-control dependency runtime release (0.4.133)
+
+- RED independent audit reproduced an escaping resolver exception that left a
+  valid claimed task executing. GREEN normalizes the fault, durably fails the
+  task, and proves zero authority calls. Five pre-transaction gate cases and
+  the distinct runtime/source argument case pass in the bounded 155-line test
+  module; the exact three-file selection is **38 passed**.
+- WSP_62 differential is green: the executor main function is 181 lines versus
+  186 at base, the helper is 27 lines, and inherited oversized suites did not
+  grow. Independent WSP_97 re-audit returned GO after documentation truth was
+  narrowed to exclude installed-payload byte closure.
+- Backend generator **8 passed** at `b58778d3358e...19dc7b6`; fast 14-member,
+  conversation 32-test, contract 3-member, deterministic package, candidate
+  WSP_62, and exhaustive four-group release gates pass. Exact release wall is
+  224.617 seconds; package is 946,123 bytes at
+  `89f19ddb703b...b491e773`.
+- The read-only VSIX inspection found 69 safe entries, 67 extension members,
+  no encryption/duplicate/path/source-byte mismatch, and zero credential-value
+  patterns. Artifact: 275,743 bytes at
+  `sha256:0cd9288febe9...5c17971`.
+
+## 2026-08-28 - Producer-ranked Holo owner release (0.4.132)
+
+- Producer-rank, HoloDAE Tier-0, synthetic runtime identity, and host-package
+  isolation falsifiers are green. Focused Holo/bridge/HoloDAE is 246/246 and
+  the complete bridge matrix is 1,188 passed / 14 expected skips.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, backend compatibility, candidate WSP_62, and exhaustive four-group
+  release gates pass. Exhaustive wall is 203.191 seconds with no timeout.
+- Exact identities: backend `64e314c2931b...9b77d3`, contract
+  `052b944c5bd7...0cc96`, package `a492686c440f...f0c589`, and VSIX
+  `sha256:f40ed659c685...25e40b` / 275,728 bytes.
+
+## 2026-08-28 - Current-truth Holo retrieval (0.4.131)
+
+- Added executable counterexamples for premature docs truncation, duplicate
+  section starvation, mixed historical/current intent, temporal queries,
+  nested audit classification, and exact PR/slice bypass.
+- Added exact canonical-source admission and per-path current-section
+  allowlisting. All indexing tests remain fake-collection/read-only and cannot
+  open or mutate the live Holo store.
+- The 0.4.130 pre-release artifact was rejected at the governed-adapter
+  boundary. Final 0.4.131 identities are backend `43705c230f38...e59ec`,
+  contract `21f7ff0902c6...e4b7d`, package `cc0f6a6c5830...23e57`, and VSIX
+  `sha256:736c307fcb91...58f9d1` / 275,738 bytes.
+- Candidate retrieval/WSP/generator validation is **299 passed / 1 capability
+  skip** with no deselection. Generator is **8 passed**; framework coherence is
+  **6 passed**; fast, conversation, contract, package, and exhaustive
+  four-group release tiers pass in 207.169 seconds.
+
+## 2026-08-28 - Claim-clock fencing and RSI truth release (0.4.129)
+
+- Independent audit reproduced deferred-SQLite lease-clock races. Three new
+  on-disk contention falsifiers pass for delayed issuance and start/completion
+  waits that cross expiry; no sleep, timeout, or lease ceiling was widened.
+- Affected Python selection is **309 passed**; backend manifest **8 passed**;
+  WSP_62 **16 passed**; registry/differential/Holo indexing **52 passed**. The
+  canonical registry is **1,607 tests / 268 quarantined** after rebase.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive 4-group release tiers pass; final wall is 202.154s.
+- Rebase validation exposed a Windows CRLF materialization false positive in
+  the raw-compared generated shard manifest; its exact path is now pinned to
+  LF without changing any packaged RedDog source byte.
+- Exact identities: backend `6160d5be6d36...5fdaffd8`, contract
+  `772c72ece00c...e50aa6f0`, package `5d7a7f254548...99461e93`, VSIX
+  `sha256:7e9bad6a3e02...6c39f4d1e` / 275,700 bytes.
+
+## 2026-08-28 - Exact-task liveness and v2 claim-fence release (0.4.128)
+
+- WSP_97 audit found two P0 counterexamples: claim digest omission of claim
+  identity/expiry with non-atomic late completion, and a permissive top-level
+  `scripts` namespace extension. Both were reproduced and closed without
+  increasing a WSP_62 ceiling.
+- The affected Python selection is **303 passed**; backend manifest is **8
+  passed**; WSP_62 is **16 passed**; registry/differential/Holo indexing is
+  **52 passed**. The canonical registry is **1,605 tests / 268 quarantined**.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive 4-group release tiers pass. The exact final package
+  release completed in 201.201 seconds.
+- The 1,363-file backend digest is `61bcfeb6ce69...e16c0d58`; the 18-shard
+  contract digest is `16bcddfc83a8...f6557361`; the 67-file package is 945,990
+  bytes at `e5eb5e0b0035...bf00d146`.
+- The independently inspected 0.4.128 VSIX is 275,700 bytes at
+  `sha256:f9fa068d79ff...7ab3ce30f`. Broad database audit separately exposed
+  inherited Chroma handle/corruption and quantum-test debt; none is relabeled
+  as a passing claim or attributed to the v2 lease slice.
+
+## 2026-08-28 - Receipt-bound owner reproof release (0.4.127)
+
+- Independent WSP_97 review first rejected malformed error types, stale
+  deadline accounting, coupled retry ceilings, and top-level-only retry
+  telemetry. Exact counterexamples now pass and the final verifier returned GO.
+- Owner-result consumers: **148 passed**; bridge lifecycle: **84 passed / 1
+  skipped**; query receipt plus one-shot: **68 passed**; WSP_62: **16 passed**;
+  backend manifest: **8 passed**; registry/differential/indexing: **94 passed**.
+- The canonical registry is **1,601 tests / 268 quarantined**. Fast 14-member,
+  conversation 32-test, contract 3-member, deterministic package, and exhaustive
+  4-group release tiers pass; the latter completed in 195.725 seconds.
+- The 67-file package is 945,836 bytes at `f080f99bb960...8831d`; the VSIX is
+  275,672 bytes at `sha256:287853f6e933...6b830` and independently matches all
+  67 source members. Live exact-main replay remains separate.
+
+## 2026-08-27 - Exact-main post-merge lifecycle release (0.4.126)
+
+- Rebound version/contract fixtures and the authenticated 1,357-file backend
+  manifest to the exact-completion and register-only bootstrap hardening.
+- Added Python lifecycle falsifiers for owned/pre-existing runtimes and
+  thread-dead cleanup; the exact controller file is 22 passed and the complete
+  controller/launch/supervisor selection is 90 passed. Packaging evidence is
+  18-shard contract, and exhaustive 4/4 release groups pass in 184.570 seconds.
+- Kept the Holo-specific supervisor cases in a separate 269-line test module;
+  the inherited supervisor test host is smaller than base and receives no new
+  WSP 62 exemption.
+- The exact 67-file package is 945,801 bytes at
+  `sha256:7a1a8fb2e803...9a27f7c9`; the VSIX is 275,668 bytes at
+  `sha256:639d6c82b195...b52b94b`.
+- The canonical staged-index registry is current at 1,600 tests / 267
+  quarantined entries; its focused registry selection passed 52 tests.
 
 ## 2026-08-27 - Inert dependency-runtime closure release (0.4.125)
 

@@ -214,6 +214,9 @@ class ImmutableSnapshotCollection:
         self._query_chunk_rows = limits.query_chunk_rows
         self._id_to_index = {row["id"]: index for index, row in enumerate(rows)}
         self._path_to_indices = self._build_path_index(rows)
+        self._record_kind_to_indices = self._build_metadata_index(
+            rows, "record_kind"
+        )
 
     @property
     def metadata(self) -> dict[str, Any]:
@@ -232,6 +235,20 @@ class ImmutableSnapshotCollection:
             if type(path) is str:
                 values.setdefault(path, []).append(index)
         return {key: tuple(indices) for key, indices in values.items()}
+
+    @staticmethod
+    def _build_metadata_index(
+        rows: tuple[dict[str, Any], ...], key: str,
+    ) -> dict[str, tuple[int, ...]]:
+        """Build one bounded exact-string metadata index used by query()."""
+
+        values: dict[str, list[int]] = {}
+        for index, row in enumerate(rows):
+            metadata = row["metadata"]
+            value = metadata.get(key) if type(metadata) is dict else None
+            if type(value) is str:
+                values.setdefault(value, []).append(index)
+        return {value: tuple(indices) for value, indices in values.items()}
 
     def count(self) -> int:
         return len(self._rows)
@@ -306,8 +323,9 @@ class ImmutableSnapshotCollection:
             result[field] = [value] if nested else value
         return result
 
-    def _distance_chunk(self, query: np.ndarray, start: int, end: int) -> np.ndarray:
-        chunk = np.asarray(self._vectors[start:end], dtype=np.float64)
+    def _distance_values(
+        self, query: np.ndarray, chunk: np.ndarray,
+    ) -> np.ndarray:
         if self.metric == "l2":
             delta = chunk - query
             return np.sum(delta * delta, axis=1)
@@ -316,16 +334,42 @@ class ImmutableSnapshotCollection:
             return 1.0 - dots
         chunk_norms = np.linalg.norm(chunk, axis=1)
         query_norm = float(np.linalg.norm(query))
-        distances = np.ones(end - start, dtype=np.float64)
+        distances = np.ones(len(chunk), dtype=np.float64)
         nonzero = (chunk_norms > 0.0) & (query_norm > 0.0)
         if bool(nonzero.any()):
             similarity = dots[nonzero] / (chunk_norms[nonzero] * query_norm)
             distances[nonzero] = np.clip(1.0 - similarity, 0.0, 2.0)
         return distances
 
+    def _distance_chunk(self, query: np.ndarray, start: int, end: int) -> np.ndarray:
+        chunk = np.asarray(self._vectors[start:end], dtype=np.float64)
+        return self._distance_values(query, chunk)
+
+    def _distance_indices(
+        self, query: np.ndarray, indices: np.ndarray,
+    ) -> np.ndarray:
+        chunk = np.asarray(self._vectors[indices], dtype=np.float64)
+        return self._distance_values(query, chunk)
+
+    def _query_candidate_indices(
+        self, where: Mapping[str, Any] | None,
+    ) -> tuple[int, ...] | None:
+        """Resolve the only governed query filter: exact record-kind equality."""
+
+        if where is None:
+            return None
+        if (
+            type(where) is not dict
+            or set(where) != {"record_kind"}
+            or not _valid_id(where["record_kind"], self._limits)
+        ):
+            fail("QUERY_WHERE_INVALID")
+        return self._record_kind_to_indices.get(where["record_kind"], ())
+
     def _nearest(
         self, query: np.ndarray, count: int, batch_query_bytes: int,
         retained_match_bytes: int,
+        candidate_indices: tuple[int, ...] | None = None,
     ) -> tuple[np.ndarray, np.ndarray]:
         best_indices = np.empty(0, dtype=np.int64)
         best_distances = np.empty(0, dtype=np.float64)
@@ -333,12 +377,22 @@ class ImmutableSnapshotCollection:
             self._limits, self.metric, self._dimension, count,
             batch_query_bytes, retained_match_bytes, self._query_chunk_rows,
         )
-        for start in range(0, len(self._rows), chunk_rows):
-            end = min(start + chunk_rows, len(self._rows))
-            chunk_distances = np.asarray(self._distance_chunk(query, start, end))
+        candidate_count = (
+            len(self._rows) if candidate_indices is None else len(candidate_indices)
+        )
+        for start in range(0, candidate_count, chunk_rows):
+            end = min(start + chunk_rows, candidate_count)
+            if candidate_indices is None:
+                chunk_indices = np.arange(start, end, dtype=np.int64)
+                chunk_distances = self._distance_chunk(query, start, end)
+            else:
+                chunk_indices = np.asarray(
+                    candidate_indices[start:end], dtype=np.int64,
+                )
+                chunk_distances = self._distance_indices(query, chunk_indices)
+            chunk_distances = np.asarray(chunk_distances)
             if not bool(np.isfinite(chunk_distances).all()):
                 fail("QUERY_DISTANCE_NONFINITE")
-            chunk_indices = np.arange(start, end, dtype=np.int64)
             candidates_i = np.concatenate((best_indices, chunk_indices))
             candidates_d = np.concatenate((best_distances, chunk_distances))
             order = np.lexsort((candidates_i, candidates_d))[:count]
@@ -348,6 +402,7 @@ class ImmutableSnapshotCollection:
     def query(
         self, *, query_embeddings: Sequence[Sequence[float]], n_results: int,
         include: Sequence[str] | None = None,
+        where: Mapping[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Return nested Chroma-compatible exact vector results."""
 
@@ -362,15 +417,19 @@ class ImmutableSnapshotCollection:
         queries = _validated_queries(
             query_embeddings, self._dimension, self._limits,
         )
-        result_rows = len(queries) * min(wanted, len(self._rows))
+        candidate_indices = self._query_candidate_indices(where)
+        candidate_count = (
+            len(self._rows) if candidate_indices is None else len(candidate_indices)
+        )
+        result_rows = len(queries) * min(wanted, candidate_count)
         _ensure_result_items(result_rows, fields, self._limits)
         matches: list[tuple[np.ndarray, np.ndarray]] = []
         retained_match_bytes = 0
         for query in queries:
             query64 = np.asarray(query, dtype=np.float64)
             match = self._nearest(
-                query64, min(wanted, len(self._rows)), queries.nbytes,
-                retained_match_bytes,
+                query64, min(wanted, candidate_count), queries.nbytes,
+                retained_match_bytes, candidate_indices,
             )
             matches.append(match)
             retained_match_bytes += match[0].nbytes + match[1].nbytes

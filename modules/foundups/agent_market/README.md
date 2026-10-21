@@ -30,7 +30,7 @@ Design intent:
 - Foundup registry with immutable vs mutable metadata rules.
 - Token factory adapter interface (no chain lock-in).
 - Agent join requests and capability tagging.
-- Task lifecycle: `open -> claimed -> submitted -> verified -> paid`.
+- In-memory task lifecycle simulation: `open -> claimed -> submitted -> verified -> paid`. Persistent SQLite initiation leaves a task `verified` with a pending payout; it does not confirm payment.
 - Treasury and governance boundaries as interfaces.
 - CABR integration hooks as interfaces.
 - Event audit trail linking payout to proof to task to foundup.
@@ -39,6 +39,10 @@ Design intent:
 - In-memory adapter for deterministic tests.
 - SQLite persistence adapter with schema migrations and query indexes.
 - Postgres adapter boundary and backend factory selection.
+
+### Persistent initiation boundary
+
+SQLite `trigger_payout` records payout, task linkage, configured compute charge and event atomically. An exact retry returns the same pending result, including after reopen, without duplicate effects. Ambiguous legacy records are held for reconciliation; no automatic refund, deletion or settlement occurs. Non-SQLite initiation is unsupported. Persistent role authentication and live rewards remain unproved; see [the interface](INTERFACE.md#taskpipelineservice) and [R24 contract](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22).
 
 ## Out of Scope in This PoC
 - Production blockchain writes.
@@ -51,6 +55,8 @@ Design intent:
 - `src/interfaces.py`: service contracts and adapter boundaries.
 - `src/in_memory.py`: PoC in-memory implementation.
 - `src/persistence/`: SQLite/Postgres adapters, migration manager, repository factory.
+- `src/persistence/orm_models.py`: single shared Base/13 ORM row mappings; legacy `sqlite_adapter` Base/row imports remain compatible. Domain dataclasses stay in `src/models.py`.
+- `src/persistence/verification.py`: internal atomic SQLite verification used by the existing task pipeline; one decision/debit/event, exact replay and fail-closed legacy history. This records a supplied decision without granting verifier authority.
 - `src/exceptions.py`: domain errors.
 - `tests/`: schema, lifecycle, and permission tests.
 - `memory/`: module memory artifacts.

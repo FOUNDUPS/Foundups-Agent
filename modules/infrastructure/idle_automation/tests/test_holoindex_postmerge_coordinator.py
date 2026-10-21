@@ -344,10 +344,11 @@ def _incident_binding(
     *,
     observed_head: str = STALE_HEAD,
     incident_id: str = "sha256:" + ("d" * 64),
+    incident_kind: str = "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
 ) -> dict[str, str]:
     return {
         "schema_version": contract.INCIDENT_SCHEMA,
-        "incident_kind": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+        "incident_kind": incident_kind,
         "incident_id": incident_id,
         "workspace_repo_head_sha": HEAD,
         "observed_authority_head_sha": observed_head,
@@ -488,8 +489,9 @@ def test_distinct_incidents_share_canonical_maintenance_without_overwrite(
     events_before = {key: dict(value) for key, value in db.events.items()}
 
     second_incident = _incident_binding(
-        observed_head="e" * 40,
+        observed_head=HEAD,
         incident_id="sha256:" + ("e" * 64),
+        incident_kind=contract.REPO_HEAD_MISMATCH,
     )
     associated = coordinator._coordinate_holoindex_postmerge_for_test(
         repo_root=workspace,
@@ -500,6 +502,8 @@ def test_distinct_incidents_share_canonical_maintenance_without_overwrite(
     )
 
     assert associated.accepted and associated.status == "PENDING"
+    assert associated.task_id == queued.task_id
+    assert len(db.tasks) == 1
     assert db.tasks[queued.task_id] == task_before
     request_id = coordinator.REQUEST_EVENT_PREFIX + HEAD
     assert db.events[request_id] == events_before[request_id]

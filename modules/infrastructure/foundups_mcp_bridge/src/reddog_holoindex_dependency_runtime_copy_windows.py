@@ -74,7 +74,9 @@ def _open_initial_leases(
     store_proof: StoreProof,
 ) -> _WindowsTreeLeases:
     source = open_windows_directory_lease(
-        source_root, expected_identity=_directory_identity(snapshot.directories[source_root])
+        source_root,
+        expected_identity=_directory_identity(snapshot.directories[source_root]),
+        require_delete_authority=False,
     )
     store: WindowsDirectoryLease | None = None
     destination: WindowsDirectoryLease | None = None
@@ -130,7 +132,8 @@ def _open_next_directory(state: _WindowsTreeLeases, component: str) -> None:
         _fail("MODEL_SOURCE_DIRECTORY_CHANGED")
     validate_windows_directory_lease(source_parent)
     source = open_windows_directory_lease(
-        source_path, expected_identity=_directory_identity(expected)
+        source_path, expected_identity=_directory_identity(expected),
+        require_delete_authority=False,
     )
     try:
         destination = _open_destination_directory(

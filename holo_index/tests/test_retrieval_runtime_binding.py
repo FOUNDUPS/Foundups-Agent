@@ -28,6 +28,7 @@ def test_ranker_closure_pins_routing_projection_and_owner_config() -> None:
         "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_response.py",
         "modules/infrastructure/foundups_mcp_bridge/src/holo_query_path_projection.py",
         "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_replica.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_adapter.py",
     }.issubset(paths)
 
 

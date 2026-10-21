@@ -1,5 +1,14 @@
 # WSP Framework Change Log
 
+## 2026-09-05 - RedDog Surface / 0102 Digital Twin Boundary Correction
+
+- Advanced WSP 73 to v2.3 and aligned WSP 98: RedDog is the lightweight
+  low-latency interaction/exchange surface; 0102 is the principal-scoped
+  Digital Twin and deep cognition/orchestration layer behind it.
+- Preserved one continuous conversational relationship without collapsing the
+  two components or creating competing assistants. Synchronized both
+  `WSP_knowledge` mirrors byte-for-byte. (WSP 22/50/64/73/81/97/98)
+
 ## 2026-08-26 - RedDog/0102 Canonical Architecture Alignment
 
 - Replaced obsolete WSP 73 II-Agent/FastAPI/Docker/YAML topology with the

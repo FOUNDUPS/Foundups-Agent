@@ -28,6 +28,7 @@ RANKER_RUNTIME_MODULES = (
         "holo_index.module_intent_snapshot",
         "holo_index/module_intent_snapshot.py",
     ),
+    ("holo_index.document_truth", "holo_index/document_truth.py"),
     (
         "modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_response",
         "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_response.py",
@@ -39,6 +40,10 @@ RANKER_RUNTIME_MODULES = (
     (
         "modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_replica",
         "modules/infrastructure/foundups_mcp_bridge/src/holo_query_service_replica.py",
+    ),
+    (
+        "modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_adapter",
+        "modules/infrastructure/foundups_mcp_bridge/src/holo_query_snapshot_adapter.py",
     ),
 )
 _WINDOWS_REPARSE_POINT = getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0x400)

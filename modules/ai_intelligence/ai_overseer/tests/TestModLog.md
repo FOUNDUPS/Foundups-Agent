@@ -1,4 +1,26 @@
+## 2026-09-24: WRE research display preserves preflight enforcement
+
+Two new cases in `test_preflight_resolution.py` bind the configured advisory reader
+and verify its failure cannot block healthy startup. Five prior dashboard cases
+remain unchanged. The connected dashboard/export suite additionally exercises the
+real reader through the exact main function bodies. Final 67-case selection passes
+locally and independently, without full main import or runtime effects. Scoped
+`--noconftest` prevents this module's allowlist skipping the WRE file; no repository
+collection policy changed. Detailed controls and preserved harness failures are in
+WRE `tests/TestModLog.md` and the canonical RSI backlog (WSP22/97).
+
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
 # AI Overseer Test ModLog
+
+## 2026-09-20: Commander metadata-to-job regression
+
+Existing intake fixture now uses the actual intent dataclass, explicit fixture authority and exact queue assertions. Covers malformed/root/field types, JSON coercions/cycles/depth, conflicting copies/targets, callback detachment, unchanged dry-run/action/digest semantics and authority-before-intake. Thirteen cases preserve independent review's three discoveries. Qualified RED15fail/16pass; focused111pass; independent99overlap plus31adversarial cases. Connected1048pass/4fail; all4failures reproduce on clean main d00b156f and remain separately tracked. No live worker/provider and no fabricated all-green result. Evidence: root RSI backlog current_observation (WSP22/49/97).
+
 
 | Date       | Author | Description | Notes |
 |------------|--------|-------------|-------|

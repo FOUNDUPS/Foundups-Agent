@@ -5,6 +5,8 @@
 > HoloIndex freshness. WSP_00 may route here for continuity, but WSP 50 and
 > WSP 97 require fresh evidence from each owning system before action.
 
+**Canonical Red Dog vision:** `docs/REDDOG_OUTCOME_VISION.md`
+
 **Slice**: `REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1`
 
 This directory provides a curated, manually-imported continuity channel for work
@@ -83,6 +85,7 @@ Reserved sibling directories for future source-specific adapters:
 
 ## Related
 
+- `docs/REDDOG_OUTCOME_VISION.md` - Canonical Red Dog outcome / north star
 - [BOOTSTRAP.md](BOOTSTRAP.md) - Boot card with strict read-order (referenced by WSP_00)
 - [SCHEMA.md](SCHEMA.md) - Session closeout schema specification
 - [MEMORY_BOUNDARY.md](MEMORY_BOUNDARY.md) - Curated vs forbidden memory boundary

@@ -44,6 +44,17 @@ class _Distribution:
         return self._files.get(name)
 
 
+@pytest.fixture(autouse=True)
+def _single_synthetic_site_packages(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path,
+) -> None:
+    """Keep runtime-identity tests independent of host package roots."""
+    site_packages = tmp_path / "synthetic-runtime" / "site-packages"
+    site_packages.parent.mkdir(exist_ok=True)
+    site_packages.mkdir(exist_ok=True)
+    monkeypatch.setattr(runtime.sys, "path", [str(site_packages)])
+
+
 def _source_root(tmp_path: Path, marker: str = "a") -> Path:
     source = tmp_path / "runtime.py"
     source.write_text(f"MARKER = {marker!r}\n", encoding="utf-8", newline="\n")

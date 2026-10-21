@@ -64,6 +64,27 @@ def test_configured_clean_same_head_authority_is_selected(tmp_path: Path) -> Non
     assert result.rejection_reasons == ()
 
 
+def test_control_root_reaches_authority_that_rejects_as_its_own_workspace(
+    tmp_path: Path,
+) -> None:
+    workspace, authority = _roots(tmp_path)
+    environment = {AUTHORITY_REPO_ROOT_ENV: str(authority)}
+    common = tmp_path / "common.git"
+    reader = _state_reader(workspace, authority, _state())
+
+    admitted = resolve_holoindex_authority_root(
+        workspace, environment=environment, state_reader=reader,
+        common_dir_reader=lambda _path: common,
+    )
+    rejected = resolve_holoindex_authority_root(
+        authority, environment=environment, state_reader=reader,
+        common_dir_reader=lambda _path: common,
+    )
+
+    assert admitted.accepted is True and admitted.selected_root == authority
+    assert rejected.accepted is False and rejected.error == AUTHORITY_ROOT_INVALID
+
+
 def test_dirty_workspace_can_use_clean_same_head_authority(tmp_path: Path) -> None:
     workspace, authority = _roots(tmp_path)
     common = tmp_path / "common.git"
@@ -133,6 +154,19 @@ def test_configured_invalid_path_fails_without_workspace_fallback(
         workspace,
         environment={AUTHORITY_REPO_ROOT_ENV: "relative/repo"},
         state_reader=lambda _path: _state(),
+    )
+
+    assert result.accepted is False
+    assert result.error == AUTHORITY_ROOT_INVALID
+
+
+def test_configured_workspace_root_is_rejected(tmp_path: Path) -> None:
+    workspace, _authority = _roots(tmp_path)
+    result = resolve_holoindex_authority_root(
+        workspace,
+        environment={AUTHORITY_REPO_ROOT_ENV: str(workspace)},
+        state_reader=lambda _path: _state(),
+        common_dir_reader=lambda _path: tmp_path / "common.git",
     )
 
     assert result.accepted is False

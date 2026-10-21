@@ -9,10 +9,14 @@ import shutil
 import sqlite3
 import tempfile
 import threading
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from modules.infrastructure.database.src.agent_db import AgentDB
 from modules.infrastructure.database.src.db_manager import DatabaseManager
+from modules.infrastructure.database.src.holoindex_postmerge_claim_contract import (
+    build_holoindex_postmerge_claim_context,
+)
 
 
 def _reset_database(db_path: Path) -> None:
@@ -358,6 +362,27 @@ def test_holoindex_postmerge_assignment_reclaim_is_compare_and_swap() -> None:
             task_id,
             "openclaw_supervisor",
             expected_assigned_at="wrong",
+        )
+        assert not agent_db.reclaim_expired_holoindex_postmerge_task(
+            task_id,
+            "openclaw_supervisor",
+            expected_assigned_at=assigned_at,
+        )
+        expired_at = datetime.now(timezone.utc) - timedelta(seconds=2)
+        expired_context = build_holoindex_postmerge_claim_context(
+            task_id=task_id,
+            agent_id="openclaw_supervisor",
+            base_context=context,
+            claim_id=claim_id,
+            issued_at=expired_at,
+            lease_seconds=1,
+        )
+        assert expired_context is not None
+        assigned_at = str(expired_context["claim_issued_at"])
+        agent_db.db.execute_write(
+            "UPDATE agents_autonomous_tasks SET context = ?, assigned_at = ? "
+            "WHERE task_id = ?",
+            (json.dumps(expired_context), assigned_at, task_id),
         )
         assert agent_db.reclaim_expired_holoindex_postmerge_task(
             task_id,

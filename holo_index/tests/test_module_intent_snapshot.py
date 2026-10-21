@@ -19,23 +19,23 @@ from holo_index.module_intent_snapshot import (
 )
 from holo_index.core import search_engine
 from holo_index.core.search_engine import _module_intent
+from holo_index.tests.module_intent_test_support import (
+    HEAD_A,
+    HEAD_B,
+    candidate_batch as _batch,
+    directory_tree as _tree,
+)
 from holo_index.tier0_retrieval import infer_explicit_module_target
 
 
-HEAD_A = "a" * 40
-HEAD_B = "b" * 40
-
-
-def _tree(*paths: str) -> bytes:
-    return b"".join(
-        f"040000 tree {'1' * 40}\t{path}\0".encode("utf-8")
-        for path in paths
-    )
-
-
 def _snapshot_failure(tmp_path: Path, tree: bytes) -> None:
-    def run(argv, **_kwargs):
-        output = HEAD_A.encode() if "rev-parse" in argv else tree
+    def run(argv, **kwargs):
+        if "rev-parse" in argv:
+            output = HEAD_A.encode()
+        elif "cat-file" in argv:
+            output = _batch(kwargs["input"])
+        else:
+            output = tree
         return SimpleNamespace(returncode=0, stdout=output)
 
     with pytest.raises(
@@ -50,19 +50,35 @@ def _clear_cache() -> None:
     clear_module_intent_snapshot_cache()
 
 
-def test_snapshot_uses_shell_free_head_pinned_nul_git_tree(tmp_path: Path) -> None:
+def test_snapshot_uses_closed_git_authority_and_head_pinned_tree(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+) -> None:
     calls: list[tuple[str, ...]] = []
+    hostile_git = {
+        "GIT_DIR": "attacker", "GIT_WORK_TREE": "attacker",
+        "GIT_OBJECT_DIRECTORY": "attacker",
+        "GIT_ALTERNATE_OBJECT_DIRECTORIES": "attacker",
+        "GIT_REPLACE_REF_BASE": "refs/evil",
+    }
+    for key, value in hostile_git.items():
+        monkeypatch.setenv(key, value)
 
     def run(argv, **kwargs):
         calls.append(tuple(argv))
         assert kwargs["shell"] is False
         assert kwargs["timeout"] == 5.0
+        assert all(kwargs["env"].get(key) != value for key, value in hostile_git.items())
+        assert kwargs["env"]["GIT_NO_REPLACE_OBJECTS"] == "1"
+        assert kwargs["env"]["GIT_OPTIONAL_LOCKS"] == "0"
         if "rev-parse" in argv:
             return SimpleNamespace(returncode=0, stdout=(HEAD_A + "\n").encode())
+        if "cat-file" in argv:
+            assert kwargs["input"]
+            return SimpleNamespace(returncode=0, stdout=_batch(kwargs["input"]))
         return SimpleNamespace(returncode=0, stdout=_tree(
-            "modules/zeta/worker", "modules/alpha/worker",
-            "modules/alpha/unique",
-            "modules/alpha/unique/src",
+            "modules/zeta/worker", "modules/zeta/worker/src",
+            "modules/alpha/worker", "modules/alpha/worker/tests",
+            "modules/alpha/unique", "modules/alpha/unique/src",
         ))
 
     assert load_module_intent_paths(tmp_path, run=run) == (
@@ -73,6 +89,9 @@ def test_snapshot_uses_shell_free_head_pinned_nul_git_tree(tmp_path: Path) -> No
     assert calls[1][-8:] == (
         "ls-tree", "-z", "-d", "-r", "--full-tree", HEAD_A, "--", "modules",
     )
+    assert "--no-replace-objects" in calls[1]
+    assert "--no-optional-locks" in calls[1]
+    assert calls[2][-2:] == ("cat-file", "--batch")
 
 
 @pytest.mark.parametrize(
@@ -106,10 +125,16 @@ def test_cache_is_keyed_by_resolved_root_and_head(tmp_path: Path) -> None:
         nonlocal tree_calls
         if "rev-parse" in argv:
             return SimpleNamespace(returncode=0, stdout=next(heads).encode())
+        if "cat-file" in argv:
+            return SimpleNamespace(
+                returncode=0, stdout=_batch(_kwargs["input"])
+            )
         tree_calls += 1
         suffix = "one" if HEAD_A in argv else "two"
         return SimpleNamespace(
-            returncode=0, stdout=_tree(f"modules/domain/{suffix}")
+            returncode=0, stdout=_tree(
+                f"modules/domain/{suffix}", f"modules/domain/{suffix}/src"
+            )
         )
 
     assert load_module_intent_paths(tmp_path, run=run)[0].endswith("/one")
@@ -146,10 +171,15 @@ def test_concurrent_cache_population_remains_bounded(tmp_path: Path) -> None:
     def load(root: Path) -> tuple[str, ...]:
         marker = root.name.replace("repo-", "module")
 
-        def run(argv, **_kwargs):
-            output = HEAD_A.encode() if "rev-parse" in argv else _tree(
-                f"modules/domain/{marker}"
-            )
+        def run(argv, **kwargs):
+            if "rev-parse" in argv:
+                output = HEAD_A.encode()
+            elif "cat-file" in argv:
+                output = _batch(kwargs["input"])
+            else:
+                output = _tree(
+                    f"modules/domain/{marker}", f"modules/domain/{marker}/src"
+                )
             return SimpleNamespace(returncode=0, stdout=output)
 
         return load_module_intent_paths(root, run=run)
@@ -169,14 +199,20 @@ def test_duplicate_cold_git_loads_are_allowed_but_single_entry_is_published(
     barrier = threading.Barrier(2)
     tree_calls = 0
 
-    def run(argv, **_kwargs):
+    def run(argv, **kwargs):
         nonlocal tree_calls
         if "rev-parse" in argv:
             return SimpleNamespace(returncode=0, stdout=HEAD_A.encode())
+        if "cat-file" in argv:
+            return SimpleNamespace(
+                returncode=0, stdout=_batch(kwargs["input"])
+            )
         tree_calls += 1
         barrier.wait(timeout=2)
         return SimpleNamespace(
-            returncode=0, stdout=_tree("modules/domain/valid")
+            returncode=0, stdout=_tree(
+                "modules/domain/valid", "modules/domain/valid/src"
+            )
         )
 
     with ThreadPoolExecutor(max_workers=2) as executor:
@@ -205,7 +241,7 @@ def test_every_tree_path_is_validated_before_depth_filter(
 ) -> None:
     _snapshot_failure(
         tmp_path,
-        _tree("modules/domain/valid", hostile_path),
+        _tree("modules/domain/valid", "modules/domain/valid/src", hostile_path),
     )
 
 
@@ -226,7 +262,7 @@ def test_every_tree_path_rejects_unicode_control_and_format_characters(
     _snapshot_failure(
         tmp_path,
         _tree(
-            "modules/domain/valid",
+            "modules/domain/valid", "modules/domain/valid/src",
             f"modules/domain/valid/src{hostile_character}hidden",
         ),
     )
@@ -242,14 +278,14 @@ def test_every_tree_path_rejects_surrogate_code_points() -> None:
         ModuleIntentSnapshotError,
         match="HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE",
     ):
-        snapshot._tree_path(record)
+        snapshot._tree_entry(record)
 
 
 def test_nfc_equivalent_deeper_paths_are_duplicates(tmp_path: Path) -> None:
     _snapshot_failure(
         tmp_path,
         _tree(
-            "modules/domain/valid",
+            "modules/domain/valid", "modules/domain/valid/src",
             "modules/domain/valid/caf\u00e9",
             "modules/domain/valid/cafe\u0301",
         ),
@@ -258,14 +294,19 @@ def test_nfc_equivalent_deeper_paths_are_duplicates(tmp_path: Path) -> None:
 
 def test_visible_unicode_letters_and_symbols_remain_valid(tmp_path: Path) -> None:
     tree = _tree(
-        "modules/domain/valid",
+        "modules/domain/valid", "modules/domain/valid/src",
         "modules/domain/valid/caf\u00e9",
         "modules/domain/valid/\u5de5\u5177",
         "modules/domain/valid/\u2605",
     )
 
-    def run(argv, **_kwargs):
-        output = HEAD_A.encode() if "rev-parse" in argv else tree
+    def run(argv, **kwargs):
+        if "rev-parse" in argv:
+            output = HEAD_A.encode()
+        elif "cat-file" in argv:
+            output = _batch(kwargs["input"])
+        else:
+            output = tree
         return SimpleNamespace(returncode=0, stdout=output)
 
     assert load_module_intent_paths(tmp_path, run=run) == (
@@ -276,11 +317,11 @@ def test_visible_unicode_letters_and_symbols_remain_valid(tmp_path: Path) -> Non
 @pytest.mark.parametrize(
     "tree",
     [
-        _tree("modules/domain/valid")[:-1],
-        _tree("modules/domain/valid") + b"\0",
+        _tree("modules/domain/valid", "modules/domain/valid/src")[:-1],
+        _tree("modules/domain/valid", "modules/domain/valid/src") + b"\0",
         b"040000 tree " + (b"1" * 40) + b" modules/domain/valid\0",
         b"040000 tree " + (b"1" * 40) + b"\t\0",
-        _tree("modules/domain/valid") + b"\xff\0",
+        _tree("modules/domain/valid", "modules/domain/valid/src") + b"\xff\0",
     ],
 )
 def test_nul_framing_truncation_and_utf8_fail_closed(
@@ -293,28 +334,33 @@ def test_nul_framing_truncation_and_utf8_fail_closed(
 def test_duplicate_deeper_records_fail_before_depth_filter(
     tmp_path: Path, case_variant: bool,
 ) -> None:
-    duplicate = "modules/domain/valid/SRC" if case_variant else "modules/domain/valid/src"
+    duplicate = (
+        "modules/domain/valid/SRC"
+        if case_variant else "modules/domain/valid/src"
+    )
     _snapshot_failure(
         tmp_path,
         _tree(
-            "modules/domain/valid",
-            "modules/domain/valid/src",
+            "modules/domain/valid", "modules/domain/valid/src",
             duplicate,
         ),
     )
 
 
-def test_valid_ancestors_and_deeper_descendants_are_accepted(tmp_path: Path) -> None:
+def test_valid_module_evidence_and_deeper_artifacts_are_accepted(tmp_path: Path) -> None:
     tree = _tree(
-        "modules",
-        "modules/domain",
-        "modules/domain/valid",
-        "modules/domain/valid/src",
-        "modules/domain/valid/src/deeper",
+        "modules", "modules/domain", "modules/domain/valid",
+        "modules/domain/valid/src", "modules/domain/valid/src/deeper",
+        "modules/domain/valid/docs",
     )
 
-    def run(argv, **_kwargs):
-        output = HEAD_A.encode() if "rev-parse" in argv else tree
+    def run(argv, **kwargs):
+        if "rev-parse" in argv:
+            output = HEAD_A.encode()
+        elif "cat-file" in argv:
+            output = _batch(kwargs["input"])
+        else:
+            output = tree
         return SimpleNamespace(returncode=0, stdout=output)
 
     assert load_module_intent_paths(tmp_path, run=run) == (
@@ -323,22 +369,33 @@ def test_valid_ancestors_and_deeper_descendants_are_accepted(tmp_path: Path) -> 
 
 
 def test_exact_module_root_cap_accepts_4096_and_rejects_4097(tmp_path: Path) -> None:
-    accepted = _tree(*(
-        f"modules/domain/module{index:04d}" for index in range(MAX_MODULE_PATHS)
-    ))
+    accepted_paths = tuple(
+        path
+        for index in range(MAX_MODULE_PATHS)
+        for path in (
+            f"modules/domain/module{index:04d}",
+            f"modules/domain/module{index:04d}/src",
+        )
+    )
+    accepted = _tree(*accepted_paths)
 
-    def run_accepted(argv, **_kwargs):
-        output = HEAD_A.encode() if "rev-parse" in argv else accepted
+    def run_accepted(argv, **kwargs):
+        if "rev-parse" in argv:
+            output = HEAD_A.encode()
+        elif "cat-file" in argv:
+            output = _batch(kwargs["input"])
+        else:
+            output = accepted
         return SimpleNamespace(returncode=0, stdout=output)
 
     assert len(load_module_intent_paths(tmp_path, run=run_accepted)) == 4096
     clear_module_intent_snapshot_cache()
     _snapshot_failure(
         tmp_path,
-        _tree(*(
-            f"modules/domain/module{index:04d}"
-            for index in range(MAX_MODULE_PATHS + 1)
-        )),
+        _tree(*(path for index in range(MAX_MODULE_PATHS + 1) for path in (
+            f"modules/domain/module{index:04d}",
+            f"modules/domain/module{index:04d}/src",
+        ))),
     )
 
 
@@ -349,39 +406,48 @@ def test_exact_module_root_cap_accepts_4096_and_rejects_4097(tmp_path: Path) -> 
         SimpleNamespace(returncode=0, stdout=b"x" * (MAX_GIT_TREE_BYTES + 1)),
         SimpleNamespace(
             returncode=0,
-            stdout=_tree("modules/domain/valid") + b"malformed\0",
+            stdout=_tree("modules/domain/valid", "modules/domain/valid/src")
+            + b"malformed\0",
         ),
         SimpleNamespace(
             returncode=0,
-            stdout=_tree("modules/domain/valid")
+            stdout=_tree("modules/domain/valid", "modules/domain/valid/src")
             + f"100644 tree {'1' * 40}\tmodules/domain/mode\0".encode(),
         ),
         SimpleNamespace(
             returncode=0,
-            stdout=_tree("modules/domain/valid")
+            stdout=_tree("modules/domain/valid", "modules/domain/valid/src")
             + f"040000 blob {'1' * 40}\tmodules/domain/type\0".encode(),
         ),
         SimpleNamespace(
             returncode=0,
-            stdout=_tree("modules/domain/valid")
+            stdout=_tree("modules/domain/valid", "modules/domain/valid/src")
             + f"040000 tree {'z' * 40}\tmodules/domain/hash\0".encode(),
         ),
         SimpleNamespace(
             returncode=0,
-            stdout=_tree("modules/domain/valid")
+            stdout=_tree("modules/domain/valid", "modules/domain/valid/src")
             + f"040000 tree {'1' * 40}\t\0".encode(),
         ),
         SimpleNamespace(
             returncode=0,
-            stdout=_tree("modules/domain/valid", "modules/DOMAIN/VALID"),
+            stdout=_tree(
+                "modules/domain/valid", "modules/domain/valid/src",
+                "modules/DOMAIN/VALID", "modules/DOMAIN/VALID/SRC",
+            ),
         ),
         SimpleNamespace(
             returncode=0,
-            stdout=_tree("modules/domain/valid", "modules/domain/valid"),
+            stdout=_tree(
+                "modules/domain/valid", "modules/domain/valid/src",
+                "modules/domain/valid/src",
+            ),
         ),
         SimpleNamespace(
             returncode=0,
-            stdout=_tree("modules/domain/bad\nname"),
+            stdout=_tree(
+                "modules/domain/bad\nname", "modules/domain/bad\nname/src"
+            ),
         ),
     ],
 )

@@ -1,4 +1,260 @@
+## Security scan coverage contract (2026-10-10)
+
+The `security_scan` executor distinguishes `completed`, `partial`, `error`, and
+`tool_unavailable`. Aggregate `partial` means some evidence completed or findings
+were retained but requested coverage is incomplete; all attempted tools failing
+without findings is `error`. CLI exits: 0 complete/no gate, 1 complete/012 gate,
+2 incomplete coverage (including unavailable tools). Findings remain available
+for policy escalation even in partial reports, with type and source location.
+
+SEC9 status includes `scans_completed`, `scans_partial`, and `scans_failed`; live errors cannot
+become `completed`. Dry-run/report-only calls remain proposals and never execute.
+SEC4 proposes scans for website/application/test source and modern lockfiles;
+these changes do not enroll any scheduler or runtime.
+
+## Measured-zero fidelity — P15 contract
+
+`PatternMemory.get_skill_fidelity_stats(skill_name, days=30) -> dict` keeps its
+existing fields, queries, time windows and rounding. Measured zero is retained
+for overall, recent and older means. Only `None` means absence: overall uses 0.5;
+an empty temporal window uses the overall mean. `success_rate` still counts
+fidelity >= 0.7, independently of execution-success flags. Ranking weights and
+`SkillSelector` are unchanged. These values describe structural fidelity,
+not authenticated effects or model fitness. Nine frozen and 42 disjoint controls
+pass locally. PR2062 is merged/main-verified; separate retained/control/recovery
+observations confirm positive → zero control → positive on unchanged saved rows.
+This is retained consumer behavior, not worker learning or effect authority.
+
+## Named registry-scope telemetry — P14 contract
+
+Source-qualified contract with independently reviewed actual scanner,
+projection and private-persistence observation; PR2061 is merged/main-verified. Existing `auto_test_registry_audit` v2.3 supports the
+named `operation="project_scope"` with a `request` containing `base_sha`,
+`head_sha`, `expected_changed_paths` and `projection_input`. Only existing
+reserved `parent_continuity_context` is additionally accepted. Caller roots,
+commands, results, receipts, `skill_name` and `agent` do not authorize dispatch.
+The adjacent executor derives its own checkout and delegates once to existing
+`produce_registry_scope_projection`; temporary commit materialization remains
+inside that owner. It does not regenerate the canonical registry or run tests.
+
+`normalize_registry_scope_projection(value, *, request) -> dict | None` in
+`src/skill_execution_truth.py` validates bounded builtin report data, request
+bindings, non-execution flags and the canonical projection ID, then detaches
+accepted data. This is validation, not authentication or independent scope proof.
+The public named result separates `telemetry_completed`, `telemetry_status`,
+`projection` and `observation_persisted` from false `success`,
+`execution_success` and `_effect_evidence`. Persistence failure preserves the
+projection and returns a stable `observation_error`; it does not retry.
+
+Registry/frontmatter, scanner, bundle, load and A/B gates remain. The named
+single/ReAct path stops before fallback, fidelity evaluation, `SkillOutcome`,
+evolution, variation and AgentDB breadcrumbs. Existing scanner counters remain;
+one `PatternMemory.record_learning_event(event_type="telemetry_projection")`
+records only execution/projection identifiers, base/head, status and bounded
+reasons. It supplies no quality, learning, permit or native admission evidence.
+Other effect/proposal paths and the manual registry CLI retain their contracts.
+
+The [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint) binds the accepted design and
+qualification evidence. Shapes/digest types and identity-only builtin traversal
+are covered by39 additive controls; original75 criteria remain unchanged.
+Stable connected validation passes306 with two Windows link skips. The initial
+source-drifted run remains historical. The separate PC observation produces
+a155-shard-per-side projection and persists one projected event, with false effect success.
+Two earlier rejected attempts remain recorded; isolated scanner2.2.0 and short
+owned TEMP qualify this environment, not native authority or automatic updates.
+
+## Prototype CodeAct file containment — 2026-10-04
+
+The existing read-file action checks resolved Path components before reading.
+Sibling directories sharing the repository's name prefix are outside. Nested,
+normalized within-root and missing-file behavior remains. A denied read returns
+an error and existing orchestration stops later actions while retaining earlier
+successful outputs. This is not atomic symlink-race protection, an OS sandbox,
+or public WRE CodeAct admission; that prototype boundary remains blocked.
+
+## Local proposal framing — 2026-10-04
+
+The existing local proposal wrapper asks for a proposal using the skill's required
+output format. It no longer adds an execution directive or an unconditional
+structured-response instruction. Exact skill text, ordinary JSON context and
+reserved continuity omission remain unchanged. This affects raw/native caller
+prompt framing only; profile, limits, cleanup and quarantine are unchanged.
+Model format adherence and semantic correctness still require verification.
+
+## Prototype CodeAct shell result — 2026-10-04
+
+Direct `CodeActExecutor` shell actions return an error containing the numeric
+status on every nonzero subprocess exit, without raw failure stdout/stderr or
+capture. Existing pre/main/post orchestration stops at that error, retains
+earlier outputs and does not count the failed action as completed. Zero exits
+retain stripped stdout capture; stderr warnings alone do not cause failure.
+This does not admit the prototype through `WREMasterOrchestrator`.
+
+## Explicit local-model ownership — 2026-10-01
+
+`QwenInferenceEngine.close() -> None` detaches its model and clears initialized
+state before invoking the captured model's `close()`. No model is a safe no-op;
+an owned model is closed even when initialized is false. Repeated/reentrant
+explicit close does not retry the captured resource, including after failure.
+Native cleanup `Exception` logs only its type and raises stable
+`RuntimeError("Qwen model cleanup failed")` with suppressed exception context.
+Generation itself retains the engine for direct callers; those callers own
+explicit close. Concurrent ownership and native partial-constructor cleanup
+are not qualified by this contract.
+
+The existing WRE local adapter closes every successfully constructed per-call
+engine in `finally`, in raw and native-chat modes. Rejected configuration or
+construction creates no ownership. Cleanup `Exception` invalidates a proposal
+as `local_model_unavailable`; primary failures keep their existing result.
+A primary interruption propagates while cleanup is attempted. A `BaseException`
+raised by cleanup itself is not normalized. Generated text remains
+`success=False`, `_effect_evidence=False`; cleanup confers no execution authority.
+
+## Opt-in local native-chat proposals
+
+`WREMasterOrchestrator(*, local_proposal_mode="raw",
+local_native_chat_profile=None)` validates configuration before constructing
+collaborators. `execute_local_skill_inference` accepts corresponding keyword-only
+`proposal_mode` and `native_chat_profile` arguments. Raw mode requires no profile.
+Native mode requires exactly `runtime_version="0.3.20"` and `template_sha256`
+(64 lowercase hexadecimal characters). Configuration is copied, never taken
+from skill text or input context, and does not confer runtime authority.
+
+The engine's `generate_chat_response(prompt, system_prompt=None, *,
+runtime_version, template_sha256)` checks observed runtime, required formatter
+capabilities and actual model template digest. It renders system/user messages
+once with `enable_thinking=False`, then verifies positive integer limits and
+`input_tokens + max_tokens <= min(actual_context, configured_context)`.
+The per-call handler uses that same rendering and the qualified formatter's
+EOS text/token criteria, with an empty caller stop list (`stop=[]`). Markdown
+`###` content is not a native stop delimiter. The output cap remains in force;
+the default raw route keeps its existing stop list. The call does not replace
+persistent model handlers. This is a qualified optional
+profile, not a promise for every GGUF/template or the declared0.2.72 runtime.
+
+Master configuration errors raise a stable `ValueError` before collaborators;
+adapter failures preserve existing structured failure output. Engine exceptions
+return `Error: Qwen chat response generation failed` and log only exception type.
+Text remains `success=False`, `_effect_evidence=False`: admission, execution,
+acceptance and retention remain separate existing gates. No automatic activation.
+
+## Merge sentinel prerequisite contract — 2026-09-27
+
+`run_main_merge_sentinel(repo_root, force=False)` keeps its dictionary interface.
+`passed` means startup may continue; it is not merge verification. Failed branch
+resolution, empty/detached branch, unavailable/empty/unrecognizable worktree
+inventory, failed/dirty status and failed fetch all return `merged=False`.
+For these failures, `passed` is false only when
+`GIT_MAIN_MERGE_SENTINEL_ENFORCED` is enabled. Dirty status includes untracked
+files even when Git configuration normally hides them.
+
+Fixed new error values: `named_branch_required`, `worktree_discovery_failed`,
+`working_tree_status_failed`, `working_tree_dirty`, `fetch_failed`.
+The existing branch-resolution and other-main-worktree errors are preserved.
+Default-disabled and already-main calls retain their early skip behavior.
+The private worktree helper uses `None` for unavailable discovery, distinct
+from a readable inventory with no competing main checkout.
+
+The post-merge cleanup check also explicitly includes untracked files and runs
+before local branch-force, checkout or explicit branch deletion. New errors
+`cleanup_working_tree_dirty` and `cleanup_status_failed` return immediately,
+with `passed = not ENFORCED`. The compatibility field `merged=True` means only
+that a remote command reported success; it does not mean verified main, complete
+cleanup or rollback. The helper neither auto-stashes/pops work nor supplies
+`--delete-branch` to GitHub CLI. After successful synchronization and checkout,
+`GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1` (also its unset default) now returns
+`cleanup_deletion_unqualified`, appends a blocked-deletion action and sets
+`passed = not ENFORCED`. The helper issues no branch-deletion commands, retains
+prior actions and keeps `merged=True` as remote-command success only. Explicit
+`DELETE_BRANCH=0` leaves the successful no-delete path unchanged. `force=True`
+bypasses enablement only, never this gate. This does not prove a remote branch
+still exists after independent server-side deletion.
+
+After the initial cleanup status guard, fetch explicitly from origin
+`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
+and capture one full 40/64-character hexadecimal object ID. Read status again
+after the fetch/resolution, then update local main using the captured ID.
+Fetch, resolution, status or branch-update failure stops before checkout and
+explicit deletion; there is no cached-target fallback.
+If checkout itself fails, `cleanup_checkout_failed` is returned with the failure
+message in actions and `passed = not ENFORCED`. The earlier local-main update
+is retained; no rollback or later deletion is attempted. `merged=True` still
+means only prior remote-command success. The existing startup error display
+consumes this structured field without a caller change.
+
+New synchronization errors are `cleanup_fetch_failed`,
+`cleanup_commit_resolution_failed` and `cleanup_main_update_failed`.
+Late status failures reuse `cleanup_working_tree_dirty`/`cleanup_status_failed`.
+All preserve `merged=True` as prior remote-command success only and
+`passed = not ENFORCED`; no rollback is implied. Commit peeling, not the string
+shape alone, checks commit type. Local branch-force uses the captured ID.
+
+These are snapshots, not an atomic worktree/ref lock. Ref movement before
+commit capture and worktree/ref changes after the final status remain races.
+The fetch updates the remote-tracking ref even if a later check blocks local
+main. Freshness does not prove intended content, checks or merge authority.
+Direct/backup pushes, unchecked PR merging, main readback and server-side
+auto-delete remain open. Automatic branch retirement is blocked pending a
+qualified combined containment/expected-ref/worktree-ownership contract.
+Default-off remains required; this does not certify WSP 97 terminal convergence
+or authorize native RSI.
+
 # WRE Core Interface
+
+## Advisory AutoResearcher startup display
+
+`read_research_report_summary(report_path, expected_baseline_sha256, *,
+max_age_seconds=86400)` in `src/dashboard_alerts.py` reads one explicitly selected
+local `invocation-*/report.json`. The expected lowercase SHA-256 identifies the
+baseline text selected by the caller; it is not authenticated producer/oracle
+identity. No directory scan or implicit latest-report selection occurs.
+
+The reader rejects relative/UNC/device paths, nonregular final files, oversized
+input (actual read capped at 1 MiB + 1), duplicate JSON fields, invalid schema,
+source/path/invocation mismatch, incomplete/aborted/cleanup-failed reports,
+inconsistent counters/history, nonfinite metrics and impossible gain accounting.
+Valid zero-attempt runs and completed runs containing failed attempts remain
+diagnostics. Positive gain requires an accepted attempt and vice versa.
+
+The age limit must be a finite positive number, excluding bool. Future/expired
+file mtime gives `unknown`; current mtime is only **file age**, never authenticated
+execution freshness. A caller must supply a trusted local regular-file location;
+mapped/network storage, ancestor links and hostile path replacement are not
+confined by this helper, and synchronous filesystem latency has no hard bound.
+
+Output is `unknown` with a fixed reason, or `unverified_diagnostic` with attempts,
+outcome counts, reported fitness delta, verification-signal class and file age.
+The reader now requires a consistent `wre_rsi_measurements.v1` bundle and
+classifies this producer as `execution_feedback`; it rejects stronger
+self-asserted classes, independent/held-out claims, production-RSI eligibility,
+or non-null verification/retention/resource/rollback/generation evidence.
+Independent verification, retained improvements and actual resource usage remain
+`None`. This checks displayed accounting and RSI truth labels, not economic
+validity or the complete report/proposal/program provenance.
+
+Mixed slash network-style prefixes (`/\\` and `\\/`) are rejected lexically on
+all hosts, before filesystem access.
+
+Measurement scalar hardening (2026-09-29): nested counters require integers,
+policy flags require Booleans, and fitness/gain numbers exclude Booleans.
+Finite integer/float fitness representations remain interoperable. Absolute
+gain is `best - baseline` in simulator fitness units (higher is better);
+relative gain is the dimensionless fraction `gain / abs(baseline)`, not a
+percentage. A zero baseline requires explicit `null`; negative baselines use
+their magnitude. Nonfinite derived relative gain rejects as `unknown`.
+The five unavailable verification/resource/rollback/retention fields must also
+be present as `null`. Complete PR #1903 v1 reports already provide these fields;
+partial bundles reject rather than silently gaining the same status. These
+checks validate diagnostic accounting, not authentication or economic validity.
+
+`print_research_report_summary()` reads `WRE_RESEARCH_REPORT_PATH` and
+`WRE_RESEARCH_BASELINE_SHA256`, then prints sanitized advisory output without raw
+paths/content/errors. `main.py:run_wre_dashboard_preflight` invokes it when that
+preflight is enabled, preserving existing health enforcement. Unconfigured or
+bad reports remain unknown; reading never constructs a researcher, model,
+PatternMemory, queue or resolution event, and writes no report. Existing health
+checks may still initialize memory and dispatch events under their own contract.
+No campaign, retention, queue admission, scheduled cycle or promotion is enabled.
 
 **Version:** 0.8.0
 **Status:** Execution-truth hardening implemented; production RSI incomplete
@@ -13,6 +269,242 @@ A WRE return value is an execution record, not repository, Git, network,
 external-service, or production-promotion authority. 012 remains sovereign.
 Callers must preserve the narrower authority of the work item and runtime
 binding.
+
+## Outcome recording and retention
+
+`ratchet_verified_outcome(...)` requires finite nonnegative numeric cost/latency
+values, with an integer `total_tokens` (Boolean/string coercion is rejected).
+Verifier and accepted-publication receipts must match the requested work/slice;
+publication must name the same verifier receipt. Accepted outcomes require an
+explicit true acceptance receipt and no contradictory failure receipt.
+Invalid evidence is ineligible for memory; secret-marker payloads are not
+stored, and affected receipt labels are redacted.
+
+Recorder identity seed v2 includes all retained receipt groups, including cost,
+latency, full publication and Holo evidence. Store/sink acknowledgments must be
+nonempty strings. Deep copies isolate callback arguments and the local store;
+callback failure does not change the evidence identity. The JSONL store refuses
+non-finite JSON. Its stored record is a pre-callback snapshot; the returned
+receipt carries final acknowledgment status. This is not an atomic transaction,
+replay guard, crash-recovery proof or authenticated storage receipt.
+
+`evaluate_held_out_recursive_improvement_regression_gate(...)` requires an
+accepted, eligible, not-yet-written ratchet outcome, matching work/slice/verifier
+and exact `verification_digest`. Test counts must be positive integers and the
+failure count must be the integer zero; malformed values cannot imply a pass. Its v2 identity binds
+the full input evidence. Old minimal hand-written fixtures must supply the
+fields already produced by the real recorder; missing fields fail closed.
+
+The existing bridge `invoke_reddog_wre_queue_authorized_pattern_memory_admission(...)`
+also isolates sink input and rejects empty/non-string acknowledgments through
+its existing `SINK_WRITE_FAILED` result. These contracts describe local
+consistency and acknowledged callbacks, not authentication of a caller's
+receipt map or proof that an external sink committed exactly once. Keep earlier
+receipt versions as historical evidence; do not rewrite them in place.
+
+## ROC research evaluator and dry-run producer
+
+`src/wre_research_evaluator.py` exposes `load_target_config_from_source(source)`,
+`load_target_config(path)`, `snapshot_cost_catalog(cost_catalog=None)`,
+`snapshot_comparison_basis()` and
+`evaluate_target(path, *, cost_catalog=None, comparison_basis=None)`. The loader uses AST literal
+evaluation; it does not import or execute the target. Metric dictionaries accept
+finite integers/floats with string keys, excluding booleans. Unusable numeric
+maps return empty dictionaries through the existing loader contract.
+
+Before simulation, `evaluate_target` rejects missing/invalid maps, agent names
+outside the captured cost catalog (default: `AGENT_INFRASTRUCTURE_COSTS`),
+allocation fractions outside `[0, 1]`,
+totals not equal to one within absolute `1e-9` (zero relative tolerance), and
+multipliers outside `[1, 5]`. These input guards return an `error`, finite
+negative `fitness`, and false compute/ROI flags. Valid known-agent subsets,
+zero allocations and the existing default multiplier of one remain supported.
+The producer's program may require a narrower, fully populated target. Invalid
+syntax or non-literal expressions can still raise through the loader; callers
+must retain the existing exception-handling boundary.
+
+`WREAutoResearcher(..., results_dir=parent)` treats `results_dir` as an output
+parent. The instance's `results_dir` names a newly allocated `run-*` child;
+`working_target_path` names `target/<original basename>` and `results_path` names
+the run's `results.tsv`. Initialization reports the results path. The default parent
+remains `<system temp>/wre_autoresearch_runs`. Reusing a parent creates a separate
+run instead of resuming or sharing the previous target/log. Callers must use the
+instance paths; existing artifacts under the parent are not migrated or deleted.
+Parents resolving inside `REPO_ROOT` reject before mkdir. This is local namespace
+isolation under a stable filesystem, not process isolation or runtime admission.
+
+Only literal `dry_run=True` is implemented. Constructor and call preflight reject
+other values with `NotImplementedError("SPECIFIED_NOT_IMPLEMENTED")`; truthy
+non-booleans cannot select a mode. The producer checks mode around the proposal
+backend and after the loop. Detected drift aborts through the existing terminal
+report path. A change during evaluation can first become a `crashed` outcome,
+then abort at the mode gate; no injected live commit is called. `_commit()` only
+records planned operations and also rejects unsupported mode when called directly.
+Cleanup always attempts scratch restoration, regardless of the current flag.
+`report["dry_run"]` is the initial literal-True selection expressed as a boolean;
+it is descriptive, not authority. Arbitrary host Python and injected runner code
+are outside this local guard's sandbox claim. Live mode remains unimplemented.
+
+Construction writes scratch from the target text captured by `read_text`, without
+a second live-source read. Each `run()` freezes the current `original_code` text
+before report allocation. It prepares scratch from that snapshot before baseline
+evaluation; the first proposal and terminal cleanup use the same snapshot even
+if a callback later changes `original_code`. A caller changing that field before
+a later run supplies that later invocation's baseline. Sequential reuse discards
+leftover scratch. Preparation failure aborts before an evaluator entry; cleanup
+is still attempted. Same-instance concurrency remains unsupported.
+
+`max_iterations` must be a non-negative built-in integer; booleans and other
+types reject before constructor output/model work and before run baseline
+execution. Each run snapshots the cap for its loop, progress and returned report.
+Zero requests no proposal attempts and still evaluates one valid baseline.
+
+`run()` retains baseline/optimized/improvement/history/dry_run accounting and
+returns the same mapping saved in its invocation's `report.json` after successful
+cleanup and publication. Python exceptions still propagate; when reporting is
+available an aborted mapping is published before propagation.
+
+| Field | Meaning |
+|---|---|
+| `schema` | `wre_auto_research_report.v1`; local diagnostic, not signed authority |
+| `invocation_id`, `report_path` | Distinct `invocation-*` namespace within the instance run directory and its JSON path |
+| `status`, `stop_reason` | `completed`/`attempt_limit` or `aborted` with `error`/`interrupted`; completion does not imply improvement |
+| `phase`, `failure`, `cleanup_failure` | Last work phase and available error types; original exception chains still propagate |
+| `cleanup` | `restored`, `failed` or `not_performed`; output failure after restoration still aborts without denying restored bytes |
+| `attempts_requested` | Valid cap frozen at invocation entry; `None` for a rejected mutated invalid cap |
+| `attempts_started`, `iterations_run` | Entered proposal attempts, including missing and unfinished proposals |
+| `attempts_finished`, `outcome_counts` | Recorded history outcomes; an aborted started attempt may have no finished outcome |
+| `baseline_evaluations`, `candidate_evaluations` | Actual evaluator entries, including calls that raise; zero before entry |
+| `baseline`, `optimized`, `improvement` | Available metrics and local difference; no valid best means `None` for optimized/improvement |
+| `baseline_input_sha256` | SHA-256 of the invocation's captured baseline text encoded as UTF-8; constructor reads normalize newlines. Describes prepared input even on abort before evaluation; not raw source bytes, program/oracle identity or authenticated provenance |
+| `proposal_inputs` | Per-invocation ordered list of `{iteration, proposal_input_sha256}` for nonempty text reaching candidate preparation. SHA-256 covers returned Unicode content encoded as UTF-8 before scratch write/diff; no raw proposal content is added to this field |
+| `program_inputs` | Ordered local attempted-call records: `{iteration, call_ordinal, program_input_sha256, identity_error}`; ordinal starts at one per invocation. Digest covers the rendered instruction text used in that call, encoded as UTF-8 |
+| `independently_verified`, `retained_improvements`, `resource_usage` | `None`; no evidence from this producer |
+| `rsi_measurements` | `wre_rsi_measurements.v1`: verification class, baseline/best fitness, absolute/relative gain, candidate/outcome counts and explicit unknowns for independent verification, resource usage, activation rollback and successive-generation gain. Current AutoResearcher class is `execution_feedback`, not formal verification; `production_rsi_eligible=false`. |
+
+Outcome keys remain `no_proposal`, `accepted`, `rejected`, `failed_validation`,
+`crashed`. History/TSV record missing proposals with blank metric cells. `crashed`
+may include evaluation or later acceptance/logging failures. Best metrics advance
+only after acceptance recording succeeds; accepted info names previous fitness.
+
+Cost comparability repair, 2026-09-23: each invocation captures immutable numeric
+unit totals and catalog names after mode/report preparation, before baseline
+evaluation. Baseline and candidates consume the same captured values; replacement,
+in-place cost mutation and membership changes cannot alter this cost basis.
+Capture failure aborts in `cost_capture` with zero evaluator entries, preserving
+the existing terminal report and cleanup path. Later invocations refresh costs;
+separate instances do not share a snapshot. Same-instance concurrency remains
+unsupported, and capture is not atomic against concurrent mutation of globals.
+
+`snapshot_cost_catalog(None)` reads current catalog totals; an explicit mapping
+is copied and never falls back to globals through truthiness. Nonempty string-key
+mappings with finite nonnegative integer/float totals are accepted; booleans,
+non-numeric, negative, nonfinite and float-overflow values raise `ValueError`
+before simulation. Zero cost remains valid and still records performed tasks.
+Only aggregate totals are validated, not their five source components. The
+calculator accepts the same keyword and owns a copied immutable mapping. Valid
+one-argument evaluator calls still capture current costs independently.
+
+PR1895 preserves historical cost-only false acceptance; PR1896 freezes those
+consumed cost values. PR1897 preserves eight historical profile-only false gains
+of five points with unchanged candidate text. The current guard rejects persistent
+profile changes in those cases without changing their metrics or acceptance oracle.
+
+Profile drift guard, 2026-09-24: `snapshot_comparison_basis()` returns an immutable
+JSON string of primitive values. It describes ordered effective tier distribution,
+tier presence/prices, subscription margin, angel subscription/OPO inputs and average
+stake default, DEX fee, consumed activity defaults, inherited constructor burn and
+SATS_PER_USD bookkeeping. The basis uses the values imported by the actual consumer
+and definition-bound method defaults. Explicitly overridden subscriber/angel/task
+defaults, unused agent mix/compute margin and unused constructor BTC price are not
+dependencies. A nonempty bound distribution takes precedence over the live global;
+an empty/None default uses the current fallback. Missing tiers differ from zero
+prices, distribution order is preserved, and integer precision is not discarded.
+
+Numeric profile values must be finite integers/floats excluding booleans. This
+validates comparability, not economic bounds or model correctness. Even a finite
+SATS change conservatively rejects bookkeeping drift although the eight returned
+scores may be equal. Missing/invalid profile inputs fail capture. No global values
+are overwritten and no shared economic method is changed.
+
+An invocation captures costs in `cost_capture`, then the profile in
+`comparison_capture`, before incrementing `baseline_evaluations`. Profile capture
+failure aborts with zero evaluator entries through normal report/cleanup handling.
+The same captured string is checked before each evaluator call performs simulation
+and after it returns metrics. A persistent change raises `ValueError` containing
+`comparison basis`; candidate failure records the existing `crashed` outcome,
+blank TSV metrics, unchanged best metrics and scratch rollback. If simulation
+raises, the existing exception path already prevents acceptance. Later invocations
+recapture; separate nested instances do not share a basis.
+
+Only omitted/None `comparison_basis` opts out for legacy direct calls. Explicit
+empty strings, other types or a mismatching string raise; they do not silently
+recapture or disable checks. The string is a local comparison value, not an
+authenticated hash, report receipt or stable public serialization contract.
+Frozen cost values remain a separate input and are not re-read by this guard.
+
+Before/after sampling is not atomic and does not make simulation consume an
+immutable profile. A value changed and restored inside simulation can evade checks;
+the fixed ABA control documents that remaining false gain. Same-instance concurrency
+is unsupported; no broader concurrency, source/oracle authentication, economic
+validity, runtime admission, promotion or retained-learning claim follows. The
+report schema and its independent-verification/retention fields are unchanged.
+
+`proposal_inputs` is separate from finished `history`: a subsequent preparation,
+diff or evaluation interruption can leave an input record without an outcome.
+Equal text has the same digest; iteration and invocation distinguish attempts.
+The list resets for each invocation. The existing falsy/no-proposal branch remains;
+truthy non-text values raise `TypeError` in `candidate_preparation` before write,
+diff or candidate evaluation. `str` subclasses remain accepted; hashing uses the
+built-in UTF-8 encoder rather than an overridden `encode` method. Encoding failure
+produces no record. Mode rejection before preparation also produces no record,
+even if a backend returned text. Digests do not identify raw model wire, normalized
+scratch bytes or the later evaluator input, and do not authenticate a proposal.
+
+`program_inputs` records the locally rendered instruction string immediately
+before invoking the resolved backend method. Rendering preserves the original
+empty-format semantics once, including custom format results, and the same text
+supplies prompt and digest. Backend failures/interruption and later mode rejection
+retain the entry. Formatting or backend-lookup failure before invocation has no
+entry. Multiple backend calls within one proposal have distinct invocation-wide
+ordinals. Heuristic, zero-attempt and overridden proposal paths that bypass the
+LLM method leave an empty list. Direct calls outside `run()` have no collector.
+The scoped collector restores its prior value or absence on every Python exit.
+An unencodable instruction records null digest and `UnicodeEncodeError`, without
+suppressing the backend call; otherwise `identity_error` is null. This describes
+an attempted local call, not provider receipt, raw program bytes, the full prompt,
+model/oracle/environment identity, authenticated provenance or retained learning.
+
+Each sequential call reserves a distinct subdirectory, stages complete JSON in
+`report.tmp`, then replaces `report.json` in that directory after cleanup settles.
+Allocation errors still attempt cleanup. Serialization/write/publication errors
+propagate, preserving earlier exception context; no completed return follows.
+Previous invocation files remain unchanged. Missing JSON, partial TSV or temporary
+files cannot certify completion; do not read temporary files as terminal evidence.
+The existing TSV still combines repeated-call groups and is not invocation-qualified.
+Abrupt process death/power loss, same-instance concurrency, authenticated source/
+oracle/environment identity, freshness, resource measurement and launch reading
+remain unqualified. This artifact creates no runtime or promotion authority.
+
+`WREAutoResearcher.run()` consumes those errors through its existing
+`failed_validation`/restore path. The negative-allocation regression proves it
+keeps baseline metrics and does not record a planned commit for the invalid
+proposal. Non-dry-run execution remains `SPECIFIED_NOT_IMPLEMENTED`.
+
+The 2026-09-14 lifecycle correction wraps `run()` in final scratch restoration
+for normal returns and Python exception exits, including `KeyboardInterrupt`.
+When the baseline evaluator returns an `error`, it logs `failed_baseline` at
+iteration zero and raises `ValueError` before proposal generation. Parse errors
+also propagate before proposals. `_rollback()` attempts the local file restore
+even if the injected runner fails; runner and file-write failures still surface
+to the caller, with Python exception chaining preserving earlier errors.
+Restoration runs before its status message, so broken output cannot skip it.
+No successful result is returned when cleanup or status output raises. This is local scratch
+recovery, not durable recovery after process termination, storage failure or
+authenticated production activation.
+
+This evaluator scores the fixed simulation; it does not authenticate runtime
+authority, establish real economic outcomes or serve as a generic code judge.
 
 ## WREMasterOrchestrator
 
@@ -59,6 +551,20 @@ Common fail-closed fields:
 
 Known `blocked_by` values include `wre_skill_scan`, `skill_load`, and
 `ab_variant_binding`.
+
+## Bounded Git byte I/O
+
+`run_bounded_stdout(argv, *, cwd, max_bytes, timeout_s, environment=None,
+stdin_bytes=None) -> bytes` captures stdout under an exact byte ceiling. Optional
+binary stdin is limited to 8 MiB and is written concurrently with stdout reads
+so `git cat-file --batch` cannot deadlock on full pipes. Timeout, output
+overflow, early child exit/broken pipe, reader/writer failure, and nonzero exit
+all terminate or fail closed; process pipes and named I/O threads are closed.
+
+`run_bounded_stdout_file(...)` retains the same stdout/time behavior and does
+not accept stdin. These helpers grant no repository, mutation, commit, or Git
+trust authority; callers must supply their own sanitized environment, exact
+executable/repository binding, and object validation.
 
 ### `execute_skill_with_reasoning(...) -> dict`
 
@@ -109,11 +615,33 @@ ok, message = validate_runtime_skill_admission(
 Admission requires exact production registry/frontmatter agreement for
 `name`, `version`, `intent_type`, and `promotion_state`.
 
-`ensure_runtime_skill_safety(...)` additionally binds the current Skillz
-bundle fingerprint, manifest verification, and required/enforced scanner
-result. An exact bundle uses Cisco `scan` with `SKILLz.md`; a wardrobe root uses
+`admit_runtime_skill(...) -> (ok, message, fingerprint)` binds the current
+Skillz bundle, manifest verification and required/enforced scanner result.
+The fingerprint belongs to that invocation and is `None` on failure. The same
+explicit parameters remain available through `ensure_runtime_skill_safety(...)`,
+which forwards to this owner and preserves its original `(ok, message)` result. An exact bundle uses Cisco `scan` with `SKILLz.md`; a wardrobe root uses
 `scan-all --recursive`. Its cache key changes when Skillz, executor, or
 manifest bytes change.
+
+The cache key also includes `max_severity`. A refresh reserves a pending slot
+and invalidates the prior result before calling the scanner. Within one shared
+mapping, a pending scan for that directory blocks further admission; readers
+cannot use its previous success. Only the owning slot can publish. Exceptions,
+including cancellation, release the slot without restoring the old receipt.
+
+Mapping operations use a short-held module lock. Scanning runs outside that
+lock. Each mapping retains at most 128 entries, evicting oldest completed entries
+first; pending slots are never evicted and exhausted pending capacity blocks.
+Callers share it through these owner functions, not raw concurrent mutation.
+Separate mappings/processes are not serialized; [the bridge scanner](../../communication/moltbot_bridge/README.md#skill-safety-gate-cisco-skill-scanner) owns private report files per call.
+
+The coordinator carries the fingerprint returned by `admit_runtime_skill()` in
+its execution call and passes it explicitly to the registered executor. It does
+not consult shared skill-name admission state or perform a second cache lookup.
+`admitted_runtime_fingerprint(..., max_severity="medium")` remains a legacy cache
+observation, not per-execution admission or a TTL validator. Neither API creates
+a signed permission, independent scan authentication or revocation lifetime.
+Complete coordinator concurrency and signed runtime admission remain separate.
 
 ## Programmatic executor
 
@@ -167,11 +695,42 @@ Unsupported agent: `unsupported_local_agent`.
 Unavailable/import/init/generation failure: `local_model_unavailable`.
 Generated proposal: `unverified_model_proposal`.
 
+Local proposal and master reflection prompt builders omit only the reserved
+`parent_continuity_context` key from JSON. The original mapping/object is not
+modified; lineage consumption remains separate. No `default=str` coercion or
+generic serializer is added. Ordinary task values keep their prior encoding;
+unrelated nonserializable values remain errors.
+
 ## PatternMemory
+
+Every `PatternMemory(db_path=None)` or explicit-path instance owns a separate
+SQLite connection. Construct, use and close it on the same worker thread;
+foreign-thread database operations raise `sqlite3.ProgrammingError`. Default
+instances share the database path and committed records, not a live connection,
+transaction or close lifecycle. The previous process-global alias is removed.
+
+DaemonSelfAuditLoop owns one handle for each _increment_counter call. After a
+successful factory return it always attempts close on the calling thread,
+including write failure or BaseException propagation. Ordinary factory/write/
+close exceptions remain fail-soft. Disabled telemetry invokes no factory.
+The daemon retains no connection; stop never closes a worker's connection.
+A timed-out stop does not mean an in-flight operation completed or stopped.
+
+Use one handle per work item; do not pass a cached handle across worker handoff
+or thread restart. This is a connection ownership boundary, not a transaction
+pool, async-task isolation, authenticated memory write or atomic R11 acceptance.
+Existing mutators still commit individually; multi-call acceptance needs its own
+independently bound transaction participant.
 
 `PatternMemory.store_outcome()` records actual post-dispatch execution
 success and structural fidelity. `outcome_quality` remains `0.0` until an
 independent authenticated evaluator supplies quality evidence.
+
+`recall_failure_patterns()` returns only explicitly unsuccessful outcomes
+(`success = 0`) at or below its inclusive `max_fidelity` threshold. Structural
+fidelity alone does not classify an execution as failed. Skill filtering,
+ascending fidelity/descending timestamp ordering and the result limit remain
+unchanged; high-fidelity failures require a correspondingly higher cutoff.
 
 `stage_variation_candidate(variation_id)` sets a non-production
 `candidate_ready` state. `promote_variation()` is a fail-closed compatibility
@@ -348,6 +907,28 @@ See the focused source interfaces and tests for:
 - `src/foundup_job_model_capability_projection.py`
 - `src/wre_autonomous_slice_verifier_runtime.py`
 
+### Consumer force-dry boundary
+
+`execute_foundup_job(job, *, force_dry_run=False)` preserves the existing
+one-argument singleton path. The keyword must be a literal boolean; invalid types
+raise `TypeError` before selecting or constructing an executor. True constructs
+`HermesJobExecutor(dry_run=True)` with ordinary safe defaults for that call.
+It neither mutates nor copies the warmed global executor's tools, custom root,
+custom validator, controlled-harness or adapter flags. False grants no live authority.
+
+`FoundUpJobConsumer.consume_one` snapshots its mode before job lookup, routing and
+binding callbacks, then uses that value for model admission and Hermes dispatch.
+Original job flags remain independent validation/action-guard input. Default
+capability-validator identity and nonce history are shared across fresh executors;
+the warmed singleton and any custom validator retain their state.
+
+Normal workspace discovery applies to the fresh executor; bind an owned root for
+tests. Dry-run evidence can write files. Validation, model admission, token/action
+guards and live-delegation blocks remain active, so not every job reaches simulation.
+Constructor cost is unmeasured. This is configuration isolation, not an OS sandbox
+or runtime admission. The [roadmap](ROADMAP.md#consumer-dry-run-isolation-qualification--2026-09-21)
+records the baseline witness, repair and verification limits.
+
 ## Test differential and independent verification
 
 `load_canonical_test_registry()`, `collect_registered_test_shards()`,
@@ -365,6 +946,68 @@ allocation, and terminal receipt must agree. The independently recorded
 `trusted_work_authority_digest` cannot be copied from the author request.
 Verifier, CI, CodeQL, and red-team evidence do not independently publish or
 promote an artifact.
+
+## Self-audit scan observations
+
+`DaemonSelfAuditLoop.scan_once() -> int` retains the synchronous count and
+exception contract. `scan_once_with_status() -> dict` adds a detached result for
+that exact attempt; ordinary scan exceptions become failed results, while
+interrupts still propagate. `get_scan_status() -> dict` reads detached diagnostic
+state and does not initiate scanning. The constructor accepts a keyword-only
+`monotonic_clock` for deterministic age validation.
+
+An attempt reports its process-local `attempt_id`, `outcome`, `coverage`,
+`event_count`, bounded `error_codes`, start/completion monotonic timestamps,
+`sampled_at_monotonic`, `clock_valid`, `last_success`, and `last_success_age_sec`. Outcomes distinguish
+`never_scanned`, `running`, `completed`, `partial`, and `failed`. Raised or
+unfinished scans have an unknown count; a returned partial scan keeps the count
+actually observed. Error metadata contains no raw exception or log payload.
+
+Coverage is `unknown`, `bounded`, `known_partial`, or `no_inputs`. Completed
+bounded scanning includes a successful zero-findings pass; it never proves full
+repository coverage. Failed/partial attempts and empty input discovery do not
+refresh the last successful bounded-input scan. Invalid, nonfinite, negative or
+backward start/completion readings prevent that attempt from replacing success;
+a later valid sample can still report the prior success age. An invalid sampling
+reading makes age unknown without erasing an already qualified completion.
+The clock tracks a high-water mark across failed attempts too. No TTL or
+categorical healthy/fresh/stale verdict is supplied: such policy belongs to the
+consuming owner. Monotonic values and attempt IDs are not durable identifiers.
+
+`observe_self_audit_status(loop, enabled=...)` supplies the OpenClaw compatibility
+projection. OpenClaw consumes the returned attempt directly, preserving its
+existing integer metric. Disabled, absent, failed and legacy status-unavailable
+owners remain distinct. Malformed additive results never trigger a second scan;
+legacy integer-only owners retain their compatibility path. These observations
+do not grant remediation, dispatch, promotion or reward authority. See the
+[monitor contract](../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
+and focused scan-status tests for qualification boundaries.
+
+## Self-audit diagnostic outcomes
+
+The opt-in `verify_dae_event_store` policy checks SQLite structure; its existing
+`(True, "event_store_verified")` return and `dae_event_store_health.json` report
+are preserved. Neither establishes repair of a failed write or JSONL parity.
+
+Eligible invocations use `self_audit_diagnostic_attempts`, including calls that
+return cooldown or missing-store results. Only the exact verification action,
+literal True flag and exact `event_store_verified` result add
+`self_audit_diagnostic_success` and feedback `diagnostic_successes`. A False flag
+does not identify whether verification ran or completed; no diagnostic failure
+count is inferred. Last-result observation remains available.
+
+Every outcome for that action stays outside repair attempt/success/failure
+counters and feedback. Historical repair counts and their score are preserved;
+they are not retrospectively corrected. A diagnostic result cannot suppress
+repeated-fault escalation, even if it contains another legacy success marker.
+Existing thresholds, cooldown and disabled process-dispatch gates still apply.
+Other legacy policy outcomes retain their prior behavior, except the SQLite
+marker alone no longer earns repair success for an unrelated action. The existing
+microphone/start markers are compatibility behavior, not proof of causal repair.
+
+The focused diagnostic tests use inert collaborators and disposable SQLite
+fixtures. They establish local accounting and escalation behavior, not live
+monitoring, authenticated verification, retained learning or native RSI readiness.
 
 ## Configuration
 

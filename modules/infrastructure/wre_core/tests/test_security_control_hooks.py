@@ -463,3 +463,31 @@ class TestDryRunResult:
         assert "reports" in d
         assert "alerts" in d
         assert d["status"]["mode"] == "dry_run"
+
+
+@pytest.mark.parametrize("statuses,expected", [(["error"], "error"), (["partial"], "partial"), (["completed", "error"], "partial")])
+def test_live_scan_failures_persist_coverage_status(tmp_path, statuses, expected):
+    from modules.infrastructure.wre_core.skillz.security_scan.executor import SecurityScanReport
+    controller = SecurityStackController(alerts_dir=tmp_path, report_only=False)
+    tools = ["snyk", "semgrep"][:len(statuses)]
+    controller._executor = MagicMock()
+    controller._executor.scan.side_effect = [SecurityScanReport("test", tool, ".", True, status)
+                                             for tool, status in zip(tools, statuses)]
+    with patch.object(controller, "check_tool_availability", return_value={t: True for t in tools}), \
+         patch.object(controller, "_load_sec3_executor", return_value=True), \
+         patch.object(controller, "_load_sec5_memory", return_value=False):
+        result = controller.run_dry_run(tools=tools)
+    assert result.status.current_state == expected
+    assert result.status.scans_failed == 1
+    assert result.status.next_operator_action == "repair_scan_coverage"
+    assert controller.read_status().current_state == expected
+
+
+def test_dry_run_mode_cannot_execute_on_live_controller(tmp_path):
+    controller = SecurityStackController(alerts_dir=tmp_path, report_only=False)
+    controller._executor = MagicMock()
+    with patch.object(controller, "_load_sec3_executor", return_value=True), \
+         patch.object(controller, "check_tool_availability", return_value={"snyk": True}):
+        result = controller.invoke_sec3_skill("snyk", ".", "dry_run")
+    assert result["state"] == "proposed"
+    controller._executor.scan.assert_not_called()

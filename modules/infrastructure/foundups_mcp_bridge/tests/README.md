@@ -1,5 +1,276 @@
 # foundups_mcp_bridge Tests
 
+## MCP runtime compatibility
+
+The `mcp-runtime-compatibility` Windows CI job selects the existing launcher,
+HTTP server and query-candidate-binding suites. It installs the module's exact
+quartet in a disposable venv, supplies private HOME/TEMP, and requires every
+selected case to pass without skips. The existing directory-alias helper can
+use a junction when Windows symlink privilege is unavailable; that tests the
+same rejected reparse boundary, not symlink privilege itself.
+
+For the two live cases, `FOUNDUPS_MCP_TEST_PYTHON` must identify the disposable
+candidate interpreter. The fixture substitutes only the shared instance-lock
+acquisition and interpreter selection. Real capability, server, authentication
+and MCP readiness checks still execute. An ephemeral loopback endpoint must
+be observed as owned by the captured child PID before requests. This is a
+sampled ownership check, not a race-free socket lease. The fixed System32
+`netstat.exe -ano -p tcp` observer projects only exact numeric loopback listener
+PIDs; raw endpoint tables are not persisted. Its15s observation window precedes
+the protocol canary, with each command capped at10s or remaining time. The finalizer observes
+lock release and reaps only captured children; emergency cleanup fails the test.
+No production singleton cleanup, public tunnel, OAuth flow, active-runtime
+upgrade, native WRE admission or generalized RSI gain follows from these tests.
+
+## Optional child Job memory contract (2026-10-02)
+
+The existing `test_reddog_bounded_child_process.py` retains its original 22
+cases. The new frozen selection has 29 deterministic cases for exact types,
+platform rejection before effects, aggregate flags/value, default call shape,
+forwarding, and failure cleanup/order. Candidate selection combines these with
+19 original no-child cases. Two separately selected Windows cases query the
+actual 128 MiB Job limit before requesting a 1 MiB successful allocation or a
+256 MiB rejected commit; they free any acquired allocation and use 10-second
+child deadlines. They do not empirically test cumulative descendant allocation.
+The physical fixture reuses the OS-observed process image rather than the venv
+redirector, whose nested Job confused the original configuration query.
+Local results: 48 deterministic + two memory + four legacy/maintenance process
+cases + eight manifest checks = 62 distinct passes across separate selections.
+The overflow tests require complete bounded capture, not zero exit after an
+intentional overflow kill. Failed attempts and that oracle correction remain
+in `TestModLog.md`; publication/hosted CI are pending. No model, provider,
+operational store, or production service is selected.
+
+## Held builder child evidence (2026-08-30 historical)
+
+- `test_reddog_bounded_child_process.py` preserves bounded output, timeout,
+  process-tree cleanup, and no-shell/no-unbounded-read behavior after extracting
+  the maintenance runner.
+- `test_reddog_holoindex_query_runtime_builder_child.py` falsifies forged
+  bindings, wrong process identity, ambiguous/noncanonical JSON, protected-root
+  aliasing, ambient environment/path inheritance, and authority inflation.
+- The opt-in Windows integration composes the reviewed packaging wheel with the
+  qualified O:-materialized CPython 3.12.10 base, launches that exact held
+  interpreter, and proves the descriptor unchanged afterward. It proves no
+  current-patch, pre-import/native/subprocess, write-denial, activation,
+  A-grade, or RSI claim.
+- Focused runner unit boundary is 22/22. The physical runner/maintenance/
+  process-image/child matrix is 70 passed / two capability skips in 108.06
+  seconds and includes the qualified physical Windows child.
+  Both the clean source and materialized runtime retain zero pycache directories
+  and pyc files afterward.
+- The complete bridge macro is 1,694 passed / 23 capability skips in 638.81
+  seconds. It includes an explicit health-JSON depth boundary that remains
+  fail-closed after the process recursion limit is raised.
+
+## Base-prefix consumer correction
+
+- `test_reddog_holoindex_query_runtime_base_prefix_consumers.py` uses the
+  shared materializer to prove the process root validator and candidate
+  composition validator accept the real `generation/python-runtime` prefix,
+  while candidate validation rejects the obsolete root-level interpreter.
+- The two legacy fixtures also separate generation and prefix roots. Authentic
+  RED was three failures after their prior selection had passed 28 / one skip;
+  final focused evidence is 31 passed / one expected skip. The exact 13-file
+  adjacent selection passes 206 / four expected capability skips.
+- The test calls topology validators only; it does not launch a child or claim
+  process, import, native/subprocess, activation, A-grade, or RSI authority.
+
+## Inert builder-runtime composition
+
+- `test_reddog_holoindex_query_runtime_builder_runtime_composition.py` proves
+  exact Phase 2C2b-to-runtime call order, every durable dependency identity
+  field, typed results and exact reuse booleans, path-free failures/projection,
+  source/dependency preservation without rollback, descriptor-only persistence,
+  and immutable false process/loader/execution/activation claims.
+- The public integration gate composes the reviewed O:/E: packaging wheel with
+  an exact base fixture, proves first publication and full reuse, and preserves
+  wheel bytes. It also asserts the real `python-runtime/python.exe` topology.
+  Focused evidence is 36 passed; adjacent builder/base/composition evidence is
+  318 passed / six expected capability or opt-in skips. Every stable failure
+  also proves that neither `__cause__` nor `__context__` retains a private path.
+
+## Sequential builder/dependency composition
+
+- `test_reddog_holoindex_query_runtime_builder_dependency_composition.py`
+  proves the exact source/dependency/source call order, current live source
+  authority at both observations, durable S1/S2 identity, call-local
+  publication-truth exclusion, dependency-tree equality, and one real inert
+  dependency materialization from the reproved source tree. Its physical gate
+  calls the sealed public coordinator against the reviewed O:/E: wheel for
+  first publication and complete reuse, skipping only when that artifact is
+  not provisioned.
+- Falsifiers cover source drift, tree mismatch, publication-field type
+  confusion, non-boolean reuse observations, absent live authority at either
+  observation, invalid dependency evidence/nonclaims, path-free stable failures
+  at all three stages, source
+  preservation without rollback, and exhaustive path-free composition
+  nonclaims. This proves a sequential structural binding only; no cross-store
+  atomicity, simultaneous snapshot, install/import/execution, authenticated
+  runtime, activation, A-grade, or retrieval RSI is claimed.
+
+## Inert clean query-runtime candidate
+
+- `test_reddog_holoindex_query_runtime_candidate_contract.py` proves exact
+  identity, approved O:/E: volumes, standalone launch policy, deterministic
+  ordering, path/case defenses, graph cross-binding, metadata ownership,
+  reachable distribution closure, descriptor-pair reproof, and strict nonclaims.
+- `test_reddog_holoindex_query_distribution_graph.py` proves module-origin/
+  broad RECORD ownership, exact target markers, extras/Requires-Python,
+  dist-info and wheel identity, selected-local-byte binding, explicit external
+  exclusions, startup/editable rejection, executable classification, and exact
+  declared-subprocess use.
+- `test_reddog_holoindex_query_runtime_candidate_binding.py` exercises the
+  private diagnostic composition/dependency/source build and exact before/
+  after reproof seam with confined O:-local files, source mutation/hardlink/
+  origin rejection, approved volumes, nested bounds, exact source-root
+  cross-binding, deterministic repeat equality, limit ceilings, disjoint
+  requirements, and transitive transport denial. It proves both public entry
+  points reject while the evidence-builder runtime is unbound. The opt-in
+  `test_reddog_holoindex_query_runtime_candidate_scale.py` supplies the separate
+  45,450-member production-shape resource tier.
+- Focused evidence is 73 passed / two expected capability or opt-in skips. No
+  authenticated parser/stdlib builder, broad-venv activation, unrecorded
+  topology, complete trace, Windows loader, owner, route, maintenance, or VSIX
+  claim is made.
+
+## Inert query-runtime builder component authority
+
+- `test_reddog_holoindex_query_runtime_builder_contract.py` proves strict
+  component schemas, source/dependency cross-binding, deterministic path-free
+  identity, raw-mapping rejection, and immutable false operational claims.
+- `test_reddog_holoindex_query_runtime_builder_process.py` proves the actual
+  image, exact isolation flags/prefix/sys.path order, O:/E: disjoint directory
+  roots, image bytes, cross-binding digests, and public before/after reproof.
+- `test_reddog_holoindex_query_runtime_builder_packaging.py` uses a synthetic
+  nine-row source-only fixture to falsify RECORD case/hash/size/blank rows,
+  wrong dist-info/package roots, duplicate METADATA headers, caches, unlisted
+  files, loader/origin substitution, final-member mutation, and wrapper drift.
+- `test_reddog_holoindex_query_runtime_builder_git.py` covers strict paths,
+  tree/batch framing and independent object hashing, hidden index flags,
+  topology/indirection/hardlinks, sanitized environment, held executable
+  pre/post hashing, stable error mapping, the absence of the worktree-status
+  filter execution surface, and an opt-in real O:/E: Git gate. The live gate
+  proves that Git authority remains bound to committed HEAD after a worktree-
+  only byte change; source authority separately rejects those changed bytes
+  against the backend manifest or exact HEAD blob.
+- `test_reddog_holoindex_query_runtime_builder_source.py` covers manifest and
+  exact-HEAD byte binding, origin/cache/alias rejection, linear committed-file
+  lookup, path-free output, and two-pass public source/Git reproof including
+  second-observation source mutation.
+- `test_reddog_holoindex_query_runtime_builder_scale.py` is opt-in and stresses
+  72,261 inventory/RECORD rows plus 1,500 batched Git blobs and physical source
+  rows. It samples RSS/handles before fixture creation, mutates the final source
+  row, and requires deterministic receipts. It does not create 72,261 physical
+  packaging files and is not public-builder, query-latency, or throughput proof.
+
+Latest focused evidence is **83 passed / one expected O:/E: Git-image skip**.
+Latest upper-shape evidence is **72,261 / 1,500 rows in 34.438s, +6 handles,
++77,557,760 RSS bytes**. The live Git gate skips because no sealed O:/E: Git
+image is provisioned. The installed 42-row packaging tree is not source-only.
+Same-interpreter wrappers are structural misuse guards, not authenticated
+provenance; public candidate build/reproof remain unbound.
+
+## Reviewed packaging wheel admission
+
+- `test_reddog_holoindex_query_runtime_builder_packaging_wheel.py` binds the
+  strict raw ZIP/distribution byte proof and falsifies envelope/layout, flags,
+  versions, methods, attributes, CRC/deflate, Windows paths and collisions,
+  source-only roots, resource ceilings, METADATA/WHEEL/RECORD ownership, exact
+  public-path leases, hardlinks, ADS, mutation denial, and every false public
+  capability claim.
+- `test_reddog_holoindex_query_runtime_builder_packaging_wheel_scale.py` is an
+  opt-in integration gate for the separately provisioned exact O:/E: reviewed
+  wheel. Once enabled, a missing artifact fails rather than skips. It performs
+  200 equal admissions, bounds process handle/RSS growth, and proves source
+  SHA-256 unchanged. This is local repeatability/leak evidence, not throughput,
+  concurrency, horizontal scale, authenticated provenance, extraction,
+  activation, A-grade, or retrieval-RSI proof.
+
+## Wheel-bound inert packaging source generation
+
+- `test_reddog_holoindex_query_runtime_builder_packaging_source.py` proves the
+  Phase 2C2a generation binds both exact wheel identity and extracted-tree
+  identity, persists raw wheel/member bytes, keeps public bindings path-free,
+  holds the source lease across contracts/publication, and conservatively
+  reports every operational nonclaim. Durable public reproof recognizes only
+  the exact configured wheel bytes and confers no live lease authority; the
+  private synthetic seam cannot upgrade its own result. It falsifies descriptor/inventory/wheel/member/topology
+  mutation, duplicate keys, wheel/member ADS and hardlinks, real or injected
+  reparse classification, case aliases, C: stores, valid-payload bounds and
+  invalid tokens before store mutation, pre/post-publication corruption, corrupt or valid
+  no-replace winners, exact reuse, same-store concurrency, quarantine failure,
+  source-authority overclaim by the private byte seam, source write attempts
+  during every target proof, skipped scope-exit reproof, and mutations between
+  two consecutive complete verification passes. Tail-race falsifiers attempt
+  descriptor/inventory/wheel/member writes immediately after pass two while
+  retained child handles are live, and inject one extra file that the terminal
+  complete-topology proof must reject before success.
+- Authority-laundering coverage flips both unsigned persisted lease/pin
+  booleans. Durable verification must return no lease authority, and a live
+  public reuse may report only current-verification authority, never historical
+  publication authority.
+- `test_reddog_holoindex_query_runtime_builder_packaging_source_scale.py`
+  separately proves a 105-member sibling shape retains handles by depth rather
+  than file count. Its opt-in physical gate persists the exact reviewed O:/E:
+  wheel once and fully reproves 200 exact reuses, requiring one generation,
+  no dependency runtime, unchanged source SHA, bounded handle/RSS deltas, and
+  an observed 120-second ceiling. The current physical result is 105.09 seconds.
+- This coverage proves inert source persistence only. It does not install,
+  import, execute, compose the dependency runtime, authenticate provenance, or
+  grant loader/native/subprocess/exact-runtime, activation, A-grade, or
+  retrieval-RSI authority.
+
+## Inert declared Windows/CPython ABI attestation
+
+- `test_reddog_holoindex_windows_pe.py` falsifies malformed/truncated PE,
+  unsupported delay dialects, null/mismatched normal and delay loader tables,
+  missing HMOD, repeated-thunk amplification, export-table nulls, forwarder
+  classification, overlap, ordinal handling, and resource-limit type/size
+  errors.
+- `test_reddog_holoindex_runtime_abi_contract.py` proves canonical path-free
+  inventory/descriptor identity, strict native/distribution cross-bindings,
+  exact numeric types, and permanently false activation-grade claims.
+- `test_reddog_holoindex_runtime_abi.py` proves exact composition reproof,
+  cp312/abi3 rules, non-forwarded Python exports, ambiguous declared-name
+  rejection, exact unique RECORD ownership, traversal rejection, aggregate
+  multi-image limits, stable path-free errors, no-replace publication/reuse,
+  tamper/mutation/alias rejection, and Windows long-path quarantine.
+- The focused result is 67 passed / one host-capability skip. Tests use only
+  disposable O:-local roots. The explicit ABI, acceptance-guard, composition,
+  base, dependency, runtime-environment, process-image, and sealed-runtime
+  adjacency passed 259 / seven expected capability skips. The production-shaped parser scan is read-only
+  and correctly leaves the mixed-architecture broad dependency closure
+  ineligible; it is not an activation or loader-resolution test.
+
+## Current-truth global response ordering
+
+`test_holo_query_service_edges.py` proves broad current-status queries preserve
+current contracts and implementation over higher-similarity historical audits,
+while historical/baseline queries preserve semantic ordering. It also proves
+case-variant repository paths deduplicate globally. These are pure response
+tests with synthetic hits; they do not query or mutate HoloIndex.
+
+## Inert exact runtime composition
+
+- `test_reddog_holoindex_runtime_composition_contract.py` proves strict
+  canonical schema, typed component roles, domain-separated identity,
+  path/secret-free encoding, component-order/substitution rejection, exact
+  numeric typing, and forced-false activation-grade claims.
+- `test_reddog_holoindex_runtime_composition.py` proves descriptor-only
+  publication, exact reuse, independent base/dependency reproof, exact
+  interpreter-member binding, payload/descriptor/topology tamper rejection,
+  component substitution, byte-identical external alias rejection, overlap
+  rejection before mutation, reverse-order cross-pass mutation detection, and
+  quarantine when a component changes across publication. Focused coverage is
+  24 passed / 1 capability skip; the explicit adjacent runtime selection is
+  bounded to non-scale cases and passed 159 / 6 skips. Tests use an
+  explicit O:-local `--basetemp` when executed in governed validation.
+- The separate production gate materialized 72,261 dependency files / 11,639
+  directories / 1,853,891,335 bytes in 2,856.73 seconds, published composition
+  `sha256:44e21db7...` in 588.32 seconds, then passed a fresh repaired-verifier
+  reproof in 579.54 seconds with the descriptor unchanged.
+
 ## Inert dependency-runtime closure
 
 - `test_reddog_holoindex_dependency_runtime.py` proves content addressing,
@@ -35,6 +306,26 @@ Exact opt-in evidence on this slice:
 - Both are single-builder resource/reuse proofs, not query-latency or
   horizontal-throughput benchmarks.
 
+## Inert Python base-runtime closure
+
+- `test_reddog_holoindex_base_runtime_contract.py` proves canonical contract
+  parsing, runnable Windows base-prefix topology, file-role classification,
+  required/optional role coverage, bounds, digest binding, and permanently
+  false activation/closure authority fields.
+- `test_reddog_holoindex_base_runtime.py` proves content addressing, exact
+  reuse without recopy, excluded `site-packages`/documentation, immutable old
+  generations, staging-before-publication verification, and rejection of
+  mutated/unlisted payloads.
+- `test_reddog_holoindex_base_runtime_edges.py` covers missing roots/roles,
+  route/store aliases, wrong generation identity, aggregate path bounds,
+  contract tampering, Windows ADS, and the protected-source lease mode's lack of a
+  DELETE-access requirement.
+- `test_reddog_holoindex_base_runtime_scale.py` is opt-in. The real installed
+  base passed first materialization plus canonical reuse at 4,068 files /
+  372 child directories / 81,515,843 bytes in 239.94 seconds as generation
+  `sha256:3efe4fba...`. All generated/test bytes were O:-local. No live Holo
+  route, replica, owner, maintenance, or extension state was touched.
+
 ## Exact retrieval runtime-environment binding
 
 - Adversarial tests cover executable/source mutation, manifest parity, raw
@@ -60,12 +351,20 @@ Exact opt-in evidence on this slice:
 - `test_reddog_holoindex_owner_acquisition_reliability.py` proves route-only
   current-user precedence, no secret/unrelated environment copying, no process
   mutation, exact owner-port validation/propagation, bounded contention retry,
-  distinct per-process retry ports, and one representative same-first-shard
-  PID pair that diverges on retry. The 4,032 ordered pairs are explicitly not
-  globally unique.
+  distinct per-process retry ports, one representative same-first-shard PID
+  pair, four distinct ports across controller cycles zero/one, and one complete
+  64-port permutation across all cycles. Invalid bool, negative, overflow, and
+  string cycles fail closed. It also proves the root one-shot imports the shared
+  attempt ceiling, operation ceiling, and transient set instead of maintaining
+  a parallel policy. The focused isolated shard is **28 passed**.
+- `scripts/tests/test_reddog_holoindex_owner_query_once.py` proves cycle one
+  reaches both one-shot attempts and its top-level/receipt evidence.
+- Activation currently invokes the one-shot default cycle for candidate and
+  post-commit proofs. A disjoint post-completion cycle is recorded reliability
+  debt, not implied by the selector's standalone cycle-one coverage.
 - Existing one-shot, bootstrap, and candidate-acceptance suites prove the new
   environment and port seams preserve strict route, freshness, cleanup, and
-  isolated-candidate behavior. Final delta result: **119 passed**; the new owner
+  isolated-candidate behavior. Final delta result: **125 passed**; the owner
   acquisition boundary independently passes the 90% WSP_5 gate at **100%
   statement coverage**.
 - Production-shaped acceptance used two independent PowerShell processes with
@@ -326,7 +625,9 @@ Exact opt-in evidence on this slice:
   public-container normalization to the stable error type, and recursive NFC
   enforcement without silent normalization.
 - The path-free adapter covers the Holo read subset: `name`, `metadata`,
-  `count()`, paged/ID/path `get()`, and nested `query()`. Squared-L2,
+  `count()`, paged/ID/path `get()`, and nested `query()`. Query filtering is
+  limited to exact-string `record_kind` equality and is exercised through the
+  real Holo collection-search boundary; unsupported shapes reject. Squared-L2,
   `1-cosine`, and `1-inner-product` distances, stable ID tie ordering, exact
   include shapes, stable float64 computation for admitted float32 extremes,
   explicit zero-vector cosine behavior, and workspace-bounded dynamic vector
@@ -379,7 +680,10 @@ Exact opt-in evidence on this slice:
 - Fake HTTP RED was ready under duplicate-`ok` last-wins. Expanded RED/GREEN is
   **24 failed / 10 passed -> 34/34** across all 19 security-relevant key
   positions, nested duplicates, NaN/infinities, depth 64/2,000, primitives,
-  syntax, UTF-8, oversize/status failures, and one unique JSON control.
+  syntax, UTF-8, oversize/status failures, and one unique JSON control. The
+  2,000-level falsifier raises the process recursion limit first and still fails
+  closed at the explicit 128-level structural boundary; brackets inside JSON
+  strings do not consume depth.
 - Invalid representations never produce ready/terminal evidence. Each admitted
   transport performs the same request, read limit 65,537, and single close.
 - Combined R16-R22 is **200/200**; lifecycle is **302 passed / 1 host skip**;
@@ -554,9 +858,9 @@ the disposable process fixture.
   replica-root configuration, existing isolated-store proof, exact route build,
   and stable fail-closed error reduction.
 - `test_reddog_holoindex_maintenance_diagnostics.py`: bounded child-output
-  capture, strict stable-error propagation, cooperative descendant containment,
-  failed-`taskkill`/escaped-session limits, exact-PID test cleanup, and secret-free
-  failure behavior.
+  capture, strict stable-error propagation, Windows kill-on-close Job Object
+  containment with no external cleanup executable, POSIX escaped-session
+  limits, exact-PID test cleanup, and secret-free failure behavior.
 - `test_reddog_holoindex_acceptance_guards.py`: clean worktree authority,
   distinct clean related dependency runtime with verified local site-packages,
   disjoint/reparse-safe store, TOCTOU identity, canonical digest, and immutable

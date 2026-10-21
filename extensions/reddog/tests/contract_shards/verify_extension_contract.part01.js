@@ -255,10 +255,10 @@ function assertFusionRedactionGateFails(contextText, expectedReason, label) {
   assertFusionRedactionGateBlocks(contextText, expectedReason, label);
 }
 
-assert.strictEqual(pkg.version, '0.4.125', 'package version must be 0.4.125');
-includes(extensionJs, "const EXTENSION_VERSION = '0.4.125'", 'extension build mismatch');
+assert.strictEqual(pkg.version, '0.4.141', 'package version must be 0.4.141');
+includes(extensionJs, "const EXTENSION_VERSION = '0.4.141'", 'extension build mismatch');
 assert.strictEqual(pkg.name, 'reddog', 'package id must be canonical RedDog in 0.4.0');
-assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Architect', 'display name must be canonical RedDog');
+assert.strictEqual(pkg.displayName, 'RedDog - FoundUps Interface', 'display name must be canonical RedDog');
 includes(JSON.stringify(pkg), 'RedDog: Open', 'canonical command title must use RedDog');
 includes(JSON.stringify(pkg), 'foundupsFusion.open', 'legacy command alias must be retained for 0.4.0 migration');
 includes(JSON.stringify(pkg), 'reddog.enableResidentArchitectSession', 'canonical resident session setting missing');
@@ -303,9 +303,9 @@ assert(
   operationsIntercept >= 0 && conversationPromptAssembly >= 0 && operationsIntercept < conversationPromptAssembly,
   'operations control must intercept before WSP prompt/Fusion assembly'
 );
-includes(readme, 'The VSIX is the IDE-side thin client for RedDog, the operator-facing identity/persona of the principal-scoped 0102 Digital Twin.', 'README product identity statement missing');
+includes(readme, 'RedDog is not 0102. The principal-scoped 0102 Digital Twin provides deep cognition and orchestration behind RedDog.', 'README product identity boundary missing');
 includes(iface, 'Fusion is one internal reasoning mode, not the product identity', 'INTERFACE mode identity statement missing');
-includes(roadmap, 'RedDog is the resident FoundUps architect identity and conversation product across thin-client surfaces.', 'ROADMAP product identity statement missing');
+includes(roadmap, 'fast interaction/exchange surface; 0102 is the principal-scoped Digital Twin', 'ROADMAP product identity statement missing');
 includes(extensionJs, 'id="reddogWorkingTrail"', 'working trail DOM missing');
 includes(extensionJs, 'data-reddog-pixel', 'trail pixel attribute missing');
 includes(fusionProgressJs, "command: 'progress'", 'progress command shape missing');
@@ -391,10 +391,10 @@ foreignProgressCollector.capture(fusionProgress.bindFusionProgressResultToRun({
 }, 'run-local'));
 assert.strictEqual(foreignProgressCollector.snapshot().length, 0, 'foreign-run receipt must not be retained');
 assert(foreignProgressCollector.validation().rejection_reasons.includes('fusion_progress_receipt_run_id_mismatch'), 'foreign-run rejection reason missing');
-const secretProgress = fusionProgress.buildProgressMessage(null, 'route sk-or-v1-THIS-IS-A-SECRET-TOKEN', {
-  model: 'sk-or-v1-THIS-IS-A-SECRET-TOKEN'
+const secretProgress = fusionProgress.buildProgressMessage(null, 'route ' + ['sk', 'or', 'v1', 'THIS-IS-A-SECRET-TOKEN'].join('-'), {
+  model: ['sk', 'or', 'v1', 'THIS-IS-A-SECRET-TOKEN'].join('-')
 });
-assert(!secretProgress.text.includes('sk-or-v1-'), 'progress UI must redact secret-like text');
+assert(!secretProgress.text.includes(['sk', 'or', 'v1'].join('-') + '-'), 'progress UI must redact secret-like text');
 assert.strictEqual(secretProgress.model, undefined, 'progress UI must drop secret-like metadata');
 assert.strictEqual(fusionProgress.buildProgressMessage('lead_start', 'attacker-controlled text', {}).text, 'Lead request started.', 'known stages must use canonical UI text');
 includes(extensionJs, 'Stopped before OpenRouter. Nothing left the machine.', 'redaction operator message missing');

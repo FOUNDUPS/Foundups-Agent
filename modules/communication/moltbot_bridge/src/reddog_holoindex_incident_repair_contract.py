@@ -120,11 +120,9 @@ def _deferred_receipt_binding_valid(
     )
 
 
-def rehydrate_deferred_receipt(
+def _rehydrate_receipt_shape(
     value: Mapping[str, Any],
 ) -> HoloIndexIncidentRepairReceipt | None:
-    """Rehydrate one self-consistent observation before durable authority checks."""
-
     names = frozenset(item.name for item in fields(HoloIndexIncidentRepairReceipt))
     bool_names = {
         "accepted", "maintenance_enqueued", "owner_requery_performed",
@@ -147,7 +145,47 @@ def rehydrate_deferred_receipt(
         expected = seal_receipt(replace(receipt, receipt_id=""))
     except (TypeError, ValueError):
         return None
-    return receipt if receipt == expected and _deferred_receipt_binding_valid(receipt) else None
+    return receipt if receipt == expected else None
+
+
+def rehydrate_deferred_receipt(
+    value: Mapping[str, Any],
+) -> HoloIndexIncidentRepairReceipt | None:
+    """Rehydrate one self-consistent observation before durable authority checks."""
+
+    receipt = _rehydrate_receipt_shape(value)
+    return receipt if receipt and _deferred_receipt_binding_valid(receipt) else None
+
+
+def rehydrate_owner_ready_receipt(
+    value: Mapping[str, Any],
+) -> HoloIndexIncidentRepairReceipt | None:
+    """Rehydrate one exact CURRENT owner receipt without trusting its producer."""
+
+    receipt = _rehydrate_receipt_shape(value)
+    sha = r"[0-9a-f]{40}"
+    digest = r"sha256:[0-9a-f]{64}"
+    valid = bool(
+        receipt
+        and receipt.accepted
+        and receipt.status == "OWNER_READY"
+        and receipt.schema_version == SCHEMA_VERSION
+        and receipt.incident_kind == "OWNER_CURRENT"
+        and re.fullmatch(digest, receipt.incident_id)
+        and re.fullmatch(digest, receipt.authority_root_digest)
+        and re.fullmatch(digest, receipt.generation_id)
+        and re.fullmatch(digest, receipt.freshness_receipt_digest)
+        and re.fullmatch(sha, receipt.target_repo_head_sha)
+        and receipt.workspace_repo_head_sha == receipt.target_repo_head_sha
+        and receipt.observed_authority_head_sha == receipt.target_repo_head_sha
+        and not receipt.task_id
+        and not receipt.request_event_id
+        and not receipt.maintenance_enqueued
+        and receipt.owner_requery_performed
+        and not receipt.coding_candidate_required
+        and not receipt.rejection_reasons
+    )
+    return receipt if valid else None
 
 
 def rejected_receipt(reason: str, **values: Any) -> HoloIndexIncidentRepairReceipt:
@@ -184,5 +222,6 @@ __all__ = [
     "escalated_receipt",
     "rejected_receipt",
     "rehydrate_deferred_receipt",
+    "rehydrate_owner_ready_receipt",
     "seal_receipt",
 ]

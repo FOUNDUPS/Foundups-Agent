@@ -1,0 +1,143 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "3a2eb9a5a3a70c393b6e89305112aaedef1bfbbc"
+  },
+  "execution_id": "HOLOINDEX_QUERY_RUNTIME_CANDIDATE_PHASE2A",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "inert_holoindex_query_runtime_candidate_diagnostic_contract",
+    "inert_diagnostic_contract": "verified",
+    "governed_candidate_evidence_builder": "intentionally_unavailable",
+    "public_build_and_reproof": "fail_closed_builder_runtime_unbound",
+    "independent_wsp97_verification": "post_repair_go_for_inert_boundary",
+    "merged_exact_main_replay": "pending",
+    "maintenance_replica_rsi": "working",
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "native_loader_closure_verified": false,
+    "runtime_environment_exact_closure_verified": false,
+    "resident_authenticated_owner": false,
+    "live_route_changed": false
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:d0d9f12f620131e00ff6bd11fcfbe19ccee51149ced55fe23cc3fe9efd4e7605",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "verify and prepare only the inert diagnostic Phase-2A contract; quarantine governed evidence build and reproof until a sealed Phase-2B builder runtime exists"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 strict awakening passed at coherence 0.733 before execution; all three independent reviewers separately re-entered WSP_00 at coherence 0.727-0.730 and applied WSP_97.",
+      "Governed Holo retrieval was CURRENT at exact authority HEAD 3a2eb9a5a3a70c393b6e89305112aaedef1bfbbc with no gap, no reindex, and no authority mutation; generation was sha256:93bfcc36f6db5ae46c119171eeb255e6649c774d0e581c6afc9eedb854790441.",
+      "Holo retrieval found adjacent runtime-environment, process-image, composition, and dependency proof mechanisms but was noisy and committed-HEAD-only while the overlay was uncommitted; exact direct overlay reads controlled every implementation decision.",
+      "Independent architecture and security reviews returned GO only for the inert diagnostic boundary and confirmed no reproducible scoped code blocker after repair."
+    ],
+    "research": [
+      "Existing exact base/dependency/composition verifiers bind artifact bytes and topology, while the existing runtime-environment contract explicitly leaves installed dependency payload bytes and deterministic runtime effects unverified.",
+      "The initial parser pin did not authenticate executing packaging, interpreter, stdlib, or transitive local builder source; a version declaration alone was rejected as evidence authority.",
+      "The reusable future Phase-2B substrate is the OS-derived process-image proof, exact composition reproof, exact dependency RECORD inventory, and clean exact-HEAD source authority, not a new shallow ambient receipt.",
+      "Broad RECORD ownership must remain visible before selected closure, and prefix-local external rows must remain explicit noncandidate exclusions rather than filename ignores."
+    ],
+    "micro_pass": [
+      "Final focused graph, binding, contract, and default scale selection passed 73 with two expected skips: the opt-in soak and an unavailable directory-symlink capability.",
+      "The opt-in 45,450-member production-shaped diagnostic soak passed exact current bytes in 4.56 seconds; its sampled post-fixture RSS methodology remains a bounded nonclaim rather than a sub-10ms peak proof.",
+      "All eight Phase-2A source modules are below 600 lines and every function is at most 50 lines; the binder is 471 lines with a 44-line maximum function.",
+      "Exact source-origin checks matched all eight declared Phase-2A files to O:-resident bytes; an actual O:-local Windows junction was rejected and cross-PYTHONHASHSEED 1/2/987654 produced one identical candidate digest.",
+      "Exact candidate-only packaging requirements remain disjoint from the unchanged four-package MCP launcher requirements; nested oversized inputs and relaxed caller ceilings reject before authority calls."
+    ],
+    "macro_pass": [
+      "The explicit adjacent candidate, ABI, base, dependency, composition, runtime-environment, process-image, and sealed-runtime matrix passed 274 with 11 expected capability or opt-in skips in 79.73 seconds.",
+      "All eight backend-manifest generator tests passed; check mode retained 1366 runtime files at sha256:4e634b8c7b99fe92b808b7e8befa15329c9b8b3c49503b7002c12875ea938b37.",
+      "The generated test registry remained current at 1625 tests with 268 quarantined entries and all four Phase-2A test modules registered.",
+      "README, INTERFACE, and ROADMAP remain at exact no-growth boundaries relative to base HEAD: 998, 1236, and 778 physical lines.",
+      "No executable backend closure changed, so no VSIX rebuild or release mutation was performed."
+    ],
+    "hard_think": [
+      "An inert schema may falsify supplied candidate bytes without proving the Python and packaging semantics that produced its projection.",
+      "Binding only eight direct Phase-2A files is an exact declared module-set proof, not complete transitive evidence-builder source or runtime closure.",
+      "A clean exact-HEAD repository proof prevents dirty-source substitution, but it cannot convert an ambient parser process into authenticated execution authority.",
+      "The smallest safe Phase-2A outcome is therefore useful diagnostic contract code with public governed build/reproof unavailable, not an unearned production happy path."
+    ],
+    "dialectic_sweep": [
+      "Treating packaging==26.0 as execution provenance was rejected because neither installed bytes, RECORD ownership, loaded origins, interpreter, nor stdlib were bound.",
+      "Expanding Phase-2A into a new sealed builder runtime was rejected by WSP_62 and Occam layering; existing process/composition primitives must be composed in a separate Phase-2B review.",
+      "Claiming the declared eight-file set as complete source closure was rejected; public fields and documentation now say phase2a_module_set explicitly.",
+      "Waiving the 624-line binder and later 59-line function was rejected; cohesive input validation and bounded-build preparation were extracted until both WSP_62 gates passed.",
+      "Ignoring source-root junctions, external RECORD rows, broad owner ambiguity, or optional FastAPI/Uvicorn presence was rejected and regression-pinned."
+    ],
+    "first_principles": [
+      "Governed candidate evidence requires authenticated producer semantics, not merely a deterministic-looking output and dependency pin.",
+      "Every accepted file, ownership claim, declaration, path root, limit, source origin, and before/after authority must be bounded and independently falsifiable.",
+      "A diagnostic candidate descriptor must force import, dynamic-load, native-loader, subprocess, determinism, bootstrap, signature, write-denial, activation, and exact-runtime claims false.",
+      "The next valid layer launches the builder from a fully reverified composition and binds actual process image, parser RECORD bytes/origins, transitive local source, and cross-pass equality before publication."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_distribution_graph.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_distribution_metadata.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_candidate_binding.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_candidate_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_candidate_descriptor.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_candidate_inputs.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_candidate_record_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_candidate_source.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_distribution_graph.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_candidate_binding.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_candidate_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_candidate_scale.py",
+      "modules/infrastructure/foundups_mcp_bridge/requirements-query-candidate.txt",
+      "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_CANDIDATE_ASSUMPTION_AUDIT_PHASE2A.md"
+    ]
+  },
+  "nonclaims": [
+    "No governed candidate evidence was built, published, materialized, loaded, activated, or routed; public build and reproof fail closed on BUILDER_RUNTIME_UNBOUND.",
+    "No exact transitive builder-source, packaging execution, stdlib, import, dynamic-load, native-loader, subprocess, determinism, bootstrap, signature, empirical write-denial, activation, or exact-runtime-closure proof was produced.",
+    "No HoloIndex maintenance, reindex, replica replacement, owner mutation, route mutation, ACL change, queue mutation, or production OpenClaw/Hermes worker dispatch occurred.",
+    "No HoloIndex A-grade or retrieval-quality RSI claim is made.",
+    "No package was installed or removed and no VSIX was built, installed, or released by this transaction.",
+    "Merged exact-main replay, clean committed source-authority verification, PR CI, and squash merge remain pending until after the focused commit."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_CANDIDATE_WSP15_ALLOCATION_RECEIPT_PHASE2A.json",
+    "docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_CANDIDATE_WSP97_EXECUTION_RECEIPT_PHASE2A.json",
+    "docs/audits/security/HOLOINDEX_QUERY_RUNTIME_CANDIDATE_ASSUMPTION_AUDIT_PHASE2A.md",
+    "docs/doc_index.json",
+    "modules/infrastructure/foundups_mcp_bridge/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "WSP_knowledge/WSP_Test_Registry.json"
+  ]
+}

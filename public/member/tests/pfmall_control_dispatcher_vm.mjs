@@ -9,7 +9,7 @@
  *   - invalid / unknown commands rejected with error shape
  *   - pfmall_command routed via postMessage produces pfmall_response
  *   - disallowed origin ignored
- *   - contract surface stable (all 7 commands registered)
+ *   - contract surface stable (existing commands plus local catalog search)
  *   - emitEvent broadcasts pfmall_event to registered listeners
  *
  * @see test_pfmall_control_dispatcher.py (optional pytest wrapper)
@@ -88,9 +88,9 @@ async function run() {
     assert(typeof d.emitEvent === 'function', 'emitEvent is function');
     assert(typeof d.registerEventListener === 'function', 'registerEventListener is function');
     const cfg = d.getConfig();
-    // Stable contract surface — all 7 commands present even before full impl.
+    // Stable contract surface — preserve existing commands and shared query API.
     const expected = ['inspect_state', 'set_layout', 'load_videos', 'play_tile',
-                      'expand_tile', 'collapse_tile', 'reset_session'];
+                      'expand_tile', 'collapse_tile', 'reset_session', 'search_catalog'];
     for (const cmd of expected) {
       assert(cfg.commands.indexOf(cmd) !== -1, 'command registered: ' + cmd);
     }
@@ -1260,7 +1260,69 @@ async function run() {
     assert(ct.status === 'ok', 'Layer 3: collapse_tile unchanged');
   }
 
-  console.log('pfmall_control_dispatcher_vm.mjs: all checks passed (Layer 1 + Layer 2 + Layer 3 + Layer 4)');
+  // 52) Shared catalog search preserves ordinary callers and observed state.
+  for (const outcome of [undefined, true]) {
+    const queries = [];
+    const sb = createSandbox({ tileField: makeTileFieldStub({
+      searchCatalog(query) { queries.push(query); return outcome; },
+      getLayoutMode() { return 'rows'; },
+      getFieldScope() { return { type: 'query', query: queries.at(-1) }; }
+    }) });
+    loadDispatcher(sb);
+    const result = sb.pfmallControlDispatcher.dispatch('search_catalog', { query: 'show me videos on Fukui' });
+    assert(result.status === 'ok' && result.result.scope === 'local_catalog', 'ordinary query remains available');
+    assert(queries.length === 1 && queries[0] === 'show me videos on Fukui', 'query reaches the shared owner once');
+    assert(result.result.state.layout_mode === 'rows', 'layout is read from the owner');
+    assert(result.result.state.field_scope.query === queries[0], 'returned scope is observed state');
+    assert(sb._lastCustomEvent && sb._lastCustomEvent.type === 'pfmall:state_changed', 'accepted query emits state change');
+    const cleared = sb.pfmallControlDispatcher.dispatch('search_catalog', { query: '' });
+    assert(cleared.status === 'ok' && queries.at(-1) === '', 'ordinary empty query still reaches the scope owner');
+  }
+
+  // 53) A selected product's refusal is an error, without a false state event.
+  {
+    let attempts = 0;
+    let stateReads = 0;
+    const events = [];
+    const sb = createSandbox({ tileField: makeTileFieldStub({
+      searchCatalog() { attempts++; return false; },
+      getCatalog() { stateReads++; return []; }
+    }) });
+    sb.dispatchEvent = event => { events.push(event); return true; };
+    loadDispatcher(sb);
+    const direct = sb.pfmallControlDispatcher.dispatch('search_catalog', { query: 'show me videos' });
+    assert(direct.status === 'error' && direct.error.code === 'incompatible_projection', 'product refusal is acknowledged');
+    assert(direct.result === undefined, 'refusal never carries a successful catalog scope');
+    let reply;
+    sb._messageHandler({
+      origin: sb.location.origin,
+      source: { postMessage(message) { reply = message; } },
+      data: { type: 'pfmall_command', source: 'red_dog', request_id: 'refused-product-query',
+        command: 'search_catalog', payload: { query: '' } }
+    });
+    assert(reply && reply.request_id === 'refused-product-query', 'refusal preserves correlation over the existing message contract');
+    assert(reply.status === 'error' && reply.error.code === 'incompatible_projection', 'empty product query cannot clear domain scope');
+    assert(attempts === 2 && stateReads === 0, 'only the owner decides refusal; no changed-state read follows');
+    assert(events.length === 0, 'refusal emits no state_changed event');
+  }
+
+  // 54) Invalid queries never call the owner; missing API remains explicit.
+  {
+    let calls = 0;
+    const sb = createSandbox({ tileField: { searchCatalog() { calls++; } } });
+    loadDispatcher(sb);
+    for (const payload of [{}, { query: null }, { query: 1 }, { query: 'x'.repeat(301) }]) {
+      const result = sb.pfmallControlDispatcher.dispatch('search_catalog', payload);
+      assert(result.status === 'error' && result.error.code === 'invalid_payload', 'invalid query is bounded before execution');
+    }
+    assert(calls === 0 && !sb._lastCustomEvent, 'invalid queries do not mutate or emit');
+    const absent = createSandbox();
+    loadDispatcher(absent);
+    const result = absent.pfmallControlDispatcher.dispatch('search_catalog', { query: 'cars' });
+    assert(result.status === 'error' && result.error.code === 'api_unavailable', 'missing search owner is explicit');
+  }
+
+  console.log('pfmall_control_dispatcher_vm.mjs: all checks passed (Layer 1 + Layer 2 + Layer 3 + Layer 4 + shared catalog query)');
 }
 
 run().catch((e) => {

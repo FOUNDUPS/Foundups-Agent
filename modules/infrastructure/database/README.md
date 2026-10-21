@@ -110,3 +110,14 @@ forward through the normal finalizer; missing, positive-only, corrupt, or
 otherwise effect-unknown evidence is quarantined and is never reported as a
 successful result.
 
+## HoloIndex Post-Merge Claim Lease
+
+`src/holoindex_postmerge_claim_contract.py` owns the canonical 7,500-second
+maximum and the v2 integrity binding for the protected post-merge task. Claim
+schema, ID, issued time, expiry, assignee, and full task context share one
+digest; the durable assignment timestamp must equal issuance. Start requires
+an active lease, reclaim requires an expired lease, and first completion checks
+the active lease inside the same transaction as task/request/event mutation.
+Exact replay after expiry is accepted only when the stored completion preceded
+expiry. This is trusted AgentDB/CAS integrity, not a secret MAC or signature.
+

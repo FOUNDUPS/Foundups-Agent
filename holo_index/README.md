@@ -1,4 +1,55 @@
+## Qualified native-chat proposal option
+
+The existing WRE-to-Qwen caller now has an explicit, default-off native-chat
+configuration. Use a trusted `local_proposal_mode="native_chat"` plus an exact
+`local_native_chat_profile` only after qualifying the runtime/model/template.
+See [the interface](INTERFACE.md#opt-in-local-native-chat-proposals) for the
+profile and errors. The default raw route is unchanged; generated text is a
+proposal, never action success. Portable/installed-source checks have passed;
+an actual-model caller trial, native admission and retained benefit are separate.
+
 # HoloIndex - Brain Surgeon Level Code Intelligence System
+
+## R03 entry checkpoint — 2026-09-13
+
+Use the existing [source-bound owner bridge and local fallback](CLI_REFERENCE.md#source-bound-owner-queries).
+The script checkout determines source; Git's primary checkout may be on another
+branch. At reviewed source `773a29e70`, local module context retrieval works
+without the semantic owner. The matched older reference currently fails owner
+startup, so no new CURRENT semantic receipt is claimed. Existing entry/root
+contracts: 81 tests passed. R03 operational qualification remains partial.
+
+## Current operational truth (2026-08-29)
+
+Live authority is a fresh governed owner receipt, not prose. Exact main
+`9c27cd03953bb4573c0a1091f01af649434c872a` was activated at generation
+`sha256:4fdfbbb1...` and freshness receipt `sha256:50cff0ab...`. A fresh owner
+query returned `CURRENT`, no gap, no reindex, first attempt; full verification
+retained 33 artifacts / 222,979,317 bytes. These values are as-of evidence,
+not authority for a later commit.
+
+The exact base and dependency payloads now also have an inert, path-free
+composition contract in the MCP bridge. It prevents component mix-and-match
+and binds the exact interpreter member without recopying payloads. It is not
+active: ABI/native-loader closure, deterministic effects, pre-import safety,
+signing, write denial, route-v2, A-grade, and retrieval RSI remain open.
+
+HoloIndex is not yet A-grade and retrieval RSI is not operational. The latest
+clean-authority public benchmark passed Recall@8 at `1.0` but failed the fixed
+`0.95` floors at MRR `0.91666667` and nDCG@8 `0.93198851`. All six benchmark
+queries reported `runtime_environment_exact_closure_verified=false`.
+`retrieval_autoresearch.py` evaluates pinned candidates only: there is no live
+retrieval proposer, administered independent evaluator, signed admission,
+shadow canary, promotion, ranker rollback, or candidate-bound production
+outcome learner.
+
+The preceding sprint exposed a separate deterministic false-module defect: the
+generic token `feedback` selected `modules/telemetry/feedback`, which is a data
+container without module contracts, and strict Tier-0 correctly failed closed.
+The merged catalog admits only roots proved by direct `src/tests` trees or
+root README/INTERFACE blobs. The exact-main refresh and broad RSI query above
+live-accepted that repair without a false Tier-0 target; this prose is never
+promotion evidence.
 
 ## Closed command-import boundary
 
@@ -27,11 +78,16 @@ path never starts Chroma or opens SQLite/HNSW; its snapshot generation must
 equal the verified replica generation. Maintenance retains the write-capable
 canonical Chroma path.
 
-Current exact-main maintenance/replica RSI is healthy at
-`bfcf9041b80be6773951e1c2e07500ebf7c9df62`, generation
-`sha256:7b94cf8a...`: the broker-managed maintenance replay completed and full
-immutable verification passed after a CURRENT/no-gap/no-reindex query. That
-proves exact-generation repair and activation, not retrieval-quality RSI.
+Earlier exact-commit maintenance/replica evidence passed at
+`db44f8be3374785341d1c237ec61da774444eb14`, generation
+`sha256:b5a138e0...`: the real OpenClaw/AgentDB maintenance task completed, a
+fresh governed owner query returned CURRENT/no-gap/no-reindex in 3.812 seconds,
+and full verification retained 33 artifacts / 222,033,165 bytes unchanged.
+The pre-repair controller still reported a false owner rejection; its exact-task,
+liveness, and distinct-cycle repair requires merged current-main replay.
+Maintenance/freshness self-repair is observed working for this bound base
+transaction, but current-main controller acceptance is not. Retrieval-quality
+RSI and A-grade remain unaccepted.
 
 Historical exact main `66526ae5cdd0467ce264c1db4122ab82eadb7733` was refreshed and activated
 through the broker-managed OpenClaw/AgentDB post-merge path at generation
@@ -42,7 +98,9 @@ wall time. Full post-query verification retained all 33 artifacts and
 221,204,272 bytes unchanged. This closes exact-main activation and cold-owner
 usability for that commit only. Current post-restart semantic-owner startup
 failed closed at 60 and 180 seconds, so that historical timing is not current
-availability evidence. Runtime identity now binds executable, ABI/platform,
+availability evidence. A later base-bound governed query succeeded on its first
+attempt inside the 300-second CLI wall; that supersedes the diagnostic timeout
+for base usability, not exact-current-main readiness or scale. Runtime identity now binds executable, ABI/platform,
 verified source bytes, distribution build records, replica/model closure, and
 actual controls, but installed dependency payload bytes remain unverified.
 Resident owner activation, quality improvement, independent evaluation, and
@@ -53,20 +111,22 @@ promotion/rollback learning remain required for retrieval RSI.
 Vector collection orchestration is split into `core/collection_search.py`;
 `core/search_engine.py` retains the compatible `_search_collection` entry
 point. Strict and interactive semantic searches resolve basename intent from
-`module_intent_snapshot.py`, a bounded, shell-free, HEAD-pinned `git ls-tree`
-module catalog cached by resolved repository root and HEAD. The catalog is
+`module_intent_snapshot.py`, a bounded, shell-free, HEAD-pinned Git-tree
+catalog cached by resolved repository root and HEAD. One directory projection
+proves direct `src/tests` scaffolds; one `cat-file --batch` reads only the
+immediate immutable tree objects of depth-three candidates to recognize root
+README/INTERFACE contracts. Data, archive, report, and container directories
+are not modules merely because they occupy `modules/<domain>/<name>`.
+The catalog is
 independent of caller K, so a module cannot become falsely singular merely
 because another named module fell outside a top-K result bucket.
-Its Git stream must be nonempty and end in exactly one record terminator;
-every record is validated for UTF-8, header, modules-only normalized path, and
-exact/NFC-normalized case-folded duplication before depth filtering. Unicode
-control, format, and surrogate code points (`Cc`/`Cf`/`Cs`) fail closed on
-every record; visible Unicode letters and symbols remain valid and retain
-their original spelling. Valid ancestors and deeper descendants are accepted
-but only exact depth-three roots are exposed.
+The directory stream requires exact NUL framing. Every directory and immediate
+tree entry validates mode/type/object identity, UTF-8, normalized path/name,
+and exact/NFC-casefold uniqueness. Unicode control, format, and surrogate code
+points (`Cc`/`Cf`/`Cs`) fail closed; visible Unicode remains unchanged.
 Cache root identity uses platform `normcase`; reads/eviction/writes/clear are
 locked, while Git calls remain outside the lock. Concurrent cold callers may
-duplicate a bounded Git read, but the final cache cannot exceed eight entries.
+duplicate bounded Git reads, but the final cache cannot exceed eight entries.
 
 When a semantic query names one module uniquely in that complete catalog, or
 supplies one validated full module path, HoloIndex performs
@@ -89,21 +149,23 @@ module queries do not receive Tier-0 promotion. Strict owner mode requires the
 catalog and complete pair. If the catalog is unavailable, non-strict mode logs
 one stable warning and continues with an explicit empty registry; it never
 falls back to hit-conditioned singularity. Query paths read bounded Git tree
-metadata but never walk/read working-tree module files or reindex the store.
+objects but never walk/read working-tree module files or reindex the store.
 
-The exact `03c332294...` tree probe has 1,265 directory records, 145,619 raw
-bytes, and 168 exact `modules/<domain>/<module>` roots. The final reproducible
-paired probe measured 122.645 ms cold and 42.043 ms warm. Hard limits are 5
-seconds, 1 MiB Git output, and 4,096 module roots.
+The exact `18cd53cc...` probe has 1,278 directory records / 146,876 bytes,
+170 candidate roots, and 68,591 bytes of immediate-tree evidence: 215,467
+bytes total versus 828,543 bytes for the rejected all-file scan. It exposes
+160 proved modules and measured 186.539 ms cold / 46.953 ms warm. Each Git
+output is capped at 8 MiB (enough for 4,096 modules at the measured shape),
+batch input at 4,096 object IDs, and each Git subprocess at five seconds.
 
-## [ALERT] REVOLUTIONARY EVOLUTION (2025-10-17): WSP 97 System Execution Prompting Protocol
+## Historical 2025 WSP 97 design claim
 
-HoloIndex has evolved from module finder to **brain surgeon level code intelligence** with **baked-in WSP 97 execution prompting**:
+The following was the 2025 design framing, not a current runtime acceptance claim:
 - **Before**: Find modules -> "Here's the file"
 - **After**: Function-level indexing -> "Lines 256-276: check_video_is_live" + Mermaid flow analysis + inefficiency detection
-- **WSP 97**: **META-FRAMEWORK** - Baked-in execution methodology for building Rubik Cubes (MVP DAEs)
+- **WSP 97**: **EXECUTION/ACTIVATION PROTOCOL** - Baked-in agentic execution methodology for building Rubik Cubes (MVP DAEs)
 
-### Core Mantra (Baked into All Agents)
+### Historical core mantra
 ```
 HoloIndex -> Research -> Hard Think -> First Principles -> Build -> Follow WSP
 ```
@@ -113,14 +175,14 @@ HoloIndex -> Research -> Hard Think -> First Principles -> Build -> Follow WSP
 **Rubik Context**: Rubik = MVP DAE. Currently "Cubes" (modules) need Qwen/Gemma enhancement to become fully agentic PWAs connecting to blockchains via FoundUp MCPs
 **Holo as Toolkit**: HoloIndex provides the intelligence toolkit for Rubik Cube development and orchestration
 
-## [ALERT] PREVIOUS REVOLUTIONARY EVOLUTION (2025-10-13)
+## Historical 2025 CodeIndex design claim
 
-HoloIndex has evolved from module finder to **brain surgeon level code intelligence**:
+This earlier goal describes intended CodeIndex behavior:
 - **Before**: Find modules -> "Here's the file"
 - **After**: Function-level indexing -> "Lines 256-276: check_video_is_live" + Mermaid flow analysis + inefficiency detection
 
-## [AI] CODE INDEX CAPABILITIES (WSP 92)
-- **Function-Level Indexing**: Every function mapped with line numbers and complexity analysis
+## [AI] CodeIndex capability targets (WSP 92)
+- **Function-Level Indexing**: Indexed functions may carry line and complexity metadata
 - **Mermaid Flow Diagrams**: Visual code flow for each module showing logic paths
 - **Inefficiency Detection**: Identifies duplicate code, overly complex functions, logic flow issues
 - **DAE Cube Mapping**: Maps modules to DAE cubes with boundary awareness
@@ -144,7 +206,9 @@ HoloIndex has evolved from module finder to **brain surgeon level code intellige
 
 ## [ALERT] MAJOR ARCHITECTURAL PIVOT (2025-09-25)
 
-HoloIndex has evolved from a search tool into the **autonomous intelligence foundation** for the entire FoundUps ecosystem. This is now the **green foundation board agent** that comes with every LEGO set.
+HoloIndex is intended to become the **knowledge foundation** for the FoundUps
+ecosystem. Today its governed generation-bound query path is usable; autonomous
+retrieval improvement, promotion, and production orchestration remain gated.
 
 ## [U+1F525] UPCOMING ENHANCEMENT: Intent-Driven Orchestration (2025-10-07)
 
@@ -158,13 +222,15 @@ HoloIndex has evolved from a search tool into the **autonomous intelligence foun
 - **Smart Routing**: Only relevant components execute (not all 7 every time)
 - **Structured Output**: 4 priority sections (INTENT, FINDINGS, MCP, ALERTS)
 - **Alert Deduplication**: 87 "ModLog outdated" warnings -> 1 line
-- **Feedback Learning**: Rate output (good/noisy/missing) -> System learns and improves
+- **Feedback Evidence**: Rate output (good/noisy/missing) -> store observations
+  for independent evaluation; no production ranker changes automatically
 - **Breadcrumb Events**: Track all orchestration decisions for multi-agent learning
 
 **Token Efficiency:**
 - Before: ~10,000 tokens per query
 - After: ~2,900 tokens per query (71% reduction)
-- With learning: ~1,500 tokens after 1000 cycles (48% total reduction)
+- Historical target after 1000 evaluated cycles: ~1,500 tokens; not current
+  measured production evidence
 
 **Architecture Preserved:** Qwen->0102->012 orchestration UNCHANGED (enhancement, not replacement)
 
@@ -180,10 +246,11 @@ for future autonomous code intelligence:
 - **HoloIndex**: Semantic code discovery (WSP 87)
 - **HoloDAE**: Observation and proposal surfaces around retrieval
 
-Current production truth is narrower than the historical vision. Exact-main
-freshness repair is operational, but retrieval-quality RSI is not. The audited
-`b5b4de05` generation passed integrity verification and Recall@8, yet failed
-the public quality policy at MRR `0.9167` and nDCG@8 `0.8718`. No live loop
+Current production truth is narrower than the historical vision. Exact main
+`5ca0c0aa...` is active at generation `sha256:a913b641...`, and
+retrieval-quality RSI is not operational. The latest clean-authority public
+run passed Recall@8 but failed the policy at MRR `0.9167` and nDCG@8 `0.9320`.
+No live loop
 currently edits the production ranker, passes an independent sealed corpus,
 and promotes or rolls back that candidate.
 
@@ -230,6 +297,10 @@ so it is not an operational RSI loop. The source-ranker digest also does not
 yet bind the owner Python executable, ABI/platform, exact dependency manifest,
 backend builds, or deterministic execution knobs; that reproducibility layer
 must be sealed once and carried as a separate runtime-environment digest.
+Owner-service query receipts bind valid acquisition attempt count, retry flag,
+and retry reason; malformed telemetry is omitted and cannot authorize a
+post-completion reproof. This closes retry-evidence integrity, not the missing
+exact runtime closure, evaluator independence, promotion, or learning loop.
 
 ### Operational Storage and Restricted-Worker Queries (2026-07-18)
 
@@ -336,7 +407,7 @@ the owner.
 - **History Gating**: Output history logging can be limited with `HOLO_OUTPUT_HISTORY_MODE=verbose|errors|signals` and rotated via `HOLO_OUTPUT_HISTORY_MAX_MB` (default 10MB).
 - **Intent Verbosity Caps**: OutputComposer now enforces per-intent limits (minimal/balanced/detailed) to keep results only to what 0102 needs.
 - **Bundle Fastpath**: `--bundle-json` with `HOLO_SKIP_MODEL=1` now includes path-based code hits when `--bundle-module-hint` is provided.
-## Revolutionary Architecture
+## Historical recursive-improvement architecture
 
 > **Historical vision, not current production truth.** The implementation
 > below contains useful observation and proposal components, but stored logs,
@@ -344,35 +415,42 @@ the owner.
 > improvement. The generation-bound and A-grade contracts above are the
 > current authority for retrieval quality.
 
-### [AI] HoloDAE - Chain-of-Thought Logging for Recursive Self-Improvement
+### [AI] HoloDAE - Decision Logging and RSI Candidate Evidence
 **The act of using HoloIndex IS the monitoring trigger!**
 
-**[TARGET] Chain-of-Thought Algorithm**: Every Holo interaction is logged for AI self-improvement!
+**[TARGET] Decision Trace**: selected Holo interactions may be logged as inputs
+to separately governed evaluation; logs do not change production behavior.
 
-When 0102 runs a search, HoloDAE executes current features (health checks, vibecoding, etc.) and logs its complete decision-making process internally:
+Historical advisor paths attempted health/coaching analysis and internal
+decision logging. The governed owner query does not execute that complete
+stack, and no claim of complete logging is accepted without a path-specific
+test.
 
-#### Chain-of-Thought Features (Logged for Self-Improvement):
+#### Decision-Trace Features (Logged for Evaluation):
 - [OK] **Decision Logging**: Every analysis choice with reasoning
 - [OK] **Effectiveness Scoring**: AI evaluates its own performance
-- [OK] **Pattern Recognition**: Learns from successful vs unsuccessful analyses
+- [PARTIAL] **Pattern Comparison**: records successful versus unsuccessful
+  analyses; verified learning and promotion are absent
 - [PARTIAL] **Recursive Improvement**: observations are stored; verified
   ranker improvement, promotion, canary, and rollback remain unproven
 - [OK] **012 Monitoring**: Logs visible for system tweaking and oversight
 
-#### Current HoloDAE Features (Executed Automatically):
+#### Historical HoloDAE feature claims (verify before relying on them):
 - [OK] **Health Checks**: Automatic dependency audits and module analysis
 - [OK] **Vibecoding Detection**: Pattern analysis for behavioral coaching
 - [OK] **File Size Analysis**: Architectural health monitoring
 - [OK] **Module Analysis**: System-wide dependency checking
-- [OK] **Real-time Execution**: All features run based on query context
+- [PARTIAL] **Contextual Execution**: feature activation depends on the query
+  path; governed owner retrieval does not run the complete advisor stack
 
 ### [SEARCH] Enhanced Search Intelligence
 - **Vector Database**: ChromaDB for semantic similarity
 - **Video Index Safety**: Subprocess health probe + safe batch indexing to avoid native segfaults
 - **Dual Search**: Code + WSP documentation
 - **NAVIGATION.py Integration**: Problem->Solution mapping
-- **Adaptive Learning**: Query enhancement and pattern learning
-- **Automatic Health Checks**: Every search triggers module dependency analysis
+- **Adaptive Learning prototype**: isolated query/response optimization code;
+  CLI integration and production ranker authority are disabled
+- **Optional Health Checks**: advisor-enabled paths can request dependency analysis
 - **Ghost Hit Filtering**: Similarity threshold (`HOLO_MIN_SIMILARITY=0.35`) eliminates low-relevance results near vector centroid
 - **Robust Deduplication**: Path normalization (Windows/Unix, absolute/relative) prevents duplicate hits
 - **Batched Symbol Indexing**: ChromaDB writes chunked at 5000 entries to prevent overflow on large codebases
@@ -408,7 +486,8 @@ Principles:
 - **NAVIGATION is minimal**: entry points only, not every new function.
 - **Complements grep/glob**: semantic/intent queries land here; `grep`/`rg` remain authoritative for exact-text and exact-symbol lookups; `glob` remains authoritative for known-path queries.
 - **rg is a safety net**: an internal exact-match fallback inside HoloIndex (via `_rg_symbol_search`), not the primary path of HoloIndex itself.
-- **Index once, search forever**: use symbol indexing to keep memory fresh.
+- **Generation-bound refresh**: source changes require governed maintenance,
+  immutable snapshot publication, exact-main activation, and freshness proof.
 
 Symbol indexing (module-scoped):
 ```
@@ -437,13 +516,14 @@ python holo_index.py --index-all
 - **LLM Integration**: Qwen-Coder 1.5B for code understanding
 - **WSP Master**: Comprehensive protocol guidance (95+ protocols)
 - **Pattern Coach**: Behavioral pattern detection and coaching
-- **HoloDAE Intelligence**: Real-time code health monitoring
+- **HoloDAE monitoring target**: prototype health/coach paths exist; governed
+  owner retrieval does not provide continuous real-time code-health authority
 
 ### 3. 0102 Consciousness Guidance
 - **0102-to-0102 Prompts**: Violation-aware compliance prompts written by 0102 for 0102
 - **Module-Specific WSP Guidance**: Contextual protocols based on detected module
 - **Violation Prevention**: Reminders based on WSP_MODULE_VIOLATIONS.md history
-- **Deep Think Enforcement**: Prevents vibecoding through consciousness prompts
+- **Deep Think prompts**: advisory reminders; they do not enforce behavior
 - **Core WSP Questions**: "Does this need to exist?", "Can I afford it?", "Can I live without it?"
 - **DAE Cube Organizer**: `--init-dae` command for alignment and structure mapping
 
@@ -511,17 +591,17 @@ python holo_index.py --code-index-report modules/communication/livechat
 # Reports saved to: holo_index/reports/CodeIndex_Report_*.md
 ```
 
-### [AI] HOLODAE INTELLIGENCE & ANALYSIS (8 functions):
+### [AI] Historical HoloDAE intelligence/analysis surfaces (verify each path):
 
-**[SEARCH] Health Analysis (Automatic)**
-- Triggered automatically on all HoloIndex searches
-- Performs dependency audits and module health checks
+**[SEARCH] Health Analysis (legacy advisor path)**
+- Not triggered by the governed owner query
+- Prototype paths may perform dependency and module checks when explicitly run
 
-**[RULER] File Size Analysis (Automatic)**
+**[RULER] File Size Analysis (prototype)**
 - Monitors architectural health and identifies large files
 - Provides refactoring recommendations for files >1000 lines
 
-**[U+1F3D7]️ Module Analysis (Automatic)**
+**[U+1F3D7]️ Module Analysis (prototype)**
 - System-wide dependency checking and structure validation
 - Identifies orphaned files and connection opportunities
 
@@ -538,9 +618,9 @@ tail -f holo_index/logs/holodae_activity.log
 python main.py  # Select option 2 -> 25
 ```
 
-**[U+1F3E5] Background Health Scans**
-- Continuous system monitoring when HoloDAE is active
-- Automatic health checks every few minutes
+**[U+1F3E5] Background Health Scans (historical claim)**
+- Continuous production monitoring has not been re-verified
+- No cadence is part of the governed retrieval contract
 
 **[UP] Effectiveness Scoring**
 - AI evaluates its own performance (0.0-1.0 scores)
@@ -548,7 +628,8 @@ python main.py  # Select option 2 -> 25
 
 **[REFRESH] Recursive Improvement Data**
 - Stored learning data from all AI interactions
-- Used for continuous system optimization
+- Available as candidate evidence for offline evaluation; no verified
+  production consumer currently adapts or promotes the retrieval ranker
 
 ### [CLIPBOARD] WSP COMPLIANCE & GOVERNANCE (5 functions):
 
@@ -559,8 +640,8 @@ python holo_index.py --wsp88
 ```
 
 **[NOTE] Compliance Checking**
-- Automatic WSP protocol validation during searches
-- Violation-aware guidance and recommendations
+- Optional advisor/diagnostic paths can produce WSP guidance
+- Governed semantic owner searches do not automatically certify compliance
 
 **[BOOKS] Documentation Audit**
 ```bash
@@ -589,7 +670,8 @@ python holo_index.py --search "create module" --llm-advisor
 
 **[U+1F4AC] Pattern Coach**
 - Behavioral pattern detection and coaching
-- Learns from user interaction patterns
+- Records interaction-pattern observations and proposes coaching; it does not
+  autonomously adapt the production ranker or policy
 
 **[U+1F4D6] WSP Master**
 - 95+ WSP protocol guidance system
@@ -645,12 +727,12 @@ python holo_index.py --search "livechat message"
 # [AI] 0102: Deep think: Can this be simplified? Follow WSP simplicity.
 ```
 
-### Chain-of-Thought Logging (For Recursive Self-Improvement)
+### Decision Logging (For Evaluation and Candidate Improvement)
 ```bash
 # 012 can see the AI's decision-making in logs for monitoring/tweaking:
 tail -f holo_index/logs/holodae_activity.log
 
-# Shows chain-of-thought decisions logged for self-improvement:
+# Shows decision observations logged for independent evaluation:
 # [HOLODAE-CALL] 012 initiated HoloIndex search: 'check health status'
 # [HOLODAE-FOUND] 8 files across 3 modules relevant to query
 # [COT-START] Session cot_1739123456: 'check health status' with 8 files, 3 modules
@@ -658,10 +740,10 @@ tail -f holo_index/logs/holodae_activity.log
 # [COT-DECISION] file_size_analysis: Files available: 8
 # [COT-DECISION] module_health_analysis: Modules available: 3
 # [COT-COMPLETE] Session cot_1739123456: 3 decisions, effectiveness 0.85
-# [COT-STORED] Session cot_1739123456 stored for recursive improvement analysis
+# [COT-STORED] Session cot_1739123456 stored as candidate evidence
 
-# The AI uses this logged data to improve future decision-making
-# 012 can analyze these logs to understand and tweak system behavior
+# 012/AutoResearch may evaluate these logs and propose bounded changes;
+# no verified production learning or promotion follows automatically
 ```
 
 ### With AI Advisor
@@ -714,11 +796,14 @@ HoloIndex uses a gamification system to encourage quality behaviors:
 - **Variants**: Different reward multipliers (currently variant A)
 
 ## Performance
-- **Search Speed**: <200ms dual search
-- **LLM Inference**: <500ms with caching
+- **Governed semantic query**: the latest exact-main public run measured p95
+  `4.483s`; the separate candidate-author run measured `4.437s`
+- **Historical targets**: <200ms dual search and <500ms cached LLM inference
+  are not current acceptance evidence
 - **Index Size**: ~500MB for full codebase
 - **Memory Usage**: <1GB with models loaded
-- **Token Efficiency**: 93% reduction vs traditional
+- **Token Efficiency**: 93% was a historical design estimate, not a current
+  governed measurement
 
 ## Dependencies
 - Python 3.8+
@@ -728,4 +813,6 @@ HoloIndex uses a gamification system to encourage quality behaviors:
 - SQLite (violation tracking)
 
 ## Status
-[OK] **PRODUCTION READY** - All systems operational with comprehensive AI intelligence
+[PARTIAL] **GOVERNED QUERY USABLE** - Exact-main maintenance, activation, and
+controller reconciliation are observed working. Exact runtime closure,
+resident scale, A-grade quality, and retrieval RSI remain blocked.

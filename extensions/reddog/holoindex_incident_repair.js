@@ -7,17 +7,49 @@ const REPAIRABLE_ERRORS = Object.freeze([
   'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH',
   'HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP',
   'QUERY_OWNER_POISONED',
+  'REPO_HEAD_MISMATCH',
   'SEMANTIC_BACKEND_UNAVAILABLE'
 ]);
 const MAX_OUTPUT_BYTES = 256 * 1024;
 const MAX_INPUT_BYTES = 64 * 1024;
 const MAX_QUERY_CHARS = 16000;
 
-function shouldCoordinate(ownerResult, ownerObserved) {
+function preownerHeadMismatchIsBound(value) {
+  const raw = value.raw_result;
+  return value.source === 'holoindex_owner_service'
+    && typeof value.query === 'string'
+    && value.query.trim().length > 0
+    && value.query.length <= MAX_QUERY_CHARS
+    && value.freshness === 'STALE'
+    && value.owner_retry_performed === false
+    && value.owner_retry_reason === ''
+    && value.owner_acquisition_cycle === 0
+    && typeof value.repo_head_sha === 'string'
+    && /^[0-9a-f]{40}$/.test(value.repo_head_sha)
+    && value.repo_head_sha !== value.authority_repo_head_sha
+    && value.repo_root_digest === value.authority_repo_root_digest
+    && value.no_reindex === true
+    && value.workspace_overlay_present === false
+    && value.semantic_evidence_authority === 'committed_head_only'
+    && raw && typeof raw === 'object' && !Array.isArray(raw)
+    && Object.keys(raw).length === 0
+    && !Object.prototype.hasOwnProperty.call(value, 'query_receipt')
+    && Array.isArray(value.stale_reasons) && value.stale_reasons.length > 0
+    && value.stale_reasons.length <= 16
+    && value.stale_reasons.every((reason) => typeof reason === 'string' && reason.length <= 128)
+    && value.stale_reasons.includes('stale_repo_head_sha')
+    && typeof value.freshness_generation_id === 'string'
+    && /^sha256:[0-9a-f]{64}$/.test(value.freshness_generation_id)
+    && typeof value.freshness_receipt_digest === 'string'
+    && /^sha256:[0-9a-f]{64}$/.test(value.freshness_receipt_digest);
+}
+
+function shouldCoordinate(ownerResult, ownerObserved, expectedQuery) {
   const value = ownerResult && typeof ownerResult === 'object' ? ownerResult : {};
   if (Object.values(value).includes(value)) return false;
   const staleAuthority = value.error === 'HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH';
-  const attemptsValid = staleAuthority
+  const preownerHeadMismatch = value.error === 'REPO_HEAD_MISMATCH';
+  const attemptsValid = staleAuthority || preownerHeadMismatch
     ? value.owner_attempts === 0
     : value.owner_attempts === 2;
   return ownerObserved === true
@@ -35,11 +67,15 @@ function shouldCoordinate(ownerResult, ownerObserved) {
     && /^sha256:[0-9a-f]{64}$/.test(value.authority_repo_root_digest)
     && (!staleAuthority
       || value.workspace_repo_head_sha !== value.authority_repo_head_sha)
+    && (!preownerHeadMismatch || (
+      typeof expectedQuery === 'string'
+      && value.query === expectedQuery.trim()
+      && preownerHeadMismatchIsBound(value)))
     && value.no_authority_worktree_mutation_performed === true;
 }
 
 function compactOwnerFailure(value) {
-  return {
+  const compact = {
     ok: value.ok,
     error: value.error,
     index_gap_detected: value.index_gap_detected === true,
@@ -50,6 +86,19 @@ function compactOwnerFailure(value) {
     authority_repo_root_digest: value.authority_repo_root_digest,
     no_authority_worktree_mutation_performed: value.no_authority_worktree_mutation_performed === true
   };
+  if (value.error !== 'REPO_HEAD_MISMATCH') return compact;
+  return Object.assign(compact, {
+    source: value.source, query: value.query, freshness: value.freshness,
+    owner_retry_performed: value.owner_retry_performed,
+    owner_retry_reason: value.owner_retry_reason,
+    owner_acquisition_cycle: value.owner_acquisition_cycle,
+    repo_head_sha: value.repo_head_sha, repo_root_digest: value.repo_root_digest,
+    no_reindex: value.no_reindex, workspace_overlay_present: value.workspace_overlay_present,
+    semantic_evidence_authority: value.semantic_evidence_authority,
+    raw_result: value.raw_result, stale_reasons: value.stale_reasons,
+    freshness_generation_id: value.freshness_generation_id,
+    freshness_receipt_digest: value.freshness_receipt_digest
+  });
 }
 
 function failure(reason) {
@@ -78,11 +127,11 @@ function classifyError(err) {
 
 function coordinate(options) {
   const opts = options && typeof options === 'object' ? options : {};
-  if (!shouldCoordinate(opts.ownerResult, opts.ownerObserved)) {
-    return failure('owner_failure_not_repairable');
-  }
   const query = typeof opts.query === 'string' ? opts.query.trim() : '';
   if (!query || query.length > MAX_QUERY_CHARS) return failure('incident_query_invalid');
+  if (!shouldCoordinate(opts.ownerResult, opts.ownerObserved, query)) {
+    return failure('owner_failure_not_repairable');
+  }
   const payload = JSON.stringify({ query, owner_failure: compactOwnerFailure(opts.ownerResult) });
   if (Buffer.byteLength(payload, 'utf8') > MAX_INPUT_BYTES) {
     return failure('bridge_input_too_large');
@@ -105,11 +154,11 @@ function coordinate(options) {
 }
 
 function asyncRequest(opts) {
-  if (!shouldCoordinate(opts.ownerResult, opts.ownerObserved)) {
-    return { error: failure('owner_failure_not_repairable') };
-  }
   const query = typeof opts.query === 'string' ? opts.query.trim() : '';
   if (!query || query.length > MAX_QUERY_CHARS) return { error: failure('incident_query_invalid') };
+  if (!shouldCoordinate(opts.ownerResult, opts.ownerObserved, query)) {
+    return { error: failure('owner_failure_not_repairable') };
+  }
   const payload = JSON.stringify({
     query, owner_failure: compactOwnerFailure(opts.ownerResult)
   });

@@ -189,6 +189,19 @@ class AtomicProposalAuthenticityNonceStore:
     def path(self) -> Path:
         return self._store.path
 
+    def validate_existing_state(self) -> None:
+        """Require provisioned authenticated state; retain one-step crash recovery."""
+        with confined_runtime_operation_lock(
+            self._transaction_lock_path, allowed_root=self._allowed_root,
+            repo_root=self._repo_root,
+        ):
+            if not self.path.is_file() or self._high_water_store.load(
+                self._replay_store_binding_digest
+            ) is None:
+                raise ValueError("proposal_authenticity_nonce_state_unprovisioned")
+            state, _ = self._load_state()
+            _validated_entries(state, integrity_key=self._integrity_key)
+
     def reserve(self, nonce: str, *, expires_at: int, subject: str) -> str | None:
         clean_nonce = _text(nonce)
         clean_subject = _text(subject)

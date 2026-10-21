@@ -14,6 +14,7 @@ Purpose:
     4. Return CommentDraft
 """
 
+import json
 import logging
 import os
 from pathlib import Path
@@ -196,6 +197,33 @@ Max 50 words."""
             logger.error(f"[DRAFTER-LLM] Generation failed: {e}")
             return self._mock_generate(prompt)
 
+    def generate_station_json(self, system_policy: str, source_data: Dict[str, Any]) -> str:
+        """Use the configured local model without mock or template fallbacks.
+
+        Station policy has its own message role. Conversation text is serialized
+        as untrusted data, and this call exposes no tools or publishing actions.
+        """
+        if self.mock_mode or self._llm is None:
+            raise RuntimeError("local_model_unavailable")
+        completion = self._llm.create_chat_completion(
+            messages=[
+                {"role": "system", "content": system_policy},
+                {"role": "user", "content": json.dumps(source_data, ensure_ascii=False)},
+            ],
+            response_format={"type": "json_object"},
+            max_tokens=384,
+            temperature=0.2,
+            stream=False,
+        )
+        choice = completion["choices"][0]
+        message = choice["message"]
+        if choice.get("finish_reason") != "stop" or message.get("tool_calls") or message.get("function_call"):
+            raise ValueError("incomplete_station_generation")
+        content = message.get("content")
+        if not isinstance(content, str) or not content.strip() or len(content) > 4096:
+            raise ValueError("invalid_station_generation")
+        return content
+
     @staticmethod
     def _correct_entities(text: str) -> str:
         """Fix common LLM mistakes in entity names (WSP 84 pattern from video_search.py)."""
@@ -276,6 +304,38 @@ class CommentDrafter:
             guardrails=StyleGuardrails(),
             llm=LocalLLM(mock_mode=False),
             use_real_llm=True
+        )
+
+    @classmethod
+    def for_station(cls, llm: Optional[LocalLLM] = None) -> "CommentDrafter":
+        """Construct the station-only path without loading human voice memory.
+
+        Use ``draft_station_reply`` on this instance. The normal constructor and
+        ``draft`` retain their existing human-voice behavior.
+        """
+        drafter = cls.__new__(cls)
+        drafter.voice_memory = None
+        drafter.guardrails = None
+        drafter.llm = llm if llm is not None else LocalLLM(mock_mode=False)
+        return drafter
+
+    def draft_station_reply(
+        self,
+        thread_context: str,
+        *,
+        context_url: str,
+        reply_to_id: str,
+        initiated_by_listener: bool,
+    ) -> Dict[str, Any]:
+        """Draft or skip an initiated station conversation; never publish."""
+        from .station_reply_decision import draft_station_reply
+
+        return draft_station_reply(
+            self.llm,
+            thread_context,
+            context_url=context_url,
+            reply_to_id=reply_to_id,
+            initiated_by_listener=initiated_by_listener,
         )
     
     def draft(

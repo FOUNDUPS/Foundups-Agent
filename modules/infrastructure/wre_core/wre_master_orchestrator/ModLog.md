@@ -1,5 +1,32 @@
 # WRE Master Orchestrator - Module Development Log
 
+## 2026-10-04 — Preserve reflection with continuity context
+
+The existing reflection prompt excludes only `parent_continuity_context`,
+matching the local adapter and PatternMemory projection. Parent lineage and
+task inputs remain unchanged. Independent tests live in the existing root
+execution-truth suite:35 focused and173 connected passes; no new nested tests.
+See root WRE ModLog for local-worker evidence and remaining admission gates.
+
+## 2026-09-15: Bind scan admission to each execution
+
+- Extended the existing admission owner with a three-value verdict/fingerprint result and preserved the two-value safety API as a forwarding view. The coordinator carries the exact value to existing executor validation; shared skill-name state and late cache readback are removed. No new module, skill, context class or grant.
+- A changed-bundle reentrant execution failed before repair; unchanged control passed. Final: 172 connected tests/four existing link skips, including 71/one skip across three focused files; 8 manifest tests and 15 fast groups pass. Six cases extend existing tests. Duplicate test helper classes are reused; private-contract mocks and two assertions are updated without removing test definitions.
+- Admission source 197→214; coordinator file/class 1165→1149 and 1047→1032; execution method remains 250. Tests 574/581/436 stay within existing limits. Two runtime hashes and both existing pins change; 1,400 members and registry 1,650/269 remain. Fresh selection: OpenClaw cache content/policy ownership 16/P0. Evidence: `execution_admission_ownership_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97. Independent runtime admission and complete RSI remain open.
+
+## 2026-09-15: Reconcile the scanner ownership follow-on
+
+- Root WRE/bridge checkpoint verifies private report ownership; all 23 existing coordinator cases pass within 166 connected passes/four existing link skips. The projection now points to per-execution fingerprint handoff at 17/P0. Coordinator source is unchanged and whole-coordinator concurrency remains unproved. Evidence: `scan_report_ownership_continuation_20260915`; WSP 15/22/50/97.
+
+## 2026-09-14: Preserve configured severity in cache readback
+
+- `_ensure_wre_skill_safety()` passes its configured severity to the existing
+  fingerprint reader; its function/class/file sizes do not grow. The root WRE
+  cache owns pending refresh and bounded retention. Root interface remains authoritative.
+- All 23 existing coordinator tests and the added root-suite policy-read case pass
+  within 148 connected passes/four existing link skips. Evidence:
+  `admission_cache_ownership_continuation_20260914`; WSP 22/50/62/95/97.
+
 <!-- Per WSP 22: Journal format - NEWEST entries at TOP, oldest at bottom -->
 
 ## External-Audit Repair: Compatibility Plugin Gate

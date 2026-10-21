@@ -19,6 +19,7 @@ from holo_index.freshness_receipt import (
     freshness_receipt_path,
     load_freshness_receipt,
 )
+from holo_index.owner_acquisition_contract import owner_acquisition_cycle_valid
 
 
 SCHEMA_VERSION = "holoindex_query_receipt.v1"
@@ -364,11 +365,26 @@ def _runtime_receipt_evidence(result: Mapping[str, Any]) -> dict[str, Any]:
     }
 
 
+def _owner_acquisition_evidence(result: Mapping[str, Any]) -> dict[str, Any]:
+    """Bind valid owner retry telemetry without normalizing malformed values."""
+
+    fields = {
+        "owner_attempts": lambda value: type(value) is int and value >= 0,
+        "owner_retry_performed": lambda value: type(value) is bool,
+        "owner_retry_reason": lambda value: type(value) is str,
+        "owner_acquisition_cycle": owner_acquisition_cycle_valid,
+    }
+    evidence: dict[str, Any] = {}
+    for field, valid in fields.items():
+        if field in result and valid(result.get(field)):
+            evidence[field] = result[field]
+    return evidence
+
+
 def _base_query_receipt_payload(
     *, source: str, source_class: str, query: str,
     result: Mapping[str, Any], require_generation: bool,
-    generation_binding: Mapping[str, Any] | None = None,
-    hit_limit: int = 8,
+    generation_binding: Mapping[str, Any] | None = None, hit_limit: int = 8,
 ) -> dict[str, Any]:
     binding = _result_binding(result, generation_binding)
     freshness = str(result.get("freshness") or "UNKNOWN").upper()
@@ -413,6 +429,7 @@ def _base_query_receipt_payload(
         "semantic_evidence_digest": semantic_evidence_digest,
         "semantic_evidence_count": semantic_evidence_count,
         "observed_latency_ms": _observed_latency_ms(result.get("latency_ms")),
+        **_owner_acquisition_evidence(result),
     }
 
 

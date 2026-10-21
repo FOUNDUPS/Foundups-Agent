@@ -12,6 +12,8 @@ use the historical placeholder claims of zero coverage or no executions.
 - `test_scheduled_routines_integration.py`: scheduled dispatch integration;
   WSP_62 growth is frozen and new provider cases belong in a split module.
 - `test_self_research_refresh.py`: self-research refresh behavior.
+  Includes real empty/bounded/partial/failed scanner consumption and malformed
+  historical data isolation; zero events must not erase coverage or unknowns.
 - `test_startup_maintenance_gate.py`: lightweight startup maintenance routing.
   Self-research and training dispatch are verified at exact mocked executor
   boundaries; this unit suite never launches those live workloads.
@@ -19,6 +21,9 @@ use the historical placeholder claims of zero coverage or no executions.
   supersession, and atomic completion contracts.
 - `test_holoindex_postmerge_authority_order.py`: split authority-lease order,
   activation failure, exact binding, owner cleanup, and finalization contracts.
+- `test_holoindex_postmerge_runtime_root.py`: linked control-to-primary
+  dependency-runtime resolution, resolver-failure finalization, and
+  pre-transaction no-effect gates.
 
 ## HoloIndex post-merge acceptance matrix
 
@@ -30,6 +35,9 @@ contention does. A route or activation failure through the real authority
 transaction and executor leaves the task non-completed, its request pending,
 and no completion event. A ready owner cannot substitute another generation
 or freshness receipt.
+The executor-specific regression injects a distinct primary runtime root and
+proves the trusted authority transaction receives that root, while retaining
+the configured dedicated authority checkout as its repository source.
 
 These are isolated tests. They do not mutate the live Holo store, route,
 replica, AgentDB, authority checkout, or network. Separately, production-shaped

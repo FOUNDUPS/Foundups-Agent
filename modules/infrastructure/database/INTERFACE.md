@@ -174,16 +174,20 @@ assurance remains unchanged.
 Completion staging revalidates both task bindings from the durable reservation,
 including an author ID absent from the verifier completion request.
 The claim is a `pending -> assigned` compare-and-swap over the exact serialized
-context. It publishes a one-use claim ID, canonical context digest, and
-expiry in the same transaction. The executor must atomically consume that
+context. It publishes a one-use v2 claim whose digest binds schema, ID, issued
+time, expiry, assignee, and the complete task context. Stored `assigned_at`
+must equal claim issuance, and duration cannot exceed 7,500 seconds. The
+executor must atomically consume that active
 claim through `assigned -> executing` before any effect. Completion is one
-database transaction: validate the executing claim and request digest, insert
+database transaction: validate the still-active executing claim and request digest, insert
 the completion event, resolve the request, and mark the task completed.
 Both terminal updates compare the exact serialized task context and request
 payload observed in that transaction.
 Competing claims and partial completion writes fail closed.
-Expired claims are reclaimed only by exact worker and assignment timestamp,
-then re-enter the coordinator's bounded retry path.
+Expired claims are reclaimed only after v2 integrity/expiry proof and exact
+worker/assignment timestamp CAS, then re-enter the coordinator's bounded retry
+path. A completed exact replay also proves its stored completion preceded
+expiry. The digest is deterministic integrity, not keyed authentication.
 
 ### Signed-Worker Result Continuity
 

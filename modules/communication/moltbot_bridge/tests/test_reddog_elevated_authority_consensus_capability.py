@@ -151,3 +151,40 @@ def test_concurrent_capability_consumers_have_one_winner() -> None:
 def test_capability_is_opaque() -> None:
     with pytest.raises(TypeError):
         VerifiedElevatedAuthorityConsensusCapability()
+
+
+def test_delegated_request_pair_matches_without_authority_issuance() -> None:
+    from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
+        _signing_requests_match,
+    )
+    from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_contract import (
+        canonical_elevated_signing_request_digest,
+    )
+
+    request = _request()
+    pair = _signing_requests(request)
+    assert len(pair) == 2
+    assert [item.signer_role for item in pair] == ["principal", "reddog"]
+    assert _signing_requests_match(pair, request) is True
+    assert len({canonical_elevated_signing_request_digest(item) for item in pair}) == 2
+
+
+@pytest.mark.parametrize("child", ["principal", "reddog"], ids=["principal", "reddog"])
+def test_effect_request_cannot_replace_delegated_child(
+    monkeypatch: pytest.MonkeyPatch, child: str
+) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
+        _signing_requests_match,
+    )
+    from modules.communication.moltbot_bridge.tests.test_reddog_authoritative_use_lease_contract_security import (
+        _effect_domain_request,
+    )
+
+    request = _request()
+    pair = _signing_requests(request)
+    assert _signing_requests_match(pair, request) is True
+    effect_request = _effect_domain_request(monkeypatch, "HIGH")
+    changed = list(pair)
+    changed[0 if child == "principal" else 1] = effect_request
+    assert _signing_requests_match(tuple(changed), request) is False
+    assert _signing_requests_match(pair, request) is True

@@ -1,5 +1,465 @@
 # foundups_mcp_bridge TestModLog
 
+## [2026-10-19] MCP 1.30.0 coordinated dependency contract
+
+- Updated the existing exact launcher dependency assertion to MCP 1.30.0;
+  the inert query candidate still admits only packaging 26.0, disjoint from
+  the launcher quartet. Existing version-drift rejection remains intact.
+- Fresh external CPython 3.12.14 copy-based venv with the declared quartet and
+  pytest 9.0.3: launcher, HTTP server and candidate-binding selection yielded
+  **28 passed, 19 skipped, 2 deselected in 3.00s**. The two deselected owned HTTP
+  cases and 19 skipped platform cases require Windows; this is partial coverage.
+  Used `-B`, disabled plugin autoload/cacheprovider, `--noconftest`, importlib
+  mode and an external basetemp. The real candidate version probe also passed.
+- Initial full-selection attempts: **28 passed, 19 skipped, 2 errors**, first
+  because uv's symlink interpreter was rejected, then because Linux lacks the
+  required System32 observer. No production service was launched. Do not count
+  these as passing lifecycle tests or aggregate repeated counts.
+- The unchanged Windows CI gate still requires all **49** cases without skips,
+  including real authentication, allowlist, concurrency and owned cleanup.
+  Hosted verification remains pending at this source checkpoint. WSP22/50/71/97.
+
+## [2026-10-04] Hosted observer correction
+
+First PR2057 head9f74a627 passed46 controls but failed both live cases: fixed
+PowerShell Get-NetTCPConnection exceeded10s before any protocol request. Both
+owned children terminated with one lock release/no cleanup errors; the owned
+VHD detached. This is an observed hosted fixture failure, not a passing release.
+
+Replaced only the test observer with fixed System32 netstat numeric TCP/PID
+projection, following the existing security sentinel's Windows row format.
+Exact host/port/listening state, a single captured PID and live process remain
+mandatory. No raw endpoint table is persisted. The1MiB character limit applies
+after capture; it is not a streaming memory bound. Polls share a15s startup
+window with each command capped at10s/remaining time.
+
+All prior48 test-function ASTs are unchanged. One new projection control covers
+foreign/wildcard/malformed/multiple-owner rows. Its first run failed because the
+test author's PID replacement also changed the port; only that input was fixed.
+Final47 nonlistener +2 live cases pass; original46 control IDs/order are intact.
+No additional model call or production change. Hosted replacement result pending.
+
+## [2026-10-04] Paired runtime, startup hooks and cleanup
+
+Frozen before repair:44 nonlistener criteria yielded40pass/4fail against original
+source; repaired startup/version handling passed44/44. An earlier harness attempt
+had28pass/3fail/2skip due missing PyWin32 startup and symlink privilege; it was
+not accepted compatibility evidence. The first two-case live invocation yielded
+one pass, one failure plus its teardown error. The first startup exception type
+was not retained and remains unknown; fixture emergency cleanup terminated only
+its owned PID28932. The other owned PID13492 completed normal fixture cleanup.
+
+Two new frozen post-spawn controls then reproduced44pass/2fail on46 cases.
+The one local worker proposal was rejected without execution. Coordinator repair
+passes the identical46 cases, and revised live diagnostics pass both HTTP cases:
+48 distinct criteria total, not the sum of repeated attempts. The live timeout
+change affects metadata observation only; auth, tool allowlist, ownership and
+cleanup assertions remain. The frozen cleanup cases stayed unchanged after worker
+output; the later hosted observer repair is recorded above. Symlink-or-junction fallback retains the same reparse-point rejection.
+
+Exact commands, source hashes, XML, typed PID/cleanup observations and all failed
+attempts are preserved under `outputs/rsi-mcp-runtime-qualification-20261004`.
+Both final phases use the existing bounded child/Job owner, a disposable candidate
+copy and2GiB ceiling. Local test durations are in their individual receipts.
+CI separately requires all48/no skips on a fresh hosted Windows runtime; hosted
+execution remains pending. No production runtime activation or native admission.
+
+## [2026-10-02] Optional Windows aggregate Job memory qualification
+
+- Frozen before implementation: 29 deterministic missing-API cases represent
+  one capability gap, not 29 independent defects. Candidate selection retains
+  19 original no-child cases alongside them; two Windows allocation controls
+  remain separately selected. The initial packet preserved the original
+  9,901-byte prefix; the later overflow-oracle correction is recorded below.
+- The first audit attempt stopped in pytest setup with a denied DLL load and
+  no executed case/test child; it is not a product assertion failure. The
+  versioned repair excludes optional interactive readline, retains the exact
+  kernel32-only DLL allowance, and records future denied DLL basenames. The
+  original failure did not identify its DLL; pyreadline's user32 dependency is
+  the source-grounded explanation, not an observed DLL name.
+- Revised baseline: 29 expected missing-API failures, zero errors/skips/test
+  children in 1.781s. The first candidate produced 48 passing assertions but
+  an invalid harness receipt: nine pytest current-temp symlink attempts were
+  denied. That attempt is preserved and is not accepted qualification.
+- Revised candidate: 48 passed in 2.047s with a valid harness receipt. The
+  initial two Windows controls failed the compound parent assertion with no
+  guard denials or source drift. Return code, oversized output, and read-failure
+  components were not recorded separately. A separately reviewed one-case
+  diagnostic then failed before allocation: the immediate nested Job reported
+  `0x3000` flags and zero memory limit. It does not retroactively prove the exact
+  failures of the first two controls.
+- The physical fixture now reuses existing `current_process_image_path`,
+  avoiding the venv redirector's nested Job. With the same 128 MiB limit,
+  V4 passed both controls in 1.203s parent time: 1 MiB commit/release succeeds,
+  256 MiB commit rejects; zero errors/skips/guard denials and stable bindings.
+- The first connected selection produced 11 passes / one failure in 75.61s.
+  The original stdout-overflow test incorrectly required zero exit even though
+  the unchanged runner deliberately terminates an oversized live writer.
+  Both it and the maintenance equivalent now require `output_read_failed is
+  False`, retaining overflow and exact-length assertions. The corrected four
+  process cases pass in 6.77s pytest / 8.656s parent time with stable bindings.
+  All eight manifest cases passed in the first selection and were not rerun.
+- Final local evidence is 62 distinct passing cases (48 + 2 + 4 + 8), not one
+  62-case invocation. Audit receipts are retained in the external
+  `20261002-rsi-child-memory` lane. Publication and hosted CI remain pending;
+  no native model/runtime admission or RSI gain follows. WSP 00/15/22/50/62/97.
+
+## [2026-09-14] Dependency candidate and immutable-query qualification
+
+- Base `1173d1ab5e4af8a0e3cbe5381bcd30cf0e865ac3`: `test_mcp_launcher_http.py`, `test_mcp_server_sse.py`, `test_holo_query_snapshot_store.py`: **38 passed, 2 deselected in 7.87s**. Includes a temporary real-Chroma export and subsequent immutable-reader query.
+- Fresh external venv with FastMCP 3.2.0, MCP 1.28.1, Pydantic 2.12.3, Uvicorn 0.38.0, pytest 9.0.3 and pytest-asyncio 1.3.0: the first two suites **25 passed, 2 deselected in 3.68s**. This repeats the same 25 MCP cases; there are 38 distinct passing cases across both environments, not 63 distinct cases.
+- Both use `-B`, importlib mode, disabled plugin autoload/cacheprovider, explicit async plugin and external temporary/DB paths. Both exclude `test_protocol_readiness_canary_auth_and_concurrency_lifecycle` and `test_canary_rejects_unauthenticated_connection`; no fixed-port service was started. Exact paired live lifecycle/closure/admission is unverified.
+- PyPI wheel-only dry runs: FastMCP-only quartet fails resolution; MCP-only and paired quartets resolve. No shared package or test-source changes. Commands, source fingerprints and environment evidence are recorded in the existing RSI baseline under `dependency_qualification_continuation_20260914`. WSP 22, 50, 97.
+
+## [2026-09-13] Existing Windows runtime-selection regression
+
+- `test_reddog_sealed_holo_runtime.py -k 'trusted_holo_site_packages or actual_windows_primary_checkout'`: **2 passed, 16 deselected in 0.39s**. Vetted primary-checkout venv, `-B`, disabled plugin autoload, explicit async plugin, isolated temporary/cache paths and importlib mode.
+- Covers synthetic checkout/version rejection and the real primary checkout's vetted dependency path. No test source changed; no provider, maintenance or product test was selected.
+- Separate normal Holo query restored CURRENT/no-gap at matched reference `78b79c36`; this is not current-main or exact-runtime-closure acceptance. WSP 22, 50, 97.
+
+## [2026-08-30] Held builder child falsification
+
+- Captured authentic RED collection before implementation: both new focused
+  tests failed import because the child contract and bounded runner were absent.
+- Closed child flags/path/environment, strict one-line JSON, identity binding,
+  timeout/overflow/tree cleanup, before/after full reproof, and temp/protected
+  root aliasing. A real qualified O: child passes without changing its
+  composition descriptor.
+- Shared runner extraction preserves maintenance compatibility. Production
+  modules remain below 500 lines and every changed function is below 50 lines.
+  Hostile review added direct-size, live-overflow, output/read failure, timeout,
+  complete protected-root, after-child mutation, and accidental-construction
+  falsifiers. Extension README was compressed to 998 lines.
+- A later authentic RED test proved that direct-parent exit could leave an
+  inherited-stdout descendant alive. Windows Job Object containment now kills
+  that tree without resolving an external cleanup executable. Setup, assignment,
+  enumeration, resume, terminate, close, and reader-start failures now have
+  direct falsifiers.
+- Two pre-`-B` validation paths polluted writable inert generations (21/181 and
+  6/32 pycache/pyc). Both are quarantined; subprocess fixtures and the explicit
+  O:/E: conversation harness now suppresses bytecode and user-site imports.
+  Focused physical adjacency is 70/two capability skips in 108.06 seconds and
+  includes the physical child, with zero active/source bytecode residue.
+- Complete final original-order bridge replay is 1,694 passed / 23 capability
+  skips in 638.81 seconds. It first exposed and then closes health JSON admission
+  that had depended on the ambient recursion limit; 160/160 focused health
+  vectors now enforce an explicit string-aware 128-level structural cap.
+- Final source-image inspection found four prior encodings pyc files. The whole
+  image is retained in O: forensic quarantine; the rematerialized runtime is
+  byte-equal to all 3,845 qualified archive members with no missing/extra files,
+  and both source/active trees are clean after a `-B` verification host run. A
+  second four-file cache stamped 08:27:30 was preserved as a complete image and
+  rematerialized archive-exact before final closure; attribution remains unknown.
+  (WSP 6/15/22/50/62/84/97)
+
+## [2026-08-30] Base-prefix consumer false-green closure
+
+- The inherited process/candidate selection passed 28 tests / one skip while
+  both fixtures incorrectly made `generation_root == base_prefix_root`.
+  Shared real materialization then produced three authentic RED failures:
+  rejecting the valid process/candidate prefix and accepting the obsolete
+  candidate root-level interpreter.
+- Corrected both fixtures, required the canonical payload directory, and bound
+  process prefix roles to `base_prefix_root`. The shared test now invokes only
+  the two topology validators, preserving the explicit no-child boundary.
+- Final focused evidence is 31 passed / one expected skip; the exact 13-file
+  adjacent selection is 206 passed / four expected capability skips. Changed
+  Python functions are at most 45 lines after extracting the 41-line process
+  fixture. Registry generation/check is current at 1,638 tests / 269
+  quarantined. (WSP 6/15/50/62/84/97)
+
+## [2026-08-30] Inert builder-runtime composition falsification
+
+- Captured authentic RED collection before production code: the focused suite
+  failed with `ModuleNotFoundError` for the absent coordinator module.
+- Added 36 falsifiers for exact outer call order, complete dependency identity,
+  exact result classes and booleans, stable path-free strings and exception
+  graphs, stage short-circuiting, no rollback/delete, descriptor-only
+  persistence, strict runtime nonclaims, first publication, exact reuse, and
+  the public reviewed O: wheel with an exact synthetic base.
+- The real binding exposed that the base payload root is `python-runtime`; this
+  is retained as next-sprint process/candidate consumer debt rather than hidden
+  by synthetic fixtures. Focused tests pass 36; the adjacent selection passes
+  318 with six expected capability/opt-in skips. Generated-manifest coverage
+  passes 8; WSP_97 coverage passes 74 with one expected skip. The registry is
+  current at 1,637 / 269 quarantined and the 1,394-file backend digest is
+  `5c081f20d5db...f9c6`. (WSP 6/15/50/62/84/97)
+
+## [2026-08-29] Sequential builder/dependency composition falsification
+
+- Added 19 focused falsifiers for exact source/dependency/source sequencing,
+  live source authority at both observations, durable source identity excluding
+  call-local publication truth, dependency-tree equality, a real dependency
+  materializer call, source/tree drift, invalid dependency claims, strict bool
+  and reuse handling, stable path-free failures, no rollback/deletion, and
+  path-free public nonclaims.
+- The initial authentic run exposed a Windows `Path` subtype rejection in the
+  contract; replacing exact-class path checks with `isinstance(..., Path)` made
+  valid Windows bindings admissible without weakening absolute-path checks.
+  Independent hostile review then identified that the call-local publication
+  field required exact-bool validation; a hostile `Path` falsifier closes that
+  authority-leak surface. A second three-stage falsifier requires every reuse
+  observation to be an exact boolean. The final physical falsifier runs the
+  sealed public coordinator against the real reviewed O: wheel for first
+  publication and complete reuse, with unchanged source bytes.
+- Final evidence is **19 focused passes**, **246 / seven expected skips** across
+  the exact 16-file adjacent builder/dependency surface, **58 generated
+  registry/manifest passes**, and **66 / one expected skip** for the WSP_97
+  validator. The registry is current at 1,636 tests / 269 quarantines; the
+  backend closure is 1,391 files at `a5831a36d548...85509`.
+  Extension compatibility and deterministic 67-file package-surface checks
+  passed; no VSIX was emitted for this backend-only slice.
+  (WSP 6/15/50/62/84/97)
+
+## [2026-08-29] Wheel-bound packaging source phase 2C2a falsification
+
+- Captured authentic RED collection before implementation: both new suites
+  failed with `ModuleNotFoundError` for the absent source-contract module; no
+  fixture or pytest configuration failed.
+- Added 44 focused falsifiers for wheel-vs-tree generation identity, exact raw
+  and extracted bytes, source lease duration, strict nonclaims, private byte
+  authority, canonical contracts, mutation/ADS/hardlink/extra topology,
+  store/limit/token rejection, pre/post-publication quarantine, valid/corrupt
+  no-replace winners, reuse, two-thread convergence, quarantine failure cause
+  preservation, O(depth) handle behavior across 105 sibling members, public
+  authority/nonclaim completeness, O:/E: pre-mutation confinement, valid
+  payload/token pre-mutation rejection, wheel ADS/hardlink/reparse and case
+  alias rejection, unconditional scope-exit source reproof, and mutations
+  between two consecutive complete verification passes, denied tail writes to
+  descriptor/inventory/wheel/member files under retained handles, and rejection
+  of a tail-added file by the terminal complete-topology proof. The final
+  falsifier flips both unsigned persisted authority booleans and proves neither
+  durable verification nor public reuse can inherit publication-time authority;
+  only current live-source verification becomes true on reuse.
+- The exact provisioned O: wheel passed first publication plus 200 full reuses
+  in **105.09 seconds**. One wheel-bound generation remained, durable binding
+  fields matched, only the first result carried publication-time lease
+  authority, every call carried current-verification authority, process
+  handle/RSS deltas stayed below fixed gates, no dependency runtime appeared,
+  and the source SHA remained unchanged.
+- The focused result is **44 passed / one expected opt-in skip**. Broader
+  evidence passed: **227 / 7 expected skips** across the exact 15-file adjacent
+  builder/dependency surface, **36 passed** for registry/manifest generation,
+  **66 / 1 expected skip** for the WSP_97 validator, and both extension
+  compatibility/package-surface checks. The final backend closure is 1,388
+  files at `ff0fb87a...e60c6`. (WSP 6/15/50/62/84/97)
+
+## [2026-08-29] Reviewed packaging wheel admission falsification
+
+- Recorded an authentic RED collection failure before implementation:
+  `ModuleNotFoundError` for the absent wheel-admission module. That evidence
+  exists in the operator execution transcript; Git history alone cannot prove
+  the pre-code ordering, so no stronger durable test-first claim is made.
+- Added 63 unit falsifiers covering the internal byte proof, raw archive
+  envelope/layout and resource dialect, Windows-illegal/case/prefix paths,
+  exact source-only distribution roots, METADATA/WHEEL/RECORD ownership, and
+  Windows held-path/hardlink/ADS/mutation behavior. Independent probes for CRC,
+  unsupported method, executable/symlink attributes, multidisk, ZIP64,
+  duplicates, control paths, duplicate tags, all seven bool limits, and public
+  nonclaims were converted to durable tests.
+- The opt-in physical integration gate admitted the exact 74,366-byte
+  `sha256:b36f1fef...37529` wheel 200 times in 2.78 seconds with equal results,
+  bounded handle/RSS deltas, 24 members / 276,911 expanded bytes, and unchanged
+  source SHA. This is repeatability/leak evidence only.
+- The inherited 72,261 RECORD/inventory plus 1,500 Git/source scale tier passed
+  in 25.70 seconds after the shared-contract refactor. Full adjacent and
+  physical builder closure passed **142 tests / one expected absent O:/E:
+  pinned-Git-image skip in 29.79 seconds**. Generated backend-manifest plus
+  registry coverage passed **36 tests in 99.08 seconds**; the extension
+  compatibility/package surface passed **2 Node tests**. These results are
+  bound in the Phase 2C1 WSP_97 execution receipt. (WSP 6/15/50/62/84/97)
+
+## [2026-08-29] Phase 2B.1 pinned-Git live-gate contract correction
+
+- Corrected the skipped O:/E: integration gate: a worktree-only mutation now
+  must reprove identical committed-HEAD Git authority. The prior expected
+  `REPOSITORY_STATE_INVALID` had no production path because the Git component
+  intentionally avoids worktree porcelain and never claims global cleanliness.
+- Preserved the layered rejection boundary: source-authority tests continue to
+  reject bound worktree bytes that differ from either the backend manifest or
+  their exact committed HEAD blobs. No production authority code changed.
+- Fresh verification recorded 2026-08-29 19:20 JST (failure signature: none):
+  - `& 'O:/Foundups-Agent/.venv/Scripts/python.exe' -m pytest
+    modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_git.py
+    modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_source.py
+    -q --basetemp='O:/tmp/reddog-phase2b1-pytest'`:
+    **29 passed / 1 expected O:/E: Git-image skip in 0.59s**.
+  - `$tests = Get-ChildItem
+    modules/infrastructure/foundups_mcp_bridge/tests
+    -Filter 'test_reddog_holoindex_query_runtime_builder*.py' |
+    Sort-Object Name; & 'O:/Foundups-Agent/.venv/Scripts/python.exe'
+    -m pytest @($tests.FullName) -q
+    --basetemp='O:/tmp/reddog-phase2b1-builder-suite'`:
+    **77 passed / 2 expected Git-image/opt-in-scale skips in 1.92s**.
+  - `& 'O:/Foundups-Agent/.venv/Scripts/python.exe' -m pytest
+    modules/infrastructure/wre_core/tests/test_wre_test_registry.py -q
+    --basetemp=O:/tmp/reddog-phase2b1-registry`: **28 passed in 11.00s**.
+  - `& 'O:/Foundups-Agent/.venv/Scripts/python.exe'
+    scripts/generate_reddog_backend_manifest.py --check`: **PASS**, 1,378
+    runtime files, digest `48a91fa832bd99de90d9580394ac2a5da492a0925aed36b90c3cea7508d3fc1d`.
+  Evidence is bound in
+  `docs/audits/infrastructure/HOLOINDEX_QUERY_RUNTIME_BUILDER_GIT_TEST_CONTRACT_WSP97_EXECUTION_RECEIPT_PHASE2B1.json`.
+
+## [2026-08-29] Inert query-runtime builder authority falsification
+
+- Added six focused builder suites for the cross-bound receipt, actual-process
+  topology, source-only packaging ownership, held/pinned Git observations,
+  exact manifest/HEAD source bytes, and opt-in resource scale.
+- Hostile review reproduced and closed missing cross-component identities,
+  incomplete `packaging.*` enumeration, permissive roots/sys.path, dist-info and
+  package-root aliases, duplicate METADATA, noncanonical RECORD hashes/sizes,
+  hidden Git index flags, unbound topology, executable hash/hold TOCTOU, raw
+  exception leakage, quadratic ownership/source lookup, and the worktree-status
+  surface that could launch an unpinned repository-configured filter process.
+- Public process/packaging/source wrappers now prove two observations or reject
+  mutation, including source bytes changed during the second origin pass; the
+  Git suite includes a real O:/E:-only integration gate that currently skips
+  because this host has no provisioned image.
+- Latest focused result is **83 passed / one expected O:/E: Git-image skip**.
+  The opt-in upper-shape tier passed **72,261 packaging rows / 1,500 Git and
+  source rows in 34.438s, +6 handles, +77,557,760 RSS bytes**.
+- The packaging fixture is synthetic (nine rows); the scale tier exercises
+  linear parser/index/batch/source algorithms rather than 72,261 physical
+  packaging files. The ambient 42-row installation remains ineligible. Typed
+  wrappers are not durable authentication, and every public candidate,
+  activation, exact-runtime, A-grade, and retrieval-RSI claim stays false.
+
+## [2026-08-29] Clean query-runtime candidate falsification
+
+- Added contract, metadata, graph, bound-build/reproof, and opt-in scale tests
+  for exact identity, approved volumes, composition/dependency/source binding,
+  strict target markers, extras/Requires-Python, distribution and wheel
+  identity, unique module-origin/RECORD owners, selected-byte bounds, path/case
+  order, startup/editable rejection, executable roles, and exact subprocess use.
+- Independent hostile probes first found and reproduced five accepted-invalid
+  schema cases plus graph/marker/RECORD/resource gaps. Regression tests now pin
+  those falsifiers; the 45,450-member scale tier is opt-in and separate from
+  interactive validation.
+- Second-round hostile tests pin clean exact-HEAD source authority, before/after
+  component and source equality, O:/E:-only inputs, bounded sequences, broad
+  ownership ambiguity, explicit external exclusions, normalized parsed
+  dependency names, and direct/transitive FastAPI/Uvicorn rejection.
+- A third audit proved the ambient `packaging` parser was pinned but not
+  execution-bound. Public build/reproof now reject; 73 focused tests (plus two
+  expected capability/opt-in skips) pin the private diagnostic boundary,
+  declared Phase-2A module bytes/origins, linked-root rejection when supported,
+  nested bounds, limit ceilings, exact source-root cross-binding, repeat
+  determinism, and launcher/candidate requirement disjointness.
+  The opt-in 45,450-member scale tier passed current bytes in 4.56 seconds.
+- Adjacent runtime contracts passed 274 / 11 expected skips; backend manifest
+  generation passed 8 and the exact 1,366-file digest remained current. The
+  test registry remained current at 1,625 tests / 268 quarantined.
+- A live trace remains lower-bound evidence only. No DLL, ctypes/CFFI, plugin,
+  subprocess, loader, activation, owner, route, maintenance, or VSIX claim was
+  introduced.
+
+## [2026-08-29] Declared Windows/CPython ABI falsification
+
+- Added parser, pure-contract, derivation, publication, reuse, and hostile
+  boundary tests for inert composition-bound ABI evidence. The first green
+  nominal suite was rejected after independent agents reproduced delay
+  attribute aliasing, null loader-table acceptance, repeated-thunk work
+  amplification, forwarded-export false positives, duplicate RECORD ownership,
+  absolute-path error leakage, and Windows long-path quarantine failure.
+- The repaired focused matrix is **67 passed / one host-capability skip**. It
+  includes paired normal/delay table checks, modern RVA delay descriptors,
+  forwarder-aware Python exports and initializers, aggregate multi-file bounds,
+  RECORD traversal/duplicate rejection, ambiguous/nonlocal basename graph
+  rejection, stable error codes, and long-path post-publication quarantine.
+- The explicit non-scale ABI/acceptance/composition/base/dependency/environment/
+  process-image/sealed-runtime adjacency passed **259 / seven expected
+  capability skips** under an O:-local basetemp.
+- A read-only O:-local scan parsed 388 of 396 native-suffix files; all eight
+  rejects were PE32, while parsed metadata identified 384 AMD64 and four ARM64
+  images. This is a falsifier for broad AMD64 admission, not permission to
+  ignore incompatible artifacts. No live Holo, owner, route, maintenance,
+  registry, extension, or VSIX state was touched.
+
+## [2026-08-29] Inert runtime-composition falsification
+
+- Added pure schema and end-to-end adversarial coverage for a descriptor-only
+  base/dependency composition generation: exact reuse, independent component
+  reproof, interpreter member binding, substitution, stale/tampered component
+  bytes/contracts, topology aliases, overlapping stores, publication-window
+  mutation, quarantine, and path-free public evidence.
+- Hostile audit falsified the initial sequential `B -> D -> interpreter` proof
+  by mutating a non-interpreter base member during dependency verification.
+  The repaired `B1 -> D1 -> D2 -> B2` verifier requires exact binding equality;
+  one-shot base and dependency mutation probes now fail closed. This remains a
+  bounded cross-pass proof, not write denial or ABA resistance.
+- Focused result is 24 passed / 1 capability skip. The explicit adjacent base,
+  dependency, runtime-environment, process-image, sealed-runtime, and
+  composition non-scale selection is 159 passed / 6 expected capability skips. All temp
+  roots were explicitly O:-local; no live owner, route, replica, Holo, ACL,
+  queue, or maintenance state was touched.
+- Production evidence is 72,261 dependency files / 11,639 directories /
+  1,853,891,335 bytes materialized in 2,856.73 seconds, followed by a 588.32
+  second descriptor-only composition. The fresh repaired verifier passed in
+  579.54 seconds, retained descriptor `sha256:cbbfe268...` unchanged, and kept
+  every activation-grade claim false.
+
+## [2026-08-29] Inert base-runtime closure falsification
+
+- Added 39 strict contract tests and adversarial materialization/edge coverage
+  for runnable topology, role coverage, projections, exact reuse, source and
+  published mutation, unlisted bytes, staging corruption, aliases, path bounds,
+  contract tampering, ADS, and protected-source lease access.
+- Synthetic base-runtime closure passed 55 tests with one opt-in scale skip;
+  dependency/runtime-environment/sealed-runtime/process-image adjacency passed
+  82 tests with five expected capability skips.
+- The first real run failed closed on four unclassified `DLLs` data files. The
+  next failed closed because the protected source root denied unnecessary
+  DELETE access. Focused fixes added an explicit runtime-data role and a
+  read-only source-lease mode without relaxing share denial.
+- The repaired opt-in production shape passed exact materialization and reuse:
+  4,068 files / 372 child directories / 81,515,843 bytes, generation
+  `sha256:3efe4fba...`, 239.94 seconds. All generated/test bytes were O:-local;
+  no live Holo state was touched.
+
+## [2026-08-28] Producer-rank preservation falsification
+
+- Added a direct owner-response counterexample proving a typed producer's
+  exact-symbol winner cannot be reversed by a slightly higher raw similarity
+  on the next item.
+- The complete flatten group is 16/16 before manifest regeneration. A wider
+  pre-manifest run passed 206 and failed six owner-construction cases only at
+  the intentional authenticated source-closure check. (WSP 05/06/34/50/97)
+- The final focused Holo/bridge/HoloDAE matrix is 246/246. Synthetic owner
+  construction now injects a false-grade test runtime identity so unit tests
+  do not inherit multiple host `site-packages` roots; the dedicated runtime
+  closure suite retains the real fail-closed boundary.
+- The first complete bridge run exposed eight host-coupled tests after 1,180
+  passes / 14 skips: four HTTP fixtures and four runtime-identity cases saw
+  both machine and per-user package roots. HTTP owners now inject an explicitly
+  non-A-grade synthetic identity, while runtime tests use one synthetic package
+  root and still exercise all manifest, tamper, and ambiguity falsifiers.
+
+## [2026-08-28] Current-truth response-order falsification
+
+- Reproduced the governed-adapter `where` incompatibility, then added a real
+  immutable-snapshot/collection-search regression for exact `record_kind`
+  filtering plus malformed-filter rejection.
+- Added synthetic cross-bucket evidence proving broad current-status queries
+  order canonical current contracts, implementation, then historical audits.
+- Added the inverse historical-baseline case and case-variant path deduplication
+  so the policy cannot leak into exact historical retrieval or duplicate one
+  repository artifact.
+- Tests are pure response normalization with no live owner, Holo store, model,
+  route, maintenance, reindex, or ranker promotion. (WSP 05/06/34/50/97)
+- Combined Holo/bridge/registry evidence: **210 passed / 1 optional skip**;
+  generated registry check: 1,608 tests / 268 quarantines.
+
+## [2026-08-28] Owner acquisition cycle falsification
+
+- Proved cycle zero preserves the existing pair, cycle one supplies two new
+  ports, and all 32 cycles form a complete 64-port permutation for one process.
+- Proved bool, negative, overflow, and string cycles reject. Existing one-shot
+  coverage in `scripts/tests/test_reddog_holoindex_owner_query_once.py` binds cycle
+  one through both startup attempts into result/receipt and rejects malformed
+  input before owner startup.
+- Isolated acquisition result: **28 passed**. No live owner, route, Holo,
+  maintenance, repository, or network state was touched.
+
 ## [2026-08-28] Inert dependency-runtime falsification
 
 - Added exact file/directory planning, bounded Windows traversal, existing

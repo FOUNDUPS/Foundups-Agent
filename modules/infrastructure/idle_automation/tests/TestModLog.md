@@ -1,11 +1,50 @@
 # Idle Automation Test Module Log
 
+## 2026-10-07 — Self-audit report consumption
+
+Six frozen regressions failed before repair; final connected140passed in3.92s.
+Independent source review found history overflow (reproduced1fail/2pass), now
+isolated by the seventh regression. Covers real empty/bounded/partial/failed
+scanners, malformed historical shapes and nonfinite count. CI includes consumer
+and three producer suites. No test invokes a live worker or external API.
+Separate live report persistence retained scan coverage and historical signatures.
+Evidence: outputs/rsi-permission-evidence-20261006/internal-audit-status-*.xml.
+
+
 **Module**: `modules/infrastructure/idle_automation`
 **Framework**: pytest
-**Last Updated**: 2026-07-24
+**Last Updated**: 2026-08-28
 **WSP Compliance**: WSP 22 (Module ModLog Protocol), WSP 34 (Test Validation)
 
 ---
+
+## 2026-08-29: Pre-owner exact-HEAD incident contract
+
+- The shared incident allowlist now includes `REPO_HEAD_MISMATCH`; durable
+  normalization continues requiring a current observed authority HEAD for all
+  non-authority-root incident kinds.
+- Fresh incident/root/coordinator result: **75 passed** with no live Holo or
+  OpenClaw effect.
+- The later exact-main acceptance at `09e98fff` used the real OpenClaw/WRE
+  path, completed the canonical task, returned CURRENT/no-gap/no-reindex on
+  the fresh query, and retained all 33 immutable replica artifacts. That live
+  receipt is separate from this no-effect test result.
+
+## 2026-08-28: Linked-control dependency runtime RED/GREEN
+
+- RED proved the post-merge executor forwarded its clean linked control
+  checkout directly to the authority transaction, reproducing the missing
+  `.venv`/snapshot-probe failure seen in the exact-main OpenClaw run.
+- GREEN reuses `resolve_holoindex_runtime_root()` and proves a distinct
+  same-repository primary runtime reaches the authority transaction while the
+  dedicated authority root remains unchanged.
+- Fresh focused result: **38 passed** across
+  `test_holoindex_postmerge_coordinator.py` and
+  `test_holoindex_postmerge_authority_order.py` plus the bounded
+  `test_holoindex_postmerge_runtime_root.py`, using O:-local temp storage.
+- The canonical WRE registry was regenerated from the staged new test and is
+  current at **1,609 tracked Python tests / 268 quarantined**; its focused
+  registry contract is **28 passed**.
 
 ## 2026-08-27: Exact-SHA activation order and AgentDB truth
 

@@ -48,7 +48,7 @@ Where:
 
 | Term | Definition | Boundary |
 |------|------------|----------|
-| **RedDog** | Operator-facing name, persona, continuous product identity, and conversation surface of a principal-scoped 0102 Digital Twin | Not one model, browser, server, or OpenClaw process |
+| **RedDog** | Lightweight, low-latency interaction, exchange, and attention surface through which a principal communicates with 0102 | Not 0102 and not one model, browser, server, or OpenClaw process |
 | **Red God** | Long-horizon metaphor for many governed RedDogs coordinating for their principals | Not a superuser, central sovereign, or implemented authority tier |
 | **p.fMALL** | Shared FoundUp discovery and interaction shell | Platform layer, not a FoundUp or OpenClaw instance |
 | **Progressive Web App** | Installable browser application technology | A presentation/runtime surface |

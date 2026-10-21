@@ -24,6 +24,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     run_reddog_signer_socket_service_config_supply,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_socket_service_config_supply import (
+    _initial_config,
     _PRINCIPAL_PUBLIC_KEY,
     _REDDOG_PUBLIC_KEY,
     _authority_profile,
@@ -225,3 +226,94 @@ def test_config_supply_uses_selected_state_not_stale_default(tmp_path: Path) -> 
     assert result.accepted is False
     assert FAIL_SIGNER_CONFIG_ARCHITECT_PUBLICATION_INVALID in result.rejection_reasons
     assert not (runtime / "signer_service_config.json").exists()
+
+
+def test_initial_handshake_composer_is_pure_and_rehydrates(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_rehydration import rehydrate_signer_socket_service_runtime_config
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import canonical_config_digest
+    repo, payload = _initial_config(tmp_path)
+    assert list(tmp_path.iterdir()) == []
+    config = rehydrate_signer_socket_service_runtime_config(
+        repo, Path(payload["runtime_root"]), payload,
+        expected_config_digest=canonical_config_digest(payload),
+    )
+    assert config.initial_handshake_only is True
+    assert config.max_requests == 1
+    assert config.control_loop_authority_policy is None
+    assert config.control_loop_anchor_path is None
+
+
+@pytest.mark.parametrize("mutation", [
+    "extra-policy", "extra-null", "legacy-schema", "missing-binding", "bad-binding",
+    "two-profiles", "other-profile", "aliased-refs", "mock-mode", "test-key",
+    "stale-permission", "two-requests", "boolean-count", "socket-artifact",
+    "socket-signer", "socket-ancestor", "socket-repo", "socket-escape",
+    "missing-digest", "wrong-digest",
+])
+def test_initial_handshake_config_rejects_widening(tmp_path, mutation):
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_rehydration import rehydrate_signer_socket_service_runtime_config
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import canonical_config_digest, SIGNER_SERVICE_CONFIG_SCHEMA_VERSION
+    repo, payload = _initial_config(tmp_path)
+    profile = payload["key_provider_profiles"][0]
+    updates = {
+        "extra-policy": {"control_loop_authority_policy": {}},
+        "extra-null": {"proposal_authority_policy": None},
+        "legacy-schema": {"schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION},
+        "bad-binding": {"owner_e0_authority_binding_digest": "sha256:invalid"},
+        "two-profiles": {"key_provider_profiles": [profile, profile]},
+        "mock-mode": {"provider_mode": "TEST_ONLY_DRYRUN"},
+        "test-key": {"allow_test_only_key_material": True},
+        "stale-permission": {"permission_snapshot_fresh": False},
+        "two-requests": {"max_requests": 2}, "boolean-count": {"max_requests": True},
+        "socket-artifact": {"socket_path": str(tmp_path / "artifacts" / "signer.sock")},
+        "socket-signer": {"socket_path": str(tmp_path / "signer-state" / "signer.sock")},
+        "socket-ancestor": {"socket_path": str(tmp_path / "signer.sock")},
+        "socket-repo": {"socket_path": str(repo / "socket" / "signer.sock")},
+        "socket-escape": {"socket_path": str(tmp_path / "socket-state" / ".." / "signer.sock")},
+    }
+    payload.update(updates.get(mutation, {}))
+    if mutation == "missing-binding":
+        del payload["owner_e0_authority_binding_digest"]
+    if mutation == "other-profile":
+        profile["signer_profile_id"] = "principal-identity"
+    if mutation == "aliased-refs":
+        profile["audit_mac_key_ref"] = profile["signing_key_ref"]
+    digest = canonical_config_digest(payload)
+    if mutation in ("missing-digest", "wrong-digest"):
+        digest = None if mutation == "missing-digest" else "sha256:" + "0" * 64
+    assert rehydrate_signer_socket_service_runtime_config(
+        repo, Path(payload["runtime_root"]), payload, expected_config_digest=digest,
+    ) is None
+
+
+@pytest.mark.parametrize("generation", [1, 2, True, "1"])
+def test_initial_config_selected_generation_is_exactly_one(tmp_path, generation):
+    from modules.communication.moltbot_bridge.src.reddog_signer_current_generation_config_loader import load_current_generation_signer_config
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import canonical_config_digest
+    repo, payload = _initial_config(tmp_path)
+    runtime = Path(payload["runtime_root"])
+    runtime.mkdir()
+    path = runtime / "signer_service_config.json"
+    path.write_text(json.dumps(payload), encoding="utf-8")
+    selection = {"runtime_root": str(runtime), "config_path": str(path),
+                 "config_digest": canonical_config_digest(payload), "generation": generation}
+    if type(generation) is int and generation == 1:
+        assert load_current_generation_signer_config(repo_root=repo, selection=selection).initial_handshake_only
+    else:
+        with pytest.raises(ValueError, match="initial_handshake_generation"):
+            load_current_generation_signer_config(repo_root=repo, selection=selection)
+
+
+def test_initial_config_cannot_enter_unadmitted_runtime(tmp_path):
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_rehydration import rehydrate_signer_socket_service_runtime_config
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply_contract import canonical_config_digest
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_wiring import run_reddog_signer_socket_service_runtime_wiring
+    repo, payload = _initial_config(tmp_path)
+    config = rehydrate_signer_socket_service_runtime_config(
+        repo, Path(payload["runtime_root"]), payload, expected_config_digest=canonical_config_digest(payload),
+    )
+    def forbidden(*args, **kwargs):
+        pytest.fail("unadmitted initial runtime accessed a dependency")
+    result = run_reddog_signer_socket_service_runtime_wiring(config, forbidden, serve_bounded=forbidden)
+    assert result.accepted is False
+    assert result.rejection_reasons == ("FAIL_SIGNER_RUNTIME_SECRET_GRANT_ADMISSION_INVALID",)

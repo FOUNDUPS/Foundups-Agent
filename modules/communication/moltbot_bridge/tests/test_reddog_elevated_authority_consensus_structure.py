@@ -20,6 +20,27 @@ MODULES = tuple(
         + list((Path(__file__).parents[1] / "src").glob(
             "reddog_ed25519_elevated_consensus_*.py"
         ))
+        + [(Path(__file__).parents[1] / "src" / name) for name in (
+            "reddog_reviewer_designation_contract.py",
+            "reddog_current_effect_reviewer_verification.py",
+            "reddog_signer_current_principal_authority_resolver.py",
+            "reddog_effect_consent_contract.py",
+            "reddog_current_effect_consent_verification.py",
+            "reddog_effect_consensus_proof.py",
+            "reddog_current_effect_signing_authority.py",
+            "reddog_effect_sovereign_contract.py",
+            "reddog_parent_consent_contract.py",
+            "reddog_current_parent_consent_verification.py",
+            "reddog_current_parent_consensus_authority.py",
+            "reddog_parent_consensus_proof.py",
+            "reddog_parent_consensus_model_evidence.py",
+            "reddog_parent_bound_effect_verification.py",
+            "reddog_parent_consensus_use_time.py",
+            "reddog_model_verifier_selection_inputs.py",
+            "reddog_consensus_nonce_custody.py",
+            "reddog_consensus_nonce_current_owner.py",
+            "reddog_consensus_nonce_authority.py",
+        )]
     )
 )
 TEST_MODULES = tuple(
@@ -32,6 +53,16 @@ TEST_MODULES = tuple(
     + sorted(
         Path(__file__).parent.glob("test_reddog_elevated_consensus_*.py")
     )
+    + sorted(Path(__file__).parent.glob("reddog_reviewer_*.py"))
+    + sorted(Path(__file__).parent.glob("test_reddog_reviewer_*.py"))
+    + sorted(Path(__file__).parent.glob("reddog_effect_consent_*.py"))
+    + sorted(Path(__file__).parent.glob("test_reddog_effect_consent_*.py"))
+    + sorted(Path(__file__).parent.glob("reddog_effect_signing_*.py"))
+    + sorted(Path(__file__).parent.glob("test_reddog_effect_signing_*.py"))
+    + sorted(Path(__file__).parent.glob("reddog_parent_*.py"))
+    + sorted(Path(__file__).parent.glob("test_reddog_parent_*.py"))
+    + sorted(Path(__file__).parent.glob("test_reddog_consensus_nonce_*.py"))
+    + [Path(__file__).parent / "consensus_nonce_test_support.py"]
 )
 LEGACY_RUNTIME_HOST_LIMITS = {
     "reddog_resident_queue_stage_handler_registry.py": (
@@ -68,7 +99,7 @@ def test_modules_have_no_shell_network_or_key_generation_imports() -> None:
 
 
 def test_consensus_modules_remain_bounded_lego_components() -> None:
-    assert len(MODULES) == 13
+    assert len(MODULES) == 33
     for path in MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name
@@ -86,7 +117,7 @@ def test_consensus_modules_remain_bounded_lego_components() -> None:
 
 
 def test_consensus_test_modules_are_bounded_lego_components() -> None:
-    assert len(TEST_MODULES) == 15
+    assert len(TEST_MODULES) == 62
     for path in TEST_MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name

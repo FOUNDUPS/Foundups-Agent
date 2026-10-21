@@ -54,45 +54,42 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels(
 
     assert runtime.issubset(tracked)
     assert set(generator.EXECUTABLE_FILES).issubset(runtime)
-    assert "holo_index.py" in runtime
-    assert "holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json" in runtime
-    assert "holo_index/query_result_contract_schema.py" in runtime
-    assert "scripts/reddog_authoritative_work_state_query_once.py" in runtime
-    assert "scripts/reddog_holoindex_incident_repair_once.py" in runtime
-    assert "scripts/reddog_start_operations_control_once.py" in runtime
-    assert (
-        "modules/communication/moltbot_bridge/src/reddog_start_operations_control.py"
-    ) in runtime
-    assert (
+    required = (
+        "holo_index.py",
+        "holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json",
+        "holo_index/query_result_contract_schema.py",
+        "scripts/reddog_authoritative_work_state_query_once.py",
+        "scripts/reddog_holoindex_incident_repair_once.py",
+        "scripts/reddog_holoindex_postmerge_runtime_once.py",
+        "scripts/reddog_start_operations_control_once.py",
+        "modules/communication/moltbot_bridge/src/reddog_start_operations_control.py",
         "modules/communication/moltbot_bridge/src/"
-        "reddog_start_operations_resident_client.py"
-    ) in runtime
-    assert (
-        "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md"
-    ) in runtime
-    assert (
-        "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py"
-        in runtime
+        "reddog_start_operations_resident_client.py",
+        "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md",
+        "modules/communication/moltbot_bridge/src/reddog_authoritative_work_state_query.py",
+        "modules/communication/moltbot_bridge/src/openclaw_dae.py",
+        "modules/foundups/src/foundup_registry_loader.py",
+        "modules/platform_integration/linkedin_agent/src/linkedin_agent.py",
+        "holo_index/maintenance_lock.py",
+        "holo_index/query_admission.py",
+        "holo_index/vector_segment_durability.py",
+        "modules/communication/moltbot_bridge/scripts/run_task.py",
+        "modules/communication/moltbot_bridge/src/openclaw_supervisor.py",
+        "modules/communication/moltbot_bridge/scripts/launch.py",
+        "modules/communication/moltbot_bridge/src/"
+        "holoindex_postmerge_runtime_controller.py",
+        "modules/communication/moltbot_bridge/src/"
+        "holoindex_postmerge_runtime_liveness.py",
+        "holo_index/owner_acquisition_contract.py",
+        "modules/infrastructure/database/src/agent_db.py",
+        "modules/infrastructure/database/src/"
+        "holoindex_postmerge_claim_contract.py",
+        "modules/infrastructure/idle_automation/src/holoindex_postmerge_coordinator.py",
+        "modules/infrastructure/database/src/database.py",
+        "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py",
     )
-    assert "modules/communication/moltbot_bridge/src/openclaw_dae.py" in runtime
-    assert "modules/foundups/src/foundup_registry_loader.py" in runtime
-    assert (
-        "modules/platform_integration/linkedin_agent/src/linkedin_agent.py" in runtime
-    )
-    assert "holo_index/maintenance_lock.py" in runtime
-    assert "holo_index/query_admission.py" in runtime
-    assert "holo_index/vector_segment_durability.py" in runtime
-    assert "modules/communication/moltbot_bridge/scripts/run_task.py" in runtime
-    assert "modules/communication/moltbot_bridge/src/openclaw_supervisor.py" in runtime
-    assert "modules/infrastructure/database/src/agent_db.py" in runtime
-    assert (
-        "modules/infrastructure/idle_automation/src/holoindex_postmerge_coordinator.py"
-    ) in runtime
+    assert set(required).issubset(runtime)
     assert "modules/infrastructure/database/src/Database.py" not in runtime
-    assert "modules/infrastructure/database/src/database.py" in runtime
-    assert (
-        "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py" in runtime
-    )
 
 
 def test_generated_closure_binds_isolated_acceptance_entrypoint(
@@ -206,6 +203,53 @@ def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
         assert "modules/communication/moltbot_bridge/src/" + filename in required
 
 
+def _assert_registry_and_builder_runtime_files(generated: dict[str, object]) -> None:
+    required = generated["required_runtime_sha256"]
+    assert (
+        "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
+        in generated["required_runtime_files"]
+    )
+    for relative in (
+        "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
+        "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md",
+        "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py",
+        "modules/infrastructure/wre_core/src/wre_test_registry_differential_plan_runtime.py",
+        "modules/infrastructure/wre_core/src/wre_git_bounded_io.py",
+        "modules/infrastructure/wre_core/src/wre_git_process_io.py",
+        "modules/infrastructure/wre_core/src/wre_git_tree_manifest.py",
+        "modules/infrastructure/wre_core/src/wre_test_registry_git_binding.py",
+        "modules/infrastructure/wre_core/src/wre_test_registry_impact_binding.py",
+        "modules/infrastructure/wre_core/src/wre_test_registry_scope_plan.py",
+        "modules/infrastructure/wre_core/src/wre_recognized_dependency_binding.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_dependency_composition_contract.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_dependency_composition.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_runtime_composition_contract.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_runtime_composition.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_child_contract.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_runtime_builder_child.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_bounded_child_process.py",
+    ):
+        assert relative in required
+    for relative in (
+        "extensions/reddog/start_operations_python_bootstrap.py",
+        "scripts/reddog_holoindex_owner_service_once.py",
+        "modules/communication/moltbot_bridge/src/reddog_holoindex_task_dispatch.py",
+        "holo_index/module_intent_snapshot.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_query_replica_manifest.py",
+        "modules/infrastructure/foundups_mcp_bridge/src/"
+        "reddog_holoindex_owner_acquisition.py",
+    ):
+        assert relative in required
+
+
 def test_checked_in_manifest_matches_independent_generation(
     generated_manifest: dict[str, object],
 ) -> None:
@@ -213,55 +257,10 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 320 * 1024
-    assert (
-        "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
-        in generated["required_runtime_files"]
-    )
-    assert (
-        "modules/infrastructure/wre_core/skillz/skills_registry_v2.json"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py"
-        in generated["required_runtime_sha256"]
-    )
-    for relative in (
-        "modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md",
-        "modules/infrastructure/wre_core/src/wre_test_registry_differential_plan_runtime.py",
-        "modules/infrastructure/wre_core/src/wre_git_bounded_io.py",
-        "modules/infrastructure/wre_core/src/wre_git_tree_manifest.py",
-        "modules/infrastructure/wre_core/src/wre_test_registry_git_binding.py",
-        "modules/infrastructure/wre_core/src/wre_test_registry_impact_binding.py",
-        "modules/infrastructure/wre_core/src/wre_test_registry_scope_plan.py",
-        "modules/infrastructure/wre_core/src/wre_recognized_dependency_binding.py",
-    ):
-        assert relative in generated["required_runtime_sha256"]
-    assert (
-        "extensions/reddog/start_operations_python_bootstrap.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "scripts/reddog_holoindex_owner_service_once.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/communication/moltbot_bridge/src/reddog_holoindex_task_dispatch.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "holo_index/module_intent_snapshot.py" in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/infrastructure/foundups_mcp_bridge/src/"
-        "reddog_holoindex_query_replica_manifest.py"
-        in generated["required_runtime_sha256"]
-    )
-    assert (
-        "modules/infrastructure/foundups_mcp_bridge/src/"
-        "reddog_holoindex_owner_acquisition.py"
-        in generated["required_runtime_sha256"]
-    )
+    assert generator.MANIFEST_PATH.stat().st_size <= 324 * 1024
+    lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 324 * 1024
+    _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
     result_module = (
         "modules/communication/moltbot_bridge/src/"
@@ -274,7 +273,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "3ccb0d6bd22754485e70b6769d83df4207efb2984eb6470570931830f8f5b827"
+    assert digest == "c7a671d41793dd6e70e61ea8cd3d7198b84a41cf91c8612eeb088c30768df7ca"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

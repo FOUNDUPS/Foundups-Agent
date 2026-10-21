@@ -5,8 +5,8 @@ NAVIGATION.py - WSP 87 Code Navigation Protocol Implementation
 This file maps problems to existing solutions to prevent vibecoding.
 0102 agents MUST consult this file BEFORE creating any new code.
 
-Status: ACTIVE - Fully functional with HoloIndex integration
-Last Updated: 2026-02-18 - Added Member Area (auth, dashboard shell, navigation)
+Status: ACTIVE curated map - Holo semantic retrieval remains fail-closed when stale
+Last Updated: 2026-08-29 - Added inert RedDog query-runtime builder authority components
 WSP Compliance: WSP 87 (Code Navigation), WSP 50 (Pre-Action Verification)
 
 COVERAGE:
@@ -26,6 +26,16 @@ ACHIEVEMENTS:
 # === NEED_TO: Problem -> Solution Mapping ===
 # Direct mapping of problems to existing code solutions
 NEED_TO = {
+    # Human-operated conversation skill; distinct from the message-only dialer
+    "RedDog phone conversation skill": ".claude/skills/reddog-phone-conversation/SKILL.md",
+    "create Japanese call conversation brief": ".claude/skills/reddog-phone-conversation/SKILL.md",
+    "two phone translate English resume": ".claude/skills/reddog-phone-conversation/SKILL.md",
+
+    # Japanese message-call prototype and agent build assignments
+    "make a phone call in Japanese": "modules/platform_integration/elevenlabs_calls/README.md",
+    "Japanese call roadmap": "modules/platform_integration/elevenlabs_calls/ROADMAP.md",
+    "Japanese call M2M Prometheus work orders": "modules/platform_integration/elevenlabs_calls/work_orders/README.md",
+
     # GotJunk Classification Logic
     "handle item classification": "modules/foundups/gotjunk/frontend/App.tsx:handleClassify()",
     "prevent duplicate item creation": "modules/foundups/gotjunk/frontend/App.tsx:handleClassify() - race condition guards",
@@ -116,6 +126,24 @@ NEED_TO = {
     "openclaw security tests": "modules/ai_intelligence/ai_overseer/tests/test_openclaw_security_sentinel.py",
     "openclaw dae tests": "modules/communication/moltbot_bridge/tests/test_openclaw_dae.py",
     "moltbot bridge digital twin": "modules/communication/moltbot_bridge/README.md",
+    "reddog holo exact main postmerge controller": "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py:run_holoindex_postmerge_runtime_once()",
+    "reddog holo postmerge cli": "scripts/reddog_holoindex_postmerge_runtime_once.py",
+    "reddog holo postmerge completion policy": "modules/communication/moltbot_bridge/src/holoindex_postmerge_supervisor_policy.py:validate_supervisor_holoindex_postmerge_completion()",
+    "reddog holo query builder authority receipt": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py:builder_authority_receipt()",
+    "reddog holo query builder process proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py:prove_builder_process_authority()",
+    "reddog holo query base prefix consumers": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_base_prefix_consumers.py",
+    "reddog holo query builder packaging proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging.py:prove_builder_packaging_authority()",
+    "reddog holo query builder packaging wheel admission": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_wheel.py:admit_pinned_builder_packaging_wheel()",
+    "reddog holo query builder packaging source generation": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_materializer.py:materialize_pinned_builder_packaging_source()",
+    "reddog holo query builder packaging source verification": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_verifier.py:verify_builder_packaging_source_generation()",
+    "reddog holo query builder packaging source topology": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_topology_windows.py:pinned_builder_packaging_source_generation()",
+    "reddog holo query builder dependency composition": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_dependency_composition.py:compose_pinned_builder_dependency_runtime()",
+    "reddog holo query builder dependency composition contract": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_dependency_composition_contract.py:BuilderDependencyCompositionBinding",
+    "reddog holo query builder runtime composition": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition.py:compose_pinned_builder_runtime()",
+    "reddog holo query builder runtime composition contract": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition_contract.py:BuilderRuntimeCompositionBinding",
+    "reddog holo query builder pinned git proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_git.py:prove_pinned_git_authority()",
+    "reddog holo query builder source proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_source.py:prove_builder_source_authority()",
+    "reddog holo query builder scale proof": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_scale.py",
     "reddog main readonly operational bootstrap": "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap.py:run_reddog_main_readonly_operational_bootstrap()",
     "reddog main bootstrap result projection": "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap_result.py:RedDogMainReadonlyBootstrapResult",
     "reddog authority profile typed rehydration": "modules/communication/moltbot_bridge/src/reddog_authority_profile_rehydration.py:rehydrate_authority_profile_runtime()",

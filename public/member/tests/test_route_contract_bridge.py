@@ -5,12 +5,16 @@ Tests for the /f/{foundup_id} canonical landing route.
 WSP 104: /f/{foundup_id} is the canonical FoundUp landing namespace.
 
 Route behavior:
-  - /f/{foundup_id} renders landing content directly (no redirect)
-  - Canonical URL stays visible in address bar
-  - Subpath support preserved for future /app mount
+  - /f/ and /f/{foundup_id} render scope-free public discovery
+  - /f/{foundup_id}/app and app deep links hand off to /member/
+  - Member runtime catalog and entry_url stay outside public rendering
 """
 import json
 import os
+import re
+import shutil
+import subprocess
+from html.parser import HTMLParser
 import pytest
 
 # public/member
@@ -44,6 +48,62 @@ def _read(relpath, base=ROOT):
         return f.read()
 
 
+class _InlineScripts(HTMLParser):
+    """Collect inline script text using HTML's case-insensitive tag semantics."""
+
+    def __init__(self):
+        super().__init__()
+        self.scripts = []
+        self.in_script = False
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "script":
+            self.in_script = not any(name == "src" for name, _ in attrs)
+            if self.in_script:
+                self.scripts.append("")
+
+    def handle_endtag(self, tag):
+        if tag == "script":
+            self.in_script = False
+
+    def handle_data(self, data):
+        if self.in_script:
+            self.scripts[-1] += data
+
+
+def _raw_landing_script():
+    """Extract the actual sole inline owner without rewriting its JavaScript."""
+    parser = _InlineScripts()
+    parser.feed(_read("../f/index.html"))
+    parser.close()
+    assert len(parser.scripts) == 1, "Expected the canonical inline route owner"
+    return parser.scripts[0]
+
+
+def _landing_script():
+    """Keep documentation comments from satisfying static runtime assertions."""
+    return re.sub(r"(?m)^\s*//[^\n]*$", "", _raw_landing_script())
+
+
+def _app_gate():
+    script = _landing_script()
+    gate = re.search(r"if\s*\(isAppMount\)\s*\{([^}]+)\}", script)
+    assert gate, "App routes must retain an explicit participation gate"
+    return script, gate
+
+
+@pytest.mark.parametrize("tag", ["SCRIPT", "ScRiPt", 'script type="text/javascript"'])
+def test_inline_script_extraction_uses_html_tag_semantics(monkeypatch, tag):
+    """Casing/attributes cannot hide code; external script names are not code."""
+    close_tag = tag.split()[0]
+    html = (
+        '<SCRIPT SRC="/member/mall-video-catalog.json"></SCRIPT>'
+        f"<{tag}>\n// documentation only\nvar marker = 'actual code';\n</{close_tag}>"
+    )
+    monkeypatch.setitem(globals(), "_read", lambda _: html)
+    assert _landing_script().strip() == "var marker = 'actual code';"
+
+
 class TestCanonicalRouteExists:
     """Test that the canonical landing surface exists."""
 
@@ -59,10 +119,13 @@ class TestCanonicalRouteExists:
         assert "foundup_id" in landing.lower() or "foundupId" in landing
 
     def test_landing_fetches_catalog(self):
-        """Landing fetches catalog to resolve FoundUp."""
-        landing = _read("../f/index.html")
-        assert "mall-video-catalog.json" in landing
-        assert "fetch(" in landing
+        """Discovery fetches only the scope-free projection, never member data."""
+        script = _landing_script()
+        assert "var PUBLIC_CATALOG_URL = '/f/public_catalog.json';" in script
+        assert re.findall(r"fetch\(([^)]+)\)", script) == [
+            "PUBLIC_CATALOG_URL", "PUBLIC_CATALOG_URL"
+        ]
+        assert "mall-video-catalog.json" not in script
 
 
 @pytest.mark.skipif(not _firebase_json_exists(), reason="firebase.json not tracked in repo")
@@ -111,9 +174,10 @@ class TestCanonicalRouteBehavior:
     """Test canonical landing page behavior."""
 
     def test_landing_handles_missing_id(self):
-        """Landing shows error for missing foundup_id."""
-        landing = _read("../f/index.html")
-        assert "No FoundUp specified" in landing
+        """The root route is the public portfolio, not an old missing-ID error."""
+        script = _landing_script()
+        assert "var isPortfolioIndex = !match || !match[1] || match[1] === 'index.html';" in script
+        assert "renderPortfolioShowcase(projection);" in script
 
     def test_landing_handles_invalid_id(self):
         """Landing shows error for unknown/invalid foundup_id."""
@@ -226,7 +290,7 @@ class TestTransitionalFallbackPreserved:
 
 
 class TestAppMountRoute:
-    """Test /f/{foundup_id}/app canonical app mount (WSP 104)."""
+    """Canonical identity does not grant participation (WSP 104/97)."""
 
     def test_app_mount_detection(self):
         """Landing detects /app subpath."""
@@ -234,78 +298,81 @@ class TestAppMountRoute:
         assert "isAppMount" in landing
         assert "subpath === 'app'" in landing or "'app'" in landing
 
-    def test_app_mount_renders_container(self):
-        """App mount has container CSS and structure."""
-        landing = _read("../f/index.html")
-        assert "app-mount-container" in landing
-        assert "app-mount-frame" in landing
-        assert "app-mount-header" in landing
+    def test_app_mount_hands_off_to_existing_member_gate(self):
+        """Public app routes leave before reading a tenant or rendering it."""
+        script, gate = _app_gate()
+        assert "var MALL_HOME = '/member/';" in script
+        assert re.fullmatch(r"\s*window\.location\.href = MALL_HOME;\s*return;\s*", gate[1])
+        assert "fetch(" not in script[script.index("var foundupId"):gate.start()]
 
-    def test_app_mount_uses_entry_url(self):
-        """App mount uses manifest entry_url."""
-        landing = _read("../f/index.html")
-        assert "entry_url" in landing
-        assert "renderAppMount" in landing
+    def test_public_route_does_not_use_member_entry_url(self):
+        """A member entry_url cannot become a public iframe source."""
+        script = _landing_script()
+        assert "entry_url" not in script
+        assert "renderAppMount" not in script
 
-    def test_app_mount_back_link(self):
-        """App mount has back link to landing."""
-        landing = _read("../f/index.html")
-        assert "Back to FoundUp" in landing
-        assert "app-mount-back" in landing
+    def test_public_landing_retains_return_to_mall(self):
+        """Discovery keeps navigation to the existing admission owner."""
+        script = _landing_script()
+        assert "'return_to_mall'" in script
+        assert "'Return to Mall'" in script
+        assert "window.location.href = MALL_HOME;" in script
 
-    def test_app_mount_sandbox(self):
-        """App mount iframe has sandbox attribute."""
-        landing = _read("../f/index.html")
-        assert 'sandbox="' in landing
-        assert "allow-scripts" in landing
+    def test_public_route_does_not_embed_tenant_iframe(self):
+        """Retired CSS must not count as an active or authorized app mount."""
+        script = _landing_script().lower()
+        assert "<iframe" not in script
+        assert not re.search(r"createelement\(['\"]iframe['\"]\)", script)
 
-    def test_app_not_ready_error(self):
-        """App mount shows error when entry_url missing."""
-        landing = _read("../f/index.html")
-        assert "App Not Ready" in landing
-        assert "does not have an app entry" in landing
+    def test_app_gate_is_independent_of_catalog_readiness(self):
+        """Admission happens before a catalog response or readiness decision."""
+        script, gate = _app_gate()
+        detail = script[script.index("var foundupId"):]
+        assert detail.index("if (isAppMount)") < detail.index("fetch(PUBLIC_CATALOG_URL)")
+        assert "entry_url" not in gate[1]
 
 
 class TestAppMountDeepLinks:
-    """Test /f/{foundup_id}/app/{path...} deep link support."""
+    """App deep links use the same admission owner; no public frame forwarding."""
 
-    def test_deep_path_captured(self):
-        """Deep path after /app is captured."""
-        landing = _read("../f/index.html")
-        assert "appSubpath" in landing
-        assert "deepPath" in landing or "deep" in landing.lower()
+    def test_deep_path_is_included_in_participation_gate(self):
+        script = _landing_script()
+        assert "subpath === 'app' || subpath.startsWith('app/')" in script
+        _app_gate()
 
-    def test_deep_path_forwarded(self):
-        """Deep path is forwarded to app frame."""
-        landing = _read("../f/index.html")
-        # Should pass path as query param or in URL
-        assert "path=" in landing or "deepPath" in landing
+    def test_deep_path_does_not_become_public_frame_url(self):
+        script = _landing_script()
+        assert "appSubpath" not in script
+        assert "deepPath" not in script
+        assert "resolvedUrl" not in script
 
 
-class TestLaunchAppCTA:
-    """Test Launch App CTA on landing surface."""
+class TestPublicDiscoveryLinks:
+    """Public view links do not resurrect the retired member launch control."""
 
-    def test_launch_app_cta_exists(self):
-        """Landing has Launch App CTA block."""
-        landing = _read("../f/index.html")
-        assert "entry-launch-app-block" in landing
-        assert "entry-launch-app-btn" in landing
+    def test_public_link_container_exists(self):
+        script = _landing_script()
+        assert "entry-cta-block" in script
+        assert "entry-launch-app-block" not in script
+        assert "entry-launch-app-btn" not in script
 
-    def test_launch_app_links_to_app_route(self):
-        """Launch App CTA links to /f/{id}/app."""
-        landing = _read("../f/index.html")
-        assert "'/f/' + foundupId + '/app'" in landing
+    def test_public_links_do_not_construct_tenant_mount_route(self):
+        script = _landing_script()
+        assert "'/f/' + foundupId + '/app'" not in script
+        assert "addLink('app_url', 'Open App', item.app_url);" in script
 
-    def test_launch_app_conditional_on_entry_url(self):
-        """Launch App CTA only shown when entry_url exists."""
-        landing = _read("../f/index.html")
-        assert "item.entry_url" in landing
+    def test_public_links_use_validated_url_properties(self):
+        script = _landing_script()
+        assert "var safe = safeUrl(url);" in script
+        assert "if (safe) links.push" in script
+        assert "a.href = l[2];" in script
+        assert "item.entry_url" not in script
 
-    def test_launch_app_recommendation(self):
-        """Red Dog has Launch App recommendation."""
-        landing = _read("../f/index.html")
-        assert "launch_app" in landing
-        assert "'Launch App'" in landing
+    def test_recommendations_do_not_offer_public_tenant_launch(self):
+        script = _landing_script()
+        assert "launch_app" not in script
+        assert "'Launch App'" not in script
+        assert "'return_to_mall'" in script
 
 
 class TestGotJunkTenantBinding:
@@ -397,20 +464,394 @@ class TestKoseiTenantBinding:
         assert '"ready"' in kosei_entry
 
 
-class TestCatalogArrayHandling:
-    """Test catalog array format handling."""
+class TestPublicProjectionHandling:
+    """Public projection shapes are sanitized before landing rendering."""
 
-    def test_landing_handles_array_catalog(self):
-        """Landing handles catalog as direct array (not wrapped)."""
-        landing = _read("../f/index.html")
-        assert "Array.isArray(catalog)" in landing
+    def test_landing_handles_public_projection_shapes(self):
+        script = _landing_script()
+        assert "Array.isArray(projection.entities)" in script
+        assert "Array.isArray(projection.items)" in script
+        assert "Array.isArray(projection)" in script
+        assert "var items = projectionEntities(projection);" in script
 
-    def test_url_resolution_uses_foundups_path(self):
-        """Relative URLs resolve to /foundups/{id}/ not routing_prefix."""
-        landing = _read("../f/index.html")
-        assert "'/foundups/' + foundupId" in landing
-        # Should NOT use routingPrefix for asset resolution
-        idx = landing.find("resolvedUrl = ")
-        if idx > 0:
-            snippet = landing[idx:idx+200]
-            assert "routingPrefix + '/'" not in snippet
+    def test_projection_is_sanitized_before_use(self):
+        script = _landing_script()
+        assert "return raw.map(sanitizeEntity);" in script
+        assert "Object.prototype.hasOwnProperty.call(entity, k)" in script
+        assert "PUBLIC_FIELD_ALLOWLIST[k] === true" in script
+        assert "resolvedUrl" not in script
+
+
+_NODE_ROUTE_VM = r"""
+const {runInNewContext} = require('node:vm');
+const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
+const events = [], fetches = [], forbidden = [], errors = [];
+const anchors = [], linkContainers = new Map();
+let address = new URL(input.path + (input.search || '') + (input.hash || ''),
+  'https://shell.invalid');
+let sandbox;
+function record(kind, target, value) {
+  const context = sandbox && sandbox.entryRedDog && sandbox.entryRedDog.getContext();
+  events.push({kind, target, value, pathname: address.pathname,
+    contextId: context ? context.foundupId : null,
+    itemId: context && context.item ? context.item.foundup_id : null});
+}
+function element(id) {
+  let html = '', text = '', href = '';
+  return {id, style: {}, children: [], value: '',
+    classList: {toggle() {}, remove() {}, add() {}},
+    addEventListener() {}, scrollIntoView() {}, querySelectorAll() { return []; },
+    querySelector(selector) {
+      if (!input.capture_links) return null;
+      let key;
+      if (id === 'entryContent' && selector === '.entry-cta-block' && html.includes('entry-cta-block')) {
+        key = 'entry-cta-block';
+      } else if (id === 'showcaseGrid') {
+        const match = selector.match(/^\.portfolio-card-links\[data-foundup-id="([a-z0-9_]+)"\]$/);
+        if (match && html.includes('data-foundup-id="' + match[1] + '"')) key = 'card:' + match[1];
+      }
+      if (!key) return null;
+      if (!linkContainers.has(key)) linkContainers.set(key, element(key));
+      return linkContainers.get(key);
+    },
+    appendChild(child) { child.parentId = id; this.children.push(child); }, insertAdjacentHTML() {},
+    set innerHTML(value) { html = String(value); record('html', id, html); },
+    get innerHTML() { return html; },
+    set textContent(value) {
+      text = String(value);
+      html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    },
+    get textContent() { return this.children.length ? this.children.map(child => child.textContent || '').join('') : text; },
+    set href(value) { href = String(value); record('link', id, value); },
+    get href() { return href; }
+  };
+}
+const ids = ['entryContent', 'entryRedDog', 'conciergeSheet', 'conciergeScrim',
+  'conciergeContextBody', 'entryBriefingBody', 'entryRecsBody',
+  'showcaseSearch', 'showcaseReadiness', 'showcaseGrid'];
+const nodes = Object.fromEntries(ids.map(id => [id, element(id)]));
+const location = {
+  get pathname() { return address.pathname; }, get search() { return address.search; },
+  get hash() { return address.hash; }, get origin() { return address.origin; },
+  get href() { return address.href; },
+  set href(value) { record('navigate', 'location', value); address = new URL(value, address); }
+};
+const document = {
+  getElementById(id) { if (!nodes[id]) throw new Error('Unexpected DOM id: ' + id); return nodes[id]; },
+  createElement(tag) {
+    if (tag === 'iframe' || tag === 'script') {
+      forbidden.push('element:' + tag); throw new Error('Forbidden active element');
+    }
+    const node = element('created:' + tag);
+    if (input.capture_links && tag === 'a') anchors.push(node);
+    return node;
+  },
+  createTextNode(text) { return {textContent: String(text)}; },
+  addEventListener() {}, querySelector() { return null; },
+  set title(value) { record('title', 'document', value); }
+};
+const history = {replaceState(_state, _title, value) {
+  record('history', 'replaceState', value);
+  if (input.history === 'throw') throw new Error('Synthetic history rejection');
+  const next = new URL(value, address);
+  if (next.origin !== address.origin) throw new Error('Cross-origin replacement');
+  address = next;
+}};
+async function run() {
+  sandbox = {document, location, URL, URLSearchParams,
+    console: {error(...args) { errors.push(args.map(String).join(' ')); }},
+    fetch(url) {
+      fetches.push(url);
+      if (url !== '/f/public_catalog.json') {
+        forbidden.push('fetch:' + url); return Promise.reject(new Error('Forbidden fetch'));
+      }
+      if (input.pending_fetch) return new Promise(() => {});
+      if (input.fetch_fail) return Promise.reject(new Error('Synthetic unavailable catalog'));
+      return Promise.resolve({ok: true, json: () => Promise.resolve(input.projection)});
+    }
+  };
+  sandbox.window = sandbox;
+  if (input.history !== 'missing') sandbox.history = history;
+  runInNewContext(input.script, sandbox, {filename: 'actual-f-inline.js', timeout: 500,
+    contextCodeGeneration: {strings: false, wasm: false}});
+  // Real Promise callbacks run after the IIFE initializes its local state.
+  await new Promise(resolve => setImmediate(resolve));
+  const context = sandbox.entryRedDog ? sandbox.entryRedDog.getContext() : null;
+  process.stdout.write(JSON.stringify({events, fetches, forbidden, errors, context,
+    pathname: address.pathname, search: address.search, hash: address.hash,
+    links: input.capture_links ? anchors.map(node => ({href: node.href,
+      label: node.children.length ? node.children[0].textContent : node.textContent,
+      target: node.target || '', rel: node.rel || '', parent: node.parentId || ''})) : undefined,
+    html: Object.fromEntries(ids.map(id => [id, nodes[id].innerHTML]))}));
+}
+run().catch(error => { console.error(error.stack); process.exitCode = 1; });
+"""
+
+
+def _public_entity(**overrides):
+    item = {"foundup_id": "synthetic_001", "display_name": "Synthetic discovery",
+            "portfolio_status": "portfolio_candidate", "poc_landing_status": "discoverable_only"}
+    item.update(overrides)
+    return item
+
+
+def _landing_vm(tmp_path, path, entities=None, **overrides):
+    """Run only the real inline owner with synthetic DOM, history and fetch."""
+    node = "C:/Program Files/nodejs/node.exe" if os.name == "nt" else shutil.which("node")
+    assert node and os.path.isfile(node), "Node is required for route behavior coverage"
+    request = {"script": _raw_landing_script(), "path": path,
+               "projection": {"entities": entities if entities is not None else [_public_entity()]}}
+    request.update(overrides)
+    env = {k: v for k, v in os.environ.items()
+           if k.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "PATHEXT"}}
+    env.update(TEMP=str(tmp_path), TMP=str(tmp_path), HOME=str(tmp_path), USERPROFILE=str(tmp_path))
+    proc = subprocess.run([node, "--unhandled-rejections=strict", "-e", _NODE_ROUTE_VM],
+                          input=json.dumps(request), capture_output=True, text=True,
+                          encoding="utf-8", timeout=10, cwd=tmp_path, env=env)
+    assert proc.returncode == 0, proc.stdout + proc.stderr
+    result = json.loads(proc.stdout)
+    assert result["forbidden"] == [], result
+    return result
+
+
+def _assert_no_tenant_render(result):
+    assert not any(e["kind"] == "html" and "entry-hero" in e["value"]
+                   for e in result["events"])
+    assert not any(e["kind"] == "html" and e["target"] == "conciergeContextBody"
+                   for e in result["events"])
+    if result["context"] is not None:
+        assert result["context"]["item"] is None
+        assert result["context"]["foundupId"] is None
+
+
+def _assert_canonical_render(result, canonical, *, replaced):
+    context = result["context"]
+    assert context["foundupId"] == canonical and context["item"]["foundup_id"] == canonical
+    assert "Canonical: /f/" + canonical in result["html"]["entryContent"]
+    renders = [i for i, e in enumerate(result["events"]) if e["kind"] == "html"
+               and ("entry-hero" in e["value"] or e["target"] == "conciergeContextBody")]
+    assert len(renders) >= 2, result
+    for index in renders:
+        event = result["events"][index]
+        assert event["pathname"] == "/f/" + canonical
+        assert event["contextId"] == canonical
+    histories = [i for i, e in enumerate(result["events"]) if e["kind"] == "history"]
+    if replaced:
+        assert len(histories) == 1 and histories[0] < min(renders)
+        assert result["events"][histories[0]]["value"] == "/f/" + canonical
+    else:
+        assert histories == []
+    assert not any(e["kind"] == "navigate" for e in result["events"])
+    assert result["fetches"] == ["/f/public_catalog.json"]
+
+
+@pytest.mark.parametrize("shape", ["entities", "items", "array"])
+def test_vm_legacy_canonical_identity_and_projection_shapes(tmp_path, shape):
+    public = _public_entity()
+    projection = [dict(public, entry_url="/private", creator="private-principal")]
+    result = _landing_vm(tmp_path, "/f/synthetic_001", search="?devMall=1", hash="#keep",
+                         projection=projection if shape == "array" else {shape: projection})
+    _assert_canonical_render(result, "synthetic_001", replaced=False)
+    assert result["context"]["item"] == public
+    assert result["search"] == "?devMall=1" and result["hash"] == "#keep"
+    assert "private-principal" not in result["html"]["entryContent"]
+
+
+@pytest.mark.parametrize("canonical,alias", [
+    ("synthetic_001", "friendly"), ("canonical", "constructor"),
+    ("canonical", "__proto__"), ("canonical", "prototype"),
+    ("__proto__", "friendly"), ("constructor", "friendly"), ("canonical", "a" * 65),
+])
+@pytest.mark.parametrize("suffix", ["", "/"])
+def test_vm_alias_canonicalizes_before_render_and_context(tmp_path, canonical, alias, suffix):
+    item = _public_entity(foundup_id=canonical, public_discovery_alias=alias)
+    result = _landing_vm(tmp_path, "/f/" + alias + suffix, [item],
+                         search="?id=other&next=https://elsewhere.invalid", hash="#other")
+    _assert_canonical_render(result, canonical, replaced=True)
+    assert result["pathname"] == "/f/" + canonical
+    assert result["search"] == result["hash"] == ""
+    assert result["context"]["item"] == item
+
+
+def test_vm_alias_single_decode_and_canonical_render_bytes(tmp_path):
+    item = _public_entity(public_discovery_alias="friendly")
+    canonical = _landing_vm(tmp_path, "/f/synthetic_001", [item])
+    alias = _landing_vm(tmp_path, "/f/%66riendly", [item])
+    _assert_canonical_render(alias, "synthetic_001", replaced=True)
+    assert alias["html"] == canonical["html"]
+    assert alias["context"] == canonical["context"]
+
+
+@pytest.mark.parametrize("token", ["synthetic_001", "friendly", "unknown"])
+@pytest.mark.parametrize("suffix", ["app", "app/jobs/1"])
+@pytest.mark.parametrize("fetch_fail", [False, True])
+def test_vm_app_handoff_precedes_even_failed_catalog(tmp_path, token, suffix, fetch_fail):
+    result = _landing_vm(tmp_path, "/f/" + token + "/" + suffix,
+                         [_public_entity(public_discovery_alias="friendly")],
+                         fetch_fail=fetch_fail, search="?devMall=1")
+    assert result["fetches"] == [] and result["context"] is None
+    assert result["pathname"] == "/member/" and result["search"] == "?devMall=1"
+    assert result["events"] == [{"kind": "navigate", "target": "location",
+                                  "value": "/member/?devMall=1", "pathname": "/f/" + token + "/" + suffix,
+                                  "contextId": None, "itemId": None}]
+
+
+@pytest.mark.parametrize("path", [
+    "/f/unknown", "/f/Friendly", "/f/friendly/other", "/f/friendly/application",
+    "/f/friendly//", "/f/friendly%2fapp", "/f/friendly%5c", "/f/friendly%25",
+    "/f/friendly%252f", "/f/%", "/f/%GG", "/f/%E0%A4%A",
+    "/f/friendly%0A", "/f/friendly%0D", "/f/friendly%20",
+])
+def test_vm_invalid_alias_paths_do_not_publish_tenant(tmp_path, path):
+    result = _landing_vm(tmp_path, path, [_public_entity(public_discovery_alias="friendly")])
+    _assert_no_tenant_render(result)
+    assert not any(e["kind"] in {"history", "navigate"} for e in result["events"])
+
+
+@pytest.mark.parametrize("bad_alias", [
+    "", None, False, 0, [], {}, "Friendly", "two words", "a/b", "a\\b", "a%2fb",
+    "caf\u00e9", "friendly\n", "friendly\r", "friendly\t", "friendly\r\n",
+])
+def test_vm_malformed_projection_alias_rejects_before_canonical_render(tmp_path, bad_alias):
+    result = _landing_vm(tmp_path, "/f/synthetic_001", [_public_entity(public_discovery_alias=bad_alias)])
+    _assert_no_tenant_render(result)
+    assert not any(e["kind"] == "history" for e in result["events"])
+
+
+@pytest.mark.parametrize("status", ["not_portfolio", "missing", None, "", "portfolio", "PORTFOLIO_READY"])
+def test_vm_alias_ineligible_or_missing_portfolio_status_is_rejected(tmp_path, status):
+    item = _public_entity(public_discovery_alias="friendly", portfolio_status=status)
+    if status == "missing":
+        del item["portfolio_status"]
+    result = _landing_vm(tmp_path, "/f/friendly", [item])
+    _assert_no_tenant_render(result)
+    assert not any(e["kind"] == "history" for e in result["events"])
+
+
+@pytest.mark.parametrize("status", ["not_portfolio", "missing", None])
+def test_vm_no_alias_keeps_legacy_canonical_status_handling(tmp_path, status):
+    item = _public_entity(portfolio_status=status)
+    if status == "missing":
+        del item["portfolio_status"]
+    result = _landing_vm(tmp_path, "/f/synthetic_001", [item])
+    _assert_canonical_render(result, "synthetic_001", replaced=False)
+
+
+@pytest.mark.parametrize("case", ["duplicate_alias", "canonical_collision", "self_collision", "duplicate_target"])
+def test_vm_ambiguous_projection_alias_is_not_first_match(tmp_path, case):
+    first = _public_entity(public_discovery_alias="friendly")
+    second = _public_entity(foundup_id="second")
+    if case == "duplicate_alias":
+        second["public_discovery_alias"] = "friendly"
+    elif case == "canonical_collision":
+        second["foundup_id"] = "friendly"
+    elif case == "self_collision":
+        first["public_discovery_alias"] = first["foundup_id"]
+    else:
+        second["foundup_id"] = first["foundup_id"]
+    path = "/f/synthetic_001" if case == "self_collision" else "/f/friendly"
+    result = _landing_vm(tmp_path, path, [first, second])
+    _assert_no_tenant_render(result)
+    assert not any(e["kind"] == "history" for e in result["events"])
+
+
+@pytest.mark.parametrize("history", ["missing", "throw"])
+def test_vm_failed_alias_history_cannot_render_or_publish_context(tmp_path, history):
+    result = _landing_vm(tmp_path, "/f/friendly", [_public_entity(public_discovery_alias="friendly")],
+                         history=history)
+    _assert_no_tenant_render(result)
+    assert result["pathname"] == "/f/friendly"
+    assert not any(e["kind"] == "navigate" for e in result["events"])
+
+
+@pytest.mark.parametrize("path", ["/f/synthetic_001", "/f/friendly"])
+def test_vm_failed_catalog_does_not_publish_tenant(tmp_path, path):
+    result = _landing_vm(tmp_path, path, [_public_entity(public_discovery_alias="friendly")], fetch_fail=True)
+    _assert_no_tenant_render(result)
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert not any(e["kind"] == "history" for e in result["events"])
+
+
+@pytest.mark.parametrize("path", ["/f/synthetic_001", "/f/friendly"])
+def test_vm_pending_catalog_exposes_no_unverified_identity(tmp_path, path):
+    result = _landing_vm(tmp_path, path, [_public_entity(public_discovery_alias="friendly")], pending_fetch=True)
+    _assert_no_tenant_render(result)
+    assert result["context"] is not None
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["events"] == [] and result["errors"] == []
+
+
+def _registered_move2japan():
+    projection = json.loads(_read("../f/public_catalog.json"))
+    entries = [item for item in projection["entities"] if item["foundup_id"] == "move2japan"]
+    assert len(entries) == 1, "The canonical public projection must contain the existing tenant"
+    return entries[0]
+
+
+def test_vm_move2japan_landing_browses_houses_inside_same_mall(tmp_path):
+    item = _registered_move2japan()
+    result = _landing_vm(tmp_path, "/f/move2japan", [item], capture_links=True,
+                         search="?foundup=other&next=https://elsewhere.invalid&account=1")
+    _assert_canonical_render(result, "move2japan", replaced=False)
+    assert result["errors"] == []
+    houses = [link for link in result["links"] if link["label"] == "Browse houses"]
+    assert houses == [{"href": "/member/?foundup=move2japan", "label": "Browse houses",
+                       "target": "", "rel": "", "parent": "entry-cta-block"}]
+    assert not any(link["label"] in {"Open App", "View PoC"} for link in result["links"])
+    assert "entry-hero-token" not in result["html"]["entryContent"]
+    assert "$move2japan" not in result["html"]["entryContent"]
+    assert all(link["target"] == "_blank" for link in result["links"]
+               if link["label"] in {"GitHub", "Docs"})
+
+
+def test_vm_move2japan_portfolio_browse_link_and_filter_initialization(tmp_path):
+    result = _landing_vm(tmp_path, "/f/", [_registered_move2japan()], capture_links=True)
+    assert result["errors"] == []
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["context"] is None
+    assert "Move2Japan" in result["html"]["showcaseGrid"]
+    assert "portfolio-card-token" not in result["html"]["showcaseGrid"]
+    assert {"href": "/member/?foundup=move2japan", "label": "Browse houses",
+            "target": "", "rel": "", "parent": "card:move2japan"} in result["links"]
+    assert {"href": "/f/move2japan", "label": "View Details", "target": "", "rel": "",
+            "parent": "card:move2japan"} in result["links"]
+    assert not any(link["label"] == "Demo App" for link in result["links"])
+
+
+@pytest.mark.parametrize("change", [
+    {"foundup_id": "other"},
+    {"foundup_id": "Move2Japan"},
+    {"poc_url": "/member/?foundup=move2japan"},
+    {"poc_url": "https://foundups.com/member/?foundup=move2japan&account=1"},
+    {"poc_url": "https://foundups.com/member/?foundup=move2japan#app"},
+    {"poc_url": "https://elsewhere.invalid/member/?foundup=move2japan"},
+])
+def test_vm_housing_handoff_requires_exact_registered_identity_and_destination(tmp_path, change):
+    item = dict(_registered_move2japan(), **change)
+    result = _landing_vm(tmp_path, "/f/" + item["foundup_id"], [item], capture_links=True,
+                         search="?foundup=move2japan&poc_url=https://foundups.com/member/")
+    assert result["errors"] == []
+    assert not any(link["label"] == "Browse houses" for link in result["links"])
+    assert all(link["target"] == "_blank" for link in result["links"])
+
+
+@pytest.mark.parametrize("suffix", ["app", "app/publish/property"])
+def test_vm_registered_houses_do_not_change_protected_app_admission(tmp_path, suffix):
+    result = _landing_vm(tmp_path, "/f/move2japan/" + suffix,
+                         [_registered_move2japan()], capture_links=True,
+                         search="?foundup=move2japan")
+    assert result["pathname"] == "/member/" and result["search"] == ""
+    assert result["fetches"] == [] and result["links"] == []
+    assert result["context"] is None
+    assert result["events"] == [{"kind": "navigate", "target": "location",
+                                  "value": "/member/", "pathname": "/f/move2japan/" + suffix,
+                                  "contextId": None, "itemId": None}]
+
+
+def test_vm_explicit_token_still_renders_without_inventing_missing_symbol(tmp_path):
+    item = _public_entity(token_symbol="ACTUAL")
+    landing = _landing_vm(tmp_path, "/f/synthetic_001", [item])
+    portfolio = _landing_vm(tmp_path, "/f/", [item])
+    assert landing["errors"] == portfolio["errors"] == []
+    assert "$ACTUAL" in landing["html"]["entryContent"]
+    assert "$ACTUAL" in portfolio["html"]["showcaseGrid"]

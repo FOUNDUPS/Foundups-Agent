@@ -13,20 +13,62 @@ from typing import Any, Dict, List, Mapping, Sequence
 
 HOLOINDEX_POSTMERGE_SOURCE = "holoindex_postmerge_coordinator"
 HOLOINDEX_POSTMERGE_TASK_PREFIX = "holoindex_postmerge_refresh:"
+HOLOINDEX_POSTMERGE_ONLY_MODE = "holoindex_postmerge_only"
 _SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+_DIGEST_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
+
+
+def is_holoindex_postmerge_only_mode(runtime_mode: str | None) -> bool:
+    if runtime_mode not in {None, HOLOINDEX_POSTMERGE_ONLY_MODE}:
+        raise ValueError("openclaw_supervisor_runtime_mode_invalid")
+    return runtime_mode == HOLOINDEX_POSTMERGE_ONLY_MODE
+
+
+def holoindex_postmerge_only_execution_rejection(
+    *, enabled: bool, plan: Any,
+) -> Dict[str, Any] | None:
+    if not enabled:
+        return None
+    if not isinstance(plan, Mapping):
+        return {
+            "ok": False,
+            "status": "rejected",
+            "error": "holoindex_postmerge_only_plan_rejected",
+        }
+    task = plan.get("task")
+    context = task.get("context") if isinstance(task, Mapping) else None
+    allowed = bool(
+        plan.get("action") == "execute_maintenance_task"
+        and isinstance(task, Mapping)
+        and task.get("family") == "holoindex_postmerge"
+        and task.get("source") == HOLOINDEX_POSTMERGE_SOURCE
+        and isinstance(context, Mapping)
+        and context.get("source") == HOLOINDEX_POSTMERGE_SOURCE
+        and is_canonical_holoindex_postmerge_task_id(task.get("task_id"))
+    )
+    return None if allowed else {
+        "ok": False, "status": "rejected",
+        "error": "holoindex_postmerge_only_plan_rejected",
+    }
 
 
 class HoloIndexPostmergePoller:
     """Own one bounded coordinator worker and its shutdown boundary."""
 
-    def __init__(self, repo_root: Path) -> None:
+    def __init__(
+        self, repo_root: Path, *, enabled: bool | None = None,
+        task_id: str = "",
+    ) -> None:
+        if task_id and not is_canonical_holoindex_postmerge_task_id(task_id):
+            raise ValueError("holoindex_postmerge_task_id_invalid")
         self._repo_root = repo_root.resolve()
+        self._enabled = enabled
         self._lock = threading.Lock()
         self._executor: ThreadPoolExecutor | None = None
         self._future: Future[Any] | None = None
         self._last_poll = 0.0
         self._stopped = False
-        self._task_id = ""
+        self._task_id = task_id
 
     @property
     def future(self) -> Future[Any] | None:
@@ -38,6 +80,32 @@ class HoloIndexPostmergePoller:
         with self._lock:
             return self._task_id
 
+    def bind_task(self, task_id: str) -> bool:
+        """Bind one exact task before selection; never replace active work."""
+
+        with self._lock:
+            if (
+                self._stopped or self._future is not None
+                or not is_canonical_holoindex_postmerge_task_id(task_id)
+                or (self._task_id and self._task_id != task_id)
+            ):
+                return False
+            self._task_id = task_id
+            return True
+
+    def release_task(self, task_id: str) -> bool:
+        """Release only the completed controller binding; never active work."""
+
+        with self._lock:
+            if (
+                self._stopped or self._future is not None
+                or not is_canonical_holoindex_postmerge_task_id(task_id)
+                or self._task_id != task_id
+            ):
+                return False
+            self._task_id = ""
+            return True
+
     def poll(self) -> Dict[str, Any] | None:
         with self._lock:
             if self._stopped:
@@ -45,7 +113,14 @@ class HoloIndexPostmergePoller:
             completed = self._completed_result()
             if completed is not None:
                 return completed
-            if not holoindex_postmerge_enabled():
+            if self._task_id:
+                return _poll_status(True, "TASK_BOUND")
+            enabled = (
+                holoindex_postmerge_enabled()
+                if self._enabled is None
+                else self._enabled
+            )
+            if not enabled:
                 return _poll_status(False, "OWNER_DISABLED", "postmerge_coordinator_disabled")
             if self._future is not None or not self._poll_due():
                 return None
@@ -67,7 +142,10 @@ class HoloIndexPostmergePoller:
             return None
         try:
             result = dict(self._future.result().to_dict())
-            self._task_id = _canonical_task_id(result)
+            completed_task_id = _canonical_task_id(result)
+            if self._task_id and completed_task_id != self._task_id:
+                return _poll_status(False, "REJECTED", "postmerge_task_binding_conflict")
+            self._task_id = completed_task_id
             return result
         except Exception as exc:
             return _poll_status(False, "REJECTED", type(exc).__name__)
@@ -125,6 +203,15 @@ def _canonical_task_id(result: Mapping[str, Any]) -> str:
     return ""
 
 
+def is_canonical_holoindex_postmerge_task_id(task_id: Any) -> bool:
+    if not isinstance(task_id, str) or not task_id.startswith(
+        HOLOINDEX_POSTMERGE_TASK_PREFIX
+    ):
+        return False
+    target_sha = task_id.removeprefix(HOLOINDEX_POSTMERGE_TASK_PREFIX)
+    return _SHA_RE.fullmatch(target_sha) is not None
+
+
 def holoindex_postmerge_enabled(
     environ: Mapping[str, str] | None = None,
 ) -> bool:
@@ -140,6 +227,59 @@ def is_holoindex_postmerge_task(task: Mapping[str, Any]) -> bool:
         isinstance(context, Mapping)
         and str(context.get("source") or "") == HOLOINDEX_POSTMERGE_SOURCE
     )
+
+
+def validate_supervisor_holoindex_postmerge_completion(
+    database: Any,
+    task_id: str,
+) -> Mapping[str, Any] | None:
+    """Require the exact task-bound atomic completion receipt."""
+
+    if not is_canonical_holoindex_postmerge_task_id(task_id):
+        return None
+    target_sha = task_id.removeprefix(HOLOINDEX_POSTMERGE_TASK_PREFIX)
+    task = database.get_autonomous_task_by_id(task_id)
+    context = task.get("context") if isinstance(task, Mapping) else None
+    if not isinstance(context, Mapping):
+        return None
+    authority_root_digest = context.get("authority_root_digest")
+    if not (
+        context.get("source") == HOLOINDEX_POSTMERGE_SOURCE
+        and context.get("target_repo_head_sha") == target_sha
+        and isinstance(authority_root_digest, str)
+        and _DIGEST_RE.fullmatch(authority_root_digest)
+    ):
+        return None
+    from modules.infrastructure.idle_automation.src.holoindex_postmerge_contract import (
+        validate_holoindex_postmerge_completion,
+    )
+
+    return validate_holoindex_postmerge_completion(
+        database,
+        task_id=task_id,
+        target_repo_head_sha=target_sha,
+        authority_root_digest=authority_root_digest,
+    )
+
+
+def verified_maintenance_task_status(
+    database: Any,
+    task_id: Any,
+    family: Any,
+) -> str | None:
+    """Return completed only from the family-appropriate evidence source."""
+
+    if family == "holoindex_postmerge":
+        completion = validate_supervisor_holoindex_postmerge_completion(
+            database, task_id
+        )
+        return "completed" if completion is not None else None
+    completed_tasks = database.get_autonomous_tasks(status="completed", limit=100)
+    if isinstance(task_id, str) and any(
+        item.get("task_id") == task_id for item in completed_tasks
+    ):
+        return "completed"
+    return None
 
 
 def maintenance_candidates(
@@ -175,4 +315,6 @@ __all__ = [
     "holoindex_postmerge_enabled",
     "is_holoindex_postmerge_task",
     "maintenance_candidates",
+    "validate_supervisor_holoindex_postmerge_completion",
+    "verified_maintenance_task_status",
 ]

@@ -308,15 +308,15 @@ class LMStudioBackend(LocalLLMBackend):
         input_text: str,
         system_prompt: str,
         max_output_tokens: int,
-        reasoning: str = "off",
+        reasoning: str | None = "off",
         temperature: float = 1.0,
         top_p: float = 0.95,
         max_response_bytes: int = 262_144,
     ) -> Dict:
-        """Call LM Studio's native chat route with explicit reasoning control."""
+        """Call native chat; explicit None omits unsupported reasoning control."""
         if not self._initialized:
             return {"output": []}
-        if reasoning not in {"off", "low", "medium", "high", "on"}:
+        if reasoning is not None and reasoning not in {"off", "low", "medium", "high", "on"}:
             raise ValueError("invalid_lm_studio_reasoning_control")
         if not 1 <= int(max_output_tokens) <= 1_000_000:
             raise ValueError("invalid_lm_studio_max_output_tokens")
@@ -409,7 +409,7 @@ def _lm_studio_native_chat_payload(
     model_id: str,
     input_text: str,
     system_prompt: str,
-    reasoning: str,
+    reasoning: str | None,
     temperature: float,
     top_p: float,
     max_output_tokens: int,
@@ -419,7 +419,7 @@ def _lm_studio_native_chat_payload(
             "model": model_id,
             "input": str(input_text),
             "system_prompt": str(system_prompt),
-            "reasoning": reasoning,
+            **({"reasoning": reasoning} if reasoning is not None else {}),
             "temperature": float(temperature),
             "top_p": float(top_p),
             "max_output_tokens": int(max_output_tokens),

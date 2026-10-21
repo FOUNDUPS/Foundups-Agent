@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
@@ -14,7 +15,12 @@ from modules.infrastructure.idle_automation.src.holoindex_postmerge_coordinator 
     coordinate_holoindex_postmerge,
 )
 from modules.infrastructure.idle_automation.src.holoindex_postmerge_contract import (
+    INCIDENT_EVENT_PREFIX,
+    REPO_HEAD_MISMATCH,
     REQUEST_EVENT_PREFIX,
+    TASK_PREFIX,
+    normalize_holoindex_incident_binding,
+    validate_holoindex_postmerge_request,
 )
 from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_contract import (
     DEFERRED_STATUSES,
@@ -31,28 +37,58 @@ from modules.communication.moltbot_bridge.src.reddog_holoindex_incident_repair_c
 from modules.communication.moltbot_bridge.src.reddog_holoindex_owner_result_verification import (
     CURRENT,
     REPAIRABLE,
+    is_bound_preowner_repo_head_mismatch,
     query_and_classify_owner_result,
 )
 
 
+def _preowner_incident_fields(owner_failure: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        "stale_repo_head_sha": owner_failure["repo_head_sha"],
+        "stale_generation_id": owner_failure["freshness_generation_id"],
+        "stale_freshness_receipt_digest": owner_failure["freshness_receipt_digest"],
+        "stale_reasons": tuple(sorted(owner_failure["stale_reasons"])),
+    }
+
+
+def _same_preowner_failure(
+    result: Mapping[str, Any], *, query: str,
+    selection: HoloIndexAuthoritySelection, binding: Mapping[str, Any],
+) -> bool:
+    return bool(
+        is_bound_preowner_repo_head_mismatch(
+            result, query=query, selection=selection,
+        )
+        and _preowner_incident_fields(result)
+        == {key: binding[key] for key in _preowner_incident_fields(result)}
+    )
+
+
+def _attempts_are_valid(error: object, owner_attempts: object) -> bool:
+    if error in (AUTHORITY_ROOT_HEAD_MISMATCH, REPO_HEAD_MISMATCH):
+        return type(owner_attempts) is int and owner_attempts == 0
+    return type(owner_attempts) is int and owner_attempts >= 2
+
+
 def _incident_binding(
-    owner_failure: Mapping[str, Any], selection: HoloIndexAuthoritySelection
+    owner_failure: Mapping[str, Any], selection: HoloIndexAuthoritySelection,
+    *, query: str,
 ) -> tuple[dict[str, Any], str]:
     error = owner_failure.get("error")
     owner_attempts = owner_failure.get("owner_attempts")
     stale_authority = error == AUTHORITY_ROOT_HEAD_MISMATCH
-    attempts_valid = (
-        type(owner_attempts) is int and owner_attempts == 0
-        if stale_authority
-        else type(owner_attempts) is int and owner_attempts >= 2
-    )
+    preowner_head_mismatch = error == REPO_HEAD_MISMATCH
     if (
         owner_failure.get("ok") is not False
         or type(error) is not str
         or error not in REPAIRABLE_ERRORS
         or owner_failure.get("index_gap_detected") is not True
         or owner_failure.get("no_holoindex_reindex_performed") is not True
-        or not attempts_valid
+        or not _attempts_are_valid(error, owner_attempts)
+    ):
+        return {}, "holoindex_incident_failure_not_authenticated"
+    if preowner_head_mismatch and not is_bound_preowner_repo_head_mismatch(
+        owner_failure, query=query, selection=selection,
     ):
         return {}, "holoindex_incident_failure_not_authenticated"
     selection_valid = selection.accepted or (
@@ -78,6 +114,8 @@ def _incident_binding(
         "owner_error": error,
         **expected,
     }
+    if preowner_head_mismatch:
+        payload.update(_preowner_incident_fields(owner_failure))
     return payload, ""
 
 
@@ -131,17 +169,16 @@ def _current_owner_receipt(
 
 
 def _coordination_receipt(
-    *, coordinated: Any, incident_id: str, query: str,
+    *, coordinated: Any, incident_id: str, query: str, workspace_repo_root: Path,
     selection: HoloIndexAuthoritySelection, expected_target_head: str,
-    binding: Mapping[str, Any],
-    query_runner: Callable[..., Mapping[str, Any]] | None,
+    binding: Mapping[str, Any], query_runner: Callable[..., Mapping[str, Any]] | None,
 ) -> HoloIndexIncidentRepairReceipt:
     fields = coordination_fields(coordinated)
     if fields is None:
         return rejected_receipt("holoindex_incident_coordinator_result_invalid")
     accepted, status, task_id, target_head, authority_digest, reasons = fields
     if (
-        target_head != expected_target_head
+        task_id != TASK_PREFIX + expected_target_head or target_head != expected_target_head
         or authority_digest != selection.authority_root_digest
     ):
         return authority_binding_rejection(
@@ -151,7 +188,9 @@ def _coordination_receipt(
     if accepted and status == "CURRENT":
         query_runner = _query_runner(query_runner)
         owner_status, result = query_and_classify_owner_result(
-            query=query, selection=selection, query_runner=query_runner
+            query=query, selection=selection,
+            workspace_repo_root=workspace_repo_root,
+            query_runner=query_runner,
         )
         if owner_status == CURRENT:
             return _current_owner_receipt(
@@ -174,8 +213,7 @@ def _coordination_receipt(
         receipt = HoloIndexIncidentRepairReceipt(True, status, maintenance_enqueued=True, **common)
         return seal_receipt(receipt)
     return seal_receipt(HoloIndexIncidentRepairReceipt(
-        False,
-        "ESCALATE",
+        False, "ESCALATE",
         coding_candidate_required=True,
         rejection_reasons=reasons or ("holoindex_incident_repair_unavailable",),
         **common,
@@ -190,17 +228,30 @@ def _validate_query(query: object) -> str | None:
 
 
 def _incident_recheck(
-    *, query: str, selection: HoloIndexAuthoritySelection,
+    *, query: str, workspace_repo_root: Path,
+    selection: HoloIndexAuthoritySelection,
     query_runner: Callable[..., Mapping[str, Any]], incident_id: str,
+    expected_binding: Mapping[str, Any],
 ) -> HoloIndexIncidentRepairReceipt | None:
     owner_status, result = query_and_classify_owner_result(
-        query=query, selection=selection, query_runner=query_runner
+        query=query, selection=selection,
+        workspace_repo_root=workspace_repo_root,
+        query_runner=query_runner,
     )
     if owner_status == CURRENT:
         return _current_owner_receipt(
             incident_id=incident_id, selection=selection, result=result
         )
-    if owner_status != REPAIRABLE:
+    expected_error = expected_binding["owner_error"]
+    preowner_match = expected_error == REPO_HEAD_MISMATCH and _same_preowner_failure(
+        result, query=query, selection=selection, binding=expected_binding,
+    )
+    status_valid = (
+        preowner_match
+        if expected_error == REPO_HEAD_MISMATCH
+        else owner_status == REPAIRABLE
+    )
+    if not status_valid or result.get("error") != expected_error:
         return rejected_receipt("holoindex_incident_independent_recheck_failed")
     return None
 
@@ -240,7 +291,7 @@ def coordinate_holoindex_incident_repair(
         return rejected_receipt("holoindex_incident_query_invalid")
     root = Path(repo_root).resolve(strict=False)
     selection = select_authority(root)
-    binding, reason = _incident_binding(owner_failure, selection)
+    binding, reason = _incident_binding(owner_failure, selection, query=normalized_query)
     if reason:
         return rejected_receipt(reason)
     incident_id = canonical_digest(binding)
@@ -248,8 +299,8 @@ def coordinate_holoindex_incident_repair(
     stale_authority = binding["owner_error"] == AUTHORITY_ROOT_HEAD_MISMATCH
     if not stale_authority:
         recheck = _incident_recheck(
-            query=normalized_query, selection=selection,
-            query_runner=query_runner, incident_id=incident_id,
+            query=normalized_query, workspace_repo_root=root, selection=selection,
+            query_runner=query_runner, incident_id=incident_id, expected_binding=binding,
         )
         if recheck is not None:
             return recheck
@@ -270,9 +321,75 @@ def coordinate_holoindex_incident_repair(
         selection = refreshed
     return _coordination_receipt(
         coordinated=coordinated, incident_id=incident_id, query=normalized_query,
+        workspace_repo_root=root,
         selection=selection,
         expected_target_head=expected_target_head,
         binding=binding,
+        query_runner=query_runner,
+    )
+
+
+def _resume_incident_binding(
+    database: Any, resume_incident_id: str, target_repo_head_sha: str,
+    authority_root_digest: str,
+) -> dict[str, str] | None:
+    """Resolve a pointer through the existing durable admission validator."""
+    if type(resume_incident_id) is not str or re.fullmatch(r"sha256:[0-9a-f]{64}", resume_incident_id) is None:
+        return None
+    try:
+        event = database.get_coordination_event_by_id(INCIDENT_EVENT_PREFIX + resume_incident_id[7:])
+        payload = event.get("payload") if isinstance(event, Mapping) else None
+        if not isinstance(payload, Mapping):
+            return None
+        binding = normalize_holoindex_incident_binding(payload.get("incident_binding"), target_repo_head_sha)
+        if binding is None or binding["incident_id"] != resume_incident_id:
+            return None
+        request = validate_holoindex_postmerge_request(
+            database, task_id=TASK_PREFIX + target_repo_head_sha,
+            request_event_id=REQUEST_EVENT_PREFIX + target_repo_head_sha,
+            target_repo_head_sha=target_repo_head_sha,
+            authority_root_digest=authority_root_digest, incident_binding=binding,
+        )
+        return binding if request is not None else None
+    except Exception:
+        return None
+
+
+def resume_holoindex_incident_repair(
+    *, repo_root: Path | str, query: str, resume_incident_id: str,
+    db: Any | None = None, environment: Mapping[str, str] | None = None,
+    select_authority: Callable[[Path], HoloIndexAuthoritySelection] = resolve_holoindex_authority_root,
+    coordinator: Callable[..., Any] = coordinate_holoindex_postmerge,
+    query_runner: Callable[..., Mapping[str, Any]] | None = None,
+) -> HoloIndexIncidentRepairReceipt:
+    """Reconcile an existing admission; the incident pointer grants no authority."""
+    if type(resume_incident_id) is not str or re.fullmatch(r"sha256:[0-9a-f]{64}", resume_incident_id) is None:
+        return rejected_receipt("holoindex_resume_incident_id_invalid")
+    normalized_query = _validate_query(query)
+    if normalized_query is None:
+        return rejected_receipt("holoindex_incident_query_invalid")
+    root = Path(repo_root).resolve(strict=False)
+    selection = select_authority(root)
+    if not (selection.accepted and selection.selected_root
+            and selection.workspace_head_sha == selection.authority_head_sha):
+        return rejected_receipt("holoindex_incident_authority_unavailable")
+    if db is None:
+        from modules.infrastructure.database.src.agent_db import AgentDB
+        db = AgentDB()
+    target = selection.workspace_head_sha
+    binding = _resume_incident_binding(db, resume_incident_id, target, selection.authority_root_digest)
+    if binding is None:
+        return rejected_receipt("holoindex_resume_admission_invalid")
+    task = db.get_autonomous_task_by_id(TASK_PREFIX + target)
+    if not isinstance(task, Mapping) or task.get("status") not in {"pending", "failed", "retry_wait"}:
+        return rejected_receipt("holoindex_resume_task_not_retryable")
+    coordinated = coordinator(repo_root=root, db=db, environment=environment, incident_binding=binding)
+    return _coordination_receipt(
+        coordinated=coordinated, incident_id=resume_incident_id, query=normalized_query,
+        workspace_repo_root=root, selection=selection, expected_target_head=target,
+        binding={"owner_error": binding["incident_kind"],
+                 "workspace_repo_head_sha": binding["workspace_repo_head_sha"],
+                 "authority_repo_head_sha": binding["observed_authority_head_sha"]},
         query_runner=query_runner,
     )
 
@@ -282,4 +399,5 @@ __all__ = [
     "REPAIRABLE_ERRORS",
     "SCHEMA_VERSION",
     "coordinate_holoindex_incident_repair",
+    "resume_holoindex_incident_repair",
 ]

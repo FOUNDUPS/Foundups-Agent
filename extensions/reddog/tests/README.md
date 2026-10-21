@@ -1,4 +1,325 @@
+## Issuer composition closure count — 2026-10-16
+
+`node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduced
+the generated1428-member manifest versus stale1426-member consumer cap. The
+updated boundary accepts1428 and rejects1429; digest, paths, hashes and byte
+limits remain enforced. CI now invokes this contract before existing preflight.
+Membership adds only the root request-role and extracted startup dependency owners.
+This verifies repository compatibility, not installed extension/runtime state.
+
+## Effect approval closure count — PR2090, 2026-10-07
+
+Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`
+and `reddog_current_effect_signing_authority.py`, removes none. The existing
+compatibility cap and boundary regression now accept1421/reject1422, and require
+both named additions. Digest remainsbc84374ad861c79d9b51c79964722916a7f6b0e336a2356909fe486923e0259d;
+byte limits, allowlists and signatures are unchanged. No service/extension install.
+
+CI37507545251 passed signing677/3skip and startup248, then exposed the stale1419
+extension boundary. Local full fast tier15 members passed in9468ms after restoring
+required LF to changed JS files. Independent two-file review found no blocker;
+receipt `effect-signing-extension-count-review.json`, SHA256
+`d09b48a349f4016dd964ab0bae45440661c4e86dc2f4a0e9c74e3e60846b6bb4`.
+WSP00/6/15/22/50/84/97. New-head hosted checks pending; no native RSI claim.
+
 # RedDog Extension Tests
+
+## 0.4.141 identity / merged builder reconciliation candidate
+
+- The fast-RedDog/deep-0102 identity boundary is applied above the already
+  merged `0.4.140` builder release and first lands in `0.4.141`.
+- Backend compatibility binds 1,398 files at `700d50f84e12...86e09ed`.
+  Focused runner and physical child tests cover suspended Job containment,
+  fixed O:/E: roots, bounded canonical JSON, and explicit authority nonclaims.
+- `.gitignore` and `ARCHITECTURE.md` retain their merged `.vscodeignore`
+  exclusions and exact package-surface regression order.
+- Focused identity, conversation, shard, Holo incident, tiering, and manifest
+  checks pass. The authenticated contract is 18 shards / 6,942 lines / 492
+  assertions at `sha256:10b5118a5c9c...e32ad247`; the canonical registry is
+  current at 1,641 tests / 269 quarantined.
+- The deterministic thin package is 67 files / 950,193 bytes at
+  `sha256:cb6e5d4bb38d...15b281b8`, below the one MiB cap.
+- Exact 0.4.140 full-release and VSIX results remain historical. This 0.4.141
+  candidate must produce its own aggregate release, package, archive, and
+  exact-main evidence before promotion.
+
+## 0.4.140 held builder child evidence release
+
+- Backend compatibility advances to the 1,398-file closure at
+  `700d50f84e12...86e09ed`. The child is backend evidence only; no extension
+  command or runtime caller is added.
+- Focused Python tests cover the shared bounded runner and strict child
+  evidence. The physical Windows gate launches the exact qualified O: runtime
+  and repeats complete composition verification around it.
+- The conversation tier honors `REDDOG_TEST_PYTHON`, suppresses user-site
+  discovery, erases every case-insensitive ambient `PYTHON*` and `PYTEST*`
+  control before setting its exact six-key test contract, and admits only validated
+  O:/E: interpreter, dependency, repository, and temporary roots.
+- Runner unit evidence is 22/22. Focused physical runner/maintenance/
+  process-image/child evidence is 70 passed / two capability skips in 108.06
+  seconds and includes the qualified physical Windows child.
+- Backend generator passes eight and the registry is current at 1,640 / 269.
+  Conversation passes 32 Python tests and 15 shared JS vectors. Complete bridge
+  replay is 1,694 passed / 23 capability skips in 638.81 seconds, including the
+  recursion-limit-independent 128-level health JSON gate. Final release is four
+  groups PASS in 214.279 seconds; the package is 67 files / 948,410 bytes. The
+  inspected VSIX identity and all exact digests are retained in the external
+  WSP_97 receipt rather than self-referenced inside the package.
+  Archive inspection requires zero duplicate, collision, encryption, symlink,
+  unsafe-path, sensitive-name, source-byte-mismatch, or credential-value-pattern
+  findings. No test grants
+  producer, pre-import/native/subprocess, write-denial, route, owner,
+  activation, A-grade, or retrieval-RSI authority.
+
+## 0.4.139 declared Windows/CPython ABI evidence release
+
+- The extension advances because the authenticated backend manifest changed
+  after shared Windows extended-path/no-replace publication hardening. The
+  inert ABI modules themselves remain outside the executable backend manifest,
+  VSIX, owner, and route.
+- Focused ABI/PE tests pass 67 / one capability skip; the explicit non-scale
+  ABI/acceptance/composition/base/dependency/environment/process/sealed-runtime
+  adjacency passes 259 / seven expected capability skips.
+- Backend manifest check is 1,366 files at `4e634b8c7b99...8b37`; its eight
+  independent generator tests pass. Contract identity is
+  `d68f91db0908...cce6` across 18 shards / 6,942 lines / 492 assertions.
+- The final deterministic package is 67 files / 948,777 bytes at
+  `sha256:44272f6f1e8f...06ed3`. Fast 14-member, O:-venv conversation
+  (32 Python / 15 JavaScript vectors), contract 3-member, package, and all four
+  exhaustive groups pass; the final exhaustive wall is 173.373 seconds.
+- The externally stored and inspected `reddog-0.4.139.vsix` is 276,340 bytes at
+  `sha256:5deb3c4df7ac...15ec`, with 69 safe unique entries, 67 exact mapped
+  source members, and zero duplicate, case-collision, encryption, symlink,
+  unsafe-path, sensitive-name, source-byte-mismatch, or credential-pattern
+  findings.
+- The tests do not load a native image or grant loader, owner, route,
+  maintenance, activation, signing, write-denial, A-grade, or retrieval-RSI
+  authority.
+
+## 0.4.138 inert exact runtime composition
+
+- The release changes no extension authority. It binds versioned documentation
+  and contract fixtures to the backend's descriptor-only exact base/dependency
+  composition, which remains outside the executable VSIX closure.
+- Hostile review falsified the first sequential component proof. The repaired
+  `B1 -> D1 -> D2 -> B2` full reproof requires exact binding equality; focused
+  composition coverage is 24 passed / 1 capability skip and the bounded
+  non-scale adjacent selection is 159 passed / 6 expected skips.
+- Backend is `fccaca219ac3...0713be` / 1,365 files; contract is
+  `0362913b7a2b...b4d05` / 18 shards / 6,942 lines / 492 assertions; registry
+  is 1,618/268. The deterministic package is 67 files / 949,053 bytes at
+  `a655ffe69f1f...f4ea`.
+- The inspected `O:\RedDog-Releases\reddog-0.4.138.vsix` is 276,441 bytes at
+  `sha256:f68a9cae2b1c...c1c47`: 69 safe unique entries, 67 exact source
+  members, and zero encryption, symlink, unsafe-path, sensitive-name,
+  source-byte-mismatch, or credential-value-pattern findings.
+- Reverse reproof is not ABA resistance or write denial. Activation, native
+  loader closure, signing, route-v2, A-grade, and retrieval RSI remain open.
+- Separate O:-local production evidence materialized 72,261 dependency files /
+  1,853,891,335 bytes, published composition `sha256:44e21db7...`, and passed a
+  fresh repaired-verifier reproof in 579.54 seconds with no descriptor change.
+- Fast 14-member, O:-venv conversation (32 Python / 15 shared JavaScript
+  vectors), contract 3-member, package, and all four exhaustive release groups
+  pass; exhaustive duration is 170.331 seconds with no timeout.
+
+## 0.4.137 inert base-runtime backend binding
+
+- The release changes no extension authority. It advances the authenticated
+  backend identity for the shared protected-source lease correction and
+  independently records the inert Windows Python base-runtime publication
+  layer, which remains outside the executable VSIX closure.
+- Focused base-runtime result is 55 passed / 1 opt-in skip; adjacent runtime
+  result is 82 passed / 5 expected skips. The real shape passed 4,068 files /
+  372 directories / 81,515,843 bytes with exact reuse in 239.94 seconds.
+- Backend is `fccaca219ac3...0713be` / 1,365 files; the 18-shard contract is
+  `bc04f3fedd2a...a519a4` / 492 assertions; registry is 1,616/268. The
+  deterministic package is 67 files / 948,887 bytes at
+  `3db698e1ff22...b652d1`.
+- The inspected `O:\RedDog-Releases\reddog-0.4.137.vsix` is 276,358 bytes at
+  `sha256:c4961ce5b543...6ef1c`, with 69 safe entries, 67 exact source members,
+  and zero byte mismatches or credential-value-pattern hits.
+- Activation, signing, write denial, owner/route changes, A-grade, and
+  retrieval-quality RSI are not claimed.
+
+## 0.4.136 pre-owner exact-main repair ingress
+
+- JavaScript positives/negatives bind the normalized outer query, exact
+  zero-attempt failure shape, stale evidence, no-receipt projection, and the
+  unchanged nine-field projection for ordinary repairable owner failures.
+- The shared Python owner classifier rejects the unreceipted result; the
+  dedicated incident bridge requires an exact independent stale binding.
+  Focused incident/root/coordinator result is 75 passed.
+- Affected Python is 283 passed and the registry is current at 1,612/268.
+  Backend `9c34a61bfeb4...db7039`, contract `6a3cf131fc90...adb273`, and
+  package `33a4a7bb09a6...be4754` are current; all four exhaustive groups pass
+  in 180.005 seconds.
+- The inspected 0.4.136 VSIX is 276,366 bytes at
+  `sha256:ccf65001c726...ced3f8`, with 69 safe entries, 67 exact source-byte
+  matches, and zero credential-value-pattern hits. Merged exact main
+  `09e98fff` completed the real OpenClaw/WRE repair; a fresh owner query was
+  CURRENT/no-gap/no-reindex on attempt one and all 33 replica artifacts
+  reverified unchanged. Runtime exact closure, A-grade, and retrieval RSI
+  remain separate blocked gates.
+
+## 0.4.135 evidence-qualified Holo module intent
+
+- The authenticated 1,365-file backend closure is
+  `22fca9ba3e28...bf598351`; the 18 shards remain 6,942 lines / 492 assertions
+  at `sha256:7ed04109cbc6...f286343b`.
+- Fast, conversation, package, contract, and exhaustive release tiers pass.
+  Holo owner/service/Tier-0 adjacency is 334/334; backend generator is 8/8;
+  independent WSP_97 reproduced 334/334 and returned GO.
+- `O:\RedDog-Releases\reddog-0.4.135.vsix` is 275,792 bytes at
+  `sha256:b1b9e203dcab...b22a55a`. Its 67 source members exactly match the
+  package surface with zero byte mismatches or credential-value patterns.
+
+## 0.4.134 Holo owner-query root separation release
+
+- Five focused caller tests prove verified owner queries use the original
+  workspace/control checkout and never recycle the selected authority as query
+  entry. A selector negative retains `HOLOINDEX_AUTHORITY_ROOT_INVALID` when
+  configured authority equals workspace.
+- The focused root selection is 21 passed and the expanded affected lifecycle
+  selection is 190 passed. The canonical registry is 1,610 tests / 268
+  quarantined; its 52-test registry/indexing selection passes.
+- Exact pre-package identities: backend `bacffc8e18b4...a8076645`; contract
+  `3c951718cb13...e14a7f1f`. Merged exact-main replay remains a separate
+  production gate.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic package,
+  candidate WSP_62, and exhaustive four-group release gates pass in 184.6
+  seconds. Package identity is 946,244 bytes at
+  `e8e2329154f5...1852246e`. The inspected 0.4.134 VSIX is 275,758 bytes at
+  `sha256:0bd21de0974b...a2a37e23`, with 69 safe entries, 67 exact source-byte
+  matches, and no credential-value-pattern hit.
+
+## 0.4.133 linked-control dependency runtime release
+
+- A bounded Python regression module proves the clean control root resolves to
+  a distinct primary dependency root while the dedicated authority argument is
+  unchanged. An injected resolver exception durably fails the task without an
+  authority call; five persisted-context/claim/authority/request/start gates
+  prove zero pre-transaction resolver or authority effects.
+- The three-file executor/coordinator selection is 38 passed; the backend
+  generator is 8 passed at 1,365 files. Fast 14-member, conversation 32-test,
+  contract 3-member, deterministic package, candidate WSP_62, and exhaustive
+  four-group release gates pass. Final staged-candidate wall is 224.617 seconds.
+- Exact identities: backend `b58778d3358e...19dc7b6`, contract
+  `b8d9b4c787cc...09d9db63`, package
+  `89f19ddb703b...b491e773`. The inspected 0.4.133 VSIX is 275,743 bytes at
+  `sha256:0cd9288febe9...5c17971`, with 69 safe entries, 67 exact source-byte
+  matches, and no credential-value-pattern hit.
+
+## 0.4.132 producer-ranked Holo owner release
+
+- A generic owner-boundary counterexample proves a typed producer's
+  exact-symbol winner survives a slightly higher raw-similarity neighbor while
+  cross-stream head scoring, current-truth authority, Tier-0 reservation, and
+  case-insensitive deduplication remain enforced.
+- The complete bridge suite is 1,188 passed / 14 expected skips. Its first run
+  exposed eight host-coupled synthetic cases; the fixtures now use explicit
+  non-A-grade runtime identities or one synthetic package root without
+  relaxing the real ambiguous-package fail-closed contract.
+- Backend closure is 1,365 files at `64e314c2931b...9b77d3`; exhaustive contract
+  identity is `052b944c5bd7...0cc96`; package identity is 67 files / 946,088
+  bytes at `a492686c440f...f0c589`. Exhaustive four-group release passes in
+  203.191 seconds with no timeout.
+- `O:\RedDog-Releases\reddog-0.4.132.vsix` is 275,728 bytes at
+  `sha256:f40ed659c685...25e40b`; read-only inspection found 69 safe entries,
+  exact extension-source equality, and no credential-pattern member.
+
+## 0.4.131 current-truth Holo retrieval
+
+- Current/history intent falsifiers cover temporal queries, case-insensitive
+  PRs, short HXA/FX/CFZ IDs, nested audit paths, and stale Holo docs.
+- Authority-before-limit and faithful bounded-candidate tests prove exact
+  current contracts survive higher-scoring history and duplicate section
+  crowding through the filtered summary stream.
+- Path-bound section tests admit only reviewed current headings. Historical or
+  generic `Status`/`Current Architecture` headings inside a current file cannot
+  inherit current-truth authority.
+- These tests do not prove A-grade quality, exact runtime byte closure,
+  independent evaluator trust, promotion, canary, rollback, or retrieval RSI.
+- Candidate Python retrieval/WSP/generator surface: 299 passed / 1 capability
+  skip, with no deselection. Backend generator: 8 passed and current at 1,365
+  files. Fast 14-member, conversation 32-test, contract
+  3-member, deterministic package, and exhaustive four-group release tiers
+  pass in 207.169 seconds.
+- The 0.4.130 pre-release artifact is rejected because its immutable snapshot
+  adapter did not support the summary filter. Version 0.4.131 package identity
+  is 67 files / 946,087 bytes at `cc0f6a6c5830...23e57`.
+  `O:\RedDog-Releases\reddog-0.4.131.vsix` is 275,738 bytes at
+  `sha256:736c307fcb91...58f9d1`; inspection found 69 safe unique entries and
+  no member-byte mismatch.
+
+## 0.4.129 claim-clock fencing and RSI truth release
+
+- SQLite writer acquisition and PostgreSQL row locking precede claim, start,
+  and completion time checks. Three contention regressions cover delayed claim
+  issuance and start/completion waits crossing expiry.
+- Affected Python surfaces pass 309 tests, the manifest shard passes 8,
+  WSP_62 passes 16, and the canonical registry is 1,607 tests / 268
+  quarantined entries with its focused 52-test selection passing.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive 4-group release tiers pass in 202.154 seconds. The
+  backend digest is `6160d5be6d36...5fdaffd8`; contract identity is
+  `772c72ece00c...e50aa6f0`.
+- The generated contract-shard manifest is pinned to LF in `.gitattributes`,
+  so a Windows rebase cannot create a false stale-manifest failure.
+- Package identity is 67 files / 945,990 bytes at
+  `5d7a7f254548...99461e93`. `O:\RedDog-Releases\reddog-0.4.129.vsix` is
+  275,700 bytes at `sha256:7e9bad6a3e02...6c39f4d1e`; independent inspection
+  found 69 safe unique entries and no member-byte mismatch.
+- These tests do not prove exact-current-main replay, exact runtime closure,
+  renewable external-effect fencing, retrieval RSI, or A-grade quality.
+
+## 0.4.128 exact-task liveness and v2 claim-fence release
+
+- The authenticated 1,363-file backend closure binds exact task/authority
+  liveness, bounded owner acquisition cycles, v2 claim integrity, atomic late
+  first-completion rejection, and exact supervisor release.
+- Affected Python surfaces pass 303 tests, the independent manifest shard passes
+  8, WSP_62 passes 16, and the canonical registry is 1,605 tests / 268
+  quarantined entries with its focused 52-test selection passing.
+- Fast 14-member, conversation 32-test, contract 3-member, deterministic
+  package, and exhaustive 4-group release tiers pass. The final release wall is
+  201.201 seconds; the 18-shard contract is `16bcddfc83a8...f6557361`.
+- Package identity is 67 files / 945,990 bytes at
+  `e5eb5e0b0035...bf00d146`. `O:\RedDog-Releases\reddog-0.4.128.vsix` is
+  275,700 bytes at `sha256:f9fa068d79ff...7ab3ce30f`; independent inspection
+  found 69 entries, no duplicates/unsafe paths, and no member-byte mismatch.
+- These tests do not establish exact-current-main replay, authenticated runtime
+  exact closure, cancellation of in-flight external effects, retrieval RSI, or
+  A-grade quality.
+
+## 0.4.127 receipt-bound owner reproof release
+
+- The authenticated 1,357-file backend closure binds owner attempt count,
+  retry flag/reason, error, semantic evidence, and authority into the query
+  receipt before the controller can admit one deadline-bounded reproof.
+- Fast 14/14, conversation 32/32, contract 3/3, deterministic package, and
+  exhaustive 4/4 release groups pass. The 18-shard contract has 6,942 lines /
+  492 assertions at `e8fccaa6791e...d3a03e2`; package identity is 67 files /
+  945,836 bytes at `f080f99bb960...8831d`.
+- `O:\RedDog-Releases\reddog-0.4.127.vsix` is 275,672 bytes at
+  `sha256:287853f6e933...6b830`. Archive inspection found 69 entries, no
+  duplicate/unsafe names, zero source-byte mismatches, and version 0.4.127.
+
+## 0.4.126 exact-main post-merge lifecycle release
+
+- The authenticated 1,357-file backend closure binds direct two-spec OpenClaw
+  registration with no main/MCP bootstrap, cross-process controller
+  serialization, explicit Holo-only supervisor isolation, and exact task-bound
+  Holo completion validation.
+- Extension version, package surface, incident-repair assertions, and all 18
+  contract shards bind 0.4.126. The operator controller is deliberately not a
+  VSIX command and adds no maintenance authority to the thin client.
+- Fast 14/14, conversation 32/32, contract 3/3, deterministic package, and
+  exhaustive 4/4 release groups pass. The package surface is 67 files / 945,801
+  bytes at `sha256:7a1a8fb2e803...9a27f7c9`.
+- `O:\RedDog-Releases\reddog-0.4.126.vsix` is 275,668 bytes at
+  `sha256:639d6c82b195...b52b94b`. Read-only archive inspection found 69 entries,
+  67 package members, no duplicate/unsafe names or source-byte mismatches, and
+  exact package version 0.4.126.
 
 ## 0.4.125 inert dependency-runtime closure release
 
@@ -335,6 +656,15 @@ npm run test:conversation   # shared Python/JavaScript conversation vectors
 npm run test:contract       # plan and shard authentication
 npm run test:release        # exact exhaustive promotion closure
 ```
+
+On Windows, the conversation runner resolves the primary checkout through the
+current worktree's Git common directory, then validates and uses that checkout's
+`.venv\\Scripts\\python.exe` and `.venv\\Lib\\site-packages`. This keeps the
+canonical commands usable from linked task worktrees without creating a local
+venv or accepting ambient/user-site Python. `REDDOG_TEST_PYTHON` and
+`REDDOG_TEST_SITE_PACKAGES` remain explicit absolute O:/E: overrides. Temporary
+artifacts use the task worktree's ignored `.tmp\\reddog-tests` by default;
+`REDDOG_TEST_TEMP` may select another existing absolute O:/E: directory.
 
 The release command is the legacy `node tests/verify_extension_contract.js`
 entry. It authenticates the 18-shard aggregate and exactly seven committed-

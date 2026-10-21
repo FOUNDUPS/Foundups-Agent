@@ -1,0 +1,67 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "78b79c36c2d776e030cd0ee8aa23359a67f952ec"
+  },
+  "execution_id": "JAPANESE_MESSAGE_CALL_PROTOTYPE_20260910",
+  "execution_plane": "local_operator_cli_adapter",
+  "outcome": "blocked",
+  "action_evidence": {
+    "retrieve_evidence": [
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "research": [
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "micro_pass": [
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "macro_pass": [
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "hard_think": [
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "dialectic_sweep": [
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "first_principles": [
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md"
+    ],
+    "execute": [
+      "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md",
+      "modules/platform_integration/elevenlabs_calls/tests/TestModLog.md"
+    ],
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_3_Enterprise_Domain_Organization.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_49_Module_Directory_Structure_Standardization_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+      "WSP_framework/src/WSP_105_CLI_Interface_Standard.md"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_3",
+    "WSP_5",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_49",
+    "WSP_84",
+    "WSP_97",
+    "WSP_105"
+  ],
+  "compliance_evidence": [
+    "modules/platform_integration/elevenlabs_calls/docs/WSP97_EXECUTION.md",
+    "modules/platform_integration/elevenlabs_calls/tests/TestModLog.md",
+    "modules/platform_integration/elevenlabs_calls/docs/SETUP.md"
+  ]
+}

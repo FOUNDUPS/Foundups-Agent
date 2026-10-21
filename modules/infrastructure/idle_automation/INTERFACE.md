@@ -21,6 +21,20 @@ wsp_cycle(input="interface", log=True)
 
 ## Primary Interface
 
+### Self-audit report status — 2026-10-07
+
+`SelfResearchRefresher.scan_self_audit()` now preserves the complete producer
+snapshot as `scan_status`. `events_opened` is its exact `event_count`, including
+`None` on an ordinary failed scan. Zero events does not prove input coverage or
+health: inspect `outcome`, `coverage`, and `error_codes`. `last_success` is scoped
+to the newly created scanner instance, not a durable success history.
+
+`top_signatures` remains historical data. `history_status` is `available`,
+`absent`, or `unavailable`; `signature_count` is `None` when history is unknown.
+Malformed history cannot suppress the current scan snapshot. These diagnostics
+do not authorize execution, establish an independently verified improvement,
+or convert historical signatures into current findings.
+
 ### Exact-SHA HoloIndex Post-Merge Coordination
 
 `coordinate_holoindex_postmerge()` observes `origin/main` from a configured
@@ -41,9 +55,23 @@ for final binding, clean-HEAD, and `origin/main` proof. `CURRENT` is returned
 only when the owner exactly matches the canonical HEAD, generation, and
 freshness-receipt digest. Failure leaves the task failed or retryable, the
 request pending, and the completion event absent.
+The executor resolves `resolve_holoindex_runtime_root(repo_root)` before calling
+the authority transaction. A clean linked control checkout therefore retains
+task/control authority while the same-repository primary checkout supplies only
+its dependency-runtime candidate (normally `.venv`) for the existing probe to
+validate. The clean dedicated authority worktree remains repository/index
+source authority. The resolver
+falls back to the supplied control root when a related primary worktree cannot
+be proven; maintenance then fails closed if that root lacks the required probe
+runtime.
 Claims have a 7500-second lease, covering the bounded 7200-second maintenance
 timeout plus margin. A crashed or interrupted worker is reclaimed
 by exact assignment timestamp and enters the existing bounded retry policy.
+
+Incident-bound coordination accepts `REPO_HEAD_MISMATCH` as a non-authority-
+root mismatch: the observed authority HEAD must equal the exact target HEAD.
+The communication bridge owns the preceding zero-attempt evidence and
+independent-query checks; this interface grants no query-side indexing.
 
 Runtime configuration:
 

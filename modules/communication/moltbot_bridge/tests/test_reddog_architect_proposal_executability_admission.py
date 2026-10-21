@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+import copy
 from dataclasses import replace
 from pathlib import Path
 
@@ -550,3 +551,181 @@ def test_admission_modules_have_no_execution_network_or_index_mutation_imports()
                 assert node.module.split(".")[0] not in banned_imports
             if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
                 assert node.func.id not in banned_calls
+
+
+def _proposal_worker_plan():
+    from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_exact_schema import _m2m_envelope
+    receipt, _, _ = _evaluate(policy=_policy())
+    packet = _m2m_envelope()
+    packet["I"].update({key: list(getattr(receipt, key)) for key in (
+        "allowed_paths", "denied_paths", "required_tests", "required_policy_gates",
+        "expected_evidence", "stop_conditions",
+    )})
+    packet["I"]["wsp15"] = {"complexity": receipt.wsp15_complexity}
+    return {"operation": receipt.requested_operation,
+            "requested_allowed_paths": list(receipt.allowed_paths),
+            "planned_artifacts": list(receipt.allowed_paths), "m2m_envelope": packet}
+
+
+def test_proposal_plan_preserves_legacy_absence_and_explicit_empty() -> None:
+    absent, _, _ = _evaluate(policy=_policy())
+    none, _, _ = _evaluate(policy=_policy(), output_updates={"bounded_worker_plan": None})
+    empty, _, _ = _evaluate(policy=_policy(), output_updates={"bounded_worker_plan": {}})
+    assert none.to_dict() == absent.to_dict()
+    assert "bounded_worker_plan" not in absent.to_dict()
+    assert empty.to_dict()["bounded_worker_plan"] == {}
+    assert empty.receipt_id != absent.receipt_id
+    assert validate_architect_proposal_executability_receipt(empty.to_dict()) == empty
+
+
+def test_proposal_plan_is_detached_and_binds_the_complete_receipt() -> None:
+    plan = _proposal_worker_plan()
+    expected = copy.deepcopy(plan)
+    receipt, _, _ = _evaluate(policy=_policy(), output_updates={"bounded_worker_plan": plan})
+    assert receipt.bounded_worker_plan == expected
+    assert receipt.accepted is True
+    plan["m2m_envelope"]["I"]["fixture"].append("caller mutation")
+    public = receipt.to_dict()
+    restored = validate_architect_proposal_executability_receipt(public)
+    public["bounded_worker_plan"]["m2m_envelope"]["A"] = "public mutation"
+    assert receipt.bounded_worker_plan == restored.bounded_worker_plan == expected
+    changed = copy.deepcopy(expected)
+    changed["m2m_envelope"]["I"]["fixture"][1] = 2
+    other, _, _ = _evaluate(policy=_policy(), output_updates={"bounded_worker_plan": changed})
+    assert other.receipt_id != receipt.receipt_id
+
+
+@pytest.mark.parametrize("case", ("operation", "paths", "artifacts", "traversal", "glob_artifact",
+                                  "domain_operation", "domain_tests", "mirror", "score", "score_type"))
+@pytest.mark.parametrize("rehash", (False, True))
+def test_proposal_plan_rejects_inconsistent_declared_bindings(case, rehash) -> None:
+    plan = _proposal_worker_plan()
+    receipt, _, _ = _evaluate(policy=_policy(), output_updates={"bounded_worker_plan": plan})
+    if case == "operation": plan["operation"] = "different_operation"
+    elif case == "paths": plan["requested_allowed_paths"] = ["modules/other/**"]
+    elif case == "artifacts": plan["planned_artifacts"] = [".env"]
+    elif case == "traversal": plan["planned_artifacts"] = ["modules/../outside.py"]
+    elif case == "glob_artifact": plan["planned_artifacts"] = ["modules/**"]
+    elif case == "domain_operation": plan["domain_profile"] = {"operation": "other"}
+    elif case == "domain_tests": plan["domain_profile"] = {"required_tests": ["skip tests"]}
+    elif case == "mirror": plan["m2m_envelope"]["I"]["allowed_paths"] = ["outside/**"]
+    elif case == "score_type": plan["m2m_envelope"]["I"]["wsp15"] = "unscored"
+    else: plan["m2m_envelope"]["I"]["wsp15"]["complexity"] = True
+    with pytest.raises(ValueError):
+        if rehash:
+            payload = receipt.to_dict()
+            payload["bounded_worker_plan"] = plan
+            payload.pop("receipt_id")
+            payload["receipt_id"] = proposal_admission._digest(payload)
+            validate_architect_proposal_executability_receipt(payload)
+        else:
+            _evaluate(policy=_policy(), output_updates={"bounded_worker_plan": plan})
+
+
+@pytest.mark.parametrize("requested,denied,valid", (
+    ("modules/**", "modules/private/**", False),
+    ("modules/**", "modules/private/config.py", False),
+    ("modules/private/*.py", "modules/p?ivate/**", False),
+    ("modules/p[ru]ivate/*.py", "modules/private/**", False),
+    ("modules/public/**", "modules/private/**", True),
+    ("modules/private/file.py", "modules/private/**", False),
+    ("modules/public/file.py", "modules/private/**", True),
+    ("modules/**", "**/credentials.json", False),
+))
+@pytest.mark.parametrize("rehash", (False, True))
+def test_requested_plan_scope_rejects_unresolved_deny_overlap(requested, denied, valid, rehash) -> None:
+    scope = {"allowed_paths": ["modules/**"], "denied_paths": [denied]}
+    plan = {"requested_allowed_paths": [requested]}
+    receipt, _, _ = _evaluate(output_updates=scope)
+    def read():
+        if rehash:
+            payload = receipt.to_dict()
+            payload["bounded_worker_plan"] = plan
+            payload.pop("receipt_id")
+            payload["receipt_id"] = proposal_admission._digest(payload)
+            return validate_architect_proposal_executability_receipt(payload)
+        return _evaluate(output_updates={**scope, "bounded_worker_plan": plan})[0]
+    if valid:
+        assert read().bounded_worker_plan == plan
+    else:
+        with pytest.raises(ValueError, match="proposal_admission_receipt_invalid"):
+            read()
+
+
+@pytest.mark.parametrize("field", ("allowed_paths", "denied_paths"))
+@pytest.mark.parametrize("invalid", (None, "modules/**", [None]))
+def test_plan_reader_rejects_malformed_outer_scope(field, invalid) -> None:
+    receipt, _, _ = _evaluate(output_updates={"bounded_worker_plan": {}})
+    payload = receipt.to_dict()
+    payload[field] = invalid
+    payload.pop("receipt_id")
+    payload["receipt_id"] = proposal_admission._digest(payload)
+    with pytest.raises(ValueError, match="proposal_admission_receipt_invalid"):
+        validate_architect_proposal_executability_receipt(payload)
+
+
+@pytest.mark.parametrize("field", ("planned_artifacts", "requested_allowed_paths"))
+@pytest.mark.parametrize("path", ("modules/PRIVATE/secret.py", "modules/private./secret.py",
+                                  "modules/private /secret.py", "modules/private/secret.py\t"))
+def test_plan_rejects_case_and_noncanonical_path_aliases(field, path) -> None:
+    with pytest.raises(ValueError, match="proposal_admission_receipt_invalid"):
+        _evaluate(output_updates={"allowed_paths": ["modules/**"], "denied_paths": ["modules/private/**"],
+                                  "bounded_worker_plan": {field: [path]}})
+
+
+@pytest.mark.parametrize("case", ("null", "wire_string", "partial", "refs_bool", "tuple", "nan",
+                                  "cycle", "depth", "nodes", "bytes", "secret", "digest",
+                                  "env_value", "false_no_effect"))
+def test_proposal_rejects_invalid_packet_before_readiness(case) -> None:
+    from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_exact_schema import _invalid_m2m
+    with pytest.raises(ValueError):
+        _evaluate(output_updates={"bounded_worker_plan": {"m2m_envelope": _invalid_m2m(case)}})
+
+
+@pytest.mark.parametrize("case", ("list", "cycle", "non_ascii", "serialized_null"))
+def test_proposal_plan_rejects_noncanonical_outer_data(case) -> None:
+    plan = {} if case != "list" else []
+    if case == "cycle": plan["domain_profile"] = plan
+    if case == "non_ascii": plan["domain_id"] = "\u00e9"
+    with pytest.raises(ValueError):
+        if case == "serialized_null":
+            receipt, _, _ = _evaluate()
+            payload = receipt.to_dict()
+            payload["bounded_worker_plan"] = None
+            validate_architect_proposal_executability_receipt(payload)
+        else:
+            _evaluate(output_updates={"bounded_worker_plan": plan})
+
+
+def test_proposal_snapshots_plan_before_other_model_fields_are_read() -> None:
+    _, inputs, output = _evaluate()
+    plan = _proposal_worker_plan()
+    expected = copy.deepcopy(plan)
+    class MutatingOutput(dict):
+        def get(self, key, default=None):
+            if key == "action":
+                plan["m2m_envelope"]["A"] = "changed during proposal parsing"
+            return super().get(key, default)
+    receipt = evaluate_architect_proposal_executability(
+        model_output=MutatingOutput(output, bounded_worker_plan=plan),
+        snapshot=inputs["snapshot"], reports=inputs["reports"],
+        report_bundle_id=inputs["report_collection"].validation.bundle.bundle_id,
+        wsp15_allocation_receipt=inputs["allocation"], policy=_policy(),
+    )
+    assert receipt.bounded_worker_plan == expected
+
+
+@pytest.mark.parametrize("path", ("proposal_admission", "operational_context_binding.proposal_admission"))
+def test_full_proposal_plan_receipt_survives_embedded_profile(path) -> None:
+    from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import rehydrate_authority_profile_runtime
+    receipt, _, _ = _evaluate(output_updates={"bounded_worker_plan": _proposal_worker_plan()})
+    profile = {"proposal_admission": receipt.to_dict()}
+    if path.startswith("operational_context_binding."):
+        profile = {"operational_context_binding": profile}
+    restored = rehydrate_authority_profile_runtime(profile)
+    for part in path.split("."):
+        restored = restored[part]
+    restored_receipt = validate_architect_proposal_executability_receipt(restored)
+    assert restored_receipt.receipt_id == receipt.receipt_id
+    assert restored_receipt.bounded_worker_plan == receipt.bounded_worker_plan
+    assert proposal_admission._digest(restored_receipt.to_dict()) == proposal_admission._digest(receipt.to_dict())

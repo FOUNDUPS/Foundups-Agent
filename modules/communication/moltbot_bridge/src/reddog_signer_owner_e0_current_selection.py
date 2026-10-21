@@ -154,6 +154,7 @@ def _validated_selected_lease(
         checked,
         repo_root=repo_root,
         signer_runtime_root=Path(config.signer_runtime_root).resolve(),
+        initial_config=config,
     )
     _require_consensus_policy(checked)
     binding = revocation_authority_binding_from_policy(

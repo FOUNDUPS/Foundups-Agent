@@ -16,6 +16,7 @@ import json
 import os
 import tempfile
 from dataclasses import asdict, dataclass, field
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Iterable, Mapping, Optional, Protocol, Sequence
 
@@ -46,6 +47,7 @@ FAIL_STAGE_NOT_CURRENT = "FAIL_STAGE_NOT_CURRENT"
 FAIL_PROPOSED_PLAN_REJECTED = "FAIL_PROPOSED_PLAN_REJECTED"
 FAIL_ATOMIC_COMMIT_FAILED = "FAIL_ATOMIC_COMMIT_FAILED"
 FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID = "FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID"
+FAIL_RECORDING_TIMESTAMP_INVALID = "FAIL_RECORDING_TIMESTAMP_INVALID"
 
 
 class ResidentQueueChainResultsStore(Protocol):
@@ -146,9 +148,13 @@ class ResidentQueueChainResultReceipt:
     no_pr_created: bool = True
     no_pattern_memory_write_performed: bool = True
     no_reward_settlement_performed: bool = True
+    recorded_at: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        if self.recorded_at is None:
+            payload.pop("recorded_at")  # Preserve historical receipt shape.
+        return payload
 
 
 @dataclass(frozen=True)
@@ -326,7 +332,6 @@ def record_resident_queue_stage_result(
     clean_stage_result = _mapping(stage_result)
     if not clean_stage_result:
         return _reject((FAIL_STAGE_RESULT_REQUIRED,))
-
     current = store.load()
     existing = _stage_results(current)
     if clean_stage_key in existing:
@@ -375,6 +380,14 @@ def record_resident_queue_stage_result(
         )
 
     try:
+        if not isinstance(now_iso, str) or datetime.fromisoformat(
+            now_iso.replace("Z", "+00:00")
+        ).tzinfo is None:
+            raise ValueError("recording timestamp must be timezone-aware")
+    except ValueError:
+        return _reject((FAIL_RECORDING_TIMESTAMP_INVALID,), previous_plan=previous_plan, next_plan=next_plan)
+
+    try:
         effects = _stage_effects(current, clean_stage_result)
     except ValueError:
         return _reject(
@@ -398,6 +411,7 @@ def record_resident_queue_stage_result(
         next_plan_id=next_plan.plan_id,
         next_action=next_plan.next_action,
         store_revision=None,
+        recorded_at=now_iso,
         no_bridge_invoked=effects["no_bridge_invoked"],
         no_worker_spawn_performed=effects["no_worker_spawn_performed"],
         no_file_write_performed=effects["no_file_write_performed"],
@@ -492,6 +506,7 @@ __all__ = [
     "CHAIN_RESULT_REJECTED",
     "FAIL_ATOMIC_COMMIT_FAILED",
     "FAIL_ARTIFACT_EFFECT_RECEIPT_INVALID",
+    "FAIL_RECORDING_TIMESTAMP_INVALID",
     "FAIL_CURRENT_PLAN_NOT_READY",
     "FAIL_PROPOSED_PLAN_REJECTED",
     "FAIL_STAGE_ALREADY_RECORDED",

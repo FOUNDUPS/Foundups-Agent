@@ -164,6 +164,12 @@
           "pattern": "^[a-z0-9_]+$",
           "description": "Canonical identifier (lowercase, underscores, digits)"
         },
+        "public_discovery_alias": {
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "not": { "pattern": "[^a-z0-9_]" },
+          "description": "Optional shell discovery slug; globally unique against every canonical ID and alias. Never a tenant identity."
+        },
         "display_name": {
           "type": "string",
           "maxLength": 64,

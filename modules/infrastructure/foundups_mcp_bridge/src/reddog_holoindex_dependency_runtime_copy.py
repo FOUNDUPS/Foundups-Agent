@@ -122,6 +122,66 @@ class DependencyRuntimeSourcePlan:
     total_bytes: int
     directories: tuple[str, ...]
     files: tuple[ExpectedArtifactFile, ...]
+    included_roots: tuple[str, ...] = ()
+    excluded_roots: tuple[str, ...] = ()
+
+
+def _projection_roots(values: Iterable[str]) -> tuple[str, ...]:
+    roots = tuple(canonical_relative_path(value) for value in values)
+    keys = tuple(value.casefold() for value in roots)
+    if keys != tuple(sorted(keys)) or len(keys) != len(set(keys)):
+        _fail("DEPENDENCY_RUNTIME_EXCLUSION_INVALID")
+    for index, root in enumerate(roots):
+        prefix = root.casefold() + "/"
+        if any(other.casefold().startswith(prefix) for other in roots[index + 1 :]):
+            _fail("DEPENDENCY_RUNTIME_EXCLUSION_INVALID")
+    return roots
+
+
+def _project_snapshot(
+    snapshot: ArtifactSnapshot, source_root: Path,
+    included_roots: tuple[str, ...],
+    excluded_roots: tuple[str, ...],
+) -> ArtifactSnapshot:
+    if not included_roots and not excluded_roots:
+        return snapshot
+    included = tuple(value.casefold() for value in included_roots)
+    excluded = tuple(value.casefold() for value in excluded_roots)
+
+    def admitted(relative: str) -> bool:
+        key = relative.casefold()
+        selected = not included or any(
+            key == root or key.startswith(root + "/") for root in included
+        )
+        omitted = any(key == root or key.startswith(root + "/") for root in excluded)
+        return selected and not omitted
+
+    def admitted_directory(relative: str) -> bool:
+        key = relative.casefold()
+        return admitted(relative) or any(root.startswith(key + "/") for root in included)
+
+    present = {
+        path.relative_to(source_root).as_posix().casefold()
+        for path in snapshot.directories if path != source_root
+    }
+    present.update(row[0].casefold() for row in snapshot.files)
+    if any(root not in present for root in included):
+        _fail("DEPENDENCY_RUNTIME_PROJECTION_ROOT_MISSING")
+    if included and any(
+        not any(root == admitted_root or root.startswith(admitted_root + "/")
+                for admitted_root in included)
+        for root in excluded
+    ):
+        _fail("DEPENDENCY_RUNTIME_EXCLUSION_INVALID")
+    directories = {
+        path: metadata for path, metadata in snapshot.directories.items()
+        if path == source_root
+        or admitted_directory(path.relative_to(source_root).as_posix())
+    }
+    files = [row for row in snapshot.files if admitted(row[0])]
+    if not files:
+        _fail("DEPENDENCY_RUNTIME_PROJECTED_SOURCE_EMPTY")
+    return ArtifactSnapshot(files=files, directories=directories)
 
 
 def _preflight_inventory_bound(
@@ -144,7 +204,8 @@ def _preflight_inventory_bound(
 
 def _source_plan(
     source_root: Path, snapshot: ArtifactSnapshot, limits: ModelCopyLimits,
-    directories: tuple[str, ...],
+    directories: tuple[str, ...], included_roots: tuple[str, ...],
+    excluded_roots: tuple[str, ...],
 ) -> DependencyRuntimeSourcePlan:
     files: list[ExpectedArtifactFile] = []
     for directory in snapshot.directories:
@@ -160,7 +221,10 @@ def _source_plan(
         files.append(ExpectedArtifactFile(relative, proof.size, proof.digest))
     for directory in snapshot.directories:
         require_unnamed_data_stream_only(directory)
-    after = snapshot_artifact_files(source_root, limits)
+    after = _project_snapshot(
+        snapshot_artifact_files(source_root, limits), source_root,
+        included_roots, excluded_roots,
+    )
     if _snapshot_identity(snapshot, source_root) != _snapshot_identity(after, source_root):
         _fail("DEPENDENCY_RUNTIME_SOURCE_CHANGED")
     rows = [
@@ -174,11 +238,15 @@ def _source_plan(
         total_bytes=sum(item.size for item in files),
         directories=directories,
         files=tuple(files),
+        included_roots=included_roots,
+        excluded_roots=excluded_roots,
     )
 
 
 def plan_dependency_runtime_snapshot(
     source: Path | str, *, limits: DependencyRuntimeLimits,
+    included_roots: Iterable[str] = (),
+    excluded_roots: Iterable[str] = (),
 ) -> DependencyRuntimeSourcePlan:
     """Hash an exact source tree once so an existing generation can be reused."""
 
@@ -187,12 +255,19 @@ def plan_dependency_runtime_snapshot(
     copy_limits = ModelCopyLimits(
         limits.max_files, limits.max_file_bytes, limits.max_total_bytes
     )
-    snapshot = snapshot_artifact_files(source_root, copy_limits)
+    inclusions = _projection_roots(included_roots)
+    exclusions = _projection_roots(excluded_roots)
+    snapshot = _project_snapshot(
+        snapshot_artifact_files(source_root, copy_limits), source_root,
+        inclusions, exclusions,
+    )
     relatives, directories = _validated_relatives(snapshot, limits)
     _preflight_inventory_bound(
         snapshot, relatives, directories, limits.max_inventory_bytes
     )
-    return _source_plan(source_root, snapshot, copy_limits, directories)
+    return _source_plan(
+        source_root, snapshot, copy_limits, directories, inclusions, exclusions
+    )
 
 
 def _proof_digest(
@@ -249,9 +324,13 @@ def _copy_posix(
 def _validate_final_shape(
     source_root: Path, destination_root: Path, before: ArtifactSnapshot,
     limits: ModelCopyLimits, proofs: list[ArtifactFileProof],
-    directories: tuple[str, ...],
+    directories: tuple[str, ...], included_roots: tuple[str, ...],
+    excluded_roots: tuple[str, ...],
 ) -> None:
-    source_after = snapshot_artifact_files(source_root, limits)
+    source_after = _project_snapshot(
+        snapshot_artifact_files(source_root, limits), source_root,
+        included_roots, excluded_roots,
+    )
     if _snapshot_identity(before, source_root) != _snapshot_identity(source_after, source_root):
         _fail("DEPENDENCY_RUNTIME_SOURCE_CHANGED")
     destination = snapshot_artifact_files(destination_root, limits)
@@ -273,13 +352,16 @@ def _validate_final_shape(
 def _validated_copy_plan(
     source_root: Path, snapshot: ArtifactSnapshot, copy_limits: ModelCopyLimits,
     limits: DependencyRuntimeLimits, expected_plan: DependencyRuntimeSourcePlan | None,
+    included_roots: tuple[str, ...],
+    excluded_roots: tuple[str, ...],
 ) -> tuple[DependencyRuntimeSourcePlan, tuple[str, ...]]:
     relatives, directories = _validated_relatives(snapshot, limits)
     _preflight_inventory_bound(
         snapshot, relatives, directories, limits.max_inventory_bytes
     )
     plan = expected_plan or _source_plan(
-        source_root, snapshot, copy_limits, directories
+        source_root, snapshot, copy_limits, directories,
+        included_roots, excluded_roots,
     )
     actual_shape = tuple((row[0], int(row[2].st_size)) for row in snapshot.files)
     planned_shape = tuple((row.relative_path, row.size) for row in plan.files)
@@ -287,6 +369,8 @@ def _validated_copy_plan(
         plan.source_root != source_root
         or actual_shape != planned_shape
         or directories != plan.directories
+        or included_roots != plan.included_roots
+        or excluded_roots != plan.excluded_roots
     ):
         _fail("DEPENDENCY_RUNTIME_SOURCE_PLAN_MISMATCH")
     return plan, directories
@@ -316,6 +400,8 @@ def _copy_dependency_snapshot(
     canonical_store: Path | str, repo_roots: Iterable[Path | str],
     limits: DependencyRuntimeLimits,
     expected_plan: DependencyRuntimeSourcePlan | None,
+    included_roots: Iterable[str] = (),
+    excluded_roots: Iterable[str] = (),
 ) -> tuple[ModelCopyProof, int]:
     verify_store_proof(
         store_proof, canonical_store=canonical_store, repo_roots=repo_roots
@@ -326,16 +412,23 @@ def _copy_dependency_snapshot(
     copy_limits = ModelCopyLimits(
         limits.max_files, limits.max_file_bytes, limits.max_total_bytes
     )
-    snapshot = snapshot_artifact_files(source_root, copy_limits)
+    inclusions = _projection_roots(included_roots)
+    exclusions = _projection_roots(excluded_roots)
+    snapshot = _project_snapshot(
+        snapshot_artifact_files(source_root, copy_limits), source_root,
+        inclusions, exclusions,
+    )
     plan, directories = _validated_copy_plan(
-        source_root, snapshot, copy_limits, limits, expected_plan
+        source_root, snapshot, copy_limits, limits, expected_plan,
+        inclusions, exclusions,
     )
     proofs, total, peak = _copy_platform_tree(
         source_root, destination_root, snapshot, store_proof, copy_limits,
         plan, directories,
     )
     _validate_final_shape(
-        source_root, destination_root, snapshot, copy_limits, proofs, directories
+        source_root, destination_root, snapshot, copy_limits, proofs, directories,
+        inclusions, exclusions,
     )
     verify_store_proof(
         store_proof, canonical_store=canonical_store, repo_roots=repo_roots
@@ -351,6 +444,8 @@ def copy_dependency_runtime_snapshot(
     canonical_store: Path | str, repo_roots: Iterable[Path | str],
     limits: DependencyRuntimeLimits,
     expected_plan: DependencyRuntimeSourcePlan | None = None,
+    included_roots: Iterable[str] = (),
+    excluded_roots: Iterable[str] = (),
 ) -> ModelCopyProof:
     """Copy one exact dependency tree with handles bounded by path depth."""
 
@@ -358,8 +453,9 @@ def copy_dependency_runtime_snapshot(
     proof, _peak = _copy_dependency_snapshot(
         source, destination, store_proof=store_proof,
         canonical_store=canonical_store, repo_roots=repo_roots,
-        limits=limits,
-        expected_plan=expected_plan,
+        limits=limits, expected_plan=expected_plan,
+        included_roots=included_roots,
+        excluded_roots=excluded_roots,
     )
     return proof
 

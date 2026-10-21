@@ -85,7 +85,8 @@ const EXPECTED_PACKAGE_FILES = Object.freeze([
   ...EXPECTED_RUNTIME_FILES, 'LICENSE', 'README.md', 'icon.png', 'package.json'
 ].sort());
 const EXPECTED_IGNORE_RULES = Object.freeze([
-  'tests/**', 'docs/**', '*.vsix', 'node_modules/**', '.vscode/**',
+  'tests/**', 'docs/**', '.gitignore', 'ARCHITECTURE.md', '*.vsix',
+  'node_modules/**', '.vscode/**',
   'ModLog.md', 'ROADMAP.md', 'INTERFACE.md', 'HOLOINDEX.md',
   'wsp_62_exemptions.yaml', '**/__pycache__/**', '**/.pytest_cache/**',
   '**/.cache/**', '**/coverage/**', '**/.coverage*', '**/.nyc_output/**',

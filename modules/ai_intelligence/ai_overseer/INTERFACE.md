@@ -73,6 +73,14 @@ Execute one of the module-local M2M workflow skillz by name.
 - `payload`: skill-specific execution payload
 - `m2m`: when `True`, wrap response in WSP 99-style M2M envelope
 
+**Compile gate boundary**: `m2m_compile_gate` stages candidate content and checks
+YAML parsing. `gate_status=PASS` reports that check only. Required-reference
+retention, section coverage and semantic/instruction fidelity are not currently
+implemented gates. The direct sentinel call has structural validation only.
+The shim writes its existing JSONL outcome record in module memory and removes
+the staged file on YAML failure; it does not promote it. Boot/Skillz rejection
+remains in the sentinel. See the [dated preservation counterexample](../../../docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13).
+
 **Returns (m2m=False)**:
 ```python
 {
@@ -869,7 +877,7 @@ from modules.ai_intelligence.ai_overseer.src.holo_adapter import HoloAdapter
 
 `src/foundup_genesis/intake_packet_builder.py` -- **dry-run** intake: chat/idea text ->
 `FoundUpGenesisEnvelope` -> the existing OpenClaw genesis gate. It fills the builder/populator gap so
-the already-built genesis gate is reachable end-to-end. It never scaffolds, enqueues, or mutates.
+the existing genesis gate can evaluate a draft. It never scaffolds, enqueues, or mutates.
 
 ```python
 from modules.ai_intelligence.ai_overseer.src.foundup_genesis.intake_packet_builder import (
@@ -890,6 +898,15 @@ result = build_intake_packet_dry_run(idea_text, actor_id="0102", source_channel=
 `acceptance: observable | method | oracle | pass_condition` lines. Empty or unstructured input ->
 `NO_ENVELOPE`. The genesis validator (strict mode) is the authority on `GATE_PASSED`. Dry-run only:
 never calls FAM, Hermes, registry, or any writer (AST-guarded).
+
+**Commander data handoff:** an independently authorized `OpenClawIntent` may carry this draft in
+`metadata.genesis_envelope`. The existing orchestrator revalidates and detaches it into
+`FoundUpJob.payload.genesis_envelope`, retaining tenant/session/FoundUp identity. Malformed input,
+conflicting legacy payload copies, or conflicting parsed targets return `NOT_READY`. The job stays
+queued and dry-run; action/mode and server-authored policy flags retain their existing meaning.
+Public intake authentication permits a draft only. Neither this builder nor `requested_by`
+establishes commander entitlement, scaffold admission, registry publication, or worker execution.
+Typed genesis/scaffold digests remain unset here; the existing scaffold planner owns those recipes.
 
 ---
 

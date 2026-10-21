@@ -34,6 +34,7 @@ BRIDGE_FILES = (
     "scripts/reddog_holoindex_blocked_request_recovery_once.py",
     "scripts/reddog_holoindex_candidate_acceptance.py",
     "scripts/reddog_holoindex_owner_query_once.py",
+    "scripts/reddog_holoindex_postmerge_runtime_once.py",
     "scripts/reddog_judgment_verifier_once.py",
     "scripts/reddog_model_freshness_query_once.py",
     "scripts/reddog_model_runtime_binding_query_once.py",
@@ -51,6 +52,42 @@ STATIC_RUNTIME_FILES = (
     "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py",
     "modules/infrastructure/wre_core/src/"
     "wre_test_registry_differential_plan_runtime.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_git.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_wheel.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_writer_windows.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_topology_windows.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_verifier.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_materializer.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_dependency_composition_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_dependency_composition.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_runtime_composition_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_runtime_composition.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_process.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_child_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_child.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_bounded_child_process.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_source.py",
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_system_service_entrypoint.py",
     "modules/communication/moltbot_bridge/src/"
@@ -61,6 +98,10 @@ STATIC_RUNTIME_FILES = (
     "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
     "modules/infrastructure/wre_core/skillz/"
     "auto_test_registry_audit/SKILLz.md",
+    "modules/infrastructure/wre_core/skillz/"
+    "auto_test_registry_audit/SKILL_MANIFEST.json",
+    "modules/infrastructure/wre_core/skillz/"
+    "auto_test_registry_audit/executor.py",
     "modules/ai_intelligence/ai_overseer/skillz/"
     "m2m_holo_retrieval_benchmark/retrieval_corpus_v1.json",
 )

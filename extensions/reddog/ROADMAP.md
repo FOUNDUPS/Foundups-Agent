@@ -2,17 +2,46 @@
 
 ## Status
 
-Phase: RedDog 0.4.125 resident architect thin-client surface.
+Phase: RedDog 0.4.141 held builder-child identity rebind candidate.
 
-0.4.125 authenticates the reachable shared filesystem-safety prerequisites
-used by the staged dependency materializer. The materializer itself remains a
-maintenance-only library outside the thin-client runtime closure. A trusted
-stage-zero verifier must still bind the full runtime, signature, and empirical
-write denial, while normal operation still needs one persistent owner.
+0.4.141 first binds the corrected architecture: foreground RedDog is the
+lightweight interaction/exchange surface, while 0102 remains the deep Digital
+Twin, architect, and orchestration layer behind it. It preserves the 0.4.140
+one-shot held-executable builder child and its suspended, Job-contained,
+O:-runtime proof as bounded path-free evidence rather than the private builder
+capability. No extension, Git, owner, route, maintenance, activation, or
+execution authority is added. The prior 0.4.140 builder release evidence
+remains exact-commit history; fresh 0.4.141
+release, VSIX, and post-merge evidence remain mandatory promotion gates.
+
+0.4.139 retains exact-task post-merge execution, receipt-bound owner
+reacquisition, phase-aware liveness, repeatable supervisor release, and
+same-repository dependency-runtime resolution. The maintenance source now also
+has inert, descriptor-only composition and declared Windows/CPython ABI
+generations that prevent payload mix-and-match and attest bounded
+PE/wheel/RECORD relationships without loading native images. The ABI files are
+outside the executable backend manifest and grant no VSIX runtime authority.
+Every verified requery now
+enters through the original workspace/control root while its captured clean
+authority remains the proof target. The bounded operator controller is not an
+extension command. A
+trusted stage-zero verifier must still bind the full runtime, signature, and
+empirical write denial, while normal operation still needs one persistent
+owner and independently governed retrieval RSI.
+The receipt-bound owner reproof and separately contained pre-owner exact-binding
+repair are live-accepted at exact main `9c27cd03`: the governed OpenClaw/WRE
+transaction completed, the ordinary owner query was CURRENT/no-gap/no-reindex
+on attempt one, and full verification retained all 33 replica artifacts.
+This exact-commit proof does not close runtime exactness, A-grade, RSI, or scale.
 
 Current implementation:
 
-- [x] Bind candidate evaluation to the owner-loaded ten-module source-ranker
+- [x] Close the 0.4.136 pre-owner exact-main acceptance gate at `09e98fff`.
+  The canonical task produced generation `sha256:7869f238...`; immutable
+  revalidation retained 33 artifacts / 222,719,702 bytes. The controller did
+  not reindex, and its owned OpenClaw runtimes stopped cleanly.
+
+- [x] Bind candidate evaluation to the owner-loaded twelve-module source-ranker
   closure and reject missing, malformed, foreign-root, or mismatched digests.
   The pure A-grade gate reruns the public corpus and prevents caller-downgraded
   floors without granting index, maintenance, dispatch, or promotion effects.
@@ -22,11 +51,21 @@ Current implementation:
   25.5-second bootstrap. This is single-owner readiness, not A-grade or scale.
 - [x] Implement and production-shape-test a maintenance-only exact dependency
   materializer; it is intentionally not reachable from the VSIX runtime.
-- [ ] P0-A: use a separately trusted stage-zero verifier to bind the owner
-  Python executable, ABI/platform, standard library, native loader closure,
-  sealed dependency generation, backend build, deterministic execution knobs,
-  signature, and empirical write denial. Then publish a route-v2 binding with
-  atomic CAS; source binding alone is not reproducibility.
+- [x] Implement and production-shape-test an inert exact Windows Python
+  base-runtime materializer. It preserves runnable topology but is intentionally
+  not reachable from the VSIX or owner runtime.
+- [x] Compose the exact base and dependency generations into one path-free,
+  descriptor-only identity with exact-equality reverse-order full-byte reproof
+  and exact interpreter/isolation topology. This remains inert; the bounded
+  proof is neither ABA resistance nor write denial.
+- [x] Bind that composition to bounded PE32+ metadata, CPython/wheel/RECORD
+  declarations, non-forwarded interpreter exports, and a declared-name graph.
+  This proves declared ABI compatibility only; it does not invoke the Windows
+  loader or import a native module.
+- [ ] P0-A: add an external Windows native-loader closure, deterministic
+  pre-import execution, signature, and empirical write denial.
+  Then publish a route-v2 binding with atomic CAS; content addressing alone is
+  not reproducibility or activation authority.
 - [ ] P0-B: activate one authenticated resident owner against only that route-v2
   binding, with bounded startup/restart, serialized requests, and identical
   per-response freshness and immutable-closure proof.
@@ -66,6 +105,12 @@ Current implementation:
   presentation-only.
 - [ ] Durable personalized memory, voice, automatic async critic dispatch, and
   promotion-to-execution binding; each remains separately gated.
+- [x] RedDog Lick non-biometric PoC: explicit session consent, guest/display-name
+  claims, one-use continuity challenge, provisional encounter profile,
+  expiry/withdrawal, AutoPost capture linkage, and a non-authoritative
+  `LickReceipt`. Not deployed; possession proof, change detection, corrections,
+  and deletion-tombstone UI remain before any biometric evaluation. AutoPost
+  does not decide identity. See `docs/REDDOG_LICK_CONNECTION_HANDSHAKE.md`.
 
 - Governed Holo resident binding (implemented / exact-main live acceptance passed): the VSIX one-shot and canonical
   resident/OpenClaw read-only worker now use the same verified replica resolver
@@ -182,11 +227,11 @@ Current implementation:
   Live materialization, retention, and ChatGPT-app acceptance remain separate
   pending work.
   Capacity is already P1 debt rather than permission to widen gates: the
-  candidate backend occupies 1,381/1,400 files (19-file headroom), its generated
-  manifest occupies 309,370/327,680 bytes (18,310-byte headroom), and the
-  package surface occupies 67 files / 964,953 bytes under its unchanged 1 MiB
-  ceiling (87,446-byte headroom). The isolated frozen-source release passed all
-  four groups in 288.505 seconds without a timeout; governed Git finished
+  candidate backend occupies 1,363/1,400 files (37-file headroom), its generated
+  manifest occupies 305,126/327,680 bytes (22,554-byte headroom), and the
+  package surface occupies 67 files / 945,990 bytes under its unchanged 1 MiB
+  ceiling (102,586-byte headroom). The final exact-byte release passed all
+  four groups in 202.154 seconds without a timeout; governed Git finished
   111.605 seconds below the unchanged 400-second child ceiling. A separate run
   under competing audit load correctly failed when core and governed Git both
   reached that ceiling. Profiling, scheduling, and reducing those long poles is
@@ -300,7 +345,7 @@ Current implementation:
 - Exact single/Fusion completion-budget parsing with a 131,072 maximum and
   pre-provider fail-closed rejection; Kimi K3 retains its 4,096 floor.
 - [x] Fail-closed VS Code workspace capability declarations and a deterministic
-  66-file VSIX surface derived from the complete runtime require/worker/Python
+  67-file VSIX surface (66 text files plus the icon) derived from the complete runtime require/worker/Python
   closure; live VSCE listing is release-only and creates no artifact.
 - [x] Governed Git executable provenance: lexical PATH/PATHEXT binding, exact
   absolute identity/hash proof, Windows Authenticode fail-closed verification,
@@ -327,17 +372,28 @@ Current implementation:
 
 ## Architecture Direction
 
-This extension is the IDE-side RedDog thin client. RedDog/0102 is the continuous principal-scoped identity; resident services host conversation/model state while OpenClaw supervises admitted work, WRE retains execution authority, and Hermes receives bounded leaf jobs.
+This extension is the IDE-side RedDog thin client. RedDog is the lightweight
+fast interaction/exchange surface; 0102 is the principal-scoped Digital Twin
+and deep cognition/orchestration layer behind it. Resident services host
+conversation/model state while OpenClaw supervises admitted work, WRE retains
+execution authority, and Hermes receives bounded leaf jobs.
 
-RedDog is the resident FoundUps architect identity and conversation product across thin-client surfaces. Fusion is one internal reasoning mode; authority-bearing work remains in the signed OpenClaw/WRE/Hermes worker path.
+RedDog is the continuous conversation and attention surface across thin
+clients. 0102 is the resident FoundUps architect and deep reasoning layer.
+Fusion is one internal reasoning mode; authority-bearing work remains in the
+signed OpenClaw/WRE/Hermes worker path.
 
 ### RedDog and the Recursive 0102 DAE Ecosystem
 
-012 does not orchestrate every worker. 012 talks to RedDog. RedDog participates in the recursive 0102 DAE ecosystem. Autonomous WRE/DAE agents perform bounded work under OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
+012 does not orchestrate every worker. 012 talks to RedDog; RedDog exchanges
+bounded intent and context with 0102. The deeper 0102 layer participates in the
+recursive DAE ecosystem. Autonomous WRE/DAE agents perform bounded work under
+OpenClaw supervision and WRE authority; Hermes receives bounded leaf jobs.
 
 ```text
 012 work focus
-  -> RedDog digital twin / architect interface
+  -> RedDog fast interaction / exchange surface
+  -> 0102 digital twin / architect layer
   -> recursive 0102 DAE ecosystem
   -> OpenClaw policy / control supervision
   -> WRE execution authority -> Hermes bounded leaf jobs

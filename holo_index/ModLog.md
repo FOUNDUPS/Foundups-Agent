@@ -1,4 +1,161 @@
+## 2026-10-04 — Preserve native Markdown until EOS
+
+- Qualified native chat supplies an empty caller stop list; formatter EOS text
+  and token criteria remain. Raw route, profile/context checks and caps unchanged.
+- Independent fixed baseline: 59 pass/4 expected failures; candidate 63 pass.
+  Connected WRE suites: 176 pass; overlapping selections, three new cases.
+- One local model proposal was malformed and rejected; coordinator applied the
+  one-line repair. Earlier real output truncation cause remains unproven.
+- WSP00/5/11/15/22/48/50/84/97. Existing manifest/pins refreshed. Publication and
+  retained usefulness are separate; see canonical dispatch/backlog checkpoint.
+
+## 2026-10-01 — Explicit per-call local-model cleanup
+
+- Existing engine gains idempotent explicit close; existing WRE adapter owns
+  cleanup in finally and rejects proposals when cleanup fails. Direct reusable
+  engines retain their lifetime semantics. No new module/skill/backend.
+- Frozen62 cases: baseline40pass/22fail; repaired62pass, zero errors/skips.
+  Separate author/reviewer; no model, provider, database, admission or retention.
+- WSP00/5/6/11/15/22/48/50/62/84/97: bounded same-owner change, source bindings,
+  refreshed existing runtime manifest/pins, exact-head publication receipts.
+- Evidence `O:/Foundups-Agent-audits/20261001-rsi-engine-lifecycle/`; backlog
+  `local_engine_lifecycle_20261001`. Next: source-only admission prerequisites.
+
+## 2026-09-30 — Opt-in native-chat proposal caller
+
+- Extend existing master/adapter/Qwen route; copied trusted runtime/template
+  configuration, raw default, single rendering and actual-context token guard.
+- 35 portable cases passed; separate4 installed-source handler controls passed.
+  Zero native initialization/generation/provider calls. Original collection-only
+  runner failure retained; corrected runner passed with unchanged19-source scope.
+- Existing CI now selects the complete execution-truth file. No admission,
+  PatternMemory promotion, held-out gain or later retained-use claim.
+- Refreshed existing RedDog 1401-member manifest and both digest pins;
+  only3 member hashes changed. Generator8 tests and backend compatibility passed.
+- WSP00/5/6/11/15/22/48/50/84/97; next 13/P1: Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper.
+  Evidence `O:/Foundups-Agent-audits/20260930-rsi-native-caller-contract/`; source `ca7117b6a64bc66a4d4885d742cd06379ab582f1`.
+
 # HoloIndex Package ModLog
+
+## [2026-09-13] Current-source maintenance and public quality benchmark
+
+- Existing OpenClaw/WRE maintenance completed main `5326080d5` after PR #1710;
+  both owned runtimes stopped. No index operation was added to the query path.
+- Existing fixed public benchmark: six CURRENT/no-gap receipts, Recall@8/MRR
+  1.0, nDCG@8 0.9939998, p95 4031ms; deterministic verification accepted.
+  Corpus, ranker and 0.95 policy unchanged. Exact runtime closure remains false
+  in all receipts; no independent sealed evaluation or promotion performed.
+- Retained the full run in the existing dated RSI evidence artifact and linked
+  the source boundary from the roadmap/CLI atlas. This is R03/R05 evidence,
+  not completed RSI or a claim about subsequent main commits. WSP 22, 50, 87, 97.
+
+## [2026-09-13] R03 interpreter selection recovery
+
+- Diagnosed ambient Python/base mismatch excluding the existing vetted dependency path; the owned child reported missing NumPy. Reused the existing repository venv with the matched reference helper, without source or index mutation.
+- Normal default-budget query: CURRENT/no-gap, one owner attempt, reference `78b79c36`. A 60-second diagnostic query timed out; current-main source `89bdd7a5` still rejects the older authority with zero attempts. See CLI_REFERENCE.md for exact evidence boundaries and the reusable Windows recipe.
+- Existing runtime-selection tests: 2 passed / 16 deselected. Updated canonical instructions and R03 status; exact-current-main qualification and runtime/quality acceptance remain open. WSP 22, 50, 84, 87, 97.
+
+## [2026-09-13] R03 source selection and existing fallback documentation
+
+- Corrected bootstrap/canonical-agent retrieval instructions to bind the helper's actual source, distinguish primary checkout from current main, and reuse the existing local bundle when semantic retrieval is unavailable. Extended this module's atlas/interface rather than adding a service or module.
+- WSP 00 activation and strict tracker gate passed in the isolated checkout (`self=0102`, role architect, origin external principal); WSP 97 review reused owner/selector/repair contracts. The separate WSP 00 state-semantics PR #1636 remains unchanged.
+- Existing entry/root selection: 81 passed in 4.37s. Live primary entry: HEAD mismatch; matched reference: owner startup exit after two attempts; clean local bundle: success, UNKNOWN freshness, zero owner attempts. An initial unsupported `bundle_module_hint` request rejected before startup and was corrected to the existing `module_hint` field; it was not classified as an infrastructure outage.
+- Retrieval assessment: current module contracts were available through the local bundle; semantic availability and stale historical completion claims remained separate. Exact field/source checks filled missing context, and direct symbol reads avoided duplicate implementation. This documentation/contract comparison used deterministic tools; no Qwen/Gemma generation or measured learning is claimed.
+- R03 remains partial. No index/route/authority mutation, model generation, runtime source change, production memory write or new execution permission. WSP 00, 22, 50, 81, 87, 97.
+- The live local fallback also passed after documentation edits and correctly changed its evidence label to `workspace_overlay`. Targeted CLAUDE-to-AGENTS renderer parity passes. The broader projection check reports pre-existing `stale:.agents/skills/file_set`: tracked `japan_hyperscaler_report/SKILL.md` has no canonical counterpart in the generator's expected set. Skill sources/projections are unchanged from the base and belong to the concurrent lane; this is not reported as a global projection pass or repaired by deleting its skill.
+- Startup follow-up: `holo_query_owner_startup.await_owner_startup()` emits the observed label when the owned child exits, while `HoloQueryServiceSupervisor._spawn()` discards stdout/stderr. The cause is not established by that label. Reuse those owners for a bounded, secret-safe diagnostic before choosing repair; no new diagnostic module or speculative reindex was added.
+
+## [2026-08-29] Pre-owner exact-main live acceptance
+
+- PR #1591 merged as exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e`.
+  The governed controller admitted only the canonical pre-owner stale-HEAD
+  incident and completed the existing OpenClaw/WRE task at generation
+  `sha256:7869f238...`; its owned runtimes stopped cleanly.
+- A fresh broad RSI owner query returned CURRENT/no-gap/no-reindex on attempt
+  one with equal authority/workspace HEADs and no overlay. The required module
+  bundle passed with no required artifact missing and no false telemetry
+  `feedback` module target.
+- Production verification retained 33 artifacts / 222,719,702 bytes at
+  descriptor `sha256:af0e9a2a...`, replica `sha256:fb03a1db...`, and path
+  identity `sha256:4d5c10b7...`. Exact runtime closure remains false; A-grade,
+  retrieval RSI, and scale remain NO-GO. (WSP 00/15/22/50/62/84/87/97)
+
+## [2026-08-28] Evidence-qualified module-intent candidate
+
+- Reproduced the exact governed failure at current main: generic `feedback`
+  promoted `modules/telemetry/feedback`, a telemetry JSON container without
+  root contracts, and strict Tier-0 failed closed as designed.
+- Rejected the first all-file repair after WSP_97 review found it already used
+  828,543/1,048,576 bytes. The replacement reads one 146,876-byte directory
+  projection and one 68,591-byte candidate-root batch, both from exact HEAD.
+- A root now qualifies only through a direct `src/tests` tree or regular root
+  README/INTERFACE blob. All directory and raw-tree framing, modes, types,
+  object IDs, paths, names, Unicode, duplicates, counts, bytes, time, cache,
+  and subprocess behavior remain fail closed and bounded.
+- Reused the repository-audit trusted Git resolver and closed read environment;
+  inherited Git authority variables, replacement refs, optional locks, system/
+  global config, hooks, attributes, excludes, and external diffs cannot steer
+  these reads. The 8 MiB per-output bound supports the stated 4,096-module cap
+  at the measured repository shape without reopening an all-file projection.
+- The local projection exposes 160 proved modules, excludes telemetry feedback,
+  and preserves HoloDAE plus doc-only consciousness-engine intent. It performs
+  no file walk, index/store access, reindex, route, owner, or activation change.
+  Exact-main refresh and original-query replay remain acceptance gates. The
+  complete execution evidence is sealed in
+  `docs/audits/infrastructure/HOLOINDEX_MODULE_INTENT_EVIDENCE_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+  (WSP 00/15/22/50/62/83/84/87/97)
+
+## [2026-08-28] Producer-ranked owner merge candidate
+
+- Live exact-main benchmarking proved the collection-local exact-symbol winner
+  was reordered by owner flattening because the latter compared raw similarity
+  and discarded producer rank. This was an integration gap between two passing
+  unit boundaries, not a corpus-label or threshold defect.
+- The owner now merges only the heads of each producer-ranked typed stream.
+  Broad current-status queries first apply the existing stable authority tier;
+  ordinary and historical queries retain producer order. Cross-bucket score,
+  casefold deduplication, and exact-module Tier-0 reservation remain in force.
+- Added source-accurate root contracts for `modules/ai_intelligence/holo_dae`,
+  whose missing README/INTERFACE caused a governed multi-module RSI query to
+  fail `HOLOINDEX_TIER0_INCOMPLETE`. The contracts explicitly quarantine the
+  legacy direct-index/auto-reindex launcher from governed retrieval authority.
+- This is a pre-merge ranker candidate. No threshold, relevance judgment,
+  corpus, index, route, replica, owner, promotion, or RSI authority changed.
+  (WSP 00/15/22/48/50/62/83/84/87/97)
+
+## [2026-08-28] Current-truth retrieval candidate
+
+- Admitted the canonical Holo README/INTERFACE/ROADMAP/CLI/test/memory and
+  adaptive-boundary contracts into the exact tracked docs source set. Only
+  reviewed path-bound current headings receive section records; historical
+  audits, ModLogs, and other sections retain summary/history treatment.
+- Added deterministic current/implementation/history/vision classification,
+  bounded status-query docs oversampling, a filtered summary stream for path
+  diversity, case-normalized path deduplication, and owner-level authority
+  ordering. Exact PR/slice and historical/temporal queries preserve semantic
+  ordering; exact module Tier-0 remains unchanged.
+- Extracted document indexing from `core/indexing_engine.py`, reducing it from
+  1,600 to 1,467 lines. The new 271-line module and all its functions satisfy
+  the WSP_62 file/function limits without an exemption.
+- Corrected WSP 60 plus adaptive-learning and memory documentation: the CLI path remains
+  disabled, advertised feedback/metrics methods do not exist, and evaluation
+  scaffolding is not production RSI. This candidate performs no reindex,
+  activation, ranker promotion, route change, or maintenance. (WSP
+  00/15/22/50/60/62/83/84/87/97)
+
+## [2026-08-28] Owner acquisition cycle receipt binding
+
+- Query receipts now integrity-bind valid owner attempt count, retry flag,
+  retry reason, and controller-selected acquisition cycle. The one-shot attaches
+  telemetry before receipt creation; communication verification independently
+  rejects malformed, out-of-range, missing, unequal, or rehashed cycle evidence.
+- Exact-main `db44f8be` maintenance completed at `sha256:b5a138e0...`; a fresh
+  query returned CURRENT in 3.812 seconds and full verification retained 33
+  artifacts / 222,033,165 bytes. The controller false-negative repair has
+  focused synthetic closure only until merge/replay. Base-bound
+  maintenance/freshness self-repair is observed working; current-main runtime
+  acceptance, retrieval-quality RSI, and A-grade remain false.
+  (WSP 00/15/22/50/62/64/84/97)
 
 ## [2026-08-27] Large-file health proof repair
 
@@ -16,7 +173,7 @@
 - Added an explicit exact-closure assurance flag and made A-grade composition
   reject until installed dependency payload bytes are verified. The public
   benchmark retains one authenticated owner across all cases.
-- Reconciled current truth: exact-main maintenance/replica RSI passes at
+- Reconciled transaction truth: base-bound maintenance/freshness self-repair passed at
   `bfcf9041`, generation `sha256:7b94cf8a...`; post-restart semantic owner
   startup failed closed at 60/180 seconds. Resident-owner activation and
   quality/promotion feedback remain open; retrieval RSI is not claimed.
@@ -173,7 +330,7 @@
   store.
 - The reproducible six-file package selection is **233 passed / 1 platform
   skip**; the earlier 237/1 aggregate had no recorded selection and is
-  superseded. The exact command is recorded in `tests/TESTModLog.md`. Current
+  superseded. The exact command is recorded in `tests/TestModLog.md`. Current
   main's JSON-only maintenance CLI output remains byte-identical and covered.
   (WSP 00/6/15/22/34/50/97)
 

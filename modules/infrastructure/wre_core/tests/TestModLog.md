@@ -1,4 +1,695 @@
+## 2026-10-10 — Scanner coverage failure regressions
+
+- Confirmed failed exits/payloads never become successful zero-finding scans;
+  secret/config findings retain type/location and secret values stay out of reports.
+- Confirmed secret gates survive scanner→WRE→real policy, partial findings remain
+  visible, failed CLI outcomes return 2, controller status persists partial/error,
+  and dry-run cannot execute on a live-capable controller.
+- Confirmed source and modern-lockfile edits propose SAST/SCA scans.
+- 131 passed, zero skipped across scanner, executor, trigger, controller and stack
+  E2E suites (2.45s); policy suite separately 29 passed (0.35s). The AI Overseer
+  conftest marks unrelated tests skipped when combined; separate runs avoid that
+  collection behavior without disabling its policy.
+
+## Measured-zero fidelity regression — P15
+
+Nine frozen cases in existing `test_pattern_memory.py` cover overall/recent/
+older zero means, absent history/windows, nonzero behavior, inclusive 0.7 rate
+independent of effect success, and actual selection after SQLite close/reopen.
+Valid baseline: 4 expected failures/5 passes (3.625s parent); coordinator repair:
+9 passes (3.266s). Separately selected 42 existing memory/selector controls pass
+(7.109s); selections are disjoint, 51 cases total, not model-fitness coverage.
+Zero errors/skips/guard denials; all 17 source pins stable in both successful runs.
+Separate manifest contracts pass 8/8 (63.719s) and the 15-member RedDog fast
+tier passes (10.000s parent), with stable named source pins. These integrity
+selections are not added to the 51 semantic/legacy cases.
+Two earlier pretest harness failures and prelaunch pin omission are preserved.
+The worker proposal is rejected/unused, not candidate code under these tests.
+
+Commands, XML, fixed IDs, bounded observations and source review are saved in
+`outputs/rsi-zero-fidelity-20261005`. The reopened selector now chooses 0.4 over
+measured 0.0. PR2062 and exact-main CI/CodeQL passed. Three separately reviewed
+retained/control/recovery phases passed in 0.218s/0.219s/0.219s parent time:
+positive → zero control → positive, with identical original rows/timestamps,
+source pins and SQLite byte hashes. All database closes returned; no errors or
+denials were recorded. Hosted 340 WRE and 675 effect selections are not summed.
+Structural fidelity and retained consumer behavior do not prove model
+improvement, worker repair credit or authority.
+
+## P14 initial telemetry controls — 2026-10-05
+
+Independent frozen 75-case baseline failed only on
+`registry_scope_normalizer_api_missing`; no collection errors/skips. Candidate
+75/75 passed with unchanged test/source bindings in that run. Saved XML hashes
+and all 75 unique parameterized names/order match the frozen selection. Empty
+JUnit classnames under `-c NUL` explain the original false classname comparison;
+the exact command and unique name/order evidence are retained.
+
+The initial connected run returned 257 pass/10 fail/2 skip, with source bindings
+changed during execution; no exact-source qualification is claimed. Independent
+review's shape/digest/metaclass controls reproduced37fail/2pass before repair,
+then39pass. Original75 still pass; stable connected306pass/two Windows link skips
+(308total, overlapping selections). Legacy fixture migration preserves55 assertion
+ASTs and passes23 master cases. These unit tests use scanner substitution,
+two owned Git producer cases and two private SQLite reopen cases. Separate
+actual PC observations preserve scanner rejection, materialization rejection
+with one rejected event, then completed155-shard-per-side projection with one
+projected event. All have zero outcome/variation rows and no watched agent
+generation. Scanner classification is local ML and is not covered by that
+agent-call counter. Four fixed compatibility controls pass in isolated2.2.0;
+short TEMP follows a measured WinError206 probe. Source PR2061 hosted331 WRE
+and675 separate effect-boundary cases pass. No fitness/native authority proof.
+Evidence: `outputs/rsi-test-scope-telemetry-20261004`; original criteria retained.
+
+## Retained source regression and rollback — 2026-10-04
+
+At merge `a2b130247c010419e1cb918e48c0595258831075`, three new Python processes
+run the unchanged29-case CodeAct file:29pass; baseline source26pass/3fail;
+restored source29pass. Exact original failure names recur; errors/skips0;
+exit0/1/0. Source bytes restored and detached worktree clean before retirement.
+These phases overlap; no new tests/model calls or held-out task. Independent
+review accepted saved source/test/criteria, actual XML and evidence-consumer
+lineage. Commands/results: P8 `retained-validation/`. Hosted PR/main logs also
+verify217 connected WRE,67 scanner and452 separate guarded cases.
+
+## Local proposal framing regression — 2026-10-04
+
+Independent frozen prompt baseline:12expected failures/67passes,25deselected,
+0errors/skips. Candidate:79passes; connected six-suite selection:209passes;
+manifest:8passes. Selections overlap. Two new inert raw-expression/native-JSON
+cases preserve payloads, limits, cleanup and proposal truth. Five exact full-prompt
+expectations migrated because they encoded the defective wrapper;77 other
+top-level AST nodes are unchanged. Finite lexical checks verify assembly only,
+not model adherence, semantic correctness or execution authority.
+The path suite remains byte-identical: baseline26pass/3fail becomes29pass after
+the exact worker predicate is substituted. All21 prior cases remain unchanged;
+the final integrated six-suite selection passes217 with no errors/skips.
+Commands, XML and independent evidence:
+`O:/Foundups-Agent/outputs/rsi-codeact-path-benchmark-20261004/prompt-contract/`.
+
+## CodeAct nonzero-exit regression — 2026-10-04
+
+Existing hardening suite now has 21 cases: six unchanged controls, eight
+nonzero status/stderr/capture combinations, four zero-exit controls and three
+pre/main/post stop cases. Baseline 11 fail/10 pass; candidate 21 pass. Connected
+CodeAct, Git-CWD, execution-truth, PatternMemory, continuity and master suites:
+207 pass (overlapping selection), no skips. All shell calls are mocked; this
+does not qualify a sandbox or enable public CodeAct. Raw-error stream exclusion
+is additionally source-reviewed, not claimed as an explicit substring test.
+Exact commands/XML: `O:/Foundups-Agent/outputs/rsi-codeact-exit-truth-20261004/`.
+
+## Native chat delimiter regression — 2026-10-04
+
+Three new cases in existing `test_wre_execution_truth.py` preserve a Markdown
+subheading, an inline `###` literal and an EOS-only control. The native fake
+honors supplied stops; all cases require EOS suffix removal, output caps,
+single cleanup and proposal quarantine. Two old fit assertions now expect EOS
+only. All other original test ASTs and raw route controls remain unchanged.
+
+Independent frozen baseline: 59 pass/4 expected failures. Candidate: 63 pass;
+connected execution-truth, PatternMemory, continuity and master suites: 176
+pass, zero skips. Selections overlap; existing CI already covers the full file.
+These deterministic tests do not prove real-model usefulness. Frozen semantic
+acceptance is unchanged for a later separately reviewed real WRE invocation.
+Exact commands, XML and source bindings:
+`O:/Foundups-Agent/outputs/rsi-native-chat-delimiter-20261004/`.
+
+## Continuity proposal regression — 2026-10-04
+
+The OpenClaw continuity object remains available to its lineage owner but is
+omitted from local proposal and reflection prompt JSON, matching existing
+PatternMemory handling. Ordinary task fields, input objects, indentation and
+reflection truncation are preserved; unrelated nonserializable values still
+fail. Two existing expressions changed; no new runtime module or admission.
+
+Independent frozen baseline:8 expected failures/27 passes across35 cases;
+repaired source:35/35 and173/173 connected cases pass (selections overlap,
+14 new cases). The raw local worker returned only “Do not claim effects.” and
+was rejected. The existing native-chat route supplied the exact two accepted
+expressions in27.172s after a counted metadata-only model load. Same task/model,
+different formatting and stop behavior: this is a route comparison, not isolated
+causal proof. Tokens unavailable; paid inference calls0; coordinator cost unknown.
+Model text remains unverified; independent source review, publication and later
+retained use are separate gates. No native Hermes/OpenClaw ticket admitted.
+
+Existing CI already selects `test_wre_execution_truth.py` plus PatternMemory,
+skill-evolution continuity and master suites. No workflow or criteria change.
+Commands/source pins/results: `O:/Foundups-Agent/outputs/rsi-local-continuity-proposal-20261004/`.
+
+## Failure recall regression — 2026-10-04
+
+Extended the existing `test_recall_failure_patterns` with independent success
+and fidelity fixtures, including the inclusive boundary, expanded cutoff,
+missing skill and zero limit. Original source: 40 pass / 1 fail (2.55s).
+Corrected source: 159 pass (8.10s), no skips, with normal pytest fixtures in the
+fresh isolated worktree. Command:
+
+```powershell
+python -B -m pytest modules/infrastructure/wre_core/tests/test_pattern_memory.py modules/infrastructure/wre_core/tests/test_skill_evolution_continuity.py modules/infrastructure/wre_core/tests/test_wre_execution_truth.py modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py -q --tb=short -p no:cacheprovider
+```
+
+FOUNDUPS_DB_PATH and WRE_PATTERN_MEMORY_DB were set to disposable evidence paths.
+Existing CI now runs these four files using its isolated configuration. Earlier
+scratch validation separately passed 41 memory and 10 continuity cases; those
+are not added to the 159 as distinct cases. An unchanged extracted reflection
+builder confirmed consumer behavior and later scratch reopening, not production
+retention. Independent source review did not itself execute these tests.
+A second run using the exact CI plugin/config isolation passed 159 cases in
+6.16s (`publication-tests.xml` in the local evidence directory). The original
+8.10s run above used normal repository configuration. Eight manifest generator
+contracts separately passed in 64.90s; these are additional distinct cases.
+
+## Terminal fixture observation — 2026-10-02
+
+**fixture_inconclusive.** One reviewed terminal child returned normally in2.5s. The recorded7895232-byte fixture hash matched; import, params, backend interval/free, descriptor close and ERROR logger/capture restoration returned. Model load returned null; vocabulary/model-free were not attempted. Capture recorded0 writes/characters and no labels: fixture_inconclusive, diagnostic usefulness insufficient. The sole allowance and this diagnostic branch are closed; no usable worker or specific rejection explanation was established.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-terminal-fixture/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `terminal_fixture_observation_20261002` pins exact artifacts and resource/receipt limits.
+
+## Model-free logger connection controls — 2026-10-02
+
+9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials. The same 32 INFO chunks followed by an ERROR EOF hint saturate the default capture (65 counted writes, 4,097 received/4,096 inspected characters); existing ERROR verbosity preserves the hint untruncated (2 writes, 14 characters). CONT fragments are suppressed at ERROR. Generic and unknown messages remain insufficient explanations.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-logger-connection/run_once.py`.
+
+Exact callback/map/set_verbose bodies and builtin print run in private globals;
+only decorator/annotations are removed. Level and stream restoration, original
+exception identity and cleanup failure are checked. Prior sink tests are not
+recounted. The child performed no native-package import/registration, real stderr replacement, model/fixture/device access or provider call. Parent process/stdio owners were reused; no production change, WRE admission or retained RSI gain occurred. Native callback threading, descriptor coverage and real error wording remain unverified. Oracle and runner share author; coordinator review is separate.
+Hosted CI does not replay this audit. Backlog `logger_connection_controls_20261002` pins the evidence.
+
+## Diagnostic capture inert controls — 2026-10-02
+
+24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials. Cases exercise bounded Python stream writes
+and restoration with injected holders. Finite labels, caps, redaction and
+truthful failure/unknown/truncation states are covered. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-diagnostic-capture/run_once.py`.
+
+The oracle author also authored the runner; coordinator review is separate.
+No held-out runtime, actual callback coverage or rejection-cause confirmation
+is claimed. Hosted CI does not replay this local audit. Backlog `diagnostic_capture_controls_20261002` pins
+source, oracle, runner, execution and review evidence.
+
+## Native guarded observation — 2026-10-02
+
+**fixture_inconclusive.** One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-guarded/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `native_guarded_diagnostic_20261002` pins exact artifacts and resource/receipt limits.
+
+## Null-device guard inert controls — 2026-10-02
+
+20/20 fixed inert guard cases passed in one bounded invocation (child 0.047s, parent 0.344s); no failed or unrun cases and no outer guard denials. Cases exercise source-derived audit tuples with a captured callback;
+expected synthetic denials are separate from outer guard violations.
+Canonical token, flags, mode, phase, two-open limit, ordinary output constraints
+and redacted denial detail are covered. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-null-guard/run_once.py`.
+
+The oracle author also authored the runner; coordinator review is separate.
+No held-out runtime, real-open compatibility or historical-target confirmation
+is claimed. Hosted CI does not replay this local audit. Backlog `null_device_guard_controls_20261002` pins
+source, oracle, runner, execution and review evidence.
+
+## Native fixture observation — 2026-10-02
+
+**setup_invalid.** One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-fixture/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `native_fixture_diagnostic_20261002` pins exact artifacts and resource/receipt limits.
+
+## Inert backend lifetime controls — 2026-10-02
+
+Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials. Sixteen cases contain seventeen inert intervals; the repeated case checks fresh
+receipts, not repeated native initialization. Fixed expectations cover initialization, parameter
+preparation, model-probe completion and backend cleanup order, including
+interruptions and combined failures. The copied worker is AST-loaded only for
+the two diagnostic functions; its original main/imports are never executed.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-backend-lifetime/run_once.py`.
+
+No original-model or captured-fixture access, native-model/backend execution, provider call, production runtime change, admission or retained RSI gain occurred. Prior 17 raw-model controls are not rerun/recounted. No native reclaim,
+ABI or fixture compatibility is established. Oracle/runner authorship and
+coordinator review are disclosed; no held-out runtime-evaluator claim. Hosted CI
+does not replay this external suite. Backlog `backend_lifetime_controls_20261002` pins exact evidence.
+
+## Verified-file connection and prefix extraction — 2026-10-02
+
+Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent). Zero failed/skipped/missing cases and no guard denials. Eight fixed
+cases cover default/explicit callbacks, exception closure, pre-open rejection,
+actual capture/output/readback, collision preservation and wrong hash/size.
+
+Historical commands (both allowances consumed; no replay):
+
+```text
+python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-extraction/connection/run_once.py
+python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-extraction/capture/run_once.py
+```
+
+Actual capture is one observation, not another unit-test case. Original prefix
+and fixture readback total 15,790,464 bytes; 14 actual padding bytes are zero. Hash
+`f0006566efd440a0274c4dcade54f94fe577c32630218f273999a8896df158ee`. No full-model hash or durability claim.
+No tensor payload access, native-model/backend loading, provider call, production runtime change, RSI admission or retained-gain demonstration occurred. Prior 32/24/15 controls are not rerun/recounted. Oracle author reviewed
+implementation; no held-out runtime evaluator claim. Hosted CI does not replay
+these external audits. Backlog `gguf_prefix_extraction_20261002` pins the sources, oracle and receipts.
+
+## Audit prefix capture/output controls — 2026-10-02
+
+One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials. The 32 IDs are frozen in the external capture contract; independent
+fixture expectations do not call the implementation to derive expected values.
+Original fixture AST remains unchanged except added `capture_cases`.
+
+Coverage: exact/over-cap one-read capture, separate physical/parser byte counts,
+typed immutable expectations, metadata/directory drift, malformed/truncated input,
+nonzero padding, untouched payload sentinel, exclusive-output collision, short/
+invalid writes and separate write/close errors. Outputs and inputs are synthetic.
+No original model stat/read, real binary capture, native-model/backend/provider execution or production runtime change occurred. Native support, admission and retained benefit remain open. Existing 24/15 controls are retained at unchanged scope, not recounted.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-capture/run_once.py`.
+The allowance is consumed and closed; no replay. No registered module test changed
+and hosted CI does not replay this audit. Backlog `gguf_prefix_capture_controls_20261002` binds sources/oracle/results.
+Oracle authorship, implementation review and coordinator acceptance are distinct
+from an independent held-out runtime evaluator.
+
+## Bounded original-file observation — 2026-10-02
+
+One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
+
+One separately reviewed local diagnostic invocation, **zero new test cases**.
+Existing 24-case header and 15-case primitive/handle evidence transfers only to
+unchanged qualified functions; none was rerun. Padding and tensor payload were not accessed. This establishes bounded structural observation, not complete-file validity, native compatibility, worker admission or retained RSI benefit. Production and installed runtime owners are unchanged.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-original-header/run_once.py`.
+The single allowance is consumed and closed. No registered module test changed;
+hosted CI does not replay this external audit. Source, runtime, review and result
+bindings are in backlog `original_gguf_directory_20261002`.
+
+## Audit GGUF header controls — 2026-10-02
+
+The external audit `20261002-rsi-header-boundary` records 24/24 fixed inert
+cases. It copies the existing metadata fixture scaffold and adds `header_cases`;
+the runner AST-loads only selected helpers/cases and reader definitions. Legacy
+model-file entrypoints and the prior 15 fixture cases are not executed or recounted.
+
+Coverage: exact directory/alignment offsets (including explicit 24), bounded
+names/ranks/count/dimensions, duplicate/malformed/truncated records and cumulative
+read/offset/deadline limits. Positive fixtures end at directory end and reject
+later read/seek. Computed padding remains uninspected; native support is unproven.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-header-boundary/run_once.py`.
+The single allowance is consumed and closed. A changed attempt requires separate
+review. No registered module test was added; ordinary hosted CI does not replay
+this external audit. Backlog `gguf_header_boundary_20261002` binds source, tests, results and review.
+
+## Audit raw-handle lifetime controls — 2026-10-02
+
+The external source-bound diagnostic `20261002-rsi-native-lifetime` records
+17/17 fixed local inert cases. `test_model_vocabulary_lifetime.py` AST-loads
+only `probe_model_vocabulary` from a copied existing worker; no worker top-level
+or installed model package executes. Matrix covers valid/null acquisition,
+ordinary/interrupt lookup failures, cleanup failures, simultaneous failures,
+type-only redaction and separate repeated acquisitions. Backend lifetime is
+outside this helper. These are not native release or model-support tests.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-lifetime/run_once.py`.
+That one reviewed invocation is consumed; do not rerun it. Receipts and frozen
+oracle are linked by backlog `native_raw_handle_lifetime_20261002`. Reuse them only at their exact
+source/environment scope. A future changed attempt needs a separately reviewed
+packet. No registered module test was added/removed; ordinary hosted CI does
+not replay these external cases. Existing high-level close tests are distinct.
+
+## 2026-10-01 — Portable engine lifecycle regression
+
+Existing execution-truth owner adds27 cases; all35 previous portable caller IDs
+remain selected. Frozen baseline40pass/22fail matches exact predicted failures;
+same62 cases pass after repair with no errors/skips. Test bytes did not change
+after baseline. Existing fake engine/model fixtures gain explicit close support.
+Coverage includes raw/native success/error/empty/rejected runtime/template,
+cleanup error, owned uninitialized/falsey handles, reentrant/repeated close,
+primary interruption and direct reuse. No actual model/native allocation used.
+Full file85 cases is already selected by CI; local evidence is the62-case subset.
+See `O:/Foundups-Agent-audits/20261001-rsi-engine-lifecycle/` and module roadmap
+for WSP62 cohesion review and evidence limits.
+
+## Native proposal caller contracts — 2026-09-30
+
+The existing `test_wre_execution_truth.py` adds33 parameterized cases. The local
+35-case selection includes2 existing controls: proposal quarantine and error
+redaction. Coverage spans raw/default/legacy calls,15 invalid profiles, copied
+configuration,12 native branch cases, unchanged handler state and error redaction.
+Real master/helper/adapter/engine methods run with inert collaborators and native
+boundaries. The initial runner failed collection before any selected case; its
+reviewed alias/diagnostic correction passed35/35 with unchanged19 source pins.
+
+Separately,4 cases passed using installed0.3.20 formatter/handler source with
+synthetic tokens/output. No model loaded. The scopes are not39 native-model
+tests. Existing test definitions remain unchanged. CI explicitly runs the full
+execution-truth file (plus existing import/measurement regressions); exact-head
+hosted counts and later main verification are recorded in publication receipts.
+Evidence: RSI backlog `current_observation.native_proposal_caller_20260930` and
+`O:/Foundups-Agent-audits/20260930-rsi-native-caller-contract/`.
+
+## Hosted measurement portability follow-up — 2026-09-29
+
+Expanded CI on PR1950 head `5449bcde` ran308 cases:306 passed, two failed.
+The existing mixed-slash path test exposed a Linux-only filesystem read; reject
+both mixed UNC-style prefixes lexically. The existing startup test imported all
+of main and hit an unrelated missing Chroma dependency; reuse the established
+two-function AST fixture while preserving actual report-reader/output assertions.
+No tests were removed. Updated connected local307 pass; final hosted execution
+and publication remain bound to the canonical backlog. The earlier103-case
+comparison is retained as the initial scalar-repair evidence, not rewritten.
+
+## 2026-09-29: Persisted RSI measurement boundary
+
+- Existing test owners cover strict nested scalar types, explicit nulls, finite relative gain, zero/negative baseline semantics and real repeated producer→JSON→reader/advisory output; aborted/cleanup-failed reports remain unknown.
+- Frozen103 controls:80 baseline passes/23 reproduced failures →103 passes. Connected307 local cases pass without errors/skips; three abrupt-exit cases are explicitly deselected locally, retained in hosted CI. The broader set contains the focused cases; do not add the counts together.
+- Local command: `python -I -B O:/Foundups-Agent-audits/20260929-rsi-measurement-reconciliation/run_regression_final.py regression-final-v2`. It uses no plugin autoload/conftests, disposable outputs, actual evaluator leaves and two isolated simulator namespaces; two main function bodies are loaded without launching main. Guards block provider/model/network/DB/child execution. These Python guards are not an OS sandbox. Hosted CI runs four full registered test files including the abrupt-exit controls.
+- Original receipts/XML/source hashes and independent review are bound in the canonical backlog. Early runner receipt wording was corrected in a separate reconciliation; historical artifacts remain intact. PR/main verification is a separate publication gate.
+- WSP00/5/6/11/15/22/48/50/97. No production RSI, authenticated outcome or retained benefit claim.
+
+## 2026-09-27: Report checkout failure through the existing error field
+
+- WSP 00/6/15/22/34/50/62/84/97. Preserve all 148 case IDs and outcomes; add six controls in the same file/helper (three command-success routes × advisory/ENFORCED).
+- Each deletion-enabled fake transcript reaches successful exact-object local-main update, then failed checkout. Assert `cleanup_checkout_failed`, preserved failure action and `merged=True` command-success meaning, `passed = not ENFORCED`, and no later command or successful checkout/deletion action. No rollback implied.
+- PR1916 is merged/main-verified with the same 148 IDs passing on PR/main. Candidate 154-case hosted validation remains pending at preparation; no host-principal tests, collection or live runtime.
+- Independent fixed acceptance and closure evidence: `O:/Foundups-Agent-audits/20260927-rsi-checkout-error/`. Existing hosted CI and command-denial fixtures remain unchanged.
+
+## 2026-09-27: Retain branches when automatic cleanup is unqualified
+
+- WSP 00/6/15/22/34/50/62/84/97; frozen 148-case plan. Retained 136 IDs, intentionally changed four clean deletion-enabled outcomes to the retention error; the other 132 outcomes remain unchanged. Twelve new controls cover three routes, advisory/ENFORCED and default-unset+force versus explicit requests.
+- Existing unified fake transcript now ends after checkout; every branch-delete, raw update-ref, stash or extra command is rejected. Preserve successful synchronization actions and command-success `merged=True`; force cannot bypass retention. No new fixture owner or runner.
+- Independent source review caught pytest's reserved `request` parameter before CI. Renamed it to `request_mode`; values and the 148-case acceptance stayed fixed. The rejected draft finding is retained in the audit receipt.
+- PR1915 is merged/main-verified with 136 exact IDs passing on PR/main. Candidate hosted regression is pending at preparation; no host-principal candidate tests or live Git/service/native runtime.
+- Independent source acceptance and closure receipts: `O:/Foundups-Agent-audits/20260927-rsi-merge-cleanup/`. This is an explicit safety gate, not completed automatic retirement or a remote branch-existence claim.
+
+## 2026-09-27: Fresh commit synchronization before sentinel cleanup
+
+- WSP 00/6/15/22/34/50/62/84/97. Reuse all 68 prior case IDs and the ordered Git/GH fake transcript; add 66 negatives covering refresh, commit resolution/invalid output, late status and local update failure, plus two full SHA256 controls. Total 136 authored cases; no new test owner or runner.
+- All negative cases enable deletion. Exact captured commit, strict stop order, advisory/ENFORCED projection and no subprocess escape are required. Earlier dirty guards and terminal merge failures remain unchanged.
+- PR1913 is merged/main-verified, with 68 identical IDs passing on PR/main. Candidate execution is pending existing hosted CI; no host-principal candidate tests. Exact source/hosted/closure receipts: `O:/Foundups-Agent-audits/20260927-rsi-merge-sync/`.
+- Fake command results qualify branch behavior, not live Git synchronization, concurrency, verified merge authority or native RSI admission.
+
+## 2026-09-27: Preserve work detected before sentinel cleanup
+
+- WSP00/6/15/22/34/50/84/97. Retained 38 prerequisite cases and added 30 cases in the existing test file: 18 dirty/unreadable cleanup failures, six clean/deletion controls, six actual terminal GH failures. Direct-push rejection enters GH fallback and is not itself a terminal failed merge.
+- Negative cleanup fixtures enable deletion; one ordered Git/GH transcript asserts the status check precedes all local ref, checkout and explicit deletion commands. Existing subprocess denial remains active. The real sentinel function is exercised with fake Git/GH seams; no external Git/GH subprocess runs.
+- Prior PR1912 and exact-main runs each passed the same38 IDs. This candidate's68 cases await hosted CI; no local host execution. Same existing CI selection/artifact; no new runner or test owner.
+- Exact source review, JUnit outcomes and terminal closure: `O:/Foundups-Agent-audits/20260927-rsi-merge-ownership/final-accounting.json`, created only after verification. Command-success `merged=True` remains distinct from main verification; server-side auto-delete and post-check races are outside scope.
+
+## 2026-09-27: Merge sentinel prerequisites
+
+- WSP 00/6/15/22/34/50/84/97. Extended the existing sentinel suite; no new test owner.
+- Preserved four guard cases and added 34 cases for named-branch/worktree/status/fetch rejection, force semantics and a clean boundary control. All external command seams are replaced and subprocess escape fails.
+- Validation at preparation: source inspection only; no local candidate test run. The dedicated hosted CI step retains exact JUnit outcomes. Publication receipt: `O:/Foundups-Agent-audits/20260927-rsi-merge-preflight/final-accounting.json` (created only after verified closure).
+- Passing this suite establishes prerequisite behavior only. It does not verify the downstream direct-push, merge, main-readback or cleanup paths.
+
+## 2026-09-25: RSI verification measurement coverage
+
+- Added focused coverage for `wre_rsi_measurements.v1`: signal hierarchy,
+  execution-feedback classification, fitness gain arithmetic and outcome counts.
+- Dashboard fixtures now carry the measurement bundle and reject inconsistent
+  signal strength, independence, held-out status, production eligibility,
+  direction-judgment substitution and accounting.
+- No test result is claimed here because this documentation/source slice has not
+  yet received CI execution evidence. Publication/CI receipts govern acceptance.
+
+## 2026-09-24: Advisory research report and startup wiring
+
+- WSP00/15/22/50/62/97; reused `test_dashboard_snapshot_export.py` and AI Overseer's existing `test_preflight_resolution.py`. Final 67 unique cases pass locally and independently (overlapping replays). Initial 63 cases: 7 pass / 56 fail. Independent review added two impossible-gain controls: 63 pass / 2 fail before the consistency repair. Coordinator review then added two Windows mixed-slash UNC controls: 65 pass / 2 fail before lexical drive rejection, followed by 67 passing.
+- Covers zero/accepted/crashed/no-proposal reports, malformed/duplicate/deep/oversized JSON, selection and baseline/path identity, source counters/outcomes, stale/future mtime, invalid age budgets, ignored authority claims, sanitized output, actual reader-to-main-function wiring, disabled preflight, reader failure and existing health enforcement.
+- Exact interpreter `O:/Foundups-Agent/.venv/Scripts/python.exe -I -B` and scoped audit runner; conftests/plugin autoload disabled. AI Overseer's cross-subtree allowlist would otherwise skip dashboard tests. Only two actual main function AST bodies are loaded to avoid its import-time env/log/daemon effects. Full main import, menu launch, current runtime and native workers are not tested.
+- Zero errors/skips/unexpected effects in final runs; no network/provider/subprocess/database access. 53 caught pytest convenience symlinks and two inherited disabled-plugin warnings per final run. Two earlier harness failures are preserved: global stat sentinel during failure reporting, then oversized pytest auto-ID exceeding Windows environment limits. Scoped restoration and explicit IDs correct the harness without weakening acceptance.
+- Exact sources, collection IDs, guard, red/green and independent evidence are bound in `docs/roadmaps/rsi_swarm_backlog.json`. New display functions are <=42 lines; main file/function have no attributed growth. No native RSI or retained-benefit claim.
+
+## 2026-09-24: AutoResearcher persistent comparison-profile guard
+
+- WSP 00/15/22/48/50/62/97; C3/I4/D4/Impact4 = 15/P1. Extended the existing evaluator and producer once; the shared economic calculator is unchanged. Costs remain frozen per invocation. A separate copied comparison basis samples consumed profile values before and after evaluation and rejects persistent drift before metrics can advance the best candidate.
+- Captures ordered effective distribution/tier membership and prices, subscription margin, angel fields/stake default, DEX rate, actual activity and constructor burn defaults, and finite SATS bookkeeping input. Exporter rebinding, unused defaults and already-frozen ambient costs do not become false dependencies. Empty/invalid explicit bases do not opt out; only None preserves the direct-call API.
+- Invalid profile capture aborts at comparison_capture with zero evaluator entries. Candidate drift uses the existing crashed/rollback/report path with zero accepted gain. Genuine multiplier improvement remains accepted with fixed arithmetic; later and nested invocations refresh independently. No new report schema/field, module, skill or runtime.
+- Fixed acceptance: 66 cases first produced 32 pass / 34 expected failures, then 66 pass. All 136 lifecycle/program regression cases also pass. Independent replay passes the same 202 unique cases; replays are overlapping. Regression adaptations only forward the optional keyword and supply the exact abrupt-exit child stub; existing assertions remain unchanged.
+- Qualified known-fixture Python guard observes no provider/network/database effects; only three reviewed abrupt-exit child commands in regression. No unexpected denials, errors or skips; 65/135 caught pytest convenience symlinks and two inherited plugin-config warnings per suite. Producer/evaluator/focused tests remain below 600 lines; existing lifecycle file remains 996. Exact source bindings and receipts are in the canonical backlog.
+- This is before/after sampling, not immutable consumption or concurrency protection. A fixed change-and-restore control still produces apparent +5 fitness and explicitly records the ABA limitation. No economic-model validity, authenticated oracle identity, admission, promotion or retained RSI claim.
+- PR1897 qualification is closed: exact reviewed merge, all ten PR checks, main CI/CodeQL and owned-lane retirement verified. Re-observe R10 consumer/identity work before expanding this serial guard; native ticket admission and protected product lanes remain separate.
+
+## 2026-09-23: AutoResearcher remaining-profile qualification
+
+- WSP 00/15/22/48/50/62/97; C3/I4/D3/Impact4 = 14/P1. Extended the existing evaluator-input owner with 21 fixed profile cases; all 22 prior cost cases and 11 prior function ASTs are preserved. Production source is unchanged. Test file is 424 lines; longest function remains 45 lines.
+- All 43 cases pass locally and independently (same cases, not 86 unique). Eight actual-loop controls (seven isolated changes and one combined) accept identical candidate text solely because ambient ROI inputs remove the five-point penalty. Fixed costs remain 1280 spend / 780 margin / 39/64 ROC. Stable, reverse, membership and importer/default controls distinguish score, revenue and binding behavior.
+- Full eight-field metrics, identical digests, JSON/TSV/history, planned-only operations, source/program restoration and patched global identities are checked for the 18-case loop matrix. Empty explicit distribution falls back to live globals. NaN SATS_PER_USD aborts a baseline but records a caught candidate crash; these are different existing report contracts.
+- Existing exact-interpreter guard: zero provider/network/subprocess/database effects, zero errors/skips/unexpected denials, 42 caught pytest convenience symlinks and two disabled-plugin warnings per run. Raw newline differences from the prior worktree are reconciled by Git blobs. Runner Git metadata includes unexplained extra modified paths; original evidence is preserved, exact scope and byte bindings govern claims.
+- Manual architecture/oracle adjudication is used because existing Qwen/Gemma routes do not establish this exact comparison/guard contract; independent verifier replays it. No new module, skill, scheduler, report field or native runtime. This qualifies an outstanding gap, not a repair, economic validity or retained RSI.
+- PR1896 cost repair is merged, all ten PR checks and both main workflows passed, owned lane retired. Next 15/P1: one complete consumed-input comparison boundary in existing evaluator/calculator/producer, covering value/membership inputs and failure-path dependencies; qualify capture versus explicit drift rejection and direct-call compatibility before implementation. No per-constant repair series.
+
+## 2026-09-23: AutoResearcher invocation-scoped cost snapshot
+
+- WSP00/15/22/48/50/62/97; C3/I4/D3/Impact4=14/P1. Existing evaluator captures copied immutable numeric cost totals and names; each actual producer invocation supplies the same values to baseline and all candidates. Replacement, in-place mutation and membership changes cannot create dependency-only improvement. Later/nested separate invocations refresh their own costs; zero-cost tasks still record work.
+- Frozen22 acceptance cases reproduced2pass/20fail before repair and now pass locally/independently. Existing136 lifecycle/program cases also pass locally/independently, including3 exact reviewed abrupt-exit children.158unique cases; replays overlap. No unexpected guard denials or databases; focused21/regression135 caught pytest symlinks and2 disabled-plugin warnings per run.
+- New value/capture/scoring helpers stay inside current owners. Researcher594lines (<600), class249→242, loop82→75; evaluator233→261 with evaluate_target93→60. Remaining inherited long-function/class debt decreases; no new helper exceeds50lines. Legacy996-line tests keep assertions and only adapt evaluator keyword forwarding/child stub; focused tests extend existing owner. No new module, skill, report field or registry entry.
+- Initial baseline finished cases but runner bookkeeping write outside its phase was denied; preserved XML/log and corrected harness before classified baseline-v2. Original frozen test criteria unchanged. Early runner Git status metadata contained transient extra modified entries not reproduced by fresh host/sanitized reads; preserved as uncertain metadata, not1820actualedits. Exact source hashes/current scope and independent review govern publication.
+- Other ROI, fee, subscription, angel and bound-default assumptions are not frozen. No complete oracle identity, hostile-host containment, provider/native execution, economic validity, AmIBot launch or retained-RSI claim. Prior PR1895 closure and next whole-profile qualification are reconciled in the canonical backlog.
+
+## 2026-09-23: AutoResearcher actual-loop comparison qualification
+
+- WSP00/15/22/48/50/62/97; C2/I4/D3/Impact4=13/P1. Extended the existing evaluator-input owner with two fixed actual-loop controls; original sensitivity test AST and production source remain unchanged. Three cases pass locally and independently (same cases), zero failures/errors/skips or unexpected guard denials.
+- Identical candidate text rejects with fixed costs but accepts when only one synthetic cost changes between baseline and candidate: fitness39/64 to78/103, apparent improvement975/6592. Full ROI/compute metrics, JSON/TSV/history, equal digests, planned-only operations and input/cleanup restoration are checked. This qualifies a comparison limitation; it is not economic benefit or retained RSI.
+- Exact interpreter with -I/-B, sanitized environment, isolated scratch/database paths, real evaluator/producer, disabled model construction and two inert simulator package initializers. Three caught pytest symlink denials/two disabled-plugin warnings; zero subprocess/SQLite. Known-fixture Python guard is not OS containment. Frozen criteria unchanged after first execution.
+- Prior PR1894 is merged with exact PR/main checks and owned-lane retirement. Next14/P1: freeze value-only cost-catalog inputs per invocation in existing evaluator/producer, with fresh-invocation refresh and explicit remaining ROI/environment limits. No provider/native job, live commit, retained-learning or AmIBot build claim. Evidence and current owner/ranking are in the canonical RSI backlog.
+
+## 2026-09-23: AutoResearcher evaluator dependency sensitivity
+
+- WSP00/15/22/34/49/50/62/97; C2/I4/D3/Impact3=12/P2. One fixed real-evaluator control passes locally and independently (same case). Fixed target bytes with synthetic cost entries produce cost/margin/ROC1280/780/39:64; changing only one cost produces2060/1560/78:103. Restoring that entry reproduces complete baseline metrics; target bytes and original table keys/object identities remain intact.
+- Production code and existing tests are unchanged. A cohesive39-line evaluator-input sibling avoids growing the996-line lifecycle owner or mixing evaluator arithmetic into the253-line prompt owner. The runner binds13 test/source/import-leaf files; canonical registry current1658/quarantined269. Two disabled-plugin config warnings remain.
+- This qualifies dependency sensitivity, not a bug repair, economic accuracy, authenticated oracle, native RSI or retained learning. Candidate bytes alone cannot identify effective evaluation inputs. No new report field/reader/model/provider call. PR1887 is closed with exact mainCI/CodeQL, merged reviewed tree and owned-lane retirement; current backlog retains authority/owner blockers and fresh selection.
+
+## 2026-09-23: AutoResearcher attempted-call program identity
+
+- WSP00/15/22/34/49/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing producer/report and focused consumption tests; no new runtime, reader or skill. Each attempted backend call records rendered-text identity, iteration and invocation-wide ordinal. Existing proposal signatures, dry-run valve, exception propagation and restoration remain intact.
+- Fixed criteria reproduced22 missing-field failures before implementation. Independent source review then exposed a double-formatting edge case; its new regression failed before the correction. Final24 focused cases pass locally and independently (same cases);34 unchanged legacy lifecycle/mode/proposal cases also pass at final source. Exact publication is tracked in the canonical backlog.
+- Same-file extraction shrinks the inherited class285 to249lines; loop82lines unchanged. Encoding failure remains diagnostic and never suppresses the backend call. No model/provider invocation, economic-quality, authenticated provenance or retained-learning claim. Prior7-case qualification closed in merged PR1885; the separate lineage draft remains paused.
+
+## 2026-09-23: AutoResearcher program-consumption qualification
+
+- WSP00/15/22/34/49/50/62/97; C2/I4/D3/Impact3=12/P2. Seven fixed fake-backend cases pass locally and independently (the same cases). They observe the existing prompt builder across captured-file, attribute/callback mutation, backend-failure, heuristic and zero-attempt paths. Exact calls, outcome accounting, saved/returned report equality and scratch restoration are checked.
+- Production and the996-line legacy test owner remain unchanged. A cohesive107-line sibling reuses its pre-construction model-disable fixture; no new production module/skill or full-suite copy. Canonical registry is current1657/quarantined269. Two disabled-asyncio config warnings are retained.
+- Per-call instructions are mutable; an invocation-entry hash cannot identify later consumed input. Backend/evaluator callbacks are synthetic, package initializers are isolated by the external runner, and only four source/test hashes are bound. This is not real model quality, economic validity, OS confinement, authenticated provenance or retained improvement. The separate lineage draft remains unexecuted and blocked on its independent review.
+- Canonical backlog records fresh ownership, exact evidence, PR1884 closure and the next bounded action. No live OpenClaw/Hermes/AmIBot invocation or production activation.
+
+## 2026-09-22: Separate SQLite diagnostics from repair credit
+
+- WSP00/15/22/49/50/62/91/97; C2/I3/D3/Impact3 = 11/P2. Exact action/result qualification separates diagnostic invocation/success across telemetry, feedback and escalation. Existing tuple/report and historical repair counters/score remain intact.
+- Baseline 7 passed/16 failed with no collection errors. Final 94 fixed cases pass locally and independently, including unchanged71 scan-status cases; original30 legacy definitions unchanged. Disposable fixtures/inert effects only; no native RSI or causal-repair claim.
+- Cohesive outcome extraction reduces the existing scanner and touched oversized method. Existing interface, module roadmap, monitor map, test registry and backend bindings updated; no new monitor/store/authority.
+- Re-observe after closure; exact checks, hashes, inherited staging-cleanup blocker and next action belong to the canonical RSI backlog.
+
+## 2026-09-22: Report bounded self-audit scan outcomes
+
+- WSP00/15/22/49/50/62/91/97; C3/I4/D3/Impact3 = 13/P1. Extends existing scanner and supervisor after PR1856 qualification; no parallel monitor or new execution authority.
+- Add per-attempt detached status and validated monotonic success age while preserving integer/exception callers. Partial reads retain known counts; raised scans retain unknown counts. The supervisor consumes the same attempt and does not rescan malformed results.
+- 71 fixed ordinary cases pass locally and independently. Initial baseline:8passed/10failed/32API-absence fixture assertions across two runs. Independent review exposed a remaining cross-field gap:18added cases failed/3controls passed before correction. Original30 unrelated definitions and all prior fault inputs preserved;13 prior cases extracted into the focused test owner.
+- No TTL or healthy verdict invented. No-input/partial/failed scans do not refresh bounded-input success. No live daemon/provider/default DB, native worker activation, financial effect or retained RSI claim.
+- Existing API/test indexes and monitor map updated; canonical test registry and backend manifest/digest bindings regenerated and verified separately. Exact sizes, tests, hashes and publication state are in the current backlog evidence.
+- Re-observe after closure; native18/P0 and FAM domain mapping14/P1 remain blocked, PostgreSQL13 unqualified and LinkedIn13 separately owned. The structural-diagnostic/repair-success distinction remains a separately re-scored11/P2 candidate.
+
+## 2026-09-22: Qualify self-audit scan health projection
+
+- WSP 00/10/15/22/49/50/62/91/97; C2/I4/D4/Impact3 = 13/P1. PR1855 is merged with ten PR checks and successful main CI/CodeQL; its owned lane is retired and blocked test-staging cleanup remains explicitly separate.
+- Existing WRE test owner characterizes scanner loop liveness, swallowed input failures and the inert OpenClaw observation projection. 13 focused cases pass locally and independently; these are overlapping runs, not twice as many unique tests.
+- No production source, API, schema, test-file inventory, backend manifest or service configuration changed. All pre-existing test definitions are preserved. No daemon/thread/provider/queue/payout execution or process harness.
+- [Scan contract](../../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22) separates event count from success/coverage and specifies future status/freshness acceptance. Current tests characterize defects, not repaired behavior.
+- Existing supervisor test owner exceeds its hard size limit and was not grown. Added cases reuse the WRE test owner; candidate size and function limits are recorded in validation. No new module/skill.
+- Re-observe before repair. Native18/P0 remains blocked; FAM role investigation is complete with domain mapping14/P1 blocked; diagnostic classification12/P2 remains separate. No live RSI or retained improvement claim.
+
+## 2026-09-21: Isolate consumer forced-dry execution
+
+- WSP 15/22/49/50/62/97; C3/I4/D3/Impact3 = 13/P1. PR1837 closed the prerequisite receipt fixture with ten PR checks and both main workflows successful.
+- The existing consumer snapshots its mode before routing/binding callbacks. The existing executor helper accepts keyword-only `force_dry_run=False`; literal True selects a fresh safe dry executor, leaving the warmed singleton untouched. False/omission preserves legacy selection. Invalid types fail before construction.
+- Default capability-validator identity and nonce history remain shared; custom warmed validators, tools, roots and controlled-adapter settings are not copied. Job flags, validation, model admission, token/action guards and live-delegation blocks are unchanged.
+- Regression baseline: 24 failures/23 passes; repaired: 47 passes. Expanded connected/size suite: 221 passes; ContextBundle wiring: 24 passes. Runs overlap and observed zero forbidden effects in the disposable Python guard. Independent review accepted the four-file source/test change and replayed the same 245 cases with zero forbidden effects; publication remains pending in the canonical backlog.
+- No runtime/provider calls or new module/skill. Normal root discovery applies and dry-run evidence can write; this is not OS containment, live admission, retained learning or an AmIBot build. Constructor cost remains unmeasured.
+
+## 2026-09-21: Reconcile WRE core-receipt test fixtures
+
+- WSP 15/22/50/62/97; prerequisite C2/I3/D3/Impact2 = 10/P2 before the separate 13/P1 forced-dry repair. Focused unchanged-source baseline: 31 pass/16 fail; the initial connected subset was 132 pass/6 fail.
+- The local projection fixture now requests an explicit direct provider through the existing paired helper and removes only its known outer verification receipt before applying mutations/digests. Production normalization, provider policy and the shared authenticated-runtime helper are unchanged.
+- Focused 49 tests and connected 174 tests pass with zero forbidden effects under the disposable Python guard. Counts overlap. Added controls preserve rejection of outer wrappers and unqualified aggregator-provider lineage. Initial null-device harness denial is preserved separately.
+- This repairs test evidence, not OpenRouter compatibility, runtime admission, retained learning or AmIBot authoring. Independent review and exact hosted publication are tracked in the canonical backlog.
+
+## 2026-09-21: Qualify consumer dry-run configuration isolation
+
+- WSP00/15/22/50/97;15/P1 actual-module witness, no production edits. Eight configurations reach the consumer/convenience/factory seam; two True-consumer cases inherit warmed non-dry or controlled-harness/tools state, contrary to its documented promise.
+- Routing result, executor body, receipt and ContextBundle sinks mocked. No queue, guard execution, provider, runtime or product build. Initial probe denied an unrelated editable-install metadata read before cases; child-only path isolation yielded zero forbidden attempts. Exact input hashes and independent replay are recorded in the canonical backlog.
+- Existing module roadmap/interface now bind the defect and a separately scored13/P1 force-dry repair: preserve legacy/default factory behavior, validator replay state and all live gates; capture consumer policy once. Source repair and its full behavioral matrix remain unimplemented.
+
+## 2026-09-20: Verify AutoResearcher abrupt-exit evidence
+
+- Added three deterministic process witnesses to the existing owner: normal terminal report/ack, proposal exit with changed scratch/no report, temporary publication exit with restored scratch/no terminal report or ack. Production source and original 109-case ASTs unchanged.
+- Author 112 and independent 112 pass (overlapping), after a preserved pre-collection null-device harness failure. Three suite attempts/six children; 111 denied symlink attempts per passing run recorded; pytest-helper attribution is inferred. Child fixed metrics isolate lifecycle, not evaluator/model quality or hostile-host sandboxing.
+- Generated only existing process capability; registry 1651/269 preserved and peer1820 overlap reconciled. Test 996 lines, parent 41, new helpers <=50; existing cohesive size review retained.
+- Both PR1827 main workflows passed. Preserve 26 packets/41 histories and archive the prior observation; distinct next 10/P2 OpenClaw diagnostic plan makes 42 histories. No recovery, reader, live runtime or retained model improvement claim. WSP00/15/22/50/62/84/97/99; exact receipts in current backlog.
+
+## 2026-09-20: Counter ownership, failure cleanup and active timeout
+
+- Preserved all 20 original daemon tests/helper ASTs; appended ten cases in the same file. Distinct simultaneously alive threads process different error events and must persist both increments; per-operation handles must close exactly once on their creator.
+- Added disabled/factory/increment/close failure and KeyboardInterrupt coverage plus a controlled active-counter stop timeout. Stop returns while the blocked operation is still running; release completes with one owner-thread close. No actual daemon.start or live logs.
+- Unchanged source: 8 failures/22 passes. Repaired: 30 passes; combined with unchanged 41-case PatternMemory suite: 71 passes, independently replayed 71 overlap. Disposable real SQLite/default-path interception, 115 combined DB opens, zero external attempts. Close-failure injection raises after actual close and does not prove recovery from partial SQLite close.
+- Test file 750 lines, largest function 40, original assertions preserved. Registry check current 1651/269. Exact red/green logs, author and independent receipts are bound in the existing RSI backlog observation; no production acceptance claim.
+
+## 2026-09-20: Proposal input identity regressions
+
+- Reused the existing model-disable fixture and real evaluator. New thirteen-case coverage checks distinct proposal text with equal outcomes, UTF-8/newlines, repeated invocations, write/diff/evaluation interruption, missing/non-text returns and a string encoder override.
+- Before source repair:13 failed/96 passed. After:109 passed; independent109 rerun overlaps. External temporary/database paths isolate all work; no provider construction, live Git runner or target execution.
+- Existing class/loop spans remain285/82; all new tests≤50 lines. Cohesive test file crosses800-line review guideline, remains below1000; module roadmap records the review. Canonical registry check remains1651/269. WSP15/22/48/50/62/84/97; exact receipts in the current RSI backlog observation.
+
+## 2026-09-15: Baseline snapshot and preparation regressions
+
+- Reused the unchanged pre-construction model-disable fixture. Ten new LF/CRLF cases cover live source changes during construction, dirty scratch between calls, and baseline/proposal/interruption callbacks changing original_code. Assertions bind evaluated text, proposal seed, restored scratch and saved report digest while preserving source bytes.
+- All 26 prior function/fixture names remain; 24 definitions unchanged. Existing mode wrapper follows the private loop signature; existing local-write fault now asserts baseline_preparation and zero evaluator/proposal entries. Initial 10 failed/86 passed; repaired 96 passed; final 96 passed in 2.04s. Runs overlap.
+- Five ten-attempt controls verify baseline text hashes, saved/returned equality and seed97 replay. Tests 797 lines retain existing infrastructure review; all functions ≤50. Registry/package unchanged. Local diagnostics only; no authenticated provenance, live model, independent retention or launch proof. Evidence: `research_input_snapshot_continuation_20260915`; WSP15/22/48/50/62/84/97.
+
+## 2026-09-15: Mode-drift and injected-commit regressions
+
+- Extended existing AST/constructor-mode tests and added a timing matrix using the same pre-construction model-disable fixture. All 24 prior function names retained; 22 definitions unchanged. Seven constructor values and fourteen timing/value cases cover unsupported/truthy modes, late mutation, missing proposals, diff/evaluator callbacks and direct commit calls.
+- Recorder-only pre-fix probes showed delegated commit, unrestored scratch and completed reports. Initial 12 failures/70 passes; first repair 82 passes; final 86 passes in 1.91s including static delegated-commit denial. These runs overlap.
+- Five normal ten-attempt controls retain 50 attempts/40 candidate/five baseline counts, report equality and seed97 replay. Test 742 lines remain within general 800 guideline with existing infrastructure review, all functions ≤50. No live model/Git/FoundUp, authenticated provenance or arbitrary-host sandbox proof. Evidence: `research_mode_guard_continuation_20260915`; WSP15/22/48/50/62/84/97.
+
+## 2026-09-15: Terminal reporting and failure boundaries
+
+- Extended four existing lifecycle/accounting tests with the unchanged model-disable fixture; all 21 prior function names retained, 17 definitions unchanged. Added namespace/publication assertions and repeated-call fault cases; total 66 pass in 1.49s.
+- Initial terminal expectations: 21 failed/39 passed; first repair: 60 passed. Partial counters/write faults: 64 passed. Allocation failure exposed skipped restoration: 1 failed/65 passed; final 66 passed. Runs overlap, not cumulative evidence.
+- Real filesystem controls cover separate reports, partial progress, keyboard interruption, failed runner/local writes/output, failed report write/replacement and preservation of earlier exceptions/reports. Five ten-attempt controls preserve source/mtime, restore scratch and match saved/returned JSON; seed97 replay differs only in invocation identity.
+- Source 524/test 681 lines; file review recorded in module ROADMAP, all test functions ≤50. Registry 1650/269 and package inputs unchanged. No authenticated source/oracle, power/process durability, independent verifier or live provider proof. Evidence: `research_terminal_report_continuation_20260915`; WSP15/22/48/50/62/84/97.
+
+## 2026-09-15: Research report denominator and acceptance regression
+
+- Extended the existing researcher test file with 16 cases: seven outcome sequences, six invalid caps, two acceptance-recording failures and one mutable-cap regression. All original tests/fixtures remain AST-identical; model construction is disabled before setup.
+- Initial 15 failed/35 passed; initial repair 50 passed. Added cap snapshot test:1 failed/50 passed, then51 passed. Reused-instance invalid caps:6 failed/45 passed, then final 51 passed in 1.08s. These runs overlap and are not summed.
+- Five final ten-attempt diagnostics validate report/history/TSV agreement with actual evaluator calls and blank missing metrics.50 attempts,40 candidates,five baselines; all11-row logs complete for normal returns. Source/mtime and scratch restoration hold; seed97 replay matches.
+- Source 491/test585 lines; class/loop shrink. Registry 1650/269 unchanged; no backend package source affected. No terminal persistence, independent verifier, provider or live FoundUp proof. Commands/hashes/failures: `research_report_accounting_continuation_20260915`; WSP15/22/48/50/62/84/97.
+
+## 2026-09-15: Execution-owned fingerprint regression
+
+## 2026-09-15: Launch/evaluation diagnostic qualification
+
+- Existing selection: **41 passed, zero failures/errors/skips, 4.64s** (35 researcher, two dashboard export, four mocked main queue cases). Explicit importlib/async plugin, no cache/autoload, external cwd/TEMP/TMP/databases/basetemp. No test source changed or main menu/service launched.
+- Separate diagnostic: five ten-attempt cases, 40 candidate and five baseline evaluations. Seed-97 replay matches original proposal hashes/summary; unchanged, invalid and absent-proposal controls yield zero gain. Every target remains unchanged and scratch restores. Model construction disabled before constructor; no provider call or live Git operation.
+- Same-oracle repeatability is not an independent judge, production campaign or retained RSI benefit. Registry 1,650/269 remains current. Reproduction and results: `launch_evaluation_continuation_20260915` in the canonical RSI observations. WSP 15/22/48/50/97.
+
+- Existing execution/admission suites add six cases: changed/unchanged reentrant execution, explicit/missing fingerprint, cached success/failure and a later call replacing cache contents before the earlier return. Original tests remain; two assertions/mocks now bind explicit receipt values. Identical helper classes are imported/re-exported from the existing admission suite.
+- Before: one failure/one passing control/22 deselected in 2.35s. After: 71 focused passes/one skip in 4.58s; 172 connected passes/four existing link skips in 9.97s. Selections overlap. Manifest 8 passes in 69.93s; fast 15 groups in 5,013ms; registry current 1,650/269. Local files and scanner doubles, no live admission/model/FoundUp call.
+- Commands, exact skipped IDs, source hashes and size checks: `execution_admission_ownership_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97. Legacy public two-value API is explicitly covered.
+
+## 2026-09-14: Auto Researcher run directory and log ownership
+
+## 2026-09-14: Admission cache refresh and ownership
+
+- Existing suite extended with 10 cases; initial 8 regressions failed in 1.72s. Final focused subset 20 passed/one file-link skip; seven-file connected run 148 passed/four existing link skips in 6.18s, including 23 coordinator tests. Exact skipped IDs and commands are in `admission_cache_ownership_continuation_20260914`.
+- Manifest 8 passed in 79.17s; RedDog fast 15 groups passed in 8,671ms; registry current 1650/269. Original 23 function definitions and 32 assertions preserved. Real threads/files with injected scanner results; no model/provider or production-store execution. Same-mapping cache isolation is not report-file or full-orchestrator concurrency proof. WSP 00/15/22/50/60/62/84/95/97.
+
+## 2026-09-14: PatternMemory transaction and thread ownership
+
+- Extended the existing suite with 17 cases; baseline: 13 failed / 4 passed / 24 deselected. SQLite commit-denial preserves a pending proposal for foreign read/commit/rollback/close checks; real worker threads cover wrong-thread rejection and independent lifetimes. Default database paths are redirected into disposable fixtures.
+- Final local evidence: 41 focused tests in 1.72s; 206 connected tests in 84.51s; 8 manifest tests in 69.80s; 15 RedDog fast groups in 10,081ms. Selections overlap, no skips. All 24 previous test/fixture definitions and 55 assertions are preserved. Registry remains 1,650/269.
+- Exact files, commands, qualified interpreter, environment, fingerprints and external logs are in `pattern_memory_ownership_continuation_20260914` in the canonical baseline. No model dispatch, live database or independent production RSI claim; WSP 00/15/22/48/50/60/62/84/97.
+
+- Existing `test_wre_auto_researcher.py`: five failures before repair / 30 deselected in 0.68s. Final full suite: **35 passed in 0.81s**, including four new cases. The initial 35-case pass before adding the results-path output assertion is overlapping evidence, not another 35 tests.
+- Reproduce explicit/default output collisions, preservation of another run's proposal during cleanup, independent TSV rows, a target named `results.tsv`, and concurrent constructor allocation. The existing path guard now uses a disposable fake repository and verifies no mkdir on rejection. All 47 original assertions remain; two output-location tests use actual run attributes.
+- Model construction is disabled before initialization. Real files and threads do not prove process/volume recovery, hostile filesystem isolation or independent RSI benefit. No new test file or packaged runtime change; registry remains current at 1,650/269. Commands and fingerprints: `research_run_isolation_continuation_20260914`; WSP 00/15/22/48/50/62/84/97.
+
 # TestModLog - wre_core/tests
+
+## 2026-09-14: Recorder, retention and admission composition
+
+- Extended the two existing ratchet/held-out test files after reading their fixtures and this history. Recorder matrix: **84 failed / 16 passed** before, then 100 passed. Retention matrix: **31 failed / 27 passed** before. Six metadata-redaction cases and six acceptance/retention-secret cases subsequently reproduced additional losses. Final two-file selection: **171 passed in 1.05s**.
+- Cases cover invalid/Boolean/non-finite measurements, exact work/slice/verifier links, contradictory acceptance, complete evidence identity, input/callback isolation, required acknowledgments, secret non-persistence/redaction, strict regression counts and changed verifier evidence. Successful and failed real recorder results feed the real retention gate in synthetic fixtures.
+- Existing verifier/publication selection: **34 passed in 0.78s**. Queue wrappers/handlers: **39 passed in 2.43s** after aligning one shared fixture with the real recorder's verification digest. Final memory-admission/handler selection: **34 passed in 2.22s**. Total current distinct selected cases: 278.
+- Downstream sink/canary review: **26 failed / 11 passed in 24.94s** before aligning one existing shared canary fixture with the producer's outcome/no-write state and verification digest; **37 passed in 33.73s** after. Total selected cases: **315**. These disposable tests preserve the real sink's staging/recall/activation boundary and the canary's blocked-proof assertion.
+- Initial PR CI stopped at registry freshness because the new ratchet test decorator invoked a local digest helper at import. Its equivalent literal parameter keeps all cases collectable. The existing generator now reports **current / 1,650 files / 269 quarantined**, with no registry or classifier edit and no additional quarantine.
+- Packaging: **15 RedDog fast groups passed in 3,137ms**; **8 staged-manifest tests passed in 65.74s**. Runtime membership remains 1,400; the manifest's four changed hashes match the three runtime sources and the already-included shared test fixture file.
+- Extended the existing bridge admission test to compose recorder → queue retention/gate → memory admission → injected sink. Invalid cost, failed outcomes and post-recording verifier changes produce no sink write. Source authorities and sink are test fixtures; no authenticated production or retained-benefit claim.
+- All runs used isolated O:-resident TEMP/TMP/basetemp and database paths, disabled automatic plugins, the explicit asyncio plugin and the qualified Python interpreter. No new test file or registry inventory change. WSP 22/48/50/60/95/97.
+
+## 2026-09-14: Auto Researcher failure/cancellation lifecycle
+
+- Reused `test_wre_auto_researcher.py`. Four regressions failed before the repair: diff `RuntimeError`, diff `KeyboardInterrupt`, final runner-restore failure, and invalid baseline reaching the proposal sentinel. A follow-up broken-output case failed because a status message preceded cleanup. Final result: **31 passed in 0.65s**, including the prior 26 cases; restoration precedes status output.
+- Assertions verify original/scratch restoration, no planned commit for interrupted first proposals, propagated cleanup errors with the earlier exception context, and rejection before proposing against invalid baseline metrics. Tests use injected failures, the existing pre-construction model-disable fixture and isolated TEMP/TMP/database/basetemp paths.
+- These tests do not prove OS process-kill recovery, storage durability, independently bound worker verification or production RSI. No new test file, dependency or registry update. WSP 22/48/50/97.
+
+
+## 2026-09-13: Auto Researcher input guards and dry-run rejection
+
+- Reused `test_wre_auto_researcher.py`: 16 invalid-map cases, two valid boundary cases, one injected invalid-proposal dry-run case and the original seven tests. Initial numeric guards exposed 10 failures; the additional unit-sum guard exposed two more. Final result: **26 passed in 0.59s**.
+- Covers negative/oversized/boolean/string/non-finite/overflowing allocation values, unknown catalog names, invalid premiums, unit totals, zero fractions, numeric endpoints, AST no-target-execution and fail-closed live mode. Invalid inputs are checked before simulator construction. The dry-run case keeps baseline metrics, restores source/scratch and records no planned commit.
+- The existing fixture now disables `get_qwen_engine()` before constructor invocation; assigning `llm=None` afterward could already initialize a model. Used explicit async plugin, importlib mode, no cache provider, disabled autoload and isolated TMP/TEMP/database/basetemp paths. No new test file or registry change. Injected proposals and simulated scores are not independent RSI acceptance. WSP 22/48/50/97.
+
+
+## 2026-09-13: R02 existing contract verification
+
+- Five existing files (execution truth, runtime admission, telemetry truth, loader hygiene and PatternMemory): **18 passed, 96 deselected in 3.61s**. Expression: `skill_load_failure or missing_registered_location or local_inference or outcome_quality or legacy_promote_variation or token or application_is_proposal_only or prototype or manifest_failure`.
+- Used importlib mode, explicit async plugin, disabled plugin autoload and isolated TMP/TEMP, AgentDB, PatternMemory, lyrics database, cache and basetemp. Injected/test model behavior only; no provider dispatch or production writes.
+- Confirms bounded failure/proposal/unknown-outcome contracts supporting the documentation corrections. No test implementation changed. Source/test inventory links in the R02 map do not assert that its other referenced suites ran in this selection. WSP 22, 50, 95, 97.
+
+## 2026-09-13: R01 exact-byte repair verification
+
+- Documented 14-file WRE execution-truth tier: **235 passed, 4 platform-limited link/reparse skips in 35.45s**, with isolated TMP/TEMP, AgentDB, PatternMemory, lyrics database, cache and basetemp; importlib mode and explicit async plugin.
+- Both registered production inventories pass the existing strict manifest guard, with `signature_verified=false`. A separate Git checkout-index materialization under `core.autocrlf=true` preserves original committed Skillz bytes and passes the same guard.
+- No new test implementation, weakened assertion, runtime behavior, signature, activation or full RSI claim. This repairs the separately reproduced R01 failure above; the historical audit remains unchanged. WSP 22, 50, 97.
+
+
+## 2026-09-13: Registry inventory and separate Skillz preflight
+
+- `test_wre_test_registry.py`: 28 passed in an isolated temporary/database environment. Plugin autoload was disabled; two configuration warnings were emitted because the async plugin was not loaded for this synchronous selection.
+- Existing generator now records 1,650 tracked Python test files / 269 quarantined after adding the already-tracked Japanese-copy test to the inventory. No test implementation or quarantine policy changed.
+- `TestCheckoutLocalSkillResolution::test_every_registered_production_skill_is_executable_content`: reproduced one failure, manifest hash mismatch for `reddog_operations/SKILLz.md`. That R01 finding remains a separate repair; no full WRE pass is claimed. WSP 22, 50, 97.
+
+## 2026-08-29: Bounded Git binary stdin
+
+- Added five adversarial cases beside the existing stdout ceiling: bounded
+  binary round-trip, >8 MiB pre-spawn rejection, early child exit, blocked
+  writer timeout/thread cleanup, and output overflow with concurrent stdin.
+- The six-case focused selection passes. No real repository is mutated and no
+  Git executable, object, or promotion authority is inferred from the helper.
+- The WSP_62 registry regression now includes both the 109-line public wrapper
+  and 143-line extracted process pump; neither module may exceed 200 lines.
+- Registry write/check is current at **1,631 total / 268 quarantined** after
+  the RedDog builder contract fixture became collectable; the complete
+  registry contract passes **28/28**.
+
+## 2026-08-28: RedDog owner-proof registry reprojection
+
+- Added the tracked, distinct post-completion proof suite to the canonical
+  projection: **1,601 total / 268 quarantined**.
+- Generator write/check plus registry, differential planning/impact/runtime,
+  and Holo registry indexing pass **94/94**. No registry execution occurred.
 
 ## 2026-08-27: Holo large-file proof registry hardening
 
@@ -1572,3 +2263,25 @@ verified unrelated to this slice on the clean tree.
   manifest admission. All temp/cache/database paths were pinned to
   `O:\pytest_tmp\reddog_wre_truth`; default PatternMemory and AgentDB digests
   remained unchanged.
+
+---
+
+## 2026-08-29 - Bounded Git process timeout test contract correction
+
+- Replaced a stale direct call to the removed private
+  `wre_git_bounded_io._terminate_reader` helper with a public
+  `run_bounded_process(...)` timeout test against the current split process
+  pump.
+- The test now proves timeout propagation, process kill/reap, both pipe closes,
+  and reader-thread join without restoring or exposing the removed private
+  seam. Production behavior is unchanged.
+- Baseline reproduction before correction:
+  `python -m pytest modules/infrastructure/wre_core/tests/test_wre_git_commit_archive.py -q --basetemp=O:/tmp/reddog-wre-archive-baseline-fix`
+  -> `1 failed, 31 passed`; failure was `AttributeError` at the obsolete test
+  call.
+- Corrected focused command:
+  `python -m pytest modules/infrastructure/wre_core/tests/test_wre_git_commit_archive.py -q --basetemp=O:/tmp/reddog-wre-archive-contract-fix`
+  -> `32 passed in 3.54s`.
+- Adjacent bounded Git/WRE differential command:
+  `python -m pytest modules/infrastructure/wre_core/tests/test_wre_git_commit_archive.py modules/infrastructure/wre_core/tests/test_wre_test_registry_differential_plan_runtime.py -q --basetemp=O:/tmp/reddog-wre-process-adjacent`
+  -> `54 passed in 26.45s`.

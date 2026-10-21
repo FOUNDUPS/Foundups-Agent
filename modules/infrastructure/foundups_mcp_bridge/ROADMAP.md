@@ -1,5 +1,341 @@
 # foundups_mcp_bridge Roadmap
 
+## 2026-10-19: MCP security dependency coordination
+
+MCP 1.30.0 is now declared consistently in requirements, the launcher's strict
+runtime contract, and the existing candidate-binding regression. Current docs
+reflect the quartet; historical qualification records below remain unchanged.
+Local Linux coverage is 28 passing cases plus a successful real runtime version
+probe. The 19 Windows-only cases and two owned HTTP cases still require the
+unchanged 49-case Windows CI gate. Installed environments require their existing
+governed upgrade and qualification procedure before activation; source acceptance
+does not establish deployment or native execution authority.
+
+## 2026-10-04: Paired MCP compatibility layer
+
+The existing launcher now pins FastMCP3.2.0/MCP1.28.1 with unchanged
+Pydantic2.12.3/Uvicorn0.38.0. Direct Windows base-interpreter launches initialize
+the selected venv's normal site hooks for both server and readiness children;
+this closes a reproduced missing-PyWin32 startup failure. Capability probes use
+explicit `-B`. Unexpected post-spawn exceptions reuse the existing termination
+owner, retaining the handle and lock when termination fails.
+
+Local evidence:47 nonlistener cases and two real owned loopback HTTP cases
+pass, with no errors/skips. The earlier live attempt failed cleanup and remains
+in the evidence. Frozen cleanup baseline:44pass/2fail; coordinator repair:46pass.
+The new Windows CI job requires all49, including real lifecycle checks, using
+its own128MiB VHD. Hosted verification/publication are pending at this checkpoint.
+
+One local Qwen proposal was rejected before application: invented helper,
+incorrect handle/lock identity and invalid fallback. The coordinator authored
+the production repairs; no worker repair success is claimed. One observed SDK
+completion:767 input/59 output tokens;52.062s parent; zero paid inference calls.
+The existing benchmark owner records that rejection; no automatic retry.
+
+This is ordinary supervised maintenance. Shared runtimes were not upgraded,
+native effect admission remains blocked, and sampled PID ownership checks do
+not establish an atomic endpoint lease or graceful ASGI shutdown. The fixture
+uses a private mock lock, so real singleton cleanup is outside this qualification.
+Evidence: `outputs/rsi-mcp-runtime-qualification-20261004` on the execution PC;
+canonical sequencing: root ROADMAP and `docs/roadmaps/rsi_swarm_backlog.json`.
+WSP00/15/22/50/84/97; no new module, skill or orchestrator.
+
+First hosted attempt:46pass/2livefail because its PowerShell ownership observer
+timed out at10s, while both owned processes cleaned up correctly. The revised
+fixture uses fixed System32 netstat numeric TCP/PID projection with unchanged
+ownership criteria and a15s startup observation window, capped10s per probe.
+One added projection negative test initially had a PID/port substitution typo;
+that failed run is retained. Corrected input and final47+2 local cases pass.
+The prior48 test-function ASTs and production source remain unchanged. Hosted
+replacement qualification remains pending; the first failure is not erased.
+
+## 2026-10-02: Optional Windows child Job memory limit
+
+The existing shared child runner and Job owner now accept opt-in aggregate
+committed-memory limits, preserving default callers, output bounds, deadlines,
+and cleanup. Invalid inputs fail before launch; configuration and assignment
+precede resume. Local evidence covers 62 distinct passing cases across separate
+selections: 48 deterministic, two Windows memory, four process/maintenance, and
+eight manifest checks. Publication and hosted CI remain pending.
+
+This is a resource-control prerequisite. Native-model file-read bounds and a
+separately reviewed disposable input remain unresolved before any native load.
+It supplies no working-set bound, complete sandbox, model support/capability,
+runtime admission, or measured RSI gain. (WSP 00/15/22/50/62/97)
+
+## 2026-08-30: Held builder child phase 2C3c
+
+**Implemented and physically falsified as inert evidence; not retained
+authority or activation.** The parent proves an exact Phase 2C3a binding,
+holds its interpreter across exactly one bounded child, replaces the child
+environment and `sys.path`, validates one canonical output record, and repeats
+the full composition proof. Protected runtime, canonical, repository, and temp
+roots must be disjoint. The child returns process observation evidence; the
+private `BuilderProcessAuthority` capability does not cross JSON.
+
+A qualified O:-materialized CPython 3.12.10 child passed the real integration.
+That is the final official CPython 3.12 Windows binary release, so it carries
+known patch debt and cannot prove current security patching. Next P0 work is an
+independently allocated current-runtime/profile migration plus provenance and
+pre-import/native-loader closure. Deterministic effects, signing, empirical
+write denial, route-v2 activation, A-grade, and retrieval RSI remain false.
+Hostile replay also demonstrated the write-denial gap by polluting two otherwise
+exact generations with bytecode; both are quarantined, the active generation is
+clean/rematerialized, and all release harnesses now suppress bytecode writes.
+
+## 2026-08-30: Base-prefix consumer correction phase 2C3b
+
+**Implemented and falsified as a topology correction only; still not a child,
+producer, loader, or activation.** The process proof now treats
+`BaseRuntimeBinding.base_prefix_root` as the CPython prefix for the executable,
+DLLs, Lib, prefix roles, and `sys.path`. Candidate validation requires the
+canonical `<generation>/python-runtime` payload directory and binds the
+interpreter beneath it. Generation-root descriptor and inventory authority
+remain unchanged.
+
+The prior process and candidate suites were false-green because their synthetic
+base generation and payload prefix were the same directory. Both fixtures now
+model distinct generation/payload roots. A shared real-materialization suite
+proves both topology validators accept the actual composition and candidate
+validation rejects the obsolete `<generation>/python.exe` topology.
+
+**Historical next step:** Phase 2C3c now supplies the smallest held child and
+reproves process evidence. It does not preserve process authority. Pre-import,
+ABI/native/subprocess closure, deterministic effects, signing, write denial,
+activation, A-grade, and retrieval RSI remain independent gates.
+
+## 2026-08-30: Inert builder-runtime composition phase 2C3a
+
+**Implemented and physically falsified as an inert join; not a producer,
+process, or activation.** The coordinator calls Phase 2C2b, passes its exact
+dependency generation to the existing runtime-composition materializer, and
+requires equality across every dependency path identity, digest, count, byte,
+and inert authority field. It creates no outer lock, rollback, deletion,
+process, import, route, owner, or persistent coordinator artifact. Its public
+binding is path-free and refuses to represent the earlier source observation
+as current authority after the longer composition call.
+
+The real reviewed O: wheel successfully composed with an exact synthetic base
+and reused both dependency and descriptor generations. This integration
+falsified an older synthetic topology assumption: materialized base runtimes
+place the interpreter at `<generation>/python-runtime/python.exe`, while the
+Phase 2B process/candidate consumers still required `<generation>/python.exe`.
+Phase 2C3a uses the real composition binding and launches nothing, so its proof
+remains valid.
+
+**Phase 2C3b addendum:** the process and candidate consumers/tests now use the
+real `base_prefix_root`. The smallest one-shot child adapter remains next.
+Pre-import, ABI/native/subprocess closure, deterministic effects, signing,
+write denial, activation, A-grade, and retrieval RSI remain later gates.
+
+## 2026-08-29: Sequential builder/dependency composition phase 2C2b
+
+**Implemented and falsified as a sequential composition proof; not an atomic,
+installed, importable, executable, or authenticated builder runtime.** The
+coordinator calls the sealed source materializer for S1, lets that call release
+its source-store lease, calls the existing dependency materializer under only
+its own store lease, then calls the source materializer again for S2. It
+requires live fixed-pin source authority for both observations, exact durable
+S1/S2 identity excluding call-local publication truth, an inert verified
+dependency binding, and
+`source.dependency_tree_digest == dependency.generation_id`.
+
+The coordinator introduces no outer or cross-store lock, rollback, deletion,
+or persistent composition artifact. A dependency failure leaves a valid source
+generation intact. Its path-free binding explicitly marks the proof as
+sequential and denies cross-store atomicity, simultaneous-snapshot authority,
+persistent write denial, and post-return immutability. Provenance/signing,
+installation/import/execution, authenticated builder and pre-import/loader/
+native/subprocess/exact-runtime closure, deterministic effects, activation,
+A-grade, and retrieval RSI remain later independently falsified gates.
+
+**Next independently allocated P0 transaction:** bind the composition to an
+authenticated producer boundary only after selecting and falsifying the
+smallest sealed O:/E: child/process and pre-import loader closure. It must not
+convert structural composition into provenance, execution, write-denial,
+activation, or retrieval-quality authority.
+
+## 2026-08-29: Wheel-bound inert packaging source phase 2C2a
+
+**Implemented and physically falsified as persistent inert source; not an
+installed, importable, executable, or authenticated builder.** One private
+Phase 2C1 capability retains the original wheel directory/file handles while
+the exact raw image and admitted members are written. Five WSP_62-bounded
+modules separate the canonical contract, O(depth) Windows writer, Windows
+store/root/topology leasing, full wheel-to-tree verifier, and
+no-replace/quarantine materializer.
+
+The generation identity binds the wheel pin and archive/distribution digests
+as well as the extracted dependency-tree digest. Canonical verification
+reparses the stored wheel, compares every extracted member byte-for-byte,
+proves exact file and empty-directory topology, and rejects ADS, hardlinks,
+reparse points, case aliases, mutation, corrupt
+reuse, and unowned no-replace winners. The exact O: artifact passed first
+publication plus 200 full reuses in 105.09 seconds with unchanged source SHA
+and bounded handle/RSS deltas. This is repeatability/leak evidence, not
+throughput or horizontal-scale proof. Public verification requires the fixed
+reviewed bytes but treats persisted lease booleans as non-authoritative. The
+live materializer exposes current-verification authority on publish/reuse and
+publication-time authority only for its own new publication. Stores are
+O:/E:-only and payload bounds/tokens fail before store creation. Every verification runs two
+consecutive complete passes, with every admitted child file/directory retained
+across pass two and a terminal handle plus complete-topology proof before
+release. This closes inter-pass and admitted-file tail mutation, and rejects a
+tail-added path before success; it is not persistent destination write denial,
+an atomic snapshot, or post-return immutability.
+
+**Completed by Phase 2C2b:** source S1/dependency/source S2 composition with
+durable source identity and dependency-tree equality, without a cross-store
+lock or rollback. Sealed child execution, Git trust, loader/native/subprocess
+closure, deterministic controls, signing, empirical write denial, activation,
+A-grade, and retrieval RSI remain later independent gates.
+
+## 2026-08-29: Reviewed packaging wheel admission phase 2C1
+
+**Implemented and physically falsified as inert source admission; not an
+authenticated builder runtime, extractor, materializer, or activation.** The
+Windows-only API binds the exact repository-reviewed `packaging==26.0` wheel
+filename/size/SHA through retained parent/file identities and a single bounded
+read. A strict raw parser rejects ZIP64, multidisk, flags, extras/comments,
+gaps/overlaps, unsafe Windows identities, unapproved roots/payloads, expansion
+bounds, metadata drift, and incomplete/noncanonical RECORD ownership.
+
+The exact provisioned O: artifact passed a 200-admission repeatability gate
+with bounded handle/RSS growth and unchanged source bytes. This is a local
+resource/leak proof, not throughput, concurrency, horizontal scale, official
+provenance, signature, download/install, extraction/publication, import,
+execution, loader/native/subprocess/exact-runtime, write-denial, activation,
+A-grade, or retrieval-RSI evidence.
+
+**Completed by Phase 2C2a:** held-handle source generation, exact admitted-byte
+extraction, no-replace publication, full reproof, and no-delete quarantine.
+The Phase 2C1 receipt itself still grants none of that authority. Dependency
+  composition is supplied only by the sequential Phase 2C2b gate above.
+
+## 2026-08-29: Inert query-runtime builder authority phase 2B
+
+**Implemented as cross-bound structural component scaffolding; not an
+authenticated, executable, or activation-capable builder.** The slice separates
+process, packaging, pinned-Git, repository-source, and receipt contracts into
+WSP_62-bounded modules. It closes accepted-invalid RECORD case/alias/hash/size,
+METADATA cardinality, dist-info identity, hidden Git index flags, Git topology,
+held-executable TOCTOU, component substitution, and quadratic ownership lookup
+failures. Public candidate build/reproof stay unbound.
+
+The current host cannot complete a real public proof: Git is not provisioned on
+O:/E:, and the ambient packaging installation is not a separate source-only
+runtime. The opt-in 72,261 RECORD/inventory plus 1,500 Git/source-row soak is an
+algorithmic resource proof only, not physical closure, interactive latency, or
+horizontal throughput. Same-interpreter wrapper seals are not durable authority.
+
+Documentation projection exposed separate debt: the canonical DocDAE full
+cross-reference rebuild exceeded a 604-second ceiling without writing. The one
+new audit entry was projected with DocDAE's exact per-document methods and
+validated inside the sorted unique 538-document index. A later WSP_15 slice
+should precompute the reference map once; this offline DocDAE scaling debt is
+not a query-runtime blocker.
+
+**Corrected next-step note:** Phase 2C2a supplies only the exact source-only
+packaging generation. Phase 2C2b binds it sequentially to the already-existing
+inert dependency materializer. A sealed O:/E: child, governed Git trust, pre-import
+loader, native/DLL/subprocess closure, deterministic controls, signing, and
+empirical write denial are not Phase 2C2 promises; each requires a later
+independently falsified receipt before candidate build/reproof can accept an
+authenticated producer. Activation, owner, route, VSIX, A-grade, and
+retrieval-RSI remain later independent gates.
+
+## 2026-08-29: Inert clean query-runtime candidate phase 2A
+
+**Implemented as an inert contract, positive graph, and diagnostic reproof seam; not a governed evidence builder, materialized runtime, or activation.** Diagnostics
+bind one composition, dependency inventory/tree, confined selected bytes, clean-HEAD repository, declared Phase-2A modules/origins, declarations, markers, roots, module
+origins, and a lower-bound trace. Broad RECORD ownership precedes selection; selected
+local rows are byte-bound and prefix-local external rows are explicit exclusions.
+Requires-Python/extras, wheels, executables, and subprocess use fail closed. Installed topology and dynamic/import/native-loader completeness remain unproved; all loader,
+determinism, signature, write-denial, activation, exact-closure, A-grade, and RSI
+claims remain false.
+
+The parser pin does not authenticate executing `packaging`, interpreter, or stdlib; public build/reproof reject with `QUERY_RUNTIME_CANDIDATE_BUILDER_RUNTIME_UNBOUND`.
+Phase 2B must bind process image, parser RECORD bytes/origins, transitive local source,
+and before/after equality before evidence can be published.
+
+Hostile review proved the broad venv cannot be activated: optional Torch and Transformers packages alter behavior by presence, `-I -S` still reaches a base
+runtime outside O:/E:, and one trace cannot enumerate DLL/delay/ctypes/CFFI or
+process surfaces. Phase 2B now supplies only the inert structural builder
+components described above; the sealed child remains next. Physical clean O:/E:
+materialization and startup parsing follow. Then the inert ABI layer may be
+regenerated over selected native rows; Windows loader resolution remains later. The candidate parser's pinned `packaging` dependency stays outside the exact
+four-package MCP runtime launch requirements.
+
+The prior ABI scan found eight PE32, four ARM64, and one duplicate native
+RECORD path. They may disappear only through a physically separate positive
+candidate, never filename ignores or a relaxed ABI contract.
+
+## 2026-08-29: Inert exact runtime-composition generation
+
+**Implemented; still not activation.** A strict path-free composition contract,
+independent verifier, and descriptor-only materializer now bind one exact
+Windows base generation to one exact dependency generation. The identity covers
+both descriptor/inventory/tree digests and counts plus the exact `python.exe`
+member, separate `site-packages` role, and fixed `-I -S -B` launch topology.
+Both existing full-byte verifiers rerun as `B1 -> D1 -> D2 -> B2` on canonical
+verification and reuse, with exact equality required across both passes;
+neither payload is copied into the composition generation. This bounded
+cross-pass mutation proof does not establish ABA resistance or write denial.
+
+The schema forces ABI compatibility, external native-loader closure,
+deterministic effects, pre-import bootstrap safety, signature, empirical write
+denial, activation eligibility, and exact runtime closure false. Focused
+coverage is 24 passed / 1 capability skip; the explicit adjacent runtime
+non-scale selection is 159 passed / 6 capability skips. Production-pair
+verification passed: dependency materialization took 2,856.73 seconds,
+descriptor-only composition took 588.32 seconds, and a fresh repaired-verifier
+reproof took 579.54 seconds. The full dependency pass is an offline release
+long pole, not interactive-query work.
+
+## 2026-08-29: Inert exact Windows Python base-runtime generation
+
+**Implemented and production-shape verified; this is not an activation
+claim.** A strict contract, materializer, and independent full-byte verifier
+now preserve a runnable base-prefix topology for root Python/VCRuntime files,
+`DLLs`, `Lib`, and `tcl`, while excluding development/documentation trees and
+`Lib/site-packages`. File roles, file bytes/sizes, complete directory topology,
+admission/exclusion policy, inventories, and descriptors are content-addressed.
+The layer reuses the bounded dependency tree copy and adds a read-only source
+lease mode that does not require DELETE authority from protected installed-Python
+roots while retaining write/delete share denial.
+
+The first real run falsified two synthetic assumptions before publication:
+four `DLLs` catalog/icon files needed an explicit runtime-data role, and
+`C:/Python312` correctly denied a source lease that unnecessarily requested
+DELETE authority. Both were repaired without relaxing topology. The final
+production shape passed materialization, staging proof, no-replace publication,
+canonical reproof, and exact reuse in 239.94 seconds: 4,068 files, 372 child
+directories, 81,515,843 bytes, generation `sha256:3efe4fba...`.
+
+The descriptor keeps native-loader closure, deterministic effects, signature,
+write denial, activation eligibility, and exact runtime closure false. No live
+owner, route, replica, maintenance state, extension behavior, or RSI changed.
+
+## 2026-08-29: Pre-owner exact-main acceptance
+
+The merged `REPO_HEAD_MISMATCH` ingress passed the real broker-managed path at
+exact main `0f992c9b55067055049674f49568e58315242c35`. The canonical task
+completed through OpenClaw/WRE at generation `sha256:eeb23404...`; a fresh
+owner query was CURRENT/no-gap/no-reindex on attempt one, and full production
+verification retained 33 artifacts / 222,706,129 bytes unchanged. This closes
+that exact-commit maintenance gate only. Exact runtime closure, A-grade,
+retrieval RSI, resident scale, and future-commit authority remain open.
+
+## 2026-08-28: Shared owner readiness policy
+
+The owner-acquisition boundary now centrally exports the exact transient set,
+two-attempt ceiling, and 300-second operation ceiling used by both the root
+one-shot and RedDog's bounded post-completion verifier. The root script no
+longer defines a parallel policy. Synthetic communication and infrastructure
+shards pass; exact-main live replay remains a separate gate. This is bounded
+availability hardening, not resident ownership, horizontal scale, exact runtime
+closure, A-grade admission, or retrieval RSI.
+
 ## 2026-08-28: Inert exact dependency-payload generation
 
 **Implemented with production-shape and exact real-byte evidence; this is not
@@ -32,8 +368,7 @@ explicit absolute control-root limit or extend every creation, publication,
 contract, quarantine, and recovery syscall boundary.
 
 Next P0 layers are deliberately separate: durable hard-crash recovery and
-retention, signer/write-denial admission, exact interpreter/
-standard-library/native dependency and deterministic-execution binding,
+retention, signer/write-denial admission, external native-loader and deterministic-execution binding,
 pre-import bootstrap verification, and resident authenticated owner selection.
 Only after those exist may the runtime exact-closure predicate become true.
 Retrieval RSI then needs a distinct authenticated proposer/evaluator,
@@ -52,12 +387,13 @@ Installed distribution payload bytes are not yet verified, so the exact-
 closure flag is false and the A-grade gate rejects. The public benchmark
 captures the authenticated digest and keeps one owner resident for its corpus.
 
-Current post-restart one-shot validation failed closed at both 60 and 180
+Earlier post-restart one-shot diagnostics failed closed at both 60 and 180
 seconds with `HOLOINDEX_QUERY_SERVICE_STARTUP_TIMEOUT`; source verification
-itself takes about 0.1 seconds, so semantic model/backend warm-up is the long
-pole. The bounded CLI allowance is aligned with the existing 270-second canary,
-but persistent authenticated RedDog owner activation is P0. Timeout expansion
-alone is not a scale solution.
+itself took about 0.1 seconds, so semantic model/backend warm-up was the long
+pole. A later base-bound governed query passed on attempt one inside the
+300-second CLI wall. That supersedes the diagnostic timeout for base usability,
+not exact-current-main readiness or scale; persistent authenticated RedDog
+owner activation remains P0. Timeout expansion alone is not a scale solution.
 
 ## 2026-08-27: Historical exact-main cold-owner evidence
 
@@ -68,9 +404,10 @@ Three fresh-process governed owner queries completed on attempt one in about 34
 seconds each. A separately pre-warmed owner started in 25.5 seconds and served
 the same governed path in 10.3 seconds. Full production verification retained
 all 33 artifacts / 221,204,272 bytes and the same descriptor, replica, and path
-identities. This was valid single-owner evidence for that exact commit. It is
-superseded for current-runtime availability by the post-restart timeout above
-and never established horizontal scale, A-grade quality, or retrieval RSI.
+identities. This remains valid single-owner evidence for that exact commit; the
+later base-bound query supersedes the timeout only for base usability. Neither
+establishes current-main acceptance, horizontal scale, A-grade quality, or
+retrieval RSI.
 
 WSP_15 keeps exact installed dependency-byte closure plus resident-owner
 activation at P0. Evaluator/proposer trust and production promotion remain
@@ -663,7 +1000,10 @@ queries, and immutable replica revalidation are complete.
 The exact post-repair HEAD differential has zero errors and this non-zero
 accepted bridge set only:
 
-- WARNING: `INTERFACE.md` 1,147 lines.
+- WARNING: `README.md` has an inherited 1,044-line no-growth boundary; focused
+  Phase 2C3b detail is extracted under `docs/clarity/`.
+- WARNING: `INTERFACE.md` has an inherited 1,250-line no-growth boundary;
+  focused Phase 2C2a detail is extracted under `docs/clarity/`.
 - WARNING: append-only `ModLog.md` 1,613 lines.
 - WARNING: `src/holo_tools.py` 1,094 lines. Its candidate-grown `holo_search`
   is now a 41-line orchestrator with cohesive helpers, so the function error is

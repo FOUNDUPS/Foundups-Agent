@@ -1,5 +1,14 @@
 # AI Gateway Module Interface Documentation
 
+## Model binding trusted time
+
+`ModelRuntimeBindingUseTimeVerifier.verify` samples `trusted_now_epoch` once.
+It must return an exact positive `int`; strings, floats (including NaN/infinity),
+booleans, None, zero and negative values raise
+`ValueError("model_runtime_binding_trusted_clock_invalid")` before lower evidence
+verification. Missing persisted receipt is still rejected first. Signature,
+revocation, expiry and one-shot capability requirements remain unchanged.
+
 ## Public API
 
 ### Classes

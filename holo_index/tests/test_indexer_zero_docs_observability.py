@@ -16,6 +16,7 @@ Slice: HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1
 Worker: W6
 """
 
+import ast
 import tempfile
 from pathlib import Path
 from types import SimpleNamespace
@@ -24,6 +25,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+import holo_index.canonical_source_manifest as manifest_module
 from holo_index.core.collection_injections import inject_module_tier0_candidates
 from holo_index.core.indexing_engine import IndexResult, index_docs_entries
 from holo_index.incremental_index_records import prepare_records
@@ -32,6 +34,28 @@ from holo_index.incremental_index_records import prepare_records
 # ---------------------------------------------------------------------------
 # IndexResult dataclass unit tests
 # ---------------------------------------------------------------------------
+
+
+def test_document_indexing_extraction_respects_wsp62() -> None:
+    """The extraction reduces the parent hard-limit debt without new debt."""
+    package_root = Path(__file__).parents[1]
+    engine_source = (package_root / "core" / "indexing_engine.py").read_text(
+        encoding="utf-8"
+    )
+    extraction_source = (package_root / "core" / "document_indexing.py").read_text(
+        encoding="utf-8"
+    )
+
+    assert len(engine_source.splitlines()) < 1500
+    assert len(extraction_source.splitlines()) < 800
+    tree = ast.parse(extraction_source)
+    functions = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    ]
+    assert functions
+    assert all(node.end_lineno - node.lineno + 1 <= 50 for node in functions)
 
 
 class TestIndexResultDataclass:
@@ -215,6 +239,70 @@ class TestIndexDocsEntriesZeroDocsScenario:
         assert len(fake_holo._reset_calls) == 1
         assert fake_holo._reset_calls[0] == "navigation_docs"
         assert len(fake_holo._add_calls) == 1
+
+    def test_current_holo_contracts_receive_section_records(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Canonical current contracts expose deep status sections."""
+        readme = tmp_path / "holo_index" / "README.md"
+        readme.parent.mkdir(parents=True)
+        readme.write_text(
+            "# HoloIndex\n\nLive retrieval contract.\n\n"
+            "## Current operational truth (2026-08-28)\n\nOwner query is current.\n\n"
+            "## RSI Boundary\n\nPromotion remains fail-closed.\n\n"
+            "## Historical Baseline\n\nOld ranker was A grade.\n\n"
+            "## 7. Instance Health & Status\n\nOld closure count was 1376.\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            manifest_module,
+            "filter_git_tracked_files",
+            lambda _root, values: list(values),
+        )
+        fake_holo = FakeHoloIndex(project_root=tmp_path)
+
+        result = index_docs_entries(fake_holo)
+
+        added = fake_holo._add_calls[0]
+        assert result.discovered_count == 1
+        assert result.indexed_count > result.discovered_count
+        assert {item["truth_class"] for item in added["metadatas"]} == {
+            "current_truth"
+        }
+        assert "document_section" in {
+            item["record_kind"] for item in added["metadatas"]
+        }
+        assert any("Promotion remains fail-closed" in item for item in added["documents"])
+        assert not any("Old ranker was A grade" in item for item in added["documents"])
+        assert not any("Old closure count was 1376" in item for item in added["documents"])
+        assert sum(
+            item["record_kind"] == "document_section"
+            for item in added["metadatas"]
+        ) == 2
+
+    def test_historical_audit_keeps_one_summary_record(
+        self, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """Historical evidence is classified without section expansion."""
+        audit = tmp_path / "docs" / "audits" / "holoindex" / "baseline.md"
+        audit.parent.mkdir(parents=True)
+        audit.write_text(
+            "# Old Baseline\n\nHistorical metric.\n\n## Detail\n\nArchived evidence.\n",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            manifest_module,
+            "filter_git_tracked_files",
+            lambda _root, values: list(values),
+        )
+        fake_holo = FakeHoloIndex(project_root=tmp_path)
+
+        result = index_docs_entries(fake_holo)
+
+        added = fake_holo._add_calls[0]
+        assert result.indexed_count == 1
+        assert added["metadatas"][0]["truth_class"] == "historical_record"
+        assert added["metadatas"][0]["record_kind"] == "document_summary"
 
     def test_partial_empty_content_shows_correct_counts(self, tmp_path: Path):
         """When some docs have content and some are empty, counts reflect reality."""

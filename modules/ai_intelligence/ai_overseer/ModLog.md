@@ -1,4 +1,32 @@
+## 2026-09-21: Qualify the existing FoundUp genesis prototype
+
+- WSP 00/15/22/50/95/97/109; static qualification C3/I3/D2/Impact2 = 10/P2 after PR1838 merged its exact reviewed tree. The previous repair's245 overlapping local/independent cases and ten exact-head checks passed; its main workflows are tracked separately.
+- Existing prototype frontmatter, canonical registry/loader, safety scanner and typed intake contracts are distinct. Missing executable registration/manifest/outcome evidence does not justify a second skill, weaker admission or redundant generic tests.
+- The structured builder/gate is implemented but does not execute the prototype document or turn arbitrary prose into the full WSP109 packet. New-ID collision checking is explicit/injected; the default gate does not load current registry occupancy. Preserve the registered detect_ai identity when extending AmIBot.
+- This slice changes canonical planning/logs only. No production, skill, registry, manifest or test changes; no tests, product imports, scanner subprocess, model/provider or runtime activation. Source/AST/JSON checks and independent review are recorded in the backlog.
+
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
 # AI Intelligence Overseer - ModLog
+
+## 2026-09-20: Prove commander draft handoff with the declared intent
+
+- Corrected the intake integration fixture that mistook an authority-denial response for success. Actual OpenClawIntent metadata now proves a queued, detached envelope only with explicit commander authority; the dry-run builder itself still does not queue.
+- Focused111pass and independent99overlap/31adversarial cases. Connected1048pass/4fail; all4 reproduced on clean d00b156f. Existing tests retain the13review-discovered regression cases.
+- Reconciled the scaffold roadmap against existing typed job/route/planner owners. Public intake grants draft rights only; planner digest, admission, registry and runtime execution remain separate.
+- WSP00/15/22/50/62/84/95/97/99/109. Exact evidence and PR closure: docs/roadmaps/rsi_swarm_backlog.json#current_observation. Preserved pre-existing ModLog NUL bytes; no unrelated cleanup.
+
+
+## 2026-09-13 - RSI context preservation evidence
+
+- Ran the existing deterministic M2M compiler and compile shim in a disposable replica of source bcc877829. The runbook shrank 186 to 14 lines but lost all eight declared boundary passages and failed YAML parsing.
+- A seven-line synthetic reference passed the YAML gate after losing its worker/verifier independence sentence. Rejected both candidates; original sources and executable Skillz remain unchanged. No model call, promotion or verified learning.
+- Corrected README, INTERFACE and the prototype compile-gate Skillz to describe implemented structural/YAML checks, actual result fields, side effects and unimplemented fidelity checks. This is a documentation correction, not a runtime fidelity repair.
+- Evidence and next acceptance requirements: docs/operations/RSI_SWARM_DISPATCH.md, linked from the root roadmap. WSP 22, 48, 50, 84, 97, 99.
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)

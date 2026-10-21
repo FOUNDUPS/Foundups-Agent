@@ -52,6 +52,12 @@ def test_canonical_operations_skill_is_role_bound_and_model_independent() -> Non
     assert "requires_wsp109_resolution" in skill.content
     assert "grant no mutation scope until resolved" in skill.content
     assert "exactly one bounded REUSE or EXTEND slice" in skill.content
+    assert "Canonical Email Draft Operations" in skill.content
+    assert "Conversation history and model memory are" in skill.content
+    assert "Maintain one canonical provider-side draft" in skill.content
+    assert "Search Sent before sending a draft" in skill.content
+    assert "body claims an attachment is included" in skill.content
+    assert "provider exposes only a snippet" in skill.content
     assert not {
         "agents",
         "primary_agent",

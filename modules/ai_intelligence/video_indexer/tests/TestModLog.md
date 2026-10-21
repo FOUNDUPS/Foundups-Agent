@@ -1,6 +1,31 @@
 # Video Indexer Tests - ModLog
 **WSP Compliance**: WSP 34 (Test Documentation), WSP 22 (Change Log)
 
+## 2026-09-22 - Pre-merge full module run
+
+- `python -m pytest modules/ai_intelligence/video_indexer/tests -q --tb=short`
+  with isolated pytest, pytest-asyncio, dotenv, Selenium and requests dependencies:
+  **142 passed, 13 skipped**.
+- Added nested-cycle-failure and legacy Gemini exclusion coverage. Browser mock
+  responses now arrive after input; stale static response fixtures no longer
+  contradict the new guard. Registry routing tests use explicit content types.
+- Live authenticated browser indexing is not covered by this mock/unit result.
+
+## 2026-09-21 - VIDEO_INDEX_PORTFOLIO_INTEGRITY
+
+- Added a retained-response regression: an answer visible before submit is
+  ignored until a different response arrives.
+- Added per-video identity/provenance, duplicate-response digest, semantic
+  training-exclusion, and Gemini enrichment-merge tests.
+- Updated action-surface coverage for channel, portfolio, and bounded-daemon IDs;
+  portfolio grouping proves Chrome receives Move2Japan/UnDaoDu while Edge
+  receives FoundUps.
+- Fixed the four previously documented parse-only `_pattern_memory`
+  `AttributeError` paths by making the optional memory lookup defensive.
+- Local full pytest run was blocked because pytest is absent. Direct equivalent
+  integrity checks and `py_compile` passed; live Studio DOM remains an operator
+  proof requiring authenticated Chrome 9222 and Edge 9223 sessions.
+
 ## 2026-06-17 - STUDIO_ASK_GEMINI_READINESS_RETRY_PHASE1 (heartbeat + no-hang budget + content_category normalize/preserve) [updates #836] (Worker-Lane SSREADY-POLISH)
 
 ### Test Run

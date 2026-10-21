@@ -1,4 +1,58 @@
+## Native proposal caller contracts — 2026-09-30
+
+The existing WRE test owner `modules/infrastructure/wre_core/tests/test_wre_execution_truth.py` adds33 parameterized cases. The local
+35-case selection includes2 existing controls: proposal quarantine and error
+redaction. Coverage spans raw/default/legacy calls,15 invalid profiles, copied
+configuration,12 native branch cases, unchanged handler state and error redaction.
+Real master/helper/adapter/engine methods run with inert collaborators and native
+boundaries. The initial runner failed collection before any selected case; its
+reviewed alias/diagnostic correction passed35/35 with unchanged19 source pins.
+
+Separately,4 cases passed using installed0.3.20 formatter/handler source with
+synthetic tokens/output. No model loaded. The scopes are not39 native-model
+tests. Existing test definitions remain unchanged. CI explicitly runs the full
+execution-truth file (plus existing import/measurement regressions); exact-head
+hosted counts and later main verification are recorded in publication receipts.
+Evidence: RSI backlog `current_observation.native_proposal_caller_20260930` and
+`O:/Foundups-Agent-audits/20260930-rsi-native-caller-contract/`.
+
 # HoloIndex Tests
+
+## Qwen package import boundary
+
+Run `python -I -S -B holo_index/tests/test_qwen_package_import.py -v`.
+Eight fixed controls use fresh children with scratch directories and a minimal
+environment. Real package/engine imports reject other application modules before
+execution; no model, coordinator constructor or service is invoked. Synthetic
+owners test all 20 public exports, original module mapping, identity caching,
+`dir`, unknown attributes, from/star imports and dependency failure propagation.
+They do not certify the real exported providers. Python effect guards supplement
+the reviewed source boundary; they are not an operating-system sandbox.
+
+## R03 source and entry qualification
+
+The three existing suites named in the [entry matrix](../CLI_REFERENCE.md#qualification-matrix-and-evidence-scope)
+cover source selection, root binding, dirty-context labels, source-change
+rejection and no-owner local bundles. Their 81-test result is a contract
+selection; semantic service readiness and current-main runtime receipts must
+be established separately. Fixtures must not refresh a live index to make an
+entry test pass.
+
+## Current-truth document retrieval
+
+`test_document_truth.py` proves low-cardinality current, implementation,
+history, vision, and unknown classification plus the broad-current versus
+exact/historical/temporal query boundary. It also proves authority ordering
+before K truncation and a filtered summary stream that preserves path diversity
+when one document has many section hits.
+
+`test_indexer_zero_docs_observability.py` proves canonical Holo contracts gain
+only for an exact per-path heading allowlist while historical or generic status
+sections cannot inherit current authority. Historical audit docs remain one
+summary record. All indexing tests use temporary repositories,
+deterministic fake embeddings, and fake collections; they never open, mutate,
+or refresh a live Holo generation. The same suite requires the parent indexing
+engine to remain below 1,500 lines and every extracted function at or below 50.
 
 ## Model source-path provenance
 
@@ -25,6 +79,12 @@ live Holo store.
 - Focus on intent routing, output composition, and HoloDAE orchestration behavior.
 - Keep unit tests deterministic; avoid external model/network dependencies.
 - Integration tests run only when model assets are available and explicitly enabled.
+
+`test_holoindex_query_receipt.py` proves valid owner attempt/retry/cycle
+telemetry is inside the receipt digest. Root one-shot and communication tests
+separately prove malformed, out-of-range, unequal, or top-level-only telemetry
+cannot authorize a controller reproof. Query-receipt plus one-shot cycle
+coverage is 77 passed.
 
 ### Query replica boundary
 
@@ -73,16 +133,17 @@ fixtures inside the authority root retain their existing behavior, while
 absolute escapes are rejected. GraphRAG currently consumes code/WSP hits, so
 this is adjacent path-contract coverage rather than a docs-index test.
 
-`test_module_intent_snapshot.py` proves shell-free HEAD pinning, deterministic
-ordering, final-NUL framing, all-record normalized paths, exact depth-three
-filtering, duplicate-basename ambiguity, 4,096/4,097 caps, platform-aware
-locked cache bounds, full-path independence, and fail-closed nonzero/timeout/
-malformed/control/oversize behavior. Unicode coverage rejects `Cc`/`Cf`/`Cs`
-on deeper records and NFC/NFD-equivalent duplicates while retaining visible
-accented letters and non-ASCII symbols. Its K=1/12/20 falsifier varies returned
-context for the exact Group-A audit query while holding the HEAD catalog fixed.
-Strict catalog failure is explicit; non-strict failure passes an empty registry
-and cannot fall back to vector-hit singularity.
+`test_module_intent_snapshot.py` proves closed Git authority, HEAD pinning,
+deterministic ordering, NUL-framed directory projection, invalid paths,
+normalized duplicates, 4,096/4,097 caps, cache bounds, and full-path/catalog
+failure behavior. `test_module_intent_evidence_projection.py` proves exact
+candidate-tree framing, direct `src/tests` or regular root-contract admission,
+and false data-container exclusion. It falsifies object ID/type/size/mode,
+truncated/extra/raw-object bytes, symlinked contracts, invalid UTF-8/names, and
+nonzero/oversize behavior. Its real-repository case preserves HoloDAE and the
+doc-only consciousness engine while excluding telemetry feedback. Hostile Git
+authority is removed and commands force no-replacement/no-lock options. The
+8 MiB bound has an exact cap-plus-one rejection.
 `test_machine_spec_contract.py` binds canonical nullable
 `tier0_module_target` metadata and rejects noncanonical target paths.
 
@@ -91,6 +152,7 @@ $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'
 python -m pytest `
   holo_index/tests/test_tier0_retrieval_hardening.py `
   holo_index/tests/test_module_intent_snapshot.py `
+  holo_index/tests/test_module_intent_evidence_projection.py `
   holo_index/tests/test_machine_spec_contract.py `
   modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service.py `
   modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_edges.py `
@@ -98,7 +160,7 @@ python -m pytest `
   -q
 ```
 
-The exact command above passed 278 tests in 4.00 s on the R3 candidate.
+The exact command above passed 334 tests in 4.94 s on this candidate.
 
 ## Test Data
 - Synthetic fixtures are preferred to keep tests fast and reproducible.

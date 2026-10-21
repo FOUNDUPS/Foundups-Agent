@@ -10,6 +10,10 @@ The FoundUp Memex POC must remain focused on one RedDog orchestrating and improv
 
 This document exists so HoloIndex and future 0102 sessions retrieve the unresolved design questions.
 
+## Related execution and feedback plan
+
+The [2026-09-11 hybrid decision](REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) and [R25 feedback packet](../roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) define a staged, consented advisory feedback path. They preserve the one-RedDog PoC and do not ratify the voting, CABR or delegated-authority hypotheses below. Technical task qualification and permissioned feedback can progress without inferring those governance powers.
+
 ## Candidate model to revisit
 
 - A `012` may participate as a stakeholder or as a delegate.

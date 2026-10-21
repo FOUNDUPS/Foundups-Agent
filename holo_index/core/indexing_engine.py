@@ -25,6 +25,11 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
+from holo_index.core.document_indexing import (
+    DocumentIndexDependencies,
+    chunk_markdown_by_headings as _chunk_markdown_by_headings,
+    index_docs_entries as _index_docs_entries,
+)
 from holo_index.source_scope import (
     CANONICAL_WEB_EXTENSIONS,
     CANONICAL_WEB_RELATIVE_ROOTS,
@@ -943,158 +948,20 @@ def index_wsp_entries(holo: "HoloIndex", paths: Optional[List[Path]] = None) -> 
 
 
 def index_docs_entries(holo: "HoloIndex") -> IndexResult:
-    """CFZ4: Index module/root docs into navigation_docs collection.
+    """Index governed Markdown documents through the bounded docs module."""
 
-    Content: modules/**, docs/**, holo_index/docs/**, WSP_framework/docs/**
-    ID prefix: doc_
-
-    HXA Audit Fix: Excludes .claude/worktrees to prevent duplicate indexing,
-    extracts slice_id metadata for HXA/FX/CFZ patterns.
-
-    HOLOINDEX_INDEXER_ZERO_DOCS_OBSERVABILITY_PHASE1: Now returns IndexResult
-    with discovered_count and indexed_count for CLI observability. Enables
-    the CLI to detect zero-doc scenarios and avoid awarding spurious rewards.
-
-    Returns:
-        IndexResult with discovered_count, indexed_count, collection_name,
-        and optional warning message.
-    """
-    collection_name = "navigation_docs"
-    from holo_index.canonical_source_manifest import _docs_source_files
-
-    files = _docs_source_files(holo)
-
-    discovered_count = len(files)
-
-    if not files:
-        holo._log_agent_action("No docs found to index", "WARN")
-        return IndexResult(
-            discovered_count=0,
-            indexed_count=0,
-            collection_name=collection_name,
-            warning="No docs found to index \u2014 discovery returned zero files"
-        )
-
-    manifest_digest = source_file_manifest_digest(
-        files,
-        project_root=holo.project_root,
+    return _index_docs_entries(
+        holo,
+        DocumentIndexDependencies(
+            result_type=IndexResult,
+            source_file_manifest_digest=source_file_manifest_digest,
+            classify_document_type=_classify_document_type,
+            calculate_document_priority=_calculate_document_priority,
+            extract_slice_id=_extract_slice_id,
+            resolve_foundup_metadata=resolve_foundup_metadata,
+            canonical_source_scope_id=canonical_source_scope_id,
+        ),
     )
-
-    holo._log_agent_action(f"Indexing {len(files)} docs into navigation_docs...", "INDEX")
-    holo.docs_collection = holo._reset_collection("navigation_docs")
-
-    ids, embeddings, documents, metadatas = [], [], [], []
-
-    for idx, file_path in enumerate(files, start=1):
-        raw_head = file_path.read_bytes()[:2]
-        if raw_head == b'\xff\xfe':
-            text = file_path.read_bytes().decode('utf-16-le', errors='ignore').lstrip('\ufeff')
-        else:
-            text = file_path.read_text(encoding='utf-8', errors='ignore')
-        lines = [line.strip() for line in text.splitlines() if line.strip()]
-        if not lines:
-            continue
-
-        title = lines[0].lstrip('# ')
-        summary = ' '.join(lines[1:6])[:400]
-        doc_type = _classify_document_type(file_path, title, lines)
-        doc_payload = f"{title}\n{summary}"
-
-        doc_fed = resolve_foundup_metadata(file_path, holo.project_root)
-        # HXA Audit Fix: Extract slice_id for HXA/FX/CFZ patterns
-        slice_id = _extract_slice_id(file_path.name, title)
-
-        ids.append(f"doc_{idx}")
-        embeddings.append(holo._get_embedding(doc_payload))
-        documents.append(doc_payload)
-        metadata_entry: Dict[str, Any] = {
-            "title": title,
-            "path": file_path.relative_to(holo.project_root).as_posix(),
-            "summary": summary,
-            "type": doc_type,
-            "priority": _calculate_document_priority(doc_type, file_path),
-            "foundup_id": doc_fed["foundup_id"],
-            "tenant_id": doc_fed["tenant_id"],
-            "source_scope": doc_fed["source_scope"],
-            "external_repo": doc_fed["external_repo"],
-        }
-        # HXA Audit Fix: Add slice_id to metadata if present
-        if slice_id:
-            metadata_entry["slice_id"] = slice_id
-        metadatas.append(metadata_entry)
-
-    indexed_count = len(ids)
-
-    if embeddings:
-        holo.docs_collection.add(ids=ids, embeddings=embeddings, documents=documents, metadatas=metadatas)
-        holo._log_agent_action(f"Docs index refreshed: {len(ids)} entries", "OK")
-        return IndexResult(
-            discovered_count=discovered_count,
-            indexed_count=indexed_count,
-            collection_name=collection_name,
-            processed_count=discovered_count,
-            source_manifest_digest=manifest_digest,
-            source_scope_id=canonical_source_scope_id(collection_name),
-        )
-    else:
-        holo._log_agent_action("No docs entries were indexed", "WARN")
-        return IndexResult(
-            discovered_count=discovered_count,
-            indexed_count=0,
-            collection_name=collection_name,
-            warning="No docs entries were indexed \u2014 all discovered files had empty content"
-        )
-
-
-def _chunk_markdown_by_headings(
-    text: str,
-    max_chunk_chars: int = 1200,
-    overlap_chars: int = 100,
-) -> List[Dict[str, str]]:
-    """Split markdown text into chunks by headings, with fallback sub-splitting.
-
-    Returns list of dicts with keys: 'section' (heading text), 'content' (chunk text).
-    Handles tables, code fences, and mermaid blocks as raw text.
-    """
-    lines = text.splitlines(keepends=True)
-    heading_pattern = re.compile(r'^(#{1,6})\s+(.+)$')
-    chunks: List[Dict[str, str]] = []
-    current_section = "Introduction"
-    current_content: List[str] = []
-
-    def flush_section(section: str, content_lines: List[str]) -> None:
-        content = ''.join(content_lines).strip()
-        if not content:
-            return
-        if len(content) <= max_chunk_chars:
-            chunks.append({'section': section, 'content': content})
-        else:
-            start = 0
-            sub_idx = 0
-            while start < len(content):
-                end = min(start + max_chunk_chars, len(content))
-                if end < len(content) and content[end] not in ' \n':
-                    space_pos = content.rfind(' ', start, end)
-                    if space_pos > start:
-                        end = space_pos
-                chunk_text = content[start:end].strip()
-                if chunk_text:
-                    sub_section = f"{section} (part {sub_idx + 1})" if sub_idx > 0 else section
-                    chunks.append({'section': sub_section, 'content': chunk_text})
-                    sub_idx += 1
-                start = max(end - overlap_chars, end) if overlap_chars and end < len(content) else end
-
-    for line in lines:
-        match = heading_pattern.match(line.strip())
-        if match:
-            flush_section(current_section, current_content)
-            current_section = match.group(2).strip()
-            current_content = []
-        else:
-            current_content.append(line)
-
-    flush_section(current_section, current_content)
-    return chunks
 
 
 def index_knowledge_entries(holo: "HoloIndex") -> IndexResult:

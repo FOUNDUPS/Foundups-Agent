@@ -24,8 +24,9 @@ The earlier Second Brain framing mixed a long-term personal digital-twin vision 
 
 ## Digital Twin and Principal Memex boundary
 
-RedDog is the application/runtime shell. 0102 is the active Digital Twin hosted
-by RedDog. The Principal Memex informs 0102 with bounded principal cognition.
+RedDog is the lightweight interaction/exchange surface. 0102 is the active
+Digital Twin and deep cognition/orchestration layer behind that surface. The
+Principal Memex informs 0102 with bounded principal cognition.
 It does not grant FoundUp scope, repository truth, execution, or merge
 authority. The existing Digital Twin voice-memory POC remains an application
 and is not relabeled as the canonical Principal Memex.

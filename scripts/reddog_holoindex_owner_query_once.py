@@ -50,17 +50,17 @@ from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_boots
     ensure_reddog_holoindex_owner,
     resolve_reddog_holoindex_owner_handoff,
 )
-from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service_supervisor import (  # noqa: E402
-    PORT_IN_USE_ERROR,
-)
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_replica_route import (  # noqa: E402
     QUERY_REPLICA_REQUIRED_ERROR,
     resolve_query_replica_owner_route,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.reddog_holoindex_owner_acquisition import (  # noqa: E402
     MAX_OWNER_ATTEMPTS,
+    OWNER_OPERATION_TIMEOUT_SECONDS,
     OWNER_PORT_SHARD_COUNT,
+    TRANSIENT_OWNER_ERRORS,
     build_owner_query_environment,
+    owner_acquisition_cycle_valid,
     owner_port_for_attempt as _owner_port_for_attempt,
 )
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_replica_binding import (  # noqa: E402
@@ -73,22 +73,13 @@ MAX_LIMIT = 20
 MAX_MODULE_HINT_CHARS = 512
 MAX_MUST_INCLUDE = 40
 MAX_MUST_INCLUDE_CHARS = 1024
-DEFAULT_OPERATION_TIMEOUT_SECONDS = 300.0
-MAX_OPERATION_TIMEOUT_SECONDS = 300.0
+DEFAULT_OPERATION_TIMEOUT_SECONDS = OWNER_OPERATION_TIMEOUT_SECONDS
+MAX_OPERATION_TIMEOUT_SECONDS = OWNER_OPERATION_TIMEOUT_SECONDS
 _REQUEST_KEYS = frozenset({
     "query", "limit", "retrieval_mode", "include_bundle", "module_hint",
     "must_include", "bundle_only",
 })
 PROCESS_OWNED_STATUSES = frozenset({OWNER_STARTED, OWNER_REUSED})
-TRANSIENT_OWNER_ERRORS = frozenset(
-    {
-        "HOLOINDEX_QUERY_SERVICE_EXITED_DURING_STARTUP",
-        PORT_IN_USE_ERROR,
-        "QUERY_OWNER_POISONED",
-        "SEMANTIC_BACKEND_UNAVAILABLE",
-        "HOLOINDEX_TIER0_LOOKUP_FAILED",
-    }
-)
 _OWNER_LIFECYCLE_LOCK = Lock()
 _REPLICA_PUBLIC_FIELDS = (
     "query_replica_descriptor_digest",
@@ -120,12 +111,14 @@ def _with_retry_telemetry(
     *,
     attempts: int,
     retry_reason: str,
+    acquisition_cycle: int = 0,
 ) -> dict[str, Any]:
     return {
         **dict(result),
         "owner_attempts": attempts,
         "owner_retry_performed": attempts > 1,
         "owner_retry_reason": retry_reason,
+        "owner_acquisition_cycle": acquisition_cycle,
     }
 
 
@@ -286,6 +279,7 @@ class _OwnerQueryState:
     attempts: int = 0
     retry_reason: str = ""
     cleanup_required: bool = False
+    acquisition_cycle: int = 0
 
 
 def _response_matches_replica_route(
@@ -343,7 +337,9 @@ def _owner_attempt(
     bootstrap = ensure_owner(
         repo_root=authority_root, runtime_root=runtime_root, requested=True,
         query_replica_route=route,
-        owner_port=_owner_port_for_attempt(state.attempts),
+        owner_port=_owner_port_for_attempt(
+            state.attempts, acquisition_cycle=state.acquisition_cycle,
+        ),
         **ensure_kwargs,
     )
     service_url, service_token, process_owned, failure = _owner_service_credentials(
@@ -501,8 +497,9 @@ def _execute_admitted_query(
     select_runtime_root: Callable[[Path], Path], ssd_path: Path,
     resolve_replica_route: Callable[..., Any], operation_deadline: float | None,
     route_environment: Mapping[str, str], preflight: Preflight,
+    acquisition_cycle: int,
 ) -> Mapping[str, Any]:
-    state = _OwnerQueryState()
+    state = _OwnerQueryState(acquisition_cycle=acquisition_cycle)
     try:
         selection, changed = _revalidate_serialized_authority(
             repo_root=repo_root, selection=selection, query=query,
@@ -521,18 +518,21 @@ def _execute_admitted_query(
             operation_deadline=operation_deadline,
             route_environment=route_environment,
         )
+        result = _with_retry_telemetry(
+            result, attempts=state.attempts, retry_reason=state.retry_reason,
+            acquisition_cycle=state.acquisition_cycle,
+        )
         if bindable:
             result = _bind_query_receipt(
                 result, query=query, repo_root=repo_root, selection=selection,
                 select_authority=select_authority,
             )
-        return _with_retry_telemetry(
-            result, attempts=state.attempts, retry_reason=state.retry_reason,
-        )
+        return result
     except Exception as exc:
         return _with_retry_telemetry(
             _failure(type(exc).__name__, query=query),
             attempts=max(1, state.attempts), retry_reason=state.retry_reason,
+            acquisition_cycle=state.acquisition_cycle,
         )
     finally:
         if state.cleanup_required:
@@ -710,9 +710,15 @@ def query_once(
     bundle_builder: Callable[..., Mapping[str, Any]] = build_wsp_memory_bundle,
     operation_timeout_seconds: float | None = DEFAULT_OPERATION_TIMEOUT_SECONDS,
     query_environment: Mapping[str, str] | None = None,
+    acquisition_cycle: int = 0,
 ) -> Mapping[str, Any]:
     """Execute one owner-bound query and always clean up process-owned state."""
 
+    if not owner_acquisition_cycle_valid(acquisition_cycle):
+        return _with_retry_telemetry(
+            _failure("owner_acquisition_cycle_invalid"),
+            attempts=0, retry_reason="", acquisition_cycle=0,
+        )
     request, deadline, request_failure = _request_and_deadline(payload, operation_timeout_seconds)
     if request_failure is not None or request is None:
         return request_failure or _failure("request_invalid")
@@ -735,6 +741,7 @@ def query_once(
             resolve_replica_route=resolve_replica_route,
             operation_deadline=deadline,
             route_environment=prepared.route_environment, preflight=preflight,
+            acquisition_cycle=acquisition_cycle,
         ),
     )
     return {**result, **(prepared.bundle_fields or {}), "no_reindex": True}

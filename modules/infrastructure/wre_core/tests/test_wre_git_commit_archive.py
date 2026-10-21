@@ -9,6 +9,7 @@ import pytest
 from modules.infrastructure.wre_core.src import wre_git_commit_archive as archive
 from modules.infrastructure.wre_core.src import wre_git_bounded_io as bounded
 from modules.infrastructure.wre_core.src import wre_git_blob_batch_reader as batch
+from modules.infrastructure.wre_core.src import wre_git_process_io as process_io
 from modules.infrastructure.wre_core.src import wre_git_tree_manifest as tree
 
 
@@ -223,15 +224,21 @@ def test_kill_and_reap_closes_process_and_worker() -> None:
     assert events == ["kill", "wait:30", "close", "close", "join:5"]
 
 
-def test_bounded_reader_timeout_reaps_and_joins() -> None:
+def test_bounded_process_timeout_reaps_closes_and_joins(monkeypatch, tmp_path: Path) -> None:
     events: list[str] = []
 
     class Stream:
+        def __init__(self, label: str) -> None:
+            self.closed = False
+            self.label = label
+
         def close(self) -> None:
-            events.append("close")
+            self.closed = True
+            events.append(f"close:{self.label}")
 
     class Process:
-        stdout = Stream()
+        stdin = Stream("stdin")
+        stdout = Stream("stdout")
 
         def poll(self):
             return None
@@ -241,14 +248,28 @@ def test_bounded_reader_timeout_reaps_and_joins() -> None:
 
         def wait(self, timeout: int) -> int:
             events.append(f"wait:{timeout}")
+            if timeout == 1:
+                raise subprocess.TimeoutExpired("git", timeout)
             return 0
 
     class Worker:
+        def start(self) -> None:
+            events.append("start")
+
         def join(self, timeout: int) -> None:
             events.append(f"join:{timeout}")
 
         def is_alive(self) -> bool:
             return False
 
-    bounded._terminate_reader(Process(), Worker())  # type: ignore[arg-type]
-    assert events == ["kill", "wait:30", "close", "join:5"]
+    monkeypatch.setattr(process_io.subprocess, "Popen", lambda *_a, **_k: Process())
+    monkeypatch.setattr(process_io.threading, "Thread", lambda **_k: Worker())
+    with pytest.raises(subprocess.TimeoutExpired):
+        process_io.run_bounded_process(
+            ["git"], cwd=tmp_path, max_bytes=1, timeout_s=1,
+            chunks=[], output_path=None, environment=None, stdin_bytes=None,
+        )
+    assert events == [
+        "start", "wait:1", "kill", "wait:30",
+        "close:stdin", "close:stdout", "join:5",
+    ]
