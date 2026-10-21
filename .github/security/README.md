@@ -1,5 +1,34 @@
 # Blocking secret scan
 
+## Historical source digest recovery — 2026-10-21
+
+Continue the existing 91-candidate triage without changing its historical
+snapshot. One formerly UNKNOWN_METADATA occurrence is now independently proved:
+`docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json`, commit
+`21afc9108fec741ec883efacc47e542dc2461a7b`, line 7989, rule `generic-api-key`.
+The JSON field is
+`acceptance_visibility_continuation_20260914.validation.source_test_fingerprints`
+for `modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py`.
+
+Load that source from ancestor `cd305f27139cf858a9bfd4d2eef17fb37f3798b6`.
+Normalize CRLF to LF, then render LF as CRLF and compute SHA256. The resulting
+23,221 bytes reproduce the recorded value exactly; plain LF does not. The
+historical record identifies a Windows worktree/interpreter. Worker and root
+independently replayed the equality without emitting the matched value.
+Root also recomputed the whole-file/rule/line fingerprint using the unchanged
+gate algorithm. Append only
+`db95baa170a7d88a3277829cb21c5d7b95242c0f06284942a3ac07fe4307924b`;
+preserve all 1,291 previously reviewed bindings.
+
+The earlier triage snapshot remains an as-of record. Its remaining queue is now
+15 metadata occurrences without recovered original bytes and 23 credential
+occurrences representing five distinct values without provider-owner disposition.
+No credential validity probe, revocation, deployment claim or blanket exception.
+WSP 71/97 scope: exact historical proof and existing ledger only. WSP 15 allocation
+C1/I3/D3/Impact2 = 9 (P3); performed while the primary repair waits for CI.
+Verification: exact digest, line and ancestor checks; existing security-gate
+regressions; exact-head CI before merge. This is not a new all-history scan.
+
 ## Move2Japan shared member page review — 2026-10-18
 
 PR #2151 head `57a2a7a3e3b4fb41b7562585966e11b7d5384033` failed security
