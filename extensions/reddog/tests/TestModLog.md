@@ -38,6 +38,23 @@ Stale-lock recovery, power-loss guarantees, Windows ACLs, cross-root SecretStora
 scope, hostile filesystem behavior and valid-tail rollback detection remain
 unqualified; failures can leave bytes or a lock for explicit inspection.
 
+Combined closure: the independent reviewer reran six scoped repository scripts
+and passed 13 separate adversarial probes with frozen source hashes. Root ran
+`node extensions/reddog/tests/run_reddog_test_tier.js fast` in the source-pinned
+O: checkout at `7615273f6`: 18 members PASS / 6,910 ms. The C: rejection remains
+recorded; the repository-location guard was not changed. Counts overlap.
+After current documentation count/link corrections, root's existing
+`node extensions/reddog/tests/test_package_surface.js` passes 69 files /
+975,019 raw bytes under the same one MiB limit. Actual local VSCE build yields
+71 archive entries / 284,536 bytes. Inspection verifies 68 exact source files,
+README's eight explicit URL-only rewrites and two generated metadata entries.
+The initial wrong-link-base archive is preserved; rebuilt qualification uses
+the existing README command's explicit monorepo content base. External evidence:
+`independent-source-review.json`, `fast-tier-result.json`,
+`package-surface-final.log`, `vsix-build-final.log`, `vsix-inspection.json`.
+Hosted CI/security, source publication, installation and native RSI remain
+separate unobserved gates. No source assertions were relaxed for closure.
+
 ## PR2150 policy manifest compatibility — 2026-10-21
 
 Reused `test_backend_compatibility_contract.js`,

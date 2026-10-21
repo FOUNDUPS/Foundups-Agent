@@ -14,6 +14,12 @@ Linux/Windows CI coverage and reconcile existing interface/architecture/test
 docs. Current evidence and remaining review/publication/installed-host gates:
 `docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md`. Remote connectivity is
 unavailable; no push, merge, hosted CI, installation or native RSI claim.
+Independent review passed 13 adversarial cases; the approved-drive checkout
+passed the 18-member fast tier at `7615273f6`. Final package-list qualification
+is 69 files / 975,019 bytes; local VSIX build and explicit archive/source mapping
+pass. Correct current package counts and the existing README's monorepo link
+base after actual archive inspection exposed wrong generated links. Receipts
+distinguish byte-identical runtime from README-only URL rewriting. No install.
 WSP00/5/6/10/11/15/22/50/77/84/97. Blockchain/PF Mall work remains separate.
 
 ## Operations policy manifest binding — 2026-10-21

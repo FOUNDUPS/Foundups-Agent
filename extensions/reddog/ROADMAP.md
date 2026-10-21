@@ -9,9 +9,11 @@ append, cooperating-process serialization, truthful write/context receipts,
 and the existing command/package closure. Canonical detail and measured results
 belong in [the existing integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
 
-Before promotion: independent source/behavior review, exact-head hosted checks,
-current-main reconciliation, squash/readback, and installed VS Code/profile
-SecretStorage and filesystem qualification. Cross-root key sharing, automatic
+Local source/behavior review is complete: 13 independent adversarial probes,
+18 fast-tier members and the actual package/archive path pass within their
+documented scopes. Remaining publication gates: fresh remote main/owner,
+exact-head hosted checks and squash/readback. Before installed promotion:
+VS Code/profile SecretStorage and filesystem qualification. Cross-root key sharing, automatic
 stale-lock recovery, anti-rollback anchoring and multi-device sync are not proved
 by the local candidate. Existing blockchain/PF Mall and native RSI lanes retain
 their ownership. Historical version/release claims below keep their original

@@ -348,7 +348,7 @@ Git, Python subprocess, worker-thread, and materialized backend behavior; these
 capability flags are a fail-closed compatibility boundary, not a permission
 grant.
 
-The distributable surface is pinned to 67 files: 63 runtime files derived from
+The distributable surface is pinned to 69 files: 65 runtime files derived from
 the static relative-require closure plus the two dynamic workers and Python
 bootstrap, and four public metadata/assets (`LICENSE`, `README.md`, `package.json`,
 `icon.png`). The packaged license text must canonically match the repository
@@ -358,7 +358,7 @@ editor files, prior VSIX files, and `.vscodeignore` do not cross the package
 boundary. The release group runs the deterministic installed-VSCE listing
 twice; the default fast tier performs static validation only.
 The listed regular-file closure is additionally capped at 1 MiB raw. Git
-attributes materialize all 66 text entries as LF on every host and keep the PNG
+attributes materialize all 68 text entries as LF on every host and keep the PNG
 binary. `reddog_package_surface_receipt.v2` emits file/byte/cap fields plus the
 governing effective EOL-policy digest, sorted member-content digest, LF mode,
 and text/binary counts. CR bytes or an effective attribute override fail before

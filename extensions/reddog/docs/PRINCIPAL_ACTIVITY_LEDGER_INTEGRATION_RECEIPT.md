@@ -54,9 +54,29 @@ node extensions/reddog/tests/test_package_manifest.js
 The ledger includes an actual child-process contention fixture. Command counts
 are not individual assertion/case counts, and reruns are not added together.
 Independent review and full package/combined-tier qualification are separate
-gates; their exact-source receipts live under the existing external audit root:
+measurements; their exact-source receipts live under the existing external audit root:
 `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1638-qualification`.
 The source-only registration check does not activate an installed extension.
+
+The source-frozen independent review passed 13 adversarial cases and reran six
+scoped repository commands. The source-pinned O: checkout at `7615273f6` passed
+the existing full fast tier: 18 members in 6,910 ms. Its earlier C: run rejected
+the repository-location guard; qualification moved to O: without weakening it.
+These runs overlap and are not an aggregate test-case count.
+
+The final package-list contract passes: 69 files / 975,019 raw bytes below the
+unchanged 1,048,576-byte cap, with 68 LF text files and one binary. Actual VSCE
+packaging succeeds. Archive inspection maps 69 source members plus two VSCE
+metadata entries: 68 members match source bytes exactly; README differs only
+in eight explicit relative-link substitutions. The first build exposed VSCE's
+wrong repository-root link base for this monorepo. The existing README build
+command now supplies `extensions/reddog` as its content base; a rebuilt artifact
+passes the declared transformation check. No install or URL-reachability claim.
+
+The final archive is 284,536 bytes; its SHA and exact source binding are in
+`vsix-inspection.json`. Source review, adversarial probes, failed controls and
+reruns are retained separately. Later documentation-only closure does not alter
+the reviewed runtime or packaged source; final binding must verify that equality.
 
 ## Unqualified boundaries and publication gates
 
@@ -68,8 +88,7 @@ append outcomes; do not replay/reset them automatically. See the architecture
 recovery boundary. A ledger/context packet grants no disclosure, signing,
 promotion, deployment or RSI authority.
 
-Before merge: finish independent review and package qualification, reconcile
-fresh remote main and owner, publish to the existing PR through normal gates,
+Before merge: reconcile fresh remote main and owner, publish to the existing PR through normal gates,
 require exact-head CI/security checks, squash and verify main. No local fixture
 result substitutes for those publication gates or installed-host acceptance.
 
