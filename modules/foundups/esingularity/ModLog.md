@@ -1,3 +1,9 @@
+## 2026-10-21 — Close private Moshpit native-write policy PR #2110
+
+- Reconciled the existing private-log policy onto main a41a76053. Both canonical Google Docs require native content writes, exact error preservation, deduplication and readback; one pending learning delta must not replay a Gmail/CRM action.
+- Reused the existing `test_contracts.py` assertions. All 21 cases passed on refreshed PR head 5cadc75d4; this proves repository policy/registration contracts, not a live Docs write or deployed provider behavior.
+- Preserved private incident boundaries and existing action authority. No live document, correspondence or deployment effects. WSP 00/22/50/95/97; hosted checks and main readback remain publication gates.
+
 ## 2026-10-13 — JHR website-first downstream newsletter contract (instruction-only)
 
 - 012 clarified: eSingularity.ai is the primary public publication for the Japan Hyperscaler Report. LinkedIn JHR is a **derived newsletter edition**, distributed after the exact site issue passes verified production deployment and live issue-anchor readback.

@@ -1,3 +1,9 @@
+## 2026-10-21 — Private Moshpit native-write parity reconciliation
+
+- PR #2110 extends the existing `test_yumori_moshpit_skill_is_wre_registered_and_projected` contract with private-log native writes, exact errors, one pending delta and no parallel log.
+- Refreshed onto main a41a76053; the existing `test_contracts.py` suite passes 21 cases on exact PR head 5cadc75d4, with zero failures/skips. No new test file or runtime side effect.
+- Tests inspect canonical skill text and registry/projection contracts; they do not execute Google Docs or certify delivery. WSP 22/50/97.
+
 ## 2026-10-02 — Directed Work versus AUTO origin regression
 
 - Extended existing contract tests: origin/schema classification never grants SEND;
