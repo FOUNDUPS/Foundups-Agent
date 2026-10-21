@@ -1,3 +1,15 @@
+## Reconcile 0102 Moshpit candidate lessons — 2026-10-21
+
+WSP00/15/22/48/50/83/97. Retain existing PR1772's seven sanitized JSONL
+candidate rows byte-for-byte and clarify the accompanying
+[candidate README](docs/0102_moshpit/README.md). Nomination is not promotion;
+module/test labels describe proposed concerns and acceptance cases, not new
+module instructions or executed tests. Existing WRE/PatternMemory owners retain
+admission and verification authority. This is SPECIFIED_NOT_IMPLEMENTED evidence,
+with no ingestion, training, account action or runtime activation. Source review
+and JSON/schema/privacy/link checks cover the document contract only. Existing
+RSI gates and private Moshpit owners remain authoritative. C1/I3/D3/Impact3=10/P2.
+
 ## Open-PR reconciliation checkpoint — 2026-10-21
 
 WSP00/10/15/22/50/71/97. Reused the existing
