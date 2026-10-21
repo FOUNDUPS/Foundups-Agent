@@ -1,3 +1,15 @@
+## 2026-10-22 — Re-review unchanged generated hash metadata
+
+PR #2175 secret scan reported 38 existing manifest metadata findings after the
+required manifest refresh changed the whole-file digest. All 38 flagged lines
+are byte-identical to base `02d1c7c14c60487619287a9cb753ff3ddaa53c14`,
+contain only generated SHA256 member-hash metadata, and have exact reviewed
+fingerprints in that base ledger (36 generic-api-key, two discord-api-token).
+Appended only their 38 refreshed whole-file/rule/line fingerprints to the ledger;
+all prior entries remain in order. No scanner exclusions, runtime source, or
+manifest bytes changed. Validation checks all old reviews, unchanged lines,
+64-hex hash metadata, and exact fingerprint derivation; WSP 50/95/97.
+
 ## 2026-10-22 — Bind skill feedback to loaded instructions
 
 The coordinator now attaches its execution ID, the exact loaded UTF-8 skill
