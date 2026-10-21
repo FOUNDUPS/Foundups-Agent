@@ -1,5 +1,22 @@
 # RedDog Roadmap
 
+## Current PAL reconciliation — PR1638
+
+WSP15: C4/I4/D3/Impact4 = 15/P1. The existing local activity-ledger proposal is
+being reconciled against main `02d1c7c`; it is not a second memory store or an
+RSI completion claim. Scope: key initialization/recovery rejection, authenticated
+append, cooperating-process serialization, truthful write/context receipts,
+and the existing command/package closure. Canonical detail and measured results
+belong in [the existing integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
+
+Before promotion: independent source/behavior review, exact-head hosted checks,
+current-main reconciliation, squash/readback, and installed VS Code/profile
+SecretStorage and filesystem qualification. Cross-root key sharing, automatic
+stale-lock recovery, anti-rollback anchoring and multi-device sync are not proved
+by the local candidate. Existing blockchain/PF Mall and native RSI lanes retain
+their ownership. Historical version/release claims below keep their original
+scope.
+
 ## Status
 
 Phase: RedDog 0.4.141 held builder-child identity rebind candidate.

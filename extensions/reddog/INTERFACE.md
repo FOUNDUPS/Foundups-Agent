@@ -1,5 +1,41 @@
 # RedDog Interface
 
+## Principal Activity Ledger candidate — PR1638
+
+`principal_activity_extension_adapter` owns local capture, context and status
+through the existing Principal Memex command-registration seam. Data remains
+under `globalStorageUri/principal-activity-ledger`; the key remains in VS Code
+SecretStorage. These local commands grant no external disclosure or execution
+authority. Installed-host operation is `IMPLEMENTED_NOT_VALIDATED`.
+
+- `ensureKey(secretStorage, scopedRoot)` now requires an existing absolute
+  storage root. An unscoped call rejects. All existing ledger files under that
+  root must authenticate with the stored key; missing, malformed or wrong keys
+  fail closed. Different roots sharing a secret slot remain unqualified.
+- `openLedger(context, principal)` supplies that scope. Same-root key operations
+  serialize locally and coordinate with cooperating processes. A busy or
+  abandoned lock rejects; there is no automatic lock stealing.
+- `PrincipalActivityLedger.append(event)` authenticates existing records before
+  extending the chain. A receipt requires the complete record write and flush
+  to succeed. An exception may leave bytes and does not authorize replay.
+- `events()` authenticates payloads. `verifyChain()` checks envelope consistency
+  only; neither proves that a valid tail was not removed.
+- `context({project, contact, limit})` identifies commitments associated with
+  matching history and applies their latest state from the entire principal
+  ledger, in append order. Filtering/windowing cannot resurrect a completion;
+  a later reopen replaces it. Recent events and open commitments each retain
+  at most `limit` entries, clamped to 1–200.
+- `contextPacket()` additionally bounds serialized output and reports when
+  entries were removed. Its `event_count` describes the pre-byte-cap recent
+  event selection, not the number left after byte truncation.
+- `open_commitment_count` counts all relevant, currently open IDs before caps;
+  `open_commitments_truncated` reports loss from either the item or byte cap.
+  The broader `truncated` flag also includes commitment truncation. An existing
+  empty/blank/partial ledger rejects; an I/O failure does not authorize reset.
+
+See [architecture and recovery boundaries](docs/PRINCIPAL_ACTIVITY_LEDGER_ARCHITECTURE.md)
+and [the integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
+
 ## Model routing and evaluation fallback
 
 The extension consumes receipt-bound AI Gateway runtime bindings when

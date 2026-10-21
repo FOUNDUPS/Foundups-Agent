@@ -1,3 +1,21 @@
+## PR1638 local activity-ledger reconciliation — 2026-10-22
+
+Preserve original PR head `688eb097` on last verified main `02d1c7c` in an
+isolated lane. Repair reproduced key/I/O/context failures in existing PAL owners:
+scoped serialized key creation; cooperating-process lock; authenticated history
+before append; strict JSON; full write/flush/close before success; globally
+latest commitment state and truthful truncation. Existing ledger/adapter tests
+and adjacent registration/disclosure/package manifest commands exit0 locally
+on Windows Node24.11.1. These are synthetic fixtures, not installed-host proof.
+
+Repair the full-package expected counts 67/66 to 69/68 for exactly the two PAL
+modules; preserve file membership, LF policy and one MiB limit. Add focused
+Linux/Windows CI coverage and reconcile existing interface/architecture/test
+docs. Current evidence and remaining review/publication/installed-host gates:
+`docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md`. Remote connectivity is
+unavailable; no push, merge, hosted CI, installation or native RSI claim.
+WSP00/5/6/10/11/15/22/50/77/84/97. Blockchain/PF Mall work remains separate.
+
 ## Operations policy manifest binding — 2026-10-21
 
 PR2150 preserves policy1.1.1 while synchronizing its existing registry/runtime

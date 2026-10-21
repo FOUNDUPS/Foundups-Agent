@@ -9,6 +9,30 @@ on:
     types: [opened, synchronize, reopened, edited, ready_for_review]
 
 jobs:
+  principal-activity-ledger:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.11.1'
+      - name: Verify isolated ledger, key lifecycle and existing disclosure boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node extensions/reddog/tests/test_principal_activity_ledger.js
+          node extensions/reddog/tests/test_principal_activity_extension_adapter.js
+          node extensions/reddog/tests/test_principal_activity_runtime_registration.js
+          node extensions/reddog/tests/test_principal_memex_disclosure_source.js
+          node extensions/reddog/tests/test_package_manifest.js
+
   youtube-selected-batch:
     runs-on: ubuntu-latest
     timeout-minutes: 10

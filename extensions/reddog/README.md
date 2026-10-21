@@ -1,5 +1,13 @@
 # RedDog
 
+The PR1638 local activity candidate adds explicit capture, context and status
+commands through the existing Principal Memex registration. It is not automatic
+conversation ingestion or permission to send personal context to a model.
+See [PAL interfaces](INTERFACE.md#principal-activity-ledger-candidate--pr1638)
+and [qualification/recovery limits](docs/PRINCIPAL_ACTIVITY_LEDGER_ARCHITECTURE.md).
+Installed-host qualification remains pending; the historical release statement
+below does not qualify the new ledger.
+
 Version: 0.4.141
 0.4.141 first binds the corrected fast-RedDog/deep-0102 identity boundary while preserving the 0.4.140 builder release: 1,398 backend files at `sha256:700d50f84e12...86e09ed` with one evidence-only held child. It changes no extension effect authority.
 

@@ -1,3 +1,43 @@
+## PR1638 PAL pre-test inventory — 2026-10-22
+
+Recorded before repair test authoring in the isolated PR1638 worktree. Source
+baseline: original `688eb097724ece28aca20e2e3477ca4c7aa9236c` merged onto
+`02d1c7c14c60487619287a9cb753ff3ddaa53c14`; this is local preparation, not native
+WRE execution or production activity/key access. WSP00/15/22/50/84/97 apply.
+
+| Existing test | Coverage and reuse decision |
+| --- | --- |
+| `test_principal_activity_ledger.js` | Temporary ledger, encrypted payload, principal path separation, context, and tampering. Original line19 does not parse. Repair and extend this file for wrong-key append, complete/short/failed writes, cooperating child-process contention, stale lock, and latest commitment status before filtering. |
+| `test_principal_activity_extension_adapter.js` | Fake SecretStorage, temporary storage, sequential key reuse, principal routing, bounded context. Extend with first-key concurrency, missing/wrong key beside existing data, root/key scope, rejected store/read, and truthful truncation. No real key store. |
+| `test_principal_activity_runtime_registration.js` | Static source/package command-registration assertions. Retain unchanged; no activated VS Code host proof. |
+| `test_principal_memex_disclosure_source.js` | Adjacent exact-shape/one-use SecretStorage and serialized consumption coverage. Reuse as a regression check; its process-local serialization is a pattern, not a cross-process lock. |
+| `test_package_manifest.js`, `test_package_surface.js`, `reddog_package_surface_contract.js`, `test_reddog_test_tiering.js` | Existing strict package/runtime membership and tier contracts remain owners. Root reproduced the original PR's missed 67/66 full-package counts after two runtime additions; root will repair these counts while retaining caps/EOL/allowlists and perform final combined-tree validation. |
+
+Read `tests/README.md`, this inventory, existing PAL tests, adjacent disclosure
+tests, and the source patterns before changes. Extend the two existing PAL test
+files; do not add a new test framework/store. The exact-head read-only baseline
+has a ledger syntax failure, passing adapter/static-registration tests, and
+separate synthetic failure receipts under external `refresh/1638-qualification`.
+Repair execution: both existing PAL files exit0 on Windows Node v24.11.1:
+`node tests/test_principal_activity_ledger.js` and
+`node tests/test_principal_activity_extension_adapter.js` (from the extension
+directory). The original contracts remain, including the repaired syntax line.
+Added fixtures cover eight concurrent first-key and append calls; independent
+child-process lock contention; scoped/missing/malformed/wrong keys across
+principals; empty/partial files; invalid JSON values; short/invalid/failed writes,
+flush/close failure; lock stat/close/replacement failure; and latest commitment
+state before scope/window limits. Context fixtures cover reopened/duplicate
+IDs, count/truncation metadata and final serialized-byte boundaries. The four
+source/test files are LF-only; diff-check passes. Evidence and source hashes:
+external `refresh/1638-qualification/repair-{ledger,adapter}-final.log` and
+`source-freeze.json`. Root owns package and combined-tree checks separately.
+
+No real SecretStorage, personal data, network, model, or installed extension was
+used. These are local fixture results, not installed-host qualification.
+Stale-lock recovery, power-loss guarantees, Windows ACLs, cross-root SecretStorage
+scope, hostile filesystem behavior and valid-tail rollback detection remain
+unqualified; failures can leave bytes or a lock for explicit inspection.
+
 ## PR2150 policy manifest compatibility — 2026-10-21
 
 Reused `test_backend_compatibility_contract.js`,
