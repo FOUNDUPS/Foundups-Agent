@@ -1183,7 +1183,7 @@ from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
 
 #### FastMCP lifecycle API
 
-The exact dependency contract is FastMCP3.2.0/MCP1.28.1/Pydantic2.12.3/
+The exact dependency contract is FastMCP3.2.0/MCP1.30.0/Pydantic2.12.3/
 Uvicorn0.38.0. On Windows, `_mcp_child_env` supplies the selected site-packages
 path from the resolved venv; an ambient `FOUNDUPS_MCP_SITE_PACKAGES` value is
 not inherited. The private command builder accepts only the existing server

@@ -42,7 +42,11 @@ class FixtureElement {
   set className(value) { this.classes = new Set(value.split(/\s+/)); }
   get className() { return [...this.classes].join(' '); }
   set textContent(value) { this._html = htmlEscape(value); }
-  get textContent() { return decode((this._html || '').replace(/<[^>]*>/g, '')); }
+  get textContent() {
+    // This fixture only reads text from leaf elements; it is not an HTML sanitizer.
+    assert.equal(this.children.length, 0, 'textContent fixture requires a leaf element');
+    return decode(this._html || '');
+  }
   get innerHTML() { return this._html || ''; }
   set innerHTML(value) {
     this._html = value;
@@ -276,11 +280,19 @@ for (const source_url of ['javascript:alert(1)', 'data:text/html,test', 'http://
   assert.match(detail.innerHTML, /link is unavailable/);
   sb.mallPlanes.closeView();
 }
+for (const [imageTag, scriptTag] of [['img', 'script'], ['IMG', 'SCRIPT'], ['ImG', 'ScRiPt']]) {
+  sb.mallTileField.updateCatalog([{ ...first, name: `<${imageTag} src=x onerror=alert(1)>`, summary: `<${scriptTag} data-x="1">alert(1)</${scriptTag}>` }]);
+  assert.doesNotMatch(field.innerHTML, /<(?:img|script)\b/i);
+  tiles()[0].fire('click');
+  assert.doesNotMatch(detail.innerHTML, /<(?:img|script)\b/i);
+  assert.ok(detail.innerHTML.includes(`&lt;${scriptTag}`));
+  sb.mallPlanes.closeView();
+}
 const hostile = { ...first, name: 'House"><img src=x onerror=alert(1)>', summary: '<script>alert(1)</script>', listing_id: 'quoted"listing', source_url: 'https://example.com/house?a=1&b=2' };
 sb.mallTileField.updateCatalog([hostile]);
-assert.doesNotMatch(field.innerHTML, /<img/);
+assert.doesNotMatch(field.innerHTML, /<img\b/i);
 tiles()[0].fire('click');
-assert.doesNotMatch(detail.innerHTML, /<script>|<img/);
+assert.doesNotMatch(detail.innerHTML, /<(?:script|img)\b/i);
 assert.match(detail.innerHTML, /&lt;script&gt;/);
 assert.match(detail.innerHTML, /a=1&amp;b=2/);
 const sourceLink = detail.querySelectorAll('a[href]')[0];
@@ -538,7 +550,7 @@ sb.mallTileField.updateCatalog([first, { ...first }, second], { groups: [
 assert.equal(field.querySelectorAll('.mall-field-group').length, 1);
 assert.equal(groupRow(dangerousKey).dataset.groupKey, dangerousKey);
 assert.deepEqual(tiles().map(tile => tile.dataset.listingId), [second.listing_id], 'ambiguous, duplicate and missing memberships are excluded');
-assert.doesNotMatch(field.innerHTML, /<img|<script>/);
+assert.doesNotMatch(field.innerHTML, /<(?:img|script)\b/i);
 assert.match(field.innerHTML, /&lt;img/);
 assert.equal(listenerCounts(), listenersBefore, 'group changes install no extra page listeners');
 

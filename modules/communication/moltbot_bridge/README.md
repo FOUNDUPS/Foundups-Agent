@@ -1,3 +1,22 @@
+## Installed HIGH connection in progress — 2026-10-20
+
+The v13 candidate supplies protected, current-owner consensus nonces using the
+existing atomic MAC state and SQLite high-water store. It preserves legacy owner
+versions and the LOW service. See the [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+Connected 437/3 platform skips and independent 21 controls pass. The installed HIGH
+issuer join remains pending; a
+callable adapter is not native author admission or retained RSI benefit.
+
+## Parent-consent prerequisite — 2026-10-19
+
+PR2163 closed policy-bound parent consent on main824d0f71. The current v12/v3
+candidate composes parent/reviewer/model evidence through effect, signer and
+current-use owners. [Contract and limits](INTERFACE.md#exact-parent-consent-connection--2026-10-19),
+[test evidence](tests/TestModLog.md#parent-consensus-connection--2026-10-20) and
+[RSI sequencing](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+The candidate is not installed HIGH admission; protected nonce/custody and genuine
+work/model/reviewer/budget inputs remain separate gates. LOW stays LOW.
+
 ## Issuer-only root LOAD — 2026-10-15
 
 [LOAD-only identity, permission fencing and custody requirements](INTERFACE.md#issuer-only-root-load--2026-10-15).

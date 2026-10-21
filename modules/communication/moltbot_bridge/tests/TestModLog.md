@@ -1,3 +1,317 @@
+## Consensus nonce publication compatibility repair — 2026-10-20
+
+Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
+the modern-owner version predicate an always-truthy tuple. Legacy owners
+entered per-selection validation. The unchanged 10-case model-pair family
+reproduces seven failures; removing the tuple tail makes all 10 pass.
+The existing signed-model gate now covers both v12 and complete v13 owners.
+The full hosted-startup selection runs locally: 901 passed, 5 platform skips, zero failures/errors.
+Source hashes remain stable.
+Independent review passes three legacy/v12/v13 behavior controls and
+verifies the one-source-digest change with unchanged pins policy.
+Regenerated digest pins retain the 1,449-file inventory and unchanged limits.
+Both generators check current, 36 binding tests pass without skips, and
+the three backend compatibility Node checks exit zero.
+These synthetic fixture checks
+do not establish installed HIGH authority or native worker execution.
+WSP00/5/6/10/15/22/50/62/71/97. Exact receipts and commands are in dispatch.
+
+## Protected consensus nonce prerequisite — 2026-10-20
+
+Base 51f9edce; WSP00/5/6/11/15/22/62/71/77/97. Connected 437 passed, 3 platform
+skips, zero failures/errors in 351.02s with 26 hashes stable; independent 21 passed
+on the same source. Real signed policy/model files, MAC/SQLite transactions,
+restart/replay/concurrency, corruption, withdrawal and owned rollback are tested;
+OS/current-generation/credential seams are synthetic. Original fixture failures
+remain in the author receipt. Counts overlap and are not additive unique tests.
+
+Post-run reviewed extraction changes two files only: identical helper/rest ASTs,
+other 24 hashes unchanged, two cold import orders pass. Loader 658/owner inputs 263 remain
+below 675. Consensus structure 7 passes; broader atomic structure 2 fails unchanged
+baseline startup tests (file 712>675 and one function 89>60). No cap/exemption was
+changed. Final freeze and exact command/JUnit/skip details are in
+[dispatch](../../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+Six nonce suites join existing startup CI with explicit repository root.
+Generated inventory 1,449 includes only the custody leaf; nonce authority/current
+owner are not yet installed runtime. Registry 1,737/270 adds only six suites with
+54 shard moves and no classification/quarantine changes. Both canonical generator
+checks pass; 36 manifest/registry tests pass with zero skips in 90.295s, including
+the staged-index check. Node contract/preflight/async commands each exit 0.
+The binding receipt records exact commands and stable final 26 hashes. Installed
+HIGH/native author admission is not established.
+
+## Parent-consensus publication structural repair — 2026-10-20
+
+Hosted CI39281556290: signing composition1,467 passed/1 failed/3 skipped; failure
+was the682-line owner loader exceeding675. The later startup step was skipped.
+Local single-case red reproduces the exact bound. Focused six-suite rerun passes
+249/2 platform skips in288.54s. All8 manifest tests pass in87.22s; three JS
+compatibility commands exit0. Unchanged helper extraction
+has independent57 differential cases, two cold imports and AST equivalence;
+no guard increase or validation removal. Exact follow-up runs and source binding
+are recorded in the canonical dispatch evidence. WSP00/5/6/22/62/71/97.
+
+## Parent-consensus connection — 2026-10-20
+
+Base5862eea0; WSP00/5/6/11/15/22/62/77/97. Independent signed-model/current-use
+20 cases and Linux RPC/nonce17 cases pass with zero failures/errors/skips against
+44 frozen files. The latter includes real process/lock controls; both retain
+synthetic owner/admission seams. Independent red tests exposed delayed generation
+expiry and clock rollback; final controls also cover shorter peer expiry.
+Final59-suite Windows run:1,545 passed/22 platform skips, zero failures/errors in
+533.14s; all45 tested hashes stable. Original1,539/6/22 remains failure evidence.
+One stale negative v3 fixture became v4. Five startup failures were test isolation:
+-c NUL without an explicit root collapsed module fixture boundaries. The same
+59-file collection/five selected tests passes with --rootdir; CI now pins root too.
+Dedicated root/Linux collection refused Windows and executed zero tests. Final
+EOF-only cleanup removes four bytes with identical AST; its receipt binds the
+post-format source separately. No semantic production change followed the run.
+
+Manifest/registry checks:35 passed; staged-index test initially failed because the
+new generated manifest was not yet staged, then passed after staging. JS exact
+cap+1 fixture initially retained1442; corrected to1449 for the generated1448-file
+inventory. Contract, preflight and async commands then exit0. Runtime limits are
+exact inventory bounds, not relaxed budgets; registry1731 tests/270 quarantined.
+After EOF-only normalization, all8 manifest tests pass in71.50s and all three JS
+commands exit0 again against the final digest. Registry28 cases already passed.
+Independent receipts, commands, source hashes and preserved failures are linked in
+[dispatch](../../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+No native author, durable crash recovery or retained gain is established.
+
+## Parent-consent connection — 2026-10-19
+
+Base58f4599d3f89620b0c12178a027a4bfbb8795ca1; WSP00/5/6/11/15/22/77/97.
+Focused96 cases passed; the connected18-suite run includes those cases and
+passes512 with2 skips, no failures/errors. Exact invocation and18 frozen source
+hashes are in the linked dispatch receipt. Both skips are existing Windows
+limitations: v10 socket-symlink ancestry and real Unix descriptor exchange.
+Independent review passes37 cases without skips (34 parent controls and3 actual
+v11 owner/model snapshot controls); do not add overlapping suites as unique cases.
+
+Tests exercise real Ed25519 signatures and artifact IO with synthetic OS owner
+and generation-lease seams. Coverage includes policy substitution, invalid types,
+wrong parent/generation/issuer/beneficiary, registration withdrawal/rotation,
+expiry, clock rollback, final input/principal/owner drift and failed lease exit.
+The legacy policy-A to policy-B counterexample reproduces the draft defect;
+distinct policy-bound evidence now rejects at the legacy consumer. Source hashes
+remain identical across author and independent runs. Initial missing-API failure
+and intermediate fixture failures are preserved in external evidence.
+
+Manifest generator8 cases passed. Backend contract, preflight and async commands
+are recorded separately in publication evidence; runtime cap grows by exactly
+the two new leaves and still rejects cap+1. Native authority, provider execution,
+retained benefit and deployment are outside this validation scope.
+
+## V31 factory localization and v32 codec repair — 2026-10-19
+
+Follow-up v33 retains accepted signing but handshake failure. Target diagnostic
+setup fails before any callback because its class check misses Protocol inheritance.
+Candidate observer controls:24 author,4 independent held-outs, plus actual installed
+import/setup comparison. Original harness errors are retained; no native cause is
+inferred. Separate test-first source repair reproduces config30 falling back to5,
+then forwards the authenticated setting through the existing client supply.
+Connected Windows suite166 passed/2 Linux-dependent skips, including invalid
+numeric/bool bounds and late/failed RPC rejection at5 and30. These test results do
+not qualify the changed installed runtime or establish native handshake success.
+Independent Linux validation73 passed with no failures/skips, including the
+Windows-skipped process-lock/AF_UNIX and symlink controls. Existing signing CI
+now explicitly includes both changed suites; no new workflow or relaxed gate.
+
+Exact source294195cdb independently passes installed qualification for both
+confined profiles,2,683 files/358 directories and four absent-owner entrypoints.
+Fresh v34 install37.769s/revocation2.046s pass; handshake exits2 after93.705s,
+full133.632s. Target observer enabled28callbacks, issuer41, caps not exhausted.
+Issuer inner/outer and target-client return accepted; issuer/target exit0.
+Requester rejects RESPONSE_INVALID. All7 services independently absent,
+observation/cleanup complete. This is a controlled failure, not author execution.
+Root handled10 counts completed connection handlers, including rejections; it
+does not prove10 successful LOADs or a causal root failure.
+
+V35 install/revocation pass, handshake2/94.125s, full135.297s. Exact factory-result
+type/ok rejection at152 is observed; an early exception-branch interpretation was
+corrected (catch is150). All7 units absent and cleanup complete. Public-input
+offline controls reproduce profile60 rejecting remaining299/200/61 from custody300;
+they do not establish the actual v35 provider code or native clock.
+
+V36 install0/39.146s, revocation0/2.076s and handshake0/94.111s; total135.444s.
+Independent archival verification checks both Ed25519 signatures and exact
+request/response binding. Target factory returns ok=true/NONE; target, issuer and
+requester exit0. Root exit2 leaves clean_service_closure=false; exact root cause
+unknown. All7 units absent, four invocations bound, no cleanup errors. Target
+profile ceiling60 becomes validated args.ttl300; absolute expiry/signed30 stay
+unchanged. This synthetic success does not establish real admission or author gain.
+
+PR2162 CI39257095414 failed collection in the Linux reviewer runner: timeout
+parametrization changed three schema-only IDs into nine cases. The runner now
+selects all three timeout options across all three schemas, retaining the five
+reviewer cases and exact expected count/set checks. Old IDs reproduce exit4; all
+nine corrected transport IDs collect independently. Local Linux execution ran no
+intended cases: setup limitations were retained, then pytest collection failed on
+`/mnt/c/hiberfil.sys` with PermissionError. Source hashes stayed stable and the
+audit guard recorded no blocked operations. Full 14-case remote CI is still
+required; no local execution pass or guard relaxation is claimed. WSP 5/10/22/97.
+
+V31 exact local returns identify factory rejection at line192. Canonical audit
+decoder controls independently reject the preparer's prior plain hex. V32 repair
+has nine codec controls (six author plus three held-out); final-byte author
+package controls12 and independent package controls6 are overlapping reruns,
+not additive unique coverage. The independent harness's initial pin-set mistake
+is preserved and corrected without changing the candidate.
+Fresh v32 install39.025s/revocation2.132s pass; handshake2/94.009s, full135.281s.
+Inner return542/193 and outer348/175 are accepted; later sendall239 C_RAISE.
+Requester exits13.700884s before that send failure. No current timeout/errno is
+observed. Exact25 sources/12 helper bindings/9 pins/4 invocations verified; all
+seven units absent and cleanup complete. Source/runtime/authority/deadlines
+unchanged. [Receipts and limits](../../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+## Qualified ec7a runtime and v29/v30 evidence — 2026-10-19
+
+Independent qualification still binds2,683 files/358 directories and both profiles.
+Historical v28 and ABBA timings remain in the current dispatch. V29 records30
+local callbacks, exact rejected backend status and subsequent sendall C_RAISE;
+no exception type or exact sign-return time is observed. All seven units are
+independently absent;25 sources/12 helper outputs/9 pins/4 invocations verified.
+V29 observer acceptance includes26 actual CPython controls and4 package controls;
+the descriptor-dispatch finding and failed test harness remain preserved.
+V30 lifecycle package independent review passes41 grouped offline checks, including
+21 unchanged-observer CPython reruns. Native v30 installation39.353s/revocation2.447s
+pass; handshake exits2 in98.031s (full139.941s). Observation and cleanup complete
+without timeout/reset error; target launcher0 before/after, all seven units absent.
+The unchanged observer again records30 callbacks, backend denial then sendall239
+C_RAISE. Exact25 sources/12 outputs/9 pins/6 refreshed files/4 invocations verified.
+No admission, retained gain or deadline/authority relaxation is established.
+[Exact receipts](../../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+Prior checkpoints below retain what was known then.
+
+## Native qualification and requester evidence — 2026-10-19
+
+V27 disables issuer/target observers with 5 author and 12 independent offline
+controls. Native installation/revocation pass; requester rejects, observation
+completion is false and cleanup-loop completion true. Independent review binds
+25 sources, 9 pins, 6 helpers, 4 invocations and all seven units absent. Issuer
+elapsed/CPU 70.046140s/66.242630s versus v26 75.128049s/71.128310s is a single
+different-boot pair, not causal gain. Root elapsed 101.027161s; v27 captures no
+inner socket operation. Receipt/hash are in the existing dispatch checkpoint.
+Containment candidate connected validation: 111 passed/8 Windows skips. Native
+qualification and full native cost measurement remain pending; no admission.
+
+V25 adds only the exact socket function to the existing RAISE selector. Author
+actual-event test covers three timeout sites; separate independent actual-event
+control covers recv OSError and excluded pairs. Fresh native execution observes
+client304/offset434 recv TimeoutError then unwind628, accepted=false exact
+SigningResponse/CONNECT_FAILED, and issuer root-client412 response-size OSError.
+Zero versus over-limit bytes and causal ordering remain unknown. Installation
+and revocation pass; requester exits2 after101.505s post-readiness. Independent
+receipt68b4c15b verifies23 exact sources,8 offsets,13 issuer frames,9 pins,
+6 applied/archived files,4 invocation pairs and all7 units absent. This remains
+a failed synthetic handshake; no native author or retained benefit is claimed.
+
+Exact head1e203d5; identical merged treec7045432 atbb9d3f802. All 19 recorded
+exact-head check runs passed (12 distinct check names), as did main CI39222572582
+and CodeQL39222573026. This is publication
+validation, not a production RSI proof. Existing external qualification owner
+`next-startup/installed-execution-qualification/qualify_all_role_runtime.py`
+ran deny/Unix profiles on fresh20261019-1e203d5de-all-role-v1: both exit0.
+Independent reopen verifies2683 files/358 directories,1246 Git sources,1437 runtime
+files,408 inventory-bound loaded modules, two guards and four absent-owner mains
+returning2 in each profile. Optional imports and writable API/scratch mounts remain
+explicit limits. No credentials, work authority or real author execution proved.
+
+V21 refresh controls:14 refresh,18 runner,6 binding and4 native adapter pass.
+Independent6 binding and8 path-predicate controls pass. Counts overlap; do not sum.
+Earlier Windows POSIX-path error, native stale fixture-date error and missing
+archive-harness input are preserved before successful corrected reruns. Four
+generation receipt checks pass and a wrong digest rejects in a private namespace.
+
+Actual existing runner `run_full_fixture.py --execute-fresh-v21`, in a private
+mount namespace, passes NTP readiness30.099512s, installation and revocation;
+handshake exits2 after101.6s post-readiness. Root/issuer/target reach readiness;
+target handles1/exits0, requester exits2 with backend/runtime rejection. The
+underlying target exception is not captured. Independent source binding covers19
+relevant files. All7 units absent afterward; retain target reset-failed_exit_1 and
+later root timeout rather than describing launcher closure as successful.
+
+V22 target diagnostics passed40 independent offline controls and4 native adapter
+controls, but the actual run exposed a coverage gap:4096 routine RAISE callbacks
+exhausted the monitor before the rejection's cause. The sole retained ValueError
+is handled containment control flow. Installation/revocation pass; handshake2
+after101.628s; no author execution. Independent review verifies17 relevant source
+files,9 helper pins,6 refreshed helper bytes, four invocation bindings and current
+absence of all7 owned units. Offline controls did not establish useful native
+diagnostic coverage; add a real-interpreter noise-flood control before retrying.
+
+V23 survives the native noise but drops an unlined context-manager unwind.
+V24 retains that offset and one fixed-enum client return. Author53 checks pass
+(22 monitor,3 real-event,7 client-event,18 runner,3 Windows-safe adapter);
+POSIX-only adapter case was excluded, not run on Windows. Separate independent
+real CPython3.12.10 held-outs pass7 cases including31 enum subcases, reusing the
+author's descriptor/import/connector fixture. Prior coverage overlaps.
+An initial independent AST-harness lookup error is retained before correction.
+The exact six-file refresh/nine pins and31 public enums were independently checked.
+
+`run_full_fixture.py --execute-fresh-v24` passes readiness30.067556s and
+installation/revocation, then rejects after100.683s post-readiness. It captures
+TimeoutError at socket-client unwind offset628/line null and a valid response
+type with accepted=false/CONNECT_FAILED. This is not the originating socket
+operation. Monitor7 scoped/185771 total callbacks, no cap exhaustion. Independent
+review binds17 exact Git/descriptor sources, four InvocationIDs, six applied and
+archived helper files, nine pins and all7 absent units. Offset inspection using
+hostCPython3.12.3 matches all7 locations but is not identical compiler provenance;
+the runtime's own co_lines membership remains the location source.
+
+The existing credential-free qualification owner separately measured two full
+runtime guards at3.768633s and2.705737s, with both passing and its unit absent.
+No target monitor or issuer request ran in that observation. It establishes
+component cost only; native diagnostic overhead and causal request latency remain
+unmeasured. No production guards, timeouts or authority changed.
+
+Separate clock experiment:1800 guest/180 host samples, service restored;
+predeclared final60s stability FAIL54.391405ms>50ms. No threshold or clock change.
+Exact receipt paths/hashes and native limits are in the existing dispatch section
+`native-requester-rejection-and-source-publication--2026-10-19`.
+
+## Installed descriptor validation cost — 2026-10-16
+
+Author focused native suite:128 passed, zero failures/skips,7.51s. Paired public
+descriptor benchmark: baseline0.181579s mean, candidate0.101624s mean across3pairs;
+canonical output unchanged. This measures pure validation only. Source/test hashes
+stable through execution. Receipt under existing E15 next-startup evidence root:
+`native-installation-inputs/descriptor-path-cost-review/author-review-receipt.json`
+SHA256 `6c8bb1c86dd7be7ef326abbedf42f5427991d6a0622bd22cd435af237d144470`.
+Independent275 differential controls matched exact baseline6fb93580:88 accepted,
+187 rejected, with identical canonical serialization/digests and detached output.
+Only _directories/_sources AST changed. Independent receipt:
+`native-installation-inputs/descriptor-path-cost-review/independent-differential-receipt.json`
+SHA256 `e31c232cf214449f3febf9a28f090495aed12bd5d4faabbd5da00943f4dc7d4d`.
+Connected selection:217 distinct cases eventually passed (55 root guard,161
+ordinary,1 targeted socket rerun). Initial ready.wait(5) failure is preserved;
+short temporary path rerun passed with observed68-byte socket path. Original
+110-byte path is reconstructed, not a captured first exception. Two collection
+harness failures are also preserved. Source hashes remained stable. Receipt:
+`native-installation-inputs/descriptor-path-cost-review/connected-review-receipt.json`
+SHA256 `c1e12eab0efc98932380c36cb3f594f18c020d0c1d689397b810f9777f765573`.
+Counts overlap focused tests; do not sum. Eight backend-manifest tests passed;
+three extension compatibility commands passed; registry current1719/quarantined270.
+The initially attempted root scripts/generate_test_registry.py path was absent;
+the existing wre_core/scripts owner supplied the successful registry check.
+Reconciled onto main ed6da441f on2026-10-19: all13 recorded connected source/test
+hashes remain unchanged; preserve the historical run rather than claim a fresh
+217-case run. Both main log histories and905 reviewed security fingerprints
+remain. Regenerated backend manifest retains main1439 runtime members; both
+pins updated. Extension compatibility commands passed; registry current1722,
+quarantined270. Reconciled manifest suite:8 passed in71.54s; receipt
+`next-startup/descriptor-path-publication-review/reconciled-manifest-tests.xml`.
+No native runtime substitution or admission proof.
+
+## AntifaFM campaign adapter — 2026-10-18
+
+Preserved five research/parser cases and added three real AntifaFM route cases:
+no-effect default preview, unsupported targeting key, and malformed/duplicate
+tokens. The connected four-file selection passed 86 tests and 32 subtests using
+importlib collection with conftest/plugin autoload disabled. Exact command and
+scope live in social_media_orchestrator/tests/README.md and TestModLog.md.
+No provider, DAE loop, model inference or external message was run here.
+
 ## Enrollment artifact bounds — 2026-10-16
 
 Same-head CI38796717521 passed; repeat38797430079 exposed a fixture clock rollover

@@ -1,5 +1,13 @@
 # Member Area Module Change Log
 
+## 2026-10-21 — Repair security test fixtures
+
+Strengthen existing hostile HTML assertions for mixed tag case and remove
+unneeded regex tag stripping from the bounded DOM fixture. Preserve runtime
+security assertions and scanner gates. Reconcile concurrent main's reviewed
+security evidence and regenerate the canonical test registry. WSP 22/50/97;
+research, scope and validation are recorded in tests/TestModLog.md.
+
 ## 2026-10-18 — Move2Japan selects houses inside the actual member shell
 
 Correct the prior separate-page composition. The registered product opens

@@ -20,7 +20,16 @@ from modules.communication.moltbot_bridge.tests import test_reddog_signer_indepe
 from modules.communication.moltbot_bridge.tests import test_reddog_signer_mutual_peer_handshake as handshake
 
 
-def _case(tmp_path, monkeypatch):
+def _case(tmp_path, monkeypatch, *, timeout_s=None):
+    if timeout_s is not None:
+        from modules.communication.moltbot_bridge.src import reddog_signer_socket_service_config_composition as composition
+        compose = composition.compose_initial_handshake_service_config
+
+        def configured(**kwargs):
+            return compose(**dict(kwargs, timeout_s=timeout_s))
+
+        # Set the public input before the fixture binds/signs its configuration.
+        monkeypatch.setattr(composition, "compose_initial_handshake_service_config", configured)
     case = fixture._admitted_initial_handshake_case(tmp_path, monkeypatch)
     case.client = provider_fixture._GrantClient(case.values["grant_private"])
     case.supply_calls = []
@@ -156,8 +165,9 @@ def test_wrong_request_or_peer_rejected_before_client_or_secret(tmp_path, monkey
 
 
 @pytest.mark.parametrize("failure", ["rpc", "signature", "audit", "request-drift", "expiry", "owner-drift"])
-def test_failed_or_late_rpc_never_falls_back_to_target_keys(tmp_path, monkeypatch, failure):
-    case = _case(tmp_path, monkeypatch)
+@pytest.mark.parametrize("timeout_s", [5, 30])
+def test_failed_or_late_rpc_never_falls_back_to_target_keys(tmp_path, monkeypatch, failure, timeout_s):
+    case = _case(tmp_path, monkeypatch, timeout_s=timeout_s)
 
     def action(backend):
         if failure == "rpc":
@@ -186,11 +196,12 @@ def test_failed_or_late_rpc_never_falls_back_to_target_keys(tmp_path, monkeypatc
 
 
 @pytest.mark.parametrize("change", ["valid", "wrong-owner", "client-rejected"])
-def test_authenticated_client_supply_is_used_with_current_policy(tmp_path, monkeypatch, change):
+@pytest.mark.parametrize("timeout_s", [0.25, 5, 15.0, 30])
+def test_authenticated_client_supply_is_used_with_current_policy(tmp_path, monkeypatch, change, timeout_s):
     from modules.communication.moltbot_bridge.src import reddog_signer_independent_grant_authority_client_supply as supply
     from modules.communication.moltbot_bridge.src import reddog_signer_system_service_manifest_selection_loader as loader
     from modules.communication.moltbot_bridge.tests import test_reddog_signer_independent_grant_authority_client_supply as supply_fixture
-    case = _case(tmp_path, monkeypatch)
+    case = _case(tmp_path, monkeypatch, timeout_s=timeout_s)
     roots = tmp_path / "grant-owner-metadata"
     roots.mkdir()
     owner = supply_fixture._owner(roots, config_id=case.owner.policy["owner_config_id"])
@@ -215,6 +226,7 @@ def test_authenticated_client_supply_is_used_with_current_policy(tmp_path, monke
         assert len(case.resolver.calls) == (2 if change == "valid" else 0)
         assert len(built) == (0 if change == "wrong-owner" else 1)
         if built:
+            assert built[0].get("timeout_s", 5.0) == timeout_s
             assert built[0]["expected_server_uid"] == 1202
             assert built[0]["expected_server_gid"] == 1203
             assert str(built[0]["socket_path"]) == owner["independent_grant_authority"]["authority_socket_path"]

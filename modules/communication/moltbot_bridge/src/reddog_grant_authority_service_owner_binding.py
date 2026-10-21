@@ -46,14 +46,14 @@ def grant_authority_owner_runtime_root(
         SCHEMA_VERSION_V4,
         SCHEMA_VERSION_V5,
         SCHEMA_VERSION_V6,
-        SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10,
+        SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13,
         _load_owner_config,
     )
 
     path = Path(owner_config_path).resolve()
     owner = _load_owner_config(path, repo=repo_root)
     if (
-        owner.get("schema_version") not in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10}
+        owner.get("schema_version") not in {SCHEMA_VERSION_V3, SCHEMA_VERSION_V4, SCHEMA_VERSION_V5, SCHEMA_VERSION_V6, SCHEMA_VERSION_V7, SCHEMA_VERSION_V8, SCHEMA_VERSION_V9, SCHEMA_VERSION_V10, SCHEMA_VERSION_V11, SCHEMA_VERSION_V12, SCHEMA_VERSION_V13}
         or owner.get("config_id") != expected_owner_config_id
     ):
         raise RuntimeArtifactManifestError(

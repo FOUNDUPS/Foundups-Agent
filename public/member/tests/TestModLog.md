@@ -1,3 +1,42 @@
+## 2026-10-21 | CodeQL fixture repair and main reconciliation
+
+Existing property VM now rejects raw script/image markup case-insensitively and
+exercises lower-, upper- and mixed-case payloads through the real field/detail
+owners. Leaf text reads decode escaped text without regex tag stripping; the
+fixture explicitly rejects unsupported non-leaf reads. No production sanitizer,
+scanner policy or suppression changed. The existing domain alias test extracts
+its trusted inline script case-insensitively with tag boundaries.
+
+Research: CodeQL `js/bad-tag-filter` and
+`js/incomplete-multi-character-sanitization` query documentation; existing
+module test inventories and the shared field/plane implementations.
+WSP 00 canonical attempt failed because torch is absent; tracker check passes,
+but no detector witness is claimed. WSP 97 lexical retrieval is bound to
+`c1a4a7eb16afc4f0e51d20797ad3ac88589a7812`, freshness UNKNOWN/index gap true.
+Missing semantic retrieval was supplemented by exact owner reads.
+
+WSP 15 allocation: C2/I4/D4/Impact3 = 13 (P1), bounded CI repair. Execution
+plane is repository maintenance; no WRE service or runtime activation.
+Verification starts with both existing Node fixtures, expands to shared member,
+projector, registry and security-gate tests, then requires exact-head CI.
+Main `1c277a3c0d0524e450ed1dd56d2373480d640ebd` conflicts were limited to
+security records and the generated test registry. Preserve the union of reviewed
+bindings; regenerate the registry with its existing owner. No new exception.
+Deployment and browser interaction remain separate, unverified gates.
+
+Integrated replay (Python 3.12, pytest 9.1.1, plugin auto-load disabled,
+`--import-mode=importlib`): **1673 passed, 3 failed, 0 skipped** across member,
+property wrapper, projector, registry-schema and security-gate suites. The three
+failure IDs are `TestFoundUpHandoff::test_open_link_exists`,
+`TestFoundUpHandoff::test_routing_prefix_surfaced` and
+`TestGestureHints::test_hint_items_present` in `test_navigation_planes.py`.
+All three also fail on exact main `1c277a3c` in the same environment (41 other
+navigation checks pass). No xfail/exclusion added. Initial collection without
+importlib collided on test package names; initial dependency-limited replay had
+missing-jsonschema failures/skips. Installing the declared test dependency and
+using isolated imports removed those coverage gaps. Registry: 1740 tracked test
+files, 270 quarantined; these are inventory counts, not executed test counts.
+
 ## 2026-10-18 | Recovered actual Mall product integration
 
 Fresh final recovered-source command:

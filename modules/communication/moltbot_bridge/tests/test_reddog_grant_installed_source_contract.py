@@ -231,3 +231,119 @@ def test_inventory_resource_limits_are_enforced(field, monkeypatch):
     monkeypatch.setattr(source, field, 1)
     with pytest.raises(RuntimeArtifactManifestError):
         source.validate_installed_grant_source(_descriptor())
+
+
+class _StringSubclass(str):
+    pass
+
+
+class _EqualStringKey:
+    """Set equality must not turn an arbitrary key into a validated path."""
+    def __init__(self, value):
+        self.value = value
+
+    def __hash__(self):
+        return hash(self.value)
+
+    def __eq__(self, other):
+        return self.value == other
+
+
+@pytest.mark.parametrize("key_type", [_StringSubclass, _EqualStringKey])
+def test_source_keys_equal_to_valid_paths_still_require_exact_strings(key_type):
+    descriptor = _descriptor()
+    name = "modules/__init__.py"
+    descriptor["source_files"][key_type(name)] = descriptor["source_files"].pop(name)
+    assert set(descriptor["source_files"]) == {
+        item["path"][len(source.SOURCE_DIRECTORY) + 1:]
+        for item in descriptor["files"] if item["path"].startswith(source.SOURCE_DIRECTORY + "/")}
+    with pytest.raises(RuntimeArtifactManifestError, match="grant_installed_source_invalid"):
+        source.validate_installed_grant_source(descriptor)
+
+
+@pytest.mark.parametrize("key", [True, 1, None, b"modules/__init__.py"])
+def test_nonstring_source_keys_reject(key):
+    descriptor = _descriptor()
+    descriptor["source_files"][key] = descriptor["source_files"].pop("modules/__init__.py")
+    with pytest.raises(RuntimeArtifactManifestError, match="grant_installed_source_invalid"):
+        source.validate_installed_grant_source(descriptor)
+
+
+def _add_source(descriptor, name):
+    descriptor["source_files"][name] = raw_digest(b"fixture")
+    descriptor["files"].append({"path": source.SOURCE_DIRECTORY + "/" + name,
+        "bytes": 7, "mode": 0o444, "sha256": raw_digest(b"fixture")[7:]})
+    descriptor["files"].sort(key=lambda item: item["path"])
+    descriptor["directories"] = _directories(descriptor["files"])
+
+
+@pytest.mark.parametrize("name", [
+    "../escape.py", "/absolute.py", "nested//file.py", "nested/./file.py",
+    "nested/../file.py", "nested\\file.py", "file.py/", "space name.py",
+    "control\x00.py", "delete\x7f.py", "caf\u00e9.py", "cafe\u0301.py",
+    "CON.py", "nested/LPT1.py", "nested/trailing./file.py", "colon:name.py",
+    "question?.py", "pipe|name.py", "star*.py", "angle<name.py", 'quote"name.py',
+])
+def test_bound_source_paths_retain_portable_path_rejections(name):
+    descriptor = _descriptor()
+    _add_source(descriptor, name)
+    with pytest.raises(RuntimeArtifactManifestError, match="grant_installed_source_invalid"):
+        source.validate_installed_grant_source(descriptor)
+
+
+@pytest.mark.parametrize("name", ["top.py", "nested/.hidden.py", "nested/COM10.py",
+                                  "nested/name..py", "nested/with-dash_123.py"])
+def test_portable_source_suffixes_keep_canonical_output_and_digest(name):
+    descriptor = _descriptor()
+    _add_source(descriptor, name)
+    accepted = source.validate_installed_grant_source(descriptor)
+    assert accepted == descriptor
+    assert source.installed_grant_source_digest(accepted) == raw_digest(
+        source.canonical_json(descriptor).encode("ascii"))
+    descriptor["source_files"][name] = raw_digest(b"changed")
+    descriptor["directories"].clear()
+    assert accepted["source_files"][name] == raw_digest(b"fixture")
+    assert accepted["directories"]
+
+
+@pytest.mark.parametrize("length,accepted", [(4096, True), (4097, False)])
+def test_source_path_length_cap_applies_to_complete_installed_path(length, accepted):
+    descriptor = _descriptor()
+    name = "a" * (length - len(source.SOURCE_DIRECTORY) - 4) + ".py"
+    _add_source(descriptor, name)
+    assert len(source.SOURCE_DIRECTORY + "/" + name) == length
+    if accepted:
+        assert source.validate_installed_grant_source(descriptor) == descriptor
+    else:
+        with pytest.raises(RuntimeArtifactManifestError, match="grant_installed_source_invalid"):
+            source.validate_installed_grant_source(descriptor)
+
+
+@pytest.mark.parametrize("missing", [None, "empty", "empty/deep", "empty/deep/nested"])
+def test_empty_directory_ancestor_closure_is_complete(missing):
+    descriptor = _descriptor()
+    descriptor["directories"] += ["empty", "empty/deep", "empty/deep/nested",
+                                  "empty/deep/nested/leaf", "unrelated"]
+    descriptor["directories"].sort()
+    if missing is None:
+        assert source.validate_installed_grant_source(descriptor) == descriptor
+    else:
+        descriptor["directories"].remove(missing)
+        with pytest.raises(RuntimeArtifactManifestError, match="grant_installed_source_invalid"):
+            source.validate_installed_grant_source(descriptor)
+
+
+@pytest.mark.parametrize("path", ["empty//leaf", "empty/./leaf", "empty/../leaf",
+                                  "/empty", "empty/", _StringSubclass("empty")])
+def test_empty_directory_paths_are_validated_before_parent_closure(path):
+    descriptor = _descriptor()
+    descriptor["directories"] = sorted(descriptor["directories"] + ["empty", path])
+    with pytest.raises(RuntimeArtifactManifestError, match="grant_installed_source_invalid"):
+        source.validate_installed_grant_source(descriptor)
+
+
+def test_sorted_directory_inventory_cannot_also_declare_a_file():
+    descriptor = _descriptor()
+    descriptor["directories"] = sorted(descriptor["directories"] + ["usr/bin/python3.12"])
+    with pytest.raises(RuntimeArtifactManifestError, match="grant_installed_source_invalid"):
+        source.validate_installed_grant_source(descriptor)

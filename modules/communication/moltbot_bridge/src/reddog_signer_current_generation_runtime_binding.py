@@ -265,15 +265,22 @@ def _validated_model_values(repo, packet, selected, work, authority, clock, star
         last_time[0] = value
         return value
     try:
-        work_digest, pair = _model_work_snapshot(work, authority)
-        model_selection, model_binding = pair.values()
         owner_path = _required_absolute_path(packet["owner_authority_config_path"])
         owner = owner_loader._load_owner_config(owner_path, repo=repo)
         if owner["config_id"] != selected["owner_config_id"]:
             raise ValueError("model_selected_owner_mismatch")
+        modern = owner['schema_version'] in {owner_loader.SCHEMA_VERSION_V12, owner_loader.SCHEMA_VERSION_V13}
+        work_digest, pair = _model_work_snapshot(work, authority, canonical_selection=modern)
+        model_selection, model_binding = pair.values()
+        model_options = {}
+        if modern:
+            from .reddog_model_verifier_selection_inputs import SelectionReadBudget
+            from .reddog_runtime_artifact_manifest_contract import digest
+            model_options = dict(selection_receipt_id=model_selection['receipt_id'],
+                selection_receipt_digest=digest(model_selection), _read_budget=SelectionReadBudget())
         verifier = owner_loader.load_system_service_model_runtime_verifier(
             owner_config_path=owner_path, repo_root=repo,
-            expected_owner_config_id=selected["owner_config_id"], trusted_now_epoch=monotonic_clock)
+            expected_owner_config_id=selected["owner_config_id"], trusted_now_epoch=monotonic_clock, **model_options)
         args = dict(selection=model_selection, binding=model_binding)
         capability = verifier.verify(**args)
         receipt = verified_runtime_binding_receipt(model_binding)
@@ -294,7 +301,7 @@ def _validated_model_values(repo, packet, selected, work, authority, clock, star
         discard_verified_runtime_binding_capability(capability)
 
 
-def _model_work_snapshot(work, authority):
+def _model_work_snapshot(work, authority, *, canonical_selection=False):
     from .reddog_work_order_binding import canonical_full_work_order_digest
     from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import canonical_model_runtime_binding_digest
     snapshot = json.loads(json.dumps(work, allow_nan=False))
@@ -309,8 +316,9 @@ def _model_work_snapshot(work, authority):
             raise ValueError("model_artifact_pair_missing_or_ambiguous")
         pair[name] = candidates[0]
     model_selection, model_binding = pair.values()
+    from .reddog_runtime_artifact_manifest_contract import digest
     expected = dict(model_selection_receipt_id=model_selection["receipt_id"],
-        model_selection_digest=_digest(model_selection),
+        model_selection_digest=digest(model_selection) if canonical_selection else _digest(model_selection),
         model_runtime_binding_receipt_id=model_binding["receipt_id"],
         model_runtime_binding_digest=canonical_model_runtime_binding_digest(model_binding))
     if any(snapshot.get(key) != value or authority.get(key) != value for key, value in expected.items()):

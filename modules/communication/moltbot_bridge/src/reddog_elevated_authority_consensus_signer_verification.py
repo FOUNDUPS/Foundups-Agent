@@ -54,13 +54,21 @@ class ElevatedConsensusSignerAuthority:
     nonce_authority: ConsensusNonceAuthority
     revoked_key_epochs: frozenset[str] = frozenset()
     effect_authority: Any = None
+    parent_authority: Any = None
 
     def reserve(
         self, proof: Mapping[str, Any], *, signing_request_digest: str, now: int, grant_expires_at=None
     ) -> VerifiedElevatedConsensusSignerReservation | None:
         from .reddog_current_effect_signing_authority import CurrentEffectSigningAuthority
-        from .reddog_effect_consensus_proof import SCHEMA
-        if isinstance(proof, Mapping) and proof.get("schema_version") == SCHEMA:
+        from .reddog_effect_consensus_proof import SCHEMA, SCHEMA_V2
+        from .reddog_current_parent_consensus_authority import CurrentParentConsensusAuthority
+        from .reddog_parent_consensus_proof import SCHEMA as PARENT_SCHEMA
+        if type(proof) is dict and proof.get("schema_version") == PARENT_SCHEMA:
+            if type(self.parent_authority) is not CurrentParentConsensusAuthority:
+                return None
+            return self.parent_authority.reserve(proof, signing_request_digest=signing_request_digest,
+                now=now, grant_expires_at=grant_expires_at, nonce_authority=self.nonce_authority)
+        if isinstance(proof, Mapping) and proof.get("schema_version") in {SCHEMA, SCHEMA_V2}:
             if type(self.effect_authority) is not CurrentEffectSigningAuthority:
                 return None
             return self.effect_authority.reserve(proof, signing_request_digest=signing_request_digest,

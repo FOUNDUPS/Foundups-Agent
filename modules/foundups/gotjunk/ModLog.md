@@ -1,3 +1,39 @@
+## 2026-10-19 — Patched multipart parser
+
+WSP 12/22/50/71/97; base `6ad7cf09c2b6df3fd439e72a7cd063b55a427f42`.
+WSP15 allocation: C2/I5/D5/Impact4; bounded dependency repair with focused API
+tests, security-gate regressions, independent review and PR CI before merge.
+Reconciles the unique dependency fix from stale PR #828 with current main.
+Updated the separate Python API's `python-multipart` pin from 0.0.29 to 0.0.31
+for CVE-2026-53539. The 1 MiB admission limit remains defense in depth, not a
+substitute for the parser patch. Preserved Firebase authentication, body/rate
+limits, and the Play FoundUps Mall migration ownership direction.
+
+Extended the existing offline backend suite with bounded form-separator and
+multipart-upload compatibility checks; inventoried the existing tests before
+adding coverage. Holo lexical retrieval found the existing security owner and
+suite; semantic freshness stayed UNKNOWN. WSP00's documented tracker fallback
+passed with the detector unavailable (torch missing). This is local repository
+maintenance, not WRE runtime activation or deployed-backend verification.
+
+Added an isolated CI job that installs the actual backend requirements and runs
+its parser/admission suite on Python 3.12. Focused local verification: 42 passed
+(25 GotJunk tests and 17 security-gate regressions), with one upstream AnyIO
+deprecation warning. Production deployment and credential status remain unverified.
+Negative control: the new parser regression fails with 0.0.29 (semicolon truncates
+the field); after restoring the full backend requirements at 0.0.31 it passes.
+Independent verification repeated all 42 checks successfully in a fresh isolated
+environment with both imported code and package metadata verified at 0.0.31.
+This supersedes the preliminary shared environment, which the reviewer found
+had inconsistent package metadata and source after the negative-control swap.
+
+Release-boundary follow-up: Cloud Build uses only `frontend/Dockerfile` with the
+frontend build context. Removed the separate backend from this frontend/rules
+workflow's production push filter, retaining PR emulator checks and backend CI.
+Extended the existing deployment security regression to enforce that boundary.
+No backend deployment is fabricated and no unrelated Firebase/frontend rollout
+is required to merge this parser repair.
+
 ## 2026-10-12 — Metadata-only Mall migration dry-run slice
 
 **WSP:** 00, 22, 50, 84, 97, 98.

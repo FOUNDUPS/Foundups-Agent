@@ -157,7 +157,8 @@ check('video routes, aliases and ambiguous selections do not grant public member
 check('legacy entry redirects only to the existing member page with bounded filters', () => {
   const vm = require('node:vm');
   const alias = fs.readFileSync(path.join(root, 'public/move2japan/index.html'), 'utf8');
-  const source = alias.match(/<script>([\s\S]*?)<\/script>/)[1];
+  // Extract this trusted local fixture's inline script, not untrusted HTML.
+  const source = alias.match(/<script\b[^>]*>([\s\S]*?)<\/script\b[^>]*>/i)[1];
   let redirected;
   vm.runInNewContext(source, { URLSearchParams, window: { location: {
     search: '?area=Wakasa&q=house&return_to=https://evil.invalid&foundup=other', replace: value => { redirected = value; }

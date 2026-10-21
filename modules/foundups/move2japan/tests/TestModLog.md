@@ -1,3 +1,12 @@
+## 2026-10-21 UTC — CodeQL fixture repair
+
+Reuse the existing 28-check property suite and shared property VM. The alias
+extractor now handles HTML tag case/boundaries; shared hostile rendering checks
+cover mixed case without a sanitizer-like fixture getter. All 28 domain checks
+and the shared VM pass locally. Full integration/CI evidence is tracked with
+the owning PR #2151; these local checks do not establish deployment.
+See `public/member/tests/TestModLog.md` for WSP 00/15/97 scope and provenance.
+
 ## 2026-10-18 UTC — Recovered source verification and actual-Mall private publication
 
 Root's final recovered integration command (shared member, domain, projector and
