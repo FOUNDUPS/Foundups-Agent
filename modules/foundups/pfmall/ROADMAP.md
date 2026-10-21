@@ -10,6 +10,50 @@
   shell-local FAQ concierge, and bounded browser control dispatcher.
 - Not implemented: authenticated resident RedDog conversation adapter,
   browser-to-OpenClaw policy admission, or browser-to-Hermes execution.
+- Specified only (updated 2026-10-18): AutoPost Live mode, general creator
+  live-session adapter and provider-confirmed live catalog projection. External
+  AutoPost already implements browser capture/recorded-file upload; continuous
+  streaming and durable live control remain unimplemented.
+
+## P1 — Mobile creator studio: evidence before implementation
+
+**WSP 15 documentation slice score:** complexity 2 + importance 4 + deferability
+4 + impact 4 = **14 / P1**. This is a bounded planning priority, not a runtime
+allocation or a reprioritization of the existing P0 repair.
+
+Goal: one authorized creator selects Live in AutoPost, starts a YouTube show, appears in
+Play from provider-confirmed evidence, recovers from tested interruptions, ends
+explicitly and starts a later event with the same valid input. The next agent
+must consume the [contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+[API register](../docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md) and
+[machine outcome](../docs/mobile_studio/mobile_studio_outcome.v1.json).
+
+| Slice | Work and promotion evidence | Status |
+|---|---|---|
+| MS0 | Research source/API constraints and AutoPost ownership; record pain, reuse, obstacles and AC01–AC11 | Documentation delivered; 2026-10-18 external-owner correction |
+| MS1 | Scope creator/channel OAuth; create/bind/start/end and reusable-input adapter; prove AC01–AC04 | Planned; actual project/channel checks and admission required |
+| MS2 | AutoPost media adapter: MS2A foreground WebRTC/relay proof (AC10–AC11); MS2B measured continuity and browser/native choice (AC05–AC06) | Planned; phone, control profile, relay, codec and lifecycle evidence required |
+| MS3 | Project fresh permitted live state into Play; test embed/watch fallback and AC07–AC08 | Planned; depends on secure service and mobile spike |
+| MS4 | Production OAuth/quota, data retention, reconnect/runbook and AC09 | Planned; release and operational evidence required |
+| MS5 | Second OS, richer scenes, OBS integration, multistream, guests and independent paid services | Deferred; each needs its own measured case and contract |
+
+The [external AutoPost Phase 4B](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md#phase-4b--autopost-live-mode-planned)
+owns the product increments. MS2A proves one foreground camera/mic route for
+10 minutes with AI disabled and A/V observed in remote YouTube playback. It may
+be separately admitted after MS0 and verified attended-control, exact destination
+and relay-admission checks, before durable MS1 completion. Integrated MS2
+promotion requires completed MS1, MS2A and MS2B; MS3 retains its MS1/MS2 gates.
+The current browser OAuth can support that bounded proof, but durable
+machine-to-machine recovery still needs the shared service.
+Preserve ordinary capture gestures and four primary Options tabs. Basic Live
+does not depend on Lick enrollment, receipt accounting or memberships.
+
+Start with a separately admitted MS1 control slice or MS2A attended feasibility
+slice after rechecking current main, related PRs and the selected prerequisites.
+Documentation completion is not live-streaming, device, deployment,
+membership or payout evidence. Each implementation PR updates the affected
+README, INTERFACE, ROADMAP and ModLog before promotion. Keep unrelated roadmap
+priorities and active member-runtime PRs intact.
 
 ## P0 — Tier-0 retrieval repair
 
@@ -52,3 +96,22 @@
 - [ ] Add module-local dependency and memory contracts per WSP 12/60.
 - [ ] Run FMAS and complete dependency/import analysis before any move. No
   deletion or broad restructuring is part of the Tier-0 repair.
+
+
+## Shared responsive discovery — 2026-10-18
+
+- Implemented in this PR: responsive category tracks, vertical category browsing,
+  horizontal touch/drag/button navigation, local row position restore, and one
+  catalog query API shared by RedDog text controls and the existing dispatcher.
+- Preserve the common shell for creator, housing, vehicle, clothing and other
+  catalog projections. Add real metadata/adapters under existing catalog ownership;
+  no independent per-FoundUp browsing app is required.
+- Next: paged catalog provider and DOM virtualization with measured large-catalog
+  performance; current rows render the loaded catalog and are not infinite ingestion.
+- Next: authenticated resident RedDog conversation/voice adapter (existing admission
+  plan above), calling the same bounded search/projection APIs.
+- Next: explicit, revocable principal-scoped preferences and transparent ranking;
+  `creator === '012'` personal scope is not digital mapping or recommendation.
+- Next: device Safari/pinch/accessibility verification, provider-confirmed live tiles,
+  independent supporter benefits/follow persistence and controlled muted previews.
+  Six simultaneous autoplay streams are not required for responsive browsing.

@@ -2,6 +2,27 @@
 
 This log tracks changes specific to the **idle_automation** module in the **infrastructure** enterprise domain.
 
+### 2026-10-07 — Preserve internal-audit measurement status
+
+WSP 00/5/11/15/22/48/50/97. Selected14/P1 (C2/I4/D4/impact4).
+The existing research consumer dropped scanner coverage and failure diagnostics.
+Six regressions failed before repair. It now preserves `scan_status` and unknown
+event counts; malformed historical summaries remain separately unavailable.
+Independent source review found numeric-history overflow; reproduced1fail/2pass,
+then repaired. Connected final140pass; no worker inference or paid provider call.
+CI now includes the producer/consumer regressions. Local tests are not native RSI.
+
+Live observation at base453f6c357: existing scanner read3193log files, produced20
+dry-run proposals, and emitted0new events on its second pass. All20 requested scope
+context; none were executable tickets. Existing OpenClaw/WRE exact-main maintenance
+completed and stopped its owned runtimes. Hermes0.20.4 passed authenticated
+read-only preflight after bounded startup readiness; initial connection refusal
+was not evidence of missing enrollment. Patched report persistence retained the
+scan snapshot,20historical signatures and3ranked candidates;0tasks published.
+Evidence: `outputs/rsi-permission-evidence-20261006/internal-audit-*` and
+`O:/RedDog-Builder-Artifacts/rsi-internal-audit-20261007/`.
+Coordinator-authored repair; independent source review is not independent execution.
+
 ### 2026-08-29 - Pre-owner exact-main live acceptance
 
 **WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97

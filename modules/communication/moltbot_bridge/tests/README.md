@@ -1,3 +1,668 @@
+## Protected consensus nonce qualification
+
+Retain the full legacy current-generation model-pair regression and the
+actual signed-model gate for both v12 and full v13 owners. A nonce-only
+test selection misses compatibility at this consumer boundary.
+
+Exercise the v13 nonce/custody suites with existing state, current owner/E0,
+parent/effect, model, issuer custody and legacy LOW regressions. Use real
+disposable MAC/SQLite files and signed model/policy inputs; label OS/installation
+seams. Require restart/replay, cross-instance handle rejection, corrupt or absent
+state, one-step recovery, withdrawal, expiry and failed commit/cleanup controls.
+Pin an explicit pytest repository root and independent temporary databases.
+Connected 437/3 platform skips and independent 21 controls exercise this source
+component. Current generated runtime includes custody only; authority/current
+owner are not yet imported or qualified installed runtime.
+Installed HIGH acceptance additionally requires a real Linux same-inode locking
+test across reserve, pre-sign validation, commit and rollback under the actual
+permission wrapper. Passing the adapter tests alone does not meet that gate.
+
+## Exact parent-consent connection
+
+Run the three parent-consent suites with the six parent-consensus/model suites:
+`test_reddog_parent_consensus_{domains,composition,transport,signer,use_time}.py`
+and `test_reddog_parent_model_inputs.py`. The existing authenticated startup CI
+selection includes all nine; retain connected effect, generation, custody/rate
+and elevated-consensus regressions. Structure checks include the new helpers.
+Exercise real signed artifacts, separate reviewer domains and model selections,
+proof bounds, failed lease exit, current-use expiry/clock drift and reservation
+failure. Linux lock tests require actual separate processes; preserve platform
+skips. Synthetic owner/lease fixtures cannot prove installed custody, durable
+recovery, authentic author execution or retained RSI benefit.
+
+## AntifaFM campaign route — 2026-10-18
+
+`test_social_campaign_adapter.py` preserves the research route and checks the
+real AntifaFM default preview, rejected targeting parameters and malformed or
+duplicate command tokens. The connected offline campaign/drafter/publisher
+selection and its importlib-mode command are documented in
+`modules/platform_integration/social_media_orchestrator/tests/README.md`.
+No action CLI loop, live DAE, provider or messaging operation is invoked.
+
+## Installed consumer/runtime integration
+
+Run installed-manifest consumer, issuer startup/service, separate rate-store and
+runtime-guard suites together with current enrollment/target regressions. Run
+ordinary positive credential fixtures as a nonroot Linux account; they bind its
+positive UID/GID. Run explicit two-UID native tests and root-owned guard fixtures
+with root separately. Preserve skips/failures; do not weaken production UID checks.
+Synthetic admission and credential-free guard probes are not native worker proof.
+
+## Installed issuer contract qualification
+
+Run `test_reddog_grant_installed_source_contract.py` and
+`test_reddog_signer_installed_policy.py` with existing initial manifest, archive,
+E0 static, authenticated binding and permission suites. The new tests exercise
+inert bundle/hash ordering and rejection boundaries, not native admission.
+
+## Protected issuer custody qualification
+
+Run `test_reddog_grant_startup_custody.py` and
+`test_reddog_grant_custody_owner_versions.py` with issuer service, root LOAD,
+permission rehydration, target protected-use, model-verifier and owner-version
+regressions. Existing CI selects these alongside the connected signing owners.
+OS custody/owner/isolation seams are explicit; production E0, signatures,
+credential resolver lifetime, replay stores and protocol routing are exercised.
+These tests do not prove installed credentials, a native service or RSI gain.
+
+## Issuer-only root LOAD qualification
+
+The signing CI selection includes `test_foundup_verified_outcome_root_grant_load.py`,
+`test_reddog_grant_root_load_rpc.py` and the resident socket regression alongside
+the issuer composition. Run current permission rehydration and legacy root
+revocation suites too. The real two-process LOAD tests preserve the old-order
+deadlock control and check policy/generation/expiry drift. Synthetic installation
+seams remain explicit; passing tests do not prove installed worker admission.
+
+The same grant-aware signing CI selection includes
+`test_reddog_signer_key_epoch_use_durable_authority.py`. Run it with root LOAD,
+root-protected composition, installed grant consumer and permission rehydration.
+Current-time cases sample inside the durable fence and recheck after snapshot/root
+LOAD and permission verification; explicit stale caller epochs must still reject.
+Cover observed rollback, snapshot/receipt expiry, identity drift and post-action
+rejection. A rejected result does not undo arbitrary callback effects. Independent
+native held-outs use real SQLite/flock/source with synthetic root/signing/clock
+fixtures; TestModLog records author 207 and separate independent 17 passes, not an
+additive unique count. Preserve the earlier fixture failures and unproved live-clock
+cause, plus Windows encoding/shell and corrected Linux runner failures as evidence.
+
+## Callable LOW grant service qualification
+
+`test_reddog_grant_authority_service.py` is selected by the existing
+`Run RedDog grant-aware signing composition regression` CI step. Run it with
+current permission rehydration, authenticated manifest binding, independent
+provider, LOW RPC, ephemeral backend and socket protocol/resident/client suites.
+The canonical registry generator owns its classification and shard membership.
+
+Coverage includes missing dependencies, non-LOW/foreign/malformed requests,
+owner/profile/custody substitution, permission failure including fence exit,
+process-isolation rejection and durable rate across fresh backends. The Linux
+positive exchanges an actual AF_UNIX request in a same-process thread and
+verifies disposable signatures and cleanup. Its peer attribution, root ownership,
+current admission, isolation, revocation and custody are synthetic. This is
+transport/composition coverage, not an admitted independent native issuer.
+Windows explicitly skips that Linux-only exchange.
+
+Resident transport regressions additionally use distinct Linux processes and real
+kernel peer attribution to verify listener lifetime, socket cleanup and replacement
+preservation. Passive wrappers observe descriptor lifetime while real cleanup runs.
+The existing closed-listener replacement test remains unchanged. Unsupported native
+platform checks keep explicit skips; no skip replaces a failing Linux assertion.
+
+## Grant bootstrap and LOW RPC qualification
+
+The existing CI `Run RedDog grant-aware signing composition regression` includes
+`test_reddog_signer_low_grant_rpc.py` beside the independent provider and E0 static
+contracts. The existing startup-policy selection already includes authenticated
+grant manifest binding and WSP71 permission rehydration. Run these suites together
+for the combined change; retain the effect and elevated provider regressions.
+
+The Linux RPC suite uses two distinct processes, the production AF_UNIX
+server/client and a real same-inode `LOCK_EX`. Its six cases demonstrate bounded
+old-order timeout, successful issuance, caller-use fencing and late policy,
+generation or expiry rejection. Authentication callbacks and keys are explicitly
+synthetic. The tests prove transport/locking behavior, not independently installed
+grant authority. They skip on Windows. Unit regressions also cover refreshed
+selection timestamps, stable identity drift, final expiry and clean lease exits.
+V9 tests retain legacy golden hashes, all retained authority fields, required
+future permission fields, full signatures and exact-Git provenance rejection.
+
+## Initial handshake producer-to-consumer qualification
+
+The existing CI `Run RedDog grant-aware signing composition regression` now
+includes configuration supply, run-packet supply and E0 static contracts beside
+the ephemeral factory, handshake, per-sign backend and protected-use suites.
+Use its exact path list for connected verification. Initial tests cover strict
+schema/type/scope/root separation and reject non-handshake requests before
+grant consumption or key resolution. Connected fixtures verify real disposable
+signatures and durable replay; root selection, packet attachment, OS transport,
+credentials, service loop and clocks are injected. Grants are helper-signed,
+not issued by a live independent grant service. Do not claim native startup.
+Independent held-out cases and commands are retained in the dispatch runbook.
+
+## Initial manifest producer-to-consumer qualification
+
+The CI step `Run initial enrollment producer and consumer contracts` selects
+`test_reddog_initial_runtime_manifest_authority.py` and
+`test_reddog_initial_enrollment_artifact_bounds.py` with legacy signed manifests,
+authority freshness, atomic provisioning/recovery, activation leases, current
+selection, system-service owner readers, authenticated grant binding and existing
+bootstrap/store/isolation/resolver suites. Run the same paths using the existing
+`python -B -m pytest --noconftest --import-mode=importlib -p pytest_asyncio.plugin
+-p no:cacheprovider -q` command. Do not infer native execution from mocked OS or
+custody seams in these tests.
+
+Artifact-bound regressions cover approval, installed descriptor and source files
+above 64 KiB, reject bytes above 1 MiB, and preserve ordinary owner 64 KiB rejection.
+The existing privileged installed-runtime CI step also runs this suite as Linux
+root, so protected-file cases execute; ordinary nonroot selection skips them.
+Synthetic authority remains explicit.
+
+Retained held-out cases cover expiry while waiting for publication, initial
+manifest rejection at generation2, source/capability mismatch, Linux process and
+inode qualification, FIFO/ancestry ordering and descriptor cleanup. Actual Linux
+systemd/immutable-inode/mmap and separate-process component evidence is recorded
+in the existing RSI dispatch runbook. Windows-specific sharing tests retain
+their explicit platform skips on Linux. Native worker admission is a later gate.
+
+## Initial writer qualification
+
+Run `test_reddog_signer_runtime_generation_bootstrap_authority.py` together with
+`test_reddog_sqlite_monotonic_authority_store.py` and the signer/anchor/provisioning
+suites. Fixtures use real disposable storage with explicitly synthetic root policy
+and custody; they do not constitute runtime admission. The existing CI bootstrap
+step includes both files. External Linux probes separately exercise actual systemd
+custody, protected installation and public verification; see the dispatch evidence.
+
+## Initial anchor and high-water bootstrap tests — 2026-10-14
+
+Run these together with `python -B -m pytest --noconftest --import-mode=importlib
+-p pytest_asyncio.plugin -p no:cacheprovider -q`:
+
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_bootstrap_signer.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_generation_anchor.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_atomic_signer_runtime_generation_high_water.py`
+- `modules/communication/moltbot_bridge/tests/test_reddog_signer_process_isolation_gate.py`
+- `modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py`
+
+The76 cases cover v1 and v2 with real Ed25519 operations with substituted custody/root-read/
+isolation boundaries. V2 adds canonical initial forms, authenticated-revision
+derivation, cross-schema rejection, header mutation and two-signature expiry.
+The real disposable store test covers prepare/abort/witness/commit. They prove policy scope, immutable state, altered inputs,
+key mismatch, clock rollback/expiry, and permission expiry during resolution and
+policy reads. They do not establish OS confinement or native admission. Separate
+real systemd component evidence is recorded in RSI_SWARM_DISPATCH; it does not
+qualify the full service/package startup. CI explicitly runs the connected suite.
+
+## Canary provider closure tests — 2026-10-13
+
+Select `test_reddog_resident_live_canary.py`,
+`test_reddog_resident_live_canary_integration.py` and
+`test_reddog_resident_live_canary_provider_readiness.py` together using
+`--noconftest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider`.
+Controls cover provider preservation, invalid configuration, confined credential
+checks, environment restoration and refusal to invoke without authority.
+Fresh-base Windows result: 133 passed/2 skipped. Hosted Linux validation remains
+pending; neither fixture result establishes native worker admission.
+
+## Proposal startup connection — current checkpoint, 2026-10-07
+
+Existing materializer/adapters reused; real proposal packet supply and public
+startup composition now pass connected113tests under explicit enrollment/OS/transport
+fixtures. Missing/empty stores still reject before service entry or target-key reads.
+Publication pending. Native enrollment and the worker/evaluator/retention/later-use
+loop remain unproven. See ModLog for failures, repairs and exact-source receipts.
+
+## Deferred proposal activation — current checkpoint, 2026-10-07
+
+PR2098 is merged/main-verified at1e220147c; its prior publication-pending entries
+are historical. Next16/P0 extends the existing deferred factory/runtime.
+Local connected119pass/2skip now covers owner/grant handshake and proposal
+composition under synthetic selection/transport. Native packet supply remains unqualified. No native RSI or retention claim. See current
+ModLog/INTERFACE for boundaries, review findings and exact evidence.
+
+## Current-generation Memex checkpoint — 2026-10-07
+
+The existing retained-evidence consumer is locally qualified: connected168pass
+and valve routing1pass; independent source review cleared the reproduced
+principal-provider identity defect. Native proposal packet/grant provisioning
+remains blocked by two explicit guards. Publication pending; fixture qualification
+is not autonomous RSI. See INTERFACE, ModLog and test evidence for boundaries.
+Next: re-observe the existing principal/replay adapter owners, then select one
+bounded admitted integration. No repeated broad audit or failed model retry.
+
+## Current-generation model consumer checkpoint — 2026-10-07
+
+Existing producer/collector/valve wiring is locally qualified with disposable
+model signatures and explicit principal/peer seams. Connected89pass including the real
+collector; source review cleared the reproduced clock rollback. See
+INTERFACE/ModLog and existing current-generation runtime/use-time test files.
+Native admission and retained RSI remain unproven; publication pending.
+
+## Model input authority checkpoint — 2026-10-07
+
+Protected owner v8 supply is locally qualified; current-generation resident
+consumption and native admission remain pending. See INTERFACE/ModLog and
+`tests/test_reddog_signer_system_service_startup_authority.py` for the existing
+API,22 input/lifetime controls,3 real-signature controls and v7/v8 startup compatibility. No model or
+provider calls are needed for these tests.
+
+## Fresh peer consumer controls — 2026-10-07
+
+Existing generation use-time suite adds23 adversarial cases for rotation, stale
+peer, substitutions, bad clocks, absent grants, missing OS evidence and mutation.
+Existing real-generation suite adds renewal and manifest-expiry controls using
+the actual selection producer; profile/process and handshake are substituted.
+Initial API baseline23fail; first focused52pass/1skip missed two review defects.
+The first expiry baseline was invalid (fixture KeyError). Corrected real-producer
+baseline2fail/0errors reproduces both intended failures against review-pinned source.
+Connected123pass/1fixturefail/5skip; corrected affected pair2pass with production
+bytes unchanged. All prior failed runs remain recorded.
+Independent recheck confirms both repairs; no live grant or native RSI claim.
+
+## Peer prerequisites — 2026-10-07
+
+Reuse owner-loader, current-generation binding, healthcheck and mutual-handshake
+suites. Windows82passed/5skipped; Linux healthcheck29passed/0skipped. Linux cases
+use real AF_UNIX/SO_PEERCRED with disposable signatures and synthetic signer
+audit fields. They establish OS peer rejection, not native signer enrollment.
+Grant tests establish forwarding/no fallback, not authorization of a real grant.
+Saved baseline/intermediate failures and exact commands are in the existing
+RSI evidence directory (`peer-preconditions-execution.json`). Linux source hashes
+were stable; test-only EOF guard was added after the Windows run started and is
+covered by the final Linux run. No unchanged connected-suite rerun required.
+
+## Principal generation connection — 2026-10-07
+
+Existing current-generation runtime/use-time suites cover key/provider/identity,
+repo/FoundUp scope, absent evidence, altered artifacts, expiry, mutable inputs,
+serialized claims and mismatched work receipts. Consumer controls preserve six
+other gates. Connected six-file run100pass/1 Windows platform skip; exact source
+hashes and historical failures are in `principal-generation-connected-execution.json`
+under the current RSI evidence directory. No native worker admission is claimed.
+
+## Shared-backend test selection — PR2090
+
+Include `test_reddog_conversation_scope_durable_authentication_wsp62.py` with the
+existing effect/consensus/provider selection. Hosted CI caught backend678>675
+that the earlier selection missed. Preserve this guard; current extraction yields
+674 lines. Expanded selection707/707 passed; source/log review is separate from
+independent test execution. Evidence: `effect-signing-ci-structure-repair.xml` in
+the current RSI evidence directory.
+
+## Effect lifetime boundary regression — 2026-10-07
+
+Existing effect signing tests now reproduce and repair excessive grant lifetime,
+independent root acceptance of that lifetime, and delayed target use. Frozen
+baseline3fail/1pass becomes passing within697 connected Windows cases. Seven
+missing/type/range cases also reject before nonce consumption. Evidence:
+`outputs/rsi-permission-evidence-20261006/effect-expiry-{baseline,focused,connected}.xml`.
+
+## Effect signing composition regression — 2026-10-07
+
+Run `test_reddog_effect_signing_composition.py`, `test_reddog_effect_signing_grant.py`
+and `test_reddog_effect_signing_lease.py` with the existing consensus/consent/reviewer
+and provider suites. Shared fixture: `reddog_effect_signing_test_support.py`.
+Covers exact target and one-use permissions, invalid evidence, expiry during
+reservation/commit, clean fence exit before RPC, owner rotation, cleanup failure,
+held-fence API rejection, real grant signatures and final lease consumption.
+The full Windows selection passed 687 cases; dedicated Linux-root qualification
+requires its own fixture and was not run. Evidence is in
+`outputs/rsi-permission-evidence-20261006/effect-signing-connected-windows.{xml,log}`.
+
+
+## Provider issuance regression — 2026-10-06
+
+The frozen composed test observes whether each target call still holds the
+provider owner lease. It failed twice in the baseline chain, then passes after
+the issuance handoff repair. The HIGH chain uses explicit synthetic admission;
+it is not native authority. Provider tests retain legacy lease lifetime and add
+clean/failed exit cases. Adapter tests reject issuance exceptions, invalid grants
+and lease-only providers before target dispatch. Connected94/94 pass in26.13s;
+commands and source review are in `outputs/rsi-permission-evidence-20261006/`.
+Production target admission and later retained RSI benefit remain separate gates.
+
+## Authenticated public startup regression — 2026-10-06
+
+Separate actual-OS qualification at `50008b241` passes using synthetic authority:
+real DynamicUser/systemd custody, production isolation/public entrypoints and
+Unix peer transport; missing grant rejection, one verified signature and nonce
+replay rejection. Exactly one target sign and six root RPCs, both services exit0,
+complete owned cleanup. Source-bound driver, observations and failed attempts:
+`outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+This local experiment is not hosted CI, authentic enrollment or native RSI.
+
+`test_reddog_signer_system_service_entrypoint.py::test_public_v7_startup_real_generation_grant_signature_and_replay`
+uses the public entrypoint, signed artifact generation, current E0 validation,
+deferred dependency materialization, root protocol handlers and durable replay.
+It verifies one valid signature and rejects missing/replayed grants. OS ownership,
+credential delivery, isolation and socket transport are controlled fixtures;
+this is source integration, not actual OS admission.
+
+Replay performs two authenticated revocation LOAD checks before nonce rejection;
+the test distinguishes their proof-key reads from forbidden repeated target
+signing and ACQUIRE/FINISH. The original overly broad no-read assertion and
+its correction are preserved in `outputs/rsi-permission-evidence-20261006/`.
+Connected entrypoint/resolver/bootstrap selection:104pass/2platform skips.
+Separate existing Linux authority runner:8pass, stable source. Authentic
+enrollment, native local-worker improvement and retained gain remain open.
+
+## Permission evidence type regression — 2026-10-05
+
+The existing systemd reference-pair test now includes twelve permission inputs.
+Only literal `True` permits the two controlled resolver reads. False and malformed
+inputs require permission denial and zero reads. The unchanged-production baseline
+failed six of twelve cases. Separate frozen held-out cases cover both reference
+schemes and caller-defined truthiness/equality methods; baseline failed all eight.
+Evidence: `outputs/rsi-startup-custody-20261005/permission-input-audit`.
+Candidate validation and publication status are recorded in TestModLog/ModLog.
+These are synthetic credential tests, not native admission or secret provisioning.
+
+## Local credential provider regression — 2026-10-05
+
+The existing key-provider tests cover systemd reference pairs, permission denial
+without reads and malformed/mixed references. Existing resolver-supply tests cover
+lazy explicit backend selection and invalid owner/binding/mixed runner rejection.
+`modules/infrastructure/secrets_mcp/tests/test_systemd_credential_secret_resolver.py`
+uses controlled OS fixtures for lifetime, ACL, file identity, symlink, size, encoding
+and audit-callback negatives. These tests do not prove actual systemd delivery.
+
+The separate local public-canary experiment exercised the real class under an
+isolated nonroot systemd unit: valid read, expired rejection without a value,
+wrong requester rejection and cleanup. It also preserves the initial group-shape
+failure that prompted strict fd-bound ACL validation. Source-bound results:
+`outputs/rsi-startup-custody-20261005`; focused206:204pass/2skip and connected152:
+151pass/1skip. Existing hosted grant-aware regression now includes resolver tests;
+hosted CI does not replay the privileged local canary.
+
+## Bootstrap grant-admission forwarding — 2026-10-05
+
+WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime
+bootstrap now forwards optional `secret_grant_admission` unchanged to the
+existing grant-aware runtime after selection and isolation. Default `None`
+preserves legacy behavior. Two frozen integration cases previously rejected the
+keyword; both now pass. Two gate-order cases also pass; connected479:472pass/7skip.
+The positive fixture substitutes outer selection/peer attachment, while executing
+actual lower grant validation, protected use, signature verification and replay
+rejection. Independent source/log review is distinct from independent execution.
+
+One bounded local Qwen3.5 proposal was rejected unchanged (incorrect plumbing);
+the four-line repair is coordinator-authored. No criteria were relaxed. Actual
+public startup still lacks authenticated dependency supply and credential custody.
+Evidence: `outputs/rsi-local-custody-20261005`; canonical backlog
+`bootstrap_grant_forwarding_20261005`. Publication pending; native RSI incomplete.
+
+## Direct revocation proof regression — 2026-10-05
+
+One added test retains the independently frozen control-key LOAD rejection;
+correct48/48 versus controlled-fault47pass/1expected failure. Existing runtime
+and tests are unchanged. This is a coordinator/team repair after0/2 accepted
+local proposals. Connected475:468pass/7skip; publication pending. See module ModLog
+and canonical backlog `control_proof_regression_20261005` for evidence.
+
+## Separate protected-use control proof — 2026-10-05
+
+**Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.
+Hosted474:471pass/3skip; exact-main CI37254048948 and CodeQL37254048507 succeeded.
+Later merged-source19/19 passed. Governed OpenClaw/WRE refresh completed442.5s;
+CURRENT/no-gap query took44.615s, one attempt/no retry. Historical6task/18event
+rows are unchanged, now7/21. Independent maintenance review and normal owned-lane
+retirement are complete; branch, bundle and ignored-file archive are preserved.
+This closes source/retrieval retention, not native worker admission or key custody.
+
+Earlier source-qualification record (historical):
+
+Two legacy custody controls pass. The17 new cases cover v2 identity/context
+binding, strict nested fields, mixed versions, real-router two-key proofs and
+preserved work proofs. Initial17fail reflect unsupported v2 shape, not17 distinct
+defects. Independent review strengthened malformed cases with identity-only
+validation so stale grant signatures cannot mask missing field checks. Candidate
+17pass; connected17-suite regression474:467pass/7platform skips,0fail/errors.
+Source review approved; publication pending. Test key access
+inside the callback is not actual resolver execution or native key custody.
+Exact evidence: `outputs/rsi-control-auth-20261005`; see module ModLog.
+
+CI37252460162 found a Windows-only mocked socket path in the newly included
+authority-service suite (42fail/90setup errors). The two substituted-transport
+paths now derive the platform root; production checks and assertions are
+unchanged. Linux hosted validation must pass on the corrected head.
+
+## Owner-bound lazy signer composition — 2026-10-05
+
+Existing signer runtime now has explicit one-target grant-aware composition;
+the public system-service entrypoint/default remains unchanged. Independent
+review/test failures drove callback-only generation locking, owner/store/oracle
+binding and a pre-sign lifetime/local-revocation recheck. Final connected:
+277pass/4platform skips,0fail/errors;14 suites selected in CI. Native setup and
+autonomous RSI remain open. See module ModLog and canonical RSI backlog
+`signer_lazy_owner_composition_20261005` for exact evidence and failure history.
+
+## Factory peer-instance propagation — 2026-10-05
+
+The existing factory test owner has14 frozen cases: original8 plus6 new handshake
+cases. Baseline10pass/4 missing-keyword failures; candidate14pass, no errors/skips.
+The direct valid control and unbound rejection establish fixture validity.
+Successive factory-built backends produce verified signatures; altered input and
+session/generation/profile substitutions reject. No existing test AST changed.
+
+Nine-suite connected selection:127pass/4skip of131, with normal package imports.
+Windows lacks AF_UNIX for one real-socket test; two symlink-privilege cases and
+one Linux-only case also skip. Original focused-harness attempt119pass/8fail/4skip
+is preserved; its URI/subprocess restrictions did not identify source defects.
+CI selects all nine suites. Scope is synthetic source qualification, not peer
+credential provenance, genuine vault access, service activation or native RSI.
+Exact commands and receipt hashes are in backlog `signer_factory_peer_binding_20261005`.
+The previous grant-digest slice PR2065 is merged/main-verified with hosted111/111.
+
+## Authenticated effect consent — 2026-10-04
+
+Local source qualification:97/97 and connected328/328 pass. The original95-case
+baseline failed on absent APIs; two later independent-review regressions failed
+before repair. Original criteria remain unchanged. See the module ModLog and
+canonical RSI backlog `authenticated_effect_consent_20261004` for exact commands,
+source bindings and test-provenance limits. Native effect admission and hosted
+publication are separate gates; retain fail-closed defaults.
+
+## Supplied effect-sovereign evidence — 2026-10-04
+
+Selected14/P1 (C3/I4/D4/Impact3), extending only the existing consensus policy
+and evidence owners. The new frozen record and matcher bind supplied approval
+references to the recomputed parent, full signing target, effect and policy,
+with exact types, bounded identity text and complete lifetime coverage.
+A true match authenticates nothing and grants no permission. Trusted production
+provenance, effect permits and native admission remain separate work.
+
+Independent frozen baseline:83 missing-API failures; candidate83/83 pass.
+Connected242/242 pass, including the83; zero errors/skips and unchanged criteria.
+Existing function/class ASTs are unchanged; both runtime files remain within
+200 lines and functions within50. One local Qwen call supplied only the lifetime
+helper, whose integrated AST is unchanged. Its prospective format and static
+scope pass; the coordinator supplied the formula and wrote the outer matcher.
+SDK telemetry:642 input/81 output tokens;53.281s parent elapsed;0 paid calls.
+Total cost and retained gain are unknown. No automatic learning or runtime grant.
+
+Exact-source review and publication are separate gates. Canonical evidence:
+`current_observation.effect_sovereign_binding_20261004` in the RSI backlog;
+PC artifacts: `outputs/rsi-effect-sovereign-binding-20261004`. WSP00/5/6/11/15/
+22/48/50/62/84/97/99. Next: authenticate supplied effect evidence through the
+existing owner, then qualify the effect-specific permit/provider composition.
+
+## Effect request preparation — 2026-10-04
+
+13/P1 source prerequisite: existing issuer preparation now feeds the canonical
+effect-binding surface before authorization. Local43/43 and connected78/78
+pass. PR2058 merged at00e0c044f with11 successful PR checks and both exact-main workflows successful;495 effect-boundary and49 MCP cases passed. Owned lane retired with recovery preserved. Local Qwen content required
+coordinator formatting recovery and caller integration; raw format remains a
+failure. Native authority is not activated. See canonical RSI backlog
+`effect_request_preparation_20261004` and module ModLog for evidence and limits.
+
+## Offline scanner environment — 2026-10-04
+
+Four frozen environment cases plus eight prior controls: corrected baseline4 fail/8 pass; candidate12 pass.
+Connected scanner/manifest/admission run:64 pass,3 skip,83 deselected. CI runs the same selection.
+The old missing-scanner mock now covers the full locator; initial accidental scanner launch is preserved with unknown external effects.
+See [module change record](../ModLog.md#offline-scanner-environment--2026-10-04) and canonical backlog for exact receipts.
+
+## Current-generation quorum acceptance — 2026-10-04
+
+Independent author froze48 cases before production edits. Baseline:47 failures,
+1 pass, zero errors/skips/unexpected failures.45 failures represent the missing
+plural entry point; two reproduce the existing late input-mutation and unbounded
+runtime snapshot-call gaps. The unchanged single-review positive passed.
+
+Candidate:153 selected cases pass; broader466-case consensus/reviewer/designation/
+signer/replay/structure suite passes, no errors/skips. These selections overlap.
+Positive fixtures use two distinct test-only Ed25519 keys, model/runtime bindings
+and roles. Assertions cover exact signature inputs, one lease/artifact read,
+one runtime resolution per reviewer, every evidence reference, same-object reuse,
+key/runtime/manifest/selection/context expiry, owner/finish-clock mutations,
+whole-set rejection, cleanup failures, interrupts and invalid input before owner
+selection. Actual OS owner provenance remains the separate existing eight-case
+Linux path; these portable fixtures substitute owner/lease/runtime boundaries.
+
+New test/support leaves preserve200-line and50-line function caps; actual
+inventory31→33 only. Existing guarded CI adds the48 exact cases (452 total),
+without relaxing audit rules. Earlier local Windows guarded collection failures
+belong to PR2048; no retry or new local guarded success is claimed here.
+Registry1674 files/270 quarantined is inventory, not a pass count. Source review,
+integrity and hosted publication evidence remain separate.
+
+Frozen hashes/IDs, baseline and candidate XML/logs:
+`O:/Foundups-Agent/outputs/rsi-current-generation-quorum-20261004/`.
+
+## Bounded effect-review quorum qualification — 2026-10-04
+
+A separate worker froze 63 acceptance cases before production edits. Original
+source: 63 expected missing-API failures, zero errors/skips (26 original cases
+deselected). Candidate: all 63 pass, and all 315 connected consensus, signer,
+author-runtime, nonce/transaction, composed-e2e and structure cases pass locally.
+The 63 cases and prior 70-case split check overlap that 315-case run.
+
+Tests cover 1/2/8 reviews, 8192/8193-byte envelopes, roles/counts, duplicated
+identity/key/model/runtime, author exclusions, tampered or stale evidence,
+invalid extras and exact signing preimages/resolver call counts. Inert resolver
+fixtures do not establish deployed independence. One arbitrary-sovereign-digest
+positive deliberately preserves the distinction from sovereign authorization.
+
+The original reviewer file was restored exactly. Frozen test function/decorator
+ASTs and all case parameters moved unchanged into two bounded test leaves;
+existing 200-line/50-line limits remain. Broader validation initially found two
+structural failures (208 passed), then three missing-import failures after the
+move (301 passed). One missing `_digest` import was repaired; expectations were
+not changed. Exact movement/attempt receipts remain in
+`O:/Foundups-Agent/outputs/rsi-review-quorum-20261004/`.
+
+Existing guarded CI explicitly adds 63 quorum cases and ten old-domain
+verification/signer regressions; its seven structure checks were already present.
+Eight staged manifest tests and the Node compatibility contract passed. Two
+local attempts at the exact guarded CI script stopped during collection (three
+errors each): isolated default Python lacked jsonschema; the qualified Windows
+interpreter failed an asyncio import (base_events undefined). These are not executed
+acceptance cases. Guard controls remain unchanged; hosted Linux is required.
+Hosted/main results remain separate. The canonical registry now has 1673 test
+files, 270 quarantined; inventory counts are not passing test counts.
+
+
+## Connected reviewer authority qualification — 2026-10-01
+
+Final registry: 1672 files, 270 quarantined. The dedicated Linux fixture now
+rejects unsupported collection before importing its helpers; the existing static
+classifier marks it operational/noncollectable. Its explicit eight-case CI path
+remains mandatory. Candidate-3 also passed198; candidate-4 reruns the same198
+after this collection guard changed a bound source file.
+
+Local candidate-4 passed **198/198**, zero failures/errors/skips, exact cases,
+stable source samples and no unexpected guard denials. The selection combines
+86 designation/composition/artifact/supplier cases, 15 owner/readiness cases,
+2 existing-owner consumer cases and 95 prior controls. Earlier 196-case attempts
+remain recorded as 183 passes/13 guard failures and 193 passes/3 guard failures;
+bounded fixture/import-closure corrections preceded the successful run.
+
+Portable composition uses real ephemeral test-only Ed25519 signatures and actual
+parsers/effect verification while substituting owner reads/generation leases.
+It therefore cannot qualify OS ownership. Separate mandatory Linux selection is
+five real-root cases (positive, wrong UID, writable owner, symlink, anchor tamper)
+plus the existing transport v3/v4/v5 cases. Every new negative first reaches a
+connected positive. Anchor corruption is not valid signed-generation rotation;
+transport fixture seams do not prove live socket services.
+
+CI selects **331 portable + 8 Linux cases; hosted results pending**. The Linux
+runner requires isolated assertion-enabled root Python, a disposable `/root`
+fixture, cleared environment, explicit eight nodes and a four-minute workflow
+limit. It confines test databases/writes and denies network/providers/processes
+through Python guards; this is not OS containment. Sources are sampled before
+and after execution, not made immutable. Actual installed runtime provenance,
+quorum/effect permission, native admission and retained gain remain unqualified.
+
+Frozen plans, source reviews, exact XML/logs and all attempts are retained under
+`O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/`.
+PR #2013's earlier crypto prerequisite is closed at `c9d1273`; historical pending
+statements below describe their original checkpoints, not current closure.
+
+## Real Ed25519 effect-review qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_crypto.py` adds 6 independently
+authored cases using disposable in-memory keys and the real public verifier.
+Each case asserts the backend was called with an independently serialized exact
+preimage. One valid signature accepts; payload/signature/key tampering, delegated
+prefix and unrelated-message signatures reject. Private keys are never serialized.
+Missing cryptography fails collection; CI explicitly installs 46.0.7. This extends
+the earlier 82 recording-verifier controls without changing their meaning.
+
+Local reviewed 95-case command: qualified Python `-I -S -B` runs
+`O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-implementation/execute_tests.py candidate`;
+the controller invokes the 90-second `-I -B` runner with frozen exact node IDs.
+Results: 95 passed,0 failures/errors/skips; source samples stable, no unexpected
+guard denials or database opens. Python audit constraints are not OS isolation.
+Hosted 228 selection/publication receipts are separate. Supplied resolver records
+remain synthetic; real test signatures do not authenticate production provenance,
+the planned inner designation, quorum, worker admission or retained RSI benefit.
+
+## Effect-review verifier qualification — 2026-10-01
+
+The new effect-review test siblings freeze 82 connected cases with recording
+inert resolvers and signature verifier, independent canonical preimage checks,
+strict wire/policy/context rejection and reviewer/evidence exclusions. No
+private-key/signing/provider/store/runtime constructor is called. Baseline82
+missing-API failures → candidate82 passes; existing140 hosted selections retained
+with 82 new exact nodes. Hosted results pending. Local reviewed tests use Python
+audit constraints, not an OS sandbox or an admitted WRE impact-plan execution.
+Fixtures cannot supply authentic production authority or retained RSI benefit.
+
+## Effect-context correlation qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_correlation.py` freezes 43 cases:
+positive boundaries, malformed typed contexts, time bounds, stale B fields,
+consistently valid changed targets and actual parent/target substitutions.
+Reuses the existing pure `_binding_inputs`/golden fixture, never signing helpers.
+Baseline 43 missing-API assertion failures → candidate 43 passes; no errors/skips.
+Old 97 CI nodes remain unchanged; the 43 exact new nodes make 140, hosted pending.
+Local execution uses reviewed Python audit constraints, not an OS sandbox or WRE
+runtime admission. Synthetic positive correlation is not authentic approval.
+
+## Inert effect-context qualification — 2026-10-01
+
+`test_reddog_elevated_authority_consensus_effect_context.py` contains47 frozen
+data-only cases. Golden bytes/digest, immutable round-trip, exact field bounds,
+8192/8193-byte boundary, malformed wire/manual contexts and past/future values
+are tested without clock/admission semantics. No signing fixtures are imported.
+Baseline47 failures were explicit missing-API assertions, not collection errors
+or an old security bypass. Candidate47passes; zero errors/skips in both runs.
+
+Exact local commands: qualified Python `-I -S -B` runs the reviewed audit
+`execute_tests.py baseline` / `execute_tests.py candidate`; it launches the
+90-second `-I -B` guarded pytest selection in `run_contract_tests.py`.
+Frozen IDs/oracles, manifests, original XML/logs and receipts are under
+`O:/Foundups-Agent-audits/20261001-rsi-effect-context/`.
+Independent source/runner/result review is separate from test execution.
+Python guards are not OS isolation; sampled hashes are not immutable execution.
+
+Existing CI qualification preserves all50 prior nodes and adds47 exact IDs;
+hosted97 pending. All seven structural checks remain, only exact leaf inventory
+counts increase; size limits unchanged. Registry generation uses the existing
+auto_test_registry_audit skill:1662 files/269 quarantined, new leaf collectable
+as unit. Runtime approval, worker admission and retained benefit are not tested.
+
 ## Existing consensus structural gates — 2026-10-01
 
 Closed the previously recorded201-line helper debt by removing one blank line
@@ -1402,9 +2067,38 @@ python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_executio
 ```
 
 Focused signer resolve-per-sign E0 boundary:
+
+The synthetic grant/crypto matrix in `test_reddog_signer_resolve_per_sign_backend.py`
+uses an explicitly named unit backend to isolate grant consumption, revocation,
+resolution and response checks. It is not authenticated owner-admission evidence.
+Its frozen factory-rejection cases still instantiate the exact production class.
+The admitted socket runtime suite covers real owner leases, consuming-boundary
+identity, instance-method substitution, current binding, root ACQUIRE/FINISH
+ordering and replay with synthetic enrolled keys and transport fixtures.
+
+The HIGH elevated-consensus and effect-issuer composition tests explicitly
+parameterize `synthetic_owner_unit`: only the synthetic unit route accepts their
+ownerless fixtures. The exact production route must reject and issue no authority
+or effect lease. Their original orchestration assertions remain useful but do
+not establish authenticated HIGH/effect admission. That capability remains an
+open roadmap prerequisite. LOW runtime/factory and concurrent revocation tests
+use the actual owner-leased constructor rather than the unit adapter.
+
 ```powershell
 python -m pytest modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_contract.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_grant_revocation_durable_authority.py modules/communication/moltbot_bridge/tests/test_reddog_signer_secret_access_grant.py modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_socket_protocol.py modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py modules/communication/moltbot_bridge/tests/test_reddog_signer_wsp71_ephemeral_backend_factory.py -q
 ```
+
+`test_reddog_signer_wsp71_ephemeral_backend_factory.py` also composes the real
+factory, resolve-per-sign backend and socket-v2 handler with a signed synthetic
+LOW readonly grant. It observes durable consume-before-resolve and verifies the
+exact signature. Six rejection controls trap secret extraction on invalid
+reference/hash metadata, original mock mode, denial and expiry. These fixtures
+do not establish live vault access, authentic principal enrollment or deployed
+service wiring. The CI grant-aware signing step additionally runs key-provider,
+runtime-wiring, system-service entrypoint, resolver-supply and conversation
+regressions. The shared test helper uses explicit per-test native roots, derives
+default socket/anchor paths from effective roots and preserves explicit negative
+overrides. Production path checks are unchanged.
 
 The revocation-contract cases use only signed test fixtures. They prove exact
 authority/generation/store binding and attacker-rehash rejection. The durable
@@ -1443,3 +2137,14 @@ worktree, OpenClaw, or execution-valve authority.
 Signer regressions also require the explicitly selected durable authoritative
 work state and reject missing state, split-path substitution, marker and
 queue/claim stripping, or injected state that differs from the durable payload.
+## Persisted HoloIndex admission recovery — 2026-10-05
+
+`test_holoindex_persisted_resume.py` has 29 frozen cases for durable bindings,
+pointer/authority rejection and existing retry timing/budget. Baseline: 28
+missing-API failures and one generic stale-index rejection pass. Candidate: 29
+pass. Six separate controller cases cover lease/preflight ordering, incident
+retention, exact-task runtime startup, retry-wait without startup, interruption
+and failed cleanup. The connected 181-case selection passes without errors/skips.
+Ports use in-memory DB/Git/runtime doubles; no live maintenance is proved.
+Original failing runs, frozen criteria and commands are retained under
+`outputs/rsi-holo-grounding-20261005`. CI runs the connected selection.

@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from modules.infrastructure.idle_automation.src.holoindex_postmerge_contract import (
     ASSIGNMENT_LEASE_SECONDS,
@@ -219,6 +219,42 @@ def preexisting_runtime_topology(broker: Any) -> str:
         )
     ]
     return "all" if all(active) else "partial" if any(active) else "none"
+
+
+def _wait_for(
+    predicate: Callable[[], bool], *, deadline: float,
+    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
+) -> bool:
+    while clock() < deadline:
+        if predicate():
+            return True
+        sleeper(interval)
+    return predicate()
+
+
+def _stop_owned(
+    broker: Any, owned: Sequence[str], *, deadline: float,
+    clock: Callable[[], float], sleeper: Callable[[float], None], interval: float,
+) -> tuple[tuple[str, ...], tuple[str, ...]]:
+    stopped: list[str] = []
+    errors: list[str] = []
+    for runtime_id in reversed(tuple(owned)):
+        try:
+            requested = broker.stop_dae(runtime_id, actor_id="0102")
+            if requested.get("success") is not True:
+                errors.append(f"{runtime_id}_stop_failed")
+                continue
+            dead = _wait_for(
+                lambda: broker.get_runtime_status(runtime_id).get("thread_alive") is False,
+                deadline=deadline, clock=clock, sleeper=sleeper, interval=interval,
+            )
+            if dead:
+                stopped.append(runtime_id)
+            else:
+                errors.append(f"{runtime_id}_stop_timeout")
+        except BaseException:
+            errors.append(f"{runtime_id}_stop_exception")
+    return tuple(stopped), tuple(errors)
 
 
 __all__ = [

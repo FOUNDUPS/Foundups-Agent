@@ -1,5 +1,32 @@
 # YouTube Shorts Scheduler - TestModLog
 
+## 2026-10-18 - Launcher import without browser dependencies
+
+**By:** 0102
+**File:** `tests/test_launch_import.py` (one isolated offline regression)
+
+- Imports the actual launcher through real package parents in a fresh Python
+  child and verifies its public launcher functions are callable, without calling
+  them. Browser/scheduler imports raise `AssertionError`; an audit hook denies
+  socket actions, child processes and shell commands. Registry fixture data stays
+  in the test's temporary directory; the child does not inherit operator config.
+- **MUST-FAIL evidence:** ran the new test before moving the import. It failed at
+  `launch.py` -> `src.__init__` -> denied `src.scheduler` loading. After moving
+  `get_peak_slots_et` into `run_multi_channel_scheduler`, the same test passed.
+- Validation with `/tmp/afm-validation-venv/bin/python -B -m pytest`, using
+  `-q --tb=short -p no:cacheprovider`: new test **1 passed**;
+  `modules/communication/moltbot_bridge/tests/test_reddog_main_architect_fix_promotion_bootstrap.py::test_main_preflight_does_not_promote_without_process_local_authority`
+  **1 passed**. Selenium was absent. Both runs emitted only the existing
+  pytest-asyncio configuration warnings in that local validation environment.
+- The unchanged 27-file resident-chain CI selection passed locally: **613 passed,
+  1 skipped** with local Unix socket capability available and Selenium absent.
+  The first sandboxed replay had 612 passed and one socket-readiness failure;
+  the same socket test passed outside that restriction before the full replay.
+  The new launcher test runs in a separate pytest command in the same CI step,
+  avoiding a collection collision between the two owners' `tests` packages.
+- These results cover import isolation and the offline resident-chain selection;
+  they do not establish live browser scheduling behavior or the full CI result.
+
 ## 2026-06-19 - test_schedule_include_private: flag-gated PRIVATE pass (mock-only, MUST-FAIL proven)
 
 **By:** 0102 (Worker-Lane SCHED-PRIVATE)

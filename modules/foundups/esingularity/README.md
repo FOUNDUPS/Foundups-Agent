@@ -14,6 +14,15 @@ Project eSingularity combines a Japanese-first community campaign with a staged 
 
 **Public site**: https://esingularity.ai/
 
+**Canonical LinkedIn project page**: https://www.linkedin.com/company/esingularity/  
+**LinkedIn company ID**: `2199715`
+
+The LinkedIn company page is a **social/publishing surface of `esingularity_001`**, not a separate FoundUp. Current partner-facing content should route through the eSingularity.ai project identity when the topic is AI Koban, regional/sovereign AI infrastructure, JHR, three-site feasibility, community-first compute, or strategic partner development. YUMORI.me remains the civic/community implementation surface. Historical Educational Singularity material is provenance, not the default scope of the current company page.
+
+The legacy pfMALL identifier `linkedin_esingularity` may remain temporarily as a compatibility/source alias, but it must not be treated as an independent venture beside `esingularity_001`. Migrate or retire that alias only through an explicit catalog change with regression coverage.
+
+LinkedIn mutation still requires live signed-in identity verification. Public naming and repository intent use **eSingularity.ai**; cached LinkedIn surfaces may lag, so a desired or cached label alone is not publication proof.
+
 **Lifecycle**: Internal Proto
 **Deployment**: OpenAI Sites
 
@@ -25,9 +34,12 @@ The WSP 97 workflow also covers bounded history/research, distinct homepage owne
 
 ## Government and correspondence operations skills
 
+- [MLIT F-08 official forms and verification](docs/official/mlit_ppp_study_20261005/README.md): preserved official ZIP, inventory, October 5 verification and unresolved Form 2-4 requirement.
+
 YUMORI operations use repository-owned skills instead of rebuilding procedure from chat memory:
 
 - [Fukui City procedure](skillz/fukui_city_procedure/SKILLz.md): Council 請願/陳情, exact official forms, executive PPP/PFI, information disclosure, procurement stages, meetings/access, routing and legal handoff.
+- [Recipient document audit](skillz/recipient_document_audit/SKILLz.md): mandatory subordinate review of proposals, PDFs/forms and linked packages for the intended reader, total reading burden, internal artifacts and exact final rendering; review-only remains unsent.
 - [YUMORI.me correspondence / contact ledger](skillz/yumori_contact_ledger/SKILLz.md): YUMORI adapter over native Red Dog correspondence continuity, adding live provider/CRM reconciliation, routing consent, 0102 proxy voice, receipts and reusable operator learning.
 - `reddog_correspondence_state` in `modules/communication/moltbot_bridge/skillz/`: generic private runtime correspondence continuity; compact provider events + one materialized scope state per stakeholder/topic, with provider-watermark refresh and no raw mailbox bodies.
 - `reddog_recipient_preflight` in `modules/communication/moltbot_bridge/skillz/`: mandatory fail-closed recipient authorization before send-ready correspondence, including exact To/CC/BCC and provider read-back.

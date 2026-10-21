@@ -1,3 +1,62 @@
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
+## 2026-10-15 — Initial enrollment backend binding
+
+Existing RedDog fast tier15members passed after regenerating the1426-member
+manifest and both consumer/generator pins. Initial generator checks exposed
+stale digest pins; those were updated to generated content rather than removing
+assertions. No member/cap/version relaxation or installed extension change.
+Evidence: `O:/RedDog-Builder-Artifacts/rsi-initial-manifest-20261015/reddog-fast.log`
+and `manifest-tests-final.xml`; hosted checks remain separately verified.
+
+## 2026-10-05 — WRE measured-zero fidelity binding (P15)
+
+The existing runtime manifest still covers1408 files; the reviewed PatternMemory
+repair changes its content digest to
+`3938f30d19cd46ecc909fc429fad9f2e967a1beb5709d7e75dc69965ff84d183`.
+Both existing consumer/generator pins are refreshed, with unchanged member and
+byte limits. Eight generator contracts pass (63.719s); the RedDog fast tier
+passes all15 members (10.000s parent), with stable named source pins. Hosted
+publication is verified: PR2062 and exact-main CI/CodeQL passed at `6efbc3ac1`.
+Hosted 340 WRE and 675 effect selections are recorded separately, not added to
+these integrity counts. P15 retained/control/recovery confirms the repaired
+consumer on unchanged saved rows; no model-learning or worker repair claim.
+See the canonical P15 RSI checkpoint. WSP5/22/50/97.
+
+## 2026-10-05 — WRE telemetry manifest boundary
+
+The existing compatibility boundary fixture now admits1408 members/rejects1409
+for the two declared audit-skill runtime additions. The generator test pins
+canonical digest `1cae5e88497899ef4021912002b85ad495cdb172196cc72a9dc9f46c58d59428`.
+No other assertions or byte limits changed. Exact consumer validation is
+recorded in the existing P14 RSI checkpoint; no installation/deployment implied.
+WSP5/6/22/50/95/97.
+
+## 2026-10-04 — Consent manifest consumer boundary
+
+`node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduces
+the1406-versus1404 assertion failure on the original PR2060 head. Production
+MAX_RUNTIME_FILES and its exact boundary fixture now admit1406/reject1407;
+the strict digest, byte caps and all other assertions are unchanged.
+`node extensions/reddog/tests/run_reddog_test_tier.js fast` passes15 members
+locally (Node24.11.1,13.142s). Hosted Node22.23.3 failed on the historical head;
+replacement-head CI remains required. Package projection remains67 files and
+950438 bytes; refreshed content digest
+`0a928318bc551f96dcae974c72d36cccde28fb1f994c0d619057476929d3b8bd`.
+No packaging, installation or deployment is implied by the projection test.
+WSP5/6/22/50/97.
+
 ## 2026-09-28 - Correspondence-state Skillz backend manifest reconciliation
 
 - RedDog fast tier initially failed the existing backend compatibility preflight after `skills_registry_v2.json` changed.

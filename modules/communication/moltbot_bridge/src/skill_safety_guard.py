@@ -240,6 +240,10 @@ def _scanner_environment(report_path: Path) -> dict[str, str]:
         TMP=str(report_path.parent),
         TEMP=str(report_path.parent),
         PYTHONIOENCODING="utf-8",
+        PYTHON_DOTENV_DISABLED="1",
+        LITELLM_MODE="PRODUCTION",
+        LITELLM_LOCAL_MODEL_COST_MAP="True",
+        PYTHONDONTWRITEBYTECODE="1",
     )
     return environment
 

@@ -13,7 +13,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `scripts/advisory_model_once.py` - OpenRouter bridge and redaction gate (repo root)
 - `scripts/reddog_holoindex_owner_query_once.py` - authenticated generation-bound owner query bridge (repo root)
 - `modules/communication/moltbot_bridge/src/reddog_public_policy.py` - public guest origins, caps, and unsigned Lick Verification input; no identity or private authority
-- `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest quotas, expiry, replay, withdrawal and concurrency accounting
+- `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest/Lick quotas, one-use host leases, owner-bound completion and expired-owner recovery; resident activation still gated
 - `modules/communication/moltbot_bridge/src/reddog_public_http.py` - opt-in public-only ASGI router; unmounted until host/responder/ingress proof
 - `modules/foundups/mobile_worker_skills/foundups-contact-discovery/SKILL.md` - public contact discovery worker: canonical identity anchor, official/public email + social discovery, cross-verification, purpose separation, provenance/confidence, no guessed private data
 
@@ -35,7 +35,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 
 - `buildCopyMarkdown`, `buildRunTraceSection`, `holoIndexMetaFromBundle`, `evaluateTargetRecall`
 - `isGenerationBoundHoloQueryAccepted`, `mergeGenerationBoundHoloResult`, `buildMetaFromBundle`
-- `PublicPolicy`, `PublicSessionGate`, `PublicSurfaceBinding`, `lick_verification_evidence`
+- `PublicPolicy`, `PublicSessionGate`, `PublicSurfaceBinding`, `lick_verification_evidence`, `register_host`, `renew_host`, `reclaim_orphaned_turns`
 
 ## Memory / history recall targets
 

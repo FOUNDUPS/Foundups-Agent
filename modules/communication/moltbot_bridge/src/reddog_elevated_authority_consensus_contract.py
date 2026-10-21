@@ -12,6 +12,8 @@ CONSENSUS_SCHEMA_VERSION = "reddog_elevated_authority_consensus.v1"
 EFFECT_TARGET_BINDING_SCHEMA_VERSION = "reddog_effect_target_binding.v1"
 DECISION_SCHEMA_VERSION = "reddog_elevated_authority_reviewer_decision.v1"
 DECISION_SIGNING_PREFIX = "reddog-elevated-consensus-review.v1"
+EFFECT_DECISION_SCHEMA_VERSION = "reddog_effect_reviewer_decision.v1"
+EFFECT_DECISION_SIGNING_PREFIX = "reddog-effect-consensus-review.v1"
 APPROVE = "APPROVE"
 
 
@@ -176,6 +178,7 @@ def canonical_consensus_receipt_digest(
 
 __all__ = [
     "EFFECT_TARGET_BINDING_SCHEMA_VERSION",
+    "EFFECT_DECISION_SCHEMA_VERSION", "EFFECT_DECISION_SIGNING_PREFIX",
     "APPROVE", "CONSENSUS_SCHEMA_VERSION", "DECISION_SCHEMA_VERSION",
     "ElevatedAuthorityConsensusContext", "ElevatedAuthorityConsensusReceipt",
     "ElevatedAuthorityReviewerDecision", "canonical_authority_request_digest",

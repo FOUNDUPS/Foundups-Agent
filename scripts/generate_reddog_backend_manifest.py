@@ -98,6 +98,10 @@ STATIC_RUNTIME_FILES = (
     "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
     "modules/infrastructure/wre_core/skillz/"
     "auto_test_registry_audit/SKILLz.md",
+    "modules/infrastructure/wre_core/skillz/"
+    "auto_test_registry_audit/SKILL_MANIFEST.json",
+    "modules/infrastructure/wre_core/skillz/"
+    "auto_test_registry_audit/executor.py",
     "modules/ai_intelligence/ai_overseer/skillz/"
     "m2m_holo_retrieval_benchmark/retrieval_corpus_v1.json",
 )

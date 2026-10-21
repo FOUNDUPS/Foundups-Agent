@@ -51,6 +51,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_audit_attestation im
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_access_grant_contract import (
     GRANT_SCHEMA,
+    SignerSecretAccessGrantRejected,
     canonical_signer_secret_access_grant_input,
     signer_secret_access_grant_id,
     signer_secret_access_request_digest,
@@ -534,7 +535,7 @@ def _provider_for(
 ) -> IndependentSignerSecretGrantProvider:
     @contextmanager
     def lease(**_kwargs):
-        yield SimpleNamespace(policy=policy, resolver=_Resolver(_public(private)))
+        yield SimpleNamespace(policy=policy, selection={"generation": 1}, resolver=_Resolver(_public(private)))
 
     monkeypatch.setattr(
         provider_module, "lease_validated_owner_e0_current_admission", lease
@@ -567,12 +568,19 @@ def test_provider_holds_generation_lease_through_caller_use(
     binding = _binding(store, _public(private))
     policy = _owner_policy(binding)
     active = {"value": False}
+    original_sign = client.sign
+
+    def unfenced_sign(request):
+        assert active["value"] is False
+        return original_sign(request)
+
+    monkeypatch.setattr(client, "sign", unfenced_sign)
 
     @contextmanager
     def lease(**_kwargs):
         active["value"] = True
         try:
-            yield SimpleNamespace(policy=policy, resolver=_Resolver(_public(private)))
+            yield SimpleNamespace(policy=policy, selection={"generation": 1}, resolver=_Resolver(_public(private)))
         finally:
             active["value"] = False
 
@@ -607,6 +615,41 @@ def test_provider_holds_generation_lease_through_caller_use(
         )
     assert active["value"] is False
     assert client.calls == 1
+
+
+@pytest.mark.parametrize("exit_fails", [False, True])
+def test_issue_grant_requires_clean_owner_lease_exit(tmp_path, monkeypatch, exit_fails):
+    store = _store(tmp_path)
+    private = Ed25519PrivateKey.generate()
+    client = _GrantClient(private)
+    policy = _owner_policy(_binding(store, _public(private)))
+    provider = _provider_for(
+        tmp_path, monkeypatch, store=store, private=private, client=client, policy=policy
+    )
+    original = provider_module.lease_validated_owner_e0_current_admission
+    events = []
+
+    @contextmanager
+    def lease(**kwargs):
+        with original(**kwargs) as owner:
+            events.append("enter")
+            yield owner
+        events.append("exit")
+        if exit_fails:
+            raise ValueError("test_owner_exit_failed")
+
+    monkeypatch.setattr(provider_module, "lease_validated_owner_e0_current_admission", lease)
+    if exit_fails:
+        with pytest.raises(ValueError, match="test_owner_exit_failed"):
+            provider.issue_grant(_target_request())
+    else:
+        grant = provider.issue_grant(_target_request())
+        assert events == ["enter", "exit", "enter", "exit"]
+        assert Ed25519SignatureVerifier().verify(
+            _public(private), canonical_signer_secret_access_grant_input(grant), grant["signature"]
+        )
+    assert events == ["enter", "exit"] * (1 if exit_fails else 2)
+    assert client.calls == (0 if exit_fails else 1)
 
 
 def test_provider_rejects_invalid_audit_attestation(
@@ -742,7 +785,7 @@ def test_provider_rejects_authority_substitution(
 
     @contextmanager
     def lease(**_kwargs):
-        yield SimpleNamespace(policy=policy, resolver=_Resolver(_public(private)))
+        yield SimpleNamespace(policy=policy, selection={"generation": 1}, resolver=_Resolver(_public(private)))
 
     monkeypatch.setattr(
         provider_module, "lease_validated_owner_e0_current_admission", lease

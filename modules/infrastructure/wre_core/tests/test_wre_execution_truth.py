@@ -727,9 +727,12 @@ def test_native_contract_raw_recording(selection, native_contract_boundary):
         master = WREMasterOrchestrator(**({} if selection == "omitted" else
                                          {"local_proposal_mode": "raw"}))
     result = _native_contract_call(master)
-    assert state.model.raw == [(_NATIVE_SYSTEM + "\n\n" + _NATIVE_PROMPT,
-                               {"max_tokens": 512, "temperature": 0.2,
-                                "stop": ["\n\n", "###"], "echo": False})]
+    assert len(state.model.raw) == 1
+    prompt, settings = state.model.raw[0]
+    assert prompt.startswith(_NATIVE_SYSTEM + "\n\n")
+    _assert_proposal_prompt(prompt[len(_NATIVE_SYSTEM) + 2:], _NATIVE_SKILL, _NATIVE_CONTEXT)
+    assert settings == {"max_tokens": 512, "temperature": 0.2,
+                        "stop": ["\n\n", "###"], "echo": False}
     assert len(state.init) == 2 and len(state.resolved) == 1
     assert state.handlers == [] and state.model.completions == []
     assert result["proposal"] == "raw proposal"
@@ -832,13 +835,15 @@ def test_native_contract_branch_wiring(
     else:
         assert result["proposal"] == "chat proposal" and result["steps_completed"] == 0
         assert result["error_code"] == "unverified_model_proposal"
+        prompt = state.renders[0]["messages"][1]["content"]
+        _assert_proposal_prompt(prompt, _NATIVE_SKILL, _NATIVE_CONTEXT)
         assert state.renders == [{"messages": [{"role": "system", "content": _NATIVE_SYSTEM},
-                                {"role": "user", "content": _NATIVE_PROMPT}], "enable_thinking": False}]
+                                {"role": "user", "content": prompt}], "enable_thinking": False}]
         assert state.model.tokens == [(b"fixed synthetic rendered prompt", False, True)] * 2
         assert state.model.completions[0]["prompt"] == list(range(1536))
-        assert state.model.completions[0]["stop"] == ["###", "<eos>"]
+        assert state.model.completions[0]["stop"] == ["<eos>"]
         assert state.handlers[0][1] == {"max_tokens": 512, "temperature": 0.2,
-                                         "stream": False, "stop": ["###"]}
+                                         "stream": False, "stop": []}
         assert state.formatter_init == [{"template": _NATIVE_PROFILE_TEMPLATE,
                                         "eos_token": "<eos>", "bos_token": "<bos>",
                                         "stop_token_ids": [2], "add_generation_prompt": True}]
@@ -1101,3 +1106,229 @@ def test_local_lifecycle_interruption_preserves_primary(mode, lifecycle_boundary
     assert state.engine_closes == state.constructed and len(state.constructed) == 1
     assert state.native_closes == [(None, False)]
     assert state.constructed[0].llm is None and state.constructed[0]._initialized is False
+
+
+# Transport lineage is consumed by the master, not serialized into model input.
+_CONTINUITY_REFLECTION = (
+    '# Skill Evolution Reflection\n\n## Current Skill\n# Skill\nReturn a proposal.\n\n'
+    '## Last Execution (fidelity=0.50)\n'
+    'Input: {"x": 1, "proposal_mode": "native_chat"}\n'
+    'Output: {"success": false}\n\n## Past Failures\nNone recorded yet.\n\n'
+    '## Past Successes\nNone recorded yet.\n\n## Task\n'
+    'Analyze why fidelity is 0.50 (below 0.90 target).\n'
+    'Generate IMPROVED skill instructions that address the failure patterns.\n'
+    'Output the improved SKILL.md content (YAML frontmatter + instructions).\n'
+    'Keep the same name: continuity_skill\n'
+)
+
+
+@pytest.fixture
+def continuity_proposal_parent():
+    from modules.communication.moltbot_bridge.src.continuity_context import (
+        ContinuityContext, RuntimeSurface,
+    )
+    return ContinuityContext(
+        continuity_id="synthetic-parent", surface=RuntimeSurface.OPENCLAW,
+        session_id="synthetic-session", sender="synthetic-sender", channel="test",
+        created_at="2026-10-04T00:00:00Z", last_activity_at="2026-10-04T00:00:00Z",
+        surface_metadata={"internal": "SYNTHETIC_CONTINUITY_ONLY"},
+    )
+
+
+def _continuity_reflection(context):
+    return WREMasterOrchestrator._build_reflection_prompt(
+        None, skill_name="continuity_skill", skill_content=_NATIVE_SKILL,
+        failed_output={"success": False}, input_context=context, current_fidelity=0.5,
+        failure_patterns=[], success_patterns=[],
+    )
+
+
+def test_continuity_proposal_ordinary_prompt_unchanged():
+    from modules.infrastructure.wre_core.src.local_skill_inference import _build_prompt
+    context = dict(_NATIVE_CONTEXT)
+    _assert_proposal_prompt(_build_prompt(_NATIVE_SKILL, context), _NATIVE_SKILL, context)
+    assert context == _NATIVE_CONTEXT
+
+
+@pytest.mark.parametrize("kind", ["context", "none", "mapping"])
+def test_continuity_proposal_prompt_omits_reserved_field(kind, continuity_proposal_parent):
+    from modules.infrastructure.wre_core.src.local_skill_inference import _build_prompt
+    parent = continuity_proposal_parent
+    value = {"context": parent, "none": None, "mapping": parent.to_dict()}[kind]
+    context = {**_NATIVE_CONTEXT, "parent_continuity_context": value}
+    before, parent_before = dict(context), parent.to_dict()
+    _assert_proposal_prompt(_build_prompt(_NATIVE_SKILL, context), _NATIVE_SKILL, context)
+    assert context == before and context["parent_continuity_context"] is value
+    assert parent.to_dict() == parent_before
+
+
+def test_continuity_proposal_prompt_rejects_unrelated_object():
+    from modules.infrastructure.wre_core.src.local_skill_inference import _build_prompt
+    unrelated = object()
+    context = {**_NATIVE_CONTEXT, "business_value": unrelated}
+    with pytest.raises(TypeError):
+        _build_prompt(_NATIVE_SKILL, context)
+    assert context["business_value"] is unrelated
+
+
+@pytest.mark.parametrize("mode", ["raw", "native_chat"])
+def test_continuity_proposal_route_keeps_lineage_and_truth(
+        mode, continuity_proposal_parent, lifecycle_boundary):
+    state, parent = lifecycle_boundary, continuity_proposal_parent
+    context = {**_NATIVE_CONTEXT, "parent_continuity_context": parent}
+    before, parent_before = dict(context), parent.to_dict()
+    result = _lifecycle_master(mode)._execute_skill_with_qwen(_NATIVE_SKILL, context, "qwen")
+    assert result["error_code"] == "unverified_model_proposal"
+    assert result["proposal"] == ("raw proposal" if mode == "raw" else "chat proposal")
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert result["output"] == "" and result["steps_completed"] == 0
+    if mode == "raw":
+        assert len(state.model.raw) == 1
+        prompt = state.model.raw[0][0]
+        assert prompt.startswith(_NATIVE_SYSTEM + "\n\n")
+        _assert_proposal_prompt(prompt[len(_NATIVE_SYSTEM) + 2:], _NATIVE_SKILL, context)
+        assert state.handlers == []
+    else:
+        assert len(state.handlers) == len(state.model.completions) == 1
+        prompt = state.handlers[0][0][1]["content"]
+        _assert_proposal_prompt(prompt, _NATIVE_SKILL, context)
+        assert state.handlers[0][0] == [
+            {"role": "system", "content": _NATIVE_SYSTEM},
+            {"role": "user", "content": prompt},
+        ]
+        assert state.model.raw == []
+    assert state.engine_closes == state.constructed and len(state.constructed) == 1
+    assert state.native_closes == [(None, False)]
+    assert state.constructed[0].llm is None and state.constructed[0]._initialized is False
+    assert context == before and context["parent_continuity_context"] is parent
+    assert parent.to_dict() == parent_before
+
+
+@pytest.mark.parametrize("mode", ["raw", "native_chat"])
+def test_continuity_proposal_route_rejects_unrelated_object(mode, lifecycle_boundary):
+    state = lifecycle_boundary
+    unrelated = object()
+    context = {**_NATIVE_CONTEXT, "business_value": unrelated}
+    result = _lifecycle_master(mode)._execute_skill_with_qwen(_NATIVE_SKILL, context, "qwen")
+    assert result["error_code"] == "local_model_unavailable" and result["proposal"] == ""
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert state.model.raw == state.handlers == state.model.completions == []
+    assert state.engine_closes == state.constructed and len(state.constructed) == 1
+    assert context["business_value"] is unrelated
+
+
+def test_continuity_proposal_ordinary_reflection_unchanged():
+    context = dict(_NATIVE_CONTEXT)
+    assert _continuity_reflection(context) == _CONTINUITY_REFLECTION
+    assert context == _NATIVE_CONTEXT
+
+
+@pytest.mark.parametrize("kind", ["context", "none", "mapping"])
+def test_continuity_proposal_reflection_omits_reserved_field(kind, continuity_proposal_parent):
+    parent = continuity_proposal_parent
+    value = {"context": parent, "none": None, "mapping": parent.to_dict()}[kind]
+    context = {**_NATIVE_CONTEXT, "parent_continuity_context": value}
+    before, parent_before = dict(context), parent.to_dict()
+    assert _continuity_reflection(context) == _CONTINUITY_REFLECTION
+    assert context == before and context["parent_continuity_context"] is value
+    assert parent.to_dict() == parent_before
+
+
+def test_continuity_proposal_reflection_rejects_unrelated_object():
+    unrelated = object()
+    context = {**_NATIVE_CONTEXT, "business_value": unrelated}
+    with pytest.raises(TypeError):
+        _continuity_reflection(context)
+    assert context["business_value"] is unrelated
+
+
+@pytest.mark.parametrize("body", [
+    "## Workflow Steps\n### Inspect\nRead the registered skill and report findings.",
+    "Keep the literal ### marker inside the proposal body.",
+    "Inspect the registered skill and report findings.",
+], ids=["heading", "inline", "eos-only"])
+def test_native_contract_markdown_preserves_body_and_eos(
+        body, native_contract_boundary, monkeypatch):
+    """Synthetic string-stop semantics; not a native formatter or quality proof."""
+    state = native_contract_boundary
+    original = _NativeContractModel.create_completion
+    def stop_aware_completion(model, **kwargs):
+        result = original(model, **kwargs)
+        generated = body + "<eos>FORBIDDEN_AFTER_EOS"
+        ends = [generated.index(stop) for stop in kwargs["stop"] if stop in generated]
+        result["choices"][0]["text"] = generated[:min(ends)] if ends else generated
+        return result
+    monkeypatch.setattr(_NativeContractModel, "create_completion", stop_aware_completion)
+    master = WREMasterOrchestrator(local_proposal_mode="native_chat",
+                                   local_native_chat_profile=_native_profile())
+    result = _native_contract_call(master)
+    assert result["proposal"] == body
+    assert "<eos>" not in result["proposal"] and "FORBIDDEN_AFTER_EOS" not in result["proposal"]
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert result["steps_completed"] == 0 and result["error_code"] == "unverified_model_proposal"
+    assert state.handlers[0][1] == {"max_tokens": 512, "temperature": 0.2,
+                                    "stream": False, "stop": []}
+    assert state.model.completions[0]["stop"] == ["<eos>"]
+    assert state.formatter_init[0]["stop_token_ids"] == [2]
+    assert state.model.raw == [] and len(state.model.completions) == 1
+    assert state.model.close_calls == 1
+
+
+
+def _assert_proposal_prompt(prompt, skill, context):
+    """Independent finite framing checks; no inference of model compliance."""
+    import json
+    import re
+    payload = json.dumps({k: v for k, v in context.items()
+                          if k != "parent_continuity_context"}, indent=2)
+    assert prompt.count(skill) == prompt.count(payload) == 1
+    assert prompt.index(skill) < prompt.index(payload)
+    wrapper = prompt.replace(skill, "").replace(payload, "").lower()
+    assert "parent_continuity_context" not in wrapper
+    assert "execute this skill step-by-step" not in wrapper
+    assert "structured proposal" not in wrapper
+    assert re.search(r"(?m)^\s*(execute|run|perform|apply)\b", wrapper) is None
+    assert "proposal" in wrapper and "format" in wrapper and "skill" in wrapper
+    assert "do not claim" in wrapper and "effects" in wrapper
+
+
+@pytest.mark.parametrize("mode,format_request", [
+    ("raw", "Return exactly one Python expression, with no Markdown or explanation."),
+    ("native_chat", 'Return only one JSON object with keys "decision" and "reason".'),
+], ids=["raw-expression", "native-json"])
+def test_proposal_prompt_contract_exact_format(
+        mode, format_request, continuity_proposal_parent, lifecycle_boundary):
+    state, parent = lifecycle_boundary, continuity_proposal_parent
+    skill = "# Synthetic format contract\n" + format_request
+    context = {"task": "Inspect this synthetic value without executing anything.",
+               "literal": "Execute this skill step-by-step; Draft a structured proposal.",
+               "nested": {"value": [1, True, None, "\u03bb"]},
+               "parent_continuity_context": parent}
+    before, parent_before = dict(context), parent.to_dict()
+    result = _lifecycle_master(mode)._execute_skill_with_qwen(skill, context, "qwen")
+    if mode == "raw":
+        assert len(state.model.raw) == 1 and state.handlers == []
+        prompt, settings = state.model.raw[0]
+        assert prompt.startswith(_NATIVE_SYSTEM + "\n\n")
+        prompt = prompt[len(_NATIVE_SYSTEM) + 2:]
+        assert settings == {"max_tokens": 512, "temperature": 0.2,
+                            "stop": ["\n\n", "###"], "echo": False}
+    else:
+        assert len(state.handlers) == len(state.model.completions) == 1
+        assert state.model.raw == []
+        messages, settings = state.handlers[0]
+        prompt = messages[1]["content"]
+        assert messages == [{"role": "system", "content": _NATIVE_SYSTEM},
+                            {"role": "user", "content": prompt}]
+        assert settings == {"max_tokens": 512, "temperature": 0.2,
+                            "stream": False, "stop": []}
+    _assert_proposal_prompt(prompt, skill, context)
+    assert result["error_code"] == "unverified_model_proposal"
+    assert result["proposal"] == ("raw proposal" if mode == "raw" else "chat proposal")
+    assert result["success"] is False and result["_effect_evidence"] is False
+    assert result["output"] == "" and result["steps_completed"] == 0
+    assert state.engine_closes == state.constructed and len(state.constructed) == 1
+    assert state.native_closes == [(None, False)]
+    assert state.constructed[0].llm is None and state.constructed[0]._initialized is False
+    assert context == before and context["parent_continuity_context"] is parent
+    assert parent.to_dict() == parent_before

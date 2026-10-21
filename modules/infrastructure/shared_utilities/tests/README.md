@@ -4,6 +4,14 @@ Offline pytest coverage for shared model, runtime-artifact, registry, policy,
 validation, and environment utilities. Network/model/process effects must be
 mocked in unit tests.
 
+`test_local_llm_backends.py` verifies explicit native `reasoning=None` omits
+the unsupported wire field while `off` is preserved, including exact instance,
+bounded response and no-storage assertions. Run it with
+`test_lm_studio_model_lifecycle.py` and the AI Gateway
+`test_model_topology_proposal_lm_studio.py`:61passed locally on2026-10-11.
+These are offline contract tests; live calibration evidence is in the RSI
+dispatch runbook and must not be represented as accepted model work.
+
 `test_runtime_artifact_safety.py` covers confined streaming-digest success,
 strict expected-identity/bound types, same-size restored-mtime mutation,
 replacement/link rejection, and descriptor/path stability with disposable

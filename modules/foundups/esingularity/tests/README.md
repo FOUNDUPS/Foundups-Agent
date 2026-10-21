@@ -83,3 +83,7 @@ unchanged commercial portfolio results before/after regional calculation.
 No new test file or second financial workbook is introduced. Existing portfolio,
 legacy-parity, demand and heat tests are preserved. Native FIN receipt: 41 outputs
 matched the dated Python expected values; this does not certify commercial inputs.
+
+## Website security regression
+
+`node --experimental-strip-types --test modules/foundups/esingularity/frontend/tests/interest-security.test.mjs` runs dependency-free handler/stream rejection tests and the actual admission SQL against Node SQLite. It checks quotas, duplicate submissions, expiry/midnight rollover and publication asset boundaries. Node >=22.13 is required. Production traffic protection and deployed D1 state are separate verification boundaries.

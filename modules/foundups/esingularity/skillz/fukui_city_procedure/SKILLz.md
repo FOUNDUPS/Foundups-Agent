@@ -2,6 +2,7 @@
 name: fukui_city_procedure
 description: Verify and execute Fukui City / Fukui City Council procedures for YUMORI and Sukatto Land without relearning or guessing forms, routes, deadlines, or procurement state.
 version: 0.2.0
+document_audit_policy_revision: 2026-10-08
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -15,6 +16,7 @@ evals:
   - current_primary_source_required
   - official_form_binary_fidelity
   - independent_procedure_lane_classification
+  - recipient_document_audit_required
   - recipient_preflight_required_for_correspondence
   - budget_not_contract
   - acknowledgment_not_statutory_filing
@@ -75,6 +77,12 @@ Always:
 If the exact official artifact cannot be retrieved or edited safely, set
 `BLOCKED_ON_OFFICIAL_TEMPLATE` and prepare only a field map. Do not create a substitute
 that could be mistaken for the official form.
+
+## Retained official national forms — MLIT study route
+
+For 官民連携基盤整備推進調査費 / F-08, read [the dated official-form evidence and untouched ZIP](../../docs/official/mlit_ppp_study_20261005/README.md) before searching again. It records the current downloaded inventory, integrity/open checks and the unresolved Form 2-4 discrepancy. Reverify the current round before use; this snapshot is not perpetual form approval.
+
+Separate an unresolved official submission requirement from preparatory work: hold the complete/submission-ready claim; do not invent the missing form. A clearly labeled decision memo, retrieved-form field map or clarification draft can proceed when the active instruction permits it. Preserve task-specific STOP conditions, DRAFT ONLY and recipient controls; this reference never authorizes an external send.
 
 ## Procedure lanes
 
@@ -195,6 +203,16 @@ milestone, not from the budget date alone.
 - A projection row must never reuse a Contact ID that belongs to a different
   canonical Contacts identity.
 
+## Recipient-facing documents
+
+Before finalizing a proposal, PDF, official form or linked document package, run
+`../recipient_document_audit/SKILLz.md`. Default to a one-page decision brief for
+unsolicited explanations; preserve every official-form requirement. Audit linked
+dossiers and quoted history as well as attachments. Do not treat a request to
+circulate an original petition as permission to add a new technical package.
+A recipient refusal of supplements means no further unsolicited supplements;
+keep revisions for review unless that restriction changes.
+
 ## Routing and outbound correspondence dependency
 
 All Fukui City / Council email or addressed-document actions must first apply the
@@ -202,9 +220,12 @@ repository-owned YUMORI.me correspondence parent:
 
 `modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md`
 
-That parent owns the canonical 0102 proxy voice, third-person monk reference,
+That parent owns plain committee correspondence, accurate attribution,
 Sent-first reconciliation, routing consent, receipt reconciliation, and recursive
-learning contract.
+learning. Its 2026-10-06 communication policy removes routine AI/proxy introductions
+and the default 0102 signature from external City messages. Required official-form
+identity/authority fields remain accurate and unchanged; no invented human role.
+Human-led phone assistance uses `.claude/skills/reddog-phone-conversation/SKILL.md`.
 
 Consequential outbound actions must also apply the repository-owned recipient guard:
 

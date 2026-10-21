@@ -438,6 +438,20 @@ POSIX signals the exact new process group but
 cannot contain a descendant that starts a new session. This is a trusted-host
 containment boundary, not an OS-privilege or hostile-kernel guarantee.
 
+The shared `bounded_child_runner(command, *, job_memory_limit_bytes=None,
+**kwargs)` accepts an optional Windows aggregate committed-memory limit in
+bytes. `None` preserves existing behavior and call shapes. An explicit value
+must be an exact positive `int` no larger than platform `SIZE_T_MAX`; booleans,
+other types, zero, negatives, overflow, and unsupported non-Windows requests
+raise `ValueError` before `Popen`. `validate_job_memory_limit` owns this rule;
+the Job attachment/configuration helpers also validate before native setup.
+The configured Job combines `JOB_OBJECT_LIMIT_JOB_MEMORY` (`0x200`) with
+kill-on-close (`0x2000`), sets `JobMemoryLimit`, and leaves
+`ProcessMemoryLimit` zero. Configuration and assignment precede child resume;
+failed setup follows existing suspended-child cleanup. This bounds Job commit,
+not working set/RSS, native file reads, every resource, or model admission.
+Existing maintenance and builder callers acquire no memory limit by default.
+
 Optional `owner_runtime_root` supplies the trusted `.venv` for nonsealed
 refresh/start; inherited `PYTHONPATH` and user-site packages stay disabled.
 The launcher passes one independently validated site-packages path through
@@ -1168,6 +1182,14 @@ from modules.infrastructure.foundups_mcp_bridge.scripts.launch import (
 ```
 
 #### FastMCP lifecycle API
+
+The exact dependency contract is FastMCP3.2.0/MCP1.30.0/Pydantic2.12.3/
+Uvicorn0.38.0. On Windows, `_mcp_child_env` supplies the selected site-packages
+path from the resolved venv; an ambient `FOUNDUPS_MCP_SITE_PACKAGES` value is
+not inherited. The private command builder accepts only the existing server
+and readiness entrypoints and performs that venv's normal `.pth` startup before
+module execution. This is compatibility behavior for the selected environment,
+not authentication of installed packages or a runtime execution grant.
 
 - `build_mcp_server(repo_root=None)` registers only the remote read allowlist
   and removes internal `repo_root` parameters from published tool schemas.

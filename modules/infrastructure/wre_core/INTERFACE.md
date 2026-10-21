@@ -1,3 +1,95 @@
+## Security scan coverage contract (2026-10-10)
+
+The `security_scan` executor distinguishes `completed`, `partial`, `error`, and
+`tool_unavailable`. Aggregate `partial` means some evidence completed or findings
+were retained but requested coverage is incomplete; all attempted tools failing
+without findings is `error`. CLI exits: 0 complete/no gate, 1 complete/012 gate,
+2 incomplete coverage (including unavailable tools). Findings remain available
+for policy escalation even in partial reports, with type and source location.
+
+SEC9 status includes `scans_completed`, `scans_partial`, and `scans_failed`; live errors cannot
+become `completed`. Dry-run/report-only calls remain proposals and never execute.
+SEC4 proposes scans for website/application/test source and modern lockfiles;
+these changes do not enroll any scheduler or runtime.
+
+## Measured-zero fidelity — P15 contract
+
+`PatternMemory.get_skill_fidelity_stats(skill_name, days=30) -> dict` keeps its
+existing fields, queries, time windows and rounding. Measured zero is retained
+for overall, recent and older means. Only `None` means absence: overall uses 0.5;
+an empty temporal window uses the overall mean. `success_rate` still counts
+fidelity >= 0.7, independently of execution-success flags. Ranking weights and
+`SkillSelector` are unchanged. These values describe structural fidelity,
+not authenticated effects or model fitness. Nine frozen and 42 disjoint controls
+pass locally. PR2062 is merged/main-verified; separate retained/control/recovery
+observations confirm positive → zero control → positive on unchanged saved rows.
+This is retained consumer behavior, not worker learning or effect authority.
+
+## Named registry-scope telemetry — P14 contract
+
+Source-qualified contract with independently reviewed actual scanner,
+projection and private-persistence observation; PR2061 is merged/main-verified. Existing `auto_test_registry_audit` v2.3 supports the
+named `operation="project_scope"` with a `request` containing `base_sha`,
+`head_sha`, `expected_changed_paths` and `projection_input`. Only existing
+reserved `parent_continuity_context` is additionally accepted. Caller roots,
+commands, results, receipts, `skill_name` and `agent` do not authorize dispatch.
+The adjacent executor derives its own checkout and delegates once to existing
+`produce_registry_scope_projection`; temporary commit materialization remains
+inside that owner. It does not regenerate the canonical registry or run tests.
+
+`normalize_registry_scope_projection(value, *, request) -> dict | None` in
+`src/skill_execution_truth.py` validates bounded builtin report data, request
+bindings, non-execution flags and the canonical projection ID, then detaches
+accepted data. This is validation, not authentication or independent scope proof.
+The public named result separates `telemetry_completed`, `telemetry_status`,
+`projection` and `observation_persisted` from false `success`,
+`execution_success` and `_effect_evidence`. Persistence failure preserves the
+projection and returns a stable `observation_error`; it does not retry.
+
+Registry/frontmatter, scanner, bundle, load and A/B gates remain. The named
+single/ReAct path stops before fallback, fidelity evaluation, `SkillOutcome`,
+evolution, variation and AgentDB breadcrumbs. Existing scanner counters remain;
+one `PatternMemory.record_learning_event(event_type="telemetry_projection")`
+records only execution/projection identifiers, base/head, status and bounded
+reasons. It supplies no quality, learning, permit or native admission evidence.
+Other effect/proposal paths and the manual registry CLI retain their contracts.
+
+The [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint) binds the accepted design and
+qualification evidence. Shapes/digest types and identity-only builtin traversal
+are covered by39 additive controls; original75 criteria remain unchanged.
+Stable connected validation passes306 with two Windows link skips. The initial
+source-drifted run remains historical. The separate PC observation produces
+a155-shard-per-side projection and persists one projected event, with false effect success.
+Two earlier rejected attempts remain recorded; isolated scanner2.2.0 and short
+owned TEMP qualify this environment, not native authority or automatic updates.
+
+## Prototype CodeAct file containment — 2026-10-04
+
+The existing read-file action checks resolved Path components before reading.
+Sibling directories sharing the repository's name prefix are outside. Nested,
+normalized within-root and missing-file behavior remains. A denied read returns
+an error and existing orchestration stops later actions while retaining earlier
+successful outputs. This is not atomic symlink-race protection, an OS sandbox,
+or public WRE CodeAct admission; that prototype boundary remains blocked.
+
+## Local proposal framing — 2026-10-04
+
+The existing local proposal wrapper asks for a proposal using the skill's required
+output format. It no longer adds an execution directive or an unconditional
+structured-response instruction. Exact skill text, ordinary JSON context and
+reserved continuity omission remain unchanged. This affects raw/native caller
+prompt framing only; profile, limits, cleanup and quarantine are unchanged.
+Model format adherence and semantic correctness still require verification.
+
+## Prototype CodeAct shell result — 2026-10-04
+
+Direct `CodeActExecutor` shell actions return an error containing the numeric
+status on every nonzero subprocess exit, without raw failure stdout/stderr or
+capture. Existing pre/main/post orchestration stops at that error, retains
+earlier outputs and does not count the failed action as completed. Zero exits
+retain stripped stdout capture; stderr warnings alone do not cause failure.
+This does not admit the prototype through `WREMasterOrchestrator`.
+
 ## Explicit local-model ownership — 2026-10-01
 
 `QwenInferenceEngine.close() -> None` detaches its model and clears initialized
@@ -33,8 +125,11 @@ runtime_version, template_sha256)` checks observed runtime, required formatter
 capabilities and actual model template digest. It renders system/user messages
 once with `enable_thinking=False`, then verifies positive integer limits and
 `input_tokens + max_tokens <= min(actual_context, configured_context)`.
-The per-call handler uses that same rendering, EOS criteria and `stop=["###"]`;
-it does not replace persistent model handlers. This is a qualified optional
+The per-call handler uses that same rendering and the qualified formatter's
+EOS text/token criteria, with an empty caller stop list (`stop=[]`). Markdown
+`###` content is not a native stop delimiter. The output cap remains in force;
+the default raw route keeps its existing stop list. The call does not replace
+persistent model handlers. This is a qualified optional
 profile, not a promise for every GGUF/template or the declared0.2.72 runtime.
 
 Master configuration errors raise a stable `ValueError` before collaborators;
@@ -600,6 +695,12 @@ Unsupported agent: `unsupported_local_agent`.
 Unavailable/import/init/generation failure: `local_model_unavailable`.
 Generated proposal: `unverified_model_proposal`.
 
+Local proposal and master reflection prompt builders omit only the reserved
+`parent_continuity_context` key from JSON. The original mapping/object is not
+modified; lineage consumption remains separate. No `default=str` coercion or
+generic serializer is added. Ordinary task values keep their prior encoding;
+unrelated nonserializable values remain errors.
+
 ## PatternMemory
 
 Every `PatternMemory(db_path=None)` or explicit-path instance owns a separate
@@ -624,6 +725,12 @@ independently bound transaction participant.
 `PatternMemory.store_outcome()` records actual post-dispatch execution
 success and structural fidelity. `outcome_quality` remains `0.0` until an
 independent authenticated evaluator supplies quality evidence.
+
+`recall_failure_patterns()` returns only explicitly unsuccessful outcomes
+(`success = 0`) at or below its inclusive `max_fidelity` threshold. Structural
+fidelity alone does not classify an execution as failed. Skill filtering,
+ascending fidelity/descending timestamp ordering and the result limit remain
+unchanged; high-fidelity failures require a correspondingly higher cutoff.
 
 `stage_variation_candidate(variation_id)` sets a non-production
 `candidate_ready` state. `promote_variation()` is a fail-closed compatibility

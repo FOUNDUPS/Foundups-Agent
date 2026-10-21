@@ -1,5 +1,24 @@
 # Social Media Orchestrator Tests
 
+## AntifaFM campaign and publication — 2026-10-18
+
+The new campaign fixture covers explicit operations, provider-derived listener
+initiation, bounded connected context and truthful outcomes. Thread dispatch is
+inline only for injected provider/model doubles. The distinct publisher fixture
+uses actual temporary SQLite storage and controlled worker threads, including
+concurrent claims, unknown writes and bounded cancellation. A real-package
+import/dry-run smoke denies filesystem, provider, browser and subprocess effects.
+
+Run the connected pilot selection without plugin/conftest side effects or test
+package-name collisions:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/platform_integration/social_media_orchestrator/tests/test_antifafm_campaign.py modules/platform_integration/social_media_orchestrator/tests/test_verified_x_publication.py modules/ai_intelligence/digital_twin/tests/test_comment_drafter.py modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py
+```
+
+This qualifies offline contracts, not host credentials, live publishing or local
+model answer quality. Existing scheduler qualification below remains unchanged.
+
 ## Caller acknowledgement and reload characterization — 2026-09-28
 
 PR1943 is merged and main-verified at `6821aac32774f5be36038bb3fb40cc55920a56cd`.

@@ -1,5 +1,22 @@
 # GitPushDAE Module Change Log
 
+## 2026-10-04 — Queue-only defaults and explicit social dispatch
+
+WSP00/10/15/22/48/50/84/97/99. Existing CLI/API now default to queue-only.
+An explicit mutually exclusive `--dispatch` selects the unchanged router path;
+`--enqueue-only` stays compatible, unsupported `--dispatch-direct` stays rejected.
+Shared hooks, imports, platform integrations and account configuration unchanged.
+
+A fixed 12-case matrix fails8 cases on original source, passes 12 on candidate;
+all 3 original unit functions remain AST-identical and pass (15 total locally).
+Two direct-local Qwen proposals used 940 tokens/77.031s and were rejected before
+execution. Coordinator implemented the repair; no native ticket admission or
+worker-authored success is claimed. No paid inference used for those two calls;
+coordinator/reviewer cost and hardware energy are unmeasured.
+
+Publication evidence is separate. Baseline a9d2b07a3; local receipts under
+`O:/Foundups-Agent/outputs/rsi-queue-default-20261004/`. Re-observe after closure.
+
 ## 2026-09-28 — Bounded post-commit entrypoint qualification
 
 WSP00/15/22/49/50/62/84/97. Selected12/P2 using the existing runner/test owner.

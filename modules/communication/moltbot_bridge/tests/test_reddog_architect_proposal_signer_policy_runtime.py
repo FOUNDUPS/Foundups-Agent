@@ -1315,15 +1315,16 @@ def test_config_supply_binds_exact_policy_and_confined_nonce_store(
     run_packet = run_reddog_signer_socket_service_run_packet_supply(
         repo_root=repo,
         config_path=runtime / "signer_service_config.json",
-        output_path=tmp_path / "proposal-run-packet.json",
+        output_path=runtime / "proposal-run-packet.json",
         owner_authority_config_path=(
             tmp_path / "signer-owner" / "owner.json"
         ),
     )
-    assert run_packet.accepted is False
-    assert run_packet.rejection_reasons == (
-        FAIL_SIGNER_RUN_PACKET_PROPOSAL_RUNTIME_ADAPTERS_UNAVAILABLE,
-    )
+    assert run_packet.accepted is True, run_packet.rejection_reasons
+    assert run_packet.rejection_reasons == ()
+    assert run_packet.no_signer_started is True
+    assert run_packet.no_secret_values_resolved is True
+    assert run_packet.config_digest == result.config_digest
     launch_binding = _write_proposal_launch_packet(
         repo=repo,
         config_path=runtime / "signer_service_config.json",

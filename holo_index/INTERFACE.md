@@ -33,8 +33,11 @@ runtime_version, template_sha256)` checks observed runtime, required formatter
 capabilities and actual model template digest. It renders system/user messages
 once with `enable_thinking=False`, then verifies positive integer limits and
 `input_tokens + max_tokens <= min(actual_context, configured_context)`.
-The per-call handler uses that same rendering, EOS criteria and `stop=["###"]`;
-it does not replace persistent model handlers. This is a qualified optional
+The per-call handler uses that same rendering and the qualified formatter's
+EOS text/token criteria, with an empty caller stop list (`stop=[]`). Markdown
+`###` content is not a native stop delimiter. The output cap remains in force;
+the default raw route keeps its existing stop list. The call does not replace
+persistent model handlers. This is a qualified optional
 profile, not a promise for every GGUF/template or the declared0.2.72 runtime.
 
 Master configuration errors raise a stable `ValueError` before collaborators;

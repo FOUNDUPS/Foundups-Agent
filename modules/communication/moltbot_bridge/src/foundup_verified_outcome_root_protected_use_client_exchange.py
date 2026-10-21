@@ -7,6 +7,7 @@ from typing import Any, Callable, Mapping
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_client import (
     RootAuthorityExchange,
+    _lookup_exchange,
 )
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_protected_use_protocol import (
     OP_ACQUIRE,
@@ -23,6 +24,20 @@ from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce
 from modules.communication.moltbot_bridge.src.reddog_signer_secret_grant_revocation_authority_binding import (
     SignerGrantRevocationAuthorityBinding,
 )
+
+
+def _valid_dependencies(
+    policy: Mapping[str, Any], descriptor: Mapping[str, Any], owner_config_id: str,
+    binding: object, exchange: object, request_signer: object,
+) -> bool:
+    return bool(
+        type(binding) is SignerGrantRevocationAuthorityBinding
+        and type(exchange) is RootAuthorityExchange and callable(request_signer)
+        and _lookup_exchange(exchange).expected_uid == 0
+        and owner_config_id == policy["owner_config_id"]
+        and policy["target_signer_public_key"] == descriptor["signer_public_key"]
+        and binding.policy_id == policy["policy_id"]
+    )
 
 
 def exchange_protected_use(

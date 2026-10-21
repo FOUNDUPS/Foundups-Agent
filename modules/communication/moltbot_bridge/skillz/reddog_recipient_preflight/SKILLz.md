@@ -1,7 +1,7 @@
 ---
 name: reddog_recipient_preflight
 description: Fail-closed two-pass recipient authorization for outbound correspondence
-version: 1.0.0
+version: 1.1.0
 author: 0102
 agents: [qwen, gemma]
 dependencies: [openclaw_dae]
@@ -70,6 +70,31 @@ for that recipient.
 
 ## Sender boundary
 
+The final provider mutation must run through the repository-owned host adapter:
+
+`modules/communication/moltbot_bridge/host/reddog_correspondence_sender_boundary.mjs`
+
+For Gmail `send_email`, reply, `send_draft`, and recipient-specific delivery repair:
+
+1. read fresh Sent coverage immediately before preflight;
+2. build a machine-readable receipt that binds provider operation, correspondence
+   scope/purpose, Contact IDs, exact To/CC/BCC roles and addresses, content digest,
+   draft/thread identifiers, duplicate coverage, issue/expiry time and Sent watermark;
+3. require `decision=SEND` and an unexpired transaction-identical receipt at the
+   adapter boundary; missing, BLOCK, stale, altered or digest-invalid receipts make
+   the provider mutation unreachable;
+4. re-read Sent coverage at the boundary and reject if the watermark or duplicate
+   coverage changed after receipt issuance;
+5. for `send_draft`, read the exact provider draft before submission and require its
+   message/thread IDs, To/CC/BCC and content digest to match the bound transaction;
+6. submit only through the injected provider callback owned by the host adapter;
+7. immediately read the exact provider Sent message and require message/thread IDs
+   plus To/CC/BCC equality before returning `VERIFIED_SENT`.
+
+A provider exception is `PROVIDER_STATE_UNKNOWN`; reconcile Sent before any retry.
+A read-back failure/mismatch is `PROVIDER_SENT_INTEGRITY_INCIDENT`, never a reason
+for an automatic resend.
+
 HIGH/CRITICAL correspondence must fail closed when a recipient is:
 
 - UNKNOWN
@@ -94,7 +119,11 @@ After a provider reports success:
 
 ## Reference implementation
 
+Recipient evidence resolution:
 `modules/communication/moltbot_bridge/src/reddog_recipient_preflight.py`
+
+Provider-call enforcement:
+`modules/communication/moltbot_bridge/host/reddog_correspondence_sender_boundary.mjs`
 
 Core APIs:
 

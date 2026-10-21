@@ -1,3 +1,124 @@
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
+## Installed issuer contract closure — 2026-10-16
+
+The existing generated closure adds one installed-source descriptor contract:
+1,430 files. Both digest pins match; finite file-count acceptance/rejection
+moves to1,430/1,431. Per-file/total bytes, paths and hashes remain enforced.
+This is backend source compatibility, not installed worker admission.
+
+## Protected custody metadata backend closure — 2026-10-16
+
+Generated membership1428→1429 adds only `reddog_grant_authority_startup_custody.py`
+for explicit owner-v9 validation. Both digest pins and finite count boundary are
+synchronized;1430 rejects and all byte/path/hash checks remain. The callable
+dependency loader is not automatically launched by this extension update. No
+installed extension/runtime or native authority is asserted. WSP6/10/22/97.
+
+## Issuer composition backend closure — 2026-10-16
+
+The source manifest grows1426→1428 for exactly `foundup_verified_outcome_root_revocation_request_role.py`
+and `reddog_signer_system_service_runtime_dependencies.py`; no prior member is
+removed. The extension's stale1426-file cap rejected the generated manifest in
+the actual Node consumer. Synchronize the finite cap to1428 and retain explicit
+1429 rejection, pinned digest, path/hash allowlists and all byte bounds. CI now
+runs this consumer contract alongside its existing preflight. WSP00/6/10/22/97.
+No extension installation or worker admission is claimed.
+
+## Initial enrollment backend binding — 2026-10-15
+
+Regenerated the existing1426-member backend manifest after initial-manifest,
+generation-reader and owner-layout changes; membership and caps are unchanged.
+Both existing digest pins now bind `4fc7653444c12854401a4f5aad6167e2a853c081e51f77a16ade42521c19ef77`.
+Fast tier15members passed. This is repository compatibility binding, not a VSIX
+release, installed-extension update or native worker admission. WSP10/22/97.
+
+## Effect approval closure count — PR2090, 2026-10-07
+
+Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`
+and `reddog_current_effect_signing_authority.py`, removes none. The existing
+compatibility cap and boundary regression now accept1421/reject1422, and require
+both named additions. Digest remainsbc84374ad861c79d9b51c79964722916a7f6b0e336a2356909fe486923e0259d;
+byte limits, allowlists and signatures are unchanged. No service/extension install.
+
+CI37507545251 passed signing677/3skip and startup248, then exposed the stale1419
+extension boundary. Local full fast tier15 members passed in9468ms after restoring
+required LF to changed JS files. Independent two-file review found no blocker;
+receipt `effect-signing-extension-count-review.json`, SHA256
+`d09b48a349f4016dd964ab0bae45440661c4e86dc2f4a0e9c74e3e60846b6bb4`.
+WSP00/6/15/22/50/84/97. New-head hosted checks pending; no native RSI claim.
+
+## Protected-use control-proof source binding — 2026-10-05
+
+Regenerate the existing backend manifest after two-owner descriptor/control-proof changes. Closure remains1,417 files; digest `70ae71c8d9973c071b4403f2e19e3d95fb541b452161031975d47105e3065d99` is pinned in existing JavaScript/Python consumers. Count limits and default startup are unchanged. See bridge module ModLog; no deployment or native RSI activation.
+
+## Owner-bound lazy signer composition — 2026-10-05
+
+The existing backend import closure now reaches nine previously standalone signer
+leaves:1408→1417 files. Regenerate the manifest, refresh both digest pins and
+require exactly1417/reject1418 in the existing compatibility boundary. Byte caps,
+allowlists and authority checks remain. No installed extension or service changed.
+See RSI backlog `signer_lazy_owner_composition_20261005` for verification/publication.
+
+## 2026-10-05 — Named WRE telemetry source closure
+
+The existing backend manifest now binds the registry-audit executor and its
+adjacent Skillz manifest explicitly, including the executor's imported source.
+Runtime members increase1406→1408. Refresh both digest pins and admit exactly1408,
+reject1409; byte caps and other compatibility rules remain. No installed
+extension, authority deployment or autonomous execution is claimed.
+Consumer validation and publication evidence belong to the existing P14 RSI
+checkpoint. WSP5/15/22/50/84/95/97.
+
+## 2026-10-04 — Authenticated consent closure count repair
+
+PR2060 CI37209280885 reproduced an overlooked compatibility boundary: the
+regenerated manifest contains1406 runtime members but the production ceiling
+and its boundary test still expected1404. The two additions are the reviewed
+consent-contract and current-consent-verification leaves. Raise only the exact
+count ceiling to1406; preserve rejection at1407, byte caps, digest pins and
+allowlists. The manifest itself remains unchanged.
+
+Local original test reproduced exit1; the repaired existing fast tier passes
+all15 members, including actual backend preflight and both count boundaries.
+No installed extension or runtime activation is claimed. Initial CI and review
+omissions remain historical evidence; replacement-head hosted checks are pending.
+Future closure refreshes must run the existing consumer fast tier as well as
+generator hash checks. Evidence: `outputs/rsi-authenticated-effect-consent-20261004`.
+WSP15/22/50/84/97.
+
+## 2026-10-02 — Scoped reviewer authority dependency closure
+
+Regenerated the existing backend manifest for two bounded reviewer-designation
+and current-verification leaves (1402 → 1404), updating exactly the eight
+changed source owners reachable from existing backend entrypoints. Three changed
+supply/readiness/service-binding owners remain outside this backend closure,
+as before; their tests bind them separately. Digest: `77d191b6bc8cd3fd8b056833d4c210d177d0a950f103a0210a0d614914a9422c`. Existing JS/runtime count
+and generator-test digest pins retain strict boundaries (1404 allowed,1405
+rejected). No production configuration or service is activated. WSP22/50/84/97.
+
+## 2026-10-01 — Effect-review dependency closure and compatibility pins
+
+The existing consensus verification owner now imports the already merged pure
+effect context. Regenerated backend closure adds exactly that one existing leaf
+(1401 → 1402) and updates the four modified consensus source hashes. Canonical
+manifest digest: `a88fc6eabcfdac210757ea916fa0ebe96744e8dafdaee6be6ef0a9a982208310`. Updated existing JavaScript and generator-test digest
+pins and exact Node count boundary (1402 allowed, 1403 rejected). Other limits,
+schema/API and checks remain unchanged; no new executable entry or activation.
+Generator write/check passed; exact test/publication evidence is recorded in
+`O:/Foundups-Agent-audits/20261001-rsi-effect-reviewer/`. WSP 22/50/84/97.
+
 ## 2026-10-01 — Pure binding publication integrity repair
 
 PR#2003 initial head `edb62321` passed43 exact effect-domain/binding cases, but
@@ -4174,3 +4295,10 @@ WSP: WSP_00, WSP_15, WSP_22, WSP_87, WSP_97, WSP_109.
 - Regenerated the backend compatibility manifest for the bounded LOW-tier
   independent signer grant-provider modules. No client execution authority was
   added; elevated issuance remains blocked on verified consensus.
+## 2026-10-05 — Admitted HoloIndex recovery binding
+
+Regenerated the existing backend manifest and both digest pins for the incident
+resume/controller/liveness/CLI repair. Runtime membership remains1408; count,
+byte limits and admission checks are unchanged. Local/hosted validation is
+recorded in the canonical RSI backlog `holo_grounding_20261005`. No installed
+extension update or deployment is claimed. WSP5/11/15/22/50/62/97.

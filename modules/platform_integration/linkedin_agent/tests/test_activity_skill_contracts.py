@@ -107,6 +107,23 @@ class ActivitySkillContracts(unittest.TestCase):
         for term in ("VERIFIED_LIVE", "SCHEDULED_VERIFIED", "draft exists"):
             self.assertIn(term, news)
 
+    def test_jhr_website_first_newsletter_is_a_gated_downstream_action(self):
+        """Site article must be deployed and verified before a JHR LinkedIn edition."""
+        website = (ROOT / "modules/foundups/esingularity/skills/website-update/SKILL.md").read_text(encoding="utf-8")
+        jhr = self.text("skillz/linkedin_jhr_newsletter/SKILLz.md")
+        publishing = self.text("skillz/linkedin_publishing/SKILLz.md")
+        workflow = self.text("skillz/linkedin_newsletters/references/editorial-workflow.md")
+        for doc in (website, jhr, publishing, workflow):
+            self.assertIn("WEBSITE_LIVE_VERIFIED", doc)
+            self.assertIn("LinkedIn", doc)
+        self.assertIn("canonical public", jhr)
+        self.assertIn("canonical website backlink", jhr)
+        self.assertIn("NO_REPORT", jhr)
+        self.assertIn("not every change", website.lower())
+        self.assertIn("approval", publishing.lower())
+        self.assertIn("SUBMITTED_UNVERIFIED", publishing)
+        self.assertIn("no new asynchronous daemon", workflow.lower())
+
     def test_continuity_privacy_and_safe_pr_closure(self):
         text = self.text("skillz/linkedin_continuity/SKILLz.md")
         for term in ("private", "next action/owner", "Do not bypass failed checks",

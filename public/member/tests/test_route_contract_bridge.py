@@ -486,6 +486,7 @@ _NODE_ROUTE_VM = r"""
 const {runInNewContext} = require('node:vm');
 const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
 const events = [], fetches = [], forbidden = [], errors = [];
+const anchors = [], linkContainers = new Map();
 let address = new URL(input.path + (input.search || '') + (input.hash || ''),
   'https://shell.invalid');
 let sandbox;
@@ -496,18 +497,33 @@ function record(kind, target, value) {
     itemId: context && context.item ? context.item.foundup_id : null});
 }
 function element(id) {
-  let html = '';
+  let html = '', text = '', href = '';
   return {id, style: {}, children: [], value: '',
     classList: {toggle() {}, remove() {}, add() {}},
     addEventListener() {}, scrollIntoView() {}, querySelectorAll() { return []; },
-    querySelector() { return null; },
-    appendChild(child) { this.children.push(child); }, insertAdjacentHTML() {},
+    querySelector(selector) {
+      if (!input.capture_links) return null;
+      let key;
+      if (id === 'entryContent' && selector === '.entry-cta-block' && html.includes('entry-cta-block')) {
+        key = 'entry-cta-block';
+      } else if (id === 'showcaseGrid') {
+        const match = selector.match(/^\.portfolio-card-links\[data-foundup-id="([a-z0-9_]+)"\]$/);
+        if (match && html.includes('data-foundup-id="' + match[1] + '"')) key = 'card:' + match[1];
+      }
+      if (!key) return null;
+      if (!linkContainers.has(key)) linkContainers.set(key, element(key));
+      return linkContainers.get(key);
+    },
+    appendChild(child) { child.parentId = id; this.children.push(child); }, insertAdjacentHTML() {},
     set innerHTML(value) { html = String(value); record('html', id, html); },
     get innerHTML() { return html; },
     set textContent(value) {
-      html = String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      text = String(value);
+      html = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     },
-    set href(value) { record('link', id, value); }
+    get textContent() { return this.children.length ? this.children.map(child => child.textContent || '').join('') : text; },
+    set href(value) { href = String(value); record('link', id, value); },
+    get href() { return href; }
   };
 }
 const ids = ['entryContent', 'entryRedDog', 'conciergeSheet', 'conciergeScrim',
@@ -526,7 +542,9 @@ const document = {
     if (tag === 'iframe' || tag === 'script') {
       forbidden.push('element:' + tag); throw new Error('Forbidden active element');
     }
-    return element('created:' + tag);
+    const node = element('created:' + tag);
+    if (input.capture_links && tag === 'a') anchors.push(node);
+    return node;
   },
   createTextNode(text) { return {textContent: String(text)}; },
   addEventListener() {}, querySelector() { return null; },
@@ -561,6 +579,9 @@ async function run() {
   const context = sandbox.entryRedDog ? sandbox.entryRedDog.getContext() : null;
   process.stdout.write(JSON.stringify({events, fetches, forbidden, errors, context,
     pathname: address.pathname, search: address.search, hash: address.hash,
+    links: input.capture_links ? anchors.map(node => ({href: node.href,
+      label: node.children.length ? node.children[0].textContent : node.textContent,
+      target: node.target || '', rel: node.rel || '', parent: node.parentId || ''})) : undefined,
     html: Object.fromEntries(ids.map(id => [id, nodes[id].innerHTML]))}));
 }
 run().catch(error => { console.error(error.stack); process.exitCode = 1; });
@@ -758,3 +779,79 @@ def test_vm_pending_catalog_exposes_no_unverified_identity(tmp_path, path):
     assert result["context"] is not None
     assert result["fetches"] == ["/f/public_catalog.json"]
     assert result["events"] == [] and result["errors"] == []
+
+
+def _registered_move2japan():
+    projection = json.loads(_read("../f/public_catalog.json"))
+    entries = [item for item in projection["entities"] if item["foundup_id"] == "move2japan"]
+    assert len(entries) == 1, "The canonical public projection must contain the existing tenant"
+    return entries[0]
+
+
+def test_vm_move2japan_landing_browses_houses_inside_same_mall(tmp_path):
+    item = _registered_move2japan()
+    result = _landing_vm(tmp_path, "/f/move2japan", [item], capture_links=True,
+                         search="?foundup=other&next=https://elsewhere.invalid&account=1")
+    _assert_canonical_render(result, "move2japan", replaced=False)
+    assert result["errors"] == []
+    houses = [link for link in result["links"] if link["label"] == "Browse houses"]
+    assert houses == [{"href": "/member/?foundup=move2japan", "label": "Browse houses",
+                       "target": "", "rel": "", "parent": "entry-cta-block"}]
+    assert not any(link["label"] in {"Open App", "View PoC"} for link in result["links"])
+    assert "entry-hero-token" not in result["html"]["entryContent"]
+    assert "$move2japan" not in result["html"]["entryContent"]
+    assert all(link["target"] == "_blank" for link in result["links"]
+               if link["label"] in {"GitHub", "Docs"})
+
+
+def test_vm_move2japan_portfolio_browse_link_and_filter_initialization(tmp_path):
+    result = _landing_vm(tmp_path, "/f/", [_registered_move2japan()], capture_links=True)
+    assert result["errors"] == []
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["context"] is None
+    assert "Move2Japan" in result["html"]["showcaseGrid"]
+    assert "portfolio-card-token" not in result["html"]["showcaseGrid"]
+    assert {"href": "/member/?foundup=move2japan", "label": "Browse houses",
+            "target": "", "rel": "", "parent": "card:move2japan"} in result["links"]
+    assert {"href": "/f/move2japan", "label": "View Details", "target": "", "rel": "",
+            "parent": "card:move2japan"} in result["links"]
+    assert not any(link["label"] == "Demo App" for link in result["links"])
+
+
+@pytest.mark.parametrize("change", [
+    {"foundup_id": "other"},
+    {"foundup_id": "Move2Japan"},
+    {"poc_url": "/member/?foundup=move2japan"},
+    {"poc_url": "https://foundups.com/member/?foundup=move2japan&account=1"},
+    {"poc_url": "https://foundups.com/member/?foundup=move2japan#app"},
+    {"poc_url": "https://elsewhere.invalid/member/?foundup=move2japan"},
+])
+def test_vm_housing_handoff_requires_exact_registered_identity_and_destination(tmp_path, change):
+    item = dict(_registered_move2japan(), **change)
+    result = _landing_vm(tmp_path, "/f/" + item["foundup_id"], [item], capture_links=True,
+                         search="?foundup=move2japan&poc_url=https://foundups.com/member/")
+    assert result["errors"] == []
+    assert not any(link["label"] == "Browse houses" for link in result["links"])
+    assert all(link["target"] == "_blank" for link in result["links"])
+
+
+@pytest.mark.parametrize("suffix", ["app", "app/publish/property"])
+def test_vm_registered_houses_do_not_change_protected_app_admission(tmp_path, suffix):
+    result = _landing_vm(tmp_path, "/f/move2japan/" + suffix,
+                         [_registered_move2japan()], capture_links=True,
+                         search="?foundup=move2japan")
+    assert result["pathname"] == "/member/" and result["search"] == ""
+    assert result["fetches"] == [] and result["links"] == []
+    assert result["context"] is None
+    assert result["events"] == [{"kind": "navigate", "target": "location",
+                                  "value": "/member/", "pathname": "/f/move2japan/" + suffix,
+                                  "contextId": None, "itemId": None}]
+
+
+def test_vm_explicit_token_still_renders_without_inventing_missing_symbol(tmp_path):
+    item = _public_entity(token_symbol="ACTUAL")
+    landing = _landing_vm(tmp_path, "/f/synthetic_001", [item])
+    portfolio = _landing_vm(tmp_path, "/f/", [item])
+    assert landing["errors"] == portfolio["errors"] == []
+    assert "$ACTUAL" in landing["html"]["entryContent"]
+    assert "$ACTUAL" in portfolio["html"]["showcaseGrid"]

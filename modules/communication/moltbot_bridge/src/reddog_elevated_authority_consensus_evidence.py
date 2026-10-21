@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 from typing import Any
+from .reddog_effect_sovereign_contract import _effect_sovereign_lifetime_matches
 
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_contract import (
-    CONSENSUS_SCHEMA_VERSION,
-    EFFECT_TARGET_BINDING_SCHEMA_VERSION,
-    ElevatedAuthorityConsensusReceipt,
-    canonical_authority_request_digest,
-    canonical_consensus_receipt_digest,
-    canonical_json_digest,
+    CONSENSUS_SCHEMA_VERSION, EFFECT_TARGET_BINDING_SCHEMA_VERSION,
+    ElevatedAuthorityConsensusReceipt, canonical_authority_request_digest,
+    canonical_consensus_receipt_digest, canonical_json_digest,
 )
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_policy import (
     AuthorRuntimeEvidence,
     SovereignAuthorizationEvidence,
+    _effect_policy_matches,
+    _effect_sovereign_shape_valid,
     elevated_consensus_policy_valid,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
@@ -22,9 +22,7 @@ from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_b
 )
 
 
-def author_runtime_evidence_matches(
-    evidence: object, request: Any, now: int
-) -> bool:
+def author_runtime_evidence_matches(evidence: object, request: Any, now: int) -> bool:
     if type(evidence) is not AuthorRuntimeEvidence or evidence.expires_at <= now:
         return False
     required_ids = (
@@ -48,34 +46,25 @@ def author_runtime_evidence_matches(
     expected = (
         (evidence.model_selection_receipt_id, request.model_selection_receipt_id),
         (evidence.model_selection_digest, request.model_selection_digest),
-        (
-            evidence.model_runtime_binding_receipt_id,
-            request.model_runtime_binding_receipt_id,
-        ),
+        (evidence.model_runtime_binding_receipt_id, request.model_runtime_binding_receipt_id),
         (evidence.model_runtime_binding_digest, request.model_runtime_binding_digest),
-        (
-            evidence.verification_receipt_id,
-            request.model_runtime_binding_verification_receipt_id,
-        ),
-        (
-            evidence.verification_digest,
-            request.model_runtime_binding_verification_digest,
-        ),
+        (evidence.verification_receipt_id, request.model_runtime_binding_verification_receipt_id),
+        (evidence.verification_digest, request.model_runtime_binding_verification_digest),
     )
     return all(left == right for left, right in expected)
 
 
 def consensus_receipt_matches(
-    receipt: ElevatedAuthorityConsensusReceipt,
-    request: Any,
-    request_digest: str,
-    policy: Any,
-    sovereign: Any,
-    now: int,
+    receipt: ElevatedAuthorityConsensusReceipt, request: Any, request_digest: str,
+    policy: Any, sovereign: Any, now: int, *, _parent=False,
 ) -> bool:
     if not elevated_consensus_policy_valid(policy):
         return False
-    if type(sovereign) is not SovereignAuthorizationEvidence:
+    from .reddog_parent_consent_contract import ParentConsentEvidence
+    if _parent:
+        if type(sovereign) is not ParentConsentEvidence or sovereign.consensus_policy_digest != policy.policy_digest:
+            return False
+    elif type(sovereign) is not SovereignAuthorizationEvidence:
         return False
     context = receipt.context
     expected_roles = tuple(dict.fromkeys(policy.required_roles))
@@ -174,7 +163,37 @@ def effect_target_binding_matches(binding, *, parent, target, expected_target, n
     return expected is not None and binding == expected
 
 
+def effect_sovereign_authorization_matches(
+    evidence: object, *, context, parent, target, expected_target, policy, now: int,
+) -> bool:
+    """Match supplied exact-effect assertions; never authenticate or grant consent."""
+    from .reddog_elevated_authority_consensus_effect_context import effect_approval_context_matches
+    from .reddog_authoritative_use_lease_contract import validate_authoritative_use_lease_request
+
+    try:
+        if not _effect_sovereign_shape_valid(evidence, now):
+            return False
+        if not effect_approval_context_matches(
+                context, parent=parent, target=target, expected_target=expected_target, now=now,
+        ) or not _effect_policy_matches(context, policy):
+            return False
+        binding = build_effect_target_binding(parent=parent, target=target, expected_target=expected_target, now=now)
+        if binding is None:
+            return False
+        names = ("parent_authority_request_digest", "target_signing_request_digest", "effect_request_digest")
+        if (not all(getattr(evidence, name) == binding[name] for name in names)
+                or evidence.authorization_digest != context.sovereign_authorization_digest
+                or evidence.consensus_policy_digest != context.consensus_policy_digest
+                or not _sovereign_matches(evidence.parent_authorization, parent, binding[names[0]], now)):
+            return False
+        payload = validate_authoritative_use_lease_request(target, now_epoch=now)
+        return payload is not None and _effect_sovereign_lifetime_matches(evidence, context, parent, payload, now)
+    except Exception:
+        return False
+
+
 __all__ = [
     "author_runtime_evidence_matches", "consensus_receipt_matches",
     "build_effect_target_binding", "effect_target_binding_matches",
+    "effect_sovereign_authorization_matches",
 ]

@@ -12,6 +12,16 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
+### AntifaFM prototype — 2026-10-18
+
+Implemented explicit SOCIAL campaign operations, bounded connected conversation
+reads, the existing AI drafter's station brief, and API-only own-account X
+publication with durable claims/readback. Prompt wrappers reuse the current
+OpenClaw/Codex owners; no production registration, reply publishing or cadence.
+Next host qualification: verify Move2Japan's API identity, inspect three real
+listener decisions with the configured local model, then qualify an authorized
+own-account post. [Runbook](docs/ANTIFAFM_CAMPAIGN.md).
+
 ### Current caller/reload characterization — 2026-09-28
 
 PR1943 safe-publication repair is closed on main6821aac3 with42 fixed methods

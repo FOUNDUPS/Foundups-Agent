@@ -392,7 +392,7 @@
         "gemma"
       ],
       "intent_type": "TELEMETRY",
-      "version": "2.2",
+      "version": "2.3",
       "promotion_state": "production",
       "domain": "testing",
       "wsp_chain": [

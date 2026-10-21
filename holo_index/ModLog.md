@@ -1,3 +1,14 @@
+## 2026-10-04 — Preserve native Markdown until EOS
+
+- Qualified native chat supplies an empty caller stop list; formatter EOS text
+  and token criteria remain. Raw route, profile/context checks and caps unchanged.
+- Independent fixed baseline: 59 pass/4 expected failures; candidate 63 pass.
+  Connected WRE suites: 176 pass; overlapping selections, three new cases.
+- One local model proposal was malformed and rejected; coordinator applied the
+  one-line repair. Earlier real output truncation cause remains unproven.
+- WSP00/5/11/15/22/48/50/84/97. Existing manifest/pins refreshed. Publication and
+  retained usefulness are separate; see canonical dispatch/backlog checkpoint.
+
 ## 2026-10-01 — Explicit per-call local-model cleanup
 
 - Existing engine gains idempotent explicit close; existing WRE adapter owns

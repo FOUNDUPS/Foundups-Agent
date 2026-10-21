@@ -102,6 +102,7 @@ _SOURCE_FIELDS = _SEED_FIELDS | frozenset(
 )
 _RUNTIME_FIELDS = _SOURCE_FIELDS | frozenset(
     {
+        "proposal_verification_inputs",
         "authorized_base_sha",
         "context_view_id",
         "determination_id",

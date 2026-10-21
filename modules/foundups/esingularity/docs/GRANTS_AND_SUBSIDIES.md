@@ -111,6 +111,10 @@ This is not YUMORI.me construction CAPEX. It supports local-government study of 
 
 **YUMORI.me relevance:** YUMORI.me cannot apply directly. Fukui City would need to determine whether a Sukatto reuse/COGDC proposal, or associated public infrastructure such as power, roads, water, communications or other qualifying infrastructure, fits the program. The current action is to show the live national program to Fukui City and request a written determination or referral to the responsible department. Do not claim eligibility until MLIT/Fukui City confirms the scope.
 
+### F-08 form verification — 2026-10-05 JST
+
+The October 8, 2026 deadline was reverified against the live MLIT third-round call. Exact cutoff time remains unverified. [Official-form evidence and untouched ZIP](official/mlit_ppp_study_20261005/README.md) retain download provenance, inventory and successful structural/open checks. The forms webpage lists Form 2-4, while the ZIP, current third-round guideline inventory and FY2026 handbook omit it. Current requirement remains unresolved; no complete application claim, project-eligibility promotion or committed subsidy revenue. City-facing preparatory material must preserve Hanyu/Shimousaka priority and Sukatto's ancillary/conditional position.
+
 ## F-09 — 福井市 令和8年度 財産有効活用民間提案制度
 
 - Agency: 福井市 財政部 施設活用推進課
