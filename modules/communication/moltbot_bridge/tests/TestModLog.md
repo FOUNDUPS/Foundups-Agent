@@ -1,3 +1,39 @@
+## Installed grant startup second-boundary repair — 2026-10-21
+
+WSP 00/15/22/50/71/97. CI on documentation-only PR2166 exposed the existing
+startup call sampling an explicit epoch before the durable revocation fence.
+A deterministic one-second advancement reproduces rejection with
+`durable_revocation_oracle_clock_invalid`; the service correctly fails closed.
+Reuse the existing current-time oracle entry point at dependency revalidation.
+It retains snapshot, permission expiry, revocation and clock-rollback checks;
+the explicit caller-epoch API remains strict. No tolerance or retry was added.
+
+WSP15 allocation: C2/I4/D4/Impact3 = 13 (P1), bounded startup correctness repair.
+Execution plane is source maintenance with disposable synthetic custody tests;
+no production services, installed credentials or native admission are exercised.
+WSP00 canonical boot lacks torch; tracker fallback gate passes, detector witness
+absent. Lexical Holo bundle is bound to main `a6b5efa2`, freshness UNKNOWN and
+index gap true. Exact module interface, custody inventory and durable-key-epoch
+tests supplement retrieval; no semantic freshness is claimed.
+
+Extended the existing installed-composition test with steady and second-boundary
+cases, preserving protected-loader-before-service ordering. Before production
+repair: steady passes, boundary fails. The four startup-custody, custody-version,
+durable-key-epoch and root-LOAD suites pass **123 cases, zero skips** in 28.19s.
+These retain expiry, revoked epoch, stale explicit time and rollback controls.
+The three service, WSP71-rehydration and installed-consumer suites report
+**133 passed, 1 failed, zero skips** in 24.41s. The failure is the native socket
+fixture `test_real_socket_exchange_through_composition_with_synthetic_custody`:
+its readiness assertion also fails in unchanged source at `9fc1ca83`, with
+`FAIL_SIGNER_SERVICE_RUNTIME_ERROR` from the synthetic socket. This test does
+not call the modified startup materializer; its local coverage remains blocked.
+No skip or waiver was added. Both runs use plugin autoload disabled and
+`--import-mode=importlib`; two unknown asyncio config warnings remain.
+
+The canonical backend-manifest generator retains 1,449 entries with no diff:
+this startup module is outside that manifest's existing import closure. No
+security exceptions changed. Current hosted checks remain required.
+
 ## Consensus nonce publication compatibility repair — 2026-10-20
 
 Hosted PR2165 CI39289991059 found a real regression: a trailing comma made

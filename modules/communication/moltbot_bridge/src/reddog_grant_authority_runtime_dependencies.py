@@ -125,8 +125,9 @@ def _revalidate_dependencies(path, repo, owner, dependencies):
             if not oracle.matches_owner(policy=current.policy, binding=current.revocation_binding):
                 raise ValueError("grant_startup_revocation_owner_changed")
             _current_owner(path, repo, owner, current.policy)
-    oracle.authorize_key_epoch_use(key_epoch=policy["grant_authority_key_epoch"],
-        at_epoch=int(time.time()), expires_at=policy["expires_at"], action=check_current)
+    # Admission must sample time inside the durable fence, not before lock/I/O.
+    oracle.authorize_current_key_epoch_use(key_epoch=policy["grant_authority_key_epoch"],
+        expires_at=policy["expires_at"], action=check_current)
 
 
 __all__ = ["materialize_grant_authority_runtime_dependencies"]
