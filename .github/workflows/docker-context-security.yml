@@ -45,33 +45,41 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Type-check the changed Python verifier
+      - name: Type-check an exact-byte snapshot of the changed verifier
         run: |
           python - <<'PYCODE'
+          import hashlib
           import json
           import os
           from pathlib import Path
           root = Path.cwd()
-          # Preserve type rules; explicitly include only this previously excluded file.
+          work = Path(os.environ['RUNNER_TEMP']) / 'docker-context-typecheck'
+          work.mkdir(exist_ok=False)
+          source = root / '.github/scripts/check_docker_context.py'
+          snapshot = work / 'check_docker_context.py'
+          snapshot.write_bytes(source.read_bytes())
+          if snapshot.read_bytes() != source.read_bytes():
+              raise SystemExit('Static-analysis snapshot differs from candidate')
           config = {
               'extends': str(root / 'pyrightconfig.json'),
-              'include': [str(root / '.github/scripts/check_docker_context.py')],
+              'include': ['check_docker_context.py'],
               'exclude': [],
           }
-          path = Path(os.environ['RUNNER_TEMP']) / 'docker-context-pyrightconfig.json'
-          with path.open('x', encoding='utf-8') as stream:
-              json.dump(config, stream)
+          (work / 'pyrightconfig.json').write_text(json.dumps(config), encoding='utf-8')
+          binding = {'source': source.relative_to(root).as_posix(),
+                     'sha256': hashlib.sha256(snapshot.read_bytes()).hexdigest()}
+          Path('docker-context-typecheck-source.json').write_text(json.dumps(binding), encoding='utf-8')
           PYCODE
-          # 1.1.414 silently drops explicit dot-directory inputs: microsoft/pyright#11861.
-          npx --yes pyright@1.1.413 --pythonversion 3.12 --outputjson \
-            --project "$RUNNER_TEMP/docker-context-pyrightconfig.json" > docker-context-pyright.json
+          # A non-hidden exact-byte snapshot avoids dot-directory enumeration bugs.
+          npx --yes pyright@1.1.414 --pythonversion 3.12 --outputjson \
+            --project "$RUNNER_TEMP/docker-context-typecheck/pyrightconfig.json" > docker-context-pyright.json
           python - <<'PYCODE'
           import json
           from pathlib import Path
           report = json.loads(Path('docker-context-pyright.json').read_text())
           summary = report['summary']
-          if summary['filesAnalyzed'] < 1 or summary['errorCount'] != 0:
-              raise SystemExit('Changed-file type-check did not qualify')
+          if summary['filesAnalyzed'] != 1 or summary['errorCount'] != 0:
+              raise SystemExit('Changed-file type-check did not qualify exactly one file')
           print(json.dumps(summary, sort_keys=True))
           PYCODE
       - name: Verify exclusions and source retention with native Docker
@@ -92,6 +100,7 @@ jobs:
           path: |
             docker-context-report.json
             docker-context-pyright.json
+            docker-context-typecheck-source.json
             docker-context-receipt-validation.json
           if-no-files-found: error
           retention-days: 30
