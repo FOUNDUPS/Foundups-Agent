@@ -97,3 +97,8 @@ large-chunk/deprecated-package warnings remain. This verifies the application
 build on Linux; it does not verify Alpine container startup or live Cloud Run.
 Merging the Dockerfile change triggers the repository's existing GotJunk deployment
 workflow; its remote deployment outcome must be checked separately.
+
+CI secret scan identified the existing reviewed moltbot ModLog documentation
+finding at line3660 shifted to3667 by this entry. Original file bytes are an
+unchanged suffix. Refreshed only its exact path/content/rule/line fingerprint
+(old53d833bf..., new965437ea...); no wildcard exemption or scanner change.
