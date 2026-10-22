@@ -9,8 +9,9 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /app
 
 # Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY requirements.txt requirements-trust-bootstrap.txt ./
+RUN python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt \
+    && python -m pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .

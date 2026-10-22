@@ -1,3 +1,11 @@
+## 2026-10-22 — Python CA trust bootstrap
+
+WSP00/6/12/15/22/97; C2/I5/D5/Impact5=17/P0. Pin reviewed certifi and
+hash-authenticate pip/certifi before CI and root Docker dependency downloads.
+Windows MCP venv is bootstrapped independently. Real isolated Linux installation
+and19 security/configuration tests pass; production rollout is unverified.
+[Evidence and deployment boundary](docs/audits/security/PYTHON_CA_TRUST_20261022.md).
+
 ## 2026-10-22 — PR1860 selected-clip closure
 
 WSP 00/6/10/11/15/22/50/84/97; 16/P0. Reconcile the existing scheduler,
