@@ -1,3 +1,22 @@
+## Generated RedDog manifest metadata re-review — 2026-10-23
+
+PR2178 regenerated `scripts/reddog_backend_manifest.json` after four new
+read-only resident runtime modules entered the dependency closure. Gitleaks
+reported 38 unreviewed findings in that generated manifest: 36
+`generic-api-key` and two `discord-api-token` heuristic matches. Direct
+JSON comparison against merged main verified that every one of the 38
+path-to-SHA256 values is unchanged from main; none is a credential, token,
+assignment, provider value, or newly introduced secret-like literal.
+
+The candidate manifest SHA256 is `b5041a2138f5b29d7bd46b78639515293eea738818a6d034a5547df97cc3a383`. The unchanged security-gate
+fingerprint algorithm was replayed with the candidate file digest, exact rule
+ID, and exact candidate line number for all 38 generated metadata findings.
+Only those 38 exact bindings were appended to the reviewed-finding ledger.
+No Gitleaks rule, allowlist, exclusion, history range, matched text, scanner
+version, fingerprint algorithm, or failure behavior changed. The generated
+runtime closure itself remains separately verified by the RedDog manifest
+generator and compatibility tests.
+
 ## Scheduled resident ModLog prose re-review — 2026-10-23
 
 PR2178 security scan reported one `generic-api-key` finding in
