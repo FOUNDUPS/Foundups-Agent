@@ -36,12 +36,16 @@ from modules.infrastructure.idle_automation.src.schedule_claim_state import (
 from modules.infrastructure.idle_automation.src.openrouter_catalog_projection import (
     project_openrouter_catalog_dispatch_outcome,
 )
+from modules.infrastructure.idle_automation.src.resident_reconcile_schedule_adapter import (
+    RESIDENT_RECONCILE_ROUTINE,
+    dispatch_resident_reconcile_claim,
+    project_resident_reconcile_dispatch_outcome,
+)
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
 _OPENROUTER_ROUTINE = "openrouter_catalog_refresh"
 _OPENROUTER_SCHEDULE_ID = "e324884d66c4"
-_RESIDENT_RECONCILE_ROUTINE = "resident_reconcile"
 
 
 def _catalog_dispatch_result(
@@ -63,19 +67,6 @@ def _valid_openrouter_catalog_claim(claim: object) -> bool:
         and claim.schedule_id == _OPENROUTER_SCHEDULE_ID
         and claim.routine == _OPENROUTER_ROUTINE
         and claim.cadence == "daily"
-    )
-
-
-def _valid_resident_reconcile_claim(claim: object) -> bool:
-    return (
-        type(claim) is ScheduleClaim
-        and claim.routine == _RESIDENT_RECONCILE_ROUTINE
-        and claim.cadence == "daily"
-        and bool(claim.schedule_id)
-        and bool(claim.execution_id)
-        and bool(claim.window_start)
-        and bool(claim.window_end)
-        and bool(claim.token)
     )
 
 
@@ -924,21 +915,11 @@ class IdleAutomationDAE:
                     claim
                 )
                 return project_openrouter_catalog_dispatch_outcome(response)
-            if claim.routine == _RESIDENT_RECONCILE_ROUTINE:
-                response = await self._dispatch_resident_reconcile_claim(claim)
-                success = bool(response.get("success", False))
-                rejections = response.get("rejection_reasons") or ()
-                return {
-                    "success": success,
-                    "outcome": "resident_reconcile_failed",
-                    "error": None if success else ",".join(str(x) for x in rejections),
-                    "receipt_id": response.get("receipt_id"),
-                    "resident_intent_id": (
-                        (response.get("resident_response") or {}).get("intent_id")
-                        if isinstance(response.get("resident_response"), dict)
-                        else None
-                    ),
-                }
+            if claim.routine == RESIDENT_RECONCILE_ROUTINE:
+                response = await dispatch_resident_reconcile_claim(
+                    claim, module_path=self.module_path
+                )
+                return project_resident_reconcile_dispatch_outcome(response)
             response = await self._dispatch_scheduled_routine(
                 claim.routine
             )
@@ -982,34 +963,6 @@ class IdleAutomationDAE:
             claim,
             repo_root=repo_root,
             runtime_root=runtime_root,
-        )
-
-    async def _dispatch_resident_reconcile_claim(
-        self, claim: ScheduleClaim
-    ) -> Dict[str, Any]:
-        """Dispatch one default-off authenticated read-only resident cycle."""
-        if not _valid_resident_reconcile_claim(claim):
-            return {
-                "success": False,
-                "rejection_reasons": ["scheduled_resident_claim_invalid"],
-            }
-        if not self._parse_bool_env(
-            "AUTO_REDDOG_RESIDENT_RECONCILE", False
-        ):
-            return {
-                "success": False,
-                "rejection_reasons": ["scheduled_resident_reconcile_disabled"],
-            }
-
-        from modules.communication.moltbot_bridge.src.reddog_scheduled_resident_reconcile import (
-            run_scheduled_resident_reconcile,
-        )
-
-        repo_root = Path(self.module_path).resolve().parents[2]
-        return await asyncio.to_thread(
-            run_scheduled_resident_reconcile,
-            claim,
-            repo_root=repo_root,
         )
 
     def _record_claim_result(
