@@ -1055,3 +1055,67 @@ class TestDuplicateRerunPrevention:
                 result2 = await IdleAutomationDAE._execute_scheduled_routines(dae)
                 assert result2["due_count"] == 0
                 assert result2["executed_count"] == 0
+
+
+class TestScheduledResidentReconcileDispatch:
+    """Keep the resident cadence owner default-off and claim-bound."""
+
+    @pytest.fixture
+    def resident_dae(self, tmp_path):
+        from modules.infrastructure.idle_automation.src.idle_automation_dae import (
+            IdleAutomationDAE,
+        )
+
+        with patch.object(IdleAutomationDAE, "__init__", lambda self: None):
+            dae = IdleAutomationDAE()
+            dae.module_path = (
+                tmp_path / "repo" / "modules" / "infrastructure" / "idle_automation"
+            )
+            return dae
+
+    @pytest.mark.asyncio
+    async def test_resident_reconcile_is_default_off(
+        self, resident_dae, monkeypatch
+    ):
+        monkeypatch.delenv("AUTO_REDDOG_RESIDENT_RECONCILE", raising=False)
+        claim = _schedule_claim(routine="resident_reconcile")
+
+        with patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_scheduled_resident_reconcile."
+            "run_scheduled_resident_reconcile"
+        ) as runner:
+            result = await resident_dae._dispatch_resident_reconcile_claim(claim)
+
+        assert result["success"] is False
+        assert result["rejection_reasons"] == [
+            "scheduled_resident_reconcile_disabled"
+        ]
+        runner.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_enabled_resident_reconcile_dispatches_exact_claim(
+        self, resident_dae, monkeypatch, tmp_path
+    ):
+        monkeypatch.setenv("AUTO_REDDOG_RESIDENT_RECONCILE", "true")
+        claim = _schedule_claim(routine="resident_reconcile")
+        expected = {
+            "success": True,
+            "receipt_id": "sha256:resident-reconcile",
+            "resident_response": {"intent_id": "sha256:resident-intent"},
+            "rejection_reasons": [],
+        }
+
+        with patch(
+            "modules.communication.moltbot_bridge.src."
+            "reddog_scheduled_resident_reconcile."
+            "run_scheduled_resident_reconcile",
+            return_value=expected,
+        ) as runner:
+            result = await resident_dae._dispatch_resident_reconcile_claim(claim)
+
+        assert result == expected
+        runner.assert_called_once()
+        assert runner.call_args.args == (claim,)
+        assert runner.call_args.kwargs["repo_root"] == tmp_path / "repo"
+
