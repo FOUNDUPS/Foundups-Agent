@@ -597,6 +597,11 @@ def test_yumori_work_orchestrator_defines_resident_rsi_canary() -> None:
         "WRE PatternMemory / verified outcomes",
         "Resident cycle contract",
         "Autonomous effect ladder",
+        "Model and research workers",
+        "OpenRouter / Fusion is a candidate advisory intelligence layer",
+        "privacy/redaction gate",
+        "AI Gateway model AutoResearch",
+        "WRE AutoResearcher only for the bounded configuration/compute-ROI target",
         "REDDOG_AUTO",
         "#1779 host deployment closure",
         "Autonomous Gmail operating loop",
@@ -614,10 +619,11 @@ def test_yumori_work_orchestrator_defines_resident_rsi_canary() -> None:
     ):
         assert required in text
 
+    assert "Do not create a\nseparate YUMORI daemon" in text
     for forbidden in (
-        "separate YUMORI daemon",
         "new store for YUMORI memory",
         "auto-send regardless of #1779",
+        "raw private Gmail bodies may be sent to OpenRouter",
     ):
         assert forbidden not in text
 
