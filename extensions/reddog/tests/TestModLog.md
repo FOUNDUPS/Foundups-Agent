@@ -1,3 +1,21 @@
+## PR1638 integration replay — 2026-10-23
+
+Reuse the existing PAL inventory and tests without source/assertion changes.
+On verified portable Windows Node24.22.1, all five focused PAL/registration/
+adjacent-disclosure/package-manifest commands exit0; full fast tier18 members
+passes in19,568ms at integration checkpoint8a88810d7. The package-surface test
+passes69 files/975,019 bytes under unchanged caps and LF rules. Actual VSCE
+build maps71 entries:68 exact files, README's eight documented URL substitutions,
+and two packager metadata files. Archive284,535 bytes; exact hashes are in the
+existing integration receipt and external current-vsix-inspection.json.
+
+The first plain-clone fast attempt failed the canonical default-Python topology
+check; a source-pinned linked O: worktree then passed without changing tests or
+the qualified environment. Prior Node24.11.1/13-case independent results below
+remain historical, not additional new cases. Main4169b051's backend closure and
+PR1759 boundary tests are retained; hosted Ubuntu/Windows CI and installed-host
+qualification are separate pending gates. WSP00/5/6/22/50/97.
+
 ## PR1638 PAL pre-test inventory — 2026-10-22
 
 Recorded before repair test authoring in the isolated PR1638 worktree. Source

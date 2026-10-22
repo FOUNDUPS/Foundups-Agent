@@ -3,8 +3,46 @@
 PR: #1638
 Original branch: `feat/reddog-principal-activity-ledger`
 Reconciliation branch: `agent/pr-1638-ledger-closure`
-Source base: `02d1c7c14c60487619287a9cb753ff3ddaa53c14`
+Original reconciliation base: `02d1c7c14c60487619287a9cb753ff3ddaa53c14`
 Preserved PR head: `688eb097724ece28aca20e2e3477ca4c7aa9236c`
+
+## Current-main integration — 2026-10-23
+
+Reviewed source checkpoint `6ed3174c` is integrated with main
+`4169b051260376237554fba9650af2c77310b2c2` at local checkpoint `8a88810d7`.
+The original PR ancestry and all four reviewed PAL source/test hashes remain
+unchanged. Three insertion conflicts retain both CI jobs and both sets of log
+entries. Main's Python trust bootstrap, operator-command job, 1,450-member
+backend manifest/digest bindings and unrelated lanes are preserved exactly.
+Only the newly added PAL job's Node pin moves from 24.11.1 to 24.22.1, matching
+the security baseline already adopted on main. No runtime generator is changed.
+
+Fresh Windows qualification uses the portable official Node24.22.1 executable,
+with archive SHA256 checked against Node's published SHASUMS. All five focused
+commands listed below exit0. The full fast tier passes18 members in19,568ms on
+a clean source-pinned linked O: worktree. An initial plain O: clone stopped at
+the existing default-Python topology check because it had no primary `.venv`;
+that failure remains recorded. The linked worktree resolves the existing
+primary environment; no runtime or location guard was weakened.
+
+The package-surface test passes69 files /975,019 raw bytes, with68 LF text files,
+one binary and the unchanged1MiB cap. An actual new VSCE build produces71
+entries /284,535 bytes. Archive inspection verifies68 source files exactly and
+README's same eight explicit URL substitutions. The package content digest is
+`6eb9fd388a11a0347373be8ab7b5393a51c4a02567d304426a6458361fb4de79`; archive SHA256 is
+`4938e1820af71b69692915267c4f4c0ab8f84ec5b0bea1485f8f585a5e61abd7`.
+Nothing is installed or published. Existing `current-*` receipts under the
+external qualification directory bind runtime, focused/fast/package execution,
+archive mapping and exact source. Overlapping commands are not summed as cases.
+
+The sections dated2026-10-22 below retain historical Node24.11.1 and independent
+review results. The prior13 adversarial cases were not rerun in this integration;
+their reviewed source bytes remain unchanged. Live GitHub was observed OPEN at
+the original `688eb097` head with old September checks and no remote reviews;
+those checks do not qualify this local candidate. Independent current-head
+review, hosted CI/security, publication and main readback remain pending.
+Installed-host operation remains `IMPLEMENTED_NOT_VALIDATED`; the existing
+privacy, recovery, cross-root, rollback and authority limits remain unchanged.
 
 ## WSP97 reconciliation — 2026-10-22
 

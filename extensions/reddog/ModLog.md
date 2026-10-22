@@ -1,3 +1,16 @@
+## PR1638 current-main integration — 2026-10-23
+
+Integrate main4169b051, preserving PR1759's CI job, trust bootstrap, generated
+1,450-member closure/pins and all received owner work. Resolve three independent
+insertions without dropping either entry. The reviewed PAL source/tests remain
+byte-identical; only the new PAL job adopts main's Node24.22.1 security baseline.
+Portable official archive checksum/version verified; five focused commands,
+18-member fast tier and exact69-file package surface pass on this runtime.
+Actual VSIX build/source mapping passes71 entries/284,535 bytes, with README's
+documented URL-only rewrite. Existing integration receipt owns exact results,
+the retained plain-clone topology failure and historical Node24.11.1 evidence.
+No installed-host, native RSI, hosted-CI or publication claim. WSP00/15/22/50/97.
+
 ## PR1638 local activity-ledger reconciliation — 2026-10-22
 
 Preserve original PR head `688eb097` on last verified main `02d1c7c` in an

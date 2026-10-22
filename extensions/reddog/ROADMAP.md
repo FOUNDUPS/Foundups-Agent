@@ -3,7 +3,9 @@
 ## Current PAL reconciliation — PR1638
 
 WSP15: C4/I4/D3/Impact4 = 15/P1. The existing local activity-ledger proposal is
-being reconciled against main `02d1c7c`; it is not a second memory store or an
+integrated locally with main `4169b051` at source checkpoint `8a88810d7`.
+Fresh Node24.22.1 focused, fast-tier and package checks pass; independent review
+and hosted convergence remain pending. It is not a second memory store or an
 RSI completion claim. Scope: key initialization/recovery rejection, authenticated
 append, cooperating-process serialization, truthful write/context receipts,
 and the existing command/package closure. Canonical detail and measured results
