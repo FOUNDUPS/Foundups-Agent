@@ -583,3 +583,48 @@ def test_reddog_email_link_source_quality_policy() -> None:
     assert "percent-encoded bare URLs" in document_audit
     assert "never\n  cite the live website as #003" in document_audit
     assert "SUPERSEDED／送信禁止" in document_audit
+
+def test_yumori_work_orchestrator_defines_resident_rsi_canary() -> None:
+    """Resident YUMORI must compose existing memory/provider owners, not a new agent stack."""
+    text = WORK_ORCHESTRATOR_SKILL_PATH.read_text(encoding="utf-8")
+    for required in (
+        "Resident RSI canary — target autonomous loop",
+        "FoundUp scope `esingularity_001`",
+        "operational FoundUp Memex snapshot supply",
+        "Brain for durable consolidated understanding",
+        "Breadcrumbs for recent episodic",
+        "Gmail / LinkedIn / other providers as transaction truth",
+        "WRE PatternMemory / verified outcomes",
+        "Resident cycle contract",
+        "Autonomous effect ladder",
+        "Model and research workers",
+        "OpenRouter / Fusion is a candidate advisory intelligence layer",
+        "privacy/redaction gate",
+        "AI Gateway model AutoResearch",
+        "WRE AutoResearcher only for the bounded configuration/compute-ROI target",
+        "REDDOG_AUTO",
+        "#1779 host deployment closure",
+        "Autonomous Gmail operating loop",
+        "RESPOND",
+        "RESEARCH_MORE",
+        "reddog_recipient_preflight",
+        "No mass blast.",
+        "Autonomous partner discovery and unblocking",
+        "search existing Contacts, Gmail and LinkedIn",
+        "RSI learning contract",
+        "Retained improvement test",
+        "a later,",
+        "unseen YUMORI cycle",
+        "012 interventions required and why",
+        "cost per verified useful outcome",
+    ):
+        assert required in text
+
+    assert "Do not create a\nseparate YUMORI daemon" in text
+    for forbidden in (
+        "new store for YUMORI memory",
+        "auto-send regardless of #1779",
+        "raw private Gmail bodies may be sent to OpenRouter",
+    ):
+        assert forbidden not in text
+

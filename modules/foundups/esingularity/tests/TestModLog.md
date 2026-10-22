@@ -1,3 +1,9 @@
+## 2026-10-23 — Resident RSI canary contract regression
+
+- Reused `test_contracts.py`; no parallel YUMORI test file or synthetic contact/mail database was created.
+- Added a contract for the existing `yumori_work_orchestrator` covering FoundUp-scoped Memex/Brain/Breadcrumb/provider continuity, resident-cycle decision flow, autonomous Gmail triage/audience validation, anti-spam recipient preflight, autonomous partner discovery, #1779 truth boundary and later unseen-cycle retained-improvement measurement.
+- The assertions deliberately do not claim a live Gmail/LinkedIn mutation, deployed OpenRouter client, resident runtime execution or retained RSI benefit. Those require provider/runtime receipts and later-use evidence.
+
 ## 2026-10-21 — Moshpit event-time and paragraph policy contracts
 
 - Extended `test_yumori_moshpit_skill_is_wre_registered_and_projected` in the existing suite. Assertions bind ordering rules to their section: completion time, exclusion of body-only timestamps, unknown-time preservation and evidence for every historical move.
