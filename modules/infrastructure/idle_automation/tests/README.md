@@ -11,7 +11,7 @@ use the historical placeholder claims of zero coverage or no executions.
 - `test_schedule_evaluator.py`: cadence parsing and claim decisions.
 - `test_scheduled_routines_integration.py`: scheduled dispatch integration;
   WSP_62 growth is frozen and new provider cases belong in a split module.
-- `test_scheduled_resident_reconcile.py`: generic daily read-only resident FoundUp reconcile;\n  composes existing memory/client owners and keeps external mutation disabled.\n- `test_self_research_refresh.py`: self-research refresh behavior.
+- `test_self_research_refresh.py`: self-research refresh behavior.
   Includes real empty/bounded/partial/failed scanner consumption and malformed
   historical data isolation; zero events must not erase coverage or unknowns.
 - `test_startup_maintenance_gate.py`: lightweight startup maintenance routing.
