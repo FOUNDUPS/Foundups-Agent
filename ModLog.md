@@ -12,6 +12,9 @@ Revalidated after integrating fetched main `87aa241b2c27649a3b23177236fafd610cb7
 The seven runtime/test source files retain their previously reviewed bytes;
 the combined 1,450-member manifest and both consumer pins were regenerated.
 GitHub publication and hosted acceptance remain pending; this is local evidence.
+Independent integration review reproduced the newly inherited CI trust check
+failing on this job. Reused main's checksum-verified bootstrap before installing
+its bounded test dependencies; the acceptance rule remains unchanged.
 
 ## 2026-10-22 — OpenClaw/WRE proposal reconciliation
 

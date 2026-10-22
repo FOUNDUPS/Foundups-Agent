@@ -19,6 +19,10 @@ contracts. This overlaps the earlier run and is not additional runtime coverage.
 The seven runtime/test files are unchanged from reviewed `30238f2f`.
 Evidence: `fresh-main-integration-20261022.json` and
 `fresh-main-tests-20261022.xml` in the same qualification directory.
+Independent review then reproduced a separate CI trust-bootstrap failure in
+the new job. The job now uses main's existing verified bootstrap before its
+runner install. The red result is retained in
+`fresh-main-independent-trust-red-20261022.xml`; security rerun is separate.
 
 ## 2026-09-15 - Operator Command Plane Phase 1
 
