@@ -271,3 +271,95 @@ class TestBreadcrumbRecoveryIntegration:
         assert recovered is None, (
             "Should not produce lineage when no breadcrumb exists"
         )
+
+
+# ---------------------------------------------------------------------------
+# Scheduled resident reconcile adapter
+# ---------------------------------------------------------------------------
+
+
+def _resident_schedule_claim():
+    from modules.infrastructure.idle_automation.src.schedule_claim_state import (
+        ScheduleClaim,
+        build_execution_id,
+    )
+
+    start = "2026-10-23T00:00:00+00:00"
+    end = "2026-10-24T00:00:00+00:00"
+    routine = "resident_reconcile"
+    schedule_id = "scheduled-yumori"
+    return ScheduleClaim(
+        schedule_id=schedule_id,
+        routine=routine,
+        cadence="daily",
+        window_start=start,
+        window_end=end,
+        execution_id=build_execution_id(
+            schedule_id, routine, "daily", start, end
+        ),
+        token="opaque-resident-token",
+        claimant_id="idle-dae",
+        lease_expires_at="2026-10-23T01:00:00+00:00",
+        attempt=1,
+    )
+
+
+@pytest.mark.asyncio
+async def test_resident_schedule_adapter_is_default_off(tmp_path):
+    from modules.infrastructure.idle_automation.src.resident_reconcile_schedule_adapter import (
+        dispatch_resident_reconcile_claim,
+    )
+
+    runner = MagicMock()
+    result = await dispatch_resident_reconcile_claim(
+        _resident_schedule_claim(),
+        module_path=tmp_path / "repo/modules/infrastructure/idle_automation",
+        environ={},
+        runner=runner,
+    )
+
+    assert result == {
+        "success": False,
+        "rejection_reasons": ["scheduled_resident_reconcile_disabled"],
+    }
+    runner.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_resident_schedule_adapter_dispatches_exact_claim_when_enabled(tmp_path):
+    from modules.infrastructure.idle_automation.src.resident_reconcile_schedule_adapter import (
+        dispatch_resident_reconcile_claim,
+        project_resident_reconcile_dispatch_outcome,
+    )
+
+    claim = _resident_schedule_claim()
+    runner = MagicMock(return_value={
+        "success": True,
+        "receipt_id": "sha256:resident-reconcile",
+        "resident_response": {"intent_id": "sha256:resident-intent"},
+        "rejection_reasons": [],
+    })
+    module_path = tmp_path / "repo/modules/infrastructure/idle_automation"
+    result = await dispatch_resident_reconcile_claim(
+        claim,
+        module_path=module_path,
+        environ={"AUTO_REDDOG_RESIDENT_RECONCILE": "true"},
+        runner=runner,
+    )
+
+    runner.assert_called_once_with(claim, repo_root=tmp_path / "repo")
+    projected = project_resident_reconcile_dispatch_outcome(result)
+    assert projected["success"] is True
+    assert projected["receipt_id"] == "sha256:resident-reconcile"
+    assert projected["resident_intent_id"] == "sha256:resident-intent"
+
+
+def test_idle_dae_routes_resident_claim_through_extracted_adapter():
+    source = Path(
+        "modules/infrastructure/idle_automation/src/idle_automation_dae.py"
+    ).read_text(encoding="utf-8")
+
+    assert "dispatch_resident_reconcile_claim" in source
+    assert "project_resident_reconcile_dispatch_outcome" in source
+    assert "async def _dispatch_resident_reconcile_claim" not in source
+
