@@ -1,3 +1,23 @@
+## 2026-10-23 - PR782 quota-only reconciliation and preserved work
+
+WSP 00/10/15/22/50/60/84/97. Reuse the existing stream-checker guard and
+existing test file to make the global API-off toggle dominate local verification.
+Reconcile the original PR on main while retaining its original commit ancestry;
+record all remaining alias/template, ignore-visibility and local-settings work
+with owner, priority and acceptance in the existing backlog audit. These residual
+changes are preserved, not implemented or declared superseded.
+
+PR1638 is now squash-merged at `5655008eaf0fcd88af85006b50cc3eb5ceb054c0`;
+its merged tree preserves the independently reviewed candidate and newer main.
+All PR checks passed. Exact-main checks and installed-host qualification remain
+separate. PR782's complete checker source passes 31 unit tests; the adjacent
+suite passes 13 under isolated dependencies. An independent reviewer reproduced
+both and confirmed that reverting either gate fails three protected cases.
+The existing CI job now invokes the checker suite directly. The existing
+manifest and both pins are regenerated; eight manifest contracts passed and
+the staged-candidate assertion passed after coherent staging. Hosted acceptance
+and publication remain pending. No live API, native worker, paid model or Brain-ingestion claim.
+
 ## 2026-10-23 - PR closure and durable backlog reconciliation
 
 WSP 00/10/15/22/50/60/97. #1759 is squash-merged at `4169b0512`;

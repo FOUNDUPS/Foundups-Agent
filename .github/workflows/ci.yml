@@ -95,6 +95,8 @@ jobs:
             modules/communication/voice_command_ingestion/tests/test_transcript_language.py \
             modules/communication/voice_command_ingestion/tests/test_voice_command_ingestion.py \
             modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py
+      - name: Verify stream checker global and local quota boundaries
+        run: python -B modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -v
 
   mcp-runtime-compatibility:
     runs-on: windows-latest
