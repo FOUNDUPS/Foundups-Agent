@@ -20,6 +20,15 @@ from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_
     AgentDbResidentArchitectCycleStore,
     resident_intent_digest,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_foundup_memex_config import (
+    build_resident_foundup_memex_supply_config,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_memory_context import (
+    resident_breadcrumbs_from_runtime,
+)
+from modules.communication.moltbot_bridge.src import (
+    reddog_scheduled_resident_reconcile as scheduled_resident,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -549,3 +558,224 @@ def test_client_module_has_no_execution_or_second_model_authority() -> None:
     assert "os" not in imported
     for forbidden in ("HermesFoundUpBuilder", "run_repo_code_audit", "git push", "gh pr", "worktree add"):
         assert forbidden not in source
+
+
+def test_real_esingularity_memex_config_uses_registered_manifest_and_roadmap() -> None:
+    config = build_resident_foundup_memex_supply_config(
+        repo_root=REPO_ROOT,
+        foundup_id="esingularity_001",
+        principal_id="012",
+        max_records=20,
+    )
+
+    assert config.foundup_id == "esingularity_001"
+    assert config.principal_id == "012"
+    assert config.identity["foundup_id"] == "esingularity_001"
+    assert config.identity["name"] == "eSingularity.ai"
+    assert config.identity["stage"] == "proto"
+    assert "Regional AI infrastructure FoundUp for Fukui" in config.identity["purpose"]
+    assert config.roadmap_state["foundup_id"] == "esingularity_001"
+    assert config.roadmap_state["roadmap_id"] == "modules/foundups/esingularity/ROADMAP.md"
+    assert config.roadmap_state["version"].startswith("sha256:")
+    assert config.roadmap_state["content_digest"] == config.roadmap_state["version"]
+    assert config.max_records == 20
+
+
+def test_resident_memex_config_rejects_unknown_foundup() -> None:
+    try:
+        build_resident_foundup_memex_supply_config(
+            repo_root=REPO_ROOT,
+            foundup_id="not_registered",
+            principal_id="012",
+        )
+    except ValueError as exc:
+        assert str(exc) == "resident_memex_foundup_not_unique"
+    else:
+        raise AssertionError("unknown FoundUp was admitted to resident Memex")
+
+
+def test_resident_breadcrumb_search_preserves_keyword_limit_contract() -> None:
+    calls = []
+
+    def search(query: str, *, limit: int):
+        calls.append((query, limit))
+        return [{"breadcrumb_id": "crumb-1"}]
+
+    result = resident_breadcrumbs_from_runtime(
+        work_focus="Audit YUMORI current blockers.",
+        foundup_id="esingularity_001",
+        environ={"REDDOG_RESIDENT_MEMORY_MAX_RECORDS": "7"},
+        breadcrumb_search=search,
+    )
+
+    assert result == ({"breadcrumb_id": "crumb-1"},)
+    assert calls == [("Audit YUMORI current blockers.", 7)]
+
+
+class _ScheduledGrounded:
+    accepted = True
+    rejection_reasons = ()
+    intent = {
+        "schema_version": "reddog_intent.v2",
+        "intent_id": "sha256:scheduled-resident-intent",
+    }
+class _ScheduledSafeResponse:
+    accepted = True
+    read_only_authority_only = True
+    client_no_shell_command_executed = True
+    client_no_repo_mutation_performed = True
+    client_no_holoindex_reindex_performed = True
+    client_no_hermes_execution_performed = True
+    client_no_worktree_operation_performed = True
+    client_no_pr_created = True
+    client_no_merge_performed = True
+    rejection_reasons = ()
+    def to_dict(self):
+        return {
+            "accepted": True,
+            "intent_id": "sha256:scheduled-resident-intent",
+            "cycle_id": "sha256:scheduled-resident-cycle",
+            "status": "DETERMINED",
+            "read_only_authority_only": True,
+        }
+class _ScheduledClient:
+    calls = []
+    def __init__(self, **kwargs):
+        type(self).calls.append(dict(kwargs))
+    def submit(self, intent):
+        type(self).calls[-1]["intent"] = dict(intent)
+        return _ScheduledSafeResponse()
+class _ScheduledClaim:
+    schedule_id = "scheduled-yumori"
+    routine = "resident_reconcile"
+    cadence = "daily"
+    window_start = "2026-10-23T00:00:00+00:00"
+    window_end = "2026-10-24T00:00:00+00:00"
+    execution_id = "sha256:scheduled-window"
+    token = "opaque-scheduled-resident-token"
+def _scheduled_env():
+    return {
+        "REDDOG_AUTHENTICATED_PRINCIPAL_ID": "012",
+        "REDDOG_AUTHORIZED_FOUNDUP_IDS": "esingularity_001",
+        "REDDOG_SCHEDULED_RESIDENT_FOUNDUP_ID": "esingularity_001",
+        "REDDOG_SCHEDULED_RESIDENT_WORK_FOCUS": (
+            "Audit current YUMORI project blockers and select the next evidence-first action."
+        ),
+        "REDDOG_RESIDENT_MEMORY_MAX_RECORDS": "20",
+    }
+def test_scheduled_resident_composes_existing_memory_memex_and_client(monkeypatch) -> None:
+    _ScheduledClient.calls.clear()
+    monkeypatch.setattr(
+        scheduled_resident,
+        "load_resident_model_runtime_bindings",
+        lambda *_args, **_kwargs: (
+            {"receipt_id": "audit-binding"},
+            {"receipt_id": "architect-binding"},
+            "",
+        ),
+    )
+    monkeypatch.setattr(
+        scheduled_resident,
+        "resident_brain_state_from_artifacts",
+        lambda _env: {"available": True, "record_count": 4},
+    )
+    monkeypatch.setattr(
+        scheduled_resident,
+        "resident_breadcrumbs_from_runtime",
+        lambda **_kwargs: (
+            {"breadcrumb_id": "crumb-1"},
+            {"breadcrumb_id": "crumb-2"},
+        ),
+    )
+    monkeypatch.setattr(
+        scheduled_resident,
+        "resident_workspace_memory_notes_from_env",
+        lambda _env: ({"note_id": "workspace-1"},),
+    )
+    memex_config = object()
+    monkeypatch.setattr(
+        scheduled_resident,
+        "build_resident_foundup_memex_supply_config",
+        lambda **_kwargs: memex_config,
+    )
+    first = scheduled_resident.run_scheduled_resident_reconcile(
+        _ScheduledClaim(),
+        repo_root=REPO_ROOT,
+        environ=_scheduled_env(),
+        client_factory=_ScheduledClient,
+        grounding_service=lambda **_kwargs: _ScheduledGrounded(),
+    )
+    second = scheduled_resident.run_scheduled_resident_reconcile(
+        _ScheduledClaim(),
+        repo_root=REPO_ROOT,
+        environ=_scheduled_env(),
+        client_factory=_ScheduledClient,
+        grounding_service=lambda **_kwargs: _ScheduledGrounded(),
+    )
+    assert first["success"] is True
+    assert first["foundup_id"] == "esingularity_001"
+    assert first["brain_record_count"] == 4
+    assert first["breadcrumb_count"] == 2
+    assert first["workspace_note_count"] == 1
+    assert first["foundup_memex_configured"] is True
+    assert first["request_id"] == second["request_id"]
+    assert first["no_gmail_mutation_performed"] is True
+    assert first["no_linkedin_mutation_performed"] is True
+    assert first["no_repo_mutation_performed"] is True
+    defaults = _ScheduledClient.calls[0]["runtime_defaults"]
+    assert defaults["memex_snapshot_supply_config"] is memex_config
+    assert defaults["audit_model_runtime_binding_receipt"]["receipt_id"] == "audit-binding"
+    assert defaults["architect_model_runtime_binding_receipt"]["receipt_id"] == "architect-binding"
+    assert defaults["breadcrumbs"][0]["breadcrumb_id"] == "crumb-1"
+    assert _ScheduledClient.calls[0]["transport"] == "api"
+    assert _ScheduledClient.calls[0]["authorized_foundup_ids"] == ("esingularity_001",)
+def test_scheduled_resident_rejects_bad_scope_before_memory(monkeypatch) -> None:
+    called = []
+    monkeypatch.setattr(
+        scheduled_resident,
+        "load_resident_model_runtime_bindings",
+        lambda *_args, **_kwargs: called.append(True),
+    )
+    env = _scheduled_env()
+    env["REDDOG_AUTHORIZED_FOUNDUP_IDS"] = "esingularity_001,other_foundup"
+    result = scheduled_resident.run_scheduled_resident_reconcile(
+        _ScheduledClaim(),
+        repo_root=REPO_ROOT,
+        environ=env,
+        client_factory=_ScheduledClient,
+        grounding_service=lambda **_kwargs: _ScheduledGrounded(),
+    )
+    assert result["success"] is False
+    assert "scheduled_resident_requires_exactly_one_foundup" in result["rejection_reasons"]
+    assert called == []
+def test_scheduled_resident_fails_closed_without_breadcrumb_memory(monkeypatch) -> None:
+    monkeypatch.setattr(
+        scheduled_resident,
+        "load_resident_model_runtime_bindings",
+        lambda *_args, **_kwargs: (
+            {"receipt_id": "audit-binding"},
+            {"receipt_id": "architect-binding"},
+            "",
+        ),
+    )
+    monkeypatch.setattr(
+        scheduled_resident,
+        "resident_brain_state_from_artifacts",
+        lambda _env: {"available": True, "record_count": 2},
+    )
+    monkeypatch.setattr(
+        scheduled_resident,
+        "resident_breadcrumbs_from_runtime",
+        lambda **_kwargs: (),
+    )
+    result = scheduled_resident.run_scheduled_resident_reconcile(
+        _ScheduledClaim(),
+        repo_root=REPO_ROOT,
+        environ=_scheduled_env(),
+        client_factory=_ScheduledClient,
+        grounding_service=lambda **_kwargs: _ScheduledGrounded(),
+    )
+    assert result["success"] is False
+    assert result["rejection_reasons"] == [
+        "resident_breadcrumbs_context_unavailable"
+    ]
