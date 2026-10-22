@@ -24,6 +24,20 @@ WSP00/6/15/22/50/84/97. New-head hosted checks pending; no native RSI claim.
 
 # RedDog Extension Tests
 
+## PR1638 local activity-ledger reconciliation
+
+Current scope and results: [integration receipt](../docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md)
+and the PR1638 entry in `TestModLog.md`. Existing ledger/adapter suites now cover
+key concurrency/loss, authenticated append, partial I/O and cleanup, cooperating
+child-process locking, strict JSON, latest commitment status, and truthful
+bounded projections using temporary data and fake SecretStorage. Registration
+remains a static contract; real installed-host operation is unqualified.
+
+The fast tier has 18 members, including the three PAL tests. The package contract
+has 69 files (68 LF text, one binary) under its unchanged one MiB cap. Historical
+67-file release receipts below keep their original source scope. The focused
+Linux/Windows CI job is configured; hosted results require new-head execution.
+
 ## 0.4.141 identity / merged builder reconciliation candidate
 
 - The fast-RedDog/deep-0102 identity boundary is applied above the already

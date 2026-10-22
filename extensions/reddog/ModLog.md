@@ -1,3 +1,40 @@
+## PR1638 current-main integration — 2026-10-23
+
+Integrate main4169b051, preserving PR1759's CI job, trust bootstrap, generated
+1,450-member closure/pins and all received owner work. Resolve three independent
+insertions without dropping either entry. The reviewed PAL source/tests remain
+byte-identical; only the new PAL job adopts main's Node24.22.1 security baseline.
+Portable official archive checksum/version verified; five focused commands,
+18-member fast tier and exact69-file package surface pass on this runtime.
+Actual VSIX build/source mapping passes71 entries/284,535 bytes, with README's
+documented URL-only rewrite. Existing integration receipt owns exact results,
+the retained plain-clone topology failure and historical Node24.11.1 evidence.
+No installed-host, native RSI, hosted-CI or publication claim. WSP00/15/22/50/97.
+
+## PR1638 local activity-ledger reconciliation — 2026-10-22
+
+Preserve original PR head `688eb097` on last verified main `02d1c7c` in an
+isolated lane. Repair reproduced key/I/O/context failures in existing PAL owners:
+scoped serialized key creation; cooperating-process lock; authenticated history
+before append; strict JSON; full write/flush/close before success; globally
+latest commitment state and truthful truncation. Existing ledger/adapter tests
+and adjacent registration/disclosure/package manifest commands exit0 locally
+on Windows Node24.11.1. These are synthetic fixtures, not installed-host proof.
+
+Repair the full-package expected counts 67/66 to 69/68 for exactly the two PAL
+modules; preserve file membership, LF policy and one MiB limit. Add focused
+Linux/Windows CI coverage and reconcile existing interface/architecture/test
+docs. Current evidence and remaining review/publication/installed-host gates:
+`docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md`. Remote connectivity is
+unavailable; no push, merge, hosted CI, installation or native RSI claim.
+Independent review passed 13 adversarial cases; the approved-drive checkout
+passed the 18-member fast tier at `7615273f6`. Final package-list qualification
+is 69 files / 975,019 bytes; local VSIX build and explicit archive/source mapping
+pass. Correct current package counts and the existing README's monorepo link
+base after actual archive inspection exposed wrong generated links. Receipts
+distinguish byte-identical runtime from README-only URL rewriting. No install.
+WSP00/5/6/10/11/15/22/50/77/84/97. Blockchain/PF Mall work remains separate.
+
 ## PR1759 operator-command runtime member — 2026-10-22
 
 The generated runtime closure adds exactly the existing PR's
