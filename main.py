@@ -1740,29 +1740,6 @@ def _reddog_bounded_json_env(name: str, *, max_chars: int = 16384) -> Any | None
         return None
 
 
-def _reddog_mapping_sequence(payload: Any, keys: Sequence[str], *, limit: int) -> tuple[Mapping[str, Any], ...]:
-    source: Any = payload
-    if isinstance(payload, Mapping):
-        for key in keys:
-            candidate = payload.get(key)
-            if isinstance(candidate, list):
-                source = candidate
-                break
-    if not isinstance(source, list):
-        return ()
-    records: list[Mapping[str, Any]] = []
-    for item in source:
-        if isinstance(item, Mapping):
-            records.append(dict(item))
-            if len(records) >= limit:
-                break
-    return tuple(records)
-
-
-def _reddog_resident_memory_limit() -> int:
-    return _reddog_positive_int_env("REDDOG_RESIDENT_MEMORY_MAX_RECORDS", 20)
-
-
 def _reddog_resident_brain_state_from_artifacts() -> Mapping[str, Any] | None:
     from modules.communication.moltbot_bridge.src.reddog_resident_memory_context import (
         resident_brain_state_from_artifacts,
