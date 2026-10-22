@@ -1,3 +1,18 @@
+## Installed HIGH service manifest contract — 2026-10-22
+
+Existing service-entrypoint imports require 1,462 runtime members (11 additions).
+Canonical digest becomes `759ee0caf65899b1baddc4329b085246e2fe4fcad53c2d273a29f257eaf833bb`.
+Pretty JSON remains LF 330,756 / CRLF 333,753 bytes. The explicit serialized
+limit changes 324→326 KiB (+2,048 bytes, about 0.62%), leaving 71 bytes above
+CRLF. This is the smallest whole-KiB contract covering the measured artifact.
+The consumer still checks exact digest and membership; 1,462/1,463 and exact
+byte-limit/+1 tests remain mandatory. Per-file 2 MiB and total 32 MiB bounds,
+JSON layout, source-line limits and runtime authority are unchanged. No extension
+installation or native HIGH admission is claimed. Independent Python manifest
+suite passes8 (including staged-index equality); JS contract/preflight/async all
+exit0 with LF/CRLF, exact-byte/+1 and member1462/1463 acceptance/rejection.
+Review and hashes: external `pr-reconciliation-20261021/refresh/rsi-installed-high-final-independent-review-20261022.json`. Hosted/current-main evidence is pending.
+
 ## Live generation scope backend byte contract — 2026-10-20
 
 The required 1,451-member closure adds nonce authority/current-owner imports.

@@ -1,3 +1,39 @@
+## Installed HIGH closure reconciliation — 2026-10-22
+
+WSP00/5/6/10/15/22/50/97; existing 19/P0 lane. Preserved all 17 unfinished
+paths before reconciliation. The service entrypoint and HIGH leaf already exist;
+no replacement service was created. Independent import tracing justifies all 11
+added runtime members. The generated 1,462-member closure was current, but its
+consumer/test pins, 1,451-member cap and indexed manifest were stale. The LF
+artifact is 330,756 bytes; CRLF is 333,753, above the old 331,776-byte contract.
+The paired limit becomes 326 KiB (333,824), the smallest whole-KiB limit covering
+both. Exact digest, count, path, per-file/total bounds and authority checks stay.
+
+Existing CI startup selection now includes installed work admission and both HIGH
+service suites. Independent binding review accepted the frozen source: Python manifest8 pass,
+JS contract/preflight/async exit0, registry1,745/270 current. Fresh connected
+six-suite result153 passed/1 Windows skip in128.67s. The first run152/1skip/1fail
+is retained: its second fixture reached261 characters; the file existed and
+read through the Windows extended-length path. Shortening only external basetemp
+resolved the harness boundary; no source or assertion changed. Counts overlap.
+No native author, installation or retained RSI gain is claimed. Fresh-main
+reconciliation, hosted checks and publication remain open.
+
+## Installed HIGH service connection — 2026-10-20
+
+WSP00/5/6/11/15/22/50/62/71/77/97; 19/P0 prerequisite. Rebased metadata checkpoint onto live-lease prerequisite with all eleven source/test blobs preserved. Existing service/dependency/model/permission owners now connect distinct V11 scope; one narrow HIGH leaf keeps the LOW service at 296 lines without cap inflation. Full runtime validation precedes custody; the self-leasing nonce loader remains outside the request fence.
+
+Actual fixture parent/effect factory signatures and durable nonce/replay controls pass. Initial installation/current-input, OS custody, permission/root oracle and clock seams are synthetic; model/approval signatures, canonical scope and MAC/SQLite are real. Focused core: 83 passed/1 Windows Unix skip/0 failures in 76.271s; independent ingestion5 pass. Connected exact results are retained externally; counts overlap. No real runtime/service/credential/grant/provider effects. Authentic current non-initial policy/manifest/selection, signed model/parent/effect inputs, custody and budget admission remain required. Known-path missing metadata and expired LOW drafts do not supply them. Historical checkpoint follows.
+
+Known exact setup gaps are retained externally: Windows native-owner configuration
+was unset (`windows-native-owner-configuration-readiness.json`, SHA256
+`21949d844b851e0a2ed061bf6126bb65081642cff4b50bc52239cfa19dc619f3`),
+and lstat found both canonical issuer/target `signed_runtime_artifact_manifests`
+directories missing (`canonical-manifest-directory-availability.json`). These
+are timestamped known-path observations, not global absence or authority checks.
+Connected six-suite validation passed153/skipped1/failed0 in182.559s; the earlier
+83/1 focused count overlaps. Root publication/base reconciliation remains pending.
+
 ## Non-initial installed metadata checkpoint — 2026-10-20
 
 WSP00/5/6/11/22/50/62/71/77/97. Seven existing production owners and four

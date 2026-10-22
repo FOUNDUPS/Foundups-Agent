@@ -12,7 +12,17 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — live authenticated generation scope (2026-10-20 JST):**
+**Current owned candidate — installed HIGH source closure (2026-10-22 JST):**
+The existing service/lease composition is implemented locally; its manifest
+consumer and index bindings now pass independent manifest8 and three JS checks.
+Fresh connected service validation passes153/1 Windows skip; native execution is
+still unproved. The original Windows long-path fixture failure remains recorded.
+This candidate is unpublished and not reconciled with unfetched remote main
+`87aa241b`. Existing 19/P0 selection remains: validate/close this composition,
+then qualify installed execution and bind authentic admission inputs. Native
+RSI G1–G5 are not demonstrated. See [current dispatch](docs/operations/RSI_SWARM_DISPATCH.md#installed-high-source-closure-candidate--2026-10-22).
+
+**Historical checkpoint — live authenticated generation scope (2026-10-20 JST):**
 Nine existing owners share the authenticated fence across parent/effect checks,
 nonce reserve, pre-sign validation, commit and rollback without nested flock.
 Connected 390/9 platform skips, separate Linux process 2/0 and independent 16

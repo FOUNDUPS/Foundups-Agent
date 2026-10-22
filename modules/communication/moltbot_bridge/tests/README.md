@@ -1,3 +1,9 @@
+## Installed HIGH service qualification
+
+Run `test_reddog_installed_high_service.py` and `test_reddog_installed_high_service_signing.py` with LOW service, startup custody, installed work-manifest, permission, parent-model and live-lease suites. `installed_high_service_test_support.py` reuses actual signed-model/parent/effect, factory and nonce fixtures; installation/current-input, OS, initial permission/root oracle and frozen-clock seams are synthetic. Verify actual Ed25519 signature, durable commit/replay rejection, no nested request fence, missing/corrupt model/proof rejection before custody, and post-sign drift/failed-exit withholding without rollback claims. The signed-manifest guard test replaces only the full runtime guard with a recorder/rejection seam; it is not native qualification.
+
+Use `-B`, `PYTHONDONTWRITEBYTECODE=1`, explicit `--rootdir=. --confcutdir=. --noconftest`, and no cache provider. On Windows use a short owned external `--basetemp` (for example `O:/RedDog-Builder-Artifacts/rsi-hi-<run-id>`) distinct from the report directory: the nested second manifest fixture can exceed259 path characters in a long evidence directory. Retain any original failure; shortening only temporary storage is environment repair, not a source fix. Retain external exact hashes and XML/logs. No native authority/provider effects are claimed.
+
 ## Non-initial installed metadata qualification
 
 `test_reddog_installed_work_admission.py` reuses real signed manifest/E0 and

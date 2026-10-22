@@ -1422,6 +1422,9 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
             modules/communication/moltbot_bridge/tests/test_reddog_installed_grant_manifest_consumer.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_installed_work_admission.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_installed_high_service.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_installed_high_service_signing.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_healthcheck.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py \

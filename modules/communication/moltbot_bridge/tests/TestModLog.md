@@ -1,3 +1,43 @@
+## Installed HIGH closure reconciliation — 2026-10-22
+
+Final staged diff-check found one surplus trailing blank line in the preserved
+HIGH leaf and one support fixture. Only those blank lines were removed; ASTs are
+identical. The manifest was regenerated and pins rebound to the resulting bytes.
+Earlier freeze/review and failure receipts remain historical. Final byte-bound
+independent review passes8 Python cases in72.34s and all three Node scripts.
+Final connected rerun passes153/skips1 in128.67s on this source; counts overlap.
+
+Independent pre-repair manifest run: 6 passed, 2 failed in 69.12s. Failures were
+Windows CRLF size and indexed-source consistency; separate inspection found stale
+digest and count pins. Existing manifest and JS boundary tests are retained.
+CI adds the existing installed-work/HIGH suites to the startup regression.
+Pre-EOF independent manifest8 passed in67.19s, JS contract/preflight/async
+all exit0, and source/index hashes matched. The pre-EOF connected six-suite run passed
+153/skipped1 in124.52s. Retain original152pass/1skip/1fail: second nested fixture
+path261 characters was published but normal Windows read failed; independent
+extended-length read proved its presence. Single-case shorter-basetemp control
+passed; complete suite then passed with unchanged source. This is a test-path
+environment correction, not a service repair. Two unknown asyncio-config warnings
+reflect disabled plugin autoload. Historical and fresh counts are not additive.
+
+Exact commands, XML, hashes and independent review live under the existing external
+`pr-reconciliation-20261021/refresh/` evidence directory: `rsi-installed-high-final-independent-review-20261022.json`,
+`rsi-installed-high-connected-path-diagnosis-20261022.json`,
+and `rsi-high-connected-final-20261022.xml`. The pre-EOF review/run remain retained
+under their original filenames.
+
+## Installed HIGH service connection — 2026-10-20
+
+Two original controls demonstrated missing V11 full-runtime guard and service selection. The first expanded run retained a 381>300 service-size failure; extracting the HIGH leaf restored the unchanged cap and LOW backend. Focused core passed83/skipped1/failed0 in76.271s. Parent/effect positives execute the actual factory and verify Ed25519 signatures and durable consensus nonce consumption/replay. Original fixture failures are retained: incorrect total lease count (two serial leases are expected), captured dataclass clock and noncanonical peer fixture were corrected only in tests. Four post-sign drift/exit cases withhold the successful result without undoing commit. Independent ingestion5 pass; counts overlap.
+
+Five production files are pinned by external `service-core-freeze.json` SHA256 `7eb7172a5049c7a28ef1363750945607231f00f23d600e24e3e283f76bb5bd0a`. Connected/final bindings are retained in `high-installed-admission-author-review`. No installed HIGH/native admission is inferred. Historical metadata results and unchanged baseline debts follow.
+
+Connected six-suite result: 153 passed, 1 Windows-only skip, 0 failures/errors in
+182.559 seconds (`service-connected.xml`). The five production hashes remained
+unchanged against the pre-run core freeze. It includes the new HIGH tests, live
+composition, model inputs, permission rehydration and signed installed admission;
+83/1 focused and independent5 counts overlap and are not summed.
+
 ## Non-initial installed metadata checkpoint — 2026-10-20
 
 Base c5dc5b7a; final freeze contains seven production and four test/support files.

@@ -1,6 +1,7 @@
 """Project reverified model artifacts using only current protected verifier inputs."""
 
 import json
+from pathlib import Path
 
 from . import reddog_model_runtime_verifier_bootstrap as models
 from .reddog_elevated_authority_consensus_policy import AuthorRuntimeEvidence
@@ -8,6 +9,43 @@ from .reddog_signer_system_service_owner_inputs import load_system_service_model
 from .reddog_model_verifier_selection_inputs import SelectionReadBudget
 from .reddog_runtime_artifact_manifest_contract import digest
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_verified_admission import verification_receipt_digest
+
+PARENT_MODEL_ARTIFACTS_FILENAME = 'parent_model_artifacts.json'
+
+
+def load_protected_parent_model_artifacts(*, owner_config_path, repo_root, expected_owner_config_id):
+    """Read untrusted signed-model data, not a verifier or authorization.
+
+    The fixed root-owned sibling avoids caller-selected paths. Actual model
+    signatures/current selection remain mandatory in verified_model_evidence.
+    The caller holds current E0 admission and rereads before returning a result.
+    """
+    from . import reddog_signer_system_service_manifest_selection_loader as loader
+    path, repo = Path(owner_config_path), Path(repo_root).resolve()
+    if not path.is_absolute():
+        raise ValueError('parent_model_owner_path_invalid')
+    owner = loader._load_owner_config(path, repo=repo)
+    if owner['schema_version'] != loader.SCHEMA_VERSION_V13 or owner['config_id'] != expected_owner_config_id:
+        raise ValueError('parent_model_owner_binding_invalid')
+    raw = loader._read_root_owned_bytes(path.parent / PARENT_MODEL_ARTIFACTS_FILENAME,
+        path.parent, max_bytes=1024 * 1024)
+    def unique(pairs):
+        value = {}
+        for key, item in pairs:
+            if key in value:
+                raise ValueError('parent_model_duplicate_field')
+            value[key] = item
+        return value
+    artifacts = snapshot_model_artifacts(json.loads(raw.decode('utf-8'), object_pairs_hook=unique))
+    pairs = {(v['selection'].get('receipt_id'), digest(v['selection']))
+             for v in (artifacts['author'], *artifacts['reviewers'].values())}
+    if (len(pairs) != 1 + len(artifacts['reviewers']) or pairs !=
+            {(e['selection_receipt_id'], e['selection_receipt_digest'])
+             for e in owner['model_verifier_authority']['entries']}):
+        raise ValueError('parent_model_selection_set_mismatch')
+    if loader._load_owner_config(path, repo=repo) != owner:
+        raise ValueError('parent_model_owner_changed')
+    return artifacts
 
 
 def snapshot_model_artifacts(value):

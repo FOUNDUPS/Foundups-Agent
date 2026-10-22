@@ -193,6 +193,10 @@ def _assert_signer_and_memex_runtime_files(generated: dict) -> None:
     )
     assert all(path in required for path in expected)
     for filename in (
+        "reddog_grant_authority_service.py",
+        "reddog_grant_authority_high_service.py",
+        "reddog_grant_authority_runtime_dependencies.py",
+        "reddog_grant_authority_wsp71_permission_rehydration.py",
         "foundup_verified_outcome_root_authority_client.py",
         "foundup_verified_outcome_root_authority_protocol.py",
         "foundup_verified_outcome_root_authority_service.py",
@@ -257,9 +261,9 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 324 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 326 * 1024
     lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
-    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 324 * 1024
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 326 * 1024
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
     result_module = (
@@ -273,7 +277,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "fd0969d46a01870d8bfaeaf5f78299be2f66467d32a11035f19936f92921b318"
+    assert digest == "759ee0caf65899b1baddc4329b085246e2fe4fcad53c2d273a29f257eaf833bb"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

@@ -1,3 +1,9 @@
+## Installed HIGH service connection — 2026-10-20
+
+Source-level composition, awaiting fresh installed-runtime qualification. A separately signed v11 policy selects HIGH/worktree_create at generation >=2. V10 initial LOW behavior and target-versus-issuer config bindings are unchanged. The materializer authenticates the installed descriptor and full runtime before custody. Protected owner v13 supplies fixed sibling `parent_model_artifacts.json`, using the existing `{author, reviewers}` shape, duplicate-key rejection, 1 MiB read/snapshot limit and exact distinct signed selection set. This is untrusted model data, never a verifier or permission. Startup verifies the author and prepares reviewer resolvers; every parent/effect request verifies the complete proof and reviewers before signing-key resolution, then rereads/verifies the model map before returning.
+
+The consensus nonce loader owns a separate preliminary lease. The new narrow HIGH leaf reuses canonical parent/effect/nonce owners under the opaque live request scope and the existing factory. Only canonical parent and effect-v2 proofs are admitted; legacy resolver slots are unavailable. Failed final checks or lease exit withhold results without undoing completed signatures/commits. No new activation/store/framework, installed authority, provider call or native author admission is supplied. Historical checkpoint statements below retain their original scope.
+
 ## Non-initial installed metadata checkpoint — 2026-10-20
 
 Source-level preparation only; unpublished integration checkpoint. Distinct signed

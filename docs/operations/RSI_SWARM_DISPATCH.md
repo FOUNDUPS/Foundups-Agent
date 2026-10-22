@@ -1,3 +1,38 @@
+## Installed HIGH source closure candidate — 2026-10-22
+
+WSP00/5/6/10/15/22/50/97. Existing 19/P0 prerequisite; integrate the already
+implemented service and live lease before another native author attempt. Owned
+base `482238effcc2cb948928f94972ab6673125cde98`; all 17 unfinished paths were
+preserved externally before editing. Service code matches the historical frozen
+153-pass/1-skip fixture evidence. The entrypoint was already a generator root.
+
+The remaining source-closure defect was stale consumer/index bindings: 1,462
+required members, canonical digest
+`759ee0caf65899b1baddc4329b085246e2fe4fcad53c2d273a29f257eaf833bb`,
+pretty LF 330,756 / CRLF 333,753 bytes. Independent AST traversal justifies all
+11 additions. Consumer/test count is now 1,462 and byte limit 326 KiB (333,824);
+exact digest, member+1 and byte+1 rejection remain required. Independent manifest8
+and three JS commands pass; registry1,745/270 is current. Fresh connected service
+suite passes153/1 Windows skip in128.67s on final byte-bound production source. The first
+run's Windows261-character fixture failure is retained and independently diagnosed;
+shorter external basetemp resolves that harness boundary. Counts overlap.
+Independent review, XML and source bindings are in existing external
+`pr-reconciliation-20261021/refresh/rsi-installed-high-*20261022*` evidence.
+Historical checks below retain their exact sources and limits.
+
+Publication remains blocked by intermittent GitHub connectivity. A successful
+read observed main `87aa241b2c27649a3b23177236fafd610cb77b9e`, but its object
+could not be fetched. Fifty open PR heads match the preceding audit; their
+classification is not revalidated against that unfetched main. PR1759 and1638
+have reviewed local candidates; unrelated or protected PRs are not prerequisites.
+
+Next: verify this coherent source/index and independent review, then reconcile
+fresh main and complete gated publication. Afterwards qualify the actual installed
+service and supply current authenticated task/model/principal/budget/verifier
+inputs through existing owners. G1–G5 remain unproved. Source tests neither mint
+admission nor demonstrate a native author, activation/rollback, later retained
+benefit or autonomous continuation.
+
 ## Live authenticated generation scope — 2026-10-20
 
 WSP00/5/6/10/11/15/22/48/50/62/71/77/97; current selection 19/P0.
