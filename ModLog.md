@@ -1,3 +1,18 @@
+## 2026-10-23 - PR closure and durable backlog reconciliation
+
+WSP 00/10/15/22/50/60/97. #1759 is squash-merged at `4169b0512`;
+all candidate and incoming-main blobs are verified. All 16 named PR checks
+passed; exact-main CI remains pending at this dated checkpoint. #1726/#800
+are closed with unique work and acceptance carried into #1729/#1342;
+#1765 is closed with its invalid-image source preserved.
+
+Refresh the existing indexed backlog audit with current heads, owner boundaries,
+WSP15 scores and executable next steps; mark prior selections historical.
+#1638 remains the reviewed local integration/publication task. The GitHub
+transport blocker is no longer current. Holo authority mismatch remains;
+source retrieval is explicitly degraded. No Brain ingestion, native worker
+execution, new scheduler/store or active-product effects are claimed.
+
 ## 2026-10-23 — PR1759 exact manifest security review
 
 WSP 00/10/22/50/97. Hosted security found 38 unreviewed generated-manifest

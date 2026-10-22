@@ -1,6 +1,134 @@
 # Open-PR backlog reconciliation
 
-## 2026-10-22 closure and next selection
+Current planning snapshot, 2026-10-23 JST: 48 open PRs, 10 drafts. #1759 is merged; #1638 is the active integration. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+
+## Current reconciliation - 2026-10-23 JST
+
+Observed `2026-10-22T21:26:56.218244+00:00`, main `4169b051260376237554fba9650af2c77310b2c2`.
+Since the former 47-item snapshot, #1759 merged and #2178/#2179 arrived:
+**48 open**, including 10 drafts. Counts are dated; concurrent lanes continue.
+This section supersedes older selections/counts, retained below as history.
+
+### Closure and selected execution
+
+- **#1759 MERGED_VERIFIED_MAIN:** squash `4169b051260376237554fba9650af2c77310b2c2`
+  from reviewed head `d23588e0faedbcc08fd867d2c526cff6d8b34008`.
+  Independent review and all 16 named PR checks passed. The merged tree equals
+  the prospective tree; all 28 candidate and six incoming-main paths survive.
+  Exact-main CI is pending at this snapshot. No live YouTube action or native
+  RSI author execution follows from this source/CI closure.
+- **#1726 SUPERSEDED_CLOSED:** unique article/source remains in #1729;
+  [carry-forward](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729#issuecomment-6350079197)
+  preserves archive, route and campaign acceptance. Successor remains open.
+- **#800 SUPERSEDED_CLOSED:** tooling delta is represented in #1342;
+  [carry-forward](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342#issuecomment-6350082881)
+  preserves compatibility checks. Successor remains open.
+- **#1765 CLOSED:** all five image blobs fail decoding. The source branch,
+  captions and file list remain; no working website or original photos changed.
+- **#1638 ACTIVE_OWNED_WORK:** reviewed local runtime `6ed3174c` is being
+  integrated with current main; original remote head remains `688eb097`.
+  Reuse the existing ledger/key custody/adapter. Align only its new CI job's
+  stale Node version and repair demonstrated integration gaps.
+  Remaining allocation C3/I4/D3/Impact4=**14/P1** (original repair 15/P1).
+  Exit: focused/independent checks, package proof, fresh hosted checks,
+  guarded squash and exact-main readback. Local repair is not publication.
+
+Select #1638 for the next closure: implementation already has independent review
+and bounded remaining integration. Higher-ranked items retain protected owners,
+draft/scope gates or need a new source reconciliation. Re-observe and rescore
+after closure, including the other unblocked rebases; do not assume the previous
+second row becomes the next task.
+
+### Durable memory and retrieval boundary
+
+Reuse this existing indexed audit for planning/closure memory. Every row carries
+current PR identity, owner, WSP15 allocation, unresolved state and next action.
+Refresh external `refresh/wsp15-ranked-51.json` in place (legacy filename);
+qualification receipts stay in the same PR-reconciliation artifact root.
+Do not create another queue/database. The existing work-ledger schema is a
+planning contract, not authenticated runtime state.
+
+Brain's Antigravity artifact exporter is not a PR backlog ingestion interface.
+Its startup bridge forwards availability/digests/counts, not PR row contents.
+Saving this audit therefore does not claim Brain ingestion or native recall.
+A later admitted auditor must receive an explicit bounded PR/source target set.
+The current resident repo-audit route already has AgentDB claim, executor,
+report and decision owners; PR-wide closure capability is not established.
+
+Holo retrieval rejects `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`; freshness is
+unknown with an index gap. WSP_CORE permits degraded exact Git/source and fresh
+PR metadata retrieval. Include current module/test contracts explicitly; treat
+historical broad tables as stale for selection. No reindex occurred. The existing
+document index registers this audit, but its recorded size is stale; index
+freshness is not verified. DocDAE only rebuilds the whole index, so a one-file
+input must not replace it. Route maintenance to the existing DocDAE/Holo owner.
+A search excerpt is not a substitute for full rows. The resident file reader
+accepts bounded targets, not the entire backlog as one model context.
+No signed admission, paid budget, native model execution or RSI retention is
+asserted by source documentation. Independent checks here are Codex reviews.
+
+### Current queue
+
+Scores: complexity/importance/deferability/impact under canonical WSP15.
+Heads are fresh metadata. Prior source audits carry forward only as evidence to
+recheck, not fresh tests or merge approval. Protected owners retain their lanes.
+Every execution requires current source, checks and authority.
+
+| PR / source head | WSP15 | Owner / state | Next executable step |
+|---|---|---|---|
+| [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
+| [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
+| [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
+| [#1478](https://github.com/FOUNDUPS/Foundups-Agent/pull/1478) `5f8c73453559625500f3023f23331e5e44020712` | 3/4/4/4=15 P1 | Comment grounding owner/root: STILL_CURRENT / DRAFT | Refresh; run context/tier/source-attribution tests without posting. |
+| [#841](https://github.com/FOUNDUPS/Foundups-Agent/pull/841) `92f0e0191cd38d4da02104ed3c1f7e0796491d82` | 3/4/4/4=15 P1 | Livechat lifecycle/root: NEEDS_REBASE | Replay guard; test real coordinator handoff plus shutdown/restart. |
+| [#782](https://github.com/FOUNDUPS/Foundups-Agent/pull/782) `b8b90afbab605c396054a8171f7c4ae2399fb2c5` | 3/4/4/4=15 P1 | Quota guard/hygiene/root: NEEDS_REBASE | Split guard; six matrix tests; preserve alias/ignore deltas separately. |
+| [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
+| [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
+| [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | Replay protocol and recall route; preserve contact privacy. |
+| [#1638](https://github.com/FOUNDUPS/Foundups-Agent/pull/1638) `688eb097724ece28aca20e2e3477ca4c7aa9236c` | 3/4/3/4=14 P1 | Root owns isolated repair candidate; original remote head/owner requires fresh verification before publication: ACTIVE_OWNED_WORK | Integrate reviewed 6ed3174c with current main and Node24.22.1; focused/fast/package checks, independent review, existing-PR publication, squash/main verification. |
+| [#1356](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356) `055cda32a0c2bff70a469aea7d967d20c61a7f42` | 4/3/4/3=14 P1 | Dependency lane/root: STILL_CURRENT | Resolve full set; offline transaction/hash interface tests. |
+| [#2179](https://github.com/FOUNDUPS/Foundups-Agent/pull/2179) `883c4aae2eed12a5fca35df0e97f0f6ace3dc08c` | 2/4/3/4=13 P1 | Active Gmail security routing owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
+| [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) `e455fd0190b0c35302a3a5776529a221c3123888` | 4/3/2/4=13 P1 | Japan Compute owner: STILL_CURRENT / DRAFT | Owner reconciles homepage/hosting; preserved-copy and economics gates. |
+| [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) `724f465bd35ac1be5e9a91f41d0721da383c67d8` | 4/3/3/3=13 P1 | eSingularity surface owner: PARTIALLY_SUPERSEDED | Keep post-vote state; port valid fixes/article; routes/locales/build. |
+| [#1659](https://github.com/FOUNDUPS/Foundups-Agent/pull/1659) `3439a4089ebc45d303fbd1a6fa31b4825dc8b39b` | 1/4/4/4=13 P1 | Contact skill owner/root: STILL_CURRENT | Normalize mirrored skill naming; validate byte equality and discovery; preserve private contact identifiers and native Doc authority. |
+| [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` | 3/3/4/3=13 P1 | Dependency lane/root: STILL_CURRENT | Coordinate #2081; resolver and Flask health/upload/error smoke. |
+| [#1342](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342) `df0a9af87ed3aa086a218fe8f61ef392634042f8` | 4/3/3/3=13 P1 | Dependency lane/root: PARTIALLY_SUPERSEDED | Current-main migration with #800; Node/config/build/PWA checks. |
+| [#2102](https://github.com/FOUNDUPS/Foundups-Agent/pull/2102) `e9294fd00c4e728b1b489627d32c4db2fd557650` | 3/3/3/3=12 P2 | EDuIT owner: PARTIALLY_SUPERSEDED | Preserve packet; reconcile README/manifest; append registry; schema tests. |
+| [#1762](https://github.com/FOUNDUPS/Foundups-Agent/pull/1762) `4a6df453f611fa62122a6cdb88a616b57fd7756c` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED / DRAFT | Reconcile only remaining lint/config/fastq changes; test both current apps; explicitly classify two obsolete branch workflows. |
+| [#1688](https://github.com/FOUNDUPS/Foundups-Agent/pull/1688) `40d71249fe913567ee6f5fa65536d89f2ecb46c3` | 4/3/2/3=12 P2 | Opening review owner: PARTIALLY_SUPERSEDED / DRAFT | Owner visual review; isolate current-main opening; locales/device checks. |
+| [#1677](https://github.com/FOUNDUPS/Foundups-Agent/pull/1677) `847568ddec7af170aaef73fdae86d4db2b3628b2` | 3/3/3/3=12 P2 | JHR routing owner: PARTIALLY_SUPERSEDED | Port canonical links with current archive; domain/JHR tests. |
+| [#1618](https://github.com/FOUNDUPS/Foundups-Agent/pull/1618) `afef5e917dd1c327d34fd8952352d3469085f9b7` | 4/3/2/3=12 P2 | Outcome content owner: PARTIALLY_SUPERSEDED | Bound current-valid content; approved profile source; locales/build/visuals. |
+| [#1457](https://github.com/FOUNDUPS/Foundups-Agent/pull/1457) `5e88e8e2eea75fc09d94421bac3c75130da2ffca` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Prove GNU/musl selection and preserve or supersede every selector. |
+| [#1360](https://github.com/FOUNDUPS/Foundups-Agent/pull/1360) `5814611e826714980627ba50f2a9b460ce6c0224` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Prove GNU/musl selection; preserve or supersede platform metadata. |
+| [#1354](https://github.com/FOUNDUPS/Foundups-Agent/pull/1354) `4effe1e2508f5a4c1a56a50a303e3406742ca2b4` | 3/3/3/3=12 P2 | Dependency lane/root: STILL_CURRENT | Resolve and start WSGI on supported Linux; HTTP parser smoke. |
+| [#1348](https://github.com/FOUNDUPS/Foundups-Agent/pull/1348) `493de46d40fc3a754948a3e902e9a015108b621d` | 3/3/3/3=12 P2 | Dependency lane/root: STILL_CURRENT | Resolve runner/plugin together; collect and run Acoustic Lab tests. |
+| [#1339](https://github.com/FOUNDUPS/Foundups-Agent/pull/1339) `029d77a20838879e5bbc90e46e445fff29cb9f69` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Resolve fresh graph; offline client tests and frontend build. |
+| [#1338](https://github.com/FOUNDUPS/Foundups-Agent/pull/1338) `bdd2a67722d1cd138699941f20b57b18549b6bf8` | 3/3/3/3=12 P2 | Dependency lane/root: STILL_CURRENT | Resolve set; mocked extraction/error tests without live media. |
+| [#802](https://github.com/FOUNDUPS/Foundups-Agent/pull/802) `de63ab95aab0ca11247cf2620cb4bc559bbce16c` | 3/3/3/3=12 P2 | GetK owner: STILL_CURRENT | Rebase additive object; 16+11+2 proofs and registry tests; no dispatch. |
+| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `2cb0e2eacff38ecc19a6658423ac0a2dddc015ed` | 2/3/3/3=11 P2 | Dependency lane/root: STILL_CURRENT | Resolve Acoustic Lab set; health/upload/geofence smoke. |
+| [#1998](https://github.com/FOUNDUPS/Foundups-Agent/pull/1998) `0457051b92d2b494dbda50f0676bce851474ecff` | 2/3/3/3=11 P2 | YUMORI content owner: STILL_CURRENT | Use verified current date or evergreen cadence; contracts/lint/build. |
+| [#1906](https://github.com/FOUNDUPS/Foundups-Agent/pull/1906) `d5eb2622a14e2c551cedd188a702a5f73fa981b0` | 2/3/3/3=11 P2 | eSingularity source owner: STILL_CURRENT | Replay section/test; canonical noun review and contract suite. |
+| [#1886](https://github.com/FOUNDUPS/Foundups-Agent/pull/1886) `3aa71a0786b9202062e01beb84769c9ba0e7950e` | 2/3/3/3=11 P2 | Receipt contract owner/root: STILL_CURRENT | Clarify intake-only schema versus the documented posting gate; validate schema and examples. No accounting or AutoPost activation. |
+| [#1774](https://github.com/FOUNDUPS/Foundups-Agent/pull/1774) `c914bc6640d3322003ce89258b353f8950b66e0c` | 3/3/2/3=11 P2 | JHR archive owner: PARTIALLY_SUPERSEDED | Preserve/archive with unique identity; drop obsolete ticker plumbing. |
+| [#1689](https://github.com/FOUNDUPS/Foundups-Agent/pull/1689) `e7d88a8b6e7afa0e1a0ae09d27610bf5cfb0ed32` | 2/3/3/3=11 P2 | RedDog docs owner/root: NEEDS_REBASE | Rebase current links/truth boundaries; no runtime activation. |
+| [#1685](https://github.com/FOUNDUPS/Foundups-Agent/pull/1685) `53df997d516bf1c909ae09a27c0e709b8ea4b3e2` | 3/3/2/3=11 P2 | CCP source/economics owner: STILL_CURRENT / DRAFT | Owner reconciles economics/source ledger; ID/language and review gates. |
+| [#1667](https://github.com/FOUNDUPS/Foundups-Agent/pull/1667) `93efc4f39ae8112d7ee987b37c623df71cc973f6` | 2/3/3/3=11 P2 | Video indexer docs owner: PARTIALLY_SUPERSEDED | Revise to reuse current cycle; retain extraction/privacy scope; CI. |
+| [#1642](https://github.com/FOUNDUPS/Foundups-Agent/pull/1642) `3cfeac66a9739ad4bf5a8e4587c5c80e574f9023` | 2/3/3/3=11 P2 | Moshpit protocol owner/root: PARTIALLY_SUPERSEDED | Merge into existing Moshpit path; reconcile contact/campaign authority. |
+| [#1636](https://github.com/FOUNDUPS/Foundups-Agent/pull/1636) `318c68007c476fce727b25239d2f3f40d8effce6` | 3/3/2/3=11 P2 | WSP doctrine owner/root: BLOCKED / DRAFT | Complete coherent canonical/mirror/projection change and checks. |
+| [#1353](https://github.com/FOUNDUPS/Foundups-Agent/pull/1353) `009e0ca4595a33d892fe2c5debec4cc847fb8917` | 2/3/3/3=11 P2 | Dependency lane/root: STILL_CURRENT | Resolve full set; stubbed HTTP/geolocation/error tests. |
+| [#1346](https://github.com/FOUNDUPS/Foundups-Agent/pull/1346) `bae7f13efa6767cecebae58e8ffe624886d8e6e7` | 2/3/3/3=11 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Raise manifest/root-lock floor; compile and bridge tests. |
+| [#408](https://github.com/FOUNDUPS/Foundups-Agent/pull/408) `2e788a0539ac93f2edfefaa51128726fcb66745f` | 2/3/3/3=11 P2 | Stream resolver tests/root: STILL_CURRENT | Map all ten obsolete wrapper skips to replacement behavior tests; restore uncovered upcoming-stream and quota-retry cases before accepting skips. |
+| [#1822](https://github.com/FOUNDUPS/Foundups-Agent/pull/1822) `663f0e17566a4e613a6b419456239e02f156923d` | 3/2/2/3=10 P2 | Memory Horizon owner: STILL_CURRENT / DRAFT | Owner keeps no-dispatch; additive registry/schema and G0 gates. |
+| [#722](https://github.com/FOUNDUPS/Foundups-Agent/pull/722) `2e9a66c8f86795fea2d75ac4c9e7b2c66ab88c61` | 2/3/2/3=10 P2 | Security intake docs/root: STILL_CURRENT | Correct nonexistent action_router.route reference to actual owner interfaces; preserve DOCS_SPEC_ONLY. |
+| [#1835](https://github.com/FOUNDUPS/Foundups-Agent/pull/1835) `8262573bf2cbaa6ebc3293bdd207cffee683694f` | 1/2/3/3=9 P3 | Architecture docs owner: STILL_CURRENT | Correct obsolete MOSH_PIT architecture reference; preserve specified-versus-operational labels; validate links. |
+| [#1646](https://github.com/FOUNDUPS/Foundups-Agent/pull/1646) `56c49762c9dae1323590943cc445f1a6a44c0f4e` | 2/2/2/3=9 P3 | YUMORI thesis owner: STILL_CURRENT / DRAFT | Owner reconciles current PPP/PFI sources before canonical promotion. |
+| [#729](https://github.com/FOUNDUPS/Foundups-Agent/pull/729) `1757a520c779c3b6a83ed8a4282f2eae13beb10a` | 2/2/2/3=9 P3 | Tooling docs/root: NEEDS_REBASE | Refresh facts; regenerate AGENTS projection; docs/consistency checks. |
+| [#1605](https://github.com/FOUNDUPS/Foundups-Agent/pull/1605) `7c5c735130bdcda77503c6637ebb246ba712fb22` | 1/2/2/3=8 P3 | FoundUp architecture owner: STILL_CURRENT | Reconcile two future-registry statements with the existing registry; retain planning-only scope. |
+
+#2178/#2179 scores are provisional owner-routing triage, without independent
+implementation acceptance. #2168 remains protected security work.
+
+## Historical 2026-10-22 closure and selection
 
 Fresh inventory after #1860: **50 open PRs**. #1860 squash-merged at
 `02d1c7c14c60487619287a9cb753ff3ddaa53c14`; all 13 final checks passed, including
@@ -29,7 +157,7 @@ rejects authority HEAD mismatch (freshness unknown/index gap); exact-source
 navigation is the explicit fallback, not an index-freshness claim. Re-observe
 again after this closure rather than blindly choosing the prior second row.
 
-## 2026-10-21 dated current reconciliation
+## Historical 2026-10-21 reconciliation
 
 This dated addendum covers the 92 initial October 21 PRs (48 dependency, 22 product, 21 infrastructure, active security #2168) plus arrivals #2170/#2171: **94 total, 50 dependency / 22 product / 21 infrastructure / 1 security**. The June Phase 1 body is retained exactly as historical evidence; its head bindings and dispositions are not current October status.
 
