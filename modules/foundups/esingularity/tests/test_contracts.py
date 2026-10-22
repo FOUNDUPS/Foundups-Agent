@@ -613,7 +613,8 @@ def test_yumori_work_orchestrator_defines_resident_rsi_canary() -> None:
         "search existing Contacts, Gmail and LinkedIn",
         "RSI learning contract",
         "Retained improvement test",
-        "later, unseen YUMORI cycle",
+        "a later,",
+        "unseen YUMORI cycle",
         "012 interventions required and why",
         "cost per verified useful outcome",
     ):
