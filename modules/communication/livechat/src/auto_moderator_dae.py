@@ -101,6 +101,7 @@ class AutoModeratorDAE:
         self.start_time = time.time()
         self.enable_ai_monitoring = enable_ai_monitoring
         self.heartbeat_service = None
+        self.operator_manifest_task = None
 
         # Comment engagement subprocess tracking (prevent dual-process race condition)
         self._comment_engagement_task = None  # Active async task reference
@@ -1835,9 +1836,37 @@ class AutoModeratorDAE:
             mode=mode
         )
     async def run(self):
-        """
-        Main entry point - full DAE lifecycle.
-        """
+        """Own one operator watcher for the complete DAE run lifetime."""
+        if getattr(self, "_operator_manifest_run_active", False):
+            raise RuntimeError("AutoModeratorDAE.run is already active")
+        self._operator_manifest_run_active = True
+        watcher = None
+        try:
+            # Independent of optional AI-overseer monitoring, but owned by run.
+            from .operator_command_queue import OperatorCommandQueue
+            self.operator_manifest_queue = OperatorCommandQueue(self)
+            watcher = asyncio.create_task(self.operator_manifest_queue.watch_forever())
+            self.operator_manifest_task = watcher
+            logger.info("[012-MANIFEST] Independent operator-manifest watcher started")
+            return await self._run_dae()
+        finally:
+            try:
+                if watcher is not None:
+                    watcher.cancel()
+                    try:
+                        await watcher
+                    except asyncio.CancelledError:
+                        pass
+                    except Exception:
+                        # Retrieve watcher failures without masking the DAE's exit.
+                        logger.exception("[012-MANIFEST] Operator watcher failed")
+            finally:
+                self.operator_manifest_task = None
+                self._operator_manifest_run_active = False
+
+    async def _run_dae(self):
+        """Existing startup, comment-only, and stream-monitoring lifecycle."""
+
         logger.info("=" * 60)
         logger.info("[AI] AUTO MODERATOR DAE STARTING")
         logger.info("WSP-Compliant: Using livechat_core architecture")

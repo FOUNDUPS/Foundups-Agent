@@ -7,6 +7,24 @@
 
 ## Change Log
 
+### 2026-10-22 — PR1759 shared-context consumption repair
+
+WSP 00/5/6/11/15/22/50/84/97. Reuse the existing queue's configured path resolver
+so changing CWD cannot split the writer from its consumer. Reject malformed
+schema/surfaces/message and nonfinite, boolean, string or expired timestamps;
+preserve the legacy fallback. Legacy mutators read only legacy storage so shared expiring context cannot leak into permanent broadcast state; six regression cases reproduced that leak before repair. New cohesive reader test
+file: 53 offline cases pass, including real queue/resolver integration. Four
+original malformed acceptance failures were reproduced before the repair.
+This is no live engagement, runtime-authority or RSI completion claim.
+
+### 2026-09-15 - Shared 012 Manifest Context
+
+- `commenting_control_plane.load_broadcast()` now resolves the active,
+  unexpired shared 012 manifest context for the `comments` surface before its
+  legacy module-local broadcast file.
+- This preserves the existing reply-generation injection and removes the need
+  for a separate operator update path.
+
 ### 2026-04-19 - YTR1: YouTube Reply Runtime Hardening Phase 1
 
 **By:** 0102 (CW5)

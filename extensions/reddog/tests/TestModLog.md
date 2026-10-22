@@ -55,6 +55,15 @@ the existing README command's explicit monorepo content base. External evidence:
 Hosted CI/security, source publication, installation and native RSI remain
 separate unobserved gates. No source assertions were relaxed for closure.
 
+## PR1759 single-member admission boundary — 2026-10-22
+
+Reused `test_backend_compatibility_contract.js` after the O: fast tier reproduced
+the old 1,449-member rejection against the generated 1,450-member closure.
+Require the added queue path and preserve exact-max/max+1 acceptance/rejection;
+no byte, digest or path-validation bound changes. The initial C: attempt failed
+the tier's allowed-volume guard; source-pinned O: validation is required. Test
+results are recorded against the final PR head, not inferred from this change.
+
 ## PR2150 policy manifest compatibility — 2026-10-21
 
 Reused `test_backend_compatibility_contract.js`,

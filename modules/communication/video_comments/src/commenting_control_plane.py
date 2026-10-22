@@ -14,10 +14,17 @@ WSP alignment:
 from __future__ import annotations
 
 import json
+import math
 import time
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+from modules.communication.livechat.src.operator_command_queue import (
+    ALLOWED_CONTEXT_SURFACES,
+    MAX_MESSAGE_LENGTH,
+    resolve_manifest_state_path,
+)
 
 
 MODULE_ROOT = Path(__file__).resolve().parents[1]  # modules/communication/video_comments
@@ -50,6 +57,15 @@ def _normalize_handle(handle: str) -> str:
 
 
 def load_broadcast(path: Path = DEFAULT_PATH) -> CommentingBroadcast:
+    """Resolve the shared 012 manifest first, then retain legacy local config."""
+    shared = _load_shared_manifest_context()
+    if shared is not None:
+        return shared
+    return _load_legacy_broadcast(path)
+
+
+def _load_legacy_broadcast(path: Path) -> CommentingBroadcast:
+    """Read only persisted local settings, never transient shared context."""
     if not path.exists():
         return CommentingBroadcast()
     try:
@@ -76,6 +92,31 @@ def load_broadcast(path: Path = DEFAULT_PATH) -> CommentingBroadcast:
         return CommentingBroadcast()
 
 
+def _load_shared_manifest_context() -> Optional[CommentingBroadcast]:
+    try:
+        raw = json.loads(resolve_manifest_state_path().read_text(encoding="utf-8"))
+        if not isinstance(raw, dict) or type(raw.get("version")) is not int or raw["version"] != 1:
+            return None
+        context = raw.get("active_context")
+        if not isinstance(context, dict):
+            return None
+        surfaces = context.get("surfaces")
+        if not isinstance(surfaces, list) or not surfaces or any(
+            not isinstance(surface, str) or surface not in ALLOWED_CONTEXT_SURFACES
+            for surface in surfaces
+        ) or "comments" not in surfaces:
+            return None
+        expiry = context.get("expires_at_unix")
+        if type(expiry) not in (int, float) or not math.isfinite(expiry) or expiry <= time.time():
+            return None
+        message = context.get("message")
+        if not isinstance(message, str) or not message.strip() or len(message) > MAX_MESSAGE_LENGTH:
+            return None
+        return CommentingBroadcast(enabled=True, promo_message=message.strip(), updated_by="012_manifest")
+    except (OSError, ValueError, TypeError, OverflowError):
+        return None
+
+
 def save_broadcast(broadcast: CommentingBroadcast, path: Path = DEFAULT_PATH) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     # Stamp update time on save
@@ -94,7 +135,7 @@ def set_promo(
     updated_by: str = "012",
     path: Path = DEFAULT_PATH,
 ) -> CommentingBroadcast:
-    current = load_broadcast(path)
+    current = _load_legacy_broadcast(path)
     if enabled is not None:
         current.enabled = bool(enabled)
     if promo_handles is not None:
@@ -111,7 +152,7 @@ def set_promo(
 
 
 def clear_promo(path: Path = DEFAULT_PATH) -> CommentingBroadcast:
-    current = load_broadcast(path)
+    current = _load_legacy_broadcast(path)
     current.enabled = False
     current.promo_handles = []
     current.promo_message = ""

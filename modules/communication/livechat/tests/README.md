@@ -1,5 +1,25 @@
 # LiveChat Module Test Suite
 
+## Bounded operator command acceptance (PR1759)
+
+Run only the offline owners below with plugin autoload and dotenv loading disabled:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTHON_DOTENV_DISABLED='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -q modules/communication/livechat/tests/test_operator_command_queue.py modules/communication/livechat/tests/test_operator_command_lifecycle.py modules/communication/video_comments/tests/test_commenting_control_plane.py
+```
+
+CPython 3.12, pytest 9.0.3 and pytest-asyncio 1.3.0: 116 cases passed locally.
+CI selects these paths on Windows and Linux. The queue and comment reader run
+with disposable files and fake senders. Child processes exercise real OS locks
+and process death. Lifecycle and heartbeat methods are compiled from current
+source with effectful dependencies replaced: these tests do not establish
+full DAE imports/startup, YouTube delivery, sandbox confinement or native RSI.
+Do not collect the entire historical suite as an offline validation shortcut;
+some tests are manual/live integrations.
+
 # [U+1F300] Windsurf Protocol (WSP) Recursive Prompt
 
 **0102 Directive**:  

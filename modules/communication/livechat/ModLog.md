@@ -1,5 +1,42 @@
 # Livechat Module - ModLog
 
+## 2026-10-22 — PR1759 crash/replay, context and lifecycle closure
+
+WSP 00/5/6/10/11/15/22/50/84/91/97; C4/I4/D4/Impact4 = 16/P0.
+Reconciled the original 13-path proposal onto current main rather than adding
+another dispatcher. Existing JSON ledger now persists a claim before effects,
+reuses the runtime operation lock, rejects corruption/payload-ID drift, and
+keeps uncertain attempts terminal. Deferred context has fixed expiry and cannot
+resurrect after a later context/clear command. Gates precede activation; dry-run
+and sender acceptance are accurately labeled. Checkout-rooted shared paths
+match the comment reader. `run()` owns cancellation/await of its watcher while
+preserving the original DAE body. Heartbeat remains observational only.
+
+116 offline cases pass across queue/process recovery, source-bound lifecycle and
+actual shared reader; tests/README records boundaries. Windows/Linux CI selects
+these three files explicitly. Native YouTube delivery, remote admission and
+end-to-end RSI remain unverified. The September exactly-once claim below is
+historical and superseded by the documented uncertain-outcome contract.
+
+Fresh-main reconciliation at `87aa241b` retains the reviewed runtime/test bytes.
+124 combined runtime/manifest cases pass locally. Generated bindings include
+the intervening main changes without changing member count or byte limits.
+Publication, hosted checks and installed operation remain separate gates.
+
+## 2026-09-15 - Operator Command Plane Phase 1
+
+**WSP:** 22, 50, 77, 91, 97
+
+- Added a local, atomic JSON operator-command inbox plus acknowledgement ledger.
+- Heartbeat checks it on its existing cadence and includes the latest result in JSONL telemetry.
+- Initial actions are intentionally narrow: `status` and gated live-chat `announce`. No JSON command can invoke an LLM, shell, browser, or code edit.
+- Added an assumption audit and focused unit tests for dispatch, rejection, and exactly-once acknowledgement behavior.
+- Follow-up: renamed the runtime inbox to the `012 manifest` and moved its
+  watcher outside optional AI-overseer monitoring; unavailable LiveChat now
+  defers an announcement instead of consuming it.
+- Added `set_context`: a bounded, expiring shared directive for live-chat and
+  stored-video comment output surfaces.
+
 This log tracks changes specific to the **livechat** module in the **communication** enterprise domain.
 
 ## WSP 22 ModLog Protocol
