@@ -1,3 +1,25 @@
+## PR782 quota guard manifest re-review — 2026-10-23
+
+Security job120119887133 on head `63540b2144a01dc821e3d1bef9ecfa914a1f615e`
+reported 38 generated-manifest findings: 36 `generic-api-key` and two
+`discord-api-token`. The introduced-history scan reported zero findings.
+Independent root and peer reviews recomputed every flagged source hash from
+exact Git blobs, confirmed the same line/value on main `27f99c174`, and found
+each prior whole-file/rule/line binding already in the existing ledger.
+
+The subsequent two constant-log corrections regenerate only the checker's
+source digest. None of the 38 finding-bearing values changes. Rebind the final
+manifest from reviewed tree `53786a4f2362ca3857f5a8cb3a323d4edb02ca7f`;
+preserve all 1,486 existing records and append only its 38 exact bindings.
+No scanner rule, scan scope, fingerprint algorithm or fail-closed behavior
+changes. These are source-integrity metadata, not credentials.
+
+Local gate regressions: 19 passed; one Windows test resolved an unavailable
+WSL launcher. Its four workflow curl-stub controls passed with explicit Git
+Bash. Fresh hosted regressions, tree/history scans and CodeQL remain required.
+Sanitized root/peer evidence is retained in the existing PR reconciliation
+`refresh/` directory. This is independent source review, not runtime authority.
+
 ## Gmail/WRE registry manifest re-review — 2026-10-22
 
 PR2179 changes one registered-skill JSON source and refreshes the generated
