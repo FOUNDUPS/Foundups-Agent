@@ -1,12 +1,12 @@
 ## 2026-10-23 — Scheduled resident FoundUp reconciliation canary
 
 - Reused the already-registered `test_schedule_evaluator.py` and
-  `test_scheduled_routines_integration.py`; no new tracked test file or manual
+  `test_caller_wiring.py`; no new tracked test file or manual
   canonical-registry edit was introduced.
 - Parser coverage makes `resident_reconcile` daily-only and both supported aliases
-  resolve to one canonical schedule ID. Scheduled integration coverage proves the
-  resident routine is default-off and, when explicitly enabled, forwards the exact
-  durable claim to the RedDog adapter.
+  resolve to one canonical schedule ID. Caller-wiring coverage proves the extracted
+  resident adapter is default-off and, when explicitly enabled, forwards the exact
+  durable claim while the legacy scheduled-integration file remains unchanged.
 - FoundUp scope, Brain/Breadcrumb/workspace-memory inputs, FoundUp Memex composition,
   stable request identity and zero-effect resident-client behavior are covered in the
   existing RedDog resident-client test owner.
