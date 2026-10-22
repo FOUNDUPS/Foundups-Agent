@@ -1092,7 +1092,7 @@ class NoQuotaStreamChecker:
                                 display_name = channel_name or channel_id
                                 trusted_video = videos_to_check[0]
                                 logger.info(
-                                    f"[NO-API] API verification disabled (YOUTUBE_API_ENABLED/YT_STREAM_API_VERIFY) - trusting /live indicators for {display_name}: {trusted_video}"
+                                    "[NO-API] API verification disabled - trusting /live indicators"
                                 )
                                 return {
                                     "live": True,
@@ -1310,7 +1310,7 @@ class NoQuotaStreamChecker:
                         trusted_video = videos_to_check[0]
                         indicator_count = sum([has_is_live_now, has_live_badge, has_watching, has_live_text])
                         logger.info(
-                            f"[NO-API] API verification disabled (YOUTUBE_API_ENABLED/YT_STREAM_API_VERIFY) - trusting /streams indicators for {display_name}: {trusted_video}"
+                            "[NO-API] API verification disabled - trusting /streams indicators"
                         )
                         return {
                             "live": True,

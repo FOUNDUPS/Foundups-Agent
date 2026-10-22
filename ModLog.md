@@ -18,6 +18,14 @@ manifest and both pins are regenerated; eight manifest contracts passed and
 the staged-candidate assertion passed after coherent staging. Hosted acceptance
 and publication remain pending. No live API, native worker, paid model or Brain-ingestion claim.
 
+Hosted follow-up: remove dynamic values from the two touched status logs and
+regenerate their integrity bindings. Independently review the 38 unchanged
+manifest source-hash findings against exact main bytes before appending their
+new whole-file/rule/line bindings. Preserve all 1,486 earlier records and the
+unchanged scanner policy. Local security regressions: 19 pass, one Windows
+WSL launcher failure; its four curl-stub cases pass with explicit Git Bash.
+Fresh hosted security and CodeQL checks remain required.
+
 ## 2026-10-23 - PR closure and durable backlog reconciliation
 
 WSP 00/10/15/22/50/60/97. #1759 is squash-merged at `4169b0512`;

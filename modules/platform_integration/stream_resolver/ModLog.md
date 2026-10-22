@@ -20,6 +20,11 @@ PR782 global/local verification helper. Global false/unset prevents this
 checker's API confirmation; the established local opt-out and scraping path
 remain. This does not gate unrelated YouTube clients.
 
+Hosted CodeQL identified dynamic values in the two touched no-API status logs.
+Keep those logs constant; returned stream identities and quota behavior remain
+unchanged. All 31 checker tests still pass after this correction. Fresh hosted
+CodeQL is required; source review alone does not clear the alert.
+
 The existing checker suite passes 31 tests through its native unittest
 entrypoint. Both real entrypoints cover seven toggle combinations. Individual
 in-memory reversions of each gate fail its three protected cases. Scoped source
