@@ -1,3 +1,22 @@
+## 2026-10-23 - Close live handoff and qualify the Clerk security patch
+
+WSP 00/10/15/22/50/97. #841 is squash-merged at `f37e2ef6f` after independent
+review and all 18 exact-head checks; fetched main matches the reviewed tree.
+Its obsolete PR comparison was refreshed normally. Fresh security checks pass
+without policy changes. Exact-main CI remains pending at this checkpoint.
+
+Re-observe 42 open PRs/10 drafts; select existing #1457 at 18/P0. Reuse the
+managed checkout and one external copy for baseline/candidate qualification.
+Reconcile Next 16.4.0 to 16.4.1, retain 20 original libc selectors and unrelated
+nodes. Independent route/selector replays pass. Identical lint and missing-Clerk
+build-configuration failures remain explicit. No fake keys, auth bypass, deployed
+service or Linux-native claim. #1762 retains its lint/protected project scope.
+Final staged review, hosted checks and main readback remain.
+
+#729's useful nested-instruction redirect and dated source evidence remain open;
+all three files were accounted for. Update existing backlog/README, with no new
+roadmap, memory store or orchestrator. This is Codex qualification, not native RSI.
+
 ## 2026-10-23 - Close quota PR and select the live-handoff reconciliation
 
 WSP 00/10/15/22/50/60/97. #782 is squash-merged at `9105fa594` after
