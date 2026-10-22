@@ -46,17 +46,62 @@ def run_scheduled_resident_reconcile(
     grounding_service: Any = ground_transport_work_focus,
 ) -> Mapping[str, Any]:
     env = os.environ if environ is None else environ
+    reasons, principal, scope, foundup_id, work_focus = _resolve_scope(claim, env)
+    if reasons:
+        return _result(False, claim, reasons=reasons)
+
+    bindings, reason = _model_bindings(repo_root, env)
+    if reason:
+        return _result(False, claim, reasons=(reason,))
+
+    memory, reason = _memory_inputs(
+        repo_root=repo_root,
+        env=env,
+        foundup_id=foundup_id,
+        principal=principal,
+        work_focus=work_focus,
+    )
+    if reason:
+        return _result(False, claim, reasons=(reason,))
+
+    grounded, reason = _ground(
+        repo_root, work_focus, foundup_id, principal, claim
+    )
+    if reason:
+        return _result(False, claim, reasons=(reason,))
+
+    response, request_id, reason = _invoke_client(
+        repo_root=repo_root, principal=principal, scope=scope,
+        claim=claim, work_focus=work_focus, grounded=grounded,
+        memory=memory, bindings=bindings, env=env,
+        client_factory=client_factory, grounding_service=grounding_service,
+    )
+    if reason:
+        return _result(False, claim, reasons=(reason,))
+    safe = _response_is_safe(response)
+    return _result(
+        safe, claim,
+        reasons=() if safe else tuple(response.rejection_reasons) or (
+            "resident_readonly_boundary_rejected",
+        ),
+        foundup_id=foundup_id, request_id=request_id,
+        response=response.to_dict(),
+        brain_record_count=memory["brain_record_count"],
+        breadcrumb_count=len(memory["breadcrumbs"]),
+        workspace_note_count=len(memory["workspace_notes"]),
+        memex_configured=True,
+    )
+
+
+def _resolve_scope(
+    claim: Any, env: Mapping[str, str]
+) -> tuple[list[str], str, tuple[str, ...], str, str]:
     reasons = _claim_rejections(claim)
     principal = str(env.get("REDDOG_AUTHENTICATED_PRINCIPAL_ID") or "").strip()
     scope = _authorized_foundups(env)
-    configured_foundup = str(
-        env.get("REDDOG_SCHEDULED_RESIDENT_FOUNDUP_ID") or ""
-    ).strip()
-    foundup_id = configured_foundup or (scope[0] if len(scope) == 1 else "")
-    work_focus = str(
-        env.get("REDDOG_SCHEDULED_RESIDENT_WORK_FOCUS") or ""
-    ).strip()
-
+    configured = str(env.get("REDDOG_SCHEDULED_RESIDENT_FOUNDUP_ID") or "").strip()
+    foundup_id = configured or (scope[0] if len(scope) == 1 else "")
+    work_focus = str(env.get("REDDOG_SCHEDULED_RESIDENT_WORK_FOCUS") or "").strip()
     if not principal:
         reasons.append("authenticated_principal_missing")
     if len(scope) != 1:
@@ -65,69 +110,117 @@ def run_scheduled_resident_reconcile(
         reasons.append("scheduled_resident_foundup_scope_mismatch")
     if not work_focus:
         reasons.append("scheduled_resident_work_focus_missing")
-    if reasons:
-        return _result(False, claim, reasons=reasons)
+    return reasons, principal, scope, foundup_id, work_focus
 
-    audit_binding, architect_binding, binding_reason = (
-        load_resident_model_runtime_bindings(repo_root, environ=env)
+
+def _model_bindings(
+    repo_root: Path | str, env: Mapping[str, str]
+) -> tuple[tuple[Mapping[str, Any], Mapping[str, Any]], str]:
+    audit, architect, reason = load_resident_model_runtime_bindings(
+        repo_root, environ=env
     )
-    if binding_reason:
-        return _result(False, claim, reasons=(binding_reason,))
+    if reason:
+        return ({}, {}), reason
+    return (audit, architect), ""
 
+
+def _memory_inputs(
+    *,
+    repo_root: Path | str,
+    env: Mapping[str, str],
+    foundup_id: str,
+    principal: str,
+    work_focus: str,
+) -> tuple[Mapping[str, Any], str]:
     brain = resident_brain_state_from_artifacts(env)
-    breadcrumbs = resident_breadcrumbs_from_runtime(
-        work_focus=work_focus,
-        foundup_id=foundup_id,
-        environ=env,
-    )
-    workspace_notes = resident_workspace_memory_notes_from_env(env)
     if not isinstance(brain, Mapping) or brain.get("available") is not True:
-        return _result(False, claim, reasons=("resident_brain_context_unavailable",))
+        return {}, "resident_brain_context_unavailable"
+    breadcrumbs = resident_breadcrumbs_from_runtime(
+        work_focus=work_focus, foundup_id=foundup_id, environ=env,
+    )
     if not breadcrumbs:
-        return _result(False, claim, reasons=("resident_breadcrumbs_context_unavailable",))
-
+        return {}, "resident_breadcrumbs_context_unavailable"
     try:
-        memex_config = build_resident_foundup_memex_supply_config(
-            repo_root=repo_root,
-            foundup_id=foundup_id,
-            principal_id=principal,
+        memex = build_resident_foundup_memex_supply_config(
+            repo_root=repo_root, foundup_id=foundup_id, principal_id=principal,
             max_records=_positive_int(
                 env.get("REDDOG_RESIDENT_MEMORY_MAX_RECORDS"), default=32
             ),
         )
     except (OSError, TypeError, ValueError) as exc:
-        return _result(
-            False,
-            claim,
-            reasons=(f"resident_foundup_memex_config_rejected:{exc}",),
-        )
+        return {}, f"resident_foundup_memex_config_rejected:{exc}"
+    return {
+        "brain": brain,
+        "brain_record_count": int(brain.get("record_count") or 0),
+        "breadcrumbs": breadcrumbs,
+        "workspace_notes": resident_workspace_memory_notes_from_env(env),
+        "memex_config": memex,
+    }, ""
 
+
+def _ground(
+    repo_root: Path | str,
+    work_focus: str,
+    foundup_id: str,
+    principal: str,
+    claim: Any,
+    *,
+    grounding_service: Any = ground_transport_work_focus,
+) -> tuple[Any, str]:
     request_id = _request_id(claim, foundup_id, principal, work_focus)
     try:
         grounded = grounding_service(
-            repo_root=repo_root,
-            work_focus=work_focus,
-            foundup_id=foundup_id,
-            authenticated_principal_id=principal,
-            source_surface="api_thin_client",
+            repo_root=repo_root, work_focus=work_focus, foundup_id=foundup_id,
+            authenticated_principal_id=principal, source_surface="api_thin_client",
             client_request_id=request_id,
         )
     except Exception:
-        return _result(False, claim, reasons=("resident_grounding_failed",))
+        return None, "resident_grounding_failed"
     if not grounded.accepted:
-        return _result(
-            False,
-            claim,
-            reasons=("resident_grounding_rejected", *grounded.rejection_reasons),
-        )
+        reasons = ",".join(str(x) for x in grounded.rejection_reasons)
+        return None, "resident_grounding_rejected" + (":" + reasons if reasons else "")
+    return grounded, ""
 
-    runtime_defaults = {
-        "breadcrumbs": breadcrumbs,
-        "brain_state": brain,
-        "workspace_memory_notes": workspace_notes,
-        "memex_snapshot_supply_config": memex_config,
-        "audit_model_runtime_binding_receipt": audit_binding,
-        "architect_model_runtime_binding_receipt": architect_binding,
+
+def _invoke_client(
+    *,
+    repo_root: Path | str, principal: str, scope: tuple[str, ...],
+    claim: Any, work_focus: str, grounded: Any, memory: Mapping[str, Any],
+    bindings: tuple[Mapping[str, Any], Mapping[str, Any]],
+    env: Mapping[str, str], client_factory: Any,
+    grounding_service: Any,
+) -> tuple[Any, str, str]:
+    del grounding_service
+    request_id = _request_id(
+        claim, str(grounded.intent.get("foundup_id") or scope[0]),
+        principal, work_focus,
+    )
+    defaults = _runtime_defaults(memory, bindings, work_focus, env)
+    try:
+        client = client_factory(
+            repo_root=repo_root, authenticated_principal_id=principal,
+            authorized_foundup_ids=scope, transport="api",
+            runtime_defaults=defaults,
+        )
+        return client.submit(grounded.intent), request_id, ""
+    except Exception:
+        return None, request_id, "resident_client_failed"
+
+
+def _runtime_defaults(
+    memory: Mapping[str, Any],
+    bindings: tuple[Mapping[str, Any], Mapping[str, Any]],
+    work_focus: str,
+    env: Mapping[str, str],
+) -> Mapping[str, Any]:
+    audit, architect = bindings
+    return {
+        "breadcrumbs": memory["breadcrumbs"],
+        "brain_state": memory["brain"],
+        "workspace_memory_notes": memory["workspace_notes"],
+        "memex_snapshot_supply_config": memory["memex_config"],
+        "audit_model_runtime_binding_receipt": audit,
+        "architect_model_runtime_binding_receipt": architect,
         "requested_operation": "scheduled_resident_reconcile",
         "prompt_text": work_focus,
         "max_claims": _positive_int(
@@ -137,19 +230,10 @@ def run_scheduled_resident_reconcile(
             env.get("REDDOG_SCHEDULED_RESIDENT_TIMEOUT_SECONDS"), default=60
         ),
     }
-    try:
-        client = client_factory(
-            repo_root=repo_root,
-            authenticated_principal_id=principal,
-            authorized_foundup_ids=scope,
-            transport="api",
-            runtime_defaults=runtime_defaults,
-        )
-        response = client.submit(grounded.intent)
-    except Exception:
-        return _result(False, claim, reasons=("resident_client_failed",))
 
-    safe = bool(
+
+def _response_is_safe(response: Any) -> bool:
+    return bool(
         response.accepted
         and response.read_only_authority_only
         and response.client_no_shell_command_executed
@@ -159,21 +243,6 @@ def run_scheduled_resident_reconcile(
         and response.client_no_worktree_operation_performed
         and response.client_no_pr_created
         and response.client_no_merge_performed
-    )
-    reasons = () if safe else tuple(response.rejection_reasons) or (
-        "resident_readonly_boundary_rejected",
-    )
-    return _result(
-        safe,
-        claim,
-        reasons=reasons,
-        foundup_id=foundup_id,
-        request_id=request_id,
-        response=response.to_dict(),
-        brain_record_count=int(brain.get("record_count") or 0),
-        breadcrumb_count=len(breadcrumbs),
-        workspace_note_count=len(workspace_notes),
-        memex_configured=True,
     )
 
 
@@ -193,20 +262,19 @@ def _claim_rejections(claim: Any) -> list[str]:
 
 def _authorized_foundups(env: Mapping[str, str]) -> tuple[str, ...]:
     raw = str(env.get("REDDOG_AUTHORIZED_FOUNDUP_IDS") or "")
-    values = tuple(
-        item.strip() for item in raw.split(",") if item.strip()
-    )
+    values = tuple(item.strip() for item in raw.split(",") if item.strip())
     return tuple(dict.fromkeys(values))
 
 
-def _request_id(claim: Any, foundup_id: str, principal: str, work_focus: str) -> str:
+def _request_id(
+    claim: Any, foundup_id: str, principal: str, work_focus: str
+) -> str:
     payload = {
         "schedule_id": str(getattr(claim, "schedule_id", "") or ""),
         "execution_id": str(getattr(claim, "execution_id", "") or ""),
         "window_start": str(getattr(claim, "window_start", "") or ""),
         "window_end": str(getattr(claim, "window_end", "") or ""),
-        "foundup_id": foundup_id,
-        "principal": principal,
+        "foundup_id": foundup_id, "principal": principal,
         "work_focus": work_focus,
     }
     digest = hashlib.sha256(
@@ -224,17 +292,10 @@ def _positive_int(value: Any, *, default: int) -> int:
 
 
 def _result(
-    success: bool,
-    claim: Any,
-    *,
-    reasons: Any = (),
-    foundup_id: str = "",
-    request_id: str = "",
-    response: Mapping[str, Any] | None = None,
-    brain_record_count: int = 0,
-    breadcrumb_count: int = 0,
-    workspace_note_count: int = 0,
-    memex_configured: bool = False,
+    success: bool, claim: Any, *, reasons: Any = (), foundup_id: str = "",
+    request_id: str = "", response: Mapping[str, Any] | None = None,
+    brain_record_count: int = 0, breadcrumb_count: int = 0,
+    workspace_note_count: int = 0, memex_configured: bool = False,
 ) -> Mapping[str, Any]:
     body = {
         "schema_version": SCHEDULED_RESIDENT_RESULT_SCHEMA,
@@ -245,8 +306,7 @@ def _result(
         "execution_id": str(getattr(claim, "execution_id", "") or ""),
         "window_start": str(getattr(claim, "window_start", "") or ""),
         "window_end": str(getattr(claim, "window_end", "") or ""),
-        "foundup_id": foundup_id,
-        "request_id": request_id,
+        "foundup_id": foundup_id, "request_id": request_id,
         "resident_response": dict(response or {}),
         "brain_record_count": int(brain_record_count),
         "breadcrumb_count": int(breadcrumb_count),
@@ -265,8 +325,7 @@ def _result(
     }
     return {
         **body,
-        "receipt_id": "sha256:"
-        + hashlib.sha256(
+        "receipt_id": "sha256:" + hashlib.sha256(
             json.dumps(
                 body, sort_keys=True, separators=(",", ":"), default=str
             ).encode("utf-8")
