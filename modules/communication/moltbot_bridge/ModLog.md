@@ -1,17 +1,3 @@
-## 2026-10-23 — Scheduled read-only resident FoundUp reconciliation
-
-WSP00/15/22/50/60/62/77/84/97. Reused the existing resident client, AgentDB cycle,
-model-binding loader, transport-neutral grounding and operational FoundUp Memex owner.
-Brain/Breadcrumb/workspace-note readers are extracted from `main.py` into a reusable
-read-only owner; `main.py` delegates to it without changing the public bootstrap surface.
-The new generic schedule adapter requires authenticated principal identity, exactly one
-authorized FoundUp, explicit work focus, current model bindings, Brain and Breadcrumbs,
-and the registered FoundUp manifest/ROADMAP-backed Memex config. Principal Memex stays
-separate. Success requires every resident no-effect flag; no Gmail/LinkedIn mutation,
-shell, repository write, Holo reindex, Hermes execution, worktree, PR or merge is
-introduced. YUMORI is configuration-only at deployment; no FoundUp-specific branch exists
-in the infrastructure code.
-
 ## 2026-10-22 — CA trust build protection
 
 WSP12/22/97. Container build dependency downloads now use the reviewed
@@ -13119,3 +13105,17 @@ openclaw onboard
 - Reused the existing raw determination read, typed plan snapshot and candidate-lineage validator. Omitted input selects the declared plan; explicit None/empty retains lower-supplier semantics. Freeze legacy absence too before later receipt callbacks; wrappers remain rejected and execution scope is never inferred. WSP00/15/22/50/62/84/97/99.
 - Nonplain ancestors reject before methods/copy. Independent review first exposed copy coercion; two red regressions precede the repair. Final638 connected tests pass; independent43 overlapping tests and69 boundary cases/191assertions qualify exact source. Existing legacy bytes remain unchanged.
 - Source220→215, public function111 unchanged; tests383 and interface1592. No new module, skill, main.py read or effect authority. Existing manifest membership/pins remain unchanged;8 packaging tests,15 fast groups and registry1651/269 pass. Exact artifacts and PR closure: root backlog current_observation.
+
+## 2026-10-23 — Scheduled read-only resident FoundUp reconciliation
+
+WSP00/15/22/50/60/62/77/84/97. Reused the existing resident client, AgentDB cycle,
+model-binding loader, transport-neutral grounding and operational FoundUp Memex owner.
+Brain/Breadcrumb/workspace-note readers are extracted from `main.py` into a reusable
+read-only owner; `main.py` delegates to it without changing the public bootstrap surface.
+The new generic schedule adapter requires authenticated principal identity, exactly one
+authorized FoundUp, explicit work focus, current model bindings, Brain and Breadcrumbs,
+and the registered FoundUp manifest/ROADMAP-backed Memex config. Principal Memex stays
+separate. Success requires every resident no-effect flag; no Gmail/LinkedIn mutation,
+shell, repository write, Holo reindex, Hermes execution, worktree, PR or merge is
+introduced. YUMORI is configuration-only at deployment; no FoundUp-specific branch exists
+in the infrastructure code.
