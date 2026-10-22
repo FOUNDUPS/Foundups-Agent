@@ -1,3 +1,39 @@
+## 2026-10-23 — PR1759 exact manifest security review
+
+WSP 00/10/22/50/97. Hosted security found 38 unreviewed generated-manifest
+locations (36 generic-api-key, two discord-api-token). Independent source
+review recomputed all 1,450 runtime and 17 bridge digests from committed blobs
+using the existing LF normalization. Each flagged line is unchanged from
+reviewed main `87aa241b`; its earlier binding remains present. PR head
+`1eeae3247` and hosted merge `e1c2f1c4` have the same manifest blob
+`6d7608563aad8ce04e566450c0ef32b233dc7a00`.
+
+Append only the 38 approved whole-file/rule/line fingerprints, preserving all
+1,410 previous records (1,448 total). Scanner rules, history coverage and
+fail-closed behavior are unchanged. These are reproducible public source hashes,
+not credentials. Independent review is source-level Codex evidence, not signed
+native-worker provenance. Fresh hosted scans remain the acceptance gate.
+Detailed evidence: external PR reconciliation `1759-qualification/`
+`security-independent-review-20261023.json`.
+
+## 2026-10-22 — PR1759 bounded operator command reconciliation
+
+WSP 00/5/6/10/11/15/22/50/84/91/97; 16/P0. Preserve the original proposal,
+repair demonstrated crash replay, expiry/supersession, reader path/type and
+watcher lifecycle gaps in their existing owners. Reuse the runtime operation
+lock; no new dispatcher/store. 116 offline cases pass; details and validation
+limits in LiveChat and Video Comments interfaces/ModLogs. No account/model
+effects, native RSI or authenticated worker completion claimed.
+
+Revalidated after integrating fetched main `87aa241b2c27649a3b23177236fafd610cb77b9e`:
+124 cases passed (116 connected runtime cases plus eight manifest contracts).
+The seven runtime/test source files retain their previously reviewed bytes;
+the combined 1,450-member manifest and both consumer pins were regenerated.
+GitHub publication and hosted acceptance remain pending; this is local evidence.
+Independent integration review reproduced the newly inherited CI trust check
+failing on this job. Reused main's checksum-verified bootstrap before installing
+its bounded test dependencies; the acceptance rule remains unchanged.
+
 ## 2026-10-22 — OpenClaw/WRE proposal reconciliation
 
 WSP00/15/17/22/48/50/60/84/95/97. Audit the supplied swarm proposal against

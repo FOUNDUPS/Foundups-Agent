@@ -10,6 +10,19 @@ This module provides autonomous YouTube Studio comment engagement through the `C
 
 It also provides a lightweight **012 → Comment DAE control plane** for “broadcast” updates (e.g., promote a new channel) stored in module memory and injected into replies probabilistically to avoid spam signatures.
 
+### Shared 012 manifest context (bounded contract)
+
+`commenting_control_plane.load_broadcast()` first reads the LiveChat queue's
+`resolve_manifest_state_path()`, respecting `YT_012_MANIFEST_STATE_FILE` relative
+to the checkout (or an absolute configured path). Shared state requires integer
+version 1, an active context object, a nonempty allowlisted string-surface list
+containing `comments`, a nonempty message of at most 500 characters, and a finite
+numeric expiry strictly in the future. Boolean/string/nonfinite expiry is invalid.
+Missing, unreadable, invalid, expired or non-comment context leaves the legacy
+local broadcast fallback unchanged. Loading does not rewrite either file.
+Legacy `set_promo`/`clear_promo` affect only the legacy file; shared context remains
+queue-owned. 53 offline reader cases validate this boundary, not live posting.
+
 ## Primary Interface: execute_skill()
 
 ### Function Signature

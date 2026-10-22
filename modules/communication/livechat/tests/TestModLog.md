@@ -1,5 +1,35 @@
 # TestModLog
 
+## 2026-10-22 — PR1759 integration and negative controls
+
+116 combined cases pass: 49 queue/heartbeat, 14 lifecycle, 53 shared reader.
+Queue tests include actual child-process lock contention/crash/restart, failed
+preclaim/final writes, corrupt ledger preservation, uncertain outcomes,
+same-thread concurrency, fixed expiry, supersession, closed gates, dry-run and
+real queue-to-source-bound heartbeat serialization. Lifecycle tests execute
+actual methods with external integrations replaced; two original-source
+controls reproduce leaked watchers. Reader tests consume the real queue's
+configured path and reject four reproduced malformed original inputs.
+No browser, account, model, full-DAE startup or native worker was exercised.
+Exact source/command/XML evidence: external PR reconciliation 1759-qualification.
+
+Fresh-main rerun against `87aa241b2c27649a3b23177236fafd610cb77b9e`:
+124 passed in 70.42s, comprising those 116 cases plus eight existing manifest
+contracts. This overlaps the earlier run and is not additional runtime coverage.
+The seven runtime/test files are unchanged from reviewed `30238f2f`.
+Evidence: `fresh-main-integration-20261022.json` and
+`fresh-main-tests-20261022.xml` in the same qualification directory.
+Independent review then reproduced a separate CI trust-bootstrap failure in
+the new job. The job now uses main's existing verified bootstrap before its
+runner install. The red result is retained in
+`fresh-main-independent-trust-red-20261022.xml`; security rerun is separate.
+
+## 2026-09-15 - Operator Command Plane Phase 1
+
+- Added `test_operator_command_queue.py` covering one-time announcement dispatch/acknowledgement and rejection of non-allowlisted actions.
+- Added deferred-delivery coverage for a manifest command received before
+  LiveChat connects.
+
 - Initialize test change log per WSP 34.
 
 ## 2025-08-24 - Comprehensive Test Fixes Following WSP

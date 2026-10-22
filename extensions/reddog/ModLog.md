@@ -1,3 +1,13 @@
+## PR1759 operator-command runtime member — 2026-10-22
+
+The generated runtime closure adds exactly the existing PR's
+`modules/communication/livechat/src/operator_command_queue.py`; no member is
+removed. The extension's count bound moves from 1,449 to 1,450 for this measured
+closure. Manifest byte, per-file byte, total byte, path and digest checks stay
+unchanged. The existing boundary test requires the queue member, accepts 1,450
+and rejects 1,451. This does not grant worker or posting authority.
+WSP 6/11/22/50/62/97; exact frozen validation belongs to PR1759.
+
 ## Operations policy manifest binding — 2026-10-21
 
 PR2150 preserves policy1.1.1 while synchronizing its existing registry/runtime

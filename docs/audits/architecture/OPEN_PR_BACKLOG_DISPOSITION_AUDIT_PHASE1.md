@@ -1,5 +1,34 @@
 # Open-PR backlog reconciliation
 
+## 2026-10-22 closure and next selection
+
+Fresh inventory after #1860: **50 open PRs**. #1860 squash-merged at
+`02d1c7c14c60487619287a9cb753ff3ddaa53c14`; all 13 final checks passed, including
+CI39654931880 and CodeQL39654926240. Exact reviewed head
+`1663f9135f00bed39390e2613bfc22726b828d4a` and main have identical whole Git
+trees/all 45 changed blobs. Owned validation checkout removed and attached
+implementation checkout archived; the original session's clean checkout remains
+preserved. [Terminal receipt](https://github.com/FOUNDUPS/Foundups-Agent/pull/1860#issuecomment-6324257991).
+
+Re-observed WSP15 queue: 3 P0 / 14 P1 / 28 P2 / 5 P3. The 50 remaining heads
+match the previous all-file audit; this is not a fresh revalidation of every PR.
+#2168 retains its active security owner. Select #1759, C4/I4/D4/Impact4=16/P0:
+current source reproduced duplicate post-crash attempts, renewed context expiry
+and leaked watchers. Repair uses its existing queue, reader and shared lock.
+Independent review additionally caught shared expiring context being saved into
+permanent legacy state; the existing mutator owner now reads only legacy storage.
+Bounded acceptance and remaining operational gaps are in the LiveChat interface,
+roadmap and TestModLog. Publication requires matching-head review/checks, squash
+and main readback; local tests alone do not close this PR or establish native RSI.
+
+Existing external ranked queue `refresh/wsp15-ranked-51.json` retains its original
+filename for continuity and now contains 50 rows; previous 51-row snapshot is
+preserved under `refresh/1759-qualification/previous-ranked-51.json`, rooted at
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021`. Holo owner query still
+rejects authority HEAD mismatch (freshness unknown/index gap); exact-source
+navigation is the explicit fallback, not an index-freshness claim. Re-observe
+again after this closure rather than blindly choosing the prior second row.
+
 ## 2026-10-21 dated current reconciliation
 
 This dated addendum covers the 92 initial October 21 PRs (48 dependency, 22 product, 21 infrastructure, active security #2168) plus arrivals #2170/#2171: **94 total, 50 dependency / 22 product / 21 infrastructure / 1 security**. The June Phase 1 body is retained exactly as historical evidence; its head bindings and dispositions are not current October status.
