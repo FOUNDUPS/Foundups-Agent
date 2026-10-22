@@ -46,6 +46,8 @@ These are continuing acceptance gates, not completed features that may later be 
 - [ ] Close the existing #1779 host-deployment sender boundary, then separately qualify one bounded `REDDOG_AUTO` Gmail transaction with fresh audience/recipient preflight, service-owned provider execution and exact Sent readback.
 - [ ] Qualify LinkedIn partner research first, then connection/DM mutation as a separate provider-effect profile; no mass outreach and no inferred relationship from discoverability.
 - [ ] Demonstrate one retained YUMORI improvement on a later unseen cycle, with independent outcome evidence and rollback, before claiming end-to-end RSI.
+- [ ] Qualify OpenRouter / Fusion as an advisory YUMORI reasoning layer only after live-client/runtime, budget and privacy/redaction evidence; keep private Gmail/contact/Memex payloads out of external panels by default.
+- [ ] Use AI Gateway model AutoResearch for bounded model selection where its benchmark contract fits; do not repurpose WRE AutoResearcher's compute/ROI evaluator as the YUMORI outcome oracle.
 - [x] Send the first formal eligibility inquiry for the MOE/RCESPA regional-coexistence data-center decarbonization program, framed around a currently closed municipal onsen and a future lawful PPP/lease/SPC structure.
 - [ ] Obtain written clarification from RCESPA on closed-facility status, applicant/operator/SPC structure, property/use-right timing, eligible heat-reuse equipment, stacking, and current-round timing.
 - [ ] Feed only verified eligibility and eligible-cost calculations into the Phase 1 financial model; never book a statutory maximum cap or an unverified model placeholder as committed funding.
