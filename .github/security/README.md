@@ -1,3 +1,24 @@
+## Gmail/WRE registry manifest re-review — 2026-10-22
+
+PR2179 changes one registered-skill JSON source and refreshes the generated
+`scripts/reddog_backend_manifest.json` digest for that exact file. The pinned
+Gitleaks 8.30.1 tracked-tree scan returned 38 unreviewed findings in the
+generated manifest: 36 `generic-api-key` and two `discord-api-token`
+heuristic matches.
+
+Independent review parsed every finding's exact manifest line, fetched every
+referenced source file at PR head `5fa880663351937d9850a700ded8e2e337bdaf9d`,
+normalized CRLF to LF, and recomputed SHA-256. All 38 values exactly matched
+their referenced source bytes. They are generated source-integrity metadata,
+not credentials. The whole manifest file SHA-256 is
+`e48885150236ab8cb7d642b278e626386dff3b47f428d0e596b1521d64fe4607`.
+
+Preserve all 1448 prior reviewed bindings and append only these 38 exact
+whole-file/rule/line bindings (1486 total). No matched value,
+scanner rule, exclusion, scan scope, fingerprint algorithm, history coverage,
+or failure behavior changed. This review approves no unrelated finding and
+does not classify separate credential-shaped incidents.
+
 # Blocking secret scan
 
 ## PR1860 selected-scheduling binding review — 2026-10-22
