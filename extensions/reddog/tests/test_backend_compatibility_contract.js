@@ -239,6 +239,9 @@ function assertConfigurationMigrationPrecedence() {
 
 function assertRuntimeFileCountBoundary() {
   assert(manifest.required_runtime_files.includes(
+    'modules/communication/livechat/src/engagement_lifecycle.py'
+  ));
+  assert(manifest.required_runtime_files.includes(
     'modules/communication/livechat/src/operator_command_queue.py'
   ));
   for (const name of ['reddog_effect_consensus_proof.py', 'reddog_current_effect_signing_authority.py', 'reddog_external_signer_authoritative_use_lease.py']) {
@@ -251,13 +254,13 @@ function assertRuntimeFileCountBoundary() {
     candidate.required_runtime_files.push(member);
     candidate.required_runtime_sha256[member] = '0'.repeat(64);
   };
-  while (candidate.required_runtime_files.length < 1450) {
+  while (candidate.required_runtime_files.length < 1451) {
     addMember(candidate.required_runtime_files.length);
   }
-  assert.strictEqual(candidate.required_runtime_files.length, 1450);
-  assert.deepStrictEqual(validator.validateManifest(candidate), []);
-  addMember(1450);
   assert.strictEqual(candidate.required_runtime_files.length, 1451);
+  assert.deepStrictEqual(validator.validateManifest(candidate), []);
+  addMember(1451);
+  assert.strictEqual(candidate.required_runtime_files.length, 1452);
   assert.deepStrictEqual(validator.validateManifest(candidate), [
     'backend_runtime_file_contract_mismatch'
   ]);

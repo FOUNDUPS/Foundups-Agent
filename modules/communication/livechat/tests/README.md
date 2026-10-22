@@ -1,5 +1,39 @@
 # LiveChat Module Test Suite
 
+## Bounded confirmed-handoff acceptance (PR841)
+
+Run the two explicitly scoped files; do not collect historical live integrations:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTHON_DOTENV_DISABLED='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+python -B -m pytest modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py modules/communication/livechat/tests/test_engagement_runner_lifecycle.py --import-mode=importlib -o addopts= -p no:cacheprovider -p pytest_asyncio.plugin -q
+```
+
+Frozen local source result: **81 passed** on CPython3.12.2, with26 inherited
+`datetime.utcnow` deprecation warnings. Six external single-change controls reject
+14 cases for missing confirmed guard, settlement, retained failed ownership,
+heartbeat cleanup, process reaping or thread completion. Fixtures are restored
+exactly; original failures are preserved in `refresh/841-qualification`.
+
+The original PR841 file owns actual DAE/coordinator/browser flows; its companion
+owns subprocess/thread/rotation lifetime checks and shared safe source loaders.
+The complete lifecycle helper runs with its own imports/globals. Heavy owner methods
+are compiled unchanged from source, while provider/browser/telemetry/DB boundaries
+are explicit substitutes. Disposable children run only generated local scripts;
+controlled thread workers terminate through test events. Host credentials/config are
+not inherited by those process fixtures. Tests include racing spawn acquisition,
+terminate/kill/wait/drain ordering, other-browser survival before polling, missing/
+stale file signals, dynamic identity, fallback/retry paths, unknown-mode waiting,
+repeated cancellation, failed-cleanup retention, concurrent sessions and #848 indexing.
+
+These tests are not a complete package import/startup or installed-host qualification.
+They do not exercise independent CommunityMonitor work, live APIs/accounts/models,
+browser-side rollback/global quiescence or native RSI. Linux CI selects the
+same two files in the existing YouTube batch. Original-source and mutation controls
+are retained externally; they are not additional passing runtime cases.
+
 ## Bounded operator command acceptance (PR1759)
 
 Run only the offline owners below with plugin autoload and dotenv loading disabled:

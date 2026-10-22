@@ -1,5 +1,40 @@
 # LiveChat Module Interface
 
+## Confirmed live-session handoff (PR841)
+
+`AutoModeratorDAE.terminate_comment_engagement(for_live_handoff=False)` keeps
+full supervisor shutdown as its default. The explicit live-handoff path reserves
+the successfully initialized API session's nonempty actual channel/chat identity,
+settles matching comment operations, then starts polling. Social-only initialization,
+pending stream hints and an environment fallback channel do not confirm a session.
+Concurrent live sessions cannot replace the reservation; every exit clears it.
+
+`MultiChannelCoordinator.settle_channel(channel_id)` and
+`RotationSupervisor.settle_channel(channel_id)` operate on their existing owned
+tasks. Both browser paths, pre-audit/fallback/retry dispatch and enabled rotation
+consult the confirmed identity in addition to the advisory signal's 300-second
+TTL. Rotation resolves registry names to channel IDs. Direct restart/inbox-clear
+runner calls use the same coordinator ownership and canonical browser mapping.
+Unrelated browser work remains owned and running. Deferred work is not reported
+as processed/failed or completed in a rotation checkpoint.
+
+`engagement_lifecycle.py` contains shared functions only; session identities and
+task registries stay on the existing DAE/coordinator/rotation instances. Subprocess
+cancellation recovers racing spawns, terminates then kills if necessary, and awaits
+child exit and pipe readers. Thread cancellation/deadlines await actual worker
+completion and may remain blocked indefinitely. Unknown/in-process runner modes
+are not treated as preemptible; handoff awaits natural completion. Failed cleanup
+retains ownership and blocks later handoff/dispatch rather than reporting settlement.
+Default shutdown awaits browser children; heartbeat cleanup also runs if session
+persistence fails.
+
+This is bounded local source/lifecycle qualification. It does not establish global
+browser quiescence, browser-side rollback, independently scheduled CommunityMonitor
+settlement, live YouTube delivery, full installed-package readiness or native RSI.
+The existing cross-browser singleton checkpoint can still race; no checkpoint
+schema/store or timing configuration is added. Existing #848 indexing, #1759 watcher
+and #782 quota contracts remain separate and intact.
+
 ## Overview
 The LiveChat module provides functionality to connect to a YouTube livestream chat, listen for messages, log them, and send responses. It integrates with other modules like BanterEngine for automated responses and token_manager for credential rotation. The module now includes QWEN intelligence for enhanced decision-making and pattern learning.
 

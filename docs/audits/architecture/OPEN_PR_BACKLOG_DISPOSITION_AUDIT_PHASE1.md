@@ -1,12 +1,13 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 47 open PRs, 10 drafts. #1759 and #1638 are merged; #782 quota repair is the active reconciliation. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+Current planning snapshot, 2026-10-23 JST: 43 open PRs, 10 drafts. #1759, #1638 and #782 are merged; #841 lifecycle repair is the active reconciliation. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
 
 ## Current reconciliation - 2026-10-23 JST
 
-Observed `2026-10-22T21:53:27.466665+00:00`, main `5655008eaf0fcd88af85006b50cc3eb5ceb054c0`.
-Since the prior snapshot, #1638 and the focused backlog-memory correction #2180
-merged: **47 open**, including 10 drafts. Counts are dated; concurrent lanes continue.
+Observed `2026-10-22T22:49:32.050789+00:00`, main `9105fa59410ab7c497a0d2be93495bf4b017ba77`.
+Since the prior 47-open snapshot, #782 and owner-managed #2179 merged, and
+#1360 was consolidated into #1342 and #1659 into #1663: **43 open**, including 10 drafts.
+Counts are dated; concurrent lanes continue.
 This section supersedes older selections/counts, retained below as history.
 
 ### Closure and selected execution
@@ -30,36 +31,107 @@ This section supersedes older selections/counts, retained below as history.
   All hosted PR checks passed, including the dedicated Windows/Linux ledger
   jobs. Independent source/package review passed; merged tree
   `648b42fb3a97f8ce328c0ba61cf125c306a8db0a` matches the reviewed union.
-  Exact-main CI remains pending at this snapshot; main CodeQL succeeded.
+  Exact-main CI and CodeQL succeeded.
   Installed VS Code, real SecretStorage and native RSI execution remain separate unproved milestones.
 - **#2180 MERGED_VERIFIED_MAIN:** existing backlog memory reconciled at
   `deda2728cd4bf7dabdb7db04b4d6aaeaaa4a22d2`; complete tree matches its
   reviewed candidate; exact-main CI and CodeQL succeeded. No new queue, store
   or Brain-ingestion claim.
-- **#782 ACTIVE_OWNED_WORK:** isolate its global/local quota guard on current
-  main, keeping original `b8b90afbab605c396054a8171f7c4ae2399fb2c5` in ancestry.
-  Current source permits authenticated video verification while the global
-  API toggle is false/unset. This is a deterministic, offline-testable effect
-  boundary; #1759 did not change it. C3/I4/D4/Impact4=**15/P1**.
-  The real checker source passes 31 unit tests; the adjacent suite passes 13
-  with isolated dependencies. Independent replay and separate gate reversions
-  confirm the protected cases. Generated bindings, independent regeneration
-  and the staged-candidate assertion pass. Remaining exit: hosted acceptance
-  and main readback. Local probes and simulated providers do not establish
-  live quota or native RSI behavior.
+- **#782 MERGED_VERIFIED_MAIN:** squash `9105fa59410ab7c497a0d2be93495bf4b017ba77`
+  from reviewed head `0db3d89bcbf4e2170e62f8a8fcd2319821d7079a`.
+  All 18 exact-head hosted checks succeeded; fetched main exactly matches
+  reviewed tree `64a15cc44edf74128ca2eb05901638b01ba50753`. Global API-off now
+  dominates local verification in both actual checker entrypoints. Local
+  qualification includes 31 checker cases, 13 adjacent cases under isolated
+  dependencies, independent gate-reversion controls and manifest contracts.
+  The two touched logs now use constant status text; the 38 regenerated source
+  hash bindings were independently reviewed without weakening scanner rules.
+  Exact-main CI39865925274 and CodeQL39865924732 succeeded. These results do not
+  establish live quota behavior or native RSI execution.
+- **#1360 CONSOLIDATED_CLOSED:** the proposal's 13 missing libc selectors are
+  preserved as acceptance requirements in #1342, whose current graph has no
+  Rollup nodes or consumer edges. This is a successor work order, not a claim
+  that main implements the missing metadata. The original branch is retained.
+  [Carry-forward](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342#issuecomment-6352415700)
+  requires current-main migration and GNU/musl native-closure qualification.
+- **#2179 MERGED_BY_OWNER:** verified merge `27f99c17470f7845f3d4e881be32b241a4b38005`
+  removes the sequencing dependency for the #1659 -> #1663 policy work.
+  Their unique identity/correction clauses still require current-owner review.
 
-Select #782 ahead of #841 at their equal 15/P1 allocation: its demonstrated
-quota gate has a narrower repair and deterministic oracle. #841 still needs
-live-session lifetime and alternate-rotation acceptance; replaying its old
-patch alone is inadequate. Protected and draft lanes remain with their owners.
-Re-observe and rescore after closure.
+- **#1659 CONSOLIDATED_CLOSED:** both original skill blobs and branch are
+  retained. Independent all-file review preserved the unique alias, source-image,
+  correction, index and privacy requirements in the existing #1663 proposal.
+  [Carry-forward](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663#issuecomment-6353016497)
+  requires current Contacts/native Docs/preflight/sender precedence, exact clause
+  mapping and relevant validation. Neither proposal is wholly implemented on main;
+  #1663 remains open and no second contact-memory skill/store is required.
+
+Re-observe after #782: select **#841, C4/I4/D4/Impact4=16/P0**, for bounded
+offline reconciliation. Preserve its original proposal but qualify actual
+confirmed-session exclusion with missing/stale (>300s) discovery signals,
+both coordinator and enabled RotationSupervisor paths, default shutdown and
+restart, #848 indexing and #1759 watcher lifecycle. A new-dispatch guard alone
+does not establish settlement of already-running channel work. The initial
+15/P1 allocation increases to 16/P0 because actual runner ownership and
+subprocess cleanup add a fourth complexity point. Existing process owners must
+settle matching-channel work before live polling; thread-mode cancellation is
+not completion evidence. Bounded uncertainty must defer handoff. This is a
+source-risk assessment, not a claim of an observed production incident. The existing
+managed checkout is reused; one Codex builder and a separate reviewer own the
+slice. Protected and draft lanes retain their owners. This is not native worker
+admission, and the historical modeled tests do not establish acceptance.
+
+The reconciled local candidate now passes 81 source-bound lifecycle cases;
+independent execution reproduces them and separately imports the complete owner
+modules and checks actual constructor/factory wiring with external boundaries
+substituted. Two independently reproduced cleanup defects are repaired. The
+original oversized DAE/coordinator files shrink through one shared helper;
+actual thread/process lifetime and failure retention remain explicit. Final
+generated bindings, hosted checks, publication and main convergence are still
+required at this source checkpoint. Neither local tests nor Codex review prove
+native RSI or live YouTube operation.
+
+### Refreshed dependency priority evidence
+
+The current GitHub dependency snapshot contains 49 open alerts: six critical,
+15 high, 22 medium and six low, across 14 package/manifest groups. These are
+reported vulnerable dependencies, not observed exploitation. All groups were
+mapped to existing owners and proposals; package metadata is not test evidence.
+
+- **#1457: 3/5/5/5=18/P0.** Current clerk Next 16.4.0 requires qualification
+  against the reported 16.4.1 patch. The original 16.3.0 target does not close
+  these alerts. The read-only ownership check permits a parent-claimed Clerk-only
+  repair after #841: no active matching writer was found across 170 registered
+  worktrees or current PR history. Preserve all 20 unique GNU/musl selectors
+  and #1762's outstanding lint requirement; its eSingularity and workflow
+  changes remain separate. This observation is not merge qualification.
+- **#1338: 3/4/4/4=15/P1.** Its yt-dlp target covers nine reported alerts,
+  including seven high. Highest standalone offline Acoustic candidate if the
+  critical clerk lane remains reserved; full resolution and controlled adapter
+  tests remain required, without live downloads.
+- **#1354: 3/4/4/4=15/P1.** Gunicorn qualification requires actual supported
+  Linux server/parser execution, not Windows import-only checks.
+- **#2081: 2/4/4/4=14/P1**, before #1355: proposed Flask requires Werkzeug
+  >=3.1.0; current Flask 3.0 permits the proposed Werkzeug by metadata. Verify
+  the complete dependency set and application behavior before either merge.
+- Four Chroma alerts and one node-forge alert have no patched version reported
+  in this snapshot. Existing owners must qualify remediation; do not infer a
+  safe version, mutate qualified Holo runtimes or dismiss the alerts.
+
+Complete the owned #841 checkpoint, then re-observe source/ownership and WSP15.
+The new critical score makes Clerk qualification the next eligible selection,
+subject to a fresh ownership check; it does not make an old PR merge-ready. Source bindings, complete
+alert mapping and acceptance remain in the existing reconciliation receipt root
+(`dependency-alert-pr-mapping-20261023.json`); the canonical queue below retains
+these revised priorities rather than opening a second backlog.
 
 ### PR782 preserved residual work
 
 The existing PR is deliberately narrowed to one quota concern. This does not
 mark its unrelated hygiene/alias changes implemented or superseded. Recovery
 source is original commit `b8b90afbab605c396054a8171f7c4ae2399fb2c5`, retained
-in the updated branch ancestry; its original 14-file delta remains recoverable.
+in closed PR head `0db3d89b` ancestry; its original 14-file delta remains recoverable.
+GitHub removed the source branch after merge; the closed PR head ref is verified.
 These follow-ups belong here, not in another roadmap or scheduler. Before any
 execution, refresh source, active ownership and WSP15. Scores below use C/I/D/I.
 
@@ -70,7 +142,7 @@ execution, refresh source, active ownership and WSP15. Scores below use C/I/D/I.
 | `.claude/settings.local.json` tracking | Repository hygiene owner, 2/3/3/2=10 P2, PRESERVED_NEEDS_REBASE | Verify still tracked/ignored; use an index-only change preserving the host file. Do not read/copy private settings into evidence or replay a deletion patch. Validate index state and host-file preservation independently. |
 
 The remaining original paths are the quota source/tests and their module logs,
-plus root/Holo historical ModLogs. Quota behavior is the active slice; old
+plus root/Holo historical ModLogs. Quota behavior is now merged; old
 security, live-scan, test-count and no-visible-files assertions remain historical
 in the original commit, not current certification. New records state only
 actually executed validation. Full original-PR functional completion is not
@@ -114,34 +186,30 @@ Every execution requires current source, checks and authority.
 | PR / source head | WSP15 | Owner / state | Next executable step |
 |---|---|---|---|
 | [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
+| [#1457](https://github.com/FOUNDUPS/Foundups-Agent/pull/1457) `5e88e8e2eea75fc09d94421bac3c75130da2ffca` | 3/5/5/5=18 P0 | Dependency lane/root: OWNER_CHECK_CLEAR_PENDING_PARENT_CLAIM | After #841, recheck ownership and qualify Clerk-only Next 16.4.1; preserve all 20 selectors and #1762 lint work, require GNU/musl graph, build and local auth boundaries. Protected eSingularity/workflows remain separate. |
+| [#841](https://github.com/FOUNDUPS/Foundups-Agent/pull/841) `92f0e0191cd38d4da02104ed3c1f7e0796491d82` | 4/4/4/4=16 P0 | Livechat lifecycle/root: LOCAL_SOURCE_VALIDATED_PUBLICATION_PENDING | Reconciled local candidate:81 lifecycle cases and independent complete-module probe; finish exact generated bindings, hosted qualification and main closure. Listed head is original remote proposal until publication. |
 | [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
 | [#1478](https://github.com/FOUNDUPS/Foundups-Agent/pull/1478) `5f8c73453559625500f3023f23331e5e44020712` | 3/4/4/4=15 P1 | Comment grounding owner/root: STILL_CURRENT / DRAFT | Refresh; run context/tier/source-attribution tests without posting. |
-| [#841](https://github.com/FOUNDUPS/Foundups-Agent/pull/841) `92f0e0191cd38d4da02104ed3c1f7e0796491d82` | 3/4/4/4=15 P1 | Livechat lifecycle/root: NEEDS_REBASE | Replay guard; test real coordinator handoff plus shutdown/restart. |
-| [#782](https://github.com/FOUNDUPS/Foundups-Agent/pull/782) `b8b90afbab605c396054a8171f7c4ae2399fb2c5` | 3/4/4/4=15 P1 | Quota guard/root: ACTIVE_OWNED_WORK | Original-head snapshot; quota-only reconciliation and exact-source tests. Preserve separate alias/ignore/settings follow-ups above; refresh final head before publication. |
+| [#1354](https://github.com/FOUNDUPS/Foundups-Agent/pull/1354) `4effe1e2508f5a4c1a56a50a303e3406742ca2b4` | 3/4/4/4=15 P1 | Dependency lane/root: LINUX_VALIDATION_REQUIRED | Resolve full set and exercise actual supported Linux WSGI/server/parser behavior for reported high alerts; Windows imports are insufficient. |
+| [#1338](https://github.com/FOUNDUPS/Foundups-Agent/pull/1338) `bdd2a67722d1cd138699941f20b57b18549b6bf8` | 3/4/4/4=15 P1 | Dependency lane/root: OFFLINE_QUALIFICATION_ELIGIBLE | Resolve complete Acoustic set; qualify proposed yt-dlp against nine reported alerts using controlled extraction/error/cleanup cases; no live download. Preserve four baseline residuals. |
 | [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
-| [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | Sequence after #2179 and #1659; preserve pre-compose identity, STT correction precedence, draft exception and correction receipts without a competing authority. |
+| [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | With #2179 merged, reconcile the single successor carrying #1659 identity/index/image/correction/privacy clauses; preserve pre-compose identity, draft exception, receipts and current owner precedence. |
 | [#1356](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356) `055cda32a0c2bff70a469aea7d967d20c61a7f42` | 4/3/4/3=14 P1 | Dependency lane/root: STILL_CURRENT | Resolve full set; offline transaction/hash interface tests. |
-| [#2179](https://github.com/FOUNDUPS/Foundups-Agent/pull/2179) `60ca1170571b67f1ed2b3e0e9dc0ef9ea7d07d3d` | 2/4/3/4=13 P1 | Active Gmail security routing owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
+| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `2cb0e2eacff38ecc19a6658423ac0a2dddc015ed` | 2/4/4/4=14 P1 | Dependency lane/root: OFFLINE_QUALIFICATION_ELIGIBLE | Qualify Werkzeug on current Flask first; complete resolver and health/upload/error smoke. This precedes #1355 and addresses eight reported alerts. |
 | [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) `e455fd0190b0c35302a3a5776529a221c3123888` | 4/3/2/4=13 P1 | Japan Compute owner: STILL_CURRENT / DRAFT | Owner reconciles homepage/hosting; preserved-copy and economics gates. |
 | [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) `724f465bd35ac1be5e9a91f41d0721da383c67d8` | 4/3/3/3=13 P1 | eSingularity surface owner: ACTIVE_OWNER_PROTECTED | Existing eSingularity owner coordinates convergence: preserve post-vote state, valid fixes and carried article; current routes/locales/build acceptance. |
-| [#1659](https://github.com/FOUNDUPS/Foundups-Agent/pull/1659) `3439a4089ebc45d303fbd1a6fa31b4825dc8b39b` | 1/4/4/4=13 P1 | Contact skill owner/root: STILL_CURRENT | Sequence after protected #2179; preserve unique alias-collision/source-image correction and private-identifier exclusion rules; reconcile current native Doc/Gmail authority. |
-| [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` | 3/3/4/3=13 P1 | Dependency lane/root: STILL_CURRENT | Coordinate #2081; resolver and Flask health/upload/error smoke. |
-| [#1342](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342) `df0a9af87ed3aa086a218fe8f61ef392634042f8` | 4/3/3/3=13 P1 | Dependency lane/root: PARTIALLY_SUPERSEDED | Current-main migration with #800; Node/config/build/PWA checks. |
+| [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` | 3/3/4/3=13 P1 | Dependency lane/root: DEPENDENCY_BLOCKED | Requires #2081 Werkzeug reconciliation before proposed Flask; complete resolver and health/upload/error smoke. |
+| [#1342](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342) `df0a9af87ed3aa086a218fe8f61ef392634042f8` | 4/3/3/3=13 P1 | Dependency lane/root: PARTIALLY_SUPERSEDED | Current-main migration carrying #800/#1360; preserve missing libc selectors if Rollup remains, otherwise qualify replacement GNU/musl native closure; Node/config/build/PWA checks. |
 | [#2102](https://github.com/FOUNDUPS/Foundups-Agent/pull/2102) `e9294fd00c4e728b1b489627d32c4db2fd557650` | 3/3/3/3=12 P2 | EDuIT owner: PARTIALLY_SUPERSEDED | Preserve packet; reconcile README/manifest; append registry; schema tests. |
 | [#1762](https://github.com/FOUNDUPS/Foundups-Agent/pull/1762) `4a6df453f611fa62122a6cdb88a616b57fd7756c` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED / DRAFT | Reconcile only remaining lint/config/fastq changes; test both current apps; explicitly classify two obsolete branch workflows. |
 | [#1688](https://github.com/FOUNDUPS/Foundups-Agent/pull/1688) `40d71249fe913567ee6f5fa65536d89f2ecb46c3` | 4/3/2/3=12 P2 | Opening review owner: PARTIALLY_SUPERSEDED / DRAFT | Owner visual review; isolate current-main opening; locales/device checks. |
 | [#1677](https://github.com/FOUNDUPS/Foundups-Agent/pull/1677) `847568ddec7af170aaef73fdae86d4db2b3628b2` | 3/3/3/3=12 P2 | JHR routing owner: PARTIALLY_SUPERSEDED | Port canonical links with current archive; domain/JHR tests. |
 | [#1618](https://github.com/FOUNDUPS/Foundups-Agent/pull/1618) `afef5e917dd1c327d34fd8952352d3469085f9b7` | 4/3/2/3=12 P2 | Outcome content owner: PARTIALLY_SUPERSEDED | Bound current-valid content; approved profile source; locales/build/visuals. |
-| [#1457](https://github.com/FOUNDUPS/Foundups-Agent/pull/1457) `5e88e8e2eea75fc09d94421bac3c75130da2ffca` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Prove GNU/musl selection and preserve or supersede every selector. |
-| [#1360](https://github.com/FOUNDUPS/Foundups-Agent/pull/1360) `5814611e826714980627ba50f2a9b460ce6c0224` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Prove GNU/musl selection; preserve or supersede platform metadata. |
-| [#1354](https://github.com/FOUNDUPS/Foundups-Agent/pull/1354) `4effe1e2508f5a4c1a56a50a303e3406742ca2b4` | 3/3/3/3=12 P2 | Dependency lane/root: STILL_CURRENT | Resolve and start WSGI on supported Linux; HTTP parser smoke. |
 | [#1348](https://github.com/FOUNDUPS/Foundups-Agent/pull/1348) `493de46d40fc3a754948a3e902e9a015108b621d` | 3/3/3/3=12 P2 | Dependency lane/root: STILL_CURRENT | Resolve runner/plugin together; collect and run Acoustic Lab tests. |
 | [#1339](https://github.com/FOUNDUPS/Foundups-Agent/pull/1339) `029d77a20838879e5bbc90e46e445fff29cb9f69` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Resolve fresh graph; offline client tests and frontend build. |
-| [#1338](https://github.com/FOUNDUPS/Foundups-Agent/pull/1338) `bdd2a67722d1cd138699941f20b57b18549b6bf8` | 3/3/3/3=12 P2 | Dependency lane/root: STILL_CURRENT | Resolve set; mocked extraction/error tests without live media. |
 | [#802](https://github.com/FOUNDUPS/Foundups-Agent/pull/802) `de63ab95aab0ca11247cf2620cb4bc559bbce16c` | 3/3/3/3=12 P2 | GetK owner: STILL_CURRENT | Rebase additive object; 16+11+2 proofs and registry tests; no dispatch. |
-| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `2cb0e2eacff38ecc19a6658423ac0a2dddc015ed` | 2/3/3/3=11 P2 | Dependency lane/root: STILL_CURRENT | Resolve Acoustic Lab set; health/upload/geofence smoke. |
 | [#1998](https://github.com/FOUNDUPS/Foundups-Agent/pull/1998) `0457051b92d2b494dbda50f0676bce851474ecff` | 2/3/3/3=11 P2 | YUMORI content owner: STILL_CURRENT | Use verified current date or evergreen cadence; contracts/lint/build. |
 | [#1906](https://github.com/FOUNDUPS/Foundups-Agent/pull/1906) `d5eb2622a14e2c551cedd188a702a5f73fa981b0` | 2/3/3/3=11 P2 | eSingularity source owner: STILL_CURRENT | Replay section/test; canonical noun review and contract suite. |
 | [#1886](https://github.com/FOUNDUPS/Foundups-Agent/pull/1886) `3aa71a0786b9202062e01beb84769c9ba0e7950e` | 2/3/3/3=11 P2 | Receipt contract owner/root: STILL_CURRENT | Clarify intake-only schema versus the documented posting gate; validate schema and examples. No accounting or AutoPost activation. |
@@ -161,7 +229,7 @@ Every execution requires current source, checks and authority.
 | [#729](https://github.com/FOUNDUPS/Foundups-Agent/pull/729) `1757a520c779c3b6a83ed8a4282f2eae13beb10a` | 2/2/2/3=9 P3 | Tooling docs/root: NEEDS_REBASE | Refresh facts; regenerate AGENTS projection; docs/consistency checks. |
 | [#1605](https://github.com/FOUNDUPS/Foundups-Agent/pull/1605) `7c5c735130bdcda77503c6637ebb246ba712fb22` | 1/2/2/3=8 P3 | FoundUp architecture owner: STILL_CURRENT | Reconcile two future-registry statements with the existing registry; retain planning-only scope. |
 
-#2178/#2179 scores are provisional owner-routing triage, without independent
+#2178 score is provisional owner-routing triage, without independent
 implementation acceptance. #2168 remains protected security work.
 
 ## Historical 2026-10-22 closure and selection
