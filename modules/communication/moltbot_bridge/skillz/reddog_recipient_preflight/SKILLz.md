@@ -1,16 +1,23 @@
 ---
 name: reddog_recipient_preflight
-description: Fail-closed two-pass recipient authorization for outbound correspondence
-version: 1.1.0
+description: Fail-closed independent recipient and release audit for outbound correspondence
+version: 1.2.0
 author: 0102
-agents: [qwen, gemma]
+agents: [0102, qwen, gemma]
+primary_agent: 0102
 dependencies: [openclaw_dae]
 domain: communication
 intent_type: DECISION
 promotion_state: prototype
 pattern_fidelity_threshold: 0.99
 category: safety
-evals: []
+wsp_chain: [WSP_00, WSP_15, WSP_48, WSP_50, WSP_73, WSP_77, WSP_91, WSP_95, WSP_97]
+evals:
+  - composer_cannot_self_approve
+  - audience_and_need_to_know_checked
+  - rendered_links_verified
+  - privacy_and_attachment_release_gate
+  - concise_single_purpose_message
 ---
 
 # RedDog Recipient Preflight
@@ -67,6 +74,32 @@ for that recipient.
 - do not silently alter hyphens, dots, plus tags, subdomains, or other characters;
 - compare against already-sent coverage to stop accidental resends;
 - block the entire transaction if any recipient fails.
+
+## Independent content and release audit
+
+Recipient resolution is necessary but not sufficient. Every external email,
+reply, forward, and send-ready draft must be audited by a verifier that did not
+compose the message. The verifier reads the final rendered transaction and
+records PASS/BLOCK for:
+
+- correct audience, exact recipient roles, consent, need-to-know, and current
+  thread;
+- supported material claims, bounded authority, and one clear purpose/ask;
+- concise audience-appropriate wording without duplicated or irrelevant context;
+- visible link labels, href destinations, redirects, canonical publisher, and
+  live destination/title agreement;
+- attachments, quoted history, and MIME for secrets, private data, stale/HOLD
+  content, or wrong files;
+- duplicate/stale-send protection and current provider watermark.
+
+Apply WSP 97: retrieve current evidence, challenge the proposed message from the
+recipient/security perspectives, separate facts from inference/unknowns, and
+bind the verifier's evidence to the final content digest. A model critique,
+draft label, syntax check, or successful provider response is not independent
+release evidence.
+
+The complete routing and release contract is:
+`modules/communication/moltbot_bridge/docs/clarity/gmail_wre_rsi_routing.md`.
 
 ## Sender boundary
 
