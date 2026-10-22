@@ -1,3 +1,17 @@
+## 2026-10-23 — Scheduled resident FoundUp reconciliation canary
+
+- Added a distinct `test_scheduled_resident_reconcile.py` surface because the existing
+  scheduled-routines integration file is growth-frozen. The new suite covers the generic
+  daily resident routine, exact durable claim fields, default-off activation, authenticated
+  one-FoundUp scope, Brain/Breadcrumb/workspace-memory inputs, FoundUp Memex composition,
+  stable request identity, canonical resident-client dispatch and zero Gmail/LinkedIn/repo
+  mutation claims.
+- Extended `test_schedule_evaluator.py` only for parser/cadence semantics: `resident_reconcile`
+  is daily-only and both supported aliases resolve to one canonical schedule ID.
+- No provider account, Gmail, LinkedIn, shell, repository mutation, HoloIndex reindex,
+  worktree, PR or merge is exercised by these tests. A real YUMORI resident cycle remains
+  a later host/runtime receipt.
+
 # Idle Automation Test Module Log
 
 ## 2026-10-07 — Self-audit report consumption
