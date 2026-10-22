@@ -1,3 +1,11 @@
+## Exact parent identity for skill feedback
+
+Execution outcomes and non-production candidates now retain the digest of the
+loaded skill instructions; scanner-admission identity remains separate. The
+binding survives unavailable output serialization and SQLite reopen. See the
+[contract](INTERFACE.md#skill-feedback-source-binding--2026-10-22). This repairs
+lineage only; it does not enable Moshpit ingestion or automatic promotion.
+
 ## Measured-zero fidelity — P15 checkpoint
 
 `PatternMemory.get_skill_fidelity_stats` preserves measured 0.0; only absent
