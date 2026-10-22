@@ -7,6 +7,31 @@ lock; no new dispatcher/store. 116 offline cases pass; details and validation
 limits in LiveChat and Video Comments interfaces/ModLogs. No account/model
 effects, native RSI or authenticated worker completion claimed.
 
+Revalidated after integrating fetched main `87aa241b2c27649a3b23177236fafd610cb77b9e`:
+124 cases passed (116 connected runtime cases plus eight manifest contracts).
+The seven runtime/test source files retain their previously reviewed bytes;
+the combined 1,450-member manifest and both consumer pins were regenerated.
+GitHub publication and hosted acceptance remain pending; this is local evidence.
+
+## 2026-10-22 — OpenClaw/WRE proposal reconciliation
+
+WSP00/15/17/22/48/50/60/84/95/97. Audit the supplied swarm proposal against
+main7d33648 and current primary documentation. Reuse existing queue, admission,
+worker and Skillz owners; correct atomic-rename, state/promotion and protocol
+claims. Record cancellation and parent-scoped recall gaps plus phased acceptance.
+Existing three component suites:46 passed; no production swarm/coverage claim.
+The [audit](docs/audits/architecture/OPENCLAW_WRE_SWARM_PROPOSAL_RECONCILIATION_20261022.md)
+extends current architecture navigation only. No runtime scaffold or backlog
+reconciliation. WSP15 planning C2/I4/D3/Impact4=13/P1; no execution authority.
+
+## 2026-10-22 — Python CA trust bootstrap
+
+WSP00/6/12/15/22/97; C2/I5/D5/Impact5=17/P0. Pin reviewed certifi and
+hash-authenticate pip/certifi before CI and root Docker dependency downloads.
+Windows MCP venv is bootstrapped independently. Real isolated Linux installation
+and19 security/configuration tests pass; production rollout is unverified.
+[Evidence and deployment boundary](docs/audits/security/PYTHON_CA_TRUST_20261022.md).
+
 ## 2026-10-22 — PR1860 selected-clip closure
 
 WSP 00/6/10/11/15/22/50/84/97; 16/P0. Reconcile the existing scheduler,

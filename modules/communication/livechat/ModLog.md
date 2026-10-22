@@ -18,6 +18,11 @@ these three files explicitly. Native YouTube delivery, remote admission and
 end-to-end RSI remain unverified. The September exactly-once claim below is
 historical and superseded by the documented uncertain-outcome contract.
 
+Fresh-main reconciliation at `87aa241b` retains the reviewed runtime/test bytes.
+124 combined runtime/manifest cases pass locally. Generated bindings include
+the intervening main changes without changing member count or byte limits.
+Publication, hosted checks and installed operation remain separate gates.
+
 ## 2026-09-15 - Operator Command Plane Phase 1
 
 **WSP:** 22, 50, 77, 91, 97

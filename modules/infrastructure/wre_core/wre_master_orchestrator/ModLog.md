@@ -1,5 +1,28 @@
 # WRE Master Orchestrator - Module Development Log
 
+## 2026-10-22 — Bind skill feedback to loaded instructions
+
+The coordinator now attaches its execution ID, the exact loaded UTF-8 skill
+text digest, and its separate scanner-admission fingerprint to returned and
+persisted result evidence. Producer/caller `_skill_binding` assertions cannot
+replace this coordinator field. Non-JSON output keeps the existing unavailable
+marker while retaining the binding. Variation `parent_version` uses the same
+loaded-text digest instead of the ambiguous literal `current`.
+
+This identifies observed source text, not authenticated runtime authority or
+proof that the scanner admitted those subsequently loaded bytes. Unknown scanner
+fingerprints remain null. Existing telemetry exclusion, structural-fidelity
+thresholds, effect success, quality placeholder and fail-closed promotion remain.
+No Moshpit ingestion, generic AutoResearch evaluation or production RSI is enabled.
+
+Validation: new real SQLite runner/candidate/reopen regression failed on the
+baseline's forged lineage, then passed. Seven new cases plus existing execution,
+continuity, PatternMemory, admission, telemetry and master suites pass 232 cases.
+Two pytest configuration warnings reflect disabled async-plugin autoload.
+WSP00 used the documented Torch-free fallback (detector witness absent); Holo
+lexical bundle used this checkout with UNKNOWN semantic freshness. WSP15
+C2/I4/D3/Impact3=12/P2; WSP00/5/6/11/15/22/48/50/60/62/84/95/97.
+
 ## 2026-10-04 — Preserve reflection with continuity context
 
 The existing reflection prompt excludes only `parent_continuity_context`,

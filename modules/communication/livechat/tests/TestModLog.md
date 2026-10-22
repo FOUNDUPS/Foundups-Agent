@@ -13,6 +13,13 @@ configured path and reject four reproduced malformed original inputs.
 No browser, account, model, full-DAE startup or native worker was exercised.
 Exact source/command/XML evidence: external PR reconciliation 1759-qualification.
 
+Fresh-main rerun against `87aa241b2c27649a3b23177236fafd610cb77b9e`:
+124 passed in 70.42s, comprising those 116 cases plus eight existing manifest
+contracts. This overlaps the earlier run and is not additional runtime coverage.
+The seven runtime/test files are unchanged from reviewed `30238f2f`.
+Evidence: `fresh-main-integration-20261022.json` and
+`fresh-main-tests-20261022.xml` in the same qualification directory.
+
 ## 2026-09-15 - Operator Command Plane Phase 1
 
 - Added `test_operator_command_queue.py` covering one-time announcement dispatch/acknowledgement and rejection of non-allowlisted actions.
