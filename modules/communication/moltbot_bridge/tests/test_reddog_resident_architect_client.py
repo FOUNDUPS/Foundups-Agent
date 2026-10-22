@@ -20,6 +20,12 @@ from modules.communication.moltbot_bridge.src.reddog_resident_architect_durable_
     AgentDbResidentArchitectCycleStore,
     resident_intent_digest,
 )
+from modules.communication.moltbot_bridge.src.reddog_resident_foundup_memex_config import (
+    build_resident_foundup_memex_supply_config,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_memory_context import (
+    resident_breadcrumbs_from_runtime,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -549,3 +555,56 @@ def test_client_module_has_no_execution_or_second_model_authority() -> None:
     assert "os" not in imported
     for forbidden in ("HermesFoundUpBuilder", "run_repo_code_audit", "git push", "gh pr", "worktree add"):
         assert forbidden not in source
+
+
+def test_real_esingularity_memex_config_uses_registered_manifest_and_roadmap() -> None:
+    config = build_resident_foundup_memex_supply_config(
+        repo_root=REPO_ROOT,
+        foundup_id="esingularity_001",
+        principal_id="012",
+        max_records=20,
+    )
+
+    assert config.foundup_id == "esingularity_001"
+    assert config.principal_id == "012"
+    assert config.identity["foundup_id"] == "esingularity_001"
+    assert config.identity["name"] == "eSingularity.ai"
+    assert config.identity["stage"] == "proto"
+    assert "Regional AI infrastructure FoundUp for Fukui" in config.identity["purpose"]
+    assert config.roadmap_state["foundup_id"] == "esingularity_001"
+    assert config.roadmap_state["roadmap_id"] == "modules/foundups/esingularity/ROADMAP.md"
+    assert config.roadmap_state["version"].startswith("sha256:")
+    assert config.roadmap_state["content_digest"] == config.roadmap_state["version"]
+    assert config.max_records == 20
+
+
+def test_resident_memex_config_rejects_unknown_foundup() -> None:
+    try:
+        build_resident_foundup_memex_supply_config(
+            repo_root=REPO_ROOT,
+            foundup_id="not_registered",
+            principal_id="012",
+        )
+    except ValueError as exc:
+        assert str(exc) == "resident_memex_foundup_not_unique"
+    else:
+        raise AssertionError("unknown FoundUp was admitted to resident Memex")
+
+
+def test_resident_breadcrumb_search_preserves_keyword_limit_contract() -> None:
+    calls = []
+
+    def search(query: str, *, limit: int):
+        calls.append((query, limit))
+        return [{"breadcrumb_id": "crumb-1"}]
+
+    result = resident_breadcrumbs_from_runtime(
+        work_focus="Audit YUMORI current blockers.",
+        foundup_id="esingularity_001",
+        environ={"REDDOG_RESIDENT_MEMORY_MAX_RECORDS": "7"},
+        breadcrumb_search=search,
+    )
+
+    assert result == ({"breadcrumb_id": "crumb-1"},)
+    assert calls == [("Audit YUMORI current blockers.", 7)]
+
