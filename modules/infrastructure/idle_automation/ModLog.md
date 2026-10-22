@@ -1,5 +1,15 @@
 # Idle Automation Module - ModLog
 
+### 2026-10-23 — Daily resident FoundUp reconcile claim
+
+WSP00/15/22/50/60/62/77/84/97. Added `resident_reconcile` as a daily-only scheduled
+routine using the existing durable claim/finalize owner. It is default-off through
+`AUTO_REDDOG_RESIDENT_RECONCILE=false`; enabling it forwards only the complete durable
+claim to the RedDog scheduled resident adapter. The routine stores no provider content
+and reuses existing schedule execution history for receipt/intent correlation. Tests
+cover daily-only parsing, default-off behavior and exact-claim dispatch. No live
+FoundUp cycle, provider mutation or RSI gain is claimed by this source change.
+
 This log tracks changes specific to the **idle_automation** module in the **infrastructure** enterprise domain.
 
 ### 2026-10-07 — Preserve internal-audit measurement status

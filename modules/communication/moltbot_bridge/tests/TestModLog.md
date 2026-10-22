@@ -1,3 +1,16 @@
+## 2026-10-23 — Resident memory reuse and FoundUp Memex configuration
+
+- Reused `test_reddog_resident_architect_client.py` to cover the resident infrastructure
+  added for scheduled FoundUp reconciliation. The real `esingularity_001` registry entry,
+  manifest and module ROADMAP now produce the existing `OperationalMemexSnapshotSupplyConfig`
+  shape without a second memory store.
+- Added direct regression for the Breadcrumb runtime query's keyword-only `limit` contract;
+  this protects parity with the pre-extraction `main.py` behavior.
+- Existing main-bootstrap memory-context tests remain the wrapper-parity coverage after
+  Brain/Breadcrumb/workspace-note readers moved into the reusable RedDog owner module.
+- These are source/memory binding tests only: no principal Memex fabrication, provider
+  mutation, model execution, shell, repository mutation or retained RSI benefit is claimed.
+
 ## 2026-10-22 — Selected-batch regression and closure evidence
 
 WSP 6/15/22/50/84/97. Reuse `test_remote_cli.py` and existing adapter,

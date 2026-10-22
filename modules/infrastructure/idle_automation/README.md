@@ -102,6 +102,21 @@ remain outside exact runtime closure and therefore outside any A-grade claim.
 - This POC gathers replay-protected candidate evidence only. It does not select
   or promote models, mutate registries, or bind runtime roles.
 
+### Daily Resident FoundUp Reconciliation
+- `resident_reconcile` is allowlisted only for `daily` cadence.
+- The schedule owner supplies one durable `ScheduleClaim`; the RedDog adapter derives a
+  stable resident request identity from that exact cadence window.
+- `AUTO_REDDOG_RESIDENT_RECONCILE` defaults to `false`. Enabling the routine still
+  requires an authenticated principal, exactly one authorized FoundUp, an explicit work
+  focus, current audit/architect model bindings, Brain state, Breadcrumbs and a canonical
+  FoundUp Memex configuration.
+- The first admitted profile is read-only. A successful receipt asserts no Gmail or
+  LinkedIn mutation, public publication, shell, repository mutation, HoloIndex reindex,
+  worktree, PR or merge.
+- FoundUp-specific behavior is configuration/state, not infrastructure branching. YUMORI
+  can be the first deployment by scoping `REDDOG_AUTHORIZED_FOUNDUP_IDS=esingularity_001`
+  and supplying its work focus; the adapter itself contains no YUMORI special case.
+
 ### Safety & Controls
 - Opt-in configuration via environment variables
 - Network availability checks

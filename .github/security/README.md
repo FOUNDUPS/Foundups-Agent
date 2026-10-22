@@ -1,3 +1,44 @@
+## Generated RedDog manifest metadata re-review — 2026-10-23
+
+PR2178 regenerated `scripts/reddog_backend_manifest.json` after four new
+read-only resident runtime modules entered the dependency closure. Gitleaks
+reported 38 unreviewed findings in that generated manifest: 36
+`generic-api-key` and two `discord-api-token` heuristic matches. Direct
+JSON comparison against merged main verified that every one of the 38
+path-to-SHA256 values is unchanged from main; none is a credential, token,
+assignment, provider value, or newly introduced secret-like literal.
+
+The candidate manifest SHA256 is `b5041a2138f5b29d7bd46b78639515293eea738818a6d034a5547df97cc3a383`. The unchanged security-gate
+fingerprint algorithm was replayed with the candidate file digest, exact rule
+ID, and exact candidate line number for all 38 generated metadata findings.
+Only those 38 exact bindings were appended to the reviewed-finding ledger.
+No Gitleaks rule, allowlist, exclusion, history range, matched text, scanner
+version, fingerprint algorithm, or failure behavior changed. The generated
+runtime closure itself remains separately verified by the RedDog manifest
+generator and compatibility tests.
+
+## Scheduled resident ModLog prose re-review — 2026-10-23
+
+PR2178 security scan reported one `generic-api-key` finding in
+`modules/communication/moltbot_bridge/ModLog.md` at line3667 after the
+scheduled-resident source entry changed the file's whole-file digest. Exact
+comparison against merged main `da94c367b4e3aab53feccdceacc4116ea649abed`
+confirmed the complete finding line is unchanged ordinary committed-profile
+key-resolution prose; it contains no credential assignment or literal.
+
+The unchanged gate algorithm was replayed over the exact UTF-8 file content.
+Main file SHA256 is
+`331ea28a243251925c90de7b494d08f600b27458d866b8fd2f33d50be79b8c68`,
+whose reviewed binding
+`965437eaa9c0ea540652a9e931a778e258747f9f0a26962d7a07d3cff546ebae`
+is already present. Candidate file SHA256 is
+`d54f91cba0429c6577a6acb41562e4a25384c88584bd2ff7822b418fa7476de2`;
+the recomputed file/rule/line binding is
+`38094946776a9725850b0d3a1121fb023655ac82307e2bdc962b462cc3c88e4d`.
+Preserve all1410 prior records and append only that binding (1411 total).
+No scanner version, rule, path exclusion, matched value, fingerprint algorithm,
+history coverage or failure behavior changed.
+
 # Blocking secret scan
 
 ## PR1860 selected-scheduling binding review — 2026-10-22

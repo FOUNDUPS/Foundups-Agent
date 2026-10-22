@@ -36,6 +36,11 @@ from modules.infrastructure.idle_automation.src.schedule_claim_state import (
 from modules.infrastructure.idle_automation.src.openrouter_catalog_projection import (
     project_openrouter_catalog_dispatch_outcome,
 )
+from modules.infrastructure.idle_automation.src.resident_reconcile_schedule_adapter import (
+    RESIDENT_RECONCILE_ROUTINE,
+    dispatch_resident_reconcile_claim,
+    project_resident_reconcile_dispatch_outcome,
+)
 from typing import Dict, Any, Optional
 
 logger = logging.getLogger(__name__)
@@ -910,10 +915,14 @@ class IdleAutomationDAE:
                     claim
                 )
                 return project_openrouter_catalog_dispatch_outcome(response)
-            else:
-                response = await self._dispatch_scheduled_routine(
-                    claim.routine
+            if claim.routine == RESIDENT_RECONCILE_ROUTINE:
+                response = await dispatch_resident_reconcile_claim(
+                    claim, module_path=self.module_path
                 )
+                return project_resident_reconcile_dispatch_outcome(response)
+            response = await self._dispatch_scheduled_routine(
+                claim.routine
+            )
             success = bool(response.get("success", False))
             return {
                 "success": success,
@@ -966,6 +975,10 @@ class IdleAutomationDAE:
             "cadence": spec.cadence,
             "success": dispatch["success"] and finalized,
         }
+        if dispatch.get("receipt_id"):
+            entry["receipt_id"] = dispatch["receipt_id"]
+        if dispatch.get("resident_intent_id"):
+            entry["resident_intent_id"] = dispatch["resident_intent_id"]
         if not finalized:
             result["finalization_failed_count"] += 1
             result["failed_count"] += 1

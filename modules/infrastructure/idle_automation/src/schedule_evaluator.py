@@ -53,6 +53,11 @@ SUPPORTED_ROUTINES = {
         "aliases": ["openrouter catalog refresh"],
         "cadences": ["daily"],
     },
+    "resident_reconcile": {
+        "description": "Run one authenticated read-only resident FoundUp reconciliation",
+        "aliases": ["resident reconcile", "resident foundup reconcile"],
+        "cadences": ["daily"],
+    },
 }
 
 # Cadence definitions with preferred execution windows (hour ranges, UTC)
