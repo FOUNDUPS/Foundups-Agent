@@ -663,65 +663,59 @@ def _scheduled_env():
         ),
         "REDDOG_RESIDENT_MEMORY_MAX_RECORDS": "20",
     }
-def test_scheduled_resident_composes_existing_memory_memex_and_client(monkeypatch) -> None:
-    _ScheduledClient.calls.clear()
+def _patch_scheduled_resident_context(monkeypatch):
     monkeypatch.setattr(
-        scheduled_resident,
-        "load_resident_model_runtime_bindings",
+        scheduled_resident, "load_resident_model_runtime_bindings",
         lambda *_args, **_kwargs: (
             {"receipt_id": "audit-binding"},
-            {"receipt_id": "architect-binding"},
-            "",
+            {"receipt_id": "architect-binding"}, "",
         ),
     )
     monkeypatch.setattr(
-        scheduled_resident,
-        "resident_brain_state_from_artifacts",
+        scheduled_resident, "resident_brain_state_from_artifacts",
         lambda _env: {"available": True, "record_count": 4},
     )
     monkeypatch.setattr(
-        scheduled_resident,
-        "resident_breadcrumbs_from_runtime",
+        scheduled_resident, "resident_breadcrumbs_from_runtime",
         lambda **_kwargs: (
-            {"breadcrumb_id": "crumb-1"},
-            {"breadcrumb_id": "crumb-2"},
+            {"breadcrumb_id": "crumb-1"}, {"breadcrumb_id": "crumb-2"},
         ),
     )
     monkeypatch.setattr(
-        scheduled_resident,
-        "resident_workspace_memory_notes_from_env",
+        scheduled_resident, "resident_workspace_memory_notes_from_env",
         lambda _env: ({"note_id": "workspace-1"},),
     )
     memex_config = object()
     monkeypatch.setattr(
-        scheduled_resident,
-        "build_resident_foundup_memex_supply_config",
+        scheduled_resident, "build_resident_foundup_memex_supply_config",
         lambda **_kwargs: memex_config,
     )
-    first = scheduled_resident.run_scheduled_resident_reconcile(
-        _ScheduledClaim(),
-        repo_root=REPO_ROOT,
-        environ=_scheduled_env(),
+    return memex_config
+
+
+def _run_scheduled_resident():
+    return scheduled_resident.run_scheduled_resident_reconcile(
+        _ScheduledClaim(), repo_root=REPO_ROOT, environ=_scheduled_env(),
         client_factory=_ScheduledClient,
         grounding_service=lambda **_kwargs: _ScheduledGrounded(),
     )
-    second = scheduled_resident.run_scheduled_resident_reconcile(
-        _ScheduledClaim(),
-        repo_root=REPO_ROOT,
-        environ=_scheduled_env(),
-        client_factory=_ScheduledClient,
-        grounding_service=lambda **_kwargs: _ScheduledGrounded(),
-    )
+
+
+def test_scheduled_resident_composes_existing_memory_memex_and_client(monkeypatch) -> None:
+    _ScheduledClient.calls.clear()
+    memex_config = _patch_scheduled_resident_context(monkeypatch)
+    first, second = _run_scheduled_resident(), _run_scheduled_resident()
+
     assert first["success"] is True
     assert first["foundup_id"] == "esingularity_001"
-    assert first["brain_record_count"] == 4
-    assert first["breadcrumb_count"] == 2
+    assert (first["brain_record_count"], first["breadcrumb_count"]) == (4, 2)
     assert first["workspace_note_count"] == 1
     assert first["foundup_memex_configured"] is True
     assert first["request_id"] == second["request_id"]
     assert first["no_gmail_mutation_performed"] is True
     assert first["no_linkedin_mutation_performed"] is True
     assert first["no_repo_mutation_performed"] is True
+
     defaults = _ScheduledClient.calls[0]["runtime_defaults"]
     assert defaults["memex_snapshot_supply_config"] is memex_config
     assert defaults["audit_model_runtime_binding_receipt"]["receipt_id"] == "audit-binding"
@@ -729,6 +723,8 @@ def test_scheduled_resident_composes_existing_memory_memex_and_client(monkeypatc
     assert defaults["breadcrumbs"][0]["breadcrumb_id"] == "crumb-1"
     assert _ScheduledClient.calls[0]["transport"] == "api"
     assert _ScheduledClient.calls[0]["authorized_foundup_ids"] == ("esingularity_001",)
+
+
 def test_scheduled_resident_rejects_bad_scope_before_memory(monkeypatch) -> None:
     called = []
     monkeypatch.setattr(
