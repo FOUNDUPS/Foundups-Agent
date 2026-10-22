@@ -183,7 +183,9 @@ def _claim_rejections(claim: Any) -> list[str]:
         reasons.append("scheduled_resident_routine_invalid")
     if str(getattr(claim, "cadence", "") or "") != SCHEDULED_RESIDENT_CADENCE:
         reasons.append("scheduled_resident_cadence_invalid")
-    for field in ("schedule_id", "execution_id", "window_key", "token"):
+    for field in (
+        "schedule_id", "execution_id", "window_start", "window_end", "token"
+    ):
         if not str(getattr(claim, field, "") or "").strip():
             reasons.append(f"scheduled_resident_claim_{field}_missing")
     return reasons
@@ -201,7 +203,8 @@ def _request_id(claim: Any, foundup_id: str, principal: str, work_focus: str) ->
     payload = {
         "schedule_id": str(getattr(claim, "schedule_id", "") or ""),
         "execution_id": str(getattr(claim, "execution_id", "") or ""),
-        "window_key": str(getattr(claim, "window_key", "") or ""),
+        "window_start": str(getattr(claim, "window_start", "") or ""),
+        "window_end": str(getattr(claim, "window_end", "") or ""),
         "foundup_id": foundup_id,
         "principal": principal,
         "work_focus": work_focus,
@@ -240,7 +243,8 @@ def _result(
         "cadence": str(getattr(claim, "cadence", "") or ""),
         "schedule_id": str(getattr(claim, "schedule_id", "") or ""),
         "execution_id": str(getattr(claim, "execution_id", "") or ""),
-        "window_key": str(getattr(claim, "window_key", "") or ""),
+        "window_start": str(getattr(claim, "window_start", "") or ""),
+        "window_end": str(getattr(claim, "window_end", "") or ""),
         "foundup_id": foundup_id,
         "request_id": request_id,
         "resident_response": dict(response or {}),
