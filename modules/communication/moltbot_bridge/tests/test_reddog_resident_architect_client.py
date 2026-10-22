@@ -619,8 +619,6 @@ class _ScheduledGrounded:
         "schema_version": "reddog_intent.v2",
         "intent_id": "sha256:scheduled-resident-intent",
     }
-
-
 class _ScheduledSafeResponse:
     accepted = True
     read_only_authority_only = True
@@ -632,7 +630,6 @@ class _ScheduledSafeResponse:
     client_no_pr_created = True
     client_no_merge_performed = True
     rejection_reasons = ()
-
     def to_dict(self):
         return {
             "accepted": True,
@@ -641,19 +638,13 @@ class _ScheduledSafeResponse:
             "status": "DETERMINED",
             "read_only_authority_only": True,
         }
-
-
 class _ScheduledClient:
     calls = []
-
     def __init__(self, **kwargs):
         type(self).calls.append(dict(kwargs))
-
     def submit(self, intent):
         type(self).calls[-1]["intent"] = dict(intent)
         return _ScheduledSafeResponse()
-
-
 class _ScheduledClaim:
     schedule_id = "scheduled-yumori"
     routine = "resident_reconcile"
@@ -662,8 +653,6 @@ class _ScheduledClaim:
     window_end = "2026-10-24T00:00:00+00:00"
     execution_id = "sha256:scheduled-window"
     token = "opaque-scheduled-resident-token"
-
-
 def _scheduled_env():
     return {
         "REDDOG_AUTHENTICATED_PRINCIPAL_ID": "012",
@@ -674,8 +663,6 @@ def _scheduled_env():
         ),
         "REDDOG_RESIDENT_MEMORY_MAX_RECORDS": "20",
     }
-
-
 def test_scheduled_resident_composes_existing_memory_memex_and_client(monkeypatch) -> None:
     _ScheduledClient.calls.clear()
     monkeypatch.setattr(
@@ -711,7 +698,6 @@ def test_scheduled_resident_composes_existing_memory_memex_and_client(monkeypatc
         "build_resident_foundup_memex_supply_config",
         lambda **_kwargs: memex_config,
     )
-
     first = scheduled_resident.run_scheduled_resident_reconcile(
         _ScheduledClaim(),
         repo_root=REPO_ROOT,
@@ -726,7 +712,6 @@ def test_scheduled_resident_composes_existing_memory_memex_and_client(monkeypatc
         client_factory=_ScheduledClient,
         grounding_service=lambda **_kwargs: _ScheduledGrounded(),
     )
-
     assert first["success"] is True
     assert first["foundup_id"] == "esingularity_001"
     assert first["brain_record_count"] == 4
@@ -744,8 +729,6 @@ def test_scheduled_resident_composes_existing_memory_memex_and_client(monkeypatc
     assert defaults["breadcrumbs"][0]["breadcrumb_id"] == "crumb-1"
     assert _ScheduledClient.calls[0]["transport"] == "api"
     assert _ScheduledClient.calls[0]["authorized_foundup_ids"] == ("esingularity_001",)
-
-
 def test_scheduled_resident_rejects_bad_scope_before_memory(monkeypatch) -> None:
     called = []
     monkeypatch.setattr(
@@ -755,7 +738,6 @@ def test_scheduled_resident_rejects_bad_scope_before_memory(monkeypatch) -> None
     )
     env = _scheduled_env()
     env["REDDOG_AUTHORIZED_FOUNDUP_IDS"] = "esingularity_001,other_foundup"
-
     result = scheduled_resident.run_scheduled_resident_reconcile(
         _ScheduledClaim(),
         repo_root=REPO_ROOT,
@@ -763,12 +745,9 @@ def test_scheduled_resident_rejects_bad_scope_before_memory(monkeypatch) -> None
         client_factory=_ScheduledClient,
         grounding_service=lambda **_kwargs: _ScheduledGrounded(),
     )
-
     assert result["success"] is False
     assert "scheduled_resident_requires_exactly_one_foundup" in result["rejection_reasons"]
     assert called == []
-
-
 def test_scheduled_resident_fails_closed_without_breadcrumb_memory(monkeypatch) -> None:
     monkeypatch.setattr(
         scheduled_resident,
@@ -789,7 +768,6 @@ def test_scheduled_resident_fails_closed_without_breadcrumb_memory(monkeypatch) 
         "resident_breadcrumbs_from_runtime",
         lambda **_kwargs: (),
     )
-
     result = scheduled_resident.run_scheduled_resident_reconcile(
         _ScheduledClaim(),
         repo_root=REPO_ROOT,
@@ -797,9 +775,7 @@ def test_scheduled_resident_fails_closed_without_breadcrumb_memory(monkeypatch) 
         client_factory=_ScheduledClient,
         grounding_service=lambda **_kwargs: _ScheduledGrounded(),
     )
-
     assert result["success"] is False
     assert result["rejection_reasons"] == [
         "resident_breadcrumbs_context_unavailable"
     ]
-
