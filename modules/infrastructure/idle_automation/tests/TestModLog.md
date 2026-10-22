@@ -1,3 +1,19 @@
+## 2026-10-23 — Scheduled resident FoundUp reconciliation canary
+
+- Reused the already-registered `test_schedule_evaluator.py` and
+  `test_scheduled_routines_integration.py`; no new tracked test file or manual
+  canonical-registry edit was introduced.
+- Parser coverage makes `resident_reconcile` daily-only and both supported aliases
+  resolve to one canonical schedule ID. Scheduled integration coverage proves the
+  resident routine is default-off and, when explicitly enabled, forwards the exact
+  durable claim to the RedDog adapter.
+- FoundUp scope, Brain/Breadcrumb/workspace-memory inputs, FoundUp Memex composition,
+  stable request identity and zero-effect resident-client behavior are covered in the
+  existing RedDog resident-client test owner.
+- No provider account, Gmail, LinkedIn, shell, repository mutation, HoloIndex reindex,
+  worktree, PR or merge is exercised by these tests. A real YUMORI resident cycle remains
+  a later host/runtime receipt.
+
 # Idle Automation Test Module Log
 
 ## 2026-10-07 — Self-audit report consumption
