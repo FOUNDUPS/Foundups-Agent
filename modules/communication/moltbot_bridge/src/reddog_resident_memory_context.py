@@ -147,7 +147,7 @@ def resident_breadcrumbs_from_runtime(
         )
         return tuple(
             dict(item)
-            for item in search(topic, limit)
+            for item in search(topic, limit=limit)
             if isinstance(item, Mapping)
         )
     except Exception:
