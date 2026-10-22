@@ -1,3 +1,12 @@
+## PR841 explicit one-member backend closure — 2026-10-23
+
+WSP 11/22/50/62/97. The cohesive livechat lifecycle extraction adds one actual
+import-closure member. Increase only MAX_RUNTIME_FILES 1450→1451 and require
+existing contract coverage accepting1451/rejecting1452. Preserve byte ceilings,
+digest enforcement and admission/identity boundaries. Generated set-difference
+and validation evidence belongs to refresh/841-qualification; no installed or
+native runtime claim.
+
 ## PR1638 current-main integration — 2026-10-23
 
 Integrate main4169b051, preserving PR1759's CI job, trust bootstrap, generated

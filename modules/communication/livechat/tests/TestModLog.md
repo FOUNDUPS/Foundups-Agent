@@ -1,5 +1,47 @@
 # TestModLog
 
+## 2026-10-23 - PR841 frozen local source acceptance
+
+The two documented source-bound files pass81 cases in8.24s on CPython3.12.2,
+with26 inherited utcnow warnings. Five rotation failure probes cover terminate,
+kill, wait, racing spawn and cancelled cleanup; unsettled ownership survives
+repeated handoff/redispatch. The initial snippet integration missing-import
+failure is retained separately, then repaired in the test fixture.
+Six external mutation controls fail14 intended cases; no repository mutation.
+Source hashes/commands/XML are in `refresh/841-qualification/source-freeze.json`,
+`final-source-suite.xml` and `post-extraction-negative-controls.json`.
+No live/provider/model/browser/DB or native worker outcome is claimed.
+
+## 2026-10-23 - PR841 extraction and companion inventory
+
+After exact-base WSP62 review, the original proposed test was split at real fixture/
+lifecycle boundaries into `test_live_handoff_selective_cancellation.py` and the
+approved `test_engagement_runner_lifecycle.py`. The companion reuses source-loader
+and process ownership checks for the same acceptance suite; no new runtime owner.
+This inventory update follows extraction and is a review-time bookkeeping recovery,
+not a claim of pre-authoring registration. Existing watcher/indexing/OODA tests remain.
+
+Independent probes reproduced heartbeat leakage after end-session save failure and
+lost task ownership after cleanup failure. Repairs nest heartbeat cleanup and retain
+failed unsettled owner entries, including the DAE's rotation instance reference.
+First extraction checkpoint: 75 cases passed with 16 inherited utcnow warnings;
+this historical checkpoint predates final failed-rotation probes and is not final
+frozen-source acceptance. No live/provider/model/DB effects or native RSI claim.
+
+## 2026-10-23 - PR841 test reuse admission (implementation in progress)
+
+Before authoring: read current tests README/TestModLog, the original five-case
+`test_live_handoff_selective_cancellation.py` proposal, and nearest existing
+operator watcher, browser indexing and OODA signal tests. Governed Holo remains
+unavailable (authority HEAD mismatch); exact Git/source retrieval is the degraded
+WSP_CORE path. Reuse the original PR841 test file and the existing AST-source
+fixture pattern instead of adding a test family. Replace modeled coordinator
+loops with execution of actual lifecycle/coordinator/rotation method bodies.
+External browser/provider/process/model/database effects remain denied or faked.
+Acceptance/results will be recorded after source qualification; no current pass
+or native worker admission is claimed by this inventory entry.
+
+
 ## 2026-10-22 — PR1759 integration and negative controls
 
 116 combined cases pass: 49 queue/heartbeat, 14 lifecycle, 53 shared reader.

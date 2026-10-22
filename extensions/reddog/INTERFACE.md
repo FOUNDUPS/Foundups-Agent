@@ -1,5 +1,14 @@
 # RedDog Interface
 
+## PR841 backend closure boundary
+
+The exact runtime-file ceiling is 1,451, admitting only the newly imported
+`modules/communication/livechat/src/engagement_lifecycle.py` beyond the prior
+1,450-member closure. Existing manifest validation accepts 1,451 members and
+rejects 1,452. Manifest 324 KiB, per-file 2 MiB and total 32 MiB byte bounds,
+schema, digest checks, identity and admission authority are unchanged. This
+source-contract qualification grants no installed-host or runtime authorization.
+
 ## Principal Activity Ledger candidate — PR1638
 
 `principal_activity_extension_adapter` owns local capture, context and status

@@ -1,3 +1,32 @@
+## 2026-10-23 - Close quota PR and select the live-handoff reconciliation
+
+WSP 00/10/15/22/50/60/97. #782 is squash-merged at `9105fa594` after
+independent source review and all 18 hosted checks; its exact main tree matches
+the reviewed candidate. Its alias/ignore/local-settings residual work remains
+in the existing backlog. #1360 is consolidated into #1342 with explicit native
+metadata acceptance, not declared implemented. Owner-managed #2179 is merged.
+
+Also consolidate #1659 into #1663 after independent clause accounting and
+successor work-order readback; retain its source branch and unfinished requirements.
+Refresh the same canonical audit to 43 open PRs/10 drafts and select #841 at
+16/P0 after in-flight runner ownership raises complexity to four. Require
+actual settlement before handoff; thread cancellation is not settlement. Reuse
+the clean managed checkout;
+keep one builder and an independent reviewer with separate file ownership.
+No new roadmap, scheduler, memory store, native worker or Brain-ingestion claim.
+Exact-main #782 CI39865925274 and CodeQL39865924732 both succeeded.
+The fresh 49-alert dependency audit raises #1457 to 18/P0 (read-only ownership
+check clear for a subsequent Clerk-only claim), #1338/#1354 to 15/P1 and #2081
+to 14/P1; #2081 precedes #1355.
+Existing queue and owner boundaries retain the evidence. Original vulnerable
+upgrade targets and metadata-only compatibility are not merge acceptance.
+
+#841 qualification extracts shared lifecycle functions into one livechat-local
+helper while preserving state on existing owners and reducing oversized files.
+Its one additional generated runtime member requires an explicit 1451-member
+contract and 1452-member rejection case; byte ceilings, exact digest checks and
+authenticated admission remain unchanged. Source/hosted qualification is pending.
+
 ## 2026-10-23 - PR782 quota-only reconciliation and preserved work
 
 WSP 00/10/15/22/50/60/84/97. Reuse the existing stream-checker guard and

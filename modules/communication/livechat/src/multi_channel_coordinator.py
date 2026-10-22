@@ -37,6 +37,10 @@ import asyncio
 import logging
 from typing import Optional, Dict, Any, Callable, List, Tuple, Awaitable
 
+from modules.communication.livechat.src.engagement_lifecycle import (
+    is_live_channel, settle_owned_engagements, run_owned_engagement,
+    comment_accounts, retry_verified_channel,
+)
 from modules.communication.livechat.src.breadcrumb_telemetry import get_breadcrumb_telemetry
 from modules.infrastructure.shared_utilities.youtube_channel_registry import (
     get_channels,
@@ -201,6 +205,7 @@ class MultiChannelCoordinator:
         update_engagement_status: Callable[[str, Dict[str, Any]], None],
         set_active_channel: Callable[[str], None],
         is_live_stream_pending: Callable[[], bool],
+        get_confirmed_live_channel: Optional[Callable[[], Optional[str]]] = None,
     ):
         """
         Initialize coordinator with callbacks to DAE.
@@ -223,7 +228,15 @@ class MultiChannelCoordinator:
         self.update_engagement_status = update_engagement_status
         self.set_active_channel = set_active_channel
         self.is_live_stream_pending = is_live_stream_pending
+        self.get_confirmed_live_channel = get_confirmed_live_channel or (lambda: None)
+        self._active_engagements = {}
         self._oops_backoff: Dict[str, float] = {}
+
+    # Bound functions retain state on this coordinator; no helper-owned registry.
+    _is_live_channel = is_live_channel
+    settle_channel = settle_owned_engagements
+    _run_owned_engagement = run_owned_engagement
+    _comment_accounts = comment_accounts
 
     def _oops_cooldown_seconds(self) -> int:
         return int(os.getenv("YT_OOPS_COOLDOWN_S", "300"))
@@ -499,14 +512,7 @@ class MultiChannelCoordinator:
             if self._should_skip_oops(account_name):
                 logger.warning(f"[ROTATE] [Edge] Skipping {account_name}: OOPS cooldown active")
                 continue
-            # Check live stream signal
-            try:
-                from modules.platform_integration.stream_resolver.src.live_stream_signal import get_live_channel
-                live_channel = get_live_channel()
-            except ImportError:
-                live_channel = None
-
-            if live_channel == channel_id:
+            if self._is_live_channel(channel_id):
                 logger.info(f"[SIGNAL] {account_name} has live stream - skipping comment processing")
                 continue
 
@@ -537,6 +543,8 @@ class MultiChannelCoordinator:
                         if fallback_channel:
                             logger.info(f"[ROTATE] [Edge] 🔄 Trying fallback channel: {fallback_channel}")
                             fallback_id = CHANNEL_IDS.get(fallback_channel)
+                            if self._is_live_channel(fallback_id):
+                                continue
                             fallback_url = (
                                 f"https://studio.youtube.com/channel/{fallback_id}/comments/inbox?filter={STUDIO_FILTER}"
                             )
@@ -588,13 +596,15 @@ class MultiChannelCoordinator:
                 self.set_active_channel(channel_id)
 
                 logger.info(f"[ROTATE] [Edge] 🚀 Launching comment processor for {account_name}...")
-                result = await runner.run_engagement(
+                result = await self._run_owned_engagement(runner,
                     channel_id=channel_id,
                     video_id=None,
                     max_comments=max_comments,
                     browser_port=9223,
                 )
 
+                if result and result.get("deferred"):
+                    continue
                 result = result or {}
                 stats = result.get("stats", {})
                 processed = stats.get("comments_processed", 0)
@@ -648,11 +658,14 @@ class MultiChannelCoordinator:
                         if comment_count > 0:
                             logger.info(f"[ROTATE] [Edge] {account_name} has {comment_count} comments REMAINING - re-running engagement")
                             # Re-run engagement for this channel
-                            retry_result = await runner.run_engagement(
+                            retry_result = await self._run_owned_engagement(runner,
                                 channel_id=channel_id,
                                 video_id=None,
-                                max_comments=max_comments
+                                max_comments=max_comments,
+                                browser_port=9223,
                             )
+                            if retry_result and retry_result.get("deferred"):
+                                continue
                             retry_result = retry_result or {}
                             retry_stats = retry_result.get('stats', {})
                             retry_processed = retry_stats.get('comments_processed', 0)
@@ -877,14 +890,7 @@ class MultiChannelCoordinator:
             if self._should_skip_oops(account_name):
                 logger.warning(f"[ROTATE] [Chrome] Skipping {account_name}: OOPS cooldown active")
                 continue
-            # Check live stream signal
-            try:
-                from modules.platform_integration.stream_resolver.src.live_stream_signal import get_live_channel
-                live_channel = get_live_channel()
-            except ImportError:
-                live_channel = None
-
-            if live_channel == channel_id:
+            if self._is_live_channel(channel_id):
                 logger.info(f"[SIGNAL] {account_name} has live stream - prioritizing live chat over comments")
                 continue
 
@@ -929,6 +935,8 @@ class MultiChannelCoordinator:
                         if fallback_channel:
                             logger.info(f"[ROTATE] [Chrome] 🔄 Trying fallback channel: {fallback_channel}")
                             fallback_id = CHANNEL_IDS.get(fallback_channel)
+                            if self._is_live_channel(fallback_id):
+                                continue
 
                             # Use swap_from_oops_page for fallback too (handles OOPS cascade)
                             fallback_success = await swapper.swap_from_oops_page(fallback_channel, navigate_to_comments=True)
@@ -982,12 +990,14 @@ class MultiChannelCoordinator:
                 self.log_studio_context(channel_id, f"{account_name} comment_engagement", chrome_driver)
 
                 logger.info(f"[ROTATE] [Chrome] 🚀 Launching comment processor for {account_name}...")
-                result = await runner.run_engagement(
+                result = await self._run_owned_engagement(runner,
                     channel_id=channel_id,
                     video_id=None,
                     max_comments=max_comments
                 )
 
+                if result and result.get("deferred"):
+                    continue
                 result = result or {}
                 stats = result.get('stats', {})
                 processed = stats.get('comments_processed', 0)
@@ -1049,11 +1059,13 @@ class MultiChannelCoordinator:
                             if comment_count > 0:
                                 logger.info(f"[ROTATE] {account_name} has {comment_count} comments REMAINING - re-running engagement")
                                 # Re-run engagement for this channel
-                                retry_result = await runner.run_engagement(
+                                retry_result = await self._run_owned_engagement(runner,
                                     channel_id=channel_id,
                                     video_id=None,
                                     max_comments=max_comments
                                 )
+                                if retry_result and retry_result.get("deferred"):
+                                    continue
                                 retry_result = retry_result or {}
                                 retry_stats = retry_result.get('stats', {})
                                 retry_processed = retry_stats.get('comments_processed', 0)
@@ -1285,7 +1297,7 @@ class MultiChannelCoordinator:
         except Exception as e:
             logger.warning(f"[AUDIT] Shorts coverage check failed: {e}")
 
-        for account_name, channel_id in edge_accounts:
+        for account_name, channel_id in self._comment_accounts(edge_accounts):
             is_foundups = account_name.lower() == "foundups"
             comment_count = 0
             needs_shorts = shorts_coverage_map.get(channel_id, True)  # Default: needs work
@@ -1387,7 +1399,7 @@ class MultiChannelCoordinator:
             except Exception as e:
                 logger.debug(f"[AUDIT] [Chrome] Indexing check skipped: {e}")
 
-        for account_name, channel_id in chrome_accounts:
+        for account_name, channel_id in self._comment_accounts(chrome_accounts):
             is_foundups = account_name.lower() == "foundups"
             comment_count = 0
             needs_shorts = shorts_coverage_map.get(channel_id, True)
@@ -1468,6 +1480,8 @@ class MultiChannelCoordinator:
         verify_result = None
 
         for attempt in range(1, verify_retries + 1):
+            if self._is_live_channel(channel_id):
+                return processed
             verify_result = await self.verify_studio_inbox_clear(
                 driver, channel_id, account_name, verify_timeout
             )
@@ -1480,32 +1494,10 @@ class MultiChannelCoordinator:
                     f"[VERIFY] {account_name} inbox not clear; re-running engagement "
                     f"(attempt {attempt}/{verify_retries})"
                 )
-                self.set_active_channel(channel_id)
-                self.log_studio_context(channel_id, f"{account_name} comment_engagement_retry", driver)
-
-                retry_result = await runner.run_engagement(
-                    channel_id=channel_id,
-                    video_id=None,
-                    max_comments=max_comments,
-                    browser_port=browser_port,
-                )
-
-                retry_result = retry_result or {}
-                retry_stats = retry_result.get('stats', {})
-                retry_processed = retry_stats.get('comments_processed', 0)
-
-                self.update_engagement_status(channel_id, {
-                    "all_processed": bool(retry_stats.get("all_processed", False)),
-                    "stats": retry_stats,
-                    "error": retry_result.get('error'),
-                    "updated_at": time.time(),
-                })
-
-                if retry_result.get('error'):
-                    logger.error(f"[ROTATE] {account_name} retry failed: {retry_result.get('error')}")
-                else:
-                    logger.info(f"[ROTATE] {account_name} retry complete: {retry_processed} comments processed")
-
+                retry_processed = await self._retry_verified_channel(
+                    driver, runner, channel_id, account_name, max_comments, browser_port)
+                if retry_processed is None:
+                    return processed
                 processed += retry_processed
                 continue
 
@@ -1520,6 +1512,10 @@ class MultiChannelCoordinator:
                 logger.info(f"[VERIFY] {account_name} verification inconclusive; continuing to next channel")
 
         return processed
+
+    async def _retry_verified_channel(self, *args):
+        return await retry_verified_channel(self, *args)
+
 
     async def _run_shorts_scheduling_chain(
         self,

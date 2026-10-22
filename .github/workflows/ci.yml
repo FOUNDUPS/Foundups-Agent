@@ -97,6 +97,12 @@ jobs:
             modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py
       - name: Verify stream checker global and local quota boundaries
         run: python -B modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -v
+      - name: Verify live handoff and owned worker settlement
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p no:cacheprovider -p pytest_asyncio.plugin -q --tb=short
+          modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py
+          modules/communication/livechat/tests/test_engagement_runner_lifecycle.py
 
   mcp-runtime-compatibility:
     runs-on: windows-latest
