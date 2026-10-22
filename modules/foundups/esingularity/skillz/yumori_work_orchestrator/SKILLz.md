@@ -20,6 +20,10 @@ evals:
   - capital_network_warm_path_expansion
   - no_parallel_backlog_authority
   - truth_boundary_preserved
+  - resident_memory_reconstruction
+  - autonomous_gmail_triage
+  - partner_discovery_dedup
+  - retained_rsi_improvement
 ---
 
 # YUMORI.me verified work orchestrator
@@ -64,6 +68,200 @@ Reconstruct current state before every planning/execution cycle from:
 
 Never infer "not done" from absence in chat. Never turn a stale backlog row into authority
 for an external effect.
+
+
+## Resident RSI canary — target autonomous loop
+
+YUMORI is the first FoundUp campaign workload for measuring whether the existing
+OpenClaw / RedDog / WRE stack can maintain a real project across days. Do not create a
+separate YUMORI daemon, scheduler, memory database or agent framework. Reuse the
+resident queue/control loop, registered Skillz, FoundUp scope `esingularity_001`,
+existing provider adapters and existing memory owners.
+
+The experiment asks two linked questions:
+
+1. **Can compute save the onsen?** — can a demand-led regional compute project create
+   enough technical, financial and institutional value to preserve useful public assets?
+2. **Can the governed AI system launch YUMORI?** — can it repeatedly recover project
+   state, identify the current bottleneck, choose a defensible action, execute within
+   authority, verify the real outcome, learn from it and improve the next cycle?
+
+### Memory reconstruction before every resident cycle
+
+A new cycle must resume from evidence, not from the previous chat transcript. Compose
+the existing memory surfaces; never collapse them into one new store:
+
+1. current repository / WSP / HoloIndex truth;
+2. authoritative work state and the existing operational FoundUp Memex snapshot supply;
+3. Brain for durable consolidated understanding and Breadcrumbs for recent episodic /
+   operational continuity;
+4. Gmail / LinkedIn / other providers as transaction truth, plus native correspondence
+   state and provider watermarks;
+5. Contacts, Correspondence Routing, Email Log, Action Queue, capital and LinkedIn
+   relationship projections;
+6. YUMORI Moshpit for material campaign history and 0102 Moshpit for agent lessons;
+7. WRE PatternMemory / verified outcomes for exact-skill execution results and later-use
+   learning evidence.
+
+A summary is never allowed to overwrite contradictory provider or primary-source
+evidence. Cross-FoundUp records fail closed.
+
+### Resident cycle contract
+
+Each admitted cycle performs this sequence:
+
+```text
+RECOVER
+  -> observe new provider / official / project evidence since the last watermark
+  -> reconcile DONE / WAIT / BLOCKED / ACTIVE state
+  -> identify the highest-leverage current project blocker
+  -> generate at least one competing action when a real alternative exists
+  -> choose with WSP 15 + deadline / irreversibility / dependency leverage
+  -> execute the highest safe admitted action
+  -> independently verify the provider / artifact / source outcome
+  -> write the owning memory receipts and projections
+  -> evaluate whether any procedure or Skillz lesson is justified
+  -> carry only verified open state into the next cycle
+```
+
+The agent is expected to decide what work is needed. It does not wait for 012 to restate
+known tasks. When evidence is insufficient, acquiring the missing evidence is itself a
+candidate action.
+
+### Project objective hierarchy
+
+Planning should reduce blockers toward a launchable three-site program rather than
+maximize activity. Current categories include:
+
+- lawful City / asset / PPP route;
+- Hanyu-first grid, fiber, building and engineering feasibility;
+- credible operator / EPC / data-center / utility / research partner;
+- demand and offtake evidence;
+- finance / capital stack and grant eligibility;
+- organizational readiness and required human/physical acts;
+- targeted public, community and media work only when it advances one of the above.
+
+The priority can change when evidence changes. Do not keep a task alive merely because
+it was previously high priority.
+
+### Autonomous effect ladder
+
+Autonomy is graduated by effect, not by confidence language:
+
+| Level | Effect class | Resident behavior |
+|---|---|---|
+| A0 | Read/research/reconcile | Autonomous when the connected source is authorized. |
+| A1 | Private runtime memory / queue / analysis writeback | Autonomous through the existing owning store and receipt contract. |
+| A2 | Draft, candidate record, decision brief, proposed reply | Autonomous; still not proof of delivery or external action. |
+| A3 | Email send, LinkedIn connect/DM, external publication | Target autonomous state, but only through the authenticated provider-effect owner with fresh recipient/audience preflight and post-effect readback. |
+| A4 | Government filing, signature, financial commitment, contract, irreversible physical/public action | Requires the narrower owning authority and any required 012 physical/legal act. |
+
+**Current truth boundary:** `REDDOG_AUTO` Gmail mutation remains draft/HOLD-only until
+the #1779 host deployment closure is evidenced: direct/alternate mutation is denied,
+the authenticated service owns provider credentials/reconciliation/private state, and
+the service-owned sender boundary is the only admitted mutation route. The canary should
+treat closing that engineering/deployment gate as project-system work; it must not route
+around it.
+
+## Autonomous Gmail operating loop
+
+Gmail should become an autonomous project sensor and response surface, not a periodic
+full-mailbox replay.
+
+1. Resume from the correspondence provider watermark and search only the required delta
+   plus any exact thread needed for context.
+2. Reconcile inbound and Sent state before deciding that a message is unanswered.
+3. Classify each material inbound item: new evidence, answer, refusal, routing change,
+   deadline, meeting/access event, partner lead, funding/procedure change, or noise.
+4. Build the current Correspondence State Capsule and decide one of:
+   `RESPOND`, `RESEARCH_MORE`, `ROUTE`, `WAIT`, `CLOSE`, `IGNORE`.
+5. Before recipient-finalized content, validate the audience: exact person/organization,
+   current role, relationship/ask history, route consent, sender identity, language,
+   purpose, reading burden, attachments/links and claim provenance.
+6. Before every send-capable attempt, run `reddog_recipient_preflight`, duplicate /
+   follow-up suppression and the service-owned sender boundary. Cached approval never
+   authorizes a later transaction.
+7. After an allowed send, read back provider From / To / CC / BCC, subject/thread and
+   provider receipt; update correspondence state, Action Queue and the next observation
+   deadline.
+8. Track outcome separately from transmission: reply, substantive answer, meeting,
+   introduction, refusal, no response by deadline, or unknown.
+
+### Anti-spam / audience rules
+
+- No mass blast.
+- Prefer one high-fit recipient or a verified warm introduction over a broad list.
+- Do not send a third follow-up without a material new delta or explicit owning policy.
+- A new employee at the same organization is not automatically a new outreach target.
+- Never guess private email patterns or infer support from discoverability.
+- If the recipient is wrong, stale, duplicated, route-closed or the message does not
+  materially fit that audience, hold and repair before any external effect.
+
+## Autonomous partner discovery and unblocking
+
+When the project is blocked on a missing operator, technical partner, funder, public
+counterparty or adviser, the resident cycle should search independently rather than
+waiting for a named lead from 012.
+
+For each blocker:
+
+1. define the capability actually missing;
+2. research organizations and people with current direct evidence of that capability,
+   prioritizing Japan/Fukui/APAC precedent where relevant;
+3. search existing Contacts, Gmail and LinkedIn before creating a candidate;
+4. verify current role/company and distinguish direct precedent from analogy;
+5. identify warm first-degree or introduction paths when provider-visible;
+6. record the candidate only in the existing CONTACTS / capital / LinkedIn surfaces;
+7. rank candidates by capability fit, geographic/reputational relevance, warm path,
+   decision authority, timing and outreach cost;
+8. prepare the smallest target-specific ask: fit check, technical diligence, introduction,
+   site discussion, operator discussion, financing discussion or non-binding interest;
+9. reconcile all prior outreach before any new message.
+
+A partner search that produces many names but no verified next action is not success.
+
+## RSI learning contract
+
+The canary is not RSI merely because it runs repeatedly.
+
+For every material cycle preserve:
+
+- source/memory snapshot identities and provider watermarks;
+- selected blocker, alternatives considered and WSP 15 decision;
+- exact Skillz/instruction digest used;
+- action/effect receipts and independent verification;
+- outcome observation deadline and later outcome;
+- human intervention count and reason;
+- model/provider/cost/latency evidence when available;
+- accepted, rejected and unresolved learning candidates.
+
+A repeated failure or near-miss may nominate a Skillz/prompt/test/code repair. The
+candidate must not rewrite its own oracle or production Skillz. Use the existing
+WRE/PatternMemory/verified-outcome path, independent review, held-out/regression
+evidence and rollback/promotion gates.
+
+**Retained improvement test:** a change counts as RSI benefit only after a later,
+unseen YUMORI cycle uses the promoted version and performs better against the same
+objective metric or avoids the verified prior failure without introducing a new
+regression. Structural fidelity or a non-empty model answer is not enough.
+
+### Canary metrics
+
+Track at minimum:
+
+- open blockers reduced / new blockers discovered with evidence;
+- provider deltas reconciled without replay;
+- duplicate or wrong-audience actions prevented;
+- response/outcome latency;
+- verified partner candidates that reach a concrete next action;
+- external effects attempted / admitted / blocked / indeterminate;
+- 012 interventions required and why;
+- cost per verified useful outcome;
+- Skillz candidates proposed / rejected / promoted;
+- later-use retained improvements and successful rollback tests.
+
+The desired trend is fewer avoidable 012 interventions and fewer repeated failures while
+truth-boundary violations remain zero.
 
 ## Conversational intake
 
