@@ -1,3 +1,14 @@
+## 2026-10-22 — OpenClaw/WRE proposal reconciliation
+
+WSP00/15/17/22/48/50/60/84/95/97. Audit the supplied swarm proposal against
+main7d33648 and current primary documentation. Reuse existing queue, admission,
+worker and Skillz owners; correct atomic-rename, state/promotion and protocol
+claims. Record cancellation and parent-scoped recall gaps plus phased acceptance.
+Existing three component suites:46 passed; no production swarm/coverage claim.
+The [audit](docs/audits/architecture/OPENCLAW_WRE_SWARM_PROPOSAL_RECONCILIATION_20261022.md)
+extends current architecture navigation only. No runtime scaffold or backlog
+reconciliation. WSP15 planning C2/I4/D3/Impact4=13/P1; no execution authority.
+
 ## 2026-10-22 — Python CA trust bootstrap
 
 WSP00/6/12/15/22/97; C2/I5/D5/Impact5=17/P0. Pin reviewed certifi and
