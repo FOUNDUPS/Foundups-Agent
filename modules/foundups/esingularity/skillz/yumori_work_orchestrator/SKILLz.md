@@ -128,6 +128,28 @@ The agent is expected to decide what work is needed. It does not wait for 012 to
 known tasks. When evidence is insufficient, acquiring the missing evidence is itself a
 candidate action.
 
+
+### Model and research workers
+
+Model brands are replaceable leaf intelligence. The canary objective, authority,
+memory lineage and acceptance oracle stay in FoundUps.
+
+- Use the currently qualified local/provider route for the first resident proof.
+- OpenRouter / Fusion is a candidate advisory intelligence layer only after its live
+  client/runtime binding, budget controls and privacy/redaction gate are independently
+  qualified. Raw private Gmail bodies, private contact graphs, credentials and unrestricted
+  Memex context must not be fanned out to external panels.
+- Model-panel output may propose alternatives, summaries, partner hypotheses or message
+  drafts; it cannot authorize provider effects or certify its own correctness.
+- Reuse AI Gateway model AutoResearch for bounded model-selection comparisons when its
+  benchmark/verifier contract fits the task.
+- Reuse WRE AutoResearcher only for the bounded configuration/compute-ROI target it
+  actually evaluates. It is execution-feedback infrastructure, not a generic judge of
+  YUMORI partner quality, correspondence quality or campaign success.
+- YUMORI learning uses the resident canary metrics and independent verified outcomes as
+  its task-specific oracle. A research worker may nominate a change but may not alter
+  that oracle to make its own candidate pass.
+
 ### Project objective hierarchy
 
 Planning should reduce blockers toward a launchable three-site program rather than
