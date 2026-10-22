@@ -73,7 +73,8 @@ def _valid_resident_reconcile_claim(claim: object) -> bool:
         and claim.cadence == "daily"
         and bool(claim.schedule_id)
         and bool(claim.execution_id)
-        and bool(claim.window_key)
+        and bool(claim.window_start)
+        and bool(claim.window_end)
         and bool(claim.token)
     )
 
