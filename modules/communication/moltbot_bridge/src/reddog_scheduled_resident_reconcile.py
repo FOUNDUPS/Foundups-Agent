@@ -65,7 +65,8 @@ def run_scheduled_resident_reconcile(
         return _result(False, claim, reasons=(reason,))
 
     grounded, reason = _ground(
-        repo_root, work_focus, foundup_id, principal, claim
+        repo_root, work_focus, foundup_id, principal, claim,
+        grounding_service=grounding_service,
     )
     if reason:
         return _result(False, claim, reasons=(reason,))
@@ -74,7 +75,7 @@ def run_scheduled_resident_reconcile(
         repo_root=repo_root, principal=principal, scope=scope,
         claim=claim, work_focus=work_focus, grounded=grounded,
         memory=memory, bindings=bindings, env=env,
-        client_factory=client_factory, grounding_service=grounding_service,
+        client_factory=client_factory,
     )
     if reason:
         return _result(False, claim, reasons=(reason,))
@@ -188,9 +189,7 @@ def _invoke_client(
     claim: Any, work_focus: str, grounded: Any, memory: Mapping[str, Any],
     bindings: tuple[Mapping[str, Any], Mapping[str, Any]],
     env: Mapping[str, str], client_factory: Any,
-    grounding_service: Any,
 ) -> tuple[Any, str, str]:
-    del grounding_service
     request_id = _request_id(
         claim, str(grounded.intent.get("foundup_id") or scope[0]),
         principal, work_focus,
