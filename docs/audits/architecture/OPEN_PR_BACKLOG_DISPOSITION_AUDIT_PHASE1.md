@@ -102,8 +102,8 @@ collection boundary and existing optional crypto fallback do not allow effects.
 Four broader test failures and the separate timeout-child defect remain.
 Exact-main CI39879980028 and CodeQL39879978431 succeeded.
 
-Re-observe and select **#1354, C3/I4/D4/Impact4=15/P1**. Its original head is
-unchanged and no competing Acoustic writer was found. Higher-score security
+Re-observe and select **#1354, C3/I4/D4/Impact4=15/P1**. Its original one-pin proposal is
+retained in the repair ancestry; no competing Acoustic writer was found. Higher-score security
 work retains its active owner; broad Moshpit/public-chat proposals need protected
 website/security scope reconciliation. The two current high Gunicorn alerts
 specify 22.0.0 as patched. Reuse this checkout and existing hosted Linux CI to
@@ -111,6 +111,17 @@ qualify the actual parser, checked-in factory configuration, bounded loopback
 server and full owned-process closure. Repair the existing module-requirements
 install path; preserve strict defaults and unrelated pins. No new service,
 scheduler, memory store or native worker execution is claimed.
+
+**#1354 HOSTED_VALIDATED_PUBLICATION_PENDING:** source head
+`3bc5471a3a2255923be30c4764d1f7d21d67b1f5` passed all 20 checks.
+Independent artifact review of CI39881377042 accepted the six native server
+cases and seven adapter cases on Ubuntu Python 3.11.17/3.12.15. Baseline 21.2
+passed valid parsing and failed exactly the protected framing assertion.
+Full dependency installations, pip checks, config/source bindings and normal
+master/worker closure passed. No unknown/duplicate effects or forced kill.
+The existing receipt `pr1354-independent-hosted-review.json` binds this result.
+Final documentation changes require fresh head checks and exact-main closure.
+This is server qualification, not admitted AI-worker execution or production RSI.
 
 ### Refreshed dependency priority evidence
 
@@ -222,7 +233,7 @@ Every execution requires current source, checks and authority.
 | [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
 | [#1478](https://github.com/FOUNDUPS/Foundups-Agent/pull/1478) `5f8c73453559625500f3023f23331e5e44020712` | 3/4/4/4=15 P1 | Comment grounding owner/root: STILL_CURRENT / DRAFT | Refresh; run context/tier/source-attribution tests without posting. |
-| [#1354](https://github.com/FOUNDUPS/Foundups-Agent/pull/1354) `4effe1e2508f5a4c1a56a50a303e3406742ca2b4` | 3/4/4/4=15 P1 | Dependency lane/root: ACTIVE_LINUX_QUALIFICATION | Resolve full set and exercise actual supported Linux WSGI/server/parser behavior for reported high alerts; Windows imports are insufficient. |
+| [#1354](https://github.com/FOUNDUPS/Foundups-Agent/pull/1354) `4effe1e2508f5a4c1a56a50a303e3406742ca2b4` | 3/4/4/4=15 P1 | Dependency lane/root: HOSTED_VALIDATED_PUBLICATION_PENDING | Independent Linux artifact acceptance complete on both supported runtimes; pass final-head checks, squash and verify exact main. |
 | [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
 | [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | With #2179 merged, reconcile the single successor carrying #1659 identity/index/image/correction/privacy clauses; preserve pre-compose identity, draft exception, receipts and current owner precedence. |

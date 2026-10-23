@@ -74,3 +74,21 @@ and 3.12 while preserving its 15-minute limit and original deny-all adapter step
 Gunicorn 22.0.0 installation, Linux parser/server execution and hosted artifact
 review remain pending. Existing four broader failures and the separate FFmpeg child-timeout
 obligation remain explicit; neither is xfailed or repaired in this slice.
+
+
+### PR1354 independently verified Linux outcome (2026-10-23)
+
+Supersedes the pending implementation checkpoint above. CI39881377042 at
+`3bc5471a3a2255923be30c4764d1f7d21d67b1f5` passed all six native cases
+and seven adapter cases on Python 3.11.17 and 3.12.15, with no skips/errors.
+The old 21.2.0 overlay passed valid parsing and failed the protected framing
+assertion with `InvalidHeader not raised`, rather than an import/setup error.
+Full installs, pinned dependencies and pip checks passed. Independent artifact
+review verified exact source/config bindings, three loopback requests, one
+master and worker, exit zero, no survivors and no forced cleanup. Unknown or
+duplicate effects were absent. All 20 head checks succeeded. Final publication
+and main checks remain separate from this observed source checkpoint.
+
+Evidence: `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/`
+`pr1354-independent-hosted-review.json`. The four broader failures and FFmpeg
+timeout-child obligation remain open. No production or native AI-worker claim.

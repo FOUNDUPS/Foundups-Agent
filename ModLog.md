@@ -1,3 +1,14 @@
+## 2026-10-23 - Independently accept the Acoustic Linux server qualification
+
+WSP 00/10/15/22/50/84/97. #1354 head `3bc5471a3` passed all 20 checks.
+Independent artifact review accepted six native Gunicorn tests and seven
+adapter tests on each of Python 3.11.17 and 3.12.15, the precise old-version
+failure control, complete dependency provenance and clean owned process exit.
+The existing module logs now distinguish this observed Linux result from the
+earlier preparation checkpoint. Final-head publication/main gates remain;
+production deployment and native RSI remain unproved. Existing residual defects
+and protected worktrees are preserved. See the canonical PR disposition audit.
+
 ## 2026-10-23 - Close downloader PR and qualify the existing Linux server path
 
 WSP 00/10/15/22/50/84/97. #1338 is squash-merged at `8068d6f78` after all
