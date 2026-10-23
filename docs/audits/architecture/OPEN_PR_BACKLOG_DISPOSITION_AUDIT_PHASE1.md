@@ -1,6 +1,6 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 35 open PRs, eight drafts. #2181 and #2081 are verified on main; #2182/#2183 merged through their separate owner. #1663 is verified on main with independent tree/check readback. #1645 is verified on main; the shared #1648 transport slice is selected at 15/P1. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-23 JST: 35 open PRs, eight drafts. #2181, #2081, #1663 and #1645 are verified on main. #2182/#2183/#2184/#2186 merged through their separate owner. The shared #1648 transport slice is verified on main through #2185; original #1648 remains open. Select #1356 at 14/P1 for the next bounded qualification. Historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-23
 
@@ -50,27 +50,52 @@ The central skill registry remains unchanged: WSP95 requires it, while current F
 would treat its growth as size debt. This is a source-derived constraint, not
 an observed hosted failure. Do not add an exemption or hide growth by packing.
 
-**Selected: #1648 shared transport slice, C3/I4/D4/Impact4=15/P1.**
-The full original proposal remains 16/P0 and open for ingress/spend/reader
-contracts. Reuse its three existing Python callers: suppress credential repr,
-reject redirects and withhold upstream transport diagnostics. Preserve current
-K3 routing, redaction, typed local authorization and campaign budgets. Execute
-synthetic offline regressions, independent fault controls and generated-binding
-checks before a focused main integration; do not leave a qualified repair
-stranded behind the original 93-file product proposal. Its carried-forward
-requirements remain open. Incoming #2184's separately owned Kids implementation
-is preserved; canonical registry regeneration retains both new test rows.
-No live provider call or native admission is implied. Focused [PR2185](https://github.com/FOUNDUPS/Foundups-Agent/pull/2185)
-publishes this slice. Its first head `239469c79` passed the 130-case transport
-and 87-case projection workflows, but CI39920499101 rejected one new workflow
-fingerprint. Independent and coordinator review recomputed all nine public
-source hashes on that line; one exact reviewed-finding binding covers the tree
-and original-commit occurrences. Preserve the failed run and require fresh
-blocking checks. Runtime, workflow and scanner policy remain unchanged.
-#1356 and #1792 remain 14/P1; #1356's
-read-only prequalification identifies the Web3/eth-account graph and middleware
-migration but does not count as executed tests. Protected #2168/#2178 retain
-their owners. Re-score after closure; draft status itself is not a blocker.
+**#2185 MERGED_VERIFIED_MAIN — #1648 shared transport slice, 15/P1:**
+squash `f2e9408ba950a80fe549887db39289e6aff04f27` from reviewed head
+`a5c4a2b3a70d379d3a76c3c4135d1beae5947b50`. The complete reviewed tree
+`7d799ed1f103354e9fdf4c30854189d89e2505ae` matches main. All 22 final-head
+and 20 exact-main checks passed: CI39922573002, CodeQL39922572451,
+transport39922572936 and projection39922572842. Independent main readback
+confirms 130 transport cases and 87 projection cases, exact source bindings,
+zero skips/unexpected effects and zero unreviewed security findings.
+The first head `239469c79` failed CI39920499101 on one new workflow fingerprint;
+independent and coordinator review recomputed its nine public source hashes
+before adding one exact binding. Preserve the failed run. Scanner policy and
+runtime/workflow source were unchanged by that repair. Incoming #2184's Kids
+files and both new registry rows were preserved. The completed remote branch
+is verified absent; the owned checkout and immutable source remain recoverable.
+[Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2185#issuecomment-6360699305).
+Original #1648 remains 16/P0 and open for public ingress/spend/reader, skill and
+Gmail-policy obligations; its stacked base branch remains. Its
+[completion/carry-forward record](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6360700203)
+prevents recreating the merged repair. No live provider call, native author
+admission, deployment or completed RSI loop is established.
+
+**Selected: #1356, C4/I3/D4/Impact3=14/P1.** This ties #1792; the latter's
+45-path proposal still needs protected product/skill/registry reconciliation.
+#1356 is a bounded existing dependency proposal. The original Web3-only update
+fails full resolution against eth-account 0.10.0. Web3 7.15.0 with its declared
+minimum eth-account 0.13.6 resolves to 76 binary packages; hash-locked installation
+and pip check pass in the reused Windows environment. This is dependency
+evidence. The repaired actual layer-zero middleware passes the 18-case guarded
+Windows selection in both author and independent runs. Fixed independent controls
+reject the old import, removed/wrong-layer middleware, caught DNS effects and
+incomplete test inventory. Existing assertions remain unchanged and simulated
+logging remains simulation. The Windows adaptations and rejected harness attempts
+are retained in the module TestModLog; no OS-sandbox claim. Fresh hosted Python
+3.11/3.12 acceptance, publication and main readback remain due. Protected
+#2168/#2178 and product owners retain their lanes. Re-score after closure;
+draft status itself is not a blocker.
+
+#1356's first published head `1b01ce24` passes both security scans and CodeQL,
+but fails both hosted CI runs 39929152950/39929152969. Each Python 3.11/3.12
+artifact has 16/18 passes, including all six Web3 cases; denied system MIME and
+CPU-inventory reads prevent acceptance and the later Gunicorn step does not run.
+Use deterministic built-in MIME data and disabled AVX in the test process,
+retaining every assertion and effect boundary. Preserve those failures and
+require fresh hosted checks. Concurrent #2186 advances main to `f6c399b1`:
+its four Markdown paths merge without overlap and remain byte/mode-identical;
+this lane does not claim their implementation or runtime validation.
 
 **#2182 MERGED_BY_OWNER:** main advanced to
 `a048c24071e1a651b161025ba3342f14f3047280` while #1663's prior candidate
@@ -79,7 +104,8 @@ EDUIT Kids Episodes implementation; this lane does not claim its implementation
 or independent runtime acceptance. The only overlap is the extension ModLog:
 retain the full incoming log plus the 22-line contact-policy entry, then require
 fresh candidate checks. #2102 must reconcile the newly published EDuIT/registry
-state. Historical post-#2182 observation: 37 PRs remained open; the current post-#1663 count above is 36.
+state. Historical post-#2182 observation: 37 PRs remained open; the subsequent
+post-#1663 snapshot had 36. The current snapshot is recorded at the top.
 
 Further #1645 accounting resolves the old manifest overlap: that blob already
 matches main. Preserve current website routes/copy and both new Kids skill keys.

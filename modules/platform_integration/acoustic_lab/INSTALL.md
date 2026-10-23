@@ -50,6 +50,28 @@ pip install -r requirements.txt
 - **Pillow** - Image processing
 - **Requests** - HTTP client for IP geofencing
 
+### Web3 compatibility (2026-10-23; hosted qualification pending)
+
+The pair is `web3==7.15.0` with `eth-account==0.13.6`, the minimum
+eth-account version declared by that Web3 release. Web3 7 uses
+`ExtraDataToPOAMiddleware` at layer zero instead of `geth_poa_middleware`.
+All other direct pins are retained. Public wheel metadata and middleware source
+have been inspected. Full requirements resolve to 76 binary packages, and
+hash-locked installation plus `pip check` pass in the reused Windows Python
+3.12.10 environment. Seven preexisting orphan distributions remain; an in-place
+install does not prove a fresh environment. Author and independent runs each
+pass the same 18 guarded cases. Independent fault controls reject incorrect
+middleware, an attempted hidden effect and incomplete test inventory. See
+[TestModLog](./tests/TestModLog.md) for Windows adaptations and retained failed
+attempts. Fresh hosted Python 3.11/3.12 acceptance is a separate remaining gate.
+
+The existing logger still returns `simulated_...` identifiers: `_real_logging`
+delegates to simulation even after a successful connection. `verify_log` returns
+educational simulation metadata, not an authenticated chain receipt. The
+existing-file tests use real Web3 and an in-memory provider under an outer effect
+guard; no RPC, key creation, signing, transaction submission or deployment is
+required. Do not use the operational examples below as qualification evidence.
+
 ### yt-dlp qualification (2026-10-23)
 
 The manifest pins bare `yt-dlp==2026.7.4`, without `[default]` or other extras. This follows the [upstream security release](https://github.com/yt-dlp/yt-dlp/releases/tag/2026.07.04); every other direct pin remains unchanged. Fresh full baseline/candidate installs and `pip check` passed on Windows AMD64 CPython 3.12.10. The target's fresh dependency graph omits brotli, mutagen and pycryptodomex; an in-place requirements install does not uninstall old packages. Pillow 13, Librosa 0.10.2 and the absence of a setuptools runtime requirement are retained.

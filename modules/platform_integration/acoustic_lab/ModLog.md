@@ -1,5 +1,49 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-10-23: Qualify the bounded PR1356 Web3 compatibility repair
+
+- WSP 00/15/22/50/97; scope is the existing Web3 7.15.0 dependency proposal,
+  eth-account 0.13.6 declared minimum, and the existing layer-zero middleware
+  import/injection. All other direct pins and transaction behavior are retained.
+- Public wheel hashes, selected RECORD entries and actual middleware/provider
+  source support the repair. Six test methods extend the existing
+  acoustic processor test file, preserving every prior test/fixture AST. They
+  use real Web3/default middleware and a controlled JSONBaseProvider, including
+  missing/wrong-layer rejection controls and no unexpected provider methods.
+- Full requirements resolve to 76 binary packages. Hash-locked installation and
+  `pip check` pass in the reused Windows CPython 3.12.10 environment; seven old
+  orphan distributions remain alongside pip. The original Web3-only proposal
+  fails resolution against eth-account 0.10.0. No fresh-environment claim.
+- Author and independent Windows runs each pass exactly 18 selected cases,
+  with no skips, unknown effects or source changes. Independent in-memory
+  controls reject the old import, removed injection and wrong middleware layer.
+  A caught DNS attempt and one lost collection ID fail the outer gate even
+  though the remaining tests pass. These runs are separate evidence, not an
+  additive test count. Hosted Python 3.11/3.12 acceptance remains pending.
+- The Windows replay suppresses only processor-name inventory and yt-dlp
+  console initialization, omits a proven-absent interpreter ZIP search entry,
+  and permits the exact hash-bound harness source for linecache. These are
+  disclosed harness adaptations, not Linux or OS-sandbox acceptance. Preserve
+  the rejected setup/guard attempts. The four broader historical failures were
+  not rerun; existing X/multipart assertions and native Gunicorn checks remain.
+- Correct current logging documentation: `_real_logging` still simulates, and
+  simulated `verify_log` output is not chain authentication. Raw initialization
+  exception printing and permissive simulated verification remain unchanged;
+  no live RPC, account, transaction, deployment or native AI claim is made.
+- Evidence in the existing external reconciliation `refresh/` directory:
+  `pr1356-approved-install-execution-20261023.json`,
+  `pr1356-author-positive-20261023.json` and
+  `pr1356-independent-execution-review-20261023.json`. Fresh hosted acceptance,
+  publication and main verification are distinct remaining gates.
+- First hosted head `1b01ce24` failed CI39929152950/39929152969 in both Python
+  versions: each 16/18 passed, including all six Web3 cases. System MIME reads
+  and Numba's CPU probe were denied; native Gunicorn did not run. Retain the
+  failures and configure built-in MIME data plus disabled AVX for the Linux
+  harness only. Application/tests and effect rules remain unchanged; fresh
+  hosted acceptance is still required. Incoming #2186's four documentation
+  paths are preserved from main `f6c399b1` without overlap or binding changes.
+
+
 ## 2026-10-23: Preserve multipart rejection for PR2081 Werkzeug update
 
 - WSP 00/15/22/50/97; C3/I4/D4/Impact4=15/P1 after controlled reproduction.

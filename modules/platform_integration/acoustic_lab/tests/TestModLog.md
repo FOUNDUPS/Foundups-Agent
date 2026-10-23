@@ -1,5 +1,77 @@
 # Acoustic Lab TestModLog
 
+## 2026-10-23 - PR1356 Web3 compatibility inventory before edits
+
+Preserve all seven existing processor/audio-library tests and their fixtures,
+the 12 selected X/multipart cases and six native Gunicorn cases. The broader
+33-case baseline retains four documented failures and six Windows-only skips.
+Read the actual Web3 7.15.0 and eth-account 0.13.6 wheels before extending the
+existing processor test file with six logical compatibility cases. Independent
+source review confirms the real default middleware, controlled JSONBaseProvider,
+both block-query routes and missing/wrong-layer rejection controls.
+
+The original Web3-only proposal fails full dependency resolution because its
+eth-account 0.10.0 pin violates Web3's minimum 0.13.6. The repaired full graph
+resolves to 76 binary packages. Hash-locked installation and pip check pass in
+the reused Windows environment; seven preexisting orphan distributions remain
+alongside pip. This is not a fresh environment or application test result.
+Record normal-import guarded execution, fault controls and fresh Linux 3.11/3.12
+hosted acceptance after they run. No RPC, wallet, transaction or live service
+effect is admitted. Existing simulated logging remains simulation.
+
+### PR1356 local qualification results
+
+- Exactly 18 selected cases pass in both the author and independent Windows
+  runs: seven existing X cases, five existing multipart cases and six new Web3
+  cases. No failures, errors, skips, unknown effects or duplicate capability
+  probes; exact collected/passed/JUnit identities agree. The author run took
+  28.797 seconds. Keep the two runs separate rather than adding denominators.
+- Actual installed Web3, default middleware and JSONBaseProvider execute with
+  synthetic replies. Both block-query routes transform oversized PoA extraData
+  only with the inner middleware; default and outer-layer controls reject it.
+  Connection fallback, network-stat conversions, canonical hashing and continued
+  simulated logging are checked. No provider call beyond the declared sequence
+  is permitted, including an attempt swallowed by application error handling.
+- Independent in-memory controls retain disk source and installed packages:
+  the old import yields six intended availability failures; removed injection
+  and outer-layer injection each yield two intended failures. A caught DNS
+  attempt leaves 18 passing tests but fails the guard; losing one collection
+  identity leaves 17 passing tests but fails inventory acceptance.
+- The Windows harness uses public SYSTEMROOT/WINDIR inventory, disables the
+  processor-name probe and yt-dlp's console-mode setup, excludes only a proven
+  absent interpreter ZIP path and allows linecache to read the exact frozen
+  harness. Fifteen console setup calls are suppressed, not exercised. File,
+  SQLite, account-configuration, network and process guards remain active.
+  These are Python checks, not OS confinement or hosted Linux acceptance.
+- Preserve the first Windows initialization/readback failure and subsequent
+  guard-rejected 18-pass attempts. They prompted narrow harness corrections,
+  not application or acceptance-criteria changes. All 13 observed source files
+  remained unchanged; independent controls also preserve 84 distribution
+  metadata bindings. Four broader historical failures were not rerun here.
+- Receipts: `pr1356-author-positive-20261023.json` and
+  `pr1356-independent-execution-review-20261023.json` in the existing external
+  reconciliation refresh directory. The existing CI selection is being extended
+  to these same 18 cases; the six native Gunicorn cases remain a separate gate.
+  Fresh hosted Python 3.11/3.12, publication and main readback remain pending.
+
+### PR1356 first hosted failure and bounded harness correction
+
+At published head `1b01ce24b45d4df1980e636064984376397ca8fd`, both
+pull-request CI runs 39929152950 and 39929152969 failed the adapter gate on
+Python 3.11 and 3.12. Each artifact records 18 collected and 16 passed, including
+all six Web3 cases. The two multipart failures attempted system MIME-file reads;
+Numba's CPU capability probe also attempted `/proc/cpuinfo`. The guard correctly
+rejected those effects. The following native Gunicorn step did not execute.
+Do not count these runs as hosted acceptance or add their case denominators.
+
+Configure only this Linux test process with `NUMBA_ENABLE_AVX=0` and initialize
+stdlib mimetypes from its built-in table, asserting the expected WAV type. Keep
+system MIME reads denied, leave application/tests unchanged, and report these
+configurations explicitly. This qualifies neither host MIME configuration nor
+AVX performance. Independent source review and fresh exact-head hosted execution
+are required; no filesystem allowlist, guard, test selection or assertion is
+weakened to accept the earlier runs.
+
 ## 2026-10-23 - PR2081 multipart boundary inventory before edits
 
 Read the existing eight web/geofencing cases, seven X-adapter cases, six

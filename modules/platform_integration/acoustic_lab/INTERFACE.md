@@ -2,6 +2,23 @@
 
 ## Public API Definition
 
+### Ethereum logger: current educational contract
+
+`EthereumLogger` uses Web3 for connection and network-stat queries when available.
+The Web3 7.15.0 / eth-account 0.13.6 pair uses
+`ExtraDataToPOAMiddleware` at layer zero. Offline Windows compatibility checks
+pass; fresh hosted Python 3.11/3.12 acceptance remains pending.
+Import, initialization or connection failure retains simulation fallback.
+`log_acoustic_analysis()` still returns `simulated_...` because `_real_logging`
+also delegates to simulation. The illustrative `ethereum_hash` fields below
+are not evidence of submitted transactions or chain receipts.
+
+`verify_log()` returns educational metadata for simulated identifiers, and for
+any supplied value when `simulate_only` is true. Otherwise it returns `None`;
+there is no chain-authenticity verification. Initialization currently prints
+raw exception text. This compatibility slice preserves these limitations and
+does not qualify real-provider diagnostics, keys, signing or transaction access.
+
 ### Web Application Interface
 
 #### `create_app() -> Flask`
@@ -230,14 +247,13 @@ Raised when request originates outside allowed geographic area.
 - Automatic memory cleanup after processing
 - IP-based geographic restrictions
 - Synthetic data only (no real audio recordings)
-- Ethereum testnet logging for educational verification
+- Educational Ethereum logging simulation; no authenticated chain receipt
 
 ## Testing
 
 Unit tests available in `tests/` directory:
-- `test_acoustic_processor.py`: Audio processing validation
-- `test_triangulation_engine.py`: Location calculation verification
-- `test_audio_library.py`: Fingerprint matching accuracy
+- `test_acoustic_processor.py`: Existing audio/library tests and six offline
+  Web3 compatibility cases (Windows passed; hosted qualification pending)
 - `test_web_app.py`: API endpoint functionality
 
 Run tests with: `python -m pytest tests/`

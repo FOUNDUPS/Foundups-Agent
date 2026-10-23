@@ -268,7 +268,7 @@ jobs:
           "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
           "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated install --index-url https://pypi.org/simple --report "$RUNNER_TEMP/acoustic-target-install.json" -r modules/platform_integration/acoustic_lab/requirements.txt
           "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated check
-      - name: Verify controlled X adapter and multipart upload boundaries
+      - name: Verify controlled X adapter, multipart and Web3 boundaries
         shell: bash
         run: |
           set -euo pipefail
@@ -281,25 +281,156 @@ jobs:
             PYCRYPTODOME_DISABLE_GMP=1 \
             NUMBA_CACHE_DIR="$RUNNER_TEMP/acoustic-tmp/numba" \
             PR1338_QUALIFICATION_TMP="$RUNNER_TEMP/acoustic-tmp" \
-            ACOUSTIC_CI_REPORT="$RUNNER_TEMP/acoustic-adapter.json" \
+            ACOUSTIC_CI_REPORT="$RUNNER_TEMP/acoustic-tmp/acoustic-adapter.json" \
+            ACOUSTIC_CI_COMMIT="$GITHUB_SHA" \
             "$RUNNER_TEMP/acoustic-venv/bin/python" -B - <<'PY'
-          import json, os, socket, subprocess, sys
+          import hashlib, json, os, socket, sqlite3, subprocess, sys, sysconfig, tempfile
+          import xml.etree.ElementTree as ET
           from pathlib import Path
+
+
+          root = Path.cwd().resolve()
+          runner_source = root / '.github/workflows/ci.yml'
+          checkout_commit = os.environ['ACOUSTIC_CI_COMMIT']
+          runner_sha256 = hashlib.sha256(runner_source.read_bytes()).hexdigest()
+
+          report_path = Path(os.environ['ACOUSTIC_CI_REPORT']).resolve()
+          output_root = Path(os.environ['TMPDIR']).resolve()
+          assert report_path.parent == output_root, 'report must remain inside owned acoustic temp'
+          owned_temp = output_root / 'temp'
+          owned_temp.mkdir()
+          source_files = [
+              'modules/platform_integration/acoustic_lab/requirements.txt',
+              'modules/platform_integration/acoustic_lab/src/ethereum_logger.py',
+              'modules/platform_integration/acoustic_lab/tests/test_acoustic_processor.py',
+              'modules/platform_integration/acoustic_lab/tests/test_web_app.py',
+              '.github/workflows/ci.yml',
+          ]
+          source_before = {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in source_files}
+          libroots = {Path(p).resolve() for k, p in sysconfig.get_paths().items() if k in ('stdlib', 'platstdlib', 'purelib', 'platlib')}
+          runtime_archives = {}
+          for value in sys.path:
+              candidate = Path(value).resolve()
+              if (candidate.name == f'python{sys.version_info.major}{sys.version_info.minor}.zip'
+                      and candidate.is_relative_to(Path(sys.base_prefix).resolve())):
+                  runtime_archives[candidate] = hashlib.sha256(candidate.read_bytes()).hexdigest() if candidate.is_file() else None
+          from importlib.metadata import distribution, version
+          probe_sources = {}
+          for package, relative in [('urllib3', 'urllib3/util/connection.py'), ('numpy', 'numpy/testing/_private/utils.py')]:
+              dist = distribution(package)
+              location = Path(dist.locate_file(relative)).resolve()
+              probe_sources[package] = {'version': dist.version, 'path': str(location), 'sha256': hashlib.sha256(location.read_bytes()).hexdigest()}
+          packages = {name: version(name) for name in ('pytest', 'web3', 'eth-account', 'ckzg', 'requests', 'urllib3', 'numpy')}
+          os.environ.clear()
+          os.environ.update(HOME=str(owned_temp), USERPROFILE=str(owned_temp), APPDATA=str(owned_temp), LOCALAPPDATA=str(owned_temp),
+              TMP=str(owned_temp), TEMP=str(owned_temp), TMPDIR=str(owned_temp), PYTHON_DOTENV_DISABLED='1',
+              PYTHONDONTWRITEBYTECODE='1', PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', PYTHONUTF8='1',
+              PYCRYPTODOME_DISABLE_GMP='1', NUMBA_ENABLE_AVX='0', NUMBA_CACHE_DIR=str(owned_temp / 'numba'),
+              PR1338_QUALIFICATION_TMP=str(owned_temp), ACOUSTIC_CI_REPORT=str(report_path))
+          sys.dont_write_bytecode = True
+          sys.pycache_prefix = str(owned_temp / 'pycache')
+          tempfile.tempdir = str(owned_temp)
+          config = owned_temp / 'pytest.ini'
+          config.write_text('[pytest]\n', encoding='utf-8')
+          file_events = []
+          hashing = False
+
+          def deny_file(event, path=None):
+              frames, frame = set(), sys._getframe(1)
+              while frame is not None:
+                  frames.add((str(frame.f_globals.get('__name__')), frame.f_code.co_name))
+                  frame = frame.f_back
+              category = None
+              if path is not None:
+                  p = Path(path).resolve()
+                  category = ('runner_source' if p == runner_source else
+                              'platform_null' if p == Path(os.devnull).resolve() else
+                              'repository:' + p.relative_to(root).as_posix() if p.is_relative_to(root) else
+                              'owned_output' if p.is_relative_to(output_root) else
+                              'installed_runtime' if any(p.is_relative_to(folder) for folder in libroots) else
+                              'external_suffix:' + p.suffix)
+              file_events.append({'phase': phase, 'event': event, 'path_class': category,
+                                  'callers': sorted(frames)[:40], 'callers_truncated': len(frames) > 40})
+              (output_root / 'file-events.json').write_text(json.dumps(file_events), encoding='utf-8')
+              raise PermissionError('Python-level file/account/SQLite guard: ' + event)
+
+          def owned(path):
+              return Path(os.fsdecode(path)).resolve().is_relative_to(output_root)
+
+          def file_audit(event, args):
+              global hashing
+              if event == 'sqlite3.connect':
+                  deny_file('sqlite3.connect')
+              if event == 'import' and str(args[0]).split('.')[0] in ('dotenv', 'openai', 'anthropic', 'boto3', 'google'):
+                  deny_file('account_config_import')
+              if event == 'open':
+                  # Only stdio and handles obtained through already guarded opens are inherited.
+                  if isinstance(args[0], int):
+                      return
+                  p = Path(os.fsdecode(args[0])).resolve()
+                  mode, flags = args[1] or '', args[2] or 0
+                  writing = any(x in mode for x in 'wax+') or flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)
+                  if writing:
+                      if not owned(p):
+                          deny_file('write_outside_owned_output', p)
+                  else:
+                      if p.name.startswith('.env') or p.name in ('.netrc', '_netrc') or p.suffix in ('.pem', '.key') or any(x in ('.ssh', '.aws', '.azure') for x in p.parts):
+                          deny_file('private_config_read')
+                      if p == runner_source:
+                          if not hashing:
+                              hashing = True
+                              try:
+                                  assert hashlib.sha256(p.read_bytes()).hexdigest() == runner_sha256
+                              finally:
+                                  hashing = False
+                          return
+                      if p in runtime_archives:
+                          if not hashing:
+                              hashing = True
+                              try:
+                                  current = hashlib.sha256(p.read_bytes()).hexdigest() if p.is_file() else None
+                                  assert current == runtime_archives[p], 'runtime archive changed'
+                              finally:
+                                  hashing = False
+                          return
+                      if owned(p) or p == Path(os.devnull).resolve():
+                          return
+                      if p.is_relative_to(root) and (p.suffix == '.py' or p.relative_to(root).as_posix() in source_before):
+                          if not hashing:
+                              hashing = True
+                              try:
+                                  source_before.setdefault(p.relative_to(root).as_posix(), hashlib.sha256(p.read_bytes()).hexdigest())
+                              finally:
+                                  hashing = False
+                      elif not any(p.is_relative_to(folder) for folder in libroots):
+                          deny_file('read_outside_source_runtime_output', p)
+              if event in ('os.remove', 'os.rmdir', 'os.mkdir', 'os.chmod', 'os.chown', 'os.utime', 'os.truncate'):
+                  if not owned(args[0]):
+                      deny_file(event + '_outside_owned_output')
+              if event in ('os.rename', 'os.link') and not all(owned(args[i]) for i in (0, 1)):
+                  deny_file(event + '_outside_owned_output')
+              if event == 'os.symlink' or event == 'os.chdir' and Path(args[0]).resolve() != root and not owned(args[0]):
+                  deny_file(event)
+
 
           # Python API guards, not an OS sandbox or native-code confinement.
           events, phase = [], 'sanity'
           def reject(kind):
               def denied(*args, **kwargs):
                   frames, frame = set(), sys._getframe(1)
+                  probe_files = set()
                   while frame is not None:
                       frames.add((frame.f_globals.get('__name__'), frame.f_code.co_name))
+                      probe_files.add((frame.f_globals.get('__name__'), frame.f_code.co_name, str(Path(frame.f_code.co_filename).resolve())))
                       frame = frame.f_back
                   probe = None
                   if (kind == 'socket.bind' and len(args) > 1 and args[1] == ('::1', 0)
-                          and ('urllib3.util.connection', '_has_ipv6') in frames):
+                          and ('urllib3.util.connection', '_has_ipv6') in frames
+                          and ('urllib3.util.connection', '_has_ipv6', probe_sources['urllib3']['path']) in probe_files):
                       probe = 'urllib3-ipv6-capability'
                   if (kind == 'subprocess.Popen' and len(args) > 1 and args[1] == 'lscpu'
-                          and ('numpy.testing._private.utils', 'check_support_sve') in frames):
+                          and ('numpy.testing._private.utils', 'check_support_sve') in frames
+                          and ('numpy.testing._private.utils', 'check_support_sve', probe_sources['numpy']['path']) in probe_files):
                       probe = 'numpy-sve-capability'
                   # Static call-site provenance only: never argv, env or frame locals.
                   callers = sorted((str(module), name) for module, name in frames)
@@ -322,6 +453,8 @@ jobs:
                       or name.startswith(('exec', 'spawn', 'posix_spawn'))):
                   if callable(getattr(os, name)):
                       setattr(os, name, reject('os.' + name))
+
+          sys.addaudithook(file_audit)
 
           status, sanity_ok, error_type = 2, False, None
           class Evidence:
@@ -352,6 +485,17 @@ jobs:
           ]
           expected = sorted(expected + [path + '::TestWebApp::' + name
                                         for name in multipart_names])
+          web3_path = 'modules/platform_integration/acoustic_lab/tests/test_acoustic_processor.py'
+          web3_names = [
+              'test_actual_constructor_preserves_default_middleware',
+              'test_actual_poa_block_transform_and_default_rejection',
+              'test_connection_failures_preserve_simulation_fallback',
+              'test_actual_web3_network_stat_conversions',
+              'test_results_hash_is_canonical_and_ignores_ethereum_hash',
+              'test_connected_logging_remains_simulated_without_provider_calls',
+          ]
+          expected = sorted(expected + [web3_path + '::TestEthereumLoggerCompatibility::' + name for name in web3_names])
+
           try:
               for operation in (lambda: socket.getaddrinfo('ci-guard.invalid', 0),
                                 lambda: subprocess.Popen(['ci-guard-sanity']),
@@ -365,11 +509,29 @@ jobs:
               sanity_ok = [item['api'] for item in events] == [
                   'socket.getaddrinfo', 'subprocess.Popen', 'os.system']
               assert sanity_ok
+              for operation in (lambda: sqlite3.connect(':memory:'),
+                                lambda: (owned_temp / '.netrc').read_text(),
+                                lambda: (root / 'pr1356-guard-forbidden-write').write_text('denied')):
+                  try:
+                      operation()
+                  except PermissionError:
+                      pass
+                  else:
+                      raise AssertionError('File/account/SQLite guard did not fail closed')
+              assert [item['event'] for item in file_events] == ['sqlite3.connect', 'private_config_read', 'write_outside_owned_output']
               phase = 'tests'
+              # Deterministic built-in MIME data; system MIME configuration remains denied.
+              import mimetypes
+              assert sys.platform.startswith('linux')
+              mimetypes.knownfiles = []
+              mimetypes.init(files=[])
+              assert mimetypes.guess_type('fixture.wav')[0] == 'audio/x-wav'
               import pytest
               status = int(pytest.main([
-                  '-q', '-c', '/dev/null', '--rootdir=.', '--confcutdir=.', '--noconftest', '--import-mode=importlib',
-                  '-p', 'no:cacheprovider', path + '::TestXVideoURL',
+                  '-q', '--tb=short', '--capture=sys', '-c', str(config), '--rootdir=.', '--confcutdir=.', '--noconftest', '--import-mode=importlib',
+                  '-p', 'no:cacheprovider', '-o', 'log_file=' + str(owned_temp / 'pytest.log'),
+                  '--basetemp=' + str(owned_temp / 'pytest'), path + '::TestXVideoURL',
+                  web3_path + '::TestEthereumLoggerCompatibility',
                   *(path + '::TestWebApp::' + name for name in multipart_names),
                   '--junitxml=' + str(Path(os.environ['ACOUSTIC_CI_REPORT']).with_suffix('.xml')),
               ], plugins=[evidence]))
@@ -378,14 +540,27 @@ jobs:
               status = 2
           observed = [item for item in events if item['phase'] == 'tests']
           probes = [item['denied_probe'] for item in observed]
-          effects_ok = (None not in probes and len(probes) == len(set(probes)))
-          passed = (status == 0 and sanity_ok and effects_ok
+          effects_ok = (None not in probes and len(probes) == len(set(probes))
+                        and not any(item['phase'] == 'tests' for item in file_events))
+          source_after = {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in source_before}
+          xml_path = report_path.with_suffix('.xml')
+          cases = list(ET.parse(xml_path).getroot().iter('testcase')) if xml_path.exists() else []
+          expected_xml = sorted((node.split('::')[0][:-3].replace('/', '.') + '.' + node.split('::')[1], node.split('::')[2]) for node in expected)
+          observed_xml = sorted((case.get('classname'), case.get('name')) for case in cases)
+          xml_ok = (observed_xml == expected_xml and not any(case.find(tag) is not None for case in cases for tag in ('failure', 'error', 'skipped')))
+          passed = (status == 0 and sanity_ok and effects_ok and xml_ok and source_before == source_after
                     and sorted(evidence.collected) == expected
                     and sorted(evidence.passed) == expected)
           report = dict(pytest_exit_code=status, guard_sanity_passed=sanity_ok,
                         guard_events=events, unexpected_effects_or_duplicate_probe=not effects_ok,
                         expected_ids=expected, collected_ids=evidence.collected,
-                        passed_ids=evidence.passed, exception_type=error_type, passed=passed)
+                        passed_ids=evidence.passed, exception_type=error_type, passed=passed,
+                        file_events=file_events, source_before=source_before, source_after=source_after,
+                        source_unchanged=source_before == source_after, packages=packages, probe_sources=probe_sources,
+                        junit_identities_verified=xml_ok, checkout_commit=checkout_commit,
+                        runtime_archives={str(p): h for p, h in runtime_archives.items()},
+                        harness_configuration={'NUMBA_ENABLE_AVX': '0', 'mime_table': 'stdlib_builtin_only'},
+                        workflow_sha256=runner_sha256, scope='Linux Python API guards; not OS confinement or live RPC')
           Path(os.environ['ACOUSTIC_CI_REPORT']).write_text(json.dumps(report, indent=2) + '\n')
           print(json.dumps(report, indent=2))
           raise SystemExit(0 if passed else (status or 1))
@@ -594,8 +769,9 @@ jobs:
         with:
           name: acoustic-x-adapter-evidence-${{ matrix.python-version }}
           path: |
-            ${{ runner.temp }}/acoustic-adapter.json
-            ${{ runner.temp }}/acoustic-adapter.xml
+            ${{ runner.temp }}/acoustic-tmp/acoustic-adapter.json
+            ${{ runner.temp }}/acoustic-tmp/acoustic-adapter.xml
+            ${{ runner.temp }}/acoustic-tmp/file-events.json
             ${{ runner.temp }}/acoustic-gunicorn/
             ${{ runner.temp }}/acoustic-target-install.json
             ${{ runner.temp }}/acoustic-baseline-install.json
