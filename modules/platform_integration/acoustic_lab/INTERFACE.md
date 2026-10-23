@@ -65,7 +65,13 @@ Process uploaded audio file or X video URL for acoustic analysis.
 **Error Responses**:
 - `400`: Invalid file format, missing audio, or invalid X URL
 - `403`: Geographic access restriction (IP geofencing)
+- `413`: Multipart request exceeds Werkzeug's parsing limits
 - `500`: Internal processing error
+
+Werkzeug 3.1.9 limits each multipart non-file field to 500,000 bytes by default.
+The upload handler preserves `RequestEntityTooLarge` as a JSON error with HTTP
+413 before audio processing or Ethereum logging. This is not a total file-upload
+size limit; the existing application `MAX_CONTENT_LENGTH` setting is unchanged.
 
 #### `/health (GET)`
 Service health monitoring endpoint.
@@ -161,6 +167,7 @@ Upload and process synthetic audio file for acoustic analysis.
 - 200: Success
 - 400: Invalid audio or missing GPS
 - 403: IP geofencing violation
+- 413: Multipart parsing limit exceeded
 - 500: Processing error
 
 ## Error Handling

@@ -1,8 +1,42 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 39 open PRs, 9 drafts, including #2181 publishing the previously local installed-HIGH RSI integration. #1759, #1638, #782, #841, #1457, #1338, #1354 and #1478 are merged. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+Current planning snapshot, 2026-10-23 JST: 38 open PRs, nine drafts. #2181 is squash-merged with exact-main CI and CodeQL verified. #2081 is the selected executable PR at 15/P1 after a reproduced multipart-response regression. Read the complete current queue before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
 
-### Publication follow-up — 2026-10-23 12:10 JST
+### Source closure and re-selection — 2026-10-23 13:28 JST
+
+**#2181 MERGED_VERIFIED_MAIN:** squash
+`cfa632775f2b13034320d45559cdc77d46e3ead6` from independently reviewed head
+`9eda543f0b0c7b795478d5d2ba46845885aabd83`. All 20 final-head acceptance
+contexts succeeded; API and fetched main match the complete reviewed tree
+`228b4f0091a40f7f6363d9abf48c0a1844aa68ed`. Exact-main CI39899710212 and
+CodeQL39899710236 both succeeded; independent exact-main review agrees. The 47-suite hosted Linux startup selection
+passed 1,003 cases with one Windows-only skip. Local per-case XML and separate
+independent positive/lock-removal controls retain their distinct evidence scope.
+Credential-free installed qualification ran at `174955143d`; all 1,264 exported
+source members/modes are identical in the final candidate. Its 2,701-file live
+integrity, confined profiles and owned-unit cleanup passed independently.
+Authentic HIGH owner/work-policy/issuer inputs remain unestablished in the bounded
+inspected locations. No native author ticket or production RSI is claimed.
+[Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181#issuecomment-6357450863).
+
+**Selected: #2081, C3/I4/D4/Impact4=15/P1.** Paired offline tests reproduced
+valid 600,015-byte multipart metadata returning missing-file 400 under Werkzeug
+3.0.0 but parser 413 becoming application 500 under 3.1.9. Preserve the new
+parser limit, retain the specific 413 response and extend existing upload tests
+and the existing Python 3.11/3.12 CI job. Qualify the full current manifest,
+including Gunicorn 22; the historical overlay comparison alone is insufficient.
+The bounded integration repair raises complexity from two to three. It precedes
+#1355's Flask upgrade. Higher-ranked #2168 and resident #2178 retain their active
+owners; #1648/#1645 remain overlapping draft reconciliation work. The other
+eligible 14/P1 proposals do not outrank this demonstrated repair.
+
+Fresh inventory has 38 open PRs and nine drafts, with unchanged heads for every
+remaining row. The existing owned checkout is reused; no new worktree or planning
+store is created. External `refresh/wsp15-ranked-51.json` retains its historical
+filename/rows and records this current selection. Canonical audit storage does
+not establish Brain ingestion, admitted dispatch or autonomous retained learning.
+
+### Historical publication follow-up — 2026-10-23 12:10 JST
 
 Fresh GitHub inventory remains 39 open / 9 draft. The existing #2181 lane is
 still selected at 19/P0. Source `174955143d` repaired the module/schema failures
@@ -18,7 +52,7 @@ Independent re-observation of #722/#729 preserves both unique proposals. Neither
 is safely closable as implemented or superseded. Their existing rows retain
 concrete reconciliation steps; no replacement backlog or Brain ingestion is claimed.
 
-## Current reconciliation - 2026-10-23 JST
+## Historical reconciliation - 2026-10-23 11:34 JST
 
 Observed `2026-10-23T02:34:41.163624+00:00`, main `99dc200869d49ab911134a11768c0d9a05472cb2`.
 Since the prior 47-open snapshot, #782 and owner-managed #2179 merged, and
@@ -149,7 +183,7 @@ validation. Final correct-base gates passed; no scanner rule or historical
 GitGuardian incident was waived. Active timed-out provider threads still cannot
 be forcibly cancelled; local source labels are not authenticated provider receipts.
 
-**Current selection: existing installed-HIGH/live-lease integration,19/P0
+**Historical selection before #2181 closure: installed-HIGH/live-lease integration,19/P0
 (C4/I5/D5/Impact5).** Reuse the attached clean branch at `0088b9a3`, now reconciling
 main `99dc20086`; do not create another service, roadmap or worktree. All76 old
 branch paths were accounted:21 exact blobs and90 security entries already on
@@ -192,16 +226,17 @@ mapped to existing owners and proposals; package metadata is not test evidence.
   stay explicit. Dependency-alert closure requires fresh GitHub readback.
 - **#1354: 3/4/4/4=15/P1, MERGED_VERIFIED_MAIN.** Independent Linux
   server/parser qualification and both exact-main gates passed.
-- **#2081: 2/4/4/4=14/P1**, before #1355: proposed Flask requires Werkzeug
-  >=3.1.0; current Flask 3.0 permits the proposed Werkzeug by metadata. Verify
-  the complete dependency set and application behavior before either merge.
+- **#2081: 3/4/4/4=15/P1, SELECTED**, before #1355: proposed Flask requires
+  Werkzeug >=3.1.0. The reproduced 413-to-500 regression requires a narrow
+  response repair and actual multipart CI coverage. Preserve parser limits;
+  verify the complete current dependency set before publication and merge.
 - Four Chroma alerts and one node-forge alert have no patched version reported
   in this snapshot. Existing owners must qualify remediation; do not infer a
   safe version, mutate qualified Holo runtimes or dismiss the alerts.
 
-The next repository-level selection is the existing19/P0 RSI integration above.
-#2081 at14/P1 remains the bounded dependency alternative. Re-observe ownership
-and WSP15 after the selected closure. Do not assume the previous second-ranked item wins. Source
+The earlier 19/P0 RSI source integration is merged; its authentic runtime-input
+gate remains separate. Fresh WSP15/WSP97 selection chooses #2081 at 15/P1 for
+the demonstrated compatibility repair. Re-observe again after closure. Source
 bindings, alert mapping and acceptance remain in the existing reconciliation
 receipt root (`dependency-alert-pr-mapping-20261023.json`). The old alert count
 is not a post-merge closure claim; refresh GitHub alerts before reporting change.
@@ -276,15 +311,14 @@ Every execution requires current source, checks and authority.
 
 | PR / source head | WSP15 | Owner / state | Next executable step |
 |---|---|---|---|
-| [#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) `174955143d96dc8a0d646bd4ba881462f0714815` | 4/5/5/5=19 P0 | Existing RSI integration/root: LOCAL_POSIX_REPAIR_VERIFIED | Preserve the actual Linux and independent lock-removal proofs; pass final-source hosted gates and converge to main; preserve bounded installed qualification and establish authentic admission. |
 | [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
 | [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
+| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `63abf6dfa075af20769b3f74feb9c23f1de51ee8` | 3/4/4/4=15 P1 | Dependency lane/root: COMPATIBILITY_REPAIR_IN_PROGRESS | Preserve Werkzeug parsing limits and return 413 for oversized multipart requests; exact full-manifest install, existing upload/adapter CI and independent review before publication. This precedes #1355; prior alert counts remain dated evidence. |
 | [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
 | [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | With #2179 merged, reconcile the single successor carrying #1659 identity/index/image/correction/privacy clauses; preserve pre-compose identity, draft exception, receipts and current owner precedence. |
 | [#1356](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356) `055cda32a0c2bff70a469aea7d967d20c61a7f42` | 4/3/4/3=14 P1 | Dependency lane/root: STILL_CURRENT | Resolve full set; offline transaction/hash interface tests. |
-| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `63abf6dfa075af20769b3f74feb9c23f1de51ee8` | 2/4/4/4=14 P1 | Dependency lane/root: OFFLINE_QUALIFICATION_ELIGIBLE | Qualify Werkzeug on current Flask first; complete resolver and health/upload/error smoke. This precedes #1355 and addresses eight reported alerts. |
 | [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) `e455fd0190b0c35302a3a5776529a221c3123888` | 4/3/2/4=13 P1 | Japan Compute owner: STILL_CURRENT / DRAFT | Owner reconciles homepage/hosting; preserved-copy and economics gates. |
 | [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) `724f465bd35ac1be5e9a91f41d0721da383c67d8` | 4/3/3/3=13 P1 | eSingularity surface owner: ACTIVE_OWNER_PROTECTED | Existing eSingularity owner coordinates convergence: preserve post-vote state, valid fixes and carried article; current routes/locales/build acceptance. |
 | [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` | 3/3/4/3=13 P1 | Dependency lane/root: DEPENDENCY_BLOCKED | Requires #2081 Werkzeug reconciliation before proposed Flask; complete resolver and health/upload/error smoke. |

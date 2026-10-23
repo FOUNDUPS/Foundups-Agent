@@ -70,6 +70,88 @@ class TestWebApp(unittest.TestCase):
         response_data = json.loads(response.data)
         self.assertIn('Invalid metadata JSON', response_data['error'])
 
+    def _controlled_upload_client(self):
+        stack, effects = ExitStack(), []
+        self.addCleanup(stack.close)
+        self.addCleanup(lambda: self.assertEqual(effects, []))
+
+        def denied(*args, **kwargs):
+            effects.append('unexpected external effect')
+            raise AssertionError('External effect attempted in multipart case')
+
+        for name in ('connect', 'connect_ex', 'bind', 'listen', 'sendto'):
+            stack.enter_context(patch.object(socket.socket, name, side_effect=denied))
+        for name in ('create_connection', 'getaddrinfo'):
+            stack.enter_context(patch.object(socket, name, side_effect=denied))
+        for target in ('requests.sessions.Session.request', 'subprocess.Popen.__init__',
+                       'os.system', 'src.ethereum_logger.get_ethereum_logger'):
+            stack.enter_context(patch(target, side_effect=denied))
+        for name in ('get_ethereum_logger', 'log_to_ethereum_testnet', 'process_x_video_url'):
+            stack.enter_context(patch.object(web_app_module, name, side_effect=denied))
+        processor = MagicMock(spec=['process_audio', 'get_processing_stats'])
+        processor.process_audio.side_effect = web_app_module.AudioValidationError(
+            'controlled parser boundary')
+        processor.get_processing_stats.return_value = {'total_processed': 0}
+        stack.enter_context(patch.object(web_app_module, 'get_acoustic_processor',
+                                        return_value=processor))
+        app = create_app()
+        return app, app.test_client(), processor
+
+    def test_multipart_oversized_metadata_returns_413(self):
+        app, client, processor = self._controlled_upload_client()
+        self.assertEqual(app.request_class.max_form_memory_size, 500_000)
+        self.assertIsNone(app.config['MAX_CONTENT_LENGTH'])
+        response = client.post('/upload', data={'metadata': json.dumps(
+            {'padding': 'x' * 600_000})}, content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 413)
+        self.assertIn('413 Request Entity Too Large', response.json['error'])
+        processor.process_audio.assert_not_called()
+        processor.get_processing_stats.assert_not_called()
+
+    def test_multipart_small_metadata_keeps_missing_file_400(self):
+        _, client, processor = self._controlled_upload_client()
+        response = client.post('/upload', data={'metadata': json.dumps(
+            {'padding': 'x' * 1000})}, content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 400)
+        self.assertIn('Missing audio file', response.json['error'])
+        processor.process_audio.assert_not_called()
+
+    def test_multipart_wav_preserves_bytes_and_metadata(self):
+        _, client, processor = self._controlled_upload_client()
+        wav = TestXVideoURL._wav_bytes()
+        metadata = {'gps': {'latitude': 40.0, 'longitude': -111.0},
+                    'timestamp': '2026-10-23T00:00:00Z'}
+        response = client.post('/upload', data={
+            'audio': (io.BytesIO(wav), 'fixture.wav'),
+            'metadata': json.dumps(metadata)}, content_type='multipart/form-data')
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json['error'],
+                         'Audio validation failed: controlled parser boundary')
+        processor.process_audio.assert_called_once_with(
+            wav, dict(metadata, source='direct_upload'))
+
+    def test_multipart_invalid_inputs_remain_400(self):
+        _, client, processor = self._controlled_upload_client()
+        cases = [({'metadata': 'not-json'}, 'Invalid metadata JSON'),
+                 ({'audio': (io.BytesIO(b'fixture'), 'fixture.mp3')},
+                  'Only WAV files are accepted')]
+        for data, message in cases:
+            with self.subTest(message=message):
+                response = client.post('/upload', data=data,
+                                       content_type='multipart/form-data')
+                self.assertEqual(response.status_code, 400)
+                self.assertIn(message, response.json['error'])
+        processor.process_audio.assert_not_called()
+
+    def test_multipart_fixture_health_remains_200(self):
+        _, client, processor = self._controlled_upload_client()
+        response = client.get('/health')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, {'status': 'healthy', 'service': 'Acoustic Lab',
+                                        'version': '1.0.0', 'stats': {'total_processed': 0}})
+        processor.get_processing_stats.assert_called_once_with()
+        processor.process_audio.assert_not_called()
+
 
 class TestIPGeofencing(unittest.TestCase):
     """Test cases for IP geofencing functionality."""
