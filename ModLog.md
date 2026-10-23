@@ -1,3 +1,22 @@
+## 2026-10-23 - Merge Gunicorn repair and select comment-context closure
+
+WSP00/10/15/22/50/84/97. #1354 squash0d3f715bb matches reviewed tree after
+20 unique successful final-head checks and independent Linux acceptance.
+Exact-main CI39883903539 and CodeQL39883902900 independently passed.
+Re-observe39open/10drafts;
+select existing #1478 at15/P1 after bounded source/owner inspection. Repair
+generation provenance, contextual-source gating and row metadata in the existing
+owners; validate offline and preserve current shared-context work. The original
+PR's historical test counts are not current evidence. No live posting, model
+call, native worker or RSI completion claim. Unpublished installed-HIGH work
+remains preserved with exact per-path reconciliation in the existing audit.
+
+#1478 now has independently reviewed source/helper behavior: 53 focused and116
+adjacent local cases, eight manifest tests and Node contract checks pass. Two
+helpers reduce the existing oversized owners without adding function debt.
+Generated closure and both pins are verified; registry quarantine is preserved.
+Exact-head hosted acceptance and main closure remain pending publication.
+
 ## 2026-10-23 - Independently accept the Acoustic Linux server qualification
 
 WSP 00/10/15/22/50/84/97. #1354 head `3bc5471a3` passed all 20 checks.

@@ -7,6 +7,47 @@
 
 ## Change Log
 
+### 2026-10-23 — Reconcile PR1478 context and generation provenance
+
+WSP00/15/22/50/84/97; C3/I4/D4/Impact4=15/P1. Reuse the existing PR and
+three runtime owners, preserving its original head in ancestry. Current main
+contains the newer PR1759 shared-context reader and test inventory; those
+contracts remain intact. The original three runtime blobs had not changed
+between the PR base and current main.
+
+The historical proposal adds row-specific video/channel context, full-prompt
+local/general-Qwen routing, history/VoiceMemory and a default no-generic reply
+gate. Its reported 7/11/23-pass runs are historical claims, not current receipts.
+Source audit found a shared-source race and substring-label acceptance gap.
+Reproduced and repaired generation/source races, permissive labels, discarded
+provider attribution and wrong-row/ambiguous video links. The processor uses an
+immutable per-generation snapshot, cancels queued expired work, and keeps generic
+legacy opt-in distinct from source evidence. Grok opt-in now gates the call too.
+Two cohesive helpers own prompt/personality and row context; all three runtime
+files shrink, all seven previously growing long functions shrink, and no new
+function exceeds 50 lines. Existing oversized debt remains explicit.
+
+Local results: 53 focused cases and 116 adjacent command/context cases pass.
+The original seven assertions, 96 prompt comparisons and ten personality
+comparisons are preserved. The existing runtime generator adds exactly the two
+helpers (1451 to 1453 members), with unchanged 324 KiB byte limit and new cap-plus-
+one rejection. Both digest pins are regenerated. The registry is 1749 files/271
+quarantined; its new test remains quarantined for broad collection. The existing
+Windows/Ubuntu CI job explicitly selects it and rejects missing/changed/skipped
+cases. Publication/main verification remain separate
+closure gates. Independent final review accepts source behavior and helper
+wiring, including held-out/mutation controls and 128 full-prompt comparisons.
+Eight manifest tests and the Node compatibility/package contracts pass locally;
+all 1453 runtime source hashes and both pins were independently recomputed.
+See tests/TestModLog.md for evidence and limitations.
+
+Governed Holo retrieval again rejects authority-root/head mismatch; freshness
+UNKNOWN and index gap remain. Exact Git/lexical fallback includes current module
+and test contracts. memory/README.md and requirements.txt are absent; no guessed
+replacement or new memory store. No live browser, model, account, reply, native
+worker or RSI activation. Existing reconciliation receipts own measured outcomes.
+
+
 ### 2026-10-22 — PR1759 shared-context consumption repair
 
 WSP 00/5/6/11/15/22/50/84/97. Reuse the existing queue's configured path resolver
