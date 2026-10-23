@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1765,
+  "total_tests": 1766,
   "quarantined_tests": 272,
   "tests": [
     {
@@ -15252,6 +15252,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Offline provider-contract tests; no actual semantic review or paid calls."
+    },
+    {
+      "id": "test::modules::foundups::kids_episodes::tests::test_little_shrew",
+      "path": "modules/foundups/kids_episodes/tests/test_little_shrew.py",
+      "owner": "modules/foundups/kids_episodes",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-kids-episodes-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Preset integration with the canonical compiler; no provider or account access."
     },
     {
       "id": "test::modules::foundups::kids_episodes::tests::test_story_pipeline",
