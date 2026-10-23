@@ -29,3 +29,7 @@ EDUIT is verified from its existing module and manifest. Ambiguous dictated phra
 ## Story pipeline foundation
 
 `src/story_pipeline.py` plans linked episodes and runs checkpointed generation, audio, rendering, independent artifact review and optional whole-story assembly/review through injected runtime capabilities. `src/gemini_story_adapters.py` supplies structured planning and actual-MP4 review adapters. `src/work_order_adapter.py` admits only an existing registered WRE executor; the OpenClaw `kids story:` / `eduit story:` route stays blocked without that binding. Prototype skills are not production authority. See INTERFACE.md for callback and checkpoint contracts.
+
+## Little Shrew series preset
+
+[Little Shrew](series/little_shrew/README.md) adapts the Gemini/Drive preschool storyboard into nine five-second beats and three linked episodes. It includes a simpler shared vector character rig, nine-panel storyboard, source provenance and `build_pilot` integration with the existing story compiler. Reference assets are design inputs; live generation remains owner-admitted and unactivated.
