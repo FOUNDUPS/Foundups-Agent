@@ -50,3 +50,7 @@ No autonomous production worker exists. Planned outputs: health status, last act
 4. Only then consider a public prototype. No DAO-driven model changes or child-data sharing in the MVP.
 
 **Evidence status:** documentation scaffold only. No runtime, validation study, game engine, child profiles, deployment, or token.
+
+## Linked educational media
+
+[Kids Episodes](../kids_episodes/README.md) (`kids_episodes`) is the related story-to-linked-episodes FoundUp using existing YouTube production components. Future EDUIT games may link to episode learning objectives; no game integration or autonomous story-production runtime is claimed. EDUIT retains its existing ID and independent scope.

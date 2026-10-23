@@ -61,5 +61,21 @@
     "hero_label": "SEARCH",
     "hero_mood": "System search interface, securely intercepting queries for external bridging.",
     "entry_copy": "HoloIndex is discoverable but remains in explicit stub mode until the backend relay clears."
+  },
+  {
+    "foundup_id": "kids_episodes",
+    "name": "Kids Episodes",
+    "tagline": "Stories become short learning episodes",
+    "description": "Turn a story into linked 15-second educational music and activity episodes in the EDUIT context. Autonomous story production is planned; a local editor/renderer component exists.",
+    "category": "ai-education",
+    "tier": "F0_DAE",
+    "lifecycle_stage": "incubating",
+    "launch_readiness": "discoverable_only",
+    "token_symbol": null,
+    "routing_prefix": "/f/kids_episodes",
+    "theme": "default",
+    "hero_label": "",
+    "hero_mood": "",
+    "entry_copy": ""
   }
 ]
