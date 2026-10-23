@@ -1,5 +1,12 @@
 # AI Gateway Tests
 
+`scripts/tests/test_openrouter_credential_boundaries.py` owns the connected
+redirect/credential diagnostics checks with the existing advisory, ALIAS,
+K3 and configured-gateway suites. Use the focused OpenRouter workflow's
+synthetic environment and effect guard; normal transport imports must not
+inherit live credentials. Bridge `tests/TestModLog.md` records qualification.
+
+
 This directory contains offline unit and contract tests for provider routing,
 catalog evidence, AutoResearch admission, runtime binding, and request safety.
 Provider transports are injected or mocked; the suite must not require live

@@ -1,6 +1,6 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 36 open PRs, eight drafts. #2181 and #2081 are verified on main; #2182/#2183 merged through their separate owner. #1663 is verified on main with independent tree/check readback. #1645 is selected at 15/P1 for its unmounted projection layer. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-23 JST: 35 open PRs, eight drafts. #2181 and #2081 are verified on main; #2182/#2183 merged through their separate owner. #1663 is verified on main with independent tree/check readback. #1645 is verified on main; the shared #1648 transport slice is selected at 15/P1. Historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-23
 
@@ -28,22 +28,19 @@ independent main review agrees. [Terminal closure](https://github.com/FOUNDUPS/F
 All 24 clauses across #1659/#1663 are preserved. The 178 Python and seven
 JavaScript cases do not prove direct connector interception or live sending.
 
-**Selected: #1645, C4/I4/D3/Impact4=15/P1.** Its four-Python projector/renderer,
-current query seam and tests form the next disjoint executable layer. Preserve
-all 37 original paths at `4b316c976aa3cdba21b901191159716f3d58631d`; the source
-is retained as a merge parent. Independent scope review confirms a useful
-unmounted, unregistered component. Original functional selection: 29 passes;
-new expiry-during-source-read regression fails as intended before repair.
-The repaired candidate passes 87 guarded cases on Windows and minimal Linux;
-these are the same case inventory. Independent probes pass 11 cases and detect
-both removed freshness guards. Independent workflow and manifest review agrees.
-The runtime closure adds exactly one projector member with qualified count and
-unchanged byte limits. Complete-source review approved `a2450411498f4de73204c6777749f864e03c35c0`,
-preserving all 13 incoming #2183 paths at `055fd68b3d2830e4d7cde88bba164c8deceaf007`.
-Hosted projection passes 87 cases with independently checked source/effect evidence.
-General CI39911497382 fails on generated registry freshness and 39 whole-file
-security fingerprints; retain those failures while repairing their exact records.
-Fresh full hosted acceptance remains required before merge.
+**#1645 MERGED_VERIFIED_MAIN:** squash
+`fa058f8b10115e67acdd86d87bd4b6ceaf8f0301` from independently reviewed head
+`1f0e4d09802ea2867d606067f01e5212f3c637a7`. The complete tree
+`5ce7d4b55e8d0bb93ce2a21d310b05a9c35d8acf` matches main. All 21 final-head
+and 19 exact-main checks succeeded: CI39914813921, CodeQL39914813585 and
+projection39914813741. Independent artifact readback confirms the same 87 cases,
+zero skips/effect denials and 27 unchanged source bindings. Initial CI39911497382
+failed on registry freshness and 39 public-source fingerprints; retain that
+failure and its canonical-generator/exact-provenance repairs. No scanner policy
+or registry classification was weakened. Independent probes detected both
+removed freshness guards. This closes an unmounted, unregistered component;
+its original 37-path source and all 13 incoming #2183 paths were preserved.
+[Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645#issuecomment-6359598885).
 
 [Existing #1648 carry-forward](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590)
 explicitly retains the skill, manifest, registry, exact wardrobe discovery test,
@@ -53,9 +50,15 @@ The central skill registry remains unchanged: WSP95 requires it, while current F
 would treat its growth as size debt. This is a source-derived constraint, not
 an observed hosted failure. Do not add an exemption or hide growth by packing.
 
-#1648 remains 16/P0 with separate ingress/spend/reader contracts. Independent
-re-observation selects its disjoint shared transport protections as a possible
-15/P1 next slice; partial progress must not close its remaining product work.
+**Selected: #1648 shared transport slice, C3/I4/D4/Impact4=15/P1.**
+The full original proposal remains 16/P0 and open for ingress/spend/reader
+contracts. Reuse its three existing Python callers: suppress credential repr,
+reject redirects and withhold upstream transport diagnostics. Preserve current
+K3 routing, redaction, typed local authorization and campaign budgets. Execute
+synthetic offline regressions, independent fault controls and generated-binding
+checks before a focused main integration; do not leave a qualified repair
+stranded behind the original 93-file product proposal. Its carried-forward
+requirements remain open. No live provider call or native admission is implied.
 #1356 and #1792 remain 14/P1; #1356's
 read-only prequalification identifies the Web3/eth-account graph and middleware
 migration but does not count as executed tests. Protected #2168/#2178 retain

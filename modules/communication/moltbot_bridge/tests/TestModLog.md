@@ -1,3 +1,32 @@
+## PR1648 shared transport qualification — 2026-10-23
+
+The frozen six-suite selection passes 130 cases with zero failures/skips in
+16.02 seconds in the qualified runner on Linux Python 3.12.3, pytest 9.0.3
+and requests 2.33.0. It includes
+the proposed credential boundary cases and existing advisory retry/progress,
+ALIAS authorization/redaction, exact K3 and configured-campaign regressions.
+Normal imports execute under a pre-import synthetic environment/effect guard;
+All recorded source hashes remain unchanged. One exact urllib3 IPv6 capability probe is
+blocked before socket creation; every unknown/repeated effect rejects the run.
+The guard is Python-level instrumentation, not an OS sandbox. Initial collection
+was rejected for caught source-cache reads, then repeated with an owned cache
+lookup directory and bytecode writes disabled; both attempts are preserved.
+Dependency stdout decoding initially failed; installed-package readback and
+pip check established the result before any retry. No provider call occurred.
+Independent review passes 23 additional cases; six in-memory faults produce
+10 intended assertion failures. Process/DNS and inventory controls reject even
+when pytest passes. Seven author effect controls and eight report-integrity
+controls also reject as intended. The final class-aware JUnit gate is checked
+against the successful inventory; the runtime/test source remains unchanged.
+Independent manifest tests pass eight cases and three Node contracts; the
+1,469-member startup set changes only two source hashes. Initial expectation
+that manual ALIAS was startup-bound was rejected and corrected, not forced
+into the manifest. Canonical registry generation adds one row (1,768/273),
+without classification changes. Hosted acceptance remains pending.
+Evidence: `pr1648-qualification/six-suite-positive-execution.json` in the existing
+external PR-reconciliation evidence family; `qualification-receipt.json` owns
+the exact CI run and guard controls. Original PR1648 remains open.
+
 ## PR1645 projection-layer inventory — 2026-10-23
 
 WSP00/5/6/15/22/50/62/95/97. Before test edits, original proposal

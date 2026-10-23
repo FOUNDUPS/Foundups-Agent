@@ -2613,8 +2613,8 @@ timeout within bounds. Raw text is redacted ON ENTRY; only the REDACTED prompt/c
 `openrouter/fusion` alias; only digests are retained; the API key is never logged. Output is ADVISORY
 (`advisory_not_canonical=True`). All failure paths fail closed with a low-cardinality reason
 (`valve_closed`/`redaction_blocked`/`authorization_missing`/`missing_api_key`/`budget_exceeded`/`timeout`/
-`http_error`/`malformed_response`). SERVER_TOOL / LOCAL_FALLBACK remain blocked. HTTP client reused from
-`ai_gateway` (`requests`) -- no new dependency.
+`http_error`/`malformed_response`). SERVER_TOOL / LOCAL_FALLBACK remain blocked. The existing `requests`
+transport disables redirects; non-200 responses are rejected before reading JSON. No new dependency.
 
 **Manual live smoke (NOT CI; requires explicit 012 opt-in):**
 ```
