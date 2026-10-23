@@ -21,6 +21,13 @@ from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage
     validate_bounded_execution_receipt,
 )
 
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_seed_worker_plan,
+)
+from modules.communication.moltbot_bridge.src.reddog_backend_architect_queue_candidate import (
+    ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
+)
+
 
 CANDIDATE_MALFORMED = "candidate_malformed"
 PROPOSAL_ADMISSION_INVALID = "proposal_admission_invalid"
@@ -111,6 +118,38 @@ def validate_architect_fix_proposal_admission(
     )
 
 
+def snapshot_architect_fix_plan_lineage(
+    value: Mapping[str, Any], plan: Mapping[str, Any] | None,
+) -> tuple[Mapping[str, Any], bool]:
+    """Freeze and check new plan-bearing lineage; retain the legacy branch."""
+    if type(value) is not dict:
+        raise ValueError("determination_not_plain_mapping")
+    admission = value.get("proposal_admission")
+    if admission is None:
+        return value, False
+    if type(admission) is not dict:
+        raise ValueError("plan_lineage_not_plain_mapping")
+    if "bounded_worker_plan" not in admission:
+        return value, False
+    # Validate/detach the typed plan before generic JSON can coerce its types.
+    nested_plan = snapshot_seed_worker_plan(admission["bounded_worker_plan"])
+    detached = json.loads(json.dumps(
+        {**value, "proposal_admission": {**admission, "bounded_worker_plan": nested_plan}},
+        allow_nan=False,
+    ))
+    receipt = validate_architect_proposal_executability_receipt(detached["proposal_admission"])
+    candidate = detached.get("queue_candidate")
+    if (plan is None or _digest(plan) != _digest(receipt.bounded_worker_plan)
+            or type(candidate) is not dict
+            or validate_architect_fix_candidate(
+                candidate, detached, schema_version=ARCHITECT_QUEUE_CANDIDATE_SCHEMA_VERSION,
+            )
+            or not architect_fix_receipt_candidate_lineage_matches(receipt, detached, candidate)):
+        raise ValueError("proposal_plan_lineage_mismatch")
+    return detached, True
+
+
+
 def _lineage_reasons(
     *,
     receipt: ArchitectProposalExecutabilityReceipt,
@@ -132,8 +171,8 @@ def _lineage_reasons(
             attestation_id=committed_retry_attestation_id,
         )
     )
-    expected = _receipt_candidate_lineage_matches(
-        receipt, determination, candidate, work_state_revision_matches
+    expected = work_state_revision_matches and architect_fix_receipt_candidate_lineage_matches(
+        receipt, determination, candidate
     )
     reasons = [] if expected else [PROPOSAL_ADMISSION_INVALID]
     if not current_repo_head_sha or receipt.repo_head_sha != current_repo_head_sha:
@@ -147,12 +186,12 @@ def _lineage_reasons(
     return reasons
 
 
-def _receipt_candidate_lineage_matches(
+def architect_fix_receipt_candidate_lineage_matches(
     receipt: ArchitectProposalExecutabilityReceipt,
     determination: Mapping[str, Any],
     candidate: Mapping[str, Any],
-    work_state_revision_matches: bool,
 ) -> bool:
+    """Check supplied receipt lineage only, never current state or authority."""
     expected_status = (
         "CANDIDATE"
         if receipt.admissible_to_authoritative_queue
@@ -175,7 +214,6 @@ def _receipt_candidate_lineage_matches(
         == str(determination.get("wsp15_allocation_receipt_id") or "")
         and receipt.wsp15_allocation_digest
         == str(determination.get("wsp15_allocation_digest") or "")
-        and work_state_revision_matches
         and str(candidate.get("status") or "").upper() == expected_status
         and receipt.receipt_id
         == str(candidate.get("proposal_admission_receipt_id") or "")
@@ -295,6 +333,8 @@ __all__ = [
     "HOLOINDEX_BINDING_MISMATCH",
     "PROPOSAL_ADMISSION_INVALID",
     "REPO_HEAD_MISMATCH",
+    "architect_fix_receipt_candidate_lineage_matches",
+    "snapshot_architect_fix_plan_lineage",
     "validate_architect_fix_candidate",
     "validate_architect_fix_proposal_admission",
 ]

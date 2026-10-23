@@ -1,0 +1,6 @@
+pytest==9.1.1
+pytest-cov==7.1.0
+pytest-asyncio==1.4.0
+numpy==2.3.5
+# Offline validation against the provider's typed configuration contract.
+elevenlabs==2.67.0

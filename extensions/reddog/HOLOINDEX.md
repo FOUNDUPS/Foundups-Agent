@@ -13,8 +13,9 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `scripts/advisory_model_once.py` - OpenRouter bridge and redaction gate (repo root)
 - `scripts/reddog_holoindex_owner_query_once.py` - authenticated generation-bound owner query bridge (repo root)
 - `modules/communication/moltbot_bridge/src/reddog_public_policy.py` - public guest origins, caps, and unsigned Lick Verification input; no identity or private authority
-- `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest quotas, expiry, replay, withdrawal and concurrency accounting
+- `modules/communication/moltbot_bridge/src/reddog_public_session_gate.py` - injected AgentDB SQLite guest/Lick quotas, one-use host leases, owner-bound completion and expired-owner recovery; resident activation still gated
 - `modules/communication/moltbot_bridge/src/reddog_public_http.py` - opt-in public-only ASGI router; unmounted until host/responder/ingress proof
+- `modules/foundups/mobile_worker_skills/foundups-contact-discovery/SKILL.md` - public contact discovery worker: canonical identity anchor, official/public email + social discovery, cross-verification, purpose separation, provenance/confidence, no guessed private data
 
 ## Documentation
 
@@ -23,7 +24,8 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 - `docs/prompts/WSP97_REDDOG_PUBLIC_SURFACE_REMOTE_PROMPT.md` - next host/mobile/site integration work order; HoloIndex requery/repair, existing database/host reuse, no knowledge-answer unlock
 - `docs/CONTACT_MEMORY_ARCHITECTURE.md` - principal-scoped relationship memory: encrypted capture, entity/event graph, semantic retrieval, provenance, AutoPost ingest, Breadcrumb/Brain/Memex projection linkage, and Lick encounter/identity linkage
 - `docs/CONTACT_COMMUNICATION_ACTION_PROTOCOL.md` - normative WSP_97 pre-action contract for email/messages/invites: resolve the canonical contact/registry and thread first; treat STT/aliases as lookup hints; verify destination, role, provenance, disclosure and authority; fail closed on material ambiguity; 0102/RedDog instructions never bypass the gate
-- `docs/MOSH_PIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Mosh Pit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
+- `docs/contact_research/FUKUI_CITY_COUNCIL_PUBLIC_CONTACTS_2026-09-11.md` - alpha evidence seed for all 31 sitting Fukui City councilors: city-listed phones, verified public political emails/social hubs, purpose labels, provenance, confidence, unresolved contacts and identity-collision warnings
+- `docs/MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md` - Moshpit as a reverse-chronological projection over Breadcrumbs + Brain/Memex; actor attribution, open-loop recall, Git evidence, STT normalization, disclosure views, and RedDog status/history retrieval contract
 - `docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md` - secure read-only projection/emitter layer for RedDog/founder views; principal+FoundUp+disclosure authorization, deterministic JSON/Markdown rendering, sink isolation, and threat model
 - `docs/prompts/WSP97_M2M_MEMEX_EMITTER_IMPLEMENTATION_PROMPT.md` - implementation work order: WSP_00 intake, WSP 97/HoloIndex ownership discovery, bounded M2M slices, fail-closed security tests, no parallel memory store, no external mutation authority
 - `README.md`, `INTERFACE.md`, `ModLog.md`, `ROADMAP.md`
@@ -34,7 +36,7 @@ Local retrieval manifest for the RedDog extension thin-client lane.
 
 - `buildCopyMarkdown`, `buildRunTraceSection`, `holoIndexMetaFromBundle`, `evaluateTargetRecall`
 - `isGenerationBoundHoloQueryAccepted`, `mergeGenerationBoundHoloResult`, `buildMetaFromBundle`
-- `PublicPolicy`, `PublicSessionGate`, `PublicSurfaceBinding`, `lick_verification_evidence`
+- `PublicPolicy`, `PublicSessionGate`, `PublicSurfaceBinding`, `lick_verification_evidence`, `register_host`, `renew_host`, `reclaim_orphaned_turns`
 
 ## Communication action recall target
 
@@ -71,7 +73,7 @@ Target composition:
 ```text
 Breadcrumb history + Brain/Memex current/open state + relevant evidence
 -> authorized Memex Projection Emitter
--> project-scoped Mosh Pit / compact status projection
+-> project-scoped Moshpit / compact status projection
 -> RedDog / founder view
 ```
 

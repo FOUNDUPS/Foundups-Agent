@@ -12,6 +12,102 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
+### AntifaFM prototype — 2026-10-18
+
+Implemented explicit SOCIAL campaign operations, bounded connected conversation
+reads, the existing AI drafter's station brief, and API-only own-account X
+publication with durable claims/readback. Prompt wrappers reuse the current
+OpenClaw/Codex owners; no production registration, reply publishing or cadence.
+Next host qualification: verify Move2Japan's API identity, inspect three real
+listener decisions with the configured local model, then qualify an authorized
+own-account post. [Runbook](docs/ANTIFAFM_CAMPAIGN.md).
+
+### Current caller/reload characterization — 2026-09-28
+
+PR1943 safe-publication repair is closed on main6821aac3 with42 fixed methods
+passing on final/main and independently reviewed owned cleanup. Fresh14/P1
+selection qualifies the three caller/save/reload boundaries with nine cases in
+the existing fixture; source remains unchanged. See
+[fixed acceptance](tests/README.md#caller-acknowledgement-and-reload-characterization--2026-09-28).
+Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
+Re-observe before selecting
+acknowledgement policy or a production repair. No exactly-once or retained RSI claim.
+
+### Historical safe-publication repair — 2026-09-28
+
+PR1942 characterization is closed on main12663d7e4f with successful main CI and
+CodeQL. WSP15 C3/I4/D4/Impact4=15/P1 selects explicit result projection and the
+existing shared atomic writer. The fixed42-method/48-input hosted contract is
+frozen.
+
+Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.
+
+This layer preserves action disposition and existing JSON load compatibility.
+Save acknowledgement across `understand_command`, `execute_pending_actions` and
+`cancel_action`, restart duplicate prevention, concurrent writers, independent
+delivery and retained RSI require separately scored work. Atomic publication
+alone does not close them.
+
+### Historical persistence qualification — 2026-09-28
+
+WSP15 C2/I4/D4/Impact4=14/P1 selects a six-case real-file characterization of the
+existing scheduler. Preserve its source and reuse the current fixture: two
+valid round-trip controls and four witnesses for typed response serialization,
+unreadable replacement and future-schedule loss on reload. Scope is disposable
+test data only. A green characterization can demonstrate a defect.
+
+Candidate `e8e06ea86f` passed all 32 methods / 38 fixed inputs in [CI36390957294](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294), with zero failures/errors/skips. All six exact file-evidence records were verified: two valid controls and four serialization/reload defect witnesses. CI and CodeQL passed; final integrated-head and merged-main validation remain receipt-bound.
+
+After exact hosted/main qualification and independent closure, re-observe and
+rescore before selecting a production repair. A repair needs explicit durable
+representation, previous-file preservation, load compatibility and save-failure
+acknowledgement contracts; in-memory success is not a durable receipt.
+
+### In-memory scheduler repair — closed 2026-09-28
+
+PR1936 closed the qualification below:13/13 witnesses passed on the reviewed PR
+and exact merged main `cd7e62d680`. Nine witnesses demonstrate misleading success;
+the four controls do not establish external delivery. That 15/P1 in-memory repair is now closed. PR1941 is merged/main-verified at `6acb3f55c2`: the frozen26 methods/32 inputs passed on final PR CI36380808132 and main CI36381188667; both CodeQL runs passed. Its owned branch/worktree were retired after recovery preservation.
+
+Freeze 26 methods/32 fixed input cases, then compare unchanged and repaired source
+through the existing hosted CI owner. Reject unsupported actions and incomplete
+or incoherent posting responses; preserve exact response objects and terminal
+no-retry behavior. Validate and snapshot unique nonempty targets before effects.
+Duplicate targets, including duplicates produced by overlapping natural-language
+matches, reject explicitly rather than silently posting to a substituted list.
+Baseline CI36379506634 confirms21 failing methods/27 assertion failures and5
+passing controls with no errors/skips. The same26-method fixture is unchanged
+for candidate validation: `9bc31ed6e0` passes all 26 methods/32 inputs in
+CI36380266749, with0 failures/errors/skips and green CI/CodeQL. Final integrated
+PR head/main convergence is recorded in the canonical backlog closure receipt.
+Source review also tightened exact response/string types and preserved posting
+classification across the await; those safeguards are source-reviewed, not
+additional independent test scenarios. Durable save/replay, independent
+delivery evidence, runtime admission and retained RSI remain separate.
+
+### Scheduler evidence qualification — 2026-09-28
+
+The historical phase checklist below is not a current whole-module completion
+claim. RSI source review at `ab9ab47a8` found that logging-only action branches
+report success, and `execute_pending_actions` marks any non-raising stream
+response executed, including failure/partial/empty responses. These observations
+must not feed verified-success or retained-learning metrics.
+
+WSP 15 C2/I4/D4/Impact4 = **14/P1** selects a bounded qualification in the
+existing scheduler test owner. Thirteen fixed cases exercise the unchanged leaf
+behind inert dependencies and record action/result/error, awaited calls, save
+requests and logs. The eight legacy test bodies remain unqualified. Hosted
+execution and independent review are required before calling the observations
+reproduced; preparation alone is not a test result.
+
+Next, re-observe and select the smallest result-contract repair supported by
+those observations. Preserve partial-result information and distinguish local
+attempt completion, provider-reported success and independently verified effect.
+Do not implement posting, a second scheduler or an outcome store as collateral
+work. Persistence failures and external delivery remain separate qualifications.
+See [test execution guidance](tests/README.md) and the
+[canonical RSI queue](../../../docs/roadmaps/rsi_swarm_backlog.json).
+
 **Phase**: Initial Implementation  
 **WSP Compliance**: WSP 3, WSP 11, WSP 22, WSP 49  
 **Created**: 2025-01-10

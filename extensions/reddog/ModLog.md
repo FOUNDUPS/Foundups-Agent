@@ -1,4 +1,408 @@
+## PR2181 private lease extraction bindings — 2026-10-23
+
+WSP6/11/22/62/97. Regenerate the existing manifest after the private scope
+extraction: 1,467 members, no removals; canonical digest
+`92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`.
+Pretty JSON measures 331,870 LF / 334,877 CRLF bytes; the prior 327 KiB cap
+misses CRLF by 29 bytes. Set only the measured whole-KiB ceiling to 328 KiB
+(995 bytes headroom), retain 2 MiB per-file / 32 MiB total, and test exact
+1,467-member acceptance / 1,468 rejection. Eight generator cases and all three
+Node contract/preflight/async commands pass. Independent staged-source/hash and
+reachability review plus its Node contract rerun pass. Fresh hosted gates remain.
+
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Locally verified candidate binding: the combined closure has
+1,466 members, adding 13 to main with no removals. Pretty JSON measures LF
+331,626 / CRLF 334,631 bytes. The smallest qualified whole-KiB ceiling is 327 KiB
+(334,848 bytes; 217 above CRLF); main's 324 KiB contract cannot contain it.
+Candidate digest: `88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16`.
+The paired boundary accepts 1,466 members and rejects 1,467. Per-file 2 MiB,
+total 32 MiB, exact digest/path/hash checks and authority gates remain unchanged.
+Eight Python manifest cases and three Node commands passed, including LF/CRLF,
+exact-byte/+1 and member/+1 controls. This is not installed-runtime qualification.
+
+
+Retain incoming main's runtime/package members and exact digest, path, finite
+membership and byte-bound checks while reconciling the preserved service closure.
+Combined manifest/pin verification and exact-bound/+1 checks pass locally;
+historical 1,451/1,462-member and 324/326 KiB figures below are not its contract.
+No installed extension or native admission is established.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## PR841 explicit one-member backend closure — 2026-10-23
+
+WSP 11/22/50/62/97. The cohesive livechat lifecycle extraction adds one actual
+import-closure member. Increase only MAX_RUNTIME_FILES 1450→1451 and require
+existing contract coverage accepting1451/rejecting1452. Preserve byte ceilings,
+digest enforcement and admission/identity boundaries. Generated set-difference
+and validation evidence belongs to refresh/841-qualification; no installed or
+native runtime claim.
+
+## PR1638 current-main integration — 2026-10-23
+
+Integrate main4169b051, preserving PR1759's CI job, trust bootstrap, generated
+1,450-member closure/pins and all received owner work. Resolve three independent
+insertions without dropping either entry. The reviewed PAL source/tests remain
+byte-identical; only the new PAL job adopts main's Node24.22.1 security baseline.
+Portable official archive checksum/version verified; five focused commands,
+18-member fast tier and exact69-file package surface pass on this runtime.
+Actual VSIX build/source mapping passes71 entries/284,535 bytes, with README's
+documented URL-only rewrite. Existing integration receipt owns exact results,
+the retained plain-clone topology failure and historical Node24.11.1 evidence.
+No installed-host, native RSI, hosted-CI or publication claim. WSP00/15/22/50/97.
+
+## PR1638 local activity-ledger reconciliation — 2026-10-22
+
+Preserve original PR head `688eb097` on last verified main `02d1c7c` in an
+isolated lane. Repair reproduced key/I/O/context failures in existing PAL owners:
+scoped serialized key creation; cooperating-process lock; authenticated history
+before append; strict JSON; full write/flush/close before success; globally
+latest commitment state and truthful truncation. Existing ledger/adapter tests
+and adjacent registration/disclosure/package manifest commands exit0 locally
+on Windows Node24.11.1. These are synthetic fixtures, not installed-host proof.
+
+Repair the full-package expected counts 67/66 to 69/68 for exactly the two PAL
+modules; preserve file membership, LF policy and one MiB limit. Add focused
+Linux/Windows CI coverage and reconcile existing interface/architecture/test
+docs. Current evidence and remaining review/publication/installed-host gates:
+`docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md`. Remote connectivity is
+unavailable; no push, merge, hosted CI, installation or native RSI claim.
+Independent review passed 13 adversarial cases; the approved-drive checkout
+passed the 18-member fast tier at `7615273f6`. Final package-list qualification
+is 69 files / 975,019 bytes; local VSIX build and explicit archive/source mapping
+pass. Correct current package counts and the existing README's monorepo link
+base after actual archive inspection exposed wrong generated links. Receipts
+distinguish byte-identical runtime from README-only URL rewriting. No install.
+WSP00/5/6/10/11/15/22/50/77/84/97. Blockchain/PF Mall work remains separate.
+
+## PR1759 operator-command runtime member — 2026-10-22
+
+The generated runtime closure adds exactly the existing PR's
+`modules/communication/livechat/src/operator_command_queue.py`; no member is
+removed. The extension's count bound moves from 1,449 to 1,450 for this measured
+closure. Manifest byte, per-file byte, total byte, path and digest checks stay
+unchanged. The existing boundary test requires the queue member, accepts 1,450
+and rejects 1,451. This does not grant worker or posting authority.
+WSP 6/11/22/50/62/97; exact frozen validation belongs to PR1759.
+
+## Operations policy manifest binding — 2026-10-21
+
+PR2150 preserves policy1.1.1 while synchronizing its existing registry/runtime
+versions and generated manifests. Backend membership remains1,449; exactly the
+policy, loader and registry hashes change. Existing JavaScript and Python pins
+now bind `ff912d79e080aa5003f18a4d31489d5c9a98ecf516015f882202b2b352b6973c`.
+No cap/API/authority changes. Three existing Node compatibility/recovery commands
+exit0; bridge TestModLog records generator and skill evidence. No installation.
+WSP22/50/71/95/97.
+
+## Installed HIGH service manifest contract — 2026-10-22
+
+Existing service-entrypoint imports require 1,462 runtime members (11 additions).
+Canonical digest becomes `759ee0caf65899b1baddc4329b085246e2fe4fcad53c2d273a29f257eaf833bb`.
+Pretty JSON remains LF 330,756 / CRLF 333,753 bytes. The explicit serialized
+limit changes 324→326 KiB (+2,048 bytes, about 0.62%), leaving 71 bytes above
+CRLF. This is the smallest whole-KiB contract covering the measured artifact.
+The consumer still checks exact digest and membership; 1,462/1,463 and exact
+byte-limit/+1 tests remain mandatory. Per-file 2 MiB and total 32 MiB bounds,
+JSON layout, source-line limits and runtime authority are unchanged. No extension
+installation or native HIGH admission is claimed. Independent Python manifest
+suite passes8 (including staged-index equality); JS contract/preflight/async all
+exit0 with LF/CRLF, exact-byte/+1 and member1462/1463 acceptance/rejection.
+Review and hashes: external `pr-reconciliation-20261021/refresh/rsi-installed-high-final-independent-review-20261022.json`. Hosted/current-main evidence is pending.
+
+## Live generation scope backend byte contract — 2026-10-20
+
+The required 1,451-member closure adds nonce authority/current-owner imports.
+Two-space JSON remains 327,910 bytes with LF and 330,885 with CRLF; the former
+crossed the unchanged 320 KiB bound by 230 bytes. The paired consumer/test bound
+is now 324 KiB (331,776 bytes), the smallest whole-KiB bound covering both: an
+explicit 4,096-byte (1.25%) increase with 891 bytes beyond the CRLF artifact.
+Exact canonical digest/member bindings and finite 1,451/1,452 count boundary
+remain. Per-file 2 MiB, runtime-total 32 MiB, independent Python readers' 4 MiB,
+source-line/component limits and all authority checks are unchanged. This is a
+serialized-byte resource contract change, not packing or a size exemption.
+The byte check follows readFileSync and precedes JSON parsing; it is not a
+preallocation memory bound.
+Both generator checks pass; 36 binding tests pass without skips and all three
+Node checks exit 0. Original 35-pass/1-failure evidence is retained.
+WSP00/5/6/11/22/50/62/97; no installed HIGH or native author claim.
+
+## Windows manifest byte compatibility — 2026-10-20
+
+Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows
+reader rejection at 320 KiB. Paired Node/Python accepted-input bound is
+now 324 KiB, a measured +4096-byte/1.25% contract change covering current
+and independently verified pending 1,451-member CRLF330885 (margin891).
+Pretty formatting, canonical digest/member bounds, other byte limits and
+source-line guards stay intact. This is post-read/pre-parse, not a memory
+allocation bound. Current binding tests36 pass; all three Node commands
+exit0 including actual LF/CRLF/exact-max/max+1 controls. Original failures
+and exact evidence remain in RSI dispatch. No native execution claim.
+WSP00/5/6/10/11/22/50/62/97.
+
+## Installed issuer contract closure — 2026-10-16
+
+The existing generated closure adds one installed-source descriptor contract:
+1,430 files. Both digest pins match; finite file-count acceptance/rejection
+moves to1,430/1,431. Per-file/total bytes, paths and hashes remain enforced.
+This is backend source compatibility, not installed worker admission.
+
+## Protected custody metadata backend closure — 2026-10-16
+
+Generated membership1428→1429 adds only `reddog_grant_authority_startup_custody.py`
+for explicit owner-v9 validation. Both digest pins and finite count boundary are
+synchronized;1430 rejects and all byte/path/hash checks remain. The callable
+dependency loader is not automatically launched by this extension update. No
+installed extension/runtime or native authority is asserted. WSP6/10/22/97.
+
+## Issuer composition backend closure — 2026-10-16
+
+The source manifest grows1426→1428 for exactly `foundup_verified_outcome_root_revocation_request_role.py`
+and `reddog_signer_system_service_runtime_dependencies.py`; no prior member is
+removed. The extension's stale1426-file cap rejected the generated manifest in
+the actual Node consumer. Synchronize the finite cap to1428 and retain explicit
+1429 rejection, pinned digest, path/hash allowlists and all byte bounds. CI now
+runs this consumer contract alongside its existing preflight. WSP00/6/10/22/97.
+No extension installation or worker admission is claimed.
+
+## Initial enrollment backend binding — 2026-10-15
+
+Regenerated the existing1426-member backend manifest after initial-manifest,
+generation-reader and owner-layout changes; membership and caps are unchanged.
+Both existing digest pins now bind `4fc7653444c12854401a4f5aad6167e2a853c081e51f77a16ade42521c19ef77`.
+Fast tier15members passed. This is repository compatibility binding, not a VSIX
+release, installed-extension update or native worker admission. WSP10/22/97.
+
+## Effect approval closure count — PR2090, 2026-10-07
+
+Backend runtime closure1419→1421 adds exactly `reddog_effect_consensus_proof.py`
+and `reddog_current_effect_signing_authority.py`, removes none. The existing
+compatibility cap and boundary regression now accept1421/reject1422, and require
+both named additions. Digest remainsbc84374ad861c79d9b51c79964722916a7f6b0e336a2356909fe486923e0259d;
+byte limits, allowlists and signatures are unchanged. No service/extension install.
+
+CI37507545251 passed signing677/3skip and startup248, then exposed the stale1419
+extension boundary. Local full fast tier15 members passed in9468ms after restoring
+required LF to changed JS files. Independent two-file review found no blocker;
+receipt `effect-signing-extension-count-review.json`, SHA256
+`d09b48a349f4016dd964ab0bae45440661c4e86dc2f4a0e9c74e3e60846b6bb4`.
+WSP00/6/15/22/50/84/97. New-head hosted checks pending; no native RSI claim.
+
+## Protected-use control-proof source binding — 2026-10-05
+
+Regenerate the existing backend manifest after two-owner descriptor/control-proof changes. Closure remains1,417 files; digest `70ae71c8d9973c071b4403f2e19e3d95fb541b452161031975d47105e3065d99` is pinned in existing JavaScript/Python consumers. Count limits and default startup are unchanged. See bridge module ModLog; no deployment or native RSI activation.
+
+## Owner-bound lazy signer composition — 2026-10-05
+
+The existing backend import closure now reaches nine previously standalone signer
+leaves:1408→1417 files. Regenerate the manifest, refresh both digest pins and
+require exactly1417/reject1418 in the existing compatibility boundary. Byte caps,
+allowlists and authority checks remain. No installed extension or service changed.
+See RSI backlog `signer_lazy_owner_composition_20261005` for verification/publication.
+
+## 2026-10-05 — Named WRE telemetry source closure
+
+The existing backend manifest now binds the registry-audit executor and its
+adjacent Skillz manifest explicitly, including the executor's imported source.
+Runtime members increase1406→1408. Refresh both digest pins and admit exactly1408,
+reject1409; byte caps and other compatibility rules remain. No installed
+extension, authority deployment or autonomous execution is claimed.
+Consumer validation and publication evidence belong to the existing P14 RSI
+checkpoint. WSP5/15/22/50/84/95/97.
+
+## 2026-10-04 — Authenticated consent closure count repair
+
+PR2060 CI37209280885 reproduced an overlooked compatibility boundary: the
+regenerated manifest contains1406 runtime members but the production ceiling
+and its boundary test still expected1404. The two additions are the reviewed
+consent-contract and current-consent-verification leaves. Raise only the exact
+count ceiling to1406; preserve rejection at1407, byte caps, digest pins and
+allowlists. The manifest itself remains unchanged.
+
+Local original test reproduced exit1; the repaired existing fast tier passes
+all15 members, including actual backend preflight and both count boundaries.
+No installed extension or runtime activation is claimed. Initial CI and review
+omissions remain historical evidence; replacement-head hosted checks are pending.
+Future closure refreshes must run the existing consumer fast tier as well as
+generator hash checks. Evidence: `outputs/rsi-authenticated-effect-consent-20261004`.
+WSP15/22/50/84/97.
+
+## 2026-10-02 — Scoped reviewer authority dependency closure
+
+Regenerated the existing backend manifest for two bounded reviewer-designation
+and current-verification leaves (1402 → 1404), updating exactly the eight
+changed source owners reachable from existing backend entrypoints. Three changed
+supply/readiness/service-binding owners remain outside this backend closure,
+as before; their tests bind them separately. Digest: `77d191b6bc8cd3fd8b056833d4c210d177d0a950f103a0210a0d614914a9422c`. Existing JS/runtime count
+and generator-test digest pins retain strict boundaries (1404 allowed,1405
+rejected). No production configuration or service is activated. WSP22/50/84/97.
+
+## 2026-10-01 — Effect-review dependency closure and compatibility pins
+
+The existing consensus verification owner now imports the already merged pure
+effect context. Regenerated backend closure adds exactly that one existing leaf
+(1401 → 1402) and updates the four modified consensus source hashes. Canonical
+manifest digest: `a88fc6eabcfdac210757ea916fa0ebe96744e8dafdaee6be6ef0a9a982208310`. Updated existing JavaScript and generator-test digest
+pins and exact Node count boundary (1402 allowed, 1403 rejected). Other limits,
+schema/API and checks remain unchanged; no new executable entry or activation.
+Generator write/check passed; exact test/publication evidence is recorded in
+`O:/Foundups-Agent-audits/20261001-rsi-effect-reviewer/`. WSP 22/50/84/97.
+
+## 2026-10-01 — Pure binding publication integrity repair
+
+PR#2003 initial head `edb62321` passed43 exact effect-domain/binding cases, but
+CI36814825254 failed the existing backend compatibility check: the two changed
+consensus source hashes had not been regenerated. Preserve that failed run;
+passing the qualification subset is not passing CI.
+
+Regenerated the existing backend manifest with its canonical AST/Git generator,
+then updated its existing JavaScript and generator-test digest pins to
+`3eefbd0321c31f55ecc27e5f3110812f591928b6edec7718d15301b30755d068`.
+Exactly two runtime digests changed; the1401-member inventory, schema/API and
+all validation assertions remain unchanged. The existing Node backend
+compatibility test now passes; all8 generator tests pass, including staged-index
+closure. Final exact-head CI remains pending.
+WSP50/84/97: source changes require generated closure/pin checks before publishing.
+Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+
+## 2026-09-28 - Correspondence-state Skillz backend inventory refresh
+
+- Registered the generic Red Dog correspondence-state Skillz and changed the WRE Skillz registry content without expanding the executable backend closure.
+- Refreshed the existing 1,401-file backend manifest entry for `skills_registry_v2.json` and both canonical manifest digest pins. Registry runtime SHA: `a8e069ea136924a368f4e9af29fcfc6ab19b1b2b5743919a8bfd05b52d79e415`; manifest digest: `663ec92531dda7c601bfdd269659b6984e72500b5f793f31b993dc5d4255dc60`.
+- This is compatibility metadata only: no extension behavior, backend API/version, permission rule, executable member, package surface, or send authority changed.
+
 # RedDog ModLog
+
+## 2026-09-24 - WRE research-display backend binding
+
+- First PR1899 CI run35889528743 failed the unchanged backend compatibility contract: the dashboard source was a missed manifest dependency. The failure is retained in the canonical RSI backlog.
+- Regenerated the existing manifest and refreshed both digest pins to `3094aeb031a7f2917afe18f19a61e254fcfa6110528c286f2191ad00ad872618`. Exactly one member hash changed: `modules/infrastructure/wre_core/src/dashboard_alerts.py`. All1,401 members, API/version, caps and other hashes remain unchanged.
+- Local manifest check, eight existing generator tests and the unchanged Node backend contract pass. The67 display/wiring cases and their independent replay remain byte-bound and unchanged. Fresh exact-head CI is required; no installed extension/runtime or live RSI claim. WSP15/22/50/84/97.
+
+
+## 2026-09-22 - Broker stop-acknowledgment backend binding
+
+- Existing broker member hash and both digest pins refreshed to `baf2e34b1d50a357692339c8489b821ed5f1f2e346c3ac87d0e5c7aa05f32098`; all1,401 members, API/version and caps unchanged.
+- Eight generator tests/check,15fast groups and deterministic67-file/950,440-byte package pass. Fixed51broker cases pass locally and independently; no installed runtime update or live RSI proof.
+- WSP15/22/49/50/62/84/97. Exact publication and next action are tracked in the canonical backlog.
+
+## 2026-09-22 - Broker import-streak backend binding
+
+- Refresh the existing broker member and both digest pins to `52968ee67ecb7645bd21d39ce6dcbafcb578ded28f0dd7fe8db7285d6884d267`. Runtime membership remains 1,401; API/version and package caps are unchanged.
+- Eight generator tests, manifest check, 15 fast groups and the deterministic 67-file/950,440-byte package pass. The broker's 13 fixed inert cases pass locally and independently; these do not prove live recovery or autonomous RSI.
+- No installed extension, service or provider update. Exact publication and fresh selection are recorded in the canonical RSI backlog. WSP 15/22/49/50/62/84/97.
+
+## 2026-09-22 - WRE diagnostic-outcome backend binding
+
+- Bind the existing scanner and one cohesive WRE outcome helper; generated runtime membership is exactly1,401, with no removed members. Both digest pins are `5cade2540f521672ca62be0ab59d34eeee89e3224316106a11cbe1871fbcac77`.
+- Increase only the explicit runtime-file ceiling from1,400 to1,401. Byte/total/path/digest controls and API/version remain unchanged. The fixed in-memory boundary test failed before the change and now accepts1,401/rejects1,402.
+- Fifteen fast groups and deterministic67-file/950,440-byte package pass. Canonical backlog evidence records generator validation, independent review and exact publication. Initial generation rejected the untracked helper; explicit owned-file Git registration preceded the successful rerun.
+- No installed extension, service or provider update. WSP15/22/49/50/62/84/97; structural diagnosis is not causal repair or production RSI.
+
+## 2026-09-22 - Event-store retry backend binding
+
+- Refresh the existing event-store member and both digest pins to `b5fd49e4592cf2814da481d42d254df4bd8ef36b897576018b789b4f291bed95`. Membership remains1,400; API/version, package caps and installed runtime are unchanged.
+- Eight generator tests,15fast groups and deterministic67-file/950,440-byte package pass. Only the existing sequence-collision retry owner changed; no installed extension/provider update or durable-store claim.
+- Exact publication/verification is tracked in the canonical RSI backlog. WSP15/22/50/62/84/97.
+
+## 2026-09-20 - Hermes rejection-evidence backend binding
+
+- Refresh the existing manifest's Hermes lifecycle member and both digest pins to `3715e23b32f56b9b8756461854f5889335628763a16878de6923521cfa86afdd`. All 1,400 members, API/version and extension behavior remain unchanged.
+- The bridge's 13/P1 repair keeps parent-only stop and noncompleted/forbidden terminal evidence from claiming complete observation or confirmed abort; it preserves possible effects and artifact withholding. No child cancellation or delivery support is added.
+- Manifest check and eight generator tests pass with two pytest configuration warnings; 15 fast groups and the deterministic 67-file/950,440-byte package pass. Independent source review accepts 117 cases (108 repeated plus nine controls); exact-head publication remains separately tracked in the RSI backlog.
+- No installed extension, runtime or provider is updated. WSP 15/22/50/62/84/97.
+
+## 2026-09-20 - Prepared-context backend manifest binding
+
+- Updated five existing runtime member hashes; unchanged1,400-member manifest/API/version and extension behavior. Both digest pins now match `cbd1292a4857bf071ab2d8807114c7a03932f98f2e3dc1535bac4b09884469ef`.
+- Reproduced inherited generator-test pin mismatch before edits; retained it separately, then refreshed both pins together. Eight generator tests/check pass;15 fast groups and67-file/950,440-byte package pass.
+- No installed extension/provider/runtime updated. Source repair and exact publication evidence belong to the current RSI backlog. WSP15/22/50/84/97.
+
+
+## 2026-09-20 - Daemon counter ownership backend binding
+
+- Refreshed the existing daemon member digest and its JavaScript/Python manifest pins to 0f65af35cfd806cc1cdc22fc3f4654e5090a8d27dc47b605831af7cc2069b60c.
+- All 1,400 members, manifest API/version, package caps and safeguard assertions remain unchanged. No installed extension, provider or runtime is updated.
+- Generator 8 tests, existing RedDog 15 fast groups and deterministic 67-file/950,440-byte package pass. Source repair is owned by WRE Core; exact-head CI remains required. WSP15/22/50/84/97.
+
+## 2026-09-20 - WSL command-control backend digest reconciliation
+
+- PR1806 candidate2033939 failed the unchanged backend compatibility gate.
+  Independent diagnostics identify the changed WSL adapter as the sole stale
+  member. The original failure is retained in the canonical RSI backlog.
+- Regenerated the existing1,400-file manifest and refreshed its extension and
+  Python test digest pins to `11b2a45c0feca2b3c53372b0c07f22788091edf89fef91555142325f560a24f1`. The member set, API, version, caps and
+  all safeguard assertions are unchanged. No installed extension is updated.
+- Local generator8 tests, RedDog15 fast groups, exact backend contract and
+  package67 files/950,440 bytes pass; backend contract overlaps the fast tier.
+  Fresh exact-head CI is still required. WSP15/22/50/84/97; no runtime effects.
+
+## 2026-09-19 - Reconcile WRE Skillz registry backend hash
+
+- Reproduced issue #1784 on exact current main: the authenticated backend manifest itself remained canonical, but runtime integrity failed closed only for `modules/infrastructure/wre_core/skillz/skills_registry_v2.json`.
+- The registry changed after the prior backend pin as new governed Skillz were registered. Regenerated the existing 1,400-file backend inventory and refreshed the canonical manifest digest; no runtime membership, compatibility assertion, authority boundary, or gate was weakened. WSP 00, 95, 97.
+
+## 2026-09-14 - Reconcile 0.4.141 release identity contract
+
+- Replaced the exhaustive release contract's stale architect-product identity
+  assertions with the canonical fast-RedDog/deep-0102 boundary already
+  enforced by the focused identity test and package manifest.
+- Corrected the remaining README sentence that described RedDog as the
+  principal-scoped 0102 identity. No command, authority, runtime, provider,
+  package membership, or release version changed. WSP 15, 22, 50, 97.
+- Made the existing package test commands work from linked task worktrees on
+  Windows by deriving the primary checkout from Git's common directory and
+  validating its O:/E: venv. Explicit runtime overrides remain authoritative;
+  ambient and user-site Python remain excluded. Temporary test artifacts now
+  default to the isolated worktree's ignored O:/E: directory instead of the
+  ambient Windows temp root.
+- Hostile independent review then rejected the first Git lookup because ambient
+  executable/environment controls could redirect the reported common directory.
+  The final path reuses the existing identity-bound Git executable and closed
+  environment, pins Git worktree controls, and validates primary/linked metadata
+  topology before selecting the venv. Foreign O:/E: repositories fail closed.
+- Closed the candidate with the unchanged 67-file package boundary. The full
+  four-group release gate passes after the hostile-review repair in 229.074
+  seconds; the package remains 950,440 raw bytes at
+  `sha256:aeace93f0386c549ac6c70e6aae25ba6aaac10738ea76ee76585735668135773`.
+  This is local candidate evidence only: no VSIX was published and no runtime
+  or Git authority was added.
+
+## 2026-09-13 - Pin compact fidelity stop-condition correction
+
+- Refreshed the existing 1,400-file backend manifest after the token-efficiency
+  gate began checking parsed stop conditions. Membership is unchanged; the
+  only runtime hash change is `token_efficiency/src/m2m_fidelity_gate.py`.
+- Updated the compatibility pin and generator-test expectation to
+  `8e0141cee8d20a84d48e1f8ccd5c03cff82e541e7bae4734533fc347bbc99437`.
+  No extension service, product route, provider binding or package was activated.
+
+## 2026-09-13 - Pin WSL advisory release-suffix correction
+
+- Regenerated the existing backend manifest after the WSL OpenClaw version
+  parser repair. The 1,400-file closure membership is unchanged; only the
+  `dependency_launcher/src/wsl_agent_runtime.py` content hash changes.
+- Updated the manifest pin and existing generator-test expectation to
+  `100c0148e7c5e2f4ceb16c4018449e60f5cdee19e14f3c6c20eb61b9ce544392`.
+  This resolves the backend preflight mismatch found by PR CI; it changes no
+  extension behavior, authority policy or release version. WSP 22, 50, 97.
+
+## 2026-09-13 - Current-main backend inventory reconciliation
+
+- Regenerated the existing 1,400-file inventory for the two phone/voice files already changed on main `034d04b427896cb7c944efb5aa1f4d6d3e2413b5`. The closure membership is unchanged; only two content hashes change.
+- Updated the extension digest pin and existing generator-test expectation to `e28795db78d22b26a3254a7cf8e60f047133ac4e1dfca0b949b9547902080e57`. No backend source, authority rule, dependency cap or release version changed.
+- This repairs the backend preflight failure exposed by roadmap PR CI. RedDog fast tier: 15 groups pass. Package remains 67 files and within the existing byte cap; this does not publish a VSIX or activate a runtime. WSP 22, 50, 97.
 
 ## 2026-09-05 - Identity / merged builder reconciliation (0.4.141)
 
@@ -4031,3 +4435,10 @@ WSP: WSP_00, WSP_15, WSP_22, WSP_87, WSP_97, WSP_109.
 - Regenerated the backend compatibility manifest for the bounded LOW-tier
   independent signer grant-provider modules. No client execution authority was
   added; elevated issuance remains blocked on verified consensus.
+## 2026-10-05 — Admitted HoloIndex recovery binding
+
+Regenerated the existing backend manifest and both digest pins for the incident
+resume/controller/liveness/CLI repair. Runtime membership remains1408; count,
+byte limits and admission checks are unchanged. Local/hosted validation is
+recorded in the canonical RSI backlog `holo_grounding_20261005`. No installed
+extension update or deployment is claimed. WSP5/11/15/22/50/62/97.

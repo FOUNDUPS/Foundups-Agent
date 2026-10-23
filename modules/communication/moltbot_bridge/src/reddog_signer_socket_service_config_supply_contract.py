@@ -20,6 +20,14 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifi
 SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT = "SIGNER_SERVICE_CONFIG_SUPPLY_ACCEPT"
 SIGNER_SERVICE_CONFIG_SUPPLY_REJECT = "SIGNER_SERVICE_CONFIG_SUPPLY_REJECT"
 SIGNER_SERVICE_CONFIG_SCHEMA_VERSION = "reddog_signer_service_config.v3"
+INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION = "reddog_initial_handshake_service_config.v1"
+INITIAL_HANDSHAKE_CONFIG_FIELDS = frozenset({
+    "schema_version", "runtime_root", "signer_runtime_root", "socket_path",
+    "key_provider_profiles", "peer_policy", "provider_mode",
+    "allow_test_only_key_material", "permission_snapshot_fresh",
+    "max_requests", "timeout_s", "max_request_bytes", "max_response_bytes",
+    "owner_e0_authority_binding_digest",
+})
 SIGNER_SERVICE_CONFIG_FILENAME = "signer_service_config.json"
 CONVERSATION_SCOPE_MIN_REQUEST_BYTES = 163840
 
@@ -145,6 +153,8 @@ def dedupe_reasons(values: Sequence[str]) -> tuple[str, ...]:
 
 
 __all__ = [name for name in globals() if name.startswith("FAIL_SIGNER_CONFIG_")] + [
+    "INITIAL_HANDSHAKE_CONFIG_SCHEMA_VERSION",
+    "INITIAL_HANDSHAKE_CONFIG_FIELDS",
     "SIGNER_SERVICE_CONFIG_SCHEMA_VERSION",
     "SIGNER_SERVICE_CONFIG_FILENAME",
     "CONVERSATION_SCOPE_MIN_REQUEST_BYTES",

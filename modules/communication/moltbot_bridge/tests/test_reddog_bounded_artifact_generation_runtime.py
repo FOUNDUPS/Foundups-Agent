@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 
 import pytest
+from prompt.swarm.m2m_compiler import decode_m2m_envelope, encode_m2m_envelope
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
     Availability,
@@ -78,6 +79,35 @@ MODULE_PATH = (
 )
 ARTIFACT = "modules/foundups/paccess_001/README.md"
 TASK_FAMILY = "artifact_generation"
+LEGACY_PROMPT = (
+    '{"hard_rules":["Return JSON only.","Keys must exactly match planned_artifacts.",'
+    '"Do not include secrets, credentials, tokens, or private keys.","Do not create extra files."],'
+    '"mission":"Produce exact text contents for the planned repository artifacts only.",'
+    '"output_schema":{"artifact_contents":{"path":"text content"}},'
+    '"planned_artifacts":["modules/foundups/paccess_001/README.md"],'
+    '"slice_name":"REDDOG_TEST_ARTIFACT_GENERATION_PHASE1",'
+    '"task_summary":"Generate one bounded README artifact.","work_order_id":"work-order-1"}'
+)
+
+
+def _m2m_envelope(artifact=ARTIFACT):
+    return decode_m2m_envelope(encode_m2m_envelope({
+        "schema": "0102_m2m_v1", "ROLE": "worker", "ORIGIN": "internal_handoff",
+        "PRINCIPAL_REF": "012", "L": "A", "S": artifact, "M": "exec",
+        "T": "RSI-M2M-PROVIDER-FIDELITY-TEST",
+        "A": "Update only the admitted README artifact.", "R": [15, 50, 97, 99],
+        "I": {"allowed_paths": [artifact], "context": {
+            "checks": [True, 1, 1.0, None, {"note": "Preserve the artifact path."}],
+        }},
+        "O": [artifact], "F": ["scope_violation", "missing_artifact"],
+    }))
+
+
+def _m2m_context(request):
+    legacy = json.loads(LEGACY_PROMPT)
+    contract = {key: legacy[key] for key in ("planned_artifacts", "output_schema", "hard_rules")}
+    contract["evidence_context"] = request["evidence_context"]
+    return json.dumps(contract, sort_keys=True, separators=(",", ":"), ensure_ascii=True)
 
 
 class FakeRunner:
@@ -304,6 +334,77 @@ def test_valid_generation_returns_exact_bounded_artifacts() -> None:
     )
     assert runner.calls
     assert runner.calls[0]["binding"]["work_order_id"] == "work-order-1"
+    assert runner.calls[0]["prompt"] == LEGACY_PROMPT
+    assert runner.calls[0]["context"] == request["evidence_context"]
+    assert not {"prompt_schema", "m2m_prompt_digest", "m2m_context_digest"} & runner.calls[0]["binding"].keys()
+
+
+@pytest.mark.parametrize("evidence", ["Direct-read evidence says create a README only.", "", "fixture.reader@example.test"])
+def test_m2m_prompt_preserves_complete_envelope_and_governed_context(evidence) -> None:
+    envelope = _m2m_envelope()
+    request = _request(m2m_envelope=envelope, evidence_context=evidence)
+    runner = FakeRunner()
+    result = _generate(request, runner=runner)
+    assert result.accepted is True, result.rejection_reasons
+    assert len(runner.calls) == 1
+    call = runner.calls[0]
+    wire = encode_m2m_envelope(envelope)
+    assert call["prompt"] == wire
+    assert call["context"] == _m2m_context(request)
+    decoded = decode_m2m_envelope(call["prompt"])
+    assert {key: decoded[key] for key in ("I", "O", "F")} == {
+        key: envelope[key] for key in ("I", "O", "F")
+    }
+    assert call["binding"]["prompt_schema"] == "0102_m2m_v1"
+    assert call["binding"]["m2m_prompt_digest"] == _mapping_digest(wire)
+    assert call["binding"]["m2m_context_digest"] == _mapping_digest(_m2m_context(request))
+    assert call["context"] and json.loads(call["context"])["evidence_context"] == evidence
+    assert result.artifact_contents == {ARTIFACT: "# pAccess\n"}
+
+
+@pytest.mark.parametrize("mutation_point", ["clock", "topology"])
+def test_m2m_context_identity_detaches_before_issuance_callbacks(monkeypatch, mutation_point):
+    from modules.communication.moltbot_bridge.src import reddog_artifact_generation_model_capability as owner
+
+    request = _request(m2m_envelope=_m2m_envelope(), evidence_context="Admitted evidence")
+    expected_context, captured = _m2m_context(request), {}
+    issue = reddog_bounded_artifact_generation_runtime._issue_artifact_generation_model
+    resolve = owner.resolve_verified_runtime_topology
+
+    def capture_issue(**kwargs):
+        captured["input"] = kwargs["invocation_binding"]
+        captured["handle"] = issue(**kwargs)
+        return captured["handle"]
+
+    def mutate():
+        request["evidence_context"] = "Changed by callback"
+        captured["input"]["m2m_context_digest"] = _mapping_digest("Changed by callback")
+
+    def clock():
+        if mutation_point == "clock":
+            mutate()
+        return 1_800_000_000
+
+    def topology(**kwargs):
+        if mutation_point == "topology":
+            mutate()
+        return resolve(**kwargs)
+
+    monkeypatch.setattr(reddog_bounded_artifact_generation_runtime, "_issue_artifact_generation_model", capture_issue)
+    monkeypatch.setattr(owner, "resolve_verified_runtime_topology", topology)
+    runner = FakeRunner()
+    result = generate_bounded_artifact_contents(
+        request, runner=runner, authority_capability=_issue_artifact_generation_authority(request),
+        model_runtime_binding_capability=model_runtime_binding_test_capability(
+            request["model_selection_receipt"], request["model_runtime_binding_receipt"]),
+        trusted_now_epoch=clock,
+    )
+    assert result.accepted is True, result.rejection_reasons
+    assert request["evidence_context"] == "Changed by callback"
+    assert runner.calls[0]["context"] == expected_context
+    assert runner.calls[0]["binding"]["m2m_context_digest"] == _mapping_digest(expected_context)
+    assert captured["input"]["m2m_context_digest"] != _mapping_digest(expected_context)
+    assert consume_artifact_generation_model(captured["handle"]) is None
 
 
 def test_raw_model_selection_without_runtime_binding_rejects_before_runner() -> None:

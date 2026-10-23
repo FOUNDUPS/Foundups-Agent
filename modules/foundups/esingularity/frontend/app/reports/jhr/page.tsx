@@ -1,40 +1,14 @@
-import type { Metadata } from "next";
-
 const YUMORI_ME = "https://yumori.me/";
 const YUMORI_INFO = "https://yumori.info/";
-
-export const metadata: Metadata = {
-  title: "Japan Hyperscaler Report #001 | eSingularity",
-  description:
-    "日本全国のハイパースケール・データセンター政策、仙台200MW計画、印西の地区計画、福井の分散型AIインフラを日本語・英語で追跡。",
-  keywords: [
-    "Japan Hyperscaler Report",
-    "JHR",
-    "日本 データセンター",
-    "ハイパースケーラー",
-    "印西 データセンター",
-    "仙台 AI データセンター",
-    "福井 データセンター",
-    "GX戦略地域",
-    "ワット・ビット連携",
-    "AIインフラ",
-    "COG DC",
-    "YUMORI.me",
-    "eSingularity",
-  ],
-  alternates: { canonical: "https://esingularity.ai/reports/jhr" },
-  openGraph: {
-    title: "JHR #001 — 日本は『次の印西』を全国につくろうとしているのか",
-    description: "仙台200MW、印西の地区計画、GX戦略地域。巨大化する前に福井は地域分散型AIインフラを選べるか。",
-    type: "article",
-    url: "https://esingularity.ai/reports/jhr",
-  },
-};
 
 const sources = [
   {
     label: "経済産業省：GX戦略地域制度の有望地域（1次審査通過地域）",
     href: "https://www.meti.go.jp/press/2026/04/20260424007/20260424007.html",
+  },
+  {
+    label: "経済産業省：GX戦略地域（第1弾）認定（2026年9月11日）",
+    href: "https://www.meti.go.jp/press/2026/09/20260911006/20260911006.html",
   },
   {
     label: "内閣官房GX実行推進室：GX戦略地域制度に係る検討状況",
@@ -101,7 +75,7 @@ export default function JapanHyperscalerReportPage() {
   return (
     <main style={{ maxWidth: 920, margin: "0 auto", padding: "48px 24px 96px", lineHeight: 1.78 }}>
       <p style={{ fontWeight: 800, letterSpacing: "0.08em" }}>JAPAN HYPERSCALER REPORT / JHR #001</p>
-      <p style={{ fontWeight: 800 }}>最終更新 / LAST UPDATED: 2026-09-10</p>
+      <p style={{ fontWeight: 800 }}>追記 / ADDENDUM: 2026-09-12 · 本文 / MAIN REPORT: 2026-09-10</p>
       <h1 style={{ fontSize: "clamp(2rem, 6vw, 4rem)", lineHeight: 1.08, marginBottom: 16 }}>
         日本は「次の印西」を全国につくろうとしているのか
       </h1>
@@ -111,10 +85,34 @@ export default function JapanHyperscalerReportPage() {
         <a href={YUMORI_INFO} target="_blank" rel="noreferrer" style={button}>YUMORI.info / 資料</a>
       </p>
 
+      <section id="latest" style={{ marginTop: 32, padding: 24, border: '2px solid #0b2d57', scrollMarginTop: 24 }}>
+        <h2>最新動向｜2026年9月12日確認</h2>
+        <p><strong>9月11日・仙台：</strong>fantasistaは、総受電容量200MW規模の計画について、米国の投資運用会社側と資金調達・協業の条件協議を始める基本合意を発表しました。資金調達の完了や開発許可の取得を意味しません。</p>
+        <p><a href="https://prtimes.jp/main/html/rd/p/000000062.000093934.html" target="_blank" rel="noreferrer">事業者発表（9月11日） →</a></p>
+        <p>全国で計画が具体化する中、福井ではどの規模・立地・地域還元が望ましいかを先に議論する必要があります。このニュースは、旧すかっとランド九頭竜周辺への立地決定を示すものではありません。</p>
+      </section>
+      <section id="land-area" style={{ marginTop: 32, scrollMarginTop: 24 }}>
+        <h2>大きさは、MWだけでは比べられない</h2>
+        <p>敷地面積と建物の延床面積は別の数字です。地図に重ねる比較には、敷地面積と原図の縮尺を使います。</p>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+            <caption style={{ textAlign: 'left', marginBottom: 12 }}>事業者公表の敷地面積</caption>
+            <thead><tr><th>比較対象</th><th>敷地面積</th><th>同面積の正方形</th></tr></thead>
+            <tbody>
+              <tr><td><a href="https://www.daiwahouse.com/about/release/house/20220329190642.html">DPDC印西パーク</a></td><td>約270,000㎡（27ha）</td><td>一辺 約520m</td></tr>
+              <tr><td><a href="https://prtimes.jp/main/html/rd/p/000000061.000093934.html">仙台・200MW計画</a></td><td>約71,787㎡（7.18ha）</td><td>一辺 約268m</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>面積比は約3.76倍です（270,000 ÷ 71,787）。正方形の一辺は各面積の平方根を丸めたものです。実際の区画形状を示す数値ではありません。</p>
+        <p>トップページの白枠は、比較用に指定された範囲です。原図には縮尺がないため、白枠を27haと認定したり、印西より大きい・小さいと断定したりすることはできません。距離の基準を確認後、同じ面積になるように調整します。</p>
+      </section>
+
       <figure style={{ margin: "36px 0" }}>
         <img
           src="https://www.re-port.net/picture_l/report/0000074457_09.png"
           alt="千葉県印西市の大規模データセンター開発地を上空から見た写真"
+          referrerPolicy="no-referrer"
           style={{ width: "100%", height: "auto", borderRadius: 12 }}
         />
         <figcaption style={{ fontSize: ".9rem", opacity: 0.8 }}>
@@ -170,7 +168,7 @@ export default function JapanHyperscalerReportPage() {
 
       <section style={{ marginTop: 36 }}>
         <h2>6. Fukui Signal — 福井は先に選択肢をつくれる</h2>
-        <p><span style={tag}>OFFICIAL</span>福井県は現時点でデータセンター集積型9道県には入っていません。一方、福井市と小浜市は別類型の「脱炭素電源活用型」の有望地域です。</p>
+        <p><span style={tag}>OFFICIAL / 2026-09-11 UPDATE</span>福井県はデータセンター集積型の認定地域ではありません。一方、福井県（福井市・小浜市）はGX戦略地域第1弾の「脱炭素電源活用型」として正式認定されました。4月24日の有望地域（一次審査通過）から一段進んだ状態です。</p>
         <p><span style={tag}>ANALYSIS</span>これは「福井に巨大データセンターが来ることが決まった」という意味ではありません。しかし、AI需要、脱炭素電源、ワット・ビット連携、地方産業立地の方向を見ると、福井も先に土地・電力・地域利益のルールを持つべきです。</p>
         <p style={{ fontSize: "1.18rem", fontWeight: 800 }}>
           YUMORI.meの立場はデータセンター反対ではありません。田んぼ、山、集落の土地を何十haも集約する大型キャンパスだけを唯一の未来にしないことです。
@@ -189,7 +187,7 @@ export default function JapanHyperscalerReportPage() {
         </ul>
         <h3>モデルB — COG DC / 地域分散型</h3>
         <ul>
-          <li>1MWから検証し、5→10→20MWへ需要に応じて拡張</li>
+          <li>MWを先に固定せず、契約需要と電力・通信条件から必要容量を逆算して段階拡張</li>
           <li>既存建物・既存インフラの再利用を優先</li>
           <li>学校、大学、病院、自治体、企業、農業への近距離コンピュート</li>
           <li>排熱を温泉、給湯、暖房、融雪、農業へ活用する可能性</li>
@@ -199,8 +197,9 @@ export default function JapanHyperscalerReportPage() {
       </section>
 
       <section style={{ marginTop: 36 }}>
-        <h2>8. YUMORI.me — 壊す前に調べる</h2>
-        <p>YUMORI.meは、旧すかっとランド九頭竜を解体する前に、60日間だけでも正式に再利用可能性を調べることを求めています。COG DC、温泉、教育、起業、文化の複合拠点として成立するかは未検証です。だからこそ、電力、通信、構造、資金、需要、温泉運営を先に調べる。</p>
+        <h2>8. YUMORI.me — 採決後はPPP/PFIで比較検証</h2>
+        <p>YUMORI.meは、eSingularity.aiの市民活動・保存運動を担う設立準備委員会です。9月25日の採決は終了しました。現在の要請は、不可逆な解体調達・工事へ進む前に、福井市がPPP/PFIの官民連携ルートを指定し、解体案と再利用案を同じ証拠で比較検証することです。COG DC、温泉、教育、起業、文化の複合拠点としての成立は未検証であり、YUMORI案の自動採用、市の出資、随意契約を求めるものではありません。</p>
+        <p>要請の対象と根拠：<a href="https://www.city.fukui.lg.jp/sisei/zaisei/yosan/yosan_d/fil/R8-9hosei.pdf#page=10">福井市の補正予算案（印刷頁8）</a> ／ <a href="https://docs.google.com/document/d/1yeO6-6_mTLW8QswosVKmCVCHSRgWiacq-7FL7-9clsE/edit">市・県・市議会向け支援資料 03</a>。安全確保に必要な調査・保全と、解体を前提とする判断を分けるよう求めます。</p>
         <p>
           <a href={YUMORI_ME} target="_blank" rel="noreferrer" style={button}>YUMORI.me / 参加・現場</a>
           <a href={YUMORI_INFO} target="_blank" rel="noreferrer" style={button}>YUMORI.info / 計画・資料</a>
@@ -213,6 +212,12 @@ export default function JapanHyperscalerReportPage() {
         <p style={{ fontWeight: 800, letterSpacing: ".08em" }}>ENGLISH / SECONDARY LANGUAGE</p>
         <h2 style={{ fontSize: "clamp(1.8rem,5vw,3rem)", lineHeight: 1.15 }}>Is Japan trying to create the “next Inzai” across the country?</h2>
         <p><strong>Bottom line:</strong> Japan is moving from attracting individual facilities toward planning large data-center clusters as national industrial infrastructure. METI has named nine prefectures as first-stage promising areas for its Data Center Concentration category, with criteria that contemplate gigawatt-scale expansion, roughly 30 hectares or more of industrial land, power, communications, water, resilience and community coexistence.</p>
+
+        <h3>September 12 addendum — latest news and land-area comparison</h3>
+        <p>On September 11, fantasista announced a basic agreement to begin financing and cooperation discussions with a U.S. investment manager&apos;s fund for the Sendai 200 MW total receiving-capacity project. This is not completed financing or development permission. <a href="https://prtimes.jp/main/html/rd/p/000000062.000093934.html">Operator announcement</a>.</p>
+        <p>These developments support discussing scale, location and community benefit in Fukui early; they do not establish a project near the onsen.</p>
+        <p>Published site areas: DPDC Inzai Park approximately 270,000 m² (27 ha), versus approximately 71,787 m² (7.18 ha) for Sendai. Inzai&apos;s area is about 3.76 times larger. Equivalent squares have sides of about 520 m and 268 m, calculated as the square root of each area. These are area comparisons, not actual plot shapes. <a href="https://www.daiwahouse.com/about/release/house/20220329190642.html">Daiwa House source</a>; <a href="https://prtimes.jp/main/html/rd/p/000000061.000093934.html">Sendai source</a>.</p>
+        <p>Site area differs from total floor area, and MW alone does not determine land requirements. The homepage outline follows the area selected for comparison. The supplied map has no scale bar; its outline is not yet calibrated to 27 ha, and cannot yet establish whether the marked area is larger or smaller than Inzai. A known map distance is needed before an equal-area overlay can be finalized.</p>
 
         <h3>Sendai — 200 MW proposal</h3>
         <p><span style={tag}>OFFICIAL / OPERATOR</span>On September 9, 2026, fantasista announced a plan to advance a 200 MW AI data center on approximately 71,787 square meters in Aoba Ward, Sendai. Phase I targets development permission in FY2028 with an indicated project budget of roughly ¥400 billion. This is an operator decision, <strong>not yet a government development approval</strong>.</p>
@@ -232,7 +237,8 @@ export default function JapanHyperscalerReportPage() {
         <p><span style={tag}>ANALYSIS</span>This does not mean a hyperscale campus is confirmed for Fukui. It means Fukui is already inside a national policy environment connecting clean power, industrial location and digital infrastructure. The YUMORI position is not anti-data-center: large greenfield campuses consuming tens of hectares should not become the only model.</p>
 
         <h3>Community-scale alternative</h3>
-        <p>Before major land conversion, Fukui can test whether existing public buildings, factories, hotels, warehouses and hot-spring facilities can support modular 1→5→10→20 MW compute where structure, power, fiber, cooling and heat reuse make sense. Distributed compute will not replace every hyperscale facility. The point is to create a third option before communities face a binary accept-or-reject decision.</p>
+        <p>Campaign update, September 28: the September 25 vote is complete. YUMORI.me now asks Fukui City to designate a PPP/PFI public-private project-formation route and compare demolition with reuse before irreversible demolition procurement or physical work proceeds. This does not ask the City to automatically adopt YUMORI, commit public investment or guarantees, or award a non-competitive contract.</p>
+        <p>Before major land conversion, Fukui can test whether existing public buildings, schools, factories, hotels, warehouses and hot-spring facilities can support demand-led modular compute. Capacity should be derived from real customer and community demand, unit economics, and verified power, fiber, cooling and site constraints rather than a preset MW ladder. Distributed compute will not replace every hyperscale facility. The point is to create a third option before communities face a binary accept-or-reject decision.</p>
 
         <p>
           <a href={YUMORI_ME} target="_blank" rel="noreferrer" style={button}>YUMORI.me / Join & field activity</a>

@@ -4,6 +4,10 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 from typing import Any, Mapping
+from .foundup_verified_outcome_root_revocation_request_role import (
+    SCHEMA_VERSION_V2, SIGNING_PREFIX_V2, TARGET_ROLE, GRANT_ROLE, GRANT_PEER_PRINCIPAL,
+    ROLE_FIELDS, request_payload as _request_payload, require_request_role,
+)
 
 from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_wire_codec import (
     MAX_MESSAGE_BYTES,
@@ -34,10 +38,14 @@ class RootRevocationRequest:
     snapshot_id: str | None
     issued_at: int
     signer_instance_signature: str
+    requester_role: str = TARGET_ROLE
+    requester_principal_id: str | None = None
+    requester_key_epoch: str | None = None
 
     def to_bytes(self) -> bytes:
         validate_request(self)
-        return encode_message({"schema_version": SCHEMA_VERSION, **asdict(self)})
+        schema = SCHEMA_VERSION if self.requester_role == TARGET_ROLE else SCHEMA_VERSION_V2
+        return encode_message({"schema_version": schema, **_request_payload(asdict(self))})
 
 
 @dataclass(frozen=True)
@@ -66,8 +74,14 @@ class RootRevocationResponse:
 def request_from_bytes(value: bytes) -> RootRevocationRequest:
     data = decode_message(value)
     expected = {"schema_version", *RootRevocationRequest.__dataclass_fields__}
-    if set(data) != expected or data.pop("schema_version") != SCHEMA_VERSION:
+    schema = data.get("schema_version")
+    if schema == SCHEMA_VERSION:
+        expected -= ROLE_FIELDS
+    if set(data) != expected or schema not in {SCHEMA_VERSION, SCHEMA_VERSION_V2}:
         raise ValueError("root_revocation_request_shape_invalid")
+    data.pop("schema_version")
+    if schema == SCHEMA_VERSION_V2 and data.get("requester_role") != GRANT_ROLE:
+        raise ValueError("root_revocation_request_role_invalid")
     request = RootRevocationRequest(**data)
     validate_request(request)
     return request
@@ -84,22 +98,25 @@ def response_from_bytes(value: bytes) -> RootRevocationResponse:
 
 
 def request_id_for(value: Mapping[str, Any]) -> str:
-    payload = dict(value)
+    payload = _request_payload(value)
     payload.pop("request_id", None)
     return digest_mapping(payload)
 
 
 def canonical_signer_input(value: RootRevocationRequest) -> str:
-    payload = asdict(value)
+    payload = _request_payload(asdict(value))
     payload.pop("request_id", None)
     payload.pop("signer_instance_signature", None)
-    return SIGNING_PREFIX + canonical_bytes(payload).decode("ascii")
+    prefix = SIGNING_PREFIX if value.requester_role == TARGET_ROLE else SIGNING_PREFIX_V2
+    return prefix + canonical_bytes(payload).decode("ascii")
 
 
 def validate_request(value: RootRevocationRequest) -> None:
+    if type(value) is not RootRevocationRequest:
+        raise ValueError("root_revocation_request_invalid")
+    require_request_role(value)
     if (
-        type(value) is not RootRevocationRequest
-        or value.operation not in {OP_LOAD, OP_ADVANCE}
+        value.operation not in {OP_LOAD, OP_ADVANCE}
         or not _nonce(value.request_nonce)
         or any(not _sha(item) for item in (
             value.request_id, value.descriptor_id, value.owner_config_id,
@@ -115,7 +132,7 @@ def validate_request(value: RootRevocationRequest) -> None:
         raise ValueError("root_revocation_request_phase_invalid")
     if value.snapshot_id is not None and not _sha(value.snapshot_id):
         raise ValueError("root_revocation_snapshot_id_invalid")
-    encode_message({"schema_version": SCHEMA_VERSION, **asdict(value)})
+    encode_message(_request_payload(asdict(value)))
 
 
 def validate_response(value: RootRevocationResponse) -> None:
@@ -143,7 +160,7 @@ def validate_response(value: RootRevocationResponse) -> None:
 
 def is_revocation_wire_message(value: bytes) -> bool:
     try:
-        return decode_message(value).get("schema_version") == SCHEMA_VERSION
+        return decode_message(value).get("schema_version") in {SCHEMA_VERSION, SCHEMA_VERSION_V2}
     except ValueError:
         return False
 
@@ -174,6 +191,7 @@ def _nonce(value: Any) -> bool:
 
 
 __all__ = [
+    "SCHEMA_VERSION_V2", "SIGNING_PREFIX_V2", "TARGET_ROLE", "GRANT_ROLE", "GRANT_PEER_PRINCIPAL",
     "MAX_MESSAGE_BYTES", "OP_ADVANCE", "OP_LOAD", "RootRevocationRequest",
     "RootRevocationResponse", "SCHEMA_VERSION", "SIGNING_PREFIX",
     "STATUS_ACCEPT", "STATUS_REJECT",

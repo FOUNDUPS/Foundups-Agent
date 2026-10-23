@@ -20,6 +20,9 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 
 
 DESCRIPTOR_SCHEMA = "foundup_verified_outcome_root_authority.v1"
+DESCRIPTOR_SCHEMA_V2 = "foundup_verified_outcome_root_authority.v2"
+ROOT_CONTROL_AUTHENTICATION_PURPOSE = "protected-use-acquire-finish.v1"
+MAX_ROOT_CONTROL_KEY_EPOCH_CHARS = 128
 VERIFIER_PREFIX = "foundup-verified-outcome-verifier.v1."
 HELD_OUT_PREFIX = "foundup-verified-outcome-held-out.v1."
 MAX_AUTHORITY_TTL_SECONDS = 600
@@ -226,6 +229,8 @@ def validate_root_verified_outcome_descriptor_public(
     checked = validate_root_verified_outcome_descriptor_identity_public(
         value, now_epoch=now_epoch
     )
+    if not _sha256(checked.get("consensus_receipt_digest")):
+        raise ValueError("verified_outcome_root_consensus_invalid")
     checked["grants"] = _validate_grants(checked, now_epoch=now_epoch)
     return checked
 
@@ -248,7 +253,7 @@ def validate_root_verified_outcome_descriptor_identity_public(
 ) -> dict[str, Any]:
     """Validate exact root descriptor identity without using outcome grants."""
 
-    if not isinstance(value, Mapping) or set(value) != _DESCRIPTOR_FIELDS:
+    if not isinstance(value, Mapping) or set(value) != _descriptor_fields(value):
         raise ValueError("verified_outcome_root_descriptor_shape_invalid")
     checked = dict(value)
     _validate_descriptor_header(checked)
@@ -268,8 +273,35 @@ def validate_root_verified_outcome_descriptor_identity_public(
     return checked
 
 
+def _descriptor_fields(value: Mapping[str, Any]) -> frozenset[str]:
+    version = value.get("schema_version")
+    if version == DESCRIPTOR_SCHEMA:
+        return _DESCRIPTOR_FIELDS
+    if version != DESCRIPTOR_SCHEMA_V2:
+        raise ValueError("verified_outcome_root_descriptor_schema_invalid")
+    _require_root_control_authentication(value)
+    return _DESCRIPTOR_FIELDS | {"root_control_authentication"}
+
+
+def _require_root_control_authentication(value: Mapping[str, Any]) -> None:
+    binding = value.get("root_control_authentication")
+    if type(binding) is not dict or set(binding) != {"purpose", "public_key", "key_epoch"}:
+        raise ValueError("verified_outcome_root_control_authentication_invalid")
+    if any(type(item) is not str or not item.isascii() for item in binding.values()):
+        raise ValueError("verified_outcome_root_control_authentication_invalid")
+    if (binding["purpose"] != ROOT_CONTROL_AUTHENTICATION_PURPOSE
+            or not binding["key_epoch"].strip()
+            or len(binding["key_epoch"]) > MAX_ROOT_CONTROL_KEY_EPOCH_CHARS):
+        raise ValueError("verified_outcome_root_control_authentication_invalid")
+    control_key = decode_ed25519_public_key(binding["public_key"])
+    work_text = value.get("signer_public_key")
+    work_key = decode_ed25519_public_key(work_text) if type(work_text) is str else None
+    if control_key is None or work_key is None or control_key == work_key:
+        raise ValueError("verified_outcome_root_control_authentication_invalid")
+
+
 def _validate_descriptor_header(checked: Mapping[str, Any]) -> None:
-    if checked.get("schema_version") != DESCRIPTOR_SCHEMA or not _ascii_deep(checked):
+    if checked.get("schema_version") not in {DESCRIPTOR_SCHEMA, DESCRIPTOR_SCHEMA_V2} or not _ascii_deep(checked):
         raise ValueError("verified_outcome_root_descriptor_schema_invalid")
     descriptor_text = (
         "authority_generation_id",
@@ -291,7 +323,7 @@ def _validate_descriptor_header(checked: Mapping[str, Any]) -> None:
         or int(checked["authority_generation_sequence"]) < 1
     ):
         raise ValueError("verified_outcome_root_generation_invalid")
-    if not _sha256(checked.get("consensus_receipt_digest")):
+    if not _sha256(checked.get("consensus_receipt_digest")) and not _initial_identity_without_consensus(checked):
         raise ValueError("verified_outcome_root_consensus_invalid")
     if any(
         not _sha256(checked.get(name))
@@ -305,6 +337,18 @@ def _validate_descriptor_header(checked: Mapping[str, Any]) -> None:
         raise ValueError("verified_outcome_root_signer_runtime_invalid")
     if decode_ed25519_public_key(str(checked["signer_public_key"])) is None:
         raise ValueError("verified_outcome_root_signer_key_invalid")
+
+
+def _initial_identity_without_consensus(value: Mapping[str, Any]) -> bool:
+    """A first LOW control identity has no work consensus or outcome grant."""
+    return bool(
+        value.get("schema_version") == DESCRIPTOR_SCHEMA_V2
+        and value.get("consensus_receipt_digest") is None
+        and value.get("authority_tier") == "LOW"
+        and type(value.get("authority_generation_sequence")) is int
+        and value["authority_generation_sequence"] == 1
+        and type(value.get("grants")) is list and value["grants"] == []
+    )
 
 
 def _validate_grants(
@@ -353,7 +397,7 @@ def authority_context_digest_for(descriptor: Mapping[str, Any]) -> str:
         "revoked_verifier_fingerprints",
     }
     payload = {key: item for key, item in descriptor.items() if key not in excluded}
-    if set(payload) != _DESCRIPTOR_FIELDS - excluded:
+    if set(payload) != _descriptor_fields(descriptor) - excluded:
         raise ValueError("verified_outcome_root_descriptor_shape_invalid")
     return _digest(payload)
 
@@ -567,6 +611,7 @@ def _digest(value: Any) -> str:
 
 __all__ = [
     "DESCRIPTOR_SCHEMA",
+    "DESCRIPTOR_SCHEMA_V2",
     "HELD_OUT_PREFIX",
     "HELD_OUT_VERIFIER_CLASS",
     "MAX_AUTHORITY_TTL_SECONDS",

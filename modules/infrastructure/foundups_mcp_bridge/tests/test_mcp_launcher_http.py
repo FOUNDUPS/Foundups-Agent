@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import pytest
 import subprocess
 import sys
 from pathlib import Path
@@ -60,20 +61,28 @@ def test_freshness_gate_import_does_not_require_optional_mcp_packages():
     assert result.stdout.strip() == "FRESHNESS_IMPORT_OK"
 
 
-def test_linked_worktree_resolver_prefers_common_main_env(monkeypatch):
+def test_linked_worktree_resolver_prefers_common_main_env(monkeypatch, tmp_path):
     observed = []
-    main_fragment = str(Path("O:/Foundups-Agent/foundups-mcp-p1"))
+    main_root, linked = tmp_path / "main", tmp_path / "linked"
+    git_dir = main_root / ".git" / "worktrees" / "linked"
+    git_dir.mkdir(parents=True)
+    linked.mkdir()
+    (linked / ".git").write_text(f"gitdir: {git_dir}\n", encoding="utf-8")
+    (git_dir / "commondir").write_text("../..\n", encoding="utf-8")
+    main_fragment = str(main_root / "foundups-mcp-p1")
 
     def capable(candidate):
         observed.append(str(candidate))
         return main_fragment.casefold() in str(candidate).casefold()
 
     monkeypatch.setattr(launch, "_mcp_python_capable", capable)
-    selected = launch._get_mcp_env_python(Path.cwd())
+    selected = launch._get_mcp_env_python(linked)
     assert main_fragment.casefold() in str(selected).casefold()
     assert len(observed) == 2
+    assert observed == [str(Path(sys.executable).resolve()), str(selected)]
 
 
+@pytest.mark.skipif(not sys.platform.startswith("win"), reason="Windows venv PID contract")
 def test_windows_venv_runtime_uses_base_interpreter_and_preserves_pid(tmp_path):
     environment = tmp_path / "mcp-env"
     scripts = environment / "Scripts"
@@ -104,6 +113,81 @@ def test_windows_venv_runtime_uses_base_interpreter_and_preserves_pid(tmp_path):
     stdout, _stderr = process.communicate(timeout=10)
     assert process.returncode == 0
     assert int(stdout.strip()) == process.pid
+
+
+def _mcp_pth_fixture(tmp_path):
+    repo, environment = tmp_path / "repo", tmp_path / "fake-venv"
+    scripts, packages = environment / "Scripts", environment / "Lib" / "site-packages"
+    scripts.mkdir(parents=True)
+    dependency = packages / "owned-dependency"
+    dependency.mkdir(parents=True)
+    (dependency / "mcp_pth_marker.py").write_text("VALUE = 'owned-pth-import'\n", encoding="utf-8")
+    (packages / "owned-bootstrap.pth").write_text(
+        "owned-dependency\nimport os; os.environ['MCP_TEST_PTH_MARKER'] = 'executed'\n",
+        encoding="utf-8",
+    )
+    base = Path(getattr(sys, "_base_executable", sys.executable)).resolve()
+    launcher = scripts / "python.exe"
+    launcher.write_bytes(b"inert venv redirector fixture")
+    (environment / "pyvenv.cfg").write_text(f"executable = {base}\n", encoding="utf-8")
+    stub = (
+        "import json, os, sys, mcp_pth_marker\n"
+        "print(json.dumps({'pid': os.getpid(), 'name': __name__, 'argv': sys.argv, "
+        "'marker': os.getenv('MCP_TEST_PTH_MARKER'), 'value': mcp_pth_marker.VALUE, "
+        "'dependency': mcp_pth_marker.__file__, 'python': sys.executable}))\n"
+    )
+    for suffix in ("src/mcp_server.py", "scripts/readiness_once.py"):
+        target = repo / "modules/infrastructure/foundups_mcp_bridge" / suffix
+        target.parent.mkdir(parents=True, exist_ok=True)
+        for parent in target.parents:
+            if parent == repo:
+                break
+            (parent / "__init__.py").write_text("", encoding="utf-8")
+        target.write_text(stub, encoding="utf-8")
+    return repo, launcher, packages, base
+
+
+@pytest.mark.skipif(not sys.platform.startswith("win"), reason="Windows selected-site bootstrap")
+def test_module_command_bootstraps_selected_pth_and_preserves_entrypoint(tmp_path, monkeypatch):
+    repo, launcher, packages, base = _mcp_pth_fixture(tmp_path)
+    monkeypatch.setenv("FOUNDUPS_MCP_SITE_PACKAGES", str(tmp_path / "foreign-site"))
+    executable, env = launch._mcp_child_env(repo, launcher, "test-only-token")
+    assert executable == base
+    assert env["FOUNDUPS_MCP_SITE_PACKAGES"] == str(packages.resolve())
+    assert env["FOUNDUPS_MCP_AUTH_TOKEN"] == "test-only-token"
+    assert env["PYTHONNOUSERSITE"] == "1"
+    assert env["PYTHONDONTWRITEBYTECODE"] == "1"
+    args = ["--label", "two words", "--literal", 'a"b\\c', "--unicode", "\u96ea"]
+    modules = (
+        "modules.infrastructure.foundups_mcp_bridge.src.mcp_server",
+        "modules.infrastructure.foundups_mcp_bridge.scripts.readiness_once",
+    )
+    with pytest.raises(ValueError):
+        launch._mcp_module_command(executable, env, "unapproved_module", args)
+    for module in modules:
+        command = launch._mcp_module_command(executable, env, module, args)
+        assert command[0] == str(base)
+        assert "test-only-token" not in " ".join(command)
+        process = subprocess.Popen(
+            command, cwd=repo, env=env, stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE, text=True, encoding="utf-8",
+        )
+        try:
+            stdout, stderr = process.communicate(timeout=10)
+        finally:
+            if process.poll() is None:
+                process.kill()
+                process.wait(timeout=2)
+        assert process.returncode == 0, stderr
+        result = json.loads(stdout)
+        assert result["pid"] == process.pid
+        assert Path(result["python"]).resolve() == base
+        assert result["name"] == "__main__"
+        assert result["argv"][1:] == args
+        assert Path(result["argv"][0]).resolve() == repo / (module.replace(".", "/") + ".py")
+        assert result["marker"] == "executed"
+        assert result["value"] == "owned-pth-import"
+        assert Path(result["dependency"]).resolve() == packages / "owned-dependency/mcp_pth_marker.py"
 
 
 def test_readiness_schema_is_exact():
@@ -182,7 +266,8 @@ def test_capability_probe_environment_is_closed(monkeypatch, tmp_path):
     interpreter.write_bytes(b"test")
     captured = {}
 
-    def run(*_args, **kwargs):
+    def run(command, **kwargs):
+        assert command[:4] == [str(interpreter), "-I", "-B", "-c"]
         captured.update(kwargs["env"])
         return subprocess.CompletedProcess(
             [], 0,
@@ -199,7 +284,7 @@ def test_capability_probe_environment_is_closed(monkeypatch, tmp_path):
 def test_capability_probe_rejects_dependency_version_drift(monkeypatch, tmp_path):
     interpreter = tmp_path / "python.exe"
     interpreter.write_bytes(b"test")
-    drift = dict(launch.MCP_RUNTIME_VERSIONS, fastmcp="3.2.0")
+    drift = dict(launch.MCP_RUNTIME_VERSIONS, fastmcp="2.13.0.2")
     monkeypatch.setattr(
         launch.subprocess, "run",
         lambda *_args, **_kwargs: subprocess.CompletedProcess(
@@ -278,3 +363,63 @@ def test_launcher_rejects_non_loopback_and_missing_dev_token(tmp_path):
         host="127.0.0.1", auth_token="", require_auth=True,
         repo_root=tmp_path, blocking=False,
     )["error"] == "auth_token_required_for_remote_exposure"
+
+
+def test_post_spawn_exception_reaps_child_and_releases_owned_lock(monkeypatch, tmp_path):
+    lock, proc = MagicMock(), MagicMock()
+    proc.poll.side_effect = [None, 0]
+    handle = launch.MCPRuntimeHandle(
+        mode="subprocess", host="127.0.0.1", port=8128,
+        started_at=0.0, lock=lock, proc=proc,
+    )
+    monkeypatch.setattr(launch, "_active_runtime", None)
+    monkeypatch.setattr(launch, "_acquire_http_lock", lambda: (lock, None))
+
+    def start(_options, acquired_lock, _blocking):
+        assert acquired_lock is lock
+        launch._active_runtime = handle
+        raise RuntimeError("synthetic post-spawn failure")
+
+    monkeypatch.setattr(launch, "_launch_http_subprocess", start)
+    result = launch.run_mcp_bridge_http(
+        host="127.0.0.1", port=8128, auth_token="", require_auth=False,
+        repo_root=tmp_path, blocking=False,
+    )
+    assert result == {"status": "failed", "error": "RuntimeError", "termination": "stopped"}
+    proc.terminate.assert_called_once_with()
+    proc.wait.assert_called_once_with(timeout=3.0)
+    proc.kill.assert_not_called()
+    lock.release.assert_called_once_with()
+    assert handle.lock is None and launch._active_runtime is None
+
+
+def test_post_spawn_exception_retains_handle_and_lock_if_termination_fails(monkeypatch, tmp_path):
+    lock, proc = MagicMock(), MagicMock()
+    proc.poll.return_value = None
+    proc.wait.side_effect = subprocess.TimeoutExpired("owned-test", 3)
+    handle = launch.MCPRuntimeHandle(
+        mode="subprocess", host="127.0.0.1", port=8128,
+        started_at=0.0, lock=lock, proc=proc,
+    )
+    monkeypatch.setattr(launch, "_active_runtime", None)
+    monkeypatch.setattr(launch, "_acquire_http_lock", lambda: (lock, None))
+
+    def start(_options, acquired_lock, _blocking):
+        assert acquired_lock is lock
+        launch._active_runtime = handle
+        raise RuntimeError("synthetic post-spawn failure")
+
+    monkeypatch.setattr(launch, "_launch_http_subprocess", start)
+    result = launch.run_mcp_bridge_http(
+        host="127.0.0.1", port=8128, auth_token="", require_auth=False,
+        repo_root=tmp_path, blocking=False,
+    )
+    assert result == {
+        "status": "failed", "error": "RuntimeError", "termination": "stop_timeout_still_running",
+    }
+    proc.terminate.assert_called_once_with()
+    proc.kill.assert_called_once_with()
+    assert proc.wait.call_count == 2
+    assert [call.kwargs for call in proc.wait.call_args_list] == [{"timeout": 3.0}, {"timeout": 2.0}]
+    lock.release.assert_not_called()
+    assert launch._active_runtime is handle and handle.lock is lock

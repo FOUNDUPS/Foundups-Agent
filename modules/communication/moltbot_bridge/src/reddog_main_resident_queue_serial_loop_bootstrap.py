@@ -26,6 +26,10 @@ from fnmatch import fnmatchcase
 from pathlib import Path
 from typing import Any, Callable, Mapping, Optional, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_authority_profile_m2m,
+)
+
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
     validate_runtime_root_path,
@@ -198,6 +202,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     signer_socket_connector: Optional[SignerSocketConnector] = None,
     signature_verifier_backend: str | None = None,
     elevated_consensus_capability_supplier: Any = None,
+    worktree_lease_issuer: Any = None,
+    signer_peer_secret_access_grant_supplier: Any = None,
     worktree_runner: Any = None,
     pilot_dryrun_binding_enabled: bool = False,
     worktree_runner_mode: str | None = None,
@@ -534,6 +540,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             now_epoch=int(dependency_bundle.now_epoch or 0),
             required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
             trusted_now_epoch=authority_clock,
+            signer_peer_secret_access_grant_supplier=signer_peer_secret_access_grant_supplier,
         )
     store = AtomicJsonResidentQueueChainResultsStore(
         chain_path,
@@ -560,6 +567,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         repo_root=root,
         valve_environment=governed_environment,
         governed_use_time_authority_resolver=governed_authority_resolver,
+        worktree_lease_issuer=worktree_lease_issuer,
         worktree_runner=resolved_worktree_runner,
         pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
         generic_writer_dryrun_result=generic_writer_dryrun_result,
@@ -882,6 +890,10 @@ def _bounded_worker_plan_from_authority_profile(
     raw_plan = authority_profile.get("bounded_worker_plan")
     if raw_plan is not None and not isinstance(raw_plan, Mapping):
         return {}, ("work_order_materializer_bounded_worker_plan_invalid:type",)
+    try:
+        authority_profile = snapshot_authority_profile_m2m(authority_profile)
+    except ValueError:
+        return {}, ("work_order_materializer_bounded_worker_plan_invalid:m2m_envelope",)
     plan = _nested_mapping(authority_profile, "bounded_worker_plan")
     if not plan:
         return {}, ()

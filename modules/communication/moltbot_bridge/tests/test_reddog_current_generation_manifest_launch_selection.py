@@ -5,6 +5,7 @@ from __future__ import annotations
 import ast
 import copy
 import json
+from dataclasses import replace
 from contextlib import contextmanager
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -17,6 +18,7 @@ from modules.communication.moltbot_bridge.src.reddog_current_generation_manifest
 )
 from modules.communication.moltbot_bridge.src import (
     reddog_current_generation_manifest_launch_selection as selection_module,
+    reddog_runtime_artifact_manifest_contract as manifest_contract,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
     Ed25519SignatureVerifier,
@@ -40,6 +42,7 @@ from modules.communication.moltbot_bridge.tests.test_reddog_signed_runtime_artif
     NOW,
     ManifestHarness,
     _build_harness,
+    _sign,
 )
 
 OWNER_CONFIG_ID = "sha256:" + "6" * 64
@@ -505,3 +508,167 @@ def _change_unbound_artifact(harness: ManifestHarness) -> None:
         json.dumps(payload, sort_keys=True, separators=(",", ":")),
         encoding="utf-8",
     )
+
+
+def _initial_manifest(harness: ManifestHarness) -> dict[str, Any]:
+    """Build only a signed test fixture, without claiming enrollment authority."""
+    manifest = {
+        key: value for key, value in harness.read_manifest().items()
+        if key in manifest_contract.UNSIGNED_FIELDS_INITIAL
+    }
+    manifest.update(
+        schema_version=manifest_contract.SCHEMA_VERSION_INITIAL,
+        enrollment_approval_digest="sha256:" + "a" * 64,
+        source_commit_sha="b" * 40,
+    )
+    _initial_id(manifest)
+    manifest["signature"] = _sign(
+        harness.reddog_private_key,
+        manifest_contract.canonical_signing_input(manifest),
+    )
+    return manifest
+
+
+def _initial_id(manifest: dict[str, Any]) -> None:
+    manifest["manifest_id"] = manifest_contract.manifest_id_for(manifest)
+    manifest["revision"] = manifest["manifest_id"][7:]
+
+
+@pytest.fixture
+def initial_manifest(tmp_path: Path):
+    harness = _build_harness(tmp_path)
+    assert harness.produce().accepted is True
+    return harness, _initial_manifest(harness)
+
+
+@pytest.mark.parametrize("commit_length", (40, 64))
+def test_initial_codec_has_distinct_domain_and_complete_artifacts(
+    initial_manifest, commit_length: int,
+) -> None:
+    _harness, manifest = initial_manifest
+    manifest["source_commit_sha"] = "b" * commit_length
+    _initial_id(manifest)
+    assert manifest_contract.validate_signed_payload(manifest) == manifest
+    assert manifest_contract.canonical_signing_input(manifest).startswith(
+        manifest_contract.SIGNING_PREFIX_INITIAL
+    )
+    assert tuple(item["filename"] for item in manifest["artifacts"]) == (
+        manifest_contract.REQUIRED_RUNTIME_ARTIFACTS
+    )
+    assert set(manifest) == manifest_contract.UNSIGNED_FIELDS_INITIAL | {"signature"}
+
+
+@pytest.mark.parametrize("field", (
+    "queue_item_id", "work_state_revision", "work_authority_digest",
+    "publication_receipt_id", "publication_binding_digest",
+    "consensus_receipt_digest", "authority_profile_source_receipt_id",
+    "signer_audit_mac", "signer_audit_attestation_signature", "runtime_profile",
+))
+def test_initial_codec_rejects_legacy_authority_and_audit_fields(
+    initial_manifest, field: str,
+) -> None:
+    _harness, manifest = initial_manifest
+    manifest[field] = "sha256:" + "c" * 64
+    _initial_id(manifest)
+    with pytest.raises(RuntimeArtifactManifestError, match="manifest_fields_invalid"):
+        manifest_contract.validate_signed_payload(manifest)
+    with pytest.raises(RuntimeArtifactManifestError, match="manifest_fields_invalid"):
+        manifest_contract.canonical_signing_input(manifest)
+
+
+@pytest.mark.parametrize("schema", (
+    manifest_contract.SCHEMA_VERSION,
+    manifest_contract.SCHEMA_VERSION_V2,
+    manifest_contract.SCHEMA_VERSION_V3,
+))
+def test_initial_codec_cannot_be_relabelled_legacy(initial_manifest, schema: str) -> None:
+    _harness, manifest = initial_manifest
+    manifest["schema_version"] = schema
+    _initial_id(manifest)
+    with pytest.raises(RuntimeArtifactManifestError, match="manifest_fields_invalid"):
+        manifest_contract.validate_signed_payload(manifest)
+
+
+@pytest.mark.parametrize("commit", (None, 123, "", "a" * 39, "a" * 41, "a" * 65, "A" * 40, "g" * 64))
+def test_initial_codec_rejects_invalid_source_commit(initial_manifest, commit) -> None:
+    _harness, manifest = initial_manifest
+    manifest["source_commit_sha"] = commit
+    _initial_id(manifest)
+    with pytest.raises(RuntimeArtifactManifestError, match="manifest_source_commit_invalid"):
+        manifest_contract.validate_signed_payload(manifest)
+
+
+@pytest.mark.parametrize("field", ("enrollment_approval_digest", "source_commit_sha", "signature"))
+def test_initial_codec_requires_enrollment_fields_and_signature(initial_manifest, field: str) -> None:
+    _harness, manifest = initial_manifest
+    manifest.pop(field)
+    _initial_id(manifest)
+    with pytest.raises(RuntimeArtifactManifestError):
+        manifest_contract.validate_signed_payload(manifest)
+
+
+@pytest.mark.parametrize("mutation", ("approval", "descriptor", "duplicate", "missing", "time", "id"))
+def test_initial_codec_rejects_malformed_bound_values(initial_manifest, mutation: str) -> None:
+    _harness, manifest = initial_manifest
+    if mutation == "approval":
+        manifest["enrollment_approval_digest"] = "not-a-digest"
+    elif mutation == "descriptor":
+        manifest["artifacts"][0]["filename"] = "../authority.json"
+    elif mutation == "duplicate":
+        manifest["artifacts"][1] = dict(manifest["artifacts"][0])
+    elif mutation == "missing":
+        manifest["artifacts"].pop()
+        manifest["artifact_count"] -= 1
+    elif mutation == "time":
+        manifest["issued_at"] = True
+    manifest["artifact_generation_digest"] = manifest_contract.digest(manifest["artifacts"])
+    _initial_id(manifest)
+    if mutation == "id":
+        manifest["revision"] = "f" * 64
+    with pytest.raises(RuntimeArtifactManifestError):
+        manifest_contract.validate_signed_payload(manifest)
+
+
+def test_initial_public_reader_requires_authenticated_generation(initial_manifest) -> None:
+    harness, manifest = initial_manifest
+    values = _legacy_values(harness)
+    values["manifest_id"] = manifest["manifest_id"]
+    target = harness.manifest_directory / f"{manifest['revision']}.json"
+    target.write_text(json.dumps(manifest), encoding="utf-8")
+    authority, boundary = create_lifecycle_generation_authority(harness.repo_root, values)
+    activation = require_signer_runtime_generation_reader_authority(authority, boundary).load()
+    assert activation is not None
+    owner, owner_boundary = _owner_authority(harness, activation)
+    subject = create_current_generation_manifest_launch_selection_boundary(
+        owner_authority=owner, owner_authority_boundary=owner_boundary,
+        generation_reader_authority=authority, generation_reader_authority_boundary=boundary,
+    )
+    selected = subject.consume(subject.select({}, now_epoch=NOW))
+    assert selected["manifest_id"] == manifest["manifest_id"]
+    assert selected["generation"] == 1
+    with pytest.raises(RuntimeArtifactManifestError, match="initial_manifest_generation_invalid"):
+        selection_module._verify_manifest(
+            manifest, replace(activation, generation=2), harness.repo_root,
+            harness.runtime_root, Ed25519SignatureVerifier(),
+        )
+    target.write_text(json.dumps({**manifest, "signature": _tamper(manifest["signature"])}), encoding="utf-8")
+    with pytest.raises(RuntimeArtifactManifestError, match="manifest_signature_invalid"):
+        subject.select({}, now_epoch=NOW)
+
+
+def test_initial_self_signature_does_not_replace_generation_authority(tmp_path: Path) -> None:
+    harness, _manifest, subject = _prepared(tmp_path)
+    _replace_manifest(harness, _initial_manifest(harness))
+    with pytest.raises(RuntimeArtifactManifestError, match="current_generation_manifest_binding_mismatch"):
+        subject.select({}, now_epoch=NOW)
+
+
+def test_initial_signature_cannot_reuse_legacy_signing_domain(initial_manifest) -> None:
+    harness, manifest = initial_manifest
+    unsigned = {key: value for key, value in manifest.items() if key != "signature"}
+    manifest["signature"] = _sign(
+        harness.reddog_private_key,
+        manifest_contract.SIGNING_PREFIX + manifest_contract.canonical_json(unsigned),
+    )
+    with pytest.raises(RuntimeArtifactManifestError, match="manifest_signature_invalid"):
+        selection_module._verify_signatures(manifest, Ed25519SignatureVerifier())

@@ -66,12 +66,14 @@ PRODUCTION_PATHS = (
     SRC_ROOT / "reddog_resident_control_loop_outcomes.py",
     SRC_ROOT / "reddog_resident_control_loop_effects.py",
     SRC_ROOT / "reddog_resident_live_canary_environment.py",
+    SRC_ROOT / "reddog_resident_live_canary_provider_readiness.py",
     SRC_ROOT / "reddog_resident_live_canary_control_preflight.py",
 )
 COMMUNICATION_TEST_PATHS = (
     Path(__file__),
     Path(__file__).with_name("reddog_resident_live_canary_test_support.py"),
     Path(__file__).with_name("test_reddog_resident_live_canary_integration.py"),
+    Path(__file__).with_name("test_reddog_resident_live_canary_provider_readiness.py"),
 )
 def test_readiness_is_non_executing_and_does_not_serialize_secret(tmp_path: Path) -> None:
     repo, runtime = _roots(tmp_path)
@@ -488,9 +490,10 @@ def test_canary_and_evidence_reads_reject_linked_parent(tmp_path: Path) -> None:
     assert _read_json_mapping(
         linked / "artifact.json", allowed_root=tmp_path
     ) == {}
-    assert read_control_receipts(
-        linked / "receipts.jsonl", allowed_root=tmp_path
-    ) == ()
+    with pytest.raises(ValueError, match="^control_receipt_stream_unreadable$") as caught:
+        read_control_receipts(linked / "receipts.jsonl", allowed_root=tmp_path)
+    assert isinstance(caught.value.__cause__, ValueError)
+    assert str(caught.value.__cause__) == "confined_read_path_link_rejected"
 
 
 def test_receipt_path_inside_repo_is_rejected(tmp_path: Path) -> None:

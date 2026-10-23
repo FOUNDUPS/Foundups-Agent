@@ -8,6 +8,7 @@ from typing import Any, Mapping, Sequence
 from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_contract import (
     CONSENSUS_SCHEMA_VERSION,
     DECISION_SCHEMA_VERSION,
+    EFFECT_DECISION_SCHEMA_VERSION,
     ElevatedAuthorityConsensusContext,
     ElevatedAuthorityConsensusReceipt,
     ElevatedAuthorityReviewerDecision,
@@ -91,14 +92,16 @@ def _rehydrate_context(value: Any) -> ElevatedAuthorityConsensusContext:
     return context
 
 
-def _rehydrate_decision(value: Any) -> ElevatedAuthorityReviewerDecision:
+def _rehydrate_decision(
+    value: Any, *, schema_version: str = DECISION_SCHEMA_VERSION,
+) -> ElevatedAuthorityReviewerDecision:
     fields = set(ElevatedAuthorityReviewerDecision.__dataclass_fields__)
     if not isinstance(value, Mapping) or set(value) != fields:
         raise ValueError("elevated_consensus_decision_schema_invalid")
     if any(not _bounded_text(value[field]) for field in fields):
         raise ValueError("elevated_consensus_decision_field_invalid")
     decision = ElevatedAuthorityReviewerDecision(**dict(value))
-    if decision.schema_version != DECISION_SCHEMA_VERSION:
+    if decision.schema_version != schema_version:
         raise ValueError("elevated_consensus_decision_schema_invalid")
     if any(
         not _sha256_digest(item)
@@ -110,6 +113,14 @@ def _rehydrate_decision(value: Any) -> ElevatedAuthorityReviewerDecision:
     ):
         raise ValueError("elevated_consensus_decision_digest_invalid")
     return decision
+
+
+
+def rehydrate_effect_reviewer_decision(value: Any) -> ElevatedAuthorityReviewerDecision:
+    """Decode one bounded effect-domain review; confer no authority."""
+    if type(value) is not dict or not _bounded_wire_value(value):
+        raise ValueError("effect_reviewer_decision_size_invalid")
+    return _rehydrate_decision(value, schema_version=EFFECT_DECISION_SCHEMA_VERSION)
 
 
 def _text(value: Mapping[str, Any], field: str) -> str:
@@ -168,4 +179,4 @@ def _bounded_wire_value(value: Mapping[str, Any]) -> bool:
     return len(encoded) <= MAX_CONSENSUS_RECEIPT_BYTES
 
 
-__all__ = ["rehydrate_consensus_receipt"]
+__all__ = ["rehydrate_consensus_receipt", "rehydrate_effect_reviewer_decision"]

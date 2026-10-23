@@ -2,7 +2,6 @@
 
 const assert = require('assert');
 const fs = require('fs');
-const os = require('os');
 const path = require('path');
 
 const extensionRoot = path.resolve(__dirname, '..');
@@ -30,18 +29,41 @@ const conversationRunner = fs.readFileSync(
 );
 assert(conversationRunner.includes("'-B', '-s', '-m', 'pytest'"),
   'conversation Python must suppress bytecode and user-site imports');
-assert(conversationRunner.includes('REDDOG_TEST_PYTHON is required on Windows'),
-  'Windows conversation tests must reject ambient Python fallback');
+assert(conversationRunner.includes("'--git-common-dir'"),
+  'conversation tests must resolve the primary checkout through Git common-dir');
+assert(conversationRunner.includes('governedGitExecutable'),
+  'conversation tests must bind the governed Git executable');
+assert(conversationRunner.includes('sanitizedGitEnv(environment)'),
+  'conversation Git lookup must use the closed governed environment');
 assert(conversationRunner.includes("environment.PYTHONNOUSERSITE = '1'"),
   'conversation tests must block per-user dependency discovery');
 assert(conversationRunner.includes('/^(PYTHON|PYTEST)/i.test(name)'),
   'conversation tests must erase every ambient Python and pytest control');
 assert(conversationRunner.includes('test Python dependency root'),
   'conversation tests must validate their O:/E: dependency root');
-assert.throws(
-  () => conversationTier.resolvePython({}, 'win32'),
-  /REDDOG_TEST_PYTHON is required on Windows/
-);
+const failingGit = { bind: () => ({}), execFileSync: () => {
+  throw new Error('rejected');
+} };
+assert.throws(() => conversationTier.resolvePrimaryRepoRoot(
+  process.platform, failingGit
+), /Git common-directory lookup failed/);
+const primaryRepoRoot = conversationTier.resolvePrimaryRepoRoot();
+assert(path.isAbsolute(primaryRepoRoot));
+const hostileGitControls = {
+  ...process.env, GIT_DIR: path.join(primaryRepoRoot, '.git', 'foreign'),
+  GIT_WORK_TREE: path.join(primaryRepoRoot, 'foreign'),
+  GIT_CONFIG_COUNT: '1', GIT_CONFIG_KEY_0: 'core.worktree',
+  GIT_CONFIG_VALUE_0: path.join(primaryRepoRoot, 'foreign')
+};
+assert.strictEqual(conversationTier.resolvePrimaryRepoRoot(
+  process.platform, undefined, hostileGitControls
+), primaryRepoRoot, 'ambient Git controls must not redirect primary checkout');
+if (process.platform === 'win32') {
+  assert.strictEqual(conversationTier.resolvePython({}, process.platform),
+    fs.realpathSync(path.join(primaryRepoRoot, '.venv', 'Scripts', 'python.exe')));
+} else {
+  assert.strictEqual(conversationTier.resolvePython({}, process.platform), 'python3');
+}
 assert.throws(
   () => conversationTier.resolvePython({ REDDOG_TEST_PYTHON: 'python.exe' }, 'win32'),
   /must be absolute/
@@ -58,11 +80,40 @@ assert.doesNotThrow(() => conversationTier.assertAllowedArtifactVolume(
 assert.doesNotThrow(() => conversationTier.assertAllowedArtifactVolume(
   'E:\\trusted\\python.exe', 'test Python override', 'win32'
 ));
-const temporaryBase = os.tmpdir();
+const temporaryBase = conversationTier.resolveTestTemporaryRoot();
 const confinementRoot = fs.mkdtempSync(
   path.join(temporaryBase, 'reddog-conversation-guard-')
 );
 try {
+  const foreign = path.join(confinementRoot, 'foreign-repo');
+  const foreignCommon = path.join(foreign, '.git');
+  const foreignGitDirectory = path.join(foreignCommon, 'worktrees', 'foreign');
+  fs.mkdirSync(foreignGitDirectory, { recursive: true });
+  const outputs = [foreignCommon, foreignGitDirectory, repoRoot];
+  const observedGit = [];
+  const foreignGit = {
+    bind: () => Object.freeze({}),
+    execFileSync: (_binding, args, options) => {
+      observedGit.push({ args, environment: options.env });
+      return outputs.shift();
+    }
+  };
+  assert.throws(() => conversationTier.resolvePrimaryRepoRoot(
+    process.platform, foreignGit, hostileGitControls
+  ), /Git common-directory lookup failed/);
+  assert.strictEqual(observedGit.length, 3);
+  for (const call of observedGit) {
+    assert.strictEqual(call.environment.GIT_DIR, undefined);
+    assert.strictEqual(call.environment.GIT_WORK_TREE, undefined);
+    assert.strictEqual(call.environment.GIT_CONFIG_COUNT, undefined);
+    assert.strictEqual(call.environment.GIT_CONFIG_KEY_0, undefined);
+    assert.strictEqual(call.environment.GIT_CONFIG_VALUE_0, undefined);
+    assert.strictEqual(call.environment.PATH, undefined);
+    assert.strictEqual(call.environment.Path, undefined);
+    assert.strictEqual(call.environment.PATHEXT, undefined);
+    assert(call.args.includes('--no-replace-objects'));
+    assert(call.args.includes('core.worktree=' + fs.realpathSync(repoRoot)));
+  }
   const realDirectory = path.join(confinementRoot, 'real');
   const junctionDirectory = path.join(confinementRoot, 'junction');
   fs.mkdirSync(realDirectory);
@@ -104,7 +155,7 @@ try {
     PYTEST_PLUGINS: 'untrusted_plugin',
     REDDOG_TEST_SITE_PACKAGES: process.platform === 'win32'
       ? (process.env.REDDOG_TEST_SITE_PACKAGES
-        || path.join(repoRoot, '.venv', 'Lib', 'site-packages'))
+        || path.join(primaryRepoRoot, '.venv', 'Lib', 'site-packages'))
       : extensionRoot
   });
   const controlled = conversationTier.controlledPythonEnvironment(

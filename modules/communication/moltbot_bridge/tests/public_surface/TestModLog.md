@@ -1,5 +1,36 @@
 # Public-surface TestModLog
 
+## 2026-10-06 — fresh-main host recovery salvage
+
+- Base `2837b0db389c567de9a5402e22fa711affcf176d`; source and existing public tests
+  are unchanged from #1680's base. Salvaged its owned source/test delta, not its
+  stale registry or backend manifest. #1680 and #1641 are historical evidence.
+- Read this inventory, README, fixtures and nearest tests before restoring
+  the distinct host-lifecycle test file. Added five cases there; no duplicate
+  test scaffold. Three failed against the salvaged source: unconfigured reclaim,
+  legacy completion of an owned reservation, and missing lease as recovery proof.
+- The candidate requires configured recovery and a recorded expired lease,
+  and matches reservation ownership even for legacy ownerless completion.
+  Exact expiry and idempotence controls pass. Preserved Lick, nonce/revision,
+  expiry, no-refund accounting and all existing policy/HTTP assertions.
+- Windows Python 3.12.2, isolated dependencies matching the admission workflow:
+  **210 passed, zero skips; 95% branch-aware combined coverage**, HTTP 94%,
+  policy 90%, gate 98%. Existing 90% floor and WSP62 bounds remain unchanged.
+  The two inherited pytest asyncio-config warnings are understood: plugin
+  autoload is intentionally disabled and async tests use `asyncio.run`.
+- Evidence outside the checkout: `O:/Foundups-Agent-audits/reddog-host-recovery-20261006/`.
+  `salvage-negative.xml` retains the three failures; `public-boundary.xml`
+  retains the candidate pass. Initial system Python lacked FastAPI; the isolated
+  pinned environment resolved collection without changing project dependencies.
+- Exact-main baseline passed189 cases. Independent review passed62 host/HTTP/Lick
+  cases with no blocker. Manifest integrity8/8 and all15 fast-tier groups pass;
+  registry1691/270 is current. FMAS exact-base diagnostic has zero errors and129
+  pre-existing warnings after keeping the oversized module log at its base length.
+- Exact-head hosted CI/review and main readback remain publication gates;
+  their final immutable evidence belongs to the replacement PR and closure receipt.
+  No running resident, provider termination, AutoPost sensory transport, deployed
+  website, live HoloIndex freshness or private 0102 access is claimed.
+
 ## 2026-09-08 — guest status recovery and actual DB wrapper
 
 - Base: `8980aa29b2a17655ad5d927c94059c068400c118`, merged through PR #1633.

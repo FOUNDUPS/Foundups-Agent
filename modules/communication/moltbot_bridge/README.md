@@ -1,4 +1,323 @@
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+The preserved implementation composes the existing installed HIGH service and
+live authenticated lease; newer main's current-time startup and nonce protections
+must survive reconciliation. Interface descriptions below are source contracts,
+not evidence that this merged candidate has been installed or admitted.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## Installed HIGH connection in progress — 2026-10-20
+
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+The live-lease core passes connected 390/9 platform skips, separate Linux 2/0
+and independent 16 controls. Installed HIGH source/policy selection and model
+artifact ingestion remain separate gates; no native author is admitted.
+[API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+
+### Historical protected-nonce checkpoint — 2026-10-20
+
+The v13 candidate supplies protected, current-owner consensus nonces using the
+existing atomic MAC state and SQLite high-water store. It preserves legacy owner
+versions and the LOW service. See the [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+Connected 437/3 platform skips and independent 21 controls pass. The installed HIGH
+issuer join remains pending; a
+callable adapter is not native author admission or retained RSI benefit.
+
+## Parent-consent prerequisite — 2026-10-19
+
+PR2163 closed policy-bound parent consent on main824d0f71. The current v12/v3
+candidate composes parent/reviewer/model evidence through effect, signer and
+current-use owners. [Contract and limits](INTERFACE.md#exact-parent-consent-connection--2026-10-19),
+[test evidence](tests/TestModLog.md#parent-consensus-connection--2026-10-20) and
+[RSI sequencing](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+The candidate is not installed HIGH admission; protected nonce/custody and genuine
+work/model/reviewer/budget inputs remain separate gates. LOW stays LOW.
+
+## Issuer-only root LOAD — 2026-10-15
+
+[LOAD-only identity, permission fencing and custody requirements](INTERFACE.md#issuer-only-root-load--2026-10-15).
+
+## Callable LOW grant service — 2026-10-15
+
+[One-request LOW API, protected loader, installed startup and runtime checks](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#installed-issuer-startup--2026-10-16). Native admission remains unproved.
+
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+E0 v9 removes the future grant-permission receipt from the pre-configuration
+binding while retaining it in the full signed policy and current admission checks.
+LOW grant requests release the generation lock during signer RPC and revalidate
+under a fresh lease before returning. These repairs have component and Linux
+transport/locking tests; native issuer enrollment and admission remain open.
+See [the contract](INTERFACE.md#grant-bootstrap-binding-and-low-rpc--2026-10-15)
+and [test evidence](tests/TestModLog.md#grant-bootstrap-and-low-rpc--2026-10-15).
+
+## Initial handshake configuration — 2026-10-15
+
+The existing signer composer now supports one explicitly scoped initial LOW
+handshake under E0 and per-request grants. It creates public configuration only;
+native startup still needs the independent grant issuer and authentic custody.
+See [the interface](INTERFACE.md#initial-handshake-configuration--2026-10-15)
+and the current RSI dispatch evidence before attempting runtime activation.
+
+## Initial manifest activation — 2026-10-15
+
+Protected administrative enrollment signs one exact source/artifact inventory in
+an explicit initial-only domain. Existing generation recovery activates it;
+Linux consumes root-installed immutable files and a separate writable anchor.
+Actual isolated publication, activation and credential-free selection passed.
+Disabled component inputs do not qualify worker startup or RSI. See
+[the contract](INTERFACE.md#initial-runtime-manifest-enrollment--2026-10-15).
+
+## Protected generation writer — 2026-10-14
+
+The missing initial-writer adapter now composes existing stores with protected
+owner/receipt bindings and per-mutation guards. Real isolated component execution
+and independent validation passed; manifest admission and native workers remain
+open. See [the API and trust limits](INTERFACE.md#protected-initial-writer-authority--2026-10-14).
+
+## Bounded high-water signing — 2026-10-14
+
+The existing generation bootstrap signer now has a separate explicit v2 interface
+for initial high-water contents. V1 stays anchor-only. Actual isolated signing,
+store transitions and a later public-only read passed as component probes;
+protected writer admission and native workers remain pending. See
+[the v2 contract](INTERFACE.md#initial-high-water-bootstrap-v2--2026-10-14).
+
+## Initial generation bootstrap — 2026-10-14
+
+The generation subsystem now has a root-policy-bound initial-anchor signer.
+Its real systemd component probe passed; complete enrollment and native worker
+admission remain pending. See [the API and scope](INTERFACE.md#initial-generation-anchor-bootstrap--2026-10-14)
+and the existing RSI dispatch runbook. No production service is enabled by this adapter.
+
+## Current-generation model consumer checkpoint — 2026-10-07
+
+Existing producer/collector/valve wiring is locally qualified with disposable
+model signatures and explicit principal/peer seams. Connected89pass including the real
+collector; source review cleared the reproduced clock rollback. See
+INTERFACE/ModLog and existing current-generation runtime/use-time test files.
+Native admission and retained RSI remain unproven; publication pending.
+
+## Model input authority checkpoint — 2026-10-07
+
+Protected owner v8 supply is locally qualified; current-generation resident
+consumption and native admission remain pending. See INTERFACE/ModLog and
+`tests/test_reddog_signer_system_service_startup_authority.py` for the existing
+API,22 input/lifetime controls,3 real-signature controls and v7/v8 startup compatibility. No model or
+provider calls are needed for these tests.
+
+## Resident effect admission — 2026-10-07
+
+Existing resident bootstrap accepts an explicitly provisioned worktree lease
+issuer; see [INTERFACE](INTERFACE.md#resident-final-decision-effect-join--2026-10-07).
+Local connected fixtures are tested. Native admission still requires authentic
+runtime supply and all independent trust gates.
+
+## Reviewer artifact verification — 2026-10-07
+
+Reuse `ReviewerRuntimeArtifacts` and `ModelRuntimeReviewerEvidenceResolver` from
+the existing runtime verifier bootstrap with current-effect review verification.
+See [INTERFACE](INTERFACE.md#reviewer-runtime-artifact-adapter--2026-10-07) for
+trusted-input requirements. Local composition is validated with test authority;
+production reviewer execution and native RSI are not established.
+
+## Separate protected-use control proof — 2026-10-05
+
+V2 separates ACQUIRE/FINISH control authentication from work signing; v1 is unchanged.
+[PR2068 source/retrieval closure](ModLog.md#separate-protected-use-control-proof--2026-10-05)
+does not establish native admission or key custody.
+
+## Recover an admitted HoloIndex refresh — 2026-10-05
+
+Use the existing post-merge controller with the original `incident_id` as
+`resume_incident_id`. It validates persisted admission and current source before
+reusing the bounded retry path. See the [runtime contract](docs/HOLOINDEX_RUNTIME.md#post-merge-controller).
+Source tests pass locally; merged-source runtime recovery remains a separate gate.
+
+## Detached effect consent — 2026-10-04
+
+Use `resolve_current_effect_sovereign_authorization` from the existing principal
+resolver to authenticate a detached exact-effect assertion through current owner
+v6. See [the interface](INTERFACE.md#authenticated-effect-consent--2026-10-04).
+The returned evidence is data; it cannot authorize a signer, create a worktree,
+or replace a later effect permit. Linux owner checks remain required.
+
+## Supplied effect approval matching — 2026-10-04
+
+Use the existing evidence owner's `effect_sovereign_authorization_matches` to
+compare a supplied record against the actual parent, full target, context and
+policy. See [the API](INTERFACE.md#supplied-effect-sovereign-evidence-api--2026-10-04).
+This pure data check does not authenticate the record or authorize execution.
+
+## Current-generation review sets — 2026-10-04
+
+`verify_current_effect_reviewer_decisions` now composes the bounded quorum under
+one current-generation lease. It retains and rechecks every supplied evidence
+record; the existing single-review API remains available. See the
+[API contract](INTERFACE.md#current-generation-review-set-api--2026-10-04).
+Caller-supplied runtime evidence still requires independent provenance; this
+verification does not issue an execution permit or activate native workers.
+
+## Effect-review quorum — 2026-10-04
+
+The existing consensus verifier now exposes `verify_effect_reviewer_decisions`
+for a complete bounded set. See [the contract](INTERFACE.md#bounded-effect-review-quorum-api--2026-10-04).
+It checks all reviews, quorum, roles and independence relative to supplied trusted
+resolvers; it does not issue authority or authenticate those resolvers. The
+single-review API and delegated two-request domain remain unchanged. Earlier
+one-review checkpoints below retain their historical scope.
+
+## Connected current reviewer verification — 2026-10-01
+
+The [current reviewer API](INTERFACE.md#connected-current-reviewer-verification-api--2026-10-01)
+connects opt-in owner v5, a separately signed designation in principal-artifact v2,
+current-generation identity and two real signature checks. The existing supplier
+can carry distinct producer/reviewer identities; legacy defaults remain v1.
+Local candidate-4 passed 198/198; hosted 331 portable and 8 Linux cases and publication
+are pending. PR #2013 closed at `c9d1273`; older pending notes below are historical.
+The lease and owner/time rechecks do not establish atomic revocation, independent
+runtime provenance, quorum, effect permission, native admission or retained gain.
+
+## Conditional effect-review verification — 2026-10-01
+
+The [consensus interface](INTERFACE.md#conditional-effect-review-verification-api--2026-10-01)
+now checks one effect-specific review against the actual request and supplied
+policy/key/runtime evidence. PR #2010 is merged/main-verified: 82 frozen local
+cases and 222 selected consensus cases on both PR/main CI pass. A conditional
+valid review is not quorum or runtime approval. The [source-qualified owner map](INTERFACE.md#authenticated-effect-authority-qualification--2026-10-01)
+identifies the existing identity/runtime machinery and missing authenticated
+effect-authority contract. Production provenance and worker admission remain open.
+
+## Cross-process observer qualification — 2026-09-27
+
+PR1923 is merged/main-verified at `5578f7bd` with254 candidate cases passing.
+Readable and nondumpable same-UID children qualify the permission boundary;
+authenticated cross-UID supervision is still open. The corrected
+[existing-owner contract](INTERFACE.md#external-supervision-source-contract--2026-09-27)
+separates observer, signer and actual handshake requester, and requires verified
+observation handoff before requester-local lifecycle issuance. No runtime API or
+authority changes in this documentation slice; see canonical backlog for closure.
+
+## Existing observer socket repair — 2026-09-27
+
+The existing external signer OS observer now maps socket FD identities to VFS
+metadata through bounded exact kernel diagnostics and concrete-cookie rechecks.
+See the [contract and limits](INTERFACE.md#connected-socket-ownership-observation--2026-09-27)
+and [hosted qualification](tests/README.md#connected-socket-mapping-qualification--2026-09-27).
+Source is prepared; actual validation/closure belongs to the canonical backlog.
+PR1921 characterization is merged/main-verified. Native RSI remains incomplete.
+
+## Socket identity experiment — 2026-09-27
+
+PR1920 supervision design is merged/main-verified at `f9988486`. Its concrete
+socket prerequisite now has two bounded hosted characterization cases in the
+[existing observer test owner](tests/README.md#hosted-socket-identity-characterization--2026-09-27).
+The source is prepared; actual execution and closure are receipt-bound in the
+canonical RSI backlog. Production observer and native authority remain unchanged.
+
+## Supervision implementation boundary — 2026-09-27
+
+The [existing-owner supervision contract](INTERFACE.md#external-supervision-source-contract--2026-09-27)
+now specifies process selection, field provenance, lifetime and consumer ownership.
+The inode-domain repair and same-UID visibility qualification are closed in
+PR1922/1923. Its remaining prerequisite is the authenticated observation transport,
+canonical consumer registration and independently qualified deployment visibility. No service/runtime was activated.
+PR1919 requester selection is merged and main-verified; see the canonical RSI
+backlog for exact closure evidence and the next ranked action.
+
+## Effective requester selection — 2026-09-27
+
+Omitted signer-healthcheck requesters now use the current effective UID/GID and
+existing peer policy. Unknown local identity rejects before connection; explicit
+valid identities still require server attestation. See the
+[selection and future handoff contract](INTERFACE.md#healthcheck-requester-selection--2026-09-27)
+and [focused regression](tests/README.md#healthcheck-requester-regression--2026-09-27).
+This source repair grants no native execution authority.
+
+## Lifecycle dependency selection — 2026-09-27
+
+The existing verified lifecycle consumer can opt into default dependency
+selection. See the [interface contract](INTERFACE.md#lifecycle-default-dependency-requirement--2026-09-27)
+and [fixed regression scope](tests/README.md#lifecycle-dependency-selection-regression--2026-09-27).
+This distinguishes injected test dependencies; it does not establish production
+provenance or remove resident execution blockers.
+
 # OpenClaw Bridge - Digital Twin Execution Layer
+
+## Verified-outcome recovery and RSI
+
+The [activation recovery checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14)
+reuses the authority store to recover an exact committed activation after a lost
+reply or competing revision. It rechecks the original envelope and current accepted
+memory, with at most three revision attempts. Both production factories remain
+unbound. The documented memory acceptance transaction and its independent write
+authority are still prerequisites; this recovery path grants no activation.
+
+R11 builds on the existing signing, root authority, publication and PatternMemory owners.
+The v2 root commit route persists the bounded full response through the existing
+pending writer, then commits its complete digest in both state mirrors. Exact retries
+retain current authority checks. Ordinary signer finalization still uses v1.
+
+The [API index](INTERFACE.md#verified-outcome-authority-signing-and-memory) and
+[complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference)
+cover signed records, strict response validation, root COMMIT acknowledgment retry,
+immutable publication, canonical event time and invisible PatternMemory staging.
+The [storage-read checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14)
+adds `load_committed_response_for_root()` to the existing root state owner. It
+returns only exact committed bytes under installed ownership, generation, selection,
+signature and time checks. Healthy reads preserve the original state; one-sided
+mirror recovery reuses the existing path. Current read admission and the external
+read route are still required. Activation and retained improvement remain open.
 
 ## HoloIndex runtime truth
 
@@ -27,18 +346,33 @@ authority. See [docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
 
 ## Receipt-bound artifact model routing
 
-The resident bounded-artifact path does not infer models from provider names,
-worker type, prompts, or model-vendor prefixes. It verifies one AI Gateway
-runtime binding at use time, resolves its exact role/provider/model topology,
-and mints a short-lived one-shot model capability. The configured provider must
-publish an explicit available-provider inventory; missing, stale, replayed,
-retargeted, or unavailable routes reject before egress.
+Architect model-output proposals accept optional `bounded_worker_plan`. The existing
+producer and v3 receipt reader detach/validate it and bind its complete contents to
+the receipt digest. Missing/None input preserves legacy wire bytes; explicit `{}`
+is retained. For example, add `"bounded_worker_plan": {"m2m_envelope": packet}` to
+the existing proposal only when `packet` is already complete, normalized WSP 99 data.
+Supplied operation, tests, path scope and recognized receipt mirrors must agree.
+Prose is not converted or inferred here. Partial plans are data, not work admission.
 
-FoundUps Fusion admits only the configured `openrouter` route. OpenClaw passes
-the resolved principal route to its exact `--model` argument. Hermes passes the
-same resolved principal model and provider to its API request. Neither worker
-can replace the topology or use the RedDog evaluation fallback. Provider
-credentials, worker authority, and runtime-model authority remain separate.
+Seed supplier/bootstrap accept optional normalized `bounded_worker_plan`. When the
+proposal receipt contains a plan, supply the same explicit plan: omission/None and
+conflicting content reject. The supplier detaches and validates receipt/candidate
+lineage before other receipt callbacks, then checks declared execution constraints
+against effective seed scope. Legacy plain-dict receipts without a plan retain their
+previous bytes and separate-plan behavior; `{}` is explicit. Main startup still
+supplies no plan; automatic extraction and principal normalization remain open.
+Direct promotion and bootstrap now enforce profile/proposal agreement using the
+existing profile owner. Both input snapshots are detached before downstream effects,
+including the legacy absent-plan branch. A declared proposal plan must equal the
+explicit profile plan and its declared scope; missing, conflicting or tampered
+lineage rejects. This does not automatically extract a plan or authorize execution.
+Generation checks the signed full-order digest before one-use model admission.
+Explicit M2M packets survive profile/signing and detached request preparation;
+rejection consumes the matching handle. Legacy bytes and the 24,000-character
+prompt/context budget remain. Sealed prompt and prepared raw-context digests reject
+changed delivery before Fusion/OpenClaw/Hermes effects; legitimate context redaction
+is preserved. Partial canonical bindings reject; all-absent markers retain legacy.
+Source provenance, native-child fidelity, live admission and retained RSI remain unqualified.
 
 ## RedDog HoloIndex promotion binding
 
@@ -231,6 +565,9 @@ unavailable.
 
 ## External signer exact-effect authority
 
+The issuer exposes clock-free `prepare_request` for exact canonical target
+data before authorization. See INTERFACE; this API issues no permission or lease.
+
 The bridge now contains the smallest reusable authoritative-use lease primitive.
 It extends the existing E0 secret-grant and isolated signer socket instead of
 adding a signer or trust store. A strict signed request can be rehydrated into
@@ -386,26 +723,26 @@ not repository-local classes that merely carry their names:
   generates the artifact map; the existing Foundups writer alone materializes
   the already-authorized paths in the isolated worktree.
 - `hermes_api` calls the installed upstream Hermes Agent `/v1/runs` API through
-  authenticated loopback HTTP. It requires the fixed `reddogartifact` profile,
-  Hermes API `0.20.4`, bearer authentication, exactly the native `delegation`
-  toolset (`delegate_task` only), zero visible skills, and the same surface
-  after the run. The complete event queue must prove one stable completed leaf
-  identity with explicit empty file-read/write arrays and ordered delegate
-  completion before the final terminal event. Any second child, other tool, approval,
-  failed/interrupted child, effect, or drift rejects. Foundups retains all file,
-  worktree, commit, verification, PR, and merge effects.
+  authenticated loopback HTTP: fixed `reddogartifact` profile, API `0.20.4`,
+  bearer authentication, native `delegation` (`delegate_task` only), zero skills,
+  and unchanged postflight policy. The event queue must prove one stable completed
+  leaf, explicit empty file-read/write arrays, and ordered delegate completion
+  before the final terminal event. Other children/tools, approvals, failed or
+  interrupted children, effects and drift reject. Stop/status remain best-effort.
+  Parent-only stop or noncompleted/forbidden terminal evidence reports
+  `effect_observation_complete=false` and `run_abort_confirmed=false`;
+  effects remain possible and no artifacts return. This does not prove child
+  cancellation or delivery. Foundups retains all file, worktree, commit,
+  verification, PR, and merge effects.
 
 Both providers pass their returned map through the same bounded validator:
 canonical relative paths only, no traversal/absolute/device paths, non-empty
 UTF-8 text, and the author-stage per-file and aggregate size ceilings.
 
-Both modes consume the existing signed model-runtime binding and remain below
-the AgentDB/WRE work-order, WSP 15, exact-path, commit, and independent-verifier
-authority chain. Provider invocation and worker-process effects are recorded
-in the resident-cycle result instead of being reported as dry-run purity.
-`foundups_fusion` remains supported; unknown provider modes fail closed. The
-legacy repository `HermesJobExecutor` is not used by this route and no local
-class is presented as the upstream Hermes runtime.
+Both modes require the signed model-runtime binding and AgentDB/WRE work-order,
+WSP 15, exact-path, commit and independent-verifier authority chain. Invocation
+and process effects stay receipt-bound. `foundups_fusion` remains supported;
+unknown modes reject. The legacy `HermesJobExecutor` is not used by this route.
 
 The Hermes bearer key is read only from
 `<resident-runtime-root>/hermes-api/api-key` through the confined runtime-file
@@ -870,7 +1207,17 @@ Execution additionally requires `--execute --confirm
 REDDOG_RESIDENT_LIVE_CANARY_PHASE1`. The runtime root must be outside the
 repository and already contain the authority, permission, execution-valve,
 signer config/run-packet, and live signer socket artifacts named by the CLI
-receipt. The harness never starts the signer or resolves secret values.
+receipt. The harness never starts the signer or resolves principal signing keys.
+Select an existing author adapter with `--artifact-generator-mode` (or
+`REDDOG_ARTIFACT_GENERATOR_MODE`): `foundups_fusion` (default),
+`openclaw_gateway`, or `hermes_api`. Unsupported or explicitly empty modes reject.
+All modes require declared model-provider identity; this declaration does not
+replace signed model admission. Fusion additionally requires OpenRouter presence.
+Hermes readiness reads and discards the existing confined service credential
+through `RuntimeHermesApiKeyProvider`; no credential value enters the receipt.
+OpenClaw checks executable availability. These checks do not establish service
+health, sandbox confinement, model authority, budget, or worker execution.
+The receipt's `artifact_generator_mode` records selected configuration only.
 The signed runtime-artifact manifest producer is available as a
 content-addressed foundation. Canonical artifact writers and publication share
 a runtime-generation fence, and final publication uses OS-level no-replace
@@ -926,20 +1273,32 @@ records (`action_cli_<route>_<action>`), enabling recall of:
 
 ## Skill Safety Gate (Cisco Skill Scanner)
 
-`src.skill_safety_guard.run_skill_scan()` is OpenClaw's cached preflight for
-mutating routes. A `SKILLz.md` bundle uses Cisco `scan --skill-file SKILLz.md`;
-a wardrobe uses recursive `scan-all`. Reports use a caller-selected directory.
-Missing/malformed evidence, manifest failure, timeout, or a required unavailable
-scanner fails closed. Scanner output is redacted and its environment excludes
-credentials. `SkillScanResult` is supply-chain evidence only; it grants no
-execution, effect, outcome-evaluation, or promotion authority.
+`src.skill_safety_guard.run_skill_scan()` supplies OpenClaw's current preflight
+for mutating routes. A `SKILLz.md` bundle uses Cisco `scan --skill-file SKILLz.md`;
+a wardrobe uses recursive `scan-all`. The caller selects the report directory.
+Each invocation owns a temporary subdirectory for its report and scanner TMP/TEMP.
+The verdict uses only that private report, then atomically replaces
+`openclaw_skill_scan_report.json`. Returned `report_path` is a mutable latest
+diagnostic, may be absent, and is not an immutable receipt for that invocation.
+Normal return, timeout, process error and Python cancellation clean the private
+workspace. Hard process termination can leave isolated temporary files; this
+change adds no crash scavenger or persistent per-scan archive.
+Missing/malformed evidence, manifest failure, timeout, unavailable required
+scanner or workspace/publication error fails closed. Raw scanner streams are
+omitted and its environment excludes credentials. The child always sets
+`PYTHON_DOTENV_DISABLED=1`, `LITELLM_MODE=PRODUCTION`,
+`LITELLM_LOCAL_MODEL_COST_MAP=True` and `PYTHONDONTWRITEBYTECODE=1`;
+these suppress known import-time dotenv/cost-map/bytecode side effects in the
+installed scanner dependencies, without promising OS-level isolation.
+`SkillScanResult` is supply-chain
+evidence only; it grants no execution, effect, evaluation or promotion authority.
 
-Environment toggles:
+Each call returns its own Boolean verdict; keyword-only literal `details=True` returns its local `(allowed, message)` pair. The process caller validates Boolean/text fields and uses that explanation for logs/actions/responses; malformed results raise before downstream preflight/execution. REQUIRED/ENFORCED/MAX_SEVERITY drift rejects; diagnostic fields remain latest state and `force`, TTL and ALWAYS remain compatible.
 - `OPENCLAW_SKILL_SCAN_REQUIRED=1` (default): fail closed if scanner missing
 - `OPENCLAW_SKILL_SCAN_ENFORCED=1` (default): block risky scans above threshold
 - `OPENCLAW_SKILL_SCAN_MAX_SEVERITY=medium` (default)
-- `OPENCLAW_SKILL_SCAN_TTL_SEC=900` (default cache window)
-- `OPENCLAW_SKILL_SCAN_ALWAYS=0` (default): set `1` to force scan on every mutating route
+- `OPENCLAW_SKILL_SCAN_TTL_SEC=900`: retained compatibility setting; workspace TTL reuse is disabled
+- `OPENCLAW_SKILL_SCAN_ALWAYS=0`: retained compatibility setting; every guard invocation scans regardless
 - `OPENCLAW_SKILL_MANIFEST_REQUIRED=1` (default): require `workspace/skills/SKILL_MANIFEST.json`
 - `OPENCLAW_SKILL_MANIFEST_ENFORCED=1` (default): block on missing/mismatched manifest
 - `OPENCLAW_SKILL_MANIFEST_VERIFY_SIGNATURE=0` (default): verify HMAC signature when enabled
@@ -1002,3 +1361,31 @@ OpenClaw now follows a facade + delegated-module design.
 Current refactor result:
 - `openclaw_dae.py` is currently `1580` lines and remains inherited WSP 62 hard-limit debt
 - remaining file content is predominantly facade wrappers, dataclasses, and the honeypot surface
+
+
+## Red Dog correspondence continuity
+
+Red Dog correspondence continuity is owned by
+`src/reddog_correspondence_state.py` and the canonical
+`skillz/reddog_correspondence_state/SKILLz.md`.
+
+The runtime model is provider-first but not provider-replay-first:
+
+```text
+provider truth -> normalized event metadata -> materialized scope state
+              -> provider-watermark delta refresh -> state capsule
+```
+
+The private module-owned DB is the machine continuity surface. Gmail/Slack/
+LinkedIn remain transaction truth. Google Sheets/Docs are optional human-facing
+projections and must be rebuildable. Raw mailbox bodies and complete recipient
+address dumps are not persisted in this state layer. A cached state never grants
+send authority; current routing and recipient preflight remain mandatory.
+
+Freshness comparison requires nonempty string watermarks and exact opaque equality.
+Missing, mistyped or empty observations require reconciliation; values are never
+coerced or trimmed. Existing invalid-cache errors still propagate first.
+
+### Correspondence authority status — 2026-10-06
+
+For #1779, the legacy V2 JavaScript sender boundary is a quarantined fail-closed compatibility surface. The canonical implementation is the service-owned Python `CorrespondenceSenderBoundary` in `src/reddog_correspondence_sender_boundary.py`. Repository tests qualify that contract only; external Gmail/Work capability isolation remains a deployment/host requirement and must not be inferred from source or a successful individual send.

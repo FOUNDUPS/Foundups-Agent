@@ -232,51 +232,13 @@ def _format_follow_response(follow: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def handle_dae_runtime_intent(
-    message: str,
-    sender: str,
-    *,
-    allow_mutation: bool,
-) -> str:
-    """Handle launch/status/list/stop runtime commands."""
-    request = parse_dae_runtime_request(message)
-    if not request:
-        return ""
-
-    action = request["action"]
-    dae_id = request["dae_id"]
-    since_sequence = int(request.get("since_sequence", 0))
-
+def _handle_observer_request(action: str, dae_id: str, since_sequence: int) -> str:
+    """Acquire the required observer for an already resolved inspection."""
     observer = _get_dae_observer()
-    broker = _get_launch_broker()
-
-    if action == "list":
-        if broker is None:
-            return (
-                "DAE runtime broker is not available. Start the system through `python main.py` "
-                "so 0102 can bootstrap runtime launches."
-            )
-        launchable = broker.list_launchable_daes()
-        if not launchable:
-            return "No launchable DAEs are currently registered."
-        lines = ["Launchable DAEs:"]
-        for key in sorted(launchable):
-            item = launchable[key]
-            lines.append(
-                f"- {key}: running={item.get('running')} enabled={item.get('enabled')} "
-                f"domain={item.get('domain')} name={item.get('dae_name')}"
-            )
-        return "\n".join(lines)
-
-    if not dae_id:
-        return (
-            "I could not resolve that DAE name. Use `list launchable daes` first, then "
-            "launch/status/stop by the known runtime name."
-        )
+    if observer is None:
+        return "DAE observer is not available yet."
 
     if action == "tail":
-        if observer is None:
-            return "DAE observer is not available yet."
         events = observer.tail_events(dae_id=dae_id, limit=8)
         if not events:
             return f"No recent daemon events for `{dae_id}`."
@@ -285,8 +247,6 @@ def handle_dae_runtime_intent(
         return "\n".join(lines)
 
     if action == "follow":
-        if observer is None:
-            return "DAE observer is not available yet."
         follow = observer.follow_events(
             dae_id=dae_id,
             since_sequence=since_sequence,
@@ -295,19 +255,40 @@ def handle_dae_runtime_intent(
         return _format_follow_response(follow)
 
     if action == "live_status":
-        if observer is None:
-            return "DAE observer is not available yet."
         snapshot = observer.get_live_status(dae_id, limit=8)
         if not snapshot.get("registered"):
             return f"DAE runtime `{dae_id}` is not registered."
         return _format_live_status(snapshot)
 
+    return ""
+
+
+def _format_launchable_daes(launchable: Dict[str, Any]) -> str:
+    """Project the existing sorted launchable-runtime response."""
+    if not launchable:
+        return "No launchable DAEs are currently registered."
+    lines = ["Launchable DAEs:"]
+    for key in sorted(launchable):
+        item = launchable[key]
+        lines.append(
+            f"- {key}: running={item.get('running')} enabled={item.get('enabled')} "
+            f"domain={item.get('domain')} name={item.get('dae_name')}"
+        )
+    return "\n".join(lines)
+
+
+def _handle_broker_request(action: str, dae_id: str, sender: str) -> str:
+    """Acquire the required broker after resolution and authorization checks."""
+    broker = _get_launch_broker()
+    if broker is None:
+        return (
+            "DAE runtime broker is not available. Start the system through `python main.py` "
+            "so 0102 can bootstrap runtime launches."
+        )
+    if action == "list":
+        return _format_launchable_daes(broker.list_launchable_daes())
+
     if action == "status":
-        if broker is None:
-            return (
-                "DAE runtime broker is not available. Start the system through `python main.py` "
-                "so 0102 can bootstrap runtime launches."
-            )
         result = broker.get_runtime_status(dae_id)
         if not result.get("registered"):
             return f"DAE runtime `{dae_id}` is not registered."
@@ -318,18 +299,6 @@ def handle_dae_runtime_intent(
             f"enabled={result.get('enabled')}\n"
             f"run_count={result.get('run_count')}\n"
             f"last_error={result.get('last_error') or 'none'}"
-        )
-
-    if not allow_mutation:
-        return (
-            "Runtime launch and stop commands require 012 authorization. "
-            "Use `status <dae>` or `list launchable daes` for read-only inspection."
-        )
-
-    if broker is None:
-        return (
-            "DAE runtime broker is not available. Start the system through `python main.py` "
-            "so 0102 can bootstrap runtime launches."
         )
 
     if action in {"launch", "start"}:
@@ -346,3 +315,36 @@ def handle_dae_runtime_intent(
         return f"DAE runtime stop `{dae_id}` -> {status}."
 
     return ""
+
+
+def handle_dae_runtime_intent(
+    message: str,
+    sender: str,
+    *,
+    allow_mutation: bool,
+) -> str:
+    """Resolve and authorize runtime commands before acquiring collaborators."""
+    request = parse_dae_runtime_request(message)
+    if not request:
+        return ""
+
+    action = request["action"]
+    dae_id = request["dae_id"]
+    since_sequence = int(request.get("since_sequence", 0))
+
+    if action != "list" and not dae_id:
+        return (
+            "I could not resolve that DAE name. Use `list launchable daes` first, then "
+            "launch/status/stop by the known runtime name."
+        )
+
+    if action in {"tail", "follow", "live_status"}:
+        return _handle_observer_request(action, dae_id, since_sequence)
+
+    if action not in {"list", "status"} and not allow_mutation:
+        return (
+            "Runtime launch and stop commands require 012 authorization. "
+            "Use `status <dae>` or `list launchable daes` for read-only inspection."
+        )
+
+    return _handle_broker_request(action, dae_id, sender)

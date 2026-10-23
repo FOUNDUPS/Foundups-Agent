@@ -247,3 +247,39 @@ After successful deployment:
 - AI Studio Docs: https://ai.google.dev/
 
 **Deployment Status**: ✅ Ready to deploy from modules/foundups/gotjunk/
+
+## Authorization rules release gate (2026-10-10)
+
+The GitHub `deploy-gotjunk.yml` workflow now gates a production release on the
+credential-free Firestore and Storage emulator regression suite. PRs run this
+suite but cannot enter the credential-bearing deployment job. Deployment is
+restricted to `main` and serialized to avoid simultaneous rule/frontend releases.
+
+The existing GCP auth action writes the service account's Application Default
+Credentials file. Firebase CLI **14.27.0**, the version used for local emulator
+validation, uses that file to deploy only Firestore rules and Storage rules:
+
+```sh
+cd modules/foundups/gotjunk
+firebase deploy --config firebase.json --project gen-lang-client-0061781628 \
+  --only firestore:rules,storage --non-interactive
+```
+
+Both `.firebaserc` and the frontend's Firebase project ID bind to
+`gen-lang-client-0061781628`; the workflow asserts that match before deployment.
+Cloud Build uploads a clean archive of the tracked commit, excluding the auth
+action's runner credential file and all other untracked workspace files.
+
+No indexes, database data, hosting configuration, credentials, or IAM permissions
+are changed by this command. Authorization failures stop the workflow before the
+frontend Cloud Build. Do not bypass that failure: the existing service account
+must receive the appropriate Firebase rule-deployment access through its owner.
+
+Rules become stricter before the new frontend is rolled out. Existing clients
+can temporarily fail old-style writes until refreshed. If the subsequent build
+fails, leave the restrictive rules in place and fix/retry the matching frontend;
+do not automatically restore vulnerable rules. The Python Liberty Alert API is
+a separate deployment and is not launched by this static frontend workflow.
+
+Workflow source and emulator success are not deployment receipts. Confirm the
+actual CI run, Firebase rules release and Cloud Run revision separately.

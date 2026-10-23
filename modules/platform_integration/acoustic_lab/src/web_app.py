@@ -14,7 +14,7 @@ import io
 import subprocess
 import requests
 from flask import Flask, request, jsonify, render_template_string
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, RequestEntityTooLarge
 from .acoustic_processor import get_acoustic_processor, AudioValidationError, GPSValidationError
 from .ethereum_logger import get_ethereum_logger
 
@@ -105,8 +105,8 @@ def create_app() -> Flask:
             return jsonify({'error': f'Audio validation failed: {str(e)}'}), 400
         except GPSValidationError as e:
             return jsonify({'error': f'GPS validation failed: {str(e)}'}), 400
-        except BadRequest as e:
-            return jsonify({'error': str(e)}), 400
+        except (BadRequest, RequestEntityTooLarge) as e:
+            return jsonify({'error': str(e)}), e.code
         except Exception as e:
             app.logger.error(f"Processing error: {str(e)}")
             return jsonify({'error': 'Internal processing error'}), 500

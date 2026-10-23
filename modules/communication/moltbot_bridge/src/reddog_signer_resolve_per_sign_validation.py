@@ -15,6 +15,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     SignerKeyProviderDryRunResult,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
+    SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION,
+    verify_signer_peer_handshake_response,
+)
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     SignatureVerifier,
     constant_time_compare,
@@ -57,7 +61,7 @@ def provider_result_matches(
 
 
 def factory_binding_matches(
-    factory: object, binding: ResolvePerSignIdentity
+    factory: object, binding: ResolvePerSignIdentity, *, request: SigningRequest | None = None
 ) -> bool:
     try:
         values = (
@@ -67,7 +71,8 @@ def factory_binding_matches(
         )
     except Exception:
         return False
-    return all(_same(actual, expected) for actual, expected in values)
+    from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_authority_policy_runtime import initial_handshake_request_allowed
+    return all(_same(actual, expected) for actual, expected in values) and initial_handshake_request_allowed(factory, request)
 
 
 def response_matches(
@@ -127,6 +132,13 @@ def signature_matches(
     if type(response) is not SigningResponse or response.accepted is not True:
         return False
     try:
+        if request.requested_operation == SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION:
+            return bool(
+                _same(request.signer_public_key, binding.signer_public_key)
+                and verify_signer_peer_handshake_response(
+                    request, response, verifier=verifier
+                ).accepted is True
+            )
         return verifier.verify(
             binding.signer_public_key,
             request.signing_input,
@@ -154,7 +166,10 @@ def _audit_attestation_shape_matches(
     response: SigningResponse, request: SigningRequest
 ) -> bool:
     value = response.audit_attestation_signature
-    if request.requested_operation == AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION:
+    if request.requested_operation in {
+        AUTHORITATIVE_USE_LEASE_SIGNING_OPERATION,
+        SIGNER_PEER_HANDSHAKE_SIGNING_OPERATION,
+    }:
         return type(value) is str and bool(value)
     return type(value) is str and value == ""
 

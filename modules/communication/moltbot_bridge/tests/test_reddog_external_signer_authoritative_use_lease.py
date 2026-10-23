@@ -129,6 +129,11 @@ class _LeasedGrantProvider:
     def lease(self, request: SigningRequest):
         yield self._factory(request)
 
+    def issue_grant(self, request: SigningRequest):
+        with self.lease(request) as grant:
+            issued = grant
+        return issued
+
 
 class _ProtocolGrantBackend:
     def sign(self, _request: SigningRequest, _peer: SignerPeerAttestation) -> SigningResponse:
@@ -407,9 +412,12 @@ def _root_grant(
 
 
 def _resolve_backend(
-    grant: Mapping[str, Any], store: DurableSignerSecretGrantNonceStore
+    grant: Mapping[str, Any], store: DurableSignerSecretGrantNonceStore,
+    *, synthetic_owner_unit: bool = False,
 ) -> ResolvePerSignSignerBackend:
-    return ResolvePerSignSignerBackend(
+    from modules.communication.moltbot_bridge.tests.test_reddog_signer_resolve_per_sign_backend import _UnitGrantAndResolutionBackend
+    backend_type = _UnitGrantAndResolutionBackend if synthetic_owner_unit else ResolvePerSignSignerBackend
+    return backend_type(
         binding=_resolve_binding(store),
         grant_boundary=SignerSecretAccessGrantBoundary(
             nonce_store=store,
@@ -435,7 +443,15 @@ def _authority(
         assert signer_profile_id == "reddog-work-authority"
         return current
 
+    from contextlib import contextmanager
+
+    @contextmanager
+    def lease(self, **kwargs):
+        # Synthetic generation evidence; actual fence lifetime has separate tests.
+        yield self.resolve(**kwargs)
+
     monkeypatch.setattr(SignerCurrentGenerationRuntimeAuthority, "resolve", resolve)
+    monkeypatch.setattr(SignerCurrentGenerationRuntimeAuthority, "lease", lease)
     return authority
 
 
@@ -590,6 +606,52 @@ def test_external_issuer_uses_root_generation_and_durable_replay(
     assert _consume_lease(lease) is True
 
 
+@pytest.mark.parametrize("failure", [None, "cleanup", "invalid", "lease_only"])
+def test_external_issuer_dispatches_only_after_successful_provider_exit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, failure: str | None
+) -> None:
+    """Synthetic grant unit: ordering evidence, not admitted effect authority."""
+    monkeypatch.setattr(issuer_module.time, "time", lambda: NOW)
+    store = _store(tmp_path)
+    events = []
+
+    class Provider(_LeasedGrantProvider):
+        @contextmanager
+        def lease(self, request):
+            events.append("enter")
+            try:
+                yield None if failure == "invalid" else self._factory(request)
+            finally:
+                events.append("exit")
+                if failure == "cleanup":
+                    raise RuntimeError("provider cleanup failed")
+
+    class Signer(_GrantAwareSigner):
+        def sign_with_secret_grant(self, request, grant):
+            events.append("target")
+            return super().sign_with_secret_grant(request, grant)
+
+    provider = Provider(lambda _request: {"grant_id": "root-grant-1"})
+    if failure == "lease_only":
+        provider.issue_grant = None
+    issuer = ExternalSignerAuthoritativeUseLeaseIssuer(
+        signer=Signer(), grant_provider=provider, replay_store=store,
+        current_generation_authority=_authority(tmp_path, monkeypatch),
+    )
+    payload = _payload()
+    for field in _replay_binding(store):
+        payload.pop(field)
+    result = issuer.issue(payload=payload, authority_tier="HIGH")
+    if failure is None:
+        assert _is_lease(result) is True
+        assert events == ["enter", "exit", "target"]
+        assert _consume_lease(result) is True
+        assert _consume_lease(result) is False
+    else:
+        assert result is None
+        assert "target" not in events
+
+
 def test_real_lease_reaches_direct_wre_spine_without_monkeypatch(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -626,9 +688,11 @@ def test_real_lease_reaches_direct_wre_spine_without_monkeypatch(
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT
 
 
+@pytest.mark.parametrize("synthetic_owner_unit", [False, True])
 def test_composed_e0_socket_issuer_reaches_real_wre_spine(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, synthetic_owner_unit: bool
 ) -> None:
+    """Synthetic issuer composition is distinct from production target admission."""
     monkeypatch.setattr(lease_module.time, "time", lambda: NOW)
     monkeypatch.setattr(issuer_module.time, "time", lambda: NOW)
     store = _store(tmp_path / "e0-store")
@@ -650,7 +714,8 @@ def test_composed_e0_socket_issuer_reaches_real_wre_spine(
         message = json.loads(raw)
         grant = message["secret_access_grant"]
         return handle_reddog_isolated_signer_socket_request(
-            raw, peer=_peer(), backend=_resolve_backend(grant, store)
+            raw, peer=_peer(), backend=_resolve_backend(
+                grant, store, synthetic_owner_unit=synthetic_owner_unit)
         )
 
     client = RedDogIsolatedSignerSocketClient(
@@ -673,4 +738,8 @@ def test_composed_e0_socket_issuer_reaches_real_wre_spine(
     result = _invoke_direct_spine(order, repo, lease)
 
     assert _is_lease(lease) is False
+    if not synthetic_owner_unit:
+        assert lease is None
+        assert result.decision != EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT
+        return
     assert result.decision == EXTENSION_WRE_OPERATIONAL_SPINE_INVOKE_ACCEPT

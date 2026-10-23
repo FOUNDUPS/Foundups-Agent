@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+from copy import deepcopy
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -85,7 +86,7 @@ def _utc_now() -> str:
 
 
 def _validated_record(record: Mapping[str, Any]) -> Dict[str, Any]:
-    payload = dict(record)
+    payload = deepcopy(dict(record))
     if payload.get("record_type") != "reddog_verified_recursive_improvement_outcome":
         raise ValueError("unsupported_verified_outcome_record_type")
     if _contains_secret(payload):
@@ -140,6 +141,7 @@ class RedDogVerifiedPatternMemorySink:
 
         payload = _validated_record(record)
         execution_id = _record_id(payload)
+        canonical = _canonical_json(payload)
         memory = PatternMemory(db_path=self.db_path)
         try:
             _ensure_staging_table(memory)
@@ -152,25 +154,24 @@ class RedDogVerifiedPatternMemorySink:
                 if (
                     active["agent"] != self.agent
                     or active["success"] != 1
-                    or _stored_payload(active) != payload
+                    or _canonical_json(_stored_payload(active)) != canonical
                 ):
                     raise ValueError("verified_outcome_existing_record_conflict")
                 return execution_id
+            # Reconcile a competing insert against the winner without replacing it.
+            memory.conn.execute(
+                "INSERT INTO reddog_verified_outcome_staging "
+                "(record_id, payload, agent, staged_at) VALUES (?, ?, ?, ?) "
+                "ON CONFLICT(record_id) DO NOTHING",
+                (execution_id, canonical, self.agent, _utc_now()),
+            )
             staged = memory.conn.execute(
                 "SELECT payload, agent FROM reddog_verified_outcome_staging "
                 "WHERE record_id = ? LIMIT 1",
                 (execution_id,),
             ).fetchone()
-            canonical = _canonical_json(payload)
-            if staged is not None:
-                if staged["payload"] != canonical or staged["agent"] != self.agent:
-                    raise ValueError("verified_outcome_staged_record_conflict")
-                return execution_id
-            memory.conn.execute(
-                "INSERT INTO reddog_verified_outcome_staging "
-                "(record_id, payload, agent, staged_at) VALUES (?, ?, ?, ?)",
-                (execution_id, canonical, self.agent, _utc_now()),
-            )
+            if staged is None or staged["payload"] != canonical or staged["agent"] != self.agent:
+                raise ValueError("verified_outcome_staged_record_conflict")
             memory.conn.commit()
             return execution_id
         finally:

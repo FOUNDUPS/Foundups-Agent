@@ -16,7 +16,9 @@ from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_c
     RuntimeArtifactManifestError,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_signer_system_service_manifest_selection_loader import (
+    NOW,
     _prepare_real_cli_owner,
+    selection_module,
 )
 
 
@@ -31,7 +33,9 @@ pytestmark = pytest.mark.skipif(
 )
 
 
-def test_root_owned_owner_config_selects_current_generation() -> None:
+def test_root_owned_owner_config_selects_current_generation(monkeypatch) -> None:
+    # This shared fixture signs at NOW; retain real root ownership, pin only time.
+    monkeypatch.setattr(selection_module, "_now_epoch", lambda: NOW)
     with tempfile.TemporaryDirectory(dir="/root") as raw:
         prepared = _prepare_real_cli_owner(Path(raw), None)
         capability, boundary = loader_module.load_system_service_manifest_selection(
@@ -123,3 +127,37 @@ def _owner_file(base: Path, content: bytes) -> tuple[Path, Path]:
     target.write_bytes(content)
     target.chmod(0o400)
     return root, target
+
+
+def test_empty_source_requires_explicit_opt_in_and_exact_digest(monkeypatch) -> None:
+    from types import SimpleNamespace
+    from modules.communication.moltbot_bridge.src import reddog_initial_runtime_manifest_authority as authority
+    from modules.communication.moltbot_bridge.src.reddog_runtime_artifact_manifest_contract import raw_digest
+
+    with tempfile.TemporaryDirectory(dir="/root") as raw:
+        root, target = _owner_file(Path(raw), b"")
+        with pytest.raises(RuntimeArtifactManifestError, match="size_invalid"):
+            loader_module._read_root_owned_bytes(target, root)
+        monkeypatch.setattr(authority, "__file__", str(target))
+        monkeypatch.setattr(authority, "sys", SimpleNamespace(modules={}))
+        authority._check_sources(root, {target.name: raw_digest(b"")})
+        with pytest.raises(ValueError, match="source_changed"):
+            authority._check_sources(root, {target.name: raw_digest(b"different")})
+
+
+@pytest.mark.parametrize("defect", ["writable", "foreign_owner", "symlink", "oversize"])
+def test_source_empty_opt_in_preserves_protected_reader_guards(defect) -> None:
+    with tempfile.TemporaryDirectory(dir="/root") as raw:
+        root, target = _owner_file(Path(raw), b"")
+        if defect == "writable":
+            target.chmod(0o422)
+        elif defect == "foreign_owner":
+            os.chown(target, 1, 1)
+        elif defect == "symlink":
+            actual = root / "actual"
+            target.rename(actual)
+            target.symlink_to(actual)
+        else:
+            target.write_bytes(b"x" * (loader_module.MAX_OWNER_CONFIG_BYTES + 1))
+        with pytest.raises(RuntimeArtifactManifestError):
+            loader_module._read_root_owned_bytes(target, root, allow_empty=True)

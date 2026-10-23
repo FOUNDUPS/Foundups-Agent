@@ -2,6 +2,56 @@
 
 ## Chronological Change Log
 
+### 2026-10-18 - AutoPost as the mobile Live product vehicle
+
+- Corrected the [mobile-studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
+  after auditing canonical AutoPost source. AutoPost owns capture/Live mode;
+  shared creator control and pfMALL discovery keep their separate boundaries.
+- Updated the [M2M outcome](docs/mobile_studio/mobile_studio_outcome.v1.json),
+  pfMALL/member/domain roadmaps and owner references. The first media proof is
+  foreground WebRTC through an authenticated relay; native adoption is based
+  on measured requirements. OBS camera contribution and remote control differ.
+- Preserved the API evidence register and unrelated open PRs. Only existing
+  documentation changed; device, channel, streaming and deployed behavior remain
+  unverified. WSP 00/10/15/22/50/57/83/84/97; priority 14/P1. The owning PRs record
+  validation, squash-merge and main readback for each repository.
+
+---
+
+### 2026-10-17 - Play mobile creator studio documentation and roadmap
+
+- Extended the existing p.fMALL planning owner after inspecting main at
+  `407292aa754a88143796163581b67ca6679eac29`; no parallel application repository
+  or new FoundUp identity was created.
+- Added the [mobile studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+  [dated YouTube API evidence](docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+  and [M2M outcome](docs/mobile_studio/mobile_studio_outcome.v1.json). The bounded
+  collection has its own [manifest](docs/mobile_studio/doc_index.json) and
+  [execution receipt](docs/mobile_studio/wsp97_execution_receipt.json).
+- Updated p.fMALL README/INTERFACE/ROADMAP/ModLog, the domain roadmap and the
+  member roadmap's current-state pointer before implementation. Recorded current
+  reuse, API limits, eligibility, recovery, explicit unknowns and acceptance gates.
+- Documentation-only scope; current provider/channel/device verification and
+  creator-runtime admission remain absent. The PR owns validation and merge
+  evidence. WSP 00/10/15/22/50/57/83/84/97; planning score 14/P1.
+
+---
+
+### 2026-09-15 - AmIBot declarative registry onboarding
+
+- Continued the existing `detect_ai` intake in PR #1751. Added its single canonical
+  registry entry, declarative manifest and missing interface contract; retained
+  the other 17 entities unchanged.
+- Applied the existing genesis-intake guidance and onboarding protocol. AmIBot
+  stays `skeleton_candidate`, `SPECIFIED`, hidden, unbuilt and `TOKEN_DEFERRED`.
+  Its requested `/f/amibot` remains a shell-owner dependency; WSP 104 declares
+  inactive `/f/detect_ai` and `idb_detect_ai` under the permanent identity.
+- Validation and five pre-existing domain contract failures are distinguished in
+  [AmIBot validation](detect_ai/docs/VALIDATION.md). No catalog or runtime changes.
+- WSP 00/15/22/49/50/91/95/97/104/109.
+
+---
+
 ### 2026-08-30 - RedDog Lick cross-domain planning reference
 
 - Linked the RedDog-owned Lick handshake into FoundUps planning without

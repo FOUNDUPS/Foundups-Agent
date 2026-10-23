@@ -79,19 +79,14 @@ class PatternMemory(PatternABEvidenceMixin):
 
     def __init__(self, db_path: Optional[Path] = None):
         """
-        Initialize pattern memory database
+        Own a connection for one work item on the creating thread.
+
+        Instances may share a database path, never a transaction or close
+        lifecycle. Construct and close each instance in its worker thread.
 
         Args:
             db_path: Path to SQLite database file
         """
-        # Reuse shared singleton only for default production path.
-        # Tests and explicit db paths must get isolated storage.
-        self._uses_shared_singleton = db_path is None
-        if self._uses_shared_singleton and getattr(PatternMemory, "_initialized", False):
-            self.__dict__.update(getattr(PatternMemory, "_shared_state", {}))
-            logger.debug("[PATTERN-MEMORY] Reusing existing singleton instance")
-            return
-
         if db_path is None:
             self.db_path = Path(__file__).parent.parent / "data" / "pattern_memory.db"
         else:
@@ -100,21 +95,14 @@ class PatternMemory(PatternABEvidenceMixin):
         # Ensure data directory exists
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
+        self.conn = sqlite3.connect(str(self.db_path))
         self.conn.row_factory = sqlite3.Row  # Access columns by name
         self.false_positive_columns: set = set()
 
         self._initialize_schema()
         self._seed_false_positive_memory()
 
-        # Log init once per process to reduce telemetry spam for shared instance.
-        if self._uses_shared_singleton:
-            if not getattr(PatternMemory, "_initialized", False):
-                logger.info(f"[PATTERN-MEMORY] Initialized - db={self.db_path}")
-            PatternMemory._shared_state = dict(self.__dict__)
-            PatternMemory._initialized = True
-        else:
-            logger.info(f"[PATTERN-MEMORY] Initialized (isolated) - db={self.db_path}")
+        logger.info(f"[PATTERN-MEMORY] Initialized - db={self.db_path}")
 
     def _initialize_schema(self) -> None:
         """
@@ -545,6 +533,7 @@ class PatternMemory(PatternABEvidenceMixin):
             SELECT * FROM skill_outcomes
             WHERE skill_name = ?
               AND pattern_fidelity <= ?
+              AND success = 0
             ORDER BY pattern_fidelity ASC, timestamp DESC
             LIMIT ?
         """, (skill_name, max_fidelity, limit))
@@ -1103,19 +1092,9 @@ class PatternMemory(PatternABEvidenceMixin):
     # ------------------------------------------------------------------ #
 
     def get_skill_fidelity_stats(self, skill_name: str, days: int = 30) -> Dict:
-        """
-        Get historical fidelity statistics for a skill.
-
-        Per WRE_COT_DEEP_ANALYSIS.md Gap B: ToT skill selection
-
-        Returns:
-            {
-                "skill_name": str,
-                "total_executions": int,
-                "avg_fidelity": float,
-                "success_rate": float,  # fidelity >= 0.7
-                "recent_trend": float   # last 7 days vs previous
-            }
+        """Return fidelity statistics without treating measured zero as missing.
+        Absent means use 0.5 overall, or the overall mean for empty time windows.
+        success_rate counts fidelity >= 0.7, independently of execution success.
         """
         cursor = self.conn.cursor()
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
@@ -1133,7 +1112,7 @@ class PatternMemory(PatternABEvidenceMixin):
         row = cursor.fetchone()
 
         total = row['total'] or 0
-        avg_fidelity = row['avg_fidelity'] or 0.5
+        avg_fidelity = row['avg_fidelity'] if row['avg_fidelity'] is not None else 0.5
         success_rate = (row['successes'] or 0) / max(total, 1)
 
         # Recent trend (last 7 days vs previous)
@@ -1142,14 +1121,16 @@ class PatternMemory(PatternABEvidenceMixin):
             FROM skill_outcomes
             WHERE skill_name = ? AND timestamp >= ?
         """, (skill_name, recent_cutoff))
-        recent_avg = cursor.fetchone()['recent_avg'] or avg_fidelity
+        recent_avg = cursor.fetchone()['recent_avg']
+        recent_avg = avg_fidelity if recent_avg is None else recent_avg
 
         cursor.execute("""
             SELECT AVG(pattern_fidelity) as older_avg
             FROM skill_outcomes
             WHERE skill_name = ? AND timestamp >= ? AND timestamp < ?
         """, (skill_name, cutoff, recent_cutoff))
-        older_avg = cursor.fetchone()['older_avg'] or avg_fidelity
+        older_avg = cursor.fetchone()['older_avg']
+        older_avg = avg_fidelity if older_avg is None else older_avg
 
         recent_trend = recent_avg - older_avg
 
@@ -1216,11 +1197,8 @@ class PatternMemory(PatternABEvidenceMixin):
         return scored
 
     def close(self) -> None:
-        """Close database connection"""
+        """Close only this instance's connection, on its creating thread."""
         self.conn.close()
-        if getattr(self, "_uses_shared_singleton", False):
-            PatternMemory._initialized = False
-            PatternMemory._shared_state = {}
         logger.debug("[PATTERN-MEMORY] Connection closed")
 
 

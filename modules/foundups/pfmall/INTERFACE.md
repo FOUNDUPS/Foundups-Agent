@@ -1,6 +1,7 @@
 # p.fMALL Interface
 
-**Contract status**: Current implementation truth as of 2026-08-23.
+**Contract status**: Implemented shell interfaces with later dated slices;
+mobile creator seam below is specified only (updated 2026-10-18).
 **Boundary**: p.fMALL is a platform/presentation layer, not a FoundUp, model
 host, OpenClaw instance, or Hermes worker.
 
@@ -105,6 +106,45 @@ The following rules are mandatory:
 - Local/browser models may advise or surface anomalies but cannot finalize a
   protected decision.
 
+## Proposed mobile creator seam (updated 2026-10-18)
+
+**SPECIFIED_NOT_IMPLEMENTED.** This section adds no callable endpoint or browser
+command. The unauthenticated read API and presentation dispatcher cannot accept
+creator credentials or perform broadcast writes.
+
+The creator-facing Live mode belongs to external
+[AutoPost](https://github.com/FOUNDUPS/autopost), which already owns capture and
+recorded-file publishing. AutoPost composes the selected browser/native media
+adapter; this Mall interface consumes the permitted observation/projection.
+The foreground browser/relay proof and optional OBS contribution do not move
+camera code, provider tokens or relay credentials into the Mall browser.
+
+The [mobile studio contract](../docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
+defines logical `PrepareSession`, `CreateBroadcast`, `ResolveInput`, `BindInput`,
+`StartLive`, `InspectSession` and `EndLive` operations for a future authenticated
+adapter. It also specifies request identity, principal/channel scope, consent,
+revision checks, durable reconciliation and uncertainty handling. Implementations
+must independently verify every claim at the backend boundary.
+
+An attended AutoPost browser can use a valid Google grant for a bounded REST
+lifecycle proof. That proof has explicit expiry/reload limits and is not the
+durable shared backend specified here. AutoPost's local author signature or Lick
+receipt is not creator/channel authorization. Media export requires explicit
+creator intent; local End remains effective if provider control is unreachable.
+
+Play receives only an admitted public projection: creator identity, broadcast
+ID, title, approved watch/embed URLs, observed lifecycle, freshness and archive
+state. Tokens, ingest secrets and raw provider responses are excluded. Encoder
+connectivity, active ingest, a live broadcast and successful player playback are
+separate observations. Missing/stale evidence is unknown; a player-open event is
+not proof of a publicly live show.
+
+See the [API constraints register](../docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+for channel/embedding eligibility and service limits, and the
+[machine outcome](../docs/mobile_studio/mobile_studio_outcome.v1.json) for the
+proposed handoff. A future implementation must update this interface with its
+actual authentication, schema and transport after a bounded slice is admitted.
+
 ## Verification-gap guard
 
 `verification_gap_guard.py` exposes advisory event and policy types:
@@ -144,3 +184,39 @@ they do not fetch, render, or execute content.
 - `modules/foundups/docs/PFMALL_DATA_ISOLATION_MODEL.md`
 - `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
 - `public/member/INTERFACE.md`
+
+## GotJunk public listing discovery (first review slice, 2026-10-12)
+
+`GET /pfmall/listings/search?q=...&category=...&limit=...` is an
+**unauthenticated, public-only** read surface for `gotjunk_001`. The server
+must supply a trusted `app.state.listing_evidence_provider` that independently
+joins an item with a server-owned publication approval. No such production
+provider is installed; unconfigured or failed lookup returns **HTTP 503**.
+Cross-FoundUp and owner-scoped requests return **HTTP 403**. A configured
+provider returns only approved public `source_item_id`, `foundup_id`,
+`source_collection`, `title`, `category`, and `deep_link`; no
+media URLs, private locations or arbitrary captured descriptions.
+
+This endpoint is not the member JavaScript search feature, authenticated
+private search, an upload service, or a deployment claim. Publication approvals
+must not be imported from untrusted legacy client fields. See
+[GOTJUNK_LISTING_READ_SLICE.md](GOTJUNK_LISTING_READ_SLICE.md).
+
+## Server-injected GotJunk publication reader (second review slice)
+
+`FirestoreGotJunkPublicationProvider(client, expected_project_id=...)`
+(`firestore_listing_provider.py`) implements the existing
+`ListingEvidenceProvider` for two **server-controlled** collections:
+`gotjunk_items` and `gotjunk_public_approvals`. The latter is intentionally
+not readable or writable through browser Firebase rules (default catch-all
+deny). It must be independently populated by an authorized reviewer service,
+not a seller-controlled status field. Reviews require matching FoundUp,
+item/owner, reviewer distinct from owner, explicit `privacyReviewed=true`, fixed `fieldAllowlistVersion=public_listing_v1`, and exact source `updatedAt` revision.
+Changes to source items automatically invalidate the approval read.
+
+This adapter **does not** initialize Firebase credentials, create approvals,
+configure `app.state.listing_evidence_provider`, install a production
+publisher, or deploy. A trusted server bootstrap with explicit matching
+project and IAM must inject the client and activate the provider after
+security and deployment gates; otherwise HTTP search remains 503. Firebase
+Admin client libraries and deployment configuration remain external.

@@ -1,3 +1,51 @@
+## Explicit local-model ownership — 2026-10-01
+
+`QwenInferenceEngine.close() -> None` detaches its model and clears initialized
+state before invoking the captured model's `close()`. No model is a safe no-op;
+an owned model is closed even when initialized is false. Repeated/reentrant
+explicit close does not retry the captured resource, including after failure.
+Native cleanup `Exception` logs only its type and raises stable
+`RuntimeError("Qwen model cleanup failed")` with suppressed exception context.
+Generation itself retains the engine for direct callers; those callers own
+explicit close. Concurrent ownership and native partial-constructor cleanup
+are not qualified by this contract.
+
+The existing WRE local adapter closes every successfully constructed per-call
+engine in `finally`, in raw and native-chat modes. Rejected configuration or
+construction creates no ownership. Cleanup `Exception` invalidates a proposal
+as `local_model_unavailable`; primary failures keep their existing result.
+A primary interruption propagates while cleanup is attempted. A `BaseException`
+raised by cleanup itself is not normalized. Generated text remains
+`success=False`, `_effect_evidence=False`; cleanup confers no execution authority.
+
+## Opt-in local native-chat proposals
+
+`WREMasterOrchestrator(*, local_proposal_mode="raw",
+local_native_chat_profile=None)` validates configuration before constructing
+collaborators. `execute_local_skill_inference` accepts corresponding keyword-only
+`proposal_mode` and `native_chat_profile` arguments. Raw mode requires no profile.
+Native mode requires exactly `runtime_version="0.3.20"` and `template_sha256`
+(64 lowercase hexadecimal characters). Configuration is copied, never taken
+from skill text or input context, and does not confer runtime authority.
+
+The engine's `generate_chat_response(prompt, system_prompt=None, *,
+runtime_version, template_sha256)` checks observed runtime, required formatter
+capabilities and actual model template digest. It renders system/user messages
+once with `enable_thinking=False`, then verifies positive integer limits and
+`input_tokens + max_tokens <= min(actual_context, configured_context)`.
+The per-call handler uses that same rendering and the qualified formatter's
+EOS text/token criteria, with an empty caller stop list (`stop=[]`). Markdown
+`###` content is not a native stop delimiter. The output cap remains in force;
+the default raw route keeps its existing stop list. The call does not replace
+persistent model handlers. This is a qualified optional
+profile, not a promise for every GGUF/template or the declared0.2.72 runtime.
+
+Master configuration errors raise a stable `ValueError` before collaborators;
+adapter failures preserve existing structured failure output. Engine exceptions
+return `Error: Qwen chat response generation failed` and log only exception type.
+Text remains `success=False`, `_effect_evidence=False`: admission, execution,
+acceptance and retention remain separate existing gates. No automatic activation.
+
 # HoloIndex Public Interface
 
 ## Current-truth retrieval contract
@@ -19,6 +67,21 @@ module Tier-0 reservation remains stronger and unchanged.
 This policy prevents stale audit prose from becoming the default answer to a
 current-state question. It does not prove that a document is true, change the
 ranker automatically, authorize reindexing, or constitute retrieval RSI.
+
+## Owner entry and local-context evidence
+
+The existing one-shot owner adapter selects workspace source from its script
+checkout. A primary checkout is not inherently current main. Configured
+authority selection requires a clean same-repository, same-HEAD worktree;
+the owner also validates the published generation and runtime bindings.
+See [source-bound owner queries](CLI_REFERENCE.md#source-bound-owner-queries)
+for supported JSON requests and the qualification matrix.
+
+`retrieval_mode="lexical"`/`bundle_only=true` uses the existing local bundle
+path without semantic owner/store access. Its `bundle_authority` separates
+`workspace_head` from `workspace_overlay`; UNKNOWN freshness and index-gap
+labels remain visible. Bundle success does not satisfy semantic admission.
+These are existing contracts, not new API fields or a new MCP service.
 
 ## Package import boundary
 

@@ -1,7 +1,7 @@
 """Opt-in public-only router; never dispatches to the private OpenClaw webhook.
 
 The existing host must install PublicSurfaceBinding in app.state.reddog_public.
-Without an independently reviewed public responder and persistent accounting,
+Without an independently reviewed public responder and lease-backed accounting,
 all routes fail closed. No environment flag or client answer enables the host.
 """
 from __future__ import annotations
@@ -34,7 +34,8 @@ class PublicSurfaceBinding:
     tasks: set = field(default_factory=set, init=False, repr=False)
 
     def __post_init__(self):
-        if (type(self.gate) is not PublicSessionGate or not callable(self.respond)
+        if (type(self.gate) is not PublicSessionGate or self.gate.host_owner is None
+                or not callable(self.respond)
                 or type(self.subject_key) is not bytes or len(self.subject_key) < 32
                 or not callable(self.clock)):
             raise PublicAdmissionError("public_configuration_invalid", 503)

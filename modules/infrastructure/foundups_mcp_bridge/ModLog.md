@@ -1,5 +1,100 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-10-19: Coordinated MCP 1.30.0 security upgrade
+
+Upgraded the MCP dependency, launcher exact-version gate, and isolated query
+candidate's disjoint-dependency regression together to 1.30.0. FastMCP 3.2.0,
+Pydantic 2.12.3 and Uvicorn 0.38.0 remain pinned. The requirement-only update in
+PR2146 failed two version contracts and two HTTP startup cases in hosted CI
+38804918263 (45 passed, 4 failed). The launcher correctly refused the changed
+runtime; this repair updates its reviewed version contract rather than removing
+the check. Authentication, remote tool allowlist, child environment closure,
+process ownership, and cleanup gates are unchanged.
+
+Local isolated Python 3.12.14 validation: 28 passed, 19 Windows-only skipped,
+two Windows HTTP cases deselected; the real candidate capability probe passed.
+Earlier whole-selection attempts failed at fixture setup (symlink interpreter,
+then missing Windows observer); neither is accepted lifecycle evidence. Hosted
+Windows CI must still pass all 49 criteria without skips. This source upgrade
+does not upgrade or activate any installed service or grant native execution.
+
+WSP00 detector bootstrap lacked torch; the documented tracker fallback reported
+gate_passed=true, with no detector witness claimed. Source-bound lexical Holo
+retrieval reported UNKNOWN freshness/index gap; direct source checks confirmed
+all three executable version declarations. Manual bounded maintenance follows
+WSP50/71/97; no new WRE orchestration or model runtime was started.
+
+## 2026-10-04: Paired MCP runtime and startup ownership qualification
+
+The existing launcher now pins FastMCP3.2.0/MCP1.28.1 with unchanged
+Pydantic2.12.3/Uvicorn0.38.0. Direct Windows base-interpreter launches initialize
+the selected venv's normal site hooks for both server and readiness children;
+this closes a reproduced missing-PyWin32 startup failure. Capability probes use
+explicit `-B`. Unexpected post-spawn exceptions reuse the existing termination
+owner, retaining the handle and lock when termination fails.
+
+Local evidence:47 nonlistener cases and two real owned loopback HTTP cases
+pass, with no errors/skips. The earlier live attempt failed cleanup and remains
+in the evidence. Frozen cleanup baseline:44pass/2fail; coordinator repair:46pass.
+The new Windows CI job requires all49, including real lifecycle checks, using
+its own128MiB VHD. Hosted verification/publication are pending at this checkpoint.
+
+One local Qwen proposal was rejected before application: invented helper,
+incorrect handle/lock identity and invalid fallback. The coordinator authored
+the production repairs; no worker repair success is claimed. One observed SDK
+completion:767 input/59 output tokens;52.062s parent; zero paid inference calls.
+The existing benchmark owner records that rejection; no automatic retry.
+
+This is ordinary supervised maintenance. Shared runtimes were not upgraded,
+native effect admission remains blocked, and sampled PID ownership checks do
+not establish an atomic endpoint lease or graceful ASGI shutdown. The fixture
+uses a private mock lock, so real singleton cleanup is outside this qualification.
+Evidence: `outputs/rsi-mcp-runtime-qualification-20261004` on the execution PC;
+canonical sequencing: root ROADMAP and `docs/roadmaps/rsi_swarm_backlog.json`.
+WSP00/15/22/50/84/97; no new module, skill or orchestrator.
+
+First hosted attempt:46pass/2livefail because its PowerShell ownership observer
+timed out at10s, while both owned processes cleaned up correctly. The revised
+fixture uses fixed System32 netstat numeric TCP/PID projection with unchanged
+ownership criteria and a15s startup observation window, capped10s per probe.
+One added projection negative test initially had a PID/port substitution typo;
+that failed run is retained. Corrected input and final47+2 local cases pass.
+The prior48 test-function ASTs and production source remain unchanged. Hosted
+replacement qualification remains pending; the first failure is not erased.
+
+## 2026-10-02: Optional aggregate committed-memory limit for the existing child owner
+
+- Added `job_memory_limit_bytes=None` through the shared runner and Windows
+  Job owner. Exact positive integer/`SIZE_T_MAX` and platform checks precede
+  process/Job creation; `0x200` combines with existing kill-on-close `0x2000`.
+  Configuration and assignment complete before resume. Default call shapes,
+  existing output/deadline controls, and cleanup paths remain intact.
+- Appended independent deterministic and Windows controls to the existing test
+  owner. Local evidence is 48 deterministic + two physical memory + four
+  process/maintenance + eight manifest cases: 62 distinct passes across separate
+  runs. Original failed attempts remain documented in `tests/TestModLog.md`.
+- The physical fixture now reuses the existing OS process-image owner to avoid
+  the venv launcher's nested Job; the 128 MiB limit and allocation oracles stayed
+  fixed. Two older overflow tests now require intact bounded capture instead
+  of a timing-dependent zero exit after deliberate tree termination.
+- Publication and hosted CI are pending; these are local qualification results.
+- Aggregate commit is separate from RSS, native file I/O, or full containment.
+  No model, provider, production service, runtime activation, or RSI gain is
+  part of this change. Historical totals below remain dated evidence.
+  WSP 00, 15, 22, 50, 62, 97.
+
+## 2026-09-14: Existing MCP dependency candidates qualified without activation
+
+- Extended section 6 of the existing `docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md`; its expired historical decision is not renewed. Traced direct tool registration and immutable Holo snapshots against the FastMCP/Chroma advisories. Live topology remains unverified; alerts stay open.
+- Reconciled open PR1526/1525: FastMCP-only resolution fails; the paired quartet resolves and passes 25 existing MCP cases in a disposable venv. Both PRs leave `MCP_RUNTIME_VERSIONS` unchanged. A combined migration must retain the exact gate and qualify a replacement runtime before activation.
+- Existing query-environment MCP/snapshot selection: 38 passed, 2 live-service cases deselected. Source, requirements and shared environments remain unchanged. System re-score proceeds to R11 mirror restoration while runtime migration remains separately gated. WSP 00, 15, 22, 50, 84, 97.
+
+## 2026-09-13: Holo startup diagnostic and existing interpreter reuse
+
+- Observed the existing owner through the shared bounded capture primitive in an external diagnostic harness. Retained only exit codes and allowlisted error categories; both failed children exited 1 with missing NumPy. No production diagnostic API or runtime code changed.
+- The existing trusted_holo_site_packages guard rejects the ambient interpreter's different base. The canonical venv satisfies the guard and restores normal reference semantic retrieval with one attempt at `78b79c36`; current-main authority mismatch remains separate.
+- Existing runtime-selection tests passed 2 / 16 deselected. Holo CLI_REFERENCE.md and canonical retrieval instructions now select dependencies separately from source. Exact closure/admission remains unproved; no guard, route or index was changed. WSP 22, 50, 84, 97.
+
 ## 2026-08-30 - Held builder child phase 2C3c
 
 - Added one bounded held-executable child over the exact Phase 2C3a runtime.

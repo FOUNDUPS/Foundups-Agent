@@ -1,0 +1,86 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "worker",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "A",
+  "S": {
+    "owner": "modules/platform_integration/elevenlabs_calls",
+    "read": [
+      "modules/platform_integration/elevenlabs_calls/docs/SETUP.md",
+      "modules/platform_integration/elevenlabs_calls/src/config.py",
+      "modules/platform_integration/elevenlabs_calls/src/client.py",
+      "modules/platform_integration/elevenlabs_calls/src/cli.py"
+    ],
+    "write": [
+      "modules/platform_integration/elevenlabs_calls/docs/SETUP.md",
+      "modules/platform_integration/elevenlabs_calls/src/config.py",
+      "modules/platform_integration/elevenlabs_calls/src/client.py",
+      "modules/platform_integration/elevenlabs_calls/src/cli.py",
+      "modules/platform_integration/elevenlabs_calls/tests"
+    ]
+  },
+  "M": "exec",
+  "T": "JP-CALL-02",
+  "R": [
+    0,
+    5,
+    6,
+    21,
+    22,
+    34,
+    84,
+    97,
+    99
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "single_carrier_adapter": true,
+    "delivery_requires_external_confirmation": true,
+    "automatic_redial": false,
+    "effect_boundary": "Configured account operations only; do not expose keys or purchase services."
+  },
+  "O": [
+    "provider readiness report",
+    "setup corrections if necessary",
+    "work_orders/results/JP-CALL-02.json (redacted; coordinator integrates)"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Credential disclosure risk",
+    "Attempt to claim unobserved live success"
+  ],
+  "X": {
+    "status": "blocked_credentials",
+    "created_utc": "2026-09-11T00:00:00Z",
+    "timestamp_precision": "date; midnight is a date marker, not execution time",
+    "baseline_commit": "196976aea3516426552238e70be54e015c397999",
+    "depends_on": [
+      "JP-CALL-01"
+    ],
+    "objective": "Make the existing ElevenLabs/Twilio adapter ready for a controlled Japanese call.",
+    "steps": [
+      "Check credential presence without exposing values; verify current official provider requirements for outbound Japan and caller ID.",
+      "Use existing doctor and provision preview; identify the configured account, available voice and imported outbound number.",
+      "Provision the dedicated agent only within account authority; record redacted remote profile and outbound readiness. No account purchase or number purchase is implied.",
+      "If the environment cannot establish a prerequisite, return its precise blocker and the smallest operator setup step."
+    ],
+    "acceptance": [
+      "Authenticated account and outbound-capable number are verified, not inferred from environment variables.",
+      "Remote agent profile matches Japanese language, recipient check, voicemail behavior, duration and privacy limits.",
+      "No call is made by setup."
+    ],
+    "token_budget": {
+      "analysis": 2500,
+      "planning": 1500,
+      "implementation": 8000,
+      "documentation": 2000
+    },
+    "coherence": {
+      "required_threshold": 0.618,
+      "measured": null
+    },
+    "rollback": "Revert only owned changes; preserve journal and evidence. Reconcile any external effects; never automatically redial."
+  }
+}

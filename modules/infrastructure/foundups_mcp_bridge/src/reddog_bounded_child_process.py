@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from .reddog_windows_job_object import (
     CREATE_SUSPENDED,
     attach_windows_kill_on_close_job,
+    validate_job_memory_limit,
 )
 
 
@@ -132,7 +133,8 @@ def _wait_for_child(
             continue
 
 
-def _start_bounded_child(command, kwargs):
+def _start_bounded_child(command, kwargs, job_memory_limit_bytes=None):
+    limit = validate_job_memory_limit(job_memory_limit_bytes)
     timeout, reader_name = _runner_settings(kwargs)
     kwargs["bufsize"] = 0
     if os.name == "nt":
@@ -143,7 +145,10 @@ def _start_bounded_child(command, kwargs):
         kwargs["start_new_session"] = True
     process = subprocess.Popen(command, **kwargs)
     try:
-        process._reddog_tree_guard = attach_windows_kill_on_close_job(process)
+        memory_options = {} if limit is None else {"job_memory_limit_bytes": limit}
+        process._reddog_tree_guard = attach_windows_kill_on_close_job(
+            process, **memory_options,
+        )
     except (OSError, ValueError):
         _terminate_child_tree(process)
         raise OSError("bounded child tree guard unavailable") from None
@@ -178,10 +183,16 @@ def _start_capture_reader(process, capture, reader_name):
         raise
 
 
-def bounded_child_runner(command, **kwargs) -> BoundedChildResult:
-    """Run one child with bounded memory/time and no stderr or disk capture."""
+def bounded_child_runner(
+    command, *, job_memory_limit_bytes: int | None = None, **kwargs,
+) -> BoundedChildResult:
+    """Bound output/time, optionally Windows Job commit; discard stderr."""
 
-    process, timeout, reader_name = _start_bounded_child(command, kwargs)
+    memory_options = (
+        {} if job_memory_limit_bytes is None
+        else {"job_memory_limit_bytes": job_memory_limit_bytes}
+    )
+    process, timeout, reader_name = _start_bounded_child(command, kwargs, **memory_options)
     capture = BoundedChildCapture()
     reader = _start_capture_reader(process, capture, reader_name)
     try:

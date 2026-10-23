@@ -1,4 +1,39 @@
+## 2026-09-22: Noncreating observer runtime lookup
+
+- WSP00/6/10/15/22/49/50/62/97; C2/I3/D3/Impact3=11/P2. Extend existing broker singleton with a noncreating accessor, used only by observer runtime lookup. Capture under singleton lock, invoke status after release; no new scheduler/module.
+- Baseline4fail/4pass; repaired and independent8pass on identical frozen cases;19 original cases unchanged and not selected. Finite absent/present/replacement/error and creating-getter compatibility controls; no real service, broker/daemon construction, default database or provider.
+- Existing creating/reset functions and broker class remain unchanged. Default observer/adapter ingress still has effects; no global isolation, live runtime readiness or retained RSI claim. Exact source, package, review and publication evidence belongs to the canonical RSI backlog.
+
+## 2026-09-22: Truthful broker stop acknowledgment
+
+- WSP00/10/15/22/49/50/62/91/97; C3/I3/D3/Impact3=12/P2. The existing broker distinguishes accepted stop requests from observed worker exit, binds the active handle's hook and rejects changed ownership across callbacks.
+- Fixed baseline:25failed/26passed; candidate and independent replay:51passed (same cases). Existing13 import cases retained; three threaded lifecycle cases deselected, with only the legacy stop-status expectation updated for the new contract.
+- Callbacks stay outside broker locks; finite replacement tests do not prove atomic publication against arbitrary concurrent registry writers. No stop/join/kill scheduler or runtime update authority added. Canonical backlog records source, package checks, review and publication.
+
+## 2026-09-22: Preserve broker import-failure streaks
+
+- WSP00/10/15/22/49/50/62/91/97; C3/I3/D3/Impact3=12/P2. Existing broker counter now survives repeated caught import errors and reaches threshold3; successful full launch handling or a caught non-import exception resets only the affected DAE.
+- Preserve broad existing catch, events/finally, disabled admission and manual re-enable semantics. Same-file failure-transition extraction shrinks inherited class and oversized method; no new broker/module or process authority.
+- Fixed baseline:9failed/4passed; candidate and independent replay:13passed, original3 lifecycle methods unchanged/deselected. Inert fixtures only; no service, real thread, provider or default database.
+- Corrects the historical V1.2.5 completion claim in the [module ModLog](../ModLog.md); no measured live crash-loop/noise improvement is asserted. Exact source, manifest, checks and closure are in the canonical RSI backlog. Re-score after closure.
+
 # dae_daemon TestModLog
+
+## 2026-09-22: Seven persistence/acknowledgment characterization cases
+
+- Reuse the existing observer file; preserve the original nine retry regressions and three observer methods exactly. Seven ordinary cases characterize six boundaries, including a separate raised-exception control; production methods are unchanged.
+- Local and independent selected runs:16passed,3deselected, two plugin-configuration warnings. Same16cases overlap; no new crash, cross-process, live WRE/FAM or power-loss evidence.
+- Run with `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`: `python -B -m pytest modules/infrastructure/dae_daemon/tests/test_dae_observer.py -k test_event_store_ -q -o addopts= -p no:cacheprovider`. Exact interpreter, external temporary paths and JUnit are in the evidence receipts.
+- Test command, frozen hashes, independent result and any failed attempts are bound in the current backlog evidence. Existing prior process-witness screening block remains unchanged; this uses ordinary pytest only.
+- Compare returned versus raised store failure, record/append state after error and reopen, duplicate identity ambiguity and equal-count content mismatch. Do not promote a characterization pass into a durability or retained RSI claim.
+
+## 2026-09-22: Fixed sequence-collision regression oracles
+
+- Reuse `test_dae_observer.py`; nine new standalone cases, original three observer methods unchanged.
+- Before repair:5pass/4fail under the frozen baseline runner; a separate real-lock collision witness timed out with recursive acquisition observed and its own child termination confirmed. Partial-write and volatile-listener witnesses characterized remaining defects.
+- After repair: ordinary focused pytest9pass/3deselected, two configuration warnings; test IDs and assertions unchanged. Independent ordinary replay is recorded in the backlog, not added as unique test count.
+- The broader candidate process-witness harness remains paused after automatic screening blocked review. No candidate actual-lock subprocess, crash-recovery, cross-process concurrency or live-runtime proof is claimed.
+- Acceptance covers the existing retry method only; parity failures after failed attempts remain deliberate test assertions and an open durability obligation.
 
 ## V1.4.0 - Runtime Emitter Tests (2026-03-27)
 

@@ -1,4 +1,18 @@
+## 2026-10-22 — CA trust build protection
+
+WSP12/22/97. Container build dependency downloads now use the reviewed
+incident-fixed runtime/trust bootstrap; build contexts and entrypoints remain.
+See `docs/audits/security/PYTHON_CA_TRUST_20261022.md` for scope and checks.
+No production image rebuild or rollout is claimed.
+
 # Simulator ModLog
+
+## 2026-10-21 — UPS genesis denomination regression closure
+
+- Retained PR #941's architecture correction: the existing default of 100,000 UPS per BTC implies 1,000 sats per UPS at genesis. No reserve, fee, token or financial-policy implementation changed.
+- Extended the existing reserve test to verify a non-genesis circulating value after reserve growth. Extended the existing docs-alignment case to read the architecture's denomination and check it against the reserve constant; corrected the test README's coverage description.
+- Regenerated the canonical test registry: only the existing reserve test's description changed. The owning checkout passed all 12 reserve/docs cases; a fixed-genesis-value mutation and a reverted one-sat architecture statement each failed exactly the intended case. Exact source restoration returned all 12 cases to passing.
+- WSP 00 gate passed; HoloIndex returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH` with UNKNOWN freshness/index gap, so review used exact main/PR source. WSP 15/22/50/97. Validation is offline simulator/documentation evidence, not live token, deployment or financial-operation acceptance; current hosted checks and main readback remain closure gates.
 
 ## 2026-06-14 - Nomenclature Alignment: Universal Compute Account (UCA) & internal flows
 

@@ -15,6 +15,9 @@ from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_run
 from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_runtime_store import (
     AuthorityRuntimeVerifiedOutcomeStore,
 )
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_validation import (
+    verified_at_epoch,
+)
 
 
 def derive_verified_outcome_admission(
@@ -46,6 +49,9 @@ def derive_verified_outcome_admission(
         return None
     if not verifier_receipt or not now_iso:
         return None
+    recorded_at = _recorded_verification_time(chain_state, gate_receipt, now_iso)
+    if recorded_at is None:
+        return None
     binding = _outcome_binding(queue_item, gate_receipt, verifier_receipt, work_order_id)
     if any(not value for value in binding.values()):
         return None
@@ -56,9 +62,52 @@ def derive_verified_outcome_admission(
             **binding,
             "verification_receipt_digest": _digest(verifier_receipt),
             "held_out_receipt_digest": _digest(gate_receipt),
-            "verified_at": now_iso,
+            "verified_at": recorded_at,
         },
     }
+
+
+def _recorded_verification_time(
+    chain_state: Mapping[str, Any], gate_receipt: Mapping[str, Any], now_iso: str
+) -> str | None:
+    # Resolve at use time: the chain planner also imports admission adapters.
+    from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
+        CHAIN_RESULTS_SCHEMA_VERSION,
+        resident_queue_chain_receipt_id,
+        resident_queue_chain_snapshot_is_canonical,
+    )
+
+    try:
+        if (
+            chain_state.get("schema_version") != CHAIN_RESULTS_SCHEMA_VERSION
+            or not resident_queue_chain_snapshot_is_canonical(chain_state)
+        ):
+            return None
+        receipts = chain_state["receipts"]
+        if any(not isinstance(receipt, Mapping) for receipt in receipts):
+            return None
+        matches = [r for r in receipts if r.get("recorded_stage") == "held_out_regression_gate"]
+        if len(matches) != 1:
+            return None
+        receipt = matches[0]
+        identity = {key: receipt.get(key) for key in (
+            "queue_item_id", "selected_slice", "recorded_stage",
+            "previous_plan_id", "next_plan_id",
+        )}
+        if (
+            any(not isinstance(value, str) or not value for value in identity.values())
+            or identity["queue_item_id"] != chain_state.get("queue_item_id")
+            or identity["selected_slice"] != chain_state.get("selected_slice")
+            or identity["selected_slice"] != gate_receipt.get("slice_name")
+            or receipt.get("receipt_id") != resident_queue_chain_receipt_id(**identity)
+        ):
+            return None
+        recorded_at = receipt.get("recorded_at")
+        if not isinstance(recorded_at, str) or verified_at_epoch(recorded_at) > verified_at_epoch(now_iso):
+            return None
+        return recorded_at
+    except (TypeError, ValueError, OverflowError):
+        return None
 
 
 def _runtime_binding_state(queue_item: Mapping[str, Any]) -> str:

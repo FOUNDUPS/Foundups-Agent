@@ -7,6 +7,12 @@
 
 ---
 
+## 2026-10-06 superseding note — eSingularity.ai ownership
+
+The April report below remains historical evidence of the catalog at that time. The former `linkedin_esingularity` classification as a standalone `LINKEDIN_MICRO_FOUNDUP` is superseded. The active venture is `esingularity_001` under `modules/foundups/esingularity`; LinkedIn company ID `2199715` is its canonical social/publishing surface. Keep `linkedin_esingularity` only as a compatibility/source alias until an explicit catalog migration is implemented and tested.
+
+---
+
 ## 1. Current pfMALL Catalog Lanes
 
 Source: `public/member/mall-video-catalog.json` — 8 lanes.
