@@ -1,3 +1,22 @@
+## 2026-10-23 — Private AutoPost item capture and shared Mall repair
+
+Extend existing AutoPost/PF Mall ownership for Shop clothing and GetK-style
+item evidence. Add a private-default handoff and local draft specification;
+update module/domain roadmaps, interfaces, ModLogs, registry evidence and
+navigation. Mark obsolete AutoPost mock-only findings historical. Public Shop
+visibility remains undecided; grouping UI, authenticated media/private-item
+attachment and garment rendering remain explicitly unimplemented.
+
+Repair bounded Mall request prefixes/clothing aliases while preserving item
+qualifiers, unsupported constraints and grouped-domain ownership. Extend the
+existing field regression harness and advance the existing member shell cache.
+Three existing Mall VM harnesses pass; concierge reports 21/21. The affected
+product/cache harness also passes all 17 checks. AutoPost's
+companion PR #14 passed hosted lint/tests/build and merged at c7fb644c1b8897f2af29f26d7e3dc3838a67ab18.
+Independent review, document/link/hash checks and the owning PR retain exact
+scope, source and gate evidence. WSP 22/50/83/84/97; WSP 00 formula fallback has
+no detector witness, and no Holo freshness/WRE runtime claim is made.
+
 ## 2026-10-23 — Kids Episodes story-production foundation
 
 WSP 97/109: add discoverable `kids_episodes` FoundUp under EDUIT with YouTube Shorts rendering reuse. Includes local editor, exact-duration rendering and assembly, source-preserving linked story planning, checkpointed provider callbacks, actual-artifact review adapters, bounded trend research, prototype skills and a fail-closed OpenClaw/WRE route. Independent review repaired artifact-mutation and checkpoint-symlink defects. Live provider execution, WRE admission and hosted deployment remain unverified; no production activation is claimed.

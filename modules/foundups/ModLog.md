@@ -2,6 +2,22 @@
 
 ## Chronological Change Log
 
+### 2026-10-23 - Private AutoPost item capture inside the shared Mall
+
+- Added the [shared item handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) for
+  Shop clothing and GetK-style evidence. AutoPost stays the external camera and
+  original-media owner; item grouping and authenticated private attachment are
+  explicitly specified pending implementation. Public Shop remains undecided.
+- Updated the domain/module roadmaps, interfaces, canonical index, instance and
+  static-media contracts, registry evidence, navigation and bounded doc manifest.
+  Marked obsolete capture findings historical; preserved registry identities,
+  routes and unrelated Live/Lick/GetK work.
+- Repaired the existing member catalog request matcher and extended its current
+  VM harness. Detailed execution evidence lives in the member TestModLog and PR.
+  No new camera, identity/blob store, marketplace or private upload API was added.
+- WSP 22/50/83/84/97: exact-source reuse and independent review; runtime/bootstrap
+  and Holo limits remain recorded in the handoff. PRs own checks and main readback.
+
 ### 2026-10-18 - AutoPost as the mobile Live product vehicle
 
 - Corrected the [mobile-studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)

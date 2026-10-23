@@ -1,3 +1,29 @@
+## 2026-10-23 — Private AutoPost item handoff and Shop retrieval repair
+
+- Reconciled Foundups-Agent `a048c24071e1a651b161025ba3342f14f3047280` and
+  AutoPost `3c0fc19d40e225ed7f826541a33c38293f9fe664`. AutoPost owns original
+  photo capture/media; the existing platform owns authenticated attachment and
+  permitted Mall presentation. Public Shop visibility remains undecided.
+- Added [the item handoff](AUTOPOST_ITEM_CAPTURE_HANDOFF.md) and bounded
+  [document manifest](doc_index.json); linked module/domain interfaces,
+  roadmaps, registry and navigation. Corrected obsolete AutoPost mock/percentage
+  claims and marked the older capture audit historical for current capability.
+- Distinguished local batch/item/photo IDs, private defaults, missing grouping
+  UI/persistence and missing authenticated media/private-item service. Kept
+  public GotJunk routes/static assets out of the private path; GetK's unmerged
+  `public_browse` default is explicitly unsuitable for private capture.
+- Shared member matcher repair is recorded in `public/member/ModLog.md` and
+  its existing test log. It does not implement structured shopping intent,
+  microphone capture, private garment rendering or public commerce.
+- Verification: immutable-source/blob review, document/manifest attachment
+  checks, independent architecture review and the existing Mall VM harnesses.
+  This slice does not change pfmall Python/runtime authorization or deploy a
+  provider. The owning PR records hosted checks, merge and main readback.
+- WSP 22/50/83/84/97: reuse owners and preserve operational memory. WSP 00
+  canonical bootstrap lacked torch; formula fallback opened a software gate,
+  detector witness absent. No admitted Holo/WRE runtime: semantic freshness
+  UNKNOWN; no reindex or named-worker execution claimed.
+
 ## 2026-10-18 — AutoPost Live-mode owner audit and contract correction
 
 - Audited external AutoPost main `4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147`

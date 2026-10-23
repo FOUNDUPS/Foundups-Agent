@@ -15,6 +15,37 @@
   AutoPost already implements browser capture/recorded-file upload; continuous
   streaming and durable live control remain unimplemented.
 
+## Private item capture — 2026-10-23
+
+012's current goal is AutoPost clothing photographs grouped into items inside
+the shared Mall. Public Shop presentation remains undecided; the default is
+private local capture followed by an authenticated, scoped attachment. Read
+[AUTOPOST_ITEM_CAPTURE_HANDOFF.md](AUTOPOST_ITEM_CAPTURE_HANDOFF.md) and the
+[external AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md).
+
+- [x] C0: inspect current owners, specify local item-photo types and private
+  handoff, correct stale AutoPost status, attach documentation/navigation.
+- [x] Repair bounded request-prefix/clothing aliases in the existing member
+  matcher; retain unsupported constraints and grouped-domain command refusal.
+- [ ] C1: implement AutoPost's item grouping/review and draft persistence using
+  its existing media repository; prove two items, reload, missing/duplicate
+  originals, temporary fallback and late/disabled AI behavior.
+- [ ] C2: implement the authenticated shared media/private item adapter with
+  verified principal/FoundUp scope, remote-byte checks, idempotent revisions,
+  conflict handling and truthful durable acknowledgment.
+- [ ] C3: connect permitted garment records to the existing grouped Mall field;
+  prove cross-owner denial, media access, revocation and navigation parity.
+- [ ] C4: decide public/invited-vendor visibility separately, then prove the
+  corresponding authorization, review and media-cache boundaries.
+- [ ] C5: independently implement sourcing/quote/order/fulfillment/settlement.
+
+C0 is a contract and discovery repair, not working capture-to-Mall delivery.
+GetK #802 remains an unmerged comparison source with a public-listing default;
+do not merge or publish it as a shortcut. No new camera, identity/blob store,
+Shop website, public catalog entry or WRE execution service is needed for C1.
+Existing public GotJunk discovery remains unchanged. Runtime/provider choice,
+deployment and physical-phone acceptance require their own evidence.
+
 ## P1 — Mobile creator studio: evidence before implementation
 
 **WSP 15 documentation slice score:** complexity 2 + importance 4 + deferability

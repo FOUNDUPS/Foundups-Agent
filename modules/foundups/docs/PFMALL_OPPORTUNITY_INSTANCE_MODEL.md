@@ -15,7 +15,9 @@ Examples:
 
 - a community data-center FoundUp may contain candidate site instances;
 - FoundUp House may contain individual akiya/property instances;
-- GetK may contain individual vehicle instances.
+- GetK may contain individual vehicle instances;
+- Shop may contain individual garment or explicitly defined lot instances,
+  each referencing several original AutoPost photographs.
 
 These examples are illustrative. This document does not register or implement those FoundUps.
 
@@ -71,6 +73,21 @@ next_public_action: optional string
 The public projection must not expose raw project ledgers, private stakeholder records, personally identifying information, negotiation details, credentials, or security-sensitive infrastructure information.
 
 The authoritative opportunity record belongs to the FoundUp/project-state layer; p.fMALL receives a bounded projection.
+
+## Private capture before discovery (2026-10-23)
+
+An opportunity's raw capture need not be publicly discoverable. For Shop,
+AutoPost starts with a private local item draft. The existing shared platform
+must authenticate attachment and return only a principal-authorized projection
+before another surface can display its media. Public Shop presentation remains
+undecided and requires a separate decision; a local item ID or privacy label
+does not provide server authorization.
+
+The [AutoPost item handoff](../pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) records
+the local draft contract, current owners and missing implementation gates.
+It does not add a lifecycle layer, register Shop, or turn each photo/garment
+into a FoundUp. Detailed domain state remains under the owning FoundUp while
+the shared platform supplies identity, media and permitted presentation.
 
 ## Contribution model
 

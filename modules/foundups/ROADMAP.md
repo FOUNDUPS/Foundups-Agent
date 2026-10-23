@@ -25,6 +25,20 @@ implementation sources of truth:
 4. No UI promise without read models fed by canonical events.
 5. No phase promotion without concatenated tests and updated module docs.
 
+## Private AutoPost item capture (updated 2026-10-23)
+
+The [shared handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) is the continuation
+entry for Shop clothing and GetK-style evidence. AutoPost captures originals;
+its existing media store remains authoritative for local bytes. Item grouping
+types are specified, while grouping UI/persistence, authenticated shared-media
+attachment, private item writer and Mall garment projection remain missing.
+
+Follow [pfmall C1-C3](pfmall/ROADMAP.md#private-item-capture--2026-10-23) and the
+external [AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md).
+Public Shop/vending decisions are deferred. Do not put captures into static
+catalogs/media or repurpose the public GotJunk endpoint. No parallel camera,
+identity store, marketplace backend or per-garment FoundUp is required.
+
 ## Mobile Creator Studio Planning (updated 2026-10-18)
 
 The current Mall owner is `modules/foundups/pfmall`, with the member UI in

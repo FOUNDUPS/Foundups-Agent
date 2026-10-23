@@ -1,3 +1,43 @@
+## 2026-10-23 | Bounded request normalization in the existing Mall field
+
+Source baseline: `a048c24071e1a651b161025ba3342f14f3047280`; existing field blob
+`966e59f748422a5aed2cf24694d01c6fe6636626` and property harness blob
+`7cd57d0dcab2682906c20e6da4d2b5611ecb7622`. Read the module interface, roadmap,
+this test inventory and the existing actual-field harness before extending it.
+No test file, external dependency or separate search runtime was added.
+
+Release-cache follow-up verified current main
+`f2e9408ba950a80fe549887db39289e6aff04f27`: member worker blob
+`89393c6f0ef95b6150873d819bb6ce5f45cc2be4` is unchanged from the baseline.
+The matcher is a precached, cache-first shell asset, so advance only its existing
+shell cache from v4 to v5. The existing product state/service-worker harness now
+expects v5 installation and retirement of v4 while retaining poster/property
+cache generations. Its original blob is
+`a7efa398b9a34c27f0acdca2144ac75ef029bbbb`; only version-bound assertions changed.
+
+The unchanged property harness passed first. The added “I'm looking for clothing”
+regression then failed on unchanged source with zero results instead of the three
+synthetic clothing records. After the bounded matcher repair, the same harness
+passes straight/curly contractions, case/spacing, addressed request prefixes,
+reciprocal clothing aliases, retained red/dog qualifiers, original query retention,
+and literal unsupported negation/budget/size terms. The grouped-product cases
+also refuse the new phrases without changing their declared projection.
+
+Fresh Node v24.19.0 execution:
+
+- `node public/member/tests/mall_property_listing_vm.mjs`: exit 0, all checks pass.
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs`: exit 0, all checks pass.
+- `node public/member/tests/public_discovery_concierge_vm.mjs`: 21 passed, 0 failed,
+  0 skipped.
+- `node public/member/tests/mall_product_state_vm.mjs`: 17 passed; this was the
+  only harness rerun for the subsequent cache-generation change.
+
+The first two harnesses do not emit numeric test totals. Existing navigation,
+grouping, video compatibility and domain-isolation assertions were retained.
+These receipts prove offline source behavior with bounded DOM fixtures, not
+browser layout, deployed inventory, semantic shopping filters, speech, uploads,
+payments or public release. Synthetic clothing records remain test data only.
+
 ## 2026-10-21 | CodeQL fixture repair and main reconciliation
 
 Existing property VM now rejects raw script/image markup case-insensitively and

@@ -1,5 +1,19 @@
 # p.fMALL Test ModLog
 
+## 2026-10-23 — Private item handoff documentation and shared matcher
+
+- Added no Python runtime or private-media endpoint in this contract slice.
+  Verified linked document targets, draft-field alignment, manifest byte sizes
+  and hashes, navigation syntax and registry preservation.
+- The affected existing member VM harnesses passed; detailed regression and
+  21/21 concierge results are in `public/member/tests/TestModLog.md` and the PR.
+  The matcher regression fails on unchanged source before the repair.
+- C1-C3 acceptance is specified in `../AUTOPOST_ITEM_CAPTURE_HANDOFF.md`:
+  two-item local grouping/reload, original-media integrity, cross-principal
+  denial, idempotent revisions and private rendering are future proofs.
+- No new pytest, live upload, phone, provider deployment, private ACL or Holo
+  generation proof is claimed by documentation verification.
+
 ## 2026-08-23 — Tier-0 repository regression
 
 - Extended `holo_index/tests/test_tier0_retrieval_hardening.py` with a

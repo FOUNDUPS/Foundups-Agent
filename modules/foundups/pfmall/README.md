@@ -67,6 +67,21 @@ admitted leaf jobs. The browser remains an untrusted thin client. No text or
 See [INTERFACE.md](INTERFACE.md) for Python exports, HTTP routes, mutation
 boundaries, and the RedDog integration seam.
 
+## AutoPost private item capture (updated 2026-10-23)
+
+For Shop clothing, GetK-style item evidence and multiple original photographs,
+start with [AUTOPOST_ITEM_CAPTURE_HANDOFF.md](AUTOPOST_ITEM_CAPTURE_HANDOFF.md).
+AutoPost remains the external capture/media owner. The intended path is private
+local item draft, authenticated shared-media attachment, then a permitted item
+projection inside this same Mall. Public Shop presentation is undecided.
+
+The local draft types and integration obligations are specified; grouping UI,
+group persistence, authenticated transfer/private writer and garment projection
+remain unimplemented. The existing public GotJunk API and static media paths
+must not receive private drafts. The [roadmap](ROADMAP.md#private-item-capture--2026-10-23)
+names the next bounded slice; [doc_index.json](doc_index.json) makes this handoff
+discoverable without claiming semantic-index activation.
+
 ## Mobile creator studio planning (updated 2026-10-18)
 
 The intended outcome is a creator selecting Live in AutoPost, appearing in Play,

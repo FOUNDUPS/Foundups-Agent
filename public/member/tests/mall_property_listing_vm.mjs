@@ -369,7 +369,7 @@ assert.equal(wrapper.classList.contains('mall-field-grouped-wrapper'), true);
 assert.equal(wrapper.classList.contains('browse-rows'), false, 'category wrapper mode is cleared');
 assert.equal(wrapper.classList.contains('motion-glide'), false);
 const declaredGeographicMarkup = field.innerHTML;
-for (const query of ['show me houses', '', '   ']) {
+for (const query of ['show me houses', "I'm looking for clothing", 'Hey, Red Dog, show me clothes', '', '   ']) {
   assert.equal(sb.mallTileField.searchCatalog(query), false, 'global search cannot bypass the geographic form');
 }
 for (const layout of ['grid', 'rows']) assert.equal(sb.mallTileField.setLayoutMode(layout), false);
@@ -687,4 +687,41 @@ assert.equal(firstCategory().scrollLeft, 180, 'category row offsets survive a ge
 assert.equal(wrapper.classList.contains('mall-field-grouped-wrapper'), false);
 assert.equal(listenerCounts(), listenersBefore, 'switching layouts, catalog queries and products adds no page listeners');
 assert.equal(imageRequests.length, 0);
+
+// Real field queries: bounded request prefixes must not erase item qualifiers.
+// Synthetic metadata exercises local matching, not a Shop inventory/provider.
+const clothingCatalog = [
+  { foundup_id: 'red_clothes', name: 'Red denim jackets', category: 'apparel', videos: [] },
+  { foundup_id: 'blue_clothes', name: 'Blue denim jackets', category: 'clothes', videos: [] },
+  { foundup_id: 'dog_clothes', name: 'Dog coat', category: 'clothing', videos: [] },
+  { foundup_id: 'red_house', name: 'Red roof home', category: 'housing', videos: [] }
+];
+sb.mallTileField.updateCatalog(clothingCatalog);
+for (const query of [
+  "I'm looking for clothing", 'I’m looking for clothes', 'I am looking for apparel',
+  'Hey, Red Dog, please show me clothing', 'Red Dog, find clothes',
+  'Please, I am looking for clothing', '  HEY, I\'M   LOOKING FOR CLOTHING  '
+]) {
+  sb.mallTileField.searchCatalog(query);
+  assert.deepEqual(tiles().map(tile => tile.dataset.foundupId),
+    ['red_clothes', 'blue_clothes', 'dog_clothes'], query);
+}
+for (const query of ['red clothes', "I'm looking for red clothing", 'Hey, Red Dog, show me red clothes']) {
+  sb.mallTileField.searchCatalog(query);
+  assert.deepEqual(tiles().map(tile => tile.dataset.foundupId), ['red_clothes'], 'red remains an item qualifier: ' + query);
+}
+sb.mallTileField.searchCatalog('dog clothing');
+assert.deepEqual(tiles().map(tile => tile.dataset.foundupId), ['dog_clothes'], 'dog is not a global stopword');
+for (const query of [
+  "I'm not looking for clothing", 'I am looking for clothing not red',
+  'show me clothing without logos', 'find clothing under $50',
+  'I am looking for clothing size M'
+]) {
+  sb.mallTileField.searchCatalog(query);
+  assert.equal(tiles().length, 0, 'unsupported constraints remain literal terms, not discarded: ' + query);
+  assert.equal(sb.mallTileField.getFieldScope().query, query, 'preserve original query for correction');
+}
+sb.mallTileField.searchCatalog('');
+assert.equal(tiles().length, clothingCatalog.length, 'empty query still resets the loaded catalog');
+assert.equal(listenerCounts(), listenersBefore, 'request normalization adds no listeners');
 console.log('Mall property runtime: geographic/category projections, queries, both drag axes, stable indexes, restore, density, source facts, focus, URLs, and video compatibility passed.');

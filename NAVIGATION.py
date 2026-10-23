@@ -26,6 +26,11 @@ ACHIEVEMENTS:
 # === NEED_TO: Problem -> Solution Mapping ===
 # Direct mapping of problems to existing code solutions
 NEED_TO = {
+    # AutoPost owns capture; shared Mall handoff is specified, not a live upload API.
+    "Shop clothing capture": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
+    "AutoPost multiple item photos": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
+    "private Mall listing": "modules/foundups/pfmall/INTERFACE.md",
+    "Shop capture implementation roadmap": "modules/foundups/pfmall/ROADMAP.md",
     # Human-operated conversation skill; distinct from the message-only dialer
     "kids educational episode editor": "modules/communication/youtube_shorts/src/kids_editor_server.py",
     "15 second kids music captions": "modules/communication/youtube_shorts/src/kids_episode.py",
