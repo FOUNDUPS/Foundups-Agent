@@ -58,7 +58,7 @@ Requests remains 2.31.0 for existing application consumers. The new yt-dlp rejec
 
 All nine focused local checks and seven added adapter cases pass in both environments. The extended existing suite has 18 passes and the same four prior failures; no skips or weakened assertions. Real installed downloader constructors are exercised, while extraction, download and FFmpeg are controlled test boundaries. No live X download, native FFmpeg process, successful audio-upload/RPC, installed-service or deployment acceptance is claimed. The separate timeout-child diagnostic fails in both versions: temporary-file removal does not terminate/reap a timed-out FFmpeg child. This remains an unresolved repair obligation. Linux/Python 3.11 execution and exact-head CI are separate gates. See [ModLog](./ModLog.md) and [test inventory/results](./tests/TestModLog.md) for evidence and retained failures. Later live-test examples in this guide are operational instructions, not evidence that those effects were exercised here.
 
-### Earlier dependency qualification (2026-10-21)
+### Dependency qualification (2026-10-21)
 
 `Pillow==13.0.0` addresses [GHSA-8g5g-8vmr-9782 / CVE-2026-112403](https://github.com/advisories/GHSA-8g5g-8vmr-9782). Pillow 13 requires Python 3.11+, matching this module's declared minimum. Qualification ran on Windows AMD64 CPython 3.12.10; Linux deployment and Python 3.11 execution remain unverified.
 
