@@ -29,6 +29,10 @@ outside the checkout before collecting cases. Set explicit `--confcutdir=.`
 alongside the existing root; preserve filesystem permissions, guards, assertions
 and the failed evidence. Windows path adaptation had not reproduced that Linux
 configuration difference. Fresh hosted validation is required.
+The second Linux run collects and passes all seven cases, but the effect gate
+rejects three blocked dependency process probes. Add bounded static call-site
+provenance to denied-event evidence; retain rejection until those probes are
+identified. No command arguments, environment values or frame locals are logged.
 
 ## 2026-10-23 - Close live handoff and qualify the Clerk security patch
 

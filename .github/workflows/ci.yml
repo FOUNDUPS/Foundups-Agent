@@ -268,7 +268,10 @@ jobs:
                   if (kind == 'subprocess.Popen' and len(args) > 1 and args[1] == 'lscpu'
                           and ('numpy.testing._private.utils', 'check_support_sve') in frames):
                       probe = 'numpy-sve-capability'
-                  events.append({'phase': phase, 'api': kind, 'denied_probe': probe})
+                  # Static call-site provenance only: never argv, env or frame locals.
+                  callers = sorted((str(module), name) for module, name in frames)
+                  events.append({'phase': phase, 'api': kind, 'denied_probe': probe,
+                                 'callers': callers[:40], 'callers_truncated': len(callers) > 40})
                   # These two import probes catch OSError; no operation is permitted.
                   raise PermissionError('Python-level CI effect guard: ' + kind)
               return denied

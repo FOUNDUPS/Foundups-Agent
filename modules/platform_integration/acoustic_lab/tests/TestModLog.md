@@ -31,3 +31,8 @@ collection boundary and probed `/home/packer/__init__.py`. Explicit
 `--confcutdir=.` keeps ancestor collection within the checkout. No permissions,
 source assertions or effect guards changed. This was not an application failure
 or a passing test run; fresh hosted evidence remains required.
+
+Second Ubuntu job `120167490136` collects and passes all seven cases but fails
+the effect gate on three unclassified denied process probes. Denied-event
+records now include bounded module/function names for diagnosis, with no command
+arguments, environment values or frame locals. Rejection remains unchanged.
