@@ -20783,7 +20783,10 @@
       "owner": "modules/platform_integration/acoustic_lab",
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-acoustic-lab-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network",
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

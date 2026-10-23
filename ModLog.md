@@ -1,3 +1,28 @@
+## 2026-10-23 - Close Clerk and qualify the Acoustic downloader security update
+
+WSP 00/10/15/22/50/84/97. #1457 is squash-merged at `455203e52` after all
+18 exact-head checks; main matches the independently reviewed tree. Exact-main
+CI39875219151 and CodeQL39875218692 succeeded. #841 exact-main CI and CodeQL
+also succeeded. Existing lint/configuration limits remain explicit.
+
+Re-observe 41 open PRs/10 drafts; select #1338 at C3/I4/D4/Impact4=15/P1.
+Reuse the same managed checkout and an external baseline/candidate workspace.
+The bare yt-dlp security pin changes 2024.3.10 to 2026.7.4; production source
+and every other direct pin are unchanged. Full fresh installs and dependency
+checks pass. Both versions pass nine focused checks and seven new adapter tests;
+the extended suite retains four unchanged failures (18 pass/4 fail).
+Backend and removed-package capability checks are bounded offline evidence,
+not live X or complete format parity. The pre-existing FFmpeg timeout child
+cleanup defect has separate failing evidence and a preserved repair obligation.
+
+Extend the existing test file, recover its missing inventory log, and update
+existing installation/module records. Add a focused job in the existing CI
+workflow: full module dependencies, guarded collection, exact test IDs and
+failure propagation. Regenerate the existing registry's network/process
+capabilities without changing collection or quarantine policy. Independent
+source/runtime review and hosted/main closure remain required at this checkpoint.
+No new roadmap, scheduler, memory store, native worker or paid model call.
+
 ## 2026-10-23 - Close live handoff and qualify the Clerk security patch
 
 WSP 00/10/15/22/50/97. #841 is squash-merged at `f37e2ef6f` after independent

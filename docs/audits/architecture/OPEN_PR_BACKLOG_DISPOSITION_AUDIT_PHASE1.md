@@ -1,13 +1,13 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 42 open PRs, 10 drafts. #1759, #1638, #782 and #841 are merged; #1457 Clerk security qualification is active. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+Current planning snapshot, 2026-10-23 JST: 41 open PRs, 10 drafts. #1759, #1638, #782, #841 and #1457 are merged; #1338 Acoustic dependency qualification is active. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
 
 ## Current reconciliation - 2026-10-23 JST
 
-Observed `2026-10-22T23:44:23.282697+00:00`, main `f37e2ef6f17b03e4fd3f870422f914f17779b28e`.
+Observed `2026-10-22T23:59:07.973235+00:00`, main `455203e52268bb8d020866e2c3f574cee2ff1f1c`.
 Since the prior 47-open snapshot, #782 and owner-managed #2179 merged, and
-#1360 was consolidated into #1342 and #1659 into #1663. #841 has now merged:
-**42 open**, including 10 drafts.
+#1360 was consolidated into #1342 and #1659 into #1663. #841 and #1457 have now merged:
+**41 open**, including 10 drafts.
 Counts are dated; concurrent lanes continue.
 This section supersedes older selections/counts, retained below as history.
 
@@ -72,7 +72,7 @@ from independently reviewed head `9c79733d10804ec705537e007f4313f128dccc66`.
 All 18 exact-head checks passed; fetched main matches the entire reviewed tree
 `11c3b2d28f9b03e19aef889645c0bc21db1b07b2`. Independent 81-case execution,
 complete-module wiring probes and cleanup-failure controls qualify the bounded
-handoff repair. Exact-main CI is pending at this checkpoint.
+handoff repair. Exact-main CI39873663085 and CodeQL39873662883 succeeded.
 
 The first scan used an obsolete PR comparison base. Failures remain retained;
 normal base refresh plus a same-tree checkpoint produced passing fresh security
@@ -81,20 +81,33 @@ runtime contract and 1452 rejection remain explicit. Stuck threads may delay
 settlement indefinitely; global browser quiescence, live YouTube and native RSI
 are not established. The 16/P0 slice is closed, not selected again.
 
-Re-observe and select **#1457, C3/I5/D5/Impact5=18/P0**, after current ownership
-checks. Reuse the same checkout and one external qualification copy. Independent
-source/accounting and matcher/selector replays approve the two-manifest candidate;
-final documentation, hosted checks and main readback remain. Protected lanes stay
-with their owners. No native worker admission is claimed.
+**#1457 MERGED_VERIFIED_MAIN:** squash `455203e52268bb8d020866e2c3f574cee2ff1f1c`
+from independently reviewed head `222b4ea8bbe89712275e457d7d877a074f39d14c`.
+All 18 exact-head checks succeeded. Fetched main exactly matches reviewed tree
+`412daf261a35bf0b5b8e05e27ced385a783bf387`. Next 16.4.1 retains all 20 original
+libc selectors; all 249 original changed lock fields are accounted for. Local
+strict installs, TypeScript, route/member/middleware and platform-selector checks
+passed with independent replay. Unchanged lint and missing-Clerk-configuration
+build failures remain open; Linux dry-runs prove selection only. Exact-main
+CI39875219151 and CodeQL39875218692 succeeded. No live Clerk/deployment claim.
+
+Re-observe and select **#1338, C3/I4/D4/Impact4=15/P1**. Ownership inspection
+found no competing Acoustic writer; reuse this checkout and one external
+baseline/candidate workspace. Extend existing adapter tests and recover the
+missing test log after inventory. Full dependency resolution, actual installed
+constructors, controlled failure cleanup and backend capability checks are in
+progress. The current module subtree is unchanged between the qualification
+base `f37e2ef6f` and main `455203e52`. Protect unrelated owner lanes. This is Codex
+qualification, not resident OpenClaw/Hermes or native RSI execution.
 
 ### Refreshed dependency priority evidence
 
-The current GitHub dependency snapshot contains 49 open alerts: six critical,
+The pre-#1457 GitHub dependency snapshot contains 49 open alerts: six critical,
 15 high, 22 medium and six low, across 14 package/manifest groups. These are
 reported vulnerable dependencies, not observed exploitation. All groups were
 mapped to existing owners and proposals; package metadata is not test evidence.
 
-- **#1457: 3/5/5/5=18/P0, ACTIVE_OWNED_WORK.** Next 16.4.0 is reconciled
+- **#1457: 3/5/5/5=18/P0, MERGED_VERIFIED_MAIN.** Next 16.4.0 is reconciled
   to 16.4.1; original 16.3.0 is superseded. All 20 selectors and 249 original changed
   lock fields are accounted for. The 452-node graph changes 27 and preserves 425,
   with no added/removed nodes. Current PostCSS and #1762's separate lint/project
@@ -103,11 +116,11 @@ mapped to existing owners and proposals; package metadata is not test evidence.
   prove selection only. Baseline/candidate retain identical lint failure and
   build failure after compilation/typechecking (`Missing publishableKey` on `/`).
   Configuration/lint obligations remain open with existing owners. No auth bypass
-  or fake key was added. Hosted checks, publication and main readback remain.
+  or fake key was added. Hosted PR checks, main readback, exact-main CI and CodeQL passed.
 - **#1338: 3/4/4/4=15/P1.** Its yt-dlp target covers nine reported alerts,
-  including seven high. Highest standalone offline Acoustic candidate if the
-  critical clerk lane remains reserved; full resolution and controlled adapter
-  tests remain required, without live downloads.
+  including seven high. Selected after Clerk closure as the highest independently executable Acoustic
+  candidate; full resolution and controlled adapter tests remain required,
+  without live downloads. Four older module test failures stay explicit.
 - **#1354: 3/4/4/4=15/P1.** Gunicorn qualification requires actual supported
   Linux server/parser execution, not Windows import-only checks.
 - **#2081: 2/4/4/4=14/P1**, before #1355: proposed Flask requires Werkzeug
@@ -117,12 +130,21 @@ mapped to existing owners and proposals; package metadata is not test evidence.
   in this snapshot. Existing owners must qualify remediation; do not infer a
   safe version, mutate qualified Holo runtimes or dismiss the alerts.
 
-Complete the owned #841 checkpoint, then re-observe source/ownership and WSP15.
-The new critical score makes Clerk qualification the next eligible selection,
-subject to a fresh ownership check; it does not make an old PR merge-ready. Source bindings, complete
-alert mapping and acceptance remain in the existing reconciliation receipt root
-(`dependency-alert-pr-mapping-20261023.json`); the canonical queue below retains
-these revised priorities rather than opening a second backlog.
+Complete #1338 qualification, then re-observe source, ownership and WSP15 before
+selecting again. Do not assume the previous second-ranked item wins. Source
+bindings, alert mapping and acceptance remain in the existing reconciliation
+receipt root (`dependency-alert-pr-mapping-20261023.json`). The old alert count
+is not a post-merge closure claim; refresh GitHub alerts before reporting change.
+
+**Acoustic residual: FFmpeg timeout child ownership**, C3/I4/D3/Impact3=13/P1,
+module owner/root, `REPRODUCED_PENDING_REPAIR`. `process_x_video_url` removes its
+temporary file after `communicate(timeout=30)` raises but does not terminate and
+reap the child. A separate controlled negative fails in both dependency versions;
+preserve that process-ownership evidence and do
+not count temporary-file cleanup as process cleanup or hide the failure with
+xfail. Smallest follow-up: settle the owned child on timeout, retain the original
+error, and test terminate/kill/wait failure paths. Keep this pre-existing repair
+separate from dependency qualification and its four historical test failures.
 
 ### PR782 preserved residual work
 
@@ -185,12 +207,11 @@ Every execution requires current source, checks and authority.
 | PR / source head | WSP15 | Owner / state | Next executable step |
 |---|---|---|---|
 | [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
-| [#1457](https://github.com/FOUNDUPS/Foundups-Agent/pull/1457) `5e88e8e2eea75fc09d94421bac3c75130da2ffca` | 3/5/5/5=18 P0 | Dependency lane/root: LOCAL_SOURCE_VALIDATED_PUBLICATION_PENDING | Next 16.4.1 plus 20 selectors qualified; preserve unchanged lint/build-configuration debt and #1762 scope. Finish staged review, hosted checks and main readback. Listed head is original proposal until publication. |
 | [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
 | [#1478](https://github.com/FOUNDUPS/Foundups-Agent/pull/1478) `5f8c73453559625500f3023f23331e5e44020712` | 3/4/4/4=15 P1 | Comment grounding owner/root: STILL_CURRENT / DRAFT | Refresh; run context/tier/source-attribution tests without posting. |
 | [#1354](https://github.com/FOUNDUPS/Foundups-Agent/pull/1354) `4effe1e2508f5a4c1a56a50a303e3406742ca2b4` | 3/4/4/4=15 P1 | Dependency lane/root: LINUX_VALIDATION_REQUIRED | Resolve full set and exercise actual supported Linux WSGI/server/parser behavior for reported high alerts; Windows imports are insufficient. |
-| [#1338](https://github.com/FOUNDUPS/Foundups-Agent/pull/1338) `bdd2a67722d1cd138699941f20b57b18549b6bf8` | 3/4/4/4=15 P1 | Dependency lane/root: OFFLINE_QUALIFICATION_ELIGIBLE | Resolve complete Acoustic set; qualify proposed yt-dlp against nine reported alerts using controlled extraction/error/cleanup cases; no live download. Preserve four baseline residuals. |
+| [#1338](https://github.com/FOUNDUPS/Foundups-Agent/pull/1338) `bdd2a67722d1cd138699941f20b57b18549b6bf8` | 3/4/4/4=15 P1 | Dependency lane/root: ACTIVE_OFFLINE_QUALIFICATION | Resolve complete Acoustic set; qualify proposed yt-dlp against nine reported alerts using controlled extraction/error/cleanup cases; no live download. Preserve four baseline residuals. |
 | [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
 | [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | With #2179 merged, reconcile the single successor carrying #1659 identity/index/image/correction/privacy clauses; preserve pre-compose identity, draft exception, receipts and current owner precedence. |
