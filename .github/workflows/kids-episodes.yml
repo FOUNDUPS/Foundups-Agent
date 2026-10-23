@@ -41,6 +41,7 @@ jobs:
           modules/communication/youtube_shorts/tests/test_kids_episode.py
           modules/communication/youtube_shorts/tests/test_kids_editor_server.py
           modules/communication/youtube_shorts/tests/test_kids_research.py
+          modules/communication/youtube_shorts/tests/test_openrouter_storyboard.py
           modules/foundups/kids_episodes/tests
           modules/communication/moltbot_bridge/tests/test_openclaw_kids_story_route.py
           modules/foundups/tests/test_foundup_registry_schema.py
