@@ -145,3 +145,7 @@ This is a local adult-operated editor. Caption burn-in is automatic from supplie
 `src/kids_research.py` provides injected-client bounded YouTube snapshots, time-separated growth ranking and an official Lyria Clip adapter. Provider tests are mocked; live model access, billing and generation remain unverified. Suno official exports can be imported as local audio. See [research and limits](docs/KIDS_EPISODES_RESEARCH.md).
 
 Prototype WRE instructions are in `skillz/kids_episode_production/SKILLz.md` and `skillz/kids_trend_research/SKILLz.md`; these do not admit an autonomous runtime or publisher. Existing Shorts callers and uploader behavior are unchanged.
+
+### Kids storyboard provider
+
+The OpenRouter adapter in `src/openrouter_storyboard.py` reuses the existing AI Gateway provider configuration and accepts approved raster character references. Its first candidate is FLUX.2 Klein 4B (Apache-2.0 weights; hosted inference is paid). `StoryboardVideoShot` passes a reviewed frame to the separately configured video generator before the existing five-second trims and 15-second assembly. See INTERFACE.md for host binding, authorization and recovery. No browser login, duplicate key store, automatic model fallback or live deployment is added.

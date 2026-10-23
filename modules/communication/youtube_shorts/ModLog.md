@@ -798,3 +798,7 @@ Components tested and working:
 3. ⏸️ Generate 15 test videos to verify cap works
 4. ⏸️ Set up automated posting schedule
 5. ⏸️ Create promotional video about the feature
+
+## 2026-10-23 — OpenRouter reference-conditioned storyboards
+
+Added an image adapter using the AI Gateway's existing provider configuration, explicit host admission, pinned FLUX.2 Klein 4B candidate, verified raster references, bounded image responses, exclusive attempt records and no retry/fallback. Added review-before-video callback composition for Kids Episodes. Kept dormant OpenRouter client, WRE and publishing unchanged. Official current API/model sources and repository-first retrieval evidence are in docs/OPENROUTER_STORYBOARDS.md. No paid generation or runtime activation is claimed.

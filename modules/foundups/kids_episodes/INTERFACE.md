@@ -41,3 +41,7 @@ Full-story assembly returns `assembled_unreviewed` until independent checks incl
 ## Little Shrew preset
 
 `little_shrew.build_pilot(request_id=..., supported_durations=(4, 6, 8))` returns a canonical `kids.story_plan.v1` for three linked episodes. It selects the shortest supplied generation duration >= 5 seconds and retains five-second edits; invalid capabilities fail before compilation. The bible and shots carry portable repository-relative design references with SHA-256 hashes. The generation owner must verify and consume those references; this function performs no admission, provider calls, rendering or publication. See `series/little_shrew/README.md` for source decisions and missing-image status.
+
+## OpenRouter storyboard-to-video composition
+
+Use the existing YouTube owner `src/openrouter_storyboard.py`: `OpenRouterStoryboard` consumes AI Gateway configuration and approved raster references; `StoryboardVideoShot` fits this controller's `generate_shot` callback by reviewing one generated frame before calling the admitted image-to-video generator. See the YouTube INTERFACE and docs/OPENROUTER_STORYBOARDS.md. Little Shrew plans and duration rules are unchanged. No runtime activation is implied.
