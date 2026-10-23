@@ -43,7 +43,7 @@
     "scripts/reddog_start_operations_control_once.py"
   ],
   "required_bridge_sha256": {
-    "scripts/advisory_model_once.py": "679ab9615174f7d02e21d3f13de70dda3d69e0c6cfcc6bad0faa6a8504e6da19",
+    "scripts/advisory_model_once.py": "37bc84f004caf2291dd16f77950e89b5fcf8fc65d967bcdae6c484d8a3509788",
     "scripts/reddog_authoritative_work_state_query_once.py": "9025d639b057d7f132205bcec029c4f1347f1e6787019ed27840f299caed5bd8",
     "scripts/reddog_extension_live_enqueue_invoke_once.py": "92aa98ab84fed01d239785a4f584817f789e289a7d27850027d0d0c744968d4d",
     "scripts/reddog_extension_wre_spine_invoke_once.py": "aeb957566760154e27f91495a52ad6a6dddcad7d1c61b739198be2f7a4dae9fc",
@@ -1679,7 +1679,7 @@
     "modules/ai_intelligence/agent_permissions/src/__init__.py": "354651f616c2b8652150bdb58c2027f8485b496f501a30d6ec29c54e9a0d651d",
     "modules/ai_intelligence/agent_permissions/src/agent_permission_manager.py": "7da8897180601786a8a235b07eca56f1503ba15b0151933a0cc062b97690295d",
     "modules/ai_intelligence/agent_permissions/src/confidence_tracker.py": "f00d417d382dab1cb5f3457c4ffb04057283931740929f9889129c1d5f81123d",
-    "modules/ai_intelligence/ai_gateway/src/ai_gateway.py": "511e7e83e19b88343b87a293440f7bc5c1a1f1a8e6be629bd4ecdd706c2220bc",
+    "modules/ai_intelligence/ai_gateway/src/ai_gateway.py": "f7bab3c91136fbe4a89aa5dc99ba5c7513341ee8c3118b6249fce1412421b58a",
     "modules/ai_intelligence/ai_gateway/src/model_combination_benchmark_harness.py": "bfc980e11eedabb56c56ce4cb3951059eb0b94740dda884fe0a309b56af77860",
     "modules/ai_intelligence/ai_gateway/src/model_evidence_authority_validation.py": "bcc5838f74b18b24e2e9ab7199e225b2ad941516819020b46bf217326ef90d96",
     "modules/ai_intelligence/ai_gateway/src/model_feedback_ledger.py": "556d135ad50d37b52dd5b53e0df89af0c395fe3de7b80a3f2f94703d04ec05b9",
@@ -2978,7 +2978,7 @@
     "modules/platform_integration/youtube_shorts_scheduler/src/schedule_tracker.py": "77af06cac03a2dd8374e5fb256f56eddece397300a0c75ff885e29925fcfdb9a",
     "modules/platform_integration/youtube_shorts_scheduler/src/scheduler.py": "2bbf2c29b6942928fb653349c587eaf39eae92bb8b852ea832c7b48fbdcdb7e5",
     "prompt/swarm/m2m_compiler.py": "3a5cb2062da8d543df4552b67524a0272e3df8a6bfd4a996248633244679ea41",
-    "scripts/advisory_model_once.py": "679ab9615174f7d02e21d3f13de70dda3d69e0c6cfcc6bad0faa6a8504e6da19",
+    "scripts/advisory_model_once.py": "37bc84f004caf2291dd16f77950e89b5fcf8fc65d967bcdae6c484d8a3509788",
     "scripts/reddog_authoritative_work_state_query_once.py": "9025d639b057d7f132205bcec029c4f1347f1e6787019ed27840f299caed5bd8",
     "scripts/reddog_extension_live_enqueue_invoke_once.py": "92aa98ab84fed01d239785a4f584817f789e289a7d27850027d0d0c744968d4d",
     "scripts/reddog_extension_wre_spine_invoke_once.py": "aeb957566760154e27f91495a52ad6a6dddcad7d1c61b739198be2f7a4dae9fc",

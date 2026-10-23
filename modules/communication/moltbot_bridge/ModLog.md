@@ -1,3 +1,17 @@
+## PR1648 shared transport containment — 2026-10-23
+
+WSP00/5/6/15/22/50/62/97: reuse three existing callers from the retained PR1648
+proposal. The manual ALIAS path disables redirects after its unchanged redaction,
+default-off, typed authorization and budget gates. The advisory caller uses a
+no-redirect opener and withholds error bodies/reasons; AI Gateway preserves
+OpenRouter timeout classification with a fixed transport diagnostic.
+The private ALIAS send/receipt extraction reduces the edited entry function
+from 80 to 49 lines without another public route. ALIAS remains a separately
+tested manual path, absent from the installed startup manifest. Its typed local
+guard is not authenticated native admission. TestModLog owns measured results.
+The original PR1648 reader, skill, Gmail-policy and product requirements remain
+open; this shared fix does not claim their completion or activate paid calls.
+
 ## PR1645 bounded Moshpit projection — 2026-10-23
 
 WSP00/5/6/10/15/22/50/62/95/97. Reconcile the existing proposal at

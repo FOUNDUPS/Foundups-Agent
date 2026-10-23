@@ -1,5 +1,15 @@
 # AI Gateway Module Change Log
 
+## [2026-10-23] - Shared OpenRouter transport containment
+
+WSP00/5/6/15/22/50/62/97, C3/I4/D4/Impact4=15/P1: reconcile the existing
+PR1648 proposal against current main. Exclude provider credentials from repr;
+disable OpenRouter redirects and replace transport diagnostics while preserving
+timeout classification. K3 request construction, campaign admission and other
+providers retain their current behavior. Bridge TestModLog owns the connected
+qualification evidence. No live calls, routing promotion or native RSI claim.
+
+
 ## [2026-10-13] - Retain PR2111 historical qualification evidence
 
 WSP10/15/22/48/50/77/97/99: reconcile the unique October8 record from

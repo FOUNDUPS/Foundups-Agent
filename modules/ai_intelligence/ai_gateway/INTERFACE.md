@@ -36,6 +36,12 @@ above that endpoint-fixture limit fail before transport. Explicit input takes
 precedence over provider environment configuration. The wire request forces
 reasoning effort `max` and omits temperature. Non-K3 routes are unchanged.
 
+**OpenRouter transport containment:** `_call_openai(...)` disables redirects and
+rejects 3xx before reading JSON. Transport failures raise a fixed
+`openrouter_request_failed` message; timeout failures remain `requests.Timeout`.
+`ProviderConfig` representation omits its API key. This is a diagnostic boundary,
+not removal of exception context from memory. Other providers are unchanged.
+
 #### `GatewayResult`
 Data class containing AI call results.
 
