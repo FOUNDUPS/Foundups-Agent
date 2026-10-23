@@ -26,6 +26,13 @@ Incoming independently owned PR2184 adds its separate Kids test row; canonical
 regeneration preserves both at 1,769 entries / 273 quarantines. None of the
 nine other incoming paths overlaps the observed transport source closure;
 classification and runtime bindings stay unchanged. Hosted acceptance remains pending.
+PR2185 head `239469c79` passed transport39920499068 (130 cases) and
+projection39920499090 (87 cases), with independent artifact/source readback.
+CI39920499101 failed on one newly observed workflow source-hash fingerprint,
+reported once in the tree and once in introduced history. Independent and
+coordinator review recomputed all nine source hashes on the exact line before
+adding one ledger binding. No runtime, workflow or scanner policy changed;
+retain the failed attempt and require fresh hosted acceptance of the repair.
 Evidence: `pr1648-qualification/six-suite-positive-execution.json` in the existing
 external PR-reconciliation evidence family; `qualification-receipt.json` owns
 the exact CI run and guard controls. Original PR1648 remains open.

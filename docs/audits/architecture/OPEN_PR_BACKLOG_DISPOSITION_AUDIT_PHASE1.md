@@ -60,7 +60,13 @@ checks before a focused main integration; do not leave a qualified repair
 stranded behind the original 93-file product proposal. Its carried-forward
 requirements remain open. Incoming #2184's separately owned Kids implementation
 is preserved; canonical registry regeneration retains both new test rows.
-No live provider call or native admission is implied.
+No live provider call or native admission is implied. Focused [PR2185](https://github.com/FOUNDUPS/Foundups-Agent/pull/2185)
+publishes this slice. Its first head `239469c79` passed the 130-case transport
+and 87-case projection workflows, but CI39920499101 rejected one new workflow
+fingerprint. Independent and coordinator review recomputed all nine public
+source hashes on that line; one exact reviewed-finding binding covers the tree
+and original-commit occurrences. Preserve the failed run and require fresh
+blocking checks. Runtime, workflow and scanner policy remain unchanged.
 #1356 and #1792 remain 14/P1; #1356's
 read-only prequalification identifies the Web3/eth-account graph and middleware
 migration but does not count as executed tests. Protected #2168/#2178 retain
