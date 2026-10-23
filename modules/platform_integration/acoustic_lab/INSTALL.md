@@ -50,7 +50,15 @@ pip install -r requirements.txt
 - **Pillow** - Image processing
 - **Requests** - HTTP client for IP geofencing
 
-### Dependency qualification (2026-10-21)
+### yt-dlp qualification (2026-10-23)
+
+The manifest pins bare `yt-dlp==2026.7.4`, without `[default]` or other extras. This follows the [upstream security release](https://github.com/yt-dlp/yt-dlp/releases/tag/2026.07.04); every other direct pin remains unchanged. Fresh full baseline/candidate installs and `pip check` passed on Windows AMD64 CPython 3.12.10. The target's fresh dependency graph omits brotli, mutagen and pycryptodomex; an in-place requirements install does not uninstall old packages. Pillow 13, Librosa 0.10.2 and the absence of a setuptools runtime requirement are retained.
+
+Requests remains 2.31.0 for existing application consumers. The new yt-dlp rejects that version for its Requests backend and uses Urllib; a prepared HTTPS request and gzip/deflate decoding passed offline checks. HTTPS proxies and Requests-style persistent connections are not qualified by this fallback. Brotli is absent and `br` is not advertised; Brotli-only responses are not qualified. The adapter does not configure metadata/thumbnail postprocessors that need mutagen. Existing pycryptodome 3.24.1 supplies `Crypto.Cipher.AES`; a known-answer CBC check and AES-128 HLS manifest acceptance passed, without an end-to-end HLS transfer/decryption claim. Do not add bundle extras without separately resolving their dependency requirements.
+
+All nine focused local checks and seven added adapter cases pass in both environments. The extended existing suite has 18 passes and the same four prior failures; no skips or weakened assertions. Real installed downloader constructors are exercised, while extraction, download and FFmpeg are controlled test boundaries. No live X download, native FFmpeg process, successful audio-upload/RPC, installed-service or deployment acceptance is claimed. The separate timeout-child diagnostic fails in both versions: temporary-file removal does not terminate/reap a timed-out FFmpeg child. This remains an unresolved repair obligation. Linux/Python 3.11 execution and exact-head CI are separate gates. See [ModLog](./ModLog.md) and [test inventory/results](./tests/TestModLog.md) for evidence and retained failures. Later live-test examples in this guide are operational instructions, not evidence that those effects were exercised here.
+
+### Earlier dependency qualification (2026-10-21)
 
 `Pillow==13.0.0` addresses [GHSA-8g5g-8vmr-9782 / CVE-2026-112403](https://github.com/advisories/GHSA-8g5g-8vmr-9782). Pillow 13 requires Python 3.11+, matching this module's declared minimum. Qualification ran on Windows AMD64 CPython 3.12.10; Linux deployment and Python 3.11 execution remain unverified.
 
