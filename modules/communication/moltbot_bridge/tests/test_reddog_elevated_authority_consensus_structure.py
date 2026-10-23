@@ -50,9 +50,7 @@ TEST_MODULES = tuple(
             "test_reddog_elevated_authority_consensus_*.py"
         )
     )
-    + sorted(
-        Path(__file__).parent.glob("test_reddog_elevated_consensus_*.py")
-    )
+    + sorted(Path(__file__).parent.glob("test_reddog_elevated_consensus_*.py"))
     + sorted(Path(__file__).parent.glob("reddog_reviewer_*.py"))
     + sorted(Path(__file__).parent.glob("test_reddog_reviewer_*.py"))
     + sorted(Path(__file__).parent.glob("reddog_effect_consent_*.py"))
@@ -63,6 +61,7 @@ TEST_MODULES = tuple(
     + sorted(Path(__file__).parent.glob("test_reddog_parent_*.py"))
     + sorted(Path(__file__).parent.glob("test_reddog_consensus_nonce_*.py"))
     + [Path(__file__).parent / "consensus_nonce_test_support.py"]
+    + sorted(Path(__file__).parent.glob("*live_lease*.py"))
 )
 LEGACY_RUNTIME_HOST_LIMITS = {
     "reddog_resident_queue_stage_handler_registry.py": (
@@ -117,7 +116,7 @@ def test_consensus_modules_remain_bounded_lego_components() -> None:
 
 
 def test_consensus_test_modules_are_bounded_lego_components() -> None:
-    assert len(TEST_MODULES) == 62
+    assert len(TEST_MODULES) == 69
     for path in TEST_MODULES:
         source = path.read_text(encoding="utf-8")
         assert len(source.splitlines()) <= 200, path.name

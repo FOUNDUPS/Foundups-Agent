@@ -1,3 +1,45 @@
+## PR2181 private lease extraction bindings — 2026-10-23
+
+WSP6/11/22/62/97. Regenerate the existing manifest after the private scope
+extraction: 1,467 members, no removals; canonical digest
+`92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`.
+Pretty JSON measures 331,870 LF / 334,877 CRLF bytes; the prior 327 KiB cap
+misses CRLF by 29 bytes. Set only the measured whole-KiB ceiling to 328 KiB
+(995 bytes headroom), retain 2 MiB per-file / 32 MiB total, and test exact
+1,467-member acceptance / 1,468 rejection. Eight generator cases and all three
+Node contract/preflight/async commands pass. Independent staged-source/hash and
+reachability review plus its Node contract rerun pass. Fresh hosted gates remain.
+
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Locally verified candidate binding: the combined closure has
+1,466 members, adding 13 to main with no removals. Pretty JSON measures LF
+331,626 / CRLF 334,631 bytes. The smallest qualified whole-KiB ceiling is 327 KiB
+(334,848 bytes; 217 above CRLF); main's 324 KiB contract cannot contain it.
+Candidate digest: `88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16`.
+The paired boundary accepts 1,466 members and rejects 1,467. Per-file 2 MiB,
+total 32 MiB, exact digest/path/hash checks and authority gates remain unchanged.
+Eight Python manifest cases and three Node commands passed, including LF/CRLF,
+exact-byte/+1 and member/+1 controls. This is not installed-runtime qualification.
+
+
+Retain incoming main's runtime/package members and exact digest, path, finite
+membership and byte-bound checks while reconciling the preserved service closure.
+Combined manifest/pin verification and exact-bound/+1 checks pass locally;
+historical 1,451/1,462-member and 324/326 KiB figures below are not its contract.
+No installed extension or native admission is established.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
 ## PR841 explicit one-member backend closure — 2026-10-23
 
 WSP 11/22/50/62/97. The cohesive livechat lifecycle extraction adds one actual
@@ -63,6 +105,38 @@ now bind `ff912d79e080aa5003f18a4d31489d5c9a98ecf516015f882202b2b352b6973c`.
 No cap/API/authority changes. Three existing Node compatibility/recovery commands
 exit0; bridge TestModLog records generator and skill evidence. No installation.
 WSP22/50/71/95/97.
+
+## Installed HIGH service manifest contract — 2026-10-22
+
+Existing service-entrypoint imports require 1,462 runtime members (11 additions).
+Canonical digest becomes `759ee0caf65899b1baddc4329b085246e2fe4fcad53c2d273a29f257eaf833bb`.
+Pretty JSON remains LF 330,756 / CRLF 333,753 bytes. The explicit serialized
+limit changes 324→326 KiB (+2,048 bytes, about 0.62%), leaving 71 bytes above
+CRLF. This is the smallest whole-KiB contract covering the measured artifact.
+The consumer still checks exact digest and membership; 1,462/1,463 and exact
+byte-limit/+1 tests remain mandatory. Per-file 2 MiB and total 32 MiB bounds,
+JSON layout, source-line limits and runtime authority are unchanged. No extension
+installation or native HIGH admission is claimed. Independent Python manifest
+suite passes8 (including staged-index equality); JS contract/preflight/async all
+exit0 with LF/CRLF, exact-byte/+1 and member1462/1463 acceptance/rejection.
+Review and hashes: external `pr-reconciliation-20261021/refresh/rsi-installed-high-final-independent-review-20261022.json`. Hosted/current-main evidence is pending.
+
+## Live generation scope backend byte contract — 2026-10-20
+
+The required 1,451-member closure adds nonce authority/current-owner imports.
+Two-space JSON remains 327,910 bytes with LF and 330,885 with CRLF; the former
+crossed the unchanged 320 KiB bound by 230 bytes. The paired consumer/test bound
+is now 324 KiB (331,776 bytes), the smallest whole-KiB bound covering both: an
+explicit 4,096-byte (1.25%) increase with 891 bytes beyond the CRLF artifact.
+Exact canonical digest/member bindings and finite 1,451/1,452 count boundary
+remain. Per-file 2 MiB, runtime-total 32 MiB, independent Python readers' 4 MiB,
+source-line/component limits and all authority checks are unchanged. This is a
+serialized-byte resource contract change, not packing or a size exemption.
+The byte check follows readFileSync and precedes JSON parsing; it is not a
+preallocation memory bound.
+Both generator checks pass; 36 binding tests pass without skips and all three
+Node checks exit 0. Original 35-pass/1-failure evidence is retained.
+WSP00/5/6/11/22/50/62/97; no installed HIGH or native author claim.
 
 ## Windows manifest byte compatibility — 2026-10-20
 

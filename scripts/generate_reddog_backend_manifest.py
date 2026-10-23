@@ -91,6 +91,8 @@ STATIC_RUNTIME_FILES = (
     "modules/communication/moltbot_bridge/src/"
     "reddog_signer_system_service_entrypoint.py",
     "modules/communication/moltbot_bridge/src/"
+    "reddog_grant_authority_service.py",
+    "modules/communication/moltbot_bridge/src/"
     "foundup_verified_outcome_root_authority_service_entrypoint.py",
     "modules/communication/moltbot_bridge/src/"
     "foundup_verified_outcome_root_authority_provision_entrypoint.py",

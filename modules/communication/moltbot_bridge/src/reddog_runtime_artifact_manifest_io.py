@@ -119,7 +119,21 @@ def _validate_described_artifact_set(values, required_artifacts, result, mapping
     if GRANT_AUTHORITY_SERVICE_ARCHIVE in required_artifacts:
         _validate_grant_artifact_set(result, mappings)
     if required_artifacts == REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS:
-        validate_initial_installed_manifest_artifacts(values.get("initial_manifest", {}), raw_bodies)
+        if "initial_manifest" in values:
+            validate_initial_installed_manifest_artifacts(values["initial_manifest"], raw_bodies)
+        else:
+            validate_installed_work_artifacts(values, raw_bodies)
+
+
+def validate_installed_work_artifacts(authority, artifacts):
+    """Validate the signed work artifact set without treating enrollment as work."""
+    from .reddog_grant_authority_service_artifact_contract import validate_installed_grant_service_artifacts
+    bundle = validate_installed_grant_service_artifacts(artifacts)
+    repo_digest = raw_digest(str(Path(authority["repo_root"]).resolve()).encode())
+    if (bundle["config"]["repo_root_digest"] != repo_digest
+            or bundle["config"]["public_key"] == authority["signer_public_key"]):
+        raise RuntimeArtifactManifestError("installed_work_artifact_binding_invalid")
+    return bundle
 
 
 def validate_initial_installed_manifest_artifacts(manifest, artifacts):
