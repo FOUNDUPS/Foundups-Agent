@@ -1,3 +1,24 @@
+## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
+
+WSP00/6/10/15/22/50/97; preserve both hosted failures at `174955143d`.
+The 47-suite startup selection reached 1,001 passed / two failed / one skipped;
+both actual process-fence cases failed child import before lock observation.
+Keep spawn, real POSIX locks, inode assertions and bounded cleanup. Reuse the
+existing test-support owner for a canonical child import; no production change.
+
+Separate credential-free installed qualification passed both profiles at that
+exact source. Independent live byte/ownership and cleanup review checked all
+2,701 installed files, 22 required source members, 18 imports and four rejecting
+absent-owner entrypoints. Both owned units are absent with PID zero. The rejected
+first export and all failure evidence remain. No native author or authenticated
+HIGH job is claimed; protected owner/current-generation inputs remain required.
+Repaired local Linux selection: 1,003 passed / one Windows-only skip across all
+47 workflow-selected suites; both actual process cases pass. Independent Linux
+review passes two unchanged positives and two effective lock-removal controls.
+The earlier focused seven cases overlap and are not added. Source hashes remain
+stable; no production or manifest bytes changed. Local --confcutdir=. prevents
+DrvFS ancestor collection; final hosted acceptance and publication remain required.
+
 ## PR2181 hosted regression repair — 2026-10-23
 
 WSP00/6/10/15/22/50/62/97; existing 19/P0 integration. Hosted run39892207131

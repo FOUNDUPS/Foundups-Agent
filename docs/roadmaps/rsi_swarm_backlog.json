@@ -1889,10 +1889,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.parent_consensus_join_20261020.installed_high_source_reconciliation_20261023.ci_followup",
+    "observation_path": "current_observation.parent_consensus_join_20261020.installed_high_source_reconciliation_20261023.posix_spawn_followup",
     "base_commit": "99dc200869d49ab911134a11768c0d9a05472cb2",
     "selected_action": "Close PR2181 combined installed HIGH/live-lease integration after hosted regressions",
-    "status": "LOCAL_REPAIR_REVIEW_PASSED_FRESH_HOSTED_GATES_REQUIRED",
+    "status": "LOCAL_LINUX_REPAIR_REVIEW_PASSED_FRESH_HOSTED_GATES_REQUIRED",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
@@ -1902,7 +1902,7 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Complete exact-head hosted acceptance; merge/read back main; then qualify isolated installed execution with authentic admission inputs through existing owners."
+    "next_action": "Pass fresh exact-head hosted gates, squash merge and verify exact-main source/checks; then establish the authentic current-generation owner/policy inputs through existing enrollment owners. No signing keys or grants are supplied by this planning record."
   },
   "current_observation": {
     "parent_consensus_join_20261020": {
@@ -2115,6 +2115,85 @@
           "targeted_and_connected_distinct_cases": 414,
           "targeted_and_connected_passed": 410,
           "targeted_and_connected_suite_count": 15
+        },
+        "posix_spawn_followup": {
+          "pr": 2181,
+          "parent_head": "174955143d96dc8a0d646bd4ba881462f0714815",
+          "status": "LOCAL_LINUX_REPAIR_REVIEW_PASSED_FRESH_HOSTED_GATES_REQUIRED",
+          "failed_hosted_runs": [
+            39895297867,
+            39895366193
+          ],
+          "per_run_startup_result": {
+            "passed": 1001,
+            "failed": 2,
+            "skipped": 1,
+            "posix_lock_behavior_verified": false
+          },
+          "cause": "Spawn could not import pytest importlib-assigned tests.test_reddog_live_lease_process; failure preceded lock observation.",
+          "scope": "Existing process test and composition test support only; retain spawn, actual POSIX same-inode oracle, timing and cleanup.",
+          "installed_qualification": {
+            "source": "174955143d96dc8a0d646bd4ba881462f0714815",
+            "receipt": "rsi-qualification-independent-result-174955143d.json",
+            "profiles": [
+              "deny",
+              "unix"
+            ],
+            "independently_rehashed_files": 2701,
+            "source_files": 1264,
+            "runtime_files": 1437,
+            "required_source_members": 22,
+            "import_only_modules": 18,
+            "absent_owner_entrypoints": 4,
+            "both_owned_units_absent": true,
+            "credentials_used": false,
+            "native_admission": false,
+            "first_incomplete_export": "Preserved rejected; eight required members missing; corrected explicit-root export independently verified."
+          },
+          "authentic_next_gate": "Existing protected owner-config and signed E0 policy/current-generation selection, with exact candidate/runtime/model/work/principal/verifier/budget bindings; presence and validity not yet established.",
+          "native_author_tickets": 0,
+          "native_rsi_complete": false,
+          "dispatchable": false,
+          "authentic_admission_inventory": {
+            "receipt": "rsi-authentic-owner-known-path-inventory-174955143d.json",
+            "coverage": "Existing named host, candidate174955 and retained294 owner locations; known isolated enrollment/public receipt locations. No environment or credential values inspected.",
+            "result": "No authentic candidate owner/current-generation policy bundle found in the inspected coverage. Existing v1 writer component owners and store qualification receipts do not satisfy supported v9-v13 runtime owner contracts.",
+            "historical_limits": "Earlier component-only fixture manifest explicitly had generation_activated=false and native_worker_admitted=false; historical public assembly was incomplete/uninstalled.",
+            "unknown": "Owner/configuration locations outside the enumerated coverage are not certified absent.",
+            "next": "Use existing protected isolated enrollment/publication owner to assemble or identify current owner/E0 policy and signed selection bound to accepted source/runtime; do not mint authority or replace the loader."
+          },
+          "local_linux": {
+            "receipt": "rsi-spawn-linux-step31-20261023.json",
+            "selector_count": 47,
+            "passed": 1003,
+            "failed": 0,
+            "errors": 0,
+            "skipped": 1,
+            "skip_reason": "Windows extended-length path regression",
+            "both_real_posix_cases_passed": true,
+            "source_bindings_stable": 48,
+            "elapsed_test_seconds": 414.212,
+            "unchanged_outer_limit_seconds": 600,
+            "difference_from_hosted": "WSL Python3.12.3/pytest9.0.3/cryptography41.0.7; documented --confcutdir=. prevents DrvFS ancestor collection; selectors/importlib/spawn/oracles unchanged."
+          },
+          "independent_linux": {
+            "receipt": "rsi-independent-spawn-review-20261023.json",
+            "passed": 4,
+            "failed": 0,
+            "skipped": 0,
+            "source_bindings_stable": 28,
+            "negative_controls": "Removing native lock is detected as held=false when true is expected on the same inode in both parent/effect routes; child cleanup and lease/nonce release preserved.",
+            "limits": "Original positives overlap the full selection; counts are not added. Controlled fixtures do not establish native author admission."
+          },
+          "runtime_preservation": {
+            "receipt": "rsi-spawn-runtime-preservation-20261023.json",
+            "qualified_source_members_unchanged": 1264,
+            "backend_manifest_unchanged": true,
+            "test_paths_in_installed_export": false,
+            "qualification_source_remains": "174955143d96dc8a0d646bd4ba881462f0714815"
+          },
+          "retention_lesson": "Windows skips did not test POSIX spawn importability. Use canonical importable child targets, actual-platform positive and negative witnesses, bounded collection roots and the full connected selector set. This is retained supervised repair evidence, not measured autonomous learning.",
+          "next_action": "Pass fresh exact-head hosted gates, squash merge and verify exact-main source/checks; then establish the authentic current-generation owner/policy inputs through existing enrollment owners. No signing keys or grants are supplied by this planning record."
         }
       }
     },

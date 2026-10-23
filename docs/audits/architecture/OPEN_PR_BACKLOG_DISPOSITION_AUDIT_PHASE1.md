@@ -4,11 +4,14 @@ Current planning snapshot, 2026-10-23 JST: 39 open PRs, 9 drafts, including #218
 
 ### Publication follow-up — 2026-10-23 12:10 JST
 
-Fresh GitHub inventory after #2181 creation is 39 open / 9 draft. Its 19/P0
-integration remains the selected existing lane. Hosted CI exposed the retained
-200-line module contract and malformed/unsupported policy-schema regressions;
-repair and independent verification precede merge. Security rebindings passed
-the fresh hosted gate at `4a401410b`; this does not clear the source regressions.
+Fresh GitHub inventory remains 39 open / 9 draft. The existing #2181 lane is
+still selected at 19/P0. Source `174955143d` repaired the module/schema failures
+and passed security/CodeQL, but both hosted startup runs exposed a child-process
+import failure before either actual POSIX lock test could execute. The two-file test repair now passes the full local Linux selection (1,003 passed,
+one Windows-only skip) and independent positive/lock-removal controls. Fresh
+final-head hosted acceptance precedes merge.
+Separately, its credential-free installed profiles passed independent byte,
+confinement and cleanup checks; this is not authenticated native admission.
 The earlier 38-open snapshot below predates #2181 and remains historical.
 
 Independent re-observation of #722/#729 preserves both unique proposals. Neither
@@ -273,7 +276,7 @@ Every execution requires current source, checks and authority.
 
 | PR / source head | WSP15 | Owner / state | Next executable step |
 |---|---|---|---|
-| [#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) `4a401410b8314e707e698ac841531c83fd3757d4` | 4/5/5/5=19 P0 | Existing RSI integration/root: SOURCE_REPAIR_ACTIVE | Repair hosted source regressions, independently verify combined service/lease source and generated bindings, pass exact-head gates and converge to main; then qualify installed runtime and authentic admission. |
+| [#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) `174955143d96dc8a0d646bd4ba881462f0714815` | 4/5/5/5=19 P0 | Existing RSI integration/root: LOCAL_POSIX_REPAIR_VERIFIED | Preserve the actual Linux and independent lock-removal proofs; pass final-source hosted gates and converge to main; preserve bounded installed qualification and establish authentic admission. |
 | [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
 | [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
@@ -281,7 +284,7 @@ Every execution requires current source, checks and authority.
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
 | [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | With #2179 merged, reconcile the single successor carrying #1659 identity/index/image/correction/privacy clauses; preserve pre-compose identity, draft exception, receipts and current owner precedence. |
 | [#1356](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356) `055cda32a0c2bff70a469aea7d967d20c61a7f42` | 4/3/4/3=14 P1 | Dependency lane/root: STILL_CURRENT | Resolve full set; offline transaction/hash interface tests. |
-| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `2cb0e2eacff38ecc19a6658423ac0a2dddc015ed` | 2/4/4/4=14 P1 | Dependency lane/root: OFFLINE_QUALIFICATION_ELIGIBLE | Qualify Werkzeug on current Flask first; complete resolver and health/upload/error smoke. This precedes #1355 and addresses eight reported alerts. |
+| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `63abf6dfa075af20769b3f74feb9c23f1de51ee8` | 2/4/4/4=14 P1 | Dependency lane/root: OFFLINE_QUALIFICATION_ELIGIBLE | Qualify Werkzeug on current Flask first; complete resolver and health/upload/error smoke. This precedes #1355 and addresses eight reported alerts. |
 | [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) `e455fd0190b0c35302a3a5776529a221c3123888` | 4/3/2/4=13 P1 | Japan Compute owner: STILL_CURRENT / DRAFT | Owner reconciles homepage/hosting; preserved-copy and economics gates. |
 | [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) `724f465bd35ac1be5e9a91f41d0721da383c67d8` | 4/3/3/3=13 P1 | eSingularity surface owner: ACTIVE_OWNER_PROTECTED | Existing eSingularity owner coordinates convergence: preserve post-vote state, valid fixes and carried article; current routes/locales/build acceptance. |
 | [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` | 3/3/4/3=13 P1 | Dependency lane/root: DEPENDENCY_BLOCKED | Requires #2081 Werkzeug reconciliation before proposed Flask; complete resolver and health/upload/error smoke. |

@@ -1,34 +1,16 @@
 """Two-process actual same-inode fence; synthetic authority, actual crypto and stores."""
 from contextlib import contextmanager
 import multiprocessing
-from pathlib import Path
 import sys
 
 import pytest
 
 from .reddog_live_lease_composition_support import setup, StrictLease
+from modules.communication.moltbot_bridge.tests.reddog_live_lease_composition_support import _probe
 from .test_reddog_live_lease_composition import route, permit
 from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
     reddog_runtime_artifact_generation_lock, REDDOG_RUNTIME_ARTIFACT_GENERATION_LOCK,
 )
-
-
-def _probe(path, channel):
-    import fcntl
-    import os
-    try:
-        while channel.recv() == 'probe':
-            with Path(path).open('rb') as stream:
-                try:
-                    fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
-                except BlockingIOError:
-                    held = True
-                else:
-                    held = False
-                    fcntl.flock(stream, fcntl.LOCK_UN)
-                channel.send((held, os.fstat(stream.fileno()).st_ino))
-    finally:
-        channel.close()
 
 
 @contextmanager

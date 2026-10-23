@@ -3,6 +3,7 @@ import json
 from contextlib import contextmanager
 from copy import deepcopy
 from dataclasses import replace
+from pathlib import Path
 from types import SimpleNamespace
 
 from . import consensus_nonce_test_support as nonce
@@ -10,6 +11,24 @@ from .reddog_parent_consensus_test_support import setup as parent_setup
 from .reddog_reviewer_composition_test_support import Lease
 from .reddog_live_lease_test_support import live
 from modules.communication.moltbot_bridge.src import reddog_grant_authority_wsp71_permission_rehydration as permission
+
+
+def _probe(path, channel):
+    import fcntl
+    import os
+    try:
+        while channel.recv() == 'probe':
+            with Path(path).open('rb') as stream:
+                try:
+                    fcntl.flock(stream, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    held = True
+                else:
+                    held = False
+                    fcntl.flock(stream, fcntl.LOCK_UN)
+                channel.send((held, os.fstat(stream.fileno()).st_ino))
+    finally:
+        channel.close()
 
 
 class StrictLease(Lease):

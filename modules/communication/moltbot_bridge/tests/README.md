@@ -13,6 +13,26 @@ checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
 Linux and publication gates remain required; earlier source counts are historical.
 Native author admission, activation and retained improvement remain unproved.
 
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
 The current acceptance selection must retain installed-work and both HIGH
 service suites, all five live-lease suites, LOW/startup, v12/v13 model/nonce,
 parent/effect, initial-enrollment and permission regressions. Preserve main's

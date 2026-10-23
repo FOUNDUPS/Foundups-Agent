@@ -13,17 +13,39 @@ checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
 Linux and publication gates remain required; earlier source counts are historical.
 Native author admission, activation and retained improvement remain unproved.
 
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
 Retain v10 initial LOW restrictions, distinct v11 non-initial HIGH scope,
 protected v13 custody/model bindings, current parent/effect/nonce checks and
 startup time sampling inside the durable revocation fence. These combined-source
-invariants have local and independent source validation; hosted and installed
-acceptance remain required. Public self-leasing
+invariants have local and independent source validation; credential-free installed
+qualification is bounded as above, while hosted acceptance and authenticated use
+remain required. Public self-leasing
 and private request-scoped APIs remain distinct; failed final checks withhold
 results without claiming reversal of completed effects or nonce consumption.
 
 The dated contract snapshots below preserve both development lines. Their former
 inventory and follow-on composition status are historical; the current combined
-closure is locally verified, while hosted and installed qualification remain pending. No signed authority follows
+closure has local and bounded installed evidence, while hosted acceptance and
+authenticated use remain pending. No signed authority follows
 from this interface document.
 
 ## Selected-clip adapter receipts — 2026-10-22
