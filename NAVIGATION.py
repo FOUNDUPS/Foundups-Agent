@@ -27,6 +27,10 @@ ACHIEVEMENTS:
 # Direct mapping of problems to existing code solutions
 NEED_TO = {
     # Human-operated conversation skill; distinct from the message-only dialer
+    "kids educational episode editor": "modules/communication/youtube_shorts/src/kids_editor_server.py",
+    "15 second kids music captions": "modules/communication/youtube_shorts/src/kids_episode.py",
+    "kids video trend research": "modules/communication/youtube_shorts/src/kids_research.py",
+    "kids episodes foundup": "modules/foundups/kids_episodes/README.md",
     "RedDog phone conversation skill": ".claude/skills/reddog-phone-conversation/SKILL.md",
     "create Japanese call conversation brief": ".claude/skills/reddog-phone-conversation/SKILL.md",
     "two phone translate English resume": ".claude/skills/reddog-phone-conversation/SKILL.md",
