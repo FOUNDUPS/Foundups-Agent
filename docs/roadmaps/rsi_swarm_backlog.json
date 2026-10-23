@@ -1889,10 +1889,10 @@
     "external_dependency": "FOUNDUPS/autopost: Remote-owned"
   },
   "current_selection": {
-    "observation_path": "current_observation.parent_consensus_join_20261020.installed_high_source_reconciliation_20261023",
+    "observation_path": "current_observation.parent_consensus_join_20261020.installed_high_source_reconciliation_20261023.ci_followup",
     "base_commit": "99dc200869d49ab911134a11768c0d9a05472cb2",
-    "selected_action": "Reconcile and validate existing installed HIGH/live-lease source against current main",
-    "status": "INDEPENDENT_LOCAL_VALIDATION_PASSED_HOSTED_CLOSURE_PENDING",
+    "selected_action": "Close PR2181 combined installed HIGH/live-lease integration after hosted regressions",
+    "status": "LOCAL_REPAIR_REVIEW_PASSED_FRESH_HOSTED_GATES_REQUIRED",
     "wsp15": {
       "complexity": 4,
       "importance": 5,
@@ -1902,7 +1902,7 @@
       "priority": "P0"
     },
     "dispatchable": false,
-    "next_action": "Validate combined source and generated runtime closure; independently review, publish and verify main. Then qualify actual installed service with authentic task/model/principal/reviewer/budget inputs; preserve LOW and current-time admission."
+    "next_action": "Complete exact-head hosted acceptance; merge/read back main; then qualify isolated installed execution with authentic admission inputs through existing owners."
   },
   "current_observation": {
     "parent_consensus_join_20261020": {
@@ -2074,6 +2074,47 @@
           "source_hashes_stable": 22,
           "effects": "controlled fixtures; no native admission or provider calls",
           "negative_controls": "exact historical startup-clock implementation and early proof-guard bypass rejected"
+        },
+        "historical_validation_source": "beb46b3e6384ef547dff29462a99f96262e03d4b; superseded for current source acceptance by ci_followup",
+        "ci_followup": {
+          "pr": 2181,
+          "parent_head": "4a401410b8314e707e698ac841531c83fd3757d4",
+          "status": "LOCAL_REPAIR_REVIEW_PASSED_FRESH_HOSTED_GATES_REQUIRED",
+          "observed_failure": {
+            "run": 39892207131,
+            "job": 120214348733,
+            "failed": 2,
+            "passed": 1467,
+            "skipped": 3,
+            "linux_startup_step": "SKIPPED; no POSIX process evidence from this run"
+          },
+          "repair": "Extract one private lease owner under unchanged 200/50 caps; reject non-string policy schemas with contract errors; update unknown-version sentinel and preserve v10 LOW/v11 HIGH shape boundaries.",
+          "source_freeze_sha256": "590fd1de820cade51dff1d28bbde05536a64037ab99b667c52cf1cbd8f302625",
+          "targeted_passed": 180,
+          "independent_passed": 21,
+          "independent_source_bindings": 26,
+          "manifest_tests_passed": 8,
+          "node_commands_passed": 3,
+          "counts_are_separate_overlapping_scopes": "Targeted and connected selections are disjoint by testcase ID; independent/manifest/Node are separate scopes and not added.",
+          "binding": {
+            "count": 1467,
+            "lf_bytes": 331870,
+            "crlf_bytes": 334877,
+            "minimum_KiB": 328,
+            "digest": "92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57",
+            "unchanged_per_file_bytes": 2097152,
+            "unchanged_total_bytes": 33554432
+          },
+          "retention_lesson": "The earlier focused selection missed an adjacent module-size and schema-version contract. Preserve full connected CI selection; do not redefine the oracle to accept the candidate. This is supervised repair evidence, not verified autonomous learning.",
+          "native_author_tickets": 0,
+          "native_rsi_complete": false,
+          "dispatchable": false,
+          "next_action": "Complete exact-head hosted acceptance; merge/read back main; then qualify isolated installed execution with authentic admission inputs through existing owners.",
+          "connected_passed": 230,
+          "connected_platform_skips": 4,
+          "targeted_and_connected_distinct_cases": 414,
+          "targeted_and_connected_passed": 410,
+          "targeted_and_connected_suite_count": 15
         }
       }
     },
@@ -18209,7 +18250,7 @@
           "total": 13,
           "priority": "P1",
           "state": "selected",
-          "reason": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
+          "reason": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement."
         },
         {
           "task": "Independent held-out and later-use benefit",
@@ -18247,7 +18288,7 @@
         "total": 13,
         "priority": "P1"
       },
-      "next_rationale": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+      "next_rationale": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
       "next_planning": {
         "task": "Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper",
         "wsp15": {
@@ -18258,7 +18299,7 @@
           "total": 13,
           "priority": "P1"
         },
-        "rationale": "The implemented trusted master-helper\u7aca\u8a95dapter\u7aca\u5606wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
+        "rationale": "The implemented trusted master-helper竊誕dapter竊嘆wen path now has finite no-model wiring and installed-source handler evidence. Neither executes the real native package, GGUF tokenizer or initialization through this new caller. Reusing the existing supervised worker/controller for one exact-source, exact-model call is the smallest executable integration layer. A known fixed task is appropriate for route qualification only; it must not be relabeled new-task competence, native RSI or retained improvement.",
         "prerequisites": [
           "Close and independently verify the current caller publication, then reobserve exact main/source/owner/peer state. Rebind candidate blobs to merged source before scheduling any execution.",
           "Reuse the existing generation controller and exact reviewed cleanup/phase witness, adapting only for the real master helper/candidate APIs. Freeze and independently review actual child/controller/manifest/import closure and source/runtime/model/profile identities before a new budget can exist.",
@@ -18284,7 +18325,7 @@
         },
         "acceptance": {
           "preflight": "Exact merged source, qualified runtime/model/profile and input bytes match; no new install or unreviewed resolver/service. Fail closed before model work on mismatch.",
-          "route": "Trusted constructor values demonstrably reach real helper\u7aca\u8a95dapter\u7aca\u5f3engine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
+          "route": "Trusted constructor values demonstrably reach real helper竊誕dapter竊弾ngine and observed runtime/template match. One actual uncached initialization, at most one actual completion; no second backend, method implementation replacement, hidden retry or default-model change.",
           "format_fit": "Real template rendered once with enable_thinking=False; exact actual rendered bytes/token vector recorded, add_bos=False/special=True, actual/configured context minimum and512output cap checked before completion. Caller### plus native EOS preserved.",
           "return": "Record returned/failed/timed-out state and actual usage/wall/finish reason without guessing the exact stop. Text remains success=false, output empty, _effect_evidence=false and unverified_model_proposal; unavailable failures remain stable/redacted.",
           "lifecycle": "Explicit native close observed or honest failure recorded; controller process termination and bounded output/phase journals verified. No default DB/provider/service/repository writes or hidden result application.",

@@ -1,3 +1,21 @@
+## PR2181 hosted regression repair — 2026-10-23
+
+WSP00/6/10/15/22/50/62/97; existing 19/P0 integration. Hosted run39892207131
+found two failures before the Linux startup step: the current-selection module
+exceeded its retained 200-line cap, and a malformed schema raised TypeError.
+Preserve that failed run. Extract the existing opaque lease into one private
+95-line owner, retaining canonical aliases, one registry/lock and every use-time
+check. Keep source caps at 200/50 lines. Reject non-string schema values with
+contract errors; move the unknown-version sentinel from supported v11 to v12.
+The positive v11 check validates shape/domain/scope, not cryptographic authority.
+
+The repaired source passes 410 cases with four platform skips across 15 distinct
+suites; independent review passes 21 separate cases with stable source bindings.
+Eight manifest cases and three Node compatibility commands pass separately.
+Windows skips retain two POSIX fence, one symlink and one Unix descriptor gate;
+fresh hosted Linux execution is required. No native author or retained RSI gain.
+The existing machine backlog preserves the failed selection and source lesson.
+
 ## Installed HIGH source integration — 2026-10-23
 
 Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.

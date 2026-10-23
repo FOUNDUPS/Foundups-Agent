@@ -1,6 +1,19 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 38 open PRs, 9 drafts. #1759, #1638, #782, #841, #1457, #1338 and #1354 are merged; #1478 is also merged; existing installed-HIGH RSI source reconciliation is active. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+Current planning snapshot, 2026-10-23 JST: 39 open PRs, 9 drafts, including #2181 publishing the previously local installed-HIGH RSI integration. #1759, #1638, #782, #841, #1457, #1338, #1354 and #1478 are merged. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+
+### Publication follow-up — 2026-10-23 12:10 JST
+
+Fresh GitHub inventory after #2181 creation is 39 open / 9 draft. Its 19/P0
+integration remains the selected existing lane. Hosted CI exposed the retained
+200-line module contract and malformed/unsupported policy-schema regressions;
+repair and independent verification precede merge. Security rebindings passed
+the fresh hosted gate at `4a401410b`; this does not clear the source regressions.
+The earlier 38-open snapshot below predates #2181 and remains historical.
+
+Independent re-observation of #722/#729 preserves both unique proposals. Neither
+is safely closable as implemented or superseded. Their existing rows retain
+concrete reconciliation steps; no replacement backlog or Brain ingestion is claimed.
 
 ## Current reconciliation - 2026-10-23 JST
 
@@ -260,6 +273,7 @@ Every execution requires current source, checks and authority.
 
 | PR / source head | WSP15 | Owner / state | Next executable step |
 |---|---|---|---|
+| [#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) `4a401410b8314e707e698ac841531c83fd3757d4` | 4/5/5/5=19 P0 | Existing RSI integration/root: SOURCE_REPAIR_ACTIVE | Repair hosted source regressions, independently verify combined service/lease source and generated bindings, pass exact-head gates and converge to main; then qualify installed runtime and authentic admission. |
 | [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
 | [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
@@ -293,7 +307,7 @@ Every execution requires current source, checks and authority.
 | [#1346](https://github.com/FOUNDUPS/Foundups-Agent/pull/1346) `bae7f13efa6767cecebae58e8ffe624886d8e6e7` | 2/3/3/3=11 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Raise manifest/root-lock floor; compile and bridge tests. |
 | [#408](https://github.com/FOUNDUPS/Foundups-Agent/pull/408) `2e788a0539ac93f2edfefaa51128726fcb66745f` | 2/3/3/3=11 P2 | Stream resolver tests/root: STILL_CURRENT | Map all ten obsolete wrapper skips to replacement behavior tests; restore uncovered upcoming-stream and quota-retry cases before accepting skips. |
 | [#1822](https://github.com/FOUNDUPS/Foundups-Agent/pull/1822) `663f0e17566a4e613a6b419456239e02f156923d` | 3/2/2/3=10 P2 | Memory Horizon owner: STILL_CURRENT / DRAFT | Owner keeps no-dispatch; additive registry/schema and G0 gates. |
-| [#722](https://github.com/FOUNDUPS/Foundups-Agent/pull/722) `2e9a66c8f86795fea2d75ac4c9e7b2c66ab88c61` | 2/3/2/3=10 P2 | Security intake docs/root: STILL_CURRENT | Correct nonexistent action_router.route reference to actual owner interfaces; preserve DOCS_SPEC_ONLY. |
+| [#722](https://github.com/FOUNDUPS/Foundups-Agent/pull/722) `2e9a66c8f86795fea2d75ac4c9e7b2c66ab88c61` | 2/3/2/3=10 P2 | Security intake docs/root: STILL_CURRENT | Preserve unique template/spec; replace nonexistent action_router.route with actual ActionRouter.execute interface, distinguish unsigned reviewer placeholders from authenticated attestation, and label best-effort observer detection separately from enforcement. Preserve DOCS_SPEC_ONLY and dated source claims. |
 | [#1835](https://github.com/FOUNDUPS/Foundups-Agent/pull/1835) `8262573bf2cbaa6ebc3293bdd207cffee683694f` | 1/2/3/3=9 P3 | Architecture docs owner: STILL_CURRENT | Correct obsolete MOSH_PIT architecture reference; preserve specified-versus-operational labels; validate links. |
 | [#1646](https://github.com/FOUNDUPS/Foundups-Agent/pull/1646) `56c49762c9dae1323590943cc445f1a6a44c0f4e` | 2/2/2/3=9 P3 | YUMORI thesis owner: STILL_CURRENT / DRAFT | Owner reconciles current PPP/PFI sources before canonical promotion. |
 | [#729](https://github.com/FOUNDUPS/Foundups-Agent/pull/729) `1757a520c779c3b6a83ed8a4282f2eae13beb10a` | 2/2/2/3=9 P3 | Tooling docs/root: PRESERVED_NEEDS_REBASE | All 3 files / 247 inventory lines accounted. Nested instruction redirect remains useful; retire or reconcile dated stack authority, preserving branch. Keep current rootCLAUDE/AGENTS and verify existing projection. Not already implemented. |

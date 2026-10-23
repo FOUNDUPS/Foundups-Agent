@@ -29,6 +29,8 @@ from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_cont
 )
 
 
+SLICE_MODULES += ("reddog_signer_owner_e0_current_scope.py",)
+
 class _AuthorityResolver:
     def __init__(self, values: dict[tuple[str, str], str]) -> None:
         self._values = values

@@ -1,13 +1,25 @@
 ## Installed HIGH source integration — 2026-10-23
 
-Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
-Combined local qualification passed 400 cases with six platform skips; eight
-manifest cases and three Node compatibility commands also passed. These are
-separate scopes. Independent offline source/outcome review passes12 held-out
-cases; hosted Linux qualification and publication remain required. Earlier counts
-below apply to their dated sources.
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
 
-Locally verified candidate binding: the combined closure has
+Current repaired binding: 1,467 members, canonical digest
+`92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`,
+331,870 LF / 334,877 CRLF bytes under the measured 328 KiB ceiling.
+The boundary accepts 1,467 members and rejects 1,468; 2 MiB per-file and
+32 MiB total limits are unchanged. Manifest and consumer checks pass.
+
+Historical `beb46b3` / `4a401410b` binding before the CI repair: the closure has
 1,466 members, adding 13 to main with no removals. Pretty JSON measures LF
 331,626 / CRLF 334,631 bytes. The smallest qualified whole-KiB ceiling is 327 KiB
 (334,848 bytes; 217 above CRLF); main's 324 KiB contract cannot contain it.
@@ -17,7 +29,7 @@ total 32 MiB, exact digest/path/hash checks and authority gates remain unchanged
 Eight Python manifest cases and three Node commands passed, including LF/CRLF,
 exact-byte/+1 and member/+1 controls. This is not installed-runtime qualification.
 
-Current frozen-source qualification: clock/custody/structure128pass/2skip and
+Historical `beb46b3` frozen-source qualification: clock/custody/structure128pass/2skip and
 core/LOW/installed compatibility272pass/4skip; together400pass/6skip across406
 cases in18 distinct suites. All22 bound hashes remain stable. The six Windows
 skips cover symlink/Unix descriptor and actual POSIX process-fence conditions;

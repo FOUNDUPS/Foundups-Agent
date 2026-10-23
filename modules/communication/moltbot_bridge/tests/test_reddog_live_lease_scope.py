@@ -88,3 +88,19 @@ def test_owned_reservation_can_roll_back_after_scope_ends(monkeypatch, tmp_path)
                                      subject=SUBJECT, _scope=next_token)
         assert retry is not None
         state.nonces.rollback(retry)
+
+
+def test_scope_facade_preserves_one_private_owner(monkeypatch, tmp_path):
+    from modules.communication.moltbot_bridge.src import reddog_signer_owner_e0_current_scope as owner
+    assert live._CurrentOwnerUseScope is owner._CurrentOwnerUseScope
+    assert live._scope_admission is owner._scope_admission
+    assert live._lease_validated_owner_e0_current_scope is owner._lease_validated_owner_e0_current_scope
+    state = setup(monkeypatch, tmp_path)
+    with scope(state) as token:
+        assert token in owner._LIVE_SCOPES
+        before = state.validations
+        current(state, token)
+        assert state.validations == before + 1
+    assert token not in owner._LIVE_SCOPES
+    with pytest.raises(ValueError, match="not_live"):
+        current(state, token)

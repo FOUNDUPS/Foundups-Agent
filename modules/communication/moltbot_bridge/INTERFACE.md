@@ -1,22 +1,29 @@
 ## Installed HIGH source integration — 2026-10-23
 
-Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
-Combined local qualification passed 400 cases with six platform skips; eight
-manifest cases and three Node compatibility commands also passed. These are
-separate scopes. Independent offline source/outcome review passes12 held-out
-cases; hosted Linux qualification and publication remain required. Earlier counts
-below apply to their dated sources.
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
 
 Retain v10 initial LOW restrictions, distinct v11 non-initial HIGH scope,
 protected v13 custody/model bindings, current parent/effect/nonce checks and
-startup time sampling inside the durable revocation fence. These are intended
-combined-source invariants awaiting exact-source validation. Public self-leasing
+startup time sampling inside the durable revocation fence. These combined-source
+invariants have local and independent source validation; hosted and installed
+acceptance remain required. Public self-leasing
 and private request-scoped APIs remain distinct; failed final checks withhold
 results without claiming reversal of completed effects or nonce consumption.
 
 The dated contract snapshots below preserve both development lines. Their former
 inventory and follow-on composition status are historical; the current combined
-closure and installed qualification remain pending. No signed authority follows
+closure is locally verified, while hosted and installed qualification remain pending. No signed authority follows
 from this interface document.
 
 ## Selected-clip adapter receipts — 2026-10-22

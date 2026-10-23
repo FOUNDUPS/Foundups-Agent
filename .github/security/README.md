@@ -1,3 +1,15 @@
+## PR2181 CI repair metadata review — 2026-10-23
+
+The source repair changes the generated manifest and historical documentation
+whole-file bindings. Parent and independent reviewers revalidated 38 unchanged
+public source-integrity records and seven unchanged historical digest/Git/prose
+contexts against published `4a401410b`, using the unchanged gate function.
+Append only these 45 fingerprints, retaining all 1,645 existing entries (1,690
+total). Actual source hashes, unique contexts and prior exact approvals match.
+No unknown finding, scanner rule, scan scope or fingerprint change is approved.
+The previous head's security job120217456059 passed. This repaired source still
+requires fresh tracked-tree and introduced-history scans; old success is historical.
+
 ## PR2181 historical documentation bindings — 2026-10-23
 
 Security job120214348539 on head `beb46b3e6384ef547dff29462a99f96262e03d4b`

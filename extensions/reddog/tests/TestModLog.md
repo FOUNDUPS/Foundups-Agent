@@ -1,3 +1,15 @@
+## PR2181 private lease extraction bindings — 2026-10-23
+
+WSP6/11/22/62/97. Regenerate the existing manifest after the private scope
+extraction: 1,467 members, no removals; canonical digest
+`92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`.
+Pretty JSON measures 331,870 LF / 334,877 CRLF bytes; the prior 327 KiB cap
+misses CRLF by 29 bytes. Set only the measured whole-KiB ceiling to 328 KiB
+(995 bytes headroom), retain 2 MiB per-file / 32 MiB total, and test exact
+1,467-member acceptance / 1,468 rejection. Eight generator cases and all three
+Node contract/preflight/async commands pass. Independent staged-source/hash and
+reachability review plus its Node contract rerun pass. Fresh hosted gates remain.
+
 ## Installed HIGH source integration — 2026-10-23
 
 Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.

@@ -159,6 +159,8 @@ def _types_valid(raw: Mapping[str, Any], fields: frozenset[str]) -> bool:
 
 
 def _policy_fields(schema: object) -> frozenset[str]:
+    if type(schema) is not str:
+        raise ValueError("signer_owner_e0_policy_schema_invalid")
     if schema == POLICY_SCHEMA_V5:
         return POLICY_FIELDS_V5
     if schema == POLICY_SCHEMA_V6:

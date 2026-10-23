@@ -261,9 +261,9 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 327 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 328 * 1024
     lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
-    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 327 * 1024
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 328 * 1024
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
     result_module = (
@@ -277,7 +277,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16"
+    assert digest == "92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")
