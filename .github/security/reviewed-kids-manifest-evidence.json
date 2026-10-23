@@ -1,0 +1,392 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-23",
+  "scope": "38 observed manifest findings in PR2182 CI job120249025720; no wildcard exclusions",
+  "candidate_head": "ade93a5971e7015359629df8851ac63b40777464",
+  "manifest_sha256": "e4b95b86ea196635710db0055315ed3d2779747ccd46bb4b0de609e757add41e",
+  "prior_manifest_sha256": "2cab805c94ec17b63ed0f6ff531aca1077a02a1b14cd756ee42187af58ab3ca2",
+  "prior_ledger_sha256": "7aaa1ae61701e5ec047386a89eb9b8408b3efb333d7d4dfd4ea4b034dd6ac422",
+  "findings": [
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1591,
+      "source_path": "holo_index/memex_access_policy_receipt.py",
+      "prior_line": 1590,
+      "prior_fingerprint": "b9534b080fad611a7ce02faff039306105cb81fa819f8714471fec850bf1a916",
+      "fingerprint": "951024557fe3eedb238ac39688f4a837e80f3ef362fb6479f913a47a2a26d305",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1725,
+      "source_path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py",
+      "prior_line": 1724,
+      "prior_fingerprint": "749dd250e05a766b2f6a7194f53256974ef4c843396a80f42f3f74422cdb8cff",
+      "fingerprint": "fc8519ede9055c1e0f3ee642d10cbfc6432c05d3be0943f0bffff87db2939358",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1765,
+      "source_path": "modules/ai_intelligence/pqn_alignment/src/council/api.py",
+      "prior_line": 1764,
+      "prior_fingerprint": "e719437d0cd9cf6db92389053b6ddef712fc899192eca2f997d11e3e0eb7f82c",
+      "fingerprint": "66dd220fdc0ea71d34961363c84c8102600ca05a15067f8337a6baa0080fb22f",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1766,
+      "source_path": "modules/ai_intelligence/pqn_alignment/src/detector/api.py",
+      "prior_line": 1765,
+      "prior_fingerprint": "42cf466c6b9b5133ae3fb4ddda4cfb9cba5b54c57223b2bb856f6036b3910abd",
+      "fingerprint": "21bb8099edec629f33ddc5bc6fe2c2a122d511d65052b5544bcc9cc3faca2f83",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1768,
+      "source_path": "modules/ai_intelligence/pqn_alignment/src/io/api.py",
+      "prior_line": 1767,
+      "prior_fingerprint": "c230bb918ddf4a4790c7e7ddf09bf18562b20c7507c0eae1abea573634898024",
+      "fingerprint": "60a9827ff687918f2e898253c158f080f7f9d109f7120322c7b8ed41f2d25784",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1773,
+      "source_path": "modules/ai_intelligence/pqn_alignment/src/sweep/api.py",
+      "prior_line": 1772,
+      "prior_fingerprint": "799442457bc59f0f62aca6165b5789d3633d7ec751329bde853d370fd95e7ab7",
+      "fingerprint": "5c93a6c90177fd6a7243b6246faa89800d9255426d2dac5dae5e1364546e5362",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1875,
+      "source_path": "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_authenticity.py",
+      "prior_line": 1874,
+      "prior_fingerprint": "3fd3d3224f5ba2258f81b306927f9328f4209db076dde68f8bade80f93116cb0",
+      "fingerprint": "d2024aba951468798e5da641c248b89cd8bfe04854f0772a7b09c30c74f55700",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1952,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_architect_proposal_authenticity.py",
+      "prior_line": 1951,
+      "prior_fingerprint": "b5e9648eb4e58095968d31537623822fe0774bca718e983b41f3a53e635d38ce",
+      "fingerprint": "d48925cea3226cdbda80132e806ca59d9f94d92ed9b288633b1a4de089dbd622",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 1990,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_authentication.py",
+      "prior_line": 1989,
+      "prior_fingerprint": "5990110a5295cace44c0faa8c9ef13d0dcc59e9a4b3dbfec3dda389bba4c0c40",
+      "fingerprint": "7a61ffce84724f812d88b02fa7d6ba63d0f4643eceab9b869a1833b4904f1edb",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "discord-api-token",
+      "line": 1831,
+      "source_path": "modules/communication/livechat/src/discord_status_pusher.py",
+      "prior_line": 1830,
+      "prior_fingerprint": "4a787afc6315edb2f667f710edb320c5f4cb6dc101fe14028deffc8f487bf076",
+      "fingerprint": "13ef3ff9c83b4c27f6f4010be7c2a056051952bba07edf1b03d1e0c95ecfdbd0",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2005,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_session_credential.py",
+      "prior_line": 2004,
+      "prior_fingerprint": "4ff8fc8917598f27b0bd8850a8519a62a2a8cb9cd72cb4fab334926312313fa8",
+      "fingerprint": "1479866bbd693c04d6c5cbfcd09cfde49464f19809173c02e41bcb4f88d72e58",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2078,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+      "prior_line": 2077,
+      "prior_fingerprint": "546f357492c93646a6052cb62b33551a093743fd49ee020983673cef5ba1be05",
+      "fingerprint": "e39bd75aefd49ae8d4c1a2390f6dce96a58e339f0f86226b6336b138888f1e89",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2079,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+      "prior_line": 2078,
+      "prior_fingerprint": "5769274194c6159d5c171c222f9798919298abf9f2c4e1feee32f1027a99b319",
+      "fingerprint": "d32644373c27bdeb228aebecbe9b992f2ffd56ba7603cadb707e1a6cd4300d27",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2080,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+      "prior_line": 2079,
+      "prior_fingerprint": "5cf93eaf51d1a6782e733cf18354abc2919ef78b74a0b7527c278ce13f3bca93",
+      "fingerprint": "8bd9fd07015f7dd405f063c9e89dfddb5db2bb01d5e2d5a7b0c1f7d3c0b3a919",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2081,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+      "prior_line": 2080,
+      "prior_fingerprint": "b0efd21cc5aa4464b6be6cf67e9f28f28871140ad21f67a699bb509d0da66b01",
+      "fingerprint": "9b7f69a6cf8e8ddbf6f91cb7a756439c658994541f1b66e1c0ef10ec28fa0fa3",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2221,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_binding.py",
+      "prior_line": 2220,
+      "prior_fingerprint": "99140679194df4089260ab7d1dec621a38ad0d90fc00e7cd58509421f9f8026e",
+      "fingerprint": "ffa2a3c8d472d1dc13e7b46cb8a17b5e858361f3c2a82f4a23d78dc85e10b936",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2222,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_provider.py",
+      "prior_line": 2221,
+      "prior_fingerprint": "b85af2f49a69d1c96077cc55f606598ebb8a3e2bac52fef2db1de280df4accb2",
+      "fingerprint": "6ec474d1055bfdf349e97718dadac1dd20a9354fdfec092e9477748f61416046",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2225,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py",
+      "prior_line": 2224,
+      "prior_fingerprint": "f657e4b281ef88cea39ea718b544347b51262730e287b3ea49ae1e8cc21e06cb",
+      "fingerprint": "01ba4e1c0d47aa5e9098d47c615c00b29a86828585f565aaca31efdd8eff6cfc",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2252,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant.py",
+      "prior_line": 2251,
+      "prior_fingerprint": "3067b0dd19ca7acc5774bc7908b8aa442977aedc14ffcb19bbb4c89dd558d23f",
+      "fingerprint": "83f0d537248ceb787ce592a24f0e0316657c9bebfdd306d4cdc5d1a79d73866b",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2253,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant_contract.py",
+      "prior_line": 2252,
+      "prior_fingerprint": "7c8835a0006631401e5041a1d0b6cdfa4cda35074e43991d4944990dbb80c1f8",
+      "fingerprint": "fa38f4fd08ffe94ca16afed967db5d9778b191cbcd45dda7c3c3291610e91714",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2257,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_issuance.py",
+      "prior_line": 2256,
+      "prior_fingerprint": "4686c5431f1d1602b8d50d43468b03079612297f82e2d27597299b0e55368560",
+      "fingerprint": "a35ea0e95731f0f721178c3bda9c764e81898c97105d6346fb6b6fc140da4552",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2269,
+      "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_socket_peer_credential_attestor.py",
+      "prior_line": 2268,
+      "prior_fingerprint": "e634503a195f2030c8d4e837a49deaae8ff269e3fff6cae7396a9bcad3d59127",
+      "fingerprint": "c6ed7f2f1c40fc5f39b8ff925d99354dc636d376c2ade588760df9a2d236be4c",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2415,
+      "source_path": "modules/foundups/pfmall/api.py",
+      "prior_line": 2413,
+      "prior_fingerprint": "88a10580d9ca0ceb0f6048f55f20ecc62e6cd1096e5cb3a4114fa4d7e4d86ef8",
+      "fingerprint": "23336d20f9e39a44ba1870154d200d1e262eae7a4a0b8b4f64e3f02b03536191",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2471,
+      "source_path": "modules/foundups/simulator/economics/token_economics.py",
+      "prior_line": 2469,
+      "prior_fingerprint": "13bf05ced7062864197d5efd0b73962daa92a13175cf41ad46186bb8800a29df",
+      "fingerprint": "b7a22ebd38ea97113b086b9988992128343ac0ad0ef3d2ef5845a0e1bf4c3de5",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2710,
+      "source_path": "modules/infrastructure/oauth_management/src/oauth_manager.py",
+      "prior_line": 2708,
+      "prior_fingerprint": "6d725b760d7c747ae82060a35a3c0830c5e7f888646b0de8a388a843c960cd23",
+      "fingerprint": "3aa03d8426bfbe8769efbb534d0b950d19f072a98ae9970426dc464bf89ae720",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2716,
+      "source_path": "modules/infrastructure/secrets_mcp/src/op_cli_secret_resolver.py",
+      "prior_line": 2714,
+      "prior_fingerprint": "4a6e6637388c4c0aa9577d4c4cbc642fdbd42ac41d2e446566b2996d847553a9",
+      "fingerprint": "c4d4965ced222ade7346cd7f60e27ac5634b8c3908ea2e466a57b44ffeab5ecc",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2717,
+      "source_path": "modules/infrastructure/secrets_mcp/src/secrets_mcp.py",
+      "prior_line": 2715,
+      "prior_fingerprint": "675d0bb24e0bd2671be4464a13f51338676b5b113a35d0cb48c18366a3c17709",
+      "fingerprint": "ad923fe0d1c81fe2bb1f66fab065c76e83876334bb3e9ef44f5b2451d5ac48a8",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2718,
+      "source_path": "modules/infrastructure/secrets_mcp/src/systemd_credential_secret_resolver.py",
+      "prior_line": 2716,
+      "prior_fingerprint": "ab623a3730ce52a25419c93086ba1845b0b0b013dcd04f8992f14b79347039b5",
+      "fingerprint": "24ffb73a51a8cbef3374c127e694489417ef472673878faf8701a5301a0ce777",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2723,
+      "source_path": "modules/infrastructure/shared_utilities/key_hygiene.py",
+      "prior_line": 2721,
+      "prior_fingerprint": "14b056669cebcb39c32f0ca9cc8440e34a78f704acaba81da56f3c5496c92f9e",
+      "fingerprint": "3e970df0d49f9491742240e3ba4a9d8c10b7a110c94eff59d5cb3af817d1e3d0",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2868,
+      "source_path": "modules/platform_integration/github_integration/src/github_api_client.py",
+      "prior_line": 2866,
+      "prior_fingerprint": "9bffbd4a3d5b6eebcbe17c464cc0321bfd52ca8b793415994add06c4c0416387",
+      "fingerprint": "31b2640077eebccc2bf460e7c9f787109442fd7a946ded82a4ddb51161b1c1b1",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2912,
+      "source_path": "modules/platform_integration/social_media_orchestrator/src/oauth/oauth_coordinator.py",
+      "prior_line": 2910,
+      "prior_fingerprint": "0e3eb03a91066cb7e5a04657a7cd3bb525c070fc00c342543f4bc32ff1744d7b",
+      "fingerprint": "fc6358cd1af6a57d02c11039fc0b64da256b96a054e44c4ee73092e5e0da32e8",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2935,
+      "source_path": "modules/platform_integration/utilities/oauth_management/src/oauth_manager.py",
+      "prior_line": 2933,
+      "prior_fingerprint": "8bf4b5728f7b8e6c93a2dc13f503d6a6e1467982908e71f64963f41cf4bbaf6c",
+      "fingerprint": "f83639a3b526a626d84411b0988567ecde1a567d4012372402c7cf5c9343e91e",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2942,
+      "source_path": "modules/platform_integration/youtube_api_operations/src/youtube_api_operations.py",
+      "prior_line": 2940,
+      "prior_fingerprint": "5a07e4d91406ef66100144e3c4a99821bea4e67692f073dfb87d2c6ac84d9556",
+      "fingerprint": "38b6306d9fa9d1bf204122257a94c92e184b69d1be607eb9fcfaaff4aa306324",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2946,
+      "source_path": "modules/platform_integration/youtube_auth/src/oauth_browser.py",
+      "prior_line": 2944,
+      "prior_fingerprint": "764ee7630ec6dafb3806fb2dc7ca9bc24b48f2dab7b9790c89c8938748bb437f",
+      "fingerprint": "69da183bfaa4e181f8501196b36e025c531f705af48558dc3b8bab8616037189",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2947,
+      "source_path": "modules/platform_integration/youtube_auth/src/oauth_health.py",
+      "prior_line": 2945,
+      "prior_fingerprint": "ac19d6e6efb97bc718611d2fc8189ca4b26ab995178885cd7070dfb50d17ff6d",
+      "fingerprint": "17968ed46b43052d6e1a36b6c0c1b7f803d1b09b58a76629ffd3ffc316ce83ae",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 2951,
+      "source_path": "modules/platform_integration/youtube_auth/src/youtube_auth.py",
+      "prior_line": 2949,
+      "prior_fingerprint": "1d39cadecd7e73d57a658999d58aab676b3b67cb9276d48d3d8d44ae222bfddf",
+      "fingerprint": "b7000e3733faa7f38244e53721e3c2178da9899c14a78949d1ae025f42125b97",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "discord-api-token",
+      "line": 2855,
+      "source_path": "modules/platform_integration/antifafm_broadcaster/src/discord_voice_output.py",
+      "prior_line": 2853,
+      "prior_fingerprint": "ebda1eb67fec26e22d00476cf4a0edf57b244eef77bdc8a7e8827ca579ff0d44",
+      "fingerprint": "b7173d45af514ec97597e1c3be6d0979f38c0f2518627523350c17c4bb494b09",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "rule": "generic-api-key",
+      "line": 3001,
+      "source_path": "utils/oauth_manager.py",
+      "prior_line": 2999,
+      "prior_fingerprint": "943c916de6b515ffe4592260b3bab169c80e0cf7fd7976d50005d9e9a2f55757",
+      "fingerprint": "fa72d39ecbc63542991ec0ce42c8279e6f32edd37208a2e02b3d5911f862a07b",
+      "verification": "Unchanged accepted manifest entry; SHA256 equals normalized referenced source bytes"
+    }
+  ],
+  "independent_review": "Second agent independently verified all 38 current source digests, unchanged origin/main source bytes and prior ledger membership; zero mismatches."
+}

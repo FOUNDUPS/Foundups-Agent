@@ -1,3 +1,7 @@
+## 2026-10-23 — Kids Episodes story-production foundation
+
+WSP 97/109: add discoverable `kids_episodes` FoundUp under EDUIT with YouTube Shorts rendering reuse. Includes local editor, exact-duration rendering and assembly, source-preserving linked story planning, checkpointed provider callbacks, actual-artifact review adapters, bounded trend research, prototype skills and a fail-closed OpenClaw/WRE route. Independent review repaired artifact-mutation and checkpoint-symlink defects. Live provider execution, WRE admission and hosted deployment remain unverified; no production activation is claimed.
+
 ## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
 
 WSP00/6/10/15/22/50/97; preserve both hosted failures at `174955143d`.

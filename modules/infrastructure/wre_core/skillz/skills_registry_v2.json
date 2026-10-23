@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-10-22T00:00:00+00:00",
-  "total_skills": 37,
+  "last_updated": "2026-10-23T00:00:00+00:00",
+  "total_skills": 39,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -652,6 +652,36 @@
         "WSP 97"
       ],
       "description": "Deduplicate and verify security-alert mail against exact repository, workflow, scanner, and deployment evidence"
+    },
+    "kids_episode_production": {
+      "location": "modules/communication/youtube_shorts/skillz/kids_episode_production",
+      "agents": [
+        "qwen"
+      ],
+      "intent_type": "GENERATION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "education",
+      "wsp_chain": [
+        "WSP 95",
+        "WSP 97",
+        "WSP 109"
+      ]
+    },
+    "kids_trend_research": {
+      "location": "modules/communication/youtube_shorts/skillz/kids_trend_research",
+      "agents": [
+        "qwen"
+      ],
+      "intent_type": "RESEARCH",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "education",
+      "wsp_chain": [
+        "WSP 95",
+        "WSP 97",
+        "WSP 109"
+      ]
     }
   }
 }

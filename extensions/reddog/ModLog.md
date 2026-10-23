@@ -20,6 +20,10 @@ or generated binding changes. Clause/link/source checks and exact receipts are
 retained in the PR reconciliation evidence; independent review and fresh hosted
 publication gates remain required. Existing historical entries below are intact.
 
+## 2026-10-23 — Kids story route dependency closure
+
+Regenerated the backend manifest for the admitted kids story dispatch adapter and changed route/skill registry digests. Runtime file bound is now exactly 1,468; byte bounds remain unchanged. Pin `0bd8eb97c46f9f35072685d3a543c46433b7e24b76ea5038a65c1cb24d59a507`. Production admission and provider execution remain unactivated.
+
 ## PR2181 private lease extraction bindings — 2026-10-23
 
 WSP6/11/22/62/97. Regenerate the existing manifest after the private scope

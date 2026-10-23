@@ -1,6 +1,6 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 38 open PRs, nine drafts. #2181 is verified on main; #2081 is also merged and verified on main. New #2182 accounts for the unchanged open count. #1663 is selected at 14/P1 for bounded contact-policy reconciliation. Read the current queue before selection; historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-23 JST: 37 open PRs, nine drafts. #2181 and #2081 are verified on main; #2182 merged through its separate owner. #1663 remains selected at 14/P1 and is reconciled against that incoming main. Read the current queue before selection; historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-23
 
@@ -38,14 +38,22 @@ not a blocker, and missing live credentials do not block offline qualification. 
 advisory; retain history and add a concise entry without inventing an exemption
 or bundling unrelated archival. Re-score again after closure.
 
-Fresh observation includes new **#2182**, an owner-held EDUIT Kids Episodes
-proposal. Its 46-path manifest spans production fixtures, model/work adapters,
-OpenClaw routing and registries; metadata-only provisional C4/I3/D3/Impact3=13/P1
-is not source validation or merge approval. Preserve its active ownership.
-#2102 must coordinate the overlapping EDuIT README/registry before execution.
-All 37 surviving earlier PR heads are unchanged; #2081 left the queue and #2182
-entered it. Existing reconciliation records retain source, failed attempts and
-remaining work; no new queue, worktree or Brain-ingestion claim is introduced.
+**#2182 MERGED_BY_OWNER:** main advanced to
+`a048c24071e1a651b161025ba3342f14f3047280` while #1663's prior candidate
+`dffad2b6a` passed all 20 checks. The 55 incoming paths are the other owner's
+EDUIT Kids Episodes implementation; this lane does not claim its implementation
+or independent runtime acceptance. The only overlap is the extension ModLog:
+retain the full incoming log plus the 22-line contact-policy entry, then require
+fresh candidate checks. #2102 must reconcile the newly published EDuIT/registry
+state. #2182 leaves the current queue; 37 PRs remain open.
+
+Further #1645 source accounting resolved its manifest overlap: that blob is
+already identical to main. A disjoint bridge/manual slice can preserve the current
+website and explicitly carry the reader into existing #1648. Its central registry
+and exact validation requirements are still being checked before allocation;
+draft status is not a permanent exclusion. Re-observe after #1663 closure.
+Existing records retain failed attempts and unfinished requirements. No new
+queue, worktree, runtime admission or Brain-ingestion claim is introduced.
 
 ### Historical source closure and re-selection — 2026-10-23
 
@@ -361,14 +369,13 @@ Every execution requires current source, checks and authority.
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
 | [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
-| [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy lane/root: SELECTED_RECONCILIATION | Preserve all 24 #1659/#1663 clauses; reconcile the existing generic protocol and discovery link with current Contacts/native Docs and Python V3 sender authority. Protected skills and JS sender quarantine stay unchanged; source/link validation and independent review precede publication. |
+| [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `dffad2b6a703d6807309a2bfcccd4164c2746d61` | 2/4/4/4=14 P1 | Communication policy lane/root: SELECTED_RECONCILIATION | Preserve all 24 #1659/#1663 clauses; reconcile the existing generic protocol and discovery link with current Contacts/native Docs and Python V3 sender authority. Protected skills and JS sender quarantine stay unchanged; source/link validation and independent review precede publication. |
 | [#1356](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356) `055cda32a0c2bff70a469aea7d967d20c61a7f42` | 4/3/4/3=14 P1 | Dependency lane/root: STILL_CURRENT | Resolve full set; offline transaction/hash interface tests. |
-| [#2182](https://github.com/FOUNDUPS/Foundups-Agent/pull/2182) `68c0a68f9a6ed6011b1b912f122f6568c426a7bb` | 4/3/3/3=13 P1 (provisional) | New EDUIT Kids Episodes owner: OWNER_HELD | Existing owner validates its 46-file production/adapters/route/registry slice and exact-head checks; this lane preserves ownership. Metadata triage alone is not implementation review, admission or deployment evidence. |
 | [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) `e455fd0190b0c35302a3a5776529a221c3123888` | 4/3/2/4=13 P1 | Japan Compute owner: STILL_CURRENT / DRAFT | Owner reconciles homepage/hosting; preserved-copy and economics gates. |
 | [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) `724f465bd35ac1be5e9a91f41d0721da383c67d8` | 4/3/3/3=13 P1 | eSingularity surface owner: ACTIVE_OWNER_PROTECTED | Existing eSingularity owner coordinates convergence: preserve post-vote state, valid fixes and carried article; current routes/locales/build acceptance. |
 | [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` | 3/3/4/3=13 P1 | Dependency lane/root: ELIGIBLE_CURRENT_MANIFEST_QUALIFICATION | #2081 is verified on main; qualify proposed Flask against the full current manifest and existing offline health/upload/error baseline. |
 | [#1342](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342) `df0a9af87ed3aa086a218fe8f61ef392634042f8` | 4/3/3/3=13 P1 | Dependency lane/root: PARTIALLY_SUPERSEDED | Current-main migration carrying #800/#1360; preserve missing libc selectors if Rollup remains, otherwise qualify replacement GNU/musl native closure; Node/config/build/PWA checks. |
-| [#2102](https://github.com/FOUNDUPS/Foundups-Agent/pull/2102) `e9294fd00c4e728b1b489627d32c4db2fd557650` | 3/3/3/3=12 P2 | EDuIT owner: PARTIALLY_SUPERSEDED | Coordinate new #2182 EDuIT README/registry ownership; preserve packet, reconcile current manifest and additive schema tests. |
+| [#2102](https://github.com/FOUNDUPS/Foundups-Agent/pull/2102) `e9294fd00c4e728b1b489627d32c4db2fd557650` | 3/3/3/3=12 P2 | EDuIT owner: PARTIALLY_SUPERSEDED | Reconcile owner-merged #2182 EDuIT README/registry and current manifest; preserve unique packet and additive schema tests. |
 | [#1762](https://github.com/FOUNDUPS/Foundups-Agent/pull/1762) `4a6df453f611fa62122a6cdb88a616b57fd7756c` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED / DRAFT | Reconcile only remaining lint/config/fastq changes; test both current apps; explicitly classify two obsolete branch workflows. |
 | [#1688](https://github.com/FOUNDUPS/Foundups-Agent/pull/1688) `40d71249fe913567ee6f5fa65536d89f2ecb46c3` | 4/3/2/3=12 P2 | Opening review owner: PARTIALLY_SUPERSEDED / DRAFT | Owner visual review; isolate current-main opening; locales/device checks. |
 | [#1677](https://github.com/FOUNDUPS/Foundups-Agent/pull/1677) `847568ddec7af170aaef73fdae86d4db2b3628b2` | 3/3/3/3=12 P2 | JHR routing owner: PARTIALLY_SUPERSEDED | Port canonical links with current archive; domain/JHR tests. |

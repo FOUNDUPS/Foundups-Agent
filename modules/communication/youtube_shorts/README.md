@@ -129,3 +129,19 @@ print(f"Posted: {short_url}")
 **Phase**: POC
 **Next**: Build the authenticated AutoPost-to-Foundups-Mall gateway and signed-command verifier without weakening the YouTubeAuth boundary.
 **Goal**: Autonomous 012->0102->YouTube generation plus governed Foundups media publishing.
+
+## Kids Episodes local editor
+
+The [Kids Episodes FoundUp](../../foundups/kids_episodes/README.md) uses this module for original 15-second educational music/activity videos.
+
+```bash
+python modules/communication/youtube_shorts/src/kids_editor_server.py --workspace /path/to/your/media
+```
+
+Open the printed loopback URL. Enter a learning goal, activity, local video clips totaling 15 seconds, music and rights evidence, and timed caption cues. Choose draft (480p) or final (1080p), landscape or portrait; render, preview and download MP4/SRT. An optional voice track mixes over quieter music. Plans can be exported/imported as JSON. Media paths must stay within the selected workspace. Requires FFmpeg/ffprobe with libass; no model SDK is needed for local editing.
+
+This is a local adult-operated editor. Caption burn-in is automatic from supplied cues; automatic speech alignment, character-consistent generation and public hosted access are not implemented. Source clip audio is replaced by selected music/voice. Outputs remain unreviewed until watched/listened and independently checked.
+
+`src/kids_research.py` provides injected-client bounded YouTube snapshots, time-separated growth ranking and an official Lyria Clip adapter. Provider tests are mocked; live model access, billing and generation remain unverified. Suno official exports can be imported as local audio. See [research and limits](docs/KIDS_EPISODES_RESEARCH.md).
+
+Prototype WRE instructions are in `skillz/kids_episode_production/SKILLz.md` and `skillz/kids_trend_research/SKILLz.md`; these do not admit an autonomous runtime or publisher. Existing Shorts callers and uploader behavior are unchanged.

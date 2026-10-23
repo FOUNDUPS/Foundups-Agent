@@ -517,3 +517,7 @@ are unchanged. WSP 71 sections 5.4–5.5 already govern this work; no new protoc
 or WRE scheduler is introduced. Remaining work belongs to the reviewing agent:
 recover the original digest artifacts and obtain authorized provider-owner
 revocation/restriction evidence. Do not treat source removal as revocation.
+
+### Kids story manifest metadata re-review — 2026-10-23
+
+PR #2182 regenerated the runtime manifest for the kids story route. CI job 120249025720 reported 38 whole-file-bound findings. Two independent checks verified every flagged entry equals the referenced source SHA256, preserves the previously accepted entry and source bytes, and has a prior fingerprint in the existing ledger. Append only those 38 new exact file/rule/line fingerprints; preserve all earlier entries and scanner rules. Evidence: `reviewed-kids-manifest-evidence.json`. These are source hashes, not provider credentials.
