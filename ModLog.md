@@ -1,3 +1,25 @@
+## 2026-10-23 - Close downloader PR and qualify the existing Linux server path
+
+WSP 00/10/15/22/50/84/97. #1338 is squash-merged at `8068d6f78` after all
+19 exact-head checks and independent Linux adapter verification. Main exactly
+matches the reviewed tree; exact-main CI39879980028 and CodeQL39879978431
+succeeded. Earlier failed
+gates and broader residual failures remain preserved.
+
+Re-observe 40 open PRs/10 drafts. Select #1354 at 15/P1 after current ownership,
+source and alert review. Reuse the managed checkout; keep all other owner lanes
+and three unfinished RSI worktrees intact. Those worktrees are clean, but unique
+HIGH integration, incomplete historical containment and unverified runtime
+location dependencies prevent treating them as disposable folders.
+
+Prepare the Gunicorn security pin plus two existing deployment-path repairs:
+recognized factory configuration and module-specific requirements installation.
+Extend existing tests/workflow for actual Linux parser and foreground lifecycle
+acceptance. Restore the installation guide's existing linked evidence anchor.
+Source review is preparation; hosted validation, independent outcome review,
+normal publication gates and exact-main closure remain required. No production
+service, signed native worker, paid model call or Brain ingestion is claimed.
+
 ## 2026-10-23 - Close Clerk and qualify the Acoustic downloader security update
 
 WSP 00/10/15/22/50/84/97. #1457 is squash-merged at `455203e52` after all

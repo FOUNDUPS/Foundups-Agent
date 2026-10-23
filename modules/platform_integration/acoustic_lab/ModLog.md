@@ -1,5 +1,13 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-10-23: Prepare the bounded PR1354 Gunicorn repair
+
+- WSP 00/15/22/50/84/97; C3/I4/D4/Impact4=15/P1. Prepare the existing Gunicorn 21.2.0 -> 22.0.0 security update while preserving all other direct pins, including the PR1338 yt-dlp update, Pillow 13, Librosa 0.10.2 and no setuptools runtime requirement.
+- Correct two independently verified deployment source defects in existing owners: replace ignored `wsgi_module`/`callable` with the recognized factory `wsgi_app`, and select the module requirements inside the inner repository-root deployment shell. Synchronize the existing deployment guide; the systemd command and every parser/worker/timeout default remain unchanged.
+- Extend the existing web-app test file with six Linux config/parser/foreground cases. Load the exact checked-in config with only explicit provisioned-host fixture replacements, never a positional app or replacement factory. Record actual bound endpoint, master/worker PIDs and cleanup; a killed-orphan fallback remains a test failure. Preserve original source/test assertions and PR1338's separate deny-all adapter step.
+- Qualification state is `IMPLEMENTED_NOT_VALIDATED`: source and the existing CI job are updated, with independent source/CI review and seven passing guarded Windows adapter regressions. The unchanged registry remains current. Actual Gunicorn 22 installation, parser controls against 21.2/22, Linux foreground `/` and `/health`, complete dependency provenance, hosted artifact review and main convergence remain required. No deployment, account, OS install, systemd/nginx, real X/FFmpeg/RPC, model, native RSI or live-service effect has been performed.
+- The four broader historical application failures and the independent FFmpeg timeout-child defect remain unchanged. Existing WSP00 session evidence is reused; Holo authority mismatch is retained with exact-source fallback. Preparation and independent review evidence remain under the existing reconciliation artifact root. PR1338 is merged; this existing PR is selected at 15/P1. Restore the installation guide's existing linked evidence anchor. Publication and Linux execution remain pending.
+
 ## 2026-10-23: Qualify the bare yt-dlp security update in existing PR1338
 
 - WSP 00/15/22/50/84/97; C3/I4/D4/Impact4=15/P1. Update only the direct `yt-dlp==2024.3.10` pin to `2026.7.4`; retain Pillow 13, Librosa 0.10.2, Requests 2.31.0, no setuptools runtime requirement, and every other direct pin. The upstream receipt identifies patched security releases through GHSA-6v4j-43gg-vj32 / CVE-2026-55404; this is not an exploit test or a claim that the entire environment is vulnerability-free.

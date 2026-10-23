@@ -278,5 +278,315 @@ class TestXVideoURL(unittest.TestCase):
         self._assert_files_removed()
 
 
+import sys
+
+
+def _gunicorn_fixture_application(root, temporary, omit_factory=False):
+    """Load the checked-in config, replacing only provisioned-host fixture fields."""
+    import hashlib
+    import json
+    import os
+    import sys
+    from pathlib import Path
+    from gunicorn.app.wsgiapp import WSGIApplication
+    root, temporary = Path(root), Path(temporary)
+    config = root / 'modules/platform_integration/acoustic_lab/scripts/gunicorn.conf.py'
+    overrides = dict(user=os.getuid(), group=os.getgid(), workers=1,
+                     bind='127.0.0.1:0', accesslog='-', errorlog='-',
+                     pidfile=str(temporary / 'gunicorn.pid'), tmp_upload_dir=str(temporary),
+                     worker_tmp_dir=str(temporary), pythonpath=str(root),
+                     raw_env=['NODE_ENV=production', 'PYTHONPATH=' + str(root),
+                              'HOME=' + str(temporary)])
+    class FixtureApplication(WSGIApplication):
+        def get_config_from_filename(self, filename):
+            assert Path(filename).resolve() == config.resolve()
+            values = super().get_config_from_filename(filename)
+            fields = ('wsgi_app', 'user', 'group', 'worker_class', 'preload_app',
+                      'daemon', 'timeout', 'graceful_timeout', 'max_requests',
+                      'max_requests_jitter')
+            evidence = dict(config_sha256=hashlib.sha256(config.read_bytes()).hexdigest(),
+                            factory_sha256=hashlib.sha256((config.parent.parent / 'src/web_app.py').read_bytes()).hexdigest(),
+                            source={key: values.get(key) for key in fields},
+                            fixture_overrides=overrides, omit_factory_control=omit_factory)
+            (temporary / 'config.json').write_text(json.dumps(evidence, indent=2))
+            values.update(overrides)
+            if omit_factory:
+                values.pop('wsgi_app', None)
+            return values
+    old_argv = sys.argv
+    try:
+        sys.argv = ['gunicorn', '--config', str(config)]  # No positional APP.
+        return FixtureApplication()
+    finally:
+        sys.argv = old_argv
+
+
+def _gunicorn_guard_denial(kind, command, probes):
+    """Reject effects; allow each provenance-bound denied capability probe once."""
+    import os
+    import sys
+    frames, frame = set(), sys._getframe(1)
+    while frame is not None:
+        frames.add((frame.f_globals.get('__name__'), frame.f_code.co_name))
+        frame = frame.f_back
+    probe = None
+    if (kind == 'bind' and command == ('::1', 0)
+            and ('urllib3.util.connection', '_has_ipv6') in frames):
+        probe = 'urllib3-ipv6-capability'
+    if (kind == 'process' and command == 'lscpu'
+            and ('numpy.testing._private.utils', 'check_support_sve') in frames):
+        probe = 'numpy-sve-capability'
+    accepted = probe is not None and probe not in probes
+    probes.add(probe)
+    os.write(2, ('PR1354_GUARD ' + (probe if accepted else 'UNEXPECTED') + '\n').encode())
+    raise PermissionError('Offline Gunicorn fixture denied ' + kind)
+
+
+def _gunicorn_child_guards():
+    """Python API boundaries only; one Gunicorn-owned fork/listener is enabled."""
+    import os
+    import socket
+    import subprocess
+    import sys
+    original_bind, original_listen, original_fork = socket.socket.bind, socket.socket.listen, os.fork
+    probes, owned = set(), {}
+    denied = lambda kind, command=None: _gunicorn_guard_denial(kind, command, probes)
+    def is_socket_owner(frame, method):
+        module = sys.modules.get('gunicorn.sock')
+        return module is not None and frame.f_code is getattr(module.BaseSocket, method).__code__
+    def bind(sock, address):
+        if (address != ('127.0.0.1', 0) or owned
+                or not is_socket_owner(sys._getframe(1), 'bind')):
+            return denied('bind', address)
+        result = original_bind(sock, address)
+        owned.update(socket=sock, listening=False, forked=False)
+        os.write(2, b'PR1354_OWNED bind\n')
+        return result
+    def listen(sock, backlog):
+        if (owned.get('socket') is not sock or owned.get('listening')
+                or not is_socket_owner(sys._getframe(1), 'set_options')):
+            return denied('listen')
+        result = original_listen(sock, backlog)
+        owned['listening'] = True
+        os.write(2, b'PR1354_OWNED listen\n')
+        return result
+    def fork():
+        frame = sys._getframe(1)
+        if (not owned.get('listening') or owned.get('forked')
+                or (frame.f_globals.get('__name__'), frame.f_code.co_name) != ('gunicorn.arbiter', 'spawn_worker')):
+            return denied('fork')
+        owned['forked'] = True
+        return original_fork()
+    socket.socket.bind, socket.socket.listen, os.fork = bind, listen, fork
+    for name in ('connect', 'connect_ex', 'sendto', 'sendmsg'):
+        if hasattr(socket.socket, name):
+            setattr(socket.socket, name, lambda *a, **k: denied('outbound socket'))
+    for name in ('getaddrinfo', 'create_connection', 'gethostbyname', 'gethostbyname_ex', 'gethostbyaddr', 'getnameinfo'):
+        setattr(socket, name, lambda *a, **k: denied('DNS/outbound connection'))
+    subprocess.Popen.__init__ = lambda self, command, *a, **k: denied('process', command)
+    for name in dir(os):
+        if name in ('system', 'popen', 'forkpty') or name.startswith(('exec', 'spawn', 'posix_spawn')):
+            if callable(getattr(os, name)):
+                setattr(os, name, lambda *a, **k: denied('OS process'))
+
+
+def _run_gunicorn_fixture(root, temporary):
+    _gunicorn_child_guards()
+    application = _gunicorn_fixture_application(root, temporary)
+    assert application.cfg.wsgi_app == 'modules.platform_integration.acoustic_lab.src.web_app:create_app()'
+    application.run()
+
+
+@unittest.skipUnless(sys.platform.startswith('linux'), 'Gunicorn requires the explicit hosted Linux gate')
+class TestGunicorn(unittest.TestCase):
+    """Actual installed parser and bounded foreground server; no deployment."""
+    def setUp(self):
+        self.root = Path(__file__).resolve().parents[4]
+        temporary = tempfile.TemporaryDirectory(dir=os.environ.get('RUNNER_TEMP'))
+        self.addCleanup(temporary.cleanup)
+        self.temporary = Path(temporary.name)
+
+    def test_config_factory_and_production_defaults(self):
+        import gunicorn
+        self.assertEqual(gunicorn.__version__, '22.0.0')
+        application = _gunicorn_fixture_application(self.root, self.temporary)
+        cfg = application.cfg
+        self.assertEqual(cfg.wsgi_app, 'modules.platform_integration.acoustic_lab.src.web_app:create_app()')
+        retained = dict(worker_class='sync', preload_app=True, daemon=False, timeout=60,
+                        graceful_timeout=30, max_requests=500, max_requests_jitter=50)
+        strict = dict(tolerate_dangerous_framing=False, strip_header_spaces=False,
+                      permit_unconventional_http_method=False, permit_unconventional_http_version=False,
+                      casefold_http_method=False, header_map='drop')
+        for name, expected in {**retained, **strict}.items():
+            self.assertEqual(cfg.settings[name].value, expected, name)
+        self.assertEqual(application.app_uri, cfg.wsgi_app)
+
+    def test_original_missing_factory_binding_is_rejected(self):
+        import contextlib
+        output = io.StringIO()
+        with contextlib.redirect_stderr(output), self.assertRaises(SystemExit) as stopped:
+            _gunicorn_fixture_application(self.root, self.temporary, omit_factory=True)
+        self.assertEqual(stopped.exception.code, 1)
+        self.assertIn('No application module specified', output.getvalue())
+
+    def test_deployment_uses_module_requirements(self):
+        module = self.root / 'modules/platform_integration/acoustic_lab'
+        expected = 'pip install -r modules/platform_integration/acoustic_lab/requirements.txt'
+        for path in ('scripts/deploy.sh', 'DEPLOYMENT.md'):
+            self.assertIn(expected, (module / path).read_text())
+        self.assertIn('--config modules/platform_integration/acoustic_lab/scripts/gunicorn.conf.py',
+                      (module / 'scripts/acoustic-lab.service').read_text())
+
+    @staticmethod
+    def _parse(raw):
+        from gunicorn.config import Config
+        from gunicorn.http.parser import RequestParser
+        return next(RequestParser(Config(), [raw], ('127.0.0.1', 12345)))
+
+    def test_parser_accepts_valid_requests(self):
+        requests = [(b'GET /health HTTP/1.1\r\nHost: localhost\r\n\r\n', b''),
+                    (b'POST /offline HTTP/1.1\r\nHost: localhost\r\nContent-Length: 3\r\n\r\nabc', b'abc'),
+                    (b'POST /offline HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n3\r\nabc\r\n0\r\n\r\n', b'abc')]
+        for raw, body in requests:
+            with self.subTest(raw=raw.split(b'\r\n', 1)[0]):
+                self.assertEqual(self._parse(raw).body.read(), body)
+
+    def test_parser_rejects_ambiguous_framing(self):
+        from gunicorn.http.errors import InvalidHeader
+        # Exercise the shared parser API before importing target-only errors.
+        with self.assertRaises(InvalidHeader):
+            self._parse(b'POST /offline HTTP/1.1\r\nHost: localhost\r\n'
+                        b'Transfer-Encoding: chunked\r\nContent-Length: 4\r\n\r\n0\r\n\r\n')
+        from gunicorn.http.errors import UnsupportedTransferCoding
+        cases = [(b'Transfer-Encoding: chunked\r\nTransfer-Encoding: chunked', InvalidHeader),
+                 (b'Transfer-Encoding: gzip', UnsupportedTransferCoding),
+                 (b'Transfer-Encoding: ', UnsupportedTransferCoding)]
+        for headers, error in cases:
+            with self.subTest(headers=headers):
+                raw = b'POST /offline HTTP/1.1\r\nHost: localhost\r\n' + headers + b'\r\n\r\n0\r\n\r\n'
+                with self.assertRaises(error):
+                    self._parse(raw)
+        with self.assertRaises(InvalidHeader):
+            self._parse(b'POST /offline HTTP/1.0\r\nTransfer-Encoding: chunked\r\n\r\n0\r\n\r\n')
+
+    @staticmethod
+    def _owned_pids(group):
+        members = []
+        for path in Path('/proc').glob('[0-9]*/stat'):
+            try:
+                fields = path.read_text().rsplit(')', 1)[1].split()
+                if int(fields[2]) == group:
+                    members.append(int(path.parent.name))
+            except (OSError, ProcessLookupError):
+                pass
+        return members
+
+    def _close_owned_server(self, child, log):
+        import json
+        import signal
+        import time
+        observed = self._owned_pids(child.pid)
+        forced_kill = False
+        try:
+            os.killpg(child.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass
+        try:
+            child.wait(timeout=8)
+        except subprocess.TimeoutExpired:
+            forced_kill = True
+            os.killpg(child.pid, signal.SIGKILL)
+            child.wait(timeout=5)
+        survivors = self._wait_owned_exit(child.pid)
+        if survivors:
+            forced_kill = True
+            os.killpg(child.pid, signal.SIGKILL)
+            survivors = self._wait_owned_exit(child.pid)
+        report = dict(master=child.pid, observed_owned_pids=observed,
+                      worker_pids=self.worker_pids, survivors=survivors, returncode=child.returncode,
+                      forced_kill=forced_kill)
+        destination = Path(os.environ.get('ACOUSTIC_GUNICORN_REPORT_DIR', str(self.temporary)))
+        destination.mkdir(parents=True, exist_ok=True)
+        (destination / 'gunicorn-closure.json').write_text(json.dumps(report, indent=2))
+        (destination / 'gunicorn.log').write_text(log.read_text())
+        if (self.temporary / 'config.json').exists():
+            (destination / 'gunicorn-config.json').write_text((self.temporary / 'config.json').read_text())
+        self.assertEqual(survivors, [], 'Owned Gunicorn process group still exists')
+        self.assertFalse(forced_kill, 'Normal foreground shutdown required forced kill')
+        self.assertEqual(child.returncode, 0)
+        self.assertNotIn('PR1354_GUARD UNEXPECTED', log.read_text())
+        self.assertEqual(log.read_text().count('PR1354_OWNED bind\n'), 1)
+        self.assertEqual(log.read_text().count('PR1354_OWNED listen\n'), 1)
+
+    def _wait_owned_exit(self, group):
+        import time
+        deadline = time.monotonic() + 3
+        while self._owned_pids(group) and time.monotonic() < deadline:
+            time.sleep(0.05)
+        return self._owned_pids(group)
+
+    def _start_server(self):
+        import inspect
+        import re
+        import time
+        helpers = (_gunicorn_fixture_application, _gunicorn_guard_denial,
+                   _gunicorn_child_guards, _run_gunicorn_fixture)
+        program = '\n'.join(inspect.getsource(fn) for fn in helpers)
+        program += '\nimport sys\n_run_gunicorn_fixture(*sys.argv[1:])\n'
+        env = dict(PATH=str(Path(sys.executable).parent) + ':/usr/bin:/bin', HOME=str(self.temporary),
+                   TMPDIR=str(self.temporary), LANG='C.UTF-8', PYTHONDONTWRITEBYTECODE='1',
+                   PYTHON_DOTENV_DISABLED='1', PYCRYPTODOME_DISABLE_GMP='1',
+                   NUMBA_CACHE_DIR=str(self.temporary / 'numba'))
+        log = self.temporary / 'server.log'
+        output = log.open('wb')
+        self.addCleanup(output.close)
+        child = subprocess.Popen([sys.executable, '-I', '-B', '-c', program, str(self.root), str(self.temporary)],
+                                 cwd=self.root, env=env, stdout=output, stderr=subprocess.STDOUT,
+                                 start_new_session=True)
+        self.worker_pids = []
+        self.addCleanup(self._close_owned_server, child, log)
+        deadline = time.monotonic() + 45
+        while time.monotonic() < deadline:
+            text = log.read_text()
+            address = re.search(r'Listening at: http://127\.0\.0\.1:(\d+)', text)
+            self.worker_pids = [int(pid) for pid in re.findall(r'Booting worker with pid: (\d+)', text)]
+            if address and self.worker_pids:
+                return child, int(address.group(1))
+            self.assertIsNone(child.poll(), text)
+            time.sleep(0.05)
+        self.fail('Gunicorn did not report a bound loopback endpoint and worker within 45 seconds')
+
+    @staticmethod
+    def _exchange(port, payload):
+        result = bytearray()
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as connection:
+            connection.settimeout(5)
+            connection.connect(('127.0.0.1', port))
+            connection.sendall(payload)
+            while len(result) < 65536:
+                part = connection.recv(4096)
+                if not part:
+                    return bytes(result)
+                result.extend(part)
+        raise AssertionError('Loopback response did not close within its size bound')
+
+    def test_foreground_health_rejection_and_owned_shutdown(self):
+        import json
+        child, port = self._start_server()
+        self.assertEqual(len(self.worker_pids), 1)
+        self.assertEqual(os.getpgid(self.worker_pids[0]), child.pid)
+        for path in ('/health', '/'):
+            response = self._exchange(port, ('GET ' + path + ' HTTP/1.0\r\nHost: localhost\r\n\r\n').encode())
+            self.assertIn(b'200 OK', response.split(b'\r\n', 1)[0])
+            if path == '/health':
+                self.assertEqual(json.loads(response.split(b'\r\n\r\n', 1)[1])['status'], 'healthy')
+        payload = (b'POST /offline HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n'
+                   b'Content-Length: 4\r\n\r\n0\r\n\r\nGET /health HTTP/1.1\r\nHost: localhost\r\n\r\n')
+        response = self._exchange(port, payload)
+        self.assertIn(b'400 Bad Request', response.split(b'\r\n', 1)[0])
+        self.assertNotIn(b'200 OK', response)
+        self.assertEqual(response.count(b'HTTP/'), 1)
+
+
 if __name__ == '__main__':
     unittest.main()
