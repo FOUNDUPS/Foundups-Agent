@@ -30,6 +30,13 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ArchitectModelRunner,
     RUNTIME_SURFACE_BACKEND_ARCHITECT,
 )
+from modules.communication.moltbot_bridge.src.reddog_principal_memex_resident_admission import (
+    AuthenticatedPrincipalMemexContext,
+)
+from modules.communication.moltbot_bridge.src.reddog_principal_memex_live_resident_source_supply import (
+    DeferredPrincipalMemexResidentSource,
+    admit_principal_memex_cycle_context,
+)
 from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
     validate_grounded_target_receipt,
 )
@@ -66,6 +73,10 @@ from modules.communication.moltbot_bridge.src.reddog_readonly_audit_decision_per
 from modules.communication.moltbot_bridge.src.reddog_readonly_audit_report_collection import (
     AgentDbReadOnlyAuditReportStore,
     ReadOnlyAuditReportStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+    STAGE_BOUNDED_EXECUTION,
 )
 
 
@@ -158,6 +169,9 @@ class ResidentCycleReason:
     CANCELLATION_CONFLICT = "REJECT_RESIDENT_CYCLE_CANCELLATION_CONFLICT"
     AUDIT_MODEL_RUNTIME_BINDING = "REJECT_RESIDENT_CYCLE_AUDIT_MODEL_RUNTIME_BINDING"
     ARCHITECT_MODEL_RUNTIME_BINDING = "REJECT_RESIDENT_CYCLE_ARCHITECT_MODEL_RUNTIME_BINDING"
+    PRINCIPAL_MEMEX_SOURCE_CONFLICT = "REJECT_RESIDENT_CYCLE_PRINCIPAL_MEMEX_SOURCE_CONFLICT"
+    PRINCIPAL_MEMEX_SOURCE_REJECTED = "REJECT_RESIDENT_CYCLE_PRINCIPAL_MEMEX_SOURCE_REJECTED"
+    PROGRESSIVE_STAGE_INVALID = "REJECT_RESIDENT_CYCLE_PROGRESSIVE_STAGE_INVALID"
 
 
 class ResidentArchitectCycleStore(Protocol):
@@ -579,6 +593,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
     brain_state: Mapping[str, Any] | None = None,
     workspace_memory_notes: Sequence[Mapping[str, Any]] = (),
     memex_snapshot_supply_config: OperationalMemexSnapshotSupplyConfig | Mapping[str, Any] | None = None,
+    verified_outcome_runtime_authority: Any = None,
     audit_lanes: Sequence[str] = DEFAULT_AUDIT_LANES,
     cycle_store: ResidentArchitectCycleStore | None = None,
     agent_db_factory: Optional[Callable[[], Any]] = None,
@@ -586,6 +601,8 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
     decision_store: ReadOnlyAuditDecisionStore | None = None,
     architect_model_runner: ArchitectModelRunner | None = None,
     architect_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
+    principal_memex_context: AuthenticatedPrincipalMemexContext | None = None,
+    principal_memex_source: DeferredPrincipalMemexResidentSource | None = None,
     architect_determination_store: ArchitectDeterminationStore | None = None,
     audit_model_runner: RepoAuditModelRunner | None = None,
     audit_model_runtime_binding_receipt: Mapping[str, Any] | None = None,
@@ -608,6 +625,8 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         architect_model_runtime_binding_receipt=architect_model_runtime_binding_receipt,
     )
     reasons = [*_validate_intent(red_dog_intent), *runtime_binding_reasons]
+    if principal_memex_context is not None and principal_memex_source is not None:
+        reasons.append(ResidentCycleReason.PRINCIPAL_MEMEX_SOURCE_CONFLICT)
     intent_id = str(red_dog_intent.get("intent_id") or "").strip()
     existing = store.load_cycle_by_intent(intent_id) if intent_id else None
     submitted_intent_digest = resident_intent_digest(red_dog_intent)
@@ -747,8 +766,12 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
                 red_dog_intent=red_dog_intent,
                 config=memex_snapshot_supply_config,
             ),
+            verified_outcome_runtime_authority=(
+                verified_outcome_runtime_authority
+            ),
             grounding_receipt=red_dog_intent.get("grounding_receipt"),
             grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
+            progressive_execution_stage_ceiling=_runtime_stage_ceiling(red_dog_intent),
             audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
             require_audit_model_runtime_binding=True,
             architect_model_runtime_binding_receipt_override=(
@@ -756,45 +779,21 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
             ),
         )
         if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
-            transitioned = _transition_record(
-                store,
-                record,
-                expected_statuses=(STATUS_SUBMITTED,),
-                updates=_failure_updates(
-                    STATUS_FAILED,
-                    (ResidentCycleReason.BOOTSTRAP_REJECTED, *initial.rejection_reasons),
-                ),
+            return _transition_failure_result(
+                store, record, intent_id, expected_status=STATUS_SUBMITTED,
+                reasons=(ResidentCycleReason.BOOTSTRAP_REJECTED, *initial.rejection_reasons),
             )
-            if transitioned is None:
-                return _transition_conflict_result(store, intent_id)
-            record = transitioned
-            return _result_from_record(record=record, accepted=False)
         if not initial.enqueue_attempted or initial.enqueue_task_count <= 0 or initial.enqueue_rejection_reasons:
-            transitioned = _transition_record(
-                store,
-                record,
-                expected_statuses=(STATUS_SUBMITTED,),
-                updates=_failure_updates(
-                    STATUS_FAILED,
-                    (ResidentCycleReason.TASK_ENQUEUE_REJECTED, *initial.enqueue_rejection_reasons),
-                ),
+            return _transition_failure_result(
+                store, record, intent_id, expected_status=STATUS_SUBMITTED,
+                reasons=(ResidentCycleReason.TASK_ENQUEUE_REJECTED, *initial.enqueue_rejection_reasons),
             )
-            if transitioned is None:
-                return _transition_conflict_result(store, intent_id)
-            record = transitioned
-            return _result_from_record(record=record, accepted=False)
         task_ids = store.load_task_ids(str(initial.determination_id or ""))
         if not task_ids:
-            transitioned = _transition_record(
-                store,
-                record,
-                expected_statuses=(STATUS_SUBMITTED,),
-                updates=_failure_updates(STATUS_FAILED, (ResidentCycleReason.NO_TASK_IDS,)),
+            return _transition_failure_result(
+                store, record, intent_id, expected_status=STATUS_SUBMITTED,
+                reasons=(ResidentCycleReason.NO_TASK_IDS,),
             )
-            if transitioned is None:
-                return _transition_conflict_result(store, intent_id)
-            record = transitioned
-            return _result_from_record(record=record, accepted=False)
         transitioned = _transition_record(
             store,
             record,
@@ -905,6 +904,17 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         return _transition_conflict_result(store, intent_id)
     record = checkpoint
 
+    principal_memex = admit_principal_memex_cycle_context(
+        direct_context=principal_memex_context, source=principal_memex_source,
+        resident_cycle_id=str(record.get("cycle_id") or ""),
+    )
+    if not principal_memex.accepted:
+        return _transition_failure_result(
+            store, record, intent_id, expected_status=STATUS_RUNNING,
+            reasons=(ResidentCycleReason.PRINCIPAL_MEMEX_SOURCE_REJECTED,
+                     *principal_memex.rejection_reasons), recovered=recovered,
+        )
+
     final = run_reddog_main_readonly_operational_bootstrap(
         repo_root=root,
         work_state_path=work_state_path,
@@ -923,6 +933,7 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         workspace_memory_notes=workspace_memory_notes,
         grounding_receipt=red_dog_intent.get("grounding_receipt"),
         grounding_work_focus=str(red_dog_intent.get("work_focus") or prompt_text),
+        progressive_execution_stage_ceiling=_runtime_stage_ceiling(red_dog_intent),
         audit_model_runtime_binding_receipt=audit_model_runtime_binding_receipt,
         require_audit_model_runtime_binding=True,
         audit_lanes=audit_lanes,
@@ -933,49 +944,22 @@ def run_reddog_resident_architect_durable_agentdb_cycle(
         run_backend_architect_determination=True,
         architect_model_runner=architect_model_runner,
         architect_model_runtime_binding_receipt_override=architect_model_runtime_binding_receipt,
+        principal_memex_context=principal_memex.context,
+        principal_memex_now_epoch=principal_memex.trusted_now_epoch,
         architect_determination_store=architect_determination_store,
     )
     if not final.ready:
-        updates = _failure_updates(
-                STATUS_FAILED,
-                (ResidentCycleReason.FINAL_BOOTSTRAP_REJECTED, *final.rejection_reasons),
-            )
-        updates["final_bootstrap"] = final.to_dict()
-        transitioned = _transition_record(
-            store,
-            record,
-            expected_statuses=(STATUS_RUNNING,),
-            updates=updates,
-        )
-        if transitioned is None:
-            return _transition_conflict_result(store, intent_id)
-        record = transitioned
-        return _result_from_record(
-            record=record,
-            accepted=False,
+        return _transition_failure_result(
+            store, record, intent_id, expected_status=STATUS_RUNNING,
+            reasons=(ResidentCycleReason.FINAL_BOOTSTRAP_REJECTED,
+                     *final.rejection_reasons), recovered=recovered,
             final_bootstrap=final,
-            recovered_existing_cycle=recovered,
         )
     if not final.backend_architect_determination_id:
-        updates = _failure_updates(
-            STATUS_FAILED,
-            (ResidentCycleReason.ARCHITECT_DETERMINATION_MISSING,),
-        )
-        updates["final_bootstrap"] = final.to_dict()
-        transitioned = _transition_record(
-            store,
-            record,
-            expected_statuses=(STATUS_RUNNING,),
-            updates=updates,
-        )
-        if transitioned is None:
-            return _transition_conflict_result(store, intent_id)
-        record = transitioned
-        return _result_from_record(
-            record=record,
-            accepted=False,
-            final_bootstrap=final,
-            recovered_existing_cycle=recovered,
+        return _transition_failure_result(
+            store, record, intent_id, expected_status=STATUS_RUNNING,
+            reasons=(ResidentCycleReason.ARCHITECT_DETERMINATION_MISSING,),
+            recovered=recovered, final_bootstrap=final,
         )
 
     transitioned = _transition_record(
@@ -1087,6 +1071,8 @@ def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
         reasons.append(ResidentCycleReason.INTENT_INVALID)
     if intent.get("submits_executable_authority") is not False:
         reasons.append(ResidentCycleReason.EXECUTABLE_AUTHORITY_REQUESTED)
+    if _intent_stage_ceiling(intent) not in {STAGE_AUDIT, STAGE_BOUNDED_EXECUTION}:
+        reasons.append(ResidentCycleReason.PROGRESSIVE_STAGE_INVALID)
     if isinstance(intent, Mapping) and schema == "reddog_intent.v2":
         grounding = validate_grounded_target_receipt(
             intent.get("grounding_receipt") if isinstance(intent.get("grounding_receipt"), Mapping) else None,
@@ -1094,6 +1080,23 @@ def _validate_intent(intent: Mapping[str, Any]) -> tuple[str, ...]:
         )
         reasons.extend(grounding.rejection_reasons)
     return tuple(dict.fromkeys(reasons))
+
+
+def _intent_stage_ceiling(intent: Mapping[str, Any]) -> str:
+    value = str(intent.get("progressive_execution_stage_ceiling") or "audit")
+    return {
+        "audit": STAGE_AUDIT,
+        "boundedExecution": STAGE_BOUNDED_EXECUTION,
+        STAGE_AUDIT: STAGE_AUDIT,
+        STAGE_BOUNDED_EXECUTION: STAGE_BOUNDED_EXECUTION,
+    }.get(value, value)
+
+
+def _runtime_stage_ceiling(intent: Mapping[str, Any]) -> str:
+    """Keep editor stage selection advisory until root-owned activation exists."""
+
+    _ = _intent_stage_ceiling(intent)
+    return STAGE_AUDIT
 
 
 def _intent_bound_memex_config(
@@ -1111,7 +1114,10 @@ def _intent_bound_memex_config(
             principal_id=_principal_id(red_dog_intent),
             identity=config.identity,
             roadmap_state=config.roadmap_state,
-            verified_outcomes=config.verified_outcomes,
+            verified_outcome_references=config.verified_outcome_references,
+            untrusted_verified_outcomes_supplied=(
+                config.untrusted_verified_outcomes_supplied
+            ),
             policy_issued_at=config.policy_issued_at,
             policy_expires_at=config.policy_expires_at,
             holoindex_generation_id=config.holoindex_generation_id,
@@ -1389,6 +1395,25 @@ def _transition_conflict_result(
     else:
         reasons = (ResidentCycleReason.TRANSITION_CONFLICT,)
     return _result_from_record(record=record, accepted=False, rejection_reasons=reasons)
+
+
+def _transition_failure_result(
+    store: ResidentArchitectCycleStore, record: Mapping[str, Any], intent_id: str,
+    *, expected_status: str, reasons: Sequence[str], recovered: bool = False,
+    final_bootstrap: RedDogMainReadonlyBootstrapResult | None = None,
+) -> RedDogResidentArchitectCycleResult:
+    updates = _failure_updates(STATUS_FAILED, reasons)
+    if final_bootstrap is not None:
+        updates["final_bootstrap"] = final_bootstrap.to_dict()
+    transitioned = _transition_record(
+        store, record, expected_statuses=(expected_status,), updates=updates,
+    )
+    if transitioned is None:
+        return _transition_conflict_result(store, intent_id)
+    return _result_from_record(
+        record=transitioned, accepted=False, final_bootstrap=final_bootstrap,
+        recovered_existing_cycle=recovered,
+    )
 
 
 def _reject(intent: Mapping[str, Any], reasons: Sequence[str]) -> RedDogResidentArchitectCycleResult:

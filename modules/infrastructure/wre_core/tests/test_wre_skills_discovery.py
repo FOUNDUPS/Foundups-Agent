@@ -26,7 +26,8 @@ class TestWRESkillsDiscovery:
         """Test discovery initializes with correct repo root"""
         assert discovery is not None
         assert discovery.repo_root.exists()
-        assert discovery.repo_root.name == "Foundups-Agent"
+        assert (discovery.repo_root / "AGENTS.md").is_file()
+        assert (discovery.repo_root / "modules").is_dir()
 
     def test_discover_all_skills(self, discovery):
         """Test discover all skills from filesystem"""

@@ -97,8 +97,10 @@ def embedding_space_fingerprint(
 def resolve_sentence_transformer_snapshot(
     models_path: Path | str,
     model_name: str,
+    *,
+    preserve_source_path: bool = False,
 ) -> Path | None:
-    """Resolve flat SentenceTransformer or Hugging Face snapshot cache layouts."""
+    """Resolve flat or cache layouts, optionally retaining alias provenance."""
 
     root = Path(models_path)
     short_name = str(model_name).strip().split("/")[-1]
@@ -114,7 +116,7 @@ def resolve_sentence_transformer_snapshot(
     )
     for candidate in flat_candidates:
         if _looks_like_model_snapshot(candidate):
-            return candidate.resolve(strict=False)
+            return candidate if preserve_source_path else candidate.resolve(strict=False)
 
     hub_root = root / ("models--" + model_id.replace("/", "--"))
     snapshots = hub_root / "snapshots"
@@ -126,7 +128,7 @@ def resolve_sentence_transformer_snapshot(
     if revision:
         selected = snapshots / revision
         if _looks_like_model_snapshot(selected):
-            return selected.resolve(strict=False)
+            return selected if preserve_source_path else selected.resolve(strict=False)
     try:
         candidates = sorted(
             candidate
@@ -135,7 +137,9 @@ def resolve_sentence_transformer_snapshot(
         )
     except OSError:
         candidates = []
-    return candidates[0].resolve(strict=False) if len(candidates) == 1 else None
+    if len(candidates) != 1:
+        return None
+    return candidates[0] if preserve_source_path else candidates[0].resolve(strict=False)
 
 
 def _looks_like_model_snapshot(path: Path) -> bool:

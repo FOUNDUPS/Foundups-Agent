@@ -1,11 +1,15 @@
 # WSP 97: System Execution Prompting Protocol
 
 **Status**: ACTIVE
-**Version**: 1.7
-**Date**: 2026-03-29
+**Version**: 1.9
+**Date**: 2026-08-26
 **Author**: 0102 (System Execution Architect)
 
 ---
+
+## System roadmap navigation
+
+After bootstrap, read [the root system roadmap](../../ROADMAP.md#authority-and-fast-start) for completion gates, current planning priorities and the selected work packet. Follow its module and evidence links on demand. The roadmap owns cross-system sequencing; it does not redefine this protocol, certify completion, grant authority or replace a current signed work order. Historical plans are listed in the roadmap archive register.
 
 ## What "Follow WSP 97" Means
 
@@ -197,6 +201,101 @@ Use this sequence unless a narrower protocol overrides it:
 7. Run the dialectic sweep
 8. Reduce to first principles / simplest valid move
 9. Execute inside the correct plane
+
+### 1.2A Main-Convergence / PR Closure Gate
+
+Repository work is not complete when a branch or pull request merely exists. For every mutation slice whose intended destination is `main`, WSP 97 requires a terminal convergence state.
+
+Canonical closure loop:
+
+```text
+bounded work
+  -> validate branch
+  -> specialized PR
+  -> inspect mergeability + checks + overlap
+  -> squash merge when qualified
+  -> read back main
+  -> reconcile/close superseded PRs
+  -> classify remaining dirty/open work
+```
+
+Required rules:
+
+1. **Specialized PRs:** keep one coherent concern per PR. Do not accumulate unrelated cleanup, product, WSP, dependency, or historical work merely to reduce PR count.
+2. **Merge is the default completion path:** when the authorized slice is validated, mergeable, has no required failing/pending gate, and does not conflict with newer authoritative work, squash-merge it rather than leaving completed work parked on a branch.
+3. **Verify main after merge:** read back the affected main-branch artifact(s) or resulting commit. A successful PR API response alone is not sufficient evidence that the intended contract survived convergence.
+4. **No blind stale merges:** an old/diverged PR must be compared with current main. Classify it as `SUPERSEDED`, `PARTIALLY_SUPERSEDED`, `NEEDS_REBASE`, `BLOCKED`, or `STILL_CURRENT` before mutation.
+5. **Preserve unique work:** never close/delete a stale PR solely because it is old or non-mergeable. If it contains unique valid delta, preserve that delta and route it through a fresh bounded reconciliation slice or explicit rebase/update.
+6. **Close superseded work:** if current main demonstrably contains the intended behavior and the old PR has no unique valid delta, close it with a reconciliation note rather than leaving repository entropy.
+7. **Dirty-tree safety:** "clean" never means discard unknown state. Classify dirty/untracked work by owner and intent before cleanup. Unknown or concurrent work is preserved and reported, not reset/stashed/deleted by assumption.
+8. **Open-PR hygiene:** before declaring a work cycle complete, inspect related open PRs for overlap. Completed work should not leave a second stale PR claiming the same outcome.
+9. **No false global-clean claim:** connector-visible PR/branch state does not prove a developer's local worktree is clean. Report local cleanliness only from direct worktree evidence.
+10. **Terminal receipt:** record one of `MERGED_VERIFIED_MAIN`, `SUPERSEDED_CLOSED`, `PRESERVED_NEEDS_REBASE`, `BLOCKED_REQUIRED_GATE`, or `ACTIVE_OWNED_WORK`. "PR created" is not a terminal receipt.
+
+This gate governs convergence, not authorization. It never bypasses review requirements, branch protection, CI, security, ownership, or a narrower WSP.
+
+### 1.2B Test Inventory / Reuse Gate
+
+When a task may create, modify, replace, or expand tests, WSP 97 MUST apply the WSP 22 TestModLog pattern before test authoring.
+
+**Required pre-test retrieval**:
+1. Query HoloIndex using the target module, behavior/contract under test, and likely test vocabulary.
+2. Read the target module's `tests/TestModLog.md` when present.
+3. Read the target module's `tests/README.md` when present.
+4. Inspect the closest existing test file(s), fixtures, and helpers surfaced by retrieval.
+
+**Reuse decision**:
+```text
+need test coverage
+  -> retrieve TestModLog + tests README + nearest tests
+  -> same behavior/contract? REUSE or EXTEND existing test
+  -> same pipeline/fixture, new edge case? ADD CASE to existing test file
+  -> materially distinct subsystem/contract? CREATE new test file
+```
+
+A worker MUST NOT create a new test file merely because doing so is easier than understanding the current suite. Existing tests, fixtures, parametrizations, and assertions are reusable architecture.
+
+If a module has active tests but no `tests/TestModLog.md`, the worker MUST first inventory the actual current test files and create or refresh the TestModLog before adding a new test file. The inventory must describe what each existing test file covers well enough for a future worker to decide whether to reuse it without opening every test file.
+
+After tests are added, removed, renamed, or materially expanded, update `tests/TestModLog.md` in the same work slice. Update `tests/README.md` when execution conventions or suite organization change.
+
+**Work-order requirement**: worker prompts that request test creation or modification SHOULD include concrete HoloIndex search parameters for the target behavior and test surface so retrieval is reproducible and not replaced by vibe-based file creation.
+
+**Failure conditions**:
+- new test file created without TestModLog/README/nearest-test retrieval when those artifacts exist;
+- duplicate coverage created where an existing test could be cleanly extended;
+- active test inventory materially diverges from `tests/TestModLog.md` after the slice;
+- a historical aggregate pass count is reported as a fresh test run without fresh execution evidence.
+
+**Relationships**: WSP 22 owns the TestModLog artifact; WSP 50 owns pre-action verification; WSP 84 supplies code/test memory discipline; WSP 6 governs verification depth. WSP 97 makes retrieval/reuse part of the execution gate.
+
+### 1.2.1 WSP 15 Economy and Verification Binding
+
+Before an implementation or autonomous improvement enters execution, WSP 97
+MUST consume one canonical WSP 15 allocation receipt. The operator asks:
+
+1. **Do I need it?** -> Importance and Impact.
+2. **Can I afford it?** -> Complexity, compute, time, and verification cost.
+3. **Can I live without it now?** -> Deferability and current blockers.
+
+These questions are a plain-language projection of WSP 15, not a second
+scoring system. WSP 15 remains authoritative for the values and priority. WSP
+97 binds the resulting receipt to the work order, selected execution plane,
+and the tiered verification plan required by WSP 6.
+
+The verification plan MUST start with focused/module evidence and expand to
+dependency, security, held-out, or full-repository scope according to observed
+impact. A stale or incomplete dependency/retrieval result requires escalation,
+not optimistic test omission. Reusable parent-baseline evidence MUST be bound
+to the exact parent SHA and execution environment; differential acceptance is
+based on test identifiers rather than matching aggregate failure counts.
+
+**Implementation truth**: `SPECIFIED_NOT_IMPLEMENTED` for end-to-end runtime
+enforcement. The current WRE differential component performs pure integrity
+and exact-ID analysis only. It does not authenticate a WSP 15 allocation,
+prove Git ancestry or collection completeness, execute tests, or authorize
+promotion. Those claims require independently verified work-order, lineage,
+collection-manifest, and evidence receipts at the WRE integration boundary.
 
 ### 1.3 Scope Discipline
 
@@ -534,13 +633,17 @@ Always reference WSP 97 in your validation tasks and optimize for minimal, preci
 | WSP | Integration Point | Status |
 |-----|------------------|--------|
 | **WSP 21** | Prompt Engineering Foundation | [OK] Enhanced |
+| **WSP 22** | ModLog/TestModLog operational memory | [OK] Enhanced |
 | **WSP 35** | HoloIndex Coordination | [OK] Enhanced |
+| **WSP 50** | Pre-action verification | [OK] Enhanced |
 | **WSP 77** | Agent Coordination | [OK] Enhanced |
 | **WSP 80** | Cube-Level Orchestration | [OK] Enhanced |
+| **WSP 84** | Existing code/test memory discipline | [OK] Enhanced |
 | **WSP 96** | MCP Governance | [OK] Enhanced |
 
 ### Testing & Validation
 
+- **Test Inventory Reuse**: Before authoring tests, retrieve `tests/TestModLog.md`, `tests/README.md`, and nearest existing tests; reuse/extend before creating new test files.
 - **Mantra Compliance**: Execution receipts must index evidence for all 7 mantra stages
 - **Profile Adherence**: Runtime receipts must identify the actual model binding
   and budget used; role labels alone are not evidence

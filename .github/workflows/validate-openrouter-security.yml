@@ -1,0 +1,182 @@
+name: OpenRouter transport boundaries
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, edited, ready_for_review]
+permissions:
+  contents: read
+jobs:
+  credential-boundaries:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install qualified offline test dependencies
+        run: |
+          python -m pip --isolated install pytest==9.0.3 requests==2.33.0 urllib3==2.8.0
+          python -m pip --isolated check
+      - name: Verify shared transports without provider effects
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir "$RUNNER_TEMP/transport-evidence"
+          timeout --signal=TERM --kill-after=5s 180s python -I -B - <<'PY' 2>&1 | tee "$RUNNER_TEMP/transport-evidence/run.log"
+          """Guarded normal-import transport qualification; not an OS sandbox."""
+          import hashlib, importlib.metadata, json, os, platform, socket, subprocess, sys, sysconfig, tempfile
+          import xml.etree.ElementTree as ET
+          from pathlib import Path
+
+          from types import SimpleNamespace
+          R = Path.cwd().resolve()
+          D = Path(os.environ["RUNNER_TEMP"]).resolve() / "transport-evidence" / "results"
+          args = SimpleNamespace(collect_only=False)
+          assert not D.exists(), "fresh owned output required"
+          expected_source = {'modules/ai_intelligence/ai_gateway/src/ai_gateway.py': 'f7bab3c91136fbe4a89aa5dc99ba5c7513341ee8c3118b6249fce1412421b58a', 'modules/communication/moltbot_bridge/src/fusion_alias_live.py': '9caa1d12609d53176712d7c46e6bc7032dd1ecfae6f72742f2edf9c7943c9f75', 'scripts/advisory_model_once.py': '37bc84f004caf2291dd16f77950e89b5fcf8fc65d967bcdae6c484d8a3509788', 'scripts/tests/test_openrouter_credential_boundaries.py': 'c17cb42beaebf505460622858d9daa27728bc64e29439b66b15bbab07e84f338', 'scripts/tests/test_advisory_model_once_hardening.py': '8afbdbb7dcf5cfb42f99b90ab7f33c0606bd89d89890e982f584eda02f76cf46', 'scripts/tests/test_reddog_fusion_progress_bridge.py': 'acef750059e07cc90fa7fed747de1d4eaa5a5801d220bbac30f69a8464abc952', 'modules/communication/moltbot_bridge/tests/test_fusion_alias_live.py': '1cc6dda4c1e9d6c0516198a5cd1bd263ab2d02603badcc318a9ab70de33296a9', 'modules/ai_intelligence/ai_gateway/tests/test_kimi_k3_request_truth.py': '52fd161e45f63ba6df5f5af561709282ab8036fc2c1142a1bb07961d152ea0f0', 'modules/ai_intelligence/ai_gateway/tests/test_model_autoresearch_configured_gateway_runner.py': 'c1b04765fc2e88a009fdb60393738b6a0c9808421ac255f1adcf417b96a22113'}
+          probe_binding = {'version': '2.8.0', 'sha256': '2633bbdb69731e5ccb5cf4e4afd65605d86c7979cc5633126f50c92d5ad74a74'}
+          expected_inventory_digest = '1ae073e17916ff54bb73f138c5dd4b1a52cdddf816ee19b95f71c5debaae8dc2'
+          selected = [p for p in expected_source if '/tests/' in p]
+          assert len(selected) == 6
+          assert all(hashlib.sha256((R / p).read_bytes().replace(b'\r\n', b'\n')).hexdigest() == v for p, v in expected_source.items())
+          checkout = subprocess.check_output(['git', '-C', str(R), 'rev-parse', 'HEAD']).decode().strip()
+          tracked = set(subprocess.check_output(['git', '-C', str(R), 'ls-files', '-z', '--', '*.py']).decode().strip('\0').split('\0'))
+          D.mkdir(); T = D / 'temp'; T.mkdir()
+          config = T / 'pytest.ini'; config.write_text('[pytest]\n', encoding='utf-8')
+          before = {p: hashlib.sha256((R / p).read_bytes()).hexdigest() for p in expected_source}
+          libroots = {Path(v).resolve() for k, v in sysconfig.get_paths().items() if k in ('stdlib', 'platstdlib', 'purelib', 'platlib')}
+          # Pin the optional denied probe to the installed dependency bytes, never an arbitrary caller name.
+          urllib_dist = importlib.metadata.distribution('urllib3')
+          probe_path = Path(urllib_dist.locate_file('urllib3/util/connection.py')).resolve()
+          probe_hash = hashlib.sha256(probe_path.read_bytes()).hexdigest()
+          assert probe_hash == probe_binding['sha256'] and urllib_dist.version == probe_binding['version'], 'unreviewed urllib3 probe bytes'
+          packages = {n: importlib.metadata.version(n) for n in ('pytest', 'requests', 'urllib3')}
+          os.environ.clear()
+          os.environ.update(HOME=str(T), TMPDIR=str(T), TMP=str(T), TEMP=str(T),
+              PYTHONDONTWRITEBYTECODE='1', PYTHON_DOTENV_DISABLED='1', PYTEST_DISABLE_PLUGIN_AUTOLOAD='1')
+          sys.dont_write_bytecode = True; sys.pycache_prefix = str(T / 'pycache'); tempfile.tempdir = str(T); sys.path.insert(0, str(R)); os.chdir(R)
+          platform.node = lambda: 'synthetic-transport-qualification'
+          platform.processor = lambda: 'not-probed'
+          denied, optional_probes = [], []
+          hashing = False
+
+          def resolved(value, fd=None):
+              if isinstance(value, int):
+                  return Path('/proc/self/fd/' + str(value)).resolve()
+              p = Path(os.fsdecode(value))
+              if not p.is_absolute() and fd not in (None, -1):
+                  p = Path('/proc/self/fd/' + str(fd)).resolve() / p
+              return p.resolve()
+
+          def owned(value, fd=None):
+              try:
+                  return resolved(value, fd).is_relative_to(D)
+              except (TypeError, ValueError, OSError):
+                  return False
+
+          def reject(event):
+              denied.append(event)
+              (D / 'denied.json').write_text(json.dumps(denied), encoding='utf-8')
+              raise PermissionError('transport_guard_denied:' + event)
+
+          def audit(event, values):
+              global hashing
+              if event.startswith('socket.'):
+                  frame = sys._getframe(1)
+                  while frame and frame.f_code.co_name != '_has_ipv6':
+                      frame = frame.f_back
+                  known = frame and Path(frame.f_code.co_filename).resolve() == probe_path
+                  if event == 'socket.__new__' and known and values[1] == socket.AF_INET6 and not optional_probes:
+                      optional_probes.append({'event': event, 'module': 'urllib3.util.connection', 'function': '_has_ipv6', 'source_sha256': probe_hash, 'effect': 'denied_before_socket_creation'})
+                      raise PermissionError('blocked_optional_ipv6_probe')
+                  reject(event)
+              if event in ('subprocess.Popen', 'os.system', 'os.fork', 'os.forkpty', 'os.posix_spawn', 'os.exec', 'os.spawn', 'os.kill', 'os.killpg', 'sqlite3.connect'):
+                  reject(event)
+              if event == 'import' and str(values[0]).split('.')[0] in ('dotenv', 'openai', 'anthropic', 'google', 'boto3', 'llama_cpp', 'torch', 'transformers', 'psycopg', 'psycopg2'):
+                  reject('provider_account_import')
+              if event == 'open':
+                  mode, flags = values[1] or '', values[2] or 0
+                  writing = any(c in mode for c in 'wax+') or flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)
+                  p = resolved(values[0])
+                  if writing and not owned(values[0]):
+                      reject('write_outside_temp')
+                  if not writing:
+                      if p.name.startswith('.env') or p.name in ('.netrc', '_netrc') or p.suffix in ('.pem', '.key', '.gguf', '.safetensors') or any(x in ('.ssh', '.aws', '.azure') for x in p.parts):
+                          reject('sensitive_read')
+                      if owned(values[0]) or p == Path(os.devnull).resolve():
+                          return
+                      if p.is_relative_to(R) and p.suffix == '.py':
+                          relative = p.relative_to(R).as_posix()
+                          if relative not in tracked and relative not in expected_source:
+                              reject('untracked_source_read')
+                          if not hashing:
+                              hashing = True
+                              try:
+                                  before.setdefault(relative, hashlib.sha256(p.read_bytes()).hexdigest())
+                              finally:
+                                  hashing = False
+                      elif not any(p.is_relative_to(root) for root in libroots):
+                          reject('read_outside_source_runtime_temp:' + (p.relative_to(R).as_posix() if p.is_relative_to(R) else 'external-' + p.suffix))
+              mutations = {'os.remove': 1, 'os.rmdir': 1, 'os.mkdir': 2, 'os.chmod': 2, 'os.chown': 3, 'os.utime': 3, 'os.truncate': None}
+              if event in mutations:
+                  i = mutations[event]
+                  if not owned(values[0], values[i] if i is not None and len(values) > i else None):
+                      reject(event)
+              if event in ('os.rename', 'os.link') and not all(owned(values[i], values[i+2] if len(values) > i+2 else None) for i in (0, 1)):
+                  reject(event)
+              if event == 'os.symlink' or event == 'os.chdir' and resolved(values[0]) != R and not owned(values[0]):
+                  reject(event)
+
+          sys.addaudithook(audit)
+          class Inventory:
+              collected = []
+              def pytest_collection_finish(self, session):
+                  self.collected = sorted(item.nodeid for item in session.items)
+          inventory = Inventory(); code = 1
+          try:
+              import pytest
+              command = ['-q', '--tb=short', '--capture=sys', '-c', str(config), '--rootdir=.', '--confcutdir=.', '--noconftest', '--import-mode=importlib', '-p', 'no:cacheprovider', '-o', 'log_file=' + str(T / 'pytest.log'), '--basetemp=' + str(T / 'pytest'), '--junitxml=' + str(D / 'results.xml')]
+              code = int(pytest.main(command + (['--collect-only'] if args.collect_only else []) + selected, plugins=[inventory]))
+          finally:
+              after = {p: hashlib.sha256((R / p).read_bytes()).hexdigest() for p in before}
+              modules = {}
+              for name, module in list(sys.modules.items()):
+                  value = getattr(module, '__file__', None)
+                  if value and Path(value).is_file() and Path(value).resolve().is_relative_to(R):
+                      p = Path(value).resolve(); modules[name] = {'path': p.relative_to(R).as_posix(), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()}
+              result = {'checkout_commit': checkout, 'pytest_exit': code, 'denied': denied, 'optional_denied_probes': optional_probes, 'collected': inventory.collected, 'source_unchanged': before == after, 'repository_modules': modules, 'python': sys.version, 'packages': packages, 'collect_only': args.collect_only, 'scope': 'Python audit guard; no OS sandbox, provider or native qualification'}
+              for name, value in [('source-before', before), ('source-after', after), ('result', result)]:
+                  (D / (name + '.json')).write_text(json.dumps(value, indent=2), encoding='utf-8')
+          assert code == 0 and not denied and before == after
+          assert inventory.collected and len(inventory.collected) == len(set(inventory.collected))
+          if args.collect_only:
+              raise SystemExit(2)  # Discovery receipt is never acceptance; review and freeze inventory first.
+          assert len(inventory.collected) == 130
+          assert hashlib.sha256("\n".join(inventory.collected).encode()).hexdigest() == expected_inventory_digest
+          expected_inventory = inventory.collected
+          cases = list(ET.parse(D / 'results.xml').getroot().iter('testcase'))
+          assert len(cases) == len(expected_inventory)
+          expected_pairs = []
+          for nodeid in expected_inventory:
+              parts = nodeid.split('::')
+              expected_pairs.append(('.'.join([parts[0][:-3].replace('/', '.')] + parts[1:-1]), parts[-1]))
+          actual_pairs = [(case.get('classname'), case.get('name')) for case in cases]
+          assert sorted(actual_pairs) == sorted(expected_pairs) and len(actual_pairs) == len(set(actual_pairs))
+          assert len({case.get('name') for case in cases}) == len(cases)  # Current frozen 130 names are unique.
+          assert not any(case.find(tag) is not None for case in cases for tag in ('failure', 'error', 'skipped'))
+          PY
+      - name: Preserve source, guard and exact test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: openrouter-transport-${{ github.sha }}
+          path: ${{ runner.temp }}/transport-evidence/
+          if-no-files-found: error

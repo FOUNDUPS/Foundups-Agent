@@ -1,0 +1,48 @@
+name: Kids Episodes
+on:
+  pull_request:
+    paths:
+      - 'modules/communication/youtube_shorts/**'
+      - 'modules/foundups/kids_episodes/**'
+      - 'modules/foundups/foundup_registry*'
+      - 'modules/communication/moltbot_bridge/src/openclaw_execution_routes.py'
+      - 'modules/communication/moltbot_bridge/tests/test_openclaw_kids_story_route.py'
+      - '.github/workflows/kids-episodes.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'modules/communication/youtube_shorts/**'
+      - 'modules/foundups/kids_episodes/**'
+      - 'modules/foundups/foundup_registry*'
+      - 'modules/communication/moltbot_bridge/src/openclaw_execution_routes.py'
+      - 'modules/communication/moltbot_bridge/tests/test_openclaw_kids_story_route.py'
+      - '.github/workflows/kids-episodes.yml'
+permissions:
+  contents: read
+jobs:
+  local-episode-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install test and rendering dependencies
+        run: |
+          python -m pip install pytest==9.0.3 jsonschema==4.26.0 PyYAML==6.0.3
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Verify renderer, local editor, research contracts and registry
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          modules/communication/youtube_shorts/tests/test_kids_episode.py
+          modules/communication/youtube_shorts/tests/test_kids_editor_server.py
+          modules/communication/youtube_shorts/tests/test_kids_research.py
+          modules/communication/youtube_shorts/tests/test_openrouter_storyboard.py
+          modules/foundups/kids_episodes/tests
+          modules/communication/moltbot_bridge/tests/test_openclaw_kids_story_route.py
+          modules/foundups/tests/test_foundup_registry_schema.py
+          modules/foundups/tests/test_foundup_registry_loader.py

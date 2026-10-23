@@ -8,9 +8,11 @@ from pathlib import Path
 
 from modules.ai_intelligence.ai_gateway.src.model_intelligence_catalog import (
     Availability,
+    ModelCapabilityCard,
     PromotionState,
     build_canonical_model_catalog,
     build_model_catalog_snapshot,
+    merge_model_capability_cards,
     normalize_local_role_cards,
     normalize_openrouter_catalog,
     normalize_static_registry_cards,
@@ -162,6 +164,132 @@ def test_build_canonical_catalog_combines_sources_and_keeps_rejections():
     assert [card.canonical_model_id for card in snapshot.cards] == ["local/triage", "openai/example"]
     assert snapshot.rejected_records[0].reason == "missing_model_id"
     assert snapshot.cards[0].promotion_state == PromotionState.CHALLENGER
+
+
+def test_catalog_merges_static_task_policy_with_live_openrouter_capabilities():
+    snapshot = build_canonical_model_catalog(
+        static_registry=True,
+        openrouter_payload={
+            "data": [
+                {
+                    "id": "qwen/qwen3.8-max",
+                    "context_length": 1_000_000,
+                    "pricing": {"prompt": "0.000002", "completion": "0.000006"},
+                    "architecture": {"input_modalities": ["text"], "output_modalities": ["text"]},
+                    "supported_parameters": [
+                        "reasoning",
+                        "response_format",
+                        "structured_outputs",
+                        "tool_choice",
+                        "tools",
+                    ],
+                }
+            ]
+        },
+        generated_at="2026-08-21T00:00:00+00:00",
+    )
+
+    cards = [card for card in snapshot.cards if card.canonical_model_id == "qwen/qwen3.8-max"]
+    assert len(cards) == 1
+    card = cards[0]
+    assert "architecture" in card.task_families
+    assert card.context_window == 1_000_000
+    assert card.supports_tools is True
+    assert card.supports_structured_output is True
+    assert card.supports_reasoning is True
+    assert card.input_cost_per_million == 2.0
+    assert card.output_cost_per_million == 6.0
+    assert card.promotion_state == PromotionState.CANDIDATE
+
+
+def test_conflicting_card_lifecycle_never_synthesizes_champion():
+    candidate = normalize_static_registry_cards(
+        {
+            "provider/model": ModelInfo(
+                model_id="provider/model",
+                provider="provider",
+                status=ModelStatus.CURRENT,
+            )
+        },
+        {"architecture": ["provider/model"]},
+    )[0]
+    cards = merge_model_capability_cards(
+        (
+            candidate,
+            ModelCapabilityCard(
+                model_id="provider/model",
+                canonical_model_id="provider/model",
+                provider="provider",
+                promotion_state=PromotionState.CHAMPION,
+                source="conflicting_test",
+            ),
+        )
+    )
+
+    assert len(cards) == 1
+    assert cards[0].promotion_state == PromotionState.CANDIDATE
+
+
+def test_conflicting_provider_capability_records_fail_closed_per_field():
+    cards = merge_model_capability_cards(
+        (
+            ModelCapabilityCard(
+                provider="openrouter",
+                model_id="provider/model",
+                canonical_model_id="provider/model",
+                source="openrouter_catalog",
+                availability=Availability.AVAILABLE,
+                supports_tools=True,
+                supported_parameters=("tools", "response_format"),
+            ),
+            ModelCapabilityCard(
+                provider="openrouter",
+                model_id="provider/model",
+                canonical_model_id="provider/model",
+                source="openrouter_catalog",
+                availability=Availability.UNKNOWN,
+                supports_tools=False,
+                supported_parameters=("response_format",),
+            ),
+        )
+    )
+
+    assert len(cards) == 1
+    assert cards[0].availability == Availability.UNKNOWN
+    assert cards[0].supports_tools is False
+    assert cards[0].supported_parameters == ("response_format",)
+
+
+def test_conflicting_provider_modalities_do_not_synthesize_text_support():
+    cards = merge_model_capability_cards(
+        (
+            ModelCapabilityCard(
+                provider="openrouter",
+                model_id="provider/model",
+                canonical_model_id="provider/model",
+                source="openrouter_catalog",
+                modalities=("image",),
+            ),
+            ModelCapabilityCard(
+                provider="openrouter",
+                model_id="provider/model",
+                canonical_model_id="provider/model",
+                source="openrouter_catalog",
+                modalities=("audio",),
+            ),
+        )
+    )
+
+    assert cards[0].modalities == ()
+
+
+def test_missing_provider_modalities_remain_unknown():
+    cards, rejected = normalize_openrouter_catalog(
+        {"data": [{"id": "provider/model", "architecture": {}}]}
+    )
+
+    assert rejected == ()
+    assert cards[0].modalities == ()
 
 
 def test_catalog_runtime_has_no_network_or_command_execution_imports():

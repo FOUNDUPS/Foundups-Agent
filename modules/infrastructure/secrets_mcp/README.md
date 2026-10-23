@@ -81,6 +81,29 @@ re-index HoloIndex.
 
 ## Integration Points
 
+### Explicit systemd credential custody
+
+`src/systemd_credential_secret_resolver.py` implements
+`SystemdCredentialSecretResolver` for a separately authenticated
+`SystemdCredentialBinding`. It reads only allowlisted
+`systemd-creds://<credential-id>` references inside the explicitly selected
+`/run/credentials/<unit>.service` directory. It does not discover paths from
+environment variables, provision credentials, decrypt files, or mint permission.
+
+The caller must establish current owner/generation, secrets permission and process
+isolation before resolving. The provider checks nonroot UID/GID, root-owned
+descriptor-relative paths, the selected systemd ACL custody shape, read-only
+credential storage, bounded UTF-8 content and both wall/monotonic lifetime bounds.
+It reads afresh and checks again after reading and after the audit callback.
+Less than one second remaining fails conservatively. No secret is cached by the
+resolver; Python buffer erasure and physical credential revocation are not claimed.
+
+`credential_pre_delivery_validation` audit events describe validation before the
+callback. Only the final `ResolveResult.success` reports delivery. A slow/failing
+callback can cause delivery to fail even after a positive validation event.
+The existing bridge factory can explicitly select this provider; authenticated
+public startup supply and native worker admission remain separate unfinished gates.
+
 ### MCP Manager
 - **Menu Integration**: Available through MCP Services Gateway
 - **Health Monitoring**: Server status and performance tracking

@@ -1,5 +1,56 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-09-23: Atomic persistent verification and exact replay
+
+- WSP 00/6/11/15/22/49/50/62/84/97; C3/I4/D3/Impact4 = 14/P1.
+- Existing `PersistentTaskPipeline.verify_proof` delegates to internal `persistence/verification.py`. One SQLite write transaction records decision, original compute cost, linked debit/event and approved task state. Exact approval/rejection retries have no new effects; a business rejection is raised after its first commit.
+- New decision times normalize to UTC (naive inputs defined as UTC), preserving microseconds and caller objects. Existing proof timestamps remain in their stored representation. Replay preserves a pending payout or a later distinct approval. Complete relevant history rejects missing/altered/duplicate lineage and ambiguous legacy verification debits across actors without guessing, refunding or backfilling.
+- Baseline 141 passed / 23 expected failures. Candidate and independent replay each pass the same 164 cases, no errors/skips: five evolved desired controls, 36 added semantic controls and 123 preserved cases. All 42 inventoried Python files stable per run; 148 disposable SQLite opens, 40 caught pytest convenience symlink denials, no unexpected denials or allowed test subprocess/provider/network calls. Two inherited configuration warnings remain.
+- Internal operation 192 lines, all functions at most 30 lines; pipeline shrinks to 362. SQLiteAdapter stays 1,125 lines with its inherited 816-line class and 1,330 ceiling unchanged. Other pipeline definitions and the 31 prior test/helper definitions outside the replaced observation are AST-identical. The new cohesive test file is 251 lines; existing compute test remains 680. Registry 1,659 current / 269 quarantined.
+- Local SQLite acceptance only. No verifier entitlement, PostgreSQL qualification, legacy repair, settlement, WRE/native worker activation or retained-learning claim. History validation currently scans complete tables; high-concurrency/large-history capacity still requires separate measurement.
+
+Evidence: `O:/Foundups-Agent-audits/20260923-rsi-verification-atomic/{baseline,candidate,independent}/receipt.json`; fixed case IDs and test hashes precede product edits. Python audit hooks constrain these known fixtures, not arbitrary hostile native code or an OS sandbox.
+
+## 2026-09-23: Shared persistence ORM cohesion prerequisite
+
+- WSP00/6/11/15/22/49/50/62/84/97; C2/I3/D4/Impact3=12/P2. Moved Base and13 existing ORM declarations once into internal `persistence/orm_models.py`; old sqlite_adapter names are identity-preserving re-exports. No duplicate registry, schema, migration, ledger or WSP module.
+- Adapter1330→1125 lines; cohesive ORM owner238; combined production source grows33 lines for imports/documentation. All29 original top-level class/function ASTs match, including unchanged816-line adapter class, transaction helpers and Engine listener. Existing critical-window/class debt remains;1330 ceiling is not expanded.
+- Three fixed compatibility controls plus125 existing cases: baseline127pass/one expected absent-owner import failure; candidate and independent replay each128pass, zero errors/skips, same IDs/oracles. Existing five verification failure observations remain unchanged.40 inventoried Python files stable,108 disposable SQLite opens/run, no allowed test subprocesses; five denied pytest convenience symlinks/run, no unexpected denials, two config warnings. Registry current1658/quarantined269.
+- Old pickle globals resolve through aliases; new row pickles name orm_models and require that file when loading/rolling back. No discovered FAM pickle consumer; no speculative module-name rewriting. Verification atomic/replay repair14/P1 remains next; this extraction does not fix its defects or confer PostgreSQL/runtime/domain/reward authority.
+
+
+## 2026-09-23: Persistent verification interruption and retry qualification
+
+- WSP00/6/15/22/49/50/62/97; C2/I4/D3/Impact3=12/P2. Five fixed observations in the existing persistent compute test owner pass locally and independently (same five cases), reproducing double debit on rejected retry, charge-only/partial-decision/missing-event residues, and state rejection on accepted retry.
+- Production code unchanged; all29 prior top-level test/helper definitions remain AST-identical. Test owner581→680 lines, new functions22/20/36; no new module/skill. Exact interpreter -I/-B, disposable SQLite,39 unchanged package/test bindings; ten SQLite opens/run, no allowed test subprocesses, five denied convenience symlinks/run and no unexpected guard denials. Two config warnings retained; registry current1658/quarantined269.
+- Characterization success is not correctness. R24 records witnesses and next14/P1 atomic/replay repair candidate, requiring fixed desired acceptance and existing adapter no-growth/cohesion reconciliation before implementation. Signed issuer/integration, PostgreSQL, payout and native AmIBot/retained RSI remain separate.
+
+
+## 2026-09-23: Persistent proof-verification handoff contract
+
+- WSP00/15/22/50/77/97; C3/I4/D3/Impact4=14/P1. R24 now specifies a prospective existing-owner handoff after durable independent terminal WRE ACCEPT, exact FAM proof/subject binding, atomic application and cross-store replay/recovery. Staged assurance and repository-write grants confer no domain authority.
+- Independent source review found no proof.verify entitlement issuer; 012 or an authorized policy delegate must supply that decision before integration. A separate12/P2 five-control disposable SQLite qualification is the next executable candidate; no new product tests ran in this documentation slice.
+- PR1889 is verified merged at eb3b66820d1ec50864a3c4470790ddc9b761b95c, exact PR/main checks passed and owned lane retired. Existing runtime, schema, rewards, providers and public FoundUps are unchanged.
+
+
+## 2026-09-22 - Atomic SQLite payout initiation and exact retry
+
+- WSP00/10/11/15/22/50/62/97; existing-owner repair C4/I4/D3/Impact3=14/P1. One BEGIN IMMEDIATE transaction covers task/proof/verification validation, payout, configured compute debit, task linkage and correlated event; pending stays VERIFIED+INITIATED.
+- Exact retry uses persisted identity and original cost, including zero cost and changed current compute policy. Ambiguous legacy records across actors and complete history fail closed; no refund/relabel/delete. Non-SQLite rejects before compute/session effects. No schema/model/migration change or live finance.
+- Corrected fixed selection: baseline 79 passed/41 failed; candidate and independent replay each 120 passed, zero errors/skips/guard denials or source drift. Independent replay covers the same case IDs, not another 120 unique cases.
+- Initial116-case baseline79pass/37fail and candidate114pass/2fail are retained. Two failures were duplicate synthetic token-symbol setup, before target execution. Corrected only the fixture; added independent lost-response, cross-scope/wrong-reason, substituted-pointer and bounded lock-timeout controls. Original test oracles remain unchanged.
+- Proposed adapter no-growth budget explicitly revised1154→1330; class875→816, pipeline446→400/class405→359, newfunctions≤40. Retained debt/remediation in ROADMAP; no exemption. Actual process/power-loss durability, unrelated wallet writers, PostgreSQL, persistent authorization and settlement remain unproved.
+
+
+## 2026-09-22 - Persistent payout transaction qualification (planned repair)
+
+- WSP00/10/11/15/22/50/62/97; qualification13/P1, separately scored source repair14/P1.
+- Current `trigger_payout` sets PAID for INITIATED and commits compute debit/payout/task/event separately. Prior exact-source SQLite interruption/reopen witnesses remain accepted; their two duplicate payouts/debits are failures, not delivered rewards.
+- Existing-owner repair contract is in [R24](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22): one SQLite write transaction, exact same-actor retry with persisted lineage, pending VERIFIED+INITIATED, no duplicate debit/event, rollback before commit, rejection of ambiguous legacy rows.
+- Reuse existing session/wallet/policy/ORM/event owners and v2 schema. Preserve configured charges even with enforcement disabled. PostgreSQL initialization lacks compute-policy fields; first repair must reject non-SQLite before effects, with backend parity/proof tracked separately.
+- No code, migration, test oracle, payment or runtime change. Existing test owners define the next repair's failure/concurrency/consumer acceptance; inherited adapter size needs bounded consolidation and WSP62 delta review. Persistent role authentication and settlement remain unproven.
+
+
 ## 2026-03-15 - Access/Subscription FAMEventTypes (WSP 103)
 
 ### WSP References

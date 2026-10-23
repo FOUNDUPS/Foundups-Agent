@@ -4,6 +4,28 @@
 **Domain**: `communication/`
 **WSP Compliance**: WSP 3, 22, 49, 80, 54
 
+## 2026-10-23 — Kids Episodes local production foundation
+
+WSP 97/109/95: registered hidden FoundUp intake; added local browser editor, exact 15-second renderer, draft/final formats, caption burn-in/SRT, local music/voice mix, bounded injected research/music adapters and prototype production/research instructions. Reuses YouTube ownership and preserves legacy publishing/auth behavior. Original/reference asset and rights review remain distinct.
+
+Evidence: new renderer, HTTP boundary and provider-fake tests plus actual FFmpeg/HTTP smoke. Live paid APIs, automatic transcription/alignment, hosted deployment, publishing and WRE admission are not validated. See docs/KIDS_EPISODES_RESEARCH.md for source retrieval, official provider research and limits.
+
+## 2026-08-25 - AutoPost/Foundups Mall publisher boundary hardening
+
+**Author**: 0102
+**WSP**: WSP_00, WSP_97, WSP_62
+
+- Removed direct OAuth token/client-secret file loading from `youtube_uploader.py`; all authentication now enters through pinned `youtube_auth.get_authenticated_service(token_index=...)`.
+- Added explicit channel policy, authorized-channel observation and optional channel-ID pinning. `foundups-mall` requires `YT_UPLOAD_CHANNEL_ID_FOUNDUPS_MALL` and fails closed without it.
+- Added `YouTubePublishResult`, video MIME/title/privacy validation, 8 MB resumable upload, optional playlist insertion, subscriber-notification suppression and authoritative result IDs.
+- Added a governed `publish_foundups_media` path that forces unlisted visibility and carries author/manifest references. The authenticated gateway and signature verifier remain separate required modules.
+- Kept `upload_short` return type and public default for existing callers to avoid a hidden behavioral break.
+- Added no-network boundary tests; live credentials were not read and no upload was attempted.
+
+**Verification**: `test_youtube_publisher_boundary.py` plus `youtube_auth/tests/test_oauth_no_silent_fallback.py` passed (9 tests).
+
+---
+
 ## 2026-04-19 - VEO1: Migrate from deprecated google.generativeai to google.genai
 
 **Author**: 0102  
@@ -776,3 +798,7 @@ Components tested and working:
 3. ⏸️ Generate 15 test videos to verify cap works
 4. ⏸️ Set up automated posting schedule
 5. ⏸️ Create promotional video about the feature
+
+## 2026-10-23 — OpenRouter reference-conditioned storyboards
+
+Added an image adapter using the AI Gateway's existing provider configuration, explicit host admission, pinned FLUX.2 Klein 4B candidate, verified raster references, bounded image responses, exclusive attempt records and no retry/fallback. Added review-before-video callback composition for Kids Episodes. Kept dormant OpenRouter client, WRE and publishing unchanged. Official current API/model sources and repository-first retrieval evidence are in docs/OPENROUTER_STORYBOARDS.md. No paid generation or runtime activation is claimed.

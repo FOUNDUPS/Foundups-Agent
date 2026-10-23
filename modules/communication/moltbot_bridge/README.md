@@ -1,4 +1,852 @@
-# OpenClaw Bridge = 012's Digital Twin
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+The preserved implementation composes the existing installed HIGH service and
+live authenticated lease; newer main's current-time startup and nonce protections
+must survive reconciliation. Interface descriptions below are source contracts,
+not evidence that this merged candidate has been installed or admitted.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## Installed HIGH connection in progress — 2026-10-20
+
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+The live-lease core passes connected 390/9 platform skips, separate Linux 2/0
+and independent 16 controls. Installed HIGH source/policy selection and model
+artifact ingestion remain separate gates; no native author is admitted.
+[API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+
+### Historical protected-nonce checkpoint — 2026-10-20
+
+The v13 candidate supplies protected, current-owner consensus nonces using the
+existing atomic MAC state and SQLite high-water store. It preserves legacy owner
+versions and the LOW service. See the [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+Connected 437/3 platform skips and independent 21 controls pass. The installed HIGH
+issuer join remains pending; a
+callable adapter is not native author admission or retained RSI benefit.
+
+## Parent-consent prerequisite — 2026-10-19
+
+PR2163 closed policy-bound parent consent on main824d0f71. The current v12/v3
+candidate composes parent/reviewer/model evidence through effect, signer and
+current-use owners. [Contract and limits](INTERFACE.md#exact-parent-consent-connection--2026-10-19),
+[test evidence](tests/TestModLog.md#parent-consensus-connection--2026-10-20) and
+[RSI sequencing](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+The candidate is not installed HIGH admission; protected nonce/custody and genuine
+work/model/reviewer/budget inputs remain separate gates. LOW stays LOW.
+
+## Issuer-only root LOAD — 2026-10-15
+
+[LOAD-only identity, permission fencing and custody requirements](INTERFACE.md#issuer-only-root-load--2026-10-15).
+
+## Callable LOW grant service — 2026-10-15
+
+[One-request LOW API, protected loader, installed startup and runtime checks](../../../docs/contracts/REDDOG_SIGNER_KEY_PROVIDER_CONTRACT_PHASE1.md#installed-issuer-startup--2026-10-16). Native admission remains unproved.
+
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+E0 v9 removes the future grant-permission receipt from the pre-configuration
+binding while retaining it in the full signed policy and current admission checks.
+LOW grant requests release the generation lock during signer RPC and revalidate
+under a fresh lease before returning. These repairs have component and Linux
+transport/locking tests; native issuer enrollment and admission remain open.
+See [the contract](INTERFACE.md#grant-bootstrap-binding-and-low-rpc--2026-10-15)
+and [test evidence](tests/TestModLog.md#grant-bootstrap-and-low-rpc--2026-10-15).
+
+## Initial handshake configuration — 2026-10-15
+
+The existing signer composer now supports one explicitly scoped initial LOW
+handshake under E0 and per-request grants. It creates public configuration only;
+native startup still needs the independent grant issuer and authentic custody.
+See [the interface](INTERFACE.md#initial-handshake-configuration--2026-10-15)
+and the current RSI dispatch evidence before attempting runtime activation.
+
+## Initial manifest activation — 2026-10-15
+
+Protected administrative enrollment signs one exact source/artifact inventory in
+an explicit initial-only domain. Existing generation recovery activates it;
+Linux consumes root-installed immutable files and a separate writable anchor.
+Actual isolated publication, activation and credential-free selection passed.
+Disabled component inputs do not qualify worker startup or RSI. See
+[the contract](INTERFACE.md#initial-runtime-manifest-enrollment--2026-10-15).
+
+## Protected generation writer — 2026-10-14
+
+The missing initial-writer adapter now composes existing stores with protected
+owner/receipt bindings and per-mutation guards. Real isolated component execution
+and independent validation passed; manifest admission and native workers remain
+open. See [the API and trust limits](INTERFACE.md#protected-initial-writer-authority--2026-10-14).
+
+## Bounded high-water signing — 2026-10-14
+
+The existing generation bootstrap signer now has a separate explicit v2 interface
+for initial high-water contents. V1 stays anchor-only. Actual isolated signing,
+store transitions and a later public-only read passed as component probes;
+protected writer admission and native workers remain pending. See
+[the v2 contract](INTERFACE.md#initial-high-water-bootstrap-v2--2026-10-14).
+
+## Initial generation bootstrap — 2026-10-14
+
+The generation subsystem now has a root-policy-bound initial-anchor signer.
+Its real systemd component probe passed; complete enrollment and native worker
+admission remain pending. See [the API and scope](INTERFACE.md#initial-generation-anchor-bootstrap--2026-10-14)
+and the existing RSI dispatch runbook. No production service is enabled by this adapter.
+
+## Current-generation model consumer checkpoint — 2026-10-07
+
+Existing producer/collector/valve wiring is locally qualified with disposable
+model signatures and explicit principal/peer seams. Connected89pass including the real
+collector; source review cleared the reproduced clock rollback. See
+INTERFACE/ModLog and existing current-generation runtime/use-time test files.
+Native admission and retained RSI remain unproven; publication pending.
+
+## Model input authority checkpoint — 2026-10-07
+
+Protected owner v8 supply is locally qualified; current-generation resident
+consumption and native admission remain pending. See INTERFACE/ModLog and
+`tests/test_reddog_signer_system_service_startup_authority.py` for the existing
+API,22 input/lifetime controls,3 real-signature controls and v7/v8 startup compatibility. No model or
+provider calls are needed for these tests.
+
+## Resident effect admission — 2026-10-07
+
+Existing resident bootstrap accepts an explicitly provisioned worktree lease
+issuer; see [INTERFACE](INTERFACE.md#resident-final-decision-effect-join--2026-10-07).
+Local connected fixtures are tested. Native admission still requires authentic
+runtime supply and all independent trust gates.
+
+## Reviewer artifact verification — 2026-10-07
+
+Reuse `ReviewerRuntimeArtifacts` and `ModelRuntimeReviewerEvidenceResolver` from
+the existing runtime verifier bootstrap with current-effect review verification.
+See [INTERFACE](INTERFACE.md#reviewer-runtime-artifact-adapter--2026-10-07) for
+trusted-input requirements. Local composition is validated with test authority;
+production reviewer execution and native RSI are not established.
+
+## Separate protected-use control proof — 2026-10-05
+
+V2 separates ACQUIRE/FINISH control authentication from work signing; v1 is unchanged.
+[PR2068 source/retrieval closure](ModLog.md#separate-protected-use-control-proof--2026-10-05)
+does not establish native admission or key custody.
+
+## Recover an admitted HoloIndex refresh — 2026-10-05
+
+Use the existing post-merge controller with the original `incident_id` as
+`resume_incident_id`. It validates persisted admission and current source before
+reusing the bounded retry path. See the [runtime contract](docs/HOLOINDEX_RUNTIME.md#post-merge-controller).
+Source tests pass locally; merged-source runtime recovery remains a separate gate.
+
+## Detached effect consent — 2026-10-04
+
+Use `resolve_current_effect_sovereign_authorization` from the existing principal
+resolver to authenticate a detached exact-effect assertion through current owner
+v6. See [the interface](INTERFACE.md#authenticated-effect-consent--2026-10-04).
+The returned evidence is data; it cannot authorize a signer, create a worktree,
+or replace a later effect permit. Linux owner checks remain required.
+
+## Supplied effect approval matching — 2026-10-04
+
+Use the existing evidence owner's `effect_sovereign_authorization_matches` to
+compare a supplied record against the actual parent, full target, context and
+policy. See [the API](INTERFACE.md#supplied-effect-sovereign-evidence-api--2026-10-04).
+This pure data check does not authenticate the record or authorize execution.
+
+## Current-generation review sets — 2026-10-04
+
+`verify_current_effect_reviewer_decisions` now composes the bounded quorum under
+one current-generation lease. It retains and rechecks every supplied evidence
+record; the existing single-review API remains available. See the
+[API contract](INTERFACE.md#current-generation-review-set-api--2026-10-04).
+Caller-supplied runtime evidence still requires independent provenance; this
+verification does not issue an execution permit or activate native workers.
+
+## Effect-review quorum — 2026-10-04
+
+The existing consensus verifier now exposes `verify_effect_reviewer_decisions`
+for a complete bounded set. See [the contract](INTERFACE.md#bounded-effect-review-quorum-api--2026-10-04).
+It checks all reviews, quorum, roles and independence relative to supplied trusted
+resolvers; it does not issue authority or authenticate those resolvers. The
+single-review API and delegated two-request domain remain unchanged. Earlier
+one-review checkpoints below retain their historical scope.
+
+## Connected current reviewer verification — 2026-10-01
+
+The [current reviewer API](INTERFACE.md#connected-current-reviewer-verification-api--2026-10-01)
+connects opt-in owner v5, a separately signed designation in principal-artifact v2,
+current-generation identity and two real signature checks. The existing supplier
+can carry distinct producer/reviewer identities; legacy defaults remain v1.
+Local candidate-4 passed 198/198; hosted 331 portable and 8 Linux cases and publication
+are pending. PR #2013 closed at `c9d1273`; older pending notes below are historical.
+The lease and owner/time rechecks do not establish atomic revocation, independent
+runtime provenance, quorum, effect permission, native admission or retained gain.
+
+## Conditional effect-review verification — 2026-10-01
+
+The [consensus interface](INTERFACE.md#conditional-effect-review-verification-api--2026-10-01)
+now checks one effect-specific review against the actual request and supplied
+policy/key/runtime evidence. PR #2010 is merged/main-verified: 82 frozen local
+cases and 222 selected consensus cases on both PR/main CI pass. A conditional
+valid review is not quorum or runtime approval. The [source-qualified owner map](INTERFACE.md#authenticated-effect-authority-qualification--2026-10-01)
+identifies the existing identity/runtime machinery and missing authenticated
+effect-authority contract. Production provenance and worker admission remain open.
+
+## Cross-process observer qualification — 2026-09-27
+
+PR1923 is merged/main-verified at `5578f7bd` with254 candidate cases passing.
+Readable and nondumpable same-UID children qualify the permission boundary;
+authenticated cross-UID supervision is still open. The corrected
+[existing-owner contract](INTERFACE.md#external-supervision-source-contract--2026-09-27)
+separates observer, signer and actual handshake requester, and requires verified
+observation handoff before requester-local lifecycle issuance. No runtime API or
+authority changes in this documentation slice; see canonical backlog for closure.
+
+## Existing observer socket repair — 2026-09-27
+
+The existing external signer OS observer now maps socket FD identities to VFS
+metadata through bounded exact kernel diagnostics and concrete-cookie rechecks.
+See the [contract and limits](INTERFACE.md#connected-socket-ownership-observation--2026-09-27)
+and [hosted qualification](tests/README.md#connected-socket-mapping-qualification--2026-09-27).
+Source is prepared; actual validation/closure belongs to the canonical backlog.
+PR1921 characterization is merged/main-verified. Native RSI remains incomplete.
+
+## Socket identity experiment — 2026-09-27
+
+PR1920 supervision design is merged/main-verified at `f9988486`. Its concrete
+socket prerequisite now has two bounded hosted characterization cases in the
+[existing observer test owner](tests/README.md#hosted-socket-identity-characterization--2026-09-27).
+The source is prepared; actual execution and closure are receipt-bound in the
+canonical RSI backlog. Production observer and native authority remain unchanged.
+
+## Supervision implementation boundary — 2026-09-27
+
+The [existing-owner supervision contract](INTERFACE.md#external-supervision-source-contract--2026-09-27)
+now specifies process selection, field provenance, lifetime and consumer ownership.
+The inode-domain repair and same-UID visibility qualification are closed in
+PR1922/1923. Its remaining prerequisite is the authenticated observation transport,
+canonical consumer registration and independently qualified deployment visibility. No service/runtime was activated.
+PR1919 requester selection is merged and main-verified; see the canonical RSI
+backlog for exact closure evidence and the next ranked action.
+
+## Effective requester selection — 2026-09-27
+
+Omitted signer-healthcheck requesters now use the current effective UID/GID and
+existing peer policy. Unknown local identity rejects before connection; explicit
+valid identities still require server attestation. See the
+[selection and future handoff contract](INTERFACE.md#healthcheck-requester-selection--2026-09-27)
+and [focused regression](tests/README.md#healthcheck-requester-regression--2026-09-27).
+This source repair grants no native execution authority.
+
+## Lifecycle dependency selection — 2026-09-27
+
+The existing verified lifecycle consumer can opt into default dependency
+selection. See the [interface contract](INTERFACE.md#lifecycle-default-dependency-requirement--2026-09-27)
+and [fixed regression scope](tests/README.md#lifecycle-dependency-selection-regression--2026-09-27).
+This distinguishes injected test dependencies; it does not establish production
+provenance or remove resident execution blockers.
+
+# OpenClaw Bridge - Digital Twin Execution Layer
+
+## Verified-outcome recovery and RSI
+
+The [activation recovery checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#activation-recovery-checkpoint--2026-09-14)
+reuses the authority store to recover an exact committed activation after a lost
+reply or competing revision. It rechecks the original envelope and current accepted
+memory, with at most three revision attempts. Both production factories remain
+unbound. The documented memory acceptance transaction and its independent write
+authority are still prerequisites; this recovery path grants no activation.
+
+R11 builds on the existing signing, root authority, publication and PatternMemory owners.
+The v2 root commit route persists the bounded full response through the existing
+pending writer, then commits its complete digest in both state mirrors. Exact retries
+retain current authority checks. Ordinary signer finalization still uses v1.
+
+The [API index](INTERFACE.md#verified-outcome-authority-signing-and-memory) and
+[complete contract](../../../docs/operations/RSI_SWARM_DISPATCH.md#verified-outcome-api-reference)
+cover signed records, strict response validation, root COMMIT acknowledgment retry,
+immutable publication, canonical event time and invisible PatternMemory staging.
+The [storage-read checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#root-record-readback-checkpoint--2026-09-14)
+adds `load_committed_response_for_root()` to the existing root state owner. It
+returns only exact committed bytes under installed ownership, generation, selection,
+signature and time checks. Healthy reads preserve the original state; one-sided
+mirror recovery reuses the existing path. Current read admission and the external
+read route are still required. Activation and retained improvement remain open.
+
+## HoloIndex runtime truth
+
+The exact-main controller requires clean `refs/remotes/origin/main`, sealed repair/completion
+receipts, stable broker readiness, final Git/owner revalidation, and proven thread-dead cleanup.
+One canonical-store lease preserves pre-existing runtimes, launches owned supervisors in Holo-only
+mode, avoids process-global flags, and directly registers only the two required OpenClaw specs.
+The exact AgentDB task ID is supplied at supervisor construction and acknowledged by a same-root,
+Holo-only resident; its sealed authority digest is rechecked during polling. A bound poller cannot
+replace it. Pre-existing bindings release exactly; owned supervisors stay bound through shutdown, closing the release-to-stop race. Runtime/task drift rejects promptly; pending/assigned progress is bounded to 60 seconds and executing observation to its canonical 7,500-second v2 integrity-bound AgentDB claim lease. Claim ID, issued time, expiry, assignee, and task context share one digest; first completion after expiry rejects atomically.
+The owner path binds replica, ranker, runtime, HEAD/root/generation, and no-reindex evidence. A pre-owner `REPO_HEAD_MISMATCH` may reuse only the existing one-task-per-HEAD OpenClaw transaction after exact zero-attempt authority/no-effect binding and an independent match of stale HEAD, generation, freshness digest, and bounded reasons; shared owner classification remains receipt-bound and query handling cannot index. Exact main `09e98fff` live-accepted this ingress through the real OpenClaw/WRE task at generation `sha256:7869f238...`; a fresh query was CURRENT/no-gap/no-reindex on attempt one and verification retained 33 artifacts / 222,719,702 bytes at descriptor `sha256:af0e9a2a...`. Runtime exact closure, retrieval RSI, A-grade, scale, and future-commit authority remain false or unproven.
+
+After completion, one receipt-bound exhausted transient may receive one immediate reproof inside
+the 300-second deadline. Its new two-port acquisition cycle is result/receipt-bound and validated.
+Historical exact main `724954fa3799b19174a7ac0b653da8c95e9ccf13` exposed a controller false-negative after real OpenClaw maintenance completed: its requery recycled the selected authority as the workspace entry root and the resolver correctly rejected that same-root topology.
+Merged exact main `da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6` passed the repaired controller on its first transaction. Real OpenClaw maintenance, activation, verification, atomic completion, and reverse-order owned-runtime shutdown produced generation `sha256:9c7e3ab6e5f8ebb45c622a6ab20ea8320fc2b530d858a7b214506cc69180b331`.
+A fresh governed query returned CURRENT/no-gap/no-reindex on attempt one; post-query full verification retained 33 artifacts / 222,647,465 bytes at descriptor `sha256:87990aba7757a556bd908f7fe64bc7ae7fe81f6f560c25aa4919285ccd953b1d`.
+This closes the merged root-separation replay gate only. Runtime exact closure, retrieval RSI, A-grade, horizontal scale, and future-commit authority remain false or unproven.
+
+Historical exact main `5e0835c690e0f4f1712c7021a75abdc35aadeca0` also ran the real
+OpenClaw transaction produced generation `sha256:ee72c0a0d1e159e19971dac0bbdcdeb98917eb7051a1690759f72fa65b4b2915`; a governed query
+returned CURRENT/no-gap/no-reindex in 3.75 seconds and revalidation preserved
+33 artifacts / 221,734,133 bytes. Runtime exact closure remains false, so this
+is maintenance lifecycle evidence—not retrieval RSI, A-grade, or future-commit
+authority. See [docs/HOLOINDEX_RUNTIME.md](docs/HOLOINDEX_RUNTIME.md).
+
+## Receipt-bound artifact model routing
+
+Architect model-output proposals accept optional `bounded_worker_plan`. The existing
+producer and v3 receipt reader detach/validate it and bind its complete contents to
+the receipt digest. Missing/None input preserves legacy wire bytes; explicit `{}`
+is retained. For example, add `"bounded_worker_plan": {"m2m_envelope": packet}` to
+the existing proposal only when `packet` is already complete, normalized WSP 99 data.
+Supplied operation, tests, path scope and recognized receipt mirrors must agree.
+Prose is not converted or inferred here. Partial plans are data, not work admission.
+
+Seed supplier/bootstrap accept optional normalized `bounded_worker_plan`. When the
+proposal receipt contains a plan, supply the same explicit plan: omission/None and
+conflicting content reject. The supplier detaches and validates receipt/candidate
+lineage before other receipt callbacks, then checks declared execution constraints
+against effective seed scope. Legacy plain-dict receipts without a plan retain their
+previous bytes and separate-plan behavior; `{}` is explicit. Main startup still
+supplies no plan; automatic extraction and principal normalization remain open.
+Direct promotion and bootstrap now enforce profile/proposal agreement using the
+existing profile owner. Both input snapshots are detached before downstream effects,
+including the legacy absent-plan branch. A declared proposal plan must equal the
+explicit profile plan and its declared scope; missing, conflicting or tampered
+lineage rejects. This does not automatically extract a plan or authorize execution.
+Generation checks the signed full-order digest before one-use model admission.
+Explicit M2M packets survive profile/signing and detached request preparation;
+rejection consumes the matching handle. Legacy bytes and the 24,000-character
+prompt/context budget remain. Sealed prompt and prepared raw-context digests reject
+changed delivery before Fusion/OpenClaw/Hermes effects; legitimate context redaction
+is preserved. Partial canonical bindings reject; all-absent markers retain legacy.
+Source provenance, native-child fidelity, live admission and retained RSI remain unqualified.
+
+## RedDog HoloIndex promotion binding
+
+Architect FIX promotion requires the already-running HoloIndex owner to prove
+the explicit, exact-generation query replica selected by
+the preferred private `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`. The legacy direct `REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` is accepted only when the route-file
+value is absent; configuring both is rejected. The resident runtime passes a closed
+environment snapshot into the promotion bootstrap. Missing or stale
+route/replica proof rejects before queue/profile publication; no fallback, materialization, or re-index is performed by promotion.
+
+## RedDog governed repository-state v2 intake
+
+Start Operations supplies a JavaScript-minted
+`reddog_governed_git_repo_state.v2` receipt; Python never launches ambient Git.
+The embedded executable v1 receipt is a digest-only public projection: raw Git
+and fixed PowerShell verifier paths remain inside the extension authority.
+`observe_repo_state()` requires exact bounded fields, complete equal identities,
+link counts, and platform signature/verifier evidence in addition to the body
+digest. This is fail-closed structural/integrity validation, not keyed origin
+authentication, and it does not attest Git DLL/helper closure.
+
+## Canonical elevated-authority consensus capability
+
+[OBSERVED] HIGH delegated-authority requests can now be projected onto exact
+identity and work-authority signer requests, verified against current policy,
+sovereign authorization, distinct signed reviewer decisions, model/runtime
+evidence, and signer-side transactional replay admission. The resulting process-local
+capability is non-constructible, non-copyable, non-serializable, and usable only
+for its exact two child requests. The signer re-verifies the complete proof at
+the independent secret-grant boundary before key resolution.
+
+[OBSERVED] Signed child inputs must be byte-canonical JSON with no duplicate
+keys, and their payload digest is recomputed before consensus projection.
+Elevated grant-authority transport is socket v2 only. Principal and RedDog
+children use distinct target-bound grant-provider identities. Signer replay state is
+reserved before policy/signing and committed only after an accepted signature;
+every prior rejection rolls it back.
+
+[SPECIFIED_NOT_IMPLEMENTED] Production HIGH authority remains fail closed. The
+signed E0 generation does not yet supply authenticated author runtime evidence,
+reviewer provider membership, reviewer keys/runtime evidence, exact sovereign
+delegated-request authorization, or the durable consensus nonce authority. Production signer
+composition therefore does not instantiate this path. ULTRA remains closed.
+
+## Independent signer secret-grant provider
+
+[OBSERVED] Production grant-authority effects now require signed owner policy
+v7 and signed runtime-artifact manifest v3. Both bind one exact repository-root
+digest, authorized Git commit, Git object format, canonical source-policy
+digest, and archive source-descriptor digest. Manifest production, isolated
+signer admission, current E0 rehydration, and the final WSP 71 callback each
+re-verify the exact committed archive lineage. Legacy v6/v2 remains readable
+for diagnostics but cannot reach the WSP 71 effect callback.
+
+[OBSERVED] The authorized commit must agree across the top-level authority
+profile, operational-context binding, and embedded proposal admission. Dirty
+checkout bytes, alternate committed sources, attacker-selected source maps,
+replacement refs, inherited Git authority variables, rehashed artifacts, and
+re-signed legacy manifests do not establish effect authority.
+
+[OBSERVED] Grant-authority service archive bytes now use one deterministic,
+uncompressed zipapp representation. Production manifest creation and use-time
+grant-manifest rehydration both reject noncanonical ZIP metadata, traversal,
+links, duplicate members, compression, trailing bytes, changed member digests,
+missing package initializers, unresolved direct archive-local imports, common
+dynamic-loader spellings, standard-library shadowing, and an entrypoint that the fixed shim
+cannot call. Every Python member and the complete claimed-source descriptor are
+bound by the inner manifest; the signed outer runtime manifest still binds the
+exact archive bytes.
+
+[OBSERVED] A separate v2 build-provenance foundation can construct the archive
+only from exact committed Git blobs and independently verify every
+non-synthetic member against the same commit tree and an explicit source-path
+policy. Dirty checkout bytes, uncommitted files, arbitrary committed source
+paths, object-ID substitution, and v1 claimed-commit metadata do not satisfy
+that verifier. Git replacement objects and inherited `GIT_*` authority
+overrides are disabled; aggregate blob reads use one bounded batch process.
+The verifier also requires independent expected repository-root, commit,
+object-format, and source-policy digests.
+
+[SPECIFIED_NOT_IMPLEMENTED] This remains archive admission, not a Python
+sandbox or hermetic-runtime claim. Python reflection is not certified safe by
+AST inspection. Interpreter,
+standard-library, external executable, OS-principal, resolver, socket,
+supervision, crash-recovery, pinned-descriptor execution, and production
+archive-build authority remain unimplemented and block all execution.
+
+[OBSERVED] Signed owner policy v6 preserves v5 validation while adding an exact
+grant-service signer profile, public identity, pairwise-distinct key-reference
+hashes, permission evidence identifiers, manifest generation, config, and run
+packet. Signed runtime-artifact manifest v2 covers exactly one bounded
+content-addressed service archive, one exact public config, and one inert run
+packet. Each binding reloads current signed E0 and securely re-reads every
+artifact under the existing runtime-generation lock. The immutable result
+contains hashes only. Public agent, profile, and epoch fields use exact inert
+grammars; URI-shaped or raw vault references are rejected by this boundary.
+
+[OBSERVED] Downgraded v1 manifests, altered bytes including archive tails past
+one MiB, substituted profile identity or key references, policy/manifest
+disagreement, unknown config fields, and run-packet/archive disagreement reject
+before service start or WSP 71 resolution.
+
+[OBSERVED] The bounded provider foundation can obtain a LOW-tier secret grant
+from a separately bound Ed25519 grant signer while one current-generation E0
+lease remains held through target-signature rehydration. It reuses the isolated
+signer, WSP 71 backend factory, signed owner policy and durable replay/high-water
+store.
+
+[OBSERVED] Owner config v3 can now bind a disjoint grant-authority root, fixed
+Unix socket, and exact non-root UID/GID. The uncomposed client supply verifies
+authenticated current-generation E0 admission, rejects link components, pins
+the protected socket identity, verifies `SO_PEERCRED`, rejects overlap with
+target, outcome, replay, and revocation authority, and derives the public grant
+identity only from authenticated signed owner policy v5.
+
+[OBSERVED] Owner config v4 additively binds the complete canonical
+grant-service archive-to-repository source map and its digest to the existing
+root-owned signer configuration. The loader returns only an opaque,
+process-local capability whose sole admission method re-reads the current
+owner configuration, so caller-selected or stale source policies cannot
+become build authority. V3 remains readable for the existing grant client but
+cannot issue source-policy authority.
+
+[OBSERVED] The existing atomic signer-generation provisioner now has one fixed
+grant-authority profile factory. It consumes the v4 source-policy capability,
+requires grant config v2 to bind the owner-config, repository-root, and source-
+policy digests, revalidates exact-Git provenance during manifest production,
+commit guarding, and recovery, and activates only the three profile-specific
+artifacts. A root-owner operation fence serializes compliant owner rotation;
+replacement observed by the final transactional commit guard rolls back both
+anchor and high-water state. Later replacement makes the generation stale at
+the existing use-time authority boundary.
+
+[SPECIFIED_NOT_IMPLEMENTED] Atomic activation is not service launch or live
+authority. External lifecycle supervision, pinned-descriptor execution,
+interpreter/OS-principal isolation, secret resolution, and the production live
+canary remain blocked. Legacy config v1 remains readable for established
+diagnostic paths but cannot enter the new grant-profile provisioner. No
+production bootstrap invokes this provisioning foundation yet.
+
+[OBSERVED] Grant-service WSP 71 permission evidence is now an exact canonical
+receipt, not a SHA-shaped identifier. Admission securely reads the fixed
+root-confined artifact and recomputes both its full-byte digest and receipt ID
+while the authenticated current-generation E0 lease remains held. The acyclic
+chain is receipt -> service config -> authenticated service manifest -> signed
+E0 policy. The receipt binds the root-selected generation, issuer,
+agent/profile, key-reference hashes, `SECRETS_READ`, and `get_secret`. No
+reusable permission object is released. One callback runs while both the E0
+lease and matching durable revocation writer fence remain held, with key-epoch
+revocation and expiry checked before and after use. Generation, grant,
+revocation, and target-signer public keys must remain role-distinct.
+Repository-write permission snapshots, grant-authority-only rehashes,
+wrong-policy oracles, oversized canonical-prefix tails, noncanonical JSON, and
+detached authority reject.
+
+[SPECIFIED_NOT_IMPLEMENTED] Permission-receipt rehydration is implemented, but
+receipt-specific revocation is not added to the
+secret-grant ID namespace; rotation, expiry, and issuer-key revocation remain
+the admitted controls. This foundation cannot activate the production
+authoritative-use path: HIGH now accepts only the canonical opaque consensus
+capability, but grant-service lifecycle and signer-service composition remain
+absent. ULTRA, root-owned service provisioning,
+distinct-OS-principal supervision and the live canary remain unimplemented.
+
+## Root-served signer-revocation anchor
+
+The existing root verified-outcome Unix service now routes a domain-separated
+revocation protocol. An opaque signer-side client sends the current signed E0
+policy and requested signed snapshot ID; the root service independently holds
+the current-generation selection lease, validates policy authorities and exact
+topology, reads the local durable snapshot and witness, derives the monotonic
+high-water value, and advances the existing three-domain root state. Callers
+cannot supply arbitrary expected or next values, receive a root-state object,
+or construct/copy/serialize either service authority. Signed request nonces,
+kernel peer credentials, signer-key proofs, bounded ASCII messages, exact
+response context, CAS convergence, and lost-response retry are fail closed.
+
+The same root service now also linearizes one exact signer callback against
+revocation. It consumes a signed, request-bound protected-use ID durably,
+marks one global odd-sequence use active, blocks revocation advancement until
+an exact FINISH, and retains replay evidence after completion. The signer
+boundary accepts only the factory-issued root capability; the older durable
+oracle alone remains explicitly non-atomic. A lost FINISH response retries
+idempotently, while a crashed active use remains fail closed.
+
+This closes the revocation-check-to-sign race but does not activate production
+signing. Independent grant issuance, WSP 71 secret resolution, signer lifecycle
+activation, worker/repository/PR/merge effects, and HoloIndex mutation remain
+unavailable.
+
+## External signer exact-effect authority
+
+The issuer exposes clock-free `prepare_request` for exact canonical target
+data before authorization. See INTERFACE; this API issues no permission or lease.
+
+The bridge now contains the smallest reusable authoritative-use lease primitive.
+It extends the existing E0 secret-grant and isolated signer socket instead of
+adding a signer or trust store. A strict signed request can be rehydrated into
+one opaque, process-local, one-shot capability for an exact worktree-create or
+live-enqueue request. The capability cannot be directly constructed, copied,
+pickled, or replayed. The signer recomputes the complete typed effect digest,
+requires socket v2 plus the exact one-use E0 grant, and checks the root-selected
+manifest, generation, owner config, run packet, session, and socket identity.
+Client rehydration uses the same durable E0 replay root and current root-owned
+generation artifacts. The current config selects the exact signer profile,
+public key, and key epoch; all four E0 replay-store identities are signed and
+checked both signer-side and client-side. Lease expiry cannot exceed the current
+generation and process-local monotonic expiry prevents wall-clock rollback
+revival. Callers cannot inject verifier, replay, time, or parent-authority
+verdicts.
+
+This is a foundation, not production activation. Worktree admission and direct
+WRE integration seams accept the capability, but the repository supplies no
+local grant issuer and the resident resolver never supplies a production lease.
+Queue, OpenClaw, Hermes, shell, PR, merge, learning, and HoloIndex effects remain
+fail closed until their independent exact-effect and crash-recovery gates exist.
+
+## Principal Memex resident admission
+
+The backend architect can consume one opaque Principal Memex context prepared
+from the current signed `principal` conversation scope. Preparation consumes
+the existing conversation-scope capability and verifies a separate
+principal-signed disclosure. Use time reloads the exact AgentDB revision,
+rechecks the model-runtime binding, expiry and revocation, then atomically
+consumes the disclosure nonce in the authority runtime store. Only public
+accepted `operator_statement` decisions reach model context. Rejected options,
+open questions, objectives, credentials, raw history, and FoundUp state do not.
+The admitted receipt and context are deeply immutable, revalidated immediately
+before use, and duplicate-cycle identity excludes volatile disclosure metadata.
+
+The editor resident bridge can accept one complete pre-issued Principal Memex
+disclosure tuple. It deletes the tuple from SecretStorage before the bridge
+call and removes it before intent persistence. Python authenticates the current
+session, atomically separates FoundUp and Principal scope capabilities, and
+defers Principal admission until audit collection and the durable cycle's final
+RUNNING checkpoint. The editor retains the packet only in a process-local
+closure and serializes all SecretStorage effects across concurrent calls.
+The editor restores it only when the durable cycle explicitly reports
+`consumed=false`; final admission, an indeterminate result, or bridge failure
+retires it. The bridge returns no disclosure content.
+Only the final backend architect call can consume the
+signed subset of accepted public decisions, in signed order, after a fresh
+expiry check. Audit workers, AgentDB, receipts, logs, and status output never
+receive Principal Memex content.
+
+Direct statement reproduction is rejected before persistence, including
+ordered cross-field, JSON-escaped, and Unicode-disguised forms. A
+Memex-informed run persists no model-authored free text or proposal body; only
+a report-bound action/slice, fixed advisory metadata, and opaque evidence
+digests survive, and no queue candidate is emitted.
+
+This path grants no work, repository, signer, merge, FoundUp-projection, or
+HoloIndex authority. Principal Memex disclosure issuance, automatic learning,
+and conversation-to-work authorization remain separate work.
+
+## FoundUp Memex learning candidates
+
+`foundup_memex_learning_candidate.py` implements the read-only
+`FOUNDUP_MEMEX_LEARNING_CANDIDATE_GATE_PHASE1` contract. It binds proposed
+FoundUp learning to one immutable current-state Memex view and exact
+Breadcrumb or verified-outcome receipts. Governed research remains a declared
+source class but fails closed until an authenticated receipt authority is
+connected; a caller-supplied digest list cannot authorize it. Supporting and
+contradicting evidence remain separate, supersession is proposal metadata, and
+reconstruction recomputes the candidate from the exact original proposal plus
+its referenced evidence. Text, timestamps, scores, and reference collections
+have one bounded canonical representation. The upstream Memex view requires
+an exact assembly receipt and invariant set. Output is `STRUCTURAL_ONLY`, non-runtime-admissible, and
+cannot persist memory, write Brain/Breadcrumb/HoloIndex/roadmap state, or grant
+work authority. Source authorities retain the raw evidence; this is not a new
+memory store. Durable Brain admission remains a later independently governed
+gate. Assembly-receipt and view-ID checks establish structural self-consistency,
+not authenticated provenance; because every output remains non-admissible and
+zero-authority, authentication belongs to that later admission boundary.
+Rehydrated nested values, extreme timestamps, and oversized collections reject
+without invoking caller callbacks or escaping the public validation boundary.
+The complete nested view graph is cumulatively bounded plain data, and public
+reconstruction accepts exactly—not a superset of—the proposal evidence closure.
+
+The isolated Ed25519 backend also rejects delegated identity or work-authority
+requests unless the backend has a signer-owned domain policy or the existing
+E0 secret-access grant has bound one ephemeral backend to the exact canonical
+signing-request digest. A loaded key profile is not signing authority.
+
+## RedDog conversational state boundary
+
+RedDog has an AgentDB-backed authenticated conversation-scope runtime. It
+stores only typed, bounded continuity state; raw provider history is never
+stored by this runtime. Every scope requires a fresh principal-signed session.
+`foundup` scope additionally requires current repository, FoundUp, snapshot,
+and HoloIndex grounding. `principal` and `comparison` scopes forbid those
+operational bindings and cannot enter work promotion. Comparison permits only
+two or more FoundUps already in the principal credential and never unions their
+authority. Expiry, principal key, transport/session, or turn lineage fails closed.
+
+This state helps RedDog interpret follow-up requests. It is not work authority.
+The backend can now bind one authenticated scope revision and resident intent
+to an immutable architect proposal preview. AgentDB persists the exact pending
+proposal by CAS. Promotion then requires both a fresh one-use pending-proposal
+capability and the existing principal-signed proposal policy authorization.
+The binding covers the operational snapshot, repository HEAD, HoloIndex
+generation/freshness receipt, FoundUp, grounding receipt, and intent.
+
+Conversation state and the pending capability do not grant work authority.
+Only a `foundup` scope may request the existing proposal-promotion chain.
+WRE/OpenClaw/Hermes dispatch, repository mutation, and merge remain downstream
+gates.
+
+For existing conversations, `reddog_resident_conversation_admission.py`
+composes strict request prevalidation, the current-generation signed-session
+lease, exact authenticated AgentDB scope binding, and a content-free durable
+replay reservation. The opaque parent and reservation child are one-use; the
+store rechecks current scope revision, receipt, expiry, and capacity under its
+backend lock. No operator text or identity value is journaled.
+
+`reddog_resident_conversation_new_scope_admission.py` now provides the separate
+trusted empty-ID `TURN` path. Exact v2 intent/request/grounding/FoundUp binding
+precedes the same generation lease and required E0 signer. Stable signed-session
+identity fences divergent nonce reuse; only a fully authenticated exact record
+may replay. The returned scope stores no raw operator text.
+
+`reddog_resident_conversation_first_turn_resolution.py` composes that resolver
+with the existing request journal. One credential lease atomically delegates
+two separately registered, one-use FoundUp authorities: one creates or exactly
+recovers E0, and the other authenticates the same E0 record before minting the
+journal proof. The explicit v2 `RESOLVED_INITIAL_TURN` row preserves the
+original empty-ID request digest separately from the derived resolved-ID/
+revision-0 request digest. Scope schema v4 also commits that exact pair into
+signed immutable E0 state. Authenticated replay atomically consumes one
+verified authority, derives the conversation ID before lookup, and may validate
+the immutable revision-0 receipt through a later signed revision chain; no
+idempotency-only lookup discloses an ID.
+
+All three aggregates remain host-unwired: they expose no endpoint and perform
+no handler, conversation CAS, model, or worker action. Live traffic still
+requires a host adapter and immediate authenticated CAS.
+Detailed locking, failure, and recovery audits are under `docs/clarity/`.
+
+## Upstream Agent Execution Boundary
+
+RedDog's bounded author stage can use the installed upstream agent runtimes,
+not repository-local classes that merely carry their names:
+
+- `openclaw_gateway` invokes `/usr/local/bin/openclaw agent` through the
+  upstream loopback Gateway. It requires a dedicated sandboxed agent, a live
+  version-matched Gateway, no elevated mode, exactly one canonical read-only
+  sandbox workspace mount, and a wildcard tool deny policy. OpenClaw
+  generates the artifact map; the existing Foundups writer alone materializes
+  the already-authorized paths in the isolated worktree.
+- `hermes_api` calls the installed upstream Hermes Agent `/v1/runs` API through
+  authenticated loopback HTTP: fixed `reddogartifact` profile, API `0.20.4`,
+  bearer authentication, native `delegation` (`delegate_task` only), zero skills,
+  and unchanged postflight policy. The event queue must prove one stable completed
+  leaf, explicit empty file-read/write arrays, and ordered delegate completion
+  before the final terminal event. Other children/tools, approvals, failed or
+  interrupted children, effects and drift reject. Stop/status remain best-effort.
+  Parent-only stop or noncompleted/forbidden terminal evidence reports
+  `effect_observation_complete=false` and `run_abort_confirmed=false`;
+  effects remain possible and no artifacts return. This does not prove child
+  cancellation or delivery. Foundups retains all file, worktree, commit,
+  verification, PR, and merge effects.
+
+Both providers pass their returned map through the same bounded validator:
+canonical relative paths only, no traversal/absolute/device paths, non-empty
+UTF-8 text, and the author-stage per-file and aggregate size ceilings.
+
+Both modes require the signed model-runtime binding and AgentDB/WRE work-order,
+WSP 15, exact-path, commit and independent-verifier authority chain. Invocation
+and process effects stay receipt-bound. `foundups_fusion` remains supported;
+unknown modes reject. The legacy `HermesJobExecutor` is not used by this route.
+
+The Hermes bearer key is read only from
+`<resident-runtime-root>/hermes-api/api-key` through the confined runtime-file
+reader. It never appears in prompts, argv, receipts, logs, or repository files.
+The upstream Hermes API executes tools in its server process and does not expose
+split-runtime confinement. Therefore only native leaf delegation is enabled;
+the leaf inherits no file, terminal, browser, web, MCP, memory, or approval
+tool. The legacy repository `HermesJobExecutor` remains policy/dry-run
+scaffolding and is not presented as the upstream production runtime.
+
+The external signer uses a stable signer-owned system-service command:
+`reddog_signer_system_service_entrypoint`. Its v2 run packet contains the
+rotating current-generation configuration, but the service manager receives
+only the fixed repository root and root-owned owner-authority configuration
+path. The entrypoint revalidates the authenticated current generation before
+service admission and never executes packet argv. The signer-side E0 boundary
+now verifies one request-bound secret-access grant, atomically consumes durable
+replay state, resolves WSP71 keys for that sign only, and rechecks revocation,
+expiry, provider identity, and the returned signature. The stable entrypoint
+now applies the executable OS-isolation boundary before resolver construction.
+An uncomposed WSP71 factory reuses `OpCliSecretResolver` and accepts only a
+fixed root-owned, executable, non-writable `/usr/bin/op`. The production
+entrypoint retains its unavailable resolver until the existing grant-aware
+resolve-per-sign backend is composed, so system-service signing fails closed.
+The owner-controlled E0 admission layer binds one signed
+policy to the exact current signer generation, key-reference digests,
+manifest-bound grant/revocation authorities, disjoint durable-state roots,
+operation/tier consensus rules, and rate limits. Its opaque one-use capability
+cannot be copied or serialized. Consumption revalidates while the canonical
+current-generation fence is held and returns only a non-authoritative receipt;
+it does not release signer composition authority or grant an effect.
+The E0 path also has an exact independently signed revocation-snapshot contract
+bound to the current policy, generation, store, and target signer. Grant and
+revocation authority identities remain separate from one another and from the
+target signer key. Policy v3 additionally freezes the exact primary store,
+separate local monotonic witness, and shared cross-process operation-lock
+topology plus the identity, durability receipt, and three-domain topology
+digest of a root-owned monotonic anchor. The revocation high-water is mirrored
+by that authority's primary and witness stores; its third installation store
+authenticates initialization but does not witness each high-water update. The append-only SQLite supply orders
+prepare, local witness, root anchor, and finalize; it recovers each publication
+crash window without unrevocation. Its detached oracle requires three-way
+agreement under the same lock. Coordinated rollback of the two local domains
+therefore rejects while the root anchor remains intact. Expired state remains unusable, while a locked
+publisher may authenticate an expired predecessor solely to append its fresh,
+monotonic successor. Canonical snapshot validation remains a separate bounded
+module from authority/signature verification. This is a partially composed durability
+foundation, not production authority: root-service transport/client and the atomic
+protected-use oracle now exist; independently administered grant issuance, production
+backend-factory wiring, and stable signer lifecycle composition remain absent. Root compromise or coordinated rollback of both
+mutable root-state mirrors is outside this foundation's claim; leaving the
+static installation store unchanged does not detect that rollback. Future
+composition must consume the opaque root-owned service boundary rather than a
+caller-constructed state object.
+RedDog and `main.py` remain clients and cannot spawn the signer.
+The older `reddog_signer_socket_service_runtime_cli` is retained only to return
+a structured retirement rejection. It cannot load authority, construct a
+secret resolver, or bind a socket. The system-service entrypoint also loads the
+current generation, a lazy outcome-authority supplier, and exact signer UID/GID
+from one immutable v2 read. The supplier runs only for a selected outcome policy;
+the live process must match both
+identity values before resolver construction. The older one-shot
+`reddog_isolated_signer_process_entrypoint` accepts test-only dry-run providers
+only; every WSP71/production provider mode rejects before key resolution.
+Legacy v1 owner configs remain readable by the lower-level manifest migration
+loader but cannot start the production signer service.
+
+Verified-outcome admission also requires the separately supervised root service:
+
+```bash
+python -m modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_provision_entrypoint \
+  --repo-root /srv/foundups-agent \
+  --owner-authority-config /etc/foundups/reddog-signer-owner.json
+
+python -m modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority_service_entrypoint \
+  --repo-root /srv/foundups-agent \
+  --owner-authority-config /etc/foundups/reddog-signer-owner.json
+```
+
+The primary/witness state and generation anchor are provisioned once by the
+separate root installer. A third disjoint installation witness commits that
+provisioning event; later replay-store deletion cannot invoke the installer to
+reopen consumed grants. Runtime startup has no state-reset or initialization
+switch. The service loads no private signing key and grants no
+repository, queue, worker, PR, or merge authority.
+Each live owner-config reload also binds the resolved roots, database paths,
+store IDs, and durability receipts for all three state domains. Store rotation
+requires a supervised service restart; a running service never combines a new
+config with stores opened from an older config. Before any production WSP71
+key resolution, the existing isolated-signer entrypoint enforces a distinct
+non-root signer UID/GID exactly matching the root-owned owner config, YAMA
+ptrace protection, absence of `CAP_SYS_PTRACE`,
+`RLIMIT_CORE=0`, `PR_SET_DUMPABLE=0`, and a cleared inherited environment.
+Test-only dry-run keys remain non-authoritative and do not claim this boundary.
+
+`start operations` binds the production `reddog_operations` Skillz from the
+manifest-authenticated runtime before model selection or grounding. The
+Skillz defines only logical roles and WSP_00/WSP_97/WSP_15 operating
+discipline; actual models are selected by the existing signed audit and
+architect runtime-binding receipts. Its content and registry-entry digests
+are carried on the durable intent and revalidated at submit/resume use time.
+A missing, retired, model-pinned, role-drifted, or otherwise unhealthy Skillz
+fails closed before a model or resident client is invoked. The read-only
+Start Operations authority boundary is unchanged.
 
 Governed read-only audit and backend-architect FoundUps Fusion calls now use
 `reddog_provider_call_evidence.v1`. The content-free receipt binds task/work
@@ -25,7 +873,33 @@ RedDog Fusion progress observability is implemented by `src/reddog_fusion_progre
 
 The durable resident architect cycle in `src/reddog_resident_architect_durable_agentdb_cycle.py` is intent-digest-bound and revision-CAS protected. Its nine process-local read-only self-attestations are persisted and enforced at this code boundary; they are not externally observed or signer-authenticated effect receipts. Cancellation is terminal against stale workers, and retries retain monotonic attempt history. Transition receipts are recomputed internal-integrity telemetry only, not execution authority or external authentication.
 
+Terminal resident `FIX` determinations cross the editor/main process boundary
+through `reddog_fix_promotion_claims`. The coordination row is derived from the
+integrity-checked terminal cycle, canonical architect determination, exact
+queue candidate, and validated WSP 15 receipt. A bounded CAS lease permits one
+main process to materialize the existing handoff artifacts. The row grants no
+execution authority; signed promotion revalidates all authoritative inputs.
+Expired claims recover, lease renewal is bounded, and successful promotion
+completes exactly once. A monotonic claim revision is revalidated under an
+AgentDB writer fence across the authoritative publication CAS; the applied row
+binds the resulting promotion receipt and committed work-state revision before
+the fence is released. Restart recovery re-enters the existing authenticated,
+idempotent promotion path; claim coordination never infers completion from an
+unsigned work-state mapping.
+
 Fresh AgentDB cycle rows must be canonical `SUBMITTED` retry-zero records. `FAILED` and `TIMED_OUT` may retry through CAS; `CANCELLED` and `DETERMINED` never reopen. Legacy rows have a cancellation-only compatibility path and are otherwise rejected.
+
+Signed worker tasks carry a canonical AgentDB envelope. The OpenClaw claim
+path and direct task runner both reverify its signed authority, WSP 15
+allocation, dispatch receipt, intent, and task binding before runner
+selection. Unverified outer AgentDB metadata never widens role, capability,
+operation, or routing authority.
+
+Each signed-worker terminal or requeue result is appended to the durable
+AgentDB result ledger in the same transaction as its exact task transition.
+For independent verification, the verifier stage emits a receipt-bound
+completion request; only that transaction may complete the durable assurance
+reservation. Detached completion and generic task finalization reject.
 
 > **OpenClaw** (formerly Moltbot/Clawdbot), trained on WSP framework, operating on Foundups-Agent codebase
 
@@ -39,10 +913,16 @@ Fresh AgentDB cycle rows must be canonical `SUBMITTED` retry-zero records. `FAIL
 
 ## Vision
 
-OpenClaw becomes **0102** — the Digital Twin of 012:
-- **Voice**: Multi-channel (WhatsApp, Telegram, Discord, Voice)
-- **Brain**: WSP framework + HoloIndex semantic search
-- **Body**: Foundups-Agent codebase
+RedDog is the lightweight, low-latency interaction, exchange, and attention
+surface for the continuous relationship with the principal-scoped **0102
+Digital Twin**. RedDog is not 0102. OpenClaw may host the 0102 execution runtime
+behind RedDog and remains the resident multi-channel gateway/work supervisor;
+the main read-only bootstrap re-exports its stable result identity from
+`reddog_main_readonly_operational_bootstrap_result.py`:
+- **Channels**: WhatsApp, Telegram, Discord, voice, and authenticated thin clients
+- **Policy and conversation**: RedDog fast surface with governed 0102 deep cognition
+- **Supervision**: OpenClaw admits bounded work to WRE/Hermes
+- **Work surface**: Foundups-Agent and FoundUp DAEs
 
 ## Architecture
 
@@ -57,11 +937,17 @@ These fields round-trip through `to_dict()` / `from_dict()` and are not an
 alias for the existing-module build or extraction actions.
 
 ```
-012 (Human) ──voice/chat──► OpenClaw Gateway ──WSP-trained──► Foundups Codebase
-                                   │
-                                   ├── AGENTS.md (WSP training)
-                                   ├── SOUL.md (0102 identity)
-                                   └── skills/ (foundups-wsp, holo-search)
+012 ──voice/chat/PFMall/VSIX──► RedDog fast interaction surface
+                                         │ bounded turn/context exchange
+                                         ▼
+                                    0102 deep layer
+                                         │ proposal-only boundary
+                                         ▼
+                              OpenClaw work supervisor
+                                         │
+                                         ├── WRE/Hermes bounded workers
+                                         ├── AGENTS.md (WSP governance)
+                                         └── Foundups-Agent / FoundUp DAEs
 ```
 
 ## 2026-03-28 Operating Rule
@@ -100,9 +986,11 @@ lineage is revalidated at use time.
 Worktree and OpenClaw effects report `COMMITTED`, `NOT_COMMITTED`, or
 `INDETERMINATE` with a stable attempt key. Exceptions after an effect attempt
 are never reported as false non-events; they require reconciliation by that
-key. Production remains `VALVE_CLOSED`: model-selection and Memex identifiers
-are now carried by signed work authority, but their independent signed-evidence
-verifiers and the other canonical trust anchors do not yet exist.
+key. Production remains `VALVE_CLOSED`. The optional Memex supply ID/digest
+pair is signed and now remains bound through dispatch, AgentDB restart, claim,
+executor, read-only 0102 assignment, and independent slice-verifier receipts.
+Malformed or conflicting pairs reject before effects. That lineage does not
+make Memex content current-code proof or replace projection/query verification.
 
 ### RedDog HoloIndex Query Boundary
 
@@ -169,6 +1057,10 @@ and queue-candidate lineage. Every runner, including an injected test runner,
 rejects a missing, malformed, rejected, wrong-surface, or pair-mismatched
 receipt before index/provider access or persistence. Selection receipts alone
 do not authorize either call.
+
+At interactive startup, a missing or invalid binding disables the resident
+cycle without blocking the main menu unless
+`REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED=1`.
 
 Model identities and panel topology come only from the exact validated runtime
 receipt. Same-surface substitution is rejected against task, assignment, WSP
@@ -315,7 +1207,29 @@ Execution additionally requires `--execute --confirm
 REDDOG_RESIDENT_LIVE_CANARY_PHASE1`. The runtime root must be outside the
 repository and already contain the authority, permission, execution-valve,
 signer config/run-packet, and live signer socket artifacts named by the CLI
-receipt. The harness never starts the signer or resolves secret values.
+receipt. The harness never starts the signer or resolves principal signing keys.
+Select an existing author adapter with `--artifact-generator-mode` (or
+`REDDOG_ARTIFACT_GENERATOR_MODE`): `foundups_fusion` (default),
+`openclaw_gateway`, or `hermes_api`. Unsupported or explicitly empty modes reject.
+All modes require declared model-provider identity; this declaration does not
+replace signed model admission. Fusion additionally requires OpenRouter presence.
+Hermes readiness reads and discards the existing confined service credential
+through `RuntimeHermesApiKeyProvider`; no credential value enters the receipt.
+OpenClaw checks executable availability. These checks do not establish service
+health, sandbox confinement, model authority, budget, or worker execution.
+The receipt's `artifact_generator_mode` records selected configuration only.
+The signed runtime-artifact manifest producer is available as a
+content-addressed foundation. Canonical artifact writers and publication share
+a runtime-generation fence, and final publication uses OS-level no-replace
+semantics. A verified manifest can now mint one opaque, non-serializable,
+one-shot launch selection inside the signer process. The selection binds the
+exact config and run-packet bytes, repository/runtime roots, and generation.
+The canary remains blocked until the external signer lifecycle supplies that
+selector from current-generation and durable replay authority, and until the
+mutual peer proof is consumed at each authoritative signing boundary. The
+explicit signer healthcheck proves a fresh Ed25519 response from the signer
+instance bound to the exact production run packet; it does not by itself
+authorize a later signing call or execution effect.
 
 `READY_FOR_EXECUTION` is only static readiness. Every main control-loop caller
 uses one shared OS advisory lock. `LIVE_PROOF_COMPLETE` requires the matching
@@ -359,20 +1273,32 @@ records (`action_cli_<route>_<action>`), enabling recall of:
 
 ## Skill Safety Gate (Cisco Skill Scanner)
 
-OpenClaw DAE now runs a cached safety preflight on local skills before mutating routes
-(`command`, `system`, `schedule`, `social`, `automation`, `foundup`).
+`src.skill_safety_guard.run_skill_scan()` supplies OpenClaw's current preflight
+for mutating routes. A `SKILLz.md` bundle uses Cisco `scan --skill-file SKILLz.md`;
+a wardrobe uses recursive `scan-all`. The caller selects the report directory.
+Each invocation owns a temporary subdirectory for its report and scanner TMP/TEMP.
+The verdict uses only that private report, then atomically replaces
+`openclaw_skill_scan_report.json`. Returned `report_path` is a mutable latest
+diagnostic, may be absent, and is not an immutable receipt for that invocation.
+Normal return, timeout, process error and Python cancellation clean the private
+workspace. Hard process termination can leave isolated temporary files; this
+change adds no crash scavenger or persistent per-scan archive.
+Missing/malformed evidence, manifest failure, timeout, unavailable required
+scanner or workspace/publication error fails closed. Raw scanner streams are
+omitted and its environment excludes credentials. The child always sets
+`PYTHON_DOTENV_DISABLED=1`, `LITELLM_MODE=PRODUCTION`,
+`LITELLM_LOCAL_MODEL_COST_MAP=True` and `PYTHONDONTWRITEBYTECODE=1`;
+these suppress known import-time dotenv/cost-map/bytecode side effects in the
+installed scanner dependencies, without promising OS-level isolation.
+`SkillScanResult` is supply-chain
+evidence only; it grants no execution, effect, evaluation or promotion authority.
 
-- Scanner package: `cisco-ai-skill-scanner`
-- CLI: `skill-scanner`
-- Skills path scanned: `modules/communication/moltbot_bridge/workspace/skills`
-- Report path: `modules/communication/moltbot_bridge/reports/openclaw_skill_scan_report.json`
-
-Environment toggles:
+Each call returns its own Boolean verdict; keyword-only literal `details=True` returns its local `(allowed, message)` pair. The process caller validates Boolean/text fields and uses that explanation for logs/actions/responses; malformed results raise before downstream preflight/execution. REQUIRED/ENFORCED/MAX_SEVERITY drift rejects; diagnostic fields remain latest state and `force`, TTL and ALWAYS remain compatible.
 - `OPENCLAW_SKILL_SCAN_REQUIRED=1` (default): fail closed if scanner missing
 - `OPENCLAW_SKILL_SCAN_ENFORCED=1` (default): block risky scans above threshold
 - `OPENCLAW_SKILL_SCAN_MAX_SEVERITY=medium` (default)
-- `OPENCLAW_SKILL_SCAN_TTL_SEC=900` (default cache window)
-- `OPENCLAW_SKILL_SCAN_ALWAYS=0` (default): set `1` to force scan on every mutating route
+- `OPENCLAW_SKILL_SCAN_TTL_SEC=900`: retained compatibility setting; workspace TTL reuse is disabled
+- `OPENCLAW_SKILL_SCAN_ALWAYS=0`: retained compatibility setting; every guard invocation scans regardless
 - `OPENCLAW_SKILL_MANIFEST_REQUIRED=1` (default): require `workspace/skills/SKILL_MANIFEST.json`
 - `OPENCLAW_SKILL_MANIFEST_ENFORCED=1` (default): block on missing/mismatched manifest
 - `OPENCLAW_SKILL_MANIFEST_VERIFY_SIGNATURE=0` (default): verify HMAC signature when enabled
@@ -425,7 +1351,7 @@ OpenClaw now follows a facade + delegated-module design.
 | `src/openclaw_runtime_support.py` | Runtime probing, IronClaw autostart, model availability |
 | `src/openclaw_status_surface.py` | `connect wre` readiness/status and outward status push |
 | `src/openclaw_process_loop.py` | Full autonomy loop orchestration |
-| `src/openclaw_result_memory.py` | Validate + remember (WRE pattern memory writeback) |
+| `src/openclaw_result_memory.py` / `src/openclaw_memory_queries.py` | WRE result writeback / memory queries, including the [unmounted Moshpit projection](INTERFACE.md#moshpit-projection-layer) |
 | `src/openclaw_turn_state.py` | Token telemetry and cooperative turn cancellation |
 | `src/openclaw_action_ledger.py` | Structured DAEmon action emission |
 | `src/openclaw_social_controller.py` | Social-routing bridge and LinkedIn mission control |
@@ -433,5 +1359,33 @@ OpenClaw now follows a facade + delegated-module design.
 | `src/openclaw_bootstrap_config.py` | Constructor-time state/bootstrap wiring |
 
 Current refactor result:
-- `openclaw_dae.py` reduced from `2638` lines to `1342`
+- `openclaw_dae.py` is currently `1580` lines and remains inherited WSP 62 hard-limit debt
 - remaining file content is predominantly facade wrappers, dataclasses, and the honeypot surface
+
+
+## Red Dog correspondence continuity
+
+Red Dog correspondence continuity is owned by
+`src/reddog_correspondence_state.py` and the canonical
+`skillz/reddog_correspondence_state/SKILLz.md`.
+
+The runtime model is provider-first but not provider-replay-first:
+
+```text
+provider truth -> normalized event metadata -> materialized scope state
+              -> provider-watermark delta refresh -> state capsule
+```
+
+The private module-owned DB is the machine continuity surface. Gmail/Slack/
+LinkedIn remain transaction truth. Google Sheets/Docs are optional human-facing
+projections and must be rebuildable. Raw mailbox bodies and complete recipient
+address dumps are not persisted in this state layer. A cached state never grants
+send authority; current routing and recipient preflight remain mandatory.
+
+Freshness comparison requires nonempty string watermarks and exact opaque equality.
+Missing, mistyped or empty observations require reconciliation; values are never
+coerced or trimmed. Existing invalid-cache errors still propagate first.
+
+### Correspondence authority status — 2026-10-06
+
+For #1779, the legacy V2 JavaScript sender boundary is a quarantined fail-closed compatibility surface. The canonical implementation is the service-owned Python `CorrespondenceSenderBoundary` in `src/reddog_correspondence_sender_boundary.py`. Repository tests qualify that contract only; external Gmail/Work capability isolation remains a deployment/host requirement and must not be inferred from source or a successful individual send.

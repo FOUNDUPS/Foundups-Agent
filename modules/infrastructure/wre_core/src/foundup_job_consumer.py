@@ -412,8 +412,8 @@ class FoundUpJobConsumer:
         Returns:
             ConsumerResult with dispatch outcome.
         """
+        force_dry_run = self.dry_run
         job_id = getattr(job, "job_id", "") or ""
-
         # Step 1: Route
         try:
             envelope = route_foundup_job(job)
@@ -430,7 +430,7 @@ class FoundUpJobConsumer:
         execution_job, admission = prepare_validate_model_capability_admission(
             job=job,
             route_envelope=envelope,
-            dry_run_mode=self.dry_run,
+            dry_run_mode=force_dry_run,
             binding_resolver=self.model_runtime_binding_resolver,
         )
         if admission.blocked and envelope.route_status == RouteStatus.ROUTED:
@@ -445,7 +445,7 @@ class FoundUpJobConsumer:
                 TargetBackend.HERMES_VALIDATOR,
             ):
                 return attach_projection(
-                    self._dispatch_to_hermes(execution_job, envelope), admission
+                    self._dispatch_to_hermes(execution_job, envelope, force_dry_run), admission
                 )
 
         # Step 3: Not dispatched (QUEUED, BLOCKED, UNSUPPORTED, FAILED, etc.)
@@ -509,17 +509,17 @@ class FoundUpJobConsumer:
         )
 
     def _dispatch_to_hermes(
-        self, job: Any, envelope: RouteEnvelope
+        self, job: Any, envelope: RouteEnvelope, force_dry_run: bool
     ) -> ConsumerResult:
         """
         Dispatch job to WRE Hermes executor dry-run seam.
 
-        Phase 1C: Uses WRE HermesJobExecutor for checkpoint/evidence artifacts.
-        Real execution is blocked in Phase 1 - all jobs return SIMULATED status.
+        Existing validation and action gates may block before simulation.
 
         Args:
             job: FoundUpJob to execute.
             envelope: RouteEnvelope from routing.
+            force_dry_run: Mode captured before routing and binding callbacks.
 
         Returns:
             ConsumerResult with Hermes execution outcome and checkpoint fields.
@@ -536,12 +536,12 @@ class FoundUpJobConsumer:
             logger.info(
                 "[CONSUMER] Dispatching job %s to WRE executor (dry_run=%s)",
                 job_id,
-                self.dry_run,
+                force_dry_run,
             )
 
-            # WRE executor respects dry_run via constructor, not per-call param
-            # For Phase 1C, we always use dry_run=True (set in consumer init)
-            hermes_result: HermesDelegationResult = execute_foundup_job(job)
+            hermes_result: HermesDelegationResult = execute_foundup_job(
+                job, force_dry_run=force_dry_run
+            )
 
             dispatched = True
             exec_status = hermes_result.status.value

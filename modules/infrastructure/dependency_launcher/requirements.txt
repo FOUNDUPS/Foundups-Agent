@@ -1,0 +1,2 @@
+# Runtime implementation uses the Python standard library only.
+# Test dependency: pytest (managed by the repository development environment).

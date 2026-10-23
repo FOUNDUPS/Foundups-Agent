@@ -13,7 +13,6 @@ The purpose is to bridge the gap after the E0/E1 contracts:
 * This module prepares authority records by validating scope, freshness,
   revocation, nonce uniqueness, and high-authority co-sign evidence before
   requesting signatures from an injected signer client.
-
 The signer response is treated as authority only when it carries the boundary
 attestations required by E0. All emitted receipts are evidence for later gates;
 they do not execute work by themselves.
@@ -29,9 +28,6 @@ from typing import Any, Dict, Mapping, Optional, Protocol, Sequence, Tuple
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
     PermissionSnapshotResolver,
-    PREFIX_IDENTITY,
-    PREFIX_WORKAUTH,
-    canonical_signing_input,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
     canonical_work_order_base_ref,
@@ -43,6 +39,21 @@ from modules.communication.moltbot_bridge.src.reddog_authority_runtime_store imp
     InMemoryAuthorityRuntimeStore,
     PrincipalAuthorityRecord,
     PrincipalAuthorityResolver,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_bindings_valid,
+    runtime_binding_request_valid,
+)
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    VerifiedQueueAuthorityAdmission,
+    consume_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_elevated_authority_consensus_capability import (
+    VerifiedElevatedAuthorityConsensusCapability,
+    VerifiedElevatedAuthoritySigningPermit,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_authority_validation import (
+    validate_progressive_runtime_request,
 )
 
 AUTHORITY_ISSUED = "DELEGATED_AUTHORITY_ISSUED"
@@ -87,6 +98,11 @@ class RuntimeRejectCode:
     NONCE_REPLAY = "REJECT_NONCE_REPLAY"
     REVOKED = "REJECT_REVOKED"
     HIGH_AUTHORITY_NEEDS_COSIGN = "REJECT_HIGH_AUTHORITY_NEEDS_COSIGN"
+    ELEVATED_CONSENSUS_NOT_VERIFIED = "REJECT_ELEVATED_CONSENSUS_NOT_VERIFIED"
+    ELEVATED_AUTHOR_RUNTIME_EVIDENCE_REQUIRED = (
+        "REJECT_ELEVATED_AUTHOR_RUNTIME_EVIDENCE_REQUIRED"
+    )
+    LOW_AUTHORITY_CONSENSUS_FORBIDDEN = "REJECT_LOW_AUTHORITY_CONSENSUS_FORBIDDEN"
     SIGNER_NOT_CONFIGURED = "REJECT_SIGNER_NOT_CONFIGURED"
     SIGNER_BOUNDARY_NOT_ATTESTED = "REJECT_SIGNER_BOUNDARY_NOT_ATTESTED"
     SIGNER_KEY_MISMATCH = "REJECT_SIGNER_KEY_MISMATCH"
@@ -122,6 +138,8 @@ def public_key_fingerprint(public_key: str) -> str:
 
 
 def _path_within_foundup(path: str, foundup_id: str) -> bool:
+    if isinstance(path, str) and any(char in path for char in "*?[]"):
+        return False
     if not isinstance(path, str) or not path or not _is_ascii(path):
         return False
     if "\x00" in path or "\\" in path or ":" in path or path.startswith("/"):
@@ -151,9 +169,13 @@ class SigningRequest:
     requested_operation: str
     authority_tier: str
     consensus_receipt_digest: Optional[str]
+    elevated_consensus_proof: Optional[Mapping[str, Any]] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        if self.elevated_consensus_proof is None:
+            payload.pop("elevated_consensus_proof")
+        return payload
 
 
 @dataclass(frozen=True)
@@ -190,6 +212,13 @@ class FailClosedSignerClient:
             no_secret_material_returned=True,
         )
 
+    def sign_with_elevated_consensus(
+        self,
+        request: SigningRequest,
+        permit: VerifiedElevatedAuthoritySigningPermit,
+    ) -> SigningResponse:
+        return self.sign(request)
+
 
 @dataclass(frozen=True)
 class DelegatedAuthorityRuntimeRequest:
@@ -207,11 +236,17 @@ class DelegatedAuthorityRuntimeRequest:
     denied_paths: Tuple[str, ...]
     requested_operation: str
     permission_snapshot_digest: str
+    queue_consumer_receipt_digest: str
+    queue_consumer_receipt: Mapping[str, Any]
+    wsp15_allocation_receipt: Mapping[str, Any]
     wsp15_allocation_receipt_id: str
     wsp15_allocation_digest: str
     wsp15_priority: str
     wsp15_mps_total: int
     wsp15_reasoning_tier: str
+    progressive_policy_stage_receipt_id: str
+    progressive_policy_stage_digest: str
+    progressive_policy_stage_receipt: Mapping[str, Any]
     identity_nonce: str
     work_authority_nonce: str
     issued_at: int
@@ -225,8 +260,12 @@ class DelegatedAuthorityRuntimeRequest:
     model_selection_digest: Optional[str] = None
     model_runtime_binding_receipt_id: Optional[str] = None
     model_runtime_binding_digest: Optional[str] = None
+    model_runtime_binding_verification_receipt_id: Optional[str] = None
+    model_runtime_binding_verification_digest: Optional[str] = None
     memex_supply_receipt_id: Optional[str] = None
     memex_supply_digest: Optional[str] = None
+    architect_fix_publication_receipt_id: Optional[str] = None
+    architect_fix_publication_binding_digest: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -361,69 +400,30 @@ def _validate_signing_response(
     return None
 
 
-def _append_unique(items: Sequence[str], item: str) -> Tuple[str, ...]:
-    seen = list(map(str, items))
-    if item not in seen:
-        seen.append(item)
-    return tuple(seen)
+def _effective_paths_valid(request: DelegatedAuthorityRuntimeRequest) -> bool:
+    from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+        STAGE_AUDIT,
+    )
+
+    audit_only = request.progressive_policy_stage_receipt.get("stage") == STAGE_AUDIT
+    if audit_only:
+        return not request.allowed_paths and not request.denied_paths
+    return bool(
+        request.allowed_paths
+        and not request.denied_paths
+        and all(_path_within_foundup(path, request.foundup_id) for path in request.allowed_paths)
+    )
 
 
-def _commit_issued_authority(
-    store: AuthorityRuntimeStore,
-    *,
-    request: DelegatedAuthorityRuntimeRequest,
-    identity_digest: str,
-    work_authority_digest: str,
-    receipt_id: str,
-) -> str:
-    current = store.load()
-    expected_revision = current.get("revision")
-    nonces = current.get("nonces") if isinstance(current.get("nonces"), Mapping) else {}
-    identity_nonces = tuple(map(str, nonces.get("identity", [])))
-    work_nonces = tuple(map(str, nonces.get("work_authority", [])))
-    issued = current.get("issued_authorities") if isinstance(current.get("issued_authorities"), Mapping) else {}
-    if request.work_order_id in issued:
-        raise RuntimeError("duplicate_work_order")
-    next_state = json.loads(json.dumps(current, sort_keys=True))
-    next_state.setdefault("schema_version", AUTHORITY_SCHEMA_VERSION)
-    next_state["nonces"] = {
-        "identity": list(_append_unique(identity_nonces, request.identity_nonce)),
-        "work_authority": list(_append_unique(work_nonces, request.work_authority_nonce)),
-    }
-    issued_next = dict(issued)
-    issued_next[request.work_order_id] = {
-        "receipt_id": receipt_id,
-        "identity_digest": identity_digest,
-        "work_authority_digest": work_authority_digest,
-        "work_order_digest": request.work_order_digest,
-        "base_ref": request.base_ref,
-        "principal_id": request.principal_id,
-        "reddog_id": request.reddog_id,
-        "foundup_id": request.foundup_id,
-        "repo_full_name": request.repo_full_name,
-        "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
-        "wsp15_allocation_digest": request.wsp15_allocation_digest,
-        "status": AUTHORITY_ISSUED,
-    }
-    if request.model_runtime_binding_receipt_id or request.model_runtime_binding_digest:
-        issued_next[request.work_order_id]["model_runtime_binding_receipt_id"] = str(
-            request.model_runtime_binding_receipt_id or ""
-        )
-        issued_next[request.work_order_id]["model_runtime_binding_digest"] = str(
-            request.model_runtime_binding_digest or ""
-        )
-    for prefix in ("model_selection", "memex_supply"):
-        receipt_id = getattr(request, f"{prefix}_receipt_id")
-        digest = getattr(request, f"{prefix}_digest")
-        if receipt_id or digest:
-            issued_next[request.work_order_id][f"{prefix}_receipt_id"] = str(
-                receipt_id or ""
-            )
-            issued_next[request.work_order_id][f"{prefix}_digest"] = str(
-                digest or ""
-            )
-    next_state["issued_authorities"] = issued_next
-    return store.commit(next_state, expected_revision=expected_revision)
+def delegated_authority_tier(request: DelegatedAuthorityRuntimeRequest) -> str:
+    """Derive the canonical signer authority tier from effect-bearing fields."""
+
+    return (
+        HIGH_AUTHORITY_TIER
+        if request.requested_operation in HIGH_AUTHORITY_OPERATIONS
+        or request.valve_state_required in HIGH_AUTHORITY_VALVE_STATES
+        else LOW_AUTHORITY_TIER
+    )
 
 
 def issue_delegated_authority_runtime(
@@ -433,6 +433,10 @@ def issue_delegated_authority_runtime(
     signer: Optional[IsolatedSignerClient] = None,
     principal_resolver: Optional[PrincipalAuthorityResolver] = None,
     snapshot_resolver: PermissionSnapshotResolver,
+    queue_authority_admission: Optional[VerifiedQueueAuthorityAdmission] = None,
+    elevated_consensus_capability: Optional[
+        VerifiedElevatedAuthorityConsensusCapability
+    ] = None,
     now: int,
     leeway_s: int = 60,
 ) -> DelegatedAuthorityRuntimeResult:
@@ -442,12 +446,20 @@ def issue_delegated_authority_runtime(
     receipt and nonce reservation through the provided store after both signing
     responses pass the E0 boundary-attestation checks.
     """
-
     signer_client = signer or FailClosedSignerClient()
     principal_lookup = principal_resolver or FailClosedPrincipalAuthorityResolver()
 
     if not isinstance(request, DelegatedAuthorityRuntimeRequest):
         return _rejection_result(now=now, request=None, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
+    if not consume_current_queue_authority(
+        queue_authority_admission,
+        request=request,
+    ):
+        return _rejection_result(
+            now=now,
+            request=request,
+            reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
+        )
     if not _assert_ascii_deep(request.to_dict()):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.NON_ASCII])
     if request.issued_at > now + leeway_s:
@@ -501,43 +513,30 @@ def issue_delegated_authority_runtime(
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_DIGEST_MISMATCH])
     if not snapshot.grants(request.requested_operation, request.repo_full_name):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.SNAPSHOT_INSUFFICIENT])
-    if (
-        not request.wsp15_allocation_receipt_id.startswith("sha256:")
-        or not request.wsp15_allocation_digest.startswith("sha256:")
-        or request.wsp15_priority not in {"P0", "P1", "P2", "P3", "P4"}
-        or type(request.wsp15_mps_total) is not int
-        or request.wsp15_reasoning_tier not in {"REGULAR", "HIGH", "ULTRA"}
-    ):
+    if not validate_progressive_runtime_request(request):
+        return _rejection_result(
+            now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST]
+        )
+    has_runtime_binding = runtime_binding_request_valid(request)
+    if has_runtime_binding is None:
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
-    has_runtime_binding = bool(request.model_runtime_binding_receipt_id or request.model_runtime_binding_digest)
-    if has_runtime_binding and not (
-        str(request.model_runtime_binding_receipt_id or "").startswith("reddog_model_runtime_binding:")
-        and str(request.model_runtime_binding_digest or "").startswith("sha256:")
-    ):
-        return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.MALFORMED_REQUEST])
-    for receipt_id, digest in (
-        (request.model_selection_receipt_id, request.model_selection_digest),
-        (request.memex_supply_receipt_id, request.memex_supply_digest),
-    ):
-        if bool(receipt_id) != bool(digest) or (
-            digest and not str(digest).startswith("sha256:")
-        ):
-            return _rejection_result(
-                now=now,
-                request=request,
-                reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
-            )
+    if not optional_authority_bindings_valid(request):
+        return _rejection_result(
+            now=now,
+            request=request,
+            reasons=[RuntimeRejectCode.MALFORMED_REQUEST],
+        )
 
-    effective_paths = set(request.allowed_paths) - set(request.denied_paths)
-    if not effective_paths or not all(_path_within_foundup(path, request.foundup_id) for path in effective_paths):
+    if not _effective_paths_valid(request):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.PATH_OUT_OF_SCOPE])
 
-    authority_tier = (
-        HIGH_AUTHORITY_TIER
-        if request.requested_operation in HIGH_AUTHORITY_OPERATIONS
-        or request.valve_state_required in HIGH_AUTHORITY_VALVE_STATES
-        else LOW_AUTHORITY_TIER
-    )
+    authority_tier = delegated_authority_tier(request)
+    if authority_tier == HIGH_AUTHORITY_TIER and has_runtime_binding is not True:
+        return _rejection_result(
+            now=now,
+            request=request,
+            reasons=[RuntimeRejectCode.ELEVATED_AUTHOR_RUNTIME_EVIDENCE_REQUIRED],
+        )
     if authority_tier == HIGH_AUTHORITY_TIER and not (
         request.consensus_receipt_digest and request.sovereign_authorization_digest
     ):
@@ -545,6 +544,25 @@ def issue_delegated_authority_runtime(
             now=now,
             request=request,
             reasons=[RuntimeRejectCode.HIGH_AUTHORITY_NEEDS_COSIGN],
+        )
+    if authority_tier == LOW_AUTHORITY_TIER:
+        if any((
+            request.consensus_receipt_digest,
+            request.sovereign_authorization_digest,
+            elevated_consensus_capability is not None,
+        )):
+            return _rejection_result(
+                now=now,
+                request=request,
+                reasons=[RuntimeRejectCode.LOW_AUTHORITY_CONSENSUS_FORBIDDEN],
+            )
+    elif type(elevated_consensus_capability) is not (
+        VerifiedElevatedAuthorityConsensusCapability
+    ):
+        return _rejection_result(
+            now=now,
+            request=request,
+            reasons=[RuntimeRejectCode.ELEVATED_CONSENSUS_NOT_VERIFIED],
         )
 
     state = store.load()
@@ -562,154 +580,72 @@ def issue_delegated_authority_runtime(
     ):
         return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.REVOKED])
 
-    identity = {
-        "principal_id": request.principal_id,
-        "principal_provider": request.principal_provider,
-        "principal_public_key": request.principal_public_key,
-        "principal_key_fingerprint": principal_fingerprint,
-        "principal_wallet": principal.principal_wallet,
-        "reddog_id": request.reddog_id,
-        "reddog_public_key": request.reddog_public_key,
-        "reddog_key_fingerprint": reddog_fingerprint,
-        "repo_scope": list(principal.repo_scope),
-        "foundup_scope": list(principal.foundup_scope),
-        "reward_account": principal.reward_account,
-        "owner_dae": principal.owner_dae,
-        "revocation_policy": {
-            "ttl_seconds": max(0, request.identity_expires_at - request.issued_at),
-            "allowlist_bound": True,
-            "kill_switch_ref": f"reddog_revocation:{request.reddog_id}",
-        },
-        "identity_nonce": request.identity_nonce,
-        "issued_at": request.issued_at,
-        "expires_at": request.identity_expires_at,
-    }
-    identity_input = canonical_signing_input(identity, PREFIX_IDENTITY)
-    identity_sign = signer_client.sign(
-        SigningRequest(
-            signing_input=identity_input,
-            payload_digest="sha256:" + _canonical_digest({"signing_input": identity_input}),
-            signer_role="principal",
-            signer_public_key=request.principal_public_key,
-            requester_principal_id=request.principal_id,
-            nonce=request.identity_nonce,
-            key_epoch=request.key_epoch,
-            requested_operation="delegate_reddog_identity",
-            authority_tier=authority_tier,
-            consensus_receipt_digest=request.consensus_receipt_digest,
-        )
+    signing_plan = build_delegated_authority_signing_requests(
+        request,
+        principal,
+        authority_tier=authority_tier,
+        has_runtime_binding=has_runtime_binding,
     )
-    reject = _validate_signing_response(
-        identity_sign,
-        expected_public_key=request.principal_public_key,
-        expected_fingerprint=principal_fingerprint,
-        expected_key_epoch=request.key_epoch,
+    return _execute_signing_plan(
+        request=request,
+        store=store,
+        signer=signer_client,
+        authority_tier=authority_tier,
+        elevated_consensus_capability=elevated_consensus_capability,
+        signing_plan=signing_plan,
+        principal_fingerprint=principal_fingerprint,
+        reddog_fingerprint=reddog_fingerprint,
+        now=now,
     )
-    if reject:
-        return _rejection_result(now=now, request=request, reasons=[reject])
-    identity["signature"] = identity_sign.signature
 
-    work_authority = {
-        "work_order_id": request.work_order_id,
-        "work_order_digest": request.work_order_digest,
-        "base_ref": request.base_ref,
-        "principal_id": request.principal_id,
-        "reddog_id": request.reddog_id,
-        "repo_full_name": request.repo_full_name,
-        "foundup_id": request.foundup_id,
-        "allowed_paths": list(request.allowed_paths),
-        "denied_paths": list(request.denied_paths),
-        "requested_operation": request.requested_operation,
-        "permission_snapshot_digest": request.permission_snapshot_digest,
-        "wsp15_allocation_receipt_id": request.wsp15_allocation_receipt_id,
-        "wsp15_allocation_digest": request.wsp15_allocation_digest,
-        "wsp15_priority": request.wsp15_priority,
-        "wsp15_mps_total": request.wsp15_mps_total,
-        "wsp15_reasoning_tier": request.wsp15_reasoning_tier,
-        "nonce": request.work_authority_nonce,
-        "issued_at": request.issued_at,
-        "expires_at": request.work_authority_expires_at,
-        "valve_state_required": request.valve_state_required,
-        "key_epoch": request.key_epoch,
-        "signer_public_key": request.reddog_public_key,
-        "authority_tier": authority_tier,
-        "consensus_receipt_digest": request.consensus_receipt_digest,
-        "sovereign_authorization_digest": request.sovereign_authorization_digest,
-        "receipt_chain": [],
-    }
-    if has_runtime_binding:
-        work_authority["model_runtime_binding_receipt_id"] = str(request.model_runtime_binding_receipt_id)
-        work_authority["model_runtime_binding_digest"] = str(request.model_runtime_binding_digest)
-    for prefix in ("model_selection", "memex_supply"):
-        receipt_id = getattr(request, f"{prefix}_receipt_id")
-        digest = getattr(request, f"{prefix}_digest")
-        if receipt_id and digest:
-            work_authority[f"{prefix}_receipt_id"] = str(receipt_id)
-            work_authority[f"{prefix}_digest"] = str(digest)
-    workauth_input = canonical_signing_input(work_authority, PREFIX_WORKAUTH)
-    workauth_sign = signer_client.sign(
-        SigningRequest(
-            signing_input=workauth_input,
-            payload_digest="sha256:" + _canonical_digest({"signing_input": workauth_input}),
-            signer_role="reddog",
-            signer_public_key=request.reddog_public_key,
-            requester_principal_id=request.principal_id,
-            nonce=request.work_authority_nonce,
-            key_epoch=request.key_epoch,
-            requested_operation=request.requested_operation,
-            authority_tier=authority_tier,
-            consensus_receipt_digest=request.consensus_receipt_digest,
-        )
-    )
-    reject = _validate_signing_response(
-        workauth_sign,
-        expected_public_key=request.reddog_public_key,
-        expected_fingerprint=reddog_fingerprint,
-        expected_key_epoch=request.key_epoch,
-    )
-    if reject:
-        return _rejection_result(now=now, request=request, reasons=[reject])
-    work_authority["signature"] = workauth_sign.signature
 
-    identity_digest = "sha256:" + _canonical_digest(identity)
-    workauth_digest = "sha256:" + _canonical_digest(work_authority)
-    receipt_payload = {
-        "status": AUTHORITY_ISSUED,
-        "work_order_id": request.work_order_id,
-        "identity_digest": identity_digest,
-        "work_authority_digest": workauth_digest,
-        "generated_at": now,
-    }
-    receipt_id = "authority-runtime-" + _canonical_digest(receipt_payload)[:16]
-    try:
-        revision = _commit_issued_authority(
-            store,
-            request=request,
-            identity_digest=identity_digest,
-            work_authority_digest=workauth_digest,
-            receipt_id=receipt_id,
-        )
-    except Exception:
-        return _rejection_result(now=now, request=request, reasons=[RuntimeRejectCode.STORE_COMMIT_FAILED])
+def build_delegated_authority_signing_requests(
+    request: DelegatedAuthorityRuntimeRequest,
+    principal: PrincipalAuthorityRecord,
+    *,
+    authority_tier: str,
+    has_runtime_binding: bool,
+) -> tuple[dict[str, Any], dict[str, Any], SigningRequest, SigningRequest]:
+    """Build the two exact signer requests approved by elevated consensus."""
 
-    receipt = DelegatedAuthorityRuntimeReceipt(
-        receipt_id=receipt_id,
-        status=AUTHORITY_ISSUED,
-        generated_at=now,
-        work_order_id=request.work_order_id,
-        principal_id=request.principal_id,
-        reddog_id=request.reddog_id,
-        identity_digest=identity_digest,
-        work_authority_digest=workauth_digest,
-        store_revision=revision,
-        signer_audit_macs=(identity_sign.audit_mac, workauth_sign.audit_mac),
-        rejection_reasons=(),
+    from modules.communication.moltbot_bridge.src.reddog_delegated_authority_signing_plan import (
+        build_delegated_authority_signing_requests as build_plan,
     )
-    return DelegatedAuthorityRuntimeResult(
-        accepted=True,
-        receipt=receipt,
-        identity=identity,
-        work_authority=work_authority,
+
+    return build_plan(
+        request,
+        principal,
+        authority_tier=authority_tier,
+        has_runtime_binding=has_runtime_binding,
+    )
+
+
+def _execute_signing_plan(
+    *,
+    request: DelegatedAuthorityRuntimeRequest,
+    store: AuthorityRuntimeStore,
+    signer: IsolatedSignerClient,
+    authority_tier: str,
+    elevated_consensus_capability: VerifiedElevatedAuthorityConsensusCapability | None,
+    signing_plan: tuple[dict[str, Any], dict[str, Any], SigningRequest, SigningRequest],
+    principal_fingerprint: str,
+    reddog_fingerprint: str,
+    now: int,
+) -> DelegatedAuthorityRuntimeResult:
+    from modules.communication.moltbot_bridge.src.reddog_delegated_authority_signing_execution import (
+        execute_signing_plan,
+    )
+
+    return execute_signing_plan(
+        request=request,
+        store=store,
+        signer=signer,
+        authority_tier=authority_tier,
+        elevated_consensus_capability=elevated_consensus_capability,
+        signing_plan=signing_plan,
+        principal_fingerprint=principal_fingerprint,
+        reddog_fingerprint=reddog_fingerprint,
+        now=now,
     )
 
 
@@ -732,6 +668,7 @@ __all__ = [
     "RuntimeRejectCode",
     "SigningRequest",
     "SigningResponse",
+    "delegated_authority_tier",
     "issue_delegated_authority_runtime",
     "public_key_fingerprint",
 ]

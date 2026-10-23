@@ -13,23 +13,24 @@ Purpose:
 
 Flow:
     1. If on main -> skip (nothing to do)
-    2. Refuse if main is checked out in another worktree
-    3. git fetch --all --quiet
+    2. Require a named branch, readable worktrees and a clean working tree
+    3. Require git fetch --all --quiet to succeed
     4. Push current branch to both remotes (ensure nothing lost)
     5. Try fast-forward: git push origin HEAD:main
     6. If fails (diverged) -> create PR via gh, merge via gh pr merge
-    7. Update local main: git branch -f main origin/main
-    8. Checkout main
-    9. Delete old feature branch (local + both remotes)
+    7. Require a second clean/readable status before local cleanup
+    8. Fetch/resolve main, recheck status and require local synchronization
+    9. Retain branches when deletion is requested but not qualified
 
 Environment:
     GIT_MAIN_MERGE_SENTINEL=1           Enable sentinel (default OFF)
     GIT_MAIN_MERGE_SENTINEL_ENFORCED=0  If 1, block startup on failure
-    GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Delete merged branch (default ON)
+    GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH=1  Request cleanup (currently retained)
 """
 
 import logging
 import os
+import re
 import subprocess
 from pathlib import Path
 from typing import Any
@@ -99,32 +100,72 @@ def _gh(args: list[str], repo_root: Path, timeout: int = 60) -> tuple[bool, str]
         return False, str(e)
 
 
-def _branch_checkout_paths(repo_root: Path, branch: str) -> list[Path]:
-    """Return other worktree paths where the branch is checked out."""
+def _branch_checkout_paths(
+    repo_root: Path, branch: str, current_branch: str,
+) -> list[Path] | None:
+    """Return other branch checkouts, or None when discovery is unavailable."""
 
     ok, output = _git(["worktree", "list", "--porcelain"], repo_root, timeout=15)
-    if not ok:
-        return []
+    if not ok or not output.strip():
+        return None
 
     root = repo_root.resolve()
     branch_ref = f"refs/heads/{branch}"
-    current_path: Path | None = None
     matches: list[Path] = []
-    for raw in output.splitlines():
-        line = raw.strip()
-        if line.startswith("worktree "):
-            current_path = Path(line.split(" ", 1)[1])
-            continue
-        if line.startswith("branch ") and current_path is not None:
-            if line.split(" ", 1)[1] == branch_ref:
-                try:
-                    resolved = current_path.resolve()
-                except OSError:
-                    resolved = current_path
-                if resolved != root:
-                    matches.append(resolved)
-            current_path = None
-    return matches
+    current_seen = False
+    for record in output.strip().split("\n\n"):
+        lines = record.splitlines()
+        paths = [line[9:] for line in lines if line.startswith("worktree ")]
+        states = [line for line in lines
+                  if line.startswith("branch ") or line in ("detached", "bare")]
+        if len(paths) != 1 or not paths[0].strip() or len(states) != 1:
+            return None
+        try:
+            resolved = Path(paths[0]).resolve()
+        except (OSError, ValueError):
+            return None
+        if resolved == root:
+            if current_seen or states[0] != f"branch refs/heads/{current_branch}":
+                return None
+            current_seen = True
+        elif states[0] == f"branch {branch_ref}":
+            matches.append(resolved)
+    # A competing main checkout is independently sufficient to block. Otherwise
+    # require evidence for this checkout rather than treating an omission as safe.
+    return matches if matches or current_seen else None
+
+
+def _synchronize_local_main(repo_root: Path, actions: list[str]) -> str | None:
+    """Refresh and pin a commit before local cleanup; snapshots are not locks."""
+    ok, status = _git(["status", "--porcelain", "--untracked-files=all"], repo_root)
+    if not ok or status.strip():
+        actions.append("blocked: cleanup requires a clean, readable working tree")
+        return "cleanup_working_tree_dirty" if ok else "cleanup_status_failed"
+
+    ok, _ = _git(
+        ["fetch", "--no-tags", "--quiet", "origin",
+         "+refs/heads/main:refs/remotes/origin/main"], repo_root, timeout=15,
+    )
+    if not ok:
+        return "cleanup_fetch_failed"
+    actions.append("refreshed origin/main")
+    ok, commit = _git(
+        ["rev-parse", "--verify", "refs/remotes/origin/main^{commit}"], repo_root,
+    )
+    if not ok or not re.fullmatch(r"(?:[0-9a-f]{40}|[0-9a-f]{64})", commit):
+        return "cleanup_commit_resolution_failed"
+
+    # Capture once: later ref movement cannot change this update's target.
+    # Ref changes before capture and changes after status remain separate races.
+    ok, status = _git(["status", "--porcelain", "--untracked-files=all"], repo_root)
+    if not ok or status.strip():
+        actions.append("blocked: cleanup requires a clean, readable working tree")
+        return "cleanup_working_tree_dirty" if ok else "cleanup_status_failed"
+    ok, _ = _git(["branch", "-f", "main", commit], repo_root)
+    if not ok:
+        return "cleanup_main_update_failed"
+    actions.append("updated local main")
+    return None
 
 
 def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, Any]:
@@ -163,6 +204,11 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
         result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
         return result
 
+    if not current_branch.strip() or current_branch == "HEAD":
+        result["error"] = "named_branch_required"
+        result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+        return result
+
     # If on main, nothing to do
     if current_branch == "main":
         result["actions"].append("skip (already on main)")
@@ -171,11 +217,23 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
     result["branch"] = current_branch
     logger.info(f"[GIT-MERGE-SENTINEL] Merging {current_branch} -> main")
 
-    main_paths = _branch_checkout_paths(repo_root, "main")
+    main_paths = _branch_checkout_paths(repo_root, "main", current_branch)
+    if main_paths is None:
+        result["error"] = "worktree_discovery_failed"
+        result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+        return result
     if main_paths:
         result["actions"].append("blocked: main checked out in another worktree")
         result["error"] = "main_checked_out_in_another_worktree"
         result["main_worktree_paths"] = [str(path) for path in main_paths]
+        result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+        return result
+
+    # Reject unknown/dirty state at preflight; later concurrent changes remain
+    # a separate downstream ownership problem, not solved by this snapshot.
+    ok, status = _git(["status", "--porcelain", "--untracked-files=all"], repo_root)
+    if not ok or status.strip():
+        result["error"] = "working_tree_dirty" if ok else "working_tree_status_failed"
         result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
         return result
 
@@ -184,8 +242,10 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
     if ok:
         result["actions"].append("fetched")
     else:
-        # Non-fatal - continue without fetch
-        result["actions"].append(f"fetch failed (continuing): {output}")
+        result["actions"].append("blocked: fetch failed")
+        result["error"] = "fetch_failed"
+        result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+        return result
 
     # Push current branch to origin (ensure nothing lost)
     ok, output = _git(["push", "origin", current_branch], repo_root, timeout=30)
@@ -221,7 +281,7 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
         ok, pr_check = _gh(["pr", "view", "--json", "state,number"], repo_root)
         if ok and '"state":"OPEN"' in pr_check:
             # PR exists, try to merge it
-            ok, merge_out = _gh(["pr", "merge", "--merge", "--delete-branch"], repo_root, timeout=120)
+            ok, merge_out = _gh(["pr", "merge", "--merge"], repo_root, timeout=120)
             if ok:
                 result["actions"].append("merged via existing PR")
                 result["merged"] = True
@@ -238,7 +298,7 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
                 result["actions"].append(f"created PR: {pr_out}")
 
                 # Merge the PR
-                ok, merge_out = _gh(["pr", "merge", "--merge", "--delete-branch"], repo_root, timeout=120)
+                ok, merge_out = _gh(["pr", "merge", "--merge"], repo_root, timeout=120)
                 if ok:
                     result["actions"].append("merged via new PR")
                     result["merged"] = True
@@ -249,50 +309,27 @@ def run_main_merge_sentinel(repo_root: Path, force: bool = False) -> dict[str, A
 
     # If merged, update local main and checkout
     if result["merged"]:
-        # Update local main to match origin/main
-        ok, _ = _git(["branch", "-f", "main", "origin/main"], repo_root)
-        if ok:
-            result["actions"].append("updated local main")
+        # Command success is not main verification or cleanup authority.
+        error = _synchronize_local_main(repo_root, result["actions"])
+        if error:
+            result["error"] = error
+            result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+            return result
 
-        # Check for uncommitted changes before checkout
-        ok, status = _git(["status", "--porcelain"], repo_root)
-        has_changes = bool(status.strip()) if ok else False
-
-        if has_changes:
-            # Stash changes
-            ok, _ = _git(["stash", "push", "-m", "git-merge-sentinel-auto-stash"], repo_root)
-            if ok:
-                result["actions"].append("stashed changes")
-
-        # Checkout main
         ok, output = _git(["checkout", "main"], repo_root)
         if ok:
             result["actions"].append("checked out main")
 
-            # Pop stash if we stashed
-            if has_changes:
-                ok, _ = _git(["stash", "pop"], repo_root)
-                if ok:
-                    result["actions"].append("restored stash")
-
-            # Delete the old feature branch if configured
+            # Ref comparison and checked-out-worktree protection have not been
+            # qualified together. Preserve refs instead of guessing ownership.
             if _env_bool("GIT_MAIN_MERGE_SENTINEL_DELETE_BRANCH", default=True):
-                # Delete local branch
-                ok, _ = _git(["branch", "-D", current_branch], repo_root)
-                if ok:
-                    result["actions"].append(f"deleted local {current_branch}")
-
-                # Delete remote branch (origin)
-                ok, _ = _git(["push", "origin", "--delete", current_branch], repo_root, timeout=30)
-                if ok:
-                    result["actions"].append(f"deleted origin/{current_branch}")
-
-                # Delete remote branch (backup)
-                ok, _ = _git(["push", "backup", "--delete", current_branch], repo_root, timeout=30)
-                if ok:
-                    result["actions"].append(f"deleted backup/{current_branch}")
+                result["actions"].append("blocked: automatic branch deletion is not qualified")
+                result["error"] = "cleanup_deletion_unqualified"
+                result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
+                return result
         else:
             result["actions"].append(f"checkout main failed: {output}")
+            result["error"] = "cleanup_checkout_failed"
             result["passed"] = not _env_bool("GIT_MAIN_MERGE_SENTINEL_ENFORCED", default=False)
     else:
         # Merge failed

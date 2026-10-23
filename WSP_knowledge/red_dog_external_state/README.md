@@ -1,5 +1,12 @@
 # RedDog External State - Session Continuity Capture
 
+> **ARCHIVAL CONTEXT ONLY:** Files in this directory are manually curated
+> snapshots, never live authority for Git HEAD, PR state, workers, runtimes, or
+> HoloIndex freshness. WSP_00 may route here for continuity, but WSP 50 and
+> WSP 97 require fresh evidence from each owning system before action.
+
+**Canonical Red Dog vision:** `docs/REDDOG_OUTCOME_VISION.md`
+
 **Slice**: `REDDOG_SESSION_CONTINUITY_CAPTURE_PHASE1`
 
 This directory provides a curated, manually-imported continuity channel for work
@@ -60,11 +67,11 @@ Session files MUST NOT contain:
 WSP_knowledge/red_dog_external_state/
   README.md                      # This file (human index)
   SCHEMA.md                      # Field-by-field contract
-  BOOTSTRAP.md                   # Boot card with strict read-order
+  BOOTSTRAP.md                   # Historical boot card with strict read-order
   MEMORY_BOUNDARY.md             # What CAN and MUST NOT be remembered
-  CURRENT_CONTEXT.md             # Active lanes, HEAD, worker roles
-  WORK_TO_WORK_LINEAGE.md        # Recent PR/slice chain
-  ACTIVE_RESEARCH_THREADS.md     # Open threads with next-action slices
+  CURRENT_CONTEXT.md             # Historical lanes, HEAD, worker-role snapshot
+  WORK_TO_WORK_LINEAGE.md        # Historical PR/slice-chain snapshot
+  ACTIVE_RESEARCH_THREADS.md     # Historical research-thread snapshot
   sessions/
     <captured_at>__<session_id>.json
 ```
@@ -78,6 +85,7 @@ Reserved sibling directories for future source-specific adapters:
 
 ## Related
 
+- `docs/REDDOG_OUTCOME_VISION.md` - Canonical Red Dog outcome / north star
 - [BOOTSTRAP.md](BOOTSTRAP.md) - Boot card with strict read-order (referenced by WSP_00)
 - [SCHEMA.md](SCHEMA.md) - Session closeout schema specification
 - [MEMORY_BOUNDARY.md](MEMORY_BOUNDARY.md) - Curated vs forbidden memory boundary

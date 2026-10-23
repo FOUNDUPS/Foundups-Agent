@@ -11,9 +11,8 @@ from modules.communication.moltbot_bridge.src import (
     reddog_main_resident_queue_serial_loop_bootstrap as bootstrap,
 )
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
+    AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING,
     GovernedValveUseTimeAuthorityResolver,
-    SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING,
     _digest,
     _signed_binding_reasons,
 )
@@ -59,7 +58,9 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
         encoding="utf-8",
     )
     captured: dict[str, object] = {}
-    dependency_bundle = SimpleNamespace(
+    issuer = object()
+    from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import RedDogMainResidentQueueRuntimeDependencyBundle
+    dependency_bundle = RedDogMainResidentQueueRuntimeDependencyBundle(
         accepted=True,
         rejection_reasons=(),
         status="READY",
@@ -111,12 +112,16 @@ def test_bootstrap_routes_canonical_environment_and_use_time_resolver(
         now_iso=NOW,
         now_epoch=dependency_bundle.now_epoch,
         max_steps=1,
+        worktree_lease_issuer=issuer,
+        signer_peer_secret_access_grant_supplier=issuer,
     )
 
     assert result.accepted is True, result.rejection_reasons
+    assert captured["worktree_lease_issuer"] is issuer
     assert isinstance(captured["valve_environment"], GovernedExecutionValveEnvironment)
     resolver = captured["governed_use_time_authority_resolver"]
     assert isinstance(resolver, GovernedValveUseTimeAuthorityResolver)
+    assert resolver.signer_peer_secret_access_grant_supplier is issuer
     assert resolver.valve_environment_path == runtime / "execution_valve_env.json"
     assert resolver.permission_snapshots_path == runtime / "permission_snapshots.json"
 
@@ -242,6 +247,11 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
     tmp_path, monkeypatch,
 ) -> None:
     repo, runtime = _roots(tmp_path, canonical_artifacts=True)
+    valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
+    work_order_id = valve["work_order_id"]
+    work_orders_path = runtime / "work_orders.json"
+    work_orders_path.write_text(json.dumps({"work_orders": {
+        work_order_id: {"work_order_id": work_order_id}}}), encoding="utf-8")
     link = runtime / "valve-link.json"
     try:
         link.symlink_to(runtime / "execution_valve_env.json")
@@ -260,7 +270,7 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
         work_state_path=runtime / "authoritative_work_state.json",
         chain_results_path=runtime / "chain_results.json",
         authority_profile_path=runtime / "authority_profile.json",
-        work_order_materializer_mode="authority_profile",
+        work_orders_path=work_orders_path,
         valve_environment_path=link,
         runtime_allowed_root=runtime,
         requested_queue_item_id=QUEUE_ID,
@@ -272,8 +282,9 @@ def test_bootstrap_rejects_symlinked_valve_artifact_before_dependency_bundle(
     assert result.rejection_reasons == ("malformed_valve_environment",)
 
 
+@pytest.mark.parametrize("fresh_now", [1_784_006_400, 1_784_006_405, True, None, 1_784_006_399])
 def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_anchors(
-    tmp_path, monkeypatch,
+    tmp_path, monkeypatch, fresh_now,
 ) -> None:
     repo, runtime = _roots(tmp_path, canonical_artifacts=True)
     valve = json.loads((runtime / "execution_valve_env.json").read_text(encoding="utf-8"))
@@ -333,9 +344,9 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         work_state_path=runtime / "authoritative_work_state.json",
         authority_profile_path=runtime / "authority_profile.json",
         permission_snapshots_path=runtime / "permission_snapshots.json",
-            principal_authority_records_path=runtime / "principal_authority_records.json",
-            valve_environment_path=runtime / "execution_valve_env.json",
-            runtime_allowed_root=runtime,
+        principal_authority_records_path=runtime / "principal_authority_records.json",
+        valve_environment_path=runtime / "execution_valve_env.json",
+        runtime_allowed_root=runtime,
         signature_verifier=object(),
         principal_key_resolver=object(),
         nonce_store=object(),
@@ -343,7 +354,7 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         revocation_oracle=object(),
         now_epoch=1_784_006_400,
         required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
-        trusted_now_epoch=lambda: 1_784_006_400,
+        trusted_now_epoch=lambda: fresh_now,
     )
 
     result = resolver.resolve(
@@ -353,74 +364,24 @@ def test_real_use_time_resolver_reverifies_without_consuming_and_names_missing_a
         selected_slice="REDDOG_TEST_SLICE_PHASE1",
     )
 
+    if type(fresh_now) is not int or fresh_now < resolver.now_epoch:
+        assert not calls
+        assert result.rejection_reasons == ("canonical_trusted_clock_invalid",)
+        assert result.signed_authority_reverified is False
+        return
     assert len(calls) == 1
+    assert calls[0]["now"] == fresh_now
     assert (
         calls[0]["verification_phase"]
         == WorkAuthorityVerificationPhase.PREFLIGHT_NON_CONSUMING
     )
     assert result.signed_authority_reverified is True
     assert result.authoritative_use_lease is None
-    assert SIGNED_RUNTIME_ARTIFACT_MANIFEST_PRODUCER_MISSING in result.rejection_reasons
+    assert AUTHENTICATED_RUNTIME_ARTIFACT_MANIFEST_SELECTION_MISSING in result.rejection_reasons
     assert "canonical_consensus_receipt_verifier_missing" in result.rejection_reasons
     assert "canonical_sovereign_authorization_verifier_missing" in result.rejection_reasons
     assert "canonical_model_selection_signed_evidence_verifier_missing" in result.rejection_reasons
     assert "canonical_memex_supply_signed_evidence_verifier_missing" in result.rejection_reasons
-
-
-@pytest.mark.parametrize(
-    "expiry_boundary",
-    ("identity_expires_at", "permission_snapshot_expires_at"),
-)
-def test_terminal_authoritative_use_verification_receives_fresh_clock(
-    tmp_path, monkeypatch, expiry_boundary: str,
-) -> None:
-    clock = [100]
-    calls: list[dict[str, object]] = []
-
-    def verify(**kwargs):
-        calls.append(kwargs)
-        return VerificationResult(
-            accepted=int(kwargs["now"]) < 150,
-            work_order_id="wo-fresh-clock",
-            reason_codes=[] if int(kwargs["now"]) < 150 else [expiry_boundary],
-        )
-
-    monkeypatch.setattr(
-        "modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority.verify_delegated_work_authority",
-        verify,
-    )
-    resolver = GovernedValveUseTimeAuthorityResolver(
-        repo_root=tmp_path / "repo",
-        work_state_path=None,
-        authority_profile_path=None,
-        permission_snapshots_path=None,
-        principal_authority_records_path=None,
-        valve_environment_path=None,
-        runtime_allowed_root=tmp_path / "runtime",
-        signature_verifier=object(),
-        principal_key_resolver=object(),
-        nonce_store=object(),
-        snapshot_resolver=object(),
-        revocation_oracle=object(),
-        now_epoch=100,
-        required_valve_state="VALVE_OPEN_WORKTREE_CREATE",
-        trusted_now_epoch=lambda: clock[0],
-    )
-    lease = AuthoritativeUseLease(
-        lambda: resolver._consume_authoritative_nonce(
-            identity={"expires_at": 150},
-            work_authority={"work_order_id": "wo-fresh-clock", "expires_at": 200},
-        ),
-        expires_at_epoch=200,
-        trusted_now_epoch=lambda: clock[0],
-    )
-
-    clock[0] = 150
-    assert lease.consume() is False
-    assert len(calls) == 1
-    assert calls[0]["now"] == 150
-    assert calls[0]["verification_phase"] is WorkAuthorityVerificationPhase.AUTHORITATIVE_USE
-
 
 def test_use_time_binding_rejects_base_ref_and_full_work_order_splices() -> None:
     original = {"work_order_id": "wo-bound", "base_ref": "main", "task_summary": "one"}

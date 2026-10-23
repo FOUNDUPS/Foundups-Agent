@@ -2,6 +2,97 @@
 
 ## Chronological Change Log
 
+### 2026-10-18 - AutoPost as the mobile Live product vehicle
+
+- Corrected the [mobile-studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md)
+  after auditing canonical AutoPost source. AutoPost owns capture/Live mode;
+  shared creator control and pfMALL discovery keep their separate boundaries.
+- Updated the [M2M outcome](docs/mobile_studio/mobile_studio_outcome.v1.json),
+  pfMALL/member/domain roadmaps and owner references. The first media proof is
+  foreground WebRTC through an authenticated relay; native adoption is based
+  on measured requirements. OBS camera contribution and remote control differ.
+- Preserved the API evidence register and unrelated open PRs. Only existing
+  documentation changed; device, channel, streaming and deployed behavior remain
+  unverified. WSP 00/10/15/22/50/57/83/84/97; priority 14/P1. The owning PRs record
+  validation, squash-merge and main readback for each repository.
+
+---
+
+### 2026-10-17 - Play mobile creator studio documentation and roadmap
+
+- Extended the existing p.fMALL planning owner after inspecting main at
+  `407292aa754a88143796163581b67ca6679eac29`; no parallel application repository
+  or new FoundUp identity was created.
+- Added the [mobile studio contract](docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md),
+  [dated YouTube API evidence](docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md)
+  and [M2M outcome](docs/mobile_studio/mobile_studio_outcome.v1.json). The bounded
+  collection has its own [manifest](docs/mobile_studio/doc_index.json) and
+  [execution receipt](docs/mobile_studio/wsp97_execution_receipt.json).
+- Updated p.fMALL README/INTERFACE/ROADMAP/ModLog, the domain roadmap and the
+  member roadmap's current-state pointer before implementation. Recorded current
+  reuse, API limits, eligibility, recovery, explicit unknowns and acceptance gates.
+- Documentation-only scope; current provider/channel/device verification and
+  creator-runtime admission remain absent. The PR owns validation and merge
+  evidence. WSP 00/10/15/22/50/57/83/84/97; planning score 14/P1.
+
+---
+
+### 2026-09-15 - AmIBot declarative registry onboarding
+
+- Continued the existing `detect_ai` intake in PR #1751. Added its single canonical
+  registry entry, declarative manifest and missing interface contract; retained
+  the other 17 entities unchanged.
+- Applied the existing genesis-intake guidance and onboarding protocol. AmIBot
+  stays `skeleton_candidate`, `SPECIFIED`, hidden, unbuilt and `TOKEN_DEFERRED`.
+  Its requested `/f/amibot` remains a shell-owner dependency; WSP 104 declares
+  inactive `/f/detect_ai` and `idb_detect_ai` under the permanent identity.
+- Validation and five pre-existing domain contract failures are distinguished in
+  [AmIBot validation](detect_ai/docs/VALIDATION.md). No catalog or runtime changes.
+- WSP 00/15/22/49/50/91/95/97/104/109.
+
+---
+
+### 2026-08-30 - RedDog Lick cross-domain planning reference
+
+- Linked the RedDog-owned Lick handshake into FoundUps planning without
+  relocating it into the FoundUps domain or WSP framework.
+- Defined AutoPost as the permissioned capture surface and RedDog as the
+  encounter-confidence interpreter; feasibility is one consumer and neither
+  record grants work authority.
+- Updated the stale AutoPost implementation summary to defer to its external
+  repository's current Liquid VLM and provider-neutral capture contracts.
+- Documentation only. WSP 15/22/50/73/87/97.
+
+---
+
+### 2026-08-30 - eSingularity FoundUp Monorepo Migration
+
+- Added `modules/foundups/esingularity/` as the canonical internal Proto for
+  Project eSingularity and its live Japanese-first campaign PWA.
+- Migrated the existing Sites source into the module's `frontend/` block while
+  preserving the live domain, hosting project, D1 declaration, routes, assets,
+  and public behavior.
+- Added the FoundUp manifest, registry entry, WSP 104 namespace, scope-free
+  public catalog projection, module memory, documentation, and contract tests.
+- Token status remains `TOKEN_DEFERRED`; no fundraising, CABR, payout, DAO, DNS,
+  or Foundups shell authority was activated.
+
+**WSP References:** WSP 3, 22, 49, 60, 97, 104
+
+---
+
+### 2026-08-26 - Canonical FoundUps/RedDog Lifecycle Alignment
+
+- Repaired the master architecture's false "no PWA" and fixed-scale claims.
+- Distinguished the implemented p.fMALL PWA shell from the target Progressive
+  Web Agent, stake gate, stakeholder interior, and authenticated RedDog
+  transport.
+- Defined RedDog/0102, OpenClaw, WRE, Hermes, phone, and p.fMALL boundaries
+  without making the browser or one OpenClaw instance authoritative.
+- Documentation-only; no catalog, route, wallet, model, worker, or runtime
+  state changed. WSP 15/22/50/62/73/97/98.
+
+
 ### 2026-05-21 - Public Portfolio Status Schema (W9: FOUNDUPS_PUBLIC_PORTFOLIO_STATUS_SCHEMA_PHASE1)
 
 **By:** 0102 (W9) — **Slice:** `FOUNDUPS_PUBLIC_PORTFOLIO_STATUS_SCHEMA_PHASE1`

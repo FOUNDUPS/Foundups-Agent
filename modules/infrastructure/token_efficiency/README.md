@@ -82,6 +82,51 @@ The classifier always fails closed:
 
 ## Files
 
+### 2026-09-13 compact fidelity correction
+
+`M2MFidelityGate` now compares stop conditions after compact serialization and
+parsing, as well as before serialization. A condition containing a comma or
+bracket can be changed by the current compact parser; the gate rejects that
+loss instead of returning PASS from the original in-memory list. Two observed
+regressions failed before the correction; all 53 fidelity/compatibility tests
+pass afterward. That stop-rule repair left the wire grammar and compiler unchanged.
+
+A subsequent action check at main `7b7a1946` found 13 false passes among the 14
+recognized verbs in plan mode: the compiler discarded the verb and the gate
+allowed a default `IMPLEMENT`. The existing compiler now serializes `A:<action>`
+and preserves it through parsing/decompilation. The gate requires an exact
+action match and checks the parsed scope, including missing or changed scopes.
+The expanded fidelity/compatibility selection passes 158 tests, including all
+14 verbs in all seven modes and wire-corruption rejection. Legacy actionless
+packets retain their old reader behavior; they do not prove action fidelity.
+
+The 2026-09-14 continuation also preserves explicit stop conditions in the
+decompiled handoff. The gate now rejects a missing stop instruction, an `Abort`
+changed to `Continue`, or a substituted list, even when parsed fields match.
+Five reproduced failures became passes in the 162-case selection. Legacy
+actionless packets render their stops; packets without stops keep their old
+rendering. The compact grammar is unchanged and its lossy-list cases still fail.
+
+The 2026-09-15 AmIBot G0 audit exposed nested-invariant loss in the existing
+legacy serializer. It now rejects unsupported mappings, nested values and
+delimiter/trim/control violations before emitting a packet. Flat scalar text,
+including empty values and internal-space keys, remains compatible. 222 focused
+tests and an independent rerun pass after compatibility review. See the
+[interface](INTERFACE.md#public-api-p2-compact-fidelity-gate) for exact limits;
+the historical guard does not qualify a canonical envelope or live dispatch.
+
+The next layer adds a bounded JSON codec in that same compiler for already
+normalized WSP99 orders. `encode_m2m_envelope` / `decode_m2m_envelope` preserve
+schema, role/origin, optional principal, stable task ID, full declared action and
+nested typed constraints. See the [codec profile](INTERFACE.md#canonical-envelope-codec--2026-09-15).
+Normalization and downstream consumer/admission qualification remain open.
+
+This gate owns compact prompt packets. It is not the AI Overseer reference-YAML
+compiler's acceptance gate. Its existing CTX.HOLO check round-trips the supplied
+context object separately; it does not prove that context traversed the compact
+packet or authenticate a retrieval receipt. General prose preservation and
+independent RSI acceptance remain separate. See the [system evidence checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13).
+
 ```
 modules/infrastructure/token_efficiency/
   src/

@@ -1,0 +1,142 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "6b06a3ba909e5dea9c72aae68114b376282107cd"
+  },
+  "execution_id": "HOLOINDEX_RUNTIME_ABI_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "inert_composition_bound_declared_windows_cpython_abi",
+    "candidate_code_and_release": "verified",
+    "independent_wsp97_verification": "post_repair_go",
+    "merged_exact_main_replay": "pending",
+    "maintenance_replica_rsi": "working",
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "native_loader_closure_verified": false,
+    "runtime_environment_exact_closure_verified": false,
+    "resident_authenticated_owner": false,
+    "live_route_changed": false
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:5553a19507e1e32aec83e91565c4bd6c2a9463b8891c809873d98b71d6e92435",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "publish and verify only inert declared ABI evidence before executable-closure narrowing, an external loader, deterministic pre-import execution, signing, write denial, route propagation, or activation"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 awakening and strict tracker gate passed before execution at coherence 0.713; every independent reviewer separately re-entered WSP_00 and applied WSP_97.",
+      "Governed Holo retrieval was CURRENT at exact authority HEAD 6b06a3ba909e5dea9c72aae68114b376282107cd with no gap, no reindex, no authority mutation, generation sha256:c93017bc6a3515ffcf5571a29af3696e86b934702a20726424b854dc9b9febe2, and query receipt sha256:e940b7deacdfdf1ce518fea3dcc8d8cfc75b959feec7d3cd003777325e5eba20.",
+      "Retrieval correctly found adjacent runtime evidence but was noisy and committed-HEAD-only while the candidate overlay was uncommitted; exact direct reads of module documents, contracts, parsers, materializers, fixtures, and tests closed that declared limitation.",
+      "Candidate HEAD, remote main, and authority HEAD were independently equal before closure; no Holo maintenance or activation was performed."
+    ],
+    "research": [
+      "The existing exact base, dependency, and composition layers authenticated bytes and topology but did not prove static native import/export compatibility or Windows loader behavior.",
+      "The implementation reuses confined reads, isolated-store proofs, exact composition reproof, no-replace publication, owned quarantine, wheel metadata, RECORD hashing, and path-free stable error patterns instead of duplicating them.",
+      "Primary-source reconciliation retained only modern RVA delay descriptors, CPython 3.12 version-specific linking, python3.dll stable-ABI linking, and standardized wheel-tag evidence; these support static declarations only.",
+      "A production-shaped read-only scan found 396 native-suffix artifacts: 388 admitted PE32+ images comprising 384 AMD64 and four ARM64, eight rejected PE32 images, 17 delay-import libraries, and zero forwarded exports; the broad environment is intentionally ineligible."
+    ],
+    "micro_pass": [
+      "Final focused ABI, contract, and PE coverage passed 67 with one expected host-capability skip, including hostile raw-section and export-directory string-boundary falsifiers.",
+      "The exact bounded non-scale ABI, acceptance, composition, base, dependency, environment, process-image, and sealed-runtime selection passed 259 with seven expected capability skips.",
+      "Every new infrastructure source is below 600 lines at 485/456/267/360/247/534/40, every candidate-created or grown function is at most 50 lines, and the packaged RedDog README is 997 lines.",
+      "The canonical test registry write/write/check is current at 1621 entries with 268 quarantined entries; git diff --cached --check and the staged credential-pattern scan passed."
+    ],
+    "macro_pass": [
+      "The backend generator converged twice and check mode retained 1366 runtime files at sha256:4e634b8c7b99fe92b808b7e8befa15329c9b8b3c49503b7002c12875ea938b37; all eight generator tests passed.",
+      "The authenticated contract remains 18 shards, 6942 source lines, and 492 assertions at sha256:d68f91db0908f59159cf7d4f4e46180dcc70f2468d319b371563107d35b4cce6.",
+      "Fast 14-member, conversation 32-Python/15-JavaScript-vector, contract 3-member, deterministic package, and all four exhaustive release groups passed; exhaustive duration was 173.373 seconds with no timeout.",
+      "The deterministic package is 67 files and 948777 raw bytes at sha256:44272f6f1e8fc173a6cf8112e8b3ffc8eb6e6f48ce5fb7f9a4bc84330ae06ed3.",
+      "The independently inspected 0.4.139 VSIX is 276340 bytes at sha256:5deb3c4df7ac10200b5ffc5aeb1261864b280c2023edcfe068cf2570e58d15ec with 69 safe unique entries, 67 exact mapped source members, and zero CRC, duplicate, case-collision, encryption, symlink, unsafe-path, sensitive-name, source-byte-mismatch, or credential-pattern finding.",
+      "The first exhaustive attempt intentionally disabled per-user packages and failed because jsonschema was unavailable; the established O:-venv configuration then passed without changing code, timeouts, assertions, or package gates, while all test scratch remained on O:."
+    ],
+    "hard_think": [
+      "A static PE name graph can falsify declared incompatibility but cannot reproduce Windows loader search order, API-set resolution, dynamic loads, or resident-process effects.",
+      "Aggregate bounds must meter parser work rather than deduplicated outputs, so every EAT slot and first decoded string byte sequence is counted while repeated RVA work is cached.",
+      "A NUL-terminated string is valid evidence only inside one mapped raw span; a forwarder is stricter and must terminate inside the declared export directory.",
+      "Whole-environment native scanning is offline release evidence and does not scale as interactive query work; the next layer must content-bind the smaller executable closure before any loader experiment."
+    ],
+    "dialectic_sweep": [
+      "Loading DLLs or PYDs to test this layer was rejected because it would convert inert evidence into unproved runtime authority.",
+      "Ignoring mixed architecture, PE32 members, duplicate RECORD ownership, or external DLL names was rejected because filename exceptions would encode host accidents as policy.",
+      "Counting only named nonzero exports or deduplicated names was rejected after hostile counterexamples demonstrated unmetered EAT and repeated string work.",
+      "Promoting the ABI source into the executable backend manifest or VSIX was rejected; only the shared Windows long-path publication repair changed that manifest and forced the 0.4.139 compatibility rebind."
+    ],
+    "first_principles": [
+      "Static evidence must authenticate exact bytes, ownership metadata, machine type, wheel tags, bounded import/export structures, and a declared-name dependency graph without executing native code.",
+      "Every parsed pointer, table, target RVA, raw string span, count, byte total, graph edge, and publication collision requires an independently falsifiable bound.",
+      "A passing declared ABI descriptor must continue to state native-loader closure, determinism, pre-import bootstrap, signature, empirical write denial, activation, and exact runtime closure as false.",
+      "The smallest next valid layer is an explicit content-bound executable closure; external loader verification and promotion remain separate later gates."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_abi_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_abi_metadata.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_abi_graph.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_abi_descriptor.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_runtime_abi_materializer.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_windows_pe.py",
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_windows_path_rename.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_runtime_abi.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_runtime_abi_contract.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_windows_pe.py",
+      "docs/audits/security/HOLOINDEX_RUNTIME_ABI_ASSUMPTION_AUDIT_PHASE1.md",
+      "extensions/reddog/package.json",
+      "O:-local external RedDog 0.4.139 VSIX artifact"
+    ]
+  },
+  "nonclaims": [
+    "No ABI generation, runtime composition, owner, or query replica was activated or added to a live route.",
+    "No external Windows loader, dynamic-load, deterministic-effect, pre-import bootstrap, signature, ABA-resistance, empirical write-denial, activation, or exact-runtime-closure proof was produced.",
+    "No HoloIndex maintenance, reindex, replica replacement, owner mutation, ACL change, queue mutation, or production OpenClaw/Hermes worker dispatch occurred.",
+    "No HoloIndex A-grade or retrieval-quality RSI claim is made.",
+    "The VSIX was packaged and inspected but not installed by this transaction.",
+    "The ABI source remains outside the executable backend manifest and VSIX; the shared long-path publication helper alone changed executable closure identity."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_RUNTIME_ABI_WSP15_ALLOCATION_RECEIPT_PHASE1.json",
+    "docs/audits/infrastructure/HOLOINDEX_RUNTIME_ABI_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/security/HOLOINDEX_RUNTIME_ABI_ASSUMPTION_AUDIT_PHASE1.md",
+    "modules/infrastructure/foundups_mcp_bridge/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

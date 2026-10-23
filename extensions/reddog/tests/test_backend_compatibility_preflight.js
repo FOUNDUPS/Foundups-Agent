@@ -196,6 +196,23 @@ for (const runtimePath of [
 
 {
   const fixture = writeFixture();
+  const generated = fs.readFileSync(path.join(repoRoot, preflight.BACKEND_MANIFEST_PATH), 'utf8');
+  const lf = generated.replace(/\r\n/g, '\n');
+  for (const serialized of [lf, lf.replace(/\n/g, '\r\n')]) {
+    const raw = Buffer.from(serialized, 'utf8');
+    assert(raw.length <= preflight.MAX_MANIFEST_BYTES);
+    fs.writeFileSync(fixture.manifestPath, raw);
+    const accepted = runFixture(fixture);
+    assert.strictEqual(accepted.passed, true);
+    assert.strictEqual(accepted.backend_manifest_integrity_verified, true);
+  }
+  const raw = Buffer.from(lf, 'utf8');
+  const maximum = Buffer.concat([
+    raw, Buffer.alloc(preflight.MAX_MANIFEST_BYTES - raw.length, 0x20)
+  ]);
+  assert.strictEqual(maximum.length, preflight.MAX_MANIFEST_BYTES);
+  fs.writeFileSync(fixture.manifestPath, maximum);
+  assert.strictEqual(runFixture(fixture).passed, true);
   fs.writeFileSync(fixture.manifestPath, 'x'.repeat(preflight.MAX_MANIFEST_BYTES + 1), 'utf8');
   const result = runFixture(fixture);
   assert.strictEqual(result.passed, false);
@@ -292,11 +309,31 @@ for (const relativePath of [
   'backend_compatibility_async.js',
   'backend_compatibility_worker.js',
   'authoritative_work_state_query.js',
+  'model_runtime_binding_query.js',
+  'local_diagnostic_router.js',
+  'model_freshness_query.js',
+  'runtime_health_query.js',
+  'runtime_health_worker.js',
   'conversational_draft_policy.js',
   'continuation_prompt.js',
+  'start_operations_bridge.js',
+  'start_operations_control.js',
+  'start_operations_extension_adapter.js',
+  'backend_compatibility_runtime_materializer.js',
   'backend_compatibility_manifest.js',
   'backend_compatibility_filesystem.js',
-  'backend_compatibility_render.js'
+  'backend_compatibility_render.js',
+  'holoindex_blocked_request_recovery.js',
+  'holoindex_incident_repair.js',
+  'grounding_failure_dialogue.js',
+  'orchestration_prompt_trace.js',
+  'orchestration_prompt_routes.js',
+  'governed_git_context.js',
+  'governed_git_projection.js',
+  'governed_git_readiness.js',
+  'governed_git_storage.js',
+  'worker_prompt_contract.js',
+  'target_read_path_policy.js'
 ]) {
   const source = fs.readFileSync(path.join(__dirname, '..', relativePath), 'utf8');
   assert(source.split(/\r?\n/).length <= 400, relativePath + ' exceeds WSP_62 file limit');
@@ -308,6 +345,8 @@ for (const relativePath of [
 require('./test_backend_compatibility_contract');
 require('./test_backend_compatibility_async');
 require('./test_authoritative_work_state_query');
+require('./test_model_runtime_binding_query');
 require('./test_conversational_draft_policy');
+require('./test_health_and_model_freshness_query');
 
 console.log('backend compatibility preflight tests passed');

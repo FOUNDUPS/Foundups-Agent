@@ -1,4 +1,678 @@
+## 2026-10-04 — Preserve native Markdown until EOS
+
+- Qualified native chat supplies an empty caller stop list; formatter EOS text
+  and token criteria remain. Raw route, profile/context checks and caps unchanged.
+- Independent fixed baseline: 59 pass/4 expected failures; candidate 63 pass.
+  Connected WRE suites: 176 pass; overlapping selections, three new cases.
+- One local model proposal was malformed and rejected; coordinator applied the
+  one-line repair. Earlier real output truncation cause remains unproven.
+- WSP00/5/11/15/22/48/50/84/97. Existing manifest/pins refreshed. Publication and
+  retained usefulness are separate; see canonical dispatch/backlog checkpoint.
+
+## 2026-10-01 — Explicit per-call local-model cleanup
+
+- Existing engine gains idempotent explicit close; existing WRE adapter owns
+  cleanup in finally and rejects proposals when cleanup fails. Direct reusable
+  engines retain their lifetime semantics. No new module/skill/backend.
+- Frozen62 cases: baseline40pass/22fail; repaired62pass, zero errors/skips.
+  Separate author/reviewer; no model, provider, database, admission or retention.
+- WSP00/5/6/11/15/22/48/50/62/84/97: bounded same-owner change, source bindings,
+  refreshed existing runtime manifest/pins, exact-head publication receipts.
+- Evidence `O:/Foundups-Agent-audits/20261001-rsi-engine-lifecycle/`; backlog
+  `local_engine_lifecycle_20261001`. Next: source-only admission prerequisites.
+
+## 2026-09-30 — Opt-in native-chat proposal caller
+
+- Extend existing master/adapter/Qwen route; copied trusted runtime/template
+  configuration, raw default, single rendering and actual-context token guard.
+- 35 portable cases passed; separate4 installed-source handler controls passed.
+  Zero native initialization/generation/provider calls. Original collection-only
+  runner failure retained; corrected runner passed with unchanged19-source scope.
+- Existing CI now selects the complete execution-truth file. No admission,
+  PatternMemory promotion, held-out gain or later retained-use claim.
+- Refreshed existing RedDog 1401-member manifest and both digest pins;
+  only3 member hashes changed. Generator8 tests and backend compatibility passed.
+- WSP00/5/6/11/15/22/48/50/84/97; next 13/P1: Preflight and separately qualify one bounded actual-model proposal call through the implemented trusted master helper.
+  Evidence `O:/Foundups-Agent-audits/20260930-rsi-native-caller-contract/`; source `ca7117b6a64bc66a4d4885d742cd06379ab582f1`.
+
 # HoloIndex Package ModLog
+
+## [2026-09-13] Current-source maintenance and public quality benchmark
+
+- Existing OpenClaw/WRE maintenance completed main `5326080d5` after PR #1710;
+  both owned runtimes stopped. No index operation was added to the query path.
+- Existing fixed public benchmark: six CURRENT/no-gap receipts, Recall@8/MRR
+  1.0, nDCG@8 0.9939998, p95 4031ms; deterministic verification accepted.
+  Corpus, ranker and 0.95 policy unchanged. Exact runtime closure remains false
+  in all receipts; no independent sealed evaluation or promotion performed.
+- Retained the full run in the existing dated RSI evidence artifact and linked
+  the source boundary from the roadmap/CLI atlas. This is R03/R05 evidence,
+  not completed RSI or a claim about subsequent main commits. WSP 22, 50, 87, 97.
+
+## [2026-09-13] R03 interpreter selection recovery
+
+- Diagnosed ambient Python/base mismatch excluding the existing vetted dependency path; the owned child reported missing NumPy. Reused the existing repository venv with the matched reference helper, without source or index mutation.
+- Normal default-budget query: CURRENT/no-gap, one owner attempt, reference `78b79c36`. A 60-second diagnostic query timed out; current-main source `89bdd7a5` still rejects the older authority with zero attempts. See CLI_REFERENCE.md for exact evidence boundaries and the reusable Windows recipe.
+- Existing runtime-selection tests: 2 passed / 16 deselected. Updated canonical instructions and R03 status; exact-current-main qualification and runtime/quality acceptance remain open. WSP 22, 50, 84, 87, 97.
+
+## [2026-09-13] R03 source selection and existing fallback documentation
+
+- Corrected bootstrap/canonical-agent retrieval instructions to bind the helper's actual source, distinguish primary checkout from current main, and reuse the existing local bundle when semantic retrieval is unavailable. Extended this module's atlas/interface rather than adding a service or module.
+- WSP 00 activation and strict tracker gate passed in the isolated checkout (`self=0102`, role architect, origin external principal); WSP 97 review reused owner/selector/repair contracts. The separate WSP 00 state-semantics PR #1636 remains unchanged.
+- Existing entry/root selection: 81 passed in 4.37s. Live primary entry: HEAD mismatch; matched reference: owner startup exit after two attempts; clean local bundle: success, UNKNOWN freshness, zero owner attempts. An initial unsupported `bundle_module_hint` request rejected before startup and was corrected to the existing `module_hint` field; it was not classified as an infrastructure outage.
+- Retrieval assessment: current module contracts were available through the local bundle; semantic availability and stale historical completion claims remained separate. Exact field/source checks filled missing context, and direct symbol reads avoided duplicate implementation. This documentation/contract comparison used deterministic tools; no Qwen/Gemma generation or measured learning is claimed.
+- R03 remains partial. No index/route/authority mutation, model generation, runtime source change, production memory write or new execution permission. WSP 00, 22, 50, 81, 87, 97.
+- The live local fallback also passed after documentation edits and correctly changed its evidence label to `workspace_overlay`. Targeted CLAUDE-to-AGENTS renderer parity passes. The broader projection check reports pre-existing `stale:.agents/skills/file_set`: tracked `japan_hyperscaler_report/SKILL.md` has no canonical counterpart in the generator's expected set. Skill sources/projections are unchanged from the base and belong to the concurrent lane; this is not reported as a global projection pass or repaired by deleting its skill.
+- Startup follow-up: `holo_query_owner_startup.await_owner_startup()` emits the observed label when the owned child exits, while `HoloQueryServiceSupervisor._spawn()` discards stdout/stderr. The cause is not established by that label. Reuse those owners for a bounded, secret-safe diagnostic before choosing repair; no new diagnostic module or speculative reindex was added.
+
+## [2026-08-29] Pre-owner exact-main live acceptance
+
+- PR #1591 merged as exact main `09e98fff04b4d94544d97a1dd7b795785d13db2e`.
+  The governed controller admitted only the canonical pre-owner stale-HEAD
+  incident and completed the existing OpenClaw/WRE task at generation
+  `sha256:7869f238...`; its owned runtimes stopped cleanly.
+- A fresh broad RSI owner query returned CURRENT/no-gap/no-reindex on attempt
+  one with equal authority/workspace HEADs and no overlay. The required module
+  bundle passed with no required artifact missing and no false telemetry
+  `feedback` module target.
+- Production verification retained 33 artifacts / 222,719,702 bytes at
+  descriptor `sha256:af0e9a2a...`, replica `sha256:fb03a1db...`, and path
+  identity `sha256:4d5c10b7...`. Exact runtime closure remains false; A-grade,
+  retrieval RSI, and scale remain NO-GO. (WSP 00/15/22/50/62/84/87/97)
+
+## [2026-08-28] Evidence-qualified module-intent candidate
+
+- Reproduced the exact governed failure at current main: generic `feedback`
+  promoted `modules/telemetry/feedback`, a telemetry JSON container without
+  root contracts, and strict Tier-0 failed closed as designed.
+- Rejected the first all-file repair after WSP_97 review found it already used
+  828,543/1,048,576 bytes. The replacement reads one 146,876-byte directory
+  projection and one 68,591-byte candidate-root batch, both from exact HEAD.
+- A root now qualifies only through a direct `src/tests` tree or regular root
+  README/INTERFACE blob. All directory and raw-tree framing, modes, types,
+  object IDs, paths, names, Unicode, duplicates, counts, bytes, time, cache,
+  and subprocess behavior remain fail closed and bounded.
+- Reused the repository-audit trusted Git resolver and closed read environment;
+  inherited Git authority variables, replacement refs, optional locks, system/
+  global config, hooks, attributes, excludes, and external diffs cannot steer
+  these reads. The 8 MiB per-output bound supports the stated 4,096-module cap
+  at the measured repository shape without reopening an all-file projection.
+- The local projection exposes 160 proved modules, excludes telemetry feedback,
+  and preserves HoloDAE plus doc-only consciousness-engine intent. It performs
+  no file walk, index/store access, reindex, route, owner, or activation change.
+  Exact-main refresh and original-query replay remain acceptance gates. The
+  complete execution evidence is sealed in
+  `docs/audits/infrastructure/HOLOINDEX_MODULE_INTENT_EVIDENCE_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+  (WSP 00/15/22/50/62/83/84/87/97)
+
+## [2026-08-28] Producer-ranked owner merge candidate
+
+- Live exact-main benchmarking proved the collection-local exact-symbol winner
+  was reordered by owner flattening because the latter compared raw similarity
+  and discarded producer rank. This was an integration gap between two passing
+  unit boundaries, not a corpus-label or threshold defect.
+- The owner now merges only the heads of each producer-ranked typed stream.
+  Broad current-status queries first apply the existing stable authority tier;
+  ordinary and historical queries retain producer order. Cross-bucket score,
+  casefold deduplication, and exact-module Tier-0 reservation remain in force.
+- Added source-accurate root contracts for `modules/ai_intelligence/holo_dae`,
+  whose missing README/INTERFACE caused a governed multi-module RSI query to
+  fail `HOLOINDEX_TIER0_INCOMPLETE`. The contracts explicitly quarantine the
+  legacy direct-index/auto-reindex launcher from governed retrieval authority.
+- This is a pre-merge ranker candidate. No threshold, relevance judgment,
+  corpus, index, route, replica, owner, promotion, or RSI authority changed.
+  (WSP 00/15/22/48/50/62/83/84/87/97)
+
+## [2026-08-28] Current-truth retrieval candidate
+
+- Admitted the canonical Holo README/INTERFACE/ROADMAP/CLI/test/memory and
+  adaptive-boundary contracts into the exact tracked docs source set. Only
+  reviewed path-bound current headings receive section records; historical
+  audits, ModLogs, and other sections retain summary/history treatment.
+- Added deterministic current/implementation/history/vision classification,
+  bounded status-query docs oversampling, a filtered summary stream for path
+  diversity, case-normalized path deduplication, and owner-level authority
+  ordering. Exact PR/slice and historical/temporal queries preserve semantic
+  ordering; exact module Tier-0 remains unchanged.
+- Extracted document indexing from `core/indexing_engine.py`, reducing it from
+  1,600 to 1,467 lines. The new 271-line module and all its functions satisfy
+  the WSP_62 file/function limits without an exemption.
+- Corrected WSP 60 plus adaptive-learning and memory documentation: the CLI path remains
+  disabled, advertised feedback/metrics methods do not exist, and evaluation
+  scaffolding is not production RSI. This candidate performs no reindex,
+  activation, ranker promotion, route change, or maintenance. (WSP
+  00/15/22/50/60/62/83/84/87/97)
+
+## [2026-08-28] Owner acquisition cycle receipt binding
+
+- Query receipts now integrity-bind valid owner attempt count, retry flag,
+  retry reason, and controller-selected acquisition cycle. The one-shot attaches
+  telemetry before receipt creation; communication verification independently
+  rejects malformed, out-of-range, missing, unequal, or rehashed cycle evidence.
+- Exact-main `db44f8be` maintenance completed at `sha256:b5a138e0...`; a fresh
+  query returned CURRENT in 3.812 seconds and full verification retained 33
+  artifacts / 222,033,165 bytes. The controller false-negative repair has
+  focused synthetic closure only until merge/replay. Base-bound
+  maintenance/freshness self-repair is observed working; current-main runtime
+  acceptance, retrieval-quality RSI, and A-grade remain false.
+  (WSP 00/15/22/50/62/64/84/97)
+
+## [2026-08-27] Large-file health proof repair
+
+- Repaired the manual WSP_62/WSP_87 health proof after validation exposed a
+  missing `io` import, a stale package-root projection, and failure-path temp
+  leakage. The proof now imports through the canonical `holo_index` package,
+  uses an external same-drive temp root, guarantees cleanup, and fails unless
+  the rules engine emits exactly one HIGH finding. (WSP 22/50/62/87/97)
+
+## [2026-08-27] Runtime-bound retrieval truth and availability correction
+
+- Added a child-computed runtime-environment digest to query receipts and
+  AutoResearch candidate identity. Exact RedDog source bytes are verified
+  against the generated manifest through stable descriptors.
+- Added an explicit exact-closure assurance flag and made A-grade composition
+  reject until installed dependency payload bytes are verified. The public
+  benchmark retains one authenticated owner across all cases.
+- Reconciled transaction truth: base-bound maintenance/freshness self-repair passed at
+  `bfcf9041`, generation `sha256:7b94cf8a...`; post-restart semantic owner
+  startup failed closed at 60/180 seconds. Resident-owner activation and
+  quality/promotion feedback remain open; retrieval RSI is not claimed.
+- Centralized complete public runtime-evidence projection and decomposed query
+  receipt assembly so the new identity path introduces no WSP_62 function debt.
+  (WSP 00/15/22/50/62/83/87/97)
+
+## [2026-08-27] Exact-main cold-owner readiness evidence
+
+- Completed the existing broker-managed OpenClaw/AgentDB post-merge transaction
+  at exact main `66526ae5`, generation `sha256:f2013aeb...`, with retry count
+  zero and a CURRENT route at revision 10.
+- Three fresh-process governed queries completed on attempt one in approximately
+  34 seconds each; an explicitly pre-warmed owner started in 25.5 seconds and
+  served the same governed query path in 10.3 seconds. All results were
+  CURRENT/no-gap/no-reindex with the same owner-loaded ranker digest.
+- Full production descriptor verification retained 33 artifacts / 221,204,272
+  bytes with the same descriptor, replica, and path-identity digests after the
+  live queries. The previous cold-owner P0 is closed for this exact commit
+  without a timeout increase.
+- Retrieval quality remains below the public MRR/nDCG floors. Runtime-environment
+  sealing, independent evaluator/proposer trust, non-test admission, promotion,
+  canary, rollback, and outcome learning remain separate work; no A-grade or
+  retrieval-quality RSI claim was made. (WSP 00/15/22/50/62/83/87/97)
+
+## [2026-08-27] A-grade retrieval evidence boundary
+
+- Added exact indexed symbol metadata scoring so a callable named directly in
+  a query can outrank semantically adjacent registry prose. The rule is generic
+  search-time ranking, not an M2M path special case.
+- Corrected the public M2M sentinel judgment: the query explicitly names the
+  sentinel runtime, while the generic compiler remains lower-grade supporting
+  relevance. No measured result was rewritten or relabeled.
+- Added a caller-supplied signature-verifier seam for a sealed-corpus A-grade
+  evidence gate in AI Overseer. It requires public regression success,
+  evaluator/proposer
+  separation, at least 30 disjoint cases, Recall/MRR/nDCG >= 0.95, and p95
+  latency <= 5s. It cannot change or promote HoloIndex.
+- The backend-content-bound callable facade re-runs the public corpus, pins
+  semantic mode, and rejects any query whose owner-emitted loaded-runtime
+  ranker digest differs from the clean authority candidate, including
+  `core/search_engine.py`.
+- No independently administered signature authority or non-test/VSIX caller is
+  implemented; the gate remains non-operational scaffolding. The source digest
+  does not yet bind the Python executable, ABI/platform, exact dependency
+  environment, backend builds, or deterministic execution knobs.
+- Replaced stale exact-main and unmeasured 95%/<200ms roadmap claims with the
+  live b5b4de05 failure baseline and explicit post-merge proof sequence.
+  (WSP 00/15/22/50/62/87/97)
+
+## [2026-08-27] Exact-main immutable route evidence reconciliation
+
+- Recorded the live exact-`a7302344` manual activation truth: generation
+  `sha256:d654414a...`, stable route CURRENT, governed semantic query current,
+  no index gap, no reindex, and unchanged immutable replica proof.
+- Corrected current documentation from the historical complete-vector-tree
+  model to the implemented selected-model plus sealed 22-snapshot query
+  closure. The canonical store remains maintenance authority; query replicas
+  remain immutable read-only projections.
+- The automatic post-merge split-lease composer is candidate evidence only
+  until a later exact-main OpenClaw task completes. No Holo source, canonical
+  store, route, or replica was changed by this documentation transaction.
+  (WSP 00/15/22/50/62/87/97)
+
+## [2026-08-23] Isolated final-probe runtime provenance
+
+- MaintenanceSession.begin() now resolves the optional governed
+  site-packages/process-image proof before lease acquisition or invalidation
+  and forwards the exact typed pair only to
+  verify_collection_snapshots_isolated. Direct callers with no governed
+  input remain runtime-free.
+- Invalid, linked, changed, ambiguous, partial, or unproven authority fails
+  before mutation as
+  HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED /
+  RUNTIME_DEPENDENCY_UNAVAILABLE. The proof remains in memory and is not
+  added to generation or freshness receipts. No retry, vector fallback,
+  reindex, or weaker verifier was introduced. (WSP
+  00/15/22/50/62/84/87/97)
+
+## [2026-08-23] Compact RedDog snapshot runtime closure
+
+- A production-shaped exact-main RedDog canary proved the new 33-artifact query
+  replica but failed before semantic search because read-only Holo startup still
+  required the excluded legacy `vectors/chroma.sqlite3` file.
+- Replaced that stale admission check with the sealed
+  `vectors/query_snapshots` directory contract and gave snapshot-open failures
+  their accurate `open_query_snapshot` operation label. Read-only startup now
+  matches the immutable snapshot client, does not import the maintenance-only
+  Chroma dependency, and does not create or open Chroma, SQLite, or HNSW state.
+  The non-baseline work-ledger collection remains absent
+  in read-only mode instead of triggering an expected exception and traceback
+  on every semantic query. (WSP 00/15/22/50/62/84/97)
+
+## [2026-08-23] Planner-preserved model source identity
+
+- Added an opt-in `preserve_source_path` resolver mode so trusted replica-plan
+  admission can inspect and reject link/junction provenance before resolution.
+  The default resolved-path behavior and all existing callers remain
+  unchanged; dedicated coverage proves the planner-only mode preserves an
+  available alias for fail-closed inspection. (WSP 00/15/22/50/62/84/97)
+
+## [2026-08-23] Repository-relative Tier-0 producer identity repair
+
+- Reproduced a live exact-HEAD `moltbot_bridge` owner query returning
+  `HOLOINDEX_TIER0_INCOMPLETE` with no reindex or authority mutation.
+- Traced the failure to `index_docs_entries`: `navigation_docs` stored absolute
+  authority-worktree paths while strict Tier-0 lookup used canonical
+  repository-relative POSIX paths.
+- Recovered the one-line producer invariant and production-shaped regression
+  from unmerged commit `b99eff3bb` instead of recreating the design or merging
+  its stale 880-line closure.
+- Added an indexer-to-strict-consumer test. No query fallback, lookup
+  normalization, hashing relaxation, maintenance, replica mutation, or live
+  activation is included. (WSP 00/15/22/50/62/84/97)
+- Adjacent hardening bound GraphRAG relative code/WSP hit reads to an explicit
+  `project_root`, rejected relative and absolute escapes plus missing-root CWD
+  fallback, and added foreign-CWD plus full/incremental path-parity coverage.
+  Legacy absolute paths remain compatible only inside that root. GraphRAG does
+  not currently consume the `navigation_docs` result bucket.
+- WSP_62 differential review: `indexing_engine.py` remains 1,600 lines and
+  `index_docs_entries` remains 102 lines, exactly matching the base. This
+  candidate replaces one producer expression without growth; the existing
+  roadmap-owned indexing-engine decomposition remains separate.
+
+## [2026-08-22] Immutable snapshot-backed query replicas
+
+- Live owner admission proved that `HOLOINDEX_QUERY_READONLY=1` prevented
+  collection creation but Chroma startup changed `chroma.sqlite3`; a second
+  proof showed `migrations="validate"` still writes `acquire_write`, and a real
+  query/close also changed HNSW segment bytes.
+- Connected the existing hardened immutable snapshot codec/read adapter to the
+  governed maintenance completion path. PASS publication now requires exact
+  snapshots for all seven baseline collections.
+- Read-only HoloIndex loads only those bounded snapshot bytes and performs
+  exact vector scans without starting Chroma or opening SQLite/HNSW. The owner
+  requires the snapshot generation to equal its verified replica binding and
+  closes the backend during normal lifecycle shutdown. Maintenance remains the
+  only Chroma writer. (WSP 00/15/22/50/62/84/97)
+
+## [2026-08-21] Closed command-import boundary for RedDog
+
+- Removed the eager full-CLI import from `holo_index.cli` while retaining its
+  compatible public exports through deferred loading. Bounded bundle/direct-read
+  imports no longer require ChromaDB or NumPy in RedDog's sealed child runtime.
+- Added a `-S -B` subprocess regression that proves command import does not load
+  `_cli_main` or the vector backend. No dependency, storage, owner, maintenance,
+  reindex, model, or network authority was widened. (WSP 00/15/22/50/62/97)
+
+## [2026-08-20] RedDog integration of module intent and isolated runtime proof
+
+- Integrated generation-stable `tier0_module_target`, exact Tier-0 metadata
+  injection, stable producer error codes, isolated collection verification,
+  and process-image capability proof without querying or mutating the Holo
+  store.
+- The reproducible six-file package selection is **233 passed / 1 platform
+  skip**; the earlier 237/1 aggregate had no recorded selection and is
+  superseded. The exact command is recorded in `tests/TestModLog.md`. Current
+  main's JSON-only maintenance CLI output remains byte-identical and covered.
+  (WSP 00/6/15/22/34/50/97)
+
+## [2026-08-17] R15 bridge Windows copy preservation alignment
+
+- Independent review found the bridge's failed Windows model copy still used
+  FileDisposition deletion. Those APIs are removed; partial output survives
+  handle closure and is quarantined with the query staging root.
+- Holo core and canonical storage were not changed or accessed. Owner routing,
+  live acceptance, and orphan disposition remain missing.
+
+## [2026-08-17] R14 bridge no-delete quarantine alignment
+
+- Independent review found the R13 bridge rollback could delete same-inode,
+  same-size content mutated after proof. The bridge now preserves failed active,
+  publication-temp, and staging names through atomic no-replace quarantine.
+- Holo core and canonical storage were not changed or accessed. Owner routing,
+  live acceptance, and governed orphan retention/deletion remain missing.
+
+## [2026-08-17] R13 noncreating retained-sentinel authority
+
+- Independent RedDog replica verification disproved point probes across active
+  publication. `maintenance_lock.py` now provides a noncreating acquisition for
+  an exact existing regular non-link/reparse sentinel, retains the platform
+  byte-range/flock exclusion, and revalidates path/descriptor identity plus
+  exact bytes before release. It never creates or rewrites the sentinel.
+- The bridge acquires authority-update then maintenance order and keeps both
+  through final active validation. Canonical vector/model/receipt bytes remain
+  read only. No live Holo, E-drive, maintenance, reindex, or publication ran.
+
+## [2026-08-17] Query-replica materialization contract attached
+
+- Attached Holo storage truth to the bridge-owned
+  `holoindex_query_replica.v1` Phase-1 candidate: exact full vector tree,
+  selected complete model snapshot, canonical receipt/generation binding, and
+  both retained read-only leases. Holo core was not changed and still requires an
+  explicitly supplied storage root.
+- Holo retrieval remained degraded/quarantined; only bounded filesystem/Git
+  evidence and synthetic fixtures were used. No live query, owner, maintenance,
+  reindex, model, canonical-store, commit, push, or promotion effect occurred.
+  Owner routing and retention remain missing.
+
+## [2026-08-17] R11 retained executable capability
+
+- Independent review proved R10 closed its validation descriptor before the
+  isolated runner, leaving path replacement possible. The runtime-bound probe
+  now retains a fresh verified process-image capability through runner return or
+  exception. Windows launches the exact path while the handle denies mutation;
+  Linux launches the retained object via `/proc/self/fd/<fd>` and `pass_fds`.
+- Exact acceptance is **146 collected = 143 passed / 3 explicit symlink skips**;
+  an actual child-launch smoke and all six manifest-generator tests passed. The
+  184-second broad bridge timeout was not rerun. Holo remained quarantined; no
+  live query, owner, maintenance, reindex, MCP, model, or store effect ran.
+
+## [2026-08-17] R10 Windows executable path-case correction
+
+- Corrected the isolated snapshot child boundary so a Windows case-only parent
+  or leaf alias cannot pass merely by naming the same file identity. A
+  point-in-time descriptor's case-preserving final path must match all non-anchor
+  components; R11 later retains a fresh descriptor across the runner call.
+- Exact acceptance evidence is **141 collected = 138 passed / 3 explicit
+  symlink-capability skips**. No Holo query, owner, maintenance, reindex, MCP,
+  model, canonical-store, or live acceptance operation ran. Independent
+  promotion verification remains pending.
+
+## [2026-08-17] Snapshot process-image authority hardening
+
+- Replaced mutable Python executable selection with an in-memory OS-derived
+  process-image proof supplied by validated acceptance runtime admission and
+  re-proved immediately before the isolated child spawn.
+- The existing shared environment scrubber now removes `PYTHONINSPECT`; source,
+  dependency, generation, version, and no-retry contracts remain unchanged.
+- Bounded closure passed three 87/2 hostile runs, the 271/2 adjacent tier, the
+  136/3 adversary/runtime/sanitizer tier, and the exact 41-test metadata tier.
+  Registry is current at 1,524/265; the 1,346-file manifest digest is
+  `4de0e76a29dfc8d5338ee0c88251f3deb7af2820ca07afd4832655920045a663`.
+  Fast Node contract/preflight/async passed; exhaustive shards and live
+  acceptance were not run or claimed.
+
+## [2026-08-17] Isolated snapshot trusted-runtime binding
+
+- The snapshot subprocess now accepts exactly one validated checkout-local
+  `.venv/Lib/site-packages`, starts from the resolved base interpreter with
+  `-S -B`, and receives a scrubbed offline environment with exact `PYTHONPATH`.
+- Before opening ChromaDB it proves candidate source origin, ChromaDB 1.5.5
+  origin under that runtime, and the supported version. Known dependency/source
+  failures remain generation-bound typed errors; unexpected output still fails
+  closed as `SEMANTIC_STORE_RECEIPT_INVALID` at the acceptance boundary.
+
+## [2026-08-16] K-invariant Tier-0 intent and diagnostic repair
+
+- Reproduced the clean `03c332294...` low-K canary as CURRENT (receipt
+  `sha256:89fe9bb9d58e026b27f72dd656ff72bdfeaf7b8ec41baabdf6e09acdbb2d0440`,
+  15.4 s wrapper wall) and the exact Group-A K12 failure as
+  `SEMANTIC_BACKEND_UNAVAILABLE` after retry (receipt
+  `sha256:9deb6e1bd76e2f6c3f110b4105de286857a795916536a80348004914f4496293`,
+  26.1 s wrapper wall). This candidate makes no live-CURRENT claim.
+- Added a bounded Git HEAD catalog (`ls-tree`, no shell/filesystem walk), keyed
+  by platform-normalized root+HEAD. Its cache operations are locked without
+  holding the lock over Git; duplicate concurrent cold reads are allowed and
+  the final cache is capped at eight generations. The exact authority tree has
+  1,265 records/145,619 bytes/168 roots; the final paired probe measured
+  122.645 ms cold and 42.043 ms warm. Other caps: 5 s, 1 MiB, 4,096 roots.
+- The parser now requires a nonempty final-NUL stream and validates every
+  record's UTF-8, mode/type/object ID, modules-only normalized path, and
+  exact/NFC-normalized casefold uniqueness before depth filtering.
+  Missing/double NUL, invalid UTF-8, traversal, empty components, backslashes,
+  Unicode `Cc`/`Cf`/`Cs`, out-of-scope paths, and canonically equivalent
+  duplicate deeper records fail closed; visible Unicode letters/symbols and
+  valid ancestors/deeper paths retain their original spelling.
+- Added canonical nullable `tier0_module_target` producer attestation. Owner
+  reservation requires target/query/exact-pair agreement; absent, unrelated,
+  ambiguous, multi-module, partial, mixed, duplicate, and forged claims keep
+  global scoring. Stable producer errors retain exact redaction/retry/HTTP.
+- R3 Unicode RED was 8 failed/39 passed in 1.47 s; isolated GREEN was 47
+  passed in 1.47 s. The exact six-file focused command, including
+  `test_machine_spec_contract.py`, passed 278 in 4.00 s; the exact 13-file
+  adjacent command passed 356/1 optional skip in 11.21 s. Exact supervisor
+  no-growth passed 1 in 1.25 s.
+- Registry write/write/check took 7.231/7.222/7.355 s at 1,517 tests/265
+  quarantined with SHA-256 `0510244d701c7df08562852f02c76cdda1fccae6eb34fb387cd096aba375c675`.
+  Manifest write/write/check took 9.581/9.613/9.761 s at 1,337 runtime files;
+  canonical digest is `8e2680eb6075c56f1528a0cbdf2f08b44076cf8c814cec0f45c5a997df723ac9`
+  and file SHA-256 is `b6910e4891b6b9008dd4d06699c209f5eddf5cff461a7aa2281618ffd5a95a41`.
+- WSP 62: infrastructure 600 is advisory and default Python hard is 1,500.
+  `search_engine.py` is 1,424 lines (<1,500); inherited `execute_search` is
+  unchanged at 216 lines. Supervisor is base/candidate 688/688, `start` 50,
+  class 200. New/touched extracted helpers are <=50 lines. No exemption or
+  ceiling increase was added. (WSP 15/22/50/62/84/87/97)
+- No reindex, owner restart, exhaustive aggregate, or live owner acceptance was
+  performed; committed exact-SHA maintenance/publication remains deferred.
+
+## [2026-08-16] Final maintenance publication clean-state proof
+
+- Added a clean exact-HEAD proof immediately before completed receipt write,
+  after the final collection snapshot comparison.
+- A dirty or changed repository at that last boundary now fails closed while
+  preserving the published IN_PROGRESS invalidation. Freshness, lease,
+  semantic, and collection proof semantics are otherwise unchanged.
+  (WSP 15/22/50/62/87/97)
+
+## [2026-08-16] Tier-0 R4 WSP 62 correction
+
+- Reproduced `search_engine.py` growth from HEAD 1,465 lines to exactly 1,500
+  and the 205-line `_search_collection` candidate self-exemption.
+- Extracted vector collection orchestration into `core/collection_search.py`.
+  Final ceilings: engine 1,368 lines, wrapper 9 lines, largest new extraction
+  helper 37 lines, largest Tier-0 injection helper 45 lines.
+- Replaced permissive `<=1500`/`<=225` assertions with protocol limits
+  `<1500`/`<=50`; no new exemption was introduced.
+
+## [2026-08-16] Tier-0 R2 verifier reconciliation
+
+- Reproduced and closed duplicate initial-vector Tier-0 admission, missing
+  non-strict exception warnings, and full-path case instability.
+- Extracted exact Tier-0 and WSP-alias collection injection so
+  `search_engine.py` is exactly 1,500 lines and `_search_collection` remains
+  within its exact WSP_62 exemption.
+- Added exact command-scoped ownership and fixed read guards to immutable-HEAD
+  repository-audit Git reads; no wildcard, config write, checkout read, or
+  mutable overlay admission was added. (WSP 22/50/62/97)
+
+## [2026-08-16] Bounded module Tier-0 semantic retrieval
+
+- Reused one shared README/INTERFACE Tier-0 contract across bundle and
+  semantic retrieval rather than adding a RedDog-specific query special case.
+- For an exact basename uniquely evidenced by initial hits, or one validated
+  full module path, added zero-to-two exact metadata
+  gets against the admitted `navigation_docs` collection and deterministic
+  root-doc ordering. No filesystem evidence or query-time reindex was added.
+- Added schema-bound `exact_metadata` provenance with null vector similarity;
+  exact rows bypass the vector floor without inventing a score.
+- Added strict-owner fail-closed checks for incomplete pairs, lookup errors,
+  malformed cardinality, and returned-path mismatch. Interactive search warns
+  while preserving available results.
+- Rejected traversal, hidden, whitespace, control-bearing, and terminal-dot
+  module components before constructing exact paths. (WSP 22/50/60/84/97)
+
+## [2026-08-11] Canonical test-suite topology metadata
+
+- Extended the existing test-registry indexer to retain canonical owner, suite
+  class, runnable final shard, collectability, and quarantine metadata. Canonical
+  v2 input uses WRE's strict loader while legacy input remains compatible. This
+  makes module-owned test topology retrievable by
+  RedDog without granting query-time index mutation. (WSP 6/22/50/60/97)
+
+## [2026-08-11] Immutable repository-audit evidence reads
+
+- Extended the existing repository-audit discovery seam so final selected
+  evidence is read from the exact current Git HEAD object rather than a
+  mutable working-tree file. Discovery may scan the checkout, but uncommitted
+  candidates cannot enter an accepted evidence receipt.
+- Added hardlink rejection to the generic confined reader. The immutable
+  reader disables Git replacement objects and inherited Git controls, admits
+  only regular tree modes, reads by blob OID, recomputes that OID, and retains
+  no write or re-index authority.
+- Streamed only the policy-bounded prefix from large Git blobs under one
+  absolute deadline. Rejected binary prefixes expose attempted-byte counts so callers
+  cannot evade the signed retrieval budget through failed reads.
+
+## [2026-08-11] Legacy symbol persistence-policy upgrade
+
+- Extended the existing symbol reconciliation eligibility check to require the
+  pinned durable HNSW policy as well as matching embedding space.
+- Legacy `navigation_symbols` collections now reset once under governed
+  maintenance instead of preserving the default `sync_threshold=1000`.
+- Already-compliant collections retain bounded record reconciliation; no new
+  indexer or query-time mutation path was added.
+
+## [2026-08-11] Durable vector-segment publication
+
+- Pinned write-mode baseline collections to a bounded Chroma HNSW persistence
+  policy so sub-threshold collections reach disk-backed segment state.
+- Added a read-only SQLite and filesystem proof for exact policy, canonical
+  segment ownership, path confinement, and complete nonempty HNSW artifacts.
+- Removed transient-reopen convergence as a publication criterion. Missing
+  durable artifacts now remain `VECTOR_SEGMENT_UNAVAILABLE` until governed
+  maintenance rebuilds the generation.
+- Added real Chroma 1.5.5 cold-open, artifact-loss, and policy-tamper
+  regressions. Query paths retain zero reindex authority.
+- Measured the strict `2/3` policy against `32/64` on Chroma 1.5.5 before
+  publication: 5,000 synthetic 64-dimensional vectors in 100-row writes took
+  1.509s versus 1.472s locally. The bounded sync cost buys deterministic disk
+  state for small canonical collections without a private force-persist API.
+
+## [2026-08-10] Source-aware governed direct-read policy
+
+- Preserved hard denials for environment, key-container, repository metadata,
+  dependency, and secret-like data paths.
+- Allowed recognized source and documentation basenames containing words such
+  as `credential`, `secret`, or `token`, while keeping secret-like parent
+  directories denied. This permits grounded security-code audits without
+  weakening the content redaction gate.
+- Added cross-language admission checks so RedDog prompt/direct-read policy
+  cannot drift from the authoritative Python bundle gate.
+
+## [2026-08-09] Stale authority observation for governed repair
+
+- Preserved the independently read authority HEAD and authority-root digest
+  when a clean authority checkout is stale, while keeping the selection
+  rejected for query use.
+- Added an exact stale-target matcher used only by the existing governed
+  repair path. Dirty, unrelated, same-HEAD, missing, or substituted authority
+  bindings remain rejected; no query-time reindex authority was introduced.
+
+## [2026-08-06] Linked-worktree runtime dependency resolution
+
+- Added a read-only resolver from a linked worktree to the primary worktree
+  derived from the same Git common directory.
+- The resolver falls back to the caller workspace unless the candidate is a
+  real worktree in the same repository; it performs no checkout or mutation.
+- This lets exact-HEAD authority queries reuse the canonical validated virtual
+  environment without treating that dependency root as repository evidence.
+
+## [2026-08-04] Test write isolation
+
+- Removed a legacy HoloIndex test's import-time write into the repository root.
+- The write probe now uses pytest's per-test temporary directory, preserving a
+  clean checkout for exact-HEAD HoloIndex query admission and WSP 85.
+
+## [2026-08-03] Windows device-entry repository discovery guard
+
+- Repository-audit discovery now rejects entries whose path cannot be
+  relativized to the governed repository root, including Windows device paths.
+- The rejection is receipt-counted as `invalid_entry_path`; remaining evidence
+  discovery continues without reading the invalid entry.
+
+## [2026-08-02] Persisted vector-segment cold-start gate
+
+- Extended the isolated post-maintenance proof beyond collection snapshots:
+  every non-empty baseline collection must now answer one nearest-neighbor
+  query from its persisted HNSW segment before the freshness receipt publishes.
+- Reused one stored embedding, so the proof loads no encoder, performs no
+  network access, and invokes no logical mutation or indexing API.
+- Runs only inside an exclusive maintenance lease after writer finalization.
+  Chroma may rewrite physical segment caches on reader open, but the probe uses
+  no logical mutation or indexing API and keeps migrations validation-only.
+- Applies the same proof before incremental generation publication and rejects
+  both verifier exceptions and returned collection mismatches.
+- Pins Chroma 1.5.5 because the proof depends on its query and lifecycle
+  contracts; unsupported versions fail before opening persistence.
+- Added fail-closed regressions for the observed Chroma failure class where
+  SQLite collection data exists but the vector segment reports that nothing is
+  available on disk.
+
+## [2026-08-01] Generation-bound retrieval AutoResearch evidence
+
+- Added immutable train/public-regression corpus digests and candidate bindings
+  for retrieval experiments. The public regression set is explicitly not
+  independent promotion evidence.
+- Added query-receipt validation plus Recall@K, MRR, nDCG@K, and latency
+  metrics with deterministic recomputation.
+- Bound observed query latency into each query receipt and made the normalized
+  hit limit explicit so K values above eight are measured truthfully.
+- Added a fail-closed comparison receipt that can report measured improvement
+  on the public regression corpus but cannot recommend or promote a generation.
+- Ordered owner hits globally by score across typed result buckets before
+  applying K, preserving deterministic bucket/position tie-breaking.
+- Replaced the AI Overseer benchmark Skillz query-time mutation path with the
+  authenticated read-only owner.
+
+## [2026-07-29] Bounded symbol reconciliation
+
+- Replaced the unbounded persisted symbol-ID snapshot with deterministic
+  `limit`/`offset` pages before stale-record reconciliation.
+- Applied the same bounded paging to collection content/embedding snapshots
+  used by the canonical freshness proof.
+- Added a large-state regression that rejects unbounded collection reads and
+  verifies complete stale-record deletion and proof construction.
+- Fail closed when a collection ignores pagination or returns short,
+  oversized, duplicate, or overlapping symbol-ID pages.
+
+## [2026-07-26] Exact-SHA post-merge authority primitives
+
+- Added a separate cross-process authority-update lease that can safely wrap
+  the existing `MaintenanceSession` writer lease.
+- Added read-only canonical freshness rehydration for an explicit expected
+  repository SHA, reusing the existing query-admission result and reason
+  codes.
+- Added an exact-content authority blocker marker primitive for durable
+  fail-closed recovery after an unpublishable supersession invalidation.
+- Preserved the authority split: HoloIndex supplies leases and proof;
+  WRE/OpenClaw owns post-merge task coordination and worktree effects.
+
+## [2026-07-25] CLI catalog deterministic refresh
+
+- Regenerated the tracked CLI catalog and JSON rolodex from current main,
+  correcting stale command counts and the invalid shared-root skill tally.
+- Preserved the query/index authority split; this was an explicit maintenance
+  action in an isolated clean worktree.
+
+## [2026-07-25] REDDOG_HOLOINDEX_SEMANTIC_EVIDENCE_RECEIPT_BINDING_PHASE1
+
+- Added a bounded canonical semantic-evidence serialization over all RedDog-consumable HoloIndex buckets and metadata.
+- Bound the serialization digest and item count into `holoindex_query_receipt.v1`.
+- Preserved query-only behavior; the receipt builder performs no maintenance or indexing.
+
+## [2026-07-25] REDDOG_HOLOINDEX_AUTHORITY_WORKTREE_QUERY_BINDING_PHASE1
+
+- Added a read-only authority-worktree selector for a configured or deterministic sibling linked worktree. It requires the same Git common directory, a clean authority, and exact workspace HEAD.
+- Added a public repository-root digest to generation-bound freshness snapshots and owner responses so a configured loopback owner cannot satisfy a query for a different same-HEAD worktree.
+- Kept maintenance ownership outside the query process: selection performs no worktree creation, Git mutation, collection write, or re-index.
 
 ## [2026-07-24] HOLOINDEX_QUERY_ROOT_ADMISSION_P0_PHASE1
 

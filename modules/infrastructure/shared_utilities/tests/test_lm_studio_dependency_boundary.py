@@ -35,7 +35,10 @@ class TestProbeAvailabilityState:
         )
 
         with patch(f"{RESOLVER}.is_lm_studio_available", return_value=True):
-            assert probe_backend_availability() is LocalLLMAvailability.LM_STUDIO_READY
+            assert (
+                probe_backend_availability()
+                is LocalLLMAvailability.LM_STUDIO_SERVER_REACHABLE
+            )
 
     def test_fallback_state_when_lm_studio_absent_but_gguf_exists(self):
         from modules.infrastructure.shared_utilities.local_llm_resolver import (
@@ -138,6 +141,24 @@ class TestRequiredPathNamedError:
 
         assert backend is mock_backend
         assert backend.backend_name == "lm_studio"
+
+    def test_require_probes_supplied_authenticated_server_configuration(self):
+        from modules.infrastructure.shared_utilities.local_llm_resolver import (
+            require_lm_studio_backend,
+        )
+
+        with patch(f"{RESOLVER}.is_lm_studio_available", return_value=True) as probe:
+            with patch(f"{RESOLVER}.LMStudioBackend") as mock_cls:
+                mock_cls.return_value.initialize.return_value = True
+                require_lm_studio_backend(
+                    model_id="ui-tars",
+                    base_url="http://127.0.0.1:4321/v1",
+                    api_token="opaque-test-token",
+                )
+
+        probe.assert_called_once_with(
+            "http://127.0.0.1:4321/v1", api_token="opaque-test-token"
+        )
 
     def test_require_raises_when_reachable_but_model_not_loaded(self):
         from modules.infrastructure.shared_utilities.local_llm_resolver import (

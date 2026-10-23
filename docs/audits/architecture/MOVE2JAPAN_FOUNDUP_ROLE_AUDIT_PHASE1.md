@@ -1,5 +1,27 @@
 # Move2Japan FoundUp Role Audit - Phase 1
 
+## 2026-10-18 disposition: housing product inside the shared Mall
+
+This May audit remains historical evidence for the implemented YouTube/BC0
+service and its preservation requirements. Under 012's later direct instruction,
+the same `move2japan` identity now also supplies a public housing-discovery POC
+inside the actual Play Foundups Mall at `/member/?foundup=move2japan`.
+The current registry classification is an incubating `foundup`, tier `F0_DAE`,
+with a declarative manifest and discoverable public entry `/f/move2japan`.
+The service implementation, stakeholder database and livechat integration remain.
+
+The original `ACCESS_SERVICE` conclusion below describes the earlier narrower
+scope. It is superseded for current registration by the
+[housing rebaseline](../../../modules/foundups/move2japan/docs/08_HOUSING_DISCOVERY_REBASELINE.md)
+and [module roadmap](../../../modules/foundups/move2japan/ROADMAP.md).
+Public discovery does not grant publisher, membership, payment or worker authority.
+Prototype publishing remains pending; MVP requires actual paying customers.
+Token status remains `TOKEN_DEFERRED`, with no symbol or issuance. The May
+audit-only constraints below remain the scope of that historical audit, rather
+than a prohibition on the later work directly authorized by 012.
+
+---
+
 **Slice**: `M2JRA-W9B`
 **Worker**: W9 sub-worker B (audit/spec)
 **Date**: 2026-05-18

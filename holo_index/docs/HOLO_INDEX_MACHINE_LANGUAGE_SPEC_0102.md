@@ -56,7 +56,11 @@ symbol references are used instead of brittle source line numbers.
 - `docs_hits` / `docs`, `knowledge_hits` / `knowledge`
 - `work_ledger_hits` / `work_ledger`
 - `metadata` with per-bucket counts, timestamp, retrieval mode, embedding
-  backend, backend quality/gate, and collection routing truth
+  backend, backend quality/gate, collection routing truth, and nullable
+  `tier0_module_target`. The target is generation-stable producer intent for
+  one canonical `modules/<domain>/<module>` path; null means full/singular
+  intent was ambiguous, generic, or unavailable. Exact metadata rows alone do
+  not attest query intent.
 
 `--bundle-json` returns schema `wsp_memory_bundle_v1`:
 - `schema_version`, `generated_at`, `ok`

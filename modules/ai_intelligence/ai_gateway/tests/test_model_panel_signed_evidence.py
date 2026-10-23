@@ -13,7 +13,9 @@ from pathlib import Path
 import pytest
 
 from model_signed_evidence_test_helpers import (
+    BENCHMARK_FINGERPRINT,
     BENCHMARK_PUBLIC_KEY,
+    PROMOTION_FINGERPRINT,
     PROMOTION_PUBLIC_KEY,
     DeterministicSignatureVerifier,
     InMemoryEvidenceNonceStore,
@@ -133,14 +135,30 @@ def _policy() -> ModelRuntimeBindingPolicy:
 def _member_resolver() -> StaticModelEvidenceKeyResolver:
     return StaticModelEvidenceKeyResolver(
         {
-            ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: BENCHMARK_PUBLIC_KEY,
-            ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value: PROMOTION_PUBLIC_KEY,
+            (
+                ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value,
+                BENCHMARK_FINGERPRINT,
+                KEY_EPOCH,
+            ): BENCHMARK_PUBLIC_KEY,
+            (
+                ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value,
+                PROMOTION_FINGERPRINT,
+                KEY_EPOCH,
+            ): PROMOTION_PUBLIC_KEY,
         }
     )
 
 
 def _panel_resolver(public_key: str = PANEL_PUBLIC_KEY) -> StaticModelEvidenceKeyResolver:
-    return StaticModelEvidenceKeyResolver({PanelEvidenceSignerRole.PANEL_AUTHORITY.value: public_key})
+    return StaticModelEvidenceKeyResolver(
+        {
+            (
+                PanelEvidenceSignerRole.PANEL_AUTHORITY.value,
+                PANEL_FINGERPRINT,
+                KEY_EPOCH,
+            ): public_key
+        }
+    )
 
 
 def _signed_panel(case: dict, **overrides):
@@ -336,6 +354,33 @@ def test_member_chain_is_verified_before_aggregate_signature():
     forged_aggregate = replace(case["aggregate"], signature="test-sig:also-forged")
     with pytest.raises(ValueError, match="benchmark_signed_evidence_rejected:signature_invalid"):
         _verify(case, aggregate=forged_aggregate, member_inputs=forged_inputs)
+
+
+def test_panel_authority_must_be_distinct_from_member_signers() -> None:
+    case = _case()
+    aggregate = _signed_panel(
+        case,
+        signer_public_key=BENCHMARK_PUBLIC_KEY,
+        signer_key_fingerprint=BENCHMARK_FINGERPRINT,
+    )
+    panel_resolver = StaticModelEvidenceKeyResolver(
+        {
+            (
+                PanelEvidenceSignerRole.PANEL_AUTHORITY.value,
+                BENCHMARK_FINGERPRINT,
+                KEY_EPOCH,
+            ): BENCHMARK_PUBLIC_KEY
+        }
+    )
+
+    with pytest.raises(
+        ValueError, match="panel_authority_signer_not_independent"
+    ):
+        _verify(
+            case,
+            aggregate=aggregate,
+            panel_key_resolver=panel_resolver,
+        )
 
 
 def test_rejects_independently_signed_member_with_spliced_topology():

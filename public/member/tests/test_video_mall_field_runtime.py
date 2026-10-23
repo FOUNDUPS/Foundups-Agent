@@ -967,7 +967,7 @@ class TestMallLocomotionAndGestures:
     def test_interactive_elements_excluded_from_drag(self):
         """Drag ignores clicks on buttons and interactive elements."""
         js = _read("js/mall-tile-field.js")
-        assert "e.target.closest('button, a, [tabindex]')" in js
+        assert "e.target.closest('button, a, input, select, textarea')" in js
 
     def test_two_dimensional_scroll(self):
         """Drag scroll works in both X and Y directions."""

@@ -43,12 +43,58 @@ pip install -r requirements.txt
 
 **What gets installed:**
 - **Flask** - Web framework
-- **Librosa** - Audio processing (MFCC fingerprinting)
+- **Librosa 0.10.2** - Audio processing (MFCC fingerprinting), without a setuptools runtime dependency
 - **NumPy** - Mathematical computations
 - **SciPy** - Advanced mathematics
 - **Web3.py** - Ethereum integration
 - **Pillow** - Image processing
 - **Requests** - HTTP client for IP geofencing
+
+### Web3 compatibility (2026-10-23; hosted qualification pending)
+
+The pair is `web3==7.15.0` with `eth-account==0.13.6`, the minimum
+eth-account version declared by that Web3 release. Web3 7 uses
+`ExtraDataToPOAMiddleware` at layer zero instead of `geth_poa_middleware`.
+All other direct pins are retained. Public wheel metadata and middleware source
+have been inspected. Full requirements resolve to 76 binary packages, and
+hash-locked installation plus `pip check` pass in the reused Windows Python
+3.12.10 environment. Seven preexisting orphan distributions remain; an in-place
+install does not prove a fresh environment. Author and independent runs each
+pass the same 18 guarded cases. Independent fault controls reject incorrect
+middleware, an attempted hidden effect and incomplete test inventory. See
+[TestModLog](./tests/TestModLog.md) for Windows adaptations and retained failed
+attempts. Fresh hosted Python 3.11/3.12 acceptance is a separate remaining gate.
+
+The existing logger still returns `simulated_...` identifiers: `_real_logging`
+delegates to simulation even after a successful connection. `verify_log` returns
+educational simulation metadata, not an authenticated chain receipt. The
+existing-file tests use real Web3 and an in-memory provider under an outer effect
+guard; no RPC, key creation, signing, transaction submission or deployment is
+required. Do not use the operational examples below as qualification evidence.
+
+### yt-dlp qualification (2026-10-23)
+
+The manifest pins bare `yt-dlp==2026.7.4`, without `[default]` or other extras. This follows the [upstream security release](https://github.com/yt-dlp/yt-dlp/releases/tag/2026.07.04); every other direct pin remains unchanged. Fresh full baseline/candidate installs and `pip check` passed on Windows AMD64 CPython 3.12.10. The target's fresh dependency graph omits brotli, mutagen and pycryptodomex; an in-place requirements install does not uninstall old packages. Pillow 13, Librosa 0.10.2 and the absence of a setuptools runtime requirement are retained.
+
+Requests remains 2.31.0 for existing application consumers. The new yt-dlp rejects that version for its Requests backend and uses Urllib; a prepared HTTPS request and gzip/deflate decoding passed offline checks. HTTPS proxies and Requests-style persistent connections are not qualified by this fallback. Brotli is absent and `br` is not advertised; Brotli-only responses are not qualified. The adapter does not configure metadata/thumbnail postprocessors that need mutagen. Existing pycryptodome 3.24.1 supplies `Crypto.Cipher.AES`; a known-answer CBC check and AES-128 HLS manifest acceptance passed, without an end-to-end HLS transfer/decryption claim. Do not add bundle extras without separately resolving their dependency requirements.
+
+All nine focused local checks and seven added adapter cases pass in both environments. The extended existing suite has 18 passes and the same four prior failures; no skips or weakened assertions. Real installed downloader constructors are exercised, while extraction, download and FFmpeg are controlled test boundaries. No live X download, native FFmpeg process, successful audio-upload/RPC, installed-service or deployment acceptance is claimed. The separate timeout-child diagnostic fails in both versions: temporary-file removal does not terminate/reap a timed-out FFmpeg child. This remains an unresolved repair obligation. Linux/Python 3.11 execution and exact-head CI are separate gates. See [ModLog](./ModLog.md) and [test inventory/results](./tests/TestModLog.md) for evidence and retained failures. Later live-test examples in this guide are operational instructions, not evidence that those effects were exercised here.
+
+### Dependency qualification (2026-10-21)
+
+`Pillow==13.0.0` addresses [GHSA-8g5g-8vmr-9782 / CVE-2026-112403](https://github.com/advisories/GHSA-8g5g-8vmr-9782). Pillow 13 requires Python 3.11+, matching this module's declared minimum. Qualification ran on Windows AMD64 CPython 3.12.10; Linux deployment and Python 3.11 execution remain unverified.
+
+`librosa==0.10.2` removes the need for the temporary setuptools 81 runtime pin. It is the earliest stable release after 0.10.1 containing the [upstream replacement of `pkg_resources` with `importlib.resources`](https://github.com/librosa/librosa/pull/1765), published on [PyPI on 2024-05-02](https://pypi.org/project/librosa/0.10.2/). Setuptools below 83 is affected by [GHSA-h35f-9h28-mq5c / CVE-2026-59890](https://github.com/advisories/GHSA-h35f-9h28-mq5c). A standalone upgrade to setuptools 83 would leave Librosa 0.10.1 dependent on the API removed in setuptools 82; this repair instead eliminates that runtime dependency. Pillow 13 and all other direct pins remain unchanged.
+
+A fresh requirements-only environment passed startup with both setuptools and `pkg_resources` absent. No resolved distribution requires setuptools at runtime; its three metadata references belong to unused test/development extras. Existing deployment bootstrap may still install current setuptools as build tooling. This change neither removes build tooling from existing environments nor certifies those environments as vulnerability-free.
+
+Running `pip install -r requirements.txt` in an old environment can retain setuptools 81.0.0: removing a requirement is not an uninstall. Replace that environment with a fresh requirements-only environment, or qualify its build-tool upgrade separately. The existing deployment bootstrap upgrades build tools and this manifest no longer downgrades them; that deployment path was not executed here. This PR does not modify any live runtime.
+
+Full dependency resolution, fresh installation, and `pip check` passed. Network-denied local checks passed for application creation, `/`, `/health`, and three invalid-upload cases. Existing audio helpers loaded an in-memory synthetic WAV, resampled 44.1 kHz to 22.05 kHz, validated its content, and produced 13 finite MFCC coefficients. Seven generated-image checks passed for Pillow codecs, resizing, invalid input, and the NumPy bridge. These image checks are package checks: no Python image adapter exists in the application. No successful upload endpoint, full `process_audio` call, Ethereum RPC, X download, live service, or deployment was exercised.
+
+For the identical WAV fixture, saved loaded-audio and MFCC arrays have identical dtypes, shapes, raw-byte hashes, and element values in baseline and candidate; maximum absolute difference is zero for both arrays. This verifies the observed fixture's fingerprint values, without asserting equivalence for every possible audio input.
+
+The unchanged 15-test unit suite has identical results with the Librosa 0.10.1/setuptools 81 baseline and Librosa 0.10.2 without setuptools: 11 pass and four fail under pytest; native unittest classifies the same four as two failures and two errors. Remaining cases are an ISO timestamp used in numeric triangulation, a stale index-page literal, a multipart bytes fixture rejected as a missing file, and a geolocation mock raising plain `Exception`. No tests were changed or weakened. Pytest used the repository's `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1` convention because these unittest-based files need no Web3 plugin; the earlier normal-autoload failure on Web3's `ContractName` import from `eth_typing` remains separate. Full application validation remains incomplete. See [ModLog](./ModLog.md) for source and evidence bindings.
 
 ### Step 3: Run the Application
 ```bash

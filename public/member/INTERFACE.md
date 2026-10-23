@@ -1,7 +1,7 @@
 # Member Area Interface
 
 **Module**: `public/member/`
-**Version**: 2.1.0
+**Version**: 2.2.0
 
 ## Public Interface
 
@@ -10,11 +10,66 @@
 /member/
 ```
 
-### Auth Requirements
+### Ordinary Mall Auth Requirements
 - Clerk session required
 - invite validation required
 - username claim required before admitted users enter the Mall
 - redirects to `/?signin=required` if not authenticated
+
+### Registered Public Product Selection
+
+`/member/?foundup=move2japan` and `/member/index.html?foundup=move2japan` select
+public houses in this same page. Exactly one case-sensitive supported `foundup`
+value is required. Unknown or duplicate selections do not relax ordinary admission.
+The legacy `/move2japan/` page is only a fixed redirect; `/f/move2japan` uses the
+registry's exact public `poc_url`. `/f/move2japan/app` retains its existing gate.
+
+`Move2JapanSearch.prepareShell(window)` runs before shared controllers bind:
+it moves the one existing `#mallTileField` into the property layout and installs
+the product form inside the existing `#accountPlane`. It creates no second shell,
+account controller or tenant runtime. The actual page's product boot selects
+`mallStateRestore.selectProduct('move2japan')` before mounting the public catalog.
+Only an already-present Clerk user starts the read-only account initializer.
+
+The shared `window.redDog` gains:
+
+| API | Product contract |
+| --- | --- |
+| `registerDiscoveryAdapter({element, focusElement})` | Register the native product form in the existing plane |
+| `setDiscoveryAdmission(boolean)` | Strict admission state; revocation clears shared identity and member content |
+| `isDiscoveryAdmitted()` | Current product account admission, never payment entitlement |
+
+`product-discovery` retains the full controller plus accessible modal handling.
+The older reduced `public-discovery` mode remains available for existing callers;
+Move2Japan's canonical page uses `product-discovery`. Shared density/motion controls
+remain available to admitted accounts. Global video scope, category, query, layout
+and channel actions cannot change geographic results; the native property form
+owns its filters. Dispatcher `search_catalog` returns `incompatible_projection`
+when the shared field refuses the query, without emitting a state-change event.
+
+The property selection has precedence over responsive category rows, including
+empty results. `getLayoutMode()` reports `grouped`; ordinary rows/grid behavior
+is retained when leaving the product. Property detail identity is
+`(foundup_id, listing_id)` and remains separate from video channel identity.
+
+### Independent View State and Account Return
+
+`mallStateRestore` exposes `selectProduct`, `save`, `restore`, `bindAutoSave`,
+`rememberProductReturn` and `consumeProductReturn`.
+
+| View | Storage key / schema |
+| --- | --- |
+| Ordinary video Mall | `pfmall_mall_state_v1`; scope, projection, layout, vertical and category-row offsets |
+| Move2Japan | `pfmall_product_move2japan_state_v1`; `pfmall_product_state.v1`, geographic rows and stable listing anchors |
+| Account return | Session-only `pfmall_product_return_v1`; one use, 15 minutes, allowlisted filters and fixed member destination |
+
+Product restoration never applies video scope or layout. Deferred video scroll
+callbacks recheck the selected product. A loading product cannot overwrite its
+previous geographic state with an empty capture. The return is consumed only by
+the normal Mall initializer after Clerk/invite/username admission succeeds.
+Service-worker cache `pfmall-member-v4` normalizes member query navigations to one
+shell entry; public property JSON uses network-first validation and dated cached
+fallback. Auth, account, dynamic and cross-origin requests are not cached.
 
 ### Runtime Surface
 
@@ -283,16 +338,19 @@ Self-contained IIFE for FAQ topics. Will be removed when OpenClaw lands.
 
 ---
 
-### Shell-Local vs OpenClaw Capabilities
+### Shell-Local vs Resident RedDog/OpenClaw Capabilities
 
-| Hook | Shell-Local (Current) | OpenClaw (Future) |
+| Hook | Shell-Local (Current) | Resident RedDog/OpenClaw (Future) |
 |------|----------------------|-------------------|
 | `searchByCreator()` | String match on catalog | AI semantic search |
 | `projectPersonalMall()` | Filter by creator | Personalized ranking |
 | `setProjection()` | Client-side sort | AI-ranked projections |
 | `getRecommendations()` | Static recommendations | AI-generated suggestions |
 
-> **Dev/Testing Shim**: The Search Mall text input is a temporary shell-local shim for testing field scope APIs. It will be replaced by OpenClaw-powered search UI.
+> **Dev/Testing Shim**: The Search Mall text input is a temporary shell-local
+> shim for testing field-scope APIs. Future AI search requires an authenticated
+> RedDog adapter; the shell does not directly host the model or OpenClaw
+> authority.
 
 ### Data Expectations
 
@@ -364,6 +422,10 @@ interface InviteDoc {
 **Scope**: Browser-side postMessage bridge for structured agent control of the pfMALL video wall. Phase 1 (PMCTRL1).
 
 This contract defines the **only** sanctioned way for an external agent (0102, Hermes, future native phone agent, future RedDog AI) to drive the `/member/` runtime. The dispatcher is an **API contract**, not a UI driver: every command routes to an existing runtime API on `window.mallTileField` / `window.mallVideoPlayer`. When the underlying API is missing, the dispatcher returns `api_unavailable`; it never fabricates success, and it never uses direct DOM selectors as a fallback.
+
+This browser control contract is not the future RedDog conversation transport.
+It carries no resident identity, durable conversation, model credential, work
+order, OpenClaw policy, or Hermes execution authority.
 
 ### Message Envelopes
 
@@ -496,3 +558,30 @@ The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideApplie
 ---
 
 *Last Updated: 2026-04-20*
+
+
+## Responsive browse and local query API — 2026-10-18
+
+- `mallTileField.setLayoutMode('rows'|'grid') -> boolean`: rows are default;
+  legacy density requests explicitly select grid. Both reuse the same tile/player API.
+- `getLayoutMode()`, `getRowOffsets()`, `restoreRowOffsets(offsets)` expose
+  presentation state; row keys are category strings, offsets nonnegative finite numbers.
+- `searchCatalog(query)` and `redDog.searchCatalog(query)` apply the same
+  `{type:'query', query}` field scope. Input is bounded to 300 characters.
+  AND-match search terms against lane/video metadata; `video(s)` requires a video
+  queue; small house/car/clothing aliases are explicit, not AI inference.
+- `pfmallControlDispatcher.dispatch('search_catalog', {query})` exposes that same
+  local presentation operation, returns `scope: local_catalog` plus observed state,
+  and emits `state_changed`. Existing origin checks are unchanged. It is not a
+  resident conversation transport or a grant of backend/worker authority.
+- State inspection includes `tile_field.layout_mode` where the field API exists.
+- Row movement preserves catalog-wide `data-index`; grouping never renumbers queues.
+- Scope/projection changes stop inline media and clear expanded index state before
+  filtering/reordering. Pinch gestures and canonical `/f/{foundup_id}` entry remain.
+
+Rows continue through the loaded catalog. Server pagination, virtualization,
+provider-confirmed live discovery, follow/payment persistence, consented preference
+mapping and authenticated speech/conversation are future slices, not implied by
+this presentation interface.
+
+Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.

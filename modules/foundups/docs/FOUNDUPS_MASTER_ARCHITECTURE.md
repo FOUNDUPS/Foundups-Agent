@@ -1,192 +1,218 @@
 # FoundUps Master Architecture
 
-**Version**: 1.0.0
-**Date**: 2026-04-05
-**Status**: Canonical
+**Version**: 1.1.0
+
+**Updated**: 2026-08-26
+
+**Status**: Canonical lifecycle and surface contract
+
 **Owner**: 012
 
----
+## 1. Outcome
 
-## 1. Five-Layer Funnel
+FoundUps replaces the startup as the unit for turning a problem, contribution,
+and desired outcome into a progressively autonomous, openly discoverable
+venture. People should be able to discover a FoundUp, understand it, join its
+community, contribute work, and enter governed economic participation without
+needing prior knowledge of the FoundUps codebase.
 
-Every FoundUp follows one flow. No exceptions.
+RedDog is the operator-facing principal-scoped 0102 Digital Twin that helps a
+person navigate and build this ecosystem. p.fMALL is the discovery and
+interaction shell. OpenClaw, WRE, Hermes, and FoundUp DAEs operate behind
+separately authenticated authority boundaries; they are not browser features.
 
+## 2. Five-layer funnel
+
+```text
+DISCOVERY -> WELCOME -> COMMUNITY -> GATE -> INTERIOR
 ```
-DISCOVERY → WELCOME → COMMUNITY → GATE → INTERIOR
+
+| Layer | Surface | Gated? | Wallet needed? | Current maturity |
+|---|---|---:|---:|---|
+| 1. Discovery | p.fMALL | No | No | Implemented shell/catalog baseline |
+| 2. Welcome | FoundUp public surface/PWA | No | No | Per-FoundUp; not universal |
+| 3. Community | Discord category + GitHub repository | No | No | Operational pattern |
+| 4. Gate | FoundUp PWA + sentinel + wallet proof | Yes | Yes | Target; not implemented generally |
+| 5. Interior | FoundUp governed stakeholder surface | Yes | Yes | Target; not implemented generally |
+
+The gate sits between Community and Interior. Discovery, public explanation,
+and ordinary community contribution remain open. Economic participation,
+governance, privileged data, and protected work require current entitlement.
+
+## 3. Layer definitions
+
+### 3.1 Discovery: p.fMALL
+
+p.fMALL is the mall: a shared Progressive Web App shell for media, FoundUp
+catalog discovery, navigation, and bounded presentation controls.
+
+- No wallet is needed for public discovery.
+- A visible `Enter FoundUp` affordance is required; gestures are enhancements,
+  not the only path.
+- The current Red Dog browser plane is a shell-local concierge/presentation
+  hook. It is not an authenticated RedDog conversation or worker transport.
+- The future resident adapter must leave the browser untrusted and keep model,
+  memory, policy, wallet, and execution credentials server-side.
+
+### 3.2 Welcome: public FoundUp surface
+
+The front door explains the mission, current evidence, stage, people, public
+content, contribution paths, and community links. A FoundUp may currently use
+a dedicated PWA, a public web page, or a truthful GitHub/community fallback.
+The architecture does not claim that every FoundUp already has the target PWA.
+
+### 3.3 Community: Discord and GitHub
+
+- GitHub is canonical for code, issues, pull requests, and releases.
+- Discord is coordination, discussion, onboarding, and notification.
+- Community participation does not prove economic entitlement.
+- Human and governed agent contributions are welcome under the same evidence
+  and review contracts.
+
+Discord is never the authoritative wallet gate or repository action surface.
+
+### 3.4 Gate: sentinel and wallet proof
+
+The target gate verifies current entitlement before economic participation,
+governance, privileged work, or protected data.
+
+- The sentinel greets, explains, routes, and enforces transitions.
+- Wallet verification occurs through an authenticated FoundUp service/PWA, not
+  through Discord roles or browser-local assertions.
+- Denial degrades to the highest public/community capability with a clear path
+  forward.
+- Any mirrored Discord role follows authoritative entitlement state; it never
+  creates that state.
+
+No general production sentinel or stake-gate implementation is claimed today.
+
+### 3.5 Interior: stakeholder operation
+
+The target interior hosts current-stake governance, economic participation,
+work assignments, and privileged dashboards. Access is continuously derived
+from current authority and is revocable. A FoundUp must not mock or infer these
+capabilities from UI state.
+
+## 4. RedDog and the Progressive Web Agent direction
+
+```text
+p.fMALL / FoundUp PWA / phone / VSIX
+                 |
+                 | authenticated thin-client request
+                 v
+RedDog / principal-scoped 0102 Digital Twin services
+                 |
+                 +-- Principal and FoundUp Memex
+                 +-- HoloIndex retrieval
+                 +-- AI Gateway model topology
+                 |
+                 | separately authorized work promotion
+                 v
+OpenClaw control supervisor -> WRE authority -> Hermes / FoundUp DAE workers
 ```
 
-| Layer | Surface | Gated? | Wallet needed? |
-|-------|---------|--------|----------------|
-| 1. Discovery | pfMALL | No | No |
-| 2. Welcome | FoundUp PWA (public routes) | No | No |
-| 3. Community | Discord category + GitHub repo | No | No |
-| 4. Gate | FoundUp PWA (sentinel + wallet) | Yes | Yes |
-| 5. Interior | FoundUp PWA (gated routes) | Yes | Yes |
+A Progressive Web App is the installable surface. A **Progressive Web Agent**
+is the target composite experience formed when that surface connects to scoped
+memory, reasoning, governance, and bounded workers. A manifest, service worker,
+or chat widget alone does not make a FoundUp autonomous.
 
-**Critical design decision**: The gate sits between Community and Interior, not between Discovery and Community. Everything up to and including Community is open. The gate only activates when someone wants economic participation, governance, or privileged work assignments.
+RedDog is the continuous 0102 product identity across surfaces, not one
+OpenClaw instance or one browser process. A phone normally connects to the
+resident/federated hub; it does not host the full execution stack. WSP 98 mesh
+operation is a later target and cannot weaken durable ordering, tenant
+isolation, revocation, or effect authority.
 
----
+## 5. Entitlement tiers
 
-## 2. Layer Definitions
+| Tier | Access | Admission |
+|---|---|---|
+| Guest | Browse p.fMALL and public media | None |
+| Visitor | Enter a public FoundUp surface | Navigation only |
+| Community | Join public coordination and contribute | Surface-specific identity |
+| Stakeholder | Enter governed economic/interior capabilities | Current wallet/stake proof |
+| Operator/Core | Bounded elevated controls | Explicit assigned authority |
 
-### 2.1 Discovery (pfMALL)
+Agent participation follows the same scope and receipt rules. Operator-held
+wallets remain the current assumption until an agent-native wallet protocol is
+separately specified and verified.
 
-The mall. Window-shopping. Browse videos, discover FoundUps.
+## 6. Target repeating unit
 
-- Entry: open pfMALL
-- Actions: watch videos, browse tiles, see FoundUp listings
-- Exit: double-tap/click tile or visible "Enter FoundUp" button
-- No account needed, no wallet, no login
+Each production FoundUp should eventually compose these seven capabilities:
 
-**Desktop rule**: Always show a visible "Enter FoundUp" control. Double-click is a power-user shortcut, not the only affordance.
+| Capability | Target |
+|---|---|
+| p.fMALL listing | Admitted catalog identity and entry route |
+| Public surface/PWA | Welcome and public evidence |
+| Community | Discord/GitHub contribution path |
+| Source authority | Canonical GitHub repository and release lineage |
+| Sentinel | Boundary explanation and routing |
+| Stake gate | Authenticated entitlement verification |
+| Interior | Revocable stakeholder capabilities |
 
-### 2.2 Welcome (FoundUp PWA — public)
+This is a target capability set, not a claim that every FoundUp currently has
+seven deployed components. Scale is `NEEDS_VERIFICATION`: tenancy, catalog,
+identity, event ordering, wallet, storage, moderation, and worker capacity must
+be measured under named deployments. No fixed instance count is guaranteed by
+this document.
 
-Each FoundUp's front door. Public-facing.
+## 7. Canonical terminology
 
-- Overview, mission statement, team info
-- Public videos and content
-- Links to Discord/community and GitHub
-- No gate — anyone can see this
+- **FoundUp:** the venture/outcome unit and, when agentic, the complete DAE
+  ecosystem rather than one repository or UI.
+- **DAE:** Decentralized or Distributed Autonomous Entity/Ecosystem under WSP
+  27. Digital describes its software embodiment; distributive describes the
+  intended spreading of agency and benefit.
+- **RedDog:** the operator-facing name/persona/surface of the principal-scoped
+  0102 Digital Twin.
+- **Red God:** the long-horizon metaphor for many RedDogs coordinating through
+  governed protocols; it is not a privileged superuser or central authority.
+- **p.fMALL:** the shared discovery/interaction platform layer, not itself a
+  FoundUp or OpenClaw instance.
+- **PWA:** Progressive Web App when describing web technology. Spell out
+  Progressive Web Agent when describing the target agentic product.
 
-### 2.3 Community (Discord + GitHub)
+## 8. Current truth and non-claims
 
-Public coordination and contribution surface.
+| Claim | State |
+|---|---|
+| p.fMALL/member PWA discovery shell | Implemented |
+| GotJunk and selected FoundUps have PWA-shaped surfaces | Implemented per project, not universal |
+| Public/community GitHub and Discord pattern | Operational architecture |
+| RedDog VSIX conversation and governed model surface | Implemented, with durable cross-surface continuity still missing |
+| Authenticated p.fMALL/phone RedDog adapter | Specified, not implemented |
+| General FoundUp sentinel and stake gate | Not implemented |
+| General stakeholder interior | Not implemented |
+| Universal Progressive Web Agent scaffold | Target, not implemented |
+| WSP 98 mesh-native/zero-server deployment | Target, not implemented |
 
-- **Discord**: Category inside the FOUNDUPS server (not a separate server)
-- **GitHub**: Repo under the FOUNDUPS org (canonical action surface)
-- Discussion, coordination, work discovery, onboarding
-- No staking required — this is the social layer
-- Human and AI contributors both welcome
+## 9. Failure modes
 
-**GitHub is canonical**. All code, issues, PRs, and releases live on GitHub. Discord is coordination and discussion only.
+- **Community-to-stake gap:** contribution must have a visible, public path to
+  entitlement; it cannot be explained only after the gate.
+- **Sentinel drift:** the sentinel must route and explain without becoming the
+  wallet, policy, repository, or sovereign authority.
+- **Browser authority drift:** localStorage, UI state, `postMessage`, and chat
+  text cannot create durable identity or effects.
+- **FoundUp coupling:** shared p.fMALL/RedDog services must not absorb tenant
+  business logic or data ownership.
+- **Scale theatre:** target diagrams and user counts are not capacity evidence.
+- **Autonomy theatre:** a PWA or AI response is not proof of a DAE capable of
+  governed work.
 
-### 2.4 Gate (Sentinel + Wallet)
-
-The boundary between public and economic participation.
-
-- **Sentinel agent**: Each FoundUp's boundary keeper
-  - Lives in the PWA as primary interface
-  - Lightweight presence in Discord (answers "how do I stake?" and links to PWA)
-  - Greets, routes, checks status, enforces transitions
-  - Denies or downgrades gracefully if not entitled
-- **Wallet verification**: In the FoundUp PWA, never in Discord
-  - Wallet connect
-  - Signed challenge
-  - Verify UPS staked + F_i held
-  - Pass → unlock interior
-  - Fail → stay in Community tier with clear path to staking
-
-**Discord is never the true gate.** Discord is a social doorway. The real gate is wallet + signature + token verification in the PWA.
-
-### 2.5 Interior (FoundUp PWA — gated)
-
-The operating surface for stakeholders.
-
-- Only unlocked after stake proof
-- Economic participation, governance, work assignments
-- Privileged data, dashboards, voting
-- Access revoked if stake drops below threshold
-
----
-
-## 3. Entitlement Tiers
-
-| Tier | Access | How Acquired |
-|------|--------|--------------|
-| **Guest** | Browse pfMALL, watch public videos | No action needed |
-| **Visitor** | Enter FoundUp Welcome page | Click into a FoundUp |
-| **Community** | Join Discord, contribute on GitHub | Join server, verify |
-| **Stakeholder** | Pass wallet gate (UPS staked + F_i held) | Connect wallet in PWA |
-| **Operator/Core** | Elevated controls beyond stakeholder | Assigned by 012 |
-
-**Agent staking**: AI agents participate at every tier. Staking is operator-mediated — the agent's operator holds the wallet until agent-native wallets are specified.
-
----
-
-## 4. Repeating Unit Per FoundUp
-
-Each FoundUp gets exactly 7 components:
-
-| Component | What | Setup time |
-|-----------|------|------------|
-| pfMALL listing | Tile in the mall | Add to catalog |
-| PWA shell | Public welcome + gated interior | Template stamp |
-| Discord category | 3 text + 1 voice channel | 15 minutes |
-| GitHub repo | Code, issues, PRs | Already exists |
-| Sentinel agent | Boundary keeper | Config per project |
-| Stake gate | Wallet verification | Contract interaction |
-| Interior routes | Gated PWA pages | Per-project build |
-
-These scale linearly. None are architecturally coupled in ways that break at 20 instances.
-
----
-
-## 5. Discord: The Community Layer
-
-Discord is layer 3. Its job:
-
-1. Help people find work (GitHub notification feeds)
-2. Let people discuss what they're doing
-3. Let the operator broadcast updates
-
-Discord never:
-- Verifies wallet state
-- Controls access to economic participation
-- Determines stakeholder status
-- Replaces GitHub as the action surface
-
-See: `FOUNDUPS_DISCORD_BLUEPRINT.md` for full server structure.
-
----
-
-## 6. Document Map
-
-### Org-level (this repo)
+## 10. Document map
 
 | Document | Purpose |
-|----------|---------|
-| `FOUNDUPS_MASTER_ARCHITECTURE.md` | This file. Five-layer flow, tiers, repeating unit. |
-| `FOUNDUPS_DISCORD_BLUEPRINT.md` | Server structure, roles, channels, automation. |
-| `FOUNDUPS_ENTITLEMENT_TIERS.md` | Formal tier definitions, per-surface access matrix. |
-| `FOUNDUP_TEMPLATE.md` | Checklist for adding a new FoundUp to the system. |
+|---|---|
+| `FOUNDUPS_MASTER_ARCHITECTURE.md` | Lifecycle, surfaces, identity, and truth boundary |
+| `FOUNDUPS_DISCORD_BLUEPRINT.md` | Community server structure |
+| `FOUNDUPS_ENTITLEMENT_TIERS.md` | Per-surface entitlement matrix |
+| `FOUNDUP_TEMPLATE.md` | Adding a FoundUp |
+| `PFMALL_SHELL_CONTRACT.md` | p.fMALL platform boundary |
+| `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` | RedDog thin-client and authority contract |
+| `WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md` | RedDog/0102 protocol |
+| `WSP_framework/src/WSP_98_FoundUps_Mesh_Native_Architecture_Protocol.md` | Federated/mesh target gates |
 
-### Per-FoundUp repo
-
-| Document | Purpose |
-|----------|---------|
-| `CONTRIBUTING.md` | How to contribute (includes Discord + GitHub paths) |
-| `SENTINEL_CONFIG.md` | Project-specific sentinel behavior (future) |
-| `STAKEHOLDER_GUIDE.md` | How to go from Community to Stakeholder (future) |
-
-### Deferred specs (future slices)
-
-| Document | Purpose |
-|----------|---------|
-| `SENTINEL_SPEC.md` | Sentinel agent contract |
-| `STAKE_GATE_SPEC.md` | Wallet verification flow |
-| `AGENT_CONTRIBUTOR_POLICY.md` | AI agent participation rules |
-
----
-
-## 7. What Breaks If You're Not Careful
-
-**Community → Stakeholder gap**: Contributors active on Discord and GitHub hit the stake gate and need UPS + F_i tokens. If the path from "contributing" to "can acquire tokens" isn't obvious and documented, best contributors bounce at the gate. The answer must live in the FoundUp Welcome layer (public), not behind the gate.
-
-**Sentinel fragility**: Sits at the public/gated boundary. Must handle graceful denial, correct routing, and wallet verification handoff. Primary interface is PWA, not Discord.
-
-**Discord role drift**: @Stakeholder in Discord must be a mirror of PWA state, never the source of truth. If someone loses their stake, the PWA revokes interior access. Discord updates to match.
-
----
-
-## 8. Non-Claims
-
-- No stake gate implementation exists today
-- No sentinel agent exists today
-- No PWA shell exists today (pfMALL has the public discovery layer only)
-- Discord and GitHub are the only operational community surfaces
-- This architecture is the target — current state is Community layer only
-
----
-
-*This document is the single source of truth for the FoundUps lifecycle architecture. All other docs reference it.*
+This document is the canonical FoundUps lifecycle and surface map. Protocols
+own governance; module interfaces own current implementation; ModLogs own
+history.

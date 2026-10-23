@@ -17,7 +17,7 @@ from modules.infrastructure.wre_core.src.foundup_job_model_capability_consumer i
 from modules.infrastructure.wre_core.src.foundup_job_model_capability_projection import (
     canonical_artifact_digest,
 )
-from modules.infrastructure.wre_core.src.foundup_job_router import RouteStatus
+from modules.infrastructure.wre_core.src.foundup_job_router import RouteStatus, TargetBackend
 from modules.infrastructure.wre_core.tests.test_foundup_job_model_capability_projection import (
     _binding,
     _job,
@@ -309,4 +309,183 @@ def test_consumer_leaves_other_action_projection_absent(
     job = _job("build_foundup")
     result = FoundUpJobConsumer(dry_run=True).consume_one(job)
     assert result.model_capability_projection is None
-    execute.assert_called_once_with(job)
+    execute.assert_called_once_with(job, force_dry_run=True)
+
+
+@pytest.fixture
+def executor_capture(monkeypatch, tmp_path):
+    from modules.infrastructure.wre_core.src import hermes_job_executor as hx
+
+    observed = []
+    monkeypatch.setenv("FOUNDUPS_WORKSPACE_ROOT", str(tmp_path))
+    monkeypatch.setattr(hx, "_executor_singleton", None)
+    validator = hx.get_default_validator()
+    monkeypatch.setattr(validator, "used_nonces", {"already-used"})
+
+    def capture(executor, job):
+        observed.append((executor, job))
+        return _simulated_result()
+
+    monkeypatch.setattr(hx.HermesJobExecutor, "execute", capture)
+    for name in ("_emit_receipt_for_hermes_result", "_attach_context_bundle_dry_run"):
+        monkeypatch.setattr(FoundUpJobConsumer, name, lambda *args: None)
+    return hx, observed, tmp_path, validator
+
+
+@pytest.mark.parametrize("state", ["fresh", "dry", "non_dry", "controlled"])
+@pytest.mark.parametrize("consumer_flag", [True, False])
+@pytest.mark.parametrize("job_flag", [True, False])
+def test_consumer_isolates_forced_dry_configuration(
+    executor_capture, monkeypatch, state, consumer_flag, job_flag
+):
+    from modules.infrastructure.wre_core.src import foundup_job_consumer as fc
+
+    hx, observed, root, validator = executor_capture
+    warm = None if state == "fresh" else hx.HermesJobExecutor(
+        dry_run=state != "non_dry", max_iterations=7,
+        workspace_root=str(root / "warm"),
+        controlled_harness=state == "controlled",
+        real_delegate_adapter=state == "controlled",
+        default_toolsets=["terminal"] if state == "controlled" else [],
+    )
+    hx._executor_singleton = warm
+    warm_state = dict(vars(warm)) if warm else None
+    job = _job("build_foundup")
+    job.policy_flags.dry_run_mode = job_flag
+    route = MagicMock(job_id=job.job_id, route_status=RouteStatus.ROUTED,
+                      target_backend=TargetBackend.HERMES_BUILDER)
+    monkeypatch.setattr(fc, "route_foundup_job", lambda job: route)
+    result = FoundUpJobConsumer(dry_run=consumer_flag).consume_one(job)
+    assert result.dispatched is True
+    executor, actual_job = observed.pop()
+    assert actual_job is job and job.policy_flags.dry_run_mode is job_flag
+    if consumer_flag:
+        assert executor is not warm and executor.dry_run is True
+        assert executor.controlled_harness is False
+        assert executor.real_delegate_adapter is False
+        assert executor.default_toolsets == [] and executor.max_iterations == 50
+        assert executor.workspace_root == str(root)
+        assert hx._executor_singleton is warm
+    else:
+        assert executor is (warm if warm is not None else hx._executor_singleton)
+    if warm:
+        assert vars(warm) == warm_state
+    assert executor.token_validator is validator
+    assert validator.used_nonces == {"already-used"}
+    assert validator.register_nonce("already-used") is False
+
+
+@pytest.mark.parametrize("explicit_false", [False, True])
+def test_convenience_legacy_calls_preserve_warmed_executor(
+    executor_capture, explicit_false
+):
+    hx, observed, root, validator = executor_capture
+    warm = hx.get_executor(dry_run=False, max_iterations=7, workspace_root=str(root))
+    job = _job()
+    options = {"force_dry_run": False} if explicit_false else {}
+    hx.execute_foundup_job(job, **options)
+    assert observed == [(warm, job)]
+    assert hx.get_executor() is warm and warm.dry_run is False
+    assert warm.max_iterations == 7 and warm.token_validator is validator
+
+
+@pytest.mark.parametrize("value", [None, 0, 1, "true", "false", [], {}, object()])
+def test_force_dry_requires_literal_boolean_before_executor_selection(value):
+    from modules.infrastructure.wre_core.src import hermes_job_executor as hx
+
+    with patch.object(hx, "get_executor") as singleton, patch.object(
+        hx, "HermesJobExecutor"
+    ) as constructor:
+        with pytest.raises(TypeError, match="force_dry_run must be a boolean"):
+            hx.execute_foundup_job(_job(), force_dry_run=value)
+        singleton.assert_not_called()
+        constructor.assert_not_called()
+
+
+@pytest.mark.parametrize("site", ["route", "resolver"])
+@pytest.mark.parametrize("initial", [True, False])
+@pytest.mark.parametrize("bound", [True, False])
+def test_consumer_mode_is_captured_before_callbacks(monkeypatch, site, initial, bound):
+    from modules.infrastructure.wre_core.src import foundup_job_consumer as fc
+
+    trusted = _trusted(_binding()) if bound else lambda lookup: None
+
+    def resolver(lookup):
+        if site == "resolver":
+            consumer.dry_run = not initial
+        return trusted(lookup)
+
+    consumer = FoundUpJobConsumer(
+        dry_run=initial, model_runtime_binding_resolver=resolver
+    )
+    original_route = fc.route_foundup_job
+
+    def route(job):
+        if site == "route":
+            consumer.dry_run = not initial
+        return original_route(job)
+
+    monkeypatch.setattr(fc, "route_foundup_job", route)
+    with patch(
+        "modules.infrastructure.wre_core.src.hermes_job_executor.execute_foundup_job",
+        return_value=_simulated_result(),
+    ) as execute:
+        result = consumer.consume_one(_job())
+    assert result.model_capability_projection["dry_run_mode"] is initial
+    if not initial and not bound:
+        assert result.checkpoint_blocker == "live_binding_required"
+        execute.assert_not_called()
+    else:
+        assert result.dispatched is True
+        assert execute.call_args.kwargs == {"force_dry_run": initial}
+
+
+def test_forced_executor_uses_shared_validator_not_warmed_custom(executor_capture):
+    hx, observed, root, shared = executor_capture
+    custom = hx.LocalCapabilityTokenValidator()
+    custom.register_nonce("custom-used")
+    warm = hx.HermesJobExecutor(dry_run=False, token_validator=custom)
+    hx._executor_singleton = warm
+    hx.execute_foundup_job(_job(), force_dry_run=True)
+    assert observed[0][0].token_validator is shared
+    assert shared.used_nonces == {"already-used"}
+    assert hx._executor_singleton is warm and warm.token_validator is custom
+    assert custom.used_nonces == {"custom-used"}
+
+
+@pytest.mark.parametrize("enabled", ["0", "1"])
+@pytest.mark.parametrize(
+    ("action", "token", "status"),
+    [
+        ("validate_foundup", False, "SIMULATED"),
+        ("build_foundup", False, "BLOCKED_BY_DESTRUCTIVE_ACTION_GUARD"),
+        ("validate_foundup", True, "BLOCKED_BY_TOKEN_VALIDATION"),
+    ],
+)
+def test_forced_dry_retains_real_guard_and_token_boundaries(
+    monkeypatch, tmp_path, enabled, action, token, status
+):
+    from modules.infrastructure.wre_core.src import hermes_job_executor as hx
+
+    monkeypatch.setenv("FOUNDUPS_WORKSPACE_ROOT", str(tmp_path))
+    monkeypatch.setenv("HERMES_DELEGATE_ENABLED", enabled)
+    warm = hx.HermesJobExecutor(
+        dry_run=False, controlled_harness=True, real_delegate_adapter=True
+    )
+    monkeypatch.setattr(hx, "_executor_singleton", warm)
+    job = _job(action)
+    if token:
+        job.payload["capability_token"] = {
+            "token_id": "invalid", "issued_at": "2000-01-01T00:00:00+00:00",
+            "expires_at": "2000-01-02T00:00:00+00:00",
+        }
+    with patch.object(hx.HermesJobExecutor, "_execute_controlled_delegate") as controlled, patch.object(
+        hx.HermesJobExecutor, "_execute_real_delegate_adapter"
+    ) as adapter, patch.object(hx.HermesJobExecutor, "_lazy_import_delegate_task") as loader:
+        result = hx.execute_foundup_job(job, force_dry_run=True)
+    assert result.status.value == status
+    assert result.real_execution_performed is False
+    assert hx._executor_singleton is warm
+    controlled.assert_not_called()
+    adapter.assert_not_called()
+    loader.assert_not_called()

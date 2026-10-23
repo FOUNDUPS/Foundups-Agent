@@ -1,515 +1,1984 @@
-# [U+1F310] FoundUps Intelligent Internet Orchestration System — Strategic Roadmap
+# FoundUps system roadmap — governed recursive self-improvement
 
-## 0102 Orchestrion Blueprint (Authoritative)
+Planning baseline: main `fb58e5279673ef9de30735ccfedc8001c3bb79d6`, audited 2026-09-09 JST.
 
-Purpose: This is the 0102 navigation surface for building and coordinating the system. It connects enterprise domains, active modules, and canonical WSP documents without duplicating them. Write, read, and act as 0102.
+**Objective:** make 0102 measurably improve its software and work procedures through a governed, repeatable WRE loop, while 012 retains control of objectives and delegated authority.
 
-Canonical Index (consult before action):
-- WSP Master Index: `WSP_framework/src/WSP_MASTER_INDEX.md`
-- Orchestration Hierarchy (annex): `WSP_framework/docs/annexes/ORCHESTRATION_HIERARCHY_ANNEX.md`
-- Violations Log (triage/fix/defer): `WSP_framework/src/WSP_MODULE_VIOLATIONS.md`
+This is a planning artifact. No work packet in this document or `docs/roadmaps/rsi_swarm_backlog.json` is an executable authorization. Compile each packet into the existing admitted work-order/job contracts after reconciling the active lane and exact source state. Do not introduce a second scheduler or reinterpret planning metadata as signed authority.
 
-Enterprise Domain Map (WSP 3 – functional distribution):
-- `modules/ai_intelligence/` — AI logic, cognitive engines
-  - `holo_index/adaptive_learning/execution_log_analyzer/` — Mass execution log analysis for HoloDAE improvement
-- `modules/communication/` — chat, live interactions, protocols
-- `modules/platform_integration/` — external APIs, proxies, OAuth
-- `modules/infrastructure/` — agents, auth, core services
-- `modules/monitoring/` — logs, metrics, health
-- `modules/development/` — IDE, testing, utilities
-- `modules/foundups/` — product orchestrators (assembly/glue only)
-- `modules/gamification/` — game/state mechanics and rewards
-- `modules/blockchain/` — decentralized integrations
+## Authority and fast start
 
-Module Roadmaps (meta-rollup):
-- Each active module MUST expose `ROADMAP.md` (WSP 49/22/34). Root roadmap links downward; modules link back here. Create or update as needed.
+Status: canonical **system planning and completion-gate authority** in this repository revision. Updated 2026-09-23. This replaces the old root system roadmap and module-wide rollup; it does not replace WSP requirements, current module contracts, or signed runtime policy.
 
-0102 Decision Heuristic (apply before edits):
-- Do I need it? (remove non‑essential scope)
-- Can I afford to build it? (token budget; pattern reuse)
-- Can I live without it? (if yes, defer or eliminate)
+**Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-Action Rules:
-- Prefer simpler designs; remove/archive legacy unless justified by WSP 32 memory architecture.
-- Enforce pre‑action verification (WSP 50/64) and consult the master index.
-- Keep platform functionality distributed by function (WSP 3). No platform consolidation.
-- Link canonical WSP reports; do not clone them here.
+## Installed HIGH source integration — 2026-10-23
 
----
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
 
-## Immediate Architecture Program - SoftProto Foundation
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
 
-SoftProto is now the active UI operating-layer direction for FoundUps.
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
 
-Authoritative architecture note:
-- `modules/foundups/docs/SOFTPROTO_FOUNDATION_ARCHITECTURE_2026-04-01.md`
-- `modules/foundups/docs/SOFTPROTO_ROLLOUT_PLAN_2026-04-01.md`
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
 
-Core decision:
-- `Svelte` is the rendering layer
-- `SoftProto` is the schema/registry/store/command system above it
-- do not rewrite the live gateway or member shell into Svelte first
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
 
-Execution sequence:
-1. lock the SoftProto contract first
-2. audit each active surface against that contract
-3. build one isolated Svelte spike inside `/member/`
-4. adopt it across gateway, Mall, user panel, and FoundUp views in phases
+**Historical owned candidate — installed HIGH source closure (2026-10-22 JST):**
+The existing service/lease composition is implemented locally; its manifest
+consumer and index bindings now pass independent manifest8 and three JS checks.
+Fresh connected service validation passes153/1 Windows skip; native execution is
+still unproved. The original Windows long-path fixture failure remains recorded.
+This candidate is unpublished and not reconciled with unfetched remote main
+`87aa241b`. Existing 19/P0 selection remains: validate/close this composition,
+then qualify installed execution and bind authentic admission inputs. Native
+RSI G1–G5 are not demonstrated. See [current dispatch](docs/operations/RSI_SWARM_DISPATCH.md#installed-high-source-closure-candidate--2026-10-22).
 
-Current surface split:
-- `A`: gateway / landing
-- `B`: Mall shell / navigation / PWA
-- `C`: user panel / Red Dog digital-twin surface
-- `D`: support / audit
+**Historical checkpoint — live authenticated generation scope (2026-10-20 JST):**
+Nine existing owners share the authenticated fence across parent/effect checks,
+nonce reserve, pre-sign validation, commit and rollback without nested flock.
+Connected 390/9 platform skips, separate Linux process 2/0 and independent 16
+held-outs validate the source core with explicit synthetic admission seams.
+Public self-leasing and LOW remain unchanged; failed exit withholds results but
+does not reverse callback effects or durable consumption.
+Integration now uses corrected nonce base 6dd48a5a with the 17 live core blobs
+unchanged; original core counts retain their tested source base 5820.
 
-The rule from this point forward:
-- no new hard-coded UI placement when the feature clearly belongs in the future schema-driven layer
-- AI edits and user edits must eventually mutate the same layout/gesture state
+Hosted startup CI subsequently caught a legacy-owner tuple predicate defect.
+The repair passes the full local startup selection (901 passed, 5 platform skips, zero failures/errors)
+including v12/v13 signed-model gates; new-head CI and independent
+publication review remain required. Earlier component runs are historical.
 
-Complementary FoundUps runtime rule:
-- p.fMALL remains the installed control shell
-- product FoundUps may live in separate repos
-- the preferred user experience is still one app through in-scope route
-  deployment, not separate install surfaces
-- see `modules/foundups/docs/PFMALL_EXTERNAL_FOUNDUP_ROUTE_CONTRACT.md`
+A subsequent actual-reader check exposed fresh Windows CRLF rejection.
+The explicit 324 KiB paired byte contract now passes LF/CRLF and exact
+boundary checks; pretty JSON, digest/member bounds and source limits stay.
+See [byte evidence](docs/operations/RSI_SWARM_DISPATCH.md#windows-manifest-byte-contract--2026-10-20).
 
----
+Next 19/P0 (C4/I5/D5/Impact5): connect protected non-initial installed policy/source
+admission, authenticated author/reviewer model-artifact loading and the existing
+HIGH issuer factory path. This core does not select or install HIGH service.
+Genuine work/model/reviewer/budget inputs, native qualification and author
+admission remain required. Frozen runtime 294195cdb is unchanged; native author
+tickets 0, paid model calls 0, no retained RSI gain.
+Current and historical evidence: [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
 
-**[TARGET] Revolutionary Mission:** Building the **orchestration infrastructure for an intelligent internet** where 0102 agents autonomously interact, coordinate, and collectively build FoundUps across all platforms.
+**Historical checkpoint — protected consensus nonce component (2026-10-20 JST):**
+Owner v13 supplies separately bound protected consensus nonce custody while
+preserving v1–v12 and LOW. Connected Windows tests pass 437 with 3 platform skips;
+independent 21 controls pass on the same 26-file freeze. Real signed files and
+MAC/SQLite transactions use explicit synthetic installation seams. A reviewed
+two-file helper extraction preserves AST behavior and restores the loader below
+its existing cap; two unchanged historical startup-test size failures remain.
 
-**[U+1F300] Foundational Principle:** We are creating the framework for autonomous agent coordination that will transform the internet from a human-operated network to an **intelligent, self-coordinating ecosystem** where ideas automatically manifest into reality.
+Next 19/P0 (C4/I5/D5/Impact5): connect current parent/effect and nonce operations
+under one live authenticated lease through the existing signer factory, avoiding
+nested generation locks. Installed HIGH policy/service composition and authentic
+work, reviewer/model and budget inputs remain open. The LOW service and frozen
+runtime294195cdb stay unchanged. Earlier parent-consensus evidence and publication
+receipts are preserved in [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+This checkpoint is component validation, not installed HIGH or author admission.
 
----
+R15 still requires one admitted author, independent evaluation, authorized
+activation/rollback, a later invocation benefiting from retained evidence and
+bounded autonomous next selection. Native author tickets0; paid model calls0;
+coordinator cost unknown. No whole-system completion percentage is justified.
 
-## [DATA] Ecosystem Audit Snapshot (2026-02-07, updated 2026-03-13)
+**Historical checkpoint — native requester rejection (2026-10-19):**
+PR2159 merged at `bb9d3f802`; all 19 recorded exact-head check runs passed
+(12 distinct check names), as did exact-main CI/CodeQL. Reviewed head `1e203d5de`
+and merged main have identical trees. The
+descriptor repair preserves current filesystem, authority, expiry and clock
+checks. Its 44% measured improvement applies to pure descriptor computation only.
+The fresh runtime independently qualifies 2,683 files, including 1,246 exact Git
+Python sources; optional deferred imports outside the selected entrypoints remain
+untested. No authenticated author admission follows from qualification.
 
-### System-Wide Status
-| Metric | Value |
-|--------|-------|
-| Total modules | 120+ across 7 enterprise domains |
-| WSP compliance | 53% (63 fully compliant, 31 partial, 26+ missing docs) |
-| Production-ready systems | 4 (video_indexer, livechat, wre_core, digital_twin) |
-| Active security controls | 45+ tests, honeypot defense, skill scanning, graduated permissions |
-| HoloIndex search quality | 100% relevance (after noise reduction sprint) |
-| main.py startup time | 2s (down from 30s+) |
+Synthetic v25 passed installation/revocation and reached root, issuer and target
+socket readiness. The diagnostic now locates `TimeoutError` at the inner client's
+`recv(4096)`, returning `REJECT_SIGNER_SOCKET_CONNECT_FAILED` and the target's
+generic rejection. The issuer separately rejects a root-authority response at
+the zero-or-over-limit size check; that observation does not identify which
+branch or prove that root termination caused it. V22's noise-cap failure and
+v23's dropped unknown-line location remain preserved.
+Root timeout followed requester rejection; a target cleanup-reset error
+is retained even though all seven owned units were independently absent afterward.
+V26 separates service lifetime from the observed failure: issuer and root exit2
+normally before the120s service limit. Issuer fails17.34s after the requester;
+its broad socket-service catch still hides the operation. V27 disabled issuer
+and target observers but still rejected the requester; installation/revocation
+passed and all seven units are independently absent. Issuer elapsed/CPU time was
+70.046140s/66.242630s versus v26 75.128049s/71.128310s. Different boots and one
+pair do not establish causal gain; v27 proves no inner socket operation. The separate
+clock experiment restored the service but failed its fixed 50ms
+host/guest stability criterion (minimum54.39ms); no clock-policy change was admitted.
 
-### WSP 15 MPS Priority Queue (P0 - Immediate)
+Next18/P0: qualify the exact-source containment candidate and measure full native
+validation cost without loosening timeouts or authority. Independent cross-platform
+parity and 111 connected passes/8 Windows skips support the candidate; its native
+runtime remains unqualified and native benefit unverified.
+The post-valve lease issuer connection
+already exists; authenticated parent consensus/sovereign evidence and a qualified
+effect-capable native composition remain distinct later gaps. LOW handshake
+authority must stay LOW. R15 still needs real author execution, independent
+evaluation, activation/rollback, later retained benefit and bounded next selection.
+[Evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#native-requester-rejection-and-source-publication--2026-10-19).
 
-| Item | MPS Score | Domain | Status |
-|------|-----------|--------|--------|
-| Gemma 270M intent classification for OpenClaw | 18/20 | communication | DONE - Hybrid classifier: keyword pre-filter + Gemma binary validation |
-| AgentPermissionManager SOURCE tier | 17/20 | communication | DONE - File-specific permission gate + execution block |
-| HoloIndex ghost hit elimination | 17/20 | infrastructure | DONE - Similarity threshold + dedup fix |
-| Rate limiting on OpenClaw webhook endpoints | 15/20 | communication | DONE - TokenBucket per-sender/channel + 429 responses + 4 tests |
-| WRE graceful degradation for COMMAND intents | 15/20 | communication | DONE - Advisory fallback when WRE unavailable instead of hard-block |
+**Historical checkpoint — bounded grant issuer and issuer LOAD (2026-10-15):**
+The candidate composes the existing LOW issuer, credential resolver, durable
+rate/replay, permission and socket owners. Explicit root LOAD v2 authenticates
+the issuer against current owner/E0/descriptor state; legacy target v1 remains
+unchanged. The issuer cannot advance revocation or acquire target protected-use
+authority. Permission checks release the generation lock for root RPC, then
+revalidate and fence the action. Tests retain synthetic installation seams.
 
-### WSP 15 MPS Priority Queue (P1 - Next Sprint)
+PR2138 is merged at `57d5cd8e8c9db2179e2761ae59f74a2912b8d168`;
+exact-main CI38747627946 and CodeQL38747627089 passed. Both owned lanes are
+archived and retired. The issuer candidate is a separate unpublished layer.
 
-| Item | MPS Score | Domain | Status |
-|------|-----------|--------|--------|
-| FAM task pipeline (open->claimed->submitted->verified->paid) | 14/20 | foundups | PoC - Needs integration testing |
-| Cross-platform memory unification (WSP 60) | 14/20 | infrastructure | DESIGN - Memory silos across modules |
-| Video indexer persistence layer hardening | 13/20 | ai_intelligence | IN PROGRESS - metadata_db added |
-| OpenClaw-to-WRE bridge for COMMAND tier | 13/20 | communication | DESIGN - Autonomy tier escalation path |
-| Unified analytics dashboard | 12/20 | monitoring | NOT STARTED - Phase 2 objective |
+Next19/P0 (C4/I5/D5/Impact5): extend existing protected custody/materializer
+owners for the independent issuer, qualify its installed-source deployment,
+then obtain a real LOW grant and handshake. R15 remains gated on authentic
+author execution, independent verification, retention/rollback and later
+measured use. See [issuer evidence and next action](docs/operations/RSI_SWARM_DISPATCH.md#bounded-grant-issuer-and-root-load--2026-10-15).
 
-### OpenClaw Security Audit (2026-02-07): CLEAN
-- Honeypot defense: 2-phase deception operational
-- Skill safety guard: fail-closed policy verified
-- Graduated autonomy: ADVISORY -> OBSERVE -> SUGGEST -> SOURCE tiers defined
-- Secret redaction: patterns validated across all output paths
-- Gap: Keyword-based intent classification vulnerable to prompt injection (P0)
+**Historical checkpoint — grant bootstrap and LOW RPC (2026-10-15):**
+Two reproduced integration defects are repaired in existing owners: LOW grant
+RPC no longer holds the same generation lock required by its server, and explicit
+E0 v9 removes future permission receipt fields from the pre-config binding while
+retaining them in the complete signed policy and current admission checks.
+Legacy policy hashes and elevated paths are preserved. Nine connected Linux
+suites passed275 cases without skips; separate independent reviews cover the
+real two-process lock behavior and85 held-out policy cases. Authorization in
+those process tests is synthetic: no native worker or retained RSI gain is proved.
 
----
+The next19/P0 dependency (C4/I5/D5/Impact5) remains the independent grant issuer.
+Source probes show its exact-Git zipapp rejects imports/native dependencies used
+by the existing backend, and initial enrollment does not admit its profile.
+Reuse and requalify the protected installed-source runtime, compose the existing
+issuer owners, explicitly admit that deployment, then prove a real LOW grant and
+handshake before the R15 author/verifier/retained-use experiment. Do not widen
+archive rules or reinterpret initial installation as work authority.
+See [evidence and next gate](docs/operations/RSI_SWARM_DISPATCH.md#grant-bootstrap-and-low-rpc--2026-10-15).
 
-## [U+1F310] **THE INTELLIGENT INTERNET VISION**
+**Historical checkpoint — initial handshake composition (2026-10-15):**
+PR2136 is merged at `1d847ad1f83022f3ace0d4be5f4098ffdb9806e7`; exact-main
+CI38733808172 and CodeQL38733807786 succeeded. Its owned worktree is retired
+with evidence preserved. The current slice reuses the service configuration,
+E0 admission and per-request owners for one LOW handshake at generation1.
+Independent held-out contract checks passed74 cases; native handshake and author
+execution remain unproven. Initial manifests authenticate bytes, E0 authorizes
+scope, and a separate request grant authorizes use; none substitutes for another.
 
-### **[TARGET] Complete Ecosystem Architecture**
+The next executable dependency is the existing independent grant issuer's
+missing production server composition (WSP15: C4/I5/D5/Impact5 =19/P0).
+Its client, validators, signing backend and durable rate controls exist. Compose
+those owners, qualify authentic policy/custody and a real grant response, then
+connect the handshake and R15 author/verifier/retained-use experiment. Do not add
+another scheduler or treat possession of a role key as admission.
+See [current evidence and scope](docs/operations/RSI_SWARM_DISPATCH.md#initial-handshake-composition--2026-10-15).
+
+**Historical checkpoint — initial manifest activation (2026-10-15):**
+The isolated Linux component now publishes an authenticated initial manifest,
+activates generation1 through existing atomic recovery, and selects it in a
+separate credential-free reader. Independent repeat selection preserves the
+same manifest and store digests. Source is base1774d1e8f plus explicitly recorded
+candidate overlays; publication remains separate. This closes a component gap,
+not native author admission or production RSI. The seven bound artifacts are
+disabled/empty component configuration, not runnable worker-service inputs.
+
+WSP15 remains18/P0 (4/5/5/4): resolve the protected initial-service policy path,
+qualify real service inputs and admission for one native author, then independent
+evaluation, governed retention/rollback and
+measured benefit on later work. Reuse existing WRE/OpenClaw/Hermes owners.
+See [contracts, failures and evidence](docs/operations/RSI_SWARM_DISPATCH.md#initial-manifest-activation--2026-10-15).
+
+**Verifier-guided loop audit — 2026-10-15:** Nigel's candidate → bounded attempt →
+external verification → re-observe pattern fits existing R15; it does not require
+another orchestrator. Keep the internal registry-workflow canary first, with a
+frozen independent oracle and later-use/control comparison. Games and simulated
+contribution rewards follow existing R20/R24 after native admission, not before it.
+See [research, owner mapping and measurable acceptance](docs/operations/RSI_SWARM_DISPATCH.md#verifier-guided-loop-audit--2026-10-15).
+WSP15 remains18/P0 for authentic first-manifest admission; R15 also18/P0 remains
+dependency-gated. This audit grants no execution or token authority.
+
+**Current checkpoint — protected initial writer (2026-10-14):**
+PR #2133 merged as `5dd7b7b9f`; reviewed/merged trees match. PR checks and main
+CI38492205671/CodeQL38492205277 passed; its clean owned lane is retired with a
+verified recovery bundle. Reuse-first permits the missing small writer adapter;
+it does not prohibit justified new code or isolated owner installation.
+
+The adapter constructs existing stores from protected owner/bootstrap policy and
+installer-trusted filesystem records. It guards the initial transaction, witness
+updates, expiry and scope. The existing SQLite owner adds non-creating opening
+and checks authority inside its transaction. Connected294pass/1Windows skip;
+independent115pass. A fresh four-process Linux component trial issued this bounded
+writer capability, committed state and verified it without credentials. Initial
+failed adversarial tests and the rejected first candidate remain preserved.
+
+Manifest digests remain fixtures. No generation activation, native author,
+promotion or retained RSI gain is established. WSP15 stays18/P0 (4/5/5/4): next
+compose existing authenticated manifest provisioning with real admitted inputs,
+then run one native author and independent verifier. Source publication is a
+separate gate; see [evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#protected-initial-writer--2026-10-14).
+Closure verified2026-10-15: this writer shipped in PR2134, merged `a6a63b8e9`;
+PR/main CI and CodeQL passed. The subsequent governed maintenance completed,
+stopped both owned runtimes, and restored CURRENT/no-gap retrieval at that exact
+source. A new October15 query confirms it; noisy ranking still requires direct
+canonical reads. These receipts do not establish freshness at future revisions.
+
+**Historical checkpoint — bounded initial high-water signing (2026-10-14):**
+PR #2132 merged as `1af66972c`; its reviewed tree matches main. PR CI/CodeQL and
+main CI38489173741/CodeQL38489173144 passed. Its owned branch/worktree are retired
+with a verified recovery bundle. The blanket no-new rule is superseded for
+isolated owner installation; protected runtime admission remains required.
+
+The next slice extends the same signer with an explicit v2 schema/loader for
+initial prepared, committed and abort high-water records. V1 stays anchor-only.
+Local connected validation:256 passed/1 platform skip, including76 focused cases.
+Real isolated Linux signing/persistence and a separate credential-free public
+reader passed with fixture store identities. This proves component behavior,
+not a writer capability, generation activation, native author ticket or RSI.
+WSP15 remains18/P0 (4/5/5/4): next is the protected writer factory and qualified
+store evidence, then existing manifest admission and one native author ticket.
+Current source/review/publication evidence belongs to the associated change;
+[scope, probes and remaining gates](docs/operations/RSI_SWARM_DISPATCH.md#initial-high-water-signing--2026-10-14).
+Holo maintenance timed out; its task remains executing until existing lease
+recovery permits retry. Exact-source lexical retrieval is explicitly degraded,
+not CURRENT semantic evidence. Do not reset claims or shorten leases to proceed.
+
+**Historical checkpoint — isolated enrollment bootstrap (2026-10-14):**
+012 superseded the prior blanket no-new-keys restriction for isolated local RSI
+enrollment. This permits bounded owner installation, not forged grants or wider
+production authority. Six separate inactive role keys now have root-only Linux
+custody. Live systemd credential and process-isolation probes passed. A new
+adapter inside the existing generation subsystem signs only one root-approved
+initial anchor record; it reuses existing custody, permission, isolation and
+public-verification contracts. The final native component probe passed with a
+disposable fixture binding. No generation, worker, promotion or RSI loop ran.
+
+WSP15 remains 18/P0 (4/5/5/4): enrollment is now implementation work, not a pending
+012 permission question. Source audit found missing custody-backed generation
+signing and writable high-water authority adapters; the earlier assertion that
+no initial-enrollment gap was established is superseded. This slice covers only
+the exact initial-anchor signer. Next: bind high-water signing and its writer
+authority to protected owner policy, initialize/reopen real stores, then complete
+authenticated manifest admission and one native author ticket. Existing runtime
+gates remain enforced. Local connected validation: 217 passed, one platform skip;
+PR #2132 and exact-main hosted checks passed. See the
+[enrollment evidence and limits](docs/operations/RSI_SWARM_DISPATCH.md#isolated-enrollment-bootstrap--2026-10-14).
+
+**Historical checkpoint — R15 deterministic planning baseline (2026-10-14):**
+Main `57670f536` is unchanged. Governed OpenClaw/WRE Holo maintenance completed
+and stopped both owned runtimes; a new October 14 query is CURRENT/no-gap at
+that source. The existing registered audit dispatcher produced identical
+SYSTEMIC plans twice for `6c7405988` → `57670f536`: 155 shards/five batches per side,
+1,429 → 1,430 collectable test paths. Changed-path substitution and a Boolean file
+bound rejected. This is direct component telemetry, not native worker admission,
+scanner/master-orchestrator qualification, executed tests or retained learning.
+The profiled initial 140.443s and unprofiled repeat 77.843s are not a speedup pair.
+
+WSP15: baseline preparation 14/P1 (2/4/4/4) is complete; native enrollment 18/P0
+(4/5/5/4) remains blocked on the pending isolated-enrollment decision under the
+prior no-new-signing-keys restriction. Do not retry unchanged qualification calls.
+The measured optimization candidate is redundant static classification work.
+Before admitting it, freeze the original generator/classifier/dependencies at
+57670f536 as a separate oracle: the current planner uses its active classifier
+for both historical trees, so self-consistency cannot prove unchanged semantics.
+Require identical canonical bytes, classifications/quarantine and complete plans;
+measure performance separately with matched unprofiled baseline/candidate runs.
+No code defect, accepted improvement or G1–G5 advance is established. See the
+[component baseline and next gate](docs/operations/RSI_SWARM_DISPATCH.md#r15-registry-component-baseline--2026-10-14).
+
+**Historical checkpoint — local reviewer qualification (2026-10-13):**
+PR #2115 merged at `62abfec9f9d720f88fe7f1e7877960ea88fa8477` after
+exact-head CI 38327520174 and all reported checks passed at `69111a905`.
+Fetched main matches the reviewed integration tree. PR #2111 is closed with
+its unique evidence preserved below. Main CI 38328147555 and CodeQL 38328146970
+passed. Provider-selection PR #2129 merged at `57670f536`; exact-head checks and
+main CI 38331796107/CodeQL 38331795483 passed. Owned worktrees/branches were
+retired with verified recovery archives. No native RSI completion is claimed.
+Eight real local Qwen Coder 7B calls compared frozen prompts on four fresh,
+independently executed source variants. Baseline and candidate each got only
+2/4 verdicts correct. Exact quotes increased from2/4 to4/4, but full acceptance
+was0/4 versus1/4: the model is not qualified to approve changes. No promotion.
+
+WSP97 reconciliation: the machine backlog's older current selection is superseded
+by this measured result. Native admission remains18/P0 (4/5/5/4), blocked on
+authentic owner enrollment. The existing root-state installer consumes an already
+authenticated configuration; no production initial-enrollment command was
+established by the audit. Do not substitute fixtures or self-issued authority.
+Next: resolve that owner bootstrap, then use existing deterministic execution
+checks plus independent review for one admitted author ticket. Do not repeat the
+unchanged model trial or treat source quotations as semantic proof. See the
+[qualification evidence](docs/operations/RSI_SWARM_DISPATCH.md#paired-local-reviewer-qualification--2026-10-13).
+
+**Historical checkpoint — local worker transport (2026-10-12):**
+Fresh remote main is `4095ad9ee`; PR #2111 remains an open draft and issue #1522
+remains open. One local-model transport defect has a bounded shared-adapter
+repair: explicit `reasoning=None` omits an unsupported control, while the existing
+default and runtime checks remain. This is a coordinator repair, not autonomous
+RSI. Native admission still needs authentic owner/principal deployment inputs;
+source inspection found its v7/v8 startup suppliers already connected.
+
+WSP15: admission is blocked 18/P0 (4/5/5/4); qualifying the local review contract
+is executable 14/P1 (2/4/4/4). Schema-constrained local reviews now satisfy JSON
+shape and verdict on two known controls, but neither supplies adequate exact
+source quotations. No reviewer promotion or G2–G5 completion follows. Next:
+verify source-bound evidence on fresh cases using existing audit owners, while
+locating authentic enrollment through the existing authority owner. See the
+[measured checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#local-review-and-admission-checkpoint--2026-10-12).
+
+**Historical evidence — layered-worker qualification (2026-10-08):**
+PR2111 source `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` retained a distinct
+one-call audit (0/1 accepted; unknown tokens), panel dataflow probe and public
+catalog snapshot. Its proposed comparison was not executed. Its former current
+selection is superseded by the October13 checkpoint above; preserving this
+history neither selects another trial nor admits a worker. See the
+[archived evidence and experiment contract](docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08).
+PR2111 closure follows verified integration of this historical record.
+
+**Historical selection — measured internal audits (2026-10-07):**
+PR2100 merged/main-verified at453f6c357; CI37559426252 and CodeQL37559426685
+passed, reviewed/main trees equal, owned branch retired with recovery bundle.
+Internal read-only audits do not require new production signer enrollment.
+Existing OpenClaw/WRE maintenance completed; Hermes0.20.4 authenticated preflight
+passed after bounded startup readiness. Existing self-audit observed3193log files,
+20dry-run proposals, then0new events on the next scan; all20 need verified repair
+scope. No worker inference, paid provider call or execution grant was requested.
+
+14/P1 (C2/I4/D4/impact4): preserve actual self-audit coverage/failure status in the
+existing research report. Six baseline failures and one independently identified
+history-overflow failure reproduced; connected final140pass. Live report persistence
+preserves the scan snapshot separately from20historical signatures and3ranked
+candidates. Publication pending; source/review evidence is not native RSI.
+Next: resolve one current finding to its actual module and bounded repair scope,
+then qualify one existing local worker and independent evaluator. Production
+signer enrollment remains separate from read-only audit readiness. No claim of
+retained autonomous improvement or complete RSI. See idle_automation ModLog and
+`outputs/rsi-permission-evidence-20261006/internal-audit-*`.
+
+**Historical selection — proposal startup composition (2026-10-07):**
+PR2099 merged/main-verified at5fd8336468720133faab980ec82f81b1929a4b3e;
+reviewed/main trees match. Main CI37556610302 and CodeQL37556610148 passed.
+The exact-main OpenClaw/WRE Holo maintenance completed and stopped its owned
+runtimes; follow-up retrieval CURRENT/no-gap before scoped edits.
+
+16/P0 (C4/I4/D4/impact4): the existing proposal packet supplier now connects to
+existing owner-custody principal/replay adapters. Final connected113pass with
+positive public startup and missing/empty-store controls; independent source review
+cleared the change. Enrollment/OS/transport remain synthetic test boundaries.
+Publication pending. Next: current native admission readiness, then a bounded
+local-worker canary. Native18/P0, independent improvement evaluation, governed
+retention/rollback and later-use benefit remain unproven.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-startup-closure.json`.
+
+**Historical selection — deferred proposal activation (2026-10-07):**
+PR2098 merged/main-verified at1e220147c20dbe733e8673e46ac391ff2277651d;
+reviewed/main trees match. Main CI37551876853 and CodeQL37551877035 passed.
+Re-observation selects16/P0 (C4/I4/D4/impact4): compose existing proposal policy
+activation with grant-protected deferred signing. The legacy fixture succeeds;
+the deferred seam rejects before key resolution because startup lacks its policy
+nonce store. Merely removing two guards cannot make the path executable.
+
+The existing factory/runtime extension now has connected119pass/2skip, including
+owner/grant proposal integration with synthetic selection/transport. A reproduced
+handshake-response rejection is repaired using the existing canonical verifier.
+Independent source review covered the handshake repair and mechanical extraction
+needed to preserve the factory's200-line limit. Native packet supply, actual worker
+execution and retained benefit remain unproven. Exact-source publication is next;
+then re-observe the existing packet-supply principal/replay adapters.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-handshake-closure.json`.
+The exact-main Holo transaction rejected overlapping workspace edits and stopped
+its owned runtimes. Retry only from a clean frozen checkout of exact main; do not call this
+CURRENT retrieval. Source inspection is pinned to the merged tree and scoped delta.
+
+**Closed source prerequisite — current-generation Memex verification:**
+PR2097 merged `15089a44fe2ffc7150e7cd09688260fa3560e607`; reviewed/main trees
+match. Main CI37547076619 and CodeQL37547076345 passed. The existing bounded
+OpenClaw/WRE maintenance controller completed the exact-main Holo task and
+stopped both owned runtimes. A subsequent owner query verified CURRENT/no-gap
+with the same generation and receipt. This is operational maintenance evidence,
+not a worker-made code improvement or retained RSI benefit.
+
+Re-observation selects15/P1 (C3/I4/D4/impact4): connect the retained proposal inputs
+to the existing authenticated current-generation producer, collector and valve.
+Reuse selected runtime configuration, protected principal resolver and existing
+signature verifier. Full work-order binding, current signer identity, revocation,
+expiry and caller-mutation controls must hold; other trust reasons and effect
+permission remain independent. The source connection is now locally qualified:
+connected168pass plus routing1pass, independent source review cleared the
+reproduced principal-provider substitution. Publication pending. Native proposal
+packet supply and grant-aware backend each retain an explicit unsupported-policy
+guard; next re-observation targets their existing principal/replay adapters.
+Fixture provisioning is not native admission or retained RSI.
+Evidence: `outputs/rsi-permission-evidence-20261006/memex-current-use-next-slice.json`
+and `memex-retention-2097-merge-closure.json` in the same directory.
+
+**Closed prerequisite — retained proposal verification inputs (2026-10-07):**
+PR2096 merged `0383b9804ce08fffaac6cf74fb0aeedd93eb04d2`; reviewed/main
+trees match. Branch and main CI/CodeQL passed (main37541532041/37541531595).
+Owned branch retired with a verified recovery bundle. This closes source wiring,
+not native enrollment or demonstrated RSI.
+
+Selected14/P1 (C2/I4/D4/impact4): preserve the signed proposal and Memex inputs
+that publication previously discarded. The existing profile artifact now retains
+bounded detached evidence; the existing verifier can recheck it with explicitly
+supplied current trust/time. Local connected229pass including structural bounds; independent review found a
+legacy-replay regression, reproduced and repaired without rewriting old artifacts.
+PR2097 CI found a61-line function against the60-line limit; repaired with unchanged
+semantics and local229pass. Second CI found main-entry tests ran before the existing
+ChromaDB install; suite moved after it with all coverage retained. Final branch
+and main checks passed; publication is closed. Evidence: module ModLog and
+`outputs/rsi-permission-evidence-20261006/memex-retention-execution.json`.
+
+No worker/provider calls, effect permission or resident trust reason is
+created by this slice. Current-generation consumption still needs an authenticated
+proposal runtime supplier and live use-time verification. After exact-source
+closure, re-observe those existing owners before selecting the next connection.
+
+Native18/P0 remains blocked: scoped local-agent improvement, independent baseline
+and held-out validation, governed retention/rollback, and benefit in a later
+invocation remain unproven. No whole-system completion percentage is claimed.
+The Holo authority-root/head mismatch is resolved at main15089a44f; later revisions
+require their own freshness proof. Local Linux86/14 historical failed broad run remains recorded debt.
+
+**Coordination cost discipline:** reuse source-bound receipts and deterministic
+checks; repeat audits/tests only after relevant changes or new failures. One
+concrete blocker per bounded source pass; review only its changed surface. No
+inference loop for unchanged state, rejected-worker retry or automatic paid
+fallback. Record coordinator, local-worker and provider usage separately; unknown
+is not zero. This planning rule is not a new autonomous scheduler.
+
+**Historical cost-bounded failure checkpoint (2026-10-07; repaired above):** the admitted proposal
+integration fixture now reaches a successful handshake signature, then rejects
+in deferred response validation before cryptographic response verification.
+The existing attestation-shape validator permits a nonempty attestation only
+for authoritative-use leases, whereas peer handshakes also supply one. Inspect
+and reuse the canonical handshake verifier next; do not weaken this gate.
+The saved reproducer also corrects stale-grant and frozen-clock fixture mismatches.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-admitted-cost-checkpoint.json`.
+No native RSI gain or model execution is established by this failed test.
+
+For subsequent slices, deterministic local checks own unchanged-state polling;
+local models receive one admitted, scoped ticket with finite usage and retry
+limits. Escalate only a changed failure signature or a reviewable candidate to
+the coordinator. Record local-model calls, paid calls, elapsed time and accepted
+improvements separately. Checkpoint unresolved diagnostics instead of expanding
+the audit. This is execution discipline; a resident loop remains unqualified.
+
+**Historical execution — single-effect grant composition (2026-10-07 JST):**
+PR2089 is merged/main-verified at ac645be6a6a30913381edc97ef93595ee20af76e;
+reviewed/main tree matches. Main CI37498282161 and CodeQL37498284318 passed.
+Re-observation selects16/P0 (C4/I4/D4/impact4): connect existing consent/reviewer,
+provider and independent signer owners without changing the exact target digest.
+707 local connected/structural tests pass after reproducing and repairing the approval-to-grant
+expiry defect (baseline3fail/1pass). Independent bounded review found no new defect;
+Draft PR2090: first hosted run failed backend678>675; reviewed extraction restores
+674 lines and includes the missed structural suite locally. Second hosted run
+passed signing677/3skip and startup248, then exposed the old1419 extension cap.
+Reviewed count correction accepts exactly1421/rejects1422; local fast tier15 passed.
+New-head publication checks pending. Fixture-backed source qualification is not native admission.
+
+The local-first budget remains: deterministic checks, no repeat broad audits,
+no failed-Qwen-route retries or paid-provider fallback. Architect/review usage is
+unmeasured. Re-observation selects the existing14/P1 resident-artifact inventory
+(C2/I4/D4/impact4), then authentic runtime/resident composition. OpenClaw and Hermes
+user services were active; six inspected RSI settings were absent in their process
+environments. This does not establish global artifact absence or a missing producer.
+The named root/profile settings are also absent in inspected Windows process/user/
+machine scopes; eight expected public artifacts are absent at the source-derived
+Windows candidate root (not a designated authority). Resolve existing authenticated
+supply configuration before invoking any producer. No global absence claim.
+Native18/P0 still requires an admitted worker, independent baseline-controlled
+validation, governed retention/rollback and benefit in a later invocation.
+
+**Historical selection — runtime evidence before effect permission:**
+PR2087 merged at `bbb975b4f20fec5981a85a971f55fd26e3c7c6e8`. Its checked head
+and main have identical tree `d10f4e91051009d5eb025ac80499a65ac58f5888`.
+Independent source review found no blocker;184 local tests and exact-head
+CI37485625238/CodeQL37485619460 passed. Exact-main CI37486916613 and
+CodeQL37486916968 also passed.
+The issuer handoff source prerequisite is closed; it is a coordinator repair,
+not retained autonomous RSI. Preserve the failed local attempt below.
+
+Re-observed15/P1 (C3/I4/D4/impact4): connect the existing authenticated model
+runtime verifier to the effect reviewer's exact principal and receipt bindings.
+The signed review already binds reviewer identity to model/receipt claims; no
+new principal-to-runtime designation schema is required. Independently verify
+the cited artifacts with the existing use-time verifier and consume its exact
+registered capability. Receipt rehydration alone is insufficient. Reuse verifier
+bootstrap and current-review owners; the architect-specific display query is
+not the admission adapter. This does not prove the model generated the review.
+Native18/P0 remains blocked pending authentic
+runtime inputs, separate single-target effect permission, resident wiring,
+independent evaluation, retention/rollback and benefit in a later invocation.
+Do not widen the delegated two-child permit or turn verifier booleans into grants.
+
+**Historical local-first experiment (2026-10-06 JST):**
+PR2084 is merged at `2837b0db389c567de9a5402e22fa711affcf176d` with equal
+reviewed/merged trees,94 connected passes,8 integrity passes and successful
+exact-main CI/CodeQL. The first main compatibility attempt failed during pip
+index parsing; its unchanged-source retry passed. The repair branch is retired.
+
+Existing local LM Studio lifecycle + AI Gateway caller completed one Qwen Coder7B
+call and unloaded it in10.672s. Independent inspection confirmed cleanup. The
+server remains on127.0.0.1:1234; no paid provider call occurred. `READY.` failed
+the exact `READY` instruction. This is runtime evidence, not admitted RSI.
+
+The next work follows the [local-first operating budget](docs/operations/RSI_SWARM_DISPATCH.md#local-first-operating-budget--2026-10-06).
+First bounded local repair experiment: two Qwen Coder7B calls, zero paid provider
+calls, no accepted patch. Frozen effect-issuer tests reproduce three failures;
+the normalized local candidate retains all three (6 other cases pass). Raw text
+completion returned only a fence; chat retry returned source but retained the
+fault and removed a required annotation import. Stop at the retry cap. Source
+and owned test edits were restored; frozen tests, raw proposals and receipts are
+preserved in `outputs/rsi-permission-evidence-20261006/effect-handoff-*`.
+This is a controlled diagnostic failure, not an admitted worker or RSI gain.
+Local worker qualification remains pending; do not repeat this exhausted
+experiment while the higher-priority permission prerequisite is unresolved. Do not infer model
+incapability or a transport root cause from this single experiment.
+
+Native18/P0 remains blocked: the resident resolver still returns no use lease;
+the real provider lacks an effect-specific HIGH/ULTRA permit; authentic runtime
+inputs remain unverified. Reuse the existing effect review/consent/grant/issuer
+owners (15/P1,C3/I4/D4/impact4) before composing the resident join. Windows-local
+callers already exist, so WSL networking is provider-dependent, not a universal
+prerequisite. No CodeAct or synthetic-authority bypass. Independent review of
+this new audit is unavailable because its worker hit a usage limit.
+
+Evidence: `outputs/rsi-permission-evidence-20261006/provider-handoff-pr2084-merge-closure.json`,
+`local-qwen-runtime-smoke.json` and its independent review. Coordinator repairs,
+local inference and passing tests do not establish retained autonomous benefit.
+
+**Historical provider issuance handoff (2026-10-06 JST):**
+PR2083 merged at `4e00032cf2c2d7b474aa6e5819f7af1c5d0b2708`; reviewed and
+merged trees match. Exact-main CI37401710455 and CodeQL37401710274 passed.
+The old owned branch is retired with a verified recovery bundle. WSP15 selects
+14/P1 (C2/I4/D4/impact4): issue a verified grant through the existing provider,
+exit its generation lease, then call the target through the existing client.
+Preserve the legacy lease API, one-use consensus permits, independent providers
+and target admission. The target now revalidates its own authenticated owner.
+Grant-authority RPC inside issuance remains a separate topology qualification;
+do not claim all remote calls are outside all fences. No new runtime grant,
+HIGH/effect admission or autonomous worker result is implied by this source slice.
+Frozen baseline reproduced target calls inside the provider lease. Candidate
+passes94 connected cases; independent source review found no concrete defect.
+Failure controls pass; integrity8/8 passed in63.61s; publication remains pending.
+The existing manifest generator leaves its digest unchanged: these two provider/
+client files are not in the current executable dependency closure. Tests bind
+their exact source separately. Wiring/admitting their native runtime remains a
+separate requirement; manifest success must not imply deployed consumption.
+
+Readiness re-observation: WSL OpenClaw2026.7.1-2 and Hermes0.20.4 are installed;
+their gateways are active. The Windows architect query is UNCONFIGURED, and
+the eight standard model evidence files are absent at the known
+`O:/.reddog/resident/Foundups-Agent` root. Named consumer variables are absent
+in both inspected gateway environments. The existing Hermes API transport gets
+status0 from127.0.0.1:8642; a messaging gateway is not proof of API availability.
+This is scoped evidence, not whole-machine absence. Signed-evidence producers
+already exist; native18/P0 requires legitimate runtime inputs and remains blocked.
+Evidence: `outputs/rsi-permission-evidence-20261006/` model-binding re-observation,
+resident-model-artifact inventory and target-owner-pr2083-merge-closure receipts.
+
+**Historical authenticated target owner prerequisite (2026-10-06 JST):**
+PR2082 is merged at `5420b85a02a76efe21947a5dc00c8aecb854e5d3`;
+exact-main CI37397915051 passed (rechecked through GitHub). WSP15 selects
+15/P1 (C3/I4/D5/impact3): require an authenticated target owner lease before
+moving target calls outside the provider fence. Frozen baseline demonstrates
+two unsafe cases: absent and no-op factory hooks each resolve and sign once.
+The candidate rejects these and preserves the admitted runtime path (18 initial
+focused passes). Connected qualification found19fail/103pass/1skip, largely older
+ownerless fixtures; this is diagnostic evidence, not publication qualification.
+Review additionally identified instance-shadowable lease dispatch; the candidate
+now invokes the checked class implementation. A further reproduced substitution
+of the consuming grant boundary is rejected by binding its replay store and
+oracle to the admission; class-directed boundary dispatch retains root RPCs.
+Latest two-owner run:70pass/1skip. Synthetic crypto unit fixtures are explicitly
+unit-scoped; exact production negatives and admitted runtime positives remain.
+Factory and root-revocation fixtures now use admitted construction. HIGH/effect
+fixtures retain explicit synthetic-unit acceptance and exact-production rejection;
+they do not establish admitted HIGH/effect support. Expanded run133pass/1fail/1skip
+found a test assertion assuming a ledger field existed after rejection; the
+corrected empty-ledger assertion passes with both elevated cases (2/2).
+Final connected run134pass/1skip in70.46s. Runtime manifest regenerated with
+1,419 files; integrity8/8 pass. Independent final production review found no
+additional concrete blocker. PR2083 publication and exact-main CI are now verified
+in the current checkpoint above; this paragraph preserves historical test detail.
+Evidence: `target-owner-connected-final.xml` (earlier failures remain preserved).
+Evidence: `outputs/rsi-permission-evidence-20261006/target-owner-lease-baseline-review.json`.
+Provider handoff follows this prerequisite; effect permits, actual local worker
+admission, independent evaluation and retained benefit remain open. No native
+RSI result or runtime authorization is implied by this source repair.
+
+**Historical generation commit fence checkpoint (2026-10-06 JST):**
+PR2078 is merged at `a2a45ddec`; reviewed/merged trees match and exact-main CI
+37396021088 passed. Next14/P1 (C3/I4/D4/impact3) reuses the current selection lease
+through response validation and replay/capability commit. Frozen expiry regression
+fails on baseline and passes on candidate; connected56tests pass. Independent
+source review approved the bounded change; publication is pending. Provider handoff/effect permit remain
+blocked; no admitted native worker or retained RSI gain is claimed.
+
+**Historical startup integration checkpoint (2026-10-06 JST):**
+Actual OS qualification now passes at `50008b241` using synthetic authorities:
+real DynamicUser/systemd credentials, isolation, public entrypoints and Unix
+peer transport; one verified target signature, missing-grant rejection and
+observed nonce-replay rejection. Six root RPCs, one protected use, one target
+sign, normal service exits and complete owned cleanup. All1,023 bound Python
+files still match; driver/dependency bindings are retained. This qualifies this
+startup mechanism, not authentic enrollment, native G1 admission or retained RSI.
+Evidence: `outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+The unchanged OS driver also passed once on merged `9039bead9` in35.550s;
+see `public-startup-merge-requalification.json` in the same evidence root.
+Publication qualification additionally found inherited WSP62 debt:5failed/11pass
+(four expired2026-09-30 exemptions; one stale exact interface-document ceiling).
+Main already has2,771 interface lines against1,517; policies/tests are unchanged.
+This is source comparison, not an executed full-main baseline. No expiry or
+ceiling was relaxed. Startup proofs do not imply whole-repository validation.
+Current publication: PR2078, pushed head19ddae326; exact-head CI remains pending.
+Its test-only setup-finalizer repair preserves the full negative oracle (5/5
+focused cases pass). Actual OS mechanism qualification also passed at41cf91cfe;
+production bytes are unchanged by19ddae326. No native admission is claimed.
+Before connecting issuer to valve (15/P1), resolve the existing elevated-permit
+contract mismatch and generation-lock composition. A bounded Windows diagnostic
+using the unchanged generation lock supports the synchronous wait-cycle risk:
+held-wait reaches its diagnostic deadline; release-before-call control completes.
+All four children exit0 and owned cleanup completes in1.140s. This is synthetic
+topology evidence, not an executed permit-qualified issuer or a proposed lock
+relaxation. Evidence: `outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json`.
+The completed13/P1 probe leads to a14/P1 contract reconciliation (C3/I4/D4/impact3);
+close startup publication against fresh main before dependent implementation.
+
+PR2075 is merged at `a3def2a83`; exact-main CI37376433116 and
+CodeQL37376432711 passed. Later main invocation12/12 passed. Governed maintenance
+completed502.86s; all prior10tasks/29events unchanged, now11/32. Separate governed
+query CURRENT/no-gap on the exact merge; evidence lives in
+`outputs/rsi-permission-evidence-20261006/maintenance-after-merge`.
+The coordinator repair is retained, not an autonomous local-worker RSI result.
+
+The existing18/P0 startup objective is now in progress on
+`codex/rsi-authenticated-startup-20261006`. Deferred dependency ordering passes
+48bootstrap cases, including18 new cases. Connected entrypoint/supplier/bootstrap
+checkpoint:100pass/2platform skips with stable modified-source pins. Owner-v7
+schema/legacy checks:72pass/7platform skips; materializer protocol/store tests:5pass.
+Independent review repaired two proof-signing defects and a frozen-policy conversion.
+Full public acceptance exposed an existing config/generation digest cycle. The
+versioned E0-v8 repair preserves v5-v7 bindings and keeps signed generation checks:
+3construction tests and88consumer tests pass (1consumer platform skip).
+Public source integration now passes: valid signature verified, missing grant
+and replay rejected; all1,030 source pins stable. OS custody/isolation and socket
+transport remain fixture substitutions in that test; the separate OS trial above
+supplies actual mechanism evidence without claiming authentic native admission.
+Separate Linux authority qualification passes8/8 with stable source hashes;
+it does not cover complete public startup. Post-projection connected regression:
+104pass/2platform skips (`startup-connected-public.xml`). Generated bindings now
+cover1,419 runtime files; manifest/index validation passes8/8. Policy-consumer CI
+coverage is added; remote CI and publication remain unverified. No activation or
+native local-worker improvement is claimed. Evidence: `outputs/rsi-permission-evidence-20261006`.
+
+**Current layer — authenticated startup and credential lifetime (2026-10-05 JST):**
+WSP15 selects18/P0 (C4/I5/D5/Impact4): connect the existing public startup,
+encrypted custody, purpose-limited LOAD signing and concrete grant admission.
+At4241b10, a real systemd public-canary experiment rejected an expired envelope
+at launch, but its nonroot child could still read a credential that expired
+after launch. Envelope expiry is not per-request expiry. The next implementation
+must bind authenticated lifetime metadata and reject each expired request before
+key access; it must also supply existing replay/revocation owners after isolation.
+No native admission, secret provisioning or autonomous RSI completion is implied.
+The local provider prerequisite is now implemented and qualified: actual nonroot
+read succeeds before expiry and rejects afterward, with exact root:root named-user
+ACL checks. Focused204pass/2skip, connected151pass/1skip; source publication pending.
+Existing factory/profile selection is wired; authenticated public startup supply
+and the first admitted native worker remain open.
+See [the measured constraint](docs/operations/RSI_SWARM_DISPATCH.md#startup-custody-lifetime-qualification--2026-10-05).
+
+**Closed source layer — connect existing signer admission (2026-10-05 JST):**
+Selected14/P1 (C2/I4/D5/Impact3): the bootstrap forwards the existing grant
+admission after its selection/isolation gates. Local connected479:472pass/7skip;
+PR2072 merged at4241b10; exact-main CI/CodeQL, later4/4, governed maintenance,
+CURRENT/no-gap retrieval and owned-lane closure verified. The local model proposal was rejected; this repair is
+coordinator-authored. Public credential/startup supply and native RSI remain open.
+See [the checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#bootstrap-grant-admission-forwarding--2026-10-05)
+and canonical backlog `bootstrap_grant_forwarding_20261005`.
+
+**Closed layer — retain a measured coverage repair (2026-10-05 JST):**
+PR2071 merged at4d03a0f1; hosted472pass/3skip, exact-main CI/CodeQL, retained
+fault discrimination, governed retrieval and owned-lane closure verified. The
+following qualification/pending wording records the earlier pre-publication state.
+
+WSP15 selects13/P1 (C2/I4/D4/Impact3). One additive existing-owner test detects a
+frozen control/work proof fault that the prior47 selected tests missed: correct48/48,
+fault47pass/1expected failure. Two local model proposals failed; the retained
+regression is team-authored. Connected475:468pass/7skip; publication pending.
+A subsequent matched Qwen3.5 local call was also rejected: truncated output,
+0/1 accepted. Next inspect actual runtime/input availability through existing
+OpenClaw/Hermes owners; model/task qualification remains a separate gate.
+Native autonomous18/P0 remains open; no new orchestration layer is selected.
+See [the checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#retain-the-direct-revocation-proof-regression--2026-10-05)
+and canonical backlog `control_proof_regression_20261005`.
+
+**Closed source layer — separate protected-use control proof (2026-10-05 JST):**
+Selected13/P1 (C3/I4/D3/Impact3), the executable prerequisite to blocked native
+admission18/P0. Descriptor v1 needs the work key to authenticate ACQUIRE before
+the guarded callback can obtain that key. An explicit v2 descriptor separates
+ACQUIRE/FINISH control proof while preserving work, grant and peer checks.
+Two custody controls and17 synthetic contract cases pass; connected474 cases (467pass/7platform skips), manifest8/8 and extension15-member
+fast tier pass. PR2068 merged at724bb684; hosted471pass/3skip, exact-main
+CI/CodeQL and later merged-source19/19 pass. Actual credential custody,
+public startup and native RSI remain open. See canonical backlog
+`protected_use_control_authentication_20261005` and the existing
+[dispatch checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#separate-protected-use-control-proof--2026-10-05).
+
+**Closed layer — owner-bound lazy signer composition (2026-10-05 JST):**
+PR2067 merged at975fe7c43861c7ad900785bed39ee057979d67f4. Independent review
+qualified lock ordering, owner/store binding and expiry/revocation before signing.
+Hosted281/281, both exact-main workflows and later merged-source24/24 passed.
+OpenClaw/WRE maintenance completed527.453s; CURRENT/no-gap retrieval, preserved
+historical records and owned-lane retirement were verified. Public system-service
+setup and native RSI remain incomplete. See the
+[composition checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#owner-bound-lazy-signer-composition--2026-10-05)
+and canonical backlog `signer_lazy_owner_composition_20261005`.
+
+**Closed layer — factory peer-instance propagation (2026-10-05 JST):**
+PR2066 merged at904ae72eaafdf5b35fe9f77c2869aafde43b0838. Hosted131/131,
+both exact-main workflows and a later merged-source14-case check passed.
+Governed Holo maintenance completed519.453s; CURRENT/no-gap query and normal
+owned-lane retirement were independently reviewed. These close source retention
+and retrieval for that checkpoint, not native autonomous RSI.
+
+**Closed layer — WSP71 factory composition (2026-10-05 JST):**
+Selected **15/P1** (C2/I4/D5/Impact4): repair a demonstrated short audit-hash versus
+full grant-digest mismatch in the existing signer factory. Frozen baseline:
+1 pass/1 fail; unchanged candidate:2/2 pass. Six added rejection controls pass;
+final connected selection:108 pass/3 Windows platform skips. Initial hosted
+99pass/11fail exposed legacy Windows-only test paths; the fixture repair preserves
+all92 assertions and production guards. PR2065 is merged at
+`fc6f6e021033af21556be3cca64f8e9c9e43fca3`; hosted111/111 and both exact-main
+CI/CodeQL checks passed. A fresh merged-source invocation passed8/8 factory cases.
+Governed maintenance completed in435.453s; historical3 tasks/9 events are unchanged,
+with one completed task/3 events added. Query:CURRENT/no-gap at exact merged main.
+The owned worktree was normally retired after verified recovery preservation.
+Production startup is still uncomposed. Native admission18/P0 and genuine input handoff15/P1 remain
+blocked/unresolved. See the [composition checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#wsp71-factory-composition--2026-10-05)
+and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).
+
+**Closed layer — P16:** PR2063 repair and PR2064 closure are merged/main-verified.
+At `1cee9a957290a8053eef263e587e3b4ac43d40a3`, another actual maintenance
+invocation completed in431.297s. The same database now has3 tasks/9 events;
+the old2 tasks/6 events are unchanged. Clean-checkout query:CURRENT/no-gap.
+Both owned runtimes stopped and the owned worktree was retired with verified
+recovery artifacts. This is retained operational use, not model learning,
+live pointer-resume proof or a speed comparison. Failures remain preserved in
+the [P16 checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint).
+
+**Closed layer — P15:** P14 PR2061 is merged/main-verified at `0b3f6cbc3`,
+with its owned lane retired and recovery preserved. Selected 14/P1 now repairs
+measured-zero fidelity in existing PatternMemory statistics. The valid baseline
+has 4 expected failures/5 passes; the coordinator repair passes 9 frozen cases
+and 42 disjoint connected controls. The actual reopened selector now prefers
+measured 0.4 over measured 0.0. One local Qwen proposal was rejected and unused.
+P15 PR2062 is merged/main-verified at `6efbc3ac1`, and its owned lane is retired.
+The same saved rows select positive → zero control → positive under merged,
+baseline and recovered source. This verifies retained consumer behavior;
+structural fidelity is not model fitness or native authority. The existing registered
+`reddog_operations` proposal route is only a conditional next 14/P1 candidate.
+See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint)
+and [canonical selection](docs/roadmaps/rsi_swarm_backlog.json).
+
+**2026-10-04 retained-source checkpoint:** PR2055 is merged/main-verified and its three
+owned lanes are retired. One local worker repair now has verified retained
+source benefit:29 frozen cases pass, controlled rollback reproduces26pass/3fail,
+and restoring the exact repair returns29pass in a fresh process. Existing
+benchmark evidence was consumed before that later invocation. This is a
+supervised local loop; native autonomous18/P0 and learned variation retention
+remain open. No whole-system completion percentage is claimed. See the
+[current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#retained-local-repair-and-remaining-admission-gate--2026-10-04)
+and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
+
+**2026-10-02 historical layer:** Terminal fixture observation is **fixture_inconclusive**: null model, empty ERROR capture, normal observed cleanup. Diagnostic usefulness is insufficient, so this prefix-diagnostic branch is closed with no retry or logging expansion. Blocked prerequisite **18/P0:** Native autonomous RSI admission. Worker admission and retained benefit remain open. See the [current checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#terminal-fixture-observation--2026-10-02) and [canonical backlog](docs/roadmaps/rsi_swarm_backlog.json).
+
+**Operational RSI audit (2026-09-28):** the [shared decision contract and measured
+baseline](#operational-decision-contract-and-rsi-audit--2026-09-28) extend existing
+WSP 73/WRE ownership across daily work. They distinguish verified regression from
+still-unmeasured operational improvement; no new runtime schema is activated.
+
+**2026-09-28 checkpoint:** PR1924 supervisor/requester contract correction is
+merged/main-verified at `1033310bc`, with its owned lane retired and 254/254
+parent/candidate cases passing. Subsequent source-only review rejected three
+manager-backend compositions across two dependencies. Supervisor integration
+remains blocked at 14/P1; the 10/P2 canonical status reconciliation has separate
+publication/closure receipts. See the [historical checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#manager-backend-qualification-closure--2026-09-28)
+and canonical backlog. No backend implementation is selected: resume only with
+reviewed strict-decoder evidence, then re-observe and rescore. Native RSI and
+AmIBot remain unadmitted; a source failure is not production runtime evidence.
+
+Read only the entry table and selected packet before retrieving its module context. Do not put the entire repository or this entire audit into every worker prompt.
+
+| Need | Entry |
+|---|---|
+| Evidence behind the completion verdict | [Dated audit](docs/audits/rsi/2026-09-09/README.md) |
+| Requirement enforcement and current gaps | [R02 map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) — all 26 packets, with source inventory |
+| System-wide coverage | [Module map](docs/audits/rsi/2026-09-09/MODULE_MAP.md) |
+| Recurring work selection | [Observe → WSP 15 → WSP 97 → execute → re-observe](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution) |
+| Next work | Re-observe the [current selection](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution); packet order is not an automatic assignment |
+| AmIBot autonomous production experiment | [G0 readiness, dependency gates and metrics](#amibot-autonomous-production-experiment--2026-09-15) — controlled failure; no build jobs admitted |
+| RSI at launch and cycle budgets | [WRE launch/evaluation sequence](modules/infrastructure/wre_core/ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15): explicit advisory report display implemented; admitted campaigns and cycle budgets remain planned. |
+| Supervision, controls, cost and dispatch | [RSI/WRE monitor layer](docs/DAEMON_ARCHITECTURE_MAP.md#rsi-and-wre-supervision-contract--2026-09-22); [production-line dispatch](docs/operations/RSI_SWARM_DISPATCH.md). [Observer lookup](modules/infrastructure/dae_daemon/INTERFACE.md#observer-runtime-lookup) now avoids broker creation; eight fixed cases pass locally and independently. Default observer/adapter ingress remains separate. |
+| Hybrid architecture and current RedDog assessment | [Tickets, bounded teams and 012 feedback](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) |
+| Production-line implementation packet | [R24: qualification → ticket → audit → reward](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) |
+| Feedback implementation packet | [R25: consented 012/RedDog feedback into tickets](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) |
+| Packet IDs, dependencies and priorities | [Planning backlog](docs/roadmaps/rsi_swarm_backlog.json) — never directly executable |
+| RedDog product navigation and owner boundaries | [RedDog documentation map](docs/REDDOG_DOCUMENTATION_MAP.md) |
+| Module-specific plans | [Module roadmap navigation](modules/ROADMAP.md) |
+| Superseded system plans and retention decisions | [Archive register](docs/_archive/roadmaps/2026-09-10/README.md) |
+
+Authority order: 012's applicable instructions and delegated policy → governing WSPs → exact current module/runtime contracts and verified receipts → this system plan for sequencing → module-local plans for their scope → dated evidence and historical memory. A plan cannot override a failed gate or manufacture permission.
+
+The baseline below remains `fb58e5279673ef9de30735ccfedc8001c3bb79d6`. Documentation integration started at `eb2994f5d1530d9f086e2f2265c65033acecd93c`; the six intervening commits affect eSingularity/YUMORI and its skill, not the inspected WRE/model-routing files. Their new product work is outside this dated audit. Reconcile the latest commit and active claims again at dispatch.
+
+R00 recovery is historical success at its recorded source/generation. R02 now includes a requirement/owner/test/gap map for R00–R25 and selected WSP 46/CORE and briefing corrections. The [ledger reconciliation](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md#historical-ledger-dispositions--2026-09-13) now covers all 11 pending April rows/tracks and four relevant closed rows; unresolved owner evidence, per-contract archival decisions and separately bound review remain open. Do not mark all of R02 or G0 complete merely because the documentation is discoverable.
+
+## Recursive selection and closure
+
+Follow the [repository prioritization loop](docs/operations/RSI_SWARM_DISPATCH.md#recursive-repository-prioritization-and-execution)
+after every completed or blocked sprint: observe current repository evidence,
+apply canonical WSP 15, reconcile under WSP 97, select the highest-ranked eligible
+action, execute, validate, document, then immediately re-observe and rescore.
+The last checkpoint's next step is a candidate, never an automatic assignment.
+The existing backlog points to the current ranked observation; historical packet
+scores below retain their original planning scope. Standing local authorization
+and fresh runtime admission remain distinct. `FOUNDUPS/autopost` stays with Remote.
+
+## Repository accounting and resumed RSI — 2026-09-21
+
+The audit baseline was `15f203ee382ea3f16fda87a4b5f0ae3360f29efa`; fresh main is
+`7a4e06a8453e77ce306ef5ca6e2e2f3a4c913f7c`, including PR1845 daily-work/hygiene accounting and PR1374 node-forge repair and PR1315 Pillow repair and PR1844 GotJunk qualification and PR1375 Functions integration and PR783 root protobuf integration and PR1378 Clerk integration and PR1843 Clerk candidate qualification and PR1842 dependency-owner qualification and PR1841 alias capability and PR1840 alias contract and PR1839 prototype qualification and PR1838 consumer isolation and PR1837 receipt-fixture closure and PR1836 dry-run qualification and PR1834 build-route qualification and PR1833 planning-DAG closure and PR1832 route-test closure, PR1751 registry onboarding, PR1831 accounting/cache closure and PR1830 OpenClaw diagnostic repair and PR1829 OpenClaw diagnostic qualification and PR1828 AutoResearcher exit witness and PR1827 AutoResearcher interruption qualification and PR1826 R25 approval qualification, PR1819 rejection-evidence repair, PR1818 lifecycle qualification, PR1817 child-input qualification, PR1816 context repair, PR1814 report delivery, PR1815 context qualification and the separately merged PR1813 correspondence owner. PR1803's ten
+exact-head checks passed; reviewed/merged trees match. PR1800/1801/1802 main workflows
+passed, as did both PR1803 main workflows and all three observed PR1804 main
+workflows. PR1805 passed all ten exact-head checks and both later main workflows.
+PR1806 passed all ten exact-head checks; both later main workflows now report
+SUCCESS (CI35480607649 and CodeQL35480607038). PR1807's exact-head checks passed and its reviewed six-document tree is merged.
+Both later PR1807 main workflows now passed; protected PR1808/1809 changes are preserved. PR1810 passed final exact-head checks; its reviewed source tree is merged.
+Both subsequent PR1810 main workflows now pass. The protected ticker change is preserved.
+The preceding full-audit snapshot (September 9 UTC onward) recorded136 merged PRs and21
+closed without merge; its98 peer heads were reconciled: the previous95 are unchanged, with externally owned PR1820 (YUMORI economics), PR1822 (Memory Horizon intake), and PR1824 (Moshpit terminology) added. All three avoid this sprint scope. The
+same historical inventory recorded14 drafts and15 PRs with failing checks; 23 have all-success checks, 59 have success/neutral/skipped results, and one has no checks.
+Preceding paginated REST inventory plus verified PR1836/1837/1838/1839/1840/1841/1842/1843/1378/783/1375/1844/1315/1374/1845 closures accounts for156 merged/21 closed without merge;93 surviving peer heads remain unchanged after PR1845 closure. The preceding snapshot had13 drafts/14 with failing checks. PR1835 remains separately owned architecture documentation. Both PR1834 main workflows passed. These observations are not an atomic snapshot;
+reported green checks alone do not establish current merge or runtime authority.
+R19 qualification preserves two earlier hosted runs with 42 passing observations
+each, XML creation and parsing, but zero artifacts because the configured action
+excluded the hidden report directory. The separately scored 13/P1 repair
+is merged in PR1814 after two normal PR runs delivered exactly the two reports.
+Final candidate checks passed; report-only gate activation stays separate.
+The original 102 heads, check summaries and 107 merge identities are retained in the
+[existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json)
+under `repository_pr_accounting_20260920`; exact Git references in the backlog preserve the
+intervening113-merge/15-closed refresh and subsequent closures. Current reconciliation binds93 peer heads; older check summaries are historical.
+
+| Work observed | Reconciliation and next action |
+|---|---|
+| Shared M2M/WRE handoff | PRs #1757/#1758/#1760/#1761/#1763/#1794/#1795/#1796/#1797/#1798 are merged. Omitted-plan bootstrap selection is closed with638 connected tests and independent review. Its14/P1 step advanced the historical18/P0 parent; the remaining local context/child fidelity contract is now15/P1. |
+| Typed FoundUp intake | PR1799 merged the commander data handoff15/P1 within17/P0 parent; metadata survives gated queueing. Focused111pass; independent99overlap/31adversarial cases. Public draft-to-commander entitlement and runtime admission remain open; exact closure is in the backlog. |
+| FoundUp validation debt | Selected14/P1 after exact-action qualification. Four baseline failures repaired in two existing test owners; focused205/connected677 pass with no skips. Independent205pass confirms production checks and parity expectations remain unchanged; PR1801 is merged with ten exact-head checks passed and both main workflows now successful. |
+| Daily-work RSI input | R25-A owner/field mapping is complete: 89 existing tests and 20 synthetic boundary checks pass, with zero authorized feedback proposals. The missing consent/target/type/version mapping is explicit in the existing R25 packet; its13/P1 compatibility qualification is merged in PR1802. Preserve v1 identities and require exact-summary permission; approval assertion/issuer/consumer selection remains unqualified before source work. No live feedback path or retained RSI improvement is claimed. |
+| AutoResearcher evidence | Proposal-text identity12/P2 is merged in PR1803 and independently accepted:109 focused tests and five additional independent probes; repeated109-case runs overlap. Reports retain per-attempt text hashes before preparation can fail. Parent15/P1 program/oracle/environment/reader contracts remain open; no authenticated or retained-learning claim. |
+| WSL advisory lifecycle | Planning13/P1 is merged in PR1805. The existing-owner12/P2 source repair is merged in PR1806:43 focused/four connected checks and independent43 overlap/18 boundary probes pass. Enable-only calls inspect metadata; version execution additionally requires the command flag. PR1806 first CI caught an omitted backend digest refresh; corrected manifest/pins passed all ten fresh exact-head checks before merge. No real WSL/provider call. |
+| PatternMemory lifecycle | PR1807 qualification is closed. The separately scored13/P1 source repair is merged in PR1810 and now creates/uses/closes one handle per counter in the existing daemon. Red 8 failures reproduced; repaired 30 daemon and connected 71 tests pass, independent 71 overlaps. Both distinct-thread increments persist. Scheduler methods/SQLite affinity unchanged; exact source closure is recorded in the backlog. |
+| AmIBot | Registry, route tests, planning DAG and source-route qualification closed in PR1751/1832/1833/1834, with final PR/main checks passed. PR1838 merged the13/P1 dry-run isolation repair after245 local/independent overlapping cases and ten exact-head checks; PR1841 closes optional generic alias source capability (271 locally/independently overlapping cases; both main workflows passed). Live authoring/admission, AmIBot visibility and POC remain open. |
+| Product work | Reusable brand context #1792 remains open. Correspondence PR1813 merged; PR1644/1793 closed without merge, as did validation #1700/#1767 and funding #1791. Funding cleanup #1812 merged. Preserve their owners and Remote's separate AutoPost work. |
+| Current RSI ticket path | PR1902 manager admission repair is merged, main-checked and retired (36 fixed cases passed locally and independently). The 11/P2 runner lesson sprint retains four reviewed Windows fixture corrections in the existing [test README](modules/communication/moltbot_bridge/tests/README.md#windows-fixture-runner-lessons--2026-09-27); publication and fresh eligibility are in the [current ranked queue](docs/roadmaps/rsi_swarm_backlog.json). PR1903 measurement truth is preserved. Native admission still requires the seven resident trust anchors, admitted effect-use binding and independent provenance; existing lease infrastructure alone does not close that path or establish retained RSI. |
+| Local branches/worktrees | Dated 2026-09-21 14:08–14:09 UTC metadata audit: 157 registered worktrees, 121 clean / 36 dirty, and 673 local branches. The final 14:17 UTC check observed 674 branches after concurrent YouTube work. No removal qualified; ignored state and ownership holds remain. Counts are snapshots, not proof of safe retirement. |
+
+## Daily work and repository hygiene — 2026-09-21
+
+Gmail and LinkedIn are existing workflows and candidate RSI inputs, with distinct completion states:
+
+- Gmail draft discipline and the [contact ledger](modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md) are merged through PR1643/1813; PR1786 supplies operational wrappers. Keep private correspondence in its existing Gmail/CRM owner. The registry marks the ledger prototype; skill text is not production admission or verified learning.
+- LinkedIn connection policy preview PR1870 is merged with verified PR/main checks. [Connection policy preview](modules/platform_integration/linkedin_agent/docs/LINKEDIN_REVIEW_WORKFLOW.md#rsi-connection-policy-preview--2026-09-22) passes17 frozen cases locally and independently (baseline12fail/5pass), preserving bookkeeping and omitting request status. Browser access, live authority and retained RSI remain separate. The canonical backlog records the fresh next ranking and exact publication evidence.
+- New main-owned contact/Moshpit/Fukui wrappers are absent from the older dirty shared checkout. Use their existing clean-main context rather than copying skills or switching that active checkout. Existing Moshpit candidate logging and the documented R25 contract describe the intended learning path. The positive feedback-to-proposal handoff and current-state consumer remain unqualified; WRE typed receipts, independent verification and promotion gates remain required.
+- The read-only snapshot found 157 worktrees: 121 clean / 36 dirty, with no missing or locked registrations. A transient shared index lock was observed and preserved. Three inspected clean, main-reachable candidates retain ignored files, including learning databases; owner release is unproven. No worktree or branch was removed. Historical print-only cleanup lists are not current removal authority.
+
+Follow the [daily-work and closure discipline](docs/operations/RSI_SWARM_DISPATCH.md#daily-work-intake-and-repository-closure). Exact source/PR/metadata receipts and scored follow-ups are in the existing backlog's current observation. These are documented integration gaps, not a claim that self-healing or retained production RSI is complete.
+
+**Daily activity belongs in RSI as scoped evidence.** Follow R25's consented, same-FoundUp proposal contract and reuse existing WSP15/admission/verified-outcome owners. Store a task summary, source lineage, test/review outcome and accepted repair; a conversational reply or nonempty model response is not a verified improvement. The [R25 source qualification](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md#r25-a-source-qualification--2026-09-20) shows why signed personal architect context and structural learning candidates cannot yet supply a consented FoundUp feedback proposal. Current OpenClaw conversation memory records previews under its own weaker outcome criterion. The governed retention sink still requires an activation capability, and R25's end-to-end feedback-to-ticket path remains unimplemented. Do not ingest raw conversations automatically or claim that merged Codex work was autonomously executed and retained by WRE.
+
+**PC execution:** this session can run local Windows commands. The September20
+06:07 UTC metadata refresh found native OpenClaw 2026.5.2 and registered WSL distros;
+running state and canonical WSL versions were not queried or activated. Current Hermes,
+WSL OpenClaw/provider bindings and a real admitted sandbox remain unverified.
+The existing resolver still supplies no authoritative effect-use lease. A cold
+WSL launch can start user services, so a disposable sandbox must first be bound
+through the existing launcher/admission/rollback path. There is no evidence yet
+that blindly upgrading either runtime is the required repair. The existing WSL
+advisory contract is now qualified13/P1: enabled `--exec ... --version` calls
+may cold-start a stopped distro, and a running-state precheck cannot exclude a
+stop-before-exec race. Independent review selects the smaller12/P2 repair:
+separate metadata-only inspection from an explicit command opt-in inside the
+[existing owner](modules/infrastructure/dependency_launcher/ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20).
+The repair is independently verified and merged in PR1806; exact closure is
+tracked in the backlog. Command opt-in selects diagnostic execution,
+not runtime or effect-use authority. The daemon lifetime qualifier reproduced mixed-thread telemetry loss with disposable
+storage; independent review accepted the scoped witness. The separately scored
+13/P1 repair now gives each daemon counter an owning-thread handle lifetime.
+Local tests and independent review pass; PR1810 is merged after final exact-head checks; real daemon shutdown/restart,
+constructor cost and live RSI retention remain unverified. The backlog binds
+the closed R19/context repairs, qualified child-input/lifecycle gaps and current rejection-evidence repair.
+R19 qualification is merged in PR1811. Its one-step upload repair has actual
+hosted proof: artifacts10598364742 and10598803405, exactly XML/stdout
+and42 passing cases each, with no failures/errors/skips. Repeated cases overlap.
+PR1814 passed final checks and merged; both exact-merge main CI and CodeQL now pass. The completed 13/P1 qualification is
+`M2M-governed-context-binding-contract`. No runtime or gate activation.
+
+## OpenClaw call-local diagnostic repair — 2026-09-21
+
+The **10/P2** repair closed in [PR #1830](https://github.com/FOUNDUPS/Foundups-Agent/pull/1830), merge `734d46fae6332f4e8feaca9d3b172992dd394147`, after all ten exact-head checks passed and18reviewed blobs/tree matched: the existing Boolean API has a literal `details=True` pair mode; the process caller validates it and keeps its own explanation through all four projections. See the [module roadmap](modules/communication/moltbot_bridge/ROADMAP.md#call-local-skill-safety-diagnostic-repair--2026-09-21).
+Focused and independent runs each pass141 tests/one existing link skip; two actual-child cases are explicitly excluded. Package checks and unchanged test-registry checks pass. Preserve the initial Windows self-pipe harness failure separately; no runtime/provider/scanner or AmIBot activation occurred.
+The optional9/P3 cache-identity qualification is now closed: retain current rescanning; existing four-file WRE identity does not cover the recursive scanner input set. No measured benefit justifies cache implementation. See the [module contract](modules/communication/moltbot_bridge/ROADMAP.md#recursive-wardrobe-cache-qualification--2026-09-21). Fresh WSP15/97 selection and exact current accounting are in the backlog; no live runtime is admitted.
+
+## Next executable AmIBot step — 2026-09-21
+
+PR1840 merged the independently reviewed **10/P2** alias contract as `f83edabc3`; all ten PR checks and both main workflows passed. Fresh98peer heads and16 source bindings match. The owned **10/P2** source slice now implements optional `public_discovery_alias` through the existing schema/projector/shell and actual-code tests. Global reservations include hidden IDs; aliases emit only for eligible explicitly visible entries; URL and internal identity canonicalize before landing/context. The member app gate remains before catalog retrieval. Local projector/schema tests pass143 and actual-inline route tests pass128; independent replay passes the same271cases. Candidate CI remains pending. Production registry/catalog/manifest remain unchanged; AmIBot stays hidden and unbuilt. Exact scope, evidence and WSP15 comparison remain in the existing backlog; no runtime admission or deployment is claimed.
+
+## R25 approval-owner qualification — 2026-09-20
+
+The13/P1 planning action is complete with a precise implementation dependency.
+Authenticated conversation identity is not approval to disclose an exact summary
+as FoundUp feedback. The current closed TURN/STATUS/CANCEL envelope lacks that
+action, and all three resident admission aggregates remain host-unwired.
+Preserve the external RedDog durable-adapter owner; this sprint does not wire it.
+
+Prefer a conditional explicit-version assertion in the existing signed record
+owners, rather than a second consent engine. Current v4 schema is immutable under
+ordinary CAS: creation or a version transition must be qualified before source work.
+No complete R25 implementation packet is admitted by this planning result.
+
+Closed in [PR #1826](https://github.com/FOUNDUPS/Foundups-Agent/pull/1826) as `531b753406c10df454d83e6e1a9de0ed717e87d1`.
+All ten exact-head checks passed; seven reviewed blobs and the merge tree match.
+Both later main workflows passed: CI35509047240 and Push on main35509047066; exact-merge evidence is in the backlog.
+
+The existing [R25 packet](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) now
+records exact preapproval bytes, prior-source binding, current revocation/retry
+checks, legacy compatibility and the missing issuer-to-consumer handoff.
+No tests or behavior probes ran; source-bound independent review validates the
+finding, not consented feedback or live RSI. Both PR1819 main workflows passed.
+
+Re-scoring retains39 histories and adds one distinct12/P2 AutoResearcher
+process-recovery oracle plan. It wins the tie over cache planning because truthful
+interruption/report ownership advances RSI evidence, while always-rescan remains
+deliberately safe. Its parent13/P1 score is not inherited. The next packet remains
+selected after fresh closure/source/ownership reconciliation; no next-plan work ran here.
+
+## Hermes rejection evidence repair — 2026-09-20
+
+Historical PR1819 repair; current R25 qualification and next action are above.
+
+The selected C2/I4/D4/Impact3 =13/P1 repair is locally verified in the existing
+run-lifecycle owner. Parent-only stop acknowledgements/status and noncompleted
+or forbidden terminal rejections report incomplete effect observation and
+unconfirmed abort. Best-effort stop/status, reasons, withheld artifacts and
+effects-possible reporting remain; successful acceptance gates are unchanged.
+This corrects receipts, not detached-child cancellation or result delivery.
+
+Corrected RED:10 failed/98 passed; GREEN:108 passed; connected:114 passed.
+Independent verification passes108 overlapping cases plus9 additional probes.
+Test-author placement, Windows temporary-path guard and independent JUnit-count
+errors are retained separately with their corrections. Backend manifest membership
+remains1,400; one runtime hash and both pins changed. Eight generator tests,
+15 extension groups,67-file package and unchanged1,651-entry registry pass.
+
+Closed in [PR #1819](https://github.com/FOUNDUPS/Foundups-Agent/pull/1819) as `fdb23b0606800547edf664c0a665d0447392058b` after all ten exact-head checks passed.
+All17 reviewed blobs and the merge tree match; main workflows are recorded separately.
+All26 original packets and39 candidate
+histories are preserved. Fresh post-closure WSP15/97 selection returns to the
+existing R25 feedback approval-owner plan at C3/I4/D3/Impact3 =13/P1: determine
+how an exact daily-work summary gains valid approval for a specific FoundUp and
+version through current owners. It is not live consent or permission to dispatch.
+The current backlog binds exact receipts, limitations and the next M2M packet.
+
+## Hermes lifecycle qualification — 2026-09-20
+
+Historical PR1818 qualification; the implemented correction and current selection are above.
+
+Pinned source at `e624e9fde561e1add9388384012b295fde669ade` clarifies the
+14/P1 compatibility question. Both PR1817 main workflows now pass. This is
+source qualification, not a live runtime test or proof of installed version.
+
+| Boundary | Qualified finding |
+|---|---|
+| Top-level dispatch | Model `background=false` does not govern dispatch. API binds `async_delivery=False`, but a captured nonempty API session ID permits background dispatch through the wake-target branch. |
+| Accepted background work | Children detach from the parent list; dispatch returns a handle. Combined results are persisted and published to a separate process completion queue; delivery into a new turn or the original run is unqualified. |
+| Inline fallback | No usable async/wake path or rejected dispatch can execute inline. Capacity fallback occurs after detachment; it does not establish parent-owned cancellation. |
+| Original run | Parent conversation return controls terminal output/status and stream closure. Existing child-before-delegate-completion and terminal-last checks remain unchanged. |
+| Stop evidence | Parent stop invokes an interrupt and schedules process cleanup. A parent `cancelled` status does not establish detached-child quiescence or complete effect observation. |
+
+The [pinned delegation owner](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/tools/delegate_tool.py#L4088)
+and exact session/async/interrupt sources were inspected: four prior immutable
+files reused and three permitted dependency reads used. The completion queue
+consumer/wake implementation remains unqualified. Do not relax event gates,
+change private depth/session identity, or substitute another endpoint on this evidence.
+Full child-input fidelity, result delivery and live sandbox readiness remain open.
+
+The smallest qualified successor is a conservative correction in existing
+`reddog_hermes_api_run_lifecycle`: retain best-effort stop/status and rejection,
+but report incomplete effect observation and unconfirmed abort from parent-only
+stop evidence. Failed/cancelled terminal rejection must also report incomplete
+observation because those event checks do not establish child closure. Existing
+receipt fields already represent this uncertainty. No schema
+or shared consumer change is needed. This does not implement detached cancellation,
+change successful-result acceptance, or prove a live leak.
+
+WSP 15 selects that distinct repair at C2/I4/D4/Impact3 = 13/P1, tied with R25
+approval-owner planning. The verified receipt overclaim breaks the tie; R25 remains
+eligible. All 26 original packets and 38 prior candidate histories are preserved;
+one repair row makes 39. No source/tests/runtime changed during this qualification.
+The existing backlog carries the independently reviewed implementation packet.
+
+Qualification merged in [PR #1818](https://github.com/FOUNDUPS/Foundups-Agent/pull/1818) as `443c8d33a263dcea79a2ab11a054c6e7fb2a8a81`.
+All ten exact-head checks passed; the six reviewed document blobs and merge tree
+match. Post-closure WSP 15/97 reconciliation of 39 histories selects the 13/P1
+rejection-evidence repair; it has not started. Full child-input, delivery and descendant cancellation
+gaps remain. Later main workflow results are separately recorded in the backlog.
+Accounting adds this verified merge: 130 merged, 21 closed without merge and
+95 unchanged peer heads. Protected shared checkout remains unchanged.
+
+## Hermes child-input evidence qualification — 2026-09-20
+
+Historical PR1817 qualification; current lifecycle finding and next action are above.
+
+Source-only WSP00/15/22/50/62/84/97/99 qualification, following merged PR1816.
+Both PR1816 main CI and CodeQL now pass. The current API contract requires0.20.4;
+the official v2026.8.18 tag resolves to commit
+`e624e9fde561e1add9388384012b295fde669ade`, whose package version matches.
+The legacy vendor gitlink is0.9.0 and is not this API-provider source. Neither
+release metadata nor historical canaries prove the current installed runtime.
+
+| Boundary | Verified source contract |
+|---|---|
+| Prepared parent | Existing raw-context/prompt checks precede provider effects; approved redacted strings enter the parent request. |
+| Requested delegation | Parent prose requests complete goal/context and background=false; it is not observed child acceptance. |
+| Child construction | Pinned delegate source places goal in child user input and nonblank context in its system framing. Final model delivery remains unproven. |
+| Current /v1/runs events | Producer drops tool arguments/call linkage; child whitelist has redacted goal and lifecycle metadata, but no complete context or accepted input. |
+| Local verifier | Checks run/child/session identity, ordering, reported empty effects and parent terminal-output agreement. These do not establish child content fidelity. |
+
+The [pinned API producer](https://github.com/NousResearch/hermes-agent/blob/e624e9fde561e1add9388384012b295fde669ade/gateway/platforms/api_server.py#L6580)
+feeds the same queued dictionaries to the run event stream. Generic preview
+completeness is unknown; a goal-only check cannot close missing context coverage.
+The separate /v1/responses argument stream has a different contract and cannot
+be substituted without qualification. The smallest prerequisite is an adequate
+version-bound accepted-child-input evidence contract in existing upstream/route
+owners. No consumer patch, invented telemetry field or new authority is qualified.
+
+New source evidence changes priority: the pinned model dispatcher ignores the
+background argument and requests background when `_delegate_depth` is not above0.
+Actual delivery can still fall back inline through session/wake/pool conditions.
+This conflicts with relying on parent prose for synchronous execution, but is not
+a demonstrated live failure. Next is bounded lifecycle/result-delivery compatibility
+qualification, C3/I4/D4/Impact3=14/P1, before R25approval-owner planning13/P1.
+Preserve the existing layered/error telemetry positive case and event confinement;
+do not loosen gates or change instructions until the pinned path is understood.
+
+The initial raw-host429 was recovered through one responsive official contents
+API read at the same commit: five of six source requests used, no raw retry or
+latest-version substitution. Failures and corrected background wording remain
+in the source-bound receipts. No new tests, probes, source edits, provider calls,
+runtime updates, AmIBot activity or retained-RSI proof occurred. Existing canonical
+backlog preserves all36 prior histories and adds two separately scored actions.
+
+Qualification merged in [PR #1817](https://github.com/FOUNDUPS/Foundups-Agent/pull/1817) as `9909103ea4d38c6659438ea140c2f85b78a45686`.
+All ten exact-head checks passed; the six reviewed document blobs and merge tree
+match. Post-closure WSP 15/97 reconciliation of 38 histories selects the 14/P1
+lifecycle compatibility plan; it has not started. The full child-input evidence
+gap remains. Later main workflow results are separately recorded in the backlog.
+Accounting adds this verified merge: 129 merged, 21 closed without merge and
+95 unchanged peer heads. Protected shared checkout remains unchanged.
+
+## Prepared-context integrity repair — 2026-09-20
+
+The existing runtime now seals the exact prepared raw governed context together
+with the canonical prompt. OpenClaw, Hermes and Fusion verify both before their
+existing effect boundaries. Legitimate context redaction remains supported;
+partial canonical bindings fail closed, while all-absent legacy calls remain.
+Regenerate older canonical calls through the current preparation path.
+
+Local validation: 45 intended red failures resolved; 247 focused and 39 connected
+tests pass. Independent review repeats the 247 cases and adds 26 adversarial
+probes; repeats overlap. Two real-process fixtures remain deliberately excluded.
+Actual capability replay/callback isolation, empty evidence, 24,000/24,001 bounds
+and final fake provider framing are covered. No live provider/child proof follows.
+Manifest generation/check and eight packaging tests pass; 15 extension fast groups,
+67-file package and unchanged test registry pass. Inherited test-pin drift was
+reproduced before repair and reconciled with both existing pins.
+
+WSP15 re-observation retains all 35 prior histories and conditionally selects
+Hermes native-child input-evidence qualification (C3/I4/D3/Impact3=13/P1) after
+this repair closes. R25 approval-owner planning is also eligible at13/P1; the
+tie favors the concrete current handoff boundary. Cache/recovery plans score12/P2.
+Native-child telemetry must be version-bound; no new implementation is qualified.
+Source provenance, live admission, AmIBot registration/build and retained RSI
+remain open. Exact receipts and publication state are in the current backlog.
+
+Repair merged in [PR #1816](https://github.com/FOUNDUPS/Foundups-Agent/pull/1816) as `470161321f6b95371b52c756d339560520f093c3`.
+All ten exact-head checks passed; merged tree and24reviewed blobs match.
+Re-observation selects the13/P1 Hermes child-evidence contract plan. Later main
+workflows are separate observations. The128merged count adds this verified merge
+to the prior127;95peer heads and protected shared checkout remain unchanged.
+
+## Governed-context qualification and resumed audit — 2026-09-20
+
+Historical PR1815 qualification below; current repair status is above.
+
+Twelve bounded synthetic cases (27 mocked adapter calls) confirm four altered,
+empty, swapped or stripped context forms pass existing adapter validation when
+the approved M2M prompt stays unchanged. Existing prompt-tamper and blocked-
+redaction negatives still reject before mocked effects. Combined length and
+one-shot synthetic capability checks pass. An initial harness attribute typo
+was corrected and retained; repeated cases overlap. This is a missing contract
+demonstrated with fixtures, not a live exploit or repaired production source.
+
+Independent review qualifies the next M2M-prepared-context-digest packet: bind
+the exact prepared RAW context using the existing digest/opaque capability and
+check it at the three current pre-effect validator calls. Preserve legitimate
+redaction, truly legacy absence, prompt fidelity and one-shot semantics.
+Incomplete canonical bindings must reject and be regenerated. Existing provider
+framing, native-child fidelity, source provenance and live admission are separate.
+See the [module contract](modules/communication/moltbot_bridge/ROADMAP.md#governed-context-binding-contract--2026-09-20)
+and current backlog for exact source/test scope and differential size budgets.
+This sprint implements none of that next source packet.
+
+Qualification merged in [PR #1815](https://github.com/FOUNDUPS/Foundups-Agent/pull/1815)
+as 11c2f164dcd4f23c75fd3e35fe8d61b0b72cb507. All ten exact-head checks passed; merged tree and
+six reviewed blobs match. The post-merge checkpoint again selects the 13/P1
+prepared-context digest repair. Both later PR1815 main workflows now pass.
+The 127 merged count is the complete 126-merge inventory plus this verified merge.
+
+Daily coding, tests, review and PR outcomes can be scoped system evidence.
+Personal feedback has separate R25 consent/target/version requirements. Neither
+ordinary receipts nor conversation-response heuristics prove independently
+retained RSI learning. The old pattern-import script has fixed historical
+examples; the verified sink still requires its existing activation/transaction
+owner. Reuse these owners rather than adding another transcript collector.
+
+## AmIBot autonomous production experiment — 2026-09-15
+
+AmIBot is the low-consequence test fixture; the production system is the subject
+of the experiment. 012 supplies ideas and observes meaningful results through
+RedDog. 0102 coordinates research, prioritization, packaging, workers and review.
+Use **principal prose → Prometheus normalization → ORCH → WSP 99 M2M → admitted
+OpenClaw/Hermes workers** through existing WRE/AgentDB owners. Local Codex author/test/review lanes are coordinator assistance, not admitted
+OpenClaw/Hermes build workers.
+
+**Current result: G0 controlled failure.** Registration is prepared on draft
+[PR #1751](https://github.com/FOUNDUPS/Foundups-Agent/pull/1751) at `04ef322f`:
+one hidden, specified skeleton under permanent ID `detect_ai`, a declarative
+manifest and the existing intake package. The earlier main `8eda8fe73` observation found 17 registry
+entries and no `detect_ai` module. The candidate has 18; its public projection
+remains four entries. Existing eSingularity ticker assertions fail in its registry-
+triggered CI; keep the PR unmerged and the protected project with its owner.
+The 13 planning orders remain unchanged; five G1 writers still overlap in ten
+scope pairs. Requested `/f/amibot` needs the existing route owner to reconcile
+the canonical `/f/detect_ai` namespace. No build order or public route is activated.
+
+| Readiness gate | Current evidence / prerequisite |
+|---|---|
+| OpenClaw | Native Windows npm metadata: 2026.5.2. Governed WSL installation/service unverified today; September13 WSL 2026.7.1-2 is historical. |
+| Hermes | Existing API contract pins 0.20.4; current WSL version/profile/provider binding unverified. Native PATH absence is not global absence. |
+| Creation/scaffold | Existing typed scaffold adapter is reusable; legacy Hermes FoundUp execution is blocked. Authorized commander handoff now preserves validated genesis lineage (PR1799); public draft-to-commander entitlement and runtime admission remain open. The live new-scaffold writer still rejects an existing module. |
+| WSP 109 intake | Eight preparation documents exist in the PR. Current structured normalizer does not automatically consume their prose. |
+| WSP 99 handoff | Explicit normalized packets survive local profile/signing, request preparation and all three provider-adapter egress fixtures. Explicit proposal-plan admission is now locally qualified. Omission-aware receipt-plan forwarding is implemented (PR1798). Raw-context ingress binding is now locally verified in all three adapters. Principal normalization, source provenance, downstream/native-child fidelity and live admission remain open. |
+| Parallel work | Existing AgentDB claims and separate author/verifier reservations pass local contention tests. Establish actual disjoint file ownership after scaffold reconciliation before G1. |
+| Receipts | Existing signed receipt/publication contracts pass locally; no actual AmIBot work-order/claim/materialization receipt chain exists. |
+| Verification | Independent slice-verifier contracts exist. Local review accepted the guard after one correction; no admitted build verification or promotion follows. |
+| Execution valve | Current resolver explicitly returns `authoritative_use_lease=None`. Current trust/effect/model authority remains required. |
+| Skillz | Reuse existing intake and diligence skills. The intake skill exists as a prototype but is absent from the standard WRE skill registries; wardrobe admission/freshness remains unqualified. |
+| Validation | Historical G0 PC audit:175 runtime-contract passes/two subprocess deselections; route53pass/11fail and genesis27pass/1fail belong to older source. Later PR1801 reconciled four current FoundUp fixtures (205 focused/677 connected passes). This refresh reran no readiness suite; no live acceptance follows. |
+| Documentation | Static Firebase `/f/**` owner exists; package claims do not establish the game. Root npm build merely echoes a message and is not frontend acceptance. |
+
+The smallest selected reusable repair was the legacy invariant guard in
+`prompt/swarm/m2m_compiler.py`, under the shared handoff parent **4+5+5+4=18/P0**.
+222 focused tests pass, including 44 rejection cases and 16 scalar compatibility
+cases. Independent review caught two representable-input regressions; after the
+author's repair it reran 222 before acceptance. Eight manifest tests and 15 RedDog fast groups pass.
+Only one of 1,400 runtime member hashes changes; registry remains 1,650/269 quarantined.
+This closes unsafe legacy emission, not the canonical envelope or the RSI system.
+
+The codec, signing, profile and provider layers are merged through PRs
+#1757/#1758/#1760/#1761. PR #1761 merged as `8da0551f` after ten exact-head checks;
+both main CI and CodeQL passed. Its local provider qualification remains 692 passes
+/one platform skip, with independent review and two inherited size failures.
+
+PR #1763 merged the explicit seed-plan APIs as `da79e5efa` after ten passing
+exact-head checks. The merged tree matches the independently reviewed files plus
+reconciled main. Its 69 focused/320 independent checks overlap; they qualify the
+seed APIs, not a producer or live build. The backend manifest/pins remain unchanged.
+
+PR #1794 merged as `b2e9e3db2` after ten passing exact-head checks; its tree
+matches the reviewed candidate. Post-merge main CI and CodeQL both passed; the latter was closed by a fresh
+remote check. Exact run IDs/statuses remain in the evidence chain.
+
+The existing architect model-output → proposal → v3 receipt now preserves an
+explicit normalized worker plan and binds its complete contents to receipt identity.
+Existing determination/candidate persistence already binds that full receipt.
+Independent local reviews accepted the seven changed source/test files after
+repairing wildcard-deny overlap and non-plain ancestor coercion. All three legacy
+receipt wires remain unchanged. Partial data does not establish an executable plan.
+
+Reconciliation onto main `123d86263` preserves the reviewed normalized hashes.
+Current-main validation: 524 passed/five filesystem failures/one platform skip;
+the affected serial suite passes 64/one skip with a short external temp root.
+All 529 applicable IDs therefore have passing local evidence. Eight manifest tests
+and 15 fast groups pass; registry is 1,651/269. Four of 1,400 runtime hashes change.
+Earlier failures and review corrections remain in the backlog evidence chain.
+
+**Receipt-to-seed prerequisite, 18/P0:** PR #1795 merged as `7de1d9ca9` after ten
+passing exact-head checks; the merged tree matches the reviewed candidate.
+A declared plan requires matching explicit seed input; missing/tampered/conflicting
+lineage rejects before later callbacks. Declared execution constraints must agree
+with effective seed scope. Legacy bytes remain. Author 553 tests and independent 471
+plus 139 probes pass; eight manifest tests/15 fast groups pass. Post-merge main CI
+and CodeQL both passed (runs 35448028771 / 35448028395).
+
+**Direct-profile prerequisite, 18/P0:** PR #1796 merged as `15f203ee3` after all ten
+checks passed on exact `f7c74fa00`. The merged tree equals the independently reviewed
+tree. Both promotion inputs are detached before capability/storage effects and
+must agree with a declared proposal plan. Local 571 +32 publication tests pass;
+independent 318 +177 asserted probes, eight manifest tests and 15 fast groups pass.
+Post-merge main CI and CodeQL both passed (35451972360 / 35451972324).
+
+**Producer serialization prerequisite, merged in [PR #1797](https://github.com/FOUNDUPS/Foundups-Agent/pull/1797):** the existing determination
+serializer now composes canonical proposal output, removing the invalid nested null
+for legacy absent plans. Result/persistence, empty/full plans and all linked IDs are
+covered by 617 connected tests. Independent review accepts86 overlapping tests plus
+72 boundary assertions;8 manifest tests/15 fast groups pass, registry1651/269 remains
+current. Source1532 and interface1592 lines do not grow; no new module or exemption.
+All10 exact-head checks passed; squash `6556a0d14` matches the reviewed tree.
+Post-merge main workflows are tracked separately in the backlog. WSP15/97 re-scored
+27 current candidates. The next bootstrap substep scores14/P1 within the18/P0
+handoff parent; explicit lower APIs already work. Omission-aware selection belongs in the existing seed bootstrap's single read, preserving
+explicit None/empty semantics. `main.py:2844` remains unwired; no prose inference.
+Principal normalization, full context/native-child fidelity, current signed admission
+and live RSI retention remain open; this local source qualification does not close G0.
+
+The adjacent 17/P0 genesis path also lacks declared typed ingress: actual
+`OpenClawIntent` has metadata, while an old fixture attaches a future payload.
+Its NOT_READY-only assertion can accept commander denial. Strengthen that evidence
+with the actual intent contract and queued job lineage before claiming integration.
+Higher 19-20 work remains blocked or separately owned. All 26 planning packets
+and the dated baseline remain unchanged; detailed audit receipts are in the backlog.
+
+| Gate | Planned work and advancement rule |
+|---|---|
+| G0 serial | Reconcile PR/package, registry identity, typed genesis/Skillz, current runtime/update evidence, signed admission and route owner; validate complete M2M packets and disjoint scopes. |
+| G1 parallel | Transport/session, moderation, scoring/state, PWA and AI adapter lanes; separate test-fixture lane only where ownership is disjoint. Each depends on accepted G0 and has its own worktree, claim and verifier. |
+| G2 integration | Prove clean two-browser human↔human chat, authorization, disconnect/reconnect and moderation before game assignment. |
+| G3 game | Hidden randomized human↔AI/human↔human assignment, server-held truth, locked verdict/confidence, reveal and benchmark scoring. |
+| G4 PWA | Real iPhone/Android/browser acceptance, keyboard/safe areas, disconnect/reconnect and installability; simulated tests do not close device acceptance. |
+| G5 independent verification | Separate security, privacy, moderation, scope, scoring, benchmark integrity and regression review; retain rejection and repair receipts. |
+| G6 public POC / RSI | Authorized FoundUps.com owner activates `/f/amibot` only after accepted verification, or records controlled failure. Bind final metrics to the actual publication outcome. |
+
+Permanent FoundUp ID is `detect_ai`, whereas current `/f/` lookup requires exact
+`foundup_id` equality and has no alias. Resolve `/f/amibot` with the existing
+registry/projector/route owner; do not silently substitute another route, rename
+the entity or configure a new domain. Public deployment and runtime upgrades
+require their existing current admission/rollback paths. WSL was not started
+during this diagnosis because a cold probe can start user services; this does
+not remove 012's update/run direction. Qualify versions and compatible providers
+at the admitted runtime window rather than blindly updating shared installations.
+
+The existing clean POC and benchmark criteria remain unchanged: consenting adult
+participants, 20-person/100-valid-focal-round minimum with at least 40 per arm,
+locked confidence/scoring and disclosed AI participation policy. Mature features,
+tokens/wallets and production-account effects stay deferred. Active RedDog,
+YUMORI/eSingularity and Remote's `FOUNDUPS/autopost` remain separate owners.
+
+Record per-order provider/model, retries, failures, scopes, conflicts, independent
+rejections, 012/0102 interventions, tokens/cost when available, elapsed time, tests,
+integration/public defects, package changes and reusable repairs/accepted retention.
+Initial G0 observation counts: 13 planned orders; 0 admitted/completed build jobs; 2 read-only audit
+lanes; 1 locally independently accepted shared repair; 0 WRE-retained improvements.
+No OpenClaw/Hermes provider invocation occurred; Codex token/cost metadata is unavailable.
+Unrun device/public tests and integration defects are unknown, not zero. Detailed
+evidence and the re-scored queue are in `amibot_g0_continuation_20260915` in the
+[existing observations](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
+After every accepted or blocked layer, reapply WSP15/97 before the next assignment.
+
+## Current delivery checkpoint — 2026-09-15
+
+The [researcher checkpoint](modules/infrastructure/wre_core/ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
+now binds scratch preparation, initial proposal and cleanup to one invocation
+baseline. A local diagnostic hash identifies that captured text. **96 local tests
+pass**; five ten-attempt controls match their observed baseline and seeded replay.
+
+WSP15/97 closed the input consistency layer and re-scored remaining report
+qualification at **15/P1**. Program/proposal, oracle, environment and authenticated
+reader evidence remain incomplete, as do resource measurement and independently
+retained benefit. Active FoundUps and peer ownership stay separate.
+Input-snapshot PR [#1755](https://github.com/FOUNDUPS/Foundups-Agent/pull/1755) merged at
+`582cbe82e3177b10ed8a69741acb6fdd92c4cc86`; main CI and CodeQL both passed.
+The AmIBot handoff prerequisite above is the current 18/P0 selection.
+The current change enables no startup campaign, live mode or automatic budget growth.
+
+TTL PR [#1748](https://github.com/FOUNDUPS/Foundups-Agent/pull/1748) merged as
+`7c9e3b8dc3e74a26653d16f283a5208bcd32257b`; all ten exact-head checks and both
+main workflows passed. It disabled unbound reuse; restoring caching needs qualification.
+Launch-plan PR [#1747](https://github.com/FOUNDUPS/Foundups-Agent/pull/1747) is merged
+at `cf8ad130cae2345a4080e4690eccd709dc5c6970`; both main workflows have now passed.
+Its earlier neutral PR aggregate remains historical advisory evidence. The plan
+enables no startup execution or automatic cycle-budget growth.
+
+Execution-admission PR [#1746](https://github.com/FOUNDUPS/Foundups-Agent/pull/1746)
+merged as `af29f082e866a05bb0d05a8f32e27414f8c1939b`; main CI and CodeQL passed.
+Its 172 connected passes/four link skips remain evidence of bounded execution
+ownership, not complete coordinator concurrency or production RSI.
+
+Scan-report PR [#1745](https://github.com/FOUNDUPS/Foundups-Agent/pull/1745)
+merged as `cd532a538720b1c659f4625784032ebfb24ed012`; both main workflows passed.
+
+Admission-cache PR [#1744](https://github.com/FOUNDUPS/Foundups-Agent/pull/1744)
+merged as `8682d569b1022f35fd357af6b3b20e4b5ce52a7e`; both main workflows passed.
+
+PatternMemory PR [#1743](https://github.com/FOUNDUPS/Foundups-Agent/pull/1743)
+merged as `cfe510f4198de3d1339be6a124b2f529d3d99c79`; main CI and CodeQL passed.
+
+Auto Researcher isolation PR [#1742](https://github.com/FOUNDUPS/Foundups-Agent/pull/1742)
+merged as `cc2ef5d8023b5c88669143d25a482148482a75d7`; its main CI and CodeQL passed.
+
+Activation recovery PR [#1740](https://github.com/FOUNDUPS/Foundups-Agent/pull/1740)
+merged as `9b056d641442022022925bb2ad4b934f621298e3`; its main CI and CodeQL passed.
+
+Visibility PR [#1739](https://github.com/FOUNDUPS/Foundups-Agent/pull/1739) merged
+as `21afc9108fec741ec883efacc47e542dc2461a7b`; its main CI and CodeQL passed.
+
+Process-race PR [#1738](https://github.com/FOUNDUPS/Foundups-Agent/pull/1738) merged
+as `916d81118bf37d8ba45b13ba2af9ec7d59d1b9c7`; its main CI and CodeQL passed.
+The following checkpoints preserve their historical scopes and priorities.
+
+Writer-exit PR [#1737](https://github.com/FOUNDUPS/Foundups-Agent/pull/1737) merged
+as `35eb1e863b7ab73024f6d430f9b116bfeebd49d7`; its main CI and CodeQL runs are
+observed successful. The following checkpoints retain their historical scope
+and priorities; they are not current assignments.
+
+Storage-read PR [#1736](https://github.com/FOUNDUPS/Foundups-Agent/pull/1736) merged
+as `18981983c1935bfed55ca8703b05629d2b9634ad`. Its exact-head checks and main
+CI/CodeQL passed. The previous storage implementation and its broader test counts
+retain their original source/environment scope.
+
+Recovery [PR #1734](https://github.com/FOUNDUPS/Foundups-Agent/pull/1734) is merged
+as `7f4f49b79692a1aa6484544c4e46115fe6690027`. All ten reported checks passed at
+its exact head; all 18 changed Git blobs match the merge. Fresh post-merge
+observation removes the pending closure and retains authenticated response
+readback at **16/P0** as the highest eligible local action. The existing baseline
+records the separate merge-CI observations and unchanged admission dependencies.
+
+The [mirror-restoration checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#mirror-restoration-checkpoint--2026-09-14)
+extends the existing root/SQLite owners to recover either missing mirror after
+exact store reopening, including later-sequence v1/v2 commitments. Identity,
+checkpoint, conflict and retry checks pass locally while generic +1 CAS remains
+unchanged. Validation: **318 passed / one Linux-only skip**, plus 8 manifest tests
+and 15 fast groups. Re-scoring selects independently authenticated readback
+**16/P0**. Live process/volume qualification and runtime/memory activation remain
+open; this is local source completion, not completed production RSI.
+
+The [dependency qualification checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#dependency-qualification-checkpoint--2026-09-14)
+closes the local Holo/MCP preflight at `1173d1ab`. The FastMCP-only PR cannot
+resolve with the pinned MCP version; the paired candidate resolves and passes
+25 existing MCP tests in a disposable environment. Both PRs omit the launcher's
+exact-version update. The existing query/snapshot selection passes 38 tests;
+live migration, deployment exposure and the three advisory closures remain open.
+That checkpoint selected mirror restoration **17/P0**. Integrated MCP migration
+**18/P0** still requires current owner/runtime admission. All packets remain
+non-dispatchable; qualification creates no replacement runtime authority.
+
+The [full-record commitment checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#full-record-commitment-checkpoint--2026-09-14)
+connects a versioned root commit route to the existing pending writer and mirrored
+terminal state. V1 remains separate; current peer/proof/grant checks and exact-byte
+retry pass locally. Validation: 279 passed / one Linux-root skip.
+The tests exposed an inherited later-sequence whole-mirror restoration gap.
+At that checkpoint, scoring ranked authenticated repair **17/P0**. Subsequent
+dependency alerts put Holo/MCP preflight first at **18/P0**; that local preflight
+is recorded above. Readback remains 16/P0 and follows the recovery contract.
+Readback, ordinary signer/publisher integration and retained RSI remain incomplete.
+
+The [pending-response storage checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#pending-response-storage-checkpoint--2026-09-14)
+remains the historical proof of the sequence-1-only primitive. The later v2 route
+above adds terminal commitment; neither checkpoint supplies read authority.
+
+The [immutable-response record checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#immutable-response-record-checkpoint--2026-09-14)
+adds bounded canonical records in the existing signing owner, binding the complete
+grant context and exact response to externally supplied context/digest checks.
+The connected selection passes 294 tests with one Linux-root skip. Historical
+validation creates no current authority. Later checkpoints add pending storage and
+local full-record commitment; authenticated readback remains open.
+
+The [signer-response handoff checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#signer-response-handoff-checkpoint--2026-09-14)
+puts response validation in the existing outcome-signing owner and keeps the
+publisher using it. Malformed boolean claims, contradictory rejection and
+non-boolean verifier results now reject. The connected selection passes 207
+tests with one Linux-root skip. Root-backed interruption tests and an ordered
+handoff contract define the remaining R11-A work: bounded immutable response
+records, root commitment, separately authorized readback, then publisher recovery.
+
+The [root-commit acknowledgment checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#root-commit-acknowledgment-checkpoint--2026-09-14)
+recovers an exact committed receipt after a lost transport reply. The existing
+client retries identical bytes once; every request still revalidates current
+authority, and a burned reservation never reopens. The connected selection
+passes 115 tests with one Linux-root skip. This is a prerequisite within R11-A;
+durable recovery of the full signer response before publication remains next.
+
+The [publication-commit checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#publication-commit-checkpoint--2026-09-14)
+retains signed bytes through bounded authority-store revision retries and
+validates durable evidence after a lost acknowledgment or competing publication.
+The connected selection passes 118 tests. R11-A remains partial for process
+death before durable evidence, exhausted retries and owner-controlled legacy
+event recovery; authenticated memory activation and later benefit remain open.
+
+The [event-timestamp checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#event-timestamp-checkpoint--2026-09-14)
+records a stage's time once in its existing chain receipt and reuses that time
+for admission. Later snapshots and retries preserve the same metadata; missing
+or invalid event evidence rejects. The connected selection passes 214 tests
+with four platform skips at that checkpoint. The publication-commit follow-up
+above addresses recoverable revision conflicts and competing publications.
+
+The [publication-retry checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#publication-retry-checkpoint--2026-09-14)
+preserves an existing signed envelope across advancing clocks and a separate
+process restart. Its recorded connected selection passed 91 tests. Queue event
+time was still unstable at that checkpoint; the event-timestamp follow-up above
+addresses it. Authority/memory activation and later benefit remain open.
+
+The [authority-to-memory connection checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#authority-to-memory-connection-checkpoint--2026-09-14)
+traces the existing queue, signer, publisher, stores and Memex reader. A disposable
+composition probe exposes early evidence visibility after failed memory activation
+and a publication conflict when the retry clock advances. The existing selection
+passes 46 tests with one Linux-only skip. R11 now has six ordered substeps;
+immutable publication/retry is next. Runtime code and activation remain unchanged.
+
+The existing sink now compares an active row using canonical JSON before
+acknowledging a retry. Three type/value mismatches that Python treated as equal
+are rejected; valid retries keep their existing record IDs. The
+[active-record checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#active-record-identity-checkpoint--2026-09-14)
+records 55 passing sink/admission cases and the revised short-checkpoint
+continuity policy. This is R11 preparation; authenticated activation and
+retained improvement remain open.
+
+The next R11 preparation repairs retries in the existing staging sink. A
+competing identical insert returns the same record ID, a conflicting winner is
+preserved and rejected, and a deep snapshot keeps identity and payload aligned.
+The new [staging checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#staging-replay-checkpoint--2026-09-14)
+records four reproduced failures and 51 fresh sink/admission passes. This is
+local staging evidence; authenticated activation and later benefit remain open.
+
+The existing outcome recorder, retention gate and final memory-admission adapter
+now reject inconsistent evidence and missing storage acknowledgments. The
+connected selections pass 315 tests, including a real recorder-to-gate-to-adapter
+fixture with an injected sink and existing disposable sink/canary boundary tests.
+The [retention checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#outcome-retention-checkpoint--2026-09-14)
+records the R10/R11/R15 preparation. Authentication, atomic/idempotent retention
+and measured benefit on a later invocation remain open.
+
+The compact compiler now carries explicit stop rules into its readable handoff,
+and the existing fidelity gate rejects omitted, weakened or replaced stop
+instructions. Five reproduced failures now pass in the 162-case selection.
+The [handoff checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#stop-rule-handoff-checkpoint--2026-09-14)
+records this R10/R15 preparation; arbitrary prose preservation remains open.
+
+The existing Auto Researcher now rejects an invalid baseline before proposing
+changes and restores its scratch baseline on Python failure/cancellation exits.
+Five reproduced failure cases now pass in the expanded 31-case selection,
+including runner-restore and cleanup-output failures. This is preparatory local recovery evidence for
+R10/R13/R15, not production activation or durable process-crash recovery. The
+[lifecycle checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#research-lifecycle-checkpoint--2026-09-14)
+retains the exact scope and unchanged worker-admission gap.
+
+The existing Auto Researcher evaluator now rejects impossible numeric proposals
+before simulation. A negative allocation previously outscored the baseline;
+all 26 focused tests now pass, including rejection through its dry-run loop.
+The valid simulation baseline is unchanged. This advances R10 input integrity,
+not independent evaluator admission or real retained benefit.
+
+The latest R10 field-preservation repair adds explicit action transport to the
+existing compact compiler and checks parsed action/scope in the existing gate.
+All 158 focused tests pass after reproducing action loss; old packets remain
+readable. See the [continuation evidence](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json).
+Worker admission, full-context fidelity and G0–G5 completion remain separate.
+
+After PR #1710 merged, governed Holo maintenance completed at
+`5326080d583625aebbc230242117fb7fcf0044a6` and stopped both owned runtimes.
+The existing six-case public retrieval benchmark passed its unchanged 0.95
+policy: Recall@8/MRR `1.0`, nDCG@8 `0.9939998`, p95 `4031ms`.
+All six receipts report CURRENT/no-gap at that source; exact runtime closure
+remains false. This advances the recorded R03/R05 evidence, not full packet
+acceptance, sealed independent evaluation or promotion. The [complete dated
+receipts](docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json) retain those
+boundaries; later commits require their own source qualification.
+
+Roadmap PR #1656 merged as `18297fc3f1449350b89079db64a3612b004687a1`; R01 PR #1702 merged as `35ed430c61e4e35c1b779f03c13e40368c82b65f`. Both passed their CI selections. The current R02 review uses that latter source. Later phone/YUMORI work is preserved and remains outside the original audit. The current generated inventory is 1,650 tracked Python test files / 269 quarantined; 28 registry-contract tests pass. One omitted, already-tracked Japanese-copy test was added to that inventory. These counts do not replace the dated module census or imply that all tests were executed.
+
+R01's narrow integrity repair is locally validated in this revision: both production manifests match unchanged committed Skillz content, and the documented WRE tier passes 235 tests with four platform-limited skips. Git materialization with `core.autocrlf=true` preserves those exact bytes. The repair is merged; live runtime admission remains separate. R02's map and selected documentation corrections are present in this revision; its remaining reconciliation and independent review stay open. A matching clean Holo reference returned CURRENT/no-gap at published source `78b79c36c2d776e030cd0ee8aa23359a67f952ec`; this is not proof of current-main freshness or exact runtime closure. [Integration evidence and merge status boundary](docs/audits/rsi/2026-09-09/INTEGRATION.md).
+
+The later R03 continuation qualified then-current main `bcc877829653997d7df638b7069258a061d04ee1` through the existing OpenClaw/WRE maintenance controller, with complete owned-runtime cleanup and a fresh CURRENT/no-gap owner query. See the [exact-main checkpoint](holo_index/CLI_REFERENCE.md#exact-main-maintenance-checkpoint--2026-09-13). The [worker readiness checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#worker-readiness-checkpoint--2026-09-13) identifies installed WSL runtimes, the repaired advisory version parser, and the still-missing local model/API admission. R03's broader operational matrix, R04 exact closure and G1 remain open; later commits require requalification.
+
+## Operating model: governed tickets with optional bounded teams
+
+Preparatory observations are now recorded in the [registry/context and Science
+Hub checkpoint](docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13).
+The existing registry audit passed once at its pinned source. A deterministic
+M2M reference candidate was rejected for lost instructions; YAML parsing alone
+does not establish fidelity. The existing compact-prompt compiler now preserves
+its recognized action; the fidelity gate rejects changed actions, scopes and
+stop conditions during serialization. The expanded 158-case fidelity/compatibility
+selection passes, including legacy packet compatibility. Full objective/prose
+preservation and admitted evaluator wiring remain open.
+Science Hub's 36 selected standalone tests passed
+with an injected detector and disposable persistence. These qualify baseline
+work and negative cases for R10/R15/R20/R23; no completion gate advances and no
+retained improvement is claimed.
+
+Use a hybrid: a qualified production line owns tickets, admission, independent audit and reward accounting; selected tickets can recruit a bounded self-organizing team. Agents may propose subtasks and coordinate within admitted scope, capacity and budget. They cannot expand authority or certify their own work. One qualified worker is the economical default; the [hybrid architecture](docs/architecture/REDDOG_HYBRID_TICKET_SWARM_FEEDBACK_MODEL.md) defines team admission, typed consensus and PoC-to-MVP evidence.
+
+The work path is **ticket → worker or bounded team → evidence synthesis → independent audit → governed acceptance/activation → reward eligibility → confirmed settlement**. The feedback path is **012 ↔ own RedDog → deep 0102/WSP 97 proposal → optional relevant opted-in 012s actively engaged with that same FoundUp → V1 feedback → revised proposal/ticket → independently verified outcome**. Agreement and feedback inform decisions; neither substitutes for authorization or verification. [R25](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md) owns the feedback integration plan.
+
+The [R24 implementation packet](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md) binds qualification, tickets, independent audit and reward accounting to existing WRE/AgentDB/FAM owners. Current FAM payout initiation is not confirmed settlement. Rewarded-production claims require R24 evidence in addition to the applicable work gates; no financial action is authorized by this roadmap.
+
+## Target architecture and ownership
+
+```mermaid
+flowchart TD
+    P[012: objective and delegated policy] --> R[0102 / RedDog: propose bounded work]
+    WSP[WSP: governing requirements] --> W[WRE: admission, job ownership, evidence]
+    R --> W
+    H[HoloIndex: current retrieval] --> R
+    AR[Existing WRE Auto Researcher: bounded proposals] --> R
+    MR[Existing model AutoResearch: benchmark evidence] --> O
+    M[Scoped Memex: principal and FoundUp context] --> R
+    W --> Q[Existing AgentDB claims and leases]
+    Q --> O[OpenClaw: supervise admitted jobs]
+    O --> HE[Hermes: bounded leaf worker]
+    HE --> A[Candidate artifact and execution receipts]
+    A --> V[Independent verifier and held-out evaluator]
+    V --> G[Authorized promoter]
+    G --> C[Activation, canary, rollback]
+    C --> E[Observed outcome receipts]
+    E --> PM[Admitted PatternMemory / outcome retention]
+    PM --> R
+    Q --> F[FAM lifecycle/event records where applicable]
 ```
-+-----------------------------------------------------------------------------+
-[U+2502]                    [U+1F310] THE INTELLIGENT INTERNET ROADMAP                      [U+2502]
-+-----------------------------------------------------------------------------+
-[U+2502]                                                                             [U+2502]
-[U+2502] PHASE 1: FOUNDATION ([OK] 85% COMPLETE)                                       [U+2502]
-[U+2502] +-- [U+1F4BB] VSCode Multi-Agent IDE [OK]                                            [U+2502]
-[U+2502] +-- [U+1F4E1] Auto Meeting Orchestration [OK]                                        [U+2502]
-[U+2502] +-- [U+1F310] Platform Access Modules [OK]                                           [U+2502]
-[U+2502] +-- [U+1F300] WRE Core Infrastructure [OK]                                           [U+2502]
-[U+2502]                                                                             [U+2502]
-[U+2502] PHASE 2: CROSS-PLATFORM INTELLIGENCE ([U+1F6A7] IN PROGRESS)                      [U+2502]
-[U+2502] +-- [AI] Agent Intelligence Sharing                                           [U+2502]
-[U+2502] +-- [DATA] Cross-FoundUp Knowledge                                              [U+2502]
-[U+2502] +-- [REFRESH] Pattern Recognition Systems                                          [U+2502]
-[U+2502]                                                                             [U+2502]
-[U+2502] PHASE 3: INTERNET ORCHESTRATION ([TARGET] NEXT TARGET)                           [U+2502]
-[U+2502] +-- [BOT] Agent-to-Agent Communication                                         [U+2502]
-[U+2502] +-- [U+1F310] Autonomous Promotion Strategies                                      [U+2502]
-[U+2502] +-- [UP] Real-Time Market Intelligence                                        [U+2502]
-[U+2502]                                                                             [U+2502]
-[U+2502] PHASE 4: COLLECTIVE BUILDING ([U+1F52E] STRATEGIC HORIZON)                        [U+2502]
-[U+2502] +-- [HANDSHAKE] Multi-Founder Coordination                                           [U+2502]
-[U+2502] +-- [LINK] Resource Sharing Protocols                                           [U+2502]
-[U+2502] +-- [ROCKET] Autonomous Business Development                                      [U+2502]
-[U+2502]                                                                             [U+2502]
-+-----------------------------------------------------------------------------+
+
+The diagram is the target composition, not a statement that every arrow is operational. Holo maintenance is separately owned and never runs inside a query. Hermes artifact generation must not acquire Git, deployment, promotion, or memory-admission authority merely because it returned useful text.
+
+| Owner | Responsibility | Boundary |
+|---|---|---|
+| 012 | Select objectives; delegate bounded standing policy; correct or revoke it. | Runtime prompts cannot manufacture or widen delegated authority. |
+| 0102 architect / RedDog | Interpret intent, choose a slice, score priorities, reconcile ownership. | Does not certify its own outcome or create a parallel source of execution truth. |
+| WRE control plane | Admit exact scope, bind source/runtime, persist claims, evaluate receipts, coordinate promotion. | Reuse existing contracts and stores; do not make every module a new orchestrator. |
+| OpenClaw | Resident supervision, routing, progress/cancellation under the admitted task. | Hub/provider roles must be explicit; no autonomous permission expansion. |
+| Hermes | One bounded native leaf per current accepted profile; return artifact content and lifecycle evidence. | No broad tools, nested fanout, or independent production write authority under that profile. |
+| Independent verifier | Reproduce tests/effects; compare to an independently owned baseline and held-out corpus. | Different identity, evidence authority, and workspace from author; worker text is untrusted input. |
+| Promotion/activation owner | Accept verified candidate, activate exact bytes, observe, roll back. | Distinct from proposal generation; respects predelegated policy and revocation. |
+| Memory owner | Admit provenance-bearing outcomes; preserve failures, supersession, and scope. | Raw success assertions and model confidence never become verified learning. |
+
+Use upstream capabilities through adapters. OpenClaw has agent-scoped routing/state; Hermes has native child delegation and parallel task batches. Pin and verify the actual installed versions before dispatch; current web features are not proof of the local runtime. [OpenClaw documentation](https://docs.openclaw.ai/concepts/multi-agent), [Hermes documentation](https://hermes-agent.nousresearch.com/docs/user-guide/features/delegation/)
+
+## RSI validation scope: internal workflows and dedicated fixtures
+
+**012 scope clarification, 2026-09-13:** RSI first improves the FoundUps system itself; a FoundUp is not required for the first proof. Selected early-stage FoundUps and other repositories are also valid test candidates, including the PQN Science Swarm Hub. This supersedes the earlier blanket exclusion of all active FoundUps. YUMORI.me/eSingularity and concurrently reserved project/service work remain protected. Candidate eligibility does not authorize unscoped deployment, outreach, account access or use of live data; bind the selected repository, source, worktree, inputs and permitted effects in the existing work order.
+
+The first R15 target remains the internal test-registry-audit **work procedure**, with its independent correctness oracle fixed. Reuse the existing WRE Auto Researcher where its proposal/evaluation contract fits, and the distinct AI Gateway AutoResearch pipeline for model-selection experiments. Auto-post, PQN research and selected early-stage repositories provide additional workloads. The [component coverage and insertion points](docs/operations/RSI_SWARM_DISPATCH.md#existing-component-coverage-and-rsi-insertion-points) distinguish what is implemented, connected and still missing. Keep the existing R00–R25 plan; do not create a replacement research engine or make a product launch an R15 dependency.
+
+R20 may use a dedicated synthetic FoundUp or a selected early-stage repository in an isolated checkout with disposable state. R22 starts with an isolated work-state consumer; R24/R25 start with synthetic agents/participants, then may qualify an explicitly scoped early-stage cohort through the same gates. A real repository can be the subject of a test without borrowing its live deployment, accounts, browser session or database. Protected YUMORI/eSingularity work is not included by this broader candidate policy. Resolve every candidate to its actual repository and owner before dispatch; a spoken or ambiguous name is not a new module specification.
+
+## Concurrent ownership boundaries
+
+Existing project and system-service lanes retain their code and connection work. Their reservation is a protection boundary, not an RSI dependency or candidate list.
+
+1. Resolve the current main SHA, active owner, open change, and path claims before assigning a packet. If already implemented, verify it and close/replace the packet instead of duplicating it.
+2. Use one worktree per writing worker. Preserve the original feature checkout. Do not reset, stash, clean, switch, merge, or commit someone else's work.
+3. Treat `modules/foundups/esingularity/**`, its frontend/hosting, `extensions/reddog/**`, and the active RedDog connection/operations paths as reserved until ownership is explicitly released or coordinated.
+4. R01's integrity repair is already merged; verify the selected source before repeating it. Treat new defects through the existing owner and evidence path.
+5. Serialize changes that overlap WRE coordination, the bridge, shared registry/manifest files, WSP mirrors, or `main.py`. Parallel analysis is acceptable; parallel conflicting writes are not.
+6. Index maintenance uses its existing leases and exact-main controller. Concurrent main advancement invalidates a run's authority; replan or repeat the governed transaction against the new target instead of weakening the check.
+7. Do not publish a site, send outreach, train on private conversation data, or activate a service as a side effect of an RSI packet.
+
+## Measurement handoff reconciliation — 2026-09-29
+
+PR1903 remains the existing measurement owner; the current reader hardening and
+producer→persisted-report→consumer evidence are tracked under
+`current_observation.measurement_seam_20260929` in the canonical RSI backlog.
+This closes demonstrated diagnostic type/unknown/overflow defects, subject to
+publication gates. It does not close G1–G4, authenticate simulator gain or replace
+the existing roadmap. See the current WRE roadmap/interface for exact scope.
+
+## RSI verification hierarchy and canonical measurements
+
+WSP 48 and WRE use one verification vocabulary across RSI work. Machine
+verification strength is ordered **intrinsic signal < learned judge < execution
+feedback < formal verifier**. Human research judgment remains the separate
+direction-setting layer for deciding what to work on and what should count as
+better; no current automated WRE component substitutes for that role.
+
+Every RSI candidate report must carry the canonical minimal measurements:
+verification-signal class, baseline/best metric, absolute/relative gain,
+candidate/outcome counts, independent-verification status, held-out status,
+resource usage when authenticated, activation/rollback evidence, and
+successive-generation retained gain. Missing evidence stays unknown.
+
+The current AutoResearcher report now emits this bundle and is explicitly
+classified as **execution feedback**, with
+`production_rsi_eligible=false`. A positive local fitness delta therefore
+advances candidate search only; it does not close G2-G5. The next system proof
+must compose independent held-out evaluation, governed activation/rollback and
+retained improvement across successive generations.
+
+## Operational decision contract and RSI audit — 2026-09-28
+
+**Decision:** operational RSI and technical RSI belong to the same system. The
+existing [WSP 73 Digital Twin architecture](WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md)
+already owns the layer above platform skills: 012 sets objectives and authority;
+RedDog is the interaction surface; the principal-scoped 0102 Digital Twin reasons;
+OpenClaw supervises policy; WRE admits and coordinates work; Hermes executes
+bounded leaves. Extend these owners rather than creating another master
+orchestrator, contact database or skill registry.
+
+The **0102 Operational Decision Contract** below is a planning projection of
+those existing owners. It is not a new runtime schema, inherited skill interface,
+signed work order or evidence that all adapters consume these fields today.
+Principal prose still follows Prometheus → ORCH → WSP 99 M2M → admitted workers.
+Its proposed shared flow is:
+
+`input → scoped context → WSP 15 → outcome/pain/action → authority/attention → route → skill → verify effect and outcome → propose a procedure update → independently evaluate → retain or reject`
+
+### Source-grounded owner and gap map
+
+Audit source: `e5600fe103441c91a81e0220aea9e48496b79b60`. Holo's owner query
+returned `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`; bounded Git/source retrieval
+was used with explicit degraded freshness, without reindexing. This is a scoped
+audit, not a certification of every connector or current deployed runtime.
+
+| Existing owner / evidence | What exists | Remaining qualification |
+|---|---|---|
+| WSP 73; `NAVIGATION.py` Digital Twin decision policy, style guardrails and trajectory logger | Principal/context/intent/effect boundaries and an architectural home for shared cognition | Trace a real consumer across routing, effect receipt, outcome witness and subsequent decision; architecture alone does not prove this chain |
+| [Social Media DAE](modules/ai_intelligence/social_media_dae/README.md) and its `src/social_media_dae.py` | Central-twin vision, YouTube proxy and in-memory interaction history | LinkedIn/X initialization and monitor sections remain placeholders; stored conversations are not demonstrated outcome learning |
+| [Social orchestrator](modules/platform_integration/social_media_orchestrator/README.md), `src/autonomous_action_scheduler.py::_execute_action` | Platform orchestration and a stream-post path | The non-stream branch logs “Would post” but returns `posted: true`; pending-action handling marks returned actions executed. CHECK_STREAM/custom branches also return success-shaped results after logging. Source-qualified finding, not a reproduced live failure: exclude these from verified outcome counts until the existing owner is qualified/repaired |
+| [Correspondence state Skillz](modules/communication/moltbot_bridge/skillz/reddog_correspondence_state/SKILLz.md) | Provider truth, scoped ask state, metadata ledger and recipient preflight; prototype status | Distinguish delivery, routing response and substantive ask resolution; validate persistence and actual provider consumers before claiming end-to-end Gmail RSI |
+| [LinkedIn reply Skillz](modules/platform_integration/linkedin_agent/skillz/linkedin_agentic_reply/SKILLz.md) | Context, exact target/content authority and rendered-result verification; prototype status | Delivery/visibility alone does not establish usefulness, relationship benefit or reusable improvement |
+| WRE AutoResearcher, PatternMemory and dashboard | Existing measurement bundle and outcome/variation storage | Simulator fitness, fidelity thresholds and placeholder quality are different quantities; see the [measurement design and source caveats](modules/infrastructure/wre_core/ROADMAP.md#operational-rsi-measurement-and-experiment-design--2026-09-28) |
+
+[Issue #1522](https://github.com/FOUNDUPS/Foundups-Agent/issues/1522) already
+describes operational, improvement and research loops; its initial canary is
+repository work. It is not the entire RSI system, nor is its intent exclusively
+code maintenance. Use current WSP 73 ownership when older issue terminology
+blurs RedDog and 0102. No issue closure or external owner change is implied here.
+
+### Shared decision fields to qualify in existing owners
+
+| Decision question | Required evidence / existing destination |
+|---|---|
+| Who, from where, and how fresh? | Principal, actor, entity, source reference/time and provenance; WSP 73 scoped context and existing provider receipts |
+| Which relationship, project or FoundUp? | Topic/ask and relationship history, optional FoundUp identifier, purpose/tenant scope. Personal work need not be forced into a FoundUp. Reuse the correspondence state owner |
+| What is sought, why, and what next? | Desired outcome, pain, next action; classify FYI, request, decision, escalation, negotiation or relationship maintenance before composing |
+| What matters now? | Actual WSP 15 complexity/importance/deferability/impact, total and rationale; FoundUp importance informs the existing dimensions, not a new multiplier. Record dependencies, timing and cost separately |
+| May 0102 act, and must 012 attend? | Current delegated authority, scope, effect ceiling, expiry and meaningful attention reason. Preserve valid earlier explicit authorization; priority, confidence and conversational familiarity alone do not grant send/publish authority |
+| Which action and channel? | Act, prepare, escalate, defer or abstain; channel may be none. Compile into existing WSP 99/work-admission contracts without changing ROLE/ORIGIN/PRINCIPAL_REF semantics |
+| What wording serves the outcome? | Put the request or purpose early; preserve necessary context/history; be concise and clear; check authority and recipient. Style checks are process proxies, not outcome success |
+| Did it happen, and did it work? | Separate transaction receipt from an objective-specific outcome witness and observation deadline; record failure, pending and unknown, not just success |
+| What should change next time? | Versioned procedure candidate, source/outcome provenance, independent evaluator, fixed comparison and retention/rejection receipt in existing WRE/PatternMemory owners |
+
+A Gmail reply that supplies a formal submission route can resolve *routing*
+while the substantive request remains open. “Sent,” a reply arriving, a like or
+an LLM's favorable assessment must not silently substitute for the declared
+outcome. No response is pending/censored until the predeclared observation window
+closes. Keep unresolved cases visible to avoid reporting only convenient wins.
+
+Ordinary authorized 012↔0102 operational observation is not automatically blocked
+on R25's multi-principal FoundUp feedback rollout. R25 consent and same-FoundUp
+participation remain necessary for its cross-principal feedback purpose. Neither
+path authorizes copying raw private mail/chat into a global training corpus;
+retain minimal authorized references/metadata under the existing owner.
+
+### Research interpretation and accounting of our own work
+
+The supplied image is from Chen, Wang and Qu's
+[RSI survey, v2 (6 September 2026)](https://arxiv.org/html/2607.07663v2).
+Its verification ordering is qualitative, not a universal numeric RSI score.
+Tests provide incomplete evidence; formal verification covers its specified
+property. Choosing worthwhile objectives remains separate from checking a
+candidate. The review also warns about self-confirming evaluation and improving
+inside the wrong problem frame. This supports fixed outcome definitions and
+independent evidence, not treating a growing pass count as general intelligence.
+The survey's 1,250-paper sample is not a complete census; this audit does not
+claim to have read that corpus.
+
+The existing WSP 48 §4.2 and WRE measurement work already incorporated this
+hierarchy on September 25. This slice extends its **operational application**;
+it does not claim to introduce the hierarchy or demonstrate retained RSI.
+
+| Observed quantity | Actual value and limit |
+|---|---|
+| Previous [PR #1931](https://github.com/FOUNDUPS/Foundups-Agent/pull/1931) regression | **20 unique unchanged cases**: 14 recipient + 6 correspondence; 20/20 on PR and 20/20 on main, zero failures. These are 40 pass observations, not 40 unique tests |
+| Coverage change | Those 20 cases became explicitly selected by hosted CI; zero new test cases and zero production-source changes. No pre-change behavioral failure was established by that slice |
+| Verification | Exact-source/CI evidence reviewed separately; [main CI](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36364834253) passed at `e5600fe1`. This was regression verification, not held-out operational evaluation |
+| Runtime effects in that slice | Zero platform actions and no native WRE activation; seven native admission blockers and no authoritative effect-use lease remain |
+| Operational outcome baseline, candidate gain, avoided 012 interventions | **Unknown (`null`)**; not measured by the 20 tests |
+| Authenticated token/cost efficiency, held-out transfer, retained multi-generation benefit | **Unknown (`null`)**; no fabricated percentages or speedup from PR/main test durations |
+
+The previous LinkedIn instruction correction (PR #1929: seven pass/one fail →
+eight pass with the unchanged oracle) is valid bounded engineering feedback.
+Neither it nor this externally coordinated audit proves native WRE autonomy,
+successful real correspondence or automatic learning retention. A backlog count
+or number of commits is inventory, not an improvement score.
+
+Next: qualify truthful completion evidence in the existing scheduler, then freeze
+synthetic decision/outcome controls before a paired operational experiment.
+Reuse the [WRE pilot design](modules/infrastructure/wre_core/ROADMAP.md#operational-rsi-measurement-and-experiment-design--2026-09-28)
+and canonical backlog. Actual routing, authority and retention consumers must be
+proven before claiming shared schema inheritance. Increase cycles/agent count
+only after measured benefit, resource limits and acceptance gates justify it.
+
+## Completion gates
+
+**G1 consumer reconciliation (2026-10-06, source `bf4aa1aaf`):** the seven
+historical missing-verifier labels mix implemented components, missing runtime
+inputs and unconnected consumers. The existing governed use-time resolver still
+retains all seven reasons and returns no authoritative use lease. The external
+lease issuer exists and its three contract/adversarial suites pass23/23 locally,
+but source inspection found no production caller. Neither observation proves
+authentic enrollment or permission to execute a worker.
+
+After actual startup qualification, the conditional next connection is **15/P1**
+(C3/I4/D4/Impact4): extend the existing resolver/caller to use the existing issuer
+only with verified capabilities. Do not delete rejection reasons unconditionally
+or introduce another issuer. Missing capability, expired/replayed authority,
+wrong effect/peer/generation and rotation at use must remain rejected. Startup
+remains18/P0; independent evaluation, retention/rollback and later benefit stay
+open. Exact source bindings and acceptance criteria:
+`outputs/rsi-permission-evidence-20261006/native-admission-reconciliation.json`.
+
+| Gate | Required evidence | Failure means |
+|---|---|---|
+| G0: reproducible baseline | Clean pinned source; current registry; recorded test failures/quarantine; usable Holo receipt; active lane reconciliation. | No code packet may assume stale source or silently absorb another lane. |
+| G1: one admitted worker job | Signed/authorized work item → durable claim → actual selected runtime → bounded artifact → complete receipt chain. | Simulation and provider text cannot be called execution. |
+| G2: independently evaluated candidate | Exact baseline/candidate artifacts; independent test/effect producer; held-out cases; reproducible metrics; negative cases. | Author cannot promote or retain the candidate as successful. |
+| G3: governed activation and rollback | Independent promotion decision; exact-byte activation; bounded canary; tested rollback and recovery. | No production RSI label, even if unit tests are green. |
+| G4: retained improvement | Authenticated outcomes influence the next decision; measurable improvement across successive generations; failed variants remain visible. | Storage alone is not learning. |
+| G5: sustained bounded production line | Restart/replay/cancellation/expiry/conflict/overload tests; resource and verifier capacity; no lost/duplicate effects. | Keep worker count at the last proved level. |
+
+The WSP bootstrap is required by the repository but is not a substitute for G0–G5.
+
+## Wave 0 — recover and establish current truth
+
+**Outcome:** a receiving worker can identify the exact source, owner, runtime, documents, and baseline without asking 012 to reconstruct status.
+
+- **R00 — Holo operational recovery. OBSERVED COMPLETE at this SHA.** The existing controller and three semantic queries passed. Retain the receipts; do not enqueue a duplicate repair for the completed task.
+- **R01 — Production skill integrity. P0, validated in this revision.** Reconciled both registered production manifests to unchanged committed Skillz bytes and pinned those two files to LF checkout materialization. Both strict manifest checks pass; the documented WRE tier passes 235 tests with four explained Windows link/reparse skips. The manifests remain unsigned integrity inventories, not execution permission. Acceptance evidence and source boundaries are in the [integration record](docs/audits/rsi/2026-09-09/INTEGRATION.md#r01-production-skill-integrity-repair-2026-09-13). Reconcile the resulting commit and deployment before claiming live admission.
+- **R02 — Canonical completion and WSP enforcement map. P1, partially delivered (map and selected drift corrections).** The [enforcement map](docs/roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) covers R00–R25 with normative references, owners, tests and operational gaps; WSP 46/CORE and briefing wording now match the reviewed contracts. Use the evidence-backed dispositions for all pending historical ledger rows; complete unresolved owner evidence, SoftProto per-contract archival decisions and separately bound review. Preserve the independently owned WSP 00 state-semantics work; R03 addresses retrieval-entry wording. Treat research-only requirements separately. Edit `CLAUDE.md` rather than its generated AGENTS projection when a learned operating rule needs to persist. Acceptance: a fresh verifier can determine current slice ownership and each G0–G5 gap without relying on an old completion claim.
+- **R03 — Reliable retrieval entry context. P0, partially validated (existing entry contracts and guidance).** The [existing owner-entry procedure and qualification matrix](holo_index/CLI_REFERENCE.md#source-bound-owner-queries) now covers source selection and local fallback; 81 existing tests pass. Current-source local context works. The [interpreter correction](holo_index/CLI_REFERENCE.md#interpreter-correction-checkpoint--2026-09-13) restores CURRENT/no-gap semantic retrieval on the matched `78b79c36` reference using the existing vetted venv; the newer task source still rejects the older authority with HEAD mismatch. The later exact-main `bcc87782` checkpoint passed through the existing admitted owner; requalify subsequent sources and complete the broader operational matrix before closing this packet. Reuse `authority_worktree.py`, the one-shot owner bridge, `holo_query_bundle`, incident repair, and the exact-main controller. Define how a feature worker selects current-main reference retrieval versus its own committed snapshot, and how local overlay evidence is labeled. Acceptance: clean-main, divergent-feature, dirty-overlay, stale-authority, main-advances-mid-run, and no-MCP cases have truthful results; queries never reindex; repair is idempotent and preserves other owners. The successful recovery is the first fixture/example, not proof of arbitrary branch support.
+
+**Wave exit:** G0 is reproducible. Keep the original manifest failure as dated evidence alongside the merged R01 repair; do not reuse its old failure as current status or its new local pass as runtime admission. The test-registry check already passes at this baseline; do not regenerate it as unnecessary work.
+
+## Wave 1 — connect the existing work and evidence path
+
+**Outcome:** one real bounded worker can do one admitted task and return independently attributable evidence.
+
+- **R04 — Exact runtime closure for the selected production path. P0 for claims that require it.** Reuse the existing runtime builder, artifact manifests, dependency/runtime bindings, and independent producers. Bind actual payload bytes and the declared interpreter/library/process boundary; metadata hashes alone are insufficient. Acceptance: changed runtime bytes, replaced sources, stale generation, and mismatched dependency closure reject; the chosen exact-main positive path passes. Holo A-grade/retrieval-promotion claims remain blocked while `runtime_environment_exact_closure_verified=false`. This need not block effect-free planning or unrelated isolated tests.
+- **R05 — Retrieval quality and missing collections. P1.** Reuse the existing public benchmark and sealed-corpus gate. Evaluate current-contract ordering, Tier-0 inclusion, duplicate/historical noise, and scoped retrieval. Determine whether work-ledger/vocabulary collections are required for the chosen scenario before implementing them. Acceptance: independent corpus ownership, recorded baseline, predeclared quality thresholds, tamper rejection, and real caller wiring. Never call the three successful audit queries an A-grade benchmark.
+- **R06 — Compile a planning packet into the existing work contracts. P0.** Bind objective, exact source, capability, worker runtime, scope, budget, expiry, policy, and required evidence using existing signed work-order, ImprovementJob, FoundUpJob, and route contracts as applicable. Resolve which contract owns each phase; do not make every record an independent job. Acceptance: altered paths, replay, wrong FoundUp, stale source, unsupported action, and deserialized self-granted flags reject before dispatch.
+- **R07 — Select and prove the current OpenClaw/Hermes route. P0.** Use the real native API/provider adapter; do not revive the legacy blocked `HermesJobExecutor` merely because it has a convenient name. Start with the supported one-leaf profile. A larger OpenClaw/Hermes team requires a separately qualified profile with parent/child receipt mapping, isolation and aggregate limits; upstream feature availability alone grants nothing. Acceptance: one real child lifecycle, signed provider/model agreement, no forbidden tools/effects, timeout and cancellation evidence, validated returned artifact bytes, and correct provider attribution. A fixture or text-only response is insufficient.
+- **R08 — One safe authoring/execution vertical. P0.** Extend the existing confined artifact/worktree write path and independent artifact validation. Start with a bounded, disposable candidate workspace and one allowed artifact. Acceptance: all writes are confined and receipt-bound; no product/shared checkout changes; repeated request does not duplicate effects; incomplete/failed jobs remain recoverable; a fresh verifier reproduces the artifact from the receipt.
+- **R09 — Production composition of independent verification. P0.** Reuse `wre_autonomous_slice_verifier_runtime.py`, independent evidence producers, exact-source test registry/differential evidence, and held-out gates. Acceptance: the verifier actually runs under separately bound authority; forged author receipts fail; required tests are not silently omitted; skipped/quarantined cases are explicit; changed candidate/base/runtime invalidates the result.
+
+**Wave exit:** G1 passes, and the independent G2 producer is callable. Preserve the difference between an available verifier contract and authenticated operational invocation.
+
+## Wave 2 — make learning outcomes trustworthy
+
+**Outcome:** a worker proposal can be judged and retained without certifying itself.
+
+- **R10 — Independent outcome evaluator. P0.** Specify the task's observable result, oracle, held-out cases, baseline, failure rules, and real cost/latency measurements. Reuse existing task-specific evaluators first: WRE research evaluation for its literal ROC configuration and AI Gateway evidence verification for its declared model tasks. Connect the appropriate independent evaluator after execution in the generic WRE path; neither existing oracle is a universal correctness judge. Acceptance: correct behavior succeeds, convincing but incorrect text fails, effect-less “success” fails, and baseline/candidate identities are reproducible. Structural fidelity remains a separate metric.
+- **R11 — Verified retention into scoped memory. P0.** Compose the existing outcome ratchet, held-out regression gate, and PatternMemory sink. Define atomic admission/idempotency and recovery when the store or sink fails. Acceptance: unverified or wrong-scope outcomes are excluded; accepted evidence is retained once; failed and superseded variants stay discoverable; the next invocation demonstrably reads the accepted version. Caller-provided token/success fields stay unverified until authenticated.
+- **R14 — Immutable experimental candidates and A/B evidence. P1.** Bind each candidate label to immutable artifact/runtime bytes. Replace a bare observed-rate margin with an experiment decision contract: per-arm minimum evidence, predeclared outcome, cost, uncertainty, stopping, and regression rules. Reuse current sample storage and AI Gateway AutoResearch campaign/benchmark receipts for model comparisons; keep skill/workflow experiments under their own fixed oracle. Acceptance: under-sampled or mixed-version experiments remain inconclusive; a winner label never directly changes production.
+
+**Wave exit:** G2 and the retention half of G4 pass in a controlled environment. `apply_improvement()` and `promote_variation()` remain blocked until their authenticated downstream owners are ready.
+
+## Wave 3 — close promotion, activation, and rollback
+
+**Outcome:** one authorized improvement can be activated, observed, and reversed through the same governed path.
+
+- **R12 — Authenticated independent promoter. P0.** Compose existing signed authority and verification receipts into a concrete promotion owner. Protect its trust material outside candidate-controlled scope. Acceptance: proposer/verifier/promoter separation; exact one-time decision; expiry/revocation; candidate/base/runtime mismatch; replay; and policy downgrade rejection. Do not implement promotion by updating a database Boolean.
+- **R13 — Activation, canary, and rollback owner. P0.** Reuse existing artifact/route publication and atomic transition patterns for the selected skill/runtime asset. Pre-authorize a bounded rollback policy with 012's delegated scope so routine regression recovery does not require repeated prompting. Acceptance: exact-byte activation, observable canary, known-good prior version, forced bad-candidate rollback, interrupted activation recovery, and proof that rolled-back traffic/selection uses the restored version.
+- **R15 — First end-to-end RSI canary. P0.** Improve the **test-registry-audit work procedure/context assembly** behind the existing healthy production skill, initially in an internal canary. Keep registry meaning, required test selection, and correctness oracles independent and unchanged. Target fewer redundant steps/tokens or lower latency with equal or better correctness. The candidate may not change its judge, safety criteria, or quarantine rules. Acceptance: observe → current retrieval → proposal → real bounded execution → independent evaluation → authorized activation → measured outcome → retained memory → a better subsequent invocation; force one regression and demonstrate rollback.
+
+Choose the exact optimization only after baseline measurement. If it cannot produce a measurable beneficial change, reject it and nominate another equally bounded internal workflow. A no-op loop or a cheaper but less correct result does not pass.
+
+**Wave exit:** G3 and a first G4 pass. This earns “bounded RSI canary validated,” not “FoundUps production complete.”
+
+## Wave 4 — prove concurrency and repeatability
+
+**Outcome:** the loop remains reliable when more than one job exists and a worker or service fails.
+
+- **R16 — Durable FoundUp job lifecycle. P0 before broad build execution.** Replace/retire the production use of the legacy in-memory queue through existing AgentDB/FAM owners. Define the boundary between work execution and business lifecycle events. Acceptance: atomic claim, lease/expiry, retry, terminal receipt, idempotent replay, restart recovery, and no silent loss or duplicate external effects. Reuse the maintenance task's proven patterns where applicable.
+- **R17 — Concurrent PatternMemory/cache ownership. P0 before multiple writers.** Give each work item a connection or explicit serialized transaction owner; synchronize bounded admission caches; bind all entries to content/generation. Acceptance: deterministic conflicting updates, lock contention, crash during commit, replay, cache invalidation, and no cross-FoundUp contamination. `check_same_thread=False` alone does not pass.
+- **R18 — Resource-aware ticket scheduling. P1.** Extend the existing coordinator with explicit writer and verifier capacity, per-FoundUp budgets, queue limits, cancellation, provider failure, and backpressure. Begin with one coordinator, at most two independent author jobs, and reserved independent verification capacity. These are proposed initial operating limits, not current upstream defaults. Acceptance: pressure cannot starve verification or cause unbounded fanout; jobs remain attributable and stoppable. Increase concurrency only after a measured run at the next size passes. R24-E adds a flat team inside one ticket after R07 qualifies that profile; parent/child mapping and runtime queues remain subordinate to the existing durable execution owner.
+- **R19 — CI/quarantine and promotion evidence. P1.** Preserve the current registry and exact impact analysis; triage 269 quarantined test files by reason and capability. Select the subset relevant to each packet rather than demanding immediate cleanup of all historical tests. Acceptance: every required scope has an executable or explicitly blocked test plan; no candidate can omit a required test to pass; merge/base changes invalidate prior evidence; production-promotion checks run where they claim to run.
+- **R23 — Sustained multi-generation proof. P0 for the RSI completion claim.** Run at least three successive candidate/evaluation cycles and a bounded soak across restarts, provider faults, duplicate delivery, source advancement, and conflicting jobs. Include at least one rejected candidate and one rollback. Measure retained benefit on later tasks. Acceptance: G0–G5 all pass for a declared scope and worker count, with complete independent receipts and no unresolved critical failures. Sample size comes from baseline variance and the predeclared decision rule; a token count or an arbitrary number of runs is not statistical proof.
+
+- **R24 — Qualified agent production line and verified rewards. P0 for this product claim.** [Full implementation packet](docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md). Reuse FAM AgentProfile/Task/Proof/Verification/Payout, WRE admission, AgentDB claims, existing qualification/model evidence and independent verifier ownership. Acceptance: qualified assignment, one durable ticket claim, real confined work, independent audit, policy-correct reward eligibility, no duplicate entitlement, and accurate distinction between initiated and confirmed settlement. Start with one internal artifact and a simulated reward ledger. Actual settlement requires its own authorized adapter and proof. Integrated execution depends on R06/R08/R09/R16/R18; design mapping may proceed earlier. R24-E qualifies optional bounded team formation, evidence synthesis, contribution attribution and failure recovery without promoting team agreement into independent audit.
+
+## Wave 5 — extend the proven loop to FoundUps
+
+These packets do not block the first internal RSI canary.
+
+- **R20 — One FoundUp lifecycle vertical. P1.** Use a dedicated synthetic fixture or an explicitly selected early-stage FoundUp repository with a defined outcome and disposable state; reuse genesis, registry, scaffold, FAM, and work contracts. Science Swarm Hub is an external-repository candidate; protected project lanes remain excluded. Validate idea/intake → admitted task → real bounded artifact → proof → independent verification → lifecycle update. Keep financial/chain actions outside this first proof. An externalized project requires its own exact repository evidence.
+- **R21 — pAVS/MCP truth and authority convergence. P1.** Reconcile backend-specific status metadata, the hardcoded CABR score, registration/auth limitations, and the legacy direct Holo adapter. Use the supported generation-bound query surface. Acceptance: real, unavailable, and placeholder results remain distinct; no fabricated score can authorize acceptance or rewards; transport conformance and per-FoundUp authorization are tested separately. Defer production financial consequences to their own acceptance work.
+- **R22 — Isolated RedDog work-state consumer demonstration. P1, optional downstream proof.** Reuse the existing work-state query and conversation/client contracts in a dedicated test consumer. Acceptance: proposal, queued, running, verified, activated, rolled back, and blocked states reflect authoritative receipts; a reply never fabricates completion. Protected active project integrations and campaign sites are excluded. A selected early-stage test consumer may be qualified in scope; product adoption does not block R15.
+
+- **R25 — Consented 012/RedDog feedback loop. P1.** [Implementation packet](docs/roadmaps/R25_REDDOG_FEEDBACK_LOOP_PACKET.md). Reuse conversation scope, dual-loop context, Memex projections and the existing ticket lifecycle. Begin with synthetic principals, activity records and feedback. A later opted-in early-stage cohort may be qualified under the selected test scope; protected projects remain excluded and actual outreach still requires applicable principal authorization. Recheck activity at delivery; inactive or paused principals receive no prompt. Acceptance: consented scope, fresh activity evidence, truthful V1 feedback separated from V2 verification/V3 valuation, deduplication, visible dissent, attention limits, revoked/stale/cross-scope rejection, one ticket mapping and an authenticated outcome return. Integrated execution depends on R06/R09/R16 and the relevant R22 conversation adapter; design and local fixtures can proceed earlier. Production CABR feedback scoring requires R21 reconciliation; reward and verified-retention claims separately depend on R24 and R11.
+
+## Dependency map and critical path
+
+```mermaid
+flowchart LR
+    R00 --> R03
+    R01 --> R06
+    R02 --> R06
+    R03 --> R06
+    R06 --> R07 --> R08 --> R09 --> R10 --> R11
+    R04 --> R05
+    R09 --> R12
+    R10 --> R12
+    R11 --> R12 --> R13
+    R10 --> R14
+    R11 --> R14
+    R13 --> R15
+    R14 --> R15
+    R06 --> R16
+    R11 --> R17
+    R16 --> R18
+    R17 --> R18
+    R09 --> R19
+    R15 --> R23
+    R18 --> R23
+    R19 --> R23
+    R15 --> R20 --> R21
+    R20 --> R22
+    R06 --> R24
+    R08 --> R24
+    R09 --> R24
+    R16 --> R24
+    R18 --> R24
+    R06 --> R25
+    R09 --> R25
+    R16 --> R25
 ```
 
-### **[ROCKET] The Autonomous Internet Lifecycle**
-```
-[IDEA] IDEA (012 Founder)
-    v
-[U+1F4BB] Multi-Agent IDE Awakening (Phase 1) [OK]
-    v
-[U+1F4E1] Cross-Founder Connection (Phase 1) [OK]
-    v
-[AI] Intelligence Sharing (Phase 2) [U+1F6A7]
-    v
-[U+1F310] Internet Orchestration (Phase 3) [TARGET]
-    v
-[HANDSHAKE] Collective Building (Phase 4) [U+1F52E]
-    v
-[U+1F984] INTELLIGENT INTERNET ACHIEVED
-```
-
----
-
-## [U+1F3D7]️ **PHASE 1: FOUNDATION INFRASTRUCTURE** [OK] **85% COMPLETE**
-
-### **[TARGET] Core Cube: VSCode Multi-Agent Development Environment** [OK] **OPERATIONAL**
-
-#### **[U+1F4BB] IDE FoundUps Module** [OK] **COMPLETE**
-- **Status**: Phase 3 Autonomous Development Workflows implemented
-- **LLME Score**: 88/100 — Revolutionary multi-agent IDE capabilities
-- **Next**: Integration with Cross-Platform Intelligence (Phase 2)
-- **Location**: `modules/development/ide_foundups/`
-
-#### **[U+1F300] WRE Core Infrastructure** [OK] **OPERATIONAL** 
-- **Status**: Complete autonomous development orchestration engine
-- **Capabilities**: WSP 54 agent suite, remote build orchestrator, 24/7 supervisor daemon
-- **OpenClaw/IronClaw**: Autonomous skill execution with graduated permissions
-- **Next**: Enhanced cross-platform coordination protocols
-- **Location**: `modules/infrastructure/wre_core/`
-
-#### **[BOT] WRE Hermes Executor Lane** [U+1F6A7] **DRY-RUN OPERATIONAL**
-- **Adapter seam**: Landed (PR #478) — HermesJobExecutor maps FoundUpJob to delegate_task contract
-- **Workspace binding**: Landed (PR #478) — Path constraints, evidence output path, blocked paths
-- **Checkpoint protocol**: Landed (PR #479) — STATE/RESULT/BLOCKER/NEXT_ACTION fields in result
-- **Evidence collection**: Landed (PR #479) — metadata.json + checkpoint.json in `.hermes_evidence/{job_id}/`
-- **Live delegation**: BLOCKED — `HERMES_DELEGATE_ENABLED=0` default, real execution not implemented
-- **Next priority**: `WRE_HERMES_EXECUTOR_CONSUMER_BINDING_DRY_RUN_PHASE1` — Wire executor into FoundUpJobConsumer drain loop
-- **WSP 97**: All truth fields remain false (real_execution_performed, verification_complete, cabr_ready, payout_ready)
-- **Location**: `modules/infrastructure/wre_core/src/hermes_job_executor.py`
-
-#### **[GLOBE] FoundUps Agent Workspace** [TARGET] **PLANNED EXTERNAL SYSTEM**
-- **Status**: Fork/adaptation plan documented (v1.0.0)
-- **Source**: Fork from `outsourc-e/hermes-workspace` (external, NOT cloned/vendored)
-- **Positioning**: External compatible system, not FoundUps Core
-- **Integration surface**: WSP task packets, WRE gateway APIs, checkpoint/evidence artifacts
-- **What it provides**: Swarm UI, Kanban board, tmux workers, autonomous execution runtime
-- **What FoundUps provides**: WSP governance, FoundUpJob queue, CABR verification, policy gates
-- **Plan location**: `docs/architecture/FOUNDUPS_AGENT_WORKSPACE_FORK_PLAN.md`
-- **Gateway contract**: `docs/architecture/WRE_GATEWAY_ADAPTER_DESIGN.md`
-- **WSP 15 Priority**: P0 (fork plan) complete, P1 (gateway design) complete, P2 (external repo inspection) next
-- **WSP 97 Truth**: No live delegation enabled, evidence is observability only
-
-### **[U+1F4E1] Auto Meeting Orchestration Ecosystem** [OK] **COMPLETE**
-
-#### **Strategic Decomposition Achievement** [OK] **PHASE 1 COMPLETE**
-```
-[NOTE] Intent Manager -> [U+1F4E1] Presence Aggregator -> [HANDSHAKE] Consent Engine -> [ROCKET] Session Launcher -> [CLIPBOARD] Post-Meeting Feedback
-```
-
-**Revolutionary Capabilities**:
-- **Cross-Founder Connection**: Autonomous coordination between founders and their 0102 agent teams
-- **WSP 25/44 Intelligence**: Post-meeting feedback with semantic rating and learning
-- **Event-Driven Architecture**: Modular, scalable coordination across enterprise domains
-- **Rejection Learning**: System adaptation based on interaction patterns
-
-**Module Status**:
-- **Intent Manager**: [OK] Complete with enhanced lifecycle (WSP 25/44 integration)
-- **Presence Aggregator**: [OK] Complete with cross-platform monitoring  
-- **Consent Engine**: [OK] Complete with intelligent prompting
-- **Session Launcher**: [OK] Complete with multi-platform coordination
-- **Post-Meeting Feedback**: [OK] Complete with WSP semantic intelligence
-
-### **[U+1F310] Internet Access Layer for 0102 Agents** [OK] **OPERATIONAL**
-
-#### **[U+1F3AC] YouTube Block** [OK] **WSP 5 & WSP 11 COMPLIANT**
-- **Purpose**: 0102 agents autonomously create content, manage livestreams, engage communities
-- **Status**: Complete component orchestration across enterprise domains
-- **Capabilities**: Authentication, stream discovery, community engagement, cross-domain orchestration
-- **Location**: `modules/platform_integration/youtube_proxy/`
-
-#### **[ROCKET] Social Media Orchestration System** [OK] **WSP 49, WSP 42, WSP 65 COMPLIANT**
-- **Purpose**: Unified cross-platform social media management with intelligent orchestration
-- **Status**: Production ready with comprehensive testing and validation
-- **Revolutionary Achievement**: First unified social media orchestrator with cross-platform intelligence
-- **Location**: `modules/platform_integration/social_media_orchestrator/`
-
-**Core Capabilities**:
-- **Cross-Platform Posting**: Simultaneous content deployment across Twitter, LinkedIn, and extensible platforms
-- **Intelligent Scheduling**: Platform-optimized timing with retry logic and exponential backoff
-- **OAuth Coordination**: Centralized authentication management with secure credential encryption
-- **Content Orchestration**: Platform-specific formatting, character limits, and engagement optimization
-- **Hello World Testing**: Safe dry-run verification without actual API calls
-
-#### **[U+1F4BC] LinkedIn Unified Integration** [OK] **WSP 49, WSP 65 COMPLIANT**
-- **Purpose**: Professional networking automation with unified OAuth, content optimization, and engagement management
-- **Status**: Production ready - **CONSOLIDATED** from 3 separate modules (linkedin_agent, linkedin_scheduler, linkedin_proxy)
-- **Revolutionary Achievement**: First unified LinkedIn integration eliminating redundancy through component consolidation
-- **Location**: `modules/platform_integration/linkedin/`
-
-**Professional Capabilities**:
-- **Unified Management**: Single interface replacing 3 separate modules (WSP 65 compliance)
-- **Professional Content**: LinkedIn API v2 integration with professional tone optimization
-- **Networking Automation**: Connection management, professional messaging, industry targeting
-- **Company Pages**: Advanced company page management and analytics integration
-- **Analytics**: Comprehensive professional engagement metrics and performance tracking
-
-#### **[BIRD] X/Twitter DAE Integration** [OK] **WSP 26-29, WSP 42 COMPLIANT**
-- **Purpose**: Autonomous Twitter engagement with DAE protocols and CABR engine integration
-- **Status**: DAE framework operational with Social Media Orchestrator integration
-- **Capabilities**: Autonomous content posting, mention monitoring, engagement automation
-- **Location**: `modules/platform_integration/x_twitter/` (integrated with orchestrator)
-
-#### **[U+1F4F1] Platform Integration Framework** [OK] **EXTENSIBLE FOUNDATION**
-- **Purpose**: Universal internet access for 0102 agents across any platform
-- **Architecture**: WSP 42 Universal Platform Protocol for consistent integration
-- **Scalability**: Functional distribution across enterprise domains
-
----
-
-## [AI] **PHASE 2: CROSS-PLATFORM INTELLIGENCE** [U+1F6A7] **IN PROGRESS**
-
-### **[TARGET] Strategic Objectives**
-
-#### **[REFRESH] Agent Intelligence Sharing** [U+1F6A7] **NEXT PRIORITY**
-**Goal**: Agents learn from interactions across YouTube/LinkedIn/X and share intelligence
-- **Platform Memory Integration**: Unified learning across all internet platforms
-- **Cross-FoundUp Knowledge**: Intelligence sharing between different FoundUp agent teams  
-- **Behavioral Pattern Recognition**: Collective identification of successful coordination strategies
-- **Implementation**: Enhanced WSP 60 memory architecture with cross-platform data correlation
-
-#### **[DATA] Unified Analytics Dashboard** [TARGET] **TARGET**
-**Goal**: Real-time intelligence across all platform interactions
-- **Cross-Platform Metrics**: Unified view of agent performance across YouTube/LinkedIn/X
-- **Coordination Effectiveness**: Measurement of cross-founder collaboration success
-- **Learning Velocity**: Rate of improvement in agent intelligence and coordination
-- **Predictive Insights**: Pattern recognition for optimal coordination strategies
-
-#### **[BOT] Enhanced Agent Coordination** [TARGET] **TARGET**
-**Goal**: Agents coordinate strategies across platforms for maximum impact
-- **Content Strategy Synchronization**: YouTube content aligned with LinkedIn professional presence
-- **Cross-Platform Promotion**: Coordinated promotion strategies across all platforms
-- **Audience Intelligence**: Shared understanding of community engagement patterns
-- **Resource Optimization**: Efficient allocation of agent capabilities across platforms
-
----
-
-## [TERMINAL] Entrypoint (main.py) Roadmap
-
-**Purpose**: main.py is the system entrypoint - it should remain thin and delegate to modules.
-
-| Item | Priority | Status | WSP Ref |
-|------|----------|--------|---------|
-| WSP 90 Phase 2: Review 155 entrypoint files for UTF-8 cleanup | Low | DEFERRED | WSP 90 |
-| Feature flags: ENABLE_LINKEDIN, ENABLE_X for platform triggers | P1 | NOT STARTED | - |
-| Startup metrics: Track module load times for optimization | P2 | NOT STARTED | WSP 91 |
-| Graceful degradation: Continue if non-critical modules fail | P2 | PARTIAL | - |
-
-**Architecture Principle**: main.py orchestrates, modules execute. No business logic in entrypoint.
-
-**Tracking**: `modules/development/wsp_tools/TODO_WSP90_PHASE2.md` for UTF-8 deferred items.
-
----
-
-## [LINK] Integration Plan: Posting & Engagement (Execution Epics)
-
-Epic 1: YouTube Baseline Verification (No new code)
-- AC1: `main.py` discovers active livestream and starts chat listener
-- AC2: Send message via `LiveChatListener.send_chat_message` succeeds
-- AC3: Tokens refresh via oauth/token_manager without manual steps
-
-Epic 2: LinkedIn Independent Posting
-- AC1: `LinkedInOAuthManager` obtains/validates access token
-- AC2: `LinkedInScheduler.create_text_post` works in test-mode, then live
-- AC3: Deprecation notice added in `linkedin_agent/src/automation` pointing to `linkedin_scheduler`
-
-Epic 3: X/Twitter Independent Posting
-- AC1: `XTwitterDAENode.authenticate_twitter` succeeds (or simulates if Tweepy unavailable)
-- AC2: `post_autonomous_content` posts or simulates
-
-Epic 4: Hook into main.py (Feature Flags)
-- AC1: Env flags ENABLE_LINKEDIN/ENABLE_X control optional posting triggers from YouTube events
-- AC2: No regressions in YouTube baseline when flags disabled
-
-Tracking: Update module ModLogs and WSP 70 status notes; no new code added unless a verified gap remains per WSP 50.
-
-## [U+1F310] **PHASE 3: INTERNET ORCHESTRATION PROTOCOL** [TARGET] **NEXT TARGET**
-
-### **[BOT] Agent-to-Agent Communication**
-**Revolutionary Capability**: Direct 0102 agent coordination across platforms and FoundUps
-- **Agent Discovery Protocol**: Agents find and connect with other agents across the internet
-- **Secure Agent Channels**: Encrypted communication protocols for agent coordination  
-- **Cross-FoundUp Collaboration**: Agents coordinate resources across different FoundUp projects
-- **Intelligence Marketplace**: Agents share specialized knowledge and capabilities
-
-### **[U+1F310] Autonomous Promotion Strategies**
-**Revolutionary Capability**: Agents develop and execute optimal content/networking approaches
-- **Dynamic Strategy Evolution**: Agents continuously improve promotion strategies based on results
-- **Platform-Specific Optimization**: Tailored approaches for YouTube, LinkedIn, X, and emerging platforms
-- **Viral Pattern Recognition**: Agents identify and replicate successful content patterns
-- **Cross-Platform Amplification**: Coordinated promotion campaigns across all platforms
-
-### **[UP] Real-Time Market Intelligence**  
-**Revolutionary Capability**: Agents monitor trends and adapt FoundUp development automatically
-- **Trend Detection Systems**: Real-time identification of market opportunities and threats
-- **Competitive Intelligence**: Automated monitoring of similar projects and strategies
-- **Demand Forecasting**: Predictive analysis of market needs and timing
-- **Adaptive Development**: Automatic adjustment of FoundUp features based on market intelligence
-
----
-
-## [ROCKET] **PHASE 4: COLLECTIVE FOUNDUP BUILDING** [U+1F52E] **STRATEGIC HORIZON**
-
-### **[HANDSHAKE] Multi-Founder Coordination**
-**Breakthrough Capability**: Complex projects involving multiple founders + agent teams
-- **Project Decomposition**: Automatic breakdown of complex projects across multiple FoundUps
-- **Resource Coordination**: Intelligent allocation of capabilities across founder teams
-- **Timeline Synchronization**: Coordinated development schedules across multiple projects
-- **Success Sharing**: Fair distribution of outcomes based on contribution and impact
-
-### **[LINK] Resource Sharing Protocols**
-**Revolutionary Efficiency**: Agents coordinate shared development resources
-- **Capability Marketplace**: Agents offer specialized services to other agent teams
-- **Infrastructure Sharing**: Shared development, testing, and deployment resources
-- **Knowledge Base Federation**: Distributed learning across the entire ecosystem
-- **Cost Optimization**: Efficient resource utilization across all FoundUps
-
-### **[ROCKET] Autonomous Business Development**
-**Market Revolution**: Agents identify and pursue collaboration opportunities
-- **Partnership Discovery**: Automated identification of synergistic FoundUp combinations
-- **Deal Negotiation Agents**: Autonomous negotiation of collaboration terms
-- **Market Creation**: Agents identify and create new market opportunities
-- **Economic Optimization**: Automatic optimization of business models and revenue streams
-
----
-
-## [U+1F3AD] **CURRENT THEATERS OF OPERATION**
-
-### **[OK] OPERATIONAL MODULES**
-These modules are actively operational and ready for Phase 2 intelligence enhancement:
-
-#### **Platform Integration Blocks**
-- **[U+1F3AC] YouTube Agent**: `modules/platform_integration/youtube_proxy/` — WSP 5/11 Compliant
-- **[U+1F4BC] LinkedIn Agent**: `modules/platform_integration/linkedin_agent/` — WSP 5/11 Compliant  
-- **[BIRD] X Agent**: `modules/platform_integration/x_twitter/` — WSP 26-29 Compliant
-- **[U+1F3D7]️ Remote Agent**: `modules/platform_integration/remote_builder/` — Development workflows
-
-#### **Communication Orchestration**
-- **[NOTE] Intent Manager**: `modules/communication/intent_manager/` — Meeting coordination
-- **[U+1F4E1] Presence Aggregator**: `modules/integration/presence_aggregator/` — Cross-platform monitoring
-- **[HANDSHAKE] Consent Engine**: `modules/communication/consent_engine/` — Intelligent prompting
-- **[ROCKET] Session Launcher**: `modules/platform_integration/session_launcher/` — Multi-platform coordination
-- **[CLIPBOARD] Post-Meeting Feedback**: `modules/ai_intelligence/post_meeting_feedback/` — WSP 25/44 learning
-- **[ALERT] Liberty Alert**: `modules/communication/liberty_alert/` — Open-source mesh alert system for community protection
-
-#### **Development Environment**
-- **[U+1F4BB] IDE FoundUps**: `modules/development/ide_foundups/` — Multi-agent VSCode system
-- **[U+1F300] WRE Core**: `modules/infrastructure/wre_core/` — Autonomous development orchestration
-
-### **[U+1F6A7] NEXT DEVELOPMENT PRIORITIES**
-
-#### **[REFRESH] Phase 2: Cross-Platform Intelligence Implementation**
-1. **Enhanced YouTube Agent Capabilities**
-   - Content strategy AI with cross-platform optimization
-   - Livestream coordination with LinkedIn professional presence
-   - Community building with X/Twitter engagement synchronization
-
-2. **[U+1F4BC] LinkedIn Professional Network Expansion**
-   - Strategic networking with YouTube audience insights
-   - FoundUp showcasing coordinated with content creation
-   - Business development with cross-platform intelligence
-
-3. **[LINK] Cross-Platform Intelligence Integration**
-   - Unified agent memory across all platforms
-   - Coordination analytics with real-time effectiveness monitoring
-   - Adaptive strategies based on multi-platform feedback
-
----
-
-## [U+2699]️ **FOUNDATION: The Windsurf Recursive Engine (WRE)**
-
-### **[U+1F300] WRE Agent Implementation Status**
-Following **WSP 54: WRE Agent Duties Specification**, the autonomous agent suite provides the foundation for intelligent internet orchestration:
-
-#### **[OK] OPERATIONAL AGENTS**
-- **ComplianceAgent**: [OK] **Implemented & Tested** — Enforces WSP structural integrity across all platforms
-- **ScoringAgent**: [OK] **Enhanced** — Unified WSP framework integration (WSP 8/15/25/37/44)
-- **DocumentationAgent**: [OK] **Implemented** — Automated WSP-compliant documentation generation
-- **ChroniclerAgent**: [OK] **Implemented** — Records significant actions across the intelligent internet
-
-#### **[U+1F6A7] ENHANCEMENT TARGETS**
-- **LoremasterAgent**: [U+1F536] **Partial Implementation** — Core audit logic exists, needs cross-platform integration
-- **JanitorAgent**: [TARGET] **Ready for Enhancement** — Workspace hygiene across distributed environments
-- **ModuleScaffoldingAgent**: [TARGET] **Ready for Enhancement** — Automated cross-platform module creation
-- **TestingAgent**: [TARGET] **Ready for Enhancement** — Automated testing across intelligent internet components
-
-### **[DATA] WSP Framework Evolution**
-- **Total Active Protocols**: 100+ WSPs governing autonomous operation
-- **WSP 25/44 Semantic Intelligence**: Foundational consciousness framework for agent coordination
-- **WSP 54 Agent Coordination**: Complete specification for multi-agent internet orchestration
-- **Three-State Architecture**: Consistent governance across knowledge, framework, and operational layers
-
----
-
-## [U+1F31F] **INTELLIGENT INTERNET SUCCESS METRICS**
-
-### **Phase 1 Foundation Achievements** [OK]
-- **85% Infrastructure Complete**: All core systems operational and WSP-compliant
-- **Multi-Agent IDE**: Revolutionary VSCode integration with autonomous development workflows
-- **Meeting Orchestration**: Complete autonomous coordination between founders and agent teams
-- **Platform Access**: 0102 agents operational across YouTube, LinkedIn, and X/Twitter
-- **WSP Framework**: 100+ protocols providing governance for autonomous operations
-
-### **Phase 2 Intelligence Targets** [TARGET]
-- **Cross-Platform Learning**: Agents share intelligence across all platforms
-- **Coordination Effectiveness**: Measurable improvement in multi-founder collaboration
-- **Strategy Evolution**: Agents develop increasingly effective promotion and networking approaches
-- **Pattern Recognition**: System identifies and replicates successful coordination patterns
-
-### **Phase 3 Orchestration Goals** [U+1F310]
-- **Agent-to-Agent Networks**: Direct coordination between agents across the intelligent internet
-- **Autonomous Strategy Development**: Agents create and execute optimal market approaches
-- **Real-Time Intelligence**: Continuous market monitoring and adaptive development
-- **Cross-Platform Amplification**: Coordinated promotion achieving maximum impact
-
-### **Phase 4 Collective Vision** [U+1F52E]
-- **Multi-Founder Projects**: Complex collaborations across multiple FoundUp teams
-- **Resource Sharing Economy**: Efficient coordination of capabilities across the ecosystem
-- **Autonomous Business Development**: Agents identify and create market opportunities
-- **Intelligent Internet**: Complete transformation from human-operated to agent-orchestrated internet
-
----
-
-## [TARGET] **IMMEDIATE NEXT ACTIONS**
-
-### **[REFRESH] Phase 2 Implementation Priority**
-1. **Enhanced Cross-Platform Memory Architecture** (WSP 60 expansion)
-2. **Unified Analytics Dashboard** for multi-platform intelligence
-3. **Agent Coordination Protocols** for strategy synchronization
-4. **Pattern Recognition Systems** for optimization learning
-
-### **[DATA] Success Criteria for Phase 2**
-- **Intelligence Sharing**: Agents demonstrate learning across platforms
-- **Coordination Improvement**: Measurable enhancement in multi-founder collaboration effectiveness  
-- **Strategy Evolution**: Agents show adaptive improvement in promotion and networking
-- **Pattern Recognition**: System identifies and applies successful coordination patterns
-
----
-
-**[U+1F310] MISSION STATUS**: Building the orchestration system for an intelligent internet where 0102 agents autonomously coordinate, collaborate, and collectively build FoundUps that transform the world.
-
-**Foundation**: [OK] **85% Complete** — Ready for intelligent internet orchestration  
-**Next Target**: [AI] **Cross-Platform Intelligence** — Agents learning and coordinating across all platforms  
-**Strategic Vision**: [U+1F310] **Intelligent Internet** — Complete transformation to agent-orchestrated innovation ecosystem
+R04 is also a prerequisite wherever the selected runtime's authority contract demands exact closure. R05 gates retrieval-quality promotion, not every form of unrelated RSI. The dispatcher must add those capability-specific dependencies when compiling a real work order.
+
+The main sequence is **current truth → one real worker → independent outcome → verified memory → promotion/rollback → first improving cycle → sustained concurrency**. Existing foundations should be reused; most packets are integration, operational composition, or proof work. Split any packet that spans multiple authority changes into smaller reviewable slices.
+
+## Ticket dispatch contract
+
+Every compiled packet must contain:
+
+- A stable packet ID, goal, owner, exact base commit, and dependencies with evidence.
+- The governing WSPs and applicable module README/INTERFACE/ROADMAP/test instructions.
+- A current Holo receipt and explicit retrieval-quality assessment: noise, ordering, missing artifacts, staleness, duplication.
+- One execution plane and existing work/job contract; no invented unsigned authority.
+- Exact allowed files/actions and explicit reserved paths; a worktree claim for writers.
+- Selected provider/model/runtime binding, tool constraints, finite time/token/cost limits, and cancellation/expiry behavior.
+- A verifier identity and capacity reservation, independent oracle/baseline, required tests, and expected rejection cases.
+- Expected execution, verification, promotion, activation, and retention receipts, only for phases actually authorized.
+- Retry/idempotency semantics, rollback/recovery procedure, and a stop condition.
+- A final report separating source implementation, local test evidence, live operational proof, and remaining gaps; updated structured memory in the same scoped change.
+
+The numeric budgets must be filled from current policy and measured runtime capacity before dispatch. This document deliberately provides no fabricated model availability, keys, budgets, or pre-signed work orders. Ordinary reversible work within an already delegated policy should proceed without repeatedly asking 012 for the same authorization.
+
+## Parallel lanes and conflict rules
+
+| Lane | Initial work | Can proceed alongside | Must serialize with |
+|---|---|---|---|
+| Governance/docs | R02; inventory disposition | Read-only runtime/evaluation research | Other WSP/ledger writers |
+| Retrieval/runtime | R03–R05 | Evaluator design and test triage | Holo maintenance/activation and bridge owners |
+| Worker integration | R06–R08, R16 | Independently scoped verifier work | Shared route/consumer/job contract changes |
+| Evaluation/memory | R09–R11, R14, R17 | Non-overlapping worker adapters | PatternMemory, ratchet, verifier contract writers |
+| Release/reliability | R12–R13, R18–R19, R23 | Documentation and isolated tests | Promoter/activation/shared registry writers |
+| Production-line integration | R24 qualification, audit and rewards | Read-only contract mapping | FAM/WRE/ledger/settlement owners |
+| Feedback integration | R25 proposal/consultation/ticket/return mapping | Synthetic fixtures and read-only contract design | RedDog conversation, Memex and disclosure owners |
+| Product owner | R20–R22 when ready | Core work outside its reserved paths | Current YUMORI/eSingularity/RedDog lane |
+
+Use OpenClaw to supervise admitted jobs and Hermes to execute the bounded leaves. Do not instantiate six independent architectural authorities. The single coordinator resolves dependencies and path conflicts; the independent verifier remains able to reject a coordinator's or author's result.
+
+## Measurements and stopping rules
+
+Track correctness against the task oracle, regression rate, accepted/rejected candidate counts, provenance completeness, actual provider cost, latency percentiles, retries, duplicate effects, lost jobs, rollback success, and benefit on subsequent tasks. Record sample size and uncertainty. Keep structural fidelity and outcome quality separate.
+
+Suggested first acceptance target: a predeclared meaningful reduction in redundant work, latency, or measured token cost with no allowed correctness regression and no scope escape. Choose the threshold after a baseline run, freeze it before candidate evaluation, and require independent evidence. Never optimize by shrinking the required test set, changing held-out answers, or ignoring failures.
+
+Stop or quarantine a packet when source/runtime authority changes, its lease expires, required evidence is absent, a reserved path would be touched, the budget is exhausted, a second worker claims the same write scope, or a candidate fails the oracle. Recovery follows the existing owner contract; silent fallbacks cannot turn those failures into success.
+
+## Practical planning horizon
+
+There are 26 packets including the already completed recovery, R24 production-line/team integration and R25 feedback integration. They are dependency-sized planning units, not 26 one-shot prompts or a reliable calendar estimate. Several will split into interface, implementation, negative-proof, and live-acceptance slices.
+
+Plan commitment one wave at a time. Measure cycle time, review throughput, and resource costs during Wave 1, then forecast later waves from actual data. Keep verifier and rollback work on the critical path rather than postponing them until after broad deployment. Do not advertise “RSI complete” until G0–G5 have evidence for the declared operating scope.
+
+## WSP 15 planning scores
+
+Preliminary architect estimates using canonical C/I/D/Impact (each 1–5): complexity, importance, urgency/deferability, and systemic impact. Totals 16–20 are P0; 13–15 are P1. Higher urgency means less deferrable. Scores are planning judgments, not measured completion or signed allocation receipts. Dependencies, reserved ownership, and capability admission determine eligibility before priority is considered.
+
+| Packet | C | I | D | Impact | Total | Priority |
+|---|---:|---:|---:|---:|---:|---|
+| R00 | 3 | 5 | 5 | 5 | 18 | P0 |
+| R01 | 2 | 5 | 5 | 4 | 16 | P0 |
+| R02 | 3 | 4 | 4 | 4 | 15 | P1 |
+| R03 | 3 | 5 | 4 | 4 | 16 | P0 |
+| R04 | 5 | 5 | 3 | 5 | 18 | P0 |
+| R05 | 4 | 4 | 3 | 4 | 15 | P1 |
+| R06 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R07 | 4 | 5 | 4 | 4 | 17 | P0 |
+| R08 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R09 | 5 | 5 | 4 | 5 | 19 | P0 |
+| R10 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R11 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R12 | 5 | 5 | 4 | 5 | 19 | P0 |
+| R13 | 5 | 5 | 4 | 5 | 19 | P0 |
+| R14 | 3 | 4 | 3 | 4 | 14 | P1 |
+| R15 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R16 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R17 | 4 | 5 | 4 | 4 | 17 | P0 |
+| R18 | 4 | 4 | 3 | 4 | 15 | P1 |
+| R19 | 3 | 4 | 3 | 4 | 14 | P1 |
+| R20 | 3 | 4 | 3 | 4 | 14 | P1 |
+| R21 | 4 | 4 | 3 | 4 | 15 | P1 |
+| R22 | 3 | 4 | 3 | 3 | 13 | P1 |
+| R23 | 5 | 5 | 3 | 5 | 18 | P0 |
+| R24 | 4 | 5 | 4 | 5 | 18 | P0 |
+| R25 | 4 | 4 | 3 | 4 | 15 | P1 |

@@ -8,11 +8,54 @@
 
 ## Dynamic RedDog Model Evidence
 
+### Historical local-worker evidence — 2026-10-08
+
+PR2111 source `cc32547b9677f2d2a5adf09bb924e52edbe9a4de` recorded a panel
+probe with no prior-output forwarding, one rejected Qwen audit (0/1 accepted;
+3/4 facts correct;24.438s; unknown tokens) and catalog discovery368/99.
+The proposed metered single/layered/routed comparison was never executed.
+Its planning selection is superseded by the root October13 checkpoint; this
+archive does not reopen inference, routed admission or model promotion.
+See [historical evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#layered-worker-qualification--2026-10-08).
+
+- [x] Strict positive integer use-time clock;55 connected offline tests pass.
+  This does not satisfy the production trust-configuration item below.
+
+- [x] Exact OpenRouter Kimi K3 request-truth boundary: explicit/env/default
+  resolution, 4,096 floor, 131,072 cap, mandatory maximum reasoning, no
+  temperature, and pre-transport rejection.
 - [x] Signed single-model benchmark and promotion evidence admission
 - [x] Signed aggregate PANEL evidence with ordered topology and runtime-context binding
 - [x] PANEL runtime binding fails closed without the verified aggregate
-- [ ] Shared verified runtime-topology resolver for RedDog/Fusion consumers
-- [ ] Outside-repository aggregate artifact supply/bootstrap and durable trust-store integration
+- [x] Shared verified runtime-topology resolver with a 60-second one-shot
+  capability TTL bounded by the verified evidence expiry
+- [x] Evaluation-only local Nemotron proposal call with exact native model
+  lifecycle evidence, node-wide managed capacity, restart-safe zero-residency
+  recovery/otherwise-quarantine, joint structural call binding, and deterministic
+  admission; signed proposer provenance remains the authentication boundary
+- [x] Deterministically include the AI Gateway incumbent in every admitted
+  held-out topology benchmark, outside proposer control
+- [x] Compose resolved topology capabilities into the RedDog extension query,
+  Fusion, OpenClaw, and Hermes callers with explicit provider availability
+- [x] Authenticate and durably bind proposer call plus admission evidence to an
+  externally signed short-lived authority receipt
+- [x] Atomically reserve bounded configured task-by-candidate campaigns before
+  first egress and persist exact call evidence
+- [x] Bind authenticated SINGLE-model campaign promotion into the existing
+  independent signed-evidence and production runtime-binding supply, including
+  use-time signature/trust/revocation/expiry verification, exact durable
+  receipt plus non-mutating already-APPLIED publication proof, deterministic
+  preflight, zero-callback exact replay/conflict decisions, durable tokenized
+  claims and provider bundles, retained inode/content proofs, non-replacing
+  final publication, ownership-safe cleanup, crash-safe immutable store writes,
+  isolated pre-seal supply, terminal-v3 source identity, POSIX interrupted-link
+  repair, fail-closed provider-receipt presence, nonce-level pre-callback
+  reservation, terminal recovery, and restart-safe exact retry only after fresh authority,
+  signature, evidence, and runtime-time verification
+- [ ] Configure production external signer/trust/revocation/durable replay
+  services and supply live production evidence artifacts
+- [ ] Define independently signed aggregate panel-promotion semantics; panels
+  remain evaluation/shadow-only
 
 ### Runtime binder decomposition
 
@@ -21,8 +64,12 @@
 
 ### Configured AutoResearch bootstrap decomposition
 
-- [ ] Before 2026-09-30, extract admission evidence collection and configured
-  runner/verifier assembly from
+- [x] Extract configured runner/verifier assembly and exact AI Gateway,
+  LM Studio, and routed caller adapters from the startup bootstrap/runner;
+  preserve behavior while restoring the configured runner below its prior
+  769-line ceiling with no function above 50 lines.
+- [ ] Before 2026-09-30, extract the remaining admission evidence collection
+  from
   `run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap`
   while preserving exact rejection precedence and result truth flags.
 
@@ -83,9 +130,12 @@
 - [ ] General provider-discovery cadence and scheduler expansion remains out of
   scope; the POC does not grant discovery any startup, selection, promotion,
   registry, or runtime authority.
-- [ ] Evaluate directory-handle publication on non-Windows hosts and stronger
-  directory durability. Their current boundary requires a trusted non-shared
-  runtime directory and all parent-directory fsync remains best-effort.
+- [x] Add fail-closed file plus directory-lineage durability through the store
+  root parent, with no-follow/type/identity checks on POSIX and pointer-width
+  directory-handle flush/close checks on Windows.
+- [ ] Exercise the POSIX directory-handle path in the target non-Windows
+  deployment matrix. Unsupported filesystems remain fail-closed; the separate
+  exclusive runtime-directory claim is still required against path replacement.
 
 ## Phase 1: Enhanced Intelligence (Next)
 - **Cost optimization algorithms** - Auto-select cheapest provider

@@ -748,7 +748,8 @@ def _categorize(err: str) -> str:
     if ("value carries a forbidden authority marker" in e or "source_authority promotion is forbidden" in e
             or "forbidden authority field present" in e or "non-string key rejected" in e
             or "non-ASCII / non-printable key" in e or "verified=true is forbidden" in e
-            or "promotion flag is forbidden" in e or "shell-string command is forbidden" in e):
+            or "promotion flag is forbidden" in e or "shell-string command is forbidden" in e
+            or e == "command must be argv-list-or-null (bare string / unsafe argv forbidden)"):
         return "authority_807"
     return "UNCLASSIFIED::" + e
 
@@ -873,11 +874,10 @@ _EXPECTED_PARITY = {
 
 
 def test_error_category_parity_self_contained():
-    """PRIMARY parity guard (self-contained; no git / origin/main / subprocess / network).
-    For each battery input, HEAD's (ok, ORDERED category labels) must equal the CHECKED-IN
-    expectation. Count alone is insufficient -- the ORDERED category list is compared. Error
-    TEXT may differ (reworded sites); the rule CATEGORY and ok must not. This RUNS+PASSES in
-    CI with zero skips."""
+    """Compare outcomes and ordered rule categories against the checked-in map."""
+    message = "command must be argv-list-or-null (bare string / unsafe argv forbidden)"
+    assert _categorize(message) == "authority_807"
+    assert _categorize(message + " changed") == "UNCLASSIFIED::" + message + " changed"
     # The battery and the expectation must enumerate exactly the same labels.
     battery_labels = [label for label, _f, _k in _parity_battery()]
     assert set(battery_labels) == set(_EXPECTED_PARITY), \

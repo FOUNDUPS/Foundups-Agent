@@ -1,92 +1,852 @@
+## Measured-zero fidelity regression ‚Äî P15
+
+Nine frozen cases in existing `test_pattern_memory.py` cover overall/recent/
+older zero means, absent history/windows, nonzero behavior, inclusive 0.7 rate
+independent of effect success, and actual selection after SQLite close/reopen.
+Valid baseline: 4 expected failures/5 passes (3.625s parent); coordinator repair:
+9 passes (3.266s). Separately selected 42 existing memory/selector controls pass
+(7.109s); selections are disjoint, 51 cases total, not model-fitness coverage.
+Zero errors/skips/guard denials; all 17 source pins stable in both successful runs.
+Separate manifest contracts pass 8/8 (63.719s) and the 15-member RedDog fast
+tier passes (10.000s parent), with stable named source pins. These integrity
+selections are not added to the 51 semantic/legacy cases.
+Two earlier pretest harness failures and prelaunch pin omission are preserved.
+The worker proposal is rejected/unused, not candidate code under these tests.
+
+Commands, XML, fixed IDs, bounded observations and source review are saved in
+`outputs/rsi-zero-fidelity-20261005`. The reopened selector now chooses 0.4 over
+measured 0.0. PR2062 and exact-main CI/CodeQL passed. Three separately reviewed
+retained/control/recovery phases passed in 0.218s/0.219s/0.219s parent time:
+positive ‚Üí zero control ‚Üí positive, with identical original rows/timestamps,
+source pins and SQLite byte hashes. All database closes returned; no errors or
+denials were recorded. Hosted 340 WRE and 675 effect selections are not summed.
+Structural fidelity and retained consumer behavior do not prove model
+improvement, worker repair credit or authority.
+
+## Named registry telemetry qualification ‚Äî P14
+
+Three new bounded test leaves plus `wre_registry_telemetry_test_support.py`
+freeze 75 cases: 44 report-normalization, 17 executor and 14 public-master cases.
+The original75 cases remain unchanged. Initial baseline:75 missing-API failures;
+initial candidate: 75 passes, zero errors/skips. Exact commands, source hashes,
+node selection, XML and case order are in `outputs/rsi-test-scope-telemetry-20261004`.
+
+Most producer reports and scanner verdicts are substituted; actual manifest and
+admission paths remain. Two owned Git fixtures exercise the real projection
+owner; two private SQLite close/reopen checks prove event persistence and no
+outcome/variation pollution. These do not qualify a real scanner or native
+runtime. Independent review added39 shape/digest/metaclass controls:37fail/2pass
+before repair,39pass after. The original75 still pass. Stable connected selection
+passes306 with two Windows link skips; these selections overlap. The original
+source-drifted connected failure remains historical. Legacy generic effect
+fixtures use an inert name and retain all55 assertions;23 master cases pass.
+A separate real PC observation now completes scanner admission,155-shard
+per-side projection and one private persisted event. Two prior rejected
+attempts remain visible. Isolated scanner2.2.0 passes four frozen actual-byte
+controls; short TEMP addresses the demonstrated Windows path-length limit.
+These runtime results are separate from the substituted unit scanner verdicts
+and do not establish effect authority or learned benefit. See the [checkpoint](../../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint).
+
+## Local proposal framing regression ‚Äî 2026-10-04
+
+Independent frozen prompt baseline:12expected failures/67passes,25deselected,
+0errors/skips. Candidate:79passes; connected six-suite selection:209passes;
+manifest:8passes. Selections overlap. Two new inert raw-expression/native-JSON
+cases preserve payloads, limits, cleanup and proposal truth. Five exact full-prompt
+expectations migrated because they encoded the defective wrapper;77 other
+top-level AST nodes are unchanged. Finite lexical checks verify assembly only,
+not model adherence, semantic correctness or execution authority.
+The path suite remains byte-identical: baseline26pass/3fail becomes29pass after
+the exact worker predicate is substituted. All21 prior cases remain unchanged;
+the final integrated six-suite selection passes217 with no errors/skips.
+Commands, XML and independent evidence:
+`O:/Foundups-Agent/outputs/rsi-codeact-path-benchmark-20261004/prompt-contract/`.
+
+## CodeAct nonzero-exit regression ‚Äî 2026-10-04
+
+Existing hardening suite now has 21 cases: six unchanged controls, eight
+nonzero status/stderr/capture combinations, four zero-exit controls and three
+pre/main/post stop cases. Baseline 11 fail/10 pass; candidate 21 pass. Connected
+CodeAct, Git-CWD, execution-truth, PatternMemory, continuity and master suites:
+207 pass (overlapping selection), no skips. All shell calls are mocked; this
+does not qualify a sandbox or enable public CodeAct. Raw-error stream exclusion
+is additionally source-reviewed, not claimed as an explicit substring test.
+Exact commands/XML: `O:/Foundups-Agent/outputs/rsi-codeact-exit-truth-20261004/`.
+
+## Native chat delimiter regression ‚Äî 2026-10-04
+
+Three new cases in existing `test_wre_execution_truth.py` preserve a Markdown
+subheading, an inline `###` literal and an EOS-only control. The native fake
+honors supplied stops; all cases require EOS suffix removal, output caps,
+single cleanup and proposal quarantine. Two old fit assertions now expect EOS
+only. All other original test ASTs and raw route controls remain unchanged.
+
+Independent frozen baseline: 59 pass/4 expected failures. Candidate: 63 pass;
+connected execution-truth, PatternMemory, continuity and master suites: 176
+pass, zero skips. Selections overlap; existing CI already covers the full file.
+These deterministic tests do not prove real-model usefulness. Frozen semantic
+acceptance is unchanged for a later separately reviewed real WRE invocation.
+Exact commands, XML and source bindings:
+`O:/Foundups-Agent/outputs/rsi-native-chat-delimiter-20261004/`.
+
+## Continuity proposal regression ‚Äî 2026-10-04
+
+The OpenClaw continuity object remains available to its lineage owner but is
+omitted from local proposal and reflection prompt JSON, matching existing
+PatternMemory handling. Ordinary task fields, input objects, indentation and
+reflection truncation are preserved; unrelated nonserializable values still
+fail. Two existing expressions changed; no new runtime module or admission.
+
+Independent frozen baseline:8 expected failures/27 passes across35 cases;
+repaired source:35/35 and173/173 connected cases pass (selections overlap,
+14 new cases). The raw local worker returned only ‚ÄúDo not claim effects.‚Äù and
+was rejected. The existing native-chat route supplied the exact two accepted
+expressions in27.172s after a counted metadata-only model load. Same task/model,
+different formatting and stop behavior: this is a route comparison, not isolated
+causal proof. Tokens unavailable; paid inference calls0; coordinator cost unknown.
+Model text remains unverified; independent source review, publication and later
+retained use are separate gates. No native Hermes/OpenClaw ticket admitted.
+
+Existing CI already selects `test_wre_execution_truth.py` plus PatternMemory,
+skill-evolution continuity and master suites. No workflow or criteria change.
+Commands/source pins/results: `O:/Foundups-Agent/outputs/rsi-local-continuity-proposal-20261004/`.
+
+## Terminal fixture observation ‚Äî 2026-10-02
+
+**fixture_inconclusive.** One reviewed terminal child returned normally in2.5s. The recorded7895232-byte fixture hash matched; import, params, backend interval/free, descriptor close and ERROR logger/capture restoration returned. Model load returned null; vocabulary/model-free were not attempted. Capture recorded0 writes/characters and no labels: fixture_inconclusive, diagnostic usefulness insufficient. The sole allowance and this diagnostic branch are closed; no usable worker or specific rejection explanation was established.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-terminal-fixture/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `terminal_fixture_observation_20261002` pins exact artifacts and resource/receipt limits.
+
+## Model-free logger connection controls ‚Äî 2026-10-02
+
+9/9 grouped model-free connection cases passed in one invocation (12 isolated intervals; child 0.063s, parent 0.328s), with no failed/unrun cases or outer guard denials. The same 32 INFO chunks followed by an ERROR EOF hint saturate the default capture (65 counted writes, 4,097 received/4,096 inspected characters); existing ERROR verbosity preserves the hint untruncated (2 writes, 14 characters). CONT fragments are suppressed at ERROR. Generic and unknown messages remain insufficient explanations.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-logger-connection/run_once.py`.
+
+Exact callback/map/set_verbose bodies and builtin print run in private globals;
+only decorator/annotations are removed. Level and stream restoration, original
+exception identity and cleanup failure are checked. Prior sink tests are not
+recounted. The child performed no native-package import/registration, real stderr replacement, model/fixture/device access or provider call. Parent process/stdio owners were reused; no production change, WRE admission or retained RSI gain occurred. Native callback threading, descriptor coverage and real error wording remain unverified. Oracle and runner share author; coordinator review is separate.
+Hosted CI does not replay this audit. Backlog `logger_connection_controls_20261002` pins the evidence.
+
+## Diagnostic capture inert controls ‚Äî 2026-10-02
+
+24/24 fixed inert capture cases passed in one bounded invocation (child 0.078s, parent 0.937s); no failed or unrun cases and no outer guard denials. Cases exercise bounded Python stream writes
+and restoration with injected holders. Finite labels, caps, redaction and
+truthful failure/unknown/truncation states are covered. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-diagnostic-capture/run_once.py`.
+
+The oracle author also authored the runner; coordinator review is separate.
+No held-out runtime, actual callback coverage or rejection-cause confirmation
+is claimed. Hosted CI does not replay this local audit. Backlog `diagnostic_capture_controls_20261002` pins
+source, oracle, runner, execution and review evidence.
+
+## Native guarded observation ‚Äî 2026-10-02
+
+**fixture_inconclusive.** One reviewed fixture-only attempt returned exit0 in4.156 seconds. One exact7,895,232-byte Python fixture hash read matched the saved digest, with stable same-API path/descriptor identities and normal descriptor close. Native package import, backend initialization, default-parameter roundtrip and backend free returned. Model load returned a null handle; vocabulary and model free were not attempted. Zero audit denials or setup/cleanup/integrity flags. The evidence is accepted, but the fixture was not accepted; the sole allowance is closed without retry.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-guarded/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `native_guarded_diagnostic_20261002` pins exact artifacts and resource/receipt limits.
+
+## Null-device guard inert controls ‚Äî 2026-10-02
+
+20/20 fixed inert guard cases passed in one bounded invocation (child 0.047s, parent 0.344s); no failed or unrun cases and no outer guard denials. Cases exercise source-derived audit tuples with a captured callback;
+expected synthetic denials are separate from outer guard violations.
+Canonical token, flags, mode, phase, two-open limit, ordinary output constraints
+and redacted denial detail are covered. No real null-device open, fixture/model read, native-package/model execution, provider call, production change, WRE admission or retained RSI gain occurred.
+
+Historical command (consumed allowance, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-null-guard/run_once.py`.
+
+The oracle author also authored the runner; coordinator review is separate.
+No held-out runtime, real-open compatibility or historical-target confirmation
+is claimed. Hosted CI does not replay this local audit. Backlog `null_device_guard_controls_20261002` pins
+source, oracle, runner, execution and review evidence.
+
+## Native fixture observation ‚Äî 2026-10-02
+
+**setup_invalid.** One bounded attempt returned child exit 1 in 2.5 seconds. The verified fixture descriptor supplied one exact 7,895,232-byte hash read matching the captured prefix. Native package import then failed with RuntimeError and one denied open_write event. The explicit native interval and parameter callback were not entered; backend_result is null. Descriptor close returned normally. Source/runtime pins matched; native import effects and aggregate native cleanup remain unknown. The one-call allowance is consumed and closed without retry.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-fixture/run_once.py`.
+
+One diagnostic attempt; zero new unit-test cases. Fixed acceptance was authored
+before implementation review. Source/result review is independent of the new
+implementation, but is not a held-out model-quality evaluator. Prior backend/raw
+handle suites are not rerun/recounted. No original-model access, inference/generation, provider call, production runtime change, WRE admission or retained RSI gain is established by this diagnostic.
+Failure evidence and fixture acceptance are distinct; absent lifecycle evidence
+remains unknown. Hosted CI does not replay this external diagnostic.
+Backlog `native_fixture_diagnostic_20261002` pins exact artifacts and resource/receipt limits.
+
+## Inert backend lifetime controls ‚Äî 2026-10-02
+
+Sixteen of sixteen fixed inert backend-lifetime cases passed in one bounded invocation (child 0.062s, parent 0.312s), with no failed, skipped, missing cases or guard denials. Sixteen cases contain seventeen inert intervals; the repeated case checks fresh
+receipts, not repeated native initialization. Fixed expectations cover initialization, parameter
+preparation, model-probe completion and backend cleanup order, including
+interruptions and combined failures. The copied worker is AST-loaded only for
+the two diagnostic functions; its original main/imports are never executed.
+
+Historical command (allowance consumed, no replay):
+`python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-backend-lifetime/run_once.py`.
+
+No original-model or captured-fixture access, native-model/backend execution, provider call, production runtime change, admission or retained RSI gain occurred. Prior 17 raw-model controls are not rerun/recounted. No native reclaim,
+ABI or fixture compatibility is established. Oracle/runner authorship and
+coordinator review are disclosed; no held-out runtime-evaluator claim. Hosted CI
+does not replay this external suite. Backlog `backend_lifetime_controls_20261002` pins exact evidence.
+
+## Verified-file connection and prefix extraction ‚Äî 2026-10-02
+
+Eight of eight disposable-file connection cases passed in one bounded invocation (0.422s parent). A separately reviewed capture then read exactly 7,895,232 original bytes, wrote the same prefix exclusively and verified one 7,895,232-byte readback (1.016s parent). Zero failed/skipped/missing cases and no guard denials. Eight fixed
+cases cover default/explicit callbacks, exception closure, pre-open rejection,
+actual capture/output/readback, collision preservation and wrong hash/size.
+
+Historical commands (both allowances consumed; no replay):
+
+```text
+python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-extraction/connection/run_once.py
+python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-extraction/capture/run_once.py
+```
+
+Actual capture is one observation, not another unit-test case. Original prefix
+and fixture readback total 15,790,464 bytes; 14 actual padding bytes are zero. Hash
+`f0006566efd440a0274c4dcade54f94fe577c32630218f273999a8896df158ee`. No full-model hash or durability claim.
+No tensor payload access, native-model/backend loading, provider call, production runtime change, RSI admission or retained-gain demonstration occurred. Prior 32/24/15 controls are not rerun/recounted. Oracle author reviewed
+implementation; no held-out runtime evaluator claim. Hosted CI does not replay
+these external audits. Backlog `gguf_prefix_extraction_20261002` pins the sources, oracle and receipts.
+
+## Audit prefix capture/output controls ‚Äî 2026-10-02
+
+One reviewed bounded child passed 32/32 fixed synthetic capture/output cases: child 0.016s, parent 0.250s; zero failures, skips, missing cases or guard denials. The 32 IDs are frozen in the external capture contract; independent
+fixture expectations do not call the implementation to derive expected values.
+Original fixture AST remains unchanged except added `capture_cases`.
+
+Coverage: exact/over-cap one-read capture, separate physical/parser byte counts,
+typed immutable expectations, metadata/directory drift, malformed/truncated input,
+nonzero padding, untouched payload sentinel, exclusive-output collision, short/
+invalid writes and separate write/close errors. Outputs and inputs are synthetic.
+No original model stat/read, real binary capture, native-model/backend/provider execution or production runtime change occurred. Native support, admission and retained benefit remain open. Existing 24/15 controls are retained at unchanged scope, not recounted.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-prefix-capture/run_once.py`.
+The allowance is consumed and closed; no replay. No registered module test changed
+and hosted CI does not replay this audit. Backlog `gguf_prefix_capture_controls_20261002` binds sources/oracle/results.
+Oracle authorship, implementation review and coordinator acceptance are distinct
+from an independent held-out runtime evaluator.
+
+## Bounded original-file observation ‚Äî 2026-10-02
+
+One independently reviewed original-file observation parsed 401 tensor-directory records. Actual reads: 3,240,638 bytes; directory end: 7,895,218; alignment: 32 (default); computed padding: 14 bytes; computed data start: 7,895,232. Frozen historical metadata matched and the descriptor was observed closed.
+
+One separately reviewed local diagnostic invocation, **zero new test cases**.
+Existing 24-case header and 15-case primitive/handle evidence transfers only to
+unchanged qualified functions; none was rerun. Padding and tensor payload were not accessed. This establishes bounded structural observation, not complete-file validity, native compatibility, worker admission or retained RSI benefit. Production and installed runtime owners are unchanged.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-original-header/run_once.py`.
+The single allowance is consumed and closed. No registered module test changed;
+hosted CI does not replay this external audit. Source, runtime, review and result
+bindings are in backlog `original_gguf_directory_20261002`.
+
+## Audit GGUF header controls ‚Äî 2026-10-02
+
+The external audit `20261002-rsi-header-boundary` records 24/24 fixed inert
+cases. It copies the existing metadata fixture scaffold and adds `header_cases`;
+the runner AST-loads only selected helpers/cases and reader definitions. Legacy
+model-file entrypoints and the prior 15 fixture cases are not executed or recounted.
+
+Coverage: exact directory/alignment offsets (including explicit 24), bounded
+names/ranks/count/dimensions, duplicate/malformed/truncated records and cumulative
+read/offset/deadline limits. Positive fixtures end at directory end and reject
+later read/seek. Computed padding remains uninspected; native support is unproven.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-header-boundary/run_once.py`.
+The single allowance is consumed and closed. A changed attempt requires separate
+review. No registered module test was added; ordinary hosted CI does not replay
+this external audit. Backlog `gguf_header_boundary_20261002` binds source, tests, results and review.
+
+## Audit raw-handle lifetime controls ‚Äî 2026-10-02
+
+The external source-bound diagnostic `20261002-rsi-native-lifetime` records
+17/17 fixed local inert cases. `test_model_vocabulary_lifetime.py` AST-loads
+only `probe_model_vocabulary` from a copied existing worker; no worker top-level
+or installed model package executes. Matrix covers valid/null acquisition,
+ordinary/interrupt lookup failures, cleanup failures, simultaneous failures,
+type-only redaction and separate repeated acquisitions. Backend lifetime is
+outside this helper. These are not native release or model-support tests.
+
+Historical command: `python -I -S -B O:/Foundups-Agent-audits/20261002-rsi-native-lifetime/run_once.py`.
+That one reviewed invocation is consumed; do not rerun it. Receipts and frozen
+oracle are linked by backlog `native_raw_handle_lifetime_20261002`. Reuse them only at their exact
+source/environment scope. A future changed attempt needs a separately reviewed
+packet. No registered module test was added/removed; ordinary hosted CI does
+not replay these external cases. Existing high-level close tests are distinct.
+
+## Native proposal caller contracts ‚Äî 2026-09-30
+
+The existing `test_wre_execution_truth.py` adds33 parameterized cases. The local
+35-case selection includes2 existing controls: proposal quarantine and error
+redaction. Coverage spans raw/default/legacy calls,15 invalid profiles, copied
+configuration,12 native branch cases, unchanged handler state and error redaction.
+Real master/helper/adapter/engine methods run with inert collaborators and native
+boundaries. The initial runner failed collection before any selected case; its
+reviewed alias/diagnostic correction passed35/35 with unchanged19 source pins.
+
+Separately,4 cases passed using installed0.3.20 formatter/handler source with
+synthetic tokens/output. No model loaded. The scopes are not39 native-model
+tests. Existing test definitions remain unchanged. CI explicitly runs the full
+execution-truth file (plus existing import/measurement regressions); exact-head
+hosted counts and later main verification are recorded in publication receipts.
+Evidence: RSI backlog `current_observation.native_proposal_caller_20260930` and
+`O:/Foundups-Agent-audits/20260930-rsi-native-caller-contract/`.
+
+## Hosted measurement portability follow-up ‚Äî 2026-09-29
+
+Expanded CI on PR1950 head `5449bcde` ran308 cases:306 passed, two failed.
+The existing mixed-slash path test exposed a Linux-only filesystem read; reject
+both mixed UNC-style prefixes lexically. The existing startup test imported all
+of main and hit an unrelated missing Chroma dependency; reuse the established
+two-function AST fixture while preserving actual report-reader/output assertions.
+No tests were removed. Updated connected local307 pass; final hosted execution
+and publication remain bound to the canonical backlog. The earlier103-case
+comparison is retained as the initial scalar-repair evidence, not rewritten.
+
+## 2026-09-29: Persisted RSI measurement boundary
+
+- Existing test owners cover strict nested scalar types, explicit nulls, finite relative gain, zero/negative baseline semantics and real repeated producer‚ÜíJSON‚Üíreader/advisory output; aborted/cleanup-failed reports remain unknown.
+- Frozen103 controls:80 baseline passes/23 reproduced failures ‚Üí103 passes. Connected307 local cases pass without errors/skips; three abrupt-exit cases are explicitly deselected locally, retained in hosted CI. The broader set contains the focused cases; do not add the counts together.
+- Local command: `python -I -B O:/Foundups-Agent-audits/20260929-rsi-measurement-reconciliation/run_regression_final.py regression-final-v2`. It uses no plugin autoload/conftests, disposable outputs, actual evaluator leaves and two isolated simulator namespaces; two main function bodies are loaded without launching main. Guards block provider/model/network/DB/child execution. These Python guards are not an OS sandbox. Hosted CI runs four full registered test files including the abrupt-exit controls.
+- Original receipts/XML/source hashes and independent review are bound in the canonical backlog. Early runner receipt wording was corrected in a separate reconciliation; historical artifacts remain intact. PR/main verification is a separate publication gate.
+- WSP00/5/6/11/15/22/48/50/97. No production RSI, authenticated outcome or retained benefit claim.
+
+## Merge sentinel prerequisite regression ‚Äî 2026-09-27
+
+Reuse `test_git_main_merge_sentinel.py`: four original startup guards,
+30 rejection cases (15 conditions with advisory/enforced modes), two force
+controls and two clean-feature controls. Git/GH calls are replaced by exact
+fake responses, and a subprocess sentinel rejects command escape. The clean
+control stops at the first push boundary without executing it. These 38 cases
+passed on PR1912 and exact main `1b02ba7a9214b0c3b8128243f24864c1dfbc779d`.
+
+The cleanup extension adds 30 cases in the same file: 18 dirty/unreadable
+cleanup cases (three command-success routes, three status failures, two
+enforcement modes), six clean/deletion-setting controls, and six terminal GH
+failure controls. One ordered Git/GH transcript proves the second status check
+precedes branch-force/checkout/deletion. Deletion is enabled in negative cases;
+all commands remain fake. The 68 authored cases do not prove live merge safety,
+repository-side auto-delete control, main readback or post-check race protection.
+
+The existing CI test job selects this registered unit file on its hosted Ubuntu
+runner with no conftests/plugin autoload, temporary database paths and JUnit
+artifact `merge-sentinel-prerequisites`. This is focused repository regression,
+not execution of the WRE differential plan, complete repository promotion
+evidence, native admission or OS-containment qualification of worker code.
+No local host candidate-test execution is part of this slice. Exact CI results
+and publication/cleanup state belong to the canonical RSI backlog's receipt.
+PR1913 and exact main `fbfc3ce405ca1cf467d66eb0239c0e73688358fd` each passed
+the same 68 cases. The synchronization extension preserves those IDs, expands
+the six clean transcripts, adds 66 rejection cases (11 stages √ó three routes √ó
+two enforcement modes), and two SHA256/deletion-setting controls: 136 authored
+cases. Negative cases enable deletion and require the exact stopping command.
+Explicit fetch/ref resolution, late status and exact object target are ordered
+in the existing fake transcript. PR1915 and exact main `6255cda690480affeef27d9f043794302a231a99`
+each passed all 136 IDs. The retention extension keeps those IDs: four clean
+delete-enabled outcomes intentionally change to `cleanup_deletion_unqualified`
+and no delete commands; the other 132 outcomes remain unchanged. Twelve added
+cases cover three routes, two ENFORCED modes and default-unset/forced versus
+explicit deletion requests. PR1916 and exact main `beff80d2097205d3fe81f37e4ea20625722f9611`
+each passed all 148 IDs. The checkout-error extension preserves those IDs and
+expectations, adding six failure cases (three routes √ó two ENFORCED modes).
+Deletion is requested; successful exact-object update precedes failed checkout,
+which ends the transcript. Total 154 authored cases; candidate hosted results
+govern acceptance. No rollback, live deletion, containment/CAS or native RSI proof.
+
+## RSI verification measurement contract ‚Äî 2026-09-25
+
+The AutoResearcher tests now require the canonical `wre_rsi_measurements.v1`
+bundle. Focused assertions cover the verification hierarchy, execution-feedback
+classification, absolute/relative gain, candidate/outcome counts and explicit
+non-eligibility for production RSI. Dashboard tests reject inconsistent or
+self-upgraded signal classes, independent/held-out claims and production-RSI
+eligibility. These tests validate reporting truth only; they do not supply an
+independent evaluator or retained RSI proof.
+
+## Selected research-report display ‚Äî 2026-09-24
+
+Extend the existing dashboard export test owner for report parsing/display and
+AI Overseer's preflight-resolution owner for startup wiring/enforcement. Final
+selection: 67 unique passing cases, independently replayed. The exact command,
+interpreter, hashes and IDs are bound in the canonical RSI backlog and external
+evidence directory `O:/Foundups-Agent-audits/20260924-rsi-research-handoff`.
+
+The qualified runner uses builtin pytest fixtures, no plugin autoload/conftests,
+and `-k "dashboard or main_wre_research"`. It loads two exact main function bodies
+without executing main's import-time effects, while importing the real dashboard
+and preflight-resolution leaves. This is focused function-wiring validation, not
+full main startup. Do not substitute a whole-folder/live-menu run or infer that
+advisory report parsing proves independent acceptance or runtime admission.
+
+The dashboard is also hashed in `scripts/reddog_backend_manifest.json`. For
+changes to a runtime member, run the existing generator check, regenerate that
+manifest and both existing digest pins together when stale, then stage the
+coherent binding before its eight generator tests (which check staged closure).
+Run the unchanged RedDog backend compatibility contract as well. PR1899
+initially missed this dependency and failed CI; local reproduction, repair and
+passing checks are retained in `binding-validation.json` in the evidence directory.
+These static checks are separate from the67 guarded display cases.
+
+## AutoResearcher persistent comparison-profile guard
+
+`test_wre_research_evaluator_inputs.py` now has 66 fixed cases: 22 preserved cost
+controls and 44 profile controls. The repair baseline is 32 pass / 34 expected
+failures; the repaired suite and independent replay both pass 66. All 136 existing
+lifecycle/program cases also pass locally and independently: 202 unique cases.
+Regressions only adapt optional-keyword forwarding and the reviewed abrupt-exit stub.
+
+The actual-loop matrix requires persistent drift to produce a caught crash,
+unchanged best metrics, no accepted gain, blank failed TSV metrics and restoration.
+It preserves eight-field arithmetic, JSON/history/digests and planned-only receipts.
+Added controls cover genuine candidate improvement, ordered/member-aware copied
+bases, invalid explicit bases, pre/post checks, nested/later refresh, all consumed
+method defaults and effective-distribution precedence/fallback. Invalid capture
+must fail before baseline evaluator entry. One deliberately accepted transient
+change-and-restore control documents the ABA limitation; it does not certify RSI.
+
+The synthetic genuine change raises the openclaw multiplier from 2 to 3: spend
+1060, margin 1120, ROC 56/53, total revenue 27170 and ROI margin 170. It is still
+accepted. The same-text persistent profile controls cannot gain five points merely
+by crossing the ROI threshold. Historical characterization remains in PR1897.
+
+The existing external exact-interpreter runner constrains known fixtures with
+isolated scratch, provider construction disabled and two eager simulator package
+initializers isolated. Focused tests use real evaluator/calculator/producer leaves;
+no subprocess/database calls occur. Regression permits exactly three reviewed
+abrupt-exit children with evaluator stubs. Both suites have zero unexpected denials,
+failures, errors or skips; 65/135 caught pytest convenience symlinks and two inherited
+plugin-config warnings per run. These Python hooks are not a native/OS sandbox.
+Exact receipts and source bindings are linked from the canonical RSI backlog.
+
+## AutoResearcher evaluator inputs and cost snapshots
+
+`test_wre_research_evaluator_inputs.py` contains 22 fixed cost cases within the 66-case combined suite. The original direct
+evaluator sensitivity test stays unchanged. Actual-loop tests require rejection
+of identical text under stable/replaced/mutated/removed cost entries. Additional
+cases cover copied immutable values, real evaluator consumption, invalid/empty
+catalogs, capture failure reporting, added-agent exclusion, later/nested-instance
+refresh and zero-cost work accounting. PR1895 preserves the old acceptance
+observation; current desired behavior repairs it.
+
+Historical PR1896 evidence: local and independent22pass after a classified2pass/20fail baseline. The existing
+112lifecycle plus24program cases also pass locally and independently, with only
+keyword-forwarding and explicit child-stub adaptations; assertions are preserved.
+These158unique cases use the existing exact-interpreter external guard, isolated
+temporary/database paths and disabled model construction. Three reviewed child
+commands exercise abrupt-exit reporting with synthetic evaluator stubs, not real
+economics. All other subprocess/network effects remain denied. No database opens;
+21focused/135regression caught pytest symlink attempts and2config warnings per run.
+
+The initial baseline post-run bookkeeping denial and noisy early Git status are
+preserved in external evidence. Fresh scope/diffs and source byte hashes remain
+the validation basis. Known-fixture Python hooks are not an OS sandbox. Immutable consumption,
+authenticated oracle/environment identity, native execution
+and independently retained benefit remain unqualified. Exact receipts are bound
+through the canonical RSI backlog.
+
+## AutoResearcher program consumption and identity
+
+`test_wre_research_program_consumption.py` exercises24 fixed cases with fake
+backend/evaluator callbacks. The seven original controls remain; added cases
+cover rendered Unicode/newlines, custom format/subclass semantics, UTF-8 failure,
+backend lookup/interrupt/mode exits, prior/absent collector restoration, bypass,
+sequential ordinals and direct-call compatibility. The existing pre-construction
+model-disable fixture is reused. Source/test identities and exact commands are
+bound in the canonical RSI backlog and its external runner receipts.
+
+Local and independent24pass (same cases) after22 missing-field failures and a separate double-formatting
+regression.34 unchanged cases from the lifecycle suite check mode drift, terminal
+reports and proposal identity. External runners disable pytest plugin autoload
+and bytecode, use fresh external temporary directories, and bypass only eager
+simulator/economics package initializers with inert namespaces. Two disabled
+asyncio config warnings remain. Focused cases mock metrics; connected cases use
+the real local evaluator where applicable. No live model behavior, economic
+validity or complete OS sandbox is claimed.
+
+## Self-audit diagnostic accounting
+
+`test_daemon_self_audit_diagnostic_outcomes.py` exercises all three existing
+accounting/escalation consumers with inert effects and disposable SQLite inputs.
+Run it with `test_daemon_self_audit_scan_status.py`: 94 cases pass locally and
+independently (the same cases). Diagnostic baseline: 7 passed,
+16 failed, no collection errors. Original 30 legacy definitions
+and the 71-case scan-status file remain unchanged.
+
+Use disabled plugin autoload, Python `-I -B -m pytest`, `-o addopts=`,
+`-p no:cacheprovider` and a fresh external `--basetemp`. No live daemon, default
+database, provider, queue claim or payout is exercised. See the
+[outcome contract](../INTERFACE.md#self-audit-diagnostic-outcomes).
+
 # wre_core Test Suite
 
-**Test Coverage:** 0% (implementation needed)
-**Last Run:** Never
+## Self-audit scan status
+
+Run `test_daemon_self_audit_scan_status.py` for the bounded scanner/consumer
+contract: 71 fixed cases pass locally and independently (the same cases).
+The file preserves 13 prior fault inputs and adds outcome, partial coverage,
+clock, snapshot and compatibility acceptance. The remaining 30 definitions in
+`test_daemon_self_audit_loop.py` are unchanged and outside this focused run.
+Use `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`, Python `-I -B -m pytest`,
+`-o addopts= -p no:cacheprovider` and an explicitly owned external `--basetemp`.
+The [scan contract](../../../../docs/DAEMON_ARCHITECTURE_MAP.md#self-audit-scan-qualification--2026-09-22)
+records baseline results and limits. Fixtures create no daemon thread, run no
+full supervisor cycle and invoke no provider/default database or payout.
+
+## Consumer forced-dry isolation
+
+The existing projection-consumer suite covers fresh/warmed dry, non-dry and
+controlled executors, both consumer/job modes, strict boolean requests, callback
+mutation, legacy singleton identity and shared default-validator nonce history.
+A custom warmed validator is not copied into forced dry execution. Real executor
+body cases preserve simulation, destructive-action rejection and token rejection
+under both feature-flag values without calling a delegate or adapter.
+
+The new regression baseline is 24 failed/23 passed, then 47 passed after the repair.
+Expanded consumer/executor/projection/adversarial/size coverage passes 221 cases;
+the separate ContextBundle wiring suite passes 24. Counts overlap across runs.
+Disposable Python guards observed zero forbidden effects; they are not native
+process containment. Existing test registry and backend manifest remain unchanged.
+
+## Core receipt versus authenticated runtime fixtures
+
+The projection tests reuse the paired runtime helper with explicit `provider="openai"`
+and remove its known outer `verification_receipt` only in local `_binding`, before
+test overrides and receipt/digest computation. WRE's projection consumes the exact
+core receipt; authenticated runtime consumers keep their enriched helper unchanged.
+Unknown fields, injected outer wrappers, and aggregator/provider lineage mismatches
+must still reject. Direct-provider fixture success does not qualify OpenRouter.
+Focused projection/consumer/adversarial suites pass 49 cases; adding the existing
+consumer/executor suites passes 174 overlapping cases in disposable guarded runs.
+The guard is a local effect check, not OS/native sandbox confinement.
+
+## Abrupt-exit lifecycle evidence
+
+The same `test_wre_auto_researcher.py` now has 112 cases (109 unchanged plus three
+child modes), passing locally and in an independent replay. The embedded child
+uses fixed metrics and disables model construction before product import; the
+original real-evaluator tests remain intact. Disposable external roots, reviewed
+pre-import effect guards, isolated Python flags and 20s wait/5s owned-child reap
+bound each case. Never run these fixtures against a live source/work directory.
+Missing and temporary-only reports remain unknown; only normal return matches
+the saved terminal report and acknowledgment. Prior sentinel bytes test
+preservation, not a previous successful run. See the module roadmap for the exact
+oracle, initial pre-collection runner failure and replay receipts. The 996 lines retain
+the existing cohesive size review; original 31 definitions unchanged, new functions
+<=50. Registry process capability is generated; no recovery or model-quality proof.
+
+
+## Proposal input identity
+
+`test_wre_auto_researcher.py` now covers returned UTF-8 proposal identity without
+changing the evaluator or pre-construction model-disable fixture. Thirteen new
+cases reproduce the missing field on unchanged source; final109 pass. Independent
+109-case execution overlaps. Tests cover equal-outcome/distinct-text diagnostics,
+LF/CRLF and non-ASCII input, sequential report preservation, preparation/diff/
+evaluation aborts, missing/non-text returns and overridden string encoders.
+All new functions remain‚â§50 lines. Retain this cohesive suite's800-line guideline
+review; no new exemption. Use the isolated execution instructions below.
+Hashes are local diagnostics, not authenticated provenance or runtime admission.
+
+## Researcher baseline snapshot
+
+Reuse `test_wre_auto_researcher.py` and its unchanged model-disable fixture.
+Five drift timings √ó LF/CRLF cover construction rereads, reused scratch and
+baseline/proposal/interruption mutation. The existing write-fault case checks
+preparation failure before evaluation. All 26 prior function names remain;
+24 definitions are unchanged. **96 pass in 2.04s**, after 10 failures/86 passes
+before the repair. Five ten-attempt controls bind report hashes to observed
+baseline text. Tests 797 lines retain the cohesive fixture and existing size
+review; all functions ‚â§50. Evidence: `research_input_snapshot_continuation_20260915`.
+Program/oracle/runtime provenance and startup reading remain unqualified.
+
+## Historical Phase1 mode integrity
+
+Reuse `test_wre_auto_researcher.py` and its unchanged model-disable fixture.
+Seven constructor values and fourteen timing/value cases cover literal-mode
+admission, before-run/proposal/missing-proposal/diff/evaluation/after-loop drift
+and direct private commit calls. Injected commit is a recorder only; the source
+AST also forbids delegated `.commit()` calls in the Phase1 producer.
+All previous tests remain; final **86 pass in 1.91s**. Reports abort on detected
+mode drift, scratch restores and no injected live commit occurs. Five ten-attempt
+controls preserve normal outcomes and saved reports. Tests 742 lines remain a
+cohesive extension under the existing infrastructure review, all functions ‚â§50.
+Evidence: `research_mode_guard_continuation_20260915`; no sandbox/runtime grant.
+
+## Historical terminal researcher reports
+
+Reuse `test_wre_auto_researcher.py` and its unchanged pre-construction model-disable
+fixture. **66 pass**: baseline/proposal/diff/evaluator exceptions and cancellation,
+partial attempts, cleanup/output failures, allocation/write/publication failures,
+sequential reuse and prior-report preservation, plus existing validation/accounting.
+All 21 prior function/fixture names remain; 17 definitions are AST-identical, four
+are extended, and terminal tests reuse that fixture. All functions stay ‚â§50.
+The 681-line file crosses the infrastructure review guideline; keep the cohesive
+contract together while WRE maintainers track decomposition, without exemption.
+
+Five ten-attempt controls use the real evaluator: 50 attempts/40 candidate and five
+baseline evaluations. Saved terminal reports equal returns; seed97 replay matches
+except distinct invocation identity. Sources/mtime and scratch are preserved.
+Commands, failure reproductions and hashes are in
+`research_terminal_report_continuation_20260915`. Counts overlap with prior runs;
+these do not prove source/oracle authenticity, process/power durability, runtime
+admission or independently retained RSI. See INTERFACE for terminal/temporary-file rules.
+
+## Historical completed-call accounting
+
+PR1752's 51-pass checkpoint and its five ten-attempt controls remain recorded in
+`research_report_accounting_continuation_20260915`. Its completed-return accounting
+is extended by the terminal layer above; do not add overlapping test totals.
+
+## Launch and evaluation evidence
+
+Reuse `test_wre_auto_researcher.py` (35) and `test_dashboard_snapshot_export.py` (2).
+The four selected `tests/test_main_runtime_bootstrap.py` cases cover bounded rounds,
+idle stopping, invalid-round rejection and persistence failure. **41 pass** at
+`af29f082e866a05bb0d05a8f32e27414f8c1939b`; no test implementation changed.
+Run from an external working directory with the owned checkout on `sys.path` so
+main's import-time log stays isolated; actual menu/service launch is not invoked.
+Use the isolation gate below, disable model construction before researcher setup,
+and retain injected dashboard/queue behavior. The [roadmap rehearsal](../ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15)
+records five ten-attempt controls/runs separately from pytest counts. Detailed
+inputs/results live under `launch_evaluation_continuation_20260915`; simulated
+repeatability is not independent verification or retained benefit.
+
+## Per-execution admission evidence
+
+Reuse `test_wre_execution_truth.py` and `test_wre_runtime_admission_truth.py` for
+reentrant execution, cached/late fingerprint ownership and explicit dispatch.
+The execution suite imports the existing `_Libido`/`_Memory` fixtures from the
+admission suite. Private admission mocks now return `(ok, message, fingerprint)`;
+the public two-value safety-check API remains unchanged. Three focused files pass
+71 tests/one skip; seven connected files pass 172/four skips. Exact commands and
+fingerprints: `execution_admission_ownership_continuation_20260915` in the RSI baseline.
+
+## Scanner cache ownership
+
+Reuse `test_wre_runtime_admission_truth.py`: the final connected run contains
+20 passed / one existing file-link skip. Ten added cases cover pending refresh,
+failed/cancelled refresh, severity changes, eviction, full and available pending
+capacity, lost reservation and coordinator policy readback. Controlled Events
+exercise concurrency with injected scan results and disposable files.
+The seven-file connected selection passes 148 with four existing link skips;
+exact IDs/commands are recorded in `admission_cache_ownership_continuation_20260914`.
+Use the isolation setup below. Cache tests do not prove report-file/process
+ownership or signed runtime admission.
+
+## PatternMemory owner isolation
+
+Reuse `test_pattern_memory.py`: **41 tests pass**, including 17 added cases for
+pending-write visibility/commit/rollback/close, foreign-thread rejection and two
+workers with independent close lifetimes. The default-path fixture redirects
+the module path into pytest's temporary directory; it never opens the repository
+store. SQLite's authorizer denies a real commit for the pending-write reproduction.
+Use the isolation setup below with importlib mode, explicit `pytest_asyncio.plugin`,
+no cache provider and a unique external basetemp. The connected 206-case selection
+and exact commands are recorded in `pattern_memory_ownership_continuation_20260914`.
+These selections overlap; thread isolation is not production concurrency proof.
+
+The existing test_daemon_self_audit_loop.py now adds ten counter-lifetime
+cases (30 daemon cases; 71 with the unchanged PatternMemory suite). Its tracked
+fixture wraps real SQLite handles at an explicit disposable path and observes
+creating/closing threads. It tests two distinct events across simultaneously
+alive threads, successive operations, disabled telemetry, failure/interruption
+cleanup and stop returning during an injected blocked counter. No actual
+daemon.start runs. Close failure is injected after real close; partial close
+and real restart/shutdown are not certified. Preserve actual factory/default-
+path interception: WRE_PATTERN_MEMORY_DB alone is not read by PatternMemory().
+
+## Auto Researcher run isolation
+
+Reuse `test_wre_auto_researcher.py` and its fixture that disables model construction
+before initialization. **35 tests pass**: overlapping explicit/default-parent runs,
+concurrent construction, target/log filename separation, rejection before mkdir,
+and the existing evaluator/lifecycle boundaries. Read the actual per-run
+`results_path` and `working_target_path`; the constructor argument is their parent.
+Use the existing O:-resident temporary/database setup below. These file/thread
+tests do not prove process/volume recovery or production admission.
+
+**Coverage claim:** focused contract coverage only
 **Framework:** pytest
+**Last verified:** 2026-08-27
 
-## [TEST] Test Categories
+## Isolation gate
 
-### Unit Tests (test_*.py)
-- test_[module_name].py - Core functionality tests
-- test_integration.py - Integration tests (when applicable)
+Every WRE test command must isolate temporary files and both database paths.
+Do not run execution tests against the default production databases.
 
-### Test Structure
-```
-tests/
-Ñ•ÑüÑü __init__.py              # Test package
-Ñ•ÑüÑü README.md               # This file
-Ñ•ÑüÑü test_[module_name].py   # Main test file
-Ñ§ÑüÑü TestModLog.md          # Test evolution log
-```
-
-## [RUN] Running Tests
-
-### All Tests
-```bash
-cd modules/infrastructure/wre_core
-python -m pytest tests/
+```powershell
+$root = 'O:\pytest_tmp\reddog_wre_truth'
+New-Item -ItemType Directory -Force -Path $root | Out-Null
+$env:TMP = $root
+$env:TEMP = $root
+$env:FOUNDUPS_DB_PATH = Join-Path $root 'foundups.db'
+$env:WRE_PATTERN_MEMORY_DB = Join-Path $root 'pattern_memory.db'
+$env:ANTIFAFM_LYRICS_DB = Join-Path $root 'lyrics.db'
+$env:PYTHONDONTWRITEBYTECODE = '1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'
 ```
 
-### Specific Test
-```bash
-cd modules/infrastructure/wre_core
-python -m pytest tests/test_[module_name].py
+Use a unique child directory for concurrent workers.
+
+## Auto Researcher input and dry-run contracts
+
+After setting the isolated paths above, run the existing
+`tests/test_wre_auto_researcher.py` with plugin autoload disabled, the explicit
+`pytest_asyncio.plugin`, importlib mode, no cache provider and a unique external
+`--basetemp`. The fixture disables Qwen construction before researcher
+initialization. The 31-case selection covers literal-only evaluation, numeric
+and catalog guards before simulation, valid boundary values, invalid-candidate
+rejection through the dry-run loop, invalid-baseline rejection, exception and
+keyboard-cancellation cleanup, runner-restore/output failure, and existing source/commit boundaries.
+It does not dispatch a model or prove production RSI.
+
+## Bounded Git I/O tier
+
+`test_wre_test_registry_differential_plan_runtime.py` includes the bounded-I/O
+primitive used by RedDog's inert pinned-Git batch proof. Six focused cases cover
+stdout overflow, binary stdin round-trip, the 8 MiB pre-spawn ceiling, early
+child exit/broken pipe, timeout cleanup with no retained named I/O threads, and
+concurrent output overflow while stdin is blocked. The test interpreter and
+temporary root must remain on O:. The helpers do not mutate Git or authenticate
+an executable/repository.
+
+## Execution-truth tier
+
+```powershell
+$base = Join-Path $root 'pytest'
+$cache = Join-Path $root 'cache'
+python -m pytest -q -p pytest_asyncio.plugin --import-mode=importlib `
+  modules/infrastructure/wre_core/tests/test_wre_execution_truth.py `
+  modules/infrastructure/wre_core/tests/test_wre_runtime_admission_truth.py `
+  modules/infrastructure/wre_core/tests/test_wre_telemetry_truth.py `
+  modules/infrastructure/wre_core/tests/test_wre_skills_loader_hygiene.py `
+  modules/infrastructure/wre_core/tests/test_skill_manifest_guard.py `
+  modules/infrastructure/wre_core/tests/test_pattern_memory.py `
+  modules/infrastructure/wre_core/tests/test_qwen_inference_wiring.py `
+  modules/infrastructure/wre_core/tests/test_skill_evolution_continuity.py `
+  modules/infrastructure/wre_core/tests/test_foundup_route_wsp62_exemptions.py `
+  modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py `
+  modules/infrastructure/wre_core/wre_gateway/tests/test_dae_gateway_policyflags_guards.py `
+  modules/infrastructure/wre_core/recursive_improvement/tests/test_learning.py `
+  modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py `
+  modules/communication/moltbot_bridge/tests/test_openclaw_skill_evolution.py `
+  --basetemp $base -o "cache_dir=$cache"
 ```
 
-### With Coverage
-```bash
-cd modules/infrastructure/wre_core
-python -m pytest --cov=src --cov-report=html tests/
+Exact current-tree result on 2026-08-26: `235 passed, 4 platform-limited
+link/reparse skips in 29.38s`.
+
+Importlib mode prevents unrelated directories named `tests` from colliding in
+one combined invocation; it does not relax collection or execution assertions.
+
+This tier must not load a local model, call a provider, write production
+PatternMemory/AgentDB state, dispatch external work, mutate Git, or reindex
+HoloIndex.
+
+It proves only the named contracts:
+
+- production Skillz admission and hygiene;
+- digest-bound loader cache;
+- manifest/scanner and adjacent executor binding;
+- mutation-during-scan and mutation-before-dispatch rejection;
+- typed effect-result validation and redacted failures;
+- proposal-only local inference;
+- PatternMemory execution truth;
+- ReAct acceptance truth;
+- blocked legacy CodeAct/direct-Holo authority boundaries;
+- WSP gates followed by fail-closed legacy plugin dispatch;
+- recursive removal of untrusted nested MLE effect/compliance claims;
+- unmeasured gateway/plugin/monitor/recursive-improvement token telemetry;
+- fail-closed recursive-improvement application compatibility;
+- stoppable opt-in recursive state persistence and truthful shutdown status;
+- WSP 62 debt reduction and WSP 95 mirror parity.
+
+## Broader suite
+
+After the focused tier passes, expand to the module suite with the same
+isolation environment:
+
+```powershell
+python -m pytest -q modules/infrastructure/wre_core/tests `
+  --basetemp (Join-Path $root 'all-pytest') `
+  -o "cache_dir=$(Join-Path $root 'all-cache')"
 ```
 
-## [COVERAGE] Coverage Requirements
+The suite contains a large sharded/exhaustive contract surface. A focused pass
+does not substitute for full-suite evidence, and an interrupted full run must
+be reported as incomplete rather than passing.
 
-**WSP 13 Compliance Target:** >=90% coverage
+## FMAS health-admission tier
 
-### Current Status
-- **Lines:** 0%
-- **Functions:** 0%
-- **Branches:** 0%
-
-### Coverage Areas Required
-- [ ] Core functionality
-- [ ] Error handling
-- [ ] Edge cases
-- [ ] Integration points
-
-## [CONFIG] Test Configuration
-
-### pytest.ini (if needed)
-```ini
-[tool:pytest]
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-addopts = -v --tb=short
+```powershell
+python -m pytest -q `
+  tools/modular_audit/tests/test_modular_audit.py `
+  tools/modular_audit/tests/test_fmas_mode2.py `
+  modules/infrastructure/wre_core/tests/test_fmas_health_triage.py `
+  modules/infrastructure/wre_core/tests/test_fmas_improvement_bridge.py `
+  modules/infrastructure/wre_core/tests/test_improvement_job_contract.py `
+  modules/infrastructure/wre_core/tests/test_security_analysis_assistant.py `
+  modules/infrastructure/wre_core/tests/test_reddog_direction.py
 ```
 
-## [CASES] Test Cases (TODO)
+Exact O:-resident result on 2026-08-27: `235 passed in 5.87s`. This proves tracked
+inventory, authority and receipt binding, scope rejection, WSP 62 quarantine,
+deterministic proposal admission, and advisory-only RedDog direction. It does
+not prove a clean real-candidate positive run, model selection, worker dispatch,
+promotion, or production RSI.
 
-### Basic Functionality
-- [ ] Test initialization
-- [ ] Test main methods
-- [ ] Test configuration handling
+## Test inventory
 
-### Error Conditions
-- [ ] Test invalid inputs
-- [ ] Test missing dependencies
-- [ ] Test network failures (if applicable)
+- `test_wre_execution_truth.py`: false-success, result evidence, ReAct, and
+  bounded executor contracts.
+- `test_wre_runtime_admission_truth.py`: runtime admission, scan fingerprints,
+  A/B binding, trigger provenance, and WSP 95 parity.
+- `test_wre_telemetry_truth.py`: no fabricated token savings/reduction and no
+  unexecuted monitor, gateway, or recursive-improvement success.
+- `test_wre_skills_loader_hygiene.py`: registry paths, metadata, retirement,
+  cache, and production entries.
+- `test_skill_manifest_guard.py`: Skillz/executor hashes and signatures.
+- `test_pattern_memory.py`: outcome and non-production candidate storage.
+- `test_reddog_verified_outcome_ratchet.py`: measurement/lineage rejection,
+  secret non-persistence, evidence identity, callback isolation and acknowledgments.
+- `test_reddog_held_out_recursive_improvement_regression_gate.py`: same-work
+  retention, verifier digest, strict counts and real-recorder composition. Its
+  fixtures remain synthetic; they are not independent production evidence.
+- `test_qwen_inference_wiring.py`: isolated proposal/result-shape wiring.
+- `test_foundup_route_wsp62_exemptions.py`: bounded inherited debt.
+- `test_fmas_health_triage.py`: exact-head producer lineage and dispositions.
+- `test_fmas_improvement_bridge.py`: normalized parsing and direct WSP 62 block.
+- `test_improvement_job_contract.py`: path confinement and dry-run job contract.
+- `test_reddog_direction.py`: advisory ordering with zero readiness authority.
+- `wre_master_orchestrator/tests/test_wre_master_orchestrator.py`: public
+  coordination behavior with injected effect evidence.
+- `wre_gateway/tests/test_dae_gateway_policyflags_guards.py`: envelope boundary
+  and degraded-route guards.
+- `recursive_improvement/tests/test_learning.py`: proposal learning smoke test.
 
-### Integration Tests
-- [ ] Test with dependent modules
-- [ ] Test end-to-end workflows
-- [ ] Test performance requirements
-
-## [EVOLUTION] Test Evolution Log
-
-See TestModLog.md for detailed test development history.
-
----
-
-**WSP 13 Testing Compliance:** Structure Complete, Implementation Pending
+See [TestModLog.md](TestModLog.md) for the append-only test history.

@@ -35,9 +35,12 @@ Main orchestrator for LinkedIn operations with 0102 consciousness.
 ## Configuration
 
 ### Environment Variables (.env)
+Use inert placeholders in examples. Keep actual credentials outside
+versioned documentation, logs and worker packets.
+
 ```
-LINKEDIN_CLIENT_ID=865rlrxtedx3ao
-LINKEDIN_CLIENT_SECRET=WPL_AP1.1xajIuOyL7HLR2Qg.gWWgRg
+LINKEDIN_CLIENT_ID=<configured-outside-repository>
+LINKEDIN_CLIENT_SECRET=<configured-outside-repository>
 ```
 
 ### OAuth Scopes Required

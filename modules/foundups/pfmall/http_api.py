@@ -42,6 +42,12 @@ from modules.foundups.pfmall.api import (
     resolve_foundup_route,
 )
 
+from modules.foundups.pfmall.listing_discovery import (
+    GOTJUNK_ID,
+    ListingProviderUnavailable,
+    search_gotjunk_public_listings,
+)
+
 logger = logging.getLogger("pfmall_http")
 
 app = FastAPI(
@@ -79,6 +85,38 @@ def health() -> Dict[str, Any]:
 def catalog(category: Optional[str] = Query(None)) -> List[Dict[str, Any]]:
     """List FoundUp tiles, optionally filtered by category."""
     return list_foundups(category=category)
+
+
+
+# ---------------------------------------------------------------------------
+# Public-only item discovery; no client-asserted identity or private browsing
+# ---------------------------------------------------------------------------
+
+@app.get("/pfmall/listings/search")
+def public_listing_search(
+    foundup_id: str = Query(GOTJUNK_ID),
+    q: str = Query("", max_length=80),
+    category: Optional[str] = Query(None, max_length=32),
+    owner_uid: Optional[str] = Query(None),
+    limit: int = Query(20, ge=1, le=50),
+) -> Dict[str, Any]:
+    """Search separately approved public listings using a server-owned provider.
+
+    Existing client Firestore/IndexedDB data is not an approved index.
+    Until deployment configures a trusted provider, this route returns 503.
+    """
+    if foundup_id != GOTJUNK_ID or owner_uid is not None:
+        raise HTTPException(status_code=403, detail="Private or cross-FoundUp listing search denied")
+    if get_foundup(GOTJUNK_ID) is None:
+        raise HTTPException(status_code=503, detail="Listing authority unavailable")
+    provider = getattr(app.state, "listing_evidence_provider", None)
+    try:
+        rows = search_gotjunk_public_listings(provider, query=q, category=category, limit=limit)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="Invalid search parameters") from None
+    except ListingProviderUnavailable:
+        raise HTTPException(status_code=503, detail="Listing provider unavailable") from None
+    return {"foundup_id": GOTJUNK_ID, "results": rows}
 
 
 # ---------------------------------------------------------------------------

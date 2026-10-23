@@ -1,5 +1,30 @@
 # Livechat Module - Roadmap
 
+## 2026-10-23 confirmed-handoff checkpoint
+
+PR841 is the bounded owned-comment handoff slice: reserve actual initialized API
+session identity, settle its coordinator/rotation worker, then poll while unrelated
+browser work continues. Shared lifecycle functions reduce the already oversized
+DAE/coordinator files; they introduce no new manager, scheduler, authority or store.
+The current rotation source remains in WSP62's guideline range; future decomposition
+belongs to its existing owner and must preserve these cancellation/receipt contracts.
+
+Remaining operational qualification uses existing authenticated owners and real
+readback/shutdown evidence. Local child/thread tests do not prove browser-side
+rollback, CommunityMonitor/global browser quiescence, installed-host readiness or
+native RSI. A stuck thread still blocks settlement. The existing singleton rotation
+checkpoint's concurrent-browser overwrite risk is unchanged and separately owned.
+
+## 2026-10-22 current operator-command checkpoint
+
+PR1759 closes bounded trusted-local queue, context-consumer and watcher-lifetime
+contracts (116 offline cases; see INTERFACE and tests/README). Current acceptance
+is source/contract validation, not the broader historical production claims below.
+Remaining operational gate: run the full DAE through its existing authenticated
+owner, prove real sender/readback behavior and clean shutdown, then use those
+receipts in the governing RSI roadmap. Do not infer native author admission,
+independent outcome evaluation or retained benefit from this local inbox.
+
 ## Overview
 This module operates within the **communication** enterprise domain following WSP protocols for modular architecture, testing, and documentation compliance.
 

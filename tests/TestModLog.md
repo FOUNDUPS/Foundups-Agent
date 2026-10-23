@@ -1,5 +1,19 @@
 # TestModLog - shared tests
 
+## 2026-08-26: WSP 97 v1.9 machine-contract declaration
+
+- Reused the existing canonical validator-contract test to bind protocol
+  version 1.9, the test-inventory/reuse applicability set, the active-suite
+  missing-TestModLog rule, and concrete HoloIndex work-order guidance.
+- Preserved receipt schema v1.1 and all repository-evidence resource limits;
+  this is a protocol-data alignment regression, not a validator behavior change.
+
+## 2026-08-08: Startup dependency-evidence enforcement
+
+- Proved malformed dependency scanner evidence remains visible in startup
+  telemetry and blocks when enforcement is active. Incomplete optional scans
+  are reported as `WARN`, never `PASS`; the 28-test startup matrix passes.
+
 ## 2026-07-24: WSP 97 repository-evidence receipt v1.1
 
 - Files: `tests/test_wsp97_execution_validator.py`, `tests/test_wsp97_repository_evidence.py`

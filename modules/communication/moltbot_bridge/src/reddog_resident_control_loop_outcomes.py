@@ -97,10 +97,18 @@ def strict_child_outcomes(value: Any) -> tuple[dict[str, Any], ...]:
         }
         _validate_outcome(outcome)
         outcomes.append(outcome)
-    task_ids = tuple(item["task_id"] for item in outcomes)
-    if len(set(task_ids)) != len(task_ids):
-        raise ValueError("resident_control_loop_receipt_child_task_replay")
+    _validate_task_attempt_order(outcomes)
     return tuple(outcomes)
+
+
+def _validate_task_attempt_order(outcomes: list[dict[str, Any]]) -> None:
+    terminal_tasks: set[str] = set()
+    for outcome in outcomes:
+        task_id = outcome["task_id"]
+        if task_id in terminal_tasks:
+            raise ValueError("resident_control_loop_receipt_child_task_replay")
+        if outcome["status"] in {"completed", "failed"}:
+            terminal_tasks.add(task_id)
 
 
 def verify_child_execution_evidence(

@@ -1,71 +1,110 @@
 ---
 name: auto_test_registry_audit
-description: Scans codebase for test files and updates the WSP Test Registry
-version: 1.0_prototype
+description: Verify, regenerate, or project the canonical module-owned Python test registry
+version: 2.3
 author: 0102
-created: 2025-12-06
-agents: [qwen]
+agents: [qwen, gemma]
 primary_agent: qwen
 intent_type: TELEMETRY
-promotion_state: prototype
+promotion_state: production
 pattern_fidelity_threshold: 0.95
-
 dependencies:
   scripts:
     - path: modules/infrastructure/wre_core/scripts/generate_test_registry.py
-      purpose: Scans file system and parses AST
-
+      purpose: Deterministic Git-tracked test registry projection
+    - path: modules/infrastructure/wre_core/src/wre_test_registry_differential_plan_runtime.py
+      purpose: Exact-SHA bounded scope-projection entrypoint
 metrics:
   pattern_fidelity_scoring:
     enabled: true
 category: workflow
-evals: []
+evals:
+  - canonical_bytes_match_git_projection
+  - every_tracked_python_test_has_one_owner
+  - quarantined_programs_remain_visible
+  - exact_sha_shard_projection_is_bounded_and_non_executing
 ---
 # Auto Test Registry Audit
 
-**Purpose**: Maintains the Single Source of Truth for verification capabilities by scanning the codebase and updating `WSP_knowledge/WSP_Test_Registry.json`.
+Maintain the single test source of truth at
+`WSP_knowledge/WSP_Test_Registry.json` without broad pytest discovery.
 
-**Intent Type**: TELEMETRY
+## Verify
 
-**Agent**: Qwen (Partner)
+Run from the repository root:
 
----
+```text
+python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
+```
 
-## Task
+The command passes only when the checked-in ASCII registry is byte-identical to
+the deterministic projection of Git-tracked `test_*.py` files.
 
-Execute the registry generation script to index all `test_*.py` files, identifying their capabilities (Selenium, Vision, Unit) and docstrings. This specifically solves the "test amnesia" problem by creating a searchable catalog.
+## Regenerate
 
-## Instructions
+Use `--write` only in a bounded registry-maintenance worktree:
 
-### 1. EXECUTE AUDIT SCRIPT
-**Rule**: ALWAYS run the python script to ensure fresh data.
-**Expected Pattern**: script_execution=True
+```text
+python modules/infrastructure/wre_core/scripts/generate_test_registry.py --write
+python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
+```
 
-**Steps**:
-1. Run `python modules/infrastructure/wre_core/scripts/generate_test_registry.py`
-2. Verify exit code is 0
-3. Log output summary (e.g., "Found 45 tests")
+The generator assigns every file exactly one owner, suite class, shard, timeout,
+and quarantine status. Unit and integration files may be automatically
+collected. Manual, operational, archived, malformed, or process-mutating files
+remain registered but cannot enter automatic pytest collection.
+Module-scope external API client construction, including Google API clients,
+is operational and quarantined even when imported through module-executed
+control-flow. Pure authentication request construction remains collectable.
 
-### 2. VALIDATE REGISTRY
-**Rule**: IF registry file exists AND size > 0 THEN validation_pass=True
-**Expected Pattern**: registry_validation=True
+## Differential Scope Projection
 
-**Steps**:
-1. Read `WSP_knowledge/WSP_Test_Registry.json`
-2. Confirm "tests" array is not empty
-3. Confirm `test_live_engagement_full` is present with "012_protocol" capability
+For a bounded changed-path work order, use the registered WRE planning API,
+not raw pytest discovery. The projection verifies the exact Git diff, regenerates
+the registry independently for parent and candidate, resolves each SHA's
+explicit module shards, validates recognized dependency/config parity, and
+emits bounded batches. It rejects stale or forged registries, changed
+quarantined tests, path substitution, dependency drift, oversized source, and
+exceeded limits. It creates the existing `wre_test_impact_plan.v1`; it does not
+define another impact-plan schema. WSP_15, runner, environment, selection, and
+lineage bindings are mandatory inputs. Stale dependency
+or HoloIndex evidence and protected/release/health work escalate to SYSTEMIC.
+Cross-owner renames expose both source and destination paths.
 
----
+The Phase 1 result is a scope projection only. It does not import tests or invoke pytest.
+Execution remains blocked until an independently authenticated OS-isolated
+runner consumes the canonical impact plan and projected shards.
 
-## Benchmark Test Cases
+## WRE deterministic telemetry entry
 
-1. Input: `run_audit` → Expected: Script runs, file updated, returns "Success"
-2. Input: `run_audit` (with syntax error in a test file) → Expected: Script logs error but finishes registry for valid files
+The adjacent manifest-bound executor accepts only `operation="project_scope"`
+and `request={base_sha, head_sha, expected_changed_paths, projection_input}`.
+The existing continuity context may accompany the request; caller-supplied
+roots, commands, receipts, skill/agent overrides and result flags are rejected.
+The executor derives its own checkout and invokes the existing projection
+producer once. Temporary per-commit registry rebuilding is unchanged; the
+canonical registry is never regenerated by this entry.
 
----
+WRE keeps production registry/frontmatter/scanner/bundle gates. A successful
+plan reports `telemetry_completed=true`, with `success`, `execution_success`
+and `_effect_evidence` all false. Rejected and unavailable attempts are terminal,
+including in ReAct mode: no model fallback, retries, fidelity, evolution or
+effect breadcrumb. A valid projected/rejected report produces one compact
+`telemetry_projection` event in existing PatternMemory; no SkillOutcome,
+variation or completion counter is created. `observation_persisted` separately
+reports storage success. Storage failure preserves the projection without
+retrying or exposing exception text.
 
-## Success Criteria
+This event is an observation, not evidence of learning. Result normalization
+checks shape, request binding and canonical identity; it does not authenticate
+assertions or qualify imported dependencies. Manual `--check`/`--write`
+workflows above are unchanged and are not WRE executor operations.
 
-- ✅ Registry file updated
-- ✅ `test_live_engagement_full.py` indexed correctly
-- ✅ Zero script errors
+## Boundaries
+
+- Do not run `pytest .`.
+- Do not delete or silently ignore a quarantined file.
+- Do not treat a local shard plan as execution or verification evidence.
+- Do not mutate HoloIndex during verification. Post-merge indexing belongs to
+  the governed HoloIndex authority transaction.
+- Do not execute candidate tests under the host principal.

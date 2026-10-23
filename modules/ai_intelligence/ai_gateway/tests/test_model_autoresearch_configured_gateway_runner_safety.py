@@ -1122,19 +1122,24 @@ def test_canonical_local_guard_malformed_prompt_input_fails_content_free(bad_pro
     assert repr(bad_prompt) not in serialized
 
 
-def test_bootstrap_owns_canonical_guard_profile_and_has_no_callback_injection():
+def test_bootstrap_owns_guard_profile_and_runtime_owns_canonical_guard_factory():
     signature = inspect.signature(
         run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap
     )
     assert "prompt_guard" not in signature.parameters
     profile_parameter = signature.parameters["runner_prompt_guard_profile"]
     assert profile_parameter.default == "canonical_local_v1"
-    source_path = Path(
+    bootstrap_path = Path(
         "modules/ai_intelligence/ai_gateway/src/"
         "model_autoresearch_campaign_execution_artifact_supply_bootstrap.py"
     )
-    source = source_path.read_text(encoding="utf-8")
-    tree = ast.parse(source)
+    runtime_path = Path(
+        "modules/ai_intelligence/ai_gateway/src/"
+        "model_autoresearch_campaign_configured_runtime.py"
+    )
+    bootstrap_source = bootstrap_path.read_text(encoding="utf-8")
+    runtime_source = runtime_path.read_text(encoding="utf-8")
+    tree = ast.parse(runtime_source)
     imported = {
         alias.name
         for node in ast.walk(tree)
@@ -1164,7 +1169,7 @@ def test_bootstrap_owns_canonical_guard_profile_and_has_no_callback_injection():
     assert len(prompt_guard_values) == 1
     assert isinstance(prompt_guard_values[0], ast.Name)
     assert prompt_guard_values[0].id == "trusted_prompt_guard"
-    assert "unsupported_model_autoresearch_campaign_prompt_guard_profile" in source
+    assert "unsupported_model_autoresearch_campaign_prompt_guard_profile" in bootstrap_source
 
 
 def test_canonical_guard_source_has_no_escape_or_sensitive_logging_surface():

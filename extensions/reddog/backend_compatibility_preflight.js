@@ -149,12 +149,33 @@ function workspaceRoot(vscode, fallback) {
     : fallback;
 }
 
+function explicitConfigurationValue(configuration, key) {
+  if (!configuration || typeof configuration.inspect !== 'function') return undefined;
+  const inspected = configuration.inspect(key);
+  if (!inspected || typeof inspected !== 'object') return undefined;
+  for (const field of [
+    'workspaceFolderLanguageValue', 'workspaceFolderValue',
+    'workspaceLanguageValue', 'workspaceValue',
+    'globalLanguageValue', 'globalValue'
+  ]) {
+    const value = inspected[field];
+    if (value !== undefined && value !== null && value !== '') return value;
+  }
+  return undefined;
+}
+
 function configurationValue(vscode, currentNamespace, legacyNamespace, key, fallback) {
-  const currentValue = vscode.workspace.getConfiguration(currentNamespace).get(key);
+  const current = vscode.workspace.getConfiguration(currentNamespace);
+  const legacy = vscode.workspace.getConfiguration(legacyNamespace);
+  const explicitCurrent = explicitConfigurationValue(current, key);
+  if (explicitCurrent !== undefined) return explicitCurrent;
+  const explicitLegacy = explicitConfigurationValue(legacy, key);
+  if (explicitLegacy !== undefined) return explicitLegacy;
+  const currentValue = current.get(key);
   if (currentValue !== undefined && currentValue !== null && currentValue !== '') {
     return currentValue;
   }
-  const legacyValue = vscode.workspace.getConfiguration(legacyNamespace).get(key);
+  const legacyValue = legacy.get(key);
   return legacyValue !== undefined && legacyValue !== null && legacyValue !== ''
     ? legacyValue
     : fallback;
@@ -246,6 +267,37 @@ function buildBlockedResult(installState, client) {
   };
 }
 
+function buildAuditDegradedResult(installState, client) {
+  const source = installState && typeof installState === 'object' ? installState : {};
+  const compatibility = projectBackendCompatibility(source.backend_compatibility);
+  const safeState = safeInstallState(source, compatibility, client);
+  const reasons = compatibility.rejection_reasons;
+  const content = [
+    '## RedDog Audit Dialogue',
+    '',
+    'The repository backend failed its integrity check, so I did not run workspace code or contact a model.',
+    '',
+    '- audit dialogue remains available for this verified local diagnosis [OBSERVED]',
+    '- repository grounding and code claims are unavailable until compatibility is restored [OBSERVED]',
+    '- execution authority remains disabled [OBSERVED]',
+    '- reasons: ' + reasons.join(', ') + ' [OBSERVED]',
+    '- next action: restore or install the backend matching this RedDog build, then retry the original request [INFERRED]'
+  ].join('\n');
+  const reviewPacket = blockedReviewPacket(compatibility);
+  reviewPacket.schema_version = 'reddog_backend_compatibility_audit_degraded.v1';
+  reviewPacket.decision = 'AUDIT_DEGRADED_LOCALLY';
+  reviewPacket.audit_dialogue_available = true;
+  return { ok: true,
+    reason: 'backend_compatibility_audit_degraded',
+    detail: reasons.join(', '),
+    content,
+    history: [],
+    review_packet: reviewPacket,
+    install_state: safeState,
+    copy_markdown: content + '\n\n' + client.buildInstallStateSection(safeState)
+  };
+}
+
 function installStatusMessage(state) {
   const value = state && typeof state === 'object' ? state : {};
   const compatibility = value.backend_compatibility;
@@ -286,6 +338,7 @@ function enforceRuntimeGate(runtimeGate, compatibility) {
 module.exports = {
   ...constants,
   activationWarning,
+  buildAuditDegradedResult,
   buildBlockedResult,
   configurationValue,
   detectInstallState,

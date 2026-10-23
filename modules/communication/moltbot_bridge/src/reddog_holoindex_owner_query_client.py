@@ -4,7 +4,6 @@ This module isolates transport from the RedDog read-only audit worker. It has
 no indexing or repository mutation authority and accepts only a loopback HTTP
 endpoint with bearer authentication.
 """
-
 from __future__ import annotations
 
 import ipaddress
@@ -21,16 +20,31 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
 from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
-from holo_index.repository_state import read_repository_state
+from holo_index.repository_state import read_repository_state, repository_root_digest
+from holo_index.retrieval_runtime_binding import (
+    is_retrieval_ranker_digest,
+    is_retrieval_runtime_digest,
+    retrieval_ranker_digest_from,
+    retrieval_runtime_binding_from, runtime_environment_digest_from,
+)
 from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     MIN_BEARER_TOKEN_CHARS,
     TOKEN_TOO_SHORT_ERROR,
 )
-
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_replica_binding import (
+    parse_replica_binding,
+)
 
 HOLOINDEX_QUERY_SERVICE_URL_ENV = "HOLOINDEX_QUERY_SERVICE_URL"
 HOLOINDEX_QUERY_SERVICE_TOKEN_ENV = "HOLOINDEX_QUERY_SERVICE_TOKEN"
 MAX_HOLOINDEX_SERVICE_RESPONSE_BYTES = 2_000_000
+_REPLICA_PUBLIC_FIELDS = (
+    "query_replica_descriptor_digest",
+    "query_replica_generation_id",
+    "query_replica_id",
+    "query_replica_path_identity_digest",
+)
+_EMPTY_REPLICA_BINDING = ("", "", "", "")
 
 
 @dataclass
@@ -41,9 +55,13 @@ class _OwnerResponseState:
     stale_reasons: list[str]
     raw_result: Mapping[str, Any]
     repo_head_sha: str
+    repo_root_digest: str
     generation_id: str
     receipt_digest: str
     retrieval_mode: str
+    replica_binding: tuple[str, str, str, str]
+    retrieval_runtime_ranker_digest: str
+    runtime_environment_digest: str
 
 
 @dataclass(frozen=True)
@@ -53,6 +71,7 @@ class _OwnerQueryContext:
     endpoint: str
     token: str
     expected_head: str
+    expected_root_digest: str
     started: float
     deadline: float
 
@@ -157,12 +176,19 @@ def _service_token(value: str | None) -> tuple[str, str]:
     return token, ""
 
 
-def _request_payload(*, query: str, limit: int, expected_head: str) -> bytes:
+def _request_payload(
+    *,
+    query: str,
+    limit: int,
+    expected_head: str,
+    expected_root_digest: str,
+) -> bytes:
     return json.dumps(
         {
             "query": query,
             "limit": max(1, min(int(limit or 8), 20)),
             "expected_repo_head_sha": expected_head,
+            "expected_repo_root_digest": expected_root_digest,
         },
         separators=(",", ":"),
     ).encode("utf-8")
@@ -315,6 +341,9 @@ def _response_state(payload: Mapping[str, Any]) -> _OwnerResponseState:
         if isinstance(raw_reasons, list)
         else []
     )
+    replica = parse_replica_binding(
+        tuple(payload.get(key) for key in _REPLICA_PUBLIC_FIELDS)
+    )
     return _OwnerResponseState(
         ok=ok,
         error=_error_code(
@@ -327,16 +356,45 @@ def _response_state(payload: Mapping[str, Any]) -> _OwnerResponseState:
         stale_reasons=stale_reasons,
         raw_result=raw_result,
         repo_head_sha=str(payload.get("repo_head_sha") or ""),
+        repo_root_digest=str(payload.get("repo_root_digest") or ""),
         generation_id=str(payload.get("freshness_generation_id") or ""),
         receipt_digest=str(payload.get("freshness_receipt_digest") or ""),
         retrieval_mode=str(payload.get("retrieval_mode") or "").lower(),
+        replica_binding=replica or _EMPTY_REPLICA_BINDING,
+        retrieval_runtime_ranker_digest=retrieval_ranker_digest_from(payload),
+        runtime_environment_digest=runtime_environment_digest_from(payload),
+    )
+
+
+def _response_contract_checks(
+    state: _OwnerResponseState, *, success_contract_valid: bool,
+    expected_head: str, repo_root: Path,
+) -> tuple[tuple[bool, str, str], ...]:
+    return (
+        (not success_contract_valid, "HOLOINDEX_QUERY_SERVICE_CONTRACT_INVALID",
+         "owner_response_contract_invalid"),
+        (state.repo_head_sha != expected_head, "REPO_HEAD_MISMATCH",
+         "stale_repo_head_sha"),
+        (state.repo_root_digest != repository_root_digest(repo_root),
+         "REPO_ROOT_MISMATCH", "repository_root_mismatch"),
+        (not state.generation_id or not state.receipt_digest,
+         "MISSING_GENERATION_BINDING", ""),
+        (state.retrieval_mode != "semantic", "SEMANTIC_BACKEND_UNAVAILABLE", ""),
+        (state.replica_binding == _EMPTY_REPLICA_BINDING,
+         "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH",
+         "query_replica_binding_mismatch"),
+        (not is_retrieval_ranker_digest(state.retrieval_runtime_ranker_digest),
+         "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH",
+         "retrieval_runtime_ranker_binding_invalid"),
+        (not is_retrieval_runtime_digest(state.runtime_environment_digest),
+         "HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH",
+         "runtime_environment_binding_invalid"),
     )
 
 
 def _apply_response_contract(
-    state: _OwnerResponseState,
-    payload: Mapping[str, Any],
-    expected_head: str,
+    state: _OwnerResponseState, payload: Mapping[str, Any],
+    expected_head: str, repo_root: Path,
 ) -> None:
     contract_valid = bool(
         payload.get("schema_version") == "holoindex_query_service.v1"
@@ -355,27 +413,9 @@ def _apply_response_contract(
         state.ok = False
         state.error = "HOLOINDEX_QUERY_SERVICE_CONTRACT_INVALID"
         state.stale_reasons.append("owner_response_contract_invalid")
-    checks = (
-        (
-            not success_contract_valid,
-            "HOLOINDEX_QUERY_SERVICE_CONTRACT_INVALID",
-            "owner_response_contract_invalid",
-        ),
-        (
-            state.repo_head_sha != expected_head,
-            "REPO_HEAD_MISMATCH",
-            "stale_repo_head_sha",
-        ),
-        (
-            not state.generation_id or not state.receipt_digest,
-            "MISSING_GENERATION_BINDING",
-            "",
-        ),
-        (
-            state.retrieval_mode != "semantic",
-            "SEMANTIC_BACKEND_UNAVAILABLE",
-            "",
-        ),
+    checks = _response_contract_checks(
+        state, success_contract_valid=success_contract_valid,
+        expected_head=expected_head, repo_root=repo_root,
     )
     for failed, failure_code, reason in checks:
         if state.ok and failed:
@@ -383,6 +423,12 @@ def _apply_response_contract(
             state.error = failure_code
             if reason:
                 state.stale_reasons.append(reason)
+
+
+def _payload_hits(payload: Mapping[str, Any]) -> list[dict[str, Any]]:
+    raw_hits = payload.get("hits")
+    return [dict(item) for item in raw_hits if isinstance(item, Mapping)] if isinstance(
+        raw_hits, list) else []
 
 
 def _normalized_response(
@@ -395,7 +441,8 @@ def _normalized_response(
     deadline: float,
 ) -> Mapping[str, Any]:
     state = _response_state(payload)
-    _apply_response_contract(state, payload, expected_head)
+    _apply_response_contract(state, payload, expected_head, repo_root)
+    hits = _payload_hits(payload)
     if state.ok:
         repository_error = _post_query_repository_error(
             repo_root, expected_head, deadline
@@ -408,11 +455,13 @@ def _normalized_response(
         state.freshness = "STALE"
     if not state.ok and not state.stale_reasons:
         state.stale_reasons.append("holoindex_owner_query_failed")
+    replica_binding = dict(zip(_REPLICA_PUBLIC_FIELDS, state.replica_binding))
     return {
         "ok": state.ok,
         "source": "holoindex_owner_service",
         "query": query,
         "freshness": state.freshness,
+        "hits": hits,
         "raw_result": state.raw_result,
         "error": state.error,
         "latency_ms": int((time.monotonic() - started) * 1000),
@@ -422,8 +471,11 @@ def _normalized_response(
         "freshness_receipt_digest": state.receipt_digest,
         "freshness_receipt_path": "",
         "repo_head_sha": state.repo_head_sha,
+        "repo_root_digest": state.repo_root_digest,
         "retrieval_mode": state.retrieval_mode,
         "no_holoindex_reindex_performed": True,
+        **retrieval_runtime_binding_from(payload),
+        **replica_binding,
     }
 
 
@@ -511,6 +563,7 @@ def _query_context(
         endpoint=endpoint,
         token=token,
         expected_head=repository_state.head_sha,
+        expected_root_digest=repository_root_digest(repo_root),
         started=started,
         deadline=deadline,
     ), None
@@ -527,6 +580,7 @@ def _execute_owner_request(
             query=context.query,
             limit=limit,
             expected_head=context.expected_head,
+            expected_root_digest=context.expected_root_digest,
         ),
         headers={
             "Authorization": f"Bearer {context.token}",

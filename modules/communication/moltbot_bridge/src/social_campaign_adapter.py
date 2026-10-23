@@ -6,6 +6,7 @@ Command format (strict):
 
 Supported campaigns:
   research_x_to_ln_group
+  antifafm
 
 Example:
   social campaign research_x_to_ln_group \
@@ -23,6 +24,7 @@ from typing import Any, Dict, Optional, Tuple
 
 SUPPORTED_CAMPAIGNS = {
     "research_x_to_ln_group",
+    "antifafm",
 }
 
 CAMPAIGN_ALIASES = {
@@ -49,7 +51,12 @@ def _parse_campaign_command(message: str) -> Optional[Tuple[str, Dict[str, str]]
     if not remainder:
         return None
 
-    parts = shlex.split(remainder)
+    try:
+        parts = shlex.split(remainder)
+    except ValueError:
+        if remainder.split(None, 1)[0].lower() == "antifafm":
+            return "antifafm", {"_invalid_command": "true"}
+        raise
     if not parts:
         return None
 
@@ -61,16 +68,27 @@ def _parse_campaign_command(message: str) -> Optional[Tuple[str, Dict[str, str]]
     params: Dict[str, str] = {}
     for token in parts[1:]:
         if "=" not in token:
+            if campaign == "antifafm":
+                return campaign, {"_invalid_command": "true"}
             continue
         key, value = token.split("=", 1)
         key = key.strip().lower()
         value = value.strip()
+        if campaign == "antifafm" and (not key or key in params):
+            return campaign, {"_invalid_command": "true"}
         if key:
             params[key] = value
     return campaign, params
 
 
 async def execute_social_campaign(campaign: str, params: Dict[str, str]) -> Dict[str, Any]:
+    if campaign == "antifafm":
+        from modules.platform_integration.social_media_orchestrator.src.antifafm_campaign import (
+            execute_antifafm_campaign,
+        )
+
+        return await execute_antifafm_campaign(params)
+
     if campaign != "research_x_to_ln_group":
         return {"success": False, "campaign": campaign, "error": "unsupported campaign"}
 
@@ -141,8 +159,9 @@ async def handle_social_campaign_intent(message: str, sender: str = "") -> Optio
 
     try:
         result = await execute_social_campaign(campaign, params)
+        label = "result" if campaign == "antifafm" else "executed"
         return (
-            f"Social campaign executed for {sender or 'unknown_sender'}:\n"
+            f"Social campaign {label} for {sender or 'unknown_sender'}:\n"
             f"{json.dumps(result, indent=2, ensure_ascii=False)}"
         )
     except Exception as exc:

@@ -19,7 +19,6 @@ Usage:
 import logging
 from typing import Optional, List
 from modules.infrastructure.shared_utilities.youtube_channel_registry import group_channels_by_browser, get_channel_by_key
-from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import get_peak_slots_et
 
 logger = logging.getLogger(__name__)
 
@@ -948,6 +947,7 @@ def run_multi_channel_scheduler(
     from selenium import webdriver
     from selenium.webdriver.chrome.options import Options as ChromeOptions
     from selenium.webdriver.edge.options import Options as EdgeOptions
+    from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import get_peak_slots_et
     
     # Reuse LEGO blocks from multi_channel_coordinator (oops detection)
     from modules.communication.livechat.src.multi_channel_coordinator import (

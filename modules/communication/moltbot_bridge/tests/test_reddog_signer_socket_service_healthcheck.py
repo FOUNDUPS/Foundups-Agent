@@ -5,7 +5,27 @@ from __future__ import annotations
 import ast
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
+import pytest
+
+import modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck as healthcheck
+
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    encode_ed25519_public_key,
+    encode_ed25519_signature,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
+    SigningRequest,
+    SigningResponse,
+    public_key_fingerprint,
+)
+from modules.communication.moltbot_bridge.src.reddog_signer_mutual_peer_handshake import (
+    canonical_signer_peer_response_attestation_input,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun import (
     PROVIDER_MODE_WSP71_PERMISSIONED,
 )
@@ -13,9 +33,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_confi
     SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_healthcheck import (
+    FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED,
     FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED,
     FAIL_SIGNER_HEALTHCHECK_CONFIG_MISMATCH,
     FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING,
+    FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID,
     FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_MALFORMED,
     FAIL_SIGNER_HEALTHCHECK_RUN_PACKET_PATH_INVALID,
     FAIL_SIGNER_HEALTHCHECK_SIGNER_REJECTED,
@@ -36,6 +58,21 @@ MODULE_PATH = (
     / "src"
     / "reddog_signer_socket_service_healthcheck.py"
 )
+_PRINCIPAL_PRIVATE_KEY = Ed25519PrivateKey.from_private_bytes(bytes(range(32)))
+_REDDOG_PRIVATE_KEY = Ed25519PrivateKey.from_private_bytes(bytes(range(1, 33)))
+
+
+def _public_key(private_key: Ed25519PrivateKey) -> str:
+    return encode_ed25519_public_key(
+        private_key.public_key().public_bytes(
+            encoding=serialization.Encoding.Raw,
+            format=serialization.PublicFormat.Raw,
+        )
+    )
+
+
+_PRINCIPAL_PUBLIC_KEY = _public_key(_PRINCIPAL_PRIVATE_KEY)
+_REDDOG_PUBLIC_KEY = _public_key(_REDDOG_PRIVATE_KEY)
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -51,9 +88,26 @@ def _write_json(path: Path, payload: object) -> Path:
 
 
 def _config(socket_path: Path, **overrides: object) -> dict[str, object]:
+    runtime_root = socket_path.parent.resolve()
+    signer_runtime_root = (
+        runtime_root.parent / f"{runtime_root.name}-signer-state"
+    ).resolve()
     payload: dict[str, object] = {
         "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
-        "socket_path": str(socket_path),
+        "runtime_root": str(runtime_root),
+        "signer_runtime_root": str(signer_runtime_root),
+        "socket_path": str(socket_path.resolve()),
+        "control_loop_anchor_path": str(
+            signer_runtime_root / "signer_control_loop_anchor.json"
+        ),
+        "control_loop_authority_policy": {
+            "issuer_principal_id": "github:mjtrout",
+            "signer_public_key": _REDDOG_PUBLIC_KEY,
+            "key_epoch": "epoch-1",
+            "consensus_receipt_digest": "sha256:" + "1" * 64,
+            "authority_profile_digest": "sha256:" + "2" * 64,
+            "authority_profile_source_receipt_id": "sha256:" + "3" * 64,
+        },
         "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
         "allow_test_only_key_material": False,
         "permission_snapshot_fresh": True,
@@ -61,30 +115,7 @@ def _config(socket_path: Path, **overrides: object) -> dict[str, object]:
         "timeout_s": 2.5,
         "max_request_bytes": 4096,
         "max_response_bytes": 8192,
-        "key_provider_profiles": [
-            {
-                "signer_profile_id": "principal-identity",
-                "signer_agent_id": "signer:principal",
-                "signing_key_ref": "op://prod-vault/principal/private",
-                "audit_mac_key_ref": "op://prod-vault/principal/audit",
-                "expected_public_key": "pub:principal",
-                "expected_key_fingerprint": "sha256:principal",
-                "expected_key_epoch": "epoch-1",
-                "permission_snapshot_digest": "sha256:permission",
-                "ttl_seconds": 60,
-            },
-            {
-                "signer_profile_id": "reddog-work-authority",
-                "signer_agent_id": "signer:reddog",
-                "signing_key_ref": "op://prod-vault/reddog/private",
-                "audit_mac_key_ref": "op://prod-vault/reddog/audit",
-                "expected_public_key": "pub:reddog",
-                "expected_key_fingerprint": "sha256:reddog",
-                "expected_key_epoch": "epoch-1",
-                "permission_snapshot_digest": "sha256:permission",
-                "ttl_seconds": 60,
-            },
-        ],
+        "key_provider_profiles": _key_provider_profiles(),
         "peer_policy": {
             "uid_to_principal": {"1001": "github:mjtrout"},
             "allowed_gids": [1002],
@@ -94,6 +125,37 @@ def _config(socket_path: Path, **overrides: object) -> dict[str, object]:
     }
     payload.update(overrides)
     return payload
+
+
+def _key_provider_profiles() -> list[dict[str, object]]:
+    return [
+        {
+            "signer_profile_id": "principal-identity",
+            "signer_agent_id": "signer:principal",
+            "signing_key_ref": "op://prod-vault/principal/private",
+            "audit_mac_key_ref": "op://prod-vault/principal/audit",
+            "expected_public_key": _PRINCIPAL_PUBLIC_KEY,
+            "expected_key_fingerprint": public_key_fingerprint(
+                _PRINCIPAL_PUBLIC_KEY
+            ),
+            "expected_key_epoch": "epoch-1",
+            "permission_snapshot_digest": "sha256:" + "4" * 64,
+            "ttl_seconds": 60,
+        },
+        {
+            "signer_profile_id": "reddog-work-authority",
+            "signer_agent_id": "signer:reddog",
+            "signing_key_ref": "op://prod-vault/reddog/private",
+            "audit_mac_key_ref": "op://prod-vault/reddog/audit",
+            "expected_public_key": _REDDOG_PUBLIC_KEY,
+            "expected_key_fingerprint": public_key_fingerprint(
+                _REDDOG_PUBLIC_KEY
+            ),
+            "expected_key_epoch": "epoch-1",
+            "permission_snapshot_digest": "sha256:" + "4" * 64,
+            "ttl_seconds": 60,
+        },
+    ]
 
 
 def _packet(repo: Path, runtime: Path, *, config_payload: dict[str, object] | None = None) -> Path:
@@ -106,6 +168,9 @@ def _packet(repo: Path, runtime: Path, *, config_payload: dict[str, object] | No
         repo_root=repo,
         config_path=config_path,
         output_path=packet_path,
+        owner_authority_config_path=(
+            runtime.parent / "signer-owner" / "owner.json"
+        ),
         python_executable="python",
     )
     assert result.accepted is True
@@ -114,25 +179,157 @@ def _packet(repo: Path, runtime: Path, *, config_payload: dict[str, object] | No
 
 def _accepted_connector(_path: Path, request: bytes, _timeout: float, _max_bytes: int) -> bytes:
     decoded = json.loads(request.decode("utf-8"))
-    public_key = decoded["request"]["signer_public_key"]
-    return (
-        json.dumps(
-            {
-                "accepted": True,
-                "signature": "sig:healthcheck",
-                "signer_public_key": public_key,
-                "key_fingerprint": "sha256:fingerprint",
-                "key_epoch": "epoch-1",
-                "audit_mac": "audit:healthcheck",
-                "boundary_attested": True,
-                "requester_identity_attested": True,
-                "signer_loads_no_untrusted_code": True,
-                "no_secret_material_returned": True,
-            },
-            sort_keys=True,
+    signing_request = SigningRequest(**decoded["request"])
+    public_key = signing_request.signer_public_key
+    signature = encode_ed25519_signature(
+        _REDDOG_PRIVATE_KEY.sign(
+            signing_request.signing_input.encode("utf-8")
         )
+    )
+    response = SigningResponse(
+        accepted=True,
+        signature=signature,
+        signer_public_key=public_key,
+        key_fingerprint=public_key_fingerprint(public_key),
+        key_epoch="epoch-1",
+        audit_mac="audit:healthcheck",
+        boundary_attested=True,
+        requester_identity_attested=True,
+        signer_loads_no_untrusted_code=True,
+        no_secret_material_returned=True,
+    )
+    response = SigningResponse(
+        **{
+            **response.to_dict(),
+            "audit_attestation_signature": encode_ed25519_signature(
+                _REDDOG_PRIVATE_KEY.sign(
+                    canonical_signer_peer_response_attestation_input(
+                        signing_request, response
+                    ).encode("utf-8")
+                )
+            ),
+        }
+    )
+    return (
+        json.dumps(response.to_dict(), sort_keys=True)
         + "\n"
     ).encode("utf-8")
+
+
+MANIFEST_ID = "sha256:" + "1" * 64
+ARTIFACT_GENERATION_DIGEST = "sha256:" + "2" * 64
+
+
+def _manifest_bindings() -> dict[str, str]:
+    return {
+        "manifest_id": MANIFEST_ID,
+        "artifact_generation_digest": ARTIFACT_GENERATION_DIGEST,
+    }
+
+
+@pytest.fixture(autouse=True)
+def synthetic_identity(monkeypatch):
+    identity = SimpleNamespace(
+        geteuid=lambda: 1001, getegid=lambda: 1002,
+        getuid=lambda: 9001, getgid=lambda: 9002, getgroups=lambda: [1002],
+    )
+    monkeypatch.setattr(healthcheck, "os", identity, raising=False)
+    return identity
+
+
+@pytest.mark.parametrize("uid,principal", [(1001, "github:mjtrout"), (2002, "agent:worker")])
+def test_healthcheck_default_selects_effective_uid(tmp_path, synthetic_identity, uid, principal):
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    config = _config(runtime / "signer.sock")
+    config["peer_policy"]["uid_to_principal"]["2002"] = "agent:worker"
+    synthetic_identity.geteuid = lambda: uid
+    requests = []
+
+    def connector(*args):
+        requests.append(json.loads(args[1])["request"]["requester_principal_id"])
+        return _accepted_connector(*args)
+
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=_packet(repo, runtime, config_payload=config),
+        connector=connector, **_manifest_bindings(),
+    )
+    assert result.accepted is True
+    assert result.requester_principal_id == principal
+    assert requests == [principal]
+
+
+def _identity_unavailable():
+    raise OSError("synthetic credential read failure")
+
+
+@pytest.mark.parametrize("mode", [
+    "unmapped_uid", "disallowed_egid", "missing_uid", "missing_gid", "error_uid", "error_gid",
+])
+def test_healthcheck_rejects_unresolved_effective_identity_before_connect(tmp_path, synthetic_identity, mode):
+    repo = _repo(tmp_path)
+    packet = _packet(repo, tmp_path / "runtime")
+    if mode == "unmapped_uid":
+        synthetic_identity.geteuid = lambda: 9999
+    elif mode == "disallowed_egid":
+        synthetic_identity.getegid = lambda: 9999
+    elif mode.startswith("missing_"):
+        delattr(synthetic_identity, "geteuid" if mode.endswith("uid") else "getegid")
+    else:
+        setattr(synthetic_identity, "geteuid" if mode.endswith("uid") else "getegid", _identity_unavailable)
+    requests = []
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=packet, connector=lambda *args: requests.append(args),
+        **_manifest_bindings(),
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == (FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID,)
+    assert requests == []
+
+
+@pytest.mark.parametrize("requester", ["", False, 0, "\u00e9"])
+def test_healthcheck_invalid_explicit_requester_never_defaults(tmp_path, requester):
+    repo = _repo(tmp_path)
+    requests = []
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=_packet(repo, tmp_path / "runtime"),
+        requester_principal_id=requester, connector=lambda *args: requests.append(args),
+        **_manifest_bindings(),
+    )
+    assert result.accepted is False
+    assert result.rejection_reasons == (FAIL_SIGNER_HEALTHCHECK_REQUESTER_INVALID,)
+    assert requests == []
+
+
+def test_healthcheck_explicit_requester_does_not_require_local_identity(tmp_path, monkeypatch):
+    monkeypatch.setattr(healthcheck, "os", SimpleNamespace())
+    repo = _repo(tmp_path)
+    requests = []
+
+    def connector(*args):
+        requests.append(json.loads(args[1])["request"]["requester_principal_id"])
+        return _accepted_connector(*args)
+
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=_packet(repo, tmp_path / "runtime"),
+        requester_principal_id="github:mjtrout", connector=connector, **_manifest_bindings(),
+    )
+    assert result.accepted is True
+    assert requests == ["github:mjtrout"]
+
+
+def test_healthcheck_unrestricted_gids_accept_mapped_effective_uid(tmp_path, synthetic_identity):
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    config = _config(runtime / "signer.sock")
+    config["peer_policy"]["allowed_gids"] = []
+    synthetic_identity.getegid = lambda: 9999
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=_packet(repo, runtime, config_payload=config),
+        connector=_accepted_connector, **_manifest_bindings(),
+    )
+    assert result.accepted is True
+    assert result.requester_principal_id == "github:mjtrout"
 
 
 def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_path: Path) -> None:
@@ -144,6 +341,7 @@ def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_pa
         repo_root=repo,
         run_packet_path=packet_path,
         connector=_accepted_connector,
+        **_manifest_bindings(),
     )
 
     assert result.accepted is True
@@ -153,10 +351,14 @@ def test_healthcheck_validates_run_packet_config_and_returns_digests_only(tmp_pa
     assert result.config_digest and result.config_digest.startswith("sha256:")
     assert result.socket_path == str((runtime / "signer.sock").resolve())
     assert result.signer_profile_id == "reddog-work-authority"
-    assert result.signer_public_key == "pub:reddog"
+    assert result.signer_public_key == _REDDOG_PUBLIC_KEY
     assert result.requester_principal_id == "github:mjtrout"
     assert result.request_digest and result.request_digest.startswith("sha256:")
     assert result.response_digest and result.response_digest.startswith("sha256:")
+    assert result.peer_handshake_verified is True
+    assert result.manifest_id == MANIFEST_ID
+    assert result.artifact_generation_digest == ARTIFACT_GENERATION_DIGEST
+    assert result.peer_handshake_expires_at is not None
     assert result.no_signature_value_returned is True
     serialized = json.dumps(result.to_dict(), sort_keys=True)
     assert "sig:healthcheck" not in serialized
@@ -205,6 +407,9 @@ def test_healthcheck_rejects_missing_profile_and_signer_rejection(tmp_path: Path
     runtime = tmp_path / "runtime"
     no_reddog = _config(runtime / "signer.sock")
     no_reddog["key_provider_profiles"] = [no_reddog["key_provider_profiles"][0]]
+    no_reddog["control_loop_authority_policy"]["signer_public_key"] = (
+        _PRINCIPAL_PUBLIC_KEY
+    )
     missing_profile = run_reddog_signer_socket_service_healthcheck(
         repo_root=repo,
         run_packet_path=_packet(repo, runtime, config_payload=no_reddog),
@@ -216,6 +421,7 @@ def test_healthcheck_rejects_missing_profile_and_signer_rejection(tmp_path: Path
         repo_root=repo,
         run_packet_path=reject_packet,
         connector=lambda *_: b'{"accepted":false,"rejection_code":"REJECT_TEST"}\n',
+        **_manifest_bindings(),
     )
 
     assert FAIL_SIGNER_HEALTHCHECK_PROFILE_MISSING in missing_profile.rejection_reasons
@@ -231,10 +437,61 @@ def test_healthcheck_rejects_unavailable_socket_without_connector(tmp_path: Path
     result = run_reddog_signer_socket_service_healthcheck(
         repo_root=repo,
         run_packet_path=packet_path,
+        **_manifest_bindings(),
     )
 
     assert result.accepted is False
     assert FAIL_SIGNER_HEALTHCHECK_CLIENT_REJECTED in result.rejection_reasons
+
+
+def test_healthcheck_never_accepts_an_unbound_manifest(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    packet_path = _packet(repo, tmp_path / "runtime")
+    called = False
+
+    def connector(*_args):
+        nonlocal called
+        called = True
+        return _accepted_connector(*_args)
+
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo,
+        run_packet_path=packet_path,
+        connector=connector,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED in (
+        result.rejection_reasons
+    )
+    assert called is False
+
+
+def test_healthcheck_rejects_all_zero_manifest_binding_before_connect(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    packet_path = _packet(repo, tmp_path / "runtime")
+    called = False
+
+    def connector(*_args):
+        nonlocal called
+        called = True
+        return _accepted_connector(*_args)
+
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo,
+        run_packet_path=packet_path,
+        connector=connector,
+        manifest_id="sha256:" + "0" * 64,
+        artifact_generation_digest=ARTIFACT_GENERATION_DIGEST,
+    )
+
+    assert result.accepted is False
+    assert FAIL_SIGNER_HEALTHCHECK_MANIFEST_BINDING_REQUIRED in (
+        result.rejection_reasons
+    )
+    assert called is False
 
 
 def test_healthcheck_module_has_no_spawn_secret_resolution_or_runtime_authority_surface() -> None:
@@ -273,3 +530,103 @@ def test_healthcheck_module_has_no_spawn_secret_resolution_or_runtime_authority_
                 assert node.func.id not in banned_name_calls
             if isinstance(node.func, ast.Attribute):
                 assert node.func.attr not in banned_attrs
+
+
+@pytest.mark.parametrize("mode", ["grant", "absent", "wrong-type", "exception"])
+def test_healthcheck_protected_request_never_falls_back_to_bare_sign(tmp_path, mode):
+    repo = _repo(tmp_path)
+    packet = _packet(repo, tmp_path / "runtime")
+    supplied, sent = [], []
+    def supply(request):
+        supplied.append(request)
+        if mode == "exception":
+            raise ValueError("unavailable")
+        return {"fixture_grant": "bounded-test-only"} if mode == "grant" else ([] if mode == "wrong-type" else None)
+    def connector(path, raw, timeout, limit):
+        decoded = json.loads(raw)
+        sent.append(decoded)
+        return _accepted_connector(path, raw, timeout, limit)
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=packet, requester_principal_id="github:mjtrout",
+        connector=connector, secret_access_grant_supplier=supply, **_manifest_bindings())
+    assert len(supplied) == 1
+    assert result.accepted is (mode == "grant")
+    assert not result.server_identity_verified
+    if mode == "grant":
+        assert len(sent) == 1 and sent[0]["schema_version"] == "reddog_signer_socket_request.v2"
+        assert sent[0]["request"] == supplied[0].to_dict()
+        assert sent[0]["secret_access_grant"] == {"fixture_grant": "bounded-test-only"}
+        assert result.session_id and result.key_epoch == "epoch-1"
+        assert result.socket_path_digest.startswith("sha256:")
+    else:
+        assert sent == []
+        assert "signer_healthcheck_grant_unavailable" in result.rejection_reasons
+
+
+def test_healthcheck_kernel_identity_disallows_custom_connector(tmp_path):
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    packet = _packet(repo, runtime)
+    called = []
+    def connector(*args):
+        called.append(True)
+        raise AssertionError("must reject before untrusted transport")
+    result = run_reddog_signer_socket_service_healthcheck(
+        repo_root=repo, run_packet_path=packet, requester_principal_id="github:mjtrout",
+        connector=connector, expected_server_uid=1234, expected_server_gid=1235,
+        trusted_socket_root=runtime, **_manifest_bindings())
+    assert not result.accepted and not result.server_identity_verified and called == []
+
+
+@pytest.mark.parametrize("mode", ["current", "wrong-uid", "wrong-gid"])
+def test_healthcheck_real_socket_checks_kernel_peer(tmp_path_factory, mode):
+    import os
+    import socket
+    import threading
+    if not hasattr(socket, "SO_PEERCRED"):
+        pytest.skip("Linux kernel peer credentials required")
+    root = tmp_path_factory.mktemp("hp")
+    repo = _repo(root)
+    runtime = root / "runtime"
+    packet = _packet(repo, runtime)
+    path = runtime / "signer.sock"
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    errors, requests = [], []
+    worker = None
+    try:
+        server.bind(str(path))
+        path.chmod(0o600)
+        server.listen(1)
+        server.settimeout(5)
+        def serve():
+            try:
+                with server.accept()[0] as client:
+                    client.settimeout(5)
+                    raw = b""
+                    while not raw.endswith(b"\n"):
+                        chunk = client.recv(4096)
+                        assert chunk, "truncated request"
+                        raw += chunk
+                        assert len(raw) < 16384
+                    requests.append(json.loads(raw))
+                    client.sendall(_accepted_connector(path, raw, 2, 8192))
+            except Exception as exc:
+                errors.append(type(exc).__name__)
+        if mode == "current":
+            worker = threading.Thread(target=serve, daemon=True)
+            worker.start()
+        result = run_reddog_signer_socket_service_healthcheck(
+            repo_root=repo, run_packet_path=packet, requester_principal_id="github:mjtrout",
+            expected_server_uid=os.geteuid() + (mode == "wrong-uid"),
+            expected_server_gid=os.getegid() + (mode == "wrong-gid"),
+            trusted_socket_root=runtime, **_manifest_bindings())
+        assert result.accepted is (mode == "current")
+        assert result.server_identity_verified is (mode == "current")
+    finally:
+        server.close()
+        if worker:
+            worker.join(6)
+            assert not worker.is_alive()
+        path.unlink(missing_ok=True)
+    assert errors == []
+    assert len(requests) == (1 if mode == "current" else 0)

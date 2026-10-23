@@ -1,0 +1,132 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "f72fc5d65cdb2a1927e0bca2dae3ba1f4817d81e"
+  },
+  "execution_id": "HOLOINDEX_PREOWNER_REPO_HEAD_REPAIR_PHASE1",
+  "execution_plane": "local_tools_wre_runtime_and_wsp00_subagents",
+  "outcome": "completed",
+  "system_verdict": {
+    "slice": "reddog_holoindex_preowner_exact_head_postmerge_ingress",
+    "candidate_code_and_release": "verified",
+    "shared_owner_classifier_receipt_bound": true,
+    "dedicated_preowner_exception_exactly_bound": true,
+    "canonical_task_per_head": true,
+    "merged_exact_main_live_acceptance": "pending",
+    "runtime_environment_exact_closure_verified": false,
+    "retrieval_quality_rsi": "not_operational",
+    "holoindex_a_grade": "blocked",
+    "live_route_changed": false
+  },
+  "wsp15_allocation": {
+    "receipt_id": "sha256:33939db847e1c385c70d6d566348f30835db4aaa8152ce7cb0d7139a04a0277f",
+    "complexity": 5,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 20,
+    "priority": "P0",
+    "reasoning_tier": "ULTRA",
+    "decision": "admit only an independently reproduced exact pre-owner stale binding into the existing one-task-per-HEAD OpenClaw maintenance transaction"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "WSP_00 awakening passed at coherence 0.699 before candidate edits; independent verifier replay later passed at 0.715.",
+      "The governed exact-base query failed closed with REPO_HEAD_MISMATCH, freshness STALE, owner_attempts zero, no reindex, no authority mutation, workspace/authority HEAD f72fc5d65cdb2a1927e0bca2dae3ba1f4817d81e, and stale receipt HEAD 18cd53cc63d771b8636b7f73d7674d4f325ba4b0.",
+      "The query failure was preserved and no query-time reindex, owner restart, route mutation, replica write, queue mutation, or maintenance transaction was run before merge.",
+      "RedDog, moltbot_bridge, idle_automation, Holo runtime, incident, owner-classifier, coordinator, test, release, WSP_62, and prior exact-main acceptance documentation were retrieved before final closure."
+    ],
+    "research": [
+      "Freshness admission runs before owner acquisition, so restarting the resident owner cannot repair a stale exact-HEAD receipt.",
+      "The existing post-merge coordinator already owns the only canonical task and request event per HEAD; a new task family would duplicate authority and weaken idempotency.",
+      "The initial zero-attempt exception was rejected after audit because it leaked into the shared classifier and matched only the error kind; the accepted design confines it to the incident bridge and binds stale HEAD, generation, freshness digest, bounded reasons, query, authority, and effects.",
+      "The VSIX bridge requires the embedded pre-owner query to equal the normalized outer query before spawning Python and forwards no query receipt."
+    ],
+    "micro_pass": [
+      "Focused incident, pre-owner, root-binding, and durable-coordinator closure passed 75 tests.",
+      "Final affected Holo owner/controller/coordinator/authority plus governance selection passed 283 tests; backend generator is 8/8 within that result.",
+      "The shared classifier explicitly returns INVALID and transient false for the unreceipted result; receipt-bound same-error, different-error, changed stale binding, explicit null receipt, forged task ID, and duplicate-task counterexamples reject.",
+      "All candidate-created or changed Python production functions are at most 50 lines; inherited documentation remains exactly README 998 and INTERFACE 1527 lines, and tests are split into 449-line generic plus 218-line pre-owner modules.",
+      "The canonical registry was generated after staging the new test and is current at 1612 tests / 268 quarantined."
+    ],
+    "macro_pass": [
+      "Backend closure is 1365 runtime files at sha256:9c34a61bfeb4ea99bc35501e52eff0b3c186c4a084b697b78669e356a8db7039.",
+      "The extension contract is 18 shards / 6942 lines / 492 assertions at sha256:6a3cf131fc901f4e50257d2f7c95897a78cbc2cf5279cf5ec456fef807adb273.",
+      "The deterministic 67-file package is 948953 bytes at sha256:33a4a7bb09a6fec3ff9a9a7cc7e61267383b27d252c6c7be7502ec397ebe4754.",
+      "Fast, 32-test conversation, package, contract, and all four exhaustive release groups passed; final exhaustive wall was 180.005 seconds.",
+      "O:/RedDog-Releases/reddog-0.4.136.vsix is 276366 bytes at sha256:ccf65001c726839856353694cf3579bf7ce1b3eb41abed2bc9cb33ded3ced3f8; inspection proved version 0.4.136, 69 safe unique ZIP files, 67 exact source members, no byte mismatch, encryption, symlink, unsafe path, or credential-value pattern."
+    ],
+    "hard_think": [
+      "An unreceipted pre-owner observation cannot become general owner authority; it is an incident-specific maintenance trigger only after independent exact reproduction.",
+      "The independent result must match the complete stale binding, not merely status REPAIRABLE or error REPO_HEAD_MISMATCH.",
+      "A coordinator result with correct HEAD/root but a different task ID must reject before a sealed incident receipt is admitted.",
+      "Candidate validation and a VSIX artifact cannot replace merged exact-main OpenClaw execution, governed CURRENT query, and immutable post-query replica verification."
+    ],
+    "dialectic_sweep": [
+      "Restarting the owner is ineffective because freshness rejects before owner acquisition.",
+      "Admitting every zero-attempt result would bypass receipt-bound retry authentication and was rejected.",
+      "Adding REPO_HEAD_MISMATCH to the shared classifier would leak unreceipted evidence into post-completion and blocked-recovery callers and was removed.",
+      "Creating a new repair task would permit duplicate work; the accepted path reuses exact holoindex_postmerge_refresh:<HEAD> identity and proves one database task.",
+      "Matching only error kind would allow a receipt-bound or differently generated incident to substitute for the submitted observation and was rejected."
+    ],
+    "first_principles": [
+      "Query is read-only evidence and never maintenance authority.",
+      "One exact commit has one canonical post-merge maintenance task regardless of how many authenticated incidents observe the need.",
+      "Every accepted receipt must bind query, workspace, authority, target HEAD, stale generation, no-effect claims, exact task, and independently observed evidence.",
+      "HoloIndex A-grade and retrieval RSI remain false until exact runtime closure, independent evaluation, promotion/canary/rollback, and candidate-bound outcome learning are separately proven."
+    ],
+    "execute": [
+      "modules/infrastructure/idle_automation/src/holoindex_postmerge_contract.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_owner_result_verification.py",
+      "modules/communication/moltbot_bridge/src/reddog_holoindex_incident_repair_runtime.py",
+      "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_preowner_incident_repair.py",
+      "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_owner_query_root_binding.py",
+      "modules/infrastructure/idle_automation/tests/test_holoindex_postmerge_coordinator.py",
+      "extensions/reddog/holoindex_incident_repair.js",
+      "extensions/reddog/extension.js",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/package.json",
+      "scripts/reddog_backend_manifest.json",
+      "WSP_knowledge/WSP_Test_Registry.json",
+      "docs/audits/security/REDDOG_HOLO_PREOWNER_REPO_HEAD_ASSUMPTION_AUDIT_20260829.md",
+      "docs/audits/infrastructure/HOLOINDEX_PREOWNER_REPO_HEAD_REPAIR_WSP15_ALLOCATION_RECEIPT_PHASE1.json",
+      "O:/RedDog-Releases/reddog-0.4.136.vsix"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/HOLOINDEX_PREOWNER_REPO_HEAD_REPAIR_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "docs/audits/infrastructure/HOLOINDEX_PREOWNER_REPO_HEAD_REPAIR_WSP15_ALLOCATION_RECEIPT_PHASE1.json",
+    "docs/audits/security/REDDOG_HOLO_PREOWNER_REPO_HEAD_ASSUMPTION_AUDIT_20260829.md",
+    "modules/communication/moltbot_bridge/README.md",
+    "modules/communication/moltbot_bridge/INTERFACE.md",
+    "modules/communication/moltbot_bridge/ROADMAP.md",
+    "modules/communication/moltbot_bridge/ModLog.md",
+    "modules/communication/moltbot_bridge/tests/README.md",
+    "modules/communication/moltbot_bridge/tests/TestModLog.md",
+    "extensions/reddog/README.md",
+    "extensions/reddog/ROADMAP.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/README.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

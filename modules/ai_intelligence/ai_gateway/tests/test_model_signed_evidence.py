@@ -5,10 +5,13 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
+import pytest
+
 from model_signed_evidence_test_helpers import (
     BENCHMARK_FINGERPRINT,
     BENCHMARK_PUBLIC_KEY,
     DeterministicSignatureVerifier,
+    KEY_EPOCH,
     NOW,
     make_signed_evidence_receipt,
     make_verified_production_evidence,
@@ -45,6 +48,18 @@ CATALOG = "model_catalog_snapshot:test"
 SELECTION = "model_selection_receipt:test"
 BENCHMARK_RUN = "model_combination_benchmark_run:test"
 PROMOTION_POLICY = "sha256:promotion-policy"
+
+
+def _benchmark_resolver() -> StaticModelEvidenceKeyResolver:
+    return StaticModelEvidenceKeyResolver(
+        {
+            (
+                ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value,
+                BENCHMARK_FINGERPRINT,
+                KEY_EPOCH,
+            ): BENCHMARK_PUBLIC_KEY
+        }
+    )
 
 
 def _benchmark(model_id: str = "provider/model"):
@@ -126,9 +141,7 @@ def test_signed_evidence_verifies_role_key_ttl_and_signature():
     result = verify_model_signed_evidence_receipt(
         signed,
         expected_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,
-        key_resolver=StaticModelEvidenceKeyResolver(
-            {ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: BENCHMARK_PUBLIC_KEY}
-        ),
+        key_resolver=_benchmark_resolver(),
         signature_verifier=DeterministicSignatureVerifier(),
         now=NOW,
     )
@@ -137,9 +150,7 @@ def test_signed_evidence_verifies_role_key_ttl_and_signature():
     wrong_role = verify_model_signed_evidence_receipt(
         signed,
         expected_role=ModelEvidenceSignerRole.PROMOTION_AUTHORITY,
-        key_resolver=StaticModelEvidenceKeyResolver(
-            {ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: BENCHMARK_PUBLIC_KEY}
-        ),
+        key_resolver=_benchmark_resolver(),
         signature_verifier=DeterministicSignatureVerifier(),
         now=NOW,
     )
@@ -161,14 +172,48 @@ def test_signed_evidence_verifies_role_key_ttl_and_signature():
     bad_signature = verify_model_signed_evidence_receipt(
         forged,
         expected_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,
-        key_resolver=StaticModelEvidenceKeyResolver(
-            {ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: BENCHMARK_PUBLIC_KEY}
-        ),
+        key_resolver=_benchmark_resolver(),
         signature_verifier=DeterministicSignatureVerifier(),
         now=NOW,
     )
     assert bad_signature.accepted is False
     assert "signature_invalid" in bad_signature.reason_codes
+
+
+def test_trust_anchor_requires_exact_role_fingerprint_and_epoch() -> None:
+    with pytest.raises(
+        ValueError, match="trusted_model_evidence_key_tuple_required"
+    ):
+        StaticModelEvidenceKeyResolver(
+            {
+                ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: (
+                    BENCHMARK_PUBLIC_KEY
+                )
+            }
+        )
+
+    benchmark = _benchmark()
+    spoofed = make_signed_evidence_receipt(
+        signer_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,
+        public_key=BENCHMARK_PUBLIC_KEY,
+        fingerprint="fingerprint:attacker-selected",
+        model_id=benchmark.model_id,
+        catalog_snapshot_id=CATALOG,
+        selection_receipt_id=SELECTION,
+        benchmark_run_receipt_id=BENCHMARK_RUN,
+        benchmark_receipt=benchmark,
+        nonce="nonce:spoofed-epoch",
+    )
+    result = verify_model_signed_evidence_receipt(
+        spoofed,
+        expected_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,
+        key_resolver=_benchmark_resolver(),
+        signature_verifier=DeterministicSignatureVerifier(),
+        now=NOW,
+    )
+
+    assert result.accepted is False
+    assert result.reason_codes == ("signer_key_untrusted",)
 
 
 def test_nonce_consumed_only_when_admission_requests_it():
@@ -187,9 +232,7 @@ def test_nonce_consumed_only_when_admission_requests_it():
     store = InMemoryEvidenceNonceStore()
     kwargs = {
         "expected_role": ModelEvidenceSignerRole.BENCHMARK_VERIFIER,
-        "key_resolver": StaticModelEvidenceKeyResolver(
-            {ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: BENCHMARK_PUBLIC_KEY}
-        ),
+        "key_resolver": _benchmark_resolver(),
         "signature_verifier": DeterministicSignatureVerifier(),
         "now": NOW,
         "nonce_store": store,
@@ -199,6 +242,72 @@ def test_nonce_consumed_only_when_admission_requests_it():
     replay = verify_model_signed_evidence_receipt(signed, consume_nonce=True, **kwargs)
     assert replay.accepted is False
     assert replay.reason_codes == ("nonce_replay",)
+
+
+def test_benchmark_and_promotion_signers_must_be_independent() -> None:
+    benchmark = _benchmark()
+    promotion = _promotion(benchmark)
+    benchmark_signature, promotion_signature, resolver = _shared_signer_chain(
+        benchmark, promotion
+    )
+
+    with pytest.raises(
+        ValueError, match="benchmark_and_promotion_signers_not_independent"
+    ):
+        build_verified_model_production_evidence(
+            catalog_snapshot_id=CATALOG,
+            selection_receipt_id=SELECTION,
+            benchmark_run_receipt_id=BENCHMARK_RUN,
+            benchmark_receipt=benchmark,
+            promotion_receipt=promotion,
+            benchmark_signature_receipt=benchmark_signature,
+            promotion_signature_receipt=promotion_signature,
+            key_resolver=resolver,
+            signature_verifier=DeterministicSignatureVerifier(),
+            now=NOW,
+        )
+
+
+def _shared_signer_chain(benchmark, promotion):
+    benchmark_signature = make_signed_evidence_receipt(
+        signer_role=ModelEvidenceSignerRole.BENCHMARK_VERIFIER,
+        public_key=BENCHMARK_PUBLIC_KEY,
+        fingerprint=BENCHMARK_FINGERPRINT,
+        model_id=benchmark.model_id,
+        catalog_snapshot_id=CATALOG,
+        selection_receipt_id=SELECTION,
+        benchmark_run_receipt_id=BENCHMARK_RUN,
+        benchmark_receipt=benchmark,
+        nonce="nonce:shared:benchmark",
+    )
+    promotion_signature = make_signed_evidence_receipt(
+        signer_role=ModelEvidenceSignerRole.PROMOTION_AUTHORITY,
+        public_key=BENCHMARK_PUBLIC_KEY,
+        fingerprint=BENCHMARK_FINGERPRINT,
+        model_id=benchmark.model_id,
+        catalog_snapshot_id=CATALOG,
+        selection_receipt_id=SELECTION,
+        benchmark_run_receipt_id=BENCHMARK_RUN,
+        benchmark_receipt=benchmark,
+        promotion_receipt=promotion,
+        promotion_policy_digest=PROMOTION_POLICY,
+        nonce="nonce:shared:promotion",
+    )
+    resolver = StaticModelEvidenceKeyResolver(
+        {
+            (
+                ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value,
+                BENCHMARK_FINGERPRINT,
+                KEY_EPOCH,
+            ): BENCHMARK_PUBLIC_KEY,
+            (
+                ModelEvidenceSignerRole.PROMOTION_AUTHORITY.value,
+                BENCHMARK_FINGERPRINT,
+                KEY_EPOCH,
+            ): BENCHMARK_PUBLIC_KEY,
+        }
+    )
+    return benchmark_signature, promotion_signature, resolver
 
 
 def test_build_verified_production_evidence_rejects_panel_and_tampered_bindings():
@@ -236,9 +345,7 @@ def test_build_verified_production_evidence_rejects_panel_and_tampered_bindings(
             promotion_receipt=promotion,
             benchmark_signature_receipt=panel_signature,
             promotion_signature_receipt=evidence.entries[0].promotion_signature_receipt,
-            key_resolver=StaticModelEvidenceKeyResolver(
-                {ModelEvidenceSignerRole.BENCHMARK_VERIFIER.value: BENCHMARK_PUBLIC_KEY}
-            ),
+            key_resolver=_benchmark_resolver(),
             signature_verifier=DeterministicSignatureVerifier(),
             now=NOW,
         )
