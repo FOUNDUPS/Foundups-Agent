@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1766,
-  "quarantined_tests": 272,
+  "total_tests": 1767,
+  "quarantined_tests": 273,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -7559,6 +7559,21 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for model/provider status authority reconciliation.\n\nVerifies that get_model_availability_snapshot() is the canonical OpenClaw\nsnapshot builder, callable with or without a DAE instance, and that:\n  - local-target map derives from local_target_dirs() in openclaw_model_policy\n  - provider key/external-target resolution routes through policy functions\n  - startup_refresh_model_status writes the same output shape as runtime\n  - the snapshot includes a generated_on timestamp for freshness track"
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_moshpit_projection",
+      "path": "modules/communication/moltbot_bridge/tests/test_moshpit_projection.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-moltbot-bridge-operational",
+      "capabilities": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_file_write"
+      ],
+      "description": "Synthetic-only projection/renderer contracts, with no remote effects."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_openclaw_capability_audit",

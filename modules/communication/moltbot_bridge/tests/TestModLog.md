@@ -1,3 +1,41 @@
+## PR1645 projection-layer inventory — 2026-10-23
+
+WSP00/5/6/15/22/50/62/95/97. Before test edits, original proposal
+`4b316c976aa3cdba21b901191159716f3d58631d` contains 14 test functions in
+182 lines of `test_mosh_pit_projection.py`. Preserve its 13 functional tests
+under canonical `moshpit` naming. Transfer the exact wardrobe discovery test
+(original lines 174–182), skill, manifest and registry acceptance to existing
+#1648; do not turn it into an xfail or claim registration here. The current
+layer remains unmounted and unregistered. Reproduce expiry during source read
+before repair, then record actual collection/results and independent controls.
+Guarded normal-import reproduction collected 30 cases: all 29 original
+functional cases passed; the new source-read expiry control failed with
+`DID NOT RAISE(snapshot_expired)`. No errors, skips or guard violations.
+Original source hashes and failure receipts are preserved outside the checkout.
+The repaired frozen four-file candidate passes 87 cases on Windows and the same
+87 cases in minimal Linux CPython 3.12.3 with pytest 9.0.3; these overlap, not
+174 unique tests. All 13 original functional test bodies and three fixtures are
+retained. Clock-removal, private-fallback and escaping faults are detected by
+unchanged assertions in separate in-memory controls; disk source stays frozen.
+The focused workflow rejects caught effects and invalid/missing XML inventories.
+Independent normal-import probes pass 11 separately selected cases; two
+freshness-removal controls fail for their intended reasons with unchanged disk
+source and zero guarded effects. Independent review confirms original AST parity
+and workflow records. These probes overlap behavior, not a blinded benchmark.
+Hosted projection run39911497355 passes the same 87 cases with zero skipped or
+denied effects and 27 unchanged source bindings. General CI39911497382 exposes
+two separate publication gaps: stale generated test registry and 39 unreviewed
+whole-file secret-scan fingerprints. Preserve both failures until fresh checks.
+The canonical generator adds only the Moshpit row (1767 total / 273 quarantined).
+Its conservative AST classifier mistakes module-scope datetime.replace calls
+for file writes; all 1766 prior rows remain unchanged. The focused guarded job
+executes this file explicitly; default collection is not claimed. Independent
+review and a separate reproduction match all 39 unchanged findings to prior
+reviewed source; the existing ledger retains its 1735 entries and adds only those
+39 exact bindings. Five security-gate boundary tests pass; policy stays unchanged.
+Final hosted gates remain required. API-level guards are not an OS sandbox or
+native RSI execution evidence.
+
 ## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
 
 WSP00/6/10/15/22/50/97; preserve both hosted failures at `174955143d`.

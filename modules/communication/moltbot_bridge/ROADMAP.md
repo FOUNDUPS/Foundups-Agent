@@ -1669,11 +1669,11 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
 
 ## FoundUps Memex lane
 
-The FoundUp Memex grows from existing RedDog operational context, Brain,
-Breadcrumbs, authoritative work state, HoloIndex repository truth, verified
-outcomes, and roadmap receipts. Brain remains the durable-consolidation
-component inside the Memex. The lane does not begin as a separate personal
-second-brain database.
+The FoundUp Memex grows from RedDog context, Brain, Breadcrumbs, authoritative
+work state, HoloIndex repository truth, verified outcomes and roadmap receipts.
+Brain owns durable consolidation; no separate personal second-brain database.
+Moshpit is an unmounted, unregistered activity projection, not durable Brain.
+[PR1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590) retains host/reader/skill/Gmail-receipt acceptance.
 
 ### POC
 

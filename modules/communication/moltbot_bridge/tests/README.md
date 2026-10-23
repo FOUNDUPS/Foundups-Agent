@@ -912,23 +912,23 @@ The unchanged production baseline `55649b08dd` ran29 case IDs:22 passed and7 fai
 
 Final-head/main checks and owned closure remain bound to the canonical backlog publication receipt. These are synthetic SQLite regression results; provider delivery, PostgreSQL, concurrency, held-out generalization, native admission and retained RSI improvement are not established. Local application tests:0.
 
-## Correspondence and recipient CI baseline — 2026-09-28
+## Correspondence and projection test entrypoints
 
-The existing `test_reddog_recipient_preflight.py` contains 20 cases: 14 recipient
-contracts and six correspondence-state cases added by PR1930. Its green CI did
-not select this Python owner; the RedDog fast tier runs Node tests. The normal CI
-test job now selects the unchanged Python suite explicitly, with plugin autoload
-and conftest disabled, disposable runner DB/temp paths, and the existing SQLite
-fixture resetting `DatabaseManager` around persistence cases. No new cases or
-assertions are introduced in this baseline sprint.
+`test_reddog_recipient_preflight.py` runs explicitly in normal CI; the RedDog
+fast tier runs Node tests. Preserve isolated SQLite fixtures, disabled plugins
+and conftest, and disposable DB/temp paths. The 20-case September 28 selection
+was a historical baseline, not the current inventory. Exact receipts remain in
+the [RSI backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json) and TestModLog.
+Neither roundtrip success nor these fixtures prove live sending or retained RSI.
 
-Actual execution, exact-head checks and main readback are recorded through the
-[canonical RSI backlog](../../../../docs/roadmaps/rsi_swarm_backlog.json).
-No local application import or test execution is claimed. These synthetic tests
-do not establish live provider delivery, send authority, R25 consent, concurrent
-store semantics or retained RSI. Independently reviewed persisted-load schema,
-state-invariant and scope-binding gaps remain a separate follow-on; a passing
-roundtrip is not proof of those rejection paths.
+`test_moshpit_projection.py` exercises the unmounted/unregistered projection,
+renderer and query seam. Run the dedicated `moshpit-projection.yml` workflow's
+normal-import guard and exact selected suite; retain its collection, XML, source
+hashes, failures and effect-denial record. Cover source-read/release expiry,
+disclosure, bounds, date precision and escaping. No database/provider calls are
+allowed. Original skill discovery remains required in #1648, not skipped here.
+See [TestModLog](TestModLog.md#pr1645-projection-layer-inventory--2026-10-23)
+for the pre-edit inventory and actual qualification outcome.
 
 ## Supervisor-requester connected acceptance — 2026-09-27
 

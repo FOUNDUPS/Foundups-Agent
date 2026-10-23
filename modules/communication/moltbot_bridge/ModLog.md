@@ -1,3 +1,24 @@
+## PR1645 bounded Moshpit projection — 2026-10-23
+
+WSP00/5/6/10/15/22/50/62/95/97. Reconcile the existing proposal at
+`4b316c976aa3cdba21b901191159716f3d58631d` as a four-Python-path layer:
+canonical `moshpit` projector/renderer, current memory query seam and tests.
+The source-read expiry defect is reproduced before repair. No host, private
+store, website, skill registry, account effect or native worker is activated.
+The original skill/discovery assertion, unique Gmail-receipt policy and reader
+acceptance are retained in [existing PR1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590).
+TestModLog owns original inventory and qualification results. Interface, README
+and roadmap reconcile existing descriptions without increasing their line count;
+the obsolete V2 sender description now points to current Python V3 authority.
+The 87-case candidate passes guarded Windows and minimal Linux qualification;
+separate clock/privacy/escaping faults are detected. A bounded focused workflow
+runs the exact suite with normal imports and no database/network/process effects.
+Independent probes confirm expiry, disclosure, pagination identity and escaping;
+workflow review confirms actual assertions and effect-denial controls. The existing
+backend manifest gains exactly the projector; its member bound and digest pins
+are qualified without changing byte limits or WSP62 exemptions. Hosted checks
+and the final complete-source review remain required before publication.
+
 ## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
 
 WSP00/6/10/15/22/50/97; preserve both hosted failures at `174955143d`.

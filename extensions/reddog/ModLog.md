@@ -1,3 +1,13 @@
+## PR1645 Moshpit runtime-closure binding — 2026-10-23
+
+WSP00/6/10/22/50/62/97. The existing query seam imports the new unmounted
+projector, so regenerate the existing backend manifest and its digest pins.
+Exactly one runtime member is added; renderer is outside the startup closure.
+The structural member bound becomes 1,469 with a 1,470-member rejection check;
+this is not a WSP62 exemption. Preserve the 328 KiB manifest, 2 MiB member and
+32 MiB aggregate limits. Generated CRLF size is 335,285 bytes (587-byte margin).
+This source/package update grants no host, skill, worker or provider authority.
+
 ## PR1663 contact communication policy reconciliation — 2026-10-23
 
 WSP00/15/22/50/62/97. Reconcile the existing protocol and HoloIndex recall entry
