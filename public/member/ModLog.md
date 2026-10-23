@@ -1,5 +1,26 @@
 # Member Area Module Change Log
 
+## 2026-10-23 — Preserve intent-bearing terms in bounded Mall queries
+
+Repair the existing local catalog matcher for “I'm looking for clothing” and
+equivalent explicit request prefixes. Normalize straight/curly apostrophe input,
+make clothes/clothing/apparel aliases reciprocal, and keep red/dog as item terms
+unless they form the recognized leading Red Dog address. Negation, budgets and
+size words stay literal; this does not implement semantic intent or commerce
+filters. Grouped product discovery continues to refuse global catalog queries.
+
+Advance the existing member service-worker shell cache from v4 to v5 so
+previously installed clients refresh the precached matcher on worker update.
+Keep poster/property cache generations unchanged. Align the existing product
+state/service-worker harness with the new shell generation and v4 retirement.
+
+Extend the existing actual-field VM harness rather than create another search
+owner or test fixture. The new request regression fails on the unchanged source
+and passes after the repair; dispatcher and concierge harnesses also pass.
+See `tests/TestModLog.md` for exact commands and limits. WSP 22/50/84/97:
+current-source retrieval, shared-owner reuse, bounded change and recorded proof.
+No catalog, private capture, publication, microphone, backend or payment change.
+
 ## 2026-10-21 — Repair security test fixtures
 
 Strengthen existing hostile HTML assertions for mixed tag case and remove

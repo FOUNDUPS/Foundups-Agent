@@ -145,6 +145,28 @@ for channel/embedding eligibility and service limits, and the
 proposed handoff. A future implementation must update this interface with its
 actual authentication, schema and transport after a bounded slice is admitted.
 
+## Private AutoPost item attachment (specified 2026-10-23)
+
+**SPECIFIED_NOT_IMPLEMENTED.** The
+[item capture handoff](AUTOPOST_ITEM_CAPTURE_HANDOFF.md) defines the shared
+ownership and acceptance contract. AutoPost's local `AutoPostItemDraft`
+(`autopost.item-draft.v1`) groups original photo references under one item;
+the type does not create a writer, transport, permission or callable route.
+
+A future adapter in the existing platform service owner must authenticate the
+principal, authorize the target FoundUp/item, validate uploaded bytes and bind
+private media references server-side. Scoped draft/revision retries must be
+idempotent; conflicts and partial failures remain visible. Mall may acknowledge
+attachment only after trusted durable storage evidence exists.
+
+`GET /pfmall/listings/search` remains public-only GotJunk discovery. It cannot
+ingest these drafts or provide owner/private search. Static `/media/` and
+`/member/media/` are not private media stores. Browser identity claims, a local
+draft state or a GetK `public_browse` default cannot authorize publication.
+
+No route is added by this specification. C1 local grouping, C2 authenticated
+attachment and C3 private presentation are tracked separately in [ROADMAP.md](ROADMAP.md#private-item-capture--2026-10-23).
+
 ## Verification-gap guard
 
 `verification_gap_guard.py` exposes advisory event and policy types:

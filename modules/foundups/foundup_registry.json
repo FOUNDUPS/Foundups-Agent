@@ -466,16 +466,17 @@
       "token_status": "TOKEN_DEFERRED",
       "token_symbol": null,
       "evidence_docs": [
-        "docs/audits/architecture/AUTOPOST_EXTERNAL_FOUNDUP_COMPLETION_AUDIT_PHASE1.md"
+        "docs/audits/architecture/AUTOPOST_EXTERNAL_FOUNDUP_COMPLETION_AUDIT_PHASE1.md",
+        "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md"
       ],
-      "next_slice": "AUTOPOST_EXTERNAL_FOUNDUP_MANIFEST_READINESS_PHASE1",
+      "next_slice": "AUTOPOST_PRIVATE_ITEM_CAPTURE_GROUPING_PHASE1",
       "public_url_or_route": "https://ai.studio/apps/a53b5519-3cb4-40f0-a999-fcf0fa381023",
       "mall_entry_status": "discoverable_only",
       "invite_required": false,
-      "notes": "External FoundUp in O:/repos/AutoPost/. PoC 35% complete. Platform connectors are mock stubs.",
+      "notes": "External capture owner: FOUNDUPS/autopost. Source reviewed 2026-10-23 at 3c0fc19d40e225ed7f826541a33c38293f9fe664: still-photo capture, origin-local media persistence and real local model invocation. Private multi-photo item grouping and authenticated shared-media/Mall attachment are specified, not implemented; phone and deployed delivery evidence remain pending.",
       "related_external_repo": "https://github.com/FOUNDUPS/autopost.git",
-      "audit_date": "2026-05-18",
-      "auditor": "W6",
+      "audit_date": "2026-10-23",
+      "auditor": "0102",
       "portfolio_status": "not_portfolio",
       "poc_landing_status": "placeholder",
       "website_url": null,
