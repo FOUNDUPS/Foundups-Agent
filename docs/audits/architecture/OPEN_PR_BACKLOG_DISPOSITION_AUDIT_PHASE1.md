@@ -1,6 +1,6 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 37 open PRs, nine drafts. #2181 and #2081 are verified on main; #2182 merged through its separate owner. #1663 remains selected at 14/P1 and is reconciled against that incoming main. Read the current queue before selection; historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-23 JST: 36 open PRs, nine drafts. #2181 and #2081 are verified on main; #2182 merged through its separate owner. #1663 is verified on main with independent tree/check readback. #1645 is selected at 15/P1 for its unmounted projection layer. Historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-23
 
@@ -19,24 +19,40 @@ execution is established. The disposable Windows test environment remains
 preserved after automatic approval review blocked its cleanup.
 [Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081#issuecomment-6357779387).
 
-**Selected: #1663, C2/I4/D4/Impact4=14/P1.** Reconcile the original generic
-contact/communication proposal with the actual current owners; preserve all 24
-clauses across #1659/#1663 and all four original file representations. The
-three functional write locations are the existing proposed protocol, extension
-HOLOINDEX and extension ModLog. Current sending belongs to the Python V3 service;
-the legacy JavaScript wrapper remains permanently blocked. Reference protected
-Contacts/native Docs/Skillz owners instead of duplicating or changing them.
-Documentation does not intercept direct connectors or mint sending authority.
+**#1663 MERGED_VERIFIED_MAIN:** squash
+`32aa56890c55e1c13acd62785ebdc98b1287528b` from reviewed head
+`f870c41630a82aa215ae7f5ef9a1aa217f6c3113`; all 20 final-head checks passed.
+Fetched main matches the complete reviewed tree `ef6e8ae2e613b9a6efceccb0c99449d23b78b8f2`.
+All 18 exact-main checks passed, including CI39908011388 and CodeQL39908010868;
+independent main review agrees. [Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663#issuecomment-6358612979).
+All 24 clauses across #1659/#1663 are preserved. The 178 Python and seven
+JavaScript cases do not prove direct connector interception or live sending.
 
-This is the highest eligible score after #2081; #1792 and #1356 also score 14.
-The already mapped #1659/#1663 convergence has bounded documentation scope,
-current authority evidence and no live account effects. Protected #2168 and
-#2178 retain their owners. #1648 is stacked on an older #1645-line base; #1645
-has unique policy and frontend-manifest overlap with protected #1729. Resolve
-that ownership overlap before shared-surface changes. Draft status itself is
-not a blocker, and missing live credentials do not block offline qualification. WSP 62 explicitly makes canonical ModLog archival thresholds
-advisory; retain history and add a concise entry without inventing an exemption
-or bundling unrelated archival. Re-score again after closure.
+**Selected: #1645, C4/I4/D3/Impact4=15/P1.** Its four-Python projector/renderer,
+current query seam and tests form the next disjoint executable layer. Preserve
+all 37 original paths at `4b316c976aa3cdba21b901191159716f3d58631d`; the source
+is retained as a merge parent. Independent scope review confirms a useful
+unmounted, unregistered component. Original functional selection: 29 passes;
+new expiry-during-source-read regression fails as intended before repair.
+The repaired candidate passes 87 guarded cases on Windows and minimal Linux;
+these are the same case inventory. Independent probes pass 11 cases and detect
+both removed freshness guards. Independent workflow and manifest review agrees.
+The runtime closure adds exactly one projector member with qualified count and
+unchanged byte limits. Complete-source review and hosted acceptance remain gates.
+
+[Existing #1648 carry-forward](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590)
+explicitly retains the skill, manifest, registry, exact wardrobe discovery test,
+unique GMAIL_RECEIPT_REQUIRED policy, trusted host and gated reader acceptance.
+Current native Docs/Contacts authority supersedes planned ContactMemory claims.
+The central registry remains unchanged: WSP95 requires it, while current FMAS
+would treat its growth as size debt. This is a source-derived constraint, not
+an observed hosted failure. Do not add an exemption or hide growth by packing.
+
+#1648 remains 16/P0 but depends on reconciliation of this older proposal and its
+separate ingress/spend/reader contracts. #1356 and #1792 remain 14/P1; #1356's
+read-only prequalification identifies the Web3/eth-account graph and middleware
+migration but does not count as executed tests. Protected #2168/#2178 retain
+their owners. Re-score after closure; draft status itself is not a blocker.
 
 **#2182 MERGED_BY_OWNER:** main advanced to
 `a048c24071e1a651b161025ba3342f14f3047280` while #1663's prior candidate
@@ -45,15 +61,12 @@ EDUIT Kids Episodes implementation; this lane does not claim its implementation
 or independent runtime acceptance. The only overlap is the extension ModLog:
 retain the full incoming log plus the 22-line contact-policy entry, then require
 fresh candidate checks. #2102 must reconcile the newly published EDuIT/registry
-state. #2182 leaves the current queue; 37 PRs remain open.
+state. Historical post-#2182 observation: 37 PRs remained open; the current post-#1663 count above is 36.
 
-Further #1645 source accounting resolved its manifest overlap: that blob is
-already identical to main. A disjoint bridge/manual slice can preserve the current
-website and explicitly carry the reader into existing #1648. Its central registry
-and exact validation requirements are still being checked before allocation;
-draft status is not a permanent exclusion. Re-observe after #1663 closure.
-Existing records retain failed attempts and unfinished requirements. No new
-queue, worktree, runtime admission or Brain-ingestion claim is introduced.
+Further #1645 accounting resolves the old manifest overlap: that blob already
+matches main. Preserve current website routes/copy and both new Kids skill keys.
+Canonical logs retain failed attempts and unfinished requirements. Reuse the owned
+checkout; no new queue, worktree, runtime admission or Brain-ingestion claim.
 
 ### Historical source closure and re-selection — 2026-10-23
 
@@ -365,11 +378,10 @@ Every execution requires current source, checks and authority.
 | PR / source head | WSP15 | Owner / state | Next executable step |
 |---|---|---|---|
 | [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
-| [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
-| [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
+| [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Reconcile public chat/spend plus [retained #1645 host, reader, skill, discovery and Gmail acceptance](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590). |
+| [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Projection lane/root: SELECTED_RECONCILIATION | Qualify the unmounted four-Python layer and expiry repair; preserve all original functional cases. Skill/discovery, unique Gmail policy and reader remain explicit #1648 carry-forward. |
 | [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
-| [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `dffad2b6a703d6807309a2bfcccd4164c2746d61` | 2/4/4/4=14 P1 | Communication policy lane/root: SELECTED_RECONCILIATION | Preserve all 24 #1659/#1663 clauses; reconcile the existing generic protocol and discovery link with current Contacts/native Docs and Python V3 sender authority. Protected skills and JS sender quarantine stay unchanged; source/link validation and independent review precede publication. |
 | [#1356](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356) `055cda32a0c2bff70a469aea7d967d20c61a7f42` | 4/3/4/3=14 P1 | Dependency lane/root: STILL_CURRENT | Resolve full set; offline transaction/hash interface tests. |
 | [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) `e455fd0190b0c35302a3a5776529a221c3123888` | 4/3/2/4=13 P1 | Japan Compute owner: STILL_CURRENT / DRAFT | Owner reconciles homepage/hosting; preserved-copy and economics gates. |
 | [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) `724f465bd35ac1be5e9a91f41d0721da383c67d8` | 4/3/3/3=13 P1 | eSingularity surface owner: ACTIVE_OWNER_PROTECTED | Existing eSingularity owner coordinates convergence: preserve post-vote state, valid fixes and carried article; current routes/locales/build acceptance. |

@@ -1351,7 +1351,7 @@ OpenClaw now follows a facade + delegated-module design.
 | `src/openclaw_runtime_support.py` | Runtime probing, IronClaw autostart, model availability |
 | `src/openclaw_status_surface.py` | `connect wre` readiness/status and outward status push |
 | `src/openclaw_process_loop.py` | Full autonomy loop orchestration |
-| `src/openclaw_result_memory.py` | Validate + remember (WRE pattern memory writeback) |
+| `src/openclaw_result_memory.py` / `src/openclaw_memory_queries.py` | WRE result writeback / memory queries, including the [unmounted Moshpit projection](INTERFACE.md#moshpit-projection-layer) |
 | `src/openclaw_turn_state.py` | Token telemetry and cooperative turn cancellation |
 | `src/openclaw_action_ledger.py` | Structured DAEmon action emission |
 | `src/openclaw_social_controller.py` | Social-routing bridge and LinkedIn mission control |
