@@ -33,6 +33,11 @@ The second Linux run collects and passes all seven cases, but the effect gate
 rejects three blocked dependency process probes. Add bounded static call-site
 provenance to denied-event evidence; retain rejection until those probes are
 identified. No command arguments, environment values or frame locals are logged.
+The third run identifies all three as PyCryptodome's optional GMP discovery via
+ctypes. Select its existing `PYCRYPTODOME_DISABLE_GMP=1` test-environment option,
+the fallback already selected after those denied probes. No effect is allowed,
+no denied-probe exception is added, and production configuration is unchanged.
+GMP itself is outside this adapter qualification; fresh hosted validation remains.
 
 ## 2026-10-23 - Close live handoff and qualify the Clerk security patch
 

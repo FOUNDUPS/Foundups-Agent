@@ -36,3 +36,10 @@ Second Ubuntu job `120167490136` collects and passes all seven cases but fails
 the effect gate on three unclassified denied process probes. Denied-event
 records now include bounded module/function names for diagnosis, with no command
 arguments, environment values or frame locals. Rejection remains unchanged.
+
+Third Ubuntu job `120168933047` identifies all three denied calls as optional
+PyCryptodome GMP discovery (`ldconfig`, compiler and linker helpers in ctypes).
+The isolated test environment now explicitly selects the supported
+`PYCRYPTODOME_DISABLE_GMP=1` fallback already reached after denial. Production
+configuration and all effect rejection remain unchanged; this does not qualify
+GMP. Seven cases passed in that failed gate; corrected hosted acceptance is pending.

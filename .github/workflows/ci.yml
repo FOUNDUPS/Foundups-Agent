@@ -246,6 +246,7 @@ jobs:
             LANG=C.UTF-8 PYTHONUTF8=1 PYTHONDONTWRITEBYTECODE=1 \
             PYTHON_DOTENV_DISABLED=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
             PYTHONPATH="$GITHUB_WORKSPACE/modules/platform_integration/acoustic_lab" \
+            PYCRYPTODOME_DISABLE_GMP=1 \
             NUMBA_CACHE_DIR="$RUNNER_TEMP/acoustic-tmp/numba" \
             PR1338_QUALIFICATION_TMP="$RUNNER_TEMP/acoustic-tmp" \
             ACOUSTIC_CI_REPORT="$RUNNER_TEMP/acoustic-adapter.json" \
