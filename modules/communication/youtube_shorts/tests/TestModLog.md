@@ -13,3 +13,9 @@
 | Explicitly pinned dead OAuth sets do not silently rotate channels | `youtube_auth/tests/test_oauth_no_silent_fallback.py` |
 
 Focused repository gate: 9 passed. All services/files are fakes or temporary fixtures. No credentials were read, refreshed, logged or uploaded; no live YouTube write is claimed.
+
+## 2026-10-23 — OpenRouter storyboard boundary
+
+Added offline tests for reference-byte requests, output/provenance, denied admission, changed references, invalid IDs/directories, malformed responses, redacted transport errors, replay refusal, review failure, reviewed-frame handoff and post-review mutation. Included the suite in Kids Episodes CI. Fixtures are local images and fake transport/review/video callbacks; tests do not establish live quality or account access.
+
+Validation: 266 selected tests passed, including the existing renderer/editor/research, all Kids story contracts, OpenClaw route, registry loader/schema and CI security gate. The regenerated global test registry adds only this new test module.

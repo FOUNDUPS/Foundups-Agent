@@ -21,8 +21,11 @@ against the successful inventory; the runtime/test source remains unchanged.
 Independent manifest tests pass eight cases and three Node contracts; the
 1,469-member startup set changes only two source hashes. Initial expectation
 that manual ALIAS was startup-bound was rejected and corrected, not forced
-into the manifest. Canonical registry generation adds one row (1,768/273),
-without classification changes. Hosted acceptance remains pending.
+into the manifest. Initial registry generation adds one row (1,768/273).
+Incoming independently owned PR2184 adds its separate Kids test row; canonical
+regeneration preserves both at 1,769 entries / 273 quarantines. None of the
+nine other incoming paths overlaps the observed transport source closure;
+classification and runtime bindings stay unchanged. Hosted acceptance remains pending.
 Evidence: `pr1648-qualification/six-suite-positive-execution.json` in the existing
 external PR-reconciliation evidence family; `qualification-receipt.json` owns
 the exact CI run and guard controls. Original PR1648 remains open.

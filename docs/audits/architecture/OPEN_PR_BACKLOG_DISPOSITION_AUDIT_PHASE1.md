@@ -58,7 +58,9 @@ K3 routing, redaction, typed local authorization and campaign budgets. Execute
 synthetic offline regressions, independent fault controls and generated-binding
 checks before a focused main integration; do not leave a qualified repair
 stranded behind the original 93-file product proposal. Its carried-forward
-requirements remain open. No live provider call or native admission is implied.
+requirements remain open. Incoming #2184's separately owned Kids implementation
+is preserved; canonical registry regeneration retains both new test rows.
+No live provider call or native admission is implied.
 #1356 and #1792 remain 14/P1; #1356's
 read-only prequalification identifies the Web3/eth-account graph and middleware
 migration but does not count as executed tests. Protected #2168/#2178 retain
