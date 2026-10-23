@@ -75,8 +75,29 @@ def test_yumori_moshpit_skill_is_wre_registered_and_projected() -> None:
     assert "https://docs.google.com/document/d/1Le5foHxTHWa8QMAfqTJ0PZFUULw3oNgJTgghlXaHEYM/edit" in skill
     assert "is the canonical YUMORI campaign ledger" in skill
     assert "Do not create or maintain a parallel Markdown, DOCX, Library, or repository campaign ledger." in skill
+    # Both canonical Docs must use native content mutation; private-log failures stay observable.
+    assert "## Private 0102 Moshpit native write parity" in skill
+    assert "applies **equally to both**" in skill
+    assert "0102 Moshpit — Agent Learning & Action Log" in skill
+    assert "documents.batchUpdate" in skill
+    assert "exact returned connector error code/message" in skill
+    assert "one pending learning-log delta" in skill
+    assert "do not create a parallel log" in skill
     assert "Branch-protection “required” status alone is never sufficient evidence." in skill
     assert "Never merge while any RELEVANT_BLOCKING workflow is pending, cancelled, or failed." in skill
+
+    # These protect the operator policy; they do not execute live Docs ordering.
+    ordering = skill.split("## Ordering rule", 1)[1].split("\n## ", 1)[0]
+    assert "**end/completion time**" in ordering
+    assert "Do not sort from times merely mentioned inside the body" in ordering
+    assert "If an event's own time is unknown, do not invent one" in ordering
+    assert "every moved event has an established effective event time" in ordering
+    write_procedure = skill.split("## Write procedure", 1)[1].split("\n## ", 1)[0]
+    assert "standalone `HEADING_2` paragraph" in write_procedure
+    assert "standalone `NORMAL_TEXT` paragraph beginning with `•`" in write_procedure
+    assert "no paragraph contains multiple activity bullets" in write_procedure
+    assert "verify the whole current-day block after mutation" in write_procedure
+    assert "Do not rewrite or reorder historical event text" in write_procedure
 
     for projection in (
         REPOSITORY_ROOT / ".agents" / "skills" / "yumori-moshpit" / "SKILL.md",
@@ -562,3 +583,48 @@ def test_reddog_email_link_source_quality_policy() -> None:
     assert "percent-encoded bare URLs" in document_audit
     assert "never\n  cite the live website as #003" in document_audit
     assert "SUPERSEDED／送信禁止" in document_audit
+
+def test_yumori_work_orchestrator_defines_resident_rsi_canary() -> None:
+    """Resident YUMORI must compose existing memory/provider owners, not a new agent stack."""
+    text = WORK_ORCHESTRATOR_SKILL_PATH.read_text(encoding="utf-8")
+    for required in (
+        "Resident RSI canary — target autonomous loop",
+        "FoundUp scope `esingularity_001`",
+        "operational FoundUp Memex snapshot supply",
+        "Brain for durable consolidated understanding",
+        "Breadcrumbs for recent episodic",
+        "Gmail / LinkedIn / other providers as transaction truth",
+        "WRE PatternMemory / verified outcomes",
+        "Resident cycle contract",
+        "Autonomous effect ladder",
+        "Model and research workers",
+        "OpenRouter / Fusion is a candidate advisory intelligence layer",
+        "privacy/redaction gate",
+        "AI Gateway model AutoResearch",
+        "WRE AutoResearcher only for the bounded configuration/compute-ROI target",
+        "REDDOG_AUTO",
+        "#1779 host deployment closure",
+        "Autonomous Gmail operating loop",
+        "RESPOND",
+        "RESEARCH_MORE",
+        "reddog_recipient_preflight",
+        "No mass blast.",
+        "Autonomous partner discovery and unblocking",
+        "search existing Contacts, Gmail and LinkedIn",
+        "RSI learning contract",
+        "Retained improvement test",
+        "a later,",
+        "unseen YUMORI cycle",
+        "012 interventions required and why",
+        "cost per verified useful outcome",
+    ):
+        assert required in text
+
+    assert "Do not create a\nseparate YUMORI daemon" in text
+    for forbidden in (
+        "new store for YUMORI memory",
+        "auto-send regardless of #1779",
+        "raw private Gmail bodies may be sent to OpenRouter",
+    ):
+        assert forbidden not in text
+

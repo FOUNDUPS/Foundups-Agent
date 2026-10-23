@@ -1,3 +1,31 @@
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Retain v10 initial LOW restrictions, distinct v11 non-initial HIGH scope,
+protected v13 custody/model bindings, current parent/effect/nonce checks and
+startup time sampling inside the durable revocation fence. These are intended
+combined-source invariants awaiting exact-source validation. Public self-leasing
+and private request-scoped APIs remain distinct; failed final checks withhold
+results without claiming reversal of completed effects or nonce consumption.
+
+The dated contract snapshots below preserve both development lines. Their former
+inventory and follow-on composition status are historical; the current combined
+closure and installed qualification remain pending. No signed authority follows
+from this interface document.
+
+## Selected-clip adapter receipts — 2026-10-22
+
+The scheduling action requires process success and a parsed receipt with boolean
+`success=true`, no error(s), and no incomplete batch. Empty/truncated output,
+truthy strings/numbers and contradictory partial results fail closed. This is
+local result interpretation, not authenticated execution or saved-state proof.
+
 ## Installed HIGH service connection — 2026-10-20
 
 Source-level composition, awaiting fresh installed-runtime qualification. A separately signed v11 policy selects HIGH/worktree_create at generation >=2. V10 initial LOW behavior and target-versus-issuer config bindings are unchanged. The materializer authenticates the installed descriptor and full runtime before custody. Protected owner v13 supplies fixed sibling `parent_model_artifacts.json`, using the existing `{author, reviewers}` shape, duplicate-key rejection, 1 MiB read/snapshot limit and exact distinct signed selection set. This is untrusted model data, never a verifier or permission. Startup verifies the author and prepares reviewer resolvers; every parent/effect request verifies the complete proof and reviewers before signing-key resolution, then rereads/verifies the model map before returning.
@@ -68,6 +96,19 @@ policy/source selection and authenticated author/reviewer model-artifact loading
 remain required before the existing HIGH factory can be served. Reuse supplied-
 grant target transport; authentic work/model/reviewer/budget inputs, native
 qualification/admission and retained RSI benefit remain open.
+
+### Historical nonce-only import/composition status — 2026-10-20
+
+The generated 1,449-file runtime currently includes only the new custody leaf;
+the public nonce authority/current-owner leaves remain source/test validated,
+not imported or qualified installed runtime until the HIGH join.
+
+This adapter does not install HIGH signing. The existing LOW service remains
+LOW-only. HIGH composition must avoid nesting these public self-leasing methods
+inside the permission owner's generation lease; the next join requires one live
+authenticated scope for verification, secret use and nonce callbacks. Reuse the
+existing supplied-grant target transport. Native qualification/admission,
+authentic work/model/reviewer/budget inputs and retained RSI benefit remain open.
 
 ## Exact parent-consent connection — 2026-10-19
 
@@ -1654,6 +1695,16 @@ skip the injected trusted clock and generation verifier, retain all missing-anch
 diagnostics, and return no generation receipt. `signed_authority_reverified` still
 reports the signature result independently. Generation evidence never supplies an
 authoritative effect-use lease. See the existing execution-valve roadmap section.
+
+## YouTube scheduling command repair (2026-09-22)
+
+`youtube action scheduling channel=move2japan preflight=true` checks transport
+without launching or changing YouTube. Preview/apply requires `video_ids`;
+the default `max_videos=0` includes all selected clips. Pass
+`preserve_metadata=true` to retain prepared metadata. Structured CLI failure
+remains failure even with subprocess exit zero. See the scheduler
+[runbook](../../platform_integration/youtube_shorts_scheduler/docs/REMOTE_SCHEDULING.md)
+and existing Work prototype boundary before enabling recent discovery.
 
 ## Public RedDog Lick PoC
 

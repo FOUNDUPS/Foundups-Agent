@@ -1,3 +1,99 @@
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Locally verified candidate binding: the combined closure has
+1,466 members, adding 13 to main with no removals. Pretty JSON measures LF
+331,626 / CRLF 334,631 bytes. The smallest qualified whole-KiB ceiling is 327 KiB
+(334,848 bytes; 217 above CRLF); main's 324 KiB contract cannot contain it.
+Candidate digest: `88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16`.
+The paired boundary accepts 1,466 members and rejects 1,467. Per-file 2 MiB,
+total 32 MiB, exact digest/path/hash checks and authority gates remain unchanged.
+Eight Python manifest cases and three Node commands passed, including LF/CRLF,
+exact-byte/+1 and member/+1 controls. This is not installed-runtime qualification.
+
+
+Retain incoming main's runtime/package members and exact digest, path, finite
+membership and byte-bound checks while reconciling the preserved service closure.
+Combined manifest/pin verification and exact-bound/+1 checks pass locally;
+historical 1,451/1,462-member and 324/326 KiB figures below are not its contract.
+No installed extension or native admission is established.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## PR841 explicit one-member backend closure — 2026-10-23
+
+WSP 11/22/50/62/97. The cohesive livechat lifecycle extraction adds one actual
+import-closure member. Increase only MAX_RUNTIME_FILES 1450→1451 and require
+existing contract coverage accepting1451/rejecting1452. Preserve byte ceilings,
+digest enforcement and admission/identity boundaries. Generated set-difference
+and validation evidence belongs to refresh/841-qualification; no installed or
+native runtime claim.
+
+## PR1638 current-main integration — 2026-10-23
+
+Integrate main4169b051, preserving PR1759's CI job, trust bootstrap, generated
+1,450-member closure/pins and all received owner work. Resolve three independent
+insertions without dropping either entry. The reviewed PAL source/tests remain
+byte-identical; only the new PAL job adopts main's Node24.22.1 security baseline.
+Portable official archive checksum/version verified; five focused commands,
+18-member fast tier and exact69-file package surface pass on this runtime.
+Actual VSIX build/source mapping passes71 entries/284,535 bytes, with README's
+documented URL-only rewrite. Existing integration receipt owns exact results,
+the retained plain-clone topology failure and historical Node24.11.1 evidence.
+No installed-host, native RSI, hosted-CI or publication claim. WSP00/15/22/50/97.
+
+## PR1638 local activity-ledger reconciliation — 2026-10-22
+
+Preserve original PR head `688eb097` on last verified main `02d1c7c` in an
+isolated lane. Repair reproduced key/I/O/context failures in existing PAL owners:
+scoped serialized key creation; cooperating-process lock; authenticated history
+before append; strict JSON; full write/flush/close before success; globally
+latest commitment state and truthful truncation. Existing ledger/adapter tests
+and adjacent registration/disclosure/package manifest commands exit0 locally
+on Windows Node24.11.1. These are synthetic fixtures, not installed-host proof.
+
+Repair the full-package expected counts 67/66 to 69/68 for exactly the two PAL
+modules; preserve file membership, LF policy and one MiB limit. Add focused
+Linux/Windows CI coverage and reconcile existing interface/architecture/test
+docs. Current evidence and remaining review/publication/installed-host gates:
+`docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md`. Remote connectivity is
+unavailable; no push, merge, hosted CI, installation or native RSI claim.
+Independent review passed 13 adversarial cases; the approved-drive checkout
+passed the 18-member fast tier at `7615273f6`. Final package-list qualification
+is 69 files / 975,019 bytes; local VSIX build and explicit archive/source mapping
+pass. Correct current package counts and the existing README's monorepo link
+base after actual archive inspection exposed wrong generated links. Receipts
+distinguish byte-identical runtime from README-only URL rewriting. No install.
+WSP00/5/6/10/11/15/22/50/77/84/97. Blockchain/PF Mall work remains separate.
+
+## PR1759 operator-command runtime member — 2026-10-22
+
+The generated runtime closure adds exactly the existing PR's
+`modules/communication/livechat/src/operator_command_queue.py`; no member is
+removed. The extension's count bound moves from 1,449 to 1,450 for this measured
+closure. Manifest byte, per-file byte, total byte, path and digest checks stay
+unchanged. The existing boundary test requires the queue member, accepts 1,450
+and rejects 1,451. This does not grant worker or posting authority.
+WSP 6/11/22/50/62/97; exact frozen validation belongs to PR1759.
+
+## Operations policy manifest binding — 2026-10-21
+
+PR2150 preserves policy1.1.1 while synchronizing its existing registry/runtime
+versions and generated manifests. Backend membership remains1,449; exactly the
+policy, loader and registry hashes change. Existing JavaScript and Python pins
+now bind `ff912d79e080aa5003f18a4d31489d5c9a98ecf516015f882202b2b352b6973c`.
+No cap/API/authority changes. Three existing Node compatibility/recovery commands
+exit0; bridge TestModLog records generator and skill evidence. No installation.
+WSP22/50/71/95/97.
+
 ## Installed HIGH service manifest contract — 2026-10-22
 
 Existing service-entrypoint imports require 1,462 runtime members (11 additions).

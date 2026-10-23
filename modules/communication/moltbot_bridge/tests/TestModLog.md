@@ -1,3 +1,115 @@
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Current frozen-source qualification: clock/custody/structure128pass/2skip and
+core/LOW/installed compatibility272pass/4skip; together400pass/6skip across406
+cases in18 distinct suites. All22 bound hashes remain stable. The six Windows
+skips cover symlink/Unix descriptor and actual POSIX process-fence conditions;
+Linux acceptance remains required. No installed/native execution follows.
+
+WSP00/5/6/10/15/22/50/97. Complete combined-source acceptance remains pending.
+Preserve raw earlier failures and overlapping fixture results,
+including the Windows path-length correction and Linux process-only controls.
+Independent offline review passes12 held-outs on22 unchanged hashes. Hosted Linux
+results must bind the same source and generated artifacts before publication. Native admission/evaluation/retained use remain unproved.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## 2026-10-22 — Selected-batch regression and closure evidence
+
+WSP 6/15/22/50/84/97. Reuse `test_remote_cli.py` and existing adapter,
+visibility, tracker, peak-window, rotation, metadata-decoupling and language tests.
+The original PR focused selection passed 65 cases on current main. Added
+wrong-page/unknown-visibility, sync and malformed-receipt probes reproduced
+8 failures (55 passing test cases); focused repair passed 63 cases plus
+9 subtests. Later focused+private-visibility selection passed 78 plus 9 subtests.
+These are successive overlapping runs, not additive completion metrics.
+
+Connected selection initially passed 91/skipped 2/failed 4. All four failure IDs
+are rotation-fairness tests stopped by the same obsolete test-double signature:
+`_prioritize_channels` now receives `driver`. Match the actual interface; keep
+budget and must-fail assertions. Two browser-connection skips are intentional;
+no live browser/channel action is authorized in this closure.
+
+Final local acceptance: the exact nine-file `youtube-selected-batch` CI selection
+passed **147 tests and 9 subtests**, zero skips/failures, in a fresh disposable
+Python 3.12 environment (116.62s). Invocation: `python -B -m pytest
+--import-mode=importlib -p pytest_asyncio.plugin -q --tb=short` followed by the
+explicit paths in `.github/workflows/ci.yml`; dotenv/plugin autoload and bytecode
+were disabled. The rotation fixture repair passed all four retained assertions.
+Independent execution of the earlier 144-case source passed, followed by all
+three diagnostic-preview probes; 23 additional independent source probes passed.
+These are source review and test execution, not live outcome acceptance.
+Generated binding checks and remote/main results remain separate PR1860 receipts.
+External local evidence: `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1860-qualification/`.
+Historical September counts below remain historical. No native admission,
+actual upload, independent saved-state readback or retained RSI benefit claimed.
+
+## PR2150 exact operations policy bindings — 2026-10-21
+
+WSP00/15/22/50/71/95/97; C2/I4/D4/Impact3=13/P1. Reuse existing operations,
+start-control, role-loader, hygiene, skill-manifest and backend-generator suites;
+no duplicate tests or weakened guards. Source: PR2150 `4ec562fd6`, main `a41a76053`.
+Holo owner query reports authority-head mismatch, freshness UNKNOWN/index gap;
+source-bound lexical bundle and direct module/registry/generator reads supplement
+it. Retrieval noise was reduced to the changed policy's exact bindings; module
+requirements and memory README are absent. No semantic freshness claim.
+
+Before repair, the operations suite fails5/passes2 because frontmatter1.1.1
+disagrees with registry/runtime1.1.0. Aligning those existing pins exposes the
+separate skill-manifest mismatch:87 pass/1 fail/1 platform skip. Existing
+generators repair the one-file skill manifest and three backend member hashes.
+The six existing suites then pass101 with2 platform skips in86.24s; staged-index
+and independently generated manifest equality both pass. Three existing Node
+backend/recovery commands exit0. The complete original policy remains byte-equal
+to PRhead. Receipts/logs/XML are under
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/pr2150-repair/`.
+This is source/binding qualification, not Gmail delivery or installed authority.
+
+## Installed grant startup second-boundary repair — 2026-10-21
+
+WSP 00/15/22/50/71/97. CI on documentation-only PR2166 exposed the existing
+startup call sampling an explicit epoch before the durable revocation fence.
+A deterministic one-second advancement reproduces rejection with
+`durable_revocation_oracle_clock_invalid`; the service correctly fails closed.
+Reuse the existing current-time oracle entry point at dependency revalidation.
+It retains snapshot, permission expiry, revocation and clock-rollback checks;
+the explicit caller-epoch API remains strict. No tolerance or retry was added.
+
+WSP15 allocation: C2/I4/D4/Impact3 = 13 (P1), bounded startup correctness repair.
+Execution plane is source maintenance with disposable synthetic custody tests;
+no production services, installed credentials or native admission are exercised.
+WSP00 canonical boot lacks torch; tracker fallback gate passes, detector witness
+absent. Lexical Holo bundle is bound to main `a6b5efa2`, freshness UNKNOWN and
+index gap true. Exact module interface, custody inventory and durable-key-epoch
+tests supplement retrieval; no semantic freshness is claimed.
+
+Extended the existing installed-composition test with steady and second-boundary
+cases, preserving protected-loader-before-service ordering. Before production
+repair: steady passes, boundary fails. The four startup-custody, custody-version,
+durable-key-epoch and root-LOAD suites pass **123 cases, zero skips** in 28.19s.
+These retain expiry, revoked epoch, stale explicit time and rollback controls.
+The three service, WSP71-rehydration and installed-consumer suites report
+**133 passed, 1 failed, zero skips** in 24.41s. The failure is the native socket
+fixture `test_real_socket_exchange_through_composition_with_synthetic_custody`:
+its readiness assertion also fails in unchanged source at `9fc1ca83`, with
+`FAIL_SIGNER_SERVICE_RUNTIME_ERROR` from the synthetic socket. This test does
+not call the modified startup materializer; its local coverage remains blocked.
+No skip or waiver was added. Both runs use plugin autoload disabled and
+`--import-mode=importlib`; two unknown asyncio config warnings remain.
+
+The canonical backend-manifest generator retains 1,449 entries with no diff:
+this startup module is outside that manifest's existing import closure. No
+security exceptions changed. Current hosted checks remain required.
+
 ## Installed HIGH closure reconciliation — 2026-10-22
 
 Final staged diff-check found one surplus trailing blank line in the preserved

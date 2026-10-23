@@ -1,3 +1,116 @@
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Reuse existing manifest, compatibility contract, preflight and asynchronous
+recovery checks after the combined source is frozen. Keep LF/CRLF, exact-byte/+1,
+member/+1, source-hash and staged-index assertions. The measured candidate requires 1,466/1,467 member and 327 KiB/+1 byte
+controls; all three existing Node commands and eight Python cases pass. Package/PAL and other incoming-main
+evidence remains preserved.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## PR1638 integration replay — 2026-10-23
+
+Reuse the existing PAL inventory and tests without source/assertion changes.
+On verified portable Windows Node24.22.1, all five focused PAL/registration/
+adjacent-disclosure/package-manifest commands exit0; full fast tier18 members
+passes in19,568ms at integration checkpoint8a88810d7. The package-surface test
+passes69 files/975,019 bytes under unchanged caps and LF rules. Actual VSCE
+build maps71 entries:68 exact files, README's eight documented URL substitutions,
+and two packager metadata files. Archive284,535 bytes; exact hashes are in the
+existing integration receipt and external current-vsix-inspection.json.
+
+The first plain-clone fast attempt failed the canonical default-Python topology
+check; a source-pinned linked O: worktree then passed without changing tests or
+the qualified environment. Prior Node24.11.1/13-case independent results below
+remain historical, not additional new cases. Main4169b051's backend closure and
+PR1759 boundary tests are retained; hosted Ubuntu/Windows CI and installed-host
+qualification are separate pending gates. WSP00/5/6/22/50/97.
+
+## PR1638 PAL pre-test inventory — 2026-10-22
+
+Recorded before repair test authoring in the isolated PR1638 worktree. Source
+baseline: original `688eb097724ece28aca20e2e3477ca4c7aa9236c` merged onto
+`02d1c7c14c60487619287a9cb753ff3ddaa53c14`; this is local preparation, not native
+WRE execution or production activity/key access. WSP00/15/22/50/84/97 apply.
+
+| Existing test | Coverage and reuse decision |
+| --- | --- |
+| `test_principal_activity_ledger.js` | Temporary ledger, encrypted payload, principal path separation, context, and tampering. Original line19 does not parse. Repair and extend this file for wrong-key append, complete/short/failed writes, cooperating child-process contention, stale lock, and latest commitment status before filtering. |
+| `test_principal_activity_extension_adapter.js` | Fake SecretStorage, temporary storage, sequential key reuse, principal routing, bounded context. Extend with first-key concurrency, missing/wrong key beside existing data, root/key scope, rejected store/read, and truthful truncation. No real key store. |
+| `test_principal_activity_runtime_registration.js` | Static source/package command-registration assertions. Retain unchanged; no activated VS Code host proof. |
+| `test_principal_memex_disclosure_source.js` | Adjacent exact-shape/one-use SecretStorage and serialized consumption coverage. Reuse as a regression check; its process-local serialization is a pattern, not a cross-process lock. |
+| `test_package_manifest.js`, `test_package_surface.js`, `reddog_package_surface_contract.js`, `test_reddog_test_tiering.js` | Existing strict package/runtime membership and tier contracts remain owners. Root reproduced the original PR's missed 67/66 full-package counts after two runtime additions; root will repair these counts while retaining caps/EOL/allowlists and perform final combined-tree validation. |
+
+Read `tests/README.md`, this inventory, existing PAL tests, adjacent disclosure
+tests, and the source patterns before changes. Extend the two existing PAL test
+files; do not add a new test framework/store. The exact-head read-only baseline
+has a ledger syntax failure, passing adapter/static-registration tests, and
+separate synthetic failure receipts under external `refresh/1638-qualification`.
+Repair execution: both existing PAL files exit0 on Windows Node v24.11.1:
+`node tests/test_principal_activity_ledger.js` and
+`node tests/test_principal_activity_extension_adapter.js` (from the extension
+directory). The original contracts remain, including the repaired syntax line.
+Added fixtures cover eight concurrent first-key and append calls; independent
+child-process lock contention; scoped/missing/malformed/wrong keys across
+principals; empty/partial files; invalid JSON values; short/invalid/failed writes,
+flush/close failure; lock stat/close/replacement failure; and latest commitment
+state before scope/window limits. Context fixtures cover reopened/duplicate
+IDs, count/truncation metadata and final serialized-byte boundaries. The four
+source/test files are LF-only; diff-check passes. Evidence and source hashes:
+external `refresh/1638-qualification/repair-{ledger,adapter}-final.log` and
+`source-freeze.json`. Root owns package and combined-tree checks separately.
+
+No real SecretStorage, personal data, network, model, or installed extension was
+used. These are local fixture results, not installed-host qualification.
+Stale-lock recovery, power-loss guarantees, Windows ACLs, cross-root SecretStorage
+scope, hostile filesystem behavior and valid-tail rollback detection remain
+unqualified; failures can leave bytes or a lock for explicit inspection.
+
+Combined closure: the independent reviewer reran six scoped repository scripts
+and passed 13 separate adversarial probes with frozen source hashes. Root ran
+`node extensions/reddog/tests/run_reddog_test_tier.js fast` in the source-pinned
+O: checkout at `7615273f6`: 18 members PASS / 6,910 ms. The C: rejection remains
+recorded; the repository-location guard was not changed. Counts overlap.
+After current documentation count/link corrections, root's existing
+`node extensions/reddog/tests/test_package_surface.js` passes 69 files /
+975,019 raw bytes under the same one MiB limit. Actual local VSCE build yields
+71 archive entries / 284,536 bytes. Inspection verifies 68 exact source files,
+README's eight explicit URL-only rewrites and two generated metadata entries.
+The initial wrong-link-base archive is preserved; rebuilt qualification uses
+the existing README command's explicit monorepo content base. External evidence:
+`independent-source-review.json`, `fast-tier-result.json`,
+`package-surface-final.log`, `vsix-build-final.log`, `vsix-inspection.json`.
+Hosted CI/security, source publication, installation and native RSI remain
+separate unobserved gates. No source assertions were relaxed for closure.
+
+## PR1759 single-member admission boundary — 2026-10-22
+
+Reused `test_backend_compatibility_contract.js` after the O: fast tier reproduced
+the old 1,449-member rejection against the generated 1,450-member closure.
+Require the added queue path and preserve exact-max/max+1 acceptance/rejection;
+no byte, digest or path-validation bound changes. The initial C: attempt failed
+the tier's allowed-volume guard; source-pinned O: validation is required. Test
+results are recorded against the final PR head, not inferred from this change.
+
+## PR2150 policy manifest compatibility — 2026-10-21
+
+Reused `test_backend_compatibility_contract.js`,
+`test_backend_compatibility_preflight.js` and
+`test_holoindex_blocked_request_recovery.js`; all exit0. Independent-generation
+and staged-index binding checks pass within the six Python suites (101 pass,
+2 platform skips). Same1,449-member closure and unchanged caps/checks; only
+three member digests and existing pins change. Bridge TestModLog owns the full
+baseline/final receipt. No installed-runtime or Gmail behavior claim.
+
 ## Live generation scope manifest boundary — 2026-10-20
 
 The initial binding run passed 35 tests and failed one: pretty generated JSON

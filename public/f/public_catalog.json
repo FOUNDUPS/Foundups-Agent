@@ -66,6 +66,21 @@
       "public_summary": "A Fukui community campaign to preserve Sukatto Land Kuzuryu and test a future combining the onsen, education, innovation, and locally focused AI infrastructure.",
       "portfolio_priority": 4,
       "portfolio_ready": true
+    },
+    {
+      "foundup_id": "move2japan",
+      "display_name": "Move2Japan",
+      "portfolio_status": "portfolio_candidate",
+      "poc_landing_status": "functional",
+      "website_url": null,
+      "poc_url": "https://foundups.com/member/?foundup=move2japan",
+      "app_url": null,
+      "github_url": "https://github.com/FOUNDUPS/Foundups-Agent",
+      "docs_url": "https://github.com/FOUNDUPS/Foundups-Agent/tree/main/modules/foundups/move2japan",
+      "screenshot_url": null,
+      "public_summary": "English house discovery inside the Foundups Mall: eight attributed Fukui listings with geographic and land filters. Account-linked publishing and paid services are planned.",
+      "portfolio_priority": 5,
+      "portfolio_ready": false
     }
   ]
 }

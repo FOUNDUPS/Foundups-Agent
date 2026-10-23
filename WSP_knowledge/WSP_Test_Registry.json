@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1745,
-  "quarantined_tests": 270,
+  "total_tests": 1757,
+  "quarantined_tests": 271,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -4422,6 +4422,19 @@
       "description": "Tests for OBSERVE-MODE acoustic music/talk label in PHASE 2 indexing.\n\nSlice: SHORTS_MUSIC_LABEL_OBSERVE_PHASE1   Worker-Lane: MUSIC-OBSERVE\n\nWSP refs: WSP 5 (coverage), WSP 6 (audit), WSP 84 (reuse VideoArchiveExtractor +\naudio_content_classifier.classify_content).\n\nCONTRACT under test (observe-only, flag-gated, default OFF):\n  - flag ON  -> _observe_audio_label downloads (mocked) + classifies (mocked) and\n                returns {audio_label, audio_label_confidence}; the per-video write\n      "
     },
     {
+      "id": "test::modules::ai_intelligence::video_indexer::tests::test_audio_transcript_language",
+      "path": "modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py",
+      "owner": "modules/ai_intelligence/video_indexer",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-video-indexer-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Test real analyzer conversion without YouTube requests or model downloads."
+    },
+    {
       "id": "test::modules::ai_intelligence::video_indexer::tests::test_gemini_video_analyzer",
       "path": "modules/ai_intelligence/video_indexer/tests/test_gemini_video_analyzer.py",
       "owner": "modules/ai_intelligence/video_indexer",
@@ -5993,6 +6006,19 @@
       "description": "Test Script for Emoji Response System\nTests the complete emoji trigger -> response pipeline using 0-1-2 sequences."
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_engagement_runner_lifecycle",
+      "path": "modules/communication/livechat/tests/test_engagement_runner_lifecycle.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline source-bound subprocess, thread and rotation lifecycle cases."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_escalation",
       "path": "modules/communication/livechat/tests/test_escalation.py",
       "owner": "modules/communication/livechat",
@@ -6124,6 +6150,21 @@
       "description": "Test Intelligent Throttle Manager\nWSP-Compliant: WSP 5 (Testing), WSP 6 (Audit)\n\nTests the intelligent throttle manager and enhanced features."
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_live_handoff_selective_cancellation",
+      "path": "modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline source-bound PR841 handoff tests; no application imports or live effects.\n\nThe real owner method bodies are compiled from their AST. Browser, auth, model,\ntelemetry and provider boundaries are replaced explicitly. This is bounded local\nlifecycle evidence, not full-package or native/operational YouTube qualification."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_livechat",
       "path": "modules/communication/livechat/tests/test_livechat.py",
       "owner": "modules/communication/livechat",
@@ -6186,7 +6227,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_initialization.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -6199,7 +6240,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_lifecycle.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -6442,6 +6483,34 @@
       "description": "Unit tests for the channel-scoped OODA activity signal (RC3 observability).\n\nPURE tests -- no live browser, no driver, no router. They pin two things:\n  1. the rollup `current_activity` precedence is UNCHANGED (so should_pivot is\n     byte-for-byte identical to the pre-fix Chrome-only logic), and\n  2. the NEW channel-scoped truth: a stale Chrome comments tab during a live\n     stream is flagged, and Edge-bound channels (FoundUps/antifaFM) are never\n     mislabelled as \"processing comments\" just "
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_operator_command_lifecycle",
+      "path": "modules/communication/livechat/tests/test_operator_command_lifecycle.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline, source-bound tests for ownership of the operator watcher.\n\nCompile the actual run/_run_dae AST without importing the DAE's heavyweight\nmodule graph or calling its constructor. The public run method and the real\nstartup/stop branches execute below; auth, browser, model, and manifest IO do\nnot. This proves bounded lifecycle behavior, not full-module/runtime readiness."
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_operator_command_queue",
+      "path": "modules/communication/livechat/tests/test_operator_command_queue.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline contracts using real queue/locks, disposable files and fake senders."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_orchestrator",
       "path": "modules/communication/livechat/tests/test_orchestrator.py",
       "owner": "modules/communication/livechat",
@@ -6670,7 +6739,7 @@
       "path": "modules/communication/livechat/tests/test_unified_message_router.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13087,7 +13156,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_autonomous_all_comments.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation",
@@ -13104,7 +13173,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_autonomous_dom_verified.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation",
@@ -13121,7 +13190,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_autonomous_full.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13136,7 +13205,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_browser_nav.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13151,7 +13220,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_click_state_change.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13167,7 +13236,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_direct_selenium_click.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13183,7 +13252,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_coordinates.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13198,7 +13267,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_heart_precise.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13214,7 +13283,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_heart_stay_open.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13229,7 +13298,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_simple.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13245,7 +13314,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_vision_like.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13261,7 +13330,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_vision_visible.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13277,7 +13346,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_heart_not_like.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13292,7 +13361,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_heart_offset.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13307,7 +13376,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_integrated_architecture.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13323,7 +13392,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_map_buttons.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13339,7 +13408,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_qwen_studio_engage.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13354,7 +13423,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_save_screenshot.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13369,7 +13438,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_selenium_like.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13403,7 +13472,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_studio_simple.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13418,7 +13487,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_teaching_system.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13434,7 +13503,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_visible_heart_click.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13450,7 +13519,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_what_gets_clicked.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13466,7 +13535,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_youtube_studio_vision.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13533,7 +13602,7 @@
       "path": "modules/communication/video_comments/skillz/tars_account_swapper/tests/test_oops_page_switch.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13548,7 +13617,7 @@
       "path": "modules/communication/video_comments/tests/test_classifier_pipeline.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13559,11 +13628,24 @@
       "description": "Test Classification Pipeline - Phase 3O-3R End-to-End Verification\n\nVerifies:\n1. Whacked users database tracking\n2. Fast 0/1/2 classification (<5ms)\n3. Confidence scoring (Gemma-style pattern matching)\n4. Integration with whack_a_magat gamification system\n\nWSP References:\n- WSP 50 (Pre-Action Verification)\n- WSP 77 (Agent Coordination)\n- WSP 96 (WRE Skills)"
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_commenting_control_plane",
+      "path": "modules/communication/video_comments/tests/test_commenting_control_plane.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Local broadcast/context reader contracts; every state file is temporary."
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_like_single_comment",
       "path": "modules/communication/video_comments/tests/test_like_single_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13595,7 +13677,7 @@
       "path": "modules/communication/video_comments/tests/test_move2japan_access.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13611,7 +13693,7 @@
       "path": "modules/communication/video_comments/tests/test_poc_dialogue.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13627,7 +13709,7 @@
       "path": "modules/communication/video_comments/tests/test_post_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13639,11 +13721,28 @@
       "description": "Test posting a comment on a Move2Japan video"
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_reply_context_pipeline",
+      "path": "modules/communication/video_comments/tests/test_reply_context_pipeline.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-video-comments-operational",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Exact-source behavioral tests; package imports/constructors/live providers excluded.\n\nThe private loader compiles complete production definitions with denied optional\ncollaborators. No Selenium, profile store, model, network, or posting is started.\nDOM checks run the actual extraction JavaScript against synthetic rows in Node."
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_reply_to_comment",
       "path": "modules/communication/video_comments/tests/test_reply_to_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13659,7 +13758,7 @@
       "path": "modules/communication/video_comments/tests/test_ytr1_runtime_hardening.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13683,6 +13782,19 @@
         "syntax_error"
       ],
       "description": ""
+    },
+    {
+      "id": "test::modules::communication::voice_command_ingestion::tests::test_transcript_language",
+      "path": "modules/communication/voice_command_ingestion/tests/test_transcript_language.py",
+      "owner": "modules/communication/voice_command_ingestion",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-voice-command-ingestion-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Language and timestamp evidence, using local fakes without model downloads."
     },
     {
       "id": "test::modules::communication::voice_command_ingestion::tests::test_voice_command_ingestion",
@@ -15166,6 +15278,21 @@
       "description": "Tests for Move2Japan Stakeholder Database (WSP 34)\n===================================================\n\nCovers: create, get, update, get_or_create, stats"
     },
     {
+      "id": "test::modules::foundups::move2japan::tests::test_property_search",
+      "path": "modules/foundups/move2japan/tests/test_property_search.py",
+      "owner": "modules/foundups/move2japan",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-move2japan-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Run the actual browser-independent search adapter through the Node harness."
+    },
+    {
       "id": "test::modules::foundups::pfmall::tests::test_api",
       "path": "modules/foundups/pfmall/tests/test_api.py",
       "owner": "modules/foundups/pfmall",
@@ -15479,7 +15606,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "BTC reserve semantics regression tests.\n\nEnsures canonical UPS naming/behavior:\n- total_ups_circulating is canonical\n- total_ups_minted remains a backward-compatible alias\n- route_ups_from_treasury is canonical routing API"
+      "description": "BTC reserve semantics regression tests.\n\nEnsures canonical UPS naming/behavior:\n- total_ups_circulating is canonical\n- total_ups_minted remains a backward-compatible alias\n- route_ups_from_treasury is canonical routing API\n- genesis UPS denomination remains 1,000 sats per UPS"
     },
     {
       "id": "test::modules::foundups::simulator::tests::test_cabr_flow_router",
@@ -20777,7 +20904,10 @@
       "owner": "modules/platform_integration/acoustic_lab",
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-acoustic-lab-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network",
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -23373,6 +23503,21 @@
       "description": "Unit tests for US-ET peak slots + per-channel Studio-tz conversion.\n\nSlice: SHORTS_SCHEDULE_US_PEAK_WINDOW_PHASE1\n\nModel under test\n----------------\nALL shorts target the US audience, so peak publish times are defined ONCE in\nUS-Eastern (ET): morning ~08:00, lunch ~12:00, evening ~20:00. The scheduler\ntypes a BARE time string that YouTube Studio interprets in each channel's own\naccount timezone, so an ET target must be converted to the channel-local\nwall-clock (DST-aware) before typing.\n\nThese t"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_remote_cli",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_remote_cli.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Remote command regressions: no live browser, model or publishing required."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_reschedule_applier",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_reschedule_applier.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
@@ -23646,12 +23791,29 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Localhost Dev Harness Tests\n\nTests for the localhost-only Mall dev harness that bypasses\nClerk/Firestore auth for local development.\n\nGating rules:\n  - MUST be localhost or 127.0.0.1\n  - MUST have ?devMall=1 query parameter\n  - Production domains NEVER bypass auth\n\nHarness provides:\n  - Mock member identity\n  - Mock invite codes\n  - Real catalog from mall-catalog.json\n  - Full Mall shell access"
+    },
+    {
+      "id": "test::public::member::tests::test_mall_product_state",
+      "path": "public/member/tests/test_mall_product_state.py",
+      "owner": "public",
+      "suite_class": "unit",
+      "shard_id": "public-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Behavioral storage and worker-cache boundaries for a product in the Mall shell."
     },
     {
       "id": "test::public::member::tests::test_mall_tile_field",
@@ -23711,12 +23873,29 @@
       "owner": "public",
       "suite_class": "unit",
       "shard_id": "public-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for non-video quickview/overlay action surfaces on Mall index.\n\nVerifies that non-video FoundUps (github_repo, external_app, internal_service)\nget truthful CTAs and metadata in the Mall quick-view and overlay surfaces,\nwhile video-backed entries retain their existing semantics.\n\nWSP Compliance:\n  WSP 5  : Test coverage for new surfaces\n  WSP 72 : Scoped to index.html + mall-planes.js (no tile-field)"
+    },
+    {
+      "id": "test::public::member::tests::test_public_discovery_concierge",
+      "path": "public/member/tests/test_public_discovery_concierge.py",
+      "owner": "public",
+      "suite_class": "unit",
+      "shard_id": "public-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Runtime coverage for the opt-in public discovery plane and default member path."
     },
     {
       "id": "test::public::member::tests::test_red_dog_concierge",

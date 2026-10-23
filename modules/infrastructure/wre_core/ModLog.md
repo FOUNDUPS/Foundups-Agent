@@ -1,3 +1,55 @@
+## 2026-10-22 — Re-review unchanged generated hash metadata
+
+PR #2175 secret scan reported 38 existing manifest metadata findings after the
+required manifest refresh changed the whole-file digest. All 38 flagged lines
+are byte-identical to base `02d1c7c14c60487619287a9cb753ff3ddaa53c14`,
+contain only generated SHA256 member-hash metadata, and have exact reviewed
+fingerprints in that base ledger (36 generic-api-key, two discord-api-token).
+Appended only their 38 refreshed whole-file/rule/line fingerprints to the ledger;
+all prior entries remain in order. No scanner exclusions, runtime source, or
+manifest bytes changed. Validation checks all old reviews, unchanged lines,
+64-hex hash metadata, and exact fingerprint derivation; WSP 50/95/97.
+
+## 2026-10-22 — Bind skill feedback to loaded instructions
+
+The coordinator now attaches its execution ID, the exact loaded UTF-8 skill
+text digest, and its separate scanner-admission fingerprint to returned and
+persisted result evidence. Producer/caller `_skill_binding` assertions cannot
+replace this coordinator field. Non-JSON output keeps the existing unavailable
+marker while retaining the binding. Variation `parent_version` uses the same
+loaded-text digest instead of the ambiguous literal `current`.
+
+This identifies observed source text, not authenticated runtime authority or
+proof that the scanner admitted those subsequently loaded bytes. Unknown scanner
+fingerprints remain null. Existing telemetry exclusion, structural-fidelity
+thresholds, effect success, quality placeholder and fail-closed promotion remain.
+No Moshpit ingestion, generic AutoResearch evaluation or production RSI is enabled.
+
+Validation: new real SQLite runner/candidate/reopen regression failed on the
+baseline's forged lineage, then passed. Seven new cases plus existing execution,
+continuity, PatternMemory, admission, telemetry and master suites pass 232 cases.
+Two pytest configuration warnings reflect disabled async-plugin autoload.
+WSP00 used the documented Torch-free fallback (detector witness absent); Holo
+lexical bundle used this checkout with UNKNOWN semantic freshness. WSP15
+C2/I4/D3/Impact3=12/P2; WSP00/5/6/11/15/22/48/50/60/62/84/95/97.
+
+The backend manifest retains all 1,449 members and changes exactly two runtime
+hashes plus its existing JavaScript/test pins. Initial manifest parity failed
+(7 pass/1 fail) when the touched docstring changed during generation; the failure
+is retained as pre-freeze evidence. Final generated digest is
+`6cf4c02e9400113ebc40e2d4d1d86696ac9825f9330d3d3b7d6327d22d55d80f`.
+The master source shrinks 1,204 to 1,194 lines; inherited method-size debt remains.
+RedDog fast tier passed all 15 groups before the docstring-only final refresh.
+Test registry remains current at 1,743 files / 270 quarantined.
+
+## 2026-10-21 — PR2150 operations registry version closure
+
+Align only the existing reddog_operations registry version to the preserved
+Skillz1.1.1 and strict runtime pin. Existing metadata equality and hygiene guards
+remain unchanged. Reused six-suite binding selection passes101/2 platform skips;
+bridge TestModLog records baseline failures and exact source/evidence. No model,
+scanner bypass, new authority or installed execution. WSP15/22/50/95/97.
+
 ## 2026-10-10 — Security audit: fail closed on missing scan coverage
 
 - Repaired scanner exit/schema validation, including authentication/configuration

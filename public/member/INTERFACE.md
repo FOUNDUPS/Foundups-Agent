@@ -1,7 +1,7 @@
 # Member Area Interface
 
 **Module**: `public/member/`
-**Version**: 2.1.0
+**Version**: 2.2.0
 
 ## Public Interface
 
@@ -10,11 +10,66 @@
 /member/
 ```
 
-### Auth Requirements
+### Ordinary Mall Auth Requirements
 - Clerk session required
 - invite validation required
 - username claim required before admitted users enter the Mall
 - redirects to `/?signin=required` if not authenticated
+
+### Registered Public Product Selection
+
+`/member/?foundup=move2japan` and `/member/index.html?foundup=move2japan` select
+public houses in this same page. Exactly one case-sensitive supported `foundup`
+value is required. Unknown or duplicate selections do not relax ordinary admission.
+The legacy `/move2japan/` page is only a fixed redirect; `/f/move2japan` uses the
+registry's exact public `poc_url`. `/f/move2japan/app` retains its existing gate.
+
+`Move2JapanSearch.prepareShell(window)` runs before shared controllers bind:
+it moves the one existing `#mallTileField` into the property layout and installs
+the product form inside the existing `#accountPlane`. It creates no second shell,
+account controller or tenant runtime. The actual page's product boot selects
+`mallStateRestore.selectProduct('move2japan')` before mounting the public catalog.
+Only an already-present Clerk user starts the read-only account initializer.
+
+The shared `window.redDog` gains:
+
+| API | Product contract |
+| --- | --- |
+| `registerDiscoveryAdapter({element, focusElement})` | Register the native product form in the existing plane |
+| `setDiscoveryAdmission(boolean)` | Strict admission state; revocation clears shared identity and member content |
+| `isDiscoveryAdmitted()` | Current product account admission, never payment entitlement |
+
+`product-discovery` retains the full controller plus accessible modal handling.
+The older reduced `public-discovery` mode remains available for existing callers;
+Move2Japan's canonical page uses `product-discovery`. Shared density/motion controls
+remain available to admitted accounts. Global video scope, category, query, layout
+and channel actions cannot change geographic results; the native property form
+owns its filters. Dispatcher `search_catalog` returns `incompatible_projection`
+when the shared field refuses the query, without emitting a state-change event.
+
+The property selection has precedence over responsive category rows, including
+empty results. `getLayoutMode()` reports `grouped`; ordinary rows/grid behavior
+is retained when leaving the product. Property detail identity is
+`(foundup_id, listing_id)` and remains separate from video channel identity.
+
+### Independent View State and Account Return
+
+`mallStateRestore` exposes `selectProduct`, `save`, `restore`, `bindAutoSave`,
+`rememberProductReturn` and `consumeProductReturn`.
+
+| View | Storage key / schema |
+| --- | --- |
+| Ordinary video Mall | `pfmall_mall_state_v1`; scope, projection, layout, vertical and category-row offsets |
+| Move2Japan | `pfmall_product_move2japan_state_v1`; `pfmall_product_state.v1`, geographic rows and stable listing anchors |
+| Account return | Session-only `pfmall_product_return_v1`; one use, 15 minutes, allowlisted filters and fixed member destination |
+
+Product restoration never applies video scope or layout. Deferred video scroll
+callbacks recheck the selected product. A loading product cannot overwrite its
+previous geographic state with an empty capture. The return is consumed only by
+the normal Mall initializer after Clerk/invite/username admission succeeds.
+Service-worker cache `pfmall-member-v4` normalizes member query navigations to one
+shell entry; public property JSON uses network-first validation and dated cached
+fallback. Auth, account, dynamic and cross-origin requests are not cached.
 
 ### Runtime Surface
 

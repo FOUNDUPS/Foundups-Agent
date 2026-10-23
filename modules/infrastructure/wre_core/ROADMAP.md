@@ -1,3 +1,13 @@
+## Skill-feedback lineage checkpoint — 2026-10-22
+
+The existing coordinator/result and variation paths now retain the loaded skill
+text identity; seven added controls plus connected suites pass 232 cases locally.
+Real SQLite reopen is exercised; scanner and model outputs are substituted.
+Next: admit evidence-backed corrections against these exact run/source bindings
+through existing owners. Moshpit nomination ingestion, authenticated evaluation,
+activation/rollback and later measured benefit remain incomplete. No new store,
+scheduler, production promoter or model execution is introduced.
+
 ## Closed measured-zero layer — P15 checkpoint
 
 Selected 14/P1 (C2/I4/D4/Impact4): repair existing fidelity statistics without

@@ -2,16 +2,31 @@
   "name": "move2japan",
   "type": "foundup",
   "domain": "foundups",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "status": "poc",
-  "description": "Agent-driven relocation system — guided ascent from intent to settlement in Japan",
+  "description": "Registered public house-discovery product inside the existing Foundups Mall shell, shared account and PWA; publisher and paid-service stages pending",
   "surfaces": {
-    "funnel": "movetojapan.info",
-    "pwa": "movetojapan.foundups.com"
+    "funnel": "move2japan.info",
+    "pwa": "https://foundups.com/member/",
+    "public_poc_path": "/member/?foundup=move2japan",
+    "canonical_landing": "/f/move2japan",
+    "protected_app_path": "/f/move2japan/app",
+    "legacy_alias": "/move2japan/",
+    "shared_account_entry": "https://foundups.com/member/",
+    "private_review": "https://move2japan.undaodu.chatgpt.site"
   },
   "wsp_compliance": [
-    "WSP 3", "WSP 11", "WSP 22", "WSP 27",
-    "WSP 49", "WSP 60", "WSP 80", "WSP 95"
+    "WSP 00",
+    "WSP 3",
+    "WSP 11",
+    "WSP 22",
+    "WSP 27",
+    "WSP 49",
+    "WSP 60",
+    "WSP 80",
+    "WSP 95",
+    "WSP 97",
+    "WSP 104"
   ],
   "integration_points": {
     "livechat_skill": "communication/livechat/skillz/persona_move2japan.json",
@@ -30,5 +45,45 @@
       "BC6_PaperworkExecution",
       "BC7_LandingSettlement"
     ]
+  },
+  "surface_notes": {
+    "funnel": "Primary domain; hosting/forwarding requires separate live verification",
+    "pwa": "Existing member manifest and /member/ service-worker scope; the historical separate Move2Japan PWA proposal is superseded",
+    "public_poc_path": "Strict registered selection in public/member/index.html; public houses load independently of account services; production hosting not deployed in this session",
+    "canonical_landing": "Registered public discovery and Browse houses handoff into the existing Mall shell",
+    "protected_app_path": "Participation gate preserved; publisher interior remains a prototype target",
+    "legacy_alias": "Redirect only; domain catalog, adapter and styles remain under public/move2japan/",
+    "shared_account_entry": "Existing Clerk plus invite and username admission; public product reads existing state and infers no paid Move2Japan entitlement",
+    "private_review": "Owner-private review mirror only; prior 2026-10-17 publication receipts are superseded source history, not production delivery"
+  },
+  "housing_discovery": {
+    "primary_language": "en",
+    "schema_version": "move2japan_property_catalog.v2",
+    "catalog_kind": "curated_public_source_observations",
+    "source_record_count": 8,
+    "source_municipality_count": 5,
+    "navigation": "Shared Mall groups: houses horizontally within an area, areas vertically",
+    "public_search_mode": "accountPlane data-reddog-mode=product-discovery",
+    "integration_status": "SHARED_MALL_SOURCE_IMPLEMENTED",
+    "production_hosting": "NOT_DEPLOYED_IN_THIS_SESSION",
+    "browser_qa": "BLOCKED_BROWSER_QA",
+    "primary_domain_cutover": "UNVERIFIED_DOMAIN_CUTOVER",
+    "roadmap": "ROADMAP.md",
+    "evidence": "docs/08_HOUSING_DISCOVERY_REBASELINE.md",
+    "token_status": "TOKEN_DEFERRED",
+    "registry_boundary": "Existing move2japan tenant is a discoverable incubating FoundUp with a public POC and declarative manifest; discoverable_only does not grant protected app admission"
+  },
+  "hosting_target": {
+    "firebase_project": "gen-lang-client-0061781628",
+    "firebase_site": "foundupscom",
+    "status": "Production deploy requires authenticated hosting access unavailable in the 2026-10-18 session"
+  },
+  "historical_delivery": {
+    "status": "SUPERSEDED_2026_10_17_REVIEW_COMPOSITION",
+    "publication": "PRIVATE_CORRECTION_PUBLISHED",
+    "delivery_pr": "https://github.com/FOUNDUPS/Foundups-Agent/pull/2151",
+    "site_source_commit": "77db7957ce7527a0f614de545317ac03842c876b",
+    "site_deployment": "appgdep_6ad2c99dae548191b4b4458ef66b7307",
+    "published_at": "2026-10-17T01:04:36Z"
   }
 }

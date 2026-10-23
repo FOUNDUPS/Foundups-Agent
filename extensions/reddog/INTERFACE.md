@@ -1,5 +1,50 @@
 # RedDog Interface
 
+## PR841 backend closure boundary
+
+The exact runtime-file ceiling is 1,451, admitting only the newly imported
+`modules/communication/livechat/src/engagement_lifecycle.py` beyond the prior
+1,450-member closure. Existing manifest validation accepts 1,451 members and
+rejects 1,452. Manifest 324 KiB, per-file 2 MiB and total 32 MiB byte bounds,
+schema, digest checks, identity and admission authority are unchanged. This
+source-contract qualification grants no installed-host or runtime authorization.
+
+## Principal Activity Ledger candidate — PR1638
+
+`principal_activity_extension_adapter` owns local capture, context and status
+through the existing Principal Memex command-registration seam. Data remains
+under `globalStorageUri/principal-activity-ledger`; the key remains in VS Code
+SecretStorage. These local commands grant no external disclosure or execution
+authority. Installed-host operation is `IMPLEMENTED_NOT_VALIDATED`.
+
+- `ensureKey(secretStorage, scopedRoot)` now requires an existing absolute
+  storage root. An unscoped call rejects. All existing ledger files under that
+  root must authenticate with the stored key; missing, malformed or wrong keys
+  fail closed. Different roots sharing a secret slot remain unqualified.
+- `openLedger(context, principal)` supplies that scope. Same-root key operations
+  serialize locally and coordinate with cooperating processes. A busy or
+  abandoned lock rejects; there is no automatic lock stealing.
+- `PrincipalActivityLedger.append(event)` authenticates existing records before
+  extending the chain. A receipt requires the complete record write and flush
+  to succeed. An exception may leave bytes and does not authorize replay.
+- `events()` authenticates payloads. `verifyChain()` checks envelope consistency
+  only; neither proves that a valid tail was not removed.
+- `context({project, contact, limit})` identifies commitments associated with
+  matching history and applies their latest state from the entire principal
+  ledger, in append order. Filtering/windowing cannot resurrect a completion;
+  a later reopen replaces it. Recent events and open commitments each retain
+  at most `limit` entries, clamped to 1–200.
+- `contextPacket()` additionally bounds serialized output and reports when
+  entries were removed. Its `event_count` describes the pre-byte-cap recent
+  event selection, not the number left after byte truncation.
+- `open_commitment_count` counts all relevant, currently open IDs before caps;
+  `open_commitments_truncated` reports loss from either the item or byte cap.
+  The broader `truncated` flag also includes commitment truncation. An existing
+  empty/blank/partial ledger rejects; an I/O failure does not authorize reset.
+
+See [architecture and recovery boundaries](docs/PRINCIPAL_ACTIVITY_LEDGER_ARCHITECTURE.md)
+and [the integration receipt](docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md).
+
 ## Model routing and evaluation fallback
 
 The extension consumes receipt-bound AI Gateway runtime bindings when
@@ -312,7 +357,7 @@ Git, Python subprocess, worker-thread, and materialized backend behavior; these
 capability flags are a fail-closed compatibility boundary, not a permission
 grant.
 
-The distributable surface is pinned to 67 files: 63 runtime files derived from
+The distributable surface is pinned to 69 files: 65 runtime files derived from
 the static relative-require closure plus the two dynamic workers and Python
 bootstrap, and four public metadata/assets (`LICENSE`, `README.md`, `package.json`,
 `icon.png`). The packaged license text must canonically match the repository
@@ -322,7 +367,7 @@ editor files, prior VSIX files, and `.vscodeignore` do not cross the package
 boundary. The release group runs the deterministic installed-VSCE listing
 twice; the default fast tier performs static validation only.
 The listed regular-file closure is additionally capped at 1 MiB raw. Git
-attributes materialize all 66 text entries as LF on every host and keep the PNG
+attributes materialize all 68 text entries as LF on every host and keep the PNG
 binary. `reddog_package_surface_receipt.v2` emits file/byte/cap fields plus the
 governing effective EOL-policy digest, sorted member-content digest, LF mode,
 and text/binary counts. CR bytes or an effective attribute override fail before

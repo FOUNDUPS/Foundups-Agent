@@ -6,6 +6,14 @@ Date: 2026-09-11. Status: `SPECIFIED_NOT_IMPLEMENTED` for the integrated model. 
 
 ## Decision
 
+Current-source proposal reconciliation (2026-10-22): the
+[OpenClaw/WRE audit and implementation gates](../audits/architecture/OPENCLAW_WRE_SWARM_PROPOSAL_RECONCILIATION_20261022.md)
+map the proposed spooler/playbook/swarm to existing AgentDB, admission, worker,
+Skillz and memory owners. Reuse those owners; atomic rename and generated
+instructions do not grant execution or promotion authority. The integrated model
+remains unproven. The audit also records cancellation and exact-parent feedback
+gaps without activating a new orchestrator or changing the root roadmap's order.
+
 Use a **hybrid agent production system**: a governed ticket queue outside, a bounded self-organizing team inside selected tickets, and a consented feedback network of 012s actively engaged with that FoundUp. One qualified worker remains the economical default. A swarm is an execution topology, not an authority, a judge or a payment system.
 
 The kitchen analogy still works: the ticket fixes the order and constraints; qualified stations coordinate their work; an independent inspector checks the result. A team may propose a better division of work without rewriting the order, increasing its spending limit or appointing itself inspector.

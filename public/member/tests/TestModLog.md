@@ -1,3 +1,94 @@
+## 2026-10-21 | CodeQL fixture repair and main reconciliation
+
+Existing property VM now rejects raw script/image markup case-insensitively and
+exercises lower-, upper- and mixed-case payloads through the real field/detail
+owners. Leaf text reads decode escaped text without regex tag stripping; the
+fixture explicitly rejects unsupported non-leaf reads. No production sanitizer,
+scanner policy or suppression changed. The existing domain alias test extracts
+its trusted inline script case-insensitively with tag boundaries.
+
+Research: CodeQL `js/bad-tag-filter` and
+`js/incomplete-multi-character-sanitization` query documentation; existing
+module test inventories and the shared field/plane implementations.
+WSP 00 canonical attempt failed because torch is absent; tracker check passes,
+but no detector witness is claimed. WSP 97 lexical retrieval is bound to
+`c1a4a7eb16afc4f0e51d20797ad3ac88589a7812`, freshness UNKNOWN/index gap true.
+Missing semantic retrieval was supplemented by exact owner reads.
+
+WSP 15 allocation: C2/I4/D4/Impact3 = 13 (P1), bounded CI repair. Execution
+plane is repository maintenance; no WRE service or runtime activation.
+Verification starts with both existing Node fixtures, expands to shared member,
+projector, registry and security-gate tests, then requires exact-head CI.
+Main `1c277a3c0d0524e450ed1dd56d2373480d640ebd` conflicts were limited to
+security records and the generated test registry. Preserve the union of reviewed
+bindings; regenerate the registry with its existing owner. No new exception.
+Deployment and browser interaction remain separate, unverified gates.
+
+Integrated replay (Python 3.12, pytest 9.1.1, plugin auto-load disabled,
+`--import-mode=importlib`): **1673 passed, 3 failed, 0 skipped** across member,
+property wrapper, projector, registry-schema and security-gate suites. The three
+failure IDs are `TestFoundUpHandoff::test_open_link_exists`,
+`TestFoundUpHandoff::test_routing_prefix_surfaced` and
+`TestGestureHints::test_hint_items_present` in `test_navigation_planes.py`.
+All three also fail on exact main `1c277a3c` in the same environment (41 other
+navigation checks pass). No xfail/exclusion added. Initial collection without
+importlib collided on test package names; initial dependency-limited replay had
+missing-jsonschema failures/skips. Installing the declared test dependency and
+using isolated imports removed those coverage gaps. Registry: 1740 tracked test
+files, 270 quarantined; these are inventory counts, not executed test counts.
+
+## 2026-10-18 | Recovered actual Mall product integration
+
+Fresh final recovered-source command:
+
+```bash
+/tmp/move2japan-tests/bin/python -B -m pytest --import-mode=importlib \
+  public/member/tests modules/foundups/move2japan/tests \
+  modules/foundups/public_catalog_projector/tests/test_projector.py \
+  modules/foundups/tests/test_foundup_registry_schema.py -q
+```
+
+Result: **1698 passed, 4 failed, 0 skipped in 11.52 seconds**. The four failures
+are unchanged baseline expectations: navigation's `fv-open-link`,
+`routing_prefix`, obsolete `Tap to play/pause`, and BC0 intent classification of
+“is it expensive to live there”. The original tests and BC0 handler remain
+unchanged from main. No suppression or unrelated repair was added.
+
+Actual source VM receipts (counts overlap with Python wrappers):
+
+- `member_product_boot_vm.mjs`: 21 checks, complete `memberRuntime` inline script
+  with only dynamic imports routed to controlled test modules. Guest startup,
+  Clerk failure/timeout, actual stored admission, no public account writes,
+  missing invite status, sign-out and reversed account reads, same-account
+  generation races, ordinary gate, account return and explicit video entry.
+  Executed from the existing `test_localhost_dev_harness.py` owner.
+- `public_discovery_concierge_vm.mjs`: 21 checks against the actual member plane
+  and product template, real concierge and gestures. Includes visible shared
+  briefing/recommendations, invite action, focus/profile handoff, strict guest
+  revocation, captured callbacks and independent product filters.
+- `mall_product_state_vm.mjs`: 17 checks on actual state/SW source. Separate
+  namespaces, loading captures, bounded returns, deferred video restoration,
+  explicit public caching, network fallback and HTML rejection.
+- `mall_property_listing_vm.mjs`: actual field/plane/gesture behavior, both axes,
+  stable listing identity, empty filters, source safety, modal scroll/focus,
+  restored offsets and preserved ordinary category/grid behavior.
+- Dispatcher VM and independent actual-field/dispatcher composition: geography
+  refuses populated/empty global queries without mutation or success event;
+  shared density and ordinary queries remain functional.
+- Domain `property_search.cjs`: 28 factual catalog, geography, land, price, route
+  and alias checks.
+
+Independent reviewers replayed the field/state, concierge, boot and dispatcher
+boundaries and found no remaining material blocker. The restored field is exact
+blob `966e59f748422a5aed2cf24694d01c6fe6636626`; regenerated harness/account segments
+have fresh receipts, not claims of identical lost bytes. Canonical registry:
+1722 test files, 270 quarantined; generator output matches the previously uploaded
+blob `1af2a9330d932d9d121331152f0d1ac3ddc1e03c`. No registry gate is weakened.
+
+Browser layout, production auth, source availability, payments, live playback and
+real offline browser operation remain outside these VM receipts. The historical
+records below retain their original stage/source scope.
+
 ## 2026-10-18 | Responsive shared Mall discovery
 
 Validation on the proposed branch:
@@ -7,6 +98,39 @@ Validation on the proposed branch:
 - JavaScript syntax and git diff whitespace checks passed. Independent read-only review found no remaining material regressions after stable-index, category attribute and vertical restoration fixes.
 
 Browser fixture uses 60 synthetic channels and intercepts network requests. This does not establish real authentication, provider playback, Safari/iPad hardware behavior, voice conversation, or personalized ranking. Runtime-owned browser dependencies were used; repository dependencies unchanged.
+
+## 2026-10-17 | Property tiles and shared quick-view runtime
+
+Extended `test_non_video_quickview_actions.py` with a Node runtime check using
+`mall_property_listing_vm.mjs`. Existing dispatcher VM tests stub the render
+APIs and cannot cover this seam; the new fixture executes the actual shared
+gesture/tile/plane scripts with a bounded DOM. It requires only Node built-ins.
+
+Covered: two properties under one FoundUp; separate selection/focus keys;
+wrong-tenant/missing/duplicate identity rejection; tap/Enter/Space/pinch detail;
+arrow navigation; repeated filter/reorder/empty updates without added page
+listeners; inert state and Tab wrapping; HTTPS/no-userinfo source URLs; escaped
+hostile text; ignored property video/token/poster fields; and retained video
+Enter/fullscreen dispatch. Source checks and existing quick-view fixtures are
+retained. First adversarial execution failed on raw angle brackets in an
+attribute; escaping was fixed and the complete runtime replay passed.
+
+Independent review exposed detached focus after detail replacement and vertical
+scroll gestures closing long property details. The DOM fixture now models focus
+loss when innerHTML removes its target; that regression failed before the repair.
+Real gesture-engine touch events verify property scrolling remains open, lateral
+navigation still works, and non-property swipe-up still closes. Outside-dialog
+Tab/Shift-Tab recovery and the property-specific hint are checked as well.
+
+Command: `node public/member/tests/mall_property_listing_vm.mjs`.
+Focused pytest replay: **277 passed** across `test_non_video_quickview_actions.py`
+(including the Node runtime), `test_video_mall_field_runtime.py`,
+`test_tile_keyboard_a11y.py`, and `test_non_video_action_surfaces.py`.
+Two initial source-window regressions were resolved by keeping Enter on the
+existing fullscreen dispatch function and putting preview cleanup first;
+the original assertions were retained.
+Scope: local JavaScript behavior, no network, browser layout, live listings,
+authentication, payment, production deployment or media permission proof.
 
 ## 2026-09-21 | Optional public discovery alias behavior (local and independent replay passed)
 

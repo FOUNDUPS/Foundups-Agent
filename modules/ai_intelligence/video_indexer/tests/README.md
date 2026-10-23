@@ -1,5 +1,11 @@
 # Video Indexer Test Suite
 
+`test_audio_transcript_language.py` also constructs the real batch factory in
+temporary storage to verify omitted/explicit language compatibility, with model
+initialization forbidden. It covers the reused batch and local-file
+language parameters, Japanese/mixed/unknown labels and chunk start positions.
+Its extractor, metadata request and model are fake; no live content changes.
+
 **WSP Compliance**: WSP 5 (Test Coverage), WSP 6 (Test Audit), WSP 49 (Module Structure)
 
 ## Purpose

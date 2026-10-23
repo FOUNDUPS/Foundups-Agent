@@ -24,6 +24,28 @@ _PROJECTION_KEYS = _PROJECTION_FALSE_FLAGS | {
 _SIDE_KEYS = {"registry_digest", "shard_ids", "paths", "batches", "plan_digest"}
 
 
+def loaded_skill_digest(skill_content: str) -> str:
+    """Identify the exact loaded UTF-8 instruction text, not runtime authority."""
+    return "sha256:" + hashlib.sha256(skill_content.encode("utf-8")).hexdigest()
+
+
+def bind_skill_execution_result(
+    result: Mapping[str, Any], *, skill_content: str, execution_id: str,
+    admission_fingerprint: str | None,
+) -> dict[str, Any]:
+    """Attach coordinator-owned lineage without trusting producer assertions."""
+    scanner_fingerprint = admission_fingerprint if (
+        type(admission_fingerprint) is str and len(admission_fingerprint) == 64
+        and all(char in "0123456789abcdef" for char in admission_fingerprint)
+    ) else None
+    return {**result, "_skill_binding": {
+        "schema_version": "wre_skill_execution_binding.v1",
+        "execution_id": execution_id,
+        "loaded_skill_sha256": loaded_skill_digest(skill_content),
+        "scanner_admission_fingerprint": scanner_fingerprint,
+    }}
+
+
 def structural_step_output(result: Mapping[str, Any]) -> dict[str, Any]:
     """Return only meaningful output fields used for structural fidelity."""
     evidence: dict[str, Any] = {}
@@ -50,6 +72,13 @@ def stable_json_record(value: Any) -> str:
         return json.dumps(value, allow_nan=False)
     except (TypeError, ValueError, OverflowError):
         return '{"record_unavailable":"non_json_value"}'
+
+
+def serialize_bound_skill_result(result: Mapping[str, Any]) -> str:
+    """Keep coordinator lineage when an output payload cannot be serialized."""
+    payload = json.loads(stable_json_record(result))
+    payload["_skill_binding"] = result["_skill_binding"]
+    return stable_json_record(payload)
 
 
 def _bounded_builtin_json(value: Any) -> bool:

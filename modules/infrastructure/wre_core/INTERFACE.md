@@ -1,3 +1,25 @@
+## Skill-feedback source binding — 2026-10-22
+
+For non-telemetry dispatched outcomes, the coordinator owns `_skill_binding`
+in both `result` and the existing `SkillOutcome.output_result` JSON. Its v1
+fields are `schema_version=wre_skill_execution_binding.v1`, `execution_id`,
+`loaded_skill_sha256` (`sha256:` plus SHA-256 of the complete loaded text encoded
+as UTF-8), and `scanner_admission_fingerprint` (the separate admission receipt's
+64-character lowercase hex digest, or null if unavailable/invalid). Any
+producer-supplied value at this key is replaced without mutating that producer's
+object. Nonserializable payloads retain `record_unavailable=non_json_value` plus
+the coordinator binding; legacy serializable result fields remain top-level.
+
+`evolve_skill()` derives variation `parent_version` from the same exact loaded
+text supplied to it. Historical rows with `current` remain historical/ambiguous;
+no migration invents their source. These hashes identify content, not provenance,
+correctness, scanner-to-loaded-text equivalence, activation or independent
+verification. The direct compatibility method supplies no scanner claim.
+
+Telemetry stays outside skill outcomes/variations. Failure recall and evolution
+thresholds remain unchanged. Moshpit ingestion, cross-version history filtering,
+authenticated evaluation, activation/rollback and later-use benefit remain open.
+
 ## Security scan coverage contract (2026-10-10)
 
 The `security_scan` executor distinguishes `completed`, `partial`, `error`, and

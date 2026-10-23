@@ -1,3 +1,28 @@
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+The preserved implementation composes the existing installed HIGH service and
+live authenticated lease; newer main's current-time startup and nonce protections
+must survive reconciliation. Interface descriptions below are source contracts,
+not evidence that this merged candidate has been installed or admitted.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
 ## Installed HIGH connection in progress — 2026-10-20
 
 The existing permission, generation, parent/effect, signer and nonce owners now
@@ -12,6 +37,15 @@ The live-lease core passes connected 390/9 platform skips, separate Linux 2/0
 and independent 16 controls. Installed HIGH source/policy selection and model
 artifact ingestion remain separate gates; no native author is admitted.
 [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+
+### Historical protected-nonce checkpoint — 2026-10-20
+
+The v13 candidate supplies protected, current-owner consensus nonces using the
+existing atomic MAC state and SQLite high-water store. It preserves legacy owner
+versions and the LOW service. See the [API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+Connected 437/3 platform skips and independent 21 controls pass. The installed HIGH
+issuer join remains pending; a
+callable adapter is not native author admission or retained RSI benefit.
 
 ## Parent-consent prerequisite — 2026-10-19
 

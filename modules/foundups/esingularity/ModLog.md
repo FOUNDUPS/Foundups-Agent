@@ -1,3 +1,24 @@
+## 2026-10-23 — YUMORI resident RSI canary contract
+
+- Extended the existing registered `yumori_work_orchestrator` instead of creating another daemon/orchestrator. YUMORI is now the domain canary for the existing RedDog/OpenClaw/WRE resident loop under FoundUp scope `esingularity_001`.
+- Defined day-to-day continuity as evidence reconstruction across repository/Holo truth, authoritative work state, operational FoundUp Memex, Brain, Breadcrumbs, provider transaction truth, correspondence state, existing Contacts/Action Queue projections, YUMORI/0102 Moshpits and WRE PatternMemory/verified outcomes. No parallel memory database is introduced.
+- Added the autonomous project loop: recover -> observe deltas -> reconcile state -> identify the highest-leverage blocker -> compare actions -> WSP 15 select -> execute the highest admitted action -> independently verify -> write owned receipts/projections -> nominate learning.
+- Added Gmail autonomy requirements for provider-watermark deltas, complete-thread/Sent reconciliation, audience/route/sender/content validation, anti-spam/duplicate suppression, recipient preflight, provider readback and separate outcome tracking. `REDDOG_AUTO` external mutation remains truthfully gated on #1779 host deployment rather than bypassed.
+- Added autonomous partner discovery: derive the missing capability from the blocker, research direct precedent, cross against existing Contacts/Gmail/LinkedIn, verify roles and warm paths, rank fit, and prepare the smallest target-specific ask. Many names without a verified next action are not success.
+- Defined RSI success as later-cycle retained improvement with independent outcome evidence, not repetition, structural fidelity or non-empty model output. Metrics include blocker reduction, provider delta/replay behavior, wrong-audience prevention, partner progression, external-effect disposition, 012 intervention count, cost per useful verified outcome, and promoted/rejected learning candidates.
+
+## 2026-10-21 — Reconcile Moshpit event ordering policy PR #2007
+
+- Preserved the original event-owned timestamp, unknown-time placement, evidence-led historical repair and whole-day paragraph readback rules alongside PR #2110's private native-Docs safeguards.
+- Extended the existing Moshpit contract assertions; all 21 cases in `test_contracts.py` pass. Canonical agent projections still resolve the existing skill. Registry metadata is unchanged; its pre-existing 0.1.0 version versus canonical 0.1.2 is deferred from this policy slice.
+- This validates repository policy text, not live Docs mutation, automated ordering or end-to-end RSI. No correspondence, document or deployment effects. WSP 00/15/22/50/95/97; exact-head hosted checks and main readback remain publication gates.
+
+## 2026-10-21 — Close private Moshpit native-write policy PR #2110
+
+- Reconciled the existing private-log policy onto main a41a76053. Both canonical Google Docs require native content writes, exact error preservation, deduplication and readback; one pending learning delta must not replay a Gmail/CRM action.
+- Reused the existing `test_contracts.py` assertions. All 21 cases passed on refreshed PR head 5cadc75d4; this proves repository policy/registration contracts, not a live Docs write or deployed provider behavior.
+- Preserved private incident boundaries and existing action authority. No live document, correspondence or deployment effects. WSP 00/22/50/95/97; hosted checks and main readback remain publication gates.
+
 ## 2026-10-13 — JHR website-first downstream newsletter contract (instruction-only)
 
 - 012 clarified: eSingularity.ai is the primary public publication for the Japan Hyperscaler Report. LinkedIn JHR is a **derived newsletter edition**, distributed after the exact site issue passes verified production deployment and live issue-anchor readback.

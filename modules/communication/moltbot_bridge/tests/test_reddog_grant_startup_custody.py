@@ -118,8 +118,24 @@ def test_runtime_rejection_precedes_first_integrity_secret(case, monkeypatch):
     assert case.events == ['isolate', 'guard-rejected'] and case.active == 0
 
 
-def test_installed_composition_uses_protected_loader_before_service(case, monkeypatch):
+@pytest.mark.parametrize('cross_second_boundary', [False, True])
+def test_installed_composition_uses_protected_loader_before_service(case, monkeypatch, cross_second_boundary):
     from modules.communication.moltbot_bridge.src import reddog_grant_authority_service as service
+    if cross_second_boundary:
+        def advance_before_fence(method):
+            def invoke(self, **kwargs):
+                # Model time advancing between the caller and durable fence.
+                # Both entry points receive the same delay; stale explicit
+                # caller time must fail, while current-time admission must work.
+                after_boundary = int(time.time()) + 1
+                with monkeypatch.context() as clock:
+                    clock.setattr(time, 'time', lambda: after_boundary)
+                    return method(self, **kwargs)
+            return invoke
+        for name in ('authorize_key_epoch_use', 'authorize_current_key_epoch_use'):
+            original = getattr(RootAuthorizedSignerGrantRevocationOracle, name)
+            monkeypatch.setattr(RootAuthorizedSignerGrantRevocationOracle, name,
+                                advance_before_fence(original))
     def guard(*args):
         assert case.active and case.isolated
         case.events.append('guard')

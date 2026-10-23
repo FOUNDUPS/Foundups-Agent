@@ -1,5 +1,214 @@
+## Installed HIGH combined manifest metadata review — 2026-10-23
+
+The combined 1,466-member service closure changes the manifest's whole-file
+binding. Parent and independent reviews revalidated exactly 38 previously
+reported generated-metadata findings against main `99dc20086`: 36
+`generic-api-key` and two `discord-api-token` matches. Every finding-bearing
+line remains unique and unchanged, its referenced source bytes rehash correctly,
+and its prior exact fingerprint exists in the existing 1,600-entry ledger.
+
+Append only the 38 new whole-file/rule/line fingerprints calculated with the
+unchanged gate, retaining all prior entries (1,638 total). These are public
+source-integrity metadata; this bounded rebind is not a new scanner run. No
+rule, exclusion, scan scope, fingerprint algorithm or unknown finding is
+approved. Fresh hosted tracked-tree and introduced-history scans remain required;
+old source commits and failure evidence are preserved. Independent evidence is
+in the existing reconciliation refresh receipt
+`rsi-installed-independent-known-manifest-rebindings-20261023.json`.
+
+## PR1478 reply-context manifest re-review — 2026-10-23
+
+Head `70ad1bd9f5483d3f74ca4d3365aabbae174cb6e0` adds two generated runtime
+members. Security job 120199282798 reports 38 new whole-file bindings in the
+manifest: 36 `generic-api-key` and two `discord-api-token`. Independent root and
+peer reviews parsed every exact line, recomputed its SHA-256 from the referenced
+Git source with the existing LF normalization, and verified unchanged values and
+prior exact reviewed fingerprints against main `0d3f715bb`. They are source-
+integrity metadata. Append only these 38 bindings; preserve all 1562 prior entries
+(1600 total). Rules, scan scope, byte limits and failure behavior are unchanged.
+
+The first CI event still carried the PR's obsolete base `0b91dad785`; GitHub
+reported 2,390 changed files/700 commits despite the intended20-file delta.
+Refreshing the existing PR's base to main restored `0d3f715bb` and 20 files/four
+introduced commits. That stale event also scanned historical findings and ran
+parent lifecycle tests against a version lacking the newer test. Those failures
+are preserved, not waived. No historical or separate GitGuardian incident is
+approved here. Fresh exact-head tree/history, lifecycle and GitGuardian results
+must be observed on the corrected base before merge.
+
+Sanitized root/independent records are in the existing PR reconciliation refresh
+folder (`pr1478-security-root-review.json` and
+`pr1478-independent-security-metadata-review.json`). This is source review, not
+credential validity, signed admission, or native worker evidence.
+
+## PR782 quota guard manifest re-review — 2026-10-23
+
+Security job120119887133 on head `63540b2144a01dc821e3d1bef9ecfa914a1f615e`
+reported 38 generated-manifest findings: 36 `generic-api-key` and two
+`discord-api-token`. The introduced-history scan reported zero findings.
+Independent root and peer reviews recomputed every flagged source hash from
+exact Git blobs, confirmed the same line/value on main `27f99c174`, and found
+each prior whole-file/rule/line binding already in the existing ledger.
+
+The subsequent two constant-log corrections regenerate only the checker's
+source digest. None of the 38 finding-bearing values changes. Rebind the final
+manifest from reviewed tree `53786a4f2362ca3857f5a8cb3a323d4edb02ca7f`;
+preserve all 1,486 existing records and append only its 38 exact bindings.
+No scanner rule, scan scope, fingerprint algorithm or fail-closed behavior
+changes. These are source-integrity metadata, not credentials.
+
+Local gate regressions: 19 passed; one Windows test resolved an unavailable
+WSL launcher. Its four workflow curl-stub controls passed with explicit Git
+Bash. Fresh hosted regressions, tree/history scans and CodeQL remain required.
+Sanitized root/peer evidence is retained in the existing PR reconciliation
+`refresh/` directory. This is independent source review, not runtime authority.
+
+## Gmail/WRE registry manifest re-review — 2026-10-22
+
+PR2179 changes one registered-skill JSON source and refreshes the generated
+`scripts/reddog_backend_manifest.json` digest for that exact file. The pinned
+Gitleaks 8.30.1 tracked-tree scan returned 38 unreviewed findings in the
+generated manifest: 36 `generic-api-key` and two `discord-api-token`
+heuristic matches.
+
+Independent review parsed every finding's exact manifest line, fetched every
+referenced source file at PR head `5fa880663351937d9850a700ded8e2e337bdaf9d`,
+normalized CRLF to LF, and recomputed SHA-256. All 38 values exactly matched
+their referenced source bytes. They are generated source-integrity metadata,
+not credentials. The whole manifest file SHA-256 is
+`e48885150236ab8cb7d642b278e626386dff3b47f428d0e596b1521d64fe4607`.
+
+Preserve all 1448 prior reviewed bindings and append only these 38 exact
+whole-file/rule/line bindings (1486 total). No matched value,
+scanner rule, exclusion, scan scope, fingerprint algorithm, history coverage,
+or failure behavior changed. This review approves no unrelated finding and
+does not classify separate credential-shaped incidents.
+
 # Blocking secret scan
 
+## PR1860 selected-scheduling binding review — 2026-10-22
+
+Security job119408805011 on head `dfdbf27b02149b71e13ca65d2a8467bb0768b5ea`
+flagged39 changed whole-file bindings:38 generated source digests and one
+unchanged bridge changelog passage. CI merge `007b1cd96b68c91540a531c59058a04eeca3ee0a`
+has identical finding-bearing blobs. Introduced-history scan reported zero
+unreviewed findings (eight previously reviewed occurrences).
+
+Root and independent reviewer recomputed all1449 runtime source hashes from
+exact Git blobs with the unchanged CRLF-to-LF normalization; the independent
+review also recomputed17 bridge mappings. Each flagged line is unchanged from
+main `be7ce629b5f36382466432987eaf279b0e5bbc5c` and has a unique exact reviewed
+prior binding. The prose's surrounding five lines also match. None of the six
+changed manifest values is flagged.
+
+Preserve all1332 existing bindings and append only these39 independently
+proved whole-file/rule/line fingerprints (1371 total). No scanner rule, scan
+scope, fingerprint algorithm, unknown finding or credential is approved.
+Five fingerprint/history/error-handling regressions passed locally; require
+fresh hosted gate regressions and tree/introduced-history scans before merge.
+Sanitized root/peer evidence: `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1860-qualification/`.
+WSP00/10/15/22/50/71/97; unsigned source review, no runtime authority or provider probe.
+
+## PR2150 operations policy binding review — 2026-10-21
+
+The exact repair head `4cabbbb873958bf22e3d830d4c8328727f0d2610` failed
+security job119133711355 on39 changed whole-file bindings:38 generated source
+digests and one unchanged bridge changelog sentence. The actual CI merge was
+`757219add14b8cd8adbc194bad5f72a92753bd55`; its two finding-bearing files match
+the repair head exactly. Introduced-history scanning reported zero findings.
+
+Independent reviewer and coordinating root each recomputed all1449 manifest
+source digests from exact Git blobs using the unchanged CRLF-to-LF normalization.
+Every flagged line/value is unchanged from main `a41a76053`; all39 prior exact
+bindings are in its1293-entry ledger. The only three changed manifest mappings
+are the operations skill, operations version binding and skills registry; none
+of these changed values is flagged. The unchanged prose moves3612 to3625.
+
+Retain all1293 reviewed records and append only these39 individually proved
+whole-file/rule/line bindings (1332 total). Scanner rules, configuration, scan
+scope, fingerprint algorithm and fail-closed behavior remain unchanged. No
+unknown historical finding or credential is approved. Sanitized peer/root proof:
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/pr2150-repair/security-review/`.
+This is unsigned source review, not native worker provenance or runtime authority.
+Local gate regressions with UTF-8:16 passed, one Windows `bash` lookup failure
+(the test resolves the unavailable WSL launcher). The same four actual-workflow
+curl-stub controls pass4/4 with explicit Git Bash, without network invocation.
+The unmodified local suite is not reported all-green; initial encoding/launcher
+failures are retained. Require the existing Linux gate-regression job and fresh
+exact-head full-tree/introduced-history scans before merge.
+WSP00/15/22/50/71/97; no provider validity probes or deployment.
+
+## Historical source digest recovery — 2026-10-21
+
+Continue the existing 91-candidate triage without changing its historical
+snapshot. One formerly UNKNOWN_METADATA occurrence is now independently proved:
+`docs/roadmaps/RSI_BASELINE_OBSERVATIONS_20260913.json`, commit
+`21afc9108fec741ec883efacc47e542dc2461a7b`, line 7989, rule `generic-api-key`.
+The JSON field is
+`acceptance_visibility_continuation_20260914.validation.source_test_fingerprints`
+for `modules/communication/moltbot_bridge/tests/test_foundup_memex_verified_outcome_authenticity.py`.
+
+Load that source from ancestor `cd305f27139cf858a9bfd4d2eef17fb37f3798b6`.
+Normalize CRLF to LF, then render LF as CRLF and compute SHA256. The resulting
+23,221 bytes reproduce the recorded value exactly; plain LF does not. The
+historical record identifies a Windows worktree/interpreter. Worker and root
+independently replayed the equality without emitting the matched value.
+Root also recomputed the whole-file/rule/line fingerprint using the unchanged
+gate algorithm. Append only
+`db95baa170a7d88a3277829cb21c5d7b95242c0f06284942a3ac07fe4307924b`;
+preserve all previously reviewed bindings, including the startup changelog re-review below.
+
+The earlier triage snapshot remains an as-of record. Its remaining queue is now
+15 metadata occurrences without recovered original bytes and 23 credential
+occurrences representing five distinct values without provider-owner disposition.
+No credential validity probe, revocation, deployment claim or blanket exception.
+WSP 71/97 scope: exact historical proof and existing ledger only. WSP 15 allocation
+C1/I3/D3/Impact2 = 9 (P3); performed while the primary repair waits for CI.
+Verification: exact digest, line and ancestor checks; existing security-gate
+regressions; exact-head CI before merge. This is not a new all-history scan.
+
+## Grant startup changelog prose re-review — 2026-10-21
+
+PR2167 security job119107129537 reported one `generic-api-key` finding in
+`modules/communication/moltbot_bridge/ModLog.md` at line3612. Independent review
+compared the full finding span against line3603 on main `a6b5efa2`: identical
+ordinary committed-profile key-resolution prose, with no credential assignment
+or literal. The nine-line changelog addition changed its whole-file binding.
+
+Replayed both exact committed files with Gitleaks8.30.1 after verifying the release
+archive against the workflow's SHA256 pin. Each scan returned exactly one finding,
+exit1, and zero stderr bytes, with full redaction, the existing config, inline
+allowances ignored and implicit ignore disabled. Sanitized binding evidence:
+
+- Prior file SHA256: `a69ac33da83ce48ac53fc8743c738acb42885a63f3c1327c105da8996be41c69`.
+- Prior exact reviewed binding: `e9a4a29140a6ec5052f328c50d4ef2872734699d814c107c69287f5bbd3539ef`.
+- Current file SHA256: `a95a097d38132d4bf5712543e8f0ccf45fc3f60a5fc585f14fd36064be880a78`.
+- Current exact binding: `2902fa07012568ff448d61c33fb6f823df973f1b111e17545f805d159c758f9a`.
+
+Preserve all1291 existing records and add only this binding, for1292 total.
+No matched value, scanner rule, exclusion, fingerprint algorithm or failure
+behavior changed. Temporary redacted scan reports were removed after review.
+
+## Move2Japan shared member page review — 2026-10-18
+
+PR #2151 head `57a2a7a3e3b4fb41b7562585966e11b7d5384033` failed security
+job `117808506171` on one current-tree finding in `public/member/index.html`.
+Independent review compared the exact committed HTML with main `b9051be2`:
+the Clerk publishable identifier and complete SDK script block are unchanged.
+Clerk documents this identifier and SDK attribute for public frontend use.
+The page changes invalidated its whole-file binding and moved the line from
+23 to 25; the prior exact binding is already reviewed.
+
+A checksum-verified Gitleaks 8.30.1 replay of the exact committed HTML produced
+only that one `generic-api-key` finding at line 25, with zero stderr bytes.
+Preserve all 828 existing records and append only its independently recomputed
+whole-file/rule/line fingerprint (829 total). Runtime source, scanner rules,
+scan scope, fingerprint calculation and failure behavior are unchanged.
+Sanitized evidence: `reviewed-move2japan-member-evidence.json`. No matched value
+is retained in the evidence. This review does not grant account or provider
+authority and does not approve any other occurrence.
+The existing `scripts/tests/test_ci_security_gate.py` regressions passed:
+**17 passed in 0.33 seconds**, with plugin auto-loading disabled and no skips.
 ## Descriptor path-cost binding review — 2026-10-19
 
 Independent exact-tree review of81e2a305582d974d54c0e4318d57d9c170b6d8bc

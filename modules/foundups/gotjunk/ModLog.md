@@ -1,3 +1,10 @@
+## 2026-10-22 — CA trust build protection
+
+WSP12/22/97. Container build dependency downloads now use the reviewed
+incident-fixed runtime/trust bootstrap; build contexts and entrypoints remain.
+See `docs/audits/security/PYTHON_CA_TRUST_20261022.md` for scope and checks.
+No production image rebuild or rollout is claimed.
+
 ## 2026-10-19 — Patched multipart parser
 
 WSP 12/22/50/71/97; base `6ad7cf09c2b6df3fd439e72a7cd063b55a427f42`.

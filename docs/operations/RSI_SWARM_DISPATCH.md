@@ -1,3 +1,54 @@
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Locally verified candidate binding: the combined closure has
+1,466 members, adding 13 to main with no removals. Pretty JSON measures LF
+331,626 / CRLF 334,631 bytes. The smallest qualified whole-KiB ceiling is 327 KiB
+(334,848 bytes; 217 above CRLF); main's 324 KiB contract cannot contain it.
+Candidate digest: `88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16`.
+The paired boundary accepts 1,466 members and rejects 1,467. Per-file 2 MiB,
+total 32 MiB, exact digest/path/hash checks and authority gates remain unchanged.
+Eight Python manifest cases and three Node commands passed, including LF/CRLF,
+exact-byte/+1 and member/+1 controls. This is not installed-runtime qualification.
+
+Current frozen-source qualification: clock/custody/structure128pass/2skip and
+core/LOW/installed compatibility272pass/4skip; together400pass/6skip across406
+cases in18 distinct suites. All22 bound hashes remain stable. The six Windows
+skips cover symlink/Unix descriptor and actual POSIX process-fence conditions;
+Linux acceptance remains required. No installed/native execution follows.
+
+
+The service entrypoint was already included as a generator root in the preserved
+candidate. Reconcile its live-lease and installed HIGH implementation with newer
+main's nonce/startup protections; do not recreate that solved entrypoint work.
+Use the existing installed-work/HIGH, live-lease, LOW/startup and parent/model
+regressions, then verify generated closure and consumer boundaries against the
+actual combined source. Linux process controls remain separate from Windows
+skips. Local binding checks and independent source acceptance pass; hosted gates remain required.
+
+PR1478's exact-head20 checks, merged-tree readback and exact-main CI39889900717/
+CodeQL39889900055 passed. This source integration still requires its own publication gates.
+Known-path missing-file and expired-draft observations below retain their original
+dates; authentic current policy/manifest, model/parent/effect, custody, budget and
+reviewer inputs must be established through their existing owners.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
 ## Installed HIGH source closure candidate — 2026-10-22
 
 WSP00/5/6/10/15/22/50/97. Existing 19/P0 prerequisite; integrate the already

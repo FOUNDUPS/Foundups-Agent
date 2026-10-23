@@ -1,3 +1,21 @@
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+The current acceptance selection must retain installed-work and both HIGH
+service suites, all five live-lease suites, LOW/startup, v12/v13 model/nonce,
+parent/effect, initial-enrollment and permission regressions. Preserve main's
+inside-fence clock regression. Actual collection determines the final count;
+Windows skips do not prove Linux same-inode/process behavior. Use the existing
+qualified interpreters, explicit root/confcutdir and short external temporary
+paths. No live service, model, account or real credential is needed for this
+source qualification. Installed admission and retained-use evidence remain open.
+
 ## Installed HIGH service qualification
 
 Run `test_reddog_installed_high_service.py` and `test_reddog_installed_high_service_signing.py` with LOW service, startup custody, installed work-manifest, permission, parent-model and live-lease suites. `installed_high_service_test_support.py` reuses actual signed-model/parent/effect, factory and nonce fixtures; installation/current-input, OS, initial permission/root oracle and frozen-clock seams are synthetic. Verify actual Ed25519 signature, durable commit/replay rejection, no nested request fence, missing/corrupt model/proof rejection before custody, and post-sign drift/failed-exit withholding without rollback claims. The signed-manifest guard test replaces only the full runtime guard with a recorder/rejection seam; it is not native qualification.
@@ -16,10 +34,11 @@ The static contract unknown-version fixture now uses v12 because v11 is supporte
 
 Run with an explicit checkout `--rootdir`, `--noconftest`, `-p no:cacheprovider`
 and bytecode disabled; preserve raw failures and exact source bindings externally.
-The existing connected run retains two unchanged startup-test size failures.
+Historical 2026-10-20 checkpoint: that connected run retained two unchanged
+startup-test size failures and generated integrity was pending integration.
+The current 2026-10-23 results above supersede that source-validation status.
 Source metadata tests and independent controls do not establish installed HIGH
-activation, authentic input supply or native admission. Generated integrity is
-pending root-owned integration; this checkpoint does not claim a publication gate.
+activation, authentic input supply, native admission or publication.
 
 ## Live generation scope and protected consensus nonce qualification
 
@@ -36,17 +55,33 @@ proof/model tampering with unchanged owner, withdrawal and post-commit rejection
 The Linux process suite proves actual same-inode blocking/release with a bounded
 test-only watchdog; it does not provision installed HIGH authority.
 
-Connected Windows validation: 390 passed, 9 platform skips, zero failures/errors
+Historical 2026-10-20 source validation: 390 passed, 9 platform skips, zero failures/errors
 across 25 suites in 389.797s. Separate Linux process controls: 2 passed without
 skips in 29.394s, using the actual same-inode generation lock and signed files
 with synthetic admission/installation seams. Independent core review: 16 unique
-held-outs passed. Counts overlap and are not additive. Original fixture failures
+held-outs passed. These are not current merged-source Linux results. Counts
+overlap and are not additive. Original fixture failures
 and the bounded nested-lock red control remain in external evidence.
 
 The existing authenticated startup CI selection includes all five suites. Native
 installed HIGH acceptance still requires protected policy/source and model data
 composition plus genuine admission inputs. See TestModLog for preserved nonce
 history and dispatch for exact frozen receipts and generated inventory.
+
+### Historical nonce-only qualification checkpoint — 2026-10-20
+
+Exercise the v13 nonce/custody suites with existing state, current owner/E0,
+parent/effect, model, issuer custody and legacy LOW regressions. Use real
+disposable MAC/SQLite files and signed model/policy inputs; label OS/installation
+seams. Require restart/replay, cross-instance handle rejection, corrupt or absent
+state, one-step recovery, withdrawal, expiry and failed commit/cleanup controls.
+Pin an explicit pytest repository root and independent temporary databases.
+Connected 437/3 platform skips and independent 21 controls exercise this source
+component. Current generated runtime includes custody only; authority/current
+owner are not yet imported or qualified installed runtime.
+Installed HIGH acceptance additionally requires a real Linux same-inode locking
+test across reserve, pre-sign validation, commit and rollback under the actual
+permission wrapper. Passing the adapter tests alone does not meet that gate.
 
 ## Exact parent-consent connection
 

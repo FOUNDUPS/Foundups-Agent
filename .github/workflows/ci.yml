@@ -9,6 +9,129 @@ on:
     types: [opened, synchronize, reopened, edited, ready_for_review]
 
 jobs:
+  principal-activity-ledger:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+      - name: Verify isolated ledger, key lifecycle and existing disclosure boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          node extensions/reddog/tests/test_principal_activity_ledger.js
+          node extensions/reddog/tests/test_principal_activity_extension_adapter.js
+          node extensions/reddog/tests/test_principal_activity_runtime_registration.js
+          node extensions/reddog/tests/test_principal_memex_disclosure_source.js
+          node extensions/reddog/tests/test_package_manifest.js
+
+  youtube-operator-command:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install bounded offline runner
+        run: python -m pip install pytest==9.0.3 pytest-asyncio==1.3.0
+      - name: Verify claims, process recovery, lifecycle and context consumption
+        run: >-
+          python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -q --tb=short
+          modules/communication/livechat/tests/test_operator_command_queue.py
+          modules/communication/livechat/tests/test_operator_command_lifecycle.py
+          modules/communication/video_comments/tests/test_commenting_control_plane.py
+
+      - name: Verify isolated reply provenance and row context
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p pytest_asyncio.plugin -p no:cacheprovider -q --tb=short
+          modules/communication/video_comments/tests/test_reply_context_pipeline.py
+          --junitxml=reply-context-results.xml
+      - name: Require the reviewed reply case inventory without skips
+        shell: python
+        run: |
+          import hashlib
+          import xml.etree.ElementTree as ET
+          root = ET.parse('reply-context-results.xml').getroot()
+          cases = list(root.iter('testcase'))
+          assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
+          names = sorted(case.get('name') for case in cases)
+          digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
+          assert digest == '909f31dfc4a764e43cf1ae618ee2e03fcd4a14a02ddb803ff6c85ef5cfd77c6f', (len(cases), digest)
+      - name: Preserve reply context results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reply-context-results-${{ matrix.os }}
+          path: reply-context-results.xml
+          if-no-files-found: error
+
+  youtube-selected-batch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install bounded offline test dependencies
+        run: >-
+          python -m pip install pytest==9.0.3 pytest-asyncio==1.3.0
+          selenium==4.35.0 numpy==1.26.4 pytz==2025.2 python-dotenv==1.2.2
+          requests==2.33.0 pydantic==2.11.5
+      - name: Verify selected clips, preview, receipts and transcript compatibility
+        run: |
+          python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -q --tb=short \
+            modules/platform_integration/youtube_shorts_scheduler/tests/test_remote_cli.py \
+            modules/platform_integration/youtube_shorts_scheduler/tests/test_schedule_include_private.py \
+            modules/platform_integration/youtube_shorts_scheduler/tests/test_index_metadata_decoupling.py \
+            modules/platform_integration/youtube_shorts_scheduler/tests/test_peak_window.py \
+            modules/platform_integration/youtube_shorts_scheduler/tests/test_visibility_filter_enforcement.py \
+            modules/communication/moltbot_bridge/tests/test_youtube_automation_adapter.py \
+            modules/communication/voice_command_ingestion/tests/test_transcript_language.py \
+            modules/communication/voice_command_ingestion/tests/test_voice_command_ingestion.py \
+            modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py
+      - name: Verify stream checker global and local quota boundaries
+        run: python -B modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -v
+      - name: Verify live handoff and owned worker settlement
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p no:cacheprovider -p pytest_asyncio.plugin -q --tb=short
+          modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py
+          modules/communication/livechat/tests/test_engagement_runner_lifecycle.py
+
   mcp-runtime-compatibility:
     runs-on: windows-latest
     timeout-minutes: 10
@@ -17,6 +140,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Prepare isolated MCP candidate
         shell: pwsh
         run: |
@@ -51,6 +176,8 @@ jobs:
           'MCP_TEST_VOLUME_OWNED=1' >> $env:GITHUB_ENV
           python -m venv "$env:RUNNER_TEMP/mcp-candidate"
           if ($LASTEXITCODE -ne 0) { throw 'Candidate venv creation failed' }
+          & "$env:RUNNER_TEMP/mcp-candidate/Scripts/python.exe" -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+          if ($LASTEXITCODE -ne 0) { throw 'Candidate trust bootstrap failed' }
           & "$env:RUNNER_TEMP/mcp-candidate/Scripts/python.exe" -m pip install `
             -r modules/infrastructure/foundups_mcp_bridge/requirements.txt 'pytest==9.0.3'
           if ($LASTEXITCODE -ne 0) { throw 'Candidate dependency installation failed' }
@@ -119,6 +246,353 @@ jobs:
             if ((Get-DiskImage -ImagePath $expected).Attached) { throw 'VHD still attached' }
           }
 
+  acoustic-x-adapter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.11', '3.12']
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install separate Acoustic Lab requirements
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B -m venv "$RUNNER_TEMP/acoustic-venv"
+          "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+          "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated install --index-url https://pypi.org/simple --report "$RUNNER_TEMP/acoustic-target-install.json" -r modules/platform_integration/acoustic_lab/requirements.txt
+          "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated check
+      - name: Verify seven controlled X adapter cases
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/acoustic-home" "$RUNNER_TEMP/acoustic-tmp"
+          env -i PATH="$RUNNER_TEMP/acoustic-venv/bin:/usr/bin:/bin" \
+            HOME="$RUNNER_TEMP/acoustic-home" TMPDIR="$RUNNER_TEMP/acoustic-tmp" \
+            LANG=C.UTF-8 PYTHONUTF8=1 PYTHONDONTWRITEBYTECODE=1 \
+            PYTHON_DOTENV_DISABLED=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+            PYTHONPATH="$GITHUB_WORKSPACE/modules/platform_integration/acoustic_lab" \
+            PYCRYPTODOME_DISABLE_GMP=1 \
+            NUMBA_CACHE_DIR="$RUNNER_TEMP/acoustic-tmp/numba" \
+            PR1338_QUALIFICATION_TMP="$RUNNER_TEMP/acoustic-tmp" \
+            ACOUSTIC_CI_REPORT="$RUNNER_TEMP/acoustic-adapter.json" \
+            "$RUNNER_TEMP/acoustic-venv/bin/python" -B - <<'PY'
+          import json, os, socket, subprocess, sys
+          from pathlib import Path
+
+          # Python API guards, not an OS sandbox or native-code confinement.
+          events, phase = [], 'sanity'
+          def reject(kind):
+              def denied(*args, **kwargs):
+                  frames, frame = set(), sys._getframe(1)
+                  while frame is not None:
+                      frames.add((frame.f_globals.get('__name__'), frame.f_code.co_name))
+                      frame = frame.f_back
+                  probe = None
+                  if (kind == 'socket.bind' and len(args) > 1 and args[1] == ('::1', 0)
+                          and ('urllib3.util.connection', '_has_ipv6') in frames):
+                      probe = 'urllib3-ipv6-capability'
+                  if (kind == 'subprocess.Popen' and len(args) > 1 and args[1] == 'lscpu'
+                          and ('numpy.testing._private.utils', 'check_support_sve') in frames):
+                      probe = 'numpy-sve-capability'
+                  # Static call-site provenance only: never argv, env or frame locals.
+                  callers = sorted((str(module), name) for module, name in frames)
+                  events.append({'phase': phase, 'api': kind, 'denied_probe': probe,
+                                 'callers': callers[:40], 'callers_truncated': len(callers) > 40})
+                  # These two import probes catch OSError; no operation is permitted.
+                  raise PermissionError('Python-level CI effect guard: ' + kind)
+              return denied
+
+          for name in ('connect', 'connect_ex', 'bind', 'listen', 'sendto', 'sendmsg'):
+              if hasattr(socket.socket, name):
+                  setattr(socket.socket, name, reject('socket.' + name))
+          for name in ('create_connection', 'getaddrinfo', 'gethostbyname',
+                       'gethostbyname_ex', 'gethostbyaddr', 'getnameinfo'):
+              setattr(socket, name, reject('socket.' + name))
+          # Preserve the Popen class for asyncio and yt-dlp subclass declarations.
+          subprocess.Popen.__init__ = reject('subprocess.Popen')
+          for name in dir(os):
+              if (name in ('system', 'popen', 'fork', 'forkpty', 'startfile')
+                      or name.startswith(('exec', 'spawn', 'posix_spawn'))):
+                  if callable(getattr(os, name)):
+                      setattr(os, name, reject('os.' + name))
+
+          status, sanity_ok, error_type = 2, False, None
+          class Evidence:
+              collected, passed = [], []
+              def pytest_collection_finish(self, session):
+                  self.collected = [item.nodeid for item in session.items]
+              def pytest_runtest_logreport(self, report):
+                  if report.when == 'call' and report.passed:
+                      self.passed.append(report.nodeid)
+          evidence = Evidence()
+          path = 'modules/platform_integration/acoustic_lab/tests/test_web_app.py'
+          names = [
+              'test_x_video_real_constructors_and_audio_contract',
+              'test_x_video_missing_dependency_fails_before_constructor',
+              'test_x_video_missing_metadata_and_extractor_failure',
+              'test_x_video_download_failure_removes_temporary_file',
+              'test_x_video_bad_ffmpeg_result_removes_temporary_file',
+              'test_x_video_ffmpeg_spawn_failure_removes_temporary_file',
+              'test_x_video_timeout_reports_error_and_removes_temporary_file',
+          ]
+          expected = sorted(path + '::TestXVideoURL::' + name for name in names)
+          try:
+              for operation in (lambda: socket.getaddrinfo('ci-guard.invalid', 0),
+                                lambda: subprocess.Popen(['ci-guard-sanity']),
+                                lambda: os.system('ci-guard-sanity')):
+                  try:
+                      operation()
+                  except PermissionError:
+                      pass
+                  else:
+                      raise AssertionError('An effect guard did not fail closed')
+              sanity_ok = [item['api'] for item in events] == [
+                  'socket.getaddrinfo', 'subprocess.Popen', 'os.system']
+              assert sanity_ok
+              phase = 'tests'
+              import pytest
+              status = int(pytest.main([
+                  '-q', '-c', '/dev/null', '--rootdir=.', '--confcutdir=.', '--noconftest', '--import-mode=importlib',
+                  '-p', 'no:cacheprovider', path + '::TestXVideoURL',
+                  '--junitxml=' + str(Path(os.environ['ACOUSTIC_CI_REPORT']).with_suffix('.xml')),
+              ], plugins=[evidence]))
+          except BaseException as exc:
+              error_type = type(exc).__name__
+              status = 2
+          observed = [item for item in events if item['phase'] == 'tests']
+          probes = [item['denied_probe'] for item in observed]
+          effects_ok = (None not in probes and len(probes) == len(set(probes)))
+          passed = (status == 0 and sanity_ok and effects_ok
+                    and sorted(evidence.collected) == expected
+                    and sorted(evidence.passed) == expected)
+          report = dict(pytest_exit_code=status, guard_sanity_passed=sanity_ok,
+                        guard_events=events, unexpected_effects_or_duplicate_probe=not effects_ok,
+                        expected_ids=expected, collected_ids=evidence.collected,
+                        passed_ids=evidence.passed, exception_type=error_type, passed=passed)
+          Path(os.environ['ACOUSTIC_CI_REPORT']).write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps(report, indent=2))
+          raise SystemExit(0 if passed else (status or 1))
+          PY
+      - name: Verify native Gunicorn target and parser baseline control
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/acoustic-gunicorn" "$RUNNER_TEMP/acoustic-tmp"
+          "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated list --format=json > "$RUNNER_TEMP/acoustic-target-inventory-before.json"
+          "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated install --index-url https://pypi.org/simple --only-binary=:all: --no-deps --target "$RUNNER_TEMP/acoustic-gunicorn-baseline" --report "$RUNNER_TEMP/acoustic-baseline-install.json" gunicorn==21.2.0
+          "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated list --format=json > "$RUNNER_TEMP/acoustic-target-inventory-after.json"
+          cmp "$RUNNER_TEMP/acoustic-target-inventory-before.json" "$RUNNER_TEMP/acoustic-target-inventory-after.json"
+          for mode in baseline target; do
+            env -i PATH="$RUNNER_TEMP/acoustic-venv/bin:/usr/bin:/bin" \
+              HOME="$RUNNER_TEMP/acoustic-home" TMPDIR="$RUNNER_TEMP/acoustic-tmp" \
+              RUNNER_TEMP="$RUNNER_TEMP/acoustic-tmp" LANG=C.UTF-8 PYTHONUTF8=1 \
+              PYTHONDONTWRITEBYTECODE=1 PYTHON_DOTENV_DISABLED=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+              PYTHONPATH="$GITHUB_WORKSPACE/modules/platform_integration/acoustic_lab" \
+              PYCRYPTODOME_DISABLE_GMP=1 NUMBA_CACHE_DIR="$RUNNER_TEMP/acoustic-tmp/numba" \
+              ACOUSTIC_GUNICORN_MODE="$mode" \
+              ACOUSTIC_GUNICORN_BASELINE="$RUNNER_TEMP/acoustic-gunicorn-baseline" \
+              ACOUSTIC_GUNICORN_REPORT_DIR="$RUNNER_TEMP/acoustic-gunicorn" \
+              "$RUNNER_TEMP/acoustic-venv/bin/python" -B - <<'PY'
+          """Bounded Linux qualification using Python API guards, not an OS sandbox."""
+          import hashlib, importlib.metadata, inspect, json, os, re, socket, subprocess, sys
+          from pathlib import Path
+
+          root = Path.cwd().resolve()
+          path = 'modules/platform_integration/acoustic_lab/tests/test_web_app.py'
+          test_file = (root / path).resolve()
+          temporary = Path(os.environ['TMPDIR']).resolve()
+          report_dir = Path(os.environ['ACOUSTIC_GUNICORN_REPORT_DIR']).resolve()
+          mode = os.environ['ACOUSTIC_GUNICORN_MODE']
+          overlay = Path(os.environ['ACOUSTIC_GUNICORN_BASELINE']).resolve()
+          report_dir.mkdir(parents=True, exist_ok=True)
+          events, phase, owned = [], 'sanity', {}
+          original_popen, original_connect = subprocess.Popen.__init__, socket.socket.connect
+
+          def reject(kind, args=()):
+              frames, frame = set(), sys._getframe(1)
+              while frame:
+                  frames.add((frame.f_globals.get('__name__'), frame.f_code.co_name))
+                  frame = frame.f_back
+              probe = None
+              if (kind == 'socket.bind' and len(args) > 1 and args[1] == ('::1', 0)
+                      and ('urllib3.util.connection', '_has_ipv6') in frames):
+                  probe = 'urllib3-ipv6-capability'
+              if (kind == 'subprocess.Popen' and len(args) > 1 and args[1] == 'lscpu'
+                      and ('numpy.testing._private.utils', 'check_support_sve') in frames):
+                  probe = 'numpy-sve-capability'
+              events.append(dict(phase=phase, api=kind, denied_probe=probe))
+              raise PermissionError('Python-level CI guard: ' + kind)
+
+          def blocked(kind):
+              return lambda *args, **kwargs: reject(kind, args)
+
+          def correct_caller(frame, name):
+              return (Path(frame.f_code.co_filename).resolve() == test_file
+                      and frame.f_code.co_name == name)
+
+          def popen(self, command, *args, **kwargs):
+              frame = sys._getframe(1)
+              if mode != 'target' or owned or not correct_caller(frame, '_start_server'):
+                  return reject('subprocess.Popen', (self, command))
+              names = ('_gunicorn_fixture_application', '_gunicorn_guard_denial',
+                       '_gunicorn_child_guards', '_run_gunicorn_fixture')
+              program = '\n'.join(inspect.getsource(frame.f_globals[name]) for name in names)
+              program += '\nimport sys\n_run_gunicorn_fixture(*sys.argv[1:])\n'
+              valid = isinstance(command, list) and len(command) == 7
+              valid = valid and command[:5] == [sys.executable, '-I', '-B', '-c', program]
+              fixture = Path(command[-1]).resolve() if valid else temporary
+              valid = (valid and Path(command[-2]).resolve() == root
+                       and fixture.is_relative_to(temporary) and fixture != temporary
+                       and not args and kwargs.get('cwd') == root
+                       and kwargs.get('start_new_session') is True and not kwargs.get('shell', False)
+                       and kwargs.get('stderr') == subprocess.STDOUT)
+              expected_env = dict(PATH=str(Path(sys.executable).parent) + ':/usr/bin:/bin',
+                                  HOME=str(fixture), TMPDIR=str(fixture), LANG='C.UTF-8',
+                                  PYTHONDONTWRITEBYTECODE='1', PYTHON_DOTENV_DISABLED='1',
+                                  PYCRYPTODOME_DISABLE_GMP='1', NUMBA_CACHE_DIR=str(fixture / 'numba'))
+              output = kwargs.get('stdout')
+              valid = (valid and kwargs.get('env') == expected_env
+                       and set(kwargs) == {'cwd', 'env', 'stdout', 'stderr', 'start_new_session'}
+                       and output is not None and Path(output.name).resolve() == fixture / 'server.log')
+              if not valid:
+                  return reject('subprocess.Popen', (self, command))
+              result = original_popen(self, command, **kwargs)
+              owned.update(child=self, log=fixture / 'server.log', connections=0)
+              return result
+
+          def connect(sock, address):
+              if (mode != 'target' or not owned or not correct_caller(sys._getframe(1), '_exchange')
+                      or owned['child'].poll() is not None):
+                  return reject('socket.connect')
+              match = re.search(r'Listening at: http://127\.0\.0\.1:(\d+)', owned['log'].read_text())
+              valid = match and address == ('127.0.0.1', int(match.group(1)))
+              if not valid or not 0 < address[1] < 65536 or owned['connections'] >= 3:
+                  return reject('socket.connect')
+              owned['connections'] += 1
+              return original_connect(sock, address)
+
+          for name in ('connect_ex', 'bind', 'listen', 'sendto', 'sendmsg'):
+              if hasattr(socket.socket, name):
+                  setattr(socket.socket, name, blocked('socket.' + name))
+          socket.socket.connect = connect
+          for name in ('create_connection', 'getaddrinfo', 'gethostbyname',
+                       'gethostbyname_ex', 'gethostbyaddr', 'getnameinfo'):
+              setattr(socket, name, blocked('socket.' + name))
+          subprocess.Popen.__init__ = popen
+          for name in dir(os):
+              if (name in ('system', 'popen', 'fork', 'forkpty', 'startfile')
+                      or name.startswith(('exec', 'spawn', 'posix_spawn'))):
+                  if callable(getattr(os, name)):
+                      setattr(os, name, blocked('os.' + name))
+
+          names = ['test_config_factory_and_production_defaults',
+                   'test_original_missing_factory_binding_is_rejected',
+                   'test_deployment_uses_module_requirements',
+                   'test_parser_accepts_valid_requests', 'test_parser_rejects_ambiguous_framing',
+                   'test_foreground_health_rejection_and_owned_shutdown']
+          if mode == 'baseline':
+              names = ['test_parser_accepts_valid_requests', 'test_parser_rejects_ambiguous_framing']
+          expected = sorted(path + '::TestGunicorn::' + name for name in names)
+          negative_id = path + '::TestGunicorn::test_parser_rejects_ambiguous_framing'
+          class Evidence:
+              collected, passed, failed, skipped, phase_failures = [], [], [], [], []
+              intended_baseline_assertion = False
+              def pytest_collection_finish(self, session):
+                  self.collected = [item.nodeid for item in session.items]
+              def pytest_runtest_logreport(self, report):
+                  if report.skipped:
+                      self.skipped.append(report.nodeid)
+                  if report.failed and report.when != 'call':
+                      self.phase_failures.append(report.nodeid)
+                  if report.when == 'call':
+                      if report.passed:
+                          self.passed.append(report.nodeid)
+                      if report.failed:
+                          self.failed.append(report.nodeid)
+                          self.intended_baseline_assertion = (report.nodeid == negative_id
+                              and 'AssertionError: InvalidHeader not raised' in report.longreprtext
+                              and 'ImportError' not in report.longreprtext)
+
+          evidence, status, sanity_ok, error_type, source = Evidence(), 2, False, None, {}
+          try:
+              for operation in (lambda: socket.getaddrinfo('ci-guard.invalid', 0),
+                                lambda: subprocess.Popen(['ci-guard-sanity']),
+                                lambda: os.system('ci-guard-sanity')):
+                  try:
+                      operation()
+                  except PermissionError:
+                      pass
+                  else:
+                      raise AssertionError('Guard failed open')
+              sanity_ok = [event['api'] for event in events] == [
+                  'socket.getaddrinfo', 'subprocess.Popen', 'os.system']
+              assert sanity_ok
+              phase = 'tests'
+              if mode == 'baseline':
+                  sys.path.insert(0, str(overlay))
+                  distributions = list(importlib.metadata.distributions(path=[str(overlay)]))
+                  assert [(d.metadata['Name'].lower(), d.version) for d in distributions] == [('gunicorn', '21.2.0')]
+              import gunicorn
+              imported = Path(gunicorn.__file__).resolve()
+              assert gunicorn.__version__ == ('21.2.0' if mode == 'baseline' else '22.0.0')
+              assert imported.is_relative_to(overlay) == (mode == 'baseline')
+              source = dict(version=gunicorn.__version__, imported_path=str(imported),
+                            package_sha256={str(p.relative_to(imported.parent)): hashlib.sha256(p.read_bytes()).hexdigest()
+                                            for p in sorted(imported.parent.rglob('*.py'))},
+                            test_sha256=hashlib.sha256(test_file.read_bytes()).hexdigest(),
+                            config_sha256=hashlib.sha256((root / 'modules/platform_integration/acoustic_lab/scripts/gunicorn.conf.py').read_bytes()).hexdigest())
+              import pytest
+              status = int(pytest.main(['-q', '-c', '/dev/null', '--rootdir=.', '--confcutdir=.',
+                  '--noconftest', '--import-mode=importlib', '-p', 'no:cacheprovider', *expected,
+                  '--junitxml=' + str(report_dir / (mode + '.xml'))], plugins=[evidence]))
+          except BaseException as exc:
+              error_type = type(exc).__name__
+              status = 2
+          probes = [event['denied_probe'] for event in events if event['phase'] == 'tests']
+          effects_ok = None not in probes and len(probes) == len(set(probes))
+          common_ok = (sanity_ok and effects_ok and sorted(evidence.collected) == expected
+                       and not evidence.skipped and not evidence.phase_failures and error_type is None)
+          if mode == 'baseline':
+              passed = (common_ok and status == 1 and evidence.failed == [negative_id]
+                        and sorted(evidence.passed) == [item for item in expected if item != negative_id]
+                        and evidence.intended_baseline_assertion and not owned)
+          else:
+              passed = (common_ok and status == 0 and sorted(evidence.passed) == expected
+                        and not evidence.failed and owned and owned['connections'] == 3
+                        and owned['child'].returncode == 0)
+          report = dict(mode=mode, passed=bool(passed), pytest_exit_code=status, source=source,
+                        guard_sanity_passed=sanity_ok, guard_events=events, effects_ok=effects_ok,
+                        expected_ids=expected, collected_ids=evidence.collected, passed_ids=evidence.passed,
+                        failed_ids=evidence.failed, skipped_ids=evidence.skipped,
+                        phase_failures=evidence.phase_failures, intended_baseline_assertion=evidence.intended_baseline_assertion,
+                        owned_child_pid=owned['child'].pid if owned else None,
+                        loopback_connections=owned.get('connections', 0), exception_type=error_type)
+          (report_dir / (mode + '.json')).write_text(json.dumps(report, indent=2) + '\n')
+          print(json.dumps(report, indent=2))
+          raise SystemExit(0 if passed else 1)
+          PY
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: acoustic-x-adapter-evidence-${{ matrix.python-version }}
+          path: |
+            ${{ runner.temp }}/acoustic-adapter.json
+            ${{ runner.temp }}/acoustic-adapter.xml
+            ${{ runner.temp }}/acoustic-gunicorn/
+            ${{ runner.temp }}/acoustic-target-install.json
+            ${{ runner.temp }}/acoustic-baseline-install.json
+            ${{ runner.temp }}/acoustic-target-inventory-before.json
+            ${{ runner.temp }}/acoustic-target-inventory-after.json
+          if-no-files-found: warn
+
   gotjunk-backend-security:
     runs-on: ubuntu-latest
     permissions:
@@ -128,6 +602,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install separate backend dependencies
         run: python -m pip install -r modules/foundups/gotjunk/backend/requirements.txt pytest httpx
       - name: Verify parser and API admission
@@ -153,6 +629,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
@@ -1317,7 +1795,9 @@ jobs:
           if-no-files-found: error
 
       - name: Run RedDog grant-aware signing composition regression
-        timeout-minutes: 3
+        # Same-checkout jobs119109373540/119109577954: 3m timeout versus 97s pass.
+        # Allow runner variation; individual test/runtime deadlines stay intact.
+        timeout-minutes: 5
         env:
           PYTHONDONTWRITEBYTECODE: '1'
           PYTHON_DOTENV_DISABLED: '1'
@@ -1419,12 +1899,12 @@ jobs:
             modules/communication/moltbot_bridge/tests/test_reddog_live_lease_current_use.py \
             modules/communication/moltbot_bridge/tests/test_reddog_live_lease_generation.py \
             modules/communication/moltbot_bridge/tests/test_reddog_live_lease_process.py \
-            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
-            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
-            modules/communication/moltbot_bridge/tests/test_reddog_installed_grant_manifest_consumer.py \
             modules/communication/moltbot_bridge/tests/test_reddog_installed_work_admission.py \
             modules/communication/moltbot_bridge/tests/test_reddog_installed_high_service.py \
             modules/communication/moltbot_bridge/tests/test_reddog_installed_high_service_signing.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_service_authenticated_manifest_binding.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_grant_authority_wsp71_permission_rehydration.py \
+            modules/communication/moltbot_bridge/tests/test_reddog_installed_grant_manifest_consumer.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_current_generation_runtime_binding.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_socket_service_healthcheck.py \
             modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_controlled_e0_admission.py \
@@ -1540,6 +2020,8 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install ruff
         run: pip install ruff
 
@@ -1622,6 +2104,8 @@ jobs:
         with:
           python-version: '3.12'
 
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Cache pip dependencies
         uses: actions/cache@v4
         with:
