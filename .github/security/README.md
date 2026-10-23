@@ -1,3 +1,19 @@
+## PR2181 historical documentation bindings — 2026-10-23
+
+Security job120214348539 on head `beb46b3e6384ef547dff29462a99f96262e03d4b`
+reported seven current-tree findings; the introduced-history scan found none.
+Parent and independent review identified five historical tokenizer source hashes,
+one historical Git binding for the grant-provider source, and one unchanged
+changelog sentence about key resolution. The independent review rehashed the
+public tokenizer file and resolved the historical Git blob; neither is key material.
+
+All seven exact contexts and prior whole-file/rule/line fingerprints match main
+`99dc20086`. Preserve the 1,638 existing bindings and append only these seven
+(1,645 total). The finding-bearing backlog and bridge ModLog bytes stay unchanged.
+No source, assertion, scanner rule, scope or unknown finding is approved. The
+failed attempt and sanitized independent/root receipts remain in the existing
+reconciliation refresh directory. Fresh hosted tree/history gates are required.
+
 ## Installed HIGH combined manifest metadata review — 2026-10-23
 
 The combined 1,466-member service closure changes the manifest's whole-file

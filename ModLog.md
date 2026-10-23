@@ -1,3 +1,10 @@
+## 2026-10-23 — Close seven observed PR2181 metadata bindings
+
+WSP10/22/50/97. Independently and locally verify seven unchanged historical
+source-hash/Git/prose findings against prior exact reviews; append only those
+bindings to the existing security ledger. Preserve failed hosted evidence and
+all source/test bytes. Fresh normal hosted validation remains required.
+
 ## 2026-10-23 — Reconcile preserved installed HIGH source with current main
 
 WSP00/10/15/22/50/97; existing 19/P0 lane. Integrate preserved `0088b9a3`
