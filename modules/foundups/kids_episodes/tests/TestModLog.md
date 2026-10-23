@@ -15,3 +15,7 @@ Independent review hardening: post-review asset rehashes reject changed media/ca
 Global acceptance rechecks all episode source/audio/render/caption assets and final assembly before returning; later reviewer or assembler mutation of earlier accepted media is rejected.
 
 Final selected regression suite: 217 passed, including registry/schema, OpenClaw route, real WRE loader, provider contracts and FFmpeg integration. Planner caption schema is bounded to the renderer maximum of 30; reviewer explicitly checks raw source fidelity and supplied audience/corrections.
+
+## 2026-10-23 — Little Shrew preset
+
+85 module tests passed, including 12 new preset cases for canonical controller compatibility, nine-beat coverage, joined states, provider-duration rejection, design reference hashes and shared rig consistency. SVG render inspection caught missing legacy xlink references; added compatibility attributes and checked the corrected storyboard. These checks validate a design preset, not actual generated video or audio. Existing pytest configuration emits two warnings because the local interpreter lacks pytest-asyncio; no tests in this selection require it.

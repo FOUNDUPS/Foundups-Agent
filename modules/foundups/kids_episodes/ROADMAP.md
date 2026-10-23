@@ -31,3 +31,5 @@ Reuse the existing `eduit` FoundUp identity and Play EDUIT context. Design activ
 ## Status and release gates
 
 All stages beyond the bounded local implementation require separate evidence. Registration does not activate a daemon, provider account, public route, monetization or token. The [prototype gate](docs/intake/PROTOTYPE_GATE.md) owns promotion criteria. No completion percentage is asserted.
+
+Little Shrew now supplies a source-grounded preset and shared vector storyboard. Next evidence: admitted generation consuming verified character references, original audio, and independent review of the actual nine-shot result. The source's missing Gemini image remains explicitly unreceived.
