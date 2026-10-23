@@ -54,6 +54,24 @@ effect is admitted. Existing simulated logging remains simulation.
   to these same 18 cases; the six native Gunicorn cases remain a separate gate.
   Fresh hosted Python 3.11/3.12, publication and main readback remain pending.
 
+### PR1356 first hosted failure and bounded harness correction
+
+At published head `1b01ce24b45d4df1980e636064984376397ca8fd`, both
+pull-request CI runs 39929152950 and 39929152969 failed the adapter gate on
+Python 3.11 and 3.12. Each artifact records 18 collected and 16 passed, including
+all six Web3 cases. The two multipart failures attempted system MIME-file reads;
+Numba's CPU capability probe also attempted `/proc/cpuinfo`. The guard correctly
+rejected those effects. The following native Gunicorn step did not execute.
+Do not count these runs as hosted acceptance or add their case denominators.
+
+Configure only this Linux test process with `NUMBA_ENABLE_AVX=0` and initialize
+stdlib mimetypes from its built-in table, asserting the expected WAV type. Keep
+system MIME reads denied, leave application/tests unchanged, and report these
+configurations explicitly. This qualifies neither host MIME configuration nor
+AVX performance. Independent source review and fresh exact-head hosted execution
+are required; no filesystem allowlist, guard, test selection or assertion is
+weakened to accept the earlier runs.
+
 ## 2026-10-23 - PR2081 multipart boundary inventory before edits
 
 Read the existing eight web/geofencing cases, seven X-adapter cases, six

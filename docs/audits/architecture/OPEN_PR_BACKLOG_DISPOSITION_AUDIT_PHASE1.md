@@ -1,6 +1,6 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 35 open PRs, eight drafts. #2181, #2081, #1663 and #1645 are verified on main. #2182/#2183/#2184 merged through their separate owner. The shared #1648 transport slice is verified on main through #2185; original #1648 remains open. Select #1356 at 14/P1 for the next bounded qualification. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-23 JST: 35 open PRs, eight drafts. #2181, #2081, #1663 and #1645 are verified on main. #2182/#2183/#2184/#2186 merged through their separate owner. The shared #1648 transport slice is verified on main through #2185; original #1648 remains open. Select #1356 at 14/P1 for the next bounded qualification. Historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-23
 
@@ -86,6 +86,16 @@ are retained in the module TestModLog; no OS-sandbox claim. Fresh hosted Python
 3.11/3.12 acceptance, publication and main readback remain due. Protected
 #2168/#2178 and product owners retain their lanes. Re-score after closure;
 draft status itself is not a blocker.
+
+#1356's first published head `1b01ce24` passes both security scans and CodeQL,
+but fails both hosted CI runs 39929152950/39929152969. Each Python 3.11/3.12
+artifact has 16/18 passes, including all six Web3 cases; denied system MIME and
+CPU-inventory reads prevent acceptance and the later Gunicorn step does not run.
+Use deterministic built-in MIME data and disabled AVX in the test process,
+retaining every assertion and effect boundary. Preserve those failures and
+require fresh hosted checks. Concurrent #2186 advances main to `f6c399b1`:
+its four Markdown paths merge without overlap and remain byte/mode-identical;
+this lane does not claim their implementation or runtime validation.
 
 **#2182 MERGED_BY_OWNER:** main advanced to
 `a048c24071e1a651b161025ba3342f14f3047280` while #1663's prior candidate

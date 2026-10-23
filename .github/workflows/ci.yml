@@ -325,7 +325,7 @@ jobs:
           os.environ.update(HOME=str(owned_temp), USERPROFILE=str(owned_temp), APPDATA=str(owned_temp), LOCALAPPDATA=str(owned_temp),
               TMP=str(owned_temp), TEMP=str(owned_temp), TMPDIR=str(owned_temp), PYTHON_DOTENV_DISABLED='1',
               PYTHONDONTWRITEBYTECODE='1', PYTEST_DISABLE_PLUGIN_AUTOLOAD='1', PYTHONUTF8='1',
-              PYCRYPTODOME_DISABLE_GMP='1', NUMBA_CACHE_DIR=str(owned_temp / 'numba'),
+              PYCRYPTODOME_DISABLE_GMP='1', NUMBA_ENABLE_AVX='0', NUMBA_CACHE_DIR=str(owned_temp / 'numba'),
               PR1338_QUALIFICATION_TMP=str(owned_temp), ACOUSTIC_CI_REPORT=str(report_path))
           sys.dont_write_bytecode = True
           sys.pycache_prefix = str(owned_temp / 'pycache')
@@ -520,6 +520,12 @@ jobs:
                       raise AssertionError('File/account/SQLite guard did not fail closed')
               assert [item['event'] for item in file_events] == ['sqlite3.connect', 'private_config_read', 'write_outside_owned_output']
               phase = 'tests'
+              # Deterministic built-in MIME data; system MIME configuration remains denied.
+              import mimetypes
+              assert sys.platform.startswith('linux')
+              mimetypes.knownfiles = []
+              mimetypes.init(files=[])
+              assert mimetypes.guess_type('fixture.wav')[0] == 'audio/x-wav'
               import pytest
               status = int(pytest.main([
                   '-q', '--tb=short', '--capture=sys', '-c', str(config), '--rootdir=.', '--confcutdir=.', '--noconftest', '--import-mode=importlib',
@@ -553,6 +559,7 @@ jobs:
                         source_unchanged=source_before == source_after, packages=packages, probe_sources=probe_sources,
                         junit_identities_verified=xml_ok, checkout_commit=checkout_commit,
                         runtime_archives={str(p): h for p, h in runtime_archives.items()},
+                        harness_configuration={'NUMBA_ENABLE_AVX': '0', 'mime_table': 'stdlib_builtin_only'},
                         workflow_sha256=runner_sha256, scope='Linux Python API guards; not OS confinement or live RPC')
           Path(os.environ['ACOUSTIC_CI_REPORT']).write_text(json.dumps(report, indent=2) + '\n')
           print(json.dumps(report, indent=2))

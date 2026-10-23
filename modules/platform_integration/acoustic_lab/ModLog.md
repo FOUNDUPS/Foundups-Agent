@@ -35,6 +35,13 @@
   `pr1356-author-positive-20261023.json` and
   `pr1356-independent-execution-review-20261023.json`. Fresh hosted acceptance,
   publication and main verification are distinct remaining gates.
+- First hosted head `1b01ce24` failed CI39929152950/39929152969 in both Python
+  versions: each 16/18 passed, including all six Web3 cases. System MIME reads
+  and Numba's CPU probe were denied; native Gunicorn did not run. Retain the
+  failures and configure built-in MIME data plus disabled AVX for the Linux
+  harness only. Application/tests and effect rules remain unchanged; fresh
+  hosted acceptance is still required. Incoming #2186's four documentation
+  paths are preserved from main `f6c399b1` without overlap or binding changes.
 
 
 ## 2026-10-23: Preserve multipart rejection for PR2081 Werkzeug update
