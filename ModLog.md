@@ -1,3 +1,14 @@
+## 2026-10-23 - Reconcile PR1478 base and exact manifest findings
+
+The first hosted event used obsolete base `0b91dad785` despite current main `0d3f715bb`.
+Refresh the existing PR base, verify 20 changed files/four introduced commits,
+and rerun normal gates. Preserve the failed history/lifecycle evidence. Root and
+independent reviewer proved 38 current manifest matches are unchanged generated
+source hashes with prior reviewed bindings; append only those 38 to the existing
+security ledger. No scanner, authority, historical finding or credential waiver.
+See .github/security/README.md and the canonical PR audit. Runtime/source tests
+remain bound to the reviewed implementation; fresh publication checks are pending.
+
 ## 2026-10-23 - Merge Gunicorn repair and select comment-context closure
 
 WSP00/10/15/22/50/84/97. #1354 squash0d3f715bb matches reviewed tree after

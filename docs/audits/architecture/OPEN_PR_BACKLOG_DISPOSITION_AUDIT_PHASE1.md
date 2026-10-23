@@ -137,6 +137,14 @@ out/mutation controls, exact prompt data, bindings and no new function debt.
 Eight manifest tests and Node contract checks pass. Hosted checks and exact-main
 closure remain required; this is not native worker or RSI execution evidence.
 
+Publication correction: the first 70ad event used obsolete PR base 0b91 instead
+of current 0d3, expanding the comparison to 2,390 files/700 commits and causing old-
+parent lifecycle/history failures. Refreshing the existing base restores the
+intended 20 files/four commits. Independently prove 38 generated-manifest findings
+against exact Git bytes and prior bindings, append only those 38 to the existing
+ledger, then require fresh correct-base gates. No historical or GitGuardian
+incident is waived and no validation rule is relaxed.
+
 The read-only three-worktree RSI preservation audit remains separate. All76
 installed-HIGH branch paths are accounted in the existing receipt
 `rsi-installed-source-reconciliation-20261023.json`:21 exact blobs and90
