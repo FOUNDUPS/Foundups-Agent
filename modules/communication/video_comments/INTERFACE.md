@@ -23,6 +23,49 @@ local broadcast fallback unchanged. Loading does not rewrite either file.
 Legacy `set_promo`/`clear_promo` affect only the legacy file; shared context remains
 queue-owned. 53 offline reader cases validate this boundary, not live posting.
 
+## Contextual reply contract (PR1478 offline qualification)
+
+The Studio row supplies comment text and video context; the receiving channel
+selects personality. Preserve the raw comment when adding semantic guidance,
+history and verified VoiceMemory. The same full prompt reaches the local
+service and embedded general-language model routes.
+
+The proposed route tries LM Studio with a three-second request bound, then
+embedded general Qwen via the existing role resolver. Grok is an explicit
+`YT_ENABLE_GROK_REPLIES=true` legacy opt-in. This source configuration is not
+current model availability, provider admission or a measured successful call.
+
+`generate_reply()` remains the string-returning interface. The processor uses
+`generate_reply_with_source(..., cancel_event=None)` and its immutable
+`ReplyGenerationResult(text, source)` snapshot under the same per-instance lock.
+The source used for the posting decision and later diagnostics belongs to that
+result; `get_last_llm_source()` is a legacy diagnostic, not a cross-thread receipt.
+The ten-second await invalidates queued work before provider invocation. It
+cannot terminate an already-running provider thread; that thread retains the
+lock until it finishes, and its timed-out result is not posted.
+
+The exact allowlist is `CommentProcessor.CONTEXTUAL_PROVIDERS`,
+`CONTEXTUAL_SKILLS` and `CONTEXTUAL_STRATEGIES`: recognized providers, supported
+skill/provider combinations, and specific content-aware greeting/emoji strategies.
+Unknown, malformed or substring-only labels reject. Replacing or discarding a
+model draft must discard its provider attribution. This local source snapshot is
+not an authenticated provider-call receipt or proof of semantic correctness.
+For example, the legacy `skill_0:grok_greeting` name identifies a local
+content-matched response-pool strategy; it does not establish a Grok call.
+`YT_ALLOW_GENERIC_REPLY_FALLBACK` explicitly restores generic legacy behavior;
+it does not prove grounded generation. Grok opt-in is checked at the actual call.
+
+`reply_context.py` owns pure prompt/personality assembly;
+`comment_row_context.py` owns row extraction and small context adapters. No new
+provider, store or scheduler is introduced. Missing or ambiguous row metadata
+must remain absent rather than falling back to another video's inbox context.
+
+This module does not acquire a RedDog/OpenRouter reply grant. The original PR's
+provider-neutral reply-runner proposal remains a future integration requiring
+current route/owner discovery and existing authenticated admission, budget and
+call-evidence contracts. It is not permission to use a private script bridge or
+a promise that signed inputs are presently configured.
+
 ## Primary Interface: execute_skill()
 
 ### Function Signature

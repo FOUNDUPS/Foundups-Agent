@@ -1,13 +1,13 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 40 open PRs, 10 drafts. #1759, #1638, #782, #841, #1457 and #1338 are merged; #1354 Acoustic server qualification is active. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+Current planning snapshot, 2026-10-23 JST: 39 open PRs, 10 drafts. #1759, #1638, #782, #841, #1457, #1338 and #1354 are merged; #1478 comment-context reconciliation is active. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
 
 ## Current reconciliation - 2026-10-23 JST
 
-Observed `2026-10-23T00:48:24.914980+00:00`, main `8068d6f78c9ab4bfd5c10c74cc4b94dd36302ab1`.
+Observed `2026-10-23T01:29:16.126416+00:00`, main `0d3f715bb475c6451e8f23243f43f1adf057cb0f`.
 Since the prior 47-open snapshot, #782 and owner-managed #2179 merged, and
-#1360 was consolidated into #1342 and #1659 into #1663. #841, #1457 and #1338 have now merged:
-**40 open**, including 10 drafts.
+#1360 was consolidated into #1342 and #1659 into #1663. #841, #1457, #1338 and #1354 have now merged:
+**39 open**, including 10 drafts.
 Counts are dated; concurrent lanes continue.
 This section supersedes older selections/counts, retained below as history.
 
@@ -102,26 +102,58 @@ collection boundary and existing optional crypto fallback do not allow effects.
 Four broader test failures and the separate timeout-child defect remain.
 Exact-main CI39879980028 and CodeQL39879978431 succeeded.
 
-Re-observe and select **#1354, C3/I4/D4/Impact4=15/P1**. Its original one-pin proposal is
-retained in the repair ancestry; no competing Acoustic writer was found. Higher-score security
-work retains its active owner; broad Moshpit/public-chat proposals need protected
-website/security scope reconciliation. The two current high Gunicorn alerts
-specify 22.0.0 as patched. Reuse this checkout and existing hosted Linux CI to
-qualify the actual parser, checked-in factory configuration, bounded loopback
-server and full owned-process closure. Repair the existing module-requirements
-install path; preserve strict defaults and unrelated pins. No new service,
-scheduler, memory store or native worker execution is claimed.
+**#1354 MERGED_VERIFIED_MAIN:** squash
+`0d3f715bb475c6451e8f23243f43f1adf057cb0f` from reviewed head
+`c4778dd08279cede544689ee9bed06906b0c8cb0`; reviewed/main tree
+`19c74d52a0242184be5069f2fe6c13a812a544b4` matches exactly.
+All 20 unique final-head acceptance contexts passed: CI39882533868 and
+CodeQL39882527398, plus aggregate/security checks. A redundant identical-source
+CI from the PR body edit was cancelled with its provenance retained; it was not
+a failed test bypass. Independently accepted Ubuntu Python 3.11.17/3.12.15
+artifacts at source head3bc5471a cover six native server and seven adapter cases,
+precise old-version framing failure, installed dependency/source bindings and
+normal master/worker exit. Final documentation changes leave executable bytes
+unchanged. Exact-main CI39883903539/CodeQL39883902900 independently passed.
+No production service or admitted AI-worker execution is established.
 
-**#1354 HOSTED_VALIDATED_PUBLICATION_PENDING:** source head
-`3bc5471a3a2255923be30c4764d1f7d21d67b1f5` passed all 20 checks.
-Independent artifact review of CI39881377042 accepted the six native server
-cases and seven adapter cases on Ubuntu Python 3.11.17/3.12.15. Baseline 21.2
-passed valid parsing and failed exactly the protected framing assertion.
-Full dependency installations, pip checks, config/source bindings and normal
-master/worker closure passed. No unknown/duplicate effects or forced kill.
-The existing receipt `pr1354-independent-hosted-review.json` binds this result.
-Final documentation changes require fresh head checks and exact-main closure.
-This is server qualification, not admitted AI-worker execution or production RSI.
+Select **#1478, C3/I4/D4/Impact4=15/P1**, after current source/owner review.
+Its three runtime files are unchanged between original base and fresh main;
+no dirty overlap or competing writer was found in the bounded inspection.
+Draft status is not a blocker. It ranks above #2081 at14/P1; higher-score
+security and broad Moshpit work retain protected ownership/scope dependencies.
+The existing PR is claimed for offline repair: bind text/source to the same
+generation, reject ambiguous source labels, preserve exact-row video context,
+and test the actual no-post boundary under timeout/concurrency. Reuse the
+current test owner, preserve PR1759's reader/inventory, and regenerate existing
+integrity bindings. No live posting, provider calls or native admission.
+
+The selected repair now passes 53 focused and 116 adjacent local cases. Original
+assertions and prompt/personality parity are retained; independent review added
+an ambiguity control before acceptance. Two small helpers reduce the existing
+oversized owners; no new/grown long functions or exemption was added. Generated
+runtime closure is 1453 members within the unchanged byte limit, and registry
+quarantine remains intact. Independent final source/helper review accepts held-
+out/mutation controls, exact prompt data, bindings and no new function debt.
+Eight manifest tests and Node contract checks pass. Hosted checks and exact-main
+closure remain required; this is not native worker or RSI execution evidence.
+
+Publication correction: the first 70ad event used obsolete PR base 0b91 instead
+of current 0d3, expanding the comparison to 2,390 files/700 commits and causing old-
+parent lifecycle/history failures. Refreshing the existing base restores the
+intended 20 files/four commits. Independently prove 38 generated-manifest findings
+against exact Git bytes and prior bindings, append only those 38 to the existing
+ledger, then require fresh correct-base gates. No historical or GitGuardian
+incident is waived and no validation rule is relaxed.
+
+The read-only three-worktree RSI preservation audit remains separate. All76
+installed-HIGH branch paths are accounted in the existing receipt
+`rsi-installed-source-reconciliation-20261023.json`:21 exact blobs and90
+security-ledger additions are already on main;20 production paths,15 moltbot
+test/support paths and2 binding tests retain unique work. Preserve main's newer
+inside-fence startup clock check, and regenerate the union of source bindings
+rather than copying old1462-member pins/caps. The predicted1464-member union
+is an inventory, not generator or runtime validation. Selective reconciliation
+and current-source qualification remain next for that preserved RSI branch.
 
 ### Refreshed dependency priority evidence
 
@@ -144,8 +176,8 @@ mapped to existing owners and proposals; package metadata is not test evidence.
   2026.7.4 passed full resolution and controlled adapter qualification; no live
   downloads. Four older module failures and the separate child-lifetime defect
   stay explicit. Dependency-alert closure requires fresh GitHub readback.
-- **#1354: 3/4/4/4=15/P1.** Gunicorn qualification requires actual supported
-  Linux server/parser execution, not Windows import-only checks.
+- **#1354: 3/4/4/4=15/P1, MERGED_VERIFIED_MAIN.** Independent Linux
+  server/parser qualification and both exact-main gates passed.
 - **#2081: 2/4/4/4=14/P1**, before #1355: proposed Flask requires Werkzeug
   >=3.1.0; current Flask 3.0 permits the proposed Werkzeug by metadata. Verify
   the complete dependency set and application behavior before either merge.
@@ -153,8 +185,8 @@ mapped to existing owners and proposals; package metadata is not test evidence.
   in this snapshot. Existing owners must qualify remediation; do not infer a
   safe version, mutate qualified Holo runtimes or dismiss the alerts.
 
-Complete #1354 qualification, then re-observe source, ownership and WSP15 before
-selecting again. Do not assume the previous second-ranked item wins. Source
+Complete #1478 qualification and closure, then re-observe source, ownership
+and WSP15 before selecting again. Do not assume the previous second-ranked item wins. Source
 bindings, alert mapping and acceptance remain in the existing reconciliation
 receipt root (`dependency-alert-pr-mapping-20261023.json`). The old alert count
 is not a post-merge closure claim; refresh GitHub alerts before reporting change.
@@ -232,8 +264,7 @@ Every execution requires current source, checks and authority.
 | [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
 | [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
-| [#1478](https://github.com/FOUNDUPS/Foundups-Agent/pull/1478) `5f8c73453559625500f3023f23331e5e44020712` | 3/4/4/4=15 P1 | Comment grounding owner/root: STILL_CURRENT / DRAFT | Refresh; run context/tier/source-attribution tests without posting. |
-| [#1354](https://github.com/FOUNDUPS/Foundups-Agent/pull/1354) `4effe1e2508f5a4c1a56a50a303e3406742ca2b4` | 3/4/4/4=15 P1 | Dependency lane/root: HOSTED_VALIDATED_PUBLICATION_PENDING | Independent Linux artifact acceptance complete on both supported runtimes; pass final-head checks, squash and verify exact main. |
+| [#1478](https://github.com/FOUNDUPS/Foundups-Agent/pull/1478) `5f8c73453559625500f3023f23331e5e44020712` | 3/4/4/4=15 P1 | Comment grounding owner/root: ACTIVE_OFFLINE_RECONCILIATION / DRAFT | Claimed existing scope; repair per-generation attribution and exact-row context; controlled no-post/concurrency/DOM tests, integrity bindings, independent review and normal closure. |
 | [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
 | [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | With #2179 merged, reconcile the single successor carrying #1659 identity/index/image/correction/privacy clauses; preserve pre-compose identity, draft exception, receipts and current owner precedence. |
@@ -272,6 +303,7 @@ Every execution requires current source, checks and authority.
 
 #2178 score is provisional owner-routing triage, without independent
 implementation acceptance. #2168 remains protected security work.
+
 
 ## Historical 2026-10-22 closure and selection
 

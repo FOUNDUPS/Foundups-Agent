@@ -60,3 +60,37 @@ is made here.
 Before adding or expanding tests, read the TestModLog, this README, and the
 nearest existing tests. Extend the existing contract when possible and update
 the inventory/history in the same slice (WSP 22 and WSP 97 section 1.2B).
+
+## PR1478 context pipeline reconciliation
+
+Run only this separately reviewed selector with Node available:
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE = "1"
+$env:PYTHONUTF8 = "1"
+$env:PYTHON_DOTENV_DISABLED = "1"
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = "1"
+python -B -m pytest --import-mode=importlib -p pytest_asyncio.plugin -p no:cacheprovider -o addopts= modules/communication/video_comments/tests/test_reply_context_pipeline.py -q --tb=short
+```
+
+**53 passed, zero failures/errors/skips** locally with Python 3.12.2 and
+Node 24.11.1. The private loader compiles complete production definitions and
+injects controlled collaborators; package import and constructor lifecycle are
+excluded. Actual extraction JavaScript executes against synthetic Node rows.
+The preserved original seven assertions are extended with timeout, overlapping
+generations, stale/discarded attribution, malformed labels, no-post decisions,
+full-prompt fallback, explicit Grok opt-in, helper adapters, missing metadata and
+conflicting/duplicate video IDs. Existing command/context selectors separately
+pass 116 cases; overlapping counts are not a coverage percentage.
+
+The existing Windows/Ubuntu CI job selects this file, pins Node 24.22.1, uploads
+JUnit and requires the reviewed 53-case identity with no skips. Hosted results
+must be observed separately. The canonical registry still quarantines this file
+from broad automatic collection (`module_scope_local_function_invocation`,
+process capability); this explicit selector does not waive that classification.
+
+No real models, browser, account, profile database or posting were used. Fixture
+boundaries are not an OS sandbox. A timeout does not kill an active provider
+thread; later callers can remain blocked behind it. Full application startup,
+live Studio selector behavior and native RSI remain separately unqualified.
+The original PR's 23-pass blanket command is historical, not an approved run.

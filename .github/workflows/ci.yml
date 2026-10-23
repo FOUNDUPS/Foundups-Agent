@@ -51,6 +51,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
       - name: Bootstrap checksum-verified Python trust
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install bounded offline runner
@@ -61,6 +64,31 @@ jobs:
           modules/communication/livechat/tests/test_operator_command_queue.py
           modules/communication/livechat/tests/test_operator_command_lifecycle.py
           modules/communication/video_comments/tests/test_commenting_control_plane.py
+
+      - name: Verify isolated reply provenance and row context
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p pytest_asyncio.plugin -p no:cacheprovider -q --tb=short
+          modules/communication/video_comments/tests/test_reply_context_pipeline.py
+          --junitxml=reply-context-results.xml
+      - name: Require the reviewed reply case inventory without skips
+        shell: python
+        run: |
+          import hashlib
+          import xml.etree.ElementTree as ET
+          root = ET.parse('reply-context-results.xml').getroot()
+          cases = list(root.iter('testcase'))
+          assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
+          names = sorted(case.get('name') for case in cases)
+          digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
+          assert digest == '909f31dfc4a764e43cf1ae618ee2e03fcd4a14a02ddb803ff6c85ef5cfd77c6f', (len(cases), digest)
+      - name: Preserve reply context results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reply-context-results-${{ matrix.os }}
+          path: reply-context-results.xml
+          if-no-files-found: error
 
   youtube-selected-batch:
     runs-on: ubuntu-latest

@@ -1,3 +1,28 @@
+## PR1478 reply-context manifest re-review — 2026-10-23
+
+Head `70ad1bd9f5483d3f74ca4d3365aabbae174cb6e0` adds two generated runtime
+members. Security job 120199282798 reports 38 new whole-file bindings in the
+manifest: 36 `generic-api-key` and two `discord-api-token`. Independent root and
+peer reviews parsed every exact line, recomputed its SHA-256 from the referenced
+Git source with the existing LF normalization, and verified unchanged values and
+prior exact reviewed fingerprints against main `0d3f715bb`. They are source-
+integrity metadata. Append only these 38 bindings; preserve all 1562 prior entries
+(1600 total). Rules, scan scope, byte limits and failure behavior are unchanged.
+
+The first CI event still carried the PR's obsolete base `0b91dad785`; GitHub
+reported 2,390 changed files/700 commits despite the intended20-file delta.
+Refreshing the existing PR's base to main restored `0d3f715bb` and 20 files/four
+introduced commits. That stale event also scanned historical findings and ran
+parent lifecycle tests against a version lacking the newer test. Those failures
+are preserved, not waived. No historical or separate GitGuardian incident is
+approved here. Fresh exact-head tree/history, lifecycle and GitGuardian results
+must be observed on the corrected base before merge.
+
+Sanitized root/independent records are in the existing PR reconciliation refresh
+folder (`pr1478-security-root-review.json` and
+`pr1478-independent-security-metadata-review.json`). This is source review, not
+credential validity, signed admission, or native worker evidence.
+
 ## PR782 quota guard manifest re-review — 2026-10-23
 
 Security job120119887133 on head `63540b2144a01dc821e3d1bef9ecfa914a1f615e`
