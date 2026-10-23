@@ -1,3 +1,25 @@
+## PR1663 contact communication policy reconciliation — 2026-10-23
+
+WSP00/15/22/50/62/97. Reconcile the existing protocol and HoloIndex recall entry
+with current Contacts, native Docs and Python V3 correspondence owners. Preserve
+all 24 consolidated clauses from PR1659's duplicate skill proposals and PR1663;
+no new skill, resolver, store or release authority. Identity discovery precedes
+composition, while fresh provider routing, independent audit and exact sender
+checks retain precedence. Internal drafts cannot become provider actions;
+private contact evidence stays separate from sanitized material history. The
+JavaScript compatibility sender remains BLOCK; automatic Contact Memory and
+unqualified channel adapters remain specified rather than implemented.
+
+Validation: 178 existing Python owner cases passed (recipient-preflight plus the
+single synthetic execution-origin contract), with zero Python network/process
+guard attempts; all seven existing JavaScript quarantine cases passed. Actual
+Windows runtimes: CPython 3.12.10 / pytest 8.0.0 and Node 24.11.1. These are local
+synthetic regressions, not live Contacts/Docs, provider delivery, connector
+interception or native execution. No runtime, protected skill, registry, package
+or generated binding changes. Clause/link/source checks and exact receipts are
+retained in the PR reconciliation evidence; independent review and fresh hosted
+publication gates remain required. Existing historical entries below are intact.
+
 ## PR2181 private lease extraction bindings — 2026-10-23
 
 WSP6/11/22/62/97. Regenerate the existing manifest after the private scope

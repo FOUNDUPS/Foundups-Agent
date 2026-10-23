@@ -1,293 +1,260 @@
-# RedDog Contact Communication Action Protocol
+# Contact Communication Action Protocol
 
-Status: `NORMATIVE_EXECUTION_CONTRACT`
+Status: `MANUAL_OPERATING_POLICY`; automatic Contact Memory resolution and
+persistence remain `SPECIFIED_NOT_IMPLEMENTED`.
 
-This document defines the pre-action contract for RedDog / 0102 when drafting,
-replying to, sending, forwarding, scheduling, or otherwise initiating external
-communication to a human or organization.
+## Purpose and authority
 
-It exists because live 012/0102 alpha use repeatedly shows that approximate
-speech, STT artifacts, aliases, nicknames, OCR, and remembered roles can resolve
-to the wrong person unless identity is checked against canonical relationship
-evidence before action.
+Resolve who a communication concerns before composing it, then use the existing
+channel owner to verify routing, disclosure and release. This is a manual alpha
+workflow for principal-scoped relationship context, not proof of a connected
+Contact Memory runtime, connector interception or an installed native worker.
 
-## Authority Boundary
+This protocol consolidates the valid requirements of PR1659's two identical
+`contact_memory` skill proposals into PR1663's existing protocol and recall entry.
+It does not create either skill, another resolver, store, orchestrator or release
+gate. Original proposals and their source branches remain historical evidence;
+consolidation does not mean their automation was implemented on main.
 
-No instruction source bypasses this protocol.
+No origin bypasses the checks: 012 direction, 0102/RedDog, a specialist worker,
+a continuation, queue item, saved draft or template all need the applicable
+current authority. Intent identifies requested work; it does not prove identity,
+coordinates, current role, consent or permission to disclose or send. A cache,
+index entry, WRE receipt or copied instruction is not provider-effect authority.
 
-That includes:
+Apply [WSP 00](../../../WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md)
+and [WSP 97](../../../WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md).
+Fail closed on material ambiguity, missing authority or unavailable evidence.
 
-- 012;
-- 0102;
-- RedDog;
-- a specialist agent;
-- a continuation prompt;
-- a queued task;
-- a retrieved draft;
-- a prior message template.
+## Scope and pre-compose order
 
-An instruction supplies intent. It does not prove recipient identity, contact
-coordinates, current role, relationship context, or authority to communicate.
-
-Before any external communication action, execute WSP_97 and this protocol.
-Where identity or authority remains materially ambiguous, fail closed rather
-than guess.
-
-## Scope
-
-This protocol applies to:
-
-- email;
-- SMS / iMessage / RCS;
-- LINE / Signal / WhatsApp / Telegram / other chat;
-- Slack / Teams / Discord or equivalent direct outreach;
-- social direct messages;
-- letters and addressed documents;
-- meeting invitations when the invite targets a known human or organization;
-- contact-sensitive drafts intended for immediate sending by the principal.
-
-It applies both to actual sends and to final send-ready drafts where a wrong
-name, role, address, or thread would create relationship damage.
-
-## WSP_97 Pre-Action Gate
-
-Every communication action must enter through:
+The policy covers email, SMS/iMessage/RCS, LINE/Signal/WhatsApp/Telegram,
+Slack/Teams/Discord, social direct messages, letters and documents, meeting
+invitations/scheduling, forwards, replies and send-ready drafts. This broad policy
+scope does not assert that every channel has an implemented enforcement adapter.
 
 ```text
-intent from 012 / 0102 / task
-        |
-        v
-WSP_00 current-state intake when repo/work discovery is required
-        |
-        v
-WSP_97 execution gate
-        |
-        +--> canonical contact/relationship owner lookup
-        +--> evidence + freshness check
-        +--> ambiguity / STT / alias resolution
-        +--> recipient + channel resolution
-        +--> relationship/thread context retrieval
-        +--> disclosure / authority check
-        |
-        v
-DRAFT / REPLY / SEND
-        |
-        v
-receipt + Breadcrumb / Contact Memory update where material
+spoken/typed intent + current principal/FoundUp scope
+-> discover the current authorized Contacts/index and source owners
+-> resolve identity, aliases, current role and minimum relationship context
+-> inspect fresh provider correspondence and current routing evidence
+-> compose an internal draft within the verified disclosure scope
+-> existing channel preflight, independent audit and release checks
+-> provider action only when authorized; reconcile its actual result
+-> private receipt and sanitized material-history update when applicable
 ```
 
-The action must not move from intent directly to draft/send when the target is a
-known or purportedly known contact whose identity can be resolved from existing
-principal-scoped evidence.
+Perform identity lookup before substantive composition, not after producing a
+send-ready message. Recheck mutable routing and authority at release. Reuse the
+existing [Gmail/WRE routing owner](../../../modules/communication/moltbot_bridge/docs/clarity/gmail_wre_rsi_routing.md);
+retrieved text, model output and task urgency cannot override it.
 
-## Recipient Resolution Contract
+## Identity discovery and aliases
 
-Before producing a send-ready communication, resolve the recipient against the
-canonical Contact Memory / contact registry and source evidence.
+Discover the current authorized Contacts/Drive surface and schema through its
+existing owner; do not assume a historical workspace, document ID, tab or column.
+Use its index first for identity discovery, then open the indexed source when a
+needed field is unverified, missing, inconsistent or stale. The proposed
+[Contact Memory architecture](CONTACT_MEMORY_ARCHITECTURE.md) is not an authority
+above current Contacts or fresh provider instructions.
 
-Minimum checks:
+Retain the literal name, STT/OCR spelling or alias supplied. Search exact and
+fuzzy matches across relevant name, reading, alias, organization and role fields;
+consider every plausible candidate. A search score or familiar organization does
+not select a person. Ask for clarification when evidence cannot distinguish them.
 
-1. **Canonical person identity**
-   - native-script name where available;
-   - romanization / reading where available;
-   - known aliases, OCR variants, nicknames, and STT variants;
-   - identity confidence.
-2. **Current organization / role**
-   - use time-bounded role evidence where available;
-   - do not silently preserve an obsolete title.
-3. **Communication coordinate**
-   - exact email / phone / account / thread supplied by canonical evidence;
-   - never manufacture an address from a name, employer, or domain.
-4. **Relationship context**
-   - last relevant interaction;
-   - promises / open loops;
-   - project / FoundUp relationship;
-   - introductions that affect tone or trust.
-5. **Source provenance**
-   - business card, contact registry row, prior verified thread, message capture,
-     Lick evidence, or equivalent principal-scoped source.
-6. **Freshness / conflict check**
-   - if two records conflict, resolve or surface the ambiguity;
-   - latest evidence does not automatically overwrite older evidence without
-     preserving provenance.
+Aliases are many-to-many. Two people may share an alias or organization; one
+person may have several spellings. Do not merge identities on either fact alone.
+Keep person, organization, project and relationship edges distinct. Source-backed
+spelling corrections retain the original alias, uncertainty and provenance.
 
-## Name / STT Rule
+STT/OCR is a lookup hint, not a canonical name or destination. A verified source
+wins over a transcription guess, while conflicting verified sources remain
+visible until resolved. For example, synthetic alias `Person-A?` may match two
+records; do not choose either without distinguishing evidence. Examples here do
+not identify real contacts.
 
-Speech recognition is evidence, not authority.
+## Minimum private context packet
 
-When 012 dictates an approximate name, RedDog / 0102 must treat it as a lookup
-hint, not as canonical spelling.
+Retrieve only what the present purpose and disclosure scope require:
 
-Example failure pattern:
+- principal/FoundUp scope and the private stable identity reference;
+- verified native name and reading, aliases/OCR variants and confidence;
+- organization and role with source date, validity period and conflict status;
+- exact verified channel coordinate or an explicit unknown value;
+- relevant last interaction, introductions, commitments, promises and open loops;
+- project relationship and next action, without inventing support or affiliation;
+- source/capture reference, verification status and provenance for material fields.
 
-```text
-spoken / STT: "Akamura"
-canonical registry evidence: 中村 光宏 / Nakamura Mitsuhiro
-```
+Keep the packet private and principal-scoped. A card/image capture is evidence,
+not the identity itself. Preserve its extracted fields, capture provenance,
+verification status, OCR variants and index pointer in the authorized evidence
+owner; reopen the source when verification needs it. Do not copy raw images,
+full contact profiles or unrelated history into a prompt or public repository.
 
-The outgoing communication must use the canonical identity returned by the
-contact registry / relationship evidence, not the approximate STT token.
+Use explicit evidence classes: `VERIFIED`, `REPORTED`, `OCR`, `UNVERIFIED`.
+An introduction, meeting, card, photograph or alias does not establish consent,
+support, membership, investment, current office or action authority. Distinguish
+reported roles from verified current roles; retain older/conflicting evidence
+rather than silently overwriting it or using a stale title as current.
 
-If no canonical match reaches sufficient confidence, do not guess. Ask only
-when the ambiguity materially prevents safe completion and cannot be resolved
-from available evidence.
+## Current routing and correspondence precedence
 
-## Drafting vs Sending
+Identity lookup and action routing answer different questions. The index is a
+discovery shortcut; the existing [recipient preflight](../../../modules/communication/moltbot_bridge/skillz/reddog_recipient_preflight/SKILLz.md)
+owns recipient resolution and exact-address/recipient-role decisions.
 
-### Draft-only
+Before deciding reply versus new mail, follow the current
+[correspondence-state owner](../../../modules/communication/moltbot_bridge/skillz/reddog_correspondence_state/SKILLz.md):
+read fresh provider correspondence, Sent coverage, full thread and draft state,
+then reconcile the authorized queue/log/routing state. Provider-first continuity
+prevents stale local caches or spreadsheets from inventing the next action.
+Sent alone never verifies a route, recipient permission or delivery acceptance.
 
-A draft may be prepared before a communication coordinate is known only when:
+Fresh explicit provider routing and active routing restrictions take precedence
+over stale Contacts coordinates. Do not silently reopen a closed personal route,
+change To/Cc/Bcc roles or widen recipients from a historical thread. Preserve
+follow-up limits, duplicate checks, freshness and independent audit requirements.
+If routing evidence conflicts, is missing or cannot be refreshed, hold the action.
 
-- the recipient identity itself is resolved; and
-- the draft is clearly not represented as ready to send through a specific
-  unresolved channel.
+## Internal drafts versus provider actions
 
-A send-ready draft must still use the canonical name/role and relevant thread
-context.
+An identity-resolved internal draft may omit an unknown destination only when
+clearly marked `INTERNAL_DRAFT_NOT_SEND_READY`, with the unresolved field and
+required evidence stated. This permits composition within the verified disclosure
+scope, not a provider-facing draft, queued send, scheduled action or release.
+If identity itself is ambiguous, resolve it before composing contact-specific text.
 
-### Sending / forwarding / replying
+Provider draft creation/update is an effect and uses the existing channel gate.
+Before any provider action, verify the exact account/principal/FoundUp scope,
+recipient coordinates and roles, reply/new-message choice, current thread and
+draft identity, subject/body, attachments/links, disclosure and authorization,
+including current principal direction and any tool-required confirmation. Apply
+the existing independent content/document audit, transaction digest,
+receipt expiry, live reconciliation and provider readback; this document does
+not issue any of those receipts or replace their owners.
 
-Before mutation of an external communication system, additionally verify:
+The current service-owned [Python V3 sender](../../../modules/communication/moltbot_bridge/src/reddog_correspondence_sender_boundary.py)
+accepts exactly `send_email`, `reply`, `send_draft`, `delivery_repair`,
+`create_draft` and `update_draft`. Its trusted bootstrap owns provider access and
+reconciliation; a composer cannot provide its own authority objects. Its existence
+does not prove that direct connector mutations are intercepted or disabled.
 
-- exact destination coordinate or existing thread;
-- correct account / provider context;
-- reply vs new-thread intent;
-- attachments and links;
-- disclosure class / confidentiality;
-- whether the principal actually authorized the external action;
-- whether any action-specific confirmation is required by the connected tool.
+The [JavaScript V2 compatibility sender](../../../modules/communication/moltbot_bridge/host/reddog_correspondence_sender_boundary.mjs)
+remains quarantined: `BLOCK`, `provider_invoked=false`. Historical references to
+that JS path are not a working send route; use the Python owner for the current
+service contract. Scheduling, invitations and other providers remain policy
+scope only until their actual adapters and authority boundaries are qualified.
 
-## Relationship Protection Invariants
+Linked documents also require the existing
+[recipient-document audit](../../../modules/foundups/esingularity/skillz/recipient_document_audit/SKILLz.md)
+for the intended audience, current version, sharing and disclosure. A safe email
+address does not make every linked document safe. No live send or account mutation
+is needed or authorized merely to validate this policy text.
 
-1. **Never guess a known contact's name when registry evidence is available.**
-2. **Never invent an email address, phone number, handle, organization, or role.**
-3. **Never rely on STT spelling when canonical relationship evidence conflicts.**
-4. **Never upgrade an inferred identity into a verified identity silently.**
-5. **Never send on the basis of a stale role if fresher evidence is available.**
-6. **Never expose private contact evidence merely to prove identity to an
-   external recipient.**
-7. **Never let 0102 authority bypass WSP_97.** 0102 orchestrates; WSP governance
-   still gates execution.
-8. **Never let RedDog speed bypass verification.** Fast surface behavior means
-   fast retrieval, not lower truth standards.
-9. **Fail closed on material recipient ambiguity.**
-10. **Preserve correction evidence.** When 012 or a contact corrects a name,
-    alias, role, or relationship, append the correction to Contact Memory and
-    prefer it in future resolution while retaining provenance.
+## Contacts corrections and project context
 
-## Canonical Retrieval Order
+Use the current [Contacts ledger owner](../../../modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md)
+for authorized corrections. Discover and verify actual live headers and field
+mapping; preserve formula-owned columns, preimages, rollback requirements and
+exact readback. Do not assume old tabs, create a second contact database or
+invent write authority because a draft revealed a discrepancy.
 
-For a known/project contact, query in this order where available:
+Where authorized, correct the existing row/index/pointer and append aliases,
+OCR corrections and provenance without destroying verified identity or unresolved
+conflicts. Record uncertainty when the evidence is insufficient. Automatic
+correction persistence is a future acceptance requirement, not established by
+this manual procedure or by a successful communication.
 
-```text
-1. Contact Memory canonical entity / contact registry
-2. verified prior communication thread
-3. business card / source capture / Lick evidence
-4. project-specific Contacts ledger
-5. Breadcrumbs / Brain/Memex relationship context
-6. semantic retrieval / fuzzy recall as discovery aid only
-```
+Project records may contain project-specific role, outreach state, interaction
+date, next action, relationship context and evidence pointers. Reconcile them
+through the current Contacts owner; a planned Contact Memory registry cannot
+overrule that live schema or become a new source of coordinates. Keep material
+project history separate from the private identity index.
 
-Semantic retrieval may locate the candidate, but deterministic identity evidence
-must decide the final recipient whenever possible.
+## Private receipts and material-history privacy
 
-## Project-Specific Registry Rule
+The authorized private action receipt should bind the principal/FoundUp scope,
+resolved identity reference, source/provenance, channel, action, authority and
+disclosure decisions, outcome and material follow-up. Record provider IDs only
+when actually returned and reconciled by the existing sender. A draft saved is
+not Sent; provider uncertainty or an integrity incident requires reconciliation,
+not a claim of delivery or a blind retry.
 
-A FoundUp may maintain a project-facing contact ledger or projection (for
-example YUMORI Contacts), but this must project from or reconcile with canonical
-Contact Memory rather than becoming an independent contradictory identity
-source.
+Moshpit/Breadcrumb history records material activity, not a contact directory.
+Keep contact coordinates, personal addresses, card details, source-image
+filenames, alias lists, index/profile rows, stable contact IDs and contact tokens
+out of every Moshpit/Breadcrumb history projection, including private and campaign
+histories. A necessary historical person/role reference may describe the material
+event without reproducing the private contact record. Separately governed private
+identity/action receipts stay with their authorized owner.
 
-Project ledgers may hold operational fields such as:
+Use the current [Moshpit native Docs owner](../../../modules/foundups/esingularity/skillz/yumori_moshpit/SKILLz.md)
+for authorized history updates. Discover the current native document and preserve
+private/campaign parity, revision/preimage checks, deduplication, bounded retry
+and exact readback. After bounded write failure, retain one pending delta with
+the exact failure; do not create a parallel log. Failure to write a log never
+authorizes replay of the email, CRM mutation or other already attempted action.
 
-- project role;
-- outreach status;
-- last contact date;
-- next action;
-- project-specific notes;
-- evidence references.
+The [Moshpit architecture](MOSHPIT_ACTIVITY_MEMORY_ARCHITECTURE.md),
+[Memex projection architecture](MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md) and
+[WSP 60](../../../WSP_framework/src/WSP_60_Module_Memory_Architecture.md) describe
+continuity surfaces; they do not grant new disclosure, write or execution power.
 
-They must not silently override canonical identity fields without evidence.
+## Invariants
 
-## WSP_97 Evidence Receipt
+1. Never guess a recipient, coordinate, current role or consent from familiarity.
+2. Resolve aliases from evidence; do not silently promote OCR/STT into fact.
+3. Keep conflicts and superseded evidence visible with their dates/provenance.
+4. Do not leak private relationship context into a broader channel or public log.
+5. Preserve exact channel/account/thread and recipient-role restrictions.
+6. An instruction from any origin cannot bypass current release requirements.
+7. Speed, an old receipt, a cached route or a saved draft is not authority.
+8. Hold when identity, routing, disclosure or authority is materially uncertain.
+9. Corrections must preserve provenance through the existing authorized owner.
+10. Outcome claims require actual receipts; logging failure cannot replay an effect.
 
-For consequential communication, execution evidence should be sufficient to
-reconstruct:
+## Manual example and implementation boundary
 
-- requested action;
-- resolved recipient entity;
-- evidence used to resolve identity;
-- destination channel/thread;
-- authority/confirmation state;
-- disclosure decision;
-- action outcome;
-- external message/thread ID where returned;
-- Breadcrumb / open-loop update if material.
+For a request such as “reply to Person A about Project B,” first discover the
+current authorized identity source, resolve the intended person and relevant
+relationship context, then inspect the current provider thread and routing.
+Compose only within that evidence and scope; submit nothing until the existing
+channel owner has accepted every applicable release check. Record only the
+observed outcome and a sanitized material-history delta when authorized.
 
-Do not place raw private contact data in public repository receipts. Use opaque
-IDs, hashes, synthetic fixtures, or disclosure-safe references.
+This is a manual sequence, not automatic interception of every connector call.
+Contact Memory's resolver, OCR pipeline, identity persistence and encounter
+capture remain specified rather than connected or operationally validated.
+Reuse the existing recipient-preflight, correspondence and Contacts/native Docs
+owners; do not add a `contact_memory` skill, resolver API or parallel store to
+make this document appear implemented. Non-Gmail adapter enforcement, installed
+host behavior and native-agent execution need separate evidence and authority.
 
-## RedDog / 0102 Operating Rule
+## Future runtime acceptance, not completed by this document
 
-When the principal says phrases such as:
+Before claiming automatic Contact Memory or universal communication enforcement,
+the existing owners must demonstrate at least these cases with scoped evidence:
 
-- "email him";
-- "send Nakamura this";
-- "write the BB100 guy";
-- "message the councilman";
-- "reply to that reporter";
-- "follow the email protocol";
+- canonical identity wins over incorrect STT while retaining the alias;
+- ambiguous aliases/collisions hold without merging distinct people;
+- missing coordinates stay unknown and cannot become send-ready;
+- stale/conflicting roles are not presented as verified current office;
+- missing, stale or substituted action receipts reject before provider effects;
+- wrong-principal and wrong-FoundUp access is rejected;
+- authorized corrections persist with provenance and are reused on later lookup;
+- every origin, including continuations and queued drafts, keeps the same gates;
+- every Moshpit/Breadcrumb history excludes the private contact fields listed above;
+- unqualified adapters cannot claim scheduling, send or native execution support.
 
-RedDog / 0102 must interpret the request as:
+The original private evidence packet and internal-draft exceptions remain subject
+to these boundaries. Passing source-policy or synthetic preflight tests does not
+prove OCR, live Contacts/Docs writes, delivery, correction durability or RSI.
 
-```text
-resolve person -> retrieve relationship/thread -> run WSP_97 -> draft/action
-```
+## Related owners
 
-not:
-
-```text
-approximate spoken name -> compose -> send
-```
-
-This rule is part of the RedDog proxy contract, not optional user-memory
-personalization.
-
-## Implementation Status
-
-The current repository contains Contact Memory architecture and governed
-external-action boundaries, but the complete automated recipient-resolution
-runtime is not yet proven deployed. Until runtime enforcement exists, agents
-must follow this protocol manually and must not claim automated enforcement.
-
-Future implementation should expose a fail-closed `resolve_communication_target`
-or equivalent owner interface that returns a bounded recipient-resolution
-receipt before any external communication adapter can execute.
-
-## Acceptance Tests for Runtime Enforcement
-
-A production communication gate is not complete until tests prove:
-
-- canonical name beats conflicting STT spelling;
-- ambiguous same/similar names fail closed;
-- no contact coordinate can be invented;
-- stale and current role conflicts are surfaced/resolved;
-- a send adapter rejects a missing recipient-resolution receipt;
-- a send adapter rejects a recipient receipt scoped to another principal;
-- a send adapter rejects a recipient receipt scoped to another FoundUp when
-  project scope matters;
-- corrections persist and win future resolution without destroying old source
-  evidence;
-- 0102-originated and RedDog-originated actions pass through the same gate;
-- public logs/receipts do not leak raw contact data.
-
-## Canonical Dependencies
-
-- `WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md`
-- `extensions/reddog/ARCHITECTURE.md`
-- `extensions/reddog/docs/CONTACT_MEMORY_ARCHITECTURE.md`
-- `extensions/reddog/docs/MEMEX_PROJECTION_EMITTER_ARCHITECTURE.md`
-- WSP 60 Breadcrumbs / FoundUp Brain/Memex current-state surfaces
-
-This protocol refines the communication domain under WSP_97. It does not replace
-WSP_97 or create an alternate execution authority.
+- [RedDog architecture](../ARCHITECTURE.md): foreground surface and authority boundary.
+- [Contact Memory](CONTACT_MEMORY_ARCHITECTURE.md): planned relationship/evidence model.
+- [Gmail/WRE routing](../../../modules/communication/moltbot_bridge/docs/clarity/gmail_wre_rsi_routing.md): current correspondence workflow and limits.
+- [Recipient preflight](../../../modules/communication/moltbot_bridge/skillz/reddog_recipient_preflight/SKILLz.md) and [Python V3 sender](../../../modules/communication/moltbot_bridge/src/reddog_correspondence_sender_boundary.py): current resolution/release owners.
+- [Contacts](../../../modules/foundups/esingularity/skillz/yumori_contact_ledger/SKILLz.md), [native Docs history](../../../modules/foundups/esingularity/skillz/yumori_moshpit/SKILLz.md) and [document audit](../../../modules/foundups/esingularity/skillz/recipient_document_audit/SKILLz.md): existing scoped mutation/disclosure owners.
