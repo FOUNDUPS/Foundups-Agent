@@ -1,3 +1,61 @@
+## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
+
+WSP00/6/10/15/22/50/97; preserve both hosted failures at `174955143d`.
+The 47-suite startup selection reached 1,001 passed / two failed / one skipped;
+both actual process-fence cases failed child import before lock observation.
+Keep spawn, real POSIX locks, inode assertions and bounded cleanup. Reuse the
+existing test-support owner for a canonical child import; no production change.
+
+Separate credential-free installed qualification passed both profiles at that
+exact source. Independent live byte/ownership and cleanup review checked all
+2,701 installed files, 22 required source members, 18 imports and four rejecting
+absent-owner entrypoints. Both owned units are absent with PID zero. The rejected
+first export and all failure evidence remain. No native author or authenticated
+HIGH job is claimed; protected owner/current-generation inputs remain required.
+Repaired local Linux selection: 1,003 passed / one Windows-only skip across all
+47 workflow-selected suites; both actual process cases pass. Independent Linux
+review passes two unchanged positives and two effective lock-removal controls.
+The earlier focused seven cases overlap and are not added. Source hashes remain
+stable; no production or manifest bytes changed. Local --confcutdir=. prevents
+DrvFS ancestor collection; final hosted acceptance and publication remain required.
+
+## PR2181 hosted regression repair — 2026-10-23
+
+WSP00/6/10/15/22/50/62/97; existing 19/P0 integration. Hosted run39892207131
+found two failures before the Linux startup step: the current-selection module
+exceeded its retained 200-line cap, and a malformed schema raised TypeError.
+Preserve that failed run. Extract the existing opaque lease into one private
+95-line owner, retaining canonical aliases, one registry/lock and every use-time
+check. Keep source caps at 200/50 lines. Reject non-string schema values with
+contract errors; move the unknown-version sentinel from supported v11 to v12.
+The positive v11 check validates shape/domain/scope, not cryptographic authority.
+
+The repaired source passes 410 cases with four platform skips across 15 distinct
+suites; independent review passes 21 separate cases with stable source bindings.
+Eight manifest cases and three Node compatibility commands pass separately.
+Windows skips retain two POSIX fence, one symlink and one Unix descriptor gate;
+fresh hosted Linux execution is required. No native author or retained RSI gain.
+The existing machine backlog preserves the failed selection and source lesson.
+
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+WSP00/10/15/22/50/97; existing 19/P0 integration. Retain the preserved installed
+HIGH and live-lease history together with main's startup-clock repair, operations
+policy and selected-clip protections. Historical source/tests and timestamped
+input observations below remain distinct from current acceptance. Native author
+admission, evaluation and retained use are pending; LOW stays preserved.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
 ## 2026-10-22 — CA trust build protection
 
 WSP12/22/97. Container build dependency downloads now use the reviewed
@@ -52,6 +110,82 @@ caller sampling and durable lock admission. Existing expiry/revocation/rollback
 checks and explicit-epoch equality remain intact. Deterministic regression
 extends the existing custody composition test; no native deployment is claimed.
 See tests/TestModLog.md for WSP97 research, allocation and validation evidence.
+
+## Installed HIGH closure reconciliation — 2026-10-22
+
+WSP00/5/6/10/15/22/50/97; existing 19/P0 lane. Preserved all 17 unfinished
+paths before reconciliation. The service entrypoint and HIGH leaf already exist;
+no replacement service was created. Independent import tracing justifies all 11
+added runtime members. The generated 1,462-member closure was current, but its
+consumer/test pins, 1,451-member cap and indexed manifest were stale. The LF
+artifact is 330,756 bytes; CRLF is 333,753, above the old 331,776-byte contract.
+The paired limit becomes 326 KiB (333,824), the smallest whole-KiB limit covering
+both. Exact digest, count, path, per-file/total bounds and authority checks stay.
+
+Existing CI startup selection now includes installed work admission and both HIGH
+service suites. Independent binding review accepted the frozen source: Python manifest8 pass,
+JS contract/preflight/async exit0, registry1,745/270 current. Fresh connected
+six-suite result153 passed/1 Windows skip in128.67s. The first run152/1skip/1fail
+is retained: its second fixture reached261 characters; the file existed and
+read through the Windows extended-length path. Shortening only external basetemp
+resolved the harness boundary; no source or assertion changed. Counts overlap.
+No native author, installation or retained RSI gain is claimed. Fresh-main
+reconciliation, hosted checks and publication remain open.
+
+## Installed HIGH service connection — 2026-10-20
+
+WSP00/5/6/11/15/22/50/62/71/77/97; 19/P0 prerequisite. Rebased metadata checkpoint onto live-lease prerequisite with all eleven source/test blobs preserved. Existing service/dependency/model/permission owners now connect distinct V11 scope; one narrow HIGH leaf keeps the LOW service at 296 lines without cap inflation. Full runtime validation precedes custody; the self-leasing nonce loader remains outside the request fence.
+
+Actual fixture parent/effect factory signatures and durable nonce/replay controls pass. Initial installation/current-input, OS custody, permission/root oracle and clock seams are synthetic; model/approval signatures, canonical scope and MAC/SQLite are real. Focused core: 83 passed/1 Windows Unix skip/0 failures in 76.271s; independent ingestion5 pass. Connected exact results are retained externally; counts overlap. No real runtime/service/credential/grant/provider effects. Authentic current non-initial policy/manifest/selection, signed model/parent/effect inputs, custody and budget admission remain required. Known-path missing metadata and expired LOW drafts do not supply them. Historical checkpoint follows.
+
+Known exact setup gaps are retained externally: Windows native-owner configuration
+was unset (`windows-native-owner-configuration-readiness.json`, SHA256
+`21949d844b851e0a2ed061bf6126bb65081642cff4b50bc52239cfa19dc619f3`),
+and lstat found both canonical issuer/target `signed_runtime_artifact_manifests`
+directories missing (`canonical-manifest-directory-availability.json`). These
+are timestamped known-path observations, not global absence or authority checks.
+Connected six-suite validation passed153/skipped1/failed0 in182.559s; the earlier
+83/1 focused count overlaps. Root publication/base reconciliation remains pending.
+
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+WSP00/5/6/11/22/50/62/71/77/97. Seven existing production owners and four
+test/support files provide distinct v11 signed policy and generic work-manifest
+installed-source metadata binding. Existing v10 initial LOW restrictions retain
+their AST. Real fixture signatures, audit attestation and artifact hashes are
+checked; OS provenance/current selection seams remain synthetic. No native HIGH
+activation or work authority is established. Permission/live-lease integration,
+parent/model ingestion and service dispatch remain closed pending composition.
+
+Original connected run: 450 passed/3 failed, zero skips. One stale unsupported-v11
+fixture now uses unsupported v12; its affected suite passes 102. The two remaining
+failures are unchanged baseline startup-test size debts (712>675 and 89>60), with
+no cap changes. Eight independent controls passed on the production freeze;
+counts overlap and must not be summed. Exact receipts are under the existing
+external `current-time-independent-review/high-installed-admission-author-review`
+and `high-installed-admission-independent-review` evidence directories.
+
+This is an unpublished recoverable checkpoint. Generated integrity, registry and
+runtime qualification remain pending after root-owned base/live-lease integration.
+Metadata-only inspection found the known real owner/E0/target/issuer input files
+absent at `/var/lib/foundups-rsi-handshake/20261016`; the Windows preparation draft
+is expired initial LOW with no queued work. This is not a global absence claim or
+proof about unread budgets, parent evidence or credential availability.
+
+## Live authenticated generation scope — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Reused nine existing owners to avoid
+nested generation flock while repeating actual current parent/effect/model and
+nonce checks. Public self-leasing and LOW remain unchanged. Connected 390/9
+platform skips, Linux process 2/0 and independent 16 controls validate the core
+with synthetic admission seams. Failed exit withholds the result; durable effects
+are not rolled back by that claim. Installed HIGH selection/model ingestion and
+genuine admission remain next. Historical checkpoints below retain their tested
+source and publication state. Integration base 6dd48a5a inherits the corrected
+nonce compatibility history and byte contract; all 17 core Git-LF blobs match.
+Generated runtime 1,451; registry 1,742/270; both generators check clean. Binding
+36 tests pass without skips and all three Node checks exit 0.
+[Receipts and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
 
 ## Consensus nonce publication compatibility repair — 2026-10-20
 

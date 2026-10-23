@@ -51,7 +51,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_owner_e0_policy_contract import (
-    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10,
+    POLICY_SCHEMA_V7, POLICY_SCHEMA_V8, POLICY_SCHEMA_V9, POLICY_SCHEMA_V10, POLICY_SCHEMA_V11,
 )
 
 
@@ -63,6 +63,8 @@ def verify_current_grant_service_artifacts(
 
     if policy.get("schema_version") == POLICY_SCHEMA_V10:
         return _verify_installed_current(repo_root, grant_root, policy, owner_config_path)
+    if policy.get("schema_version") == POLICY_SCHEMA_V11:
+        return _verify_installed_work_current(repo_root, grant_root, policy, owner_config_path)
     with reddog_runtime_artifact_generation_lock(
         grant_root, repo_root=repo_root, allow_sealed=True
     ):
@@ -130,15 +132,72 @@ def _installed_manifest_bindings(manifest, repo, root, policy):
     validate_freshness(manifest, now_epoch=_now_epoch(), max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS)
 
 
+def _verify_installed_work_current(repo, root, policy, owner_path):
+    """Verify non-initial work metadata inside the caller's authenticated E0 lease."""
+    from .reddog_grant_authority_service_owner_binding import grant_authority_owner_runtime_root
+    from .reddog_signer_system_service_manifest_selection_loader import _load_owner_config
+    if owner_path is None:
+        raise RuntimeArtifactManifestError("grant_installed_work_owner_missing")
+    if grant_authority_owner_runtime_root(owner_path, repo, policy["owner_config_id"]) != root:
+        raise RuntimeArtifactManifestError("grant_installed_owner_root_mismatch")
+    owner = _load_owner_config(owner_path, repo=repo)
+    started = _now_epoch()
+    with reddog_runtime_artifact_generation_lock(root, repo_root=repo, allow_sealed=True):
+        manifest = _read_manifest(repo, root, policy)
+        _installed_work_manifest_bindings(manifest, repo, root, policy)
+        verify_grant_service_manifest_signatures(manifest)
+        artifacts = _read_installed_artifacts(manifest, repo, root)
+        _installed_config_bindings(artifacts["config"], policy)
+        source = _installed_source_policy(owner, repo, policy, artifacts["source_descriptor"])
+        if (artifacts["config"]["owner_config_id"] != policy["owner_config_id"]
+                or artifacts["config_digest"] != policy["grant_authority_config_digest"]
+                or artifacts["run_packet_digest"] != policy["grant_authority_run_packet_digest"]):
+            raise RuntimeArtifactManifestError("grant_service_policy_artifact_mismatch")
+        if _load_owner_config(owner_path, repo=repo) != owner:
+            raise RuntimeArtifactManifestError("grant_installed_owner_changed")
+        now = _now_epoch()
+        if now < started or not policy["issued_at"] <= now < policy["expires_at"]:
+            raise RuntimeArtifactManifestError("grant_installed_work_time_invalid")
+        validate_freshness(manifest, now_epoch=now, max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS)
+        return MappingProxyType({"manifest_id": manifest["manifest_id"],
+            "artifact_generation_digest": manifest["artifact_generation_digest"],
+            **artifacts, **source})
+
+
+def _installed_work_manifest_bindings(manifest, repo, root, policy):
+    from .reddog_runtime_artifact_manifest_contract import RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE
+    from .reddog_signer_owner_e0_policy_v7 import require_grant_service_installed_work_bindings
+    require_grant_service_installed_work_bindings(policy)
+    expected = {"schema_version": SCHEMA_VERSION_V2,
+        "runtime_profile": RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE,
+        "manifest_id": policy["grant_authority_manifest_id"],
+        "artifact_generation_digest": policy["grant_authority_artifact_generation_digest"],
+        "repo_root_digest": raw_digest(str(repo.resolve()).encode()),
+        "runtime_root_digest": raw_digest(str(root).encode()),
+        "signer_service_config_digest": policy["config_digest"],
+        "signer_public_key": policy["target_signer_public_key"],
+        "signer_key_fingerprint": policy["target_signer_key_fingerprint"],
+        "key_epoch": policy["target_signer_key_epoch"]}
+    if any(manifest.get(k) != v for k, v in expected.items()):
+        raise RuntimeArtifactManifestError("grant_installed_work_manifest_binding_mismatch")
+    validate_freshness(manifest, now_epoch=_now_epoch(), max_ttl_seconds=DEFAULT_MAX_TTL_SECONDS)
+
+
 def _read_installed_artifacts(manifest, repo, root):
     from .reddog_grant_authority_service_artifact_contract import validate_installed_grant_service_artifacts
-    from .reddog_runtime_artifact_manifest_io import validate_initial_installed_manifest_artifacts
+    from .reddog_runtime_artifact_manifest_io import (
+        validate_initial_installed_manifest_artifacts, validate_installed_work_artifacts,
+    )
     raw = {item["filename"]: _read_bytes(root / item["filename"], repo, root,
         runtime_artifact_size_limit(item["filename"])) for item in manifest["artifacts"]}
     if any(len(raw[item["filename"]]) != item["byte_count"]
            or raw_digest(raw[item["filename"]]) != item["content_digest"] for item in manifest["artifacts"]):
         raise RuntimeArtifactManifestError("grant_service_artifact_changed")
-    validate_initial_installed_manifest_artifacts(manifest, raw)
+    if manifest["schema_version"] == SCHEMA_VERSION_V2:
+        validate_installed_work_artifacts({"repo_root": repo,
+            "signer_public_key": manifest["signer_public_key"]}, raw)
+    else:
+        validate_initial_installed_manifest_artifacts(manifest, raw)
     return validate_installed_grant_service_artifacts(raw)
 
 

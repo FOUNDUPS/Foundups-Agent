@@ -1,3 +1,100 @@
+## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
+
+WSP00/6/10/15/22/50/97; preserve both hosted failures at `174955143d`.
+The 47-suite startup selection reached 1,001 passed / two failed / one skipped;
+both actual process-fence cases failed child import before lock observation.
+Keep spawn, real POSIX locks, inode assertions and bounded cleanup. Reuse the
+existing test-support owner for a canonical child import; no production change.
+
+Separate credential-free installed qualification passed both profiles at that
+exact source. Independent live byte/ownership and cleanup review checked all
+2,701 installed files, 22 required source members, 18 imports and four rejecting
+absent-owner entrypoints. Both owned units are absent with PID zero. The rejected
+first export and all failure evidence remain. No native author or authenticated
+HIGH job is claimed; protected owner/current-generation inputs remain required.
+Repaired local Linux selection: 1,003 passed / one Windows-only skip across all
+47 workflow-selected suites; both actual process cases pass. Independent Linux
+review passes two unchanged positives and two effective lock-removal controls.
+The earlier focused seven cases overlap and are not added. Source hashes remain
+stable; no production or manifest bytes changed. Local --confcutdir=. prevents
+DrvFS ancestor collection; final hosted acceptance and publication remain required.
+
+## PR2181 hosted regression repair — 2026-10-23
+
+WSP00/6/10/15/22/50/62/97; existing 19/P0 integration. Hosted run39892207131
+found two failures before the Linux startup step: the current-selection module
+exceeded its retained 200-line cap, and a malformed schema raised TypeError.
+Preserve that failed run. Extract the existing opaque lease into one private
+95-line owner, retaining canonical aliases, one registry/lock and every use-time
+check. Keep source caps at 200/50 lines. Reject non-string schema values with
+contract errors; move the unknown-version sentinel from supported v11 to v12.
+The positive v11 check validates shape/domain/scope, not cryptographic authority.
+
+The repaired source passes 410 cases with four platform skips across 15 distinct
+suites; independent review passes 21 separate cases with stable source bindings.
+Eight manifest cases and three Node compatibility commands pass separately.
+Windows skips retain two POSIX fence, one symlink and one Unix descriptor gate;
+fresh hosted Linux execution is required. No native author or retained RSI gain.
+The existing machine backlog preserves the failed selection and source lesson.
+
+## 2026-10-23 — Close seven observed PR2181 metadata bindings
+
+WSP10/22/50/97. Independently and locally verify seven unchanged historical
+source-hash/Git/prose findings against prior exact reviews; append only those
+bindings to the existing security ledger. Preserve failed hosted evidence and
+all source/test bytes. Fresh normal hosted validation remains required.
+
+## 2026-10-23 — Reconcile preserved installed HIGH source with current main
+
+WSP00/10/15/22/50/97; existing 19/P0 lane. Integrate preserved `0088b9a3`
+with main `99dc200869d49ab911134a11768c0d9a05472cb2`, retaining newer-main
+startup-clock, nonce, CI and source protections. PR1478's exact-head 20 checks
+and merged-tree readback are verified; exact-main CI39889900717 and CodeQL39889900055
+passed. Combined-source local validation passed400/6platform skips, separate
+manifest8 and threeNode commands. Independent offline review passes12held-outs;
+hosted Linux qualification remains required. No inherited count establishes current acceptance.
+Native admission, evaluation and retained use remain pending. Frozen LOW runtime
+`294195cdb` and other owners' unfinished work remain preserved.
+
+Markdown reconciliation retains both sides' historical entries. Holo freshness
+remains UNKNOWN with an authority mismatch; exact local source and the existing
+reconciliation receipt provide the bounded fallback. No model/runtime call or
+fresh missing-input observation is claimed. See the current dispatch checkpoint.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## 2026-10-23 - Reconcile PR1478 base and exact manifest findings
+
+The first hosted event used obsolete base `0b91dad785` despite current main `0d3f715bb`.
+Refresh the existing PR base, verify 20 changed files/four introduced commits,
+and rerun normal gates. Preserve the failed history/lifecycle evidence. Root and
+independent reviewer proved 38 current manifest matches are unchanged generated
+source hashes with prior reviewed bindings; append only those 38 to the existing
+security ledger. No scanner, authority, historical finding or credential waiver.
+See .github/security/README.md and the canonical PR audit. Runtime/source tests
+remain bound to the reviewed implementation; fresh publication checks are pending.
+
+## 2026-10-23 - Merge Gunicorn repair and select comment-context closure
+
+WSP00/10/15/22/50/84/97. #1354 squash0d3f715bb matches reviewed tree after
+20 unique successful final-head checks and independent Linux acceptance.
+Exact-main CI39883903539 and CodeQL39883902900 independently passed.
+Re-observe39open/10drafts;
+select existing #1478 at15/P1 after bounded source/owner inspection. Repair
+generation provenance, contextual-source gating and row metadata in the existing
+owners; validate offline and preserve current shared-context work. The original
+PR's historical test counts are not current evidence. No live posting, model
+call, native worker or RSI completion claim. Unpublished installed-HIGH work
+remains preserved with exact per-path reconciliation in the existing audit.
+
+#1478 now has independently reviewed source/helper behavior: 53 focused and116
+adjacent local cases, eight manifest tests and Node contract checks pass. Two
+helpers reduce the existing oversized owners without adding function debt.
+Generated closure and both pins are verified; registry quarantine is preserved.
+Exact-head hosted acceptance and main closure remain pending publication.
+
 ## 2026-10-23 - Independently accept the Acoustic Linux server qualification
 
 WSP 00/10/15/22/50/84/97. #1354 head `3bc5471a3` passed all 20 checks.
@@ -271,6 +368,18 @@ are preserved. The owned merged consensus-runtime checkout was recoverably
 archived after exact-tree verification. No live account, deployment, paid-model
 or native RSI completion is claimed. Historical June audit retained verbatim;
 nonempty three-dot differences alone prove neither novelty nor supersession.
+
+## Live authenticated generation scope — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Reused nine existing owners to avoid
+nested generation flock while repeating actual current parent/effect/model and
+nonce checks. Public self-leasing and LOW remain unchanged. Connected 390/9
+platform skips, Linux process 2/0 and independent 16 controls validate the core
+with synthetic admission seams. Failed exit withholds the result; durable effects
+are not rolled back by that claim. Installed HIGH selection/model ingestion and
+genuine admission remain next. Historical checkpoints below retain their tested
+source and publication state.
+[Receipts and limits](docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
 
 ## Windows manifest byte compatibility — 2026-10-20
 

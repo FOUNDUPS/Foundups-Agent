@@ -1,5 +1,64 @@
 # video_comments TestModLog
 
+## 2026-10-23 — PR1478 source-bound offline reconciliation
+
+Base `0d3f715bb475c6451e8f23243f43f1adf057cb0f`; original PR head
+`5f8c73453559625500f3023f23331e5e44020712` preserved in the merge ancestry.
+The pre-edit inventory below preceded extensions to the existing seven tests.
+
+- Original controlled regression selection: 8 passed, 10 failed. The seven
+  original assertions pass and are preserved as AST-equivalent assertions.
+- Final selector: 53 passed, no failures/errors/skips. Independent review found
+  ambiguous metadata IDs; its new two-case control failed once before repair,
+  then both passed. Conflicting IDs now clear title, ID and URL.
+- Existing operator queue/lifecycle/shared-context selection: 116 passed.
+- Extraction parity: 96 complete prompt and ten personality comparisons match.
+  The later ambiguity repair intentionally changes row-link selection only.
+- Independent held-outs exercise active timeout, queued cancellation, later
+  recovery, malformed results, cross-thread lock recovery and hostile links.
+  Final extraction review passed separately: 11 synthetic DOM rows, two JS
+  mutations, capture-lock mutation, real source-bound Skill0/emoji attribution,
+  actual pure-helper imports and three DAE call expressions. An independent
+  128-prompt matrix and complete personality/system/semantic data agree.
+- Eight manifest tests and Node backend/package contracts pass. Independent
+  regeneration review accepts all 1453 source hashes, paired pins, unchanged
+  byte limit and preserved registry quarantine. CI inventory controls accept
+  valid XML and reject skipped, removed, renamed, error and empty variants.
+  Hosted acceptance remains a separate exact-head gate.
+
+Exact commands, raw logs, XML, source hashes, failed controls and review records
+are retained in the existing `pr-reconciliation-20261021/refresh` evidence root:
+`pr1478-builder-ambiguity-freeze.json`, `pr1478-parent-final.xml`,
+`pr1478-adjacent-tests.xml`, `pr1478-extraction-parity.json` and the independent
+review receipts. No new evidence store or memory-ingestion claim is introduced.
+The test README records the supported selector and effect/timeout limits.
+The CI case-identity hash is `909f31dfc4a764e43cf1ae618ee2e03fcd4a14a02ddb803ff6c85ef5cfd77c6f`.
+
+
+## 2026-10-23 — PR1478 pre-edit inventory and qualification boundary
+
+Read the restored original `test_reply_context_pipeline.py` (171 lines, seven
+functions) before extending it. It imports the real generator and processor
+modules, constructs instances with `object.__new__`, and supplies a fake Qwen,
+VoiceMemory, generator and driver. Its seven original assertions cover:
+
+- Full comment, guidance, video title, history and memory in the embedded prompt;
+  stop tokens and recorded Qwen label.
+- Video title plus comment in the VoiceMemory query.
+- Existing semantic-pattern text without automatic troll attribution.
+- Row video title and receiving-channel forwarding at both boundaries.
+- A mocked driver returning prebuilt video fields (the JavaScript is not run).
+- A small label sample rejecting generic/unknown output.
+
+The original tests do not establish import-time confinement, the actual
+processor's no-post path, overlapping/timed-out generations, complete label
+validation or real DOM extraction. Historical seven-pass output is not current
+qualification. Extend this existing file with isolated providers/state and
+explicit effect controls; do not run the historical classifier command against
+the real profile store. The prior PR1759 inventory and 53 reader cases below
+remain intact. Current outcome: qualification in progress; no new pass claim.
+
+
 ## 2026-10-22 — PR #1759 inventory recovery and reader regressions
 
 **Work-order correction:** this file was absent when the reader tests were

@@ -1,3 +1,197 @@
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+Current repaired binding: 1,467 members, canonical digest
+`92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`,
+331,870 LF / 334,877 CRLF bytes under the measured 328 KiB ceiling.
+The boundary accepts 1,467 members and rejects 1,468; 2 MiB per-file and
+32 MiB total limits are unchanged. Manifest and consumer checks pass.
+
+Historical `beb46b3` / `4a401410b` binding before the CI repair: the closure has
+1,466 members, adding 13 to main with no removals. Pretty JSON measures LF
+331,626 / CRLF 334,631 bytes. The smallest qualified whole-KiB ceiling is 327 KiB
+(334,848 bytes; 217 above CRLF); main's 324 KiB contract cannot contain it.
+Candidate digest: `88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16`.
+The paired boundary accepts 1,466 members and rejects 1,467. Per-file 2 MiB,
+total 32 MiB, exact digest/path/hash checks and authority gates remain unchanged.
+Eight Python manifest cases and three Node commands passed, including LF/CRLF,
+exact-byte/+1 and member/+1 controls. This is not installed-runtime qualification.
+
+Historical `beb46b3` frozen-source qualification: clock/custody/structure128pass/2skip and
+core/LOW/installed compatibility272pass/4skip; together400pass/6skip across406
+cases in18 distinct suites. All22 bound hashes remain stable. The six Windows
+skips cover symlink/Unix descriptor and actual POSIX process-fence conditions;
+Linux acceptance remains required. No installed/native execution follows.
+
+
+The service entrypoint was already included as a generator root in the preserved
+candidate. Reconcile its live-lease and installed HIGH implementation with newer
+main's nonce/startup protections; do not recreate that solved entrypoint work.
+Use the existing installed-work/HIGH, live-lease, LOW/startup and parent/model
+regressions, then verify generated closure and consumer boundaries against the
+actual combined source. Linux process controls remain separate from Windows
+skips. Local binding checks and independent source acceptance pass; hosted gates remain required.
+
+PR1478's exact-head20 checks, merged-tree readback and exact-main CI39889900717/
+CodeQL39889900055 passed. This source integration still requires its own publication gates.
+Known-path missing-file and expired-draft observations below retain their original
+dates; authentic current policy/manifest, model/parent/effect, custody, budget and
+reviewer inputs must be established through their existing owners.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## Installed HIGH source closure candidate — 2026-10-22
+
+WSP00/5/6/10/15/22/50/97. Existing 19/P0 prerequisite; integrate the already
+implemented service and live lease before another native author attempt. Owned
+base `482238effcc2cb948928f94972ab6673125cde98`; all 17 unfinished paths were
+preserved externally before editing. Service code matches the historical frozen
+153-pass/1-skip fixture evidence. The entrypoint was already a generator root.
+
+The remaining source-closure defect was stale consumer/index bindings: 1,462
+required members, canonical digest
+`759ee0caf65899b1baddc4329b085246e2fe4fcad53c2d273a29f257eaf833bb`,
+pretty LF 330,756 / CRLF 333,753 bytes. Independent AST traversal justifies all
+11 additions. Consumer/test count is now 1,462 and byte limit 326 KiB (333,824);
+exact digest, member+1 and byte+1 rejection remain required. Independent manifest8
+and three JS commands pass; registry1,745/270 is current. Fresh connected service
+suite passes153/1 Windows skip in128.67s on final byte-bound production source. The first
+run's Windows261-character fixture failure is retained and independently diagnosed;
+shorter external basetemp resolves that harness boundary. Counts overlap.
+Independent review, XML and source bindings are in existing external
+`pr-reconciliation-20261021/refresh/rsi-installed-high-*20261022*` evidence.
+Historical checks below retain their exact sources and limits.
+
+Publication remains blocked by intermittent GitHub connectivity. A successful
+read observed main `87aa241b2c27649a3b23177236fafd610cb77b9e`, but its object
+could not be fetched. Fifty open PR heads match the preceding audit; their
+classification is not revalidated against that unfetched main. PR1759 and1638
+have reviewed local candidates; unrelated or protected PRs are not prerequisites.
+
+Next: verify this coherent source/index and independent review, then reconcile
+fresh main and complete gated publication. Afterwards qualify the actual installed
+service and supply current authenticated task/model/principal/budget/verifier
+inputs through existing owners. G1–G5 remain unproved. Source tests neither mint
+admission nor demonstrate a native author, activation/rollback, later retained
+benefit or autonomous continuation.
+
+## Live authenticated generation scope — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97; current selection 19/P0.
+Source base 5820daf8; nine existing production owners and eight test/support files.
+Integration base 6dd48a5a inherits the independently reviewed legacy-owner
+tuple repair, complete v13 signed-model regression and 324 KiB byte contract.
+All 17 live source/test canonical Git-LF blobs remain exact. The 390/9,
+Linux 2/0 and independent 16 counts below retain source base 5820 evidence;
+Combined-source checks now pass: both generators, 36 binding tests with no
+skips/failures/errors in 96.046s, and all three Node commands. Inventory
+remains 1,451, registry 1,742/270; only the inherited runtime-binding repair
+changes a member hash relative to the prior live manifest. Current digest:
+`fd0969d46a01870d8bfaeaf5f78299be2f66467d32a11035f19936f92921b318`. Rebase binding receipt:
+`high-live-lease-author-review/nonce-base-integration/bindings/review.json`,
+SHA256 `1870bb658dbb15e13959deee41ecca63caae6414a551003169918b873c0d7ed4`. No core runtime suite was rerun.
+The bounded same-inode red proves nested public leasing blocks while the outer
+fence is held and succeeds after release. The private live-scope connection reuses
+the existing permission and manifest-selection owners without nested locking.
+
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+Connected Windows validation: 390 passed, 9 platform skips, zero failures/errors
+across 25 suites in 389.797s. Separate Linux process controls: 2 passed without
+skips in 29.394s, using the actual same-inode generation lock and signed files
+with synthetic admission/installation seams. Independent core review: 16 unique
+held-outs passed. Counts overlap and are not additive. Original fixture failures
+and the bounded nested-lock red control remain in external evidence.
+
+Final production bytes equal the connected tested freeze. Only the Linux test
+gained a bounded watchdog before its two passing final controls. The independent
+core review binds those production bytes; no independent publication or hosted
+CI acceptance is claimed here. Evidence paths are relative to existing
+`native-installation-inputs/current-time-independent-review/`:
+
+| Receipt | SHA256 | Scope |
+| --- | --- | --- |
+| `high-live-lease-author-review/source-freeze-final.json` | `f5853a3d39461c1ee4ac5859883580765693dbfeccccc4422887a1e51e1cf20e` | Exact 17-file final freeze |
+| `high-live-lease-author-review/author-review-final.json` | `3d7e49d5c139aa9720d463f6636e06f57c463ed73989ba8bbb3d48bf7356aa76` | Commands, preserved failures and truth limits |
+| `high-live-lease-author-review/connected-review.json` | `e057d20e8e3dcec3511bf3aae383781bc1a5d76d57736221dd7b943400ebbdf2` | 25 suites, 390 passed and 9 platform skips |
+| `high-live-lease-author-review/process-final.json` | `04935721e4a43dae2965453bdb9be8d1b7dd6ebf66930af110336cdef5e9f2ea` | Two actual Linux lock/process controls; synthetic admission |
+| `high-live-lease-author-review/nested-lock-red.json` | `3c110e3e56b7a4577774b65588fc3918cee6dc87e911d799eb44016f588e2f57` | Bounded same-inode nested-lock red and released control |
+| `high-live-lease-independent-review/independent-core-review.json` | `9f465821601dcf58689d16c89b15ff851281d576a44486c5ccc8ec8399824bbe` | 16 unique independent core held-outs |
+
+Before rebase, generated closure contained 1,451 files, adding the nonce authority
+and current-owner modules through existing imports. This is source closure,
+not installed qualification. Registry 1,742/270 adds exactly five suites and
+35 shard-only moves; existing classifications/quarantines remain unchanged.
+The original binding checks passed 36 manifest/registry tests without skips in
+80.266s, including staged-index binding. Node contract/preflight/async
+each exit 0. Exact inventory bounds and cap+1 checks follow this inventory;
+structural ceilings are unchanged. All 17 frozen source/test hashes remain exact.
+The serialized-manifest byte contract explicitly evolves from 320 to 324 KiB
+(+4,096 bytes/1.25%): pretty LF 327,910 and CRLF 330,885 fit 331,776,
+leaving 891 bytes above CRLF. The original 35-pass/1-failure receipt is
+retained; formatting stays indent=2. Actual LF/CRLF, exact-max acceptance
+and max+1 rejection are tested; independent 4 MiB readers are unchanged.
+This is a post-read, pre-parse accepted-input bound, not a preallocation
+memory guarantee.
+Binding receipt: `high-live-lease-author-review/publication-bindings/review.json`,
+SHA256 `e6ab727aa667a1dc134b6748feeff87f2799ff1a9566209f27f928bb5cd81d29`.
+
+Next 19/P0 (C4/I5/D5/Impact5): connect protected non-initial installed policy/source
+admission, authenticated author/reviewer model-artifact loading and the existing
+HIGH issuer factory path. This core does not select or install HIGH service.
+Genuine work/model/reviewer/budget inputs, native qualification and author
+admission remain required. Frozen runtime 294195cdb is unchanged; native author
+tickets 0, paid model calls 0, no retained RSI gain.
+
+The following nonce and parent checkpoints are historical source-bound evidence.
+
 ## Windows manifest byte contract — 2026-10-20
 
 Actual readManifest independently accepts the current 1,449-member LF

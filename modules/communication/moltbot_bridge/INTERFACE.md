@@ -1,9 +1,86 @@
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+Retain v10 initial LOW restrictions, distinct v11 non-initial HIGH scope,
+protected v13 custody/model bindings, current parent/effect/nonce checks and
+startup time sampling inside the durable revocation fence. These combined-source
+invariants have local and independent source validation; credential-free installed
+qualification is bounded as above, while hosted acceptance and authenticated use
+remain required. Public self-leasing
+and private request-scoped APIs remain distinct; failed final checks withhold
+results without claiming reversal of completed effects or nonce consumption.
+
+The dated contract snapshots below preserve both development lines. Their former
+inventory and follow-on composition status are historical; the current combined
+closure has local and bounded installed evidence, while hosted acceptance and
+authenticated use remain pending. No signed authority follows
+from this interface document.
+
 ## Selected-clip adapter receipts — 2026-10-22
 
 The scheduling action requires process success and a parsed receipt with boolean
 `success=true`, no error(s), and no incomplete batch. Empty/truncated output,
 truthy strings/numbers and contradictory partial results fail closed. This is
 local result interpretation, not authenticated execution or saved-state proof.
+
+## Installed HIGH service connection — 2026-10-20
+
+Source-level composition, awaiting fresh installed-runtime qualification. A separately signed v11 policy selects HIGH/worktree_create at generation >=2. V10 initial LOW behavior and target-versus-issuer config bindings are unchanged. The materializer authenticates the installed descriptor and full runtime before custody. Protected owner v13 supplies fixed sibling `parent_model_artifacts.json`, using the existing `{author, reviewers}` shape, duplicate-key rejection, 1 MiB read/snapshot limit and exact distinct signed selection set. This is untrusted model data, never a verifier or permission. Startup verifies the author and prepares reviewer resolvers; every parent/effect request verifies the complete proof and reviewers before signing-key resolution, then rereads/verifies the model map before returning.
+
+The consensus nonce loader owns a separate preliminary lease. The new narrow HIGH leaf reuses canonical parent/effect/nonce owners under the opaque live request scope and the existing factory. Only canonical parent and effect-v2 proofs are admitted; legacy resolver slots are unavailable. Failed final checks or lease exit withhold results without undoing completed signatures/commits. No new activation/store/framework, installed authority, provider call or native author admission is supplied. Historical checkpoint statements below retain their original scope.
+
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+Source-level preparation only; unpublished integration checkpoint. Distinct signed
+E0 policy v11 requires generation >=2, HIGH/worktree_create and HIGH consensus.
+The existing generic signed work manifest v2 can describe the installed-source
+artifact family through existing signature, audit-attestation and work-authority
+owners. Initial policy v10 remains generation-1 LOW handshake enrollment; its
+restrictions and initial-approval checks are unchanged.
+
+`bind_grant_authority_service_manifest` verifies this separate issuer bundle under
+the current target E0 lease. The manifest's authorizing signer configuration is
+the target configuration; the issuer artifact/configuration digest is separately
+bound. The returned metadata binding does not activate HIGH service dispatch.
+The ordinary target generation and independent issuer artifact root remain
+distinct; this layer adds no issuer generation store or activation framework.
+
+Permission/live-lease integration, protected parent/model input ingestion, full
+installed runtime guarding and HIGH dispatch remain follow-on composition.
+Generated manifest/registry bindings are deliberately pending integration onto
+the corrected base. No installed runtime, authority, service or provider changed.
 
 ## Protected consensus nonce supply — 2026-10-20
 
@@ -28,6 +105,28 @@ Cleanup failures remain errors rather than claims of successful rollback.
 `AtomicProposalAuthenticityNonceStore.validate_existing_state()` rejects absent
 or unauthenticated state and retains the existing one-step high-water crash
 recovery; it is not a promise of read-only IO.
+
+Private `_authorize_current_grant_authority_scoped_use` passes the existing
+permission action an opaque scope created under the canonical generation lease.
+Current parent/effect and nonce private variants consume that exact live scope;
+public methods still acquire their own leases. No public trusted boolean or
+global reentrancy bypass is introduced. The scope binds thread/process, exact
+owner-config path/repo, owner/policy/selection snapshots and nondecreasing clocks.
+The manifest-selection owner performs its nonlocking current check only while
+the authenticated fence is held. Reserve, pre-sign validation and commit repeat
+actual proof/model verification; withdrawal allows only confined owned rollback.
+Failed lease exit withholds results without undoing side effects or consumption.
+
+The generated 1,451-file closure now includes nonce authority/current-owner
+modules through existing imports; exact binding checks are recorded in dispatch.
+Inclusion in that import closure is not installed qualification.
+This core does not install HIGH signing or widen LOW. Protected non-initial
+policy/source selection and authenticated author/reviewer model-artifact loading
+remain required before the existing HIGH factory can be served. Reuse supplied-
+grant target transport; authentic work/model/reviewer/budget inputs, native
+qualification/admission and retained RSI benefit remain open.
+
+### Historical nonce-only import/composition status — 2026-10-20
 
 The generated 1,449-file runtime currently includes only the new custody leaf;
 the public nonce authority/current-owner leaves remain source/test validated,

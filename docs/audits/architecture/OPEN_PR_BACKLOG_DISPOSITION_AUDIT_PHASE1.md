@@ -1,13 +1,29 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 40 open PRs, 10 drafts. #1759, #1638, #782, #841, #1457 and #1338 are merged; #1354 Acoustic server qualification is active. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+Current planning snapshot, 2026-10-23 JST: 39 open PRs, 9 drafts, including #2181 publishing the previously local installed-HIGH RSI integration. #1759, #1638, #782, #841, #1457, #1338, #1354 and #1478 are merged. Read the complete current queue below before selection; search excerpts and historical tables are insufficient. This is planning memory, not runtime admission.
+
+### Publication follow-up — 2026-10-23 12:10 JST
+
+Fresh GitHub inventory remains 39 open / 9 draft. The existing #2181 lane is
+still selected at 19/P0. Source `174955143d` repaired the module/schema failures
+and passed security/CodeQL, but both hosted startup runs exposed a child-process
+import failure before either actual POSIX lock test could execute. The two-file test repair now passes the full local Linux selection (1,003 passed,
+one Windows-only skip) and independent positive/lock-removal controls. Fresh
+final-head hosted acceptance precedes merge.
+Separately, its credential-free installed profiles passed independent byte,
+confinement and cleanup checks; this is not authenticated native admission.
+The earlier 38-open snapshot below predates #2181 and remains historical.
+
+Independent re-observation of #722/#729 preserves both unique proposals. Neither
+is safely closable as implemented or superseded. Their existing rows retain
+concrete reconciliation steps; no replacement backlog or Brain ingestion is claimed.
 
 ## Current reconciliation - 2026-10-23 JST
 
-Observed `2026-10-23T00:48:24.914980+00:00`, main `8068d6f78c9ab4bfd5c10c74cc4b94dd36302ab1`.
+Observed `2026-10-23T02:34:41.163624+00:00`, main `99dc200869d49ab911134a11768c0d9a05472cb2`.
 Since the prior 47-open snapshot, #782 and owner-managed #2179 merged, and
-#1360 was consolidated into #1342 and #1659 into #1663. #841, #1457 and #1338 have now merged:
-**40 open**, including 10 drafts.
+#1360 was consolidated into #1342 and #1659 into #1663. #841, #1457, #1338, #1354 and #1478 have now merged:
+**38 open**, including 9 drafts.
 Counts are dated; concurrent lanes continue.
 This section supersedes older selections/counts, retained below as history.
 
@@ -102,26 +118,56 @@ collection boundary and existing optional crypto fallback do not allow effects.
 Four broader test failures and the separate timeout-child defect remain.
 Exact-main CI39879980028 and CodeQL39879978431 succeeded.
 
-Re-observe and select **#1354, C3/I4/D4/Impact4=15/P1**. Its original one-pin proposal is
-retained in the repair ancestry; no competing Acoustic writer was found. Higher-score security
-work retains its active owner; broad Moshpit/public-chat proposals need protected
-website/security scope reconciliation. The two current high Gunicorn alerts
-specify 22.0.0 as patched. Reuse this checkout and existing hosted Linux CI to
-qualify the actual parser, checked-in factory configuration, bounded loopback
-server and full owned-process closure. Repair the existing module-requirements
-install path; preserve strict defaults and unrelated pins. No new service,
-scheduler, memory store or native worker execution is claimed.
+**#1354 MERGED_VERIFIED_MAIN:** squash
+`0d3f715bb475c6451e8f23243f43f1adf057cb0f` from reviewed head
+`c4778dd08279cede544689ee9bed06906b0c8cb0`; reviewed/main tree
+`19c74d52a0242184be5069f2fe6c13a812a544b4` matches exactly.
+All 20 unique final-head acceptance contexts passed: CI39882533868 and
+CodeQL39882527398, plus aggregate/security checks. A redundant identical-source
+CI from the PR body edit was cancelled with its provenance retained; it was not
+a failed test bypass. Independently accepted Ubuntu Python 3.11.17/3.12.15
+artifacts at source head3bc5471a cover six native server and seven adapter cases,
+precise old-version framing failure, installed dependency/source bindings and
+normal master/worker exit. Final documentation changes leave executable bytes
+unchanged. Exact-main CI39883903539/CodeQL39883902900 independently passed.
+No production service or admitted AI-worker execution is established.
 
-**#1354 HOSTED_VALIDATED_PUBLICATION_PENDING:** source head
-`3bc5471a3a2255923be30c4764d1f7d21d67b1f5` passed all 20 checks.
-Independent artifact review of CI39881377042 accepted the six native server
-cases and seven adapter cases on Ubuntu Python 3.11.17/3.12.15. Baseline 21.2
-passed valid parsing and failed exactly the protected framing assertion.
-Full dependency installations, pip checks, config/source bindings and normal
-master/worker closure passed. No unknown/duplicate effects or forced kill.
-The existing receipt `pr1354-independent-hosted-review.json` binds this result.
-Final documentation changes require fresh head checks and exact-main closure.
-This is server qualification, not admitted AI-worker execution or production RSI.
+**#1478 MERGED_VERIFIED_MAIN:** squash `99dc200869d49ab911134a11768c0d9a05472cb2`
+from independently reviewed head `fd5e670867f3efb124ef61bce3c3960112ce1443`.
+All 20 exact-head checks succeeded; fetched main has the complete reviewed tree
+`a67ae68ee4e97dde1a949a8ea92c707e9a707e72`. Exact-main CI39889900717 and
+CodeQL39889900055 succeeded. Local qualification passed 53 focused, 116 adjacent
+and eight manifest cases; these are separate overlapping scopes, not one count.
+Independent held-out/mutation controls, prompt/personality parity and source
+bindings passed. Actual source with controlled collaborators and synthetic DOM
+is not live posting, native provider execution or proof of production RSI.
+
+The initial publication failure is retained: GitHub's obsolete base expanded the
+comparison to 2,390 files/700 commits. Refreshing the existing PR to actual main
+and separately reviewing 38 generated metadata fingerprints restored correct
+validation. Final correct-base gates passed; no scanner rule or historical
+GitGuardian incident was waived. Active timed-out provider threads still cannot
+be forcibly cancelled; local source labels are not authenticated provider receipts.
+
+**Current selection: existing installed-HIGH/live-lease integration,19/P0
+(C4/I5/D5/Impact5).** Reuse the attached clean branch at `0088b9a3`, now reconciling
+main `99dc20086`; do not create another service, roadmap or worktree. All76 old
+branch paths were accounted:21 exact blobs and90 security entries already on
+main;20 production paths,15 bridge test/support changes and2 binding tests retain
+unique work. Preserve main's newer inside-fence startup clock check and LOW path.
+Local combined-source tests pass400/6platform skips; independent offline review passes12held-outs. Eight missing CI
+selectors reuse the existing Linux job; actual Linux process coverage remains
+required. Regenerated closure has1466 members (+13/no removals), with measured
+LF331626/CRLF334631 bytes; eight manifest tests and three Node commands verify
+the exact327KiB/+1 and1466/1467 boundaries.
+The old1464/1466 set-union predictions were inventory, not execution evidence.
+
+Existing canonical backlog observations retain historical source evidence and
+identify current acceptance separately. Publish only after combined source,
+bindings, independent review and normal gates pass. Then qualify the actual
+installed service and authentic work/model/principal/reviewer/budget inputs.
+Native author admission, independent outcome evaluation, activation/rollback,
+retained later-use benefit and bounded continuation remain unproved.
 
 ### Refreshed dependency priority evidence
 
@@ -144,8 +190,8 @@ mapped to existing owners and proposals; package metadata is not test evidence.
   2026.7.4 passed full resolution and controlled adapter qualification; no live
   downloads. Four older module failures and the separate child-lifetime defect
   stay explicit. Dependency-alert closure requires fresh GitHub readback.
-- **#1354: 3/4/4/4=15/P1.** Gunicorn qualification requires actual supported
-  Linux server/parser execution, not Windows import-only checks.
+- **#1354: 3/4/4/4=15/P1, MERGED_VERIFIED_MAIN.** Independent Linux
+  server/parser qualification and both exact-main gates passed.
 - **#2081: 2/4/4/4=14/P1**, before #1355: proposed Flask requires Werkzeug
   >=3.1.0; current Flask 3.0 permits the proposed Werkzeug by metadata. Verify
   the complete dependency set and application behavior before either merge.
@@ -153,8 +199,9 @@ mapped to existing owners and proposals; package metadata is not test evidence.
   in this snapshot. Existing owners must qualify remediation; do not infer a
   safe version, mutate qualified Holo runtimes or dismiss the alerts.
 
-Complete #1354 qualification, then re-observe source, ownership and WSP15 before
-selecting again. Do not assume the previous second-ranked item wins. Source
+The next repository-level selection is the existing19/P0 RSI integration above.
+#2081 at14/P1 remains the bounded dependency alternative. Re-observe ownership
+and WSP15 after the selected closure. Do not assume the previous second-ranked item wins. Source
 bindings, alert mapping and acceptance remain in the existing reconciliation
 receipt root (`dependency-alert-pr-mapping-20261023.json`). The old alert count
 is not a post-merge closure claim; refresh GitHub alerts before reporting change.
@@ -229,16 +276,15 @@ Every execution requires current source, checks and authority.
 
 | PR / source head | WSP15 | Owner / state | Next executable step |
 |---|---|---|---|
+| [#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) `174955143d96dc8a0d646bd4ba881462f0714815` | 4/5/5/5=19 P0 | Existing RSI integration/root: LOCAL_POSIX_REPAIR_VERIFIED | Preserve the actual Linux and independent lock-removal proofs; pass final-source hosted gates and converge to main; preserve bounded installed qualification and establish authentic admission. |
 | [#2168](https://github.com/FOUNDUPS/Foundups-Agent/pull/2168) `8c85f2e85c63af0d6979ec55adf37e1506b10da8` | 3/5/5/5=18 P0 | Active security owner: ACTIVE_OWNER_PROTECTED | Existing security owner retains source/review/CI and terminal decision. |
 | [#1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648) `a77e284b8b72f1e731b97a987e1a48478755fda9` | 5/4/3/4=16 P0 | Public chat/Moshpit owner/root: PARTIALLY_SUPERSEDED / DRAFT | Split/reconcile spend/auth/reader tests; do not treat #1645 as contained. |
 | [#1645](https://github.com/FOUNDUPS/Foundups-Agent/pull/1645) `4b316c976aa3cdba21b901191159716f3d58631d` | 4/4/3/4=15 P1 | Moshpit reader owner/root: PARTIALLY_SUPERSEDED / DRAFT | Preserve guard; reconcile native Doc authority/naming; reader tests. |
-| [#1478](https://github.com/FOUNDUPS/Foundups-Agent/pull/1478) `5f8c73453559625500f3023f23331e5e44020712` | 3/4/4/4=15 P1 | Comment grounding owner/root: STILL_CURRENT / DRAFT | Refresh; run context/tier/source-attribution tests without posting. |
-| [#1354](https://github.com/FOUNDUPS/Foundups-Agent/pull/1354) `4effe1e2508f5a4c1a56a50a303e3406742ca2b4` | 3/4/4/4=15 P1 | Dependency lane/root: HOSTED_VALIDATED_PUBLICATION_PENDING | Independent Linux artifact acceptance complete on both supported runtimes; pass final-head checks, squash and verify exact main. |
 | [#2178](https://github.com/FOUNDUPS/Foundups-Agent/pull/2178) `f1fb9763b1f4b602b7f93371cc5057d378610745` | 3/4/3/4=14 P1 | Active resident FoundUp reconcile owner: ACTIVE_OWNER_PROTECTED | Existing owner completes exact-head review, applicable validation and closure; no overlapping implementation. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) `09d0ad70f6a91f9e9690ee796bf594cb50bb8631` | 4/3/3/4=14 P1 | Brand grounding owner/root: NEEDS_REBASE | Replay core; validate verifier/packages; retire branch-specific writer. |
 | [#1663](https://github.com/FOUNDUPS/Foundups-Agent/pull/1663) `ced01f2c5ec477eae80e404638ef4b99203ff4a9` | 2/4/4/4=14 P1 | Communication policy owner/root: NEEDS_REBASE | With #2179 merged, reconcile the single successor carrying #1659 identity/index/image/correction/privacy clauses; preserve pre-compose identity, draft exception, receipts and current owner precedence. |
 | [#1356](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356) `055cda32a0c2bff70a469aea7d967d20c61a7f42` | 4/3/4/3=14 P1 | Dependency lane/root: STILL_CURRENT | Resolve full set; offline transaction/hash interface tests. |
-| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `2cb0e2eacff38ecc19a6658423ac0a2dddc015ed` | 2/4/4/4=14 P1 | Dependency lane/root: OFFLINE_QUALIFICATION_ELIGIBLE | Qualify Werkzeug on current Flask first; complete resolver and health/upload/error smoke. This precedes #1355 and addresses eight reported alerts. |
+| [#2081](https://github.com/FOUNDUPS/Foundups-Agent/pull/2081) `63abf6dfa075af20769b3f74feb9c23f1de51ee8` | 2/4/4/4=14 P1 | Dependency lane/root: OFFLINE_QUALIFICATION_ELIGIBLE | Qualify Werkzeug on current Flask first; complete resolver and health/upload/error smoke. This precedes #1355 and addresses eight reported alerts. |
 | [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) `e455fd0190b0c35302a3a5776529a221c3123888` | 4/3/2/4=13 P1 | Japan Compute owner: STILL_CURRENT / DRAFT | Owner reconciles homepage/hosting; preserved-copy and economics gates. |
 | [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) `724f465bd35ac1be5e9a91f41d0721da383c67d8` | 4/3/3/3=13 P1 | eSingularity surface owner: ACTIVE_OWNER_PROTECTED | Existing eSingularity owner coordinates convergence: preserve post-vote state, valid fixes and carried article; current routes/locales/build acceptance. |
 | [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` | 3/3/4/3=13 P1 | Dependency lane/root: DEPENDENCY_BLOCKED | Requires #2081 Werkzeug reconciliation before proposed Flask; complete resolver and health/upload/error smoke. |
@@ -264,7 +310,7 @@ Every execution requires current source, checks and authority.
 | [#1346](https://github.com/FOUNDUPS/Foundups-Agent/pull/1346) `bae7f13efa6767cecebae58e8ffe624886d8e6e7` | 2/3/3/3=11 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED | Raise manifest/root-lock floor; compile and bridge tests. |
 | [#408](https://github.com/FOUNDUPS/Foundups-Agent/pull/408) `2e788a0539ac93f2edfefaa51128726fcb66745f` | 2/3/3/3=11 P2 | Stream resolver tests/root: STILL_CURRENT | Map all ten obsolete wrapper skips to replacement behavior tests; restore uncovered upcoming-stream and quota-retry cases before accepting skips. |
 | [#1822](https://github.com/FOUNDUPS/Foundups-Agent/pull/1822) `663f0e17566a4e613a6b419456239e02f156923d` | 3/2/2/3=10 P2 | Memory Horizon owner: STILL_CURRENT / DRAFT | Owner keeps no-dispatch; additive registry/schema and G0 gates. |
-| [#722](https://github.com/FOUNDUPS/Foundups-Agent/pull/722) `2e9a66c8f86795fea2d75ac4c9e7b2c66ab88c61` | 2/3/2/3=10 P2 | Security intake docs/root: STILL_CURRENT | Correct nonexistent action_router.route reference to actual owner interfaces; preserve DOCS_SPEC_ONLY. |
+| [#722](https://github.com/FOUNDUPS/Foundups-Agent/pull/722) `2e9a66c8f86795fea2d75ac4c9e7b2c66ab88c61` | 2/3/2/3=10 P2 | Security intake docs/root: STILL_CURRENT | Preserve unique template/spec; replace nonexistent action_router.route with actual ActionRouter.execute interface, distinguish unsigned reviewer placeholders from authenticated attestation, and label best-effort observer detection separately from enforcement. Preserve DOCS_SPEC_ONLY and dated source claims. |
 | [#1835](https://github.com/FOUNDUPS/Foundups-Agent/pull/1835) `8262573bf2cbaa6ebc3293bdd207cffee683694f` | 1/2/3/3=9 P3 | Architecture docs owner: STILL_CURRENT | Correct obsolete MOSH_PIT architecture reference; preserve specified-versus-operational labels; validate links. |
 | [#1646](https://github.com/FOUNDUPS/Foundups-Agent/pull/1646) `56c49762c9dae1323590943cc445f1a6a44c0f4e` | 2/2/2/3=9 P3 | YUMORI thesis owner: STILL_CURRENT / DRAFT | Owner reconciles current PPP/PFI sources before canonical promotion. |
 | [#729](https://github.com/FOUNDUPS/Foundups-Agent/pull/729) `1757a520c779c3b6a83ed8a4282f2eae13beb10a` | 2/2/2/3=9 P3 | Tooling docs/root: PRESERVED_NEEDS_REBASE | All 3 files / 247 inventory lines accounted. Nested instruction redirect remains useful; retire or reconcile dated stack authority, preserving branch. Keep current rootCLAUDE/AGENTS and verify existing projection. Not already implemented. |
@@ -272,6 +318,7 @@ Every execution requires current source, checks and authority.
 
 #2178 score is provisional owner-routing triage, without independent
 implementation acceptance. #2168 remains protected security work.
+
 
 ## Historical 2026-10-22 closure and selection
 

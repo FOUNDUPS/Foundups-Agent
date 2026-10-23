@@ -1,3 +1,74 @@
+## PR2181 CI repair metadata review — 2026-10-23
+
+The source repair changes the generated manifest and historical documentation
+whole-file bindings. Parent and independent reviewers revalidated 38 unchanged
+public source-integrity records and seven unchanged historical digest/Git/prose
+contexts against published `4a401410b`, using the unchanged gate function.
+Append only these 45 fingerprints, retaining all 1,645 existing entries (1,690
+total). Actual source hashes, unique contexts and prior exact approvals match.
+No unknown finding, scanner rule, scan scope or fingerprint change is approved.
+The previous head's security job120217456059 passed. This repaired source still
+requires fresh tracked-tree and introduced-history scans; old success is historical.
+
+## PR2181 historical documentation bindings — 2026-10-23
+
+Security job120214348539 on head `beb46b3e6384ef547dff29462a99f96262e03d4b`
+reported seven current-tree findings; the introduced-history scan found none.
+Parent and independent review identified five historical tokenizer source hashes,
+one historical Git binding for the grant-provider source, and one unchanged
+changelog sentence about key resolution. The independent review rehashed the
+public tokenizer file and resolved the historical Git blob; neither is key material.
+
+All seven exact contexts and prior whole-file/rule/line fingerprints match main
+`99dc20086`. Preserve the 1,638 existing bindings and append only these seven
+(1,645 total). The finding-bearing backlog and bridge ModLog bytes stay unchanged.
+No source, assertion, scanner rule, scope or unknown finding is approved. The
+failed attempt and sanitized independent/root receipts remain in the existing
+reconciliation refresh directory. Fresh hosted tree/history gates are required.
+
+## Installed HIGH combined manifest metadata review — 2026-10-23
+
+The combined 1,466-member service closure changes the manifest's whole-file
+binding. Parent and independent reviews revalidated exactly 38 previously
+reported generated-metadata findings against main `99dc20086`: 36
+`generic-api-key` and two `discord-api-token` matches. Every finding-bearing
+line remains unique and unchanged, its referenced source bytes rehash correctly,
+and its prior exact fingerprint exists in the existing 1,600-entry ledger.
+
+Append only the 38 new whole-file/rule/line fingerprints calculated with the
+unchanged gate, retaining all prior entries (1,638 total). These are public
+source-integrity metadata; this bounded rebind is not a new scanner run. No
+rule, exclusion, scan scope, fingerprint algorithm or unknown finding is
+approved. Fresh hosted tracked-tree and introduced-history scans remain required;
+old source commits and failure evidence are preserved. Independent evidence is
+in the existing reconciliation refresh receipt
+`rsi-installed-independent-known-manifest-rebindings-20261023.json`.
+
+## PR1478 reply-context manifest re-review — 2026-10-23
+
+Head `70ad1bd9f5483d3f74ca4d3365aabbae174cb6e0` adds two generated runtime
+members. Security job 120199282798 reports 38 new whole-file bindings in the
+manifest: 36 `generic-api-key` and two `discord-api-token`. Independent root and
+peer reviews parsed every exact line, recomputed its SHA-256 from the referenced
+Git source with the existing LF normalization, and verified unchanged values and
+prior exact reviewed fingerprints against main `0d3f715bb`. They are source-
+integrity metadata. Append only these 38 bindings; preserve all 1562 prior entries
+(1600 total). Rules, scan scope, byte limits and failure behavior are unchanged.
+
+The first CI event still carried the PR's obsolete base `0b91dad785`; GitHub
+reported 2,390 changed files/700 commits despite the intended20-file delta.
+Refreshing the existing PR's base to main restored `0d3f715bb` and 20 files/four
+introduced commits. That stale event also scanned historical findings and ran
+parent lifecycle tests against a version lacking the newer test. Those failures
+are preserved, not waived. No historical or separate GitGuardian incident is
+approved here. Fresh exact-head tree/history, lifecycle and GitGuardian results
+must be observed on the corrected base before merge.
+
+Sanitized root/independent records are in the existing PR reconciliation refresh
+folder (`pr1478-security-root-review.json` and
+`pr1478-independent-security-metadata-review.json`). This is source review, not
+credential validity, signed admission, or native worker evidence.
+
 ## PR782 quota guard manifest re-review — 2026-10-23
 
 Security job120119887133 on head `63540b2144a01dc821e3d1bef9ecfa914a1f615e`

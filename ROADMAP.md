@@ -12,13 +12,71 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
-**Current checkpoint — protected consensus nonce component (2026-10-20 JST):**
-Owner v13 supplies separately bound protected consensus nonce custody while
-preserving v1–v12 and LOW. Connected Windows tests pass 437 with 3 platform skips;
-independent 21 controls pass on the same 26-file freeze. Real signed files and
-MAC/SQLite transactions use explicit synthetic installation seams. A reviewed
-two-file helper extraction preserves AST behavior and restores the loader below
-its existing cap; two unchanged historical startup-test size failures remain.
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+**Historical owned candidate — installed HIGH source closure (2026-10-22 JST):**
+The existing service/lease composition is implemented locally; its manifest
+consumer and index bindings now pass independent manifest8 and three JS checks.
+Fresh connected service validation passes153/1 Windows skip; native execution is
+still unproved. The original Windows long-path fixture failure remains recorded.
+This candidate is unpublished and not reconciled with unfetched remote main
+`87aa241b`. Existing 19/P0 selection remains: validate/close this composition,
+then qualify installed execution and bind authentic admission inputs. Native
+RSI G1–G5 are not demonstrated. See [current dispatch](docs/operations/RSI_SWARM_DISPATCH.md#installed-high-source-closure-candidate--2026-10-22).
+
+**Historical checkpoint — live authenticated generation scope (2026-10-20 JST):**
+Nine existing owners share the authenticated fence across parent/effect checks,
+nonce reserve, pre-sign validation, commit and rollback without nested flock.
+Connected 390/9 platform skips, separate Linux process 2/0 and independent 16
+held-outs validate the source core with explicit synthetic admission seams.
+Public self-leasing and LOW remain unchanged; failed exit withholds results but
+does not reverse callback effects or durable consumption.
+Integration now uses corrected nonce base 6dd48a5a with the 17 live core blobs
+unchanged; original core counts retain their tested source base 5820.
 
 Hosted startup CI subsequently caught a legacy-owner tuple predicate defect.
 The repair passes the full local startup selection (901 passed, 5 platform skips, zero failures/errors)
@@ -29,6 +87,22 @@ A subsequent actual-reader check exposed fresh Windows CRLF rejection.
 The explicit 324 KiB paired byte contract now passes LF/CRLF and exact
 boundary checks; pretty JSON, digest/member bounds and source limits stay.
 See [byte evidence](docs/operations/RSI_SWARM_DISPATCH.md#windows-manifest-byte-contract--2026-10-20).
+
+Next 19/P0 (C4/I5/D5/Impact5): connect protected non-initial installed policy/source
+admission, authenticated author/reviewer model-artifact loading and the existing
+HIGH issuer factory path. This core does not select or install HIGH service.
+Genuine work/model/reviewer/budget inputs, native qualification and author
+admission remain required. Frozen runtime 294195cdb is unchanged; native author
+tickets 0, paid model calls 0, no retained RSI gain.
+Current and historical evidence: [dispatch](docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
+
+**Historical checkpoint — protected consensus nonce component (2026-10-20 JST):**
+Owner v13 supplies separately bound protected consensus nonce custody while
+preserving v1–v12 and LOW. Connected Windows tests pass 437 with 3 platform skips;
+independent 21 controls pass on the same 26-file freeze. Real signed files and
+MAC/SQLite transactions use explicit synthetic installation seams. A reviewed
+two-file helper extraction preserves AST behavior and restores the loader below
+its existing cap; two unchanged historical startup-test size failures remain.
 
 Next 19/P0 (C4/I5/D5/Impact5): connect current parent/effect and nonce operations
 under one live authenticated lease through the existing signer factory, avoiding
