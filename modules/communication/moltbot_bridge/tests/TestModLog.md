@@ -22,8 +22,19 @@ Independent normal-import probes pass 11 separately selected cases; two
 freshness-removal controls fail for their intended reasons with unchanged disk
 source and zero guarded effects. Independent review confirms original AST parity
 and workflow records. These probes overlap behavior, not a blinded benchmark.
-Final full-source and hosted gates remain required. API-level guards are not an
-OS sandbox or native RSI execution evidence.
+Hosted projection run39911497355 passes the same 87 cases with zero skipped or
+denied effects and 27 unchanged source bindings. General CI39911497382 exposes
+two separate publication gaps: stale generated test registry and 39 unreviewed
+whole-file secret-scan fingerprints. Preserve both failures until fresh checks.
+The canonical generator adds only the Moshpit row (1767 total / 273 quarantined).
+Its conservative AST classifier mistakes module-scope datetime.replace calls
+for file writes; all 1766 prior rows remain unchanged. The focused guarded job
+executes this file explicitly; default collection is not claimed. Independent
+review and a separate reproduction match all 39 unchanged findings to prior
+reviewed source; the existing ledger retains its 1735 entries and adds only those
+39 exact bindings. Five security-gate boundary tests pass; policy stays unchanged.
+Final hosted gates remain required. API-level guards are not an OS sandbox or
+native RSI execution evidence.
 
 ## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
 

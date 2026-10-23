@@ -1,6 +1,6 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 36 open PRs, nine drafts. #2181 and #2081 are verified on main; #2182 merged through its separate owner. #1663 is verified on main with independent tree/check readback. #1645 is selected at 15/P1 for its unmounted projection layer. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-23 JST: 36 open PRs, eight drafts. #2181 and #2081 are verified on main; #2182/#2183 merged through their separate owner. #1663 is verified on main with independent tree/check readback. #1645 is selected at 15/P1 for its unmounted projection layer. Historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-23
 
@@ -38,18 +38,25 @@ The repaired candidate passes 87 guarded cases on Windows and minimal Linux;
 these are the same case inventory. Independent probes pass 11 cases and detect
 both removed freshness guards. Independent workflow and manifest review agrees.
 The runtime closure adds exactly one projector member with qualified count and
-unchanged byte limits. Complete-source review and hosted acceptance remain gates.
+unchanged byte limits. Complete-source review approved `a2450411498f4de73204c6777749f864e03c35c0`,
+preserving all 13 incoming #2183 paths at `055fd68b3d2830e4d7cde88bba164c8deceaf007`.
+Hosted projection passes 87 cases with independently checked source/effect evidence.
+General CI39911497382 fails on generated registry freshness and 39 whole-file
+security fingerprints; retain those failures while repairing their exact records.
+Fresh full hosted acceptance remains required before merge.
 
 [Existing #1648 carry-forward](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590)
 explicitly retains the skill, manifest, registry, exact wardrobe discovery test,
 unique GMAIL_RECEIPT_REQUIRED policy, trusted host and gated reader acceptance.
 Current native Docs/Contacts authority supersedes planned ContactMemory claims.
-The central registry remains unchanged: WSP95 requires it, while current FMAS
+The central skill registry remains unchanged: WSP95 requires it, while current FMAS
 would treat its growth as size debt. This is a source-derived constraint, not
 an observed hosted failure. Do not add an exemption or hide growth by packing.
 
-#1648 remains 16/P0 but depends on reconciliation of this older proposal and its
-separate ingress/spend/reader contracts. #1356 and #1792 remain 14/P1; #1356's
+#1648 remains 16/P0 with separate ingress/spend/reader contracts. Independent
+re-observation selects its disjoint shared transport protections as a possible
+15/P1 next slice; partial progress must not close its remaining product work.
+#1356 and #1792 remain 14/P1; #1356's
 read-only prequalification identifies the Web3/eth-account graph and middleware
 migration but does not count as executed tests. Protected #2168/#2178 retain
 their owners. Re-score after closure; draft status itself is not a blocker.
