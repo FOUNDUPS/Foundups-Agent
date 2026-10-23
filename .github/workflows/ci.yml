@@ -268,7 +268,7 @@ jobs:
           "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
           "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated install --index-url https://pypi.org/simple --report "$RUNNER_TEMP/acoustic-target-install.json" -r modules/platform_integration/acoustic_lab/requirements.txt
           "$RUNNER_TEMP/acoustic-venv/bin/python" -m pip --isolated check
-      - name: Verify seven controlled X adapter cases
+      - name: Verify controlled X adapter and multipart upload boundaries
         shell: bash
         run: |
           set -euo pipefail
@@ -343,6 +343,15 @@ jobs:
               'test_x_video_timeout_reports_error_and_removes_temporary_file',
           ]
           expected = sorted(path + '::TestXVideoURL::' + name for name in names)
+          multipart_names = [
+              'test_multipart_oversized_metadata_returns_413',
+              'test_multipart_small_metadata_keeps_missing_file_400',
+              'test_multipart_wav_preserves_bytes_and_metadata',
+              'test_multipart_invalid_inputs_remain_400',
+              'test_multipart_fixture_health_remains_200',
+          ]
+          expected = sorted(expected + [path + '::TestWebApp::' + name
+                                        for name in multipart_names])
           try:
               for operation in (lambda: socket.getaddrinfo('ci-guard.invalid', 0),
                                 lambda: subprocess.Popen(['ci-guard-sanity']),
@@ -361,6 +370,7 @@ jobs:
               status = int(pytest.main([
                   '-q', '-c', '/dev/null', '--rootdir=.', '--confcutdir=.', '--noconftest', '--import-mode=importlib',
                   '-p', 'no:cacheprovider', path + '::TestXVideoURL',
+                  *(path + '::TestWebApp::' + name for name in multipart_names),
                   '--junitxml=' + str(Path(os.environ['ACOUSTIC_CI_REPORT']).with_suffix('.xml')),
               ], plugins=[evidence]))
           except BaseException as exc:

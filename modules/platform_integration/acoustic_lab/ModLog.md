@@ -1,5 +1,45 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-10-23: Preserve multipart rejection for PR2081 Werkzeug update
+
+- WSP 00/15/22/50/97; C3/I4/D4/Impact4=15/P1 after controlled reproduction.
+  Preserve the existing PR's Werkzeug 3.0.0 -> 3.1.9 pin and every other direct
+  dependency, including Gunicorn 22.0.0. Flask remains 3.0.0.
+- The same 600,015-byte multipart metadata field produced parser 413 but
+  application 500 with Werkzeug 3.1.9. The prior 3.0.0 baseline reached the
+  missing-file 400 instead. Add only a specific `RequestEntityTooLarge` JSON
+  413 handler; do not change parser limits or the existing total-size setting.
+- Reuse `TestWebApp` for five controlled multipart/health cases. Keep all prior
+  assertions, the four broader failures and the separate FFmpeg child-timeout
+  obligation. The existing CI deny-all step adds five explicit IDs while
+  retaining seven X cases, strict effect/result accounting and the separate
+  six-case native Gunicorn qualification.
+- State: locally validated and independently reviewed; exact-head hosted
+  acceptance remains separate. A fresh Windows CPython 3.12.10 environment resolved and
+  installed all 81 module packages (82 distributions including pip), including
+  Gunicorn 22.0.0, and passed `pip check`. All 12 selected cases pass with no
+  skips or unexpected effects. The full two-file comparison has 23 passes,
+  the same four failures and six explicit Linux-only Gunicorn skips. No test
+  assertions, quarantine or platform skips were weakened.
+- The earlier causal comparison used a temporary verified Werkzeug overlay over
+  a historical environment with uninvoked Gunicorn 21.2; it remains a distinct
+  diagnostic. Current source/constructor/client checks use Python API guards,
+  not an OS sandbox, deployment, live upload, RPC or native AI-worker evidence.
+  Existing `TestWebApp` setup still constructs the synthetic processor under the
+  outer guard; the request fixture substitutes only the processor operation.
+- Evidence: existing external `refresh/pr2081-causal-qualification-20261023.json`
+  under `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/`, together with
+  `pr2081-full-environment-20261023.json`, `pr2081-focused-ci-20261023.json` and
+  `pr2081-existing-suite-execution-20261023.json`. Hosted Python 3.11/3.12 must
+  run the preserved native Gunicorn checks; Windows results do not replace them.
+- Independent review in `pr2081-independent-source-execution-review-20261023.json`
+  reran all 12 selected cases and verified original method preservation. Reverting
+  the handler or disabling the parser limit fails the protected assertion;
+  swallowed unexpected process attempts and result-inventory mismatch fail the
+  CI gate even when the selected tests pass. This separate Windows-adapted
+  verification does not add cases to the builder's denominator or establish
+  hosted Linux acceptance.
+
 ## 2026-10-23: Prepare the bounded PR1354 Gunicorn repair
 
 - WSP 00/15/22/50/84/97; C3/I4/D4/Impact4=15/P1. Prepare the existing Gunicorn 21.2.0 -> 22.0.0 security update while preserving all other direct pins, including the PR1338 yt-dlp update, Pillow 13, Librosa 0.10.2 and no setuptools runtime requirement.

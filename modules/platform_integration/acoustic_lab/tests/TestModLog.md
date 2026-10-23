@@ -1,5 +1,57 @@
 # Acoustic Lab TestModLog
 
+## 2026-10-23 - PR2081 multipart boundary inventory before edits
+
+Read the existing eight web/geofencing cases, seven X-adapter cases, six
+Linux Gunicorn cases and seven processor cases before this extension. Keep
+their assertions and the four documented broader failures unchanged. Reuse
+`TestWebApp` for actual multipart parsing with controlled processor and denied
+network, process, downloader and Ethereum boundaries; no server or live upload.
+
+The external paired probe reproduced the same 600,015-byte multipart metadata
+request returning missing-file 400 on Werkzeug 3.0.0, but parser
+`RequestEntityTooLarge` 413 becoming application 500 on 3.1.9. Preserve that
+pre-repair evidence. Add only the missing oversized rejection and small,
+invalid, health and exact byte/metadata forwarding controls. Qualification
+results follow after execution; the older Gunicorn 21.2 probe environment is
+not the current full requirements environment.
+
+### PR2081 local qualification results
+
+- Fresh full requirements on Windows CPython 3.12.10: 81 installed module
+  packages plus pip, Werkzeug 3.1.9 and Gunicorn 22.0.0, successful `pip check`.
+- Existing CI wrapper replay: seven X cases plus five explicit `TestWebApp`
+  cases, exactly 12 collected/passed, no skips or unexpected effects. Original
+  whole-X-class collection remains so an unlisted future test fails inventory
+  accounting. The Windows replay replaces `/dev/null` with `os.devnull` and
+  suppresses the existing Windows processor-name inventory probe; hosted Linux
+  Python 3.11/3.12 remains a separate gate.
+- The new multipart rejection traverses the actual parser and returns JSON 413
+  for a 600,015-byte valid metadata field, retaining its 500,000-byte default.
+  Below-limit metadata still reaches missing-file 400. A tiny WAV is forwarded
+  with exact bytes and metadata to a controlled domain-error boundary; invalid
+  JSON, non-WAV and health behavior remain correct. Effect tripwires also fail
+  cleanup if an attempted operation was swallowed by the application's handler.
+- Existing setup constructs the real synthetic processor under the outer
+  pre-import guard. Only the request fixture substitutes its operation; no real
+  audio-processing success, downloader, HTTP/RPC, wallet or logger effect ran.
+  Python guards are not an OS sandbox.
+- One full two-file comparison after adding tests: 33 cases, 23 passes, the
+  same four failures and six explicit Windows Gunicorn skips. The unchanged
+  failures are `test_index_page`, `test_upload_invalid_file_type`,
+  `test_geolocation_service_failure` and `test_triangulation_calculation`.
+  No xfail, quarantine or assertion change; FFmpeg timeout-child debt remains.
+- Evidence in the existing external refresh directory: `pr2081-focused-ci-20261023.*`,
+  `pr2081-existing-suite-execution-20261023.json` and the full-environment receipt.
+  Fresh hosted acceptance remains pending at this checkpoint.
+- Separate independent Windows-adapted verification reran the exact 12 cases
+  with no skips. Handler-reversion and disabled-limit controls fail the protected
+  assertion. A caught unexpected process attempt and a missing passed-result ID
+  each fail the CI gate even with 12 passing tests. Original method ASTs and
+  frozen executable hashes remain unchanged. Evidence:
+  `pr2081-independent-source-execution-review-20261023.json`; these results are
+  separate from the builder's counts and do not replace hosted Linux acceptance.
+
 ## 2026-10-23 - PR1338 inventory recovery before adapter tests
 
 This module previously had no test inventory log. Read both existing unit files
