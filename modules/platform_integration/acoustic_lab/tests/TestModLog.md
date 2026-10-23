@@ -22,3 +22,12 @@ remain explicit. Record execution results after qualification.
 - Executed under Windows CPython 3.12.10, fresh full requirements installs and `pip check`, with environment allowlisting, `PYTHONDONTWRITEBYTECODE=1`, `PYTHON_DOTENV_DISABLED=1` and `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`. External guard denies sockets/DNS/listeners/native processes before source imports; optional host probes fail as unavailable. The existing 2173 harness was reused byte-for-byte, with an external guarded launcher. Initial fixture/guard failures remain in the evidence directory.
 - Repeatable repository gate: `.github/workflows/ci.yml`, job `acoustic-x-adapter`, installs complete module requirements in a separate environment and selects exactly `test_web_app.py::TestXVideoURL`. Its pre-collection Python API guards record denied effects, reject unexpected attempts and require all seven collected/passed IDs. These are Python guards, not an OS security sandbox. An independent Windows-adapted replay passes; caught unexpected effects and missing-result controls fail the gate. Hosted Ubuntu execution remains pending at this checkpoint.
 - Exact commands, source hashes, residual identifiers and all logs: `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1338-qualification/qualification-receipt.json`. No installed-service, Linux, Python 3.11, account, FFmpeg, native RSI or live operational claim.
+
+### Hosted collection correction
+
+First Ubuntu job `120166049591` passed full installation and `pip check`, then
+failed before collecting cases: pytest 8 used `/dev/null`'s parent as its default
+collection boundary and probed `/home/packer/__init__.py`. Explicit
+`--confcutdir=.` keeps ancestor collection within the checkout. No permissions,
+source assertions or effect guards changed. This was not an application failure
+or a passing test run; fresh hosted evidence remains required.

@@ -323,7 +323,7 @@ jobs:
               phase = 'tests'
               import pytest
               status = int(pytest.main([
-                  '-q', '-c', '/dev/null', '--rootdir=.', '--noconftest', '--import-mode=importlib',
+                  '-q', '-c', '/dev/null', '--rootdir=.', '--confcutdir=.', '--noconftest', '--import-mode=importlib',
                   '-p', 'no:cacheprovider', path + '::TestXVideoURL',
                   '--junitxml=' + str(Path(os.environ['ACOUSTIC_CI_REPORT']).with_suffix('.xml')),
               ], plugins=[evidence]))
