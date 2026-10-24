@@ -1,8 +1,8 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-23 JST: 35 open PRs, eight drafts. #2181, #2081, #1663 and #1645 are verified on main. #2182/#2183/#2184/#2186 merged through their separate owner. The shared #1648 transport slice is verified on main through #2185; original #1648 remains open. Select #1356 at 14/P1 for the next bounded qualification. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-25 JST: 34 open PRs, eight drafts. #2181, #2081, #1663, #1645, #2185 and #1356 are verified on main; original #1648 remains open for its unique product obligations. #2182/#2183/#2184/#2186/#2187 merged through separate owners. Select the bounded reusable #1792 core at 14/P1; protected activation remains with its original owner. Historical rows and search excerpts are not execution authority.
 
-### Current closure and selection — 2026-10-23
+### Current closure and selection — 2026-10-25
 
 **#2081 MERGED_VERIFIED_MAIN:** squash
 `2952d8e2c639ea95a3d329e770409b79e5700b36` from reviewed head
@@ -71,7 +71,57 @@ Gmail-policy obligations; its stacked base branch remains. Its
 prevents recreating the merged repair. No live provider call, native author
 admission, deployment or completed RSI loop is established.
 
-**Selected: #1356, C4/I3/D4/Impact3=14/P1.** This ties #1792; the latter's
+**#1356 MERGED_VERIFIED_MAIN:** squash
+`8b2fccf64251097b647b7fc5a45dad75706a9192` from reviewed head
+`312bc8c4587f002c6670b92412731c1622d85a3b`. All 22 final-head and 21 exact-main
+checks passed, including CI39933050016 and CodeQL39933049802. Independent
+source, hosted-artifact and terminal-main reviews agree. Actual combined tree
+`ca118d96fe0f08ed1de4f6c9aa5bf05bd8dbed03` matches the reviewed union with parent
+`a82a125385da25b1870969f748395ba351f0195d`; all 27 incoming PFMall paths and
+qualified source bindings are preserved. It differs from the earlier head tree.
+Each hosted Python 3.11/3.12 runtime passed all 18 application/Web3 cases and
+six native Gunicorn cases; two old-version controls failed as intended.
+Full dependency installation, fixed MIME/AVX configuration and process cleanup
+are independently verified. Initial failed runs remain historical evidence.
+The completed remote branch is absent, with no dependent open PR; local source
+is recoverable. Four historical broader failures and separate FFmpeg child-timeout
+debt remain. No deployment, live blockchain transaction or native RSI is proved.
+[Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356#issuecomment-6390857956).
+
+**Selected: #1792 reusable core, C4/I3/D3/Impact4=14/P1.** The merge of #2187
+supersedes the earlier active-overlap blocker. The unchanged original proposal
+still has unique reusable brand-context loading and receipt-verification work.
+Allocate its 11 core paths plus the existing target-phrase owner for demonstrated
+Unicode matching/receipt, private-path read and ambiguous-identity gaps. Reuse
+the existing Node grounding, Python verifier/schema and package contract tests;
+qualify an actual Node-produced receipt through its Python consumer. No new
+scheduler, memory store, skill or test family is required.
+All 45 original paths remain accounted for: 11 core, five existing documentation
+paths, two obsolete branch-specific writers replaced by current generators, and
+27 protected content/activation paths. Production registry, eSingularity/YUMORI
+payloads, skills and PFMall remain unchanged. Generic fixture acceptance proves
+the shared core only; real-brand activation remains an explicit original-PR
+obligation. The repaired core passes 74 author Python cases and a separately
+controlled review of 36 Python cases plus 16 Node cases and one Node causal
+control. Five independent findings (four private-name pre-read gaps and a
+malformed-Unicode crash) were repaired in existing owners. The earlier 69-case
+author artifact was partly overwritten by a failed local launcher attempt;
+it is historical, not intact acceptance evidence. The fresh 74-case run and
+nonempty-output rejection control supersede it. Local language-level effect
+guards are not an OS sandbox or native author admission. Independent core
+receipt `pr1792-independent-core-review-20261025.json` has SHA256
+`a30f6d709becaf2421c96633560afc5d61cb42d81797433458c3e586868f057d`
+in the existing PR-reconciliation evidence directory. Connected CI now checks
+actual Node-to-Python receipts, exact case identities, zero skips and source
+stability. Its actual inline body passes locally with 74 cases/zero skips and
+37 stable source bindings. The indexed extension package passes at 70 files /
+979,415 bytes, below its unchanged 1 MiB limit; backend closure remains 1,469
+files. The existing test-registry generator adds only the verifier test's real
+`process` capability. Publication, hosted checks and main convergence remain
+required before this slice can close. #1355 remains eligible
+at 13/P1; re-score after the current slice rather than automatically selecting it.
+
+**Historical #1356 pre-publication checkpoint, C4/I3/D4/Impact3=14/P1.** This ties #1792; the latter's
 45-path proposal still needs protected product/skill/registry reconciliation.
 #1356 is a bounded existing dependency proposal. The original Web3-only update
 fails full resolution against eth-account 0.10.0. Web3 7.15.0 with its declared

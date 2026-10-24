@@ -1,3 +1,25 @@
+## PR1792 reusable brand core — 2026-10-25
+
+WSP00/15/22/50/62/71/97. Reconcile the original brand helper and schema with
+current grounding and packaging owners; preserve public discovery aliases.
+Reuse target-read policy and confined-file checks before brand reads, reject
+ambiguous identities, and preserve parent manifest scope. The existing phrase
+parser now retains Japanese aliases. Original-source synthetic probes exposed
+private reads, invalid-path fallback, duplicate/ambiguous children and failed
+Japanese matching; retained evidence precedes the repair.
+
+Author Node grounding and package-manifest checks pass. The existing backend
+verifier/schema suites pass 74 cases with no skips, including real Node-to-
+Python Unicode receipts and known-child relabel rejection. Qualification uses
+synthetic temporary fixtures and instrumented effects; it is not installed
+extension or native authority proof. Independent first-candidate probes found four additional private-name
+reads and an unpaired-surrogate encoding exception. The existing verifier/test
+owners repair them. Independent repaired-core review accepts 36 Python and
+16 Node positive cases plus one Node causal control, separately from author
+74. The receipt is `refresh/pr1792-independent-core-review-20261025.json`.
+Final CI/package/generated and hosted gates remain pending. Original PR1792
+remains open for protected activation/content work.
+
 ## PR1645 Moshpit runtime-closure binding — 2026-10-23
 
 WSP00/6/10/22/50/62/97. The existing query seam imports the new unmounted

@@ -1,5 +1,18 @@
 # FoundUps Domain - ModLog
 
+### 2026-10-25 — PR1792 reusable brand schema candidate
+
+Add the original optional brand-context schema and registry path field while
+preserving current public-discovery and portfolio contracts. Existing registry
+tests add synthetic context/authority-boundary and optional-field compatibility
+checks. Combined backend/schema selection: author repaired 74 pass, zero skips.
+No production registry, protected payload, website or skill bytes change.
+Original eSingularity/YUMORI activation assertions are retained as pending
+original-PR owner acceptance, not replaced by a claim of synthetic deployment.
+WSP00/15/22/50/97. Independent repaired-core review is accepted in
+`refresh/pr1792-independent-core-review-20261025.json`; final CI/package/
+generated and hosted qualification remain pending. No activation is implied.
+
 ## Chronological Change Log
 
 ### 2026-10-23 - Private AutoPost item capture inside the shared Mall
