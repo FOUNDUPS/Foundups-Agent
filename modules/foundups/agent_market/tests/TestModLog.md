@@ -1,5 +1,65 @@
 # TestModLog - tests
 
+## 2026-10-25 — P0B explicit authority and independent stored proof
+
+- Baseline: 292 connected FAM/lifecycle cases passed before test/product edits.
+  Desired default-denial controls then reproduced five failures (one initial
+  nonapplicable combination skipped); later fixed inventory omits the three N/A
+  memory replay/direct-SQLite combinations rather than skipping.
+- Reviewer-driven stored-self-verification/binding controls reproduced seven
+  failures and eight passes before the fix. The changed-verifier replay control
+  explicitly uses a second legitimate grant and still asserts identity conflict
+  and an unchanged database; it is not shadowed by a principal denial.
+- Final permission owner has 79 cases. Focused affected closure: 181 passed.
+  Final FAM+simulator closure: **690 passed, no skips/failures**, with three SSE
+  HTTP cases deselected. There were two inherited inactive asyncio options and
+  zero guarded socket/DNS attempts. All 168 inventoried Python hashes were stable.
+- Whole command: existing O: venv Python `-B -m pytest -q -p no:cacheprovider
+  -o addopts= --confcutdir <root>/modules/foundups --basetemp <scratch>/pytest
+  modules/foundups/agent_market/tests modules/foundups/simulator/tests -k
+  "not test_sim_events_endpoint_denies_without_invite_key and not
+  test_health_endpoint_denies_when_protected and not
+  test_health_endpoint_allows_with_valid_invite"`.
+- Whole-run isolation: bytecode/plugin autoload off, DB/TEMP outside checkout;
+  socket/DNS guarded; unrelated fam_adapter Holo/Qwen enrichment returns None
+  and FAMDaemon default/checkout paths redirect to unique external scratch.
+  Initial baseline had no enrichment stubs. Authorization, compute and assertion
+  paths were not replaced. This is local component acceptance, not model quality,
+  live SSE HTTP, host authentication or settlement verification.
+- Independent parent run: **115 passed** in 5.08s (79 permissions +36 existing
+  verification-transaction cases), two config warnings, zero network attempts,
+  eight source/test hashes stable. No help-enrichment patches needed in this run.
+- Raw worker receipt: host scratch
+  `foundups-p0b-cbf1b36bf14b4407b30b3db0952452d4/final_whole_candidate/receipt.json`;
+  independent receipt `foundups-p0b-independent-20261025-59g8ajp9/results.json`.
+  Portable exact node inventories and artifact hashes are in the
+  [delivery receipt](../../../../docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json).
+- No new test file. Reused permissions, persistent-compute, verification,
+  lifecycle, distribution, CABR gate/hooks, deterministic-ID and E2E owners;
+  fixture callers now pass explicitly configured principal/scope contexts.
+- Process limit: fresh simulator Markdown retrieval was completed after its small
+  compatibility edit; fresh simulator source/callsites were inspected before it.
+  This timing gap is recorded, not retroactively described as pre-action compliance.
+
+## 2026-10-25 — P0A port onto current main
+
+- Reused `test_orchestrator.py`; retained its original seven test bodies and
+  extended that fixture/owner to 49 cases. No new test file. Module docs, this
+  log and tests README were read before the reviewed patch was ported.
+- Command: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 PYTHONDONTWRITEBYTECODE=1 python -B
+  -m pytest -q -p no:cacheprovider --basetemp <scratch>/pytest
+  modules/foundups/agent_market/tests/test_orchestrator.py`, from isolated base
+  `8b2fccf64251097b647b7fc5a45dad75706a9192`, using the existing O: virtualenv.
+- Result: 49 passed in 0.31s, two inherited inactive asyncio config warnings.
+  Additional process-local socket/DNS guards recorded zero attempts; TEMP/TMP
+  and DB paths were outside the checkout. Raw receipt:
+  `foundups-fx-p0a-20261025-d00eibnz/results.json` in host temporary storage.
+- Captures invalid/missing/disconnected/errored/default/mock selection,
+  registration and health-check drift, wrong-chain results, and actual-factory
+  launch failure/simulation. Result mismatch occurs after the backend call;
+  failure before caching does not promise rollback. Later combined closure690
+  includes these49; the October 22 aggregate is not reported as fresh evidence.
+
 ## 2026-09-23: Atomic persistent verification and exact replay
 
 - WSP 00/6/11/15/22/49/50/62/84/97; C3/I4/D3/Impact4 = 14/P1.

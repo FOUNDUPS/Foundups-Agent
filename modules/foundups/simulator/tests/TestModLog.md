@@ -1,5 +1,21 @@
 # Simulator Tests ModLog
 
+## 2026-10-25 — FAM host-context compatibility
+
+Existing `test_fam_lifecycle_flow.py` covers the normal bridge flow plus wrong
+verifier/treasury IDs and legacy role substitution. No new test file. Combined
+FAM+simulator closure: 690 passed (366 FAM,324 simulator), no skips or failures,
+three unchanged SSE HTTP cases deselected, two inherited config warnings,
+zero guarded network attempts and168 stable Python source hashes.
+
+Command, exact inventory, explicit excluded IDs and runner-only Holo/Qwen/
+FAMDaemon isolation are in the
+[delivery receipt](../../../../docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json)
+and [FAM test log](../../agent_market/tests/TestModLog.md).
+The baseline292 and focused181 runs overlap; counts are not additive. Parent's
+independent115 FAM permission/verification cases also pass without help patches.
+This proves local bridge compatibility, not live SSE, authentication or payment.
+
 ## Test Modification Log (WSP 22 Compliance)
 
 ### 2026-10-21 — Genesis denomination and floating reserve regression

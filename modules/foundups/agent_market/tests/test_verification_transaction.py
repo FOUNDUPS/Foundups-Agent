@@ -11,12 +11,18 @@ import pytest
 from sqlalchemy import delete, event, insert, select, update
 from sqlalchemy.exc import InvalidRequestError
 
+from modules.foundups.agent_market.src.authorization import CallerAuthorization
 from modules.foundups.agent_market.src.exceptions import AgentMarketError, ValidationError
 from modules.foundups.agent_market.src.persistence.sqlite_adapter import Base, SQLiteAdapter
 from modules.foundups.agent_market.src.task_pipeline import PersistentTaskPipeline
 from modules.foundups.agent_market.tests.test_persistent_compute_wiring import (
     _database_snapshot, _foundup, _rows, _submitted_verification, _verification_observation,
 )
+
+
+_VERIFIER_AUTH = CallerAuthorization("verifier_1", frozenset({("f_1", "verifier")}))
+_DIFFERENT_VERIFIER_AUTH = CallerAuthorization("different", frozenset({("f_1", "verifier")}))
+_TREASURY_AUTH = CallerAuthorization("treasury_1", frozenset({("f_1", "treasury")}))
 
 
 @pytest.fixture
@@ -29,8 +35,8 @@ def ready(tmp_path):
         adapter.close()
 
 
-def _verify(adapter, task, decision):
-    return PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision)
+def _verify(adapter, task, decision, *, authorization=_VERIFIER_AUTH):
+    return PersistentTaskPipeline(adapter).verify_proof(task.task_id, decision, authorization=authorization)
 
 
 def _unchanged_rejection(adapter, task, decision):
@@ -47,7 +53,15 @@ def _unchanged_rejection(adapter, task, decision):
 def test_existing_id_rejects_changed_identity(ready, field, value):
     adapter, task, decision = ready
     _verify(adapter, task, decision)
-    _unchanged_rejection(adapter, task, replace(decision, **{field: value}))
+    changed = replace(decision, **{field: value})
+    if field == "verifier_id":
+        # Two explicitly entitled fixture principals still cannot reuse one ID.
+        before = _database_snapshot(adapter)
+        with pytest.raises(ValidationError, match="retry request identity changed"):
+            _verify(adapter, task, changed, authorization=_DIFFERENT_VERIFIER_AUTH)
+        assert _database_snapshot(adapter) == before
+    else:
+        _unchanged_rejection(adapter, task, changed)
 
 
 @pytest.mark.parametrize("naive", [False, True])
@@ -74,7 +88,7 @@ def test_accepted_retry_preserves_pending_payout(ready):
     adapter, task, decision = ready
     _verify(adapter, task, decision)
     adapter.activate_compute_plan("treasury_1", tier="builder", monthly_credit_allocation=20)
-    payout = PersistentTaskPipeline(adapter).trigger_payout(task.task_id, "treasury_1")
+    payout = PersistentTaskPipeline(adapter).trigger_payout(task.task_id, "treasury_1", authorization=_TREASURY_AUTH)
     before = _database_snapshot(adapter)
     assert _verify(adapter, task, decision).payout_id == payout.payout_id
     assert _database_snapshot(adapter) == before

@@ -1,6 +1,17 @@
 ﻿# Tests - FoundUps Agent Market
 
+## Privileged operations (P0B)
+
+Existing permission and transaction tests supply host contexts explicitly; never
+add a fixture that grants authority from the actor or profile under test. Cover
+absent/wrong principal/scope/role, self-verification, stored legacy bindings,
+unchanged state on denial and authorized exact retries. Both memory and SQLite
+owners are exercised, including direct SQLite initiation. See [TestModLog](TestModLog.md)
+for exact executed inventory and whole-run external dependency isolation.
+
 ## Coverage Goals
+- Exact token-backend selection and chain identity, preserving identified mock
+  simulation; negative cases must not dispatch to a fallback backend.
 - Schema validation for core entities.
 - Lifecycle state transition correctness.
 - Permission gating for verification and payout.

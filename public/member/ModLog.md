@@ -1,5 +1,22 @@
 # Member Area Module Change Log
 
+## 2026-10-25 — FX1 public directory discovery
+
+Expose the existing `/f/` public directory through a normal homepage FX link.
+Reuse its renderer and readiness state, adding optional declared-ticker search
+alongside name, summary and canonical ID. Directory copy distinguishes declared
+symbols from deployment/trading evidence; no registry or economic action changes.
+
+Extend the existing route VM to retain and invoke actual input/change listeners,
+then cover matching, nullable/non-string symbols, readiness/clear/empty behavior,
+escaped ticker markup and the existing error/Mall-return path. Add the missing
+tests README before authoring and preserve the existing fixture/route checks.
+The two complete route/gateway test files passed 300 cases with two inherited
+pytest configuration warnings; see `tests/TestModLog.md` for commands and limits.
+WSP 15/22/50/84/97: parent allocation 15/P1; degraded Holo retrieval was replaced
+with current contract/source/test reads. Local source verification is not a
+deployment, browser, token, liquidity or trading claim.
+
 ## 2026-10-23 — Preserve intent-bearing terms in bounded Mall queries
 
 Repair the existing local catalog matcher for “I'm looking for clothing” and

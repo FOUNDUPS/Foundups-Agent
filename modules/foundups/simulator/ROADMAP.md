@@ -1,5 +1,14 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-10-25 — FAM authority compatibility
+
+- [x] Pass configured simulation caller contexts into the existing FAM boundary;
+  reject caller-ID impersonation and legacy-role substitution.
+- [x] Preserve existing lifecycle flow under scoped grants; combined local FAM
+  and simulator run passes 690 cases, with three named SSE HTTP cases excluded.
+- [ ] Production identity/issuer integration, asset accounting/proof/replay gates,
+  real testnet effects and settlement remain separate delivery layers.
+
 ## Phase Status
 - PoC: complete
 - Prototype: in progress

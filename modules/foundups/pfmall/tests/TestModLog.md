@@ -1,5 +1,20 @@
 # p.fMALL Test ModLog
 
+## 2026-10-25 — FX1 gateway link and public filter reuse
+
+Extended the existing `test_gateway_roc_shell.py` with HTML-parser coverage of
+the normal FX navigation anchor to `/f/`, accessible label and retained existing
+links. The existing gateway/admission tests remain active. Extended the existing
+member route VM for real filter callbacks; no new suite or public API.
+
+Both complete files (`test_gateway_roc_shell.py` and
+`public/member/tests/test_route_contract_bridge.py`) passed **300 cases**, zero
+failures/skips, with two inherited unknown asyncio-config warnings. The initial
+FX-only red run and exact green command/environment are recorded in
+repository-root `public/member/tests/TestModLog.md`. Bytecode/cache writes were disabled;
+scratch state stayed outside the checkout. This is local source evidence, not
+browser layout, deployment, authentication-provider, asset or market evidence.
+
 ## 2026-10-23 — Private item handoff documentation and shared matcher
 
 - Added no Python runtime or private-media endpoint in this contract slice.

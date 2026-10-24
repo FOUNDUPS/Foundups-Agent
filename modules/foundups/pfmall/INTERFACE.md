@@ -70,6 +70,13 @@ called by catalog reads or Holo queries.
 
 ## Browser/member interface
 
+The static homepage's FX anchor targets the existing `/f/` public directory.
+Its project/ticker search consumes only the scope-free public projection; no
+Python/HTTP API or router is added. See
+[`Public FX directory`](../../../public/member/INTERFACE.md#public-fx-directory--2026-10-25)
+for matching and truth boundaries. A displayed symbol is not a chain receipt,
+price, liquidity or trading capability.
+
 The authoritative member-runtime details are in `public/member/INTERFACE.md`.
 The browser control dispatcher accepts bounded presentation commands and emits
 truthful `ok`, `denied`, or `error` responses. It must use the published Mall

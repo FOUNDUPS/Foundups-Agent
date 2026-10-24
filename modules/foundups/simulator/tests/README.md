@@ -2,6 +2,14 @@
 
 This directory contains regression tests for the FoundUps simulator module.
 
+## FAM authority compatibility
+
+`test_fam_lifecycle_flow.py` retains existing lifecycle behavior and checks that
+caller-ID impersonation and mutable legacy role labels cannot create trusted
+verification or treasury contexts. The bridge uses fixed simulation principals.
+These are local simulation controls, not authentication or funded settlement.
+See [TestModLog](TestModLog.md) for combined closure and explicit SSE exclusions.
+
 ## Relevant files for this change
 
 | Test file | Purpose |

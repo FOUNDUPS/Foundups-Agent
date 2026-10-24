@@ -1,0 +1,802 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "8b2fccf64251097b647b7fc5a45dad75706a9192"
+  },
+  "execution_id": "2026-10-25-foundups-p0a-p0b-fx1",
+  "execution_plane": "local_source_and_static_discovery_no_live_chain_admission",
+  "outcome": "completed",
+  "scope": "P0A exact token backend selection; P0B default-deny host authorization and stored-proof independence; FX1 public directory link and ticker search. Broader delivery goal remains open.",
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_11",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_84",
+    "WSP_97"
+  ],
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_11_WRE_Standard_Command_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+      "NAVIGATION.py",
+      "WSP_framework/src/WSP_CORE.md",
+      "modules/foundups/agent_market/README.md",
+      "modules/foundups/agent_market/INTERFACE.md",
+      "modules/foundups/agent_market/tests/TestModLog.md",
+      "public/member/INTERFACE.md",
+      "public/member/tests/TestModLog.md"
+    ],
+    "research": [
+      "docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md",
+      "Fresh origin/main8b2fccf includes atomic verification and pending initiation; old shared-checkout gaps were revalidated, not blindly ported.",
+      "Holo owner query failed HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH; degraded direct verified source/callsite reads, no raw query or reindex."
+    ],
+    "micro_pass": [
+      "modules/foundups/agent_market/src/token_factory.py",
+      "modules/foundups/agent_market/src/authorization.py",
+      "public/f/index.html"
+    ],
+    "macro_pass": [
+      "modules/foundups/agent_market/src/persistence/verification.py",
+      "modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+      "modules/foundups/simulator/adapters/fam_bridge.py",
+      "public/index.html",
+      "docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md"
+    ],
+    "hard_think": [
+      "Scope roles to independently supplied caller+FoundUp; no profile/compute/admin/wildcard/repository-key authority. Preserve atomic exact retry and pending payment.",
+      "Independent review reproduced stored legacy self-verification payout acceptance and an authorization-shadowed replay oracle; regressions and fixes preserve both boundaries."
+    ],
+    "dialectic_sweep": [
+      "Reuse existing public projection and transaction owners; do not create a registry, issuer, scheduler, matching engine or false live-token view.",
+      "docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md"
+    ],
+    "first_principles": [
+      "Resolve one chain and reject fallback; verify independent stored proof before effects; one public directory owner; nomination/claim/mint/market are distinct."
+    ],
+    "execute": [
+      "modules/foundups/agent_market/ModLog.md",
+      "modules/foundups/agent_market/tests/TestModLog.md",
+      "public/member/tests/TestModLog.md",
+      "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.testcases.json"
+    ]
+  },
+  "compliance_evidence": [
+    "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+    "WSP00 awakening and strict tracker passed before work.",
+    "WSP15 priorities/budgets recorded before this worktree product edits.",
+    "Existing test owners extended; no new test file, and missing public/member/tests/README added before FX authoring.",
+    "Simulator structured-memory refresh occurred after its compatibility edit; see process_limitations."
+  ],
+  "process_limitations": [
+    "Fresh simulator source/model/lifecycle/callsite reads preceded its small bridge edit, but six simulator Markdown artifacts were fully refreshed only afterward. Post-edit source/doc review found no material contradiction; this does not retroactively satisfy the pre-action memory loop.",
+    "WSP97 repository-evidence validator proves structure/tracked WSP retrieval/base ancestry only; no temporal compliance, authentic evidence, model quality, host authentication, runtime effect or security clearance is proven."
+  ],
+  "retrieval_evaluation": {
+    "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+    "ok": false,
+    "freshness": "UNKNOWN",
+    "index_gap_detected": true,
+    "reindex_performed": false,
+    "noise": "Old roadmap claims, DEX simulation, different catalog inventories and electoral-candidate search noise.",
+    "ordering": "Fresh-main contract/source/test docs supersede old0c81418fe observations.",
+    "missing": [
+      "FAM memory/README.md",
+      "FAM requirements.txt",
+      "simulator memory/README.md",
+      "simulator requirements.txt"
+    ],
+    "improvement": "Verified must-include contract docs and exact callsites; isolated worktree to preserve concurrent dirty state; no raw Holo query/reindex.",
+    "duplication": "Existing transactions, directory, fixtures and Node VM reused."
+  },
+  "test_runs": {
+    "baseline": {
+      "command_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "<root>\\modules\\foundups",
+        "--basetemp",
+        "<host-scratch>\\baseline\\pytest",
+        "modules/foundups/agent_market/tests",
+        "modules/foundups/simulator/tests/test_fam_lifecycle_flow.py"
+      ],
+      "counts": {
+        "passed": 292
+      },
+      "duration_seconds": 87.20146012306213,
+      "blocked_network_attempts": 0,
+      "raw_receipt_sha256": "c60f0ecb7c385d9f2b487941c22ece96edbbe33c0d7001bf55cd7d97844e83b2",
+      "source_hashes_captured": false,
+      "source_drift": null,
+      "runner_isolation": []
+    },
+    "red_default_deny_fixed_fixture": {
+      "command_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "<root>\\modules\\foundups",
+        "--basetemp",
+        "<host-scratch>\\red_default_deny_fixed_fixture\\pytest",
+        "modules/foundups/agent_market/tests/test_permissions.py",
+        "-k",
+        "missing_host_authorization or direct_adapter_payout"
+      ],
+      "counts": {
+        "failed": 5,
+        "skipped": 1
+      },
+      "duration_seconds": 1.0493144989013672,
+      "blocked_network_attempts": 0,
+      "raw_receipt_sha256": "5577c97a079f0bf785b56166b952ee5937916ec293065043e5fae8b16998f1ec",
+      "source_hashes_captured": false,
+      "source_drift": null,
+      "runner_isolation": []
+    },
+    "red_stored_self_verification": {
+      "command_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "<root>\\modules\\foundups",
+        "--basetemp",
+        "<host-scratch>\\red_stored_self_verification\\pytest",
+        "modules/foundups/agent_market/tests/test_permissions.py",
+        "-k",
+        "payout_requires_bound_independent_stored_verification"
+      ],
+      "counts": {
+        "failed": 7,
+        "passed": 8
+      },
+      "duration_seconds": 2.1575441360473633,
+      "blocked_network_attempts": 0,
+      "raw_receipt_sha256": "30aa8583c6205307f5f6e59ed10458478fec7202f7ebc2b6b4ad8ff19c5c2cc2",
+      "source_hashes_captured": true,
+      "source_drift": false,
+      "runner_isolation": [
+        "fam_adapter._holo_retrieve -> None",
+        "fam_adapter._qwen_enrich -> None",
+        "FAMDaemon default/checkout paths -> external per-instance scratch"
+      ]
+    },
+    "review_fix_candidate": {
+      "command_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "<root>\\modules\\foundups",
+        "--basetemp",
+        "<host-scratch>\\review_fix_candidate\\pytest",
+        "modules/foundups/agent_market/tests/test_permissions.py",
+        "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+        "modules/foundups/agent_market/tests/test_verification_transaction.py",
+        "modules/foundups/simulator/tests/test_fam_lifecycle_flow.py"
+      ],
+      "counts": {
+        "passed": 181
+      },
+      "duration_seconds": 11.478189706802368,
+      "blocked_network_attempts": 0,
+      "raw_receipt_sha256": "73b6a1686b3a3aff09559136b2244ff3c3340409ecc1f7aa64801569b8975ee5",
+      "source_hashes_captured": true,
+      "source_drift": false,
+      "runner_isolation": [
+        "fam_adapter._holo_retrieve -> None",
+        "fam_adapter._qwen_enrich -> None",
+        "FAMDaemon default/checkout paths -> external per-instance scratch"
+      ]
+    },
+    "final_whole_candidate": {
+      "command_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "<root>\\modules\\foundups",
+        "--basetemp",
+        "<host-scratch>\\final_whole_candidate\\pytest",
+        "modules/foundups/agent_market/tests",
+        "modules/foundups/simulator/tests",
+        "-k",
+        "not test_sim_events_endpoint_denies_without_invite_key and not test_health_endpoint_denies_when_protected and not test_health_endpoint_allows_with_valid_invite"
+      ],
+      "counts": {
+        "passed": 690
+      },
+      "duration_seconds": 63.796114921569824,
+      "blocked_network_attempts": 0,
+      "raw_receipt_sha256": "9ed774e42f8f018712cc50b781ebbe48452565873e1a9aa657f89ea4aff3d552",
+      "source_hashes_captured": true,
+      "source_drift": false,
+      "runner_isolation": [
+        "fam_adapter._holo_retrieve -> None",
+        "fam_adapter._qwen_enrich -> None",
+        "FAMDaemon default/checkout paths -> external per-instance scratch"
+      ]
+    },
+    "p0a_focused": {
+      "exit_code": 0,
+      "counts": {
+        "passed": 49
+      },
+      "network_attempts": 0,
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "seconds": 0.641,
+      "raw_receipt_sha256": "bdd702cd40ef9628720620f39dae9d2cfe14d5dd7c3ef17726fb87f17b414516"
+    },
+    "fx_independent": {
+      "exit_code": 0,
+      "counts": {
+        "passed": 300
+      },
+      "network_attempts": 0,
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "seconds": 6.906,
+      "raw_receipt_sha256": "6552693ee7113e616d9e85ba828d00c105b229ace211a8f2fa2aa21d6f42f4f3"
+    },
+    "p0b_independent": {
+      "exit_code": 0,
+      "counts": {
+        "passed": 115
+      },
+      "network_attempts": 0,
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "seconds": 5.422,
+      "source_hashes": {
+        "modules/foundups/agent_market/src/authorization.py": "4dc7e5d3561ee5ab5ad3d793851fbaeb391919b9a4a3ba199c3d8d8f1ced36b9",
+        "modules/foundups/agent_market/src/in_memory.py": "3d803767f081d0b057e19372dbf4ad37d966e4457e0074a60c234841d0be9b96",
+        "modules/foundups/agent_market/src/interfaces.py": "fc8c0dd9cd1085c77b8fe9867a119f4bfae1d01027fbe7d0edf7c435c0f65ec7",
+        "modules/foundups/agent_market/src/task_pipeline.py": "e34e9f0261fda32e0e8bb5f9f8d62be6813f03a5a624a3276ebda28fc4028939",
+        "modules/foundups/agent_market/src/persistence/sqlite_adapter.py": "b6e1217a86a399b6501670d36740327c553a9dcf796aff99f75ace36eadb77bd",
+        "modules/foundups/agent_market/src/persistence/verification.py": "5112aaa9dd9e68a7648c50adf2139905eca819d8e8d2f59020490bd8cfc5469a",
+        "modules/foundups/agent_market/tests/test_permissions.py": "4fa083f05c9f1755efb6c003643f8cd155d1ff1bf07dcb693dda3292412c75a9",
+        "modules/foundups/agent_market/tests/test_verification_transaction.py": "e837ea23707dc958f7a2ca891ff2d62bff36faa90346d2eb53243bae157a93fb"
+      },
+      "source_drift": [],
+      "raw_receipt_sha256": "47ad782f03dfefc60af476a8ce34bf47b1d3c713eb29b19a282f24795cd4bd94"
+    }
+  },
+  "exact_test_inventory": {
+    "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.testcases.json",
+    "sha256": "ea9f398d5ffbdd9c87ef9bfba04836b43e12ec137e3839b500e3fd2b844c295d",
+    "bytes": 292592
+  },
+  "final_counts_by_module": {
+    "agent_market": 366,
+    "simulator": 324
+  },
+  "excluded_nodes": [
+    "modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+    "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+    "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+  ],
+  "excluded_reason": "Existing SSE HTTP endpoint/TestClient boundary outside P0B; all remaining simulator and FAM tests included.",
+  "omitted_nonapplicable_combinations": [
+    "memory verification replay",
+    "memory payout replay",
+    "memory direct SQLite payout"
+  ],
+  "validation_environment": {
+    "python": "Existing O:/Foundups-Agent/.venv/Scripts/python.exe -B",
+    "bytecode": false,
+    "pytest_plugin_autoload": false,
+    "cacheprovider": false,
+    "db_and_temp": "Per-run external scratch",
+    "whole_run_isolation": [
+      "fam_adapter._holo_retrieve -> None",
+      "fam_adapter._qwen_enrich -> None",
+      "FAMDaemon default/checkout paths -> external per-instance scratch"
+    ],
+    "warning_count_per_final_run": 2,
+    "warnings": [
+      "Unknown config option asyncio_default_fixture_loop_scope",
+      "Unknown config option asyncio_mode"
+    ],
+    "baseline_difference": "Initial292 baseline had no enrichment stubs; final690 isolated unrelated model/retrieval enrichment. Independent115 FAM and300 FX cases need no enrichment patch.",
+    "network_guard_boundary": "Instrumented Python sockets/DNS, not an OS sandbox. FX Node VM separately restricts I/O. Counts overlap; do not add runs."
+  },
+  "whole_run_source_hashes": {
+    "modules\\foundups\\agent_market\\__init__.py": "a53edf1bf48c704c4a54954b150ad2b2a3eb5455acf13bccc3807b132cc5cb57",
+    "modules\\foundups\\agent_market\\src\\__init__.py": "f561ca24ceaf10a372af2b77dc08e4625050dcceb55856fdab160934f776e4ae",
+    "modules\\foundups\\agent_market\\src\\agent_join.py": "97dcbb7d212865cd231391a02c0404305b0e262292a42ca8337ce94cfa767cfb",
+    "modules\\foundups\\agent_market\\src\\authorization.py": "4dc7e5d3561ee5ab5ad3d793851fbaeb391919b9a4a3ba199c3d8d8f1ced36b9",
+    "modules\\foundups\\agent_market\\src\\cabr_hooks.py": "6b8283531033987a722f917afbb043df934d69f5de3e2f6619e14763d6eb30a9",
+    "modules\\foundups\\agent_market\\src\\exceptions.py": "6ffb9fa9f9ba9c4efa31454d02dc4cbb5d525693c91688b3efb2f8fa0f7f0932",
+    "modules\\foundups\\agent_market\\src\\fam_daemon.py": "be9234cb125d4fd142390bb0c9ace829e2d68d84dd47df984fbee6c5767d0bba",
+    "modules\\foundups\\agent_market\\src\\in_memory.py": "3d803767f081d0b057e19372dbf4ad37d966e4457e0074a60c234841d0be9b96",
+    "modules\\foundups\\agent_market\\src\\interfaces.py": "fc8c0dd9cd1085c77b8fe9867a119f4bfae1d01027fbe7d0edf7c435c0f65ec7",
+    "modules\\foundups\\agent_market\\src\\models.py": "0e59488898c7fb25924db4a6271f74126a858bd6cbad06049a6885dbccdc2725",
+    "modules\\foundups\\agent_market\\src\\observability.py": "e6211f613edfc0f5e76e677f36c3b846b03ab3a43ae3035df6f551fb793be38a",
+    "modules\\foundups\\agent_market\\src\\orchestrator.py": "aaf768dae52a24229eae50e4968d4e7212a77e6ad54663044cec296f41c82d7f",
+    "modules\\foundups\\agent_market\\src\\persistence\\__init__.py": "d81d4e05b46bd1fd09898bba188c8ff99f4465d61b70948ce0c4bb0f86807ba5",
+    "modules\\foundups\\agent_market\\src\\persistence\\migrations.py": "92df13718cfa8bf1ded17c5293a3607b8b54784e19f36946928b7d5c12930714",
+    "modules\\foundups\\agent_market\\src\\persistence\\orm_models.py": "48fc130a407f60b8302e453a947bf38747e57d27cd7482a8ab5b4bb792ec889f",
+    "modules\\foundups\\agent_market\\src\\persistence\\postgres_adapter.py": "110e84d9fd5293d43c1c196b6aaf0feb7c8a5869a198b46b462e716d540b1ef5",
+    "modules\\foundups\\agent_market\\src\\persistence\\repository_factory.py": "575eff063fbabd4a42c5bd4b145eafa13a02312518fbc5a61ca9aea53b06e5d4",
+    "modules\\foundups\\agent_market\\src\\persistence\\sqlite_adapter.py": "b6e1217a86a399b6501670d36740327c553a9dcf796aff99f75ace36eadb77bd",
+    "modules\\foundups\\agent_market\\src\\persistence\\verification.py": "5112aaa9dd9e68a7648c50adf2139905eca819d8e8d2f59020490bd8cfc5469a",
+    "modules\\foundups\\agent_market\\src\\registry.py": "0df73c7961b78f04d7dc5bda6490333f1ab26931d8d6097d682adb4e3a4d0aea",
+    "modules\\foundups\\agent_market\\src\\task_pipeline.py": "e34e9f0261fda32e0e8bb5f9f8d62be6813f03a5a624a3276ebda28fc4028939",
+    "modules\\foundups\\agent_market\\src\\token_factory.py": "d2d969090820e9b42802b981d415164e9e564587f164d4fd1273b6fd340dd5b9",
+    "modules\\foundups\\agent_market\\src\\treasury_governance.py": "57b53d62e6f96d8ac876b849ab5a4c1b473045b31e56d2aaf87fcfc731d2f78c",
+    "modules\\foundups\\agent_market\\tests\\__init__.py": "598ed606e2f7804c04d4f675659c83f8248e5509efc5a9d2c930242b2ac9d1b5",
+    "modules\\foundups\\agent_market\\tests\\run_tests.py": "3bb82b39c66d5077a8b04fec234a5ae92bf77930e4bb2e80b2790d12cf3802b7",
+    "modules\\foundups\\agent_market\\tests\\test_cabr_gate.py": "f03c2c53995b1fd782eb640359f480e5108ad2aacee88692436bdf89da0467cd",
+    "modules\\foundups\\agent_market\\tests\\test_cabr_hooks.py": "cd772f150e7eaf3c8958e305ad6895533c6157e715c0cd43bac79ad5750f3730",
+    "modules\\foundups\\agent_market\\tests\\test_compute_access.py": "efcc36be6ed9d567d3ac4a983a037081c217c65bccff073df68e910a2ce2cfd0",
+    "modules\\foundups\\agent_market\\tests\\test_deterministic_ids.py": "d19e1f766c03a0821ffbbb6e5d0f5ead4f04e5edda4bc06e8a26681bff40b522",
+    "modules\\foundups\\agent_market\\tests\\test_distribution.py": "522d156b599b7ea8da6472eaab900d0fca99ad93e9018769278aa5106f2d7b3a",
+    "modules\\foundups\\agent_market\\tests\\test_e2e_integration.py": "c4458e3c256c683ff301e5b328f84449db7fd814a95074afbd9395707d25b411",
+    "modules\\foundups\\agent_market\\tests\\test_fam_daemon.py": "7fa97808e854ed1d21bd93a86e3569e302cd3c29f222db6112d5a0db2223eaf1",
+    "modules\\foundups\\agent_market\\tests\\test_migrations.py": "ddd622d81504450dd7e10cb877e8dd2cecd92182457a8822201512811ce3bca3",
+    "modules\\foundups\\agent_market\\tests\\test_mvp_offering.py": "956a4965b8c7b607e7162b8e1d119fba6f72d0d7f3b36c3c2ebdcd4e5cf8d783",
+    "modules\\foundups\\agent_market\\tests\\test_orchestrator.py": "69047ce894b2e01efc013d1d91abe7e99577fcd4d0df9028c945b01e4ae96fb5",
+    "modules\\foundups\\agent_market\\tests\\test_permissions.py": "4fa083f05c9f1755efb6c003643f8cd155d1ff1bf07dcb693dda3292412c75a9",
+    "modules\\foundups\\agent_market\\tests\\test_persistence.py": "2eaff977e73647925097f6d26770de6ec5f6e9fae3c18eb7eb496badb5f233b5",
+    "modules\\foundups\\agent_market\\tests\\test_persistent_compute_wiring.py": "13c68b5cfae52ca6aba795d78f281551aa31385df4377312da707c38e81d831b",
+    "modules\\foundups\\agent_market\\tests\\test_repository_factory.py": "35957c6f89a3b0d364cc997269db988c6efc0cf1aa303ed6608fb427398664af",
+    "modules\\foundups\\agent_market\\tests\\test_schemas.py": "da42022ffc128c46c683d49e5bc6b6917f883082a271dc94aea5ae5f1ea07303",
+    "modules\\foundups\\agent_market\\tests\\test_sqlite_adapter.py": "95c24b4d67441258730633c6591cafb914dba296e6bb527039dfc30760dabc3f",
+    "modules\\foundups\\agent_market\\tests\\test_task_lifecycle.py": "33df93bb3da08ed06014d65ae3ac119d40697b12752735368f74f525f2c4b8fe",
+    "modules\\foundups\\agent_market\\tests\\test_verification_transaction.py": "e837ea23707dc958f7a2ca891ff2d62bff36faa90346d2eb53243bae157a93fb",
+    "modules\\foundups\\simulator\\__init__.py": "424488277a1630deb5fc00b229145826a83cfb3b918693d5a1c54fd5036862f9",
+    "modules\\foundups\\simulator\\adapters\\__init__.py": "fdc09e07e5951bbd0858484baf78b31dac63dea4b287629c2324ec5b2cd928a7",
+    "modules\\foundups\\simulator\\adapters\\fam_bridge.py": "b4489d09bc5ac487cacaaa54633d230d60d859b90903f1b67ac2409c9e0ba85c",
+    "modules\\foundups\\simulator\\adapters\\metagpt_adapter.py": "490c3e1746c77f62c75b1a3c061716a1fd4f524fb641f46647f9e1361b4323e3",
+    "modules\\foundups\\simulator\\adapters\\pfmall_state_provider.py": "0a1cb30e2e5ef2c1ec9b140d3df8731832814ec38e8e1bc9fd5734dd0366fd47",
+    "modules\\foundups\\simulator\\adapters\\phantom_plugs.py": "9128cba6f789f6c3218834c705eb08a31f50efb1da055233772756aa446c0b85",
+    "modules\\foundups\\simulator\\agents\\__init__.py": "73ba1571522dc11fa833c95b2c01e1b2913ccc0851019c7db12f2029e677b08d",
+    "modules\\foundups\\simulator\\agents\\base_agent.py": "05d76e1b9d25d2ac35e9005ac622ee4b9edf478827c209b1992e9646e613f992",
+    "modules\\foundups\\simulator\\agents\\founder_agent.py": "4ea5a2573cb2d7c427e6c60f07290d313746fcc23001364e276bedc0f013aa6a",
+    "modules\\foundups\\simulator\\agents\\synthetic_user_agent.py": "769486ccd7aaf93c981b9c1df34b75b2cb5bacae9ad5746adec6cafee02d3dd9",
+    "modules\\foundups\\simulator\\agents\\user_agent.py": "e15709f0d9dba43d808fa77b788daf68201c3e2bfedc77fa4227a19e5b26fe0e",
+    "modules\\foundups\\simulator\\ai\\__init__.py": "ee0bcf670c88ac6e355db595dd34a2ce0ca9d09595595b04349a53331f9d6c0c",
+    "modules\\foundups\\simulator\\ai\\cabr_estimator.py": "df5644cd837416e3970743c012b6dc4250b1c47b6737221ff237cb9f2160bbcd",
+    "modules\\foundups\\simulator\\ai\\gemma_user.py": "c2ac5753d6d3ff05fb1f8e1a73c2c7e4f612569e959e159dc8b1bc8431cab3b7",
+    "modules\\foundups\\simulator\\ai\\llm_inference.py": "6cbecf09d2b816fcc040515abc2c7553c923b5e187405a0d098da3be618f49c2",
+    "modules\\foundups\\simulator\\ai\\qwen_founder.py": "c4fddfd3de6804bb70dbf84e9817da98ae912f435fd9d3f30f5af6c477c31493",
+    "modules\\foundups\\simulator\\animation_adapter.py": "4a9b631786b6d14c4d2640038b36f1237ecb0fe312f4f6bbc5e03a7ef05bb33e",
+    "modules\\foundups\\simulator\\archive\\2026-03_workspace_tmp\\investor_economics_archive.py": "ecd771c4642c3750ddce310efba07cf7ab25f999b23c001eea120e89194ec7b5",
+    "modules\\foundups\\simulator\\behavior\\__init__.py": "1c152a743fc5ceebb963b863703cb7f346448bffd128a3dd918054b41757f28b",
+    "modules\\foundups\\simulator\\behavior\\agents.py": "4dbc6365cb3a00b918d2b089db7b5c94757ef8b6d742469e7abe91e667cab42c",
+    "modules\\foundups\\simulator\\config.py": "9a020a2baf73b22ecf643c43ef41f7bcfe41929cba2bdfd22a0a2fce91836577",
+    "modules\\foundups\\simulator\\economics\\__init__.py": "5bac86ae9ffca6508cf7d8c740e89d10e512b15ec33b666bd21a6f6d69ad8c35",
+    "modules\\foundups\\simulator\\economics\\agent_compute_costs.py": "3b7d83a9aa32f09d223131c2a67803f6ab1a814d8c26f42330b68b9f8c509863",
+    "modules\\foundups\\simulator\\economics\\ai_parameter_optimizer.py": "9a69e8804744d80d07cf74342e6a731d5e3c1cf82632470e3b767f352ed943ee",
+    "modules\\foundups\\simulator\\economics\\allocation_engine.py": "c86c505dc3e96fd0a858465467664d350fc505631f2165aaa788189fd26133f9",
+    "modules\\foundups\\simulator\\economics\\bonding_curve.py": "553a6063b09cddd2f3a66016d03de4699a1178a08b4db1ba9291a053eb58659b",
+    "modules\\foundups\\simulator\\economics\\btc_anchor_connector.py": "07382b237039d1792142835fcfff2afe3bd5f649e74a7c1bafb295b0efbbf7ea",
+    "modules\\foundups\\simulator\\economics\\btc_reserve.py": "b594b22ed4cea722633e2fa8f095cf0761f17081207e99ec7132e335c0e599a6",
+    "modules\\foundups\\simulator\\economics\\cabr_flow_router.py": "aac3c9cdd90ab3ddce78f021dfe6a633a707fcbf1600238ec1f4d34a586c2526",
+    "modules\\foundups\\simulator\\economics\\channel_partner_pool.py": "d1cde5a887e3d4ea0db4bb242d87caa8ead62831d7c8729dbdc6e7b5645a1148",
+    "modules\\foundups\\simulator\\economics\\circuit_breaker.py": "194405a0658a51e71e31d9a198d4e743340b47ca7bec69765f0a65dae6fe3b00",
+    "modules\\foundups\\simulator\\economics\\compute_graph.py": "0b588550d7d2c96add2867a158c3b78eb190bd5a184246fb78c9f3d804164d08",
+    "modules\\foundups\\simulator\\economics\\demurrage.py": "147d7a85557e50dea6f5f426742753536495b20ed5ee0e8091608c85e9490136",
+    "modules\\foundups\\simulator\\economics\\dilution_scenario.py": "f74165335e8a19297fa769b4379bf1c756fe15deb4ecd852188b9911f6a18bc6",
+    "modules\\foundups\\simulator\\economics\\dynamic_exit_friction.py": "a518708ecf6da82d1fe62c140a983253ce6cd9c1347f5b0677f26b2ce96a792d",
+    "modules\\foundups\\simulator\\economics\\dynamic_fee_taper.py": "b71c5a2eef2d434bb4d72aa551255882af744ce09ed44b49df329870fcf0f8e0",
+    "modules\\foundups\\simulator\\economics\\ecosystem_revenue.py": "5b6c53314b0a35175e8308b8c252162fa181212b00a2476042a180bed12176d6",
+    "modules\\foundups\\simulator\\economics\\emergency_reserve.py": "8f35b85b7ed67d291fb82791c25261f1a74a7e7b99e477245c9b26f392d1a34b",
+    "modules\\foundups\\simulator\\economics\\epoch_ledger.py": "f92c194e09f2e17e41ac2bbf15e2048f9a085412330482d95b33328ca87f571b",
+    "modules\\foundups\\simulator\\economics\\exit_scenario_sim.py": "334dde69f28c6e526495c021c32413fc01fca763ff9eaef6343cecebc6658dcd",
+    "modules\\foundups\\simulator\\economics\\fee_revenue_tracker.py": "763d13fdf4b6b94b8dfd0b0c556de6012f2819687045d762709ebf0b57b53bd1",
+    "modules\\foundups\\simulator\\economics\\fee_simulation.py": "a1c72cd22c654eca21ce15087810788daeaa1c28f6308a9dac551bcb661d839f",
+    "modules\\foundups\\simulator\\economics\\fi_orderbook.py": "a51b8d0fea69ebd1f6950400655d16d77f4fcb2184d63f9136b9d23b73bab136",
+    "modules\\foundups\\simulator\\economics\\fi_rating.py": "463a69523b4537ce6abaec63965ba6ca5b470d581e5edd353b3a154899560425",
+    "modules\\foundups\\simulator\\economics\\genesis_bootstrap.py": "e77fd4dc9098abe5f564f92c647dd3e7dcd155f7785a5d4cbfab3723594d0c3e",
+    "modules\\foundups\\simulator\\economics\\genesis_btc_model.py": "3630d948cfd10bd08ebaa822b13408f65c2a0617512a1a6e109f2a43efafab3b",
+    "modules\\foundups\\simulator\\economics\\investor_liability.py": "17ca01adbae8214378dffe73cc15cf376c354b8f25db61c648e5fd6fcf8788b4",
+    "modules\\foundups\\simulator\\economics\\investor_staking.py": "041cb44b736933863eba989f3ad93d75875b6bc1f3d3cc36ad847473e1d3b8f9",
+    "modules\\foundups\\simulator\\economics\\market_stress.py": "72b43dbf2d72ec0bf5bcd97a6c23e4f24a4c9e11bced8b497ce04a479882877b",
+    "modules\\foundups\\simulator\\economics\\participation_sentinel.py": "d72b4975751b3e422ab0360f631d267bdbd522d1b31e2bbd289ba2dc2d03417a",
+    "modules\\foundups\\simulator\\economics\\pavs_audit.py": "221f16937963fe00fa04ef7bed7a119fbf8dfc8142b242f1294a60bbc2ac939d",
+    "modules\\foundups\\simulator\\economics\\perplexity_comparison.py": "66858942f1b5b0ee5235ed84926a98d93f0d0c223b5e581ef2a470e5285aa7a8",
+    "modules\\foundups\\simulator\\economics\\pool_distribution.py": "8a0357f88ddef3aacb1a6357cb3ae42bb2f8e1272e18684d750cad714bd86aaa",
+    "modules\\foundups\\simulator\\economics\\pumpfun_comparison.py": "7165ecb6f50bbd6d858b41e303f6bdee88038e570879171685b75ddd232a971b",
+    "modules\\foundups\\simulator\\economics\\rage_quit.py": "a2940274e40d9be234318f8f0d19a832d10219457af04b2463918763b5a863d5",
+    "modules\\foundups\\simulator\\economics\\run_underwriting_matrix.py": "25699efc3a3eb16d0e844d6a38861f7720d68efe54a6bad412881b3bf8f706a0",
+    "modules\\foundups\\simulator\\economics\\smartdao_spawning.py": "44b6f5be36a6963e20021b07c9b87bcab7cde9c0ff833c6eafa1092e96097aab",
+    "modules\\foundups\\simulator\\economics\\staker_viability.py": "3dba34599c22f0811b6a06f9c45c81d17752f98f21f53d693d9360937d6f141e",
+    "modules\\foundups\\simulator\\economics\\startup_cost_validation.py": "6a07805ccf3a28e80fa330f3d9479d349072bb73668cb7d34f810d34a10c2d01",
+    "modules\\foundups\\simulator\\economics\\subscription_tiers.py": "47ff70984eee1457fd0ad8cdc64551c2ac004195dce8865b0db273ff4e3c1e4c",
+    "modules\\foundups\\simulator\\economics\\sustainability_scenarios.py": "7be960ea754d548bd6b4da8741eb481e121c21ea2d8a752f3e19171967ea5fbc",
+    "modules\\foundups\\simulator\\economics\\ten_year_projection.py": "a81f59e7bf0526f39fff56b769aaa059e9e98320a67af5d1d30c67b7cc8e5980",
+    "modules\\foundups\\simulator\\economics\\tide_economics.py": "5088e957ad22f91659520c90c68265095c6f9d1a21b6f728c2257605b7b935c5",
+    "modules\\foundups\\simulator\\economics\\token_economics.py": "c0dee07c331a520119b942a4f5bc5ea448d69fd0d9c5f9ac438e5fc8b8eb6a1c",
+    "modules\\foundups\\simulator\\economics\\underwriting_scenarios.py": "a6c84ba01d6c96338472878ad222c56d2591bcc4c06c028f95ffcc39d2d670dd",
+    "modules\\foundups\\simulator\\economics\\unified_sustainability.py": "dee01069de1c2f4ea00cecda69811c38fe7cd8928946f9b83cc9bbb9d417abe0",
+    "modules\\foundups\\simulator\\event_bus.py": "a3d86bf601bb28f618a9d0f19ef83acaf90c50919ba4d1c21dc7a96cb2f77f51",
+    "modules\\foundups\\simulator\\frame_schema.py": "7b105e1c427f0575eeaf1378a714916268edc595c26dccd57f07b81e67dc0e78",
+    "modules\\foundups\\simulator\\mesa_model.py": "ff26f212411637a8bec743a3f3711df43bdf8e220c6de2fc9f56de5372f66deb",
+    "modules\\foundups\\simulator\\parameter_registry.py": "81976574561a56519d99b22a2e82ac430552e85981bd38dda5798b0273863642",
+    "modules\\foundups\\simulator\\render\\__init__.py": "6a678d0a4a446ed1eb3c0c32336d9ddbc70529e4c0fdbef93fd8672f95378183",
+    "modules\\foundups\\simulator\\render\\cube_view.py": "82c5df635aa3f055b94d6ac81de3772ea6984bf9b2f2546f121aa358d2ddc2ec",
+    "modules\\foundups\\simulator\\render\\terminal_view.py": "7a096dfd778fc07449aaa1b067489ca3ea9e1e471fdad71ac130aa1b44196d5b",
+    "modules\\foundups\\simulator\\run.py": "89aa4dcf6af5766d8fb386a1b34fa6e65a813be44806d42ea121fe9db1a0b0e8",
+    "modules\\foundups\\simulator\\scenario_runner.py": "d192d61cd0ad375a202e81c5f666cf02fafcaac34175b66b0bc8ad3c6859a7ed",
+    "modules\\foundups\\simulator\\sse_server.py": "ca6f59f56f4dfd4adbddcc8231e9cc84731a93125fa0b11617a09da7aa312d49",
+    "modules\\foundups\\simulator\\state_contracts.py": "a75173919dfc2afd91f6767082184073395cd20441acbe25cfb4aacc7b8e3553",
+    "modules\\foundups\\simulator\\state_store.py": "b24495911b030adb7749dcbbc268a97451a8457da2c0e8e34b7b6d91eeb2d56e",
+    "modules\\foundups\\simulator\\step_core.py": "2b40ea7f3883ecc7e0763efa66322cdd4b73168cef83ea30447ad2f79cd423fe",
+    "modules\\foundups\\simulator\\step_pipeline.py": "74fb3c32dbeaee763baec6b443e1e6b140e1d320ca0e40ff763d04c525be5453",
+    "modules\\foundups\\simulator\\step_pure.py": "e7166c3bc98edfc9ee01382072c77ce4b7309095f96ddd751d9ec283a16adb43",
+    "modules\\foundups\\simulator\\sustainability_matrix.py": "4ff1a4f3c1bf56941b4ec19b480de1f2b91fb46c492644eeb72268d5453f9be1",
+    "modules\\foundups\\simulator\\tests\\test_ai_parameter_optimizer.py": "3bf87e4ed67e24fe6d39b6d10585d50846729ec7e3e7d276fee9ea8146adaaac",
+    "modules\\foundups\\simulator\\tests\\test_alignment_and_tokenomics.py": "abeef89b41f3d944c6c6490603317999cb311b8e04bb0871ebb0a52efc29e3c5",
+    "modules\\foundups\\simulator\\tests\\test_allocation_and_treasury_runtime.py": "0bae8052af1928a15a050f46054ab053d28336657a51e692e7e8104421cdba05",
+    "modules\\foundups\\simulator\\tests\\test_animation_adapter.py": "ca6dcd04de7b77eb273177b632777d2b1f5719e927a9215d7dc932dfb2bee093",
+    "modules\\foundups\\simulator\\tests\\test_btc_anchor_connector.py": "5ed802b575fc9537b7d99d46d7a31a98a71a071082c551fbdd36fe2c0b8b1726",
+    "modules\\foundups\\simulator\\tests\\test_btc_reserve_semantics.py": "e7c4c5ffb72c29b4347005cf420085342ef1d5c654099c998a1b3ad64135f448",
+    "modules\\foundups\\simulator\\tests\\test_cabr_flow_router.py": "5c7055865ec6289a324c2cde7397a7772ae8ef4b43552b2be159025b30c97908",
+    "modules\\foundups\\simulator\\tests\\test_cabr_terminology_guardrail.py": "9325ae880be863f26317ea96cc0e027840e457bf96ccd063f4f856ef2e8324ec",
+    "modules\\foundups\\simulator\\tests\\test_channel_partner_pool.py": "14bd5c3283cda31a49aab672686454c8b89396f9dafbc81574eb1beb9d7746ac",
+    "modules\\foundups\\simulator\\tests\\test_compute_graph.py": "7a4604ed175e7e398c27eee2386a444c69a01d70b5e34c603edce0e9602dba91",
+    "modules\\foundups\\simulator\\tests\\test_docs_contract_alignment.py": "db3b73b2a1c945111d2908f0d5b81343ff39df974d81180da2fb31256aafdb35",
+    "modules\\foundups\\simulator\\tests\\test_ecosystem_revenue.py": "f62ba25c441e4aa9f8761f2e62287e4857c4b260d0d831c89848e6f287d5e862",
+    "modules\\foundups\\simulator\\tests\\test_epoch_ledger_settlement_commitment.py": "72a28162a927793f7f78b4a6901cfd839d1f5d758fb652f44ede721a642757f4",
+    "modules\\foundups\\simulator\\tests\\test_f0_mvp_offering_flow.py": "9eb2858c1dff72621102c0143a2686dbab72bcd60ddbfdea88d5038ac2af0b56",
+    "modules\\foundups\\simulator\\tests\\test_fam_bridge_symbol_fallback.py": "5a08cc6e159972cb55c1d0c498aa0828cd4ac8b0cd5a277ed416966da5a787d1",
+    "modules\\foundups\\simulator\\tests\\test_fam_lifecycle_flow.py": "8758d5223ac03b722a860c3cafbffacfc000550390af0963889f5df893dca4db",
+    "modules\\foundups\\simulator\\tests\\test_fi_orderbook_entry_guards.py": "42f29267735abcce3842c1c0f61a4fcf1d04e016715dabd5f6d825baa0fa9ca2",
+    "modules\\foundups\\simulator\\tests\\test_full_tide_hardening.py": "697108dd0cfa77006db4668c2dcb02f63ba48bc57f969284c14621d3b7f822b9",
+    "modules\\foundups\\simulator\\tests\\test_investor_liability_engine.py": "a21a1aa71160bc0ae3cfbf1a251b2202ea9a990aec385d5a0943781e58ae90f5",
+    "modules\\foundups\\simulator\\tests\\test_investor_share_contract.py": "359871d3d8e4b93dbef9414b70bb9d20d0b517fb03c9e72ff9143fd6ae7dd681",
+    "modules\\foundups\\simulator\\tests\\test_layer_d_anchor_runtime.py": "597dbe8d0429386c8b5e24d2f9253daae5c43465caae8d482a877878631f7c03",
+    "modules\\foundups\\simulator\\tests\\test_lifecycle_stage_and_market.py": "4dabdd3279cdd9e1794732393272dc6f2f36e126b73ea37ed47dbe78580072eb",
+    "modules\\foundups\\simulator\\tests\\test_llm_inference_backend_routing.py": "90f017f5a487569e7c69a9b74ed6f7ab063adf468c67e4f3b175f55ba53a832d",
+    "modules\\foundups\\simulator\\tests\\test_market_stress.py": "64687c810c13bcf376355017230a288e02d6f2021c3ef6c79db50933f9b38ee6",
+    "modules\\foundups\\simulator\\tests\\test_operational_profit_proxy_flow.py": "fd84a81567d3fffee727177e20b092340bc6419c6e638dfc5aa31ac8decb555a",
+    "modules\\foundups\\simulator\\tests\\test_parameter_registry.py": "11254ecd4a35b598c83919b83b9173c44f2e18cdcfa33f501381140ca4644d20",
+    "modules\\foundups\\simulator\\tests\\test_pfmall_state_provider.py": "42a51f284c83fe990a95adbbe4bb9aaadf2f753e77a2d39664c571a22de7afb8",
+    "modules\\foundups\\simulator\\tests\\test_scenario_runner_determinism.py": "d7b9aff2b3098fae38b3156229af8a6ebf903f001fb14f292301326525eb9e26",
+    "modules\\foundups\\simulator\\tests\\test_smartdao_runtime_events.py": "0fe4fc0447c576465476b3f77d4866bc7cb253fa33b5333d97ef85b024d45c51",
+    "modules\\foundups\\simulator\\tests\\test_sse_server.py": "1138c5d05ee6bdc5b2b87fdb5ba7a398ca5128302d7fd93cb5cf20dd7c4dd517",
+    "modules\\foundups\\simulator\\tests\\test_staker_hurdle_state.py": "9db41c4ebd58b175690a4028b514213e4a0a5eb63d803cdb35aed13abb88f7f2",
+    "modules\\foundups\\simulator\\tests\\test_state_contracts.py": "409fe2d01f48e0cdca84e34c46ba6b669a8b31bca48286109ce2d01adbfeeafe",
+    "modules\\foundups\\simulator\\tests\\test_step_core.py": "0d941a7b37b58408702a85d994e6b0bb9d41eff22b1719bb22c2eb8fc8d3ff49",
+    "modules\\foundups\\simulator\\tests\\test_step_pipeline_extraction.py": "7720bb5a19f5d56da127d26c4e50a5b9902cb4a46bd42246de6086f4163f4b78",
+    "modules\\foundups\\simulator\\tests\\test_step_pure.py": "877871011d2965204e7051c1304776be09643b5a36fa7f6fe5dad3a9365cde13",
+    "modules\\foundups\\simulator\\tests\\test_step_shadow_parity.py": "4738964bcd3ca46b2effe3678d1c0143096c11a63a46e697ba92987c55d89a68",
+    "modules\\foundups\\simulator\\tests\\test_subscription_tier_capacity.py": "01818755627120a2c2e8b06659db8c7ce7fb4a0115e844bf3781e7900ff4631f",
+    "modules\\foundups\\simulator\\tests\\test_sustainability_matrix.py": "517710f2248ffa25aef4f0d02c7cbbf1ca83360e7708f3124014b9f0bfb617d6",
+    "modules\\foundups\\simulator\\tests\\test_ten_year_projection.py": "4316270a4a0a52b82ac23d5246d3db7e06d575bf8f7d2d02a205f3ec008e8e0f",
+    "modules\\foundups\\simulator\\tests\\test_underwriting_scenarios.py": "c65abe0101552bbeb0326b333504bd1468d2ea9cd575d79d518f3e1085377f05",
+    "modules\\foundups\\simulator\\tests\\test_unified_sustainability.py": "ecb288f79d3094372113663330d0bd440e509cee95f9215fdb804fff0ad79460",
+    "modules\\foundups\\simulator\\tests\\test_weighted_stake_allocation.py": "aeb8ca53200acd9484ccf0a3a8e4d925a685971c590e9b0794899bfa2d68720d",
+    "modules\\foundups\\simulator\\visual_qa.py": "57736b03332254f72bde371f2bb9905210c3363601b9ce083d0975077ff9bff4"
+  },
+  "whole_run_source_drift": false,
+  "independent_review": {
+    "FX": "/root/simulator_economics: no material finding; independent count19 registry/5 public, catalog-only data and escaping verified.",
+    "P0B": "/root/vision_catalog: stored legacy self-verification payout finding and replay oracle shadowing fixed; no remaining material finding in reviewed scope.",
+    "parent": "Actual browser verified rootFXlink,5cards,$junkfilter,readiness,empty state; independent300 FX and115 authorization/verification tests passed with exact nodes captured."
+  },
+  "artifact_snapshot": [
+    {
+      "path": "docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md",
+      "sha256": "896055455e75159e3510dc05082211261086c86e799e01f9377e140ea46a34fd",
+      "bytes": 11525
+    },
+    {
+      "path": "docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md",
+      "sha256": "f982245afbc6e51f0c4f7cf4c8a475b221b4e5f0d240a35a0ce8448825961470",
+      "bytes": 22362
+    },
+    {
+      "path": "modules/foundups/agent_market/INTERFACE.md",
+      "sha256": "19a15dd1640f56661b1df32de54e4e569e6659908da8468c3a784f19f056390a",
+      "bytes": 21458
+    },
+    {
+      "path": "modules/foundups/agent_market/ModLog.md",
+      "sha256": "76dc1ae7e926294d96c2e9e497ecf5658545ec53ed72ec45b3fc45aa902b19dd",
+      "bytes": 36431
+    },
+    {
+      "path": "modules/foundups/agent_market/README.md",
+      "sha256": "ddb672002b528e0889f882cc79390998c3715a9d0cd90eefbdac9d060cbab0d5",
+      "bytes": 7190
+    },
+    {
+      "path": "modules/foundups/agent_market/ROADMAP.md",
+      "sha256": "49ad89c6a0694dd258bd18761806236ffd035f149a00081dc73ad9332b0463ce",
+      "bytes": 10347
+    },
+    {
+      "path": "modules/foundups/agent_market/src/authorization.py",
+      "sha256": "4dc7e5d3561ee5ab5ad3d793851fbaeb391919b9a4a3ba199c3d8d8f1ced36b9",
+      "bytes": 2808
+    },
+    {
+      "path": "modules/foundups/agent_market/src/in_memory.py",
+      "sha256": "3d803767f081d0b057e19372dbf4ad37d966e4457e0074a60c234841d0be9b96",
+      "bytes": 46757
+    },
+    {
+      "path": "modules/foundups/agent_market/src/interfaces.py",
+      "sha256": "fc8c0dd9cd1085c77b8fe9867a119f4bfae1d01027fbe7d0edf7c435c0f65ec7",
+      "bytes": 8677
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+      "sha256": "b6e1217a86a399b6501670d36740327c553a9dcf796aff99f75ace36eadb77bd",
+      "bytes": 47333
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/verification.py",
+      "sha256": "5112aaa9dd9e68a7648c50adf2139905eca819d8e8d2f59020490bd8cfc5469a",
+      "bytes": 10484
+    },
+    {
+      "path": "modules/foundups/agent_market/src/task_pipeline.py",
+      "sha256": "e34e9f0261fda32e0e8bb5f9f8d62be6813f03a5a624a3276ebda28fc4028939",
+      "bytes": 12786
+    },
+    {
+      "path": "modules/foundups/agent_market/src/token_factory.py",
+      "sha256": "d2d969090820e9b42802b981d415164e9e564587f164d4fd1273b6fd340dd5b9",
+      "bytes": 13259
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/README.md",
+      "sha256": "c3432dd7e3baa541534763a57abd1f6aad00d3ad6d3f32242f175b29971ebcb5",
+      "bytes": 4299
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/TestModLog.md",
+      "sha256": "4107ec5367f45ef4763517923c81267c3d9e096c0ab73375e52ab2d7e2389320",
+      "bytes": 18887
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_cabr_gate.py",
+      "sha256": "f03c2c53995b1fd782eb640359f480e5108ad2aacee88692436bdf89da0467cd",
+      "bytes": 5790
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_cabr_hooks.py",
+      "sha256": "cd772f150e7eaf3c8958e305ad6895533c6157e715c0cd43bac79ad5750f3730",
+      "bytes": 8517
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_deterministic_ids.py",
+      "sha256": "d19e1f766c03a0821ffbbb6e5d0f5ead4f04e5edda4bc06e8a26681bff40b522",
+      "bytes": 9583
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_distribution.py",
+      "sha256": "522d156b599b7ea8da6472eaab900d0fca99ad93e9018769278aa5106f2d7b3a",
+      "bytes": 2752
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_e2e_integration.py",
+      "sha256": "c4458e3c256c683ff301e5b328f84449db7fd814a95074afbd9395707d25b411",
+      "bytes": 18086
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_orchestrator.py",
+      "sha256": "69047ce894b2e01efc013d1d91abe7e99577fcd4d0df9028c945b01e4ae96fb5",
+      "bytes": 19316
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_permissions.py",
+      "sha256": "4fa083f05c9f1755efb6c003643f8cd155d1ff1bf07dcb693dda3292412c75a9",
+      "bytes": 15393
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+      "sha256": "13c68b5cfae52ca6aba795d78f281551aa31385df4377312da707c38e81d831b",
+      "bytes": 33934
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_task_lifecycle.py",
+      "sha256": "33df93bb3da08ed06014d65ae3ac119d40697b12752735368f74f525f2c4b8fe",
+      "bytes": 3541
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_verification_transaction.py",
+      "sha256": "e837ea23707dc958f7a2ca891ff2d62bff36faa90346d2eb53243bae157a93fb",
+      "bytes": 13091
+    },
+    {
+      "path": "modules/foundups/pfmall/INTERFACE.md",
+      "sha256": "564fd38117dff16c6e4ca6e6f92ba8741ad15e3742c543cdd9ee0cba3847cb9f",
+      "bytes": 12754
+    },
+    {
+      "path": "modules/foundups/pfmall/ModLog.md",
+      "sha256": "3a2f9d37d5afa6d33f34f1127acf6377a0778f5ce671da4e069f35d6ad953042",
+      "bytes": 10716
+    },
+    {
+      "path": "modules/foundups/pfmall/README.md",
+      "sha256": "db1df18da91fd3cd0ba29dd8a9573effd2d4c9ddbde3c5e5575d576ef7394825",
+      "bytes": 9201
+    },
+    {
+      "path": "modules/foundups/pfmall/ROADMAP.md",
+      "sha256": "454a1a5d4f23ef6f43bec474b800771b9569f1a77493cc9b2247ad99ca271470",
+      "bytes": 10039
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/README.md",
+      "sha256": "fac125d7c6a83591363f68a939c98c2ecb8f98dead36cc2333699f74595ea5bb",
+      "bytes": 3973
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/TestModLog.md",
+      "sha256": "49a291fd9a165ea885cf4997de7a3413909709227c28577199215edbefaef913",
+      "bytes": 3005
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/test_gateway_roc_shell.py",
+      "sha256": "be26174f7efa8347da638f937455783e24cded7ae088387e10ae94f23bf36826",
+      "bytes": 45627
+    },
+    {
+      "path": "modules/foundups/simulator/INTERFACE.md",
+      "sha256": "01d2a938bd517fce04f942f0390c42a31048656584a4f41edf235943d3d305a4",
+      "bytes": 16987
+    },
+    {
+      "path": "modules/foundups/simulator/ModLog.md",
+      "sha256": "5a0d79538cda6cb4cd32eb02db2948b6d5671ccef34a4fe34e5355eed502a66e",
+      "bytes": 118474
+    },
+    {
+      "path": "modules/foundups/simulator/README.md",
+      "sha256": "0477be06edcc56e16c4448ba59c3dccb6142f5df7970d3a5e5a9e9f1a2a106c1",
+      "bytes": 35415
+    },
+    {
+      "path": "modules/foundups/simulator/ROADMAP.md",
+      "sha256": "d0864abc92fbfb333973420a9795ed3dc10efc569165955dc4dfc9d67da08053",
+      "bytes": 3749
+    },
+    {
+      "path": "modules/foundups/simulator/adapters/fam_bridge.py",
+      "sha256": "b4489d09bc5ac487cacaaa54633d230d60d859b90903f1b67ac2409c9e0ba85c",
+      "bytes": 35793
+    },
+    {
+      "path": "modules/foundups/simulator/tests/README.md",
+      "sha256": "e478ed9fc516714a8aba3d864ed7ff6572e86ee1f8341a2685b1caef9c67c22b",
+      "bytes": 1915
+    },
+    {
+      "path": "modules/foundups/simulator/tests/TestModLog.md",
+      "sha256": "ad75caf9fa3d16016f9f33bb364c2bf4c305901445a9dba2274a2336c8c8f6ad",
+      "bytes": 26166
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_fam_lifecycle_flow.py",
+      "sha256": "8758d5223ac03b722a860c3cafbffacfc000550390af0963889f5df893dca4db",
+      "bytes": 4959
+    },
+    {
+      "path": "public/f/index.html",
+      "sha256": "5adfed66475bcd25de54671e82beab08e6457bf26c0d4b68166e69d35163a8aa",
+      "bytes": 56991
+    },
+    {
+      "path": "public/index.html",
+      "sha256": "fc58406fa13f37ec23b6a18968372658cc5030f23cc70c318692d6acb0fa9301",
+      "bytes": 98832
+    },
+    {
+      "path": "public/member/INTERFACE.md",
+      "sha256": "24615de506c0d5c248a1e4830bc5ccc0c7c7608575b79615cb093f3d05a7cd4e",
+      "bytes": 30219
+    },
+    {
+      "path": "public/member/ModLog.md",
+      "sha256": "ec4e856783033a0fc9f2be520f8da97cb2984af629c28834739f8d808125afaf",
+      "bytes": 117014
+    },
+    {
+      "path": "public/member/README.md",
+      "sha256": "c2c3760d18470dd42f5a5a9e1a985151f41a15a47810e02c712d2d7440838a63",
+      "bytes": 9253
+    },
+    {
+      "path": "public/member/ROADMAP.md",
+      "sha256": "bc2655c3466cc6ee5c68313c2841991cba95f002cb6f7e55aa9d20aa827ef971",
+      "bytes": 7340
+    },
+    {
+      "path": "public/member/tests/README.md",
+      "sha256": "c044f11bbebd8b305c94f6a4198b5f7d4a7d2a804a2593e1007626ebb8ffaf6f",
+      "bytes": 1806
+    },
+    {
+      "path": "public/member/tests/TestModLog.md",
+      "sha256": "72170a0091448144dc9363710e3ef838fc4f02592bb198d96ed241732b4c7075",
+      "bytes": 41147
+    },
+    {
+      "path": "public/member/tests/test_route_contract_bridge.py",
+      "sha256": "ee8440f95f996177d5875919f44bac4c0c53a0fdc1480bffd86a38bb64f7c451",
+      "bytes": 44459
+    }
+  ],
+  "capability_limits": [
+    "Only mock token backend ships; no Algorand/Solana backend, signer, mint, funding or settlement delivered.",
+    "CallerAuthorization is trusted-host input, not a credential. Transport/issuer integration and current-grant resolution are absent; FAM cannot detect expiry/revocation of an old context. Low-level CRUD is trusted persistence, not an authenticated public endpoint.",
+    "Stored identity/independence is checked, but historical verifier grants are not synthesized or proven.",
+    "SQLite initiation remains VERIFIED/INITIATED with no transaction reference or payment time; memory completion is simulation. Result-chain mismatch is checked after backend call, without rollback guarantee; launch registry residue may remain.",
+    "FX has19 canonical registry records and5 public projections, not19/115 confirmed assets or markets. Declared tickers are not deployed/liquid/tradable assets. No nomination/claim/mint/trading endpoint added.",
+    "Venue sources are dated mutable-branch research; immutable pins, deployed code, testnet availability, licenses for exact components and account/venue authorization remain integration gates.",
+    "Current repository-claim, issuer, accounting/proof/replay and testnet settlement layers remain open."
+  ],
+  "publication": {
+    "status": "reviewed_snapshot_before_publication",
+    "dedicated_branch": "agent/foundups-fx-chain-foundation-20261025",
+    "main_advanced_during_preparation": false,
+    "parallel_checkout_preserved": true
+  },
+  "closeout_checks": {
+    "wsp97_repository_evidence_validator": "PASS, zero violations; structural/repository-bound WSP evidence only",
+    "artifact_and_case_hashes_verified": 50,
+    "whole_python_hashes_verified": 168,
+    "source_drift": false,
+    "new_relative_links": "PASS",
+    "markdown_fences": "balanced",
+    "git_diff_check": "PASS",
+    "canonical_test_registry": "current;1769 files,273 quarantined",
+    "original_orchestrator_test_bodies_unchanged": 7
+  }
+}

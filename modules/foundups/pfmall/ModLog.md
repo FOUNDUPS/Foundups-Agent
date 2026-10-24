@@ -1,3 +1,16 @@
+## 2026-10-25 — FX1 public directory entry
+
+Add a normal FX anchor to the current homepage navigation, retaining the gateway
+and existing `/f/` owner. The directory explains declared symbols and adds ticker
+search to its existing ID/name/summary/readiness filter. No chain, token, registry,
+wallet, router or trading operation is introduced.
+
+Extend the existing gateway-navigation test and route VM rather than creating a
+new suite. The two complete files pass 300 cases with two inherited configuration
+warnings. Exact command, red/green evidence and controlled-browser limits are in
+`../../../public/member/tests/TestModLog.md`; no public deployment is claimed.
+WSP 15/22/50/84/97: approved 15/P1 slice with current owner retrieval.
+
 ## 2026-10-23 — Private AutoPost item handoff and Shop retrieval repair
 
 - Reconciled Foundups-Agent `a048c24071e1a651b161025ba3342f14f3047280` and

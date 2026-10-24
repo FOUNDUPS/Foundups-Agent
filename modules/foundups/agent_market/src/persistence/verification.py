@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy import text
 
+from ..authorization import require_verification_authorization
 from ..exceptions import InvalidStateTransitionError, NotFoundError, PermissionDeniedError, ValidationError
 from ..models import TaskStatus, Verification
 from .orm_models import ComputeLedgerEntryRow, EventRecordRow, FoundupRow, ProofRow, TaskRow, VerificationRow
@@ -163,8 +164,8 @@ def _stage(adapter, sess, task, decision, identity):
     ))
 
 
-def verify_proof_atomic(adapter, task_id, decision):
-    """Record or replay one supplied decision; no external or domain authority."""
+def verify_proof_atomic(adapter, task_id, decision, *, authorization=None):
+    """Authorize and record/replay one decision; no external artifact judgment."""
     if adapter.engine.dialect.name != "sqlite":
         raise ValidationError("Atomic proof verification supports SQLite only")
     _require(_text(task_id) and isinstance(decision, Verification), "invalid request")
@@ -174,6 +175,9 @@ def verify_proof_atomic(adapter, task_id, decision):
         if task is None:
             raise NotFoundError(f"Task not found: {task_id}")
         identity = _identity(sess, task, decision)
+        require_verification_authorization(
+            authorization, task_id, task, sess.get(ProofRow, task.proof_id), decision,
+        )
         checked = _history(sess, task.foundup_id)
         prior = checked.get(decision.verification_id)
         if prior is not None:

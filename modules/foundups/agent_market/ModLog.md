@@ -1,5 +1,39 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-10-25 — P0B host authorization and independent proof admission
+
+- WSP00/6/11/15/22/50/84/97; pre-authoring C4/I5/D5/Impact5=19/P0.
+  Added immutable CallerAuthorization, passed explicitly to both task adapters
+  and direct SQLite initiation. Missing context, wrong principal/scope/role or
+  profile/compute/admin/wildcard substitutes deny before effects and on retries.
+- Shared stored task/proof/decision binding and independent-verifier check apply
+  at verification and payout. Independent review reproduced legacy self-verified
+  payout admission; regression controls preceded the shared guard. Also restored
+  the prior conflicting-verifier replay oracle with a distinct legitimate grant.
+- Preserved existing atomic SQLite history, exact retries and pending payment
+  state; no schema, issuer, credential, signer or confirmed settlement added.
+  The host must independently authenticate callers and resolve current grants;
+  FAM cannot detect expiry/revocation of a reused Python context.
+- Fresh closure: 690 passed (366 FAM +324 simulator), three named unchanged SSE
+  HTTP cases deselected, zero network attempts, two inherited config warnings.
+  Parent independently passed 115 permission/verification cases without the
+  whole-run help-enrichment stubs. Source hashes remained stable.
+- Existing test owners reused, no new test file. Exact nodes, isolation and
+  procedural limits are in tests/TestModLog.md and the delivery receipt.
+
+## 2026-10-25 — P0A exact token backend selection
+
+- Ported the reviewed October 22 patch onto current main without replacing its
+  later atomic verification/pending-payout repairs. WSP00/6/11/15/22/50/84/97;
+  pre-execution C2/I5/D5/Impact5=17/P0 allocation is in the delivery plan.
+- Invalid hints, absent/unhealthy defaults or hinted backends and identity drift
+  now reject through domain ValidationError. Default and explicit mock remain
+  identified simulation. Wrong-chain result rejection is post-call, not rollback.
+- Reused existing orchestrator test owner; its original seven tests are retained.
+  Fresh focused run: 49 passed, two inherited inactive asyncio config warnings,
+  zero guarded socket/DNS attempts. Later combined closure690 includes these49.
+- No chain adapter, signer, wallet, mint, settlement or profile authority added.
+
 ## 2026-09-23: Atomic persistent verification and exact replay
 
 - WSP 00/6/11/15/22/49/50/62/84/97; C3/I4/D3/Impact4 = 14/P1.

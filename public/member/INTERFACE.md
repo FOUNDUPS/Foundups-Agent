@@ -5,6 +5,26 @@
 
 ## Public Interface
 
+### Public FX directory — 2026-10-25
+
+The homepage navigation links **FX** to `/f/`, whose existing index renderer
+provides **FX — FoundUps Exchange** project/token discovery. Its only catalog
+request remains `/f/public_catalog.json`; member runtime fields are excluded.
+
+The existing input performs case-insensitive substring matching over canonical
+ID, name, public summary and a nonempty string `token_symbol`. Both a bare ticker
+and its `$`-prefixed form match. Null, missing, blank and non-string symbols do
+not become ticker text or search terms. Readiness continues to filter
+`poc_landing_status`, independently of the query. Empty/cleared queries, no-match
+results, catalog errors and Return to Mall retain the existing owners.
+
+Tickers are declarations, not deployment or trading evidence. This slice adds
+no catalog records, router, claim verification, chain observation, price feed,
+wallet, order placement or participation authority. `/f/{id}` landing routes and
+protected app/deep-app handoff remain unchanged. Controlled VM tests exercise
+the actual input/change handlers; deployment and browser layout require separate
+verification.
+
 ### Entry URL
 ```text
 /member/

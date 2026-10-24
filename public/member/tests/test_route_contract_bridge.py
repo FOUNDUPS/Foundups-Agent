@@ -486,7 +486,7 @@ _NODE_ROUTE_VM = r"""
 const {runInNewContext} = require('node:vm');
 const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
 const events = [], fetches = [], forbidden = [], errors = [];
-const anchors = [], linkContainers = new Map();
+const anchors = [], linkContainers = new Map(), snapshots = [];
 let address = new URL(input.path + (input.search || '') + (input.hash || ''),
   'https://shell.invalid');
 let sandbox;
@@ -498,9 +498,19 @@ function record(kind, target, value) {
 }
 function element(id) {
   let html = '', text = '', href = '';
+  const listeners = new Map();
   return {id, style: {}, children: [], value: '',
     classList: {toggle() {}, remove() {}, add() {}},
-    addEventListener() {}, scrollIntoView() {}, querySelectorAll() { return []; },
+    addEventListener(type, listener) {
+      if (!listeners.has(type)) listeners.set(type, []);
+      listeners.get(type).push(listener);
+    },
+    dispatch(type) {
+      const callbacks = listeners.get(type) || [];
+      if (!callbacks.length) throw new Error('Missing actual handler: ' + id + ':' + type);
+      callbacks.forEach(listener => listener.call(this, {type, target: this}));
+    },
+    scrollIntoView() {}, querySelectorAll() { return []; },
     querySelector(selector) {
       if (!input.capture_links) return null;
       let key;
@@ -576,8 +586,17 @@ async function run() {
     contextCodeGeneration: {strings: false, wasm: false}});
   // Real Promise callbacks run after the IIFE initializes its local state.
   await new Promise(resolve => setImmediate(resolve));
+  for (const action of input.actions || []) {
+    const expected = {showcaseSearch: 'input', showcaseReadiness: 'change'};
+    if (expected[action.id] !== action.type || typeof action.value !== 'string') {
+      throw new Error('Unsupported fixture action');
+    }
+    nodes[action.id].value = action.value;
+    nodes[action.id].dispatch(action.type);
+    snapshots.push({grid: nodes.showcaseGrid.innerHTML});
+  }
   const context = sandbox.entryRedDog ? sandbox.entryRedDog.getContext() : null;
-  process.stdout.write(JSON.stringify({events, fetches, forbidden, errors, context,
+  process.stdout.write(JSON.stringify({events, fetches, forbidden, errors, context, snapshots,
     pathname: address.pathname, search: address.search, hash: address.hash,
     links: input.capture_links ? anchors.map(node => ({href: node.href,
       label: node.children.length ? node.children[0].textContent : node.textContent,
@@ -855,3 +874,98 @@ def test_vm_explicit_token_still_renders_without_inventing_missing_symbol(tmp_pa
     assert landing["errors"] == portfolio["errors"] == []
     assert "$ACTUAL" in landing["html"]["entryContent"]
     assert "$ACTUAL" in portfolio["html"]["showcaseGrid"]
+
+
+def _fx_entities():
+    return [
+        _public_entity(foundup_id="alpha_001", display_name="Alpha Workshop",
+                       public_summary="Weekend tools on loan", token_symbol="BCHX",
+                       poc_landing_status="ready"),
+        _public_entity(foundup_id="beta_002", display_name="Neighbor Kitchen",
+                       public_summary="Community meals", token_symbol=None),
+        _public_entity(foundup_id="gamma_003", display_name="Gamma Lab",
+                       public_summary="Public research"),
+    ]
+
+
+def _showcase_ids(grid):
+    return re.findall(r'data-foundup-id="([a-z0-9_]+)"', grid)
+
+
+@pytest.mark.parametrize("query, expected", [
+    ("alpha_001", ["alpha_001"]),
+    ("ALPHA WORKSHOP", ["alpha_001"]),
+    ("weekend tools", ["alpha_001"]),
+    (" bchx ", ["alpha_001"]),
+    ("$bchx", ["alpha_001"]),
+    ("neighbor", ["beta_002"]),
+    ("gamma", ["gamma_003"]),
+])
+def test_vm_fx_search_uses_actual_input_handler(tmp_path, query, expected):
+    result = _landing_vm(tmp_path, "/f/", _fx_entities(), actions=[
+        {"id": "showcaseSearch", "type": "input", "value": query},
+    ])
+    assert result["errors"] == []
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert _showcase_ids(result["html"]["showcaseGrid"]) == expected
+    assert result["context"] is None
+    assert not any(event["kind"] in {"navigate", "history"} for event in result["events"])
+
+
+def test_vm_fx_readiness_query_empty_and_clear_share_existing_state(tmp_path):
+    actions = [
+        {"id": "showcaseSearch", "type": "input", "value": "neighbor"},
+        {"id": "showcaseReadiness", "type": "change", "value": "ready"},
+        {"id": "showcaseSearch", "type": "input", "value": ""},
+        {"id": "showcaseReadiness", "type": "change", "value": ""},
+        {"id": "showcaseSearch", "type": "input", "value": "missing-project"},
+        {"id": "showcaseSearch", "type": "input", "value": "BCHX"},
+    ]
+    result = _landing_vm(tmp_path, "/f/", _fx_entities(), actions=actions)
+    assert result["errors"] == []
+    assert [_showcase_ids(snapshot["grid"]) for snapshot in result["snapshots"]] == [
+        ["beta_002"], [], ["alpha_001"],
+        ["alpha_001", "beta_002", "gamma_003"], [], ["alpha_001"],
+    ]
+    for index in (1, 4):
+        assert "No FoundUps match your filter." in result["snapshots"][index]["grid"]
+
+
+@pytest.mark.parametrize("symbol", [None, "", "   ", 123, False, ["junk"], {"junk": True}])
+def test_vm_fx_missing_or_nonstring_symbol_is_not_a_token_listing(tmp_path, symbol):
+    item = _public_entity(token_symbol=symbol)
+    result = _landing_vm(tmp_path, "/f/", [item], actions=[
+        {"id": "showcaseSearch", "type": "input", "value": "junk"},
+    ])
+    assert result["errors"] == []
+    initial_grid = next(event["value"] for event in result["events"]
+                        if event["kind"] == "html" and event["target"] == "showcaseGrid")
+    assert "portfolio-card-token" not in initial_grid
+    assert _showcase_ids(result["html"]["showcaseGrid"]) == []
+
+
+def test_vm_fx_declared_ticker_is_escaped_and_not_deployment_evidence(tmp_path):
+    symbol = '\"><img src=x onerror="throw 1">'
+    result = _landing_vm(tmp_path, "/f/", [_public_entity(token_symbol=symbol)], actions=[
+        {"id": "showcaseSearch", "type": "input", "value": symbol},
+    ])
+    assert result["errors"] == []
+    grid = result["html"]["showcaseGrid"]
+    assert _showcase_ids(grid) == ["synthetic_001"]
+    assert "<img" not in grid.lower()
+    assert "&lt;img" in grid and "&gt;" in grid
+    shell = result["html"]["entryContent"]
+    assert "FX" in shell and "FoundUps Exchange" in shell
+    assert "declared" in shell.lower()
+    assert "deployment" in shell.lower() and "trading" in shell.lower()
+    assert result["forbidden"] == []
+
+
+def test_vm_fx_catalog_failure_preserves_error_and_mall_return(tmp_path):
+    result = _landing_vm(tmp_path, "/f/", fetch_fail=True)
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert len(result["errors"]) == 1
+    assert "Failed to load public portfolio showcase." in result["html"]["entryContent"]
+    assert 'href="/member/"' in result["html"]["entryContent"]
+    assert result["html"]["showcaseGrid"] == ""
+    assert result["context"] is None

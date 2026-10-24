@@ -13,6 +13,11 @@ execution, or FoundUp business logic.
 
 ## Implemented surfaces
 
+- The public homepage links **FX** to the existing `/f/` directory, which searches
+  public project identity, summary and optional declared ticker with landing
+  readiness filters. This is project/token discovery, not observed asset or
+  market readiness; see [the public directory contract](../../../public/member/INTERFACE.md#public-fx-directory--2026-10-25).
+
 - `shell_core.py` validates `foundup_manifest.json` records, builds the catalog,
   resolves shell and `/f/{foundup_id}` routes, and merges advisory state
   overlays without overriding manifest identity.

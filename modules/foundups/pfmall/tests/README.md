@@ -20,13 +20,18 @@ mutate Holo replicas or trigger a Holo reindex.
 | `test_member_foundup_entry.py` | Member FoundUp entry flow |
 | `test_member_pwa_hardening.py` | Manifest, service worker, restore, and wiring |
 | `test_member_red_dog_concierge.py` | Shell-local FAQ concierge; no backend/AI claim |
-| `test_gateway_roc_shell.py` | Gateway shell and phased runtime contracts |
+| `test_gateway_roc_shell.py` | Gateway shell, public FX navigation and phased runtime contracts |
 | `test_gateway_terms_gate.py` | Terms/disclaimer/admission UI |
 | `test_verification_gap_guard.py` | Protected decisions and advisory local-AI boundary |
 
 The repository-level PFMall Tier-0 regression lives in
 `holo_index/tests/test_tier0_retrieval_hardening.py` because it verifies the
 shared Holo contract rather than PFMall runtime behavior.
+
+The actual `/f/` inline route/filter VM is owned by
+`public/member/tests/test_route_contract_bridge.py`. Reuse it for public
+directory search, readiness, escaped output, error and admission-handoff behavior;
+its current inventory and focused commands are in `public/member/tests/README.md`.
 
 ## Commands
 
