@@ -438,5 +438,120 @@
       "prior_reviewed": true,
       "source_rehashed": true
     }
-  ]
+  ],
+  "receipt_snapshot_review": {
+    "scope": "Exactly16 source-integrity snapshot hashes independently rehashed and traced to original507/513 before/after receipts",
+    "observed_scan_job": 121048146563,
+    "reviewed_source_commit": "e6f2c2c7395a69cc5fc3c3c9637e1fe77cd85969",
+    "receipt_git_lf_sha256": "9fd1436df008ebb42d22d69d3fa15eba8769667d510fa3c8fd26286202478c1f",
+    "independent_reviewer": "/root/blockchain_architecture/btc_anchor_audit",
+    "independent_evidence_sha256": "81b3850356c6407e14ecae1f072665dec35016e4380c699360698f221c110f59",
+    "prior_entries": 1972,
+    "final_entries": 1988,
+    "hash_domains": "Fingerprints bind exact LF Git companion blob; recorded source hashes remain raw original Windows working bytes. Current raw source and original raw run receipt provenance independently verified; no normalized-source substitution.",
+    "findings": [
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 30297,
+        "fingerprint": "b27f480cf3297f9f87314d3a4e0c48e5d38e8b170f86a063d05d6478871d918e"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 30303,
+        "fingerprint": "b7a01a9540d1081a5c42a5e918f5cd791a6b32ded1cb502f36f28ee70a0e5f17"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 30382,
+        "fingerprint": "787e1e92e16d35a045f1dff71cfb99fd4a1a7770b05e575766caffdb872e5a5b"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 30402,
+        "fingerprint": "7885266336c00239d96ac81c34d274795c52e71982101367398ba30b20283c43"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 30467,
+        "fingerprint": "dec0f1543c9e59e9d7684110c8caa76025f90b1fbd54bebd9e38dd78e3c085a5"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 30473,
+        "fingerprint": "1345dd020ae3a9264523143a444bf297b0b02b7b7152b72d9abf09f890a2c672"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 30552,
+        "fingerprint": "eb8610c9eadfaa7c8871eaa50aabfb692dec0102ba20b458fbe5b7cf35fe8141"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 30572,
+        "fingerprint": "362ad046c48860afa081ba5b13bcfd67c39f2342b6f2f4da0f7fc27c4589f09f"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 45468,
+        "fingerprint": "15bf0b118e945377ceb75302628140726e4bc32e21a9d7b6b4c1df543c0eacd2"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 45474,
+        "fingerprint": "d6f6253466d075461fa82fc575cc5a3bf1754e2f702a3675667eb412f0e7ea5e"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 45553,
+        "fingerprint": "527e0e342ce69cc6a9fffdc712ebbcf50b0461c92247a23a39f058c362d5f060"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 45573,
+        "fingerprint": "8be831f3ef2671e073dba6c38569e39b5ca3c4c22f127eefc0b936a6c949babf"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 45638,
+        "fingerprint": "87f72e8032a6b9ee7da83b1bbfd33d68df35156862e8a58874bc23889b63d575"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 45644,
+        "fingerprint": "ec87a7e43c426980d0f7015df921a4a69d1a2f997d4af7f33cb29b6f979e04e8"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 45723,
+        "fingerprint": "e2a5310d1a0a2bb5b81dce983c191765cf02bed3fbbb0cd5ea7266953650c297"
+      },
+      {
+        "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+        "rule": "generic-api-key",
+        "line": 45743,
+        "fingerprint": "a671968b3540129ac793305fdeffad7b2c61a0ae59ec7111168d585e5d214409"
+      }
+    ],
+    "limits": [
+      "No snapshot or assertion changed",
+      "No matched value displayed",
+      "No scanner/rule/scope/fingerprint/history change",
+      "No unknown finding approved; fresh hosted scans required"
+    ]
+  }
 }

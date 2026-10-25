@@ -227,6 +227,19 @@ The exact8 generator cases and three Node entrypoints passed on this source
 closure; counts overlap other qualifications and confer no installed-runtime or
 real-chain authority.
 
+## Hosted receipt-metadata review allocation before binding
+
+PR2198 head e6f2c2c7395a69cc5fc3c3c9637e1fe77cd85969 passes the external
+GitGuardian check. Repository security job121048146563 passes20 regressions,
+then reports16 unreviewed generic matches in the testcase companion. Parent
+inspection finds four repeated source SHA-256 entries in the two recorded
+simulator before/after snapshots; all16 values equal their exact current raw
+source file hashes. WSP15 C1/I4/D5/Impact4=14/P1 allocates independent provenance
+and Git-whole-blob/rule/line checks before appending only their exact bindings.
+Retain every original snapshot and assertion. No global hash/path exemption,
+scanner change or unknown finding approval. Fresh current-head hosted scans,
+tests and main convergence remain required after review.
+
 ## Derived source-closure qualification and handoff
 
 Canonical generator --write/--check pass. The unchanged generator eight-case
