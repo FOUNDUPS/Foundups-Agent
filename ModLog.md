@@ -62493,3 +62493,13 @@ desired behavior RED precedes the repair. Existing source AST pin requires expli
 single-keyword review before rebaseline. No new parser, service, control or authority.
 The four-owner selection now passes601 cases after the independent AST review;
 the five behavioral RED failures and intermediate old-pin failure are preserved.
+## 2026-10-25 — project nomination inbox allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean
+checkpoint worktree from observed main e801 for a <=90-line GitHub issue form
+plus existing delivery plan/root log. Deliberate public submission and an issue
+permalink supply a usable nomination queue without another service. No automatic
+issue submission, control/admission, registry, token or market activation. Publish
+and verify the default-branch form before separately changing overlapping Mall UI.
+Implemented the55-line form; YAML/schema/required-field/order checks and independent
+source review pass. No issue submitted. Hosted publication gates remain pending.
