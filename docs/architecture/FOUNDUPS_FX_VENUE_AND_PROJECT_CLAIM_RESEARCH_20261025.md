@@ -274,3 +274,96 @@ avoids duplicating the registry, ledger, scheduler or exchange engine.
 Validation of this authoring slice is limited to source/link review. No new tests,
 chain/provider calls, credentials, installations, product code or Git operations
 were performed. Only this new research document was authored.
+
+## 9. Public legacy DAO and Playapp evidence — 2026-10-25
+
+Pre-authoring allocation: **C2/I4/D3/Impact4 = 13/P1**. The parent authorized
+at most 100 appended lines here and one root ModLog entry of at most 12 lines.
+This slice persists completed public research only; no product, test, WSP,
+registry, dependency, provider, signer or chain change is authorized.
+
+Authoring base after an authorized fetch: main
+`c7f0d93928581d67f0304cc6623876f0cabe1c54`, on the owned branch
+`agent/foundups-legacy-fx-research-20261025`. This is a dated readback,
+not continuing remote freshness. The earlier sections retain their original
+source, overlay, qualification and validation limits; they are not relabeled.
+
+The connected GitHub review used only the two requested public repositories.
+Their default branches were resolved before reading immutable trees/files:
+
+| Public repository | Default branch / commit SHA-1 | Tree SHA-1 |
+|---|---|---|
+| [foundups-dao](https://github.com/FOUNDUPS/foundups-dao/tree/303a56f7da09ea80c400034e713c967728b2ff3a) | main / `303a56f7da09ea80c400034e713c967728b2ff3a` | `c9eee933f8c3ec03313f9c869e563eb3909e1cc2` |
+| [playapp-web-frontend](https://github.com/FOUNDUPS/playapp-web-frontend/tree/8ebdb6af24acdab0b0ad0c0d1328e1c4429b313d) | master / `8ebdb6af24acdab0b0ad0c0d1328e1c4429b313d` | `cb94b9fcf1de95e3184b65a393d8e22d6e294716` |
+
+Both recursive trees were untruncated: 65 and 21 entries, including directories.
+Each release query returned no releases. Neither observation proves global
+absence across other branches, applications or deployments. Repository counts
+are nomination/discovery inputs, never counts of admitted FoundUps or tokens.
+
+**Actual DAO primitives.** [FucDao](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/contracts/FucDao.sol#L31-L79)
+accepts an ERC20 deposit, creates a beneficiary timelock and mints FUC using a
+time-dependent reward formula. Its owner can change interest, multiplier and
+lock duration. [FucToken](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/contracts/FucToken.sol)
+inherits ERC20Burnable; mint is owner-only, and its deploying FucDao owns it.
+This is source code, not evidence of a deployed issuer or accepted-work rewards.
+
+[PaymentSplitter](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/contracts/PaymentSplitter.sol#L72-L162)
+holds the accepted ERC20 and releases it to payees by shares; payees may transfer
+their shares. Its owner adds, removes or updates payees. FucDao's burn path burns
+FUC; it does not return the accepted deposit or redeem BTC.
+[TokenTimeLock](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/contracts/TokenTimeLock.sol#L29-L70)
+holds minted FUC until its threshold; its owner FucDao calls release to the fixed
+beneficiary. Contract-held funds and owner controls are part of this design.
+
+Separate [UChildERC20](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/contracts/UChildERC20.sol#L1488-L1562)
+source grants an initializer caller default admin, grants the configured child
+chain manager a depositor mint role, and burns on user withdrawal. The
+[proxy owner](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/contracts/UChildERC20Proxy.sol#L117-L143)
+can replace implementation and call it. These privileged bridge/proxy primitives
+are not proof that a bridge is deployed or connected to the FUC flow.
+
+[Hardhat configuration](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/hardhat.config.js#L36-L73)
+names local networks, Mumbai and Polygon (chain ID 137). The
+[deployment script](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/deploy/10_deploy_fucdao.js#L18-L45)
+attaches a configured accepted-token address and chooses payee shares 225/25/9750.
+Those are configuration intentions, not current network/asset verification.
+The complete tree has no committed deploy.json/deployments registry or
+transaction/finality receipt; [test setup](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/scripts/mainDeploy.js#L15-L44)
+uses ERC20Mock and a mocked clock. No AMM/router/order book or token-voting
+governance implementation was established in this tree. DAO2's canonical chain,
+asset ID, issuer relationship and role remain unverified; these sources name FUC.
+
+**Playapp and licenses.** Playapp's [App.js](https://github.com/FOUNDUPS/playapp-web-frontend/blob/8ebdb6af24acdab0b0ad0c0d1328e1c4429b313d/src/App.js)
+is the Create React App starter, and its [dependencies](https://github.com/FOUNDUPS/playapp-web-frontend/blob/8ebdb6af24acdab0b0ad0c0d1328e1c4429b313d/package.json)
+contain no wallet/chain/DEX integration. Its reviewed tree has no LICENSE.
+DAO licensing differs by layer: [root Unlicense](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/LICENSE),
+[package ISC declaration](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/package.json#L77),
+principal contracts' MIT headers, and [ABDK conditions](https://github.com/FOUNDUPS/foundups-dao/blob/303a56f7da09ea80c400034e713c967728b2ff3a/contracts/abdk-libraries-solidity/LICENSE.md)
+including notice retention and advertising acknowledgement. Preserve component
+notices and resolve the declarations before adopting a distribution.
+
+**Reuse and policy.** Reuse requirements/test vectors for deposit allocation,
+authority separation and timelock beneficiaries if an EVM experiment is selected.
+Solidity is not a direct Algorand ASA transport implementation. These repositories
+provide no existing DEX integration to adopt. Do not infer external-trading or
+issuer permission from their public visibility or from a token's existence.
+[WSP26](../../WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md):98,107,269
+describes participant-bound UPS and FoundUp-bound converted tokens; transferable
+FUC/payee shares cannot silently substitute for them. The reserve architecture
+remains DRAFT; its proposed external exit does not resolve this policy conflict.
+Keep discovery, project/asset admission and separately authorized transport apart.
+
+Evidence: external report `foundups-public-dao-research-20261025/report.json`,
+SHA-256 `951e3b3297d531f95391d22a9a50d97308e1776529cdaab93ae37dfd0fda423c`.
+It retains immutable source/blob SHA-1 IDs; that Git object hash domain differs
+from report SHA-256 and raw checkout hashes. Its older local 0c814/944 references
+remain historical. This persistence pass reread the full current FX document and
+relevant WSP26/reserve/source-authority constraints. The canonical owner query
+again returned HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH, ok=false,
+freshness=UNKNOWN and index_gap_detected=true (shared authority a519f0ad… versus
+shared workspace 0c81418f…; managed authoring base c7f0d939…). No reindex or
+CURRENT semantic claim. Direct reads corrected ordering/staleness; public-only
+scope reduced noise, missing deployment/DAO2 evidence stayed unknown, and this
+existing owner avoids duplication. Source/link/diff review only: no tests,
+product execution, installation, credentials, signing or chain/provider calls.
