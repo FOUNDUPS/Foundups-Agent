@@ -53,7 +53,7 @@ No autonomous production worker exists. Planned outputs: health status, last act
 
 ## Linked educational media
 
-[Kids Episodes](../kids_episodes/README.md) (`kids_episodes`) is the related story-to-linked-episodes FoundUp using existing YouTube production components. Future EDUIT games may link to episode learning objectives; no game integration or autonomous story-production runtime is claimed. EDUIT retains its existing ID and independent scope.
+[Kids Episodes](../kids_episodes/README.md) (`kids_episodes`) is the related story-to-linked-episodes FoundUp using existing YouTube production components. The local Story Time game now shares its scene with the episode video export. No autonomous story-production runtime is claimed. EDUIT retains its existing ID and independent scope.
 
 ## Story Time proof of concept
 

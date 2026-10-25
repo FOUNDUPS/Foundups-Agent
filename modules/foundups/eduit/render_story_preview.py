@@ -42,6 +42,8 @@ def render(output):
             'captions':cues,'music':{'path':'original-score.wav','rights_evidence':'Original code-composed score and synthesized foley, no samples or lyrics.'},
             'title':'Little Shrew — Find the Root Pocket','learning_objective':'Notice a cue and follow two ordered actions.','activity':'Tap the shrew, then the root.','language':'en','age_band':'3-6'}
     result=editor.render_episode(spec,output/'little-shrew.mp4',base_dir=output)
+    result['video_path'] = Path(result['video_path']).name
+    result['captions_path'] = Path(result['captions_path']).name
     sources=[ROOT/'public/eduit/storytime'/n for n in ('scene.mjs','rig.mjs','engine.mjs')]
     sources += [Path(__file__), Path(__file__).with_name('export_story_frames.mjs'), SRC/'little_shrew_animation.py', SRC/'kids_episode.py']
     record={'schema':'eduit.story_preview.v1','revision':'stomp-3','created_at':datetime.now(timezone.utc).isoformat(),'status':'rendered_unreviewed','duration_seconds':15,'method':'shared_browser_svg_scene','paid_calls':0,'result':result,
