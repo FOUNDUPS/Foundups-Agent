@@ -33,3 +33,12 @@ See tests/TestModLog.md for preimage evidence and qualification obligations.
 No FAM/SQLA/intent/ledger/factory/resident imports, financial policy, reward, signing
 or chain state changes. Module-only SDK/msgpack pins reuse the separately reviewed
 dependency profile. Global dependency/CI/registry admission remains parent-owned.
+## 2026-10-25 — hosted codec qualification and exact fixture review
+
+WSP15/22/50/97. Distinct Windows pip run40173561283 passes28 methods, four
+expected denials and zero unexpected attempts; source/profile bindings are in
+tests/TestModLog.md. Earlier linked-runtime pre-test failures remain recorded.
+Security job121109366122 separately flags only the synthetic public AUTH address
+at test line28. Parent and independent source review agree on its exact existing
+gate fingerprint; one bounded ledger entry is allocated, without test/gate/rule
+changes. Fresh hosted scans and separate GitGuardian disposition remain required.

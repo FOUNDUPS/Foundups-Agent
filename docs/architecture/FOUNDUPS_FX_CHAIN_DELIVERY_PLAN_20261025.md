@@ -2,6 +2,24 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Hosted codec checkpoint — 2026-10-25
+
+Distinct Windows pip run40173561283/job121109365468 passes all28 exact codec
+methods at PR2206 head24a094f; actual tested merge ref297af59 has parents main
+e801 and that PR head. Six repository sources plus lock match Git after CRLF
+conversion; four expected denials, zero unexpected attempts/diagnostics.
+Profile/receipt bindings and earlier pre-test failures remain in the module
+TestModLog. This is unsigned format qualification, without signer/node/issuance.
+
+Custom security job121109366122 reports one tree and one history occurrence of
+the same test-line28 synthetic public address. WSP15 C1/I4/D5/Impact4=14/P1:
+preallocate the existing exact ledger, security README and FX evidence owner for
+one independently reviewed file/rule/line binding; retain all2220 prior entries,
+frozen test/oracle bytes and scanner rules. Fresh scans remain required.
+GitGuardian38965909 is separate. Older Mall38958604 and TestNet38962564 findings
+are now source-verified public Git commit IDs in receipt metadata; their hosted
+gates also remain unresolved. This supersedes the historical unknown status below.
+
 ## Unsigned ASA probe codec allocation (before source/test authoring)
 
 WSP15 C3/I4/D4/Impact4 = **15/P1**; WSP3/6/12/22/49/50/62/84/97.

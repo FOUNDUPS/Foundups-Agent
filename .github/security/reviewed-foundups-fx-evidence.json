@@ -151,5 +151,26 @@
     "constraints": "Only these 38 exact new whole-file/rule/line bindings; no scanner, scope, algorithm, test, manifest or unknown finding changes; no matched values retained.",
     "fresh_scan_required": true,
     "publication_branch_scope": "Commit only this evidence, reviewed-findings ledger and existing FoundUps delivery plan; P0C source/test work remains uncommitted and excluded."
+  },
+  "algorand_unsigned_probe_review": {
+    "review_date": "2026-10-25",
+    "allocation": "C1/I4/D5/Impact4=14/P1; three existing security metadata owners only",
+    "candidate_head": "24a094fec078bad65313a6aca81d8fd2875ed3ec",
+    "security_job_id": 121109366122,
+    "observed_tree_unreviewed": 1,
+    "observed_history_unreviewed": 1,
+    "path": "modules/platform_integration/algorand/tests/test_unsigned_asa_probe.py",
+    "rule": "generic-api-key",
+    "line": 28,
+    "introduced_commit": "22d20a743d30822b12f390c74efbe0a80b55acdf",
+    "git_blob_sha1": "82d92cb6d22b567da15141dbef0912c38b313524",
+    "whole_git_lf_sha256": "b25b8cbbcd04c27baa7600fb1336601d9d17bace1fb371a41227322296a3a5a7",
+    "fingerprint": "bfc2ddb9c3b962562d8d561ea59b50c0c537ab80ed8a7264252db921a211f7fc",
+    "classification": "Synthetic public Algorand address: bytes range(65,97) plus last four SHA512_256 checksum bytes, Base32 encoded. No private key. Existing golden requests use only declared expected_auth_address. Current and introduced file bytes equal.",
+    "independent_review_path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-asa-auth-exact-fingerprint-review-7grsxec3\\review.json",
+    "independent_review_sha256": "19f05e6b5b7867d71626a2189f31b0a47121e427067afb28ea85c9aa09ad2051",
+    "prior_entries": 2220,
+    "final_entries": 2221,
+    "scope": "One exact path/whole-file/rule/line fingerprint; no test/oracle/scanner/gate/exclusion changes. Fresh hosted scans required. GitGuardian38965909 remains separate and unresolved."
   }
 }

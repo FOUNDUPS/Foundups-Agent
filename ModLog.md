@@ -62529,3 +62529,11 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+## 2026-10-25 — hosted Algorand result and exact fixture classification
+
+WSP15 C1/I4/D5/Impact4=14/P1; WSP22/50/97. Hosted run40173561283 passes the
+distinct pip profile's28 codec methods. Preserve prior failures and local bounds.
+Preallocate three existing security metadata owners to record only the exact
+line28 synthetic public-address fingerprint from job121109366122, after parent
+and independent review. Existing2220 entries, scanner/gate and frozen sources
+remain unchanged. GitGuardian disposition is separate; no merge waiver.

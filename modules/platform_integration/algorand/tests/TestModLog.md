@@ -1,5 +1,24 @@
 # Algorand test change log
 
+## 2026-10-25 — distinct hosted pip qualification passed
+
+[Run 40173561283](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40173561283),
+job121109365468, passed at PR head `24a094fec078bad65313a6aca81d8fd2875ed3ec`.
+Its actual merge-ref context is `297af59d706509254ba8732012dce327c99dcc8c`
+(parents main e801 and that PR head). All28 exact methods pass; four expected
+denials, zero unexpected attempts/diagnostics. The6,193-file `ci-pip` profile
+and245 loaded origin names are distinct from local materialization. All six
+repository sources and the lock match the PR's Git bytes after CRLF conversion.
+The disposable runner removed only its recorded unused interpreter alias;
+target executable SHA256 before/after is identical. Earlier pre-test failures
+remain historical; neither signing nor node/issuance/settlement is admitted.
+
+Artifact12590834629 retains10 JSON files until2026-11-08. Profile SHA256:
+`b4815434cc44e1e816e062e86c920f65743a9f34dcfd36c94a05e0e0d13deedd`;
+actual receipt: `3a00f3ef0f22d4d1b12e4be44c8a5dff7d45d0270f9831fa6e09cd0f7b1ba8ec`.
+Parent readback: `bc521c9cf5089dbf2c8ac4c70260b8913ac28527b187a84aed7b19c5acf42d9f`.
+This supersedes earlier pending-CI prose below. Fresh publication gates remain.
+
 ## 2026-10-25 — first exact local execution passed
 
 Committed code context: `444c9f147b6a603be57f4bfb51453cd99b1827a9`, after preserving
