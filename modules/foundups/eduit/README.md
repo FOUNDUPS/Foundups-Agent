@@ -142,3 +142,63 @@ not mix child progress with account data or the global Mall's browsing history.
 This turn preserves the design only: no tracker, database, speed ladder or
 report UI is activated. A future bounded implementation needs synthetic tests
 for timing, difficulty bounds, pause/resume, deletion and no-network leakage.
+
+## Child FoundUps, discovery scope and return navigation
+
+**012 direction:** the main Play FoundUps Mall shows EDUIT. EDUIT's education
+Mall shows its own educational child FoundUps, such as Our Story Time and a
+memory-game project once its existing identity is recovered. Educational child
+FoundUps should not independently populate the general Mall. They remain part
+of the same system; do not fork the platform or renumber existing canonical IDs.
+
+**Observed gaps:** the canonical registry currently has `kids_episodes`, but no
+`eduit` entry, despite EDUIT's module manifest. `public/member/mall-catalog.json`
+puts Kids Episodes in `ai-education`. The registry schema has entity type,
+public-surface and portfolio status, but no parent-FoundUp or education discovery
+scope contract. A category alone cannot enforce the requested boundary. The
+`parent_foundup_index` in the tile field relates an expanded video's UI position
+to a tile, not durable registry ancestry. Simulator DAO parentage is also not the
+production discovery owner. The public catalog projector reads the canonical
+registry; do not hand-edit its output as a substitute for a registry contract.
+
+**Proposed minimal contract, not activated:** retain canonical identity and
+entity type; express parent relationship and allowed discovery surfaces as
+separate, schema-validated metadata. EDUIT is visible in general discovery;
+its educational children are visible in EDUIT discovery. Keep `ai-education` as
+a descriptive category, not an authorization rule. Validate known parents,
+no cycles/self-parenting and stable IDs. Existing unrelated FoundUps retain their
+current behavior. Reconcile EDUIT's manifest into the canonical registry through
+its existing intake owner before creating child entries. Resolve whether Our
+Story Time is the public learning surface of `kids_episodes` or needs a distinct
+identity; do not silently duplicate the production FoundUp to obtain a tile.
+
+Both shared-Mall and public-directory projections, search/Red Dog discovery,
+restored view state and suggestions need the same scope boundary. Scope-specific
+projection must exclude unwanted records before presentation; hiding a tile with
+CSS is insufficient. Protected records still use existing authorization. A
+public educational game need not be inaccessible by direct URL merely because
+it is excluded from general discovery.
+
+**Navigation:** game → its parent education collection, preserving selected
+story, row and scroll position; education collection → main Play FoundUps Mall.
+Use existing product state/return owners, with bounded allowlisted destinations,
+not arbitrary return URLs or browser history that may lead outside the system.
+The proof of concept now has an explicit 'Back to EDUIT' link to the existing
+introduction page. Returning to an actual restored education Mall awaits its
+shared-shell product integration; no new route is claimed active.
+
+**Memory-game recovery:** 012 recalls an earlier memory-game project. Bounded
+searches of this checkout's modules/docs/public assets, registry and FOUNDUPS
+repository names did not establish its canonical ID or source. AI infrastructure
+memory/HoloIndex is not that game. Keep the game as an unresolved existing-project
+reference, not a fabricated new registration. Personal family/medical history
+must not be included in public catalog copy or development receipts. Reuse the
+recovered game's mechanics and shared shell after inspection, rather than copy
+Story Time into a second platform.
+
+**Acceptance for a future integration slice:** one EDUIT entry in general Mall;
+educational child tiles only within EDUIT; no duplicate IDs or state leakage;
+exit restores the correct collection position; direct-entry exit has a safe
+fallback; unknown product scopes fail closed. Current change documents this
+contract and adds the explicit POC exit only; registry/projection migration and
+memory-game recovery remain outstanding.
