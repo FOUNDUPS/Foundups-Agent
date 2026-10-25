@@ -1086,5 +1086,315 @@
       "No source, rules, scanner scope, fingerprint function or GitGuardian disposition changes.",
       "Only this actual finding is bound; fresh tree/history gates remain required."
     ]
+  },
+  "published_intake_main_manifest_review": {
+    "status": "parent_and_source_bound_review_complete_fresh_hosted_scans_required",
+    "source_head": "8bf126fce07848b1e667781f017a8fdf619cce2d",
+    "actual_hosted_merge": "0cb6c561ba8aca7df71a65098e44e7a50bc4807b",
+    "merge_tree_exact_head": true,
+    "observed_run": 40182662699,
+    "observed_job": 121136810765,
+    "actual_hosted_counts": {
+      "tree_unreviewed": 39,
+      "tree_exact_reviewed": 133,
+      "history_unreviewed": 0,
+      "history_exact_reviewed": 3,
+      "generic_api_key": 37,
+      "discord_api_token": 2,
+      "prior_bindings_in_ledger": 39,
+      "current_fingerprints_in_ledger": 0
+    },
+    "manifest": {
+      "whole_git_blob_sha256": "0335f6a6ca168e3c11e33b3f745afc421394c2a6c610fab224988b6539abd670",
+      "canonical_sha256": "5b933b75062130f7a701b810b7de8360b453d5ccde65672e4e890ef9630eb76c",
+      "runtime_members": 1471
+    },
+    "reviewer": "/root/simulator_economics",
+    "reviewer_disclosure": "Reviewer authored the intake mapper and preservation tests. This review covers generated metadata only, not independent mapper behavioral acceptance.",
+    "independent_report_sha256": "338c3da58ef3a3bee0a4eb3d2a92456190d255b7ab50fe59df0ef01511bfd380",
+    "parent_reconstructed_all39_current_prior_bindings_and_referenced_sources": true,
+    "prior_entries": 2420,
+    "final_entries": 2459,
+    "findings": [
+      {
+        "rule": "generic-api-key",
+        "line": 1594,
+        "source_path": "holo_index/memex_access_policy_receipt.py",
+        "fingerprint": "2d57a241805c6bde5719c1c2c563e81585d25169aedf38a7e6d8807500289241",
+        "prior_fingerprint": "b0121a30f942258afe74076b995ebdbb4cbcf9d8dd9f402c75acdf23f77cc29a"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1728,
+        "source_path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py",
+        "fingerprint": "2623faa7d1fdf258ee7ec12ef1f41322349d04222f55130f540c77eef2c1b0aa",
+        "prior_fingerprint": "5ce8d7083a7117f0ba4622ed4e9b9f6dded484a2f5c897e35e2961c7845c5079"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1768,
+        "source_path": "modules/ai_intelligence/pqn_alignment/src/council/api.py",
+        "fingerprint": "67539cf54b6ef3e5c77a5e6b0ff7e583edb2b814bc71d1da214912ebc2d2ee03",
+        "prior_fingerprint": "14217c68346110f08088ab687da92d911e4a795bd3ccd1dc84fa4be24b40ba61"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1769,
+        "source_path": "modules/ai_intelligence/pqn_alignment/src/detector/api.py",
+        "fingerprint": "c0a2249026f0ce2259c9288cc750932962c97fd8511f91d9a0f0dae40c308868",
+        "prior_fingerprint": "c1d5d91d709256ca25b00c3e45ee2bf94d792ea4d34ed8f1a401b244967b5fc1"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1771,
+        "source_path": "modules/ai_intelligence/pqn_alignment/src/io/api.py",
+        "fingerprint": "4aecf470d9df51753c8550dcffaedab4fcd7f814b5e4f48c98c6fb1ade146cea",
+        "prior_fingerprint": "c2cce530555c4d47b3be632ac2ecae9372fd73f5c79f35c0c42c060744871250"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1776,
+        "source_path": "modules/ai_intelligence/pqn_alignment/src/sweep/api.py",
+        "fingerprint": "daf0ea707722cc6d920bc57db2f7d808805daea5e2677ad26f2c706220f3be29",
+        "prior_fingerprint": "37017b14eb6b91a3beabc2e03772ee90634c90a352cc9c8940165a5767d7a1f9"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1878,
+        "source_path": "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_authenticity.py",
+        "fingerprint": "85a4f0cd3a2e12833e289cdbbb834f40a033de2e63a52f7b580e19d4e12e4038",
+        "prior_fingerprint": "2935cd08b7be7dcf1e221a59c83bea15120f78754510a16972c3d9581df3586c"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1956,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_architect_proposal_authenticity.py",
+        "fingerprint": "cfc090cfe94928baf3fcdbfe6911cd797450c7e15bb09772d59d7f7ad42a5574",
+        "prior_fingerprint": "5f76efc94f0abcfca3d9a26b67b87e95dc90c52686a2427aa6133087a679cfff"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1994,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_authentication.py",
+        "fingerprint": "8d14f36e7a6d8ad55ff0b01dde4d25161a4fba2489565b5bc16cbeba408c9a94",
+        "prior_fingerprint": "9aed23a02a4642aa3c6372090e53d468a7017402763d2624e805b3399b28b30b"
+      },
+      {
+        "rule": "discord-api-token",
+        "line": 1834,
+        "source_path": "modules/communication/livechat/src/discord_status_pusher.py",
+        "fingerprint": "b7b610fee54ec388484d472fcd0f67fcef4c435fdcf5e116632f6319c65baa61",
+        "prior_fingerprint": "5989a82c1f2a47cd46f019d39a28c9ab03091f749cf7e9470bf498ba4810fed3"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2009,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_session_credential.py",
+        "fingerprint": "c462fd4cf32c7334ee35f39336d29f5428016b12d0f5c75290655993e17c137d",
+        "prior_fingerprint": "fc3141b48ae69f0599897fe9d033d25d61724d0a9563328efbf1e8df044eaa68"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2082,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+        "fingerprint": "e07ad415db97cff38aeeade72018f3cc66adae283682fea0c544251fc14510a9",
+        "prior_fingerprint": "8aa1bd23ca06574b6c5839dca6d4f0ecdbf61bb254210276d7a9b9bcf28d924b"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2083,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+        "fingerprint": "3ff03e8e987603a95ee9408d99613b2a2239dd474816b3de89413382b7c280f5",
+        "prior_fingerprint": "6da522ca1b6ff41f0eee2c5770d16d86fe6060939025386b6f4059138d019bfc"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2084,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+        "fingerprint": "07a335172e130f150fdfa7eb109775b20b46c55f929ddb19fa4e982f966033a8",
+        "prior_fingerprint": "a96eab2741edc84da957a4a10ffef5ef3506b5832708595e5f97623d79b80f6d"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2085,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+        "fingerprint": "8e7f8d94640b8eb4f798d75f69c91e92254e48836e7acd59723c70eb20775a17",
+        "prior_fingerprint": "97e1f93129a55019190d894a92c336bb3684bc19ef901d801e98a8c4332df094"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2225,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_binding.py",
+        "fingerprint": "caab8a663a2a046c9fc677f825c4a3b23c5e575733d7e5823e910cbacfb49c7b",
+        "prior_fingerprint": "c0aa692ff241d81a829fd689a6a58d20a46627b21f3dbf123522f3cd328e70be"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2226,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_provider.py",
+        "fingerprint": "cf9d6c88f03b49ae6bdc27c91ddfbb79ea83af7185fe3ec4f8d76a5fa6134457",
+        "prior_fingerprint": "65a9cdc23043ca8a39decfae4dee0e283ae0912ded103f639f81ea587b4242a9"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2229,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py",
+        "fingerprint": "8911ce546a824febe9259a61bb6fdad23afdfb2872d89de6022f6ec5e40b2456",
+        "prior_fingerprint": "927ad0067da95e8a5851ee00d0ed6ce0b2fe1a459af6312ee40364ea511b9930"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2256,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant.py",
+        "fingerprint": "94be14932b8ecbdd1bc39da7b089123d605705cea50418b387e0842259b76b3f",
+        "prior_fingerprint": "191ff24729f990d1d648a004177a35892a918157c777fa4ee80ec7bf83f2a292"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2257,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant_contract.py",
+        "fingerprint": "0123834cc27600c2d21cc690cb14a41da593299410c1ca76c37afa060fae3b10",
+        "prior_fingerprint": "af5e2ffdf8c2409449f8945e5b03debf9c18752ca893f461215626a4d3f54a16"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2261,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_issuance.py",
+        "fingerprint": "e4094c07cb985ae019a718d4c30d9c6430fa59e16983087f1a172dc5f8499b46",
+        "prior_fingerprint": "f50d5c52090b3877c0bae37bc8f8d6db5da998d7882d1b777d1c95ce11716afd"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2273,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_socket_peer_credential_attestor.py",
+        "fingerprint": "089dd1c3bcca49ba130ea5fc9abfdcaf5981f22b565079e8c5454eb6258bd631",
+        "prior_fingerprint": "5b359e87fb574c4be7a3b620b075ae1d5a290c220bb721d7a6a33b32148e4d68"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2420,
+        "source_path": "modules/foundups/pfmall/api.py",
+        "fingerprint": "3d9f9fd35d6fcd35d9cfcbcdc3c3df5403cb6f49d0df821dbf487dbf12b54997",
+        "prior_fingerprint": "2171d58f681c8a58cef8f6e3f5a1149ae564ea64efaa60b8fd4e2b683a21e00c"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2444,
+        "source_path": "modules/foundups/simulator/economics/_token_numeric.py",
+        "fingerprint": "0e7bff2e8cdd596e9a9b2fc21a3b81d934f896881671ec44d5323dd409bba4fe",
+        "prior_fingerprint": "dd88a89ad237db8e7785aa929beece9f94904f09bbce507a7dfdd3bf12875489"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2477,
+        "source_path": "modules/foundups/simulator/economics/token_economics.py",
+        "fingerprint": "f4f8b1a06e42eef390ff6ae2d7b6b2ae1e660d7ceba45e513972dc171ca63707",
+        "prior_fingerprint": "5ab1c6f03c51587fdb4c367fc19d38c86ceaa91366f72bb069de4e989523f436"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2716,
+        "source_path": "modules/infrastructure/oauth_management/src/oauth_manager.py",
+        "fingerprint": "3e4a1ecb83478c1d3b021b7a32412bd550c51f99b798944e6e2c7407ad527f73",
+        "prior_fingerprint": "999758e15fb1a35c812fabf5d2e3e4466c57260d5c2465e0715ccb88c7fab3f9"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2722,
+        "source_path": "modules/infrastructure/secrets_mcp/src/op_cli_secret_resolver.py",
+        "fingerprint": "4ebb8a80a2a54451d8a2d003e1de9f3d73ba0ead1ccf0f4dec802d26904bf14a",
+        "prior_fingerprint": "30a3f5f9cbbfad8b32d6476250644546adf5122af746498484ebb1684ec07963"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2723,
+        "source_path": "modules/infrastructure/secrets_mcp/src/secrets_mcp.py",
+        "fingerprint": "b02317f7f18cc6e6721cedee9841eba7e57ab73af6ae2fbeb0eadf0699c632b4",
+        "prior_fingerprint": "4eb985d3dfb56fd7174755b4b25363f77a40a455d863d2b0c950f6019a21bc0d"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2724,
+        "source_path": "modules/infrastructure/secrets_mcp/src/systemd_credential_secret_resolver.py",
+        "fingerprint": "7a907b7e05a20a6ff37d43fe4ea0b741945c9dfb5b6fd65a6fdfe3328cf143ab",
+        "prior_fingerprint": "21da63000684faab4bb4a5e26344c11a4431cc8c84a5740e009befbe0e315e84"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2729,
+        "source_path": "modules/infrastructure/shared_utilities/key_hygiene.py",
+        "fingerprint": "257065795c9797486204497c730ceb1e9b37e1e9ea1658ce31eefda48013393b",
+        "prior_fingerprint": "893bb68e286dda92e6df7e9808c252ae4109224b4568c7905f9ded9f9ad04a16"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2874,
+        "source_path": "modules/platform_integration/github_integration/src/github_api_client.py",
+        "fingerprint": "29b50dab33a92eec3b4b2a132a4191e5983ea910c347f17b8118038e571c2415",
+        "prior_fingerprint": "96f5122b244ab92c98a261a9907b3f04331820c51d8b1b6cd68a95858788851b"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2918,
+        "source_path": "modules/platform_integration/social_media_orchestrator/src/oauth/oauth_coordinator.py",
+        "fingerprint": "a8b32814f05abf165a0f05589bd17c84260ac0231aa2c0593995ad52e675d473",
+        "prior_fingerprint": "8a3ff4f5567266650657d977a893c0931e1e3d3e4dd4a98d101f2b1a14f86ed3"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2941,
+        "source_path": "modules/platform_integration/utilities/oauth_management/src/oauth_manager.py",
+        "fingerprint": "2aca4d016b2acf025641262577815e8e75cd2b7163d8949c13116e2b3bf04fb1",
+        "prior_fingerprint": "66ccbff9eb36de66e9d5cb3abae0f599f1f2833ffa7e377b83aa0c5f1a51491d"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2948,
+        "source_path": "modules/platform_integration/youtube_api_operations/src/youtube_api_operations.py",
+        "fingerprint": "4c08d49a8788615344f07e5d74e7f3b0c96cf5f9ba994d497ac142db76991a67",
+        "prior_fingerprint": "3634a58757128cef470b55e4dc5e3001dd5ecd4074ca7473f27be729fdcb3df5"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2952,
+        "source_path": "modules/platform_integration/youtube_auth/src/oauth_browser.py",
+        "fingerprint": "7b2b64ddc01de2ae7c465c6f68c378b236901874c40e5962df550ea52aa53734",
+        "prior_fingerprint": "299ab1e6c2dbc10d66ff26cbb456fd822936bfaa64cd8bef2053e43728106955"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2953,
+        "source_path": "modules/platform_integration/youtube_auth/src/oauth_health.py",
+        "fingerprint": "86dd90c969ee190b2b042eab5e259e6db75fa0fc220dedfbeecd3ffa46b50e71",
+        "prior_fingerprint": "cb16451b01d53189de4380af5209c1fe7f22e7cf7c7d6771fe6bbf99bfaa8c68"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2957,
+        "source_path": "modules/platform_integration/youtube_auth/src/youtube_auth.py",
+        "fingerprint": "bbc54d47e81d3864906170ee86bdb2127653426d6a17cba098070b3a05bf4dd1",
+        "prior_fingerprint": "ee236ddc51b57393a920e0210489511a0f4926e341029eb334a96d4054d92324"
+      },
+      {
+        "rule": "discord-api-token",
+        "line": 2861,
+        "source_path": "modules/platform_integration/antifafm_broadcaster/src/discord_voice_output.py",
+        "fingerprint": "c6e15ee0027903f1047c45f43262b51c09f2e3f3b32f51e5d41f3de1d618361f",
+        "prior_fingerprint": "dc5b1769fac397d9ff8fa1d21f2d396724e6782eff7f03835fbb07b5be403d73"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 3007,
+        "source_path": "utils/oauth_manager.py",
+        "fingerprint": "8a780ff6e6880c45ed0400063e006cb302c053bb2fc1c24a1a2da4579be2bba6",
+        "prior_fingerprint": "3ff4158faacc994d6222017321e7617dd150bb314a9826e1ea0779b012e1bdb4"
+      }
+    ],
+    "limits": [
+      "Only these actual39 generated source-digest metadata findings receive exact bindings.",
+      "One adjacent mapper context differs; every flagged line and referenced source is unchanged.",
+      "No values, source, oracle, scanner rules/scope/fingerprint function, caps or GitGuardian disposition change.",
+      "Fresh current-head tree/history gates remain required; this review is not another scanner run."
+    ]
   }
 }

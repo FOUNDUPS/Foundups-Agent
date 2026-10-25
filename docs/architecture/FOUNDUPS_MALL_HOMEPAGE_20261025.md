@@ -21,6 +21,16 @@ Registry1,771/273 passes; all8 existing generator cases pass in72.06s, with two
 inherited config warnings, and all3 existing Node entrypoints exit0. These are
 ordinary local binding checks, separate from earlier instrumented route tests.
 Immutable peer review and fresh current-head hosted/security gates remain.
+Actual job121136810765 on8bf reports39 unreviewed manifest findings,133 exact
+reviewed tree findings, and0/3 unreviewed/reviewed history findings. All39 flagged
+source digests and prior bindings are reconstructed from committed Git blobs;
+the adjacent changed mapper context is disclosed. Preallocate14/P1 to the two
+existing ledger/evidence paths only: retain2,420 records and append only these39
+exact bindings (2,459 total), after parent and independent classification.
+No source, oracle, scanner, scope, rule, cap or GitGuardian disposition change.
+Independent final metadata-diff review confirms the exact prior prefix and only
+these39 records; five unchanged security regression cases pass. Fresh hosted
+tree/history checks remain required after publication of the bindings.
 
 ## Browser-discovered About initialization repair allocation
 

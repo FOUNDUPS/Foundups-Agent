@@ -62635,3 +62635,11 @@ binds both source deltas;1,471 members and all caps remain fixed. Registry1,771/
 passes, generator8 passes in72.06s, and three Node entrypoints exit0. Actual public
 source remains preview153; these ordinary local checks add no network-isolation
 claim. Independent immutable review and fresh hosted/GitGuardian gates remain.
+Actual8bf security job121136810765 reports39 manifest metadata findings and zero
+unreviewed history findings. Parent and source-bound review reconstruct all39
+current/prior fingerprints and referenced source hashes, including the disclosed
+adjacent mapper-context difference. Preserve2,420 prior records and append only
+these39 exact bindings (2,459 total) within the two existing metadata paths.
+No README, source, oracle, scanner, cap or GitGuardian change; fresh gates remain.
+Independent final metadata-diff review passes; five unchanged security regression
+cases pass. Fresh hosted tree/history checks remain required after this binding.
