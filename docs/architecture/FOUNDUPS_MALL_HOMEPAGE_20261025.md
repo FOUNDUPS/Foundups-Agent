@@ -13,8 +13,9 @@ higher release value than another unconsumed claim primitive. No product repair
 is justified: main changes no public/Firebase/PFMall/simulator/navigation input.
 
 Execution plane: local Git/metadata qualification, not a WRE runtime activation.
-Retain all main-only work and every Mall product/test blob, including all public
-and Firebase entries qualified at preview15311925. Preserve the three historical
+Retain all main-only work and every current Mall public/Firebase/product/test
+blob. Served assets match preview15311925; two member logs are newer metadata.
+Preserve the three historical
 Mall receipt/testcase/proof artifacts byte-for-byte. Do not relabel those receipts
 as current source, repeat unchanged preview deployment, or claim live media/auth.
 
@@ -56,6 +57,10 @@ Historical pending prose is noise; frozen source/preview and exact current heads
 outrank it. Missing legacy memory/requirements artifacts are not new stubs. Dedup
 the39 rename-aware paths, retain both approval histories, and distinguish current
 qualification from protected historical evidence. No invented115-token inventory.
+The first whole-public-tree precheck failed because it included those two logs
+(four/six added lines). Its shell continued into an uncommitted merge; that owned
+merge was aborted before resolution. Capture the exact current tree and the two
+explicit preview differences, then use exit-checked separate mutation calls.
 
 ## Published intake-main convergence allocation — 2026-10-25
 
