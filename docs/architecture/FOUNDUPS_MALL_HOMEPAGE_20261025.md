@@ -441,3 +441,31 @@ f8529da84d71e9d9549b02d21446a90f040e6a10796d243cfbee1fb1f37ef684.
 Parent independent review SHA256:
 dc45b56b425441dcb2cbaaa537f4af6312e0775a1f812b0728ca99aa41176ca8.
 Fresh hosted security/CI and the pending GitGuardian review remain required.
+
+## About synthetic-counter correction — allocation before edit
+
+2026-10-25; base f98f903aa16a7dbfd00ad2fbd7f7a0b8a398162a. Parent
+allocates WSP15 C1/I4/D4/Impact4 = 13/P1 to the existing About page only.
+Replace its synthetic-count heading with a static Browse FoundUPS link to `/`
+and remove only the deterministic FoundUP Ticker IIFE before ROC Canvas.
+Preserve every other byte of About, including admission/auth/opaque frontend
+attributes, and retain the protected Mall receipt, testcase companion and proof.
+This is local HTML copy/animation work; WRE is not applicable. Validate HTML
+structure and inline JavaScript syntax, then verify all 1,471 runtime hashes
+and existing manifest/pins unchanged. No eight-plus-three rerun, browser,
+Hosting or production claim; old preview/test evidence remains historical.
+External prior snapshots and preallocation: `foundups-mall-about-ticker-ej8lllyy`.
+No commit, push, hosting, registry, framework or proof change is allocated.
+
+### About counter correction — local static validation
+
+Replaced one synthetic-count heading with the static `Browse FoundUPS` link
+to `/`; removed only its 46-line deterministic ticker block before ROC Canvas.
+Every other About byte and all seven script start tags/attributes are preserved.
+HTML structure and JSON-LD parsing pass; all four inline JavaScript blocks pass
+Node syntax-only checks. No inline script, login flow or browser was executed.
+All 1,471 runtime inputs, manifest and two digest pins remain byte-identical;
+the three protected Mall receipt/testcase/proof artifacts are unchanged. No
+eight-plus-three, frontend suite, Hosting or production rerun is claimed.
+External snapshots, raw/Git-LF hashes, effect counts and validation are retained
+in `foundups-mall-about-ticker-ej8lllyy`. Parent review, commit and fresh preview remain pending.

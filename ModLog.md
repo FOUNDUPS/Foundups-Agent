@@ -62526,3 +62526,14 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+
+## 2026-10-25 — About synthetic counter removed
+
+WSP15/22/50/97; parent preallocated 13/P1 in the existing Mall plan before edit.
+About now links `Browse FoundUPS` to the Mall without an invented count. Remove
+only the deterministic ticker IIFE; preserve all other About/auth/script bytes.
+Local HTML/JSON-LD structure checks and four inline JavaScript syntax checks pass.
+All 1,471 runtime hashes, manifest/pins and three protected Mall artifacts are
+unchanged. Historical preview/test receipts are preserved; no browser, Hosting,
+frontend suite or resident-closure rerun is claimed. Parent review/publication
+remain pending. Evidence: `foundups-mall-about-ticker-ej8lllyy`.
