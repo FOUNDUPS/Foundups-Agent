@@ -354,14 +354,148 @@ class TestXVideoURL(unittest.TestCase):
         self._assert_files_removed()
 
     def test_x_video_timeout_reports_error_and_removes_temporary_file(self):
-        self.child.communicate.side_effect = subprocess.TimeoutExpired("ffmpeg", 30)
+        timeout = subprocess.TimeoutExpired("ffmpeg", 30)
+        self.child.communicate.side_effect = [timeout, (b"", None)]
         with self.assertRaisesRegex(BadRequest, "Audio extraction timeout"):
             web_app_module.process_x_video_url(self.url)
-        self.child.communicate.assert_called_once_with(timeout=30)
+        self.child.kill.assert_called_once_with()
+        self.assertEqual(self.child.communicate.call_args_list,
+                         [unittest.mock.call(timeout=30), unittest.mock.call(timeout=5)])
+        self._assert_files_removed()
+        self._assert_timeout_cleanup_failures()
+        self._assert_timeout_with_unlink_failure()
+
+    def _assert_timeout_cleanup_failures(self):
+        for kind in ('kill', 'drain_timeout', 'drain_error', 'unreaped'):
+            with self.subTest(cleanup=kind):
+                self.child.reset_mock()
+                self.child.returncode = None
+                self.child.kill.side_effect = OSError('synthetic kill denial') if kind == 'kill' else None
+                cleanup = (subprocess.TimeoutExpired('ffmpeg cleanup', 5)
+                           if kind == 'drain_timeout' else OSError('synthetic drain failure')
+                           if kind == 'drain_error' else (b'', None))
+                self.child.communicate.side_effect = [subprocess.TimeoutExpired('ffmpeg', 30), cleanup]
+                with self.assertRaisesRegex(BadRequest, 'Audio extraction timeout; child cleanup failed'):
+                    web_app_module.process_x_video_url(self.url)
+                self.child.kill.assert_called_once_with()
+                self.assertEqual(self.child.communicate.call_count, 1 if kind == 'kill' else 2)
+                self._assert_files_removed()
+
+    def _assert_timeout_with_unlink_failure(self):
+        self.child.reset_mock()
+        self.child.returncode = 0
+        self.child.kill.side_effect = None
+        timeout = subprocess.TimeoutExpired('ffmpeg', 30)
+        self.child.communicate.side_effect = [timeout, (b'', None)]
+        with patch.object(os, 'unlink', side_effect=PermissionError('synthetic removal denial')):
+            with self.assertRaisesRegex(BadRequest, 'Audio extraction timeout') as failure:
+                web_app_module.process_x_video_url(self.url)
+        self.assertIs(failure.exception.__context__, timeout)
+        self.assertEqual(timeout.__notes__, ['Temporary video cleanup failed: PermissionError'])
+        self.child.kill.assert_called_once_with()
+        for path in self.paths:
+            if path.exists():
+                path.unlink()
         self._assert_files_removed()
 
 
 import sys
+
+
+def _ffmpeg_timeout_fixture(ready_path):
+    """Fixed disposable child: one ready marker, no descendants or external I/O."""
+    import os
+    import sys
+    import time
+    opened = []
+    def guard(event, args):
+        if event == 'open':
+            if args[0] != ready_path or opened or args[1] != 'x':
+                raise PermissionError('Unexpected child file access')
+            opened.append(ready_path)
+        elif event.startswith(('socket.', 'subprocess.', 'os.exec', 'os.spawn')) or event in (
+                'os.system', 'os.fork', 'os.forkpty', 'os.listdir', 'os.scandir'):
+            raise PermissionError('Unexpected child effect')
+    sys.addaudithook(guard)
+    with open(ready_path, 'x', encoding='utf-8') as ready:
+        ready.write('owned-ready')
+    sys.stdout.buffer.write(b'owned-pipe-data')
+    sys.stdout.buffer.flush()
+    time.sleep(60)
+
+
+class TestFFmpegChildOwnership(unittest.TestCase):
+    def setUp(self):
+        self.launch = subprocess.Popen
+        self.fixture = TestXVideoURL('test_x_video_timeout_reports_error_and_removes_temporary_file')
+        self.addCleanup(self.fixture.doCleanups)
+        self.fixture.setUp()
+        self.child, self.rescued, self.communications = None, False, []
+        self.fixture.popen.side_effect = self._start_owned_child
+
+    def _start_owned_child(self, command, **kwargs):
+        import inspect
+        import time
+        self.fixture._ffmpeg(command, **kwargs)
+        self.assertIsNone(self.child, 'Only one owned launch is allowed')
+        ready = Path(self.fixture.temp) / 'child-ready.txt'
+        program = inspect.getsource(_ffmpeg_timeout_fixture) + '\nimport sys\n_ffmpeg_timeout_fixture(sys.argv[1])\n'
+        env = dict(HOME=self.fixture.temp, TMP=self.fixture.temp, TEMP=self.fixture.temp,
+                   PYTHONDONTWRITEBYTECODE='1', PYTHON_DOTENV_DISABLED='1')
+        if os.name == 'nt':
+            env.update(SYSTEMROOT='C:\\Windows', WINDIR='C:\\Windows')
+        self.child = self.launch([sys.executable, '-I', '-S', '-B', '-c', program, str(ready)],
+                                 cwd=self.fixture.temp, env=env, **kwargs)
+        self.real_communicate = self.child.communicate
+        self.addCleanup(self._rescue_owned_child)
+        self.child.communicate = self._bounded_fixture_communication
+        deadline = time.monotonic() + 5
+        while time.monotonic() < deadline:
+            if ready.exists() and ready.read_text(encoding='utf-8') == 'owned-ready':
+                break
+            self.assertIsNone(self.child.poll(), 'Owned fixture exited before ready')
+            time.sleep(0.01)
+        else:
+            self.fail('Owned fixture did not publish its complete marker within 5 seconds')
+        ready.unlink()
+        return self.child
+
+    def _bounded_fixture_communication(self, *args, **kwargs):
+        self.communications.append(dict(kwargs))
+        if len(self.communications) == 1:
+            self.assertEqual(kwargs, {'timeout': 30})
+            return self.real_communicate(timeout=0.05)
+        return self.real_communicate(*args, **kwargs)
+
+    def _rescue_owned_child(self):
+        if self.child.poll() is None:
+            self.rescued = True
+            self.child.kill()
+            self.real_communicate(timeout=5)
+            self.fail('Outer rescue was required; product settlement did not pass')
+
+    def test_timeout_reaps_owned_child_before_return(self):
+        with self.assertRaisesRegex(BadRequest, 'Audio extraction timeout') as failure:
+            web_app_module.process_x_video_url(self.fixture.url)
+        self.assertEqual(failure.exception.description, 'Audio extraction timeout')
+        self.assertIsNotNone(self.child.returncode, 'Adapter returned before reaping')
+        self.assertEqual(self.communications, [{'timeout': 30}, {'timeout': 5}])
+        for stream in (self.child.stdin, self.child.stdout):
+            self.assertTrue(stream.closed, 'Owned pipe remains open')
+        if os.name == 'nt':
+            import _winapi
+            self.assertEqual(_winapi.WaitForSingleObject(self.child._handle, 0), _winapi.WAIT_OBJECT_0)
+            self.assertFalse(self.child.stdout_thread.is_alive())
+        else:
+            with self.assertRaises(ChildProcessError):
+                os.waitpid(self.child.pid, os.WNOHANG)
+        self.fixture._assert_files_removed()
+        self.assertFalse(self.rescued)
+        report = dict(pid=self.child.pid, returncode=self.child.returncode,
+                      communication_timeouts=self.communications, owned_pipes_closed=True,
+                      reaped_before_return=True, outer_rescue=False, real_ffmpeg=False)
+        Path(os.environ['ACOUSTIC_FFMPEG_REPORT']).write_text(
+            json.dumps(report, indent=2) + '\n', encoding='utf-8')
 
 
 def _gunicorn_fixture_application(root, temporary, omit_factory=False):

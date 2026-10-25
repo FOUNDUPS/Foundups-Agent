@@ -1,5 +1,64 @@
 # Acoustic Lab TestModLog
 
+## 2026-10-25 - Timeout repair author and independent local results
+
+The original 18 selected identities are preserved. Only the existing timeout
+method is strengthened; the new TestFFmpegChildOwnership case is a separate
+one-child phase, never a process permission for the 18 deny-all cases. Download
+and FFmpeg command validation use controlled mocks; only the disposable Python
+child is an actual process. All six
+Gunicorn methods and every other prior test method remain AST-identical.
+
+Baseline replay: 17/18 passed; the timeout assertion failed because kill was
+not called. Repaired v3: exactly 18/18 pass (32.216s), followed by exactly 1/1
+owned-child case (0.294s), zero failures/errors/skips and matching JUnit IDs.
+The controlled first communication verifies the production 30-second argument
+then uses a real 0.05-second fixture timeout. The actual product cleanup kills
+and communicates with its five-second bound. Windows pipe closure, finished
+reader thread and signaled process handle are asserted before adapter return;
+POSIX waitpid reaping remains a separate hosted platform assertion. The small
+Python fixture writes one owned ready marker and pipe payload; it never runs
+FFmpeg or spawns descendants. Outer rescue makes the case fail.
+
+Preserve rejected v2: the 18 cases passed, but native setup failed before a PID
+existed because Popen._get_devnull's O_RDWR open was denied. The v3 guard admits
+exactly that one open during the already validated constructor, bound to the
+saved code object/instance/path/flags; unrelated null writes and launches remain
+denied. Windows flags were observed as 130 (O_RDWR|O_NOINHERIT). Existing guarded
+Windows processor/ZIP/console adaptations remain disclosed; no OS sandbox is
+claimed. The corresponding Linux CI gate has separate platform acceptance pending.
+
+Evidence under the existing external refresh directory:
+- acoustic-timeout-baseline-20261025-execution.json: original failure.
+- acoustic-timeout-positive-v2-execution-20261025.json: rejected guard attempt.
+- acoustic-timeout-positive-v3-execution-20261025.json and matching output folder:
+  exact command/environment, source hashes, collection, JUnit and child receipt.
+- acoustic-timeout-independent-null-admission-review-20261025.json: independent
+  capability preflight only, not an independent test outcome.
+
+Independent review accepts the bounded source and local lifecycle outcomes. Its
+separate one-case positive passes; missing-kill and missing-drain controls each
+select one case, producing one call failure plus an intentional rescue teardown
+error. The two JUnit entries in each rejected control are not two selected tests.
+All controlled children, pipes and reader threads are settled after recorded
+rescue; that rescue is failure evidence, never product acceptance. No unknown
+effects occurred. All 16 source and 84 distribution metadata hashes stayed stable.
+The formal receipt is acoustic-timeout-independent-outcome-review-20261025.json.
+Fresh hosted Linux/native Gunicorn gates remain pending. Four broader historical
+failures were not rerun. The original pre-repair inventory below is history.
+
+## 2026-10-25 - FFmpeg timeout settlement inventory before repair
+
+Preserve the 18 selected application/Web3 identities and six native Gunicorn
+cases. Strengthen the existing X timeout case to require owned-child kill and
+bounded second communication before tempfile cleanup. Preserve the prior 1338
+negative and reproduce this assertion against the current unmodified adapter
+before repair. A separate exact Python-child oracle must establish actual
+settlement, descriptor closure and reaping; rescue cleanup counts as failure.
+No FFmpeg binary, live download, account, provider or network call is admitted.
+Code, real-child capability review and execution outcomes are pending.
+
+
 ## 2026-10-25 - PR1355 Flask request-instance compatibility inventory
 
 Before corrected execution: retain the existing 18 selected cases (seven X,

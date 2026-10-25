@@ -165,6 +165,42 @@ def check_ip_geofencing(client_ip: str):
         print("Allowing access for educational purposes")
 
 
+def _extract_x_audio(temp_video_path: str) -> bytes:
+    """Own one FFmpeg child; failed settlement is never reported as a timeout alone."""
+    command = ['ffmpeg', '-i', temp_video_path, '-f', 'wav', '-t', '3',
+               '-ac', '1', '-ar', '44100', 'pipe:1']
+    process = subprocess.Popen(command, stdin=subprocess.PIPE,
+                               stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    try:
+        audio_data, _ = process.communicate(timeout=30)
+    except subprocess.TimeoutExpired:
+        try:
+            process.kill()
+            # communicate bounds reader-thread joins and wait, and closes drained
+            # pipes. Never manually close/join a potentially active Windows reader.
+            process.communicate(timeout=5)
+            if process.returncode is None:
+                raise OSError("Owned FFmpeg child was not reaped")
+        except (OSError, subprocess.TimeoutExpired) as cleanup_error:
+            raise RuntimeError("Audio extraction timeout; child cleanup failed") from cleanup_error
+        raise
+    if process.returncode != 0 or len(audio_data) < 1000:
+        raise BadRequest("No audio detected in X video or extraction failed")
+    return audio_data
+
+
+def _remove_x_video(temp_video_path: str, primary_error: Exception | None) -> None:
+    """Retain a processing failure if removal of its owned temporary file fails."""
+    try:
+        if os.path.exists(temp_video_path):
+            os.unlink(temp_video_path)
+    except OSError as cleanup_error:
+        if primary_error is not None:
+            primary_error.add_note("Temporary video cleanup failed: " + type(cleanup_error).__name__)
+            raise primary_error
+        raise
+
+
 def process_x_video_url(x_url: str) -> bytes:
     """
     Download X video and extract audio in-memory for acoustic analysis.
@@ -214,6 +250,7 @@ def process_x_video_url(x_url: str) -> bytes:
                 with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as temp_video:
                     temp_video_path = temp_video.name
 
+                primary_error = None
                 try:
                     # Download video to temp file (necessary for ffmpeg)
                     ydl_opts_temp = {
@@ -227,32 +264,12 @@ def process_x_video_url(x_url: str) -> bytes:
                     with yt_dlp.YoutubeDL(ydl_opts_temp) as ydl_download:
                         ydl_download.download([x_url])
 
-                    # Extract audio using ffmpeg
-                    ffmpeg_cmd = [
-                        'ffmpeg', '-i', temp_video_path,
-                        '-f', 'wav', '-t', '3',  # Limit to 3 seconds
-                        '-ac', '1', '-ar', '44100',  # Mono, 44.1kHz
-                        'pipe:1'  # Output to stdout
-                    ]
-
-                    process = subprocess.Popen(
-                        ffmpeg_cmd,
-                        stdin=subprocess.PIPE,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.DEVNULL
-                    )
-
-                    audio_data, _ = process.communicate(timeout=30)
-
-                    if process.returncode != 0 or len(audio_data) < 1000:
-                        raise BadRequest("No audio detected in X video or extraction failed")
-
-                    return audio_data
-
+                    return _extract_x_audio(temp_video_path)
+                except Exception as error:
+                    primary_error = error
+                    raise
                 finally:
-                    # Clean up temp file
-                    if os.path.exists(temp_video_path):
-                        os.unlink(temp_video_path)
+                    _remove_x_video(temp_video_path, primary_error)
 
     except subprocess.TimeoutExpired:
         raise BadRequest("Audio extraction timeout")
