@@ -2,6 +2,53 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Repository file observation allocation — 2026-10-26, before authoring
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP00/6/11/22/50/62/84/97.
+Parent main5da187622d0076f6d53de79bf8e1bd1b93aa9bb5; isolated owned worktree.
+Need: project admission needs a committed regular-file reader, while the legacy
+Contents route can dereference symlinks and discards identity/mode/commit fields.
+Affordability: extend the existing GitHub client and test owner; no new service,
+dependency declaration, claim store or execution plane. Identity-only metadata
+does not establish file provenance; a full claim/issuer flow exceeds this layer.
+
+Add frozen13-field GitHubFileObservation (including private visibility) and
+get_file_observation(path, *, commit_sha=None).
+Keep the seven-field GitHubRepository and legacy content tuple unchanged. Read
+stable numeric repository/owner IDs and actual default branch; observe its commit,
+then resolve an optional exact commit through nonrecursive Git trees and a blob.
+Admit <=8 path components/1024 UTF-8 bytes, <=4096 entries per tree and <=16384
+decoded bytes. Require exact object IDs, unique selected entries, truncated=False,
+regular modes100644/100755, strict bounded wrapped base64, length and Git blob hash.
+Compare identity/name/branch/visibility again before returning; <=13 GET requests.
+Errors must identify fields without echoing response bodies or file contents.
+
+This is provider-response consistency, not atomic repository provenance. Matching
+identity brackets cannot exclude name reuse between calls, nor prove the initially
+observed tip is still current. Existing transport is not upgraded to an admitted,
+time/body-bounded provider. No caller may treat this DTO as a claim, permission,
+trusted fact, signer, token, reward, venue or agent-work grant. Later admission
+requires its own authenticated identity-bound observation and fresh challenge.
+
+Verification: inventory/reuse the existing26 client cases, baseline them first in
+a new external venv (pytest9.0.3, pytest-asyncio1.3.0, aiohttp3.13.5,
+aioresponses0.7.8; binary wheels only, record actual closure). No shared install.
+Permit only observed baseline repairs: PATCH dispatch for existing close_issue,
+unsupported-method oracle moves to TRACE; network fixture uses aiohttp.ClientError.
+Preserve failures and exact IDs. Freeze new acceptance in the same test file before
+product changes; run desired RED, focused GREEN, adjacent compatible unit shards,
+independent source review and current hosted/security/scope gates. Local mock runs
+are development evidence, not OS isolation or full-repository promotion evidence.
+
+Budget: existing client<=850 lines/new functions<=35; existing tests<=850/new
+methods<=35. Existing interface<=100, README+20, ModLog+20, tests README+30,
+TestModLog+25, this plan+65 and root ModLog+16. Add one focused CI workflow<=100
+lines and one portable receipt<=24KiB; optional module memory README<=35. No other
+source, registry membership, runtime manifest, dependency or security-ledger change.
+Holo owner query remains HEAD_MISMATCH; direct source/callsites/test inventory
+replace stale retrieval, without a CURRENT-index claim. Legacy doc assertions are
+historical; no production-ready or comprehensive coverage claim follows.
+
 ## Unsigned integration checkpoint allocation — before authoring
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.
