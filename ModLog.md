@@ -62563,6 +62563,26 @@ identifier is unchanged; bind only its new whole-file context. Preserve 2,300
 entries and append one, for 2,301. Public source and protected Mall evidence,
 scanner/config/regressions remain unchanged. GitGuardian incident 38958604
 remains unlocated/unclassified; fresh hosted checks and review are required.
+## 2026-10-25 — intake reference preservation allocation
+
+WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Preserve submitted references
+in the existing draft envelope rather than discard them. Allocate one constructor
+keyword, nearest existing tests/docs and unchanged-membership manifest derivatives;
+desired behavior RED precedes the repair. Existing source AST pin requires explicit
+single-keyword review before rebaseline. No new parser, service, control or authority.
+The four-owner selection now passes601 cases after the independent AST review;
+the five behavioral RED failures and intermediate old-pin failure are preserved.
+Reconciled published nomination main a44; retain1,471 members and unchanged caps,
+updating only the changed source digest and two canonical pins to f427e16b.
+Seven generator passes plus the staged-index pass after staging, and3 existing
+Node entrypoint passes, are separate from the601 intake result. Keep the original
+unstaged-manifest failure; current hosted/security gates remain pending.
+Actual hosted job121124347560 reports40 tree findings and zero in history:
+39 unchanged generated source digests and one unchanged hostile-input fixture
+shifted108 to150. Parent reconstructs all40 exact current/prior bindings and39
+source hashes; append only these after source-bound review, preserving2,220 prior
+entries (2,260 total). Five unchanged security regressions pass; no scanner,
+rule, source or oracle changes. Fresh hosted gates remain required.
 ## 2026-10-25 — project nomination inbox allocation
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean
@@ -62605,3 +62625,13 @@ hosted tree/history scans and the separate GitGuardian gate remain required.
 Strict scope catches one redundant security README delta,40 actual/39 declared.
 Restore that file's exact9d/main bytes; retain the reviewed ledger/evidence and
 existing logs. No runtime/source/security cap is widened; strict scope is rechecked.
+
+## 2026-10-25 — Mall convergence with published intake main
+
+WSP15/22/50/84/97; preallocated14/P1. Preserve main0909 and all reviewed Mall
+product/oracles/receipts. Five metadata/log conflicts retain both parent inputs
+and exact2,420 prior approvals, with no new finding approval. Canonical5b933b75
+binds both source deltas;1,471 members and all caps remain fixed. Registry1,771/273
+passes, generator8 passes in72.06s, and three Node entrypoints exit0. Actual public
+source remains preview153; these ordinary local checks add no network-isolation
+claim. Independent immutable review and fresh hosted/GitGuardian gates remain.

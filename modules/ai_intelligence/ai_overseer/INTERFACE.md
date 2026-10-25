@@ -913,3 +913,14 @@ Typed genesis/scaffold digests remain unset here; the existing scaffold planner 
 **API Version**: 0.1.0
 **Status**: POC - Ready for integration testing
 **Next**: See `tests/test_ai_overseer.py` for usage examples
+
+## LaunchRequest reference mapping - 2026-10-25
+
+`to_genesis_envelope(payload, context)` copies validated `reference_urls` into
+existing `prior_art`, retaining order/values and detaching the incoming list.
+Omitted/empty references yield a fresh empty list; existing dict-None behavior is
+preserved. Dict/dataclass inputs and transport Mapping/JSON text/bytes share this
+mapping. Validation, trusted context, auth ordering and nonce handling are unchanged.
+These are untrusted references, not source identity, repository control or fetch
+instructions. The result remains an IDEA/UNBOUND draft with external repo requests
+forced false; authentication alone grants no admission, execution or token rights.

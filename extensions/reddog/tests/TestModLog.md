@@ -1,3 +1,13 @@
+## Mall/published intake binding — 2026-10-25
+
+Canonical5b933b75 retains1,471 runtime members and all existing caps. Only the
+existing digest literal changes in constants and its generator test. All8
+generator cases pass in72.06s (two inherited config warnings); the three existing
+Node contract/preflight/blocked-recovery entrypoints each exit0. Registry1,771/273
+is current. LF332,650/CRLF335,665 retains207 bytes of fixed manifest headroom.
+These are ordinary local checks, not instrumented external-effect qualification.
+Independent source-map review and fresh hosted gates remain required.
+
 ## Combined Mall/BTC closure — 2026-10-25
 
 Fresh merged-source canonical write/check exit0; all8 unchanged generator cases

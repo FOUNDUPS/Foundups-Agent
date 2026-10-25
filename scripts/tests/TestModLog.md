@@ -1,5 +1,17 @@
 # Script test inventory
 
+## 2026-10-25 — Mall and published intake source binding
+
+Preserve the two parent source deltas under canonical5b933b75 and unchanged1,471
+members/caps. The two existing pin literals are the only test/oracle edits.
+Resolve/stage all actual bindings before running the unchanged staged-index case.
+All8 generator cases pass in72.06s, with two inherited inactive asyncio config
+warnings. Three existing Node entrypoints exit0; registry1,771/273 is current.
+Manifest LF332,650/CRLF335,665 retains207 bytes below the fixed328KiB limit.
+JUnit: `C:/Users/user/AppData/Local/Temp/foundups-mall-intake-bindings-8497da4f4aa643a799602ffe70ed0084/generator.xml`.
+These ordinary local checks add no instrumented network/isolation claim or new
+runtime membership. Parent-tree review and fresh hosted/security gates remain.
+
 ## 2026-10-25 — Current main and Mall source union
 
 At c19a5055, all8 existing generator cases pass in69.95s; the three existing
@@ -38,6 +50,19 @@ case, source member, cap or installed authority. Guarded external receipts retai
 exact8 IDs, commands, JUnit, source snapshots and zero instrumented network/
 dotenv attempts under `foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`.
 These Mall results do not reuse BTC evidence; fresh hosted gates remain required.
+## 2026-10-25 — Intake reference source binding
+
+The existing mapper remains one of1,471 runtime members; regenerate its source
+hash and update only the two canonical digest literals to f427e16b. All count/byte
+caps and the Node1,471-accept/1,472-reject oracle remain unchanged.
+The first existing8-case generator run gives7 passes/1 staged-index failure:
+the generated manifest had not yet been staged beside the committed mapper.
+After staging the actual bindings, the unchanged failed index case passes.
+Preserve that failed JUnit result; this is a staging repair, not a product RED.
+The three existing Node compatibility/preflight/blocked-recovery entrypoints
+also exit0. The separate four-owner intake run passes601 cases. No new test file,
+runtime member, dependency or installed-runtime promotion is introduced.
+
 ## 2026-10-25 — Numeric/current-main canonical binding
 
 Reuse the exact existing8 generator cases after mainc7f0d939 joins numericc9bee55e.

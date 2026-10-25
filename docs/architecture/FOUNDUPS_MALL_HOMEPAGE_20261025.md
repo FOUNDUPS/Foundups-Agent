@@ -13,6 +13,14 @@ deltas. Scope remains39; inherit main's security README without a new PR delta.
 No new UI, auth, runtime member, dependency, signing or economic operation.
 Require staged-index/source-map review, registry/generator/Node checks and fresh
 hosted gates. Review only actual new scan rebindings; GitGuardian remains separate.
+Actual merge resolves five metadata/log conflicts and preserves the exact2,420
+prior-approval union. Combined canonical5b933b75 binds the two existing source
+deltas with unchanged1,471 membership/caps and two literal pin replacements.
+Manifest remains332,650 LF/335,665 CRLF bytes (207 bytes below the fixed cap).
+Registry1,771/273 passes; all8 existing generator cases pass in72.06s, with two
+inherited config warnings, and all3 existing Node entrypoints exit0. These are
+ordinary local binding checks, separate from earlier instrumented route tests.
+Immutable peer review and fresh current-head hosted/security gates remain.
 
 ## Browser-discovered About initialization repair allocation
 
