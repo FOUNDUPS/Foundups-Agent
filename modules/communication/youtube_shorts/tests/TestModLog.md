@@ -27,3 +27,7 @@ Validation: 266 selected tests passed, including the existing renderer/editor/re
 ## 2026-10-26 — Us_Story_Time publisher policy
 
 35 publisher/CI-security cases passed offline. Tests cover FoundUps set 10 reuse, optional explicit set override, invalid override refusal, missing environment pins/mismatched live identities, Story Time-only routing, unlisted made-for-kids metadata and explicit synthetic disclosure. Existing publisher regressions included. Fakes verify API arguments, not live OAuth or uploads. Added this existing suite to Kids CI and loaded only the publisher owner to avoid unrelated generation SDK imports.
+
+## 2026-10-26 — Little Shrew editorial revision 2
+
+012 requested removing the oversized sixth shrew. The rightmost of three equal-sized children now wakes after an early short tremor, wiggles and reaches the root by 5.5 seconds; parents and siblings stay asleep. Audio/captions retimed. Three five-second clips still total 15 seconds. Provenance labels this an editorial override of the original nine-beat source. Existing real render/audio tests passed; motion regression updated to inspect the smaller hero region and verifies five characters, equal child scales and sleeping family. No perceptual audio review or upload claimed for this revision.
