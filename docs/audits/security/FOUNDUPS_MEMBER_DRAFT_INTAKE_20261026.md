@@ -96,7 +96,9 @@ test registry, navigation and final evidence. Any expansion returns to allocatio
    requested_by binds issuer+case-sensitive subject, never caller username.
 3. Forged/wrong-key/none/HMAC algorithms, issuer/azp/Origin mismatch, absent or
    duplicate bearer, cookie/invite fallback, wrong v/sub/sid, any aud/sts and
-   missing/invalid/expired/future/overlong times reject generically.
+   missing/invalid/expired/future/overlong times reject generically. Independent
+   review additionally requires rejecting any `act` claim until impersonation
+   actor/subject policy is separately supported; add these cases before product.
 4. Existing complete body allowlist precedes verification; invalid/oversize/
    malformed/authority-bearing proposals cause no verifier call. Actual streamed
    bytes, duplicates/encoding/content-type and read-timeout enforce wire limits.

@@ -123,6 +123,7 @@ def test_requester_handle_is_never_body_identity(client, key):
     ("sub", "user_bad space"), ("sid", "machine_example"), ("sid", ""),
     ("aud", "other-service"), ("aud", []), ("aud", None),
     ("sts", "pending"), ("sts", "active"), ("sts", None),
+    ("act", {"sub": "user_actor"}), ("act", None),
     ("exp", True), ("iat", "123"), ("nbf", 1.5),
 ])
 def test_signed_but_ineligible_claims_are_generic(client, key, field, value):
