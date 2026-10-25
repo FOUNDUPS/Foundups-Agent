@@ -7,8 +7,10 @@ including all119 WSP-prefixed files and3 support docs; publish the bounded reade
 coverage index with redaction/display/source-authority limits.
 Keep19 mixed registry/5 public/14 media populations distinct and capture012's
 Mall/FX/intake/Outcome-Solution-Pain requirements plus economic policy conflicts.
-Mall2196 and TestNet2202 retain unknown GitGuardian failures. SDK qualification
-is pending: direct attempt failed after1 function passed,6 not reached.
+Mall2196 and TestNet2202 retain unknown GitGuardian failures. Earlier direct SDK
+attempt failed after1 function passed,6 not reached. Subsequent fixed-target
+direct-v2 passes all7 unchanged functions/4 denied controls with0 unexpected attempts;
+candidate/base/source/origin hashes stay exact. No transaction/runtime admission.
 Documentation only; no runtime/cap, product/test, registry, dependency, signer,
 media publication, production root, reward, asset, liquidity or trading effects.
 

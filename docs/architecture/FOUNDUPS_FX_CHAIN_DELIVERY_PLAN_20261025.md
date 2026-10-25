@@ -80,6 +80,16 @@ stopped it. Controller0 attempts/all1505 bytes stable. Earlier installer/framewo
 stay UNLOCATED. Frozen assertion/guard bytes remain unchanged; no
 pip/pytest/runtime/signing/transaction qualification or live effect is inferred.
 
+Subsequent fixed-target direct-v2 qualification passes all seven unchanged functions.
+It uses the reviewed CPython3.12.10/WindowsAMD64/no-extras dependency edges and explicit
+public tag constructors, avoiding the hostname helper with no guard/vendor/oracle change.
+All four intentional denials pass; zero unexpected/controller attempts. Parent rehashes
+256 loaded origins,1505 candidate files,4207 base files and209 source files unchanged.
+Controller receipt SHA256: `6de7b3757fd05414eb92ff5d4014d7d44c2c7e92a9cf1bfe7f09957595e9a0e8`;
+child result: `b7d23c93adfa2c6f16e3b349b903ba3065e7bc5d9bf34eb1b2f007cf8ff0e6fa`.
+These are direct assertion checks, not pytest/pip installation, OS/native isolation,
+transaction or production-runtime qualification. Prior failures remain as recorded above.
+
 Policy gates before economic issuance/trading: WSP26 nontransferable/bound UPS/Fi versus external
 realization/DEX proposals; human UPS versus older agent-UPS examples; fixed21M/adoption release
 versus older1000/creator80 drafts; global60/16/4/16/4 versus differently scoped task/activity splits
