@@ -1,3 +1,19 @@
+## 2026-10-25 — FoundUps delivery and research checkpoint
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP22/50/97. Reconcile existing delivery/research
+owners with observed main5be and exact open-PR heads; preserve earlier chronology.
+Record190 fully read allocated paths and18 supplementary physical versions,
+including all119 WSP-prefixed files and3 support docs; publish the bounded reader
+coverage index with redaction/display/source-authority limits.
+Keep19 mixed registry/5 public/14 media populations distinct and capture012's
+Mall/FX/intake/Outcome-Solution-Pain requirements plus economic policy conflicts.
+Mall2196 and TestNet2202 retain unknown GitGuardian failures. Earlier direct SDK
+attempt failed after1 function passed,6 not reached. Subsequent fixed-target
+direct-v2 passes all7 unchanged functions/4 denied controls with0 unexpected attempts;
+candidate/base/source/origin hashes stay exact. No transaction/runtime admission.
+Documentation only; no runtime/cap, product/test, registry, dependency, signer,
+media publication, production root, reward, asset, liquidity or trading effects.
+
 ## 2026-10-25 — Numeric hosted metadata review
 
 WSP15/22/50/97; pre-review14/P1. Parent and peer independently classify75 safe

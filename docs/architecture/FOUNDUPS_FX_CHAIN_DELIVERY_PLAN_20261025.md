@@ -2,6 +2,143 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Current-state consolidation allocation (before authoring)
+
+WSP15 C2/I4/D4/Impact4 = **14/P1**. On main
+`5be89ae4bb34133d775cd09f273d7781adfebc9f`, reconcile delivered layers,
+open PRs, the completed source review and 012's Mall/FX/intake/pitch requirements
+in these existing architecture owners. Historical observations below remain dated
+evidence. Need: the older delivery state precedes subsequent merged work.
+Affordability: documentation only, no new execution plane. Deferral obscures the
+remaining prerequisites; copying the three older untracked plans would duplicate
+owners and promote stale status. Qwen/Gemma model execution is unnecessary for
+source-bound status reconciliation; parallel readers provide attributed evidence.
+
+Budget: this plan at most220 added lines, venue/claim research at most30,
+root ModLog at most18, and one compact coverage index at most100KiB/210 records.
+No product, test, WSP policy, registry, dependency, runtime manifest, scanner,
+ledger, provider, signer, chain or deployment changes. Preserve1471 resident
+members and fixed limits. Validate source/link identities, counts, exact scope
+and independent review; no runtime test rerun is implied by this docs-only slice.
+
+## Current checkpoint — 2026-10-25 (supersedes status prose, preserves history)
+
+Pre-authoring WSP15 C2/I4/D4/Impact4=14/P1; existing two architecture owners plus root ModLog, max4
+files/zero runtime. Observed main `5be89ae4bb34133d775cd09f273d7781adfebc9f`; research source
+`182e15bdd7f0be887d3c78c0d55cc2755b69d8f3` has the same tree
+`f9abf184dacc65f28ee23458bba713c860df0ec9`. This is a dated readback, not continuing remote
+freshness. Earlier allocation, execution-base and receipt terminal states remain historical.
+
+| 012 outcome | Delivered or evidence available | Still required / honest boundary |
+|---|---|---|
+| Read all WSP/vision and map the architecture | Three readers completed190 allocated paths; gap reader completed18 additional physical versions | All119 canonical WSP-prefixed files and3 framework support documents covered. Bounded vision scope and display exceptions below; no all-repository claim. |
+| List the FoundUps, recalling about115 | Current separate audit:19 mixed registry records,5 public project projections,14 media lanes | Different populations; do not add them or claim115 verified ventures/assets. Reuse canonical registry/public projector; publish source/date/classification. |
+| Testnet system where accepted work earns tokens/pool allocations | Main has fail-closed mock backend selection and trusted-host scoped verification/initiation; epoch, mock BTC integrity and selected numeric repairs | No real issuance, funded rewards, settlement, live reserve or trade. Unit/rights/funding/authority policy and independent effect/replay/conservation gates remain. |
+| Root Play FoundUps Mall, About explanatory page, visible FX | Mall PR2196 local/preview route/auth/cache/browser evidence; `/f/` five-card directory is live | Last verified production root is the old About/gateway. Mall homepage is not merged/deployed to production. Preserve admission search/hash, member/callback, tenant `/f/{id}/app`, Move2Japan exception and scoped SW. |
+| Clean Netflix-like browsing/listening | Requested vertical panel rows plus horizontal browsing, tap elevator pitch, scrolling/listening queue, pinch density with accessible zoom | Presentation backlog; not proof existing cards contain audio/video or that media automation exists. Preserve source attribution and actual artifact state. |
+| Useful RedDog discovery and participation | Requested1–7 chili/like-hate preferences and organization; hold bottom RedDog push-to-talk; anyone may nominate/join/support/vote | Bounded catalog filtering/sorting only: “show Japanese FoundUps”, “dealing with clones”, “closest to me”. Explicit microphone/locality consent; preferences/votes do not establish CABR, entitlement or authority. |
+| Bring any external project into FoundUps | Existing authenticated genesis/intake plus registry/projection owners; fresh claim contract researched | Nomination→repository-control/representative claim→admission→optional issuer grant→confirmed asset→separately funded market. No-code projects possible. No new parallel registry or automatic mint from a URL/key file. |
+| Vision-first pitch/deck from RedDog conversation | Source-bound local Move2Japan package:13 sources,5 slides, desktop/mobile rendered QA | Outcome “Wouldn’t it be great if…”→Solution/how/what with nested PoC/Prototype/MVP→Pain/obstacles. Current package has no audio/video; original prototype skill is untracked/absent main, no resident executor/publication. |
+| FX token discovery and later exchange | FX metadata/search/readiness view; existing chain-native venue/license comparison; pinned public DAO/Playapp source research | No token deployed or tradable just because it has a ticker/card. Prefer reviewed venue integration over new AMM; exact asset/network/rights/liquidity approvals still required. |
+
+Main delivery facts: epoch PR2192 merged at `7d3d7f64390762040bc2ca737ff0964d94d887c1`; mock BTC
+PR2198 at `6fe7eba424c17f7813043dfb104cd845617cab38`; legacy public-repository research PR2200 at
+`919beb0ff106fbbe5e94138759e68b3f93477f7c`; numeric PR2201 at main5be above. Numeric final226
+focused,28 independent and736 simulator cases pass, with overlapping inventories and named SSE
+exclusions. These are bounded local source checks, not aggregate conservation or settlement proof.
+Existing exact-ID receipts remain the owners of test detail.
+
+Open exact-head PRs: Mall2196 `3767e36e5b33a54a3f3f6205dec7075a08861461` (39 files); TestNet2202
+`8723a28bd7c5c4dd04e63f8202224e9e1177176b` (17 files). Retained snapshots each show37 SUCCESS plus1
+GitGuardian FAILURE; strict scopes39/39 and17/17 PASS. Mall latest custom security job121079425887
+passes20 regressions, tree0unreviewed/172reviewed and history0unreviewed/3reviewed; this separate
+scanner does not resolve GitGuardian. GG38958604/Mall and38962564/TestNet remain
+unlocated/unclassified. Known scanner metadata/frontend-ID classification does not resolve those
+unknown GG gates; no bypass or ready-to-merge claim.
+
+TestNet intent is a separate local `PREPARED` disposable `TEST_TRANSPORT_PROBE`, not UPS/F_i/reward
+conversion, funded reservation or paid settlement. Its affected173, independent16 and all-FAM459
+case counts overlap. It has no resident/HTTP/daemon/TokenFactory consumer. Payout remains INITIATED
+without tx reference/paid_at, task VERIFIED. Durable records and trusted injected policy are not an
+authenticated production host or node observation.
+
+Source binding remains **1,471 runtime members**,1,472 rejected; byte caps328KiB manifest/2MiB
+source/32MiB total unchanged. Observed main manifest332,650 LF bytes/335,665 CRLF-equivalent
+leaves207 bytes under335,872 cap. Dependency/native experiments are external and do not join this
+runtime or change Holo’s packaging-only admission. Do not add imports/exports just to force an
+intent facade into reachability.
+
+External dependency chronology: v1/v2 acquisition literal-metadata failures retained; v3 exact15
+wheels acquired; pip bootstrap failed on2 unlocated unexpected sockets. A separate
+exact1498-payload+7-baseline materialization passed; pytest setup then failed before JUnit/case
+results on1 unlocated socket and1 denied `\\.\nul` write. **SDK/native qualification PENDING; actual
+direct seven-function attempt FAILED.** One actual isolated-flags function passed; six were not
+reached. The new bounded observer located this attempt’s
+`packaging.default_environment→platform.machine→uname→_node→socket.gethostname` denial; `_node`
+catches PermissionError as OSError, so setup continued until the unchanged post-function guard check
+stopped it. Controller0 attempts/all1505 bytes stable. Earlier installer/framework socket callers
+stay UNLOCATED. Frozen assertion/guard bytes remain unchanged; no
+pip/pytest/runtime/signing/transaction qualification or live effect is inferred.
+
+Subsequent fixed-target direct-v2 qualification passes all seven unchanged functions.
+It uses the reviewed CPython3.12.10/WindowsAMD64/no-extras dependency edges and explicit
+public tag constructors, avoiding the hostname helper with no guard/vendor/oracle change.
+All four intentional denials pass; zero unexpected/controller attempts. Parent rehashes
+256 loaded origins,1505 candidate files,4207 base files and209 source files unchanged.
+Controller receipt SHA256: `6de7b3757fd05414eb92ff5d4014d7d44c2c7e92a9cf1bfe7f09957595e9a0e8`;
+child result: `b7d23c93adfa2c6f16e3b349b903ba3065e7bc5d9bf34eb1b2f007cf8ff0e6fa`.
+These are direct assertion checks, not pytest/pip installation, OS/native isolation,
+transaction or production-runtime qualification. Prior failures remain as recorded above.
+
+Policy gates before economic issuance/trading: WSP26 nontransferable/bound UPS/Fi versus external
+realization/DEX proposals; human UPS versus older agent-UPS examples; fixed21M/adoption release
+versus older1000/creator80 drafts; global60/16/4/16/4 versus differently scoped task/activity splits
+and passive-Du/event Dao/Un refinements. Ratify an asset-rights/recipient/unit/policy-version table,
+liability scope, denominator, rounding/residuals and finite funded release/reservation authority.
+WSP27 also says PoC has no tokens while its tier6 example releases5%/1.05M at PoC;
+resolve that stage conflict before using maturity labels as issuance triggers.
+CABR routes a bounded budget and PoB gates it; neither creates mint rights, treasury capacity or
+entitlement. An unspecified aggregate guarantee is not itself a confirmed runtime cap violation.
+Preserve disabled economic activation without inventing a new supply or conversion policy.
+
+Coverage: allocation119 tracked WSP-prefixed files plus71 curated vision/Mall/economics/support
+paths.119 is not119 active unique numbered protocols. Recursive framework total122 Markdown
+equals119 prefix files+3 support docs, not3 missing protocols. Group0:43 canonical/21 curated paths;
+group1:38 canonical/25 curated. Group1 read all lines but redacted one secret-like example literal;
+WSP31 used NUL-only display cleanup. Group2:38 canonical/25 curated paths, fully read. The190-path
+corpus totals58,376 lines/2,564,730 host bytes. All27 tracked Markdown basenames containing vision
+were covered across the corpus and six gap additions. Gap separately read both roots’ support docs,
+six extra literal vision filenames and bounded original continuity files; do not add its
+physical-version count to unique corpus totals. Ten directory-only computer-vision docs and
+arbitrary semantic/vendor/nested vision remain unclaimed.
+
+Retrieval: no generation-current Holo proof; retained owner query failed
+`HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH` (`ok=false`, `freshness=UNKNOWN`, gap=true). Direct
+path/hash reads and module-owner evidence are the fallback, no reindex. Historic operational labels,
+mock outputs, aliases/mirrors and dated provider claims are the principal
+noise/staleness/duplication; missing real effect evidence stays explicit. Original O untracked
+plans/skill are continuity inputs, not canonical main.
+
+Next order: (1) publish this source-bound checkpoint while the existing exact unknown GG gates
+remain unresolved; (2) read back and merge Mall/TestNet only after their current gates pass, then
+qualify and deploy the exact merged Mall public tree; (3) qualify the fixed-target offline SDK
+dependencies, preserving all prior failures; (4) allocate a pure unsigned Algorand probe codec, then
+durable exact-artifact/attempt/reissue state before any signer; (5) independently allocate project
+nomination/control through the existing intake/GitHub owners after its runtime-footprint review.
+Codec inputs still need trusted host
+network/genesis/asset/decimals/authority/holdings/freeze/balance/fee/round facts; node snapshot
+authenticity is separate, UTC expiry is not automatic on-chain round expiry. Do not
+sign/fund/broadcast. Mall presentation improvements can be separately layered after its own
+publication, while real rewards/venue trading wait for ratified policy and funded
+conservation/replay/reconciliation gates.
+
+References: existing `FOUNDUPS_EPOCH_COMMITMENT_HARDENING_20261025.md`,
+`FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md`, `FOUNDUPS_NUMERIC_ADMISSION_20261025.md` and their
+exact-ID receipts. Pending Mall/TestNet owners are in their PRs, not assumed main links. The
+[coverage index](receipts/FOUNDUPS_WSP_VISION_COVERAGE_20261025.json) records all208 physical read
+contexts/205 relative paths and reader report identities; dated PR snapshots remain external
+publication evidence; no historical receipt is relabeled as a later run or main verification.
+
 ## Generated-manifest security re-review allocation (before binding)
 
 Frozen candidate `80cccc3f7` security job121027671790 reports38 unreviewed
@@ -141,7 +278,7 @@ and review pass; never force-push main or commit parallel work. The original
 checkout is neither reset nor switched. Completion is demonstrated by outcomes,
 not aggregate test counts or a planning checkbox.
 
-## Current delivery state
+## Initial P0A/P0B/FX1 delivery snapshot (historical)
 
 - P0A: ported to this base; 49 focused cases pass and are included in final
   connected closure. Default/mock simulation remains identified.
