@@ -1,3 +1,17 @@
+## 2026-10-25 — Durable local TestNet probe preparation
+
+WSP00/6/11/15/22/50/62/97; runtime 16/P0, evidence/docs 14/P1. Add an explicit
+immutable TestNet probe-intent API, one shared ORM row and additive migration3.
+Current authority, complete pending lineage, exact integer units/identity/expiry
+and actual SQLite schema precede the single new row or exact content replay.
+Payout/task/event/compute state stays unchanged. Repaired focused 173, independent
+16 and qualified full FAM 459 pass with honest overlap and preserved failures.
+The full run binds 203 stable sources and confines 1,061 SQLite connections.
+Canonical test registry adds one unit owner: 1,771 files, 273 quarantined.
+The module plan retains generated-column, fixture, inventory and packaging
+corrections. No resident integration, signer, chain effect or paid reward exists;
+corrected portable evidence and dedicated hosted publication gates remain.
+
 ## 2026-10-25 — Mock BTC anchor replay integrity candidate
 
 WSP00/6/11/15/22/50/62/84/97;14/P1 optional mock infrastructure. Bind the

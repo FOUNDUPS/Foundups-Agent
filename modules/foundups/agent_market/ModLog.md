@@ -1,5 +1,33 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-10-25 — Opt-in local TestNet probe intents
+
+- WSP00/15/22/50/62/97; pre-runtime C3/I4/D5/Impact4=16/P0. Added one
+  233-line explicit local facade, one row on the existing Base and additive
+  migration 3. SQLiteAdapter is unchanged; original 13 row/export/pickle contracts
+  remain intact. Separate evidence/docs packaging C2/I4/D4/Impact4=14/P1.
+- Trusted immutable host policy is separate from submitted binding; exact
+  network/asset/units/principal/recipient/caps/expiry and current treasury
+  authority are checked on every attempt. One SQLite transaction validates actual
+  schema and existing pending-payout lineage, then inserts or fully compares one
+  immutable `PREPARED` probe. No old-table, payout-event or compute mutation.
+- Independent review found that `table_info` omitted extra generated columns in
+  a supplied altered database. Two existing-owner controls preceded the narrow
+  `table_xinfo`/hidden-column rejection repair; no database repair/backfill occurs.
+  A later-task fixture was also corrected through real APIs to exercise a second
+  task in the same FoundUp, retaining the other-FoundUp case and honest timing.
+- Focused repaired 173 pass; independent repaired 16 pass. Final agreed all-FAM
+  **459/459 pass**, 19 owners, 203 prebound stable Python sources, zero guard
+  attempts, 1,061 allowed scratch SQLite connections and unchanged default-store
+  stats. Earlier all-FAM 459 assertion passes with an inventory gap were rejected
+  as qualification; the separate central-stub 459 is diagnostic only. Counts
+  overlap. All RED/correction/isolation history is in tests/TestModLog.md.
+- This is an explicit module API with no resident caller/export or automatic
+  trigger. Source-closure admission and resident integration remain future work.
+  No signer, SDK, network, funding, payment confirmation, UPS/F_i issuance or
+  reward `PAID` claim. See the
+  [allocated plan](../../../docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md).
+
 ## 2026-10-25 — P0B host authorization and independent proof admission
 
 - WSP00/6/11/15/22/50/84/97; pre-authoring C4/I5/D5/Impact5=19/P0.

@@ -1,0 +1,630 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "6fe7eba424c17f7813043dfb104cd845617cab38"
+  },
+  "execution_id": "foundups-testnet-transfer-intent-20261025",
+  "execution_plane": "Explicit opt-in local SQLite preparation and retained offline component tests; documentation/evidence packaging, no resident caller or chain effect",
+  "outcome": "completed",
+  "scope": "Local TEST_TRANSPORT_PROBE intent only; immutable units/trust binding and durable preparation, not reward settlement",
+  "completion_boundary": [
+    "One explicit module facade, one mapper on existing Base, additive migration3; SQLiteAdapter unchanged.",
+    "No resident runtime import/export/caller or automatic trigger. Resident integration and any required source admission remain future work.",
+    "No signing, SDK, funding, transaction preparation/broadcast/confirmation, token issuance, reservation, conversion, vesting or tradability policy.",
+    "Original payout INITIATED/task VERIFIED and all13 old mapped tables remain unchanged by preparation."
+  ],
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_97"
+  ],
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md",
+      "modules/foundups/agent_market/README.md",
+      "modules/foundups/agent_market/INTERFACE.md",
+      "modules/foundups/agent_market/ROADMAP.md",
+      "modules/foundups/agent_market/ModLog.md",
+      "modules/foundups/agent_market/tests/README.md",
+      "modules/foundups/agent_market/tests/TestModLog.md",
+      "NAVIGATION.py",
+      "Missing module memory/README.md and requirements.txt recorded; not created."
+    ],
+    "research": [
+      "docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md",
+      "Original research report and all8 preexisting source/six documentation comparisons are hash-bound in external_artifacts; no source-current semantic claim on owner Holo error."
+    ],
+    "micro_pass": [
+      "modules/foundups/agent_market/src/persistence/testnet_transfer_intents.py",
+      "modules/foundups/agent_market/tests/test_testnet_transfer_intents.py",
+      "Frozen v4 contract93 plus80 existing controls; generated-column repair and fixture chronology retained."
+    ],
+    "macro_pass": [
+      "modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+      "modules/foundups/agent_market/src/persistence/orm_models.py",
+      "modules/foundups/agent_market/src/persistence/migrations.py",
+      "Qualified459 tests across19 FAM owners;203 loaded Python sources prebound and stable, no missing loaded source."
+    ],
+    "hard_think": [
+      "Full canonical identity and current authorization on every retry; strict actual schema including generated columns; no digest-only admission.",
+      "docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md"
+    ],
+    "dialectic_sweep": [
+      "Reuse existing pending history, SQLite session and Base; no generic ledger/transport framework. Issuer provenance, units policy and real transport remain separate.",
+      "docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md"
+    ],
+    "first_principles": [
+      "An immutable local preparation record cannot prove a signer, funded effect or paid reward. Public strings are expected identity, not wallet proof.",
+      "docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md"
+    ],
+    "execute": [
+      "docs/architecture/receipts/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.json",
+      "docs/architecture/receipts/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.testcases.json",
+      "modules/foundups/agent_market/tests/TestModLog.md",
+      "Packaging retained artifacts only; no additional test execution during docs/receipt authoring."
+    ]
+  },
+  "compliance_evidence": [
+    "docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md",
+    "modules/foundups/agent_market/tests/TestModLog.md",
+    "docs/architecture/receipts/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.testcases.json",
+    "All RED, correction, failure and isolation phases are retained; WSP97 validation binds repository WSP paths, not runtime effect authenticity."
+  ],
+  "allocations": {
+    "implementation": "C3/I4/D5/Impact4=16/P0; parent released declarations, tests and runtime separately before each scope.",
+    "packaging": "C2/I4/D4/Impact4=14/P1; six existing module docs and external evidence only.",
+    "measured": {
+      "runtime_lines": 233,
+      "authored_functions": 8,
+      "max_function_lines": 31,
+      "orm_net_lines": 24,
+      "migration_net_lines": 23,
+      "adapter_net_lines": 0,
+      "test_lines": 422,
+      "test_functions": 26,
+      "max_test_function_lines": 30
+    },
+    "bounds": "Runtime260/8functions/max40; ORM35net/migration40net; test425/26functions/max50 after explicit pre-edit revisions."
+  },
+  "retrieval": {
+    "owner_query": "agent_market durable pending payout SQLite transaction immutable transfer intent authorization treasury retry migration",
+    "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+    "ok": false,
+    "freshness": "UNKNOWN",
+    "index_gap_detected": true,
+    "reindexed": false,
+    "evaluation": {
+      "noise": "Historical chain plans were separated from current implementations.",
+      "ordering": "Module docs and existing transaction/test owners before changes.",
+      "missing": "memory/README.md and requirements.txt absent.",
+      "staleness": "Git-blob comparison bound all8 original source owners and six docs from e6 research through944 and6fe; no semantic CURRENT claim.",
+      "duplication": "Reuse one Base, session and payout-history owner; no parallel registry/ledger."
+    }
+  },
+  "test_runs": {
+    "baseline": {
+      "label": "Unchanged pending/ORM/migration baseline",
+      "counts": {
+        "passed": 80
+      },
+      "exit_code": 0,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": 5.739460229873657,
+      "external_receipt_sha256": "a00840f322147535fea6dcde051bce576d123a935b4b30dd9d1f5c872b629f6e"
+    },
+    "red_contract_v1": {
+      "label": "Declaration-only scaffold; original89 acceptance RED",
+      "counts": {
+        "failed": 89,
+        "passed": 80
+      },
+      "exit_code": 1,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": 12.126973390579224,
+      "external_receipt_sha256": "eae18a49209e9520c46e92602213030b556fa2681c0083bc9539d4790942fe76"
+    },
+    "red_contract_v2": {
+      "label": "Constructor/legacy13-table clarification;90 RED",
+      "counts": {
+        "failed": 90,
+        "passed": 80
+      },
+      "exit_code": 1,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": 12.655579805374146,
+      "external_receipt_sha256": "96b3f9462715a64cb1efbd6d6ea108b9a085f6cb3c94ad56afef4777dd282944"
+    },
+    "red_contract_v3": {
+      "label": "Strengthened retry/race/schema assertions;90 RED",
+      "counts": {
+        "failed": 90,
+        "passed": 80
+      },
+      "exit_code": 1,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": 12.451204776763916,
+      "external_receipt_sha256": "0f5c3ac1103882928ae1b2cc4c5b11b54ed9c58e79992b5eaf8d24a04d3d1a8a"
+    },
+    "green_initial": {
+      "label": "First runtime170 passes; before generated-column repair",
+      "counts": {
+        "passed": 170
+      },
+      "exit_code": 0,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": 12.051542282104492,
+      "external_receipt_sha256": "c30a562b435ad939325d71f838e2cfa4b8393ab0d5241d96d01d24ba13bad40f"
+    },
+    "independent_initial": {
+      "label": "Independent initial14 passes/one generated-column failure",
+      "counts": {
+        "passed": 14,
+        "failed": 1
+      },
+      "exit_code": null,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": null,
+      "external_receipt_sha256": "f75d8f8d1356705c3c295b4c04ce5f322f8fb62f652b31cdc272d82e861282bd"
+    },
+    "red_generated_column": {
+      "label": "Regression before tiny repair; same-FoundUp fixture correction is after initial authoring",
+      "counts": {
+        "passed": 172,
+        "failed": 1
+      },
+      "exit_code": 1,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": 12.178737878799438,
+      "external_receipt_sha256": "bf7065988285cbfdd41eec79858fc50a2fbdef66fe4249407dc82469533b6c77"
+    },
+    "green_repaired": {
+      "label": "Repaired173 focused passes",
+      "counts": {
+        "passed": 173
+      },
+      "exit_code": 0,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": 12.553631067276001,
+      "external_receipt_sha256": "239b7ba5909782cbfc14e50e96d2636513f5efadcd5cc78c29ba7644068f3231"
+    },
+    "independent_repaired": {
+      "label": "Replayed15 plus one new STORED generated-column control;16 passes",
+      "counts": {
+        "passed": 16
+      },
+      "exit_code": null,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": null,
+      "external_receipt_sha256": "7513dd853f2caedfbe2396ab0b4959ec068e805570873f4c48266de95e8873a4"
+    },
+    "diagnostic_standalone_central": {
+      "label": "459 assertion passes; central import stub, not accepted all-FAM qualification",
+      "counts": {
+        "passed": 459
+      },
+      "exit_code": 0,
+      "qualification_exit_code": null,
+      "qualification_status": null,
+      "qualification_failures": [],
+      "seconds": 24.802741050720215,
+      "external_receipt_sha256": "2d82fd9521c893845c05ca03387ba369d956e2690b09b220f4c2f9790827d324"
+    },
+    "all_fam_inventory_gap": {
+      "label": "459 assertion passes; qualification rejected for20 unbound loaded bridge files",
+      "counts": {
+        "passed": 459
+      },
+      "exit_code": 0,
+      "qualification_exit_code": 1,
+      "qualification_status": "NOT_QUALIFIED",
+      "qualification_failures": [
+        "loaded_repository_source_not_prebound"
+      ],
+      "seconds": 25.249016284942627,
+      "external_receipt_sha256": "4a584f604f48e431bc362275432bec756bcdae37680bcb6c222a3c2dffd7a396"
+    },
+    "all_fam_qualified": {
+      "label": "Fresh released real-central203-source qualification;459 passes",
+      "counts": {
+        "passed": 459
+      },
+      "exit_code": 0,
+      "qualification_exit_code": 0,
+      "qualification_status": "QUALIFIED",
+      "qualification_failures": [],
+      "seconds": 24.859050512313843,
+      "external_receipt_sha256": "adf80cd88de5c17552a1851dee4ce691a189eef58f2e16ed8d71b5bdb0301b91"
+    }
+  },
+  "failure_chronology": [
+    "Unchanged80 baseline precedes separately approved declaration-only74-line scaffold; initial REDs are against that scaffold, not wholly unchanged declarations.",
+    "V1 89F80P retained; v2/v3 90F80P reflect pre-product constructor/snapshot and retry/race/schema refinements.",
+    "Initial170 GREEN and independent14P1F are retained. Extra VIRTUAL generated column passed table_info-based schema admission on a supplied altered database.",
+    "Original A04 later-task fixture was other-FoundUp; independent genuine same-FoundUp positive passed before real-API fixture correction. No SQL relabeling or retroactive test-first claim.",
+    "V4 retains other-FoundUp, adds same-FoundUp and two generated-column variants. Desired regression1F172P preceded tiny table_xinfo/hidden0 repair. Required-generated case already rejected.",
+    "Repaired173 GREEN and independent16 PASS bind final freeze. New STORED-generated held-out added only after repair.",
+    "Competing459 central-import-stub run is diagnostic only, separate from agreed qualification.",
+    "First agreed real-central459 assertion passes were rejected for20 unprebound bridge imports in183 inventory. Inventory-only203 repair preceded explicitly released fresh459 qualified phase.",
+    "Repeated459 runs use identical node IDs; focused173 is a subset. Independent probes overlap behaviors; no summed unique-case claim."
+  ],
+  "exact_test_inventory": {
+    "path": "docs/architecture/receipts/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.testcases.json",
+    "sha256": "40c6465ebb1d66551797c5e30e65acf8e9c25718c82b99a2c4d3ebdd3709b530",
+    "counts_overlap": true,
+    "focused173_subset_of_final459": true,
+    "first_and_final_agreed459_same_ordered_ids": true,
+    "format": "Per-run exact IDs, outcomes/phases and source-snapshot references; deduplicated source maps once in _source_snapshots."
+  },
+  "source_snapshot": {
+    "freeze_sha256": "b856ceac9217ad5e8fe5eca9e8927da1b708a54793a7582b6056937e0428d6dc",
+    "authoring_base": "6fe7eba424c17f7813043dfb104cd845617cab38",
+    "initial_worktree_base": "944127df3856c0be4a545fce926ac17b86320576",
+    "files": {
+      "modules/foundups/agent_market/src/persistence/testnet_transfer_intents.py": {
+        "raw_sha256": "d6a9bc8ec4cd82a767e37898cc4f5ee1eaecfd023e22de675f60d015f40056bc",
+        "lf_sha256": "d6a9bc8ec4cd82a767e37898cc4f5ee1eaecfd023e22de675f60d015f40056bc",
+        "lines": 233,
+        "functions": {
+          "_require": 3,
+          "_validate": 27,
+          "_schema": 29,
+          "_canonical": 5,
+          "_identity": 7,
+          "_result": 13,
+          "_store_or_replay": 16,
+          "prepare": 31
+        }
+      },
+      "modules/foundups/agent_market/src/persistence/orm_models.py": {
+        "raw_sha256": "349defcfd9ab0c8cd6f4065498a31078840c12d734f173a4517658aed3f80a01",
+        "lf_sha256": "dd3bae542888e075f7ed84abfa67f8dbc72bfb6f4b5786a4143d75171194f0da",
+        "lines": 262,
+        "functions": {}
+      },
+      "modules/foundups/agent_market/src/persistence/migrations.py": {
+        "raw_sha256": "ac07db235215bcda94bc9e35cabac138bd2282e3139d40e175b5a8336278bd54",
+        "lf_sha256": "6254928f6241f53fbb6d0963c2964e816fec51902f0fee8172ca896f2fdd61e1",
+        "lines": 187,
+        "functions": {
+          "__init__": 2,
+          "ensure_migration_table": 13,
+          "get_current_version": 5,
+          "migrate": 14,
+          "list_applied_versions": 8,
+          "_apply_migration": 14
+        }
+      },
+      "modules/foundups/agent_market/src/persistence/sqlite_adapter.py": {
+        "raw_sha256": "b6e1217a86a399b6501670d36740327c553a9dcf796aff99f75ace36eadb77bd",
+        "lf_sha256": "4a16be90334c17f9c325de6388505301715e25e21867312ef527ce04d71afec3",
+        "lines": 1131,
+        "functions": {
+          "set_sqlite_pragma": 9,
+          "_compute_decision": 21,
+          "_debit_in_session": 21,
+          "_payout_require": 3,
+          "_payout_text": 2,
+          "_payout_identity": 34,
+          "_payout_reference_scopes": 12,
+          "_payout_event_scopes": 15,
+          "_payout_scope_requires_check": 4,
+          "_payout_event_mentions": 4,
+          "_validate_pending_payout": 40,
+          "_payout_history": 31,
+          "_stage_payout": 20,
+          "_payout_value": 3,
+          "__init__": 54,
+          "close": 4,
+          "session": 11,
+          "create_foundup": 24,
+          "get_foundup": 15,
+          "update_foundup": 10,
+          "list_foundups": 16,
+          "create_task": 21,
+          "get_task": 7,
+          "update_task": 12,
+          "list_tasks": 5,
+          "_row_to_task": 16,
+          "create_proof": 15,
+          "get_proof": 15,
+          "create_verification": 14,
+          "get_verification": 14,
+          "create_payout": 15,
+          "get_payout": 15,
+          "update_payout": 10,
+          "initiate_payout": 31,
+          "create_event": 17,
+          "query_events": 31,
+          "create_distribution": 17,
+          "get_distribution": 17,
+          "get_distribution_by_task": 17,
+          "create_agent_profile": 14,
+          "get_agent_profile": 13,
+          "list_agents": 14,
+          "save_token_terms": 25,
+          "get_token_terms": 14,
+          "_now_utc": 2,
+          "_next_id": 4,
+          "_ensure_wallet_row": 12,
+          "activate_compute_plan": 42,
+          "get_wallet": 13,
+          "ensure_access": 9,
+          "purchase_credits": 43,
+          "debit_credits": 15,
+          "rebate_credits": 33,
+          "record_compute_session": 30,
+          "get_compute_session": 15,
+          "list_compute_ledger": 25
+        }
+      },
+      "modules/foundups/agent_market/tests/test_testnet_transfer_intents.py": {
+        "raw_sha256": "16d2963cfcb5d39ef0ca6b468ff8b39109d651390bbe03b841e7ab0d28372b3e",
+        "lf_sha256": "16d2963cfcb5d39ef0ca6b468ff8b39109d651390bbe03b841e7ab0d28372b3e",
+        "lines": 422,
+        "functions": {
+          "_old": 3,
+          "_intents": 4,
+          "_snapshot": 5,
+          "ready": 13,
+          "_prepare": 5,
+          "_reject": 5,
+          "test_explicit_atoms_prepare_without_old_state_effects": 12,
+          "test_exact_retry_reopen_and_original_pending_call": 12,
+          "test_later_legitimate_task_still_initiates": 22,
+          "test_current_authority_is_required_on_every_call": 2,
+          "test_other_legitimate_treasury_cannot_take_over": 3,
+          "test_each_submitted_identity_field_is_bound": 5,
+          "test_host_scope_and_recipient_binding": 2,
+          "test_invalid_amount_types_and_range_have_no_effect": 2,
+          "test_invalid_fee_decimals_and_expiry": 2,
+          "test_invalid_host_policy_has_no_effect": 2,
+          "test_submitted_quantity_fee_and_recipient_limits": 2,
+          "test_exact_numeric_caps_and_zero_decimals_remain_valid": 5,
+          "test_payload_and_identity_types_fail_closed": 4,
+          "test_records_are_immutable_without_nested_mutation": 9,
+          "test_retry_revalidates_current_inputs_without_overwriting": 14,
+          "test_corrupted_intent_is_never_overwritten": 7,
+          "test_ambiguous_existing_history_is_not_repaired": 14,
+          "test_unqualified_schema_never_gains_admission": 25,
+          "test_non_sqlite_rejects_before_session": 5,
+          "test_insert_failure_rolls_back_and_reopen_sees_no_intent": 18,
+          "test_lost_response_keeps_one_record_without_renewal": 19,
+          "test_two_adapters_serialize_identical_and_conflicting_content": 30,
+          "test_first_admission_rejects_at_exact_expiry": 3,
+          "test_one_admission_clock_sample": 8,
+          "test_v2_upgrade_is_additive_and_repeatable": 10,
+          "test_busy_writer_has_no_fallback_and_can_retry_after_release": 19,
+          "interrupt": 4,
+          "lost_response": 4,
+          "run": 6,
+          "clock": 3,
+          "no_wait": 3
+        }
+      },
+      "modules/foundups/agent_market/tests/test_sqlite_adapter.py": {
+        "raw_sha256": "e34a15dd18a6fabce38bf82a05a630dabdc86e5e20903a89a242cc6d4c6e2b0b",
+        "lf_sha256": "91bf8e0f19cb9d8f7987a5366dbe534af32f2d7e09ea1353128ce3e54910ad84",
+        "lines": 218,
+        "functions": {
+          "adapter": 7,
+          "test_shared_orm_compatibility_aliases": 12,
+          "test_legacy_orm_pickle_globals_resolve": 7,
+          "test_transient_orm_row_pickle_round_trip": 14,
+          "test_creates_database_file": 8,
+          "test_creates_parent_directories": 8,
+          "test_wal_mode_enabled": 5,
+          "test_tables_created": 24,
+          "test_session_commits_on_success": 13,
+          "test_session_rollback_on_error": 17,
+          "test_foundup_row_columns": 14,
+          "test_task_row_columns": 20,
+          "test_default_db_path": 8
+        }
+      }
+    },
+    "old_orm_class_asts_unchanged": true,
+    "legacy13_dictionary_and_pickle_asts_unchanged": true,
+    "adapter_unchanged": true,
+    "qualified_source_count": 203,
+    "qualified_source_snapshot_ref": "3e2c34232a03b80ca2de19b94d82c7387253d0ae3b111cd3343f016d7ed41904",
+    "qualified_all_sources_stable": true
+  },
+  "hash_domains": [
+    "Raw SHA-256 binds observed working bytes; LF-normalized hashes in freeze are separate and must not be substituted for raw Git/working hashes.",
+    "Companion source-map references hash sorted compact UTF-8 JSON with ensure_ascii=False; actual source digest values remain raw bytes.",
+    "Receipt/companion raw SHA-256 binds packaging bytes and does not prove host authority or historical execution."
+  ],
+  "isolation": {
+    "final": [
+      "Qualified existing O: Python -B -X utf8; bytecode/plugin/cache/dotenv disabled.",
+      "Original whole-directory pytest imports/assertions, fixed external basetemp and DB/TEMP.",
+      "Real central singleton configured external before FAM construction; runner never starts it.",
+      "No FAMDaemon constructor/path rewriting; explicit supplied test data_dir semantics unchanged.",
+      "Python audit denies filesystem mutations outside phase, audits SQLite connect paths and denies unresolved/URI/external DB paths.",
+      "Socket/DNS/listen/bind and subprocess guards; provider/model/chain imports denied.",
+      "Only optional help Holo/Qwen enrichment returns None, counted and disclosed."
+    ],
+    "central": {
+      "data_dir": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-allfam-prepared-09c1d91256b348318197b70bfaa36fcb\\all_fam_repaired_candidate_v2\\central_daemon",
+      "state_before": "stopped",
+      "state_after": "stopped",
+      "started_by_runner": false
+    },
+    "guard_attempts": {
+      "network": [],
+      "process": [],
+      "writes_denied": [],
+      "dotenv_reads": [],
+      "imports_denied": [],
+      "sqlite_denied": []
+    },
+    "sqlite_connection_count": 1061,
+    "default_store_stat_drift": false,
+    "only_enrichment_stubs": "fam_adapter._holo_retrieve and _qwen_enrich return None; parser/static help/assertions retained.",
+    "diagnostic_difference": "Our separate diagnostic forces optional central import to ImportError; excluded from agreed qualification."
+  },
+  "external_artifacts": {
+    "baseline": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\baseline\\receipt.json",
+      "sha256": "a00840f322147535fea6dcde051bce576d123a935b4b30dd9d1f5c872b629f6e"
+    },
+    "red_contract_v1": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\red_contract_v1\\receipt.json",
+      "sha256": "eae18a49209e9520c46e92602213030b556fa2681c0083bc9539d4790942fe76"
+    },
+    "red_contract_v2": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\red_contract_v2\\receipt.json",
+      "sha256": "96b3f9462715a64cb1efbd6d6ea108b9a085f6cb3c94ad56afef4777dd282944"
+    },
+    "red_contract_v3": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\red_contract_v3\\receipt.json",
+      "sha256": "0f5c3ac1103882928ae1b2cc4c5b11b54ed9c58e79992b5eaf8d24a04d3d1a8a"
+    },
+    "green_initial": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\green_candidate_v1\\receipt.json",
+      "sha256": "c30a562b435ad939325d71f838e2cfa4b8393ab0d5241d96d01d24ba13bad40f"
+    },
+    "independent_initial": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-independent-v1-20261025\\receipt.json",
+      "sha256": "f75d8f8d1356705c3c295b4c04ce5f322f8fb62f652b31cdc272d82e861282bd"
+    },
+    "red_generated_column": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\red_generated_column_v1\\receipt.json",
+      "sha256": "bf7065988285cbfdd41eec79858fc50a2fbdef66fe4249407dc82469533b6c77"
+    },
+    "green_repaired": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\green_candidate_v2\\receipt.json",
+      "sha256": "239b7ba5909782cbfc14e50e96d2636513f5efadcd5cc78c29ba7644068f3231"
+    },
+    "independent_repaired": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-independent-v2-20261025\\receipt.json",
+      "sha256": "7513dd853f2caedfbe2396ab0b4959ec068e805570873f4c48266de95e8873a4"
+    },
+    "diagnostic_standalone_central": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\full_fam_v1\\receipt.json",
+      "sha256": "2d82fd9521c893845c05ca03387ba369d956e2690b09b220f4c2f9790827d324"
+    },
+    "all_fam_inventory_gap": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-allfam-prepared-09c1d91256b348318197b70bfaa36fcb\\all_fam_repaired_candidate\\receipt.json",
+      "sha256": "4a584f604f48e431bc362275432bec756bcdae37680bcb6c222a3c2dffd7a396"
+    },
+    "all_fam_qualified": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-allfam-prepared-09c1d91256b348318197b70bfaa36fcb\\all_fam_repaired_candidate_v2\\receipt.json",
+      "sha256": "adf80cd88de5c17552a1851dee4ce691a189eef58f2e16ed8d71b5bdb0301b91"
+    },
+    "source_comparison.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\source_comparison.json",
+      "sha256": "b7e8a83b640f8784bb2603821a6e22b8b3b0c2f8840c1dca4b22dc5e670e90fa"
+    },
+    "source_comparison_after_main.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\source_comparison_after_main.json",
+      "sha256": "cef1c5579487fb490f9fc94eaa307e1ac858b9966d903227d081bfa9b0c34250"
+    },
+    "declaration_receipt.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\declaration_receipt.json",
+      "sha256": "765b73841151fef7cf862e076a612d7e6faef1d7b41741c26d5f1e608233aa9d"
+    },
+    "acceptance_inventory_v1.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\acceptance_inventory_v1.json",
+      "sha256": "5d9a1bbff85a1bff4f088281f1d8f0d4073147244e914c9b4ff7257ceb255d02"
+    },
+    "acceptance_inventory_v2.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\acceptance_inventory_v2.json",
+      "sha256": "9237ac6900cb7705800e3a5cd6031d0df83980c8a50c4ad61df73dee9fa2ecaf"
+    },
+    "acceptance_inventory_v3.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\acceptance_inventory_v3.json",
+      "sha256": "c51e94a69db0bc5cf12e2b4067d34ef44b419eba9f84425c672029c078e51be2"
+    },
+    "acceptance_inventory_v4.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\acceptance_inventory_v4.json",
+      "sha256": "122c813d13ff8204fdf763b86b23148d623cbfb4a7e4730439a2890c238e0e23"
+    },
+    "runtime_freeze_v1.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\runtime_freeze_v1.json",
+      "sha256": "4c44533e5756be5e379ade69e027c79748ad4861f00602c0d283bf884c03748f"
+    },
+    "runtime_freeze_v2.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\runtime_freeze_v2.json",
+      "sha256": "b856ceac9217ad5e8fe5eca9e8927da1b708a54793a7582b6056937e0428d6dc"
+    },
+    "test_only_handoff_v3.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-intent-plan-c3806aa510aa45d1b7d8d7b9c37125b8\\test_only_handoff_v3.json",
+      "sha256": "a6199dbb387440542bcbd772a1d36736ac4ce3843a1f314040ed8bcb06efa5c8"
+    },
+    "qualification_handoff_v3.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-allfam-prepared-09c1d91256b348318197b70bfaa36fcb\\qualification_handoff_v3.json",
+      "sha256": "3d85859e78d89da4d39b594075553a82f8398ab0de5ab7b0046ba4810f1d26c6"
+    },
+    "inventory_repair_v3.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-allfam-prepared-09c1d91256b348318197b70bfaa36fcb\\inventory_repair_v3.json",
+      "sha256": "7fde2da038d0396f50de98c343df9232702f221649f77f6b1fc993350656750a"
+    },
+    "testcases.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-allfam-prepared-09c1d91256b348318197b70bfaa36fcb\\all_fam_repaired_candidate_v2\\testcases.json",
+      "sha256": "cf92ed5f81f0cc161e0c67f2a67011ef8fe1ee539ded56d24d250e5190832c01"
+    },
+    "testnet_numeric_closure_readonly_assessment.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-testnet-allfam-prepared-09c1d91256b348318197b70bfaa36fcb\\testnet_numeric_closure_readonly_assessment.json",
+      "sha256": "b884adb5664c2045e34e2189a41996cdc8e7fcd85de9cd75f095202f4a78325e"
+    },
+    "report.json": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-fam-testnet-prerequisite-research-4mw35kmj\\report.json",
+      "sha256": "1f636ef906cb3009e624d95d4b7b635e2cd666048678870526acc8d3029261f5"
+    }
+  },
+  "validation_limits": [
+    "Process-level Python guards are not OS isolation or proof against hostile native code/raw syscalls, already-open descriptors or audit-hook bypass.",
+    "SQLite native journal/WAL writes are constrained indirectly by audited database connection paths, not individually observed Python open events.",
+    "External dependency behavior, model/Holo quality, PostgreSQL/server/native runtime, auth issuer, real signer/network/chain/provider/SSE/settlement remain unqualified.",
+    "Before/after default-store stats are size/mtime metadata over this run only; no historical default-store write claim.",
+    "Actual case IDs/counts/outcomes measured only after explicit repaired-freeze execution release; preparation itself executes no tests or collection.",
+    "Any guard denial/setup failure is retained; no silent path rewrite or broader stub added to force pass.",
+    "No PostgreSQL, resident source admission, production authority issuer, real wallet control or paid settlement claim.",
+    "WSP26 transfer-policy conflict remains unresolved; this probe does not imply UPS/F_i redeemability or tradability."
+  ],
+  "publication": {
+    "status": "external package prepared for parent review; not staged, committed, published or merged by this worker",
+    "generated_source_closure": "Not modified or qualified here. No artificial runtime import/export/root or automatic cap increase."
+  },
+  "artifact_packaging": {
+    "format_source": "Existing published epoch/BTC WSP97 receipt plus exact-case companion; source maps deduplicated instead of repeated in every run.",
+    "main_max_bytes": 262144,
+    "companion_bytes": 1822244,
+    "correction_chronology": [
+      "First and second external frozen drafts are retained intact in siblings portable_review_v1 and portable_review_v2; no runtime/test edits or reruns.",
+      "Peer review found46 diagnostic source keys prefixed before Windows-separator normalization. Raw diagnostic receipt remains unchanged; companion _path_normalization records exact mapping and independent current raw-source equality for all46 normalized paths.",
+      "First saved validator result used CRLF raw bytes (09edd27b547dda76523969ef319c9f9aefd667367ba7060bbaff92aa21eaffe5); packaging_checks had recorded its LF-normalized stdout SHA (bcc68cd4c5b689cbce96d7645eb3384ff971503ea988e7612f5eb960e2413e34). These are distinct domains, not validator disagreement. Fresh packaging checks must hash saved bytes explicitly.",
+      "Peer v2 review caught a repair regression: a shadowed local source path replaced12 run receipt descriptors/digests with source-file references. Raw receipts were never changed. V3 restores all12 descriptors and per-run receipt hashes against retained v1 and adds JSON receipt-kind/binding assertions."
+    ]
+  }
+}
