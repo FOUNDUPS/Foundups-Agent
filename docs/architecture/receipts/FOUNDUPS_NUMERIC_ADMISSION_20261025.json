@@ -1,0 +1,974 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "6fe7eba424c17f7813043dfb104cd845617cab38"
+  },
+  "execution_id": "FOUNDUPS_NUMERIC_ADMISSION_20261025",
+  "execution_plane": "Existing local simulator arithmetic; process-instrumented offline qualification and evidence packaging",
+  "outcome": "completed",
+  "scope": "Selected numeric source and local evidence packaging only; not overall FoundUps, publication, financial activation or runtime promotion completion.",
+  "completion_boundary": "LOCAL_SOURCE_QUALIFIED_PUBLICATION_GATES_PENDING",
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_97"
+  ],
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md",
+      "modules/foundups/simulator/INTERFACE.md",
+      "modules/foundups/simulator/tests/TestModLog.md"
+    ],
+    "research": [
+      "docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md",
+      "Holo root HEAD mismatch; no semantic CURRENT claim or reindex; existing selected arithmetic and callsites read."
+    ],
+    "micro_pass": [
+      "modules/foundups/simulator/economics/token_economics.py",
+      "modules/foundups/simulator/economics/_token_numeric.py",
+      "modules/foundups/simulator/tests/test_alignment_and_tokenomics.py"
+    ],
+    "macro_pass": [
+      "modules/foundups/simulator/tests",
+      "Actual combined-main736 cases include original6 and adjacent8, exact3 SSE exclusions."
+    ],
+    "hard_think": [
+      "Pure scalar preparation avoids live-mutator cloning and preflight logs; numeric admission does not resolve aggregate issuance or asset units."
+    ],
+    "dialectic_sweep": [
+      "Optional-None oracle correction and actual valid-normalization regression retained with chronological RED/GREEN evidence."
+    ],
+    "first_principles": [
+      "Validate selected prospective arithmetic before participating mutations; no generic transaction framework or second ledger."
+    ],
+    "execute": [
+      "docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md",
+      "docs/architecture/receipts/FOUNDUPS_NUMERIC_ADMISSION_20261025.testcases.json",
+      "Source15/P1 implemented; local evidence packaged14/P1; derived16/P0 and independent metadata review remain separately gated."
+    ]
+  },
+  "compliance_evidence": [
+    "docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md",
+    "modules/foundups/simulator/INTERFACE.md",
+    "modules/foundups/simulator/tests/TestModLog.md",
+    "docs/architecture/receipts/FOUNDUPS_NUMERIC_ADMISSION_20261025.testcases.json"
+  ],
+  "allocation": {
+    "product": "C3/I4/D4/Impact4=15/P1",
+    "packaging": "C2/I4/D4/Impact4=14/P1",
+    "derived_closure": "C2/I5/D5/Impact4=16/P0",
+    "metadata_rebinding": "C1/I4/D5/Impact4=14/P1; separate independent approval required"
+  },
+  "retrieval": {
+    "ok": false,
+    "freshness": "UNKNOWN",
+    "index_gap_detected": true,
+    "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+    "reindex": false,
+    "evaluation": "Current six module/test memory docs and exact source precede historical proposals; direct rg/NAVIGATION resolves missing owner hits; memory/README.md and module requirements.txt absent; optional SSE requirements not installed."
+  },
+  "test_runs": {
+    "baseline": {
+      "counts": {
+        "passed": 3
+      },
+      "collected": 3,
+      "exit_code": 0,
+      "seconds": 0.25,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "baseline"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\baseline\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\baseline",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\baseline\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\baseline\\receipt.json",
+      "external_receipt_raw_sha256": "70d49486bc3091b677c724febdc8996b52ddf58f9b94b69ae8fd54de5ec16c88",
+      "source_hash_count": 3,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "red": {
+      "counts": {
+        "passed": 16,
+        "failed": 184
+      },
+      "collected": 200,
+      "exit_code": 1,
+      "seconds": 3.609000000054948,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "red"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red\\receipt.json",
+      "external_receipt_raw_sha256": "5e97d96942be4a77fe591811d89b2a41606d526d74b1cc84e6c627664da838f1",
+      "source_hash_count": 3,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "red_temporal": {
+      "counts": {
+        "passed": 18,
+        "failed": 200
+      },
+      "collected": 218,
+      "exit_code": 1,
+      "seconds": 4.657000000006519,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "red_temporal"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_temporal\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_temporal",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_temporal\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_temporal\\receipt.json",
+      "external_receipt_raw_sha256": "69d01060a76bf452087d83df8bc613ae3c398343522eb98d7d08546b54528586",
+      "source_hash_count": 3,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "red_final": {
+      "counts": {
+        "passed": 19,
+        "failed": 200
+      },
+      "collected": 219,
+      "exit_code": 1,
+      "seconds": 4.796999999904074,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "red_final"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_final\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_final",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_final\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_final\\receipt.json",
+      "external_receipt_raw_sha256": "80104d653eaf6505a49620956d9ff2bf4f7a17a0a732a8d86374f2f76437cb7a",
+      "source_hash_count": 3,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "red_representability": {
+      "counts": {
+        "passed": 19,
+        "failed": 206
+      },
+      "collected": 225,
+      "exit_code": 1,
+      "seconds": 5.094000000040978,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "red_representability"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_representability\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_representability",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_representability\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_representability\\receipt.json",
+      "external_receipt_raw_sha256": "ac84705b75ea606e68b31f3dd46f7e782b237b2d98d597173b8a89ffaae1d232",
+      "source_hash_count": 3,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "green_candidate": {
+      "counts": {
+        "passed": 224,
+        "failed": 1
+      },
+      "collected": 225,
+      "exit_code": 1,
+      "seconds": 0.8280000000959262,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "green_candidate"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_candidate\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_candidate",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_candidate\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_candidate\\receipt.json",
+      "external_receipt_raw_sha256": "b4bbef1669ca4bfd2dba7b84cce0d6fd9614ca9bc83185ae0bc659eb7026361c",
+      "source_hash_count": 4,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "red_corrected_after_authoring": {
+      "counts": {
+        "passed": 20,
+        "failed": 205
+      },
+      "collected": 225,
+      "exit_code": 1,
+      "seconds": 4.952999999979511,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "red_corrected_after_authoring",
+        "C:/Users/user/AppData/Local/Temp/foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072/red_representability/inputs/modules/foundups/simulator/economics/token_economics.py"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_corrected_after_authoring\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_corrected_after_authoring",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_corrected_after_authoring\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_corrected_after_authoring\\receipt.json",
+      "external_receipt_raw_sha256": "dda88c727b0666a3d94335c95249ff820e1468937f0c8f4032f1231d1d0a510e",
+      "source_hash_count": 4,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "green_corrected": {
+      "counts": {
+        "passed": 225
+      },
+      "collected": 225,
+      "exit_code": 0,
+      "seconds": 0.7029999999795109,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "green_corrected"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_corrected\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_corrected",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_corrected\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_corrected\\receipt.json",
+      "external_receipt_raw_sha256": "da5fd4e81cf1d9e109468c9a251cb7a968aea2a3ed55f6dc6e03fbbabf97abf3",
+      "source_hash_count": 4,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "red_policy_normalization": {
+      "counts": {
+        "passed": 225,
+        "failed": 1
+      },
+      "collected": 226,
+      "exit_code": 1,
+      "seconds": 0.765999999945052,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "red_policy_normalization"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_policy_normalization\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_policy_normalization",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_policy_normalization\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\red_policy_normalization\\receipt.json",
+      "external_receipt_raw_sha256": "8cd761c83df954c0ad86893b38fc66c0983830ba6c53bf334fae9c41b3e7663b",
+      "source_hash_count": 4,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "green_policy_fixed": {
+      "counts": {
+        "passed": 226
+      },
+      "collected": 226,
+      "exit_code": 0,
+      "seconds": 0.734000000054948,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\run_numeric.py",
+        "green_policy_fixed"
+      ],
+      "pytest_args": [
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_policy_fixed\\test_numeric_projection.py",
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "-o",
+        "python_files=test_*.py",
+        "--confcutdir",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_policy_fixed",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_policy_fixed\\pytest-temp"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\green_policy_fixed\\receipt.json",
+      "external_receipt_raw_sha256": "4925f73791c78a0a562db9a613d4a932d91434da7b8c502e14293d1146164925",
+      "source_hash_count": 4,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "exact selected AST projection; original file imports and 3 unrelated originals excluded",
+      "warnings": []
+    },
+    "independent": {
+      "counts": {
+        "passed": 28
+      },
+      "collected": 28,
+      "exit_code": 0,
+      "seconds": null,
+      "command": [
+        "O:\\RedDog-Builder-Artifacts\\cpython-3.12.10-amd64\\runtime\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:/Users/user/AppData/Local/Temp/foundups-numeric-independent-qualified-0lfo947b/probe.py",
+        "C:/Users/user/.codex/worktrees/foundups-fx-chain-delivery/Foundups-Agent"
+      ],
+      "pytest_args": null,
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-independent-qualified-0lfo947b\\receipt.json",
+      "external_receipt_raw_sha256": "07053c264d5cc7fc197d56364fab5855db6edd66b6507e3f05d70464f6651367",
+      "source_hash_count": 3,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "Exact untouched core/private files under a minimal external namespace; original f11 Git blob separately direct-loaded. No repository package initializer, AST/economic substitution or cloned mutator staging.",
+      "warnings": []
+    },
+    "original_full633": {
+      "counts": {
+        "passed": 633
+      },
+      "collected": 633,
+      "exit_code": 0,
+      "seconds": 65.00868153572083,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-full-closure-bc3e165ee4f2492b9c4452dfa348630b\\run_full_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-full-closure-bc3e165ee4f2492b9c4452dfa348630b",
+        "numeric_simulator_closure",
+        "modules/foundups/simulator/tests",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-full-closure-bc3e165ee4f2492b9c4452dfa348630b\\numeric_simulator_closure\\pytest",
+        "modules/foundups/simulator/tests",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-full-closure-bc3e165ee4f2492b9c4452dfa348630b\\numeric_simulator_closure\\receipt.json",
+      "external_receipt_raw_sha256": "c8b3ac8276804ba453b1781c36c3be21a3201d53bca0a7c2eb8452eb4e0eb14b",
+      "source_hash_count": 169,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "Actual original pytest imports/files, no AST projection; process guards, not OS isolation",
+      "warnings": [
+        {
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n",
+          "category": "PytestConfigWarning"
+        },
+        {
+          "message": "Unknown config option: asyncio_mode\n",
+          "category": "PytestConfigWarning"
+        }
+      ],
+      "filesystem_audit_counts": {
+        "repository_write_attempts": 0,
+        "dotenv_path_attempts": 0,
+        "sqlite_connections": 13175,
+        "all_sqlite_scratch_or_memory": true
+      }
+    },
+    "combined_main736": {
+      "counts": {
+        "passed": 736
+      },
+      "collected": 736,
+      "exit_code": 0,
+      "seconds": 60.000924587249756,
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-combined-main-807cjgzp\\run_full_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-combined-main-807cjgzp",
+        "numeric_btc_combined_simulator",
+        "modules/foundups/simulator/tests",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-combined-main-807cjgzp\\numeric_btc_combined_simulator\\pytest",
+        "modules/foundups/simulator/tests",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-combined-main-807cjgzp\\numeric_btc_combined_simulator\\receipt.json",
+      "external_receipt_raw_sha256": "c33f012407a75069f6b8fb1139b8b8fbc292975b70cd0a1d74e27b06f6347119",
+      "source_hash_count": 169,
+      "source_stable": true,
+      "instrumented_network_or_guard_attempts": 0,
+      "method": "Actual original pytest imports/files, no AST projection; process guards, not OS isolation",
+      "warnings": [
+        {
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n",
+          "category": "PytestConfigWarning"
+        },
+        {
+          "message": "Unknown config option: asyncio_mode\n",
+          "category": "PytestConfigWarning"
+        }
+      ],
+      "filesystem_audit_counts": {
+        "repository_write_attempts": 0,
+        "dotenv_path_attempts": 0,
+        "sqlite_connections": 13532,
+        "all_sqlite_scratch_or_memory": true
+      }
+    }
+  },
+  "exact_test_inventory": {
+    "path": "docs/architecture/receipts/FOUNDUPS_NUMERIC_ADMISSION_20261025.testcases.json",
+    "raw_sha256": "724a6b79aaf453779f13dbc35c5cb57ff1b3f20039a3e6cee6b68053660bc327",
+    "counts_overlap": true
+  },
+  "source_snapshot": [
+    {
+      "path": "modules/foundups/simulator/economics/token_economics.py",
+      "raw_sha256": "f6d5411b70af889f2fc8578112a226f48bc247675b0bd925ca0a399064930c3d",
+      "git_lf_sha256": "06fe0e57e5d633bfc9ce64891e332d606f8b51e9a124813d7861d89b7260bab5",
+      "lines": 1351
+    },
+    {
+      "path": "modules/foundups/simulator/economics/_token_numeric.py",
+      "raw_sha256": "0703e6ce3022eae7d47a03cf2d2667791babb5c228d52c5e7c24a287c82be6ed",
+      "git_lf_sha256": "0703e6ce3022eae7d47a03cf2d2667791babb5c228d52c5e7c24a287c82be6ed",
+      "lines": 156
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_alignment_and_tokenomics.py",
+      "raw_sha256": "0cc53295edff740c1de3694b54fab676e7010fe699b07472070c1b9abda9435c",
+      "git_lf_sha256": "54a3670424dbceb9c509e3086aee363fce100d58c392f25158507043f0392b72",
+      "lines": 526
+    }
+  ],
+  "repository_reconciliation": {
+    "original_base": "f11d7559746bb64677e448ff8e4e24ebfcea8feb",
+    "source_commit": "dc844e3ba8a52d367af4e8e9f490316c88c9aa66",
+    "main": "6fe7eba424c17f7813043dfb104cd845617cab38",
+    "merge": "89486886f87dbe4216fdcfc3afa513cd23f2cac5",
+    "test_formatting": "One blank EOF line removed before commit; entire AST identical. Historical projected/633/28 raw test hash retained; fresh736 uses corrected bytes."
+  },
+  "isolation": {
+    "real_central_daemon_scratch_before_FAM": true,
+    "central_started_by_runner": false,
+    "central_callback_replacements": false,
+    "FAM_directory_redirect": true,
+    "Holo_Qwen_enrichment_returns_None": true,
+    "assertions_authority_math_substituted": false,
+    "default_store_stat_unchanged": true,
+    "guard_boundary": "Python/socket/SQLite/file instrumentation, not OS sandbox or installed runtime admission.",
+    "historical_limit": "Older runner without explicit central directory/audit cannot establish historical absence of default-store writes; no retrospective qualification."
+  },
+  "chronology": [
+    "baseline3 unchanged selected numeric ASTs pass; other3 originals deferred until full run",
+    "RED184F/16P then200F/18P then200F/19P; later225206F/19P contains one invalid None negative",
+    "unapplied clone-mutator draft rejected before canonical product; no effect claim",
+    "first pure candidate224P/1F exposed optional-None oracle; corrected original replay205F/20P happened AFTER authoring",
+    "corrected225 passes; actual valid integer normalization regression RED1F/225P precedes narrow float-normalization repair; final226 passes",
+    "independent first25P/3F from external separately-loaded enum identity oracle, corrected same28 IDs pass; prior argv omission preserved",
+    "full633 old base; test-only blank EOF correction AST-identical; fresh combined-main736 after BTC merge",
+    "first parent diff-check rejected extra EOF blank before any staging; corrected whitespace only"
+  ],
+  "validation_limits": [
+    "Selected work/stake/unstake and called mutators only; independent credit/conversion/profit/outer Mesa/CABR batches excluded.",
+    "No concurrency isolation, aggregate issuance/cap or epoch budget resolution, rounding/unit conversion, custody, provider, SDK, signer or funded transfer.",
+    "Exactly three existing SSE HTTP cases excluded; no live SSE qualification.",
+    "Two inherited inactive asyncio config warnings; overlapping counts are not added.",
+    "WSP97 validator proves structural/path/base ancestry, not evidence authenticity, reasoning or runtime effects.",
+    "Historical source, projected and full execution contexts remain distinct."
+  ],
+  "publication": {
+    "state": "ACTIVE_OWNED_WORK",
+    "requires": [
+      "hosted full security tree/history scans and all exact-head CI",
+      "dedicated PR",
+      "fresh main reconciliation and exact main readback"
+    ],
+    "overall_goal_completed": false,
+    "real_chain_effects": false
+  },
+  "external_artifacts": [
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-combined-main-807cjgzp\\summary.json",
+      "raw_sha256": "e6c9aef85e6cf819b177e3f15689e530c4b3d528d598f824bf2aa51c7beaaa3a"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-combined-main-807cjgzp\\default_store_comparison.json",
+      "raw_sha256": "733406d80144febb6b7cfd7ae502c8120ddf13d2d76fc1fa26a87e53c292b05b"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-combined-main-807cjgzp\\prepared_scope.json",
+      "raw_sha256": "ba6ea312f9d6b6869eab995bb1dbf91fd0c58ccdd2ad72db062717fdfd2242f6"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-testfirst-fc613fcc381141c98b319c94faffd072\\source_freeze.json",
+      "raw_sha256": "00606b35da952a30e802afbdb9f00c61c65b91b914ecb539cc51a0402dca051a"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-independent-qualified-0lfo947b\\source-review.json",
+      "raw_sha256": "5617b0a9836af1686d725c8cce699119220c05f41396e825950921da15dffd88"
+    }
+  ],
+  "structural_validation": {
+    "is_compliant": true,
+    "validated_base_commit": "6fe7eba424c17f7813043dfb104cd845617cab38",
+    "repository_head": "89486886f87dbe4216fdcfc3afa513cd23f2cac5",
+    "truth_boundary": "Structural/path/base ancestry only; not source/authenticity, reasoning or runtime-effect proof."
+  },
+  "derived_source_closure": {
+    "allocation": "C2/I5/D5/Impact4=16/P0 before edits",
+    "measured_delta": {
+      "old_canonical": "c97e153f6184bcc7f4232ae2d5b17e1af708ec2a104ce4119f549af4839d26cd",
+      "new_canonical": "9dbe09a75cd5e4e8b572af5b37729396bd184542a2214c8997fa8072dfc71d0c",
+      "old_whole_lf_sha256": "6b7144a0d847c7cc96aa095765c464667f0d684a2741cfbc532a227f6a7d6808",
+      "new_whole_lf_sha256": "e4416ceaafc4e9b335a8244223fa0e997873ba32cd87c2f30158a1df9c3e1849",
+      "added": [
+        "modules/foundups/simulator/economics/_token_numeric.py"
+      ],
+      "removed": [],
+      "changed": {
+        "modules/foundups/simulator/economics/token_economics.py": {
+          "old": "c1ffca9167b1ce1e335a0b7e41e982498941472535560e7a36dc5ad0680ac97a",
+          "new": "06fe0e57e5d633bfc9ce64891e332d606f8b51e9a124813d7861d89b7260bab5"
+        }
+      },
+      "dimensions": {
+        "members": 1471,
+        "manifest_lf_bytes": 332650,
+        "manifest_crlf_bytes": 335665,
+        "max_source_lf_bytes": 154924,
+        "total_source_lf_bytes": 19662855
+      },
+      "same_other_manifest_fields": true,
+      "measurement_correction": "Parent first expected alignment test digest too; assertion failed before pins changed. Actual test owner is outside required runtime closure; only token_economics changes plus one new member."
+    },
+    "qualification": {
+      "generate": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\closure_runner.py",
+          "generate",
+          "generator",
+          "--write"
+        ],
+        "entrypoint_argv": [
+          "scripts/generate_reddog_backend_manifest.py",
+          "--write"
+        ],
+        "exit_code": 0,
+        "seconds": 80.99246335029602,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1613,
+        "source_drift": true,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\generate\\receipt.json",
+        "external_receipt_raw_sha256": "a4fd8cf3413dd11f9d6685355d088057cbc67a9c946d71a98f2c3eac0e5457c6",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "old_member_cap_red": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\closure_runner.py",
+          "old_member_cap_red",
+          "node",
+          "extensions/reddog/tests/test_backend_compatibility_contract.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\extensions\\reddog\\tests\\test_backend_compatibility_contract.js"
+        ],
+        "exit_code": 1,
+        "seconds": 0.3710024356842041,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\old_member_cap_red\\receipt.json",
+        "external_receipt_raw_sha256": "9f78c59af2775f5e4f9c82e024438737c1f583de826e3e66969f12b78f206efc",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "check": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\closure_runner.py",
+          "check",
+          "generator",
+          "--check"
+        ],
+        "entrypoint_argv": [
+          "scripts/generate_reddog_backend_manifest.py",
+          "--check"
+        ],
+        "exit_code": 0,
+        "seconds": 67.09976696968079,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\check\\receipt.json",
+        "external_receipt_raw_sha256": "bbc73a2f373eb0d302f04041f5f7b2a607a12ac3782a950dd039cb525b957d0a",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "generator_cases": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\closure_runner.py",
+          "generator_cases",
+          "pytest",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "entrypoint_argv": [
+          "-q",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "addopts=",
+          "--confcutdir",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\scripts\\tests",
+          "--basetemp",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\generator_cases\\pytest",
+          "--junitxml",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\generator_cases\\results.xml",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "exit_code": 0,
+        "seconds": 70.39573740959167,
+        "counts": {
+          "passed": 8
+        },
+        "collected": [
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_package_initializers_resolve_relative_imports_from_their_package",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_generated_closure_binds_executable_and_dynamic_load_sentinels",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_generated_closure_binds_isolated_acceptance_entrypoint",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_newly_tracked_imported_runtime_dependency_cannot_be_omitted",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_untracked_local_import_fails_closed",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_checked_in_manifest_matches_independent_generation",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_extension_javascript_is_package_bound_not_backend_materialized",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_staged_index_manifest_is_self_consistent"
+        ],
+        "warnings": [
+          {
+            "category": "PytestConfigWarning",
+            "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+          },
+          {
+            "category": "PytestConfigWarning",
+            "message": "Unknown config option: asyncio_mode\n"
+          }
+        ],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\generator_cases\\receipt.json",
+        "external_receipt_raw_sha256": "5a0d7ebb37837b2f374e07684e15080be82cd0bcd34c21053386fa9a7bdb6776",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "node_contract": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\closure_runner.py",
+          "node_contract",
+          "node",
+          "extensions/reddog/tests/test_backend_compatibility_contract.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\extensions\\reddog\\tests\\test_backend_compatibility_contract.js"
+        ],
+        "exit_code": 0,
+        "seconds": 1.0081923007965088,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\node_contract\\receipt.json",
+        "external_receipt_raw_sha256": "4a246b1100940fc718ab73d3a0326e26b5e6ff0b72fe2813ea22f495afbccc6f",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "node_preflight": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\closure_runner.py",
+          "node_preflight",
+          "node",
+          "extensions/reddog/tests/test_backend_compatibility_preflight.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\extensions\\reddog\\tests\\test_backend_compatibility_preflight.js"
+        ],
+        "exit_code": 0,
+        "seconds": 41.29113245010376,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\node_preflight\\receipt.json",
+        "external_receipt_raw_sha256": "1a91763cc7434fbf60599d14f2166728d404a73e588cabdd0f11c1e79f7b6c61",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "node_recovery": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\closure_runner.py",
+          "node_recovery",
+          "node",
+          "extensions/reddog/tests/test_holoindex_blocked_request_recovery.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\extensions\\reddog\\tests\\test_holoindex_blocked_request_recovery.js"
+        ],
+        "exit_code": 0,
+        "seconds": 0.4618227481842041,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-source-closure-f3jex_4s\\node_recovery\\receipt.json",
+        "external_receipt_raw_sha256": "763da333c94a6efd8ff1b2e1969f6649b6a625efa84c1b760c658d9072720e0f",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      }
+    },
+    "member_boundary": "Current existing explicit Node oracle1471 accepts/1472 rejects. Old oracle RED is its1470 expected-count assertion on actual1471 before validator invocation; not old-validator execution proof.",
+    "caps": "328KiB manifest including LF/CRLF,2MiB per source,32MiB total unchanged.",
+    "metadata_status": "38 proposed;37 unchanged source/context,1 known token_economics source digest change. Independent review required before ledger mutation.",
+    "evidence_snapshot_count": 1614,
+    "runtime_member_count": 1471,
+    "test_registry": "current total1770 quarantined273; no new test file",
+    "isolation": "Process instrumentation; no installed-runtime or OS isolation claim",
+    "generation_inventory_growth": "Initial write compares1613 old-membership evidence paths to1614 after admitting the helper; unchanged intersection hashes, not product-byte drift. Final check/tests/Node1614 stable."
+  },
+  "metadata_review": {
+    "status": "APPROVED_EXACT_38_METADATA_ONLY_HOSTED_GATES_PENDING",
+    "proof_path": ".github/security/reviewed-foundups-numeric-evidence.json",
+    "independent_report_raw_sha256": "dfc1b1093eb982f11d5e6ebb8b97cea82037e9fb7203946e231dee6bf8da22c2",
+    "prior_entries": 1988,
+    "final_entries": 2026,
+    "exact_new_count": 38,
+    "classification": "37 unchanged source/context;1 exact known tested arithmetic source SHA substitution",
+    "unknown_findings": "held"
+  }
+}

@@ -2,6 +2,18 @@
 
 This directory contains regression tests for the FoundUps simulator module.
 
+## Work/stake/unstake numeric admission
+
+The existing `test_alignment_and_tokenomics.py` retains all6 original test ASTs
+and adds223 controls for invalid quantities/fees, prospective overflow, mutation
+order, optional adoption None and valid zero/fractional/normalization behavior.
+Focused exact-AST projection226 passes; independent held-outs28 pass. Actual
+combined-main simulator736 passes, including all6 originals and8 adjacent
+profit/allocation/FAM lifecycle cases, with exactly3 existing SSE HTTP exclusions.
+These overlapping counts are not added. [TestModLog](TestModLog.md) records
+the corrected optional-None oracle, genuine normalization regression, historical
+runner limits and fresh scratch-store confinement. No funded settlement proof.
+
 ## Mock BTC replay and realm integrity
 
 The existing `test_btc_anchor_connector.py` covers full-v2 field/type/version/hex

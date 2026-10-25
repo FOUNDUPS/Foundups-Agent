@@ -1,3 +1,29 @@
+## Parent independent acceptance — 2026-10-25
+
+Independent review rehashes all1471 staged normalized sources, both pins and
+fixed byte caps. Exactly38 known generator metadata bindings are accepted:
+37 sources/contexts unchanged;1 token_economics source SHA256 value matches the
+actual tested arithmetic bytes. Append only those38,1988->2026; preserve every
+old binding. No unknown finding, scanner rule/path or GitGuardian exemption.
+Generation's1613->1614 evidence-domain growth has unchanged intersection hashes;
+final check/tests/Node1614 maps are stable. Old boundary RED is an expected-count
+assertion before validator invocation, not old-validator execution proof.
+Fresh hosted scans/CI, dedicated PR and main readback remain required.
+Independent report rawSHA256:
+dfc1b1093eb982f11d5e6ebb8b97cea82037e9fb7203946e231dee6bf8da22c2.
+
+## 2026-10-25 — Selected simulator numeric integrity candidate
+
+WSP15 pre-code15/P1; WSP00/6/11/22/50/62/84/97. Reuse existing work/stake/
+unstake paths with strict operand and mutable-fee admission plus pure prospective
+balance calculations before participating mutations. Existing valid arithmetic
+and references remain; one private scalar owner replaces duplicated preparation.
+Focused226, independent28 and combined-main simulator736 pass with3 named SSE
+exclusions; counts overlap. Source/stores and process-guard evidence are recorded,
+including actual failure/oracle chronology and historical isolation limits.
+This is simulation numeric integrity, not aggregate issuance or funded payment.
+Dedicated PR/security/CI/source-binding/main gates remain pending.
+
 ## 2026-10-25 — Mock BTC anchor replay integrity candidate
 
 WSP00/6/11/15/22/50/62/84/97;14/P1 optional mock infrastructure. Bind the

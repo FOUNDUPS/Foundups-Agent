@@ -311,3 +311,68 @@ rejected one extra blank EOF line in the existing test owner before staging;
 only that blank line was removed, with the complete test AST verified identical.
 Historical receipt hashes retain the actual earlier bytes. Fresh combined-main
 qualification, derived closure and security review remain required before merge.
+
+## Combined main and derived closure allocation — 2026-10-25
+
+Numeric source commit dc844e3ba8a52d367af4e8e9f490316c88c9aa66 is reconciled
+with verified main6fe7eba424c17f7813043dfb104cd845617cab38 at
+89486886f87dbe4216fdcfc3afa513cd23f2cac5. No arithmetic bytes changed.
+Fresh actual whole-simulator736 passes in60.00s;169 simulator/FAM sources and8
+central sources stable, all original/adjacent required IDs present, exact3 SSE
+exclusions, zero instrumented network/dotenv/checkout-write attempts. All13532
+SQLite connections use scratch/memory; default central store stats unchanged.
+This supersedes no historical result and does not add overlapping counts.
+
+BEFORE derived edits, parent allocates C2/I5/D5/Impact4=16/P0 to regenerate the
+existing manifest and two pins for exactly one required arithmetic member:
+economics/_token_numeric.py. Accept exactly1471 members and reject1472 using
+the existing explicit Node boundary oracle. Change MAX_RUNTIME_FILES1470->1471
+only for that measured member; keep328KiB manifest,2MiB/source,32MiB total caps.
+The existing test's1470/1471 accepted/rejected constants advance1471/1472;
+no generic cap widening, runtime endpoint or installed-runtime qualification.
+Generator8 and existing Node3 entrypoints require fresh guarded execution.
+
+Evidence packaging C2/I4/D4/Impact4=14/P1 may create one receipt plus exact-case
+companion and update existing module/test memory. Retain raw-vs-Git hash domains,
+chronology, commands and explicit limits; no raw logs/credentials. Exact existing
+known-metadata rebinding is separately14/P1 and requires independent review
+before ledger mutation. Unknown findings are held, never blanket-exempted.
+
+## Derived source closure qualification — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## Parent independent acceptance — 2026-10-25
+
+Independent review rehashes all1471 staged normalized sources, both pins and
+fixed byte caps. Exactly38 known generator metadata bindings are accepted:
+37 sources/contexts unchanged;1 token_economics source SHA256 value matches the
+actual tested arithmetic bytes. Append only those38,1988->2026; preserve every
+old binding. No unknown finding, scanner rule/path or GitGuardian exemption.
+Generation's1613->1614 evidence-domain growth has unchanged intersection hashes;
+final check/tests/Node1614 maps are stable. Old boundary RED is an expected-count
+assertion before validator invocation, not old-validator execution proof.
+Fresh hosted scans/CI, dedicated PR and main readback remain required.
+Independent report rawSHA256:
+dfc1b1093eb982f11d5e6ebb8b97cea82037e9fb7203946e231dee6bf8da22c2.
