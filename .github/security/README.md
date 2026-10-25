@@ -539,3 +539,19 @@ revocation/restriction evidence. Do not treat source removal as revocation.
 ### Kids story manifest metadata re-review — 2026-10-23
 
 PR #2182 regenerated the runtime manifest for the kids story route. CI job 120249025720 reported 38 whole-file-bound findings. Two independent checks verified every flagged entry equals the referenced source SHA256, preserves the previously accepted entry and source bytes, and has a prior fingerprint in the existing ledger. Append only those 38 new exact file/rule/line fingerprints; preserve all earlier entries and scanner rules. Evidence: `reviewed-kids-manifest-evidence.json`. These are source hashes, not provider credentials.
+
+### Resident parent-authority bootstrap metadata re-review — 2026-10-25
+
+PR #2199 at `5bfcff258415e0bfcb2e3ab2e8d72204783de06a` invalidated
+39 whole-file-bound reviews in CI job 121049860507. Independent review
+compared each finding with main `944127df3856c0be4a545fce926ac17b86320576`:
+38 unchanged manifest entries equal their exact source SHA256, and the
+unchanged changelog prose moved from line 3852 to 3865. Every prior binding
+was present in the existing ledger. Append only these 39 reviewed fingerprints,
+preserving all 1,934 earlier entries (1,973 total). No scanner rule, path
+exclusion, fingerprint formula, or history exception was changed. The failed
+run remains evidence; fresh hosted scans must verify the repaired head.
+Sanitized per-finding proof and independent review are retained under
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/` as
+`rsi-parent-bootstrap-security-proofs-20261025.json` and
+`rsi-parent-bootstrap-independent-security-review-20261025.json`.
