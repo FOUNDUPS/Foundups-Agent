@@ -52,6 +52,16 @@ including actual failure/oracle chronology and historical isolation limits.
 This is simulation numeric integrity, not aggregate issuance or funded payment.
 Dedicated PR/security/CI/source-binding/main gates remain pending.
 
+## 2026-10-25 — Public legacy DAO and Playapp research
+
+WSP15 pre-authoring allocation C2/I4/D3/Impact4=13/P1; WSP00/22/50/97.
+Append bounded immutable public-source evidence to the existing
+[FX research](docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md#9-public-legacy-dao-and-playapp-evidence--2026-10-25).
+Preserve legacy FUC roles, custody, license and deployment limits; Playapp is a
+starter, and neither reviewed tree establishes a DEX or DAO2 identity.
+No token, FoundUp admission, economic-policy or runtime capability is created.
+Source/link/diff review only; no tests or chain calls.
+
 ## 2026-10-25 — Mock BTC anchor replay integrity candidate
 
 WSP00/6/11/15/22/50/62/84/97;14/P1 optional mock infrastructure. Bind the
