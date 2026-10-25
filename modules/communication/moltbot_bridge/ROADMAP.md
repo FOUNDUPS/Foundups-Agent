@@ -94,12 +94,12 @@ controls pass against44 frozen files. Connected59 suites pass1,545/22 platform
 skips with explicit repository test root; the original failures remain recorded.
 Final45-file source adds a test-only unknown-schema update and EOF-only cleanup.
 
-After exact-source validation/publication, qualify and connect installed HIGH
-custody/nonce supply through existing startup/factory owners. Preserve LOW;
-require authentic work/reviewer/model/budget evidence before a native author.
-Then independently verify, activate/roll back, measure later retained benefit and
-select the next bounded task. No second orchestrator or repeated LOW-handshake
-trial substitutes for this sequence.
+2026-10-25: the serial bootstrap forwards optional `parent_consensus_authority` to its
+real resolver. Connected source checks pass 34 cases with one Windows symlink skip;
+valid parent evidence clears only its two blockers and never supplies an effect lease.
+This 15/P1 slice (C2/I5/D4/Impact4) leaves main caller/issuer composition and authentic
+work/reviewer/model/budget inputs pending under the 19/P0 umbrella. Preserve LOW;
+native admission, independent outcome, activation/rollback and retained benefit remain open.
 [Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
 
 ## Native startup integration checkpoint — 2026-10-16

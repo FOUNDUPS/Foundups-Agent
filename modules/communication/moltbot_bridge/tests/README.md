@@ -111,16 +111,16 @@ permission wrapper. Passing the adapter tests alone does not meet that gate.
 
 ## Exact parent-consent connection
 
-Run the three parent-consent suites with the six parent-consensus/model suites:
-`test_reddog_parent_consensus_{domains,composition,transport,signer,use_time}.py`
-and `test_reddog_parent_model_inputs.py`. The existing authenticated startup CI
-selection includes all nine; retain connected effect, generation, custody/rate
-and elevated-consensus regressions. Structure checks include the new helpers.
-Exercise real signed artifacts, separate reviewer domains and model selections,
-proof bounds, failed lease exit, current-use expiry/clock drift and reservation
-failure. Linux lock tests require actual separate processes; preserve platform
-skips. Synthetic owner/lease fixtures cannot prove installed custody, durable
-recovery, authentic author execution or retained RSI benefit.
+The authenticated startup CI retains three parent-consent and six parent-consensus/model
+suites (`test_reddog_parent_consensus_{domains,composition,transport,signer,use_time}.py`
+and `test_reddog_parent_model_inputs.py`); retain connected effect/generation/custody/rate
+and elevated-consensus checks. The bounded resident-chain CI selects the existing
+`test_reddog_governed_execution_valve_production_wiring.py`: its eight bootstrap cases
+keep real resolver/parent/model verification, explicit earlier evidence seams, and no lease.
+With `test_reddog_parent_consensus_use_time.py`, local qualification is 34 pass/one Windows
+symlink skip; [TestModLog](TestModLog.md#parent-authority-bootstrap-forwarding--2026-10-25)
+records the guarded command, baseline and fixture boundaries. Signed domains, proof bounds,
+expiry/clock/reservation checks and actual Linux process tests remain; no native RSI is proved.
 
 ## AntifaFM campaign route — 2026-10-18
 
