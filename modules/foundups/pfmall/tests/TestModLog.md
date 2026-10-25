@@ -1,5 +1,19 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Member draft intake, test-first allocation
+
+The distinct `test_clerk_proposal_intake.py` owner covers real ephemeral RSA
+signatures through the actual FastAPI route, body-before-auth ordering, bearer/
+issuer/origin/time/session policy, wire caps, generic rejection and identity
+minimization. Existing HTTP/nomination/HMAC/mapper/transport/validator owners are
+unchanged. Allocation6efb68f50 precedes tests and product authoring.
+Credential-free Python3.12.10/pytest9.0.3/PyJWT2.15.1/cryptography46.0.7/
+FastAPI0.128.0/Starlette0.50.0/httpx0.28.1 baseline695PASS. Initial80-case RED:
+695PASS/2FAIL/78ERROR (missing adapter/route). Boundary additions follow before
+the final test freeze. Logs/JUnit/exact cases/source hashes are external under
+`foundups-member-intake-20261026`. No live identity, deployment, OS confinement
+or full-repository promotion claim. WSP6/22/50/84/97.
+
 ## 2026-10-25 — FX1 gateway link and public filter reuse
 
 Extended the existing `test_gateway_roc_shell.py` with HTML-parser coverage of
