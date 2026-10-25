@@ -1,3 +1,16 @@
+## 2026-10-25 — About route compatibility for simulator tools
+
+The public homepage becomes Play discovery; the explanatory cube moves once
+to public/about/index.html. Update only the visual QA tool's three defaults to
+http://localhost:5000/about/, SSE documentation and current INTERFACE/cube-spec
+examples. A running local Hosting server is required; direct-file preview is
+not claimed because About loads the root-relative cube script. Custom SSE
+examples include sim=1. No simulator economics, event or auth behavior changes.
+
+WSP15/22/50/97; public route tests and actual Hosting preview qualify the route
+move, not a fresh Playwright visual-QA or live SSE invocation. Existing epoch
+and FAM authority contracts and evidence remain intact.
+
 ## 2026-10-25 — P0C epoch commitment integrity
 
 WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation is

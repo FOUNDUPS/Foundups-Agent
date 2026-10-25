@@ -1,3 +1,25 @@
+## 2026-10-25 — Play homepage and About routing candidate
+
+WSP00/15/22/50/97/102/104; existing15/P1 discovery allocation. Move the one
+explanatory/admission page to About and reuse the public directory at root;
+FX remains discoverable. Preserve callback/member/app admission and the exact
+public Move2Japan exception. Correct virtual-route freshness and scope root
+worker cleanup to its own cache namespace. No new catalog, voice, media, token
+issuer, trading or authenticated worker runtime is introduced.
+
+Parent affected validation repeats437 passes with3 inherited missing-media
+prerequisites; adjacent164 passes retain3 stale PWA regex failures reproduced
+on unchanged source. Counts overlap. Hosting preview verifies12 exact archived
+responses, root/About/FX navigation, phone search/empty state, preserved legacy
+query/hash, eligibility curtain before sign-in, and cache upgrade preserving
+member/tenant contents; disposable test caches are removed. Production and
+dedicated-PR/main gates remain pending. Portable receipt records exact limits.
+
+Prior layers: PR2188 merged92ae36900 and FX Hosting deployed/verified; PR2192
+epoch integrity merged7d3d7f643 after22 successful checks and exact-tree readback.
+Current reconciliation also preserves parallel Kids preview main7384448fb.
+No real chain, payout, reserve custody or whole-system completion is claimed.
+
 ## 2026-10-23 — Private AutoPost item capture and shared Mall repair
 
 Extend existing AutoPost/PF Mall ownership for Shop clothing and GetK-style

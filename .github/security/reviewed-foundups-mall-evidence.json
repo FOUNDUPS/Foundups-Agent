@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-25",
+  "scope": "One previously observed unchanged frontend publishable-identifier finding moved to About",
+  "status": "independently_reviewed_exact_binding_pending_hosted_scan",
+  "base_commit": "7384448fb7da797fc7a811d04cad963436e4e6cc",
+  "reviewed_source_commit": "336c211cefac77b4d0c09a4c804bf085aa16b347",
+  "allocation": "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md",
+  "independent_reviewer": "/root/blockchain_architecture",
+  "independent_report": "foundups-mall-moved-identifier-review-83wmts10/sanitized_review.json",
+  "opaque_attribute_byte_equal": true,
+  "prior_path": "public/index.html",
+  "new_path": "public/about/index.html",
+  "rule": "generic-api-key",
+  "line": 75,
+  "prior_fingerprint": "f6b19f6eb8167140c0f53a86608e54350bf5d171f6871fb8f59cd63696608891",
+  "new_fingerprint": "91bf448b2d1219f81b2a488d093373919f4264d561dd29cef7a2d65275099c54",
+  "git_blob_sha256": "4b59768407253e7909f964f9a55173b5234aa7c870465aaef2a1412ccccd0da3",
+  "prior_entries": 1934,
+  "final_entries": 1935,
+  "hash_domains": "Fingerprint binds exact LF Git blob. Hosting archive and Windows working bytes have observed CRLF conversion; LF-normalized archive equals Git source.",
+  "constraints": [
+    "No matched values retained or displayed",
+    "No scanner, rule, scope, fingerprint, history or regression changes",
+    "No other finding approved; fresh hosted tracked-tree and introduced-history scans remain required"
+  ]
+}

@@ -211,8 +211,15 @@ scanner, rule, fingerprint, history/tree scope or regression changes. Fresh
 hosted scans remain required.
 
 Derived maintenance budget: regenerate the existing canonical test registry only
-if its check proves description drift, preserving all membership/classification;
+if its check proves derived drift, preserving membership and suite/quarantine classification;
 append bounded root and simulator ModLog notes for the route/tool compatibility.
 No extra simulator behavior or source-manifest member/cap change is allocated.
 Hosting preview remains a reversible verification environment. Production follows
 independent browser/headers/cache evidence, dedicated PR checks and main readback.
+
+Registry check observed stale1770-file metadata after fresh-main reconciliation.
+Canonical regeneration changes only two gateway/media descriptions and adds
+the required process capability to the gateway owner, which now runs the real
+Node worker harness. Membership, owner, suite, collectability and quarantine
+remain unchanged (1770 files/273 quarantined). Retain this truthful derived
+capability; do not alter the classifier or hide the new process dependency.
