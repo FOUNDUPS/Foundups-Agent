@@ -924,3 +924,32 @@ mapping. Validation, trusted context, auth ordering and nonce handling are uncha
 These are untrusted references, not source identity, repository control or fetch
 instructions. The result remains an IDEA/UNBOUND draft with external repo requests
 forced false; authentication alone grants no admission, execution or token rights.
+
+## GitHub nomination review host contract — 2026-10-26
+
+Implemented, under publication qualification: `foundup_genesis.github_nomination_review` connects
+the public issue form to a review artifact through the unchanged LaunchRequest
+mapper. This is a separate draft-service host, not an HTTP authentication path.
+The session/invite provider remains the sole verifier for HTTP intake. Historical
+sole-provider statements apply to that session/invite contract; this host may
+supply `LaunchRequestIntakeContext(authenticated=True,
+requester_handle="github_nomination_review_service")` for draft creation only.
+Here `authenticated` asserts the host's fixed service context, never GitHub-user
+authentication, repository control, a session, commander or issuer entitlement.
+
+`review_nomination_event(event, *, context=None)` requires that explicit context
+(invite verification false); it never creates a context from parsed event data.
+Only opened issues in repository956651858/FOUNDUPS/Foundups-Agent and the exact
+bounded nomination form are eligible. The issue author is separately the nominator.
+The result is `DRAFT_ONLY`, with `source`, advisory `pitch_brief` (Outcome/Solution/
+Pain), and the existing `genesis_envelope`. Missing optional brief fields are null;
+acceptance criteria stay empty. Name/reference mapping preserves IDEA/UNBOUND and
+external_repo_requested=False. No strict genesis-gate pass is asserted.
+
+The CLI takes host-supplied `--event-path` and `--output-path`, reads <=256KiB,
+rejects duplicate JSON keys and exclusively creates one JSON artifact. Malformed
+input yields NEEDS_MANUAL_REVIEW/invalid_nomination; I/O errors fail without raw
+input diagnostics. Event replay metadata stays explicitly unverified; JSON fields
+cannot attest GitHub hosting. The Actions run supplies external provenance.
+No application API call, URL fetch, project checkout, queue, registry, comments,
+claims, token issuance or trading follows. This command is not a resident export.
