@@ -1,3 +1,22 @@
+## 2026-10-25 — Reconciled BTC/Mesa runtime source closure
+
+WSP15 derived16/P0 (C2/I5/D5/Impact4) allocation precedes regeneration in the
+BTC architecture plan. Parent integration uses main f11d7559746 at merge
+d9a57ab1d; original211/513/21 mock-test evidence retains actual base b6d2cf316.
+All168 raw simulator/FAM source hashes still match that tested freeze.
+
+Canonical RedDog regeneration changes exactly the BTC connector/Mesa normalized
+digests;1470 members and all byte/+1 limits remain fixed. Both existing pins
+advance together. Unchanged generator8 and three existing Node entrypoints pass
+with stable source snapshots and zero guarded network/dotenv attempts. No new
+simulator test run, product behavior, installed runtime, authority or chain effect.
+Three binding paths are staged only; parent owns commit/push and publication.
+
+The portable receipt distinguishes current base/merge context from old test
+execution. A38-record known-metadata rebinding proof is proposed externally,
+pending independent approval and fresh hosted scan; the finding ledger is
+untouched. Exact commands/hashes/limits belong in the existing test log/receipt.
+
 ## 2026-10-25 — Mock BTC content/realm replay integrity
 
 WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation14/P1 is recorded in

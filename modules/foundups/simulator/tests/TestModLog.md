@@ -1,5 +1,32 @@
 # Simulator Tests ModLog
 
+## 2026-10-25 — Derived source-binding qualification after reconciliation
+
+Original211 focused/513 simulator/21 independent runs remain at actual base
+b6d2cf316; those product tests were not rerun or relabeled after parent merged
+main f11d7559746 at d9a57ab1d. Fresh checks are canonical manifest --write/--check,
+the unchanged scripts/tests/test_generate_reddog_backend_manifest.py eight cases,
+and the existing Node backend compatibility contract/preflight/blocked recovery
+entrypoints. All pass; generator8 takes97.68s wrapper/96.64s pytest with two
+inherited inactive asyncio config warnings. Counts are not added to earlier
+product coverage and do not establish installed/runtime or real-chain behavior.
+
+Runtime member set stays1470 and only BTC/Mesa LF source digests change.
+All328KiB manifest,2MiB/source,32MiB total and1471-member rejection limits remain.
+The three existing manifest/pin files alone were staged for index consistency.
+All168 original raw simulator/FAM hashes still match. Qualification freezes1613
+files including existing extension JS and generator/pins as extra evidence;
+this does not expand runtime membership. Instrumented network/dotenv attempts0;
+Python/Node guards are not OS isolation.
+
+Exact commands, case IDs, warnings, staged delta and raw run receipts:
+C:/Users/user/AppData/Local/Temp/foundups-btc-source-closure-6b08022181194325a9f2eea110484734/.
+Prior epoch source-closure evidence retained JUnit8 but not exact argv, a preserved
+historical metadata gap. Current portable BTC receipt rebinds repository context
+to f11d7559 while preserving original b6 execution and parent merge provenance.
+The38 old reviewed metadata contexts have a proposal only; no scanner/ledger
+approval, source/member/cap expansion or additional test-coverage claim.
+
 ## 2026-10-25 — BTC content/realm replay integrity,14/P1
 
 Pre-authoring plan: `docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md`.

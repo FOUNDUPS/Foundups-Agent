@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp97_execution_receipt.v1.1",
   "repository_context": {
-    "base_commit": "b6d2cf31666e23707d84ca9adb154650cc2e1b24"
+    "base_commit": "f11d7559746bb64677e448ff8e4e24ebfcea8feb"
   },
   "execution_id": "FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025",
   "execution_plane": "Documentation packaging of existing local source/mock test evidence; no WRE runtime or chain effects",
@@ -83,6 +83,23 @@
       "impact": 4,
       "sum": 14,
       "priority": "P1"
+    },
+    "derived_source_closure": {
+      "C": 2,
+      "I": 5,
+      "D": 5,
+      "impact": 4,
+      "sum": 16,
+      "priority": "P0"
+    },
+    "metadata_rebinding_proposal": {
+      "C": 1,
+      "I": 4,
+      "D": 5,
+      "impact": 4,
+      "sum": 14,
+      "priority": "P1",
+      "status": "pending independent review and fresh hosted scan"
     }
   },
   "retrieval": {
@@ -895,7 +912,8 @@
     "counts_overlap": true,
     "focused_is_subset_of_simulator": true,
     "independent_same_ordered_ids_after_oracle_fix": true,
-    "qualification": "Exact observed pytest commands retained; independent original argv absent from source receipt and not invented."
+    "qualification": "Exact observed pytest commands retained; independent original argv absent from source receipt and not invented.",
+    "derived_generator_case_ids": "derived_source_closure.qualification.generator_cases.case_ids (fresh8 only; source-binding assurance)"
   },
   "source_snapshot": [
     {
@@ -1758,13 +1776,72 @@
       "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\simulator_closure_schema\\receipt.json",
       "sha256": "97e1cd732dd152a208a8409b423cdbd89570f516cc19d5ec18e40d8be6a5f033",
       "kind": "exact simulator_closure_schema run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\generate\\receipt.json",
+      "sha256": "56318d3c4f7242a05afaef1f4e6859679769caf16a068ab65921def72c4b7efe",
+      "kind": "fresh derived source-closure generate evidence"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\check\\receipt.json",
+      "sha256": "403eeae45be1f7dd7e7592bc7319ebedd6d023c7e4f85bf9a0838e815be57558",
+      "kind": "fresh derived source-closure check evidence"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\generator_cases\\receipt.json",
+      "sha256": "75cd57d505c211561d788b73b4dabb57984a38375fa491013bfd20d5da743e1d",
+      "kind": "fresh derived source-closure generator_cases evidence"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\node_contract\\receipt.json",
+      "sha256": "a051c6cbd88bc02eace4a9bc46ecbcaec4c0cc96d551ed209f6baacaa9755783",
+      "kind": "fresh derived source-closure node_contract evidence"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\node_preflight\\receipt.json",
+      "sha256": "d2953ba8b418f04e3c3dd97b5d28749d1fae6dd03f9bc623a08efea2ccde30b1",
+      "kind": "fresh derived source-closure node_preflight evidence"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\node_recovery\\receipt.json",
+      "sha256": "a52c434e1abfb9ac32829589c7bb646ecb84e75fac8f156dfcba02cea948319d",
+      "kind": "fresh derived source-closure node_recovery evidence"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\closure_runner.py",
+      "sha256": "d4ff162797aab20a053165c3ab5fe73f62f6ec87e7a1f2598fa8f9dbcc797cc4",
+      "kind": "external guarded source-closure runner"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\node_guard.cjs",
+      "sha256": "87aa0c41ab8de923cd0ce463dc5da8eb17eeb09637a15f31e229c39e184b7f05",
+      "kind": "external Node network/dotenv guard"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\proposed_metadata_rebindings.json",
+      "sha256": "17105d1b24767162613bd54d9f1911f1b260304d96bf10c863426072151873bb",
+      "kind": "proposed known metadata rebindings, unapproved"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-epoch-manifest-1939e35963ec4eceb86d1a57fd2184ae\\results.xml",
+      "sha256": "f5470cb302f4b1d9432687b0f82637be83274f8831f1084ef2c83b565119298a",
+      "kind": "prior epoch eight-case JUnit identity reference"
     }
   ],
   "source_stability": {
-    "handoff_four_file_freeze_matches": true,
-    "final168_current_bytes_match": true,
-    "handoff_nonplan_changed_files_match": true,
-    "python_test_or_structured_memory_mutated_by_packager": false
+    "original_packaging_observations_before_parent_reconciliation": {
+      "handoff_four_file_freeze_matches": true,
+      "final168_current_bytes_match": true,
+      "handoff_nonplan_changed_files_match": true,
+      "python_test_or_structured_memory_mutated_by_packager": false
+    },
+    "post_reconciliation": {
+      "current168_raw_source_hashes_still_match": true,
+      "four_python_test_freeze_still_matches": true,
+      "structured_memory": "Six additive docs were intentionally reconciled by parent; original packaging identity is historical, not a current doc-equality claim.",
+      "source_closure_qualification_snapshot_count": 1613,
+      "source_closure_frozen_maps_match_after_runs": true
+    }
   },
   "validation_limits": [
     "Local mock-only evidence; no credentials, signer, chain broadcast, real confirmations, provider, authentication or financial entitlement proof.",
@@ -1800,7 +1877,7 @@
       "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json"
     ],
     "existing_doc_allocation": "docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md",
-    "validation": {
+    "original_validation_before_reconciliation": {
       "command": [
         "O:/Foundups-Agent/.venv/Scripts/python.exe",
         "-B",
@@ -1822,6 +1899,317 @@
       "violations": [],
       "truth_boundary": "WSP 97 receipt v1.1 validates structural completeness plus repository-bound Retrieve WSPs evidence; all other evidence references remain opaque and no reasoning quality or runtime side effect is proven.",
       "qualification": "Validator uses read-only repository/WSP ancestry evidence; it does not validate opaque non-WSP evidence or confer publication/security approval."
+    },
+    "context_qualification": "Original packaging observations remain historical. Current repository base f11d7559 and merge d9a57ab1d pass current-base structural/repository validation; actual product-test execution remains b6d2cf316. New source-closure8/Node3 evidence is explicitly separate.",
+    "validation": {
+      "validation_mode": "repository_evidence_v1.1",
+      "structurally_complete": true,
+      "is_compliant": true,
+      "validated_base_commit": "f11d7559746bb64677e448ff8e4e24ebfcea8feb",
+      "repository_head_commit": "d9a57ab1d0f64ceaf7c71947710a6ba855fa27ba",
+      "violations": [],
+      "truth_boundary": "WSP 97 receipt v1.1 validates structural completeness plus repository-bound Retrieve WSPs evidence; all other evidence references remain opaque and no reasoning quality or runtime side effect is proven."
     }
+  },
+  "test_execution_context": {
+    "original_base_commit": "b6d2cf31666e23707d84ca9adb154650cc2e1b24",
+    "recorded_runs": "Original211focused/513simulator/21independent runs remain bound to original source/external receipts; counts overlap.",
+    "product_tests_rerun_after_reconciliation": false,
+    "current168_raw_source_hashes_still_match": true
+  },
+  "repository_reconciliation": {
+    "new_base_commit": "f11d7559746bb64677e448ff8e4e24ebfcea8feb",
+    "btc_candidate_commit": "899a40e6e9252172a50eca897b9e8679aaeae12c",
+    "merge_commit": "d9a57ab1d0f64ceaf7c71947710a6ba855fa27ba",
+    "parent_resolution": "Six additive documentation conflicts resolved preserving BTC content and unconflicted main. No new product-test result inferred.",
+    "derived_source_closure": "Allocated16/P0; fresh generator/Node qualification recorded separately when complete.",
+    "metadata_review": "Separate14/P1 proposal only; independent review/fresh hosted scan pending."
+  },
+  "derived_source_closure": {
+    "allocation": "C2/I5/D5/Impact4=16/P0; source closure only",
+    "base_commit": "f11d7559746bb64677e448ff8e4e24ebfcea8feb",
+    "merge_commit": "d9a57ab1d0f64ceaf7c71947710a6ba855fa27ba",
+    "manifest_path": "scripts/reddog_backend_manifest.json",
+    "old_canonical_digest": "ca30b569629d1cb31ad1cda643c1101c5d5227ad90c12a35914147b288761788",
+    "new_canonical_digest": "c97e153f6184bcc7f4232ae2d5b17e1af708ec2a104ce4119f549af4839d26cd",
+    "old_whole_lf_sha256": "f1c8ee9899b1a12b1fc9af62c7165377f06647eb4d567ac81d05d6fd2703b380",
+    "new_whole_lf_sha256": "6b7144a0d847c7cc96aa095765c464667f0d684a2741cfbc532a227f6a7d6808",
+    "new_staged_manifest_blob_id": "69e69610dbec42811f248b354551780c1da77676",
+    "runtime_members": 1470,
+    "added_members": [],
+    "removed_members": [],
+    "changed_runtime_lf_sha256": {
+      "modules/foundups/simulator/economics/btc_anchor_connector.py": {
+        "old": "5cb39718ec4fff01f0a50abbfe8d1afd926e26b79d40e7813a477bb34406312d",
+        "new": "ed4aa3997a1f4cb670802239a1e32601a21bfc1d53d624a64d980c4502e18a8b"
+      },
+      "modules/foundups/simulator/mesa_model.py": {
+        "old": "f0481697f7d21dd7d0e9798fc08663475fd87e94bc29812c679ba2b1162b5f7b",
+        "new": "9e7e17cf9a82d9bc94e81a9d621b70061ec89904aa0b404a5c8e65dcddec6281"
+      }
+    },
+    "other_manifest_keys_changed": [],
+    "caps": {
+      "manifest_bytes": 335872,
+      "source_file_bytes": 2097152,
+      "members": 1470,
+      "source_total_bytes": 33554432,
+      "member1471_rejected_by_unchanged_node_oracle": true
+    },
+    "measured": {
+      "lf_bytes": 332458,
+      "crlf_bytes": 335471,
+      "max_source_lf_bytes": 154924,
+      "total_source_lf_bytes": 19656413
+    },
+    "pin_proofs": {
+      "extensions/reddog/backend_compatibility_constants.js": {
+        "old_whole_lf_sha256": "040dfe83b6a88ab2651a554570fde3a7dc56604ccb3f17264b7021dd0591c08a",
+        "new_whole_lf_sha256": "f40a16b952f49a21d7c4896ee687c9647f2a3c5d89ab82d4e75442b80f3e99a9",
+        "old_digest_literal": "ca30b569629d1cb31ad1cda643c1101c5d5227ad90c12a35914147b288761788",
+        "new_digest_literal": "c97e153f6184bcc7f4232ae2d5b17e1af708ec2a104ce4119f549af4839d26cd",
+        "only_one_literal_changed_after_lf_normalization": true
+      },
+      "scripts/tests/test_generate_reddog_backend_manifest.py": {
+        "old_whole_lf_sha256": "a5975138a7800bdcf3f55f4340438434d205ab8af7212679d21159b78f5b44d3",
+        "new_whole_lf_sha256": "84f199fcf0b63b4e2010133960e299514c48582fb21f1e6b8de1d9c46acf3534",
+        "old_digest_literal": "ca30b569629d1cb31ad1cda643c1101c5d5227ad90c12a35914147b288761788",
+        "new_digest_literal": "c97e153f6184bcc7f4232ae2d5b17e1af708ec2a104ce4119f549af4839d26cd",
+        "only_one_literal_changed_after_lf_normalization": true
+      }
+    },
+    "staged_binding_paths": [
+      "extensions/reddog/backend_compatibility_constants.js",
+      "scripts/reddog_backend_manifest.json",
+      "scripts/tests/test_generate_reddog_backend_manifest.py"
+    ],
+    "source_oracle_changes": "Only one existing canonical digest literal in the Python test. All eight IDs and other assertion bytes unchanged after LF-normalized pin substitution.",
+    "qualification": {
+      "generate": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734/closure_runner.py",
+          "generate",
+          "generator",
+          "--write"
+        ],
+        "entrypoint_argv": [
+          "scripts/generate_reddog_backend_manifest.py",
+          "--write"
+        ],
+        "cwd": "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "exit_code": 0,
+        "seconds": 77.8511233329773,
+        "counts": {},
+        "case_ids": [],
+        "warnings": [],
+        "source_snapshot_count": 1613,
+        "source_drift": false,
+        "instrumented_network_attempts": 0,
+        "dotenv_read_attempts": 0,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\generate\\receipt.json",
+        "external_receipt_sha256": "56318d3c4f7242a05afaef1f4e6859679769caf16a068ab65921def72c4b7efe"
+      },
+      "check": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734/closure_runner.py",
+          "check",
+          "generator",
+          "--check"
+        ],
+        "entrypoint_argv": [
+          "scripts/generate_reddog_backend_manifest.py",
+          "--check"
+        ],
+        "cwd": "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "exit_code": 0,
+        "seconds": 91.1241295337677,
+        "counts": {},
+        "case_ids": [],
+        "warnings": [],
+        "source_snapshot_count": 1613,
+        "source_drift": false,
+        "instrumented_network_attempts": 0,
+        "dotenv_read_attempts": 0,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\check\\receipt.json",
+        "external_receipt_sha256": "403eeae45be1f7dd7e7592bc7319ebedd6d023c7e4f85bf9a0838e815be57558"
+      },
+      "generator_cases": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734/closure_runner.py",
+          "generator_cases",
+          "pytest",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "entrypoint_argv": [
+          "-q",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "addopts=",
+          "--confcutdir",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\scripts\\tests",
+          "--basetemp",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\generator_cases\\pytest",
+          "--junitxml",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\generator_cases\\results.xml",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "cwd": "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "exit_code": 0,
+        "seconds": 97.68460488319397,
+        "counts": {
+          "passed": 8
+        },
+        "case_ids": [
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_package_initializers_resolve_relative_imports_from_their_package",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_generated_closure_binds_executable_and_dynamic_load_sentinels",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_generated_closure_binds_isolated_acceptance_entrypoint",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_newly_tracked_imported_runtime_dependency_cannot_be_omitted",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_untracked_local_import_fails_closed",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_checked_in_manifest_matches_independent_generation",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_extension_javascript_is_package_bound_not_backend_materialized",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_staged_index_manifest_is_self_consistent"
+        ],
+        "warnings": [
+          {
+            "category": "PytestConfigWarning",
+            "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+          },
+          {
+            "category": "PytestConfigWarning",
+            "message": "Unknown config option: asyncio_mode\n"
+          }
+        ],
+        "source_snapshot_count": 1613,
+        "source_drift": false,
+        "instrumented_network_attempts": 0,
+        "dotenv_read_attempts": 0,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\generator_cases\\receipt.json",
+        "external_receipt_sha256": "75cd57d505c211561d788b73b4dabb57984a38375fa491013bfd20d5da743e1d"
+      },
+      "node_contract": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734/closure_runner.py",
+          "node_contract",
+          "node",
+          "extensions/reddog/tests/test_backend_compatibility_contract.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\extensions\\reddog\\tests\\test_backend_compatibility_contract.js"
+        ],
+        "cwd": "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "exit_code": 0,
+        "seconds": 1.479863166809082,
+        "counts": {},
+        "case_ids": [],
+        "warnings": [],
+        "source_snapshot_count": 1613,
+        "source_drift": false,
+        "instrumented_network_attempts": 0,
+        "dotenv_read_attempts": 0,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\node_contract\\receipt.json",
+        "external_receipt_sha256": "a051c6cbd88bc02eace4a9bc46ecbcaec4c0cc96d551ed209f6baacaa9755783"
+      },
+      "node_preflight": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734/closure_runner.py",
+          "node_preflight",
+          "node",
+          "extensions/reddog/tests/test_backend_compatibility_preflight.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\extensions\\reddog\\tests\\test_backend_compatibility_preflight.js"
+        ],
+        "cwd": "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "exit_code": 0,
+        "seconds": 56.701111793518066,
+        "counts": {},
+        "case_ids": [],
+        "warnings": [],
+        "source_snapshot_count": 1613,
+        "source_drift": false,
+        "instrumented_network_attempts": 0,
+        "dotenv_read_attempts": 0,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\node_preflight\\receipt.json",
+        "external_receipt_sha256": "d2953ba8b418f04e3c3dd97b5d28749d1fae6dd03f9bc623a08efea2ccde30b1"
+      },
+      "node_recovery": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734/closure_runner.py",
+          "node_recovery",
+          "node",
+          "extensions/reddog/tests/test_holoindex_blocked_request_recovery.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\extensions\\reddog\\tests\\test_holoindex_blocked_request_recovery.js"
+        ],
+        "cwd": "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "exit_code": 0,
+        "seconds": 0.5798330307006836,
+        "counts": {},
+        "case_ids": [],
+        "warnings": [],
+        "source_snapshot_count": 1613,
+        "source_drift": false,
+        "instrumented_network_attempts": 0,
+        "dotenv_read_attempts": 0,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\node_recovery\\receipt.json",
+        "external_receipt_sha256": "a52c434e1abfb9ac32829589c7bb646ecb84e75fac8f156dfcba02cea948319d"
+      }
+    },
+    "snapshot_domain": "1613 raw measured files:1470 runtime members plus existing extension JavaScript/generator/pin evidence. Extra evidence is not installed membership.",
+    "original168_raw_source_hashes_match": true,
+    "historical_command_gap": "Prior epoch JUnit retains exact eight case identities but no original argv; actual current invocations are recorded without reconstructing history.",
+    "proposal": {
+      "allocation": "C1/I4/D5/Impact4=14/P1",
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-source-closure-6b08022181194325a9f2eea110484734\\proposed_metadata_rebindings.json",
+      "sha256": "17105d1b24767162613bd54d9f1911f1b260304d96bf10c863426072151873bb",
+      "prior_review_evidence": ".github/security/reviewed-foundups-epoch-evidence.json",
+      "records": 38,
+      "rule_counts": {
+        "discord-api-token": 2,
+        "generic-api-key": 36
+      },
+      "status": "PROPOSED_PENDING_INDEPENDENT_APPROVAL_AND_HOSTED_SCAN",
+      "approval_granted": false,
+      "scanner_executed": false,
+      "ledger_edits": false,
+      "unknown_finding_status": "UNASSESSED_NO_SCANNER_EXECUTED",
+      "ledger_whole_lf_sha256_unchanged_from_head": "344ed9d5bcfe7d69322844a19c10ed5f7457e32e40e5ee456b4129f4232fc922"
+    },
+    "limits": [
+      "No Python product or generator behavior change",
+      "No new product test/coverage claim beyond observed source-closure eight cases/three Node entrypoints",
+      "Python/Node guards are not OS isolation or installed runtime admission",
+      "No SDK/model/provider/chain/env-load or installed descriptor action",
+      "Metadata approval and fresh hosted tree/history scan remain parent gates"
+    ]
   }
 }

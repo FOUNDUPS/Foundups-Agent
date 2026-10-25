@@ -2,7 +2,7 @@
 
 Status: locally implemented, tested and independently reviewed; publication and
 main readback remain parent-owned. The following allocation preceded authoring.
-Parent source is the frozen P0C
+Original test execution base is the frozen P0C
 candidate `b6d2cf31666e23707d84ca9adb154650cc2e1b24`, not a claim of main convergence.
 WSP15: C3/I4/D3/Impact4 = **14/P1** while this is optional mock infrastructure.
 Non-mock activation would require a separate P0 gate and actual effect design.
@@ -178,3 +178,95 @@ Artifacts:
 
 - docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.json
 - docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json
+
+## Pre-authoring derived source-closure allocation — after main reconciliation
+
+Parent reconciled candidate899a40e6e with main
+`f11d7559746bb64677e448ff8e4e24ebfcea8feb` at merge d9a57ab1d. Original
+211/513/21 test execution remains bound to allocated b6d2cf316; reconciliation
+does not relabel those runs as executed on current main.
+
+WSP15 **C2/I5/D5/Impact4=16/P0** allocates derived runtime-closure integrity for
+the changed BTC/Mesa owners: canonical manifest regeneration/check, the two
+existing digest pins and mandatory existing logs/portable evidence. Preserve
+the1470-member set,328KiB manifest cap,2MiB per-source cap,32MiB total source
+cap and1471-member rejection. No Python product/test behavior or cap expansion.
+Coordinate the exact coherent path list before any necessary staging; no
+commit/push or installed-runtime action.
+
+Qualify the eight unchanged generator cases and three existing Node entrypoints
+under external scratch and instrumentation, reusing their recorded prior
+commands. Source members and pins must be frozen for qualification; record
+actual new results without expanding test/coverage claims. Update portable
+receipt repository base to f11d7559 with explicit original execution base b6d2
+and parent merge context.
+
+Separate WSP15 **C1/I4/D5/Impact4=14/P1** covers a proposal for the38 known
+manifest metadata rebindings, keyed to prior epoch evidence. Keep reviewed-
+findings.json untouched. Preserve old/new whole-LF manifest hashes and unchanged
+five-line contexts/referenced source blobs, without displaying opaque contents.
+Independent review and fresh hosted scan remain parent gates; no new finding,
+rule/path exemption, source-manifest member or security weakening is authorized.
+
+## Parent exact metadata binding allocation after independent review
+
+The independent reviewer rehashed all1470 staged source blobs twice and verified
+both pins, unchanged membership/caps and exactly two changed source digests.
+It separately verified all38 prior whole-file/rule/line approvals, unique unchanged
+five-line contexts, exact source blob identities and all38 proposed new bindings.
+Its first scratch measurement incorrectly excluded valid empty initializers;
+the corrected measurement follows the unchanged upper-cap contract. No product
+failure or validation-rule change is inferred from that correction.
+
+Under the already allocated14/P1 review, the parent may now append exactly these
+38 verified metadata fingerprints to the1934-entry ledger and save their bounded
+review proof. Preserve all prior entries/order, scanner/rules/scope and source
+bytes. No unknown finding receives approval. Fresh hosted tracked-tree and
+introduced-history scans, dedicated PR checks and main readback remain required.
+The exact8 generator cases and three Node entrypoints passed on this source
+closure; counts overlap other qualifications and confer no installed-runtime or
+real-chain authority.
+
+## Derived source-closure qualification and handoff
+
+Canonical generator --write/--check pass. The unchanged generator eight-case
+selection passes (97.68s guarded wrapper,96.64s pytest, two inherited inactive
+asyncio configuration warnings). Existing Node backend compatibility contract,
+preflight and blocked-request recovery entrypoints each exit0. Exact IDs match
+prior epoch JUnit8; original historical argv was absent and was not invented.
+All actual new commands, warnings, outputs and source maps are preserved in
+external host scratch foundups-btc-source-closure-6b08022181194325a9f2eea110484734.
+
+The manifest changes only BTC connector/Mesa LF source hashes. No member is
+added/removed:1470. Canonical digest advances from ca30b569... to
+c97e153f6184bcc7f4232ae2d5b17e1af708ec2a104ce4119f549af4839d26cd.
+The separate whole-LF manifest SHA advances from f1c8ee9899... to
+6b7144a0d847c7cc96aa095765c464667f0d684a2741cfbc532a227f6a7d6808.
+LF332458/CRLF335471 bytes remain below335872; measured normalized source
+maximum154924 and total19656413 remain below2MiB/32MiB. All caps and existing
+1471 rejection are unchanged. Both JS/Python pins change by exactly one existing
+literal after LF normalization, with no other oracle or algorithm change.
+
+Only manifest, JS constant and Python digest pin are staged, as coordinated
+before staging. The staged-index case checks all1470 runtime source blobs and
+pin consistency. Qualification freezes1613 measured files including existing
+extension JavaScript/generator/pin evidence; this extra evidence is not runtime
+membership. Every qualification phase reports zero instrumented network or
+dotenv-read attempts and stable source maps. All168 originally tested raw
+simulator/FAM hashes still match. Guards are not OS isolation or installed
+runtime admission, and no product tests/coverage were added or rerun.
+
+The portable receipt now binds repository base f11d7559746bb64677e448ff8e4e24ebfcea8feb
+and merge d9a57ab1d0f64ceaf7c71947710a6ba855fa27ba, while retaining actual
+211/513/21 execution base b6d2cf31666e23707d84ca9adb154650cc2e1b24. Current-base
+WSP97v1.1 structural/repository evidence validation passes; it does not
+authenticate opaque run evidence or confer security/publication approval.
+
+The external proposed_metadata_rebindings.json maps exactly38 previously
+reviewed contexts (36generic-api-key/2discord-api-token), with unchanged unique
+five-line contexts, referenced staged source blob identities/digests and old
+ledger membership. Proposal SHA:
+17105d1b24767162613bd54d9f1911f1b260304d96bf10c863426072151873bb.
+No finding ledger or rule changed; no scanner ran. Unknown findings remain
+unassessed. Parent/independent review must approve exact metadata rebindings,
+run fresh hosted gates and complete publication/main readback.
