@@ -33,6 +33,10 @@ FFCPLN description. Never force music branding onto speech, sports or travel.
    requested/response IDs and verified identity. Timestamped YouTube/Whisper
    segments are accepted under their explicit source. Missing, failed, mismatched
    and title-only stubs preserve the original title and body.
+When inherited labels conflict with the analysis, inspect the actual clip or
+   another matched source before choosing the subject. Existing campaign labels
+   do not turn a nature or personal-workflow clip into campaign commentary.
+   State visual coverage as unavailable when the analyzer did not see video.
 4. Propose a specific factual title within 100 characters and a description
    within 5,000, based on inspected content. Preserve useful original text.
    Include only relevant entities/hashtags and a compact `M2M_CONTEXT` provenance
