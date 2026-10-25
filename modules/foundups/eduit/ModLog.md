@@ -13,3 +13,5 @@ WSP 97 architecture correction: EDUIT is the education-scoped sleeve of the shar
 Recorded 012's watch → play → optional faster challenge and on-device parent-report proposal. Verified current fixed windows/practice against engine and controller. Distinguished story learning from reaction speed, within-player trends from unvalidated age rankings, and local play records from ordinary hosting traffic. Documentation only; no child tracking or adaptive runtime activated.
 
 Clarified educational child FoundUps versus category labels; audited registry, projection and existing return owners. Recorded missing EDUIT registry entry and unresolved historical memory-game identity without personal health details. Added explicit Back to EDUIT link to current game; no catalog-scope enforcement or shared-Mall return claimed implemented.
+
+Resolved historical game identity through GitHub branch search: Memory Horizon (`memory_horizon`) exists on docs/memory-horizon-wsp109-intake-20260920 with manifest, registry candidate, design packet and work orders. Updated EDUIT reference; no implementation/merge/deployment claim and no duplicate registration.

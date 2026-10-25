@@ -187,18 +187,26 @@ The proof of concept now has an explicit 'Back to EDUIT' link to the existing
 introduction page. Returning to an actual restored education Mall awaits its
 shared-shell product integration; no new route is claimed active.
 
-**Memory-game recovery:** 012 recalls an earlier memory-game project. Bounded
-searches of this checkout's modules/docs/public assets, registry and FOUNDUPS
-repository names did not establish its canonical ID or source. AI infrastructure
-memory/HoloIndex is not that game. Keep the game as an unresolved existing-project
-reference, not a fabricated new registration. Personal family/medical history
-must not be included in public catalog copy or development receipts. Reuse the
-recovered game's mechanics and shared shell after inspection, rather than copy
-Story Time into a second platform.
+**Memory-game recovery — verified:** the existing FoundUp is **Memory Horizon**,
+canonical candidate ID `memory_horizon`, module `modules/foundups/memory_horizon/`.
+Its documentation/manifest and registry candidate are on the existing branch
+[`docs/memory-horizon-wsp109-intake-20260920`](https://github.com/FOUNDUPS/Foundups-Agent/tree/docs/memory-horizon-wsp109-intake-20260920/modules/foundups/memory_horizon),
+not in the main-branch checkout inspected earlier. The branch README and onboarding
+audit identify `SPECIFIED_NOT_IMPLEMENTED`: a branching adventure, unique events,
+delayed recall probes and a retention timeline. Product POC issue
+[#1821](https://github.com/FOUNDUPS/Foundups-Agent/issues/1821), RSI build experiment
+#1825 and deferred assistive companion #1823 are linked in that source packet;
+issue links do not prove completion. No runnable game or deployed tile was found
+in the inspected module tree. Reconcile the existing branch/PR before importing
+or extending it; preserve its ID and design work instead of registering a new
+'Memory' FoundUp. 012's new direction places its educational game under EDUIT;
+the separately proposed assistive companion is not automatically reassigned.
+No clinical or recovery claim follows from the game. Keep personal family/medical
+history out of public catalog copy and development receipts.
 
 **Acceptance for a future integration slice:** one EDUIT entry in general Mall;
 educational child tiles only within EDUIT; no duplicate IDs or state leakage;
 exit restores the correct collection position; direct-entry exit has a safe
 fallback; unknown product scopes fail closed. Current change documents this
 contract and adds the explicit POC exit only; registry/projection migration and
-memory-game recovery remain outstanding.
+Memory Horizon branch integration remain outstanding.
