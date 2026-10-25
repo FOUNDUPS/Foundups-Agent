@@ -1,0 +1,120 @@
+name: Algorand unsigned probe codec
+
+on:
+  pull_request:
+    paths:
+      - 'modules/platform_integration/algorand/**'
+      - 'WSP_knowledge/WSP_Test_Registry.json'
+      - '.github/workflows/algorand-probe-codec.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'modules/platform_integration/algorand/**'
+      - 'WSP_knowledge/WSP_Test_Registry.json'
+      - '.github/workflows/algorand-probe-codec.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  unsigned-probe:
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHONNOUSERSITE: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: '3.12.10'
+          architecture: 'x64'
+      - name: Prepare distinct hash-locked CI installation
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $taskRoot = Join-Path $env:RUNNER_TEMP 'asa-probe-profile'
+          if (Test-Path -LiteralPath $taskRoot) { throw 'Candidate root already exists' }
+          New-Item -ItemType Directory -Path $taskRoot | Out-Null
+          "ASA_CODEC_ROOT=$taskRoot" >> $env:GITHUB_ENV
+          @{ phase = 'setup-started'; installation_profile = 'ci-pip'; candidate_tests_started = $false } | ConvertTo-Json | Set-Content -LiteralPath "$taskRoot/setup-start.json" -Encoding utf8
+          $wheelhouse = Join-Path $taskRoot 'wheelhouse'
+          $candidate = Join-Path $taskRoot 'venv'
+          $lock = 'modules/platform_integration/algorand/tests/requirements-win312.lock'
+          python -I -B -m pip --isolated download --no-deps --no-cache-dir --require-hashes --dest $wheelhouse -r $lock
+          $downloadExit = $LASTEXITCODE
+          $observedWheels = @(Get-ChildItem -LiteralPath $wheelhouse -File -ErrorAction SilentlyContinue)
+          $wheels = @($observedWheels | Select-Object -First 32 | ForEach-Object {
+            @{ name = $_.Name; bytes = $_.Length; sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant() }
+          })
+          @{ phase = 'wheel-acquisition'; exit_code = $downloadExit; observed_file_count = $observedWheels.Count; inventory_truncated = ($observedWheels.Count -gt 32); observed_files = $wheels; logs = 'GitHub job stdout/stderr'; candidate_tests_started = $false } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath "$taskRoot/setup-acquisition.json" -Encoding utf8
+          if ($downloadExit -ne 0) { throw 'Locked wheel acquisition failed' }
+          python -I -B -m venv $candidate
+          $venvExit = $LASTEXITCODE
+          @{ phase = 'venv-creation'; exit_code = $venvExit; candidate_tests_started = $false } | ConvertTo-Json | Set-Content -LiteralPath "$taskRoot/setup-venv.json" -Encoding utf8
+          if ($venvExit -ne 0) { throw 'Candidate creation failed' }
+          & "$candidate/Scripts/python.exe" -I -B -m pip --isolated install --no-compile --no-deps --no-cache-dir --no-index --require-hashes --find-links $wheelhouse -r $lock
+          $installExit = $LASTEXITCODE
+          @{ phase = 'offline-installation'; installation_profile = 'ci-pip'; exit_code = $installExit; candidate_tests_started = $false; logs = 'GitHub job stdout/stderr' } | ConvertTo-Json | Set-Content -LiteralPath "$taskRoot/setup-installation.json" -Encoding utf8
+          if ($installExit -ne 0) { throw 'Locked offline installation failed' }
+      - name: Require canonical registry shard
+        run: |
+          @'
+          import json, os, pathlib, sys
+          root = pathlib.Path.cwd().resolve()
+          sys.path.insert(0, str(root))
+          from modules.infrastructure.wre_core.src.wre_test_registry import load_canonical_test_registry
+          registry = load_canonical_test_registry(root)
+          selected = [s for s in registry.automated_shards() if s.shard_id == 'modules-platform-integration-algorand-unit']
+          assert len(selected) == 1
+          shard = selected[0]
+          assert shard.owner == 'modules/platform_integration/algorand' and shard.suite_class == 'unit'
+          assert shard.paths == ('modules/platform_integration/algorand/tests/test_unsigned_asa_probe.py',)
+          target = pathlib.Path(os.environ['ASA_CODEC_ROOT']) / 'registry-shard.json'
+          target.write_text(json.dumps(shard.to_dict(), sort_keys=True, indent=2), encoding='utf-8')
+          print('Canonical Algorand unit shard selected; one source file, no quarantine')
+          '@ | python -I -B -X utf8 -
+          if ($LASTEXITCODE -ne 0) { throw 'Registry selection failed' }
+      - name: Prepare exact source and installed wheel profile
+        run: |
+          $taskRoot = $env:ASA_CODEC_ROOT
+          $adapter = Join-Path $env:GITHUB_WORKSPACE 'modules/platform_integration/algorand/tests/qualify_sdk.py'
+          $head = git rev-parse HEAD
+          if ($LASTEXITCODE -ne 0 -or $head -ne $env:GITHUB_SHA) { throw 'Workflow checkout identity mismatch' }
+          & "$taskRoot/venv/Scripts/python.exe" -I -B -X utf8 $adapter prepare --repo $env:GITHUB_WORKSPACE --wheelhouse "$taskRoot/wheelhouse" --profile "$taskRoot/profile.json" --installation-profile ci-pip --head $head
+          if ($LASTEXITCODE -ne 0) { throw 'Profile preparation failed' }
+      - name: Release only this reviewed workflow profile and run all exact cases
+        run: |
+          @'
+          import hashlib, json, os, pathlib
+          task = pathlib.Path(os.environ['ASA_CODEC_ROOT']).resolve()
+          repo = pathlib.Path(os.environ['GITHUB_WORKSPACE']).resolve()
+          profile = task / 'profile.json'
+          adapter = repo / 'modules/platform_integration/algorand/tests/qualify_sdk.py'
+          release = dict(status='RELEASED_FOR_CODEC_TESTS', profile_sha256=hashlib.sha256(profile.read_bytes()).hexdigest(), adapter_sha256=hashlib.sha256(adapter.read_bytes()).hexdigest(), head=os.environ['GITHUB_SHA'], phase=str(task / 'run'))
+          (task / 'release.json').write_text(json.dumps(release, sort_keys=True, indent=2), encoding='utf-8')
+          '@ | python -I -B -X utf8 -
+          if ($LASTEXITCODE -ne 0) { throw 'Workflow profile release failed' }
+          $taskRoot = $env:ASA_CODEC_ROOT
+          $adapter = Join-Path $env:GITHUB_WORKSPACE 'modules/platform_integration/algorand/tests/qualify_sdk.py'
+          & "$taskRoot/venv/Scripts/python.exe" -I -B -X utf8 $adapter run --profile "$taskRoot/profile.json" --phase "$taskRoot/run" --release "$taskRoot/release.json"
+          if ($LASTEXITCODE -ne 0) { throw 'Exact codec cases or effect controls failed' }
+      - name: Preserve exact profile and outcome evidence
+        if: always() && env.ASA_CODEC_ROOT != ''
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: algorand-unsigned-probe-${{ github.sha }}
+          path: |
+            ${{ env.ASA_CODEC_ROOT }}/setup-*.json
+            ${{ env.ASA_CODEC_ROOT }}/registry-shard.json
+            ${{ env.ASA_CODEC_ROOT }}/profile.json
+            ${{ env.ASA_CODEC_ROOT }}/release.json
+            ${{ env.ASA_CODEC_ROOT }}/run/*.json
+          if-no-files-found: error
+          retention-days: 14

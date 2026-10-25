@@ -2,6 +2,64 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Unsigned ASA probe codec allocation (before source/test authoring)
+
+WSP15 C3/I4/D4/Impact4 = **15/P1**; WSP3/6/12/22/49/50/62/84/97.
+Source base is reviewed checkpoint branch `b88f438723cce766d9a6a12d22cb3c6707fb1137`,
+whose production code equals observed main5be. This layer may be prepared before
+that documentation PR merges; publish a separate code PR after main reconciliation.
+Need: convert a bounded probe request into inspectable unsigned bytes before a
+signer exists. Affordability: one pure format owner and one qualified dependency
+profile; no chain/client/wallet/treasury service. Deferral blocks transport learning.
+Competing reuse of the placeholder blockchain module or local mining/WSP-token
+simulation would mix responsibilities. FAM-adjacent SDK tests would widen whole-FAM
+CI dependencies. New Algorand platform ownership is the cohesive smaller boundary.
+
+Canonical Holo query again returns `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`,
+UNKNOWN/gap (shared authority a519 versus original0c); no reindex. Verified rg finds
+no existing unsigned ASA codec. NAVIGATION, existing blockchain/platform utilities,
+FAM/persistence, registry/CI contracts and pinned SDK source inform the allocation.
+Retrieval noise is placeholder/simulator readiness; missing new-module docs are
+authored with the module. Old manifests/versions are dated; no CURRENT semantic claim.
+Parallel source/CI/containment reviewers supply evidence; model inference adds no
+value to this fixed-format boundary and no Qwen/Gemma download is needed.
+
+Owner: `modules/platform_integration/algorand/src/unsigned_asa_probe.py` (<=220 lines),
+ordinary package imports and a frozen scalar request/immutable byte artifact. Build
+and independently validate canonical unsigned ASA bytes, SDK transaction ID and
+separately named source-binding digest. Exact built-in integer/address/realm/fee/
+round bounds; prohibit signed wrappers, duplicates/noncanonical/trailing maps,
+unknown fields, rekey/close/clawback/group/note/lease. Use SDK flat_fee=True; its
+default estimator generates an account and signs. Public TestNet genesis reference:
+[official networks](https://dev.algorand.co/concepts/protocol/networks/), checked
+2026-10-25. Genesis ID alone is not unique; require the documented32-byte hash.
+
+Budget <=19 paths:12 module structure/source/test/memory files, immutable15-wheel
+test lock, one bounded qualification adapter if needed, one Windows3.12.10 x64
+workflow, registry, NAVIGATION, this existing plan and root ModLog. Test owner
+<=320 lines; canonical collectable unit shard, no skip/quarantine/import alias.
+Preserve root requirements/global CI/whole-FAM jobs. Explicit exact-module source
+admission must retain actual effect denials; never evade the old repository finder.
+Tests precede implementation; missing-module collection is a prerequisite result,
+not a claimed behavioral RED. Qualify real vectors, malformed/forbidden packets,
+immutable inputs and no sign/client/network effects; preserve actual failures.
+
+No intent/ORM/ledger/factory/resident import, source-cap, signing, account creation,
+provider, chain, paid state or economic policy changes. The future consumer is the
+existing durable intent owner after trusted ledger facts and exact artifact/attempt/
+reissue identity are qualified. Changed rounds change txID; UTC expiry is separate.
+Measure resident reachability; no presumed member increase or activation by tests.
+
+Pre-execution adapter revision allocation: preserve initial238-line source and its
+static finding; allow <=284 lines in the same qualification owner to bind actual
+venv launcher/configuration bytes, record guarded source/chdir refusal attempts and
+retain safe exception type/source-line diagnostics. Parent and independent readers
+identified missing candidate baseline byte bindings before any SDK/test execution.
+No product/oracle/case inventory or effect/source grants change; no extra path,
+generic installation framework or OS/native/concurrent-writer claim is allocated.
+The final four-line increment is preallocated for an explicit repository namespace
+location fence and a readable canonical file-name check; it grants no extra import.
+
 ## Current-state consolidation allocation (before authoring)
 
 WSP15 C2/I4/D4/Impact4 = **14/P1**. On main

@@ -1,3 +1,18 @@
+## 2026-10-25 — unsigned Algorand probe format allocation
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP3/6/12/22/49/50/62/84/97.
+Prepare one platform codec with frozen scalar declarations, canonical unsigned
+ASA bytes, actual SDK transaction ID and a separate request binding. Freeze28
+independent unittest methods before product authoring; flat fee avoids SDK account
+generation/signing in fee estimation. New module docs, module-only direct pins,
+exact15-wheel Windows3.12.10 qualification lock, bounded source/effect adapter and
+dedicated workflow are separately reviewed before execution. Current authoring
+is not a passing test, runtime admission or transaction submission result.
+Canonical Holo authority mismatch is preserved; direct source retrieval finds no
+existing codec. Existing FAM intent/accounting owners and global CI/dependencies
+remain unchanged. No resident import, signer, ledger, provider, chain or paid state
+effect is allocated; next integration needs trusted ledger and artifact ownership.
+
 ## 2026-10-25 — FoundUps delivery and research checkpoint
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP22/50/97. Reconcile existing delivery/research
