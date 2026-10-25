@@ -175,11 +175,11 @@ def test_story_channel_rejects_invalid_oauth_override(monkeypatch, configured):
 
 
 @pytest.mark.parametrize("pin", [None, "main-foundups"])
-def test_story_channel_rejects_missing_or_wrong_pin(monkeypatch, pin):
+def test_story_channel_rejects_wrong_identity_or_conflicting_pin(monkeypatch, pin):
     monkeypatch.delenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", raising=False)
     if pin:
         monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", pin)
-    service = FakeYouTube("story-channel")
+    service = FakeYouTube("wrong-channel")
     with pytest.raises(YouTubeUploadError):
         YouTubeShortsUploader("us_story_time", youtube_service=service)
     assert service._videos.insert_args is None
@@ -187,8 +187,8 @@ def test_story_channel_rejects_missing_or_wrong_pin(monkeypatch, pin):
 
 def test_story_episode_uses_selected_oauth_and_kids_review_upload(tmp_path, monkeypatch):
     monkeypatch.setenv("YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME", "23")
-    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", "story-channel")
-    service = FakeYouTube("story-channel")
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", "UCfo9NxwyjAQvaVn3cEjXT4g")
+    service = FakeYouTube("UCfo9NxwyjAQvaVn3cEjXT4g")
     calls = []
     def factory(**kwargs):
         calls.append(kwargs)
@@ -210,8 +210,8 @@ def test_story_helper_refuses_other_channel_and_ambiguous_disclosure(tmp_path, m
     with pytest.raises(YouTubeUploadError, match="us_story_time"):
         uploader.publish_story_episode(video_file(tmp_path), "Title", "Preview",
                                        contains_synthetic_media=False)
-    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", "channel-10")
-    uploader = YouTubeShortsUploader("us_story_time", youtube_service=FakeYouTube())
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", "UCfo9NxwyjAQvaVn3cEjXT4g")
+    uploader = YouTubeShortsUploader("us_story_time", youtube_service=FakeYouTube("UCfo9NxwyjAQvaVn3cEjXT4g"))
     with pytest.raises(YouTubeUploadError, match="boolean"):
         uploader.publish_story_episode(video_file(tmp_path), "Title", "Preview",
                                        contains_synthetic_media="false")
@@ -222,10 +222,10 @@ def test_story_channel_reuses_foundups_oauth_by_default(monkeypatch, override):
     monkeypatch.delenv("YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME", raising=False)
     if override is not None:
         monkeypatch.setenv("YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME", override)
-    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", "story-channel")
+    monkeypatch.delenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", raising=False)
     calls = []
     def factory(**kwargs):
         calls.append(kwargs)
-        return FakeYouTube("story-channel")
+        return FakeYouTube("UCfo9NxwyjAQvaVn3cEjXT4g")
     YouTubeShortsUploader("us_story_time", service_factory=factory)
     assert calls == [{"token_index": 10}]

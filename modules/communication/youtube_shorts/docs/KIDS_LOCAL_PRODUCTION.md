@@ -117,15 +117,17 @@ timer, provider, account, paid generation or upload was activated in this slice.
 FoundUps YouTube account. Canonical publisher key: `us_story_time`; educational
 FoundUp identity remains `kids_episodes`, in the EDUIT context.
 
-**OBSERVED:** channel name and intended use are operator-provided. 012 confirmed reuse of the FoundUps OAuth binding (set 10), like antifafm. The immutable
-YouTube channel ID has not been independently observed. Operator-supplied channel URL:
+**OBSERVED:** channel name and intended use are operator-provided. 012 confirmed reuse of the FoundUps OAuth binding (set 10), like antifafm. 012 supplied Studio channel ID `UCfo9NxwyjAQvaVn3cEjXT4g`, now pinned in policy.
+Live OAuth selection has not been independently observed. Operator-supplied channel URL:
 https://www.youtube.com/@Us_Story_Time (canonical handle `@Us_Story_Time`).
 A shared Google account does not prove that an existing token selects this channel.
 
 Configure the production host (never commit credentials):
 
-- `YT_UPLOAD_CHANNEL_ID_US_STORY_TIME`: exact channel ID verified in Studio and
-  against the authenticated `channels.list(mine=True)` result; never the display name.
+- Registered channel ID: `UCfo9NxwyjAQvaVn3cEjXT4g`, supplied via
+  https://studio.youtube.com/channel/UCfo9NxwyjAQvaVn3cEjXT4g. The uploader checks
+  `channels.list(mine=True)` against this ID. No channel-ID environment variable is
+  required; if `YT_UPLOAD_CHANNEL_ID_US_STORY_TIME` is set, it must match this pin.
 - `YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME`: optional positive integer override; defaults to the existing
   FoundUps set 10, as requested by 012, following the antifafm pattern. Reuse the
   existing hardened `youtube_auth` owner and verify its observed channel. No new
