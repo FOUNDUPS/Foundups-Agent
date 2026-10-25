@@ -1,5 +1,62 @@
 # Mall homepage and About routing — 2026-10-25
 
+## Current-main release reconciliation — 2026-10-26, before mutation
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP00/6/11/22/50/62/84/97.
+Self0102/architect/autonomous_trigger; gate passes after fresh awakening.
+Reuse existing PR2196/owned clean Mall329b10493c159d1c42a448d3743cd18b491f2f91,
+merge base5da187622d0076f6d53de79bf8e1bd1b93aa9bb5. Integrate verified current
+main33f1442d76cca7fc084523355c6895964828258e; no new PR or history rewrite.
+Need: the actual homepage release is behind main and cannot converge until its
+metadata bindings combine parallel client/scheduler/nomination work. This is
+higher release value than another unconsumed claim primitive. No product repair
+is justified: main changes no public/Firebase/PFMall/simulator/navigation input.
+
+Execution plane: local Git/metadata qualification, not a WRE runtime activation.
+Retain all main-only work and every Mall product/test blob, including all public
+and Firebase entries qualified at preview15311925. Preserve the three historical
+Mall receipt/testcase/proof artifacts byte-for-byte. Do not relabel those receipts
+as current source, repeat unchanged preview deployment, or claim live media/auth.
+
+Resolve six predicted textual conflicts by preserving both additive log histories,
+main-first ordered union of all existing ledger approvals (predicted2538), and
+regenerating the existing1471-member manifest plus its two digest literals.
+The combined map retains main's client/six scheduler hashes and Mall's gateway
+test hash. No member or byte cap increase, semantic assertion, dependency, source,
+test case, public UI, auth, scanner rule, exclusion or authority change.
+Regenerate the existing registry:1772 files/273 quarantined, including main's
+nomination unit row and Mall's two existing capability/description row changes.
+
+Retrieve/reuse existing four affected test owners and the prior offline Mall
+runner/preload. Capture a fresh baseline before merging, then the same exact-ID
+selection after resolution; retain actual missing-media failures without empty
+directories, suppression or quarantine. No new tests or adjacent167-case rerun
+unless actual dependency drift appears. Reuse the corrected1471 closure runner
+for the unchanged eight generator cases and three Node compatibility/preflight/
+blocked-recovery entrypoints after staging the actual bindings. Keep its write,
+dotenv and network instrumentation unchanged; these are not OS isolation proofs.
+Copy existing runners to fresh external scratch; only receipt base-head metadata
+may change. Launch with a credential-free environment, record current Python/
+pytest/Node identity and runner hashes; old receipts lack historical version pins.
+No shared install or provider/model inference is necessary for deterministic Git,
+canonical generation and attributed independent source-map/test review.
+
+Budget: existing39 GitHub paths only (rename-aware); this plan+70/root ModLog+16,
+extension ModLog/TestModLog+12 each and scripts TestModLog+12. Preserve inherited
+main-only security README. No new proof/receipt file or runtime/test membership.
+Existing security-ledger union grants no new approval: observe actual new scanner
+findings, reconstruct their exact public metadata origins, then separately allocate
+and independently review any necessary rebindings before adding fingerprints.
+Publish this same PR and inspect fresh hosted/scope/security/merge gates. Incident
+38958604 remains blocking; no production deployment or merge while it fails.
+
+Retrieval evaluation: owner Holo query again returns HEAD_MISMATCH/UNKNOWN/gaptrue;
+no retry/reindex. Current Git trees and module/test owners replace stale retrieval.
+Historical pending prose is noise; frozen source/preview and exact current heads
+outrank it. Missing legacy memory/requirements artifacts are not new stubs. Dedup
+the39 rename-aware paths, retain both approval histories, and distinguish current
+qualification from protected historical evidence. No invented115-token inventory.
+
 ## Published intake-main convergence allocation — 2026-10-25
 
 WSP15/22/50/84/97;14/P1. Preserve reviewed5c3a Mall product, actual153 preview
