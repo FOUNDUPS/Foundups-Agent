@@ -24,9 +24,34 @@
   },
   "date": "2026-10-25",
   "hosted": {
-    "artifact_retention_days": 14,
-    "installation": "distinct ci-pip; cannot inherit local evidence",
-    "status": "PENDING_FRESH_HOSTED_RUN",
+    "actual_merge_head": "90767d6fa572dd3129d44611cf84c0fa410f85d3",
+    "alias_target_sha256_before_after_equal": true,
+    "all_six_repo_source_bindings_match_pr_git_bytes": true,
+    "archive_sha256": "4b3070e4b36e2b533c817cffcbcf502c0816b21e7fcb4053dbd039194d2d6139",
+    "artifact": 12601834163,
+    "artifact_expires": "2026-11-08T14:27:24Z",
+    "distinct_installation": "ci-pip; not local materialized environment",
+    "errors_failures_skips_diagnostics_overflow": 0,
+    "expected_denials": 4,
+    "frozen_files": 6193,
+    "independent_review_sha256": "921296d7fc5ac6cdc24eccf18785b354572d069021f00d22492cc067f7b0c8f6",
+    "job": 121195694357,
+    "limit": "Hosted profile/origin assertions verified from retained CI artifact and exact source blobs; remote interpreter/package bytes not separately rehashed on local host. Current metadata-only head must satisfy its own PR checks.",
+    "ordinary_methods": 52,
+    "origins": 286,
+    "parents": [
+      "24fb851d1d1e1be4b1e1b51420483c5f0d8689a6",
+      "135bd6542dc920e0552131418459cde5b847f8b4"
+    ],
+    "passes": 52,
+    "pr_head": "135bd6542dc920e0552131418459cde5b847f8b4",
+    "profile_sha256": "187cd3b3ac977da0918099840a2e4716e90537c713e3254127ffc48e27443b5f",
+    "receipt_sha256": "a51a8b9e7d1b65b915bd95df82fead118a744b07ddefd0dc2baf5d9699cf798a",
+    "release_sha256": "0e27efd86d5efd8f0b0db38810f78f71d1725a488daa89a8231aa3536bd4595d",
+    "root_review_sha256": "9af2fb486a6924a2dec3e83ff9812f16b86031931a337ed2d9e6960b4cf574d0",
+    "run": 40202250448,
+    "status": "HOSTED_EXACT52_ACCEPTED",
+    "unexpected_attempts": 0,
     "workflow": ".github/workflows/algorand-probe-codec.yml"
   },
   "independent_reviews": [
@@ -165,6 +190,22 @@
     "Independent reviewer initial RED diagnostic count assertion corrected to64 retained plus79 overflow; no receipt or test changes."
   ],
   "schema": "foundups-algorand-format-protocol-receipt-v1",
+  "security_fixture_refresh": {
+    "actual_job_log_sha256": "0e7313e8fd509aacbef371db463aa4c7db6cf3501f818d017b24639ace62a3a0",
+    "appended_fingerprint": "fbddca4e3764d6ddd12015b77052b3cb38693e6f0e6ad04e927828cc4aac9e00",
+    "classification": "Unchanged synthetic public-address fixture moves28to31; old AST and deterministic public bytes65..96/checksum verified. No private credential at this finding.",
+    "independent_review_sha256": "10422aee1c76262cc61d3b00bce33819a4cc7aaac440197db0ac5919535d363d",
+    "job": 121195695168,
+    "new_entries": 2262,
+    "old_entries": 2261,
+    "old_ordered_prefix_preserved": true,
+    "parent_gitguardian_disposition": "Separate; not cleared or waived by exact fixture review.",
+    "root_review_sha256": "41b47ec5ffc863a574295818dc728a97f638530df28f8f0de50b65e82e2cb4a2",
+    "run": 40202250445,
+    "scanner_rules_scope_history_and_failure_semantics_unchanged": true,
+    "source_head": "135bd6542dc920e0552131418459cde5b847f8b4",
+    "status": "EXACT_ONE_PUBLIC_FIXTURE_REVIEWED_PENDING_FRESH_RESCAN"
+  },
   "source_history": {
     "all_original_codec_owners_unchanged": true,
     "original161_raw_prefix_preserved": true,
@@ -198,7 +239,7 @@
       "raw_sha256": "cbb57b86d616b5fd376b712c8077e7de48e9d01cb578578161f8c1cd2fb82617"
     }
   ],
-  "status": "LOCAL_COMPONENT_QUALIFIED_HOSTED_PENDING",
+  "status": "LOCAL_AND_HOSTED_COMPONENT_QUALIFIED_CURRENT_SECURITY_RESCAN_PENDING",
   "test_inventory": {
     "count": 52,
     "ids": [

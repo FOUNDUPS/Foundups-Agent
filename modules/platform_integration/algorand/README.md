@@ -8,7 +8,7 @@ request fields and returns six fields describing immutable bytes and their hashe
 It builds and generally validates the packet through the existing codec; it adds
 no alternative wire decoder. See INTERFACE.md for exact byte and scalar bounds.
 
-All52 methods pass in the local materialized profile; exact bindings are recorded
+All52 methods pass in local and distinct hosted profiles; exact bindings are recorded
 in tests/TestModLog.md. Old28-method results remain historical. Output hashes bind
 declared request data and wire bytes; they grant no producer or account authority.
 This API adds no FAM caller, process launch, durable artifact, signing or settlement.

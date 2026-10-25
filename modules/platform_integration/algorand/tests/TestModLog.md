@@ -1,5 +1,14 @@
 # Algorand test change log
 
+## 2026-10-25 — distinct hosted52-method qualification passed
+
+[Run40202250448](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40202250448), job121195694357,
+passes52 exact IDs at PR head135bd6542/actual merge90767d6fa. Four expected denials,
+zero unexpected attempts/diagnostics,6193-file ci-pip profile and286 origins.
+Artifact12601834163 (expires2026-11-08) and profile/release/source/review hashes
+are retained in the portable format receipt. Local5263 is a distinct installation.
+Current metadata-only publication and its security rescan remain separately gated.
+
 ## 2026-10-25 — canonical JSON framing locally qualified
 
 Test-first commit1fdd98bdb01423bc50203c2c23bed12b81a1659d preserved product161;

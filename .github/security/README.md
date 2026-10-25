@@ -602,3 +602,12 @@ Append only its exact whole-file/rule/line fingerprint, retaining all2220 existi
 records (2221 total). Evidence is appended to reviewed-foundups-fx-evidence.json.
 No test/oracle bytes, scanner rules, exclusions, gate or history coverage changes.
 Fresh hosted scans remain required. Separate GitGuardian38965909 is unresolved.
+
+## PR2211 exact public-fixture rebind — 2026-10-25
+
+Job121195695168 reports only generic-api-key at Algorand test line31;
+history has no unreviewed findings. Original AUTH AST/public bytes65..96 are exact.
+Root and independent review append one whole-file/rule/line fingerprint only,
+retaining all2261 ordered entries (2262 total). The format protocol receipt binds
+actual source/job/review evidence. No rule, scope, gate or history behavior changes.
+Fresh hosted acceptance and separate parent GitGuardian disposition remain required.
