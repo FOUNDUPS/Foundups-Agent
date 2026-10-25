@@ -1,0 +1,1827 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "b6d2cf31666e23707d84ca9adb154650cc2e1b24"
+  },
+  "execution_id": "FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025",
+  "execution_plane": "Documentation packaging of existing local source/mock test evidence; no WRE runtime or chain effects",
+  "outcome": "completed",
+  "scope": "Portable evidence packaging and recorded local mock-source closure only. Not completion of publication, security/main gates or the overall blockchain goal.",
+  "completion_boundary": "LOCAL_EVIDENCE_PACKAGED_ONLY; parent publication/source-manifest/security/main gates pending",
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_97"
+  ],
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md",
+      "modules/foundups/simulator/tests/TestModLog.md",
+      "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\handoff.json",
+      "docs/architecture/receipts/FOUNDUPS_EPOCH_COMMITMENT_20261025.json"
+    ],
+    "research": [
+      "docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md",
+      "Recorded implementation Holo authority mismatch remains explicit; existing owner/schema reused; no new provider/model/query or reindex during packaging."
+    ],
+    "micro_pass": [
+      "modules/foundups/simulator/economics/btc_anchor_connector.py",
+      "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+      "Frozen source SHA-256 checked without executing product code."
+    ],
+    "macro_pass": [
+      "modules/foundups/simulator/mesa_model.py",
+      "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+      "Recorded simulator/FAM168-file snapshot and selected513 cases; no whole-module coverage claim."
+    ],
+    "hard_think": [
+      "Preserve chronology and raw hash domains; final211 is a subset of513; later negative controls cannot become earlier test-first proof.",
+      "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-qualified-e27d3467bd534777a74ee3318f6c548a\\probe_correction.json"
+    ],
+    "dialectic_sweep": [
+      "Reuse one connector/database/test owner; optional mock replay repair does not solve Algorand denomination or future external-I/O recovery.",
+      "docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md"
+    ],
+    "first_principles": [
+      "Evidence must bind exact local source and immutable mock realm; legacy unsupported schema and real effect authority remain separate.",
+      "docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md"
+    ],
+    "execute": [
+      "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.json",
+      "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+      "Documentation-only package; no new test/scanner/model/provider/chain execution."
+    ]
+  },
+  "compliance_evidence": [
+    "docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md",
+    "modules/foundups/simulator/tests/TestModLog.md",
+    "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+    "Final raw168-file snapshot, four frozen changed Python/test files, exact run IDs/commands and named exclusions preserved."
+  ],
+  "allocations": {
+    "mock_integrity_product": {
+      "C": 3,
+      "I": 4,
+      "D": 3,
+      "impact": 4,
+      "sum": 14,
+      "priority": "P1"
+    },
+    "evidence_packaging": {
+      "C": 2,
+      "I": 4,
+      "D": 4,
+      "impact": 4,
+      "sum": 14,
+      "priority": "P1"
+    }
+  },
+  "retrieval": {
+    "stage": "inherited implementation retrieval, not a fresh semantic-generation proof",
+    "query": "BTCAnchorConnector publish_commitment content-bound replay commitment format realm database migration force confirmation tests",
+    "error": "HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH",
+    "ok": false,
+    "freshness": "UNKNOWN",
+    "index_gap_detected": true,
+    "authority_head": "a519f0ad758618c5d82f0ebf8b48a3c4a0eae7f0",
+    "canonical_main_workspace_head": "0c81418fe94a7786cfd55f01e138ddc5d510583d",
+    "workspace_overlay_present": true,
+    "owner_attempts": 0,
+    "reindex": false,
+    "evaluation": "Current module contract/test evidence before history; generated training/durable settlement promises excluded as noise. Missing memory/README.md and module requirements.txt explicit. Exact frozen source and receipt metadata used for packaging."
+  },
+  "test_runs": {
+    "baseline": {
+      "counts": {
+        "passed": 18
+      },
+      "collected": 18,
+      "exit_code": 0,
+      "seconds": 2.3876805305480957,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "baseline",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\baseline\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ],
+      "external_receipt_sha256": "21574cc5485c00f2e30b17ff800f662ee49c58ca6ebdf7e3c76a78a6ba43826c"
+    },
+    "red": {
+      "counts": {
+        "passed": 19,
+        "failed": 85
+      },
+      "collected": 104,
+      "exit_code": 1,
+      "seconds": 5.330299139022827,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "red",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ],
+      "external_receipt_sha256": "fede844e617c80774c7e95b4a165056c9c9c505598c5b9832396a9c12f56d122"
+    },
+    "red_config": {
+      "counts": {
+        "failed": 1
+      },
+      "collected": 1,
+      "exit_code": 1,
+      "seconds": 1.1980609893798828,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "red_config",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py::test_public_configuration_cannot_retarget_connector"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red_config\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py::test_public_configuration_cannot_retarget_connector"
+      ],
+      "external_receipt_sha256": "8d349ac5e19b0a3bb28247107f60e461e0abb1cac63127785c6ff39833d29474"
+    },
+    "green_initial": {
+      "counts": {
+        "passed": 104,
+        "failed": 1
+      },
+      "collected": 105,
+      "exit_code": 1,
+      "seconds": 3.358006000518799,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "green_initial",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_initial\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ],
+      "external_receipt_sha256": "b0f8ac3f49ad71d8ea5b21c073355becdae1f4abb5dd87584155b863e779fe1c"
+    },
+    "red_corrected": {
+      "counts": {
+        "passed": 19,
+        "failed": 86
+      },
+      "collected": 105,
+      "exit_code": 1,
+      "seconds": 4.640403747558594,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "red_corrected",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red_corrected\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ],
+      "external_receipt_sha256": "581be335b24e6fc60787d645936cf94983e5751955388d7b20d7da2ec35769f3"
+    },
+    "red_literal_types": {
+      "counts": {
+        "failed": 4
+      },
+      "collected": 4,
+      "exit_code": 1,
+      "seconds": 1.24391770362854,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "red_literal_types",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py::test_literal_fields_require_builtin_strings"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red_literal_types\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py::test_literal_fields_require_builtin_strings"
+      ],
+      "external_receipt_sha256": "e65935ba362308e80f6a00b3fa32101bc256d9cace3307879233e8bb74940f66"
+    },
+    "green_focused": {
+      "counts": {
+        "passed": 204,
+        "failed": 1
+      },
+      "collected": 205,
+      "exit_code": 1,
+      "seconds": 3.8880422115325928,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "green_focused",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_parameter_registry.py"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_focused\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_parameter_registry.py"
+      ],
+      "external_receipt_sha256": "fc1b9105bca6f3cb178e1bafb19bd2cc68690923a6a969c5321a6bce25c8fbf0"
+    },
+    "green_wal": {
+      "counts": {
+        "passed": 205
+      },
+      "collected": 205,
+      "exit_code": 0,
+      "seconds": 3.7519826889038086,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "green_wal",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_parameter_registry.py"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_wal\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_parameter_registry.py"
+      ],
+      "external_receipt_sha256": "2ba28b67ded87a37b0f9ef966fdbcc51479ff2b896ec060060201c9a509b4f12"
+    },
+    "green_freeze": {
+      "counts": {
+        "passed": 205
+      },
+      "collected": 205,
+      "exit_code": 0,
+      "seconds": 3.5893666744232178,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "green_freeze",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_parameter_registry.py"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_freeze\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_parameter_registry.py"
+      ],
+      "external_receipt_sha256": "2ec04df97fe07fe90dd1b7c00a20a7d584014ee92d4338a57d9aba43870db4f4"
+    },
+    "simulator_closure": {
+      "counts": {
+        "passed": 507
+      },
+      "collected": 507,
+      "exit_code": 0,
+      "seconds": 60.26706290245056,
+      "source_hash_count": 168,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [
+        "modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_full_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "simulator_closure",
+        "modules/foundups/simulator/tests",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\simulator_closure\\pytest",
+        "modules/foundups/simulator/tests",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "external_receipt_sha256": "9ffba91232243cc256c026c0ee2a6efa226485ce24230d12dc3a26a4e8b1b5a5"
+    },
+    "red_schema": {
+      "counts": {
+        "failed": 6
+      },
+      "collected": 6,
+      "exit_code": 1,
+      "seconds": 1.2225403785705566,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "red_schema",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py::test_unsupported_persisted_schema_rejects_without_migration",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py::test_duplicate_current_rows_in_unsupported_schema_cannot_replay"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red_schema\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py::test_unsupported_persisted_schema_rejects_without_migration",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py::test_duplicate_current_rows_in_unsupported_schema_cannot_replay"
+      ],
+      "external_receipt_sha256": "0c5b18a245e0b7d29a1b11582ab5132cdf33f14eb1916a6e7bb92ffb19054ab1"
+    },
+    "green_schema": {
+      "counts": {
+        "passed": 211
+      },
+      "collected": 211,
+      "exit_code": 0,
+      "seconds": 3.2996633052825928,
+      "source_hash_count": 7,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "green_schema",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_parameter_registry.py"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_schema\\pytest",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_parameter_registry.py"
+      ],
+      "external_receipt_sha256": "a1a5b740906f5f7e8781b52dce573da848cc55ef1dfc696a4e7fe6005c2f630f"
+    },
+    "simulator_closure_schema": {
+      "counts": {
+        "passed": 513
+      },
+      "collected": 513,
+      "exit_code": 0,
+      "seconds": 51.13062834739685,
+      "source_hash_count": 168,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "deselected": [
+        "modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "warnings": [
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+        },
+        {
+          "category": "PytestConfigWarning",
+          "message": "Unknown config option: asyncio_mode\n"
+        }
+      ],
+      "command": [
+        "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_full_offline.py",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662",
+        "simulator_closure_schema",
+        "modules/foundups/simulator/tests",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "pytest_args": [
+        "-q",
+        "-p",
+        "no:cacheprovider",
+        "-o",
+        "addopts=",
+        "--confcutdir",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent\\modules\\foundups",
+        "--basetemp",
+        "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\simulator_closure_schema\\pytest",
+        "modules/foundups/simulator/tests",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_denies_when_protected",
+        "--deselect=modules/foundups/simulator/tests/test_sse_server.py::test_health_endpoint_allows_with_valid_invite"
+      ],
+      "external_receipt_sha256": "97e1cd732dd152a208a8409b423cdbd89570f516cc19d5ec18e40d8be6a5f033"
+    },
+    "independent_initial": {
+      "counts": {
+        "passed": 20,
+        "failed": 1,
+        "errors": 0
+      },
+      "executed": 21,
+      "source_hash_count": 4,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "repository_write_attempts": 0,
+      "script_sha256": "868f434d8589dfa5f3a466c8dc1b49f80d7a007f0991249bb63a1c375df8d583",
+      "external_receipt_sha256": "d9055cd6a17830803fd13b5e7f017bb5cb656c0cb7b795c2912bd9f6d43ab76c",
+      "exact_argv_recorded": false,
+      "scope": "20 independently designed cases plus one supplied/corrupted SQLite schema repair witness; AST-isolated actual Mesa builder, no full Mesa runtime or real chain execution"
+    },
+    "independent_qualified": {
+      "counts": {
+        "passed": 21,
+        "failed": 0,
+        "errors": 0
+      },
+      "executed": 21,
+      "source_hash_count": 4,
+      "source_drift": false,
+      "instrumented_network_attempts": 0,
+      "repository_write_attempts": 0,
+      "script_sha256": "1e589e5ad8f21d6475d996aa5928125acdf9ae99f291655a3b420096b8735b75",
+      "external_receipt_sha256": "28bc5b90320a18f6336b81536bc0f048572b643491e603d23dfe87397f241a18",
+      "exact_argv_recorded": false,
+      "scope": "20 independently designed cases plus one supplied/corrupted SQLite schema repair witness; AST-isolated actual Mesa builder, no full Mesa runtime or real chain execution"
+    }
+  },
+  "failure_chronology": [
+    {
+      "stage": "baseline",
+      "run": "baseline",
+      "meaning": "18 unchanged connector/runtime cases passed."
+    },
+    {
+      "stage": "first desired controls",
+      "runs": [
+        "red",
+        "red_config"
+      ],
+      "meaning": "RED104:19 passed/85 failed:84 desired failures plus one SQL fixture-construction call-phase failure; red_config adds one desired mode/path control before first product edit."
+    },
+    {
+      "stage": "first candidate and fixture defect",
+      "run": "green_initial",
+      "meaning": "105 cases:104 pass plus the same SQL fixture-construction call-phase failure (13 values for12 columns). It is not a pytest setup-phase error or product evidence."
+    },
+    {
+      "stage": "later original-source negative control",
+      "run": "red_corrected",
+      "meaning": "After candidate authoring and fixture correction, restore original production bytes, replay the same105 IDs (19 pass/86 fail), then restore exact candidate. Effective later negative control, not retroactive test-first evidence."
+    },
+    {
+      "stage": "literal builtin strictness",
+      "run": "red_literal_types",
+      "meaning": "Four literal-string-subclass controls failed before their corresponding product fix."
+    },
+    {
+      "stage": "WAL race",
+      "run": "green_focused",
+      "meaning": "204/205 passed; concurrent partial legacy migration hit SQLite BUSY/LOCKED during journal initialization."
+    },
+    {
+      "stage": "WAL repair",
+      "runs": [
+        "green_wal",
+        "green_freeze"
+      ],
+      "meaning": "Bounded BUSY/LOCKED journal initialization retry;205 focused cases pass. These earlier results do not qualify later schema repair."
+    },
+    {
+      "stage": "full runner setup history",
+      "meaning": "Initial source-inventory replacement failed before pytest and attempted missing runner exited; no tests or source changes. Corrected def hashes() replacement boundary preserves runner isolation/assertions.",
+      "external_artifact": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\full_runner_setup_note.txt"
+    },
+    {
+      "stage": "first simulator closure",
+      "run": "simulator_closure",
+      "meaning": "507 selected simulator cases pass after full-runner preparation correction; source predates later unsupported-schema repair."
+    },
+    {
+      "stage": "first candidate independent preparation",
+      "meaning": "Preparation only; zero executed tests; no first-candidate independent qualification.",
+      "external_artifact": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-prep-10501773aa7240768f1845f3906d52e5\\first_candidate_preparation.json",
+      "tests_executed": 0
+    },
+    {
+      "stage": "parent unsupported-schema witness",
+      "meaning": "Supplied unsupported table lacks canonical uniqueness, contains two valid rows and returns successful idempotent replay. Integrity limitation for supplied schema; not canonical-schema public mutation.",
+      "source_sha256": "f5322a58dd639d29f9631385c2a5ad49ac5f6ffe29f2750266dc2bfa06000522",
+      "duplicate_records": 2,
+      "replay_success": true,
+      "idempotent_hit": true,
+      "classification": "unsupported persisted schema witness; not canonical-schema public mutation"
+    },
+    {
+      "stage": "schema controls before fix",
+      "run": "red_schema",
+      "meaning": "All six new schema controls fail before constructor schema validation."
+    },
+    {
+      "stage": "repaired final freeze",
+      "runs": [
+        "green_schema",
+        "simulator_closure_schema"
+      ],
+      "meaning": "211 focused/513 selected simulator cases pass;168 raw source/test hashes stable; three named SSE exclusions; no instrumented network attempts. Focused cases are a subset of simulator cases."
+    },
+    {
+      "stage": "initial repaired-source independent result",
+      "run": "independent_initial",
+      "meaning": "20 passed/one overly strict path-spelling assertion; ordinary and extended Win32 spellings represent one physical database; no product defect inferred from the string comparison.",
+      "failure_ids": [
+        "__main__.IndependentBTC.test_concurrent_constructor_stress"
+      ]
+    },
+    {
+      "stage": "diagnostic and external oracle-only correction",
+      "meaning": "Retained original probe/receipt and4x8 physical-file diagnostic. Change only external oracle from path-text equality to physical samefile. No repository source/test oracle change.",
+      "original_script_sha256": "868f434d8589dfa5f3a466c8dc1b49f80d7a007f0991249bb63a1c375df8d583",
+      "qualified_script_sha256": "1e589e5ad8f21d6475d996aa5928125acdf9ae99f291655a3b420096b8735b75"
+    },
+    {
+      "stage": "qualified independent result",
+      "run": "independent_qualified",
+      "meaning": "Same ordered21 IDs and identical four-file source freeze;21 pass, no failures/errors/instrumented network/repository-write attempts. Actual Mesa builder is AST-isolated; not full Mesa runtime."
+    }
+  ],
+  "exact_test_inventory": {
+    "path": "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json",
+    "sha256": "7b06f8c09b45e9e4bbf54bcf9b894c76de8338d0454aa738eb3c5b52c6e2714a",
+    "counts_overlap": true,
+    "focused_is_subset_of_simulator": true,
+    "independent_same_ordered_ids_after_oracle_fix": true,
+    "qualification": "Exact observed pytest commands retained; independent original argv absent from source receipt and not invented."
+  },
+  "source_snapshot": [
+    {
+      "path": "modules/foundups/agent_market/__init__.py",
+      "working_sha256": "a53edf1bf48c704c4a54954b150ad2b2a3eb5455acf13bccc3807b132cc5cb57"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/__init__.py",
+      "working_sha256": "f561ca24ceaf10a372af2b77dc08e4625050dcceb55856fdab160934f776e4ae"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/agent_join.py",
+      "working_sha256": "97dcbb7d212865cd231391a02c0404305b0e262292a42ca8337ce94cfa767cfb"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/authorization.py",
+      "working_sha256": "449880d7c2e7ac5f432f49cf7b4bce7a63947108fbb75488b44a092e17a44708"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/cabr_hooks.py",
+      "working_sha256": "6b8283531033987a722f917afbb043df934d69f5de3e2f6619e14763d6eb30a9"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/exceptions.py",
+      "working_sha256": "6ffb9fa9f9ba9c4efa31454d02dc4cbb5d525693c91688b3efb2f8fa0f7f0932"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/fam_daemon.py",
+      "working_sha256": "be9234cb125d4fd142390bb0c9ace829e2d68d84dd47df984fbee6c5767d0bba"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/in_memory.py",
+      "working_sha256": "3d803767f081d0b057e19372dbf4ad37d966e4457e0074a60c234841d0be9b96"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/interfaces.py",
+      "working_sha256": "fc8c0dd9cd1085c77b8fe9867a119f4bfae1d01027fbe7d0edf7c435c0f65ec7"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/models.py",
+      "working_sha256": "0e59488898c7fb25924db4a6271f74126a858bd6cbad06049a6885dbccdc2725"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/observability.py",
+      "working_sha256": "e6211f613edfc0f5e76e677f36c3b846b03ab3a43ae3035df6f551fb793be38a"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/orchestrator.py",
+      "working_sha256": "aaf768dae52a24229eae50e4968d4e7212a77e6ad54663044cec296f41c82d7f"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/__init__.py",
+      "working_sha256": "d81d4e05b46bd1fd09898bba188c8ff99f4465d61b70948ce0c4bb0f86807ba5"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/migrations.py",
+      "working_sha256": "92df13718cfa8bf1ded17c5293a3607b8b54784e19f36946928b7d5c12930714"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/orm_models.py",
+      "working_sha256": "48fc130a407f60b8302e453a947bf38747e57d27cd7482a8ab5b4bb792ec889f"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/postgres_adapter.py",
+      "working_sha256": "110e84d9fd5293d43c1c196b6aaf0feb7c8a5869a198b46b462e716d540b1ef5"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/repository_factory.py",
+      "working_sha256": "575eff063fbabd4a42c5bd4b145eafa13a02312518fbc5a61ca9aea53b06e5d4"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/sqlite_adapter.py",
+      "working_sha256": "b6e1217a86a399b6501670d36740327c553a9dcf796aff99f75ace36eadb77bd"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/persistence/verification.py",
+      "working_sha256": "5112aaa9dd9e68a7648c50adf2139905eca819d8e8d2f59020490bd8cfc5469a"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/registry.py",
+      "working_sha256": "0df73c7961b78f04d7dc5bda6490333f1ab26931d8d6097d682adb4e3a4d0aea"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/task_pipeline.py",
+      "working_sha256": "e34e9f0261fda32e0e8bb5f9f8d62be6813f03a5a624a3276ebda28fc4028939"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/token_factory.py",
+      "working_sha256": "d2d969090820e9b42802b981d415164e9e564587f164d4fd1273b6fd340dd5b9"
+    },
+    {
+      "path": "modules/foundups/agent_market/src/treasury_governance.py",
+      "working_sha256": "57b53d62e6f96d8ac876b849ab5a4c1b473045b31e56d2aaf87fcfc731d2f78c"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/__init__.py",
+      "working_sha256": "598ed606e2f7804c04d4f675659c83f8248e5509efc5a9d2c930242b2ac9d1b5"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/run_tests.py",
+      "working_sha256": "3bb82b39c66d5077a8b04fec234a5ae92bf77930e4bb2e80b2790d12cf3802b7"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_cabr_gate.py",
+      "working_sha256": "f03c2c53995b1fd782eb640359f480e5108ad2aacee88692436bdf89da0467cd"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_cabr_hooks.py",
+      "working_sha256": "cd772f150e7eaf3c8958e305ad6895533c6157e715c0cd43bac79ad5750f3730"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_compute_access.py",
+      "working_sha256": "efcc36be6ed9d567d3ac4a983a037081c217c65bccff073df68e910a2ce2cfd0"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_deterministic_ids.py",
+      "working_sha256": "d19e1f766c03a0821ffbbb6e5d0f5ead4f04e5edda4bc06e8a26681bff40b522"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_distribution.py",
+      "working_sha256": "522d156b599b7ea8da6472eaab900d0fca99ad93e9018769278aa5106f2d7b3a"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_e2e_integration.py",
+      "working_sha256": "c4458e3c256c683ff301e5b328f84449db7fd814a95074afbd9395707d25b411"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_fam_daemon.py",
+      "working_sha256": "7fa97808e854ed1d21bd93a86e3569e302cd3c29f222db6112d5a0db2223eaf1"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_migrations.py",
+      "working_sha256": "ddd622d81504450dd7e10cb877e8dd2cecd92182457a8822201512811ce3bca3"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_mvp_offering.py",
+      "working_sha256": "956a4965b8c7b607e7162b8e1d119fba6f72d0d7f3b36c3c2ebdcd4e5cf8d783"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_orchestrator.py",
+      "working_sha256": "69047ce894b2e01efc013d1d91abe7e99577fcd4d0df9028c945b01e4ae96fb5"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_permissions.py",
+      "working_sha256": "4fa083f05c9f1755efb6c003643f8cd155d1ff1bf07dcb693dda3292412c75a9"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_persistence.py",
+      "working_sha256": "2eaff977e73647925097f6d26770de6ec5f6e9fae3c18eb7eb496badb5f233b5"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_persistent_compute_wiring.py",
+      "working_sha256": "948d73fb08b4bba85a8228623feddcde43538cb118b00d9607d592a9ee7127c8"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_repository_factory.py",
+      "working_sha256": "35957c6f89a3b0d364cc997269db988c6efc0cf1aa303ed6608fb427398664af"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_schemas.py",
+      "working_sha256": "da42022ffc128c46c683d49e5bc6b6917f883082a271dc94aea5ae5f1ea07303"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_sqlite_adapter.py",
+      "working_sha256": "95c24b4d67441258730633c6591cafb914dba296e6bb527039dfc30760dabc3f"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_task_lifecycle.py",
+      "working_sha256": "33df93bb3da08ed06014d65ae3ac119d40697b12752735368f74f525f2c4b8fe"
+    },
+    {
+      "path": "modules/foundups/agent_market/tests/test_verification_transaction.py",
+      "working_sha256": "e837ea23707dc958f7a2ca891ff2d62bff36faa90346d2eb53243bae157a93fb"
+    },
+    {
+      "path": "modules/foundups/simulator/__init__.py",
+      "working_sha256": "424488277a1630deb5fc00b229145826a83cfb3b918693d5a1c54fd5036862f9"
+    },
+    {
+      "path": "modules/foundups/simulator/adapters/__init__.py",
+      "working_sha256": "fdc09e07e5951bbd0858484baf78b31dac63dea4b287629c2324ec5b2cd928a7"
+    },
+    {
+      "path": "modules/foundups/simulator/adapters/fam_bridge.py",
+      "working_sha256": "b4489d09bc5ac487cacaaa54633d230d60d859b90903f1b67ac2409c9e0ba85c"
+    },
+    {
+      "path": "modules/foundups/simulator/adapters/metagpt_adapter.py",
+      "working_sha256": "490c3e1746c77f62c75b1a3c061716a1fd4f524fb641f46647f9e1361b4323e3"
+    },
+    {
+      "path": "modules/foundups/simulator/adapters/pfmall_state_provider.py",
+      "working_sha256": "0a1cb30e2e5ef2c1ec9b140d3df8731832814ec38e8e1bc9fd5734dd0366fd47"
+    },
+    {
+      "path": "modules/foundups/simulator/adapters/phantom_plugs.py",
+      "working_sha256": "9128cba6f789f6c3218834c705eb08a31f50efb1da055233772756aa446c0b85"
+    },
+    {
+      "path": "modules/foundups/simulator/agents/__init__.py",
+      "working_sha256": "73ba1571522dc11fa833c95b2c01e1b2913ccc0851019c7db12f2029e677b08d"
+    },
+    {
+      "path": "modules/foundups/simulator/agents/base_agent.py",
+      "working_sha256": "05d76e1b9d25d2ac35e9005ac622ee4b9edf478827c209b1992e9646e613f992"
+    },
+    {
+      "path": "modules/foundups/simulator/agents/founder_agent.py",
+      "working_sha256": "4ea5a2573cb2d7c427e6c60f07290d313746fcc23001364e276bedc0f013aa6a"
+    },
+    {
+      "path": "modules/foundups/simulator/agents/synthetic_user_agent.py",
+      "working_sha256": "769486ccd7aaf93c981b9c1df34b75b2cb5bacae9ad5746adec6cafee02d3dd9"
+    },
+    {
+      "path": "modules/foundups/simulator/agents/user_agent.py",
+      "working_sha256": "e15709f0d9dba43d808fa77b788daf68201c3e2bfedc77fa4227a19e5b26fe0e"
+    },
+    {
+      "path": "modules/foundups/simulator/ai/__init__.py",
+      "working_sha256": "ee0bcf670c88ac6e355db595dd34a2ce0ca9d09595595b04349a53331f9d6c0c"
+    },
+    {
+      "path": "modules/foundups/simulator/ai/cabr_estimator.py",
+      "working_sha256": "df5644cd837416e3970743c012b6dc4250b1c47b6737221ff237cb9f2160bbcd"
+    },
+    {
+      "path": "modules/foundups/simulator/ai/gemma_user.py",
+      "working_sha256": "c2ac5753d6d3ff05fb1f8e1a73c2c7e4f612569e959e159dc8b1bc8431cab3b7"
+    },
+    {
+      "path": "modules/foundups/simulator/ai/llm_inference.py",
+      "working_sha256": "6cbecf09d2b816fcc040515abc2c7553c923b5e187405a0d098da3be618f49c2"
+    },
+    {
+      "path": "modules/foundups/simulator/ai/qwen_founder.py",
+      "working_sha256": "c4fddfd3de6804bb70dbf84e9817da98ae912f435fd9d3f30f5af6c477c31493"
+    },
+    {
+      "path": "modules/foundups/simulator/animation_adapter.py",
+      "working_sha256": "4a9b631786b6d14c4d2640038b36f1237ecb0fe312f4f6bbc5e03a7ef05bb33e"
+    },
+    {
+      "path": "modules/foundups/simulator/archive/2026-03_workspace_tmp/investor_economics_archive.py",
+      "working_sha256": "ecd771c4642c3750ddce310efba07cf7ab25f999b23c001eea120e89194ec7b5"
+    },
+    {
+      "path": "modules/foundups/simulator/behavior/__init__.py",
+      "working_sha256": "1c152a743fc5ceebb963b863703cb7f346448bffd128a3dd918054b41757f28b"
+    },
+    {
+      "path": "modules/foundups/simulator/behavior/agents.py",
+      "working_sha256": "4dbc6365cb3a00b918d2b089db7b5c94757ef8b6d742469e7abe91e667cab42c"
+    },
+    {
+      "path": "modules/foundups/simulator/config.py",
+      "working_sha256": "9a020a2baf73b22ecf643c43ef41f7bcfe41929cba2bdfd22a0a2fce91836577"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/__init__.py",
+      "working_sha256": "5bac86ae9ffca6508cf7d8c740e89d10e512b15ec33b666bd21a6f6d69ad8c35"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/agent_compute_costs.py",
+      "working_sha256": "3b7d83a9aa32f09d223131c2a67803f6ab1a814d8c26f42330b68b9f8c509863"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/ai_parameter_optimizer.py",
+      "working_sha256": "9a69e8804744d80d07cf74342e6a731d5e3c1cf82632470e3b767f352ed943ee"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/allocation_engine.py",
+      "working_sha256": "c86c505dc3e96fd0a858465467664d350fc505631f2165aaa788189fd26133f9"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/bonding_curve.py",
+      "working_sha256": "553a6063b09cddd2f3a66016d03de4699a1178a08b4db1ba9291a053eb58659b"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/btc_anchor_connector.py",
+      "working_sha256": "ec6c58b966bee0f78acfa34620ffb37b7f9744bc314f6270f176f54ab3da360b"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/btc_reserve.py",
+      "working_sha256": "b594b22ed4cea722633e2fa8f095cf0761f17081207e99ec7132e335c0e599a6"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/cabr_flow_router.py",
+      "working_sha256": "aac3c9cdd90ab3ddce78f021dfe6a633a707fcbf1600238ec1f4d34a586c2526"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/channel_partner_pool.py",
+      "working_sha256": "d1cde5a887e3d4ea0db4bb242d87caa8ead62831d7c8729dbdc6e7b5645a1148"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/circuit_breaker.py",
+      "working_sha256": "194405a0658a51e71e31d9a198d4e743340b47ca7bec69765f0a65dae6fe3b00"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/compute_graph.py",
+      "working_sha256": "0b588550d7d2c96add2867a158c3b78eb190bd5a184246fb78c9f3d804164d08"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/demurrage.py",
+      "working_sha256": "147d7a85557e50dea6f5f426742753536495b20ed5ee0e8091608c85e9490136"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/dilution_scenario.py",
+      "working_sha256": "f74165335e8a19297fa769b4379bf1c756fe15deb4ecd852188b9911f6a18bc6"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/dynamic_exit_friction.py",
+      "working_sha256": "a518708ecf6da82d1fe62c140a983253ce6cd9c1347f5b0677f26b2ce96a792d"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/dynamic_fee_taper.py",
+      "working_sha256": "b71c5a2eef2d434bb4d72aa551255882af744ce09ed44b49df329870fcf0f8e0"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/ecosystem_revenue.py",
+      "working_sha256": "5b6c53314b0a35175e8308b8c252162fa181212b00a2476042a180bed12176d6"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/emergency_reserve.py",
+      "working_sha256": "8f35b85b7ed67d291fb82791c25261f1a74a7e7b99e477245c9b26f392d1a34b"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/epoch_ledger.py",
+      "working_sha256": "970a8faaf2127db2c2c89160c109d9c6e1a05fc1db6a66935af31fb08350469f"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/exit_scenario_sim.py",
+      "working_sha256": "334dde69f28c6e526495c021c32413fc01fca763ff9eaef6343cecebc6658dcd"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/fee_revenue_tracker.py",
+      "working_sha256": "763d13fdf4b6b94b8dfd0b0c556de6012f2819687045d762709ebf0b57b53bd1"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/fee_simulation.py",
+      "working_sha256": "a1c72cd22c654eca21ce15087810788daeaa1c28f6308a9dac551bcb661d839f"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/fi_orderbook.py",
+      "working_sha256": "a51b8d0fea69ebd1f6950400655d16d77f4fcb2184d63f9136b9d23b73bab136"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/fi_rating.py",
+      "working_sha256": "463a69523b4537ce6abaec63965ba6ca5b470d581e5edd353b3a154899560425"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/genesis_bootstrap.py",
+      "working_sha256": "e77fd4dc9098abe5f564f92c647dd3e7dcd155f7785a5d4cbfab3723594d0c3e"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/genesis_btc_model.py",
+      "working_sha256": "3630d948cfd10bd08ebaa822b13408f65c2a0617512a1a6e109f2a43efafab3b"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/investor_liability.py",
+      "working_sha256": "17ca01adbae8214378dffe73cc15cf376c354b8f25db61c648e5fd6fcf8788b4"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/investor_staking.py",
+      "working_sha256": "041cb44b736933863eba989f3ad93d75875b6bc1f3d3cc36ad847473e1d3b8f9"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/market_stress.py",
+      "working_sha256": "72b43dbf2d72ec0bf5bcd97a6c23e4f24a4c9e11bced8b497ce04a479882877b"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/participation_sentinel.py",
+      "working_sha256": "d72b4975751b3e422ab0360f631d267bdbd522d1b31e2bbd289ba2dc2d03417a"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/pavs_audit.py",
+      "working_sha256": "221f16937963fe00fa04ef7bed7a119fbf8dfc8142b242f1294a60bbc2ac939d"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/perplexity_comparison.py",
+      "working_sha256": "66858942f1b5b0ee5235ed84926a98d93f0d0c223b5e581ef2a470e5285aa7a8"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/pool_distribution.py",
+      "working_sha256": "8a0357f88ddef3aacb1a6357cb3ae42bb2f8e1272e18684d750cad714bd86aaa"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/pumpfun_comparison.py",
+      "working_sha256": "7165ecb6f50bbd6d858b41e303f6bdee88038e570879171685b75ddd232a971b"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/rage_quit.py",
+      "working_sha256": "a2940274e40d9be234318f8f0d19a832d10219457af04b2463918763b5a863d5"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/run_underwriting_matrix.py",
+      "working_sha256": "25699efc3a3eb16d0e844d6a38861f7720d68efe54a6bad412881b3bf8f706a0"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/smartdao_spawning.py",
+      "working_sha256": "44b6f5be36a6963e20021b07c9b87bcab7cde9c0ff833c6eafa1092e96097aab"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/staker_viability.py",
+      "working_sha256": "3dba34599c22f0811b6a06f9c45c81d17752f98f21f53d693d9360937d6f141e"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/startup_cost_validation.py",
+      "working_sha256": "6a07805ccf3a28e80fa330f3d9479d349072bb73668cb7d34f810d34a10c2d01"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/subscription_tiers.py",
+      "working_sha256": "47ff70984eee1457fd0ad8cdc64551c2ac004195dce8865b0db273ff4e3c1e4c"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/sustainability_scenarios.py",
+      "working_sha256": "7be960ea754d548bd6b4da8741eb481e121c21ea2d8a752f3e19171967ea5fbc"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/ten_year_projection.py",
+      "working_sha256": "a81f59e7bf0526f39fff56b769aaa059e9e98320a67af5d1d30c67b7cc8e5980"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/tide_economics.py",
+      "working_sha256": "5088e957ad22f91659520c90c68265095c6f9d1a21b6f728c2257605b7b935c5"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/token_economics.py",
+      "working_sha256": "c0dee07c331a520119b942a4f5bc5ea448d69fd0d9c5f9ac438e5fc8b8eb6a1c"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/underwriting_scenarios.py",
+      "working_sha256": "a6c84ba01d6c96338472878ad222c56d2591bcc4c06c028f95ffcc39d2d670dd"
+    },
+    {
+      "path": "modules/foundups/simulator/economics/unified_sustainability.py",
+      "working_sha256": "dee01069de1c2f4ea00cecda69811c38fe7cd8928946f9b83cc9bbb9d417abe0"
+    },
+    {
+      "path": "modules/foundups/simulator/event_bus.py",
+      "working_sha256": "a3d86bf601bb28f618a9d0f19ef83acaf90c50919ba4d1c21dc7a96cb2f77f51"
+    },
+    {
+      "path": "modules/foundups/simulator/frame_schema.py",
+      "working_sha256": "7b105e1c427f0575eeaf1378a714916268edc595c26dccd57f07b81e67dc0e78"
+    },
+    {
+      "path": "modules/foundups/simulator/mesa_model.py",
+      "working_sha256": "6fb6d792058a926873e91bd54e7b7af024e0d2337ebe35b3bfe20469b3703758"
+    },
+    {
+      "path": "modules/foundups/simulator/parameter_registry.py",
+      "working_sha256": "81976574561a56519d99b22a2e82ac430552e85981bd38dda5798b0273863642"
+    },
+    {
+      "path": "modules/foundups/simulator/render/__init__.py",
+      "working_sha256": "6a678d0a4a446ed1eb3c0c32336d9ddbc70529e4c0fdbef93fd8672f95378183"
+    },
+    {
+      "path": "modules/foundups/simulator/render/cube_view.py",
+      "working_sha256": "82c5df635aa3f055b94d6ac81de3772ea6984bf9b2f2546f121aa358d2ddc2ec"
+    },
+    {
+      "path": "modules/foundups/simulator/render/terminal_view.py",
+      "working_sha256": "7a096dfd778fc07449aaa1b067489ca3ea9e1e471fdad71ac130aa1b44196d5b"
+    },
+    {
+      "path": "modules/foundups/simulator/run.py",
+      "working_sha256": "89aa4dcf6af5766d8fb386a1b34fa6e65a813be44806d42ea121fe9db1a0b0e8"
+    },
+    {
+      "path": "modules/foundups/simulator/scenario_runner.py",
+      "working_sha256": "d192d61cd0ad375a202e81c5f666cf02fafcaac34175b66b0bc8ad3c6859a7ed"
+    },
+    {
+      "path": "modules/foundups/simulator/sse_server.py",
+      "working_sha256": "ca6f59f56f4dfd4adbddcc8231e9cc84731a93125fa0b11617a09da7aa312d49"
+    },
+    {
+      "path": "modules/foundups/simulator/state_contracts.py",
+      "working_sha256": "a75173919dfc2afd91f6767082184073395cd20441acbe25cfb4aacc7b8e3553"
+    },
+    {
+      "path": "modules/foundups/simulator/state_store.py",
+      "working_sha256": "b24495911b030adb7749dcbbc268a97451a8457da2c0e8e34b7b6d91eeb2d56e"
+    },
+    {
+      "path": "modules/foundups/simulator/step_core.py",
+      "working_sha256": "2b40ea7f3883ecc7e0763efa66322cdd4b73168cef83ea30447ad2f79cd423fe"
+    },
+    {
+      "path": "modules/foundups/simulator/step_pipeline.py",
+      "working_sha256": "74fb3c32dbeaee763baec6b443e1e6b140e1d320ca0e40ff763d04c525be5453"
+    },
+    {
+      "path": "modules/foundups/simulator/step_pure.py",
+      "working_sha256": "e7166c3bc98edfc9ee01382072c77ce4b7309095f96ddd751d9ec283a16adb43"
+    },
+    {
+      "path": "modules/foundups/simulator/sustainability_matrix.py",
+      "working_sha256": "4ff1a4f3c1bf56941b4ec19b480de1f2b91fb46c492644eeb72268d5453f9be1"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_ai_parameter_optimizer.py",
+      "working_sha256": "3bf87e4ed67e24fe6d39b6d10585d50846729ec7e3e7d276fee9ea8146adaaac"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_alignment_and_tokenomics.py",
+      "working_sha256": "abeef89b41f3d944c6c6490603317999cb311b8e04bb0871ebb0a52efc29e3c5"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_allocation_and_treasury_runtime.py",
+      "working_sha256": "0bae8052af1928a15a050f46054ab053d28336657a51e692e7e8104421cdba05"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_animation_adapter.py",
+      "working_sha256": "ca6dcd04de7b77eb273177b632777d2b1f5719e927a9215d7dc932dfb2bee093"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+      "working_sha256": "b8e87708981c3a0697030a2e9c5494c50b70f8268cd2eba176730108c204fb89"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_btc_reserve_semantics.py",
+      "working_sha256": "e7c4c5ffb72c29b4347005cf420085342ef1d5c654099c998a1b3ad64135f448"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_cabr_flow_router.py",
+      "working_sha256": "5c7055865ec6289a324c2cde7397a7772ae8ef4b43552b2be159025b30c97908"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_cabr_terminology_guardrail.py",
+      "working_sha256": "9325ae880be863f26317ea96cc0e027840e457bf96ccd063f4f856ef2e8324ec"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_channel_partner_pool.py",
+      "working_sha256": "14bd5c3283cda31a49aab672686454c8b89396f9dafbc81574eb1beb9d7746ac"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_compute_graph.py",
+      "working_sha256": "7a4604ed175e7e398c27eee2386a444c69a01d70b5e34c603edce0e9602dba91"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_docs_contract_alignment.py",
+      "working_sha256": "db3b73b2a1c945111d2908f0d5b81343ff39df974d81180da2fb31256aafdb35"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_ecosystem_revenue.py",
+      "working_sha256": "f62ba25c441e4aa9f8761f2e62287e4857c4b260d0d831c89848e6f287d5e862"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+      "working_sha256": "d89bcf1503bd9e77a3f0e263c60ad6280ad2cb70f94d76ffcf3ee84c086a2751"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_f0_mvp_offering_flow.py",
+      "working_sha256": "9eb2858c1dff72621102c0143a2686dbab72bcd60ddbfdea88d5038ac2af0b56"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_fam_bridge_symbol_fallback.py",
+      "working_sha256": "5a08cc6e159972cb55c1d0c498aa0828cd4ac8b0cd5a277ed416966da5a787d1"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_fam_lifecycle_flow.py",
+      "working_sha256": "8758d5223ac03b722a860c3cafbffacfc000550390af0963889f5df893dca4db"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_fi_orderbook_entry_guards.py",
+      "working_sha256": "42f29267735abcce3842c1c0f61a4fcf1d04e016715dabd5f6d825baa0fa9ca2"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_full_tide_hardening.py",
+      "working_sha256": "697108dd0cfa77006db4668c2dcb02f63ba48bc57f969284c14621d3b7f822b9"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_investor_liability_engine.py",
+      "working_sha256": "a21a1aa71160bc0ae3cfbf1a251b2202ea9a990aec385d5a0943781e58ae90f5"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_investor_share_contract.py",
+      "working_sha256": "359871d3d8e4b93dbef9414b70bb9d20d0b517fb03c9e72ff9143fd6ae7dd681"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py",
+      "working_sha256": "950fcc0ddaa74d8ee63f632ba7f5e06db60505145a970fc1da10cb5864e24f30"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_lifecycle_stage_and_market.py",
+      "working_sha256": "4dabdd3279cdd9e1794732393272dc6f2f36e126b73ea37ed47dbe78580072eb"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_llm_inference_backend_routing.py",
+      "working_sha256": "90f017f5a487569e7c69a9b74ed6f7ab063adf468c67e4f3b175f55ba53a832d"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_market_stress.py",
+      "working_sha256": "64687c810c13bcf376355017230a288e02d6f2021c3ef6c79db50933f9b38ee6"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_operational_profit_proxy_flow.py",
+      "working_sha256": "fd84a81567d3fffee727177e20b092340bc6419c6e638dfc5aa31ac8decb555a"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_parameter_registry.py",
+      "working_sha256": "11254ecd4a35b598c83919b83b9173c44f2e18cdcfa33f501381140ca4644d20"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_pfmall_state_provider.py",
+      "working_sha256": "42a51f284c83fe990a95adbbe4bb9aaadf2f753e77a2d39664c571a22de7afb8"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_scenario_runner_determinism.py",
+      "working_sha256": "d7b9aff2b3098fae38b3156229af8a6ebf903f001fb14f292301326525eb9e26"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_smartdao_runtime_events.py",
+      "working_sha256": "0fe4fc0447c576465476b3f77d4866bc7cb253fa33b5333d97ef85b024d45c51"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_sse_server.py",
+      "working_sha256": "1138c5d05ee6bdc5b2b87fdb5ba7a398ca5128302d7fd93cb5cf20dd7c4dd517"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_staker_hurdle_state.py",
+      "working_sha256": "9db41c4ebd58b175690a4028b514213e4a0a5eb63d803cdb35aed13abb88f7f2"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_state_contracts.py",
+      "working_sha256": "409fe2d01f48e0cdca84e34c46ba6b669a8b31bca48286109ce2d01adbfeeafe"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_step_core.py",
+      "working_sha256": "0d941a7b37b58408702a85d994e6b0bb9d41eff22b1719bb22c2eb8fc8d3ff49"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_step_pipeline_extraction.py",
+      "working_sha256": "7720bb5a19f5d56da127d26c4e50a5b9902cb4a46bd42246de6086f4163f4b78"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_step_pure.py",
+      "working_sha256": "877871011d2965204e7051c1304776be09643b5a36fa7f6fe5dad3a9365cde13"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_step_shadow_parity.py",
+      "working_sha256": "4738964bcd3ca46b2effe3678d1c0143096c11a63a46e697ba92987c55d89a68"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_subscription_tier_capacity.py",
+      "working_sha256": "01818755627120a2c2e8b06659db8c7ce7fb4a0115e844bf3781e7900ff4631f"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_sustainability_matrix.py",
+      "working_sha256": "517710f2248ffa25aef4f0d02c7cbbf1ca83360e7708f3124014b9f0bfb617d6"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_ten_year_projection.py",
+      "working_sha256": "4316270a4a0a52b82ac23d5246d3db7e06d575bf8f7d2d02a205f3ec008e8e0f"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_underwriting_scenarios.py",
+      "working_sha256": "c65abe0101552bbeb0326b333504bd1468d2ea9cd575d79d518f3e1085377f05"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_unified_sustainability.py",
+      "working_sha256": "ecb288f79d3094372113663330d0bd440e509cee95f9215fdb804fff0ad79460"
+    },
+    {
+      "path": "modules/foundups/simulator/tests/test_weighted_stake_allocation.py",
+      "working_sha256": "aeb8ca53200acd9484ccf0a3a8e4d925a685971c590e9b0794899bfa2d68720d"
+    },
+    {
+      "path": "modules/foundups/simulator/visual_qa.py",
+      "working_sha256": "57736b03332254f72bde371f2bb9905210c3363601b9ce083d0975077ff9bff4"
+    }
+  ],
+  "hash_domains": {
+    "algorithm": "SHA-256 of raw working-file bytes; no Git-normalized or installed-runtime digest claim",
+    "focused": {
+      "count": 7,
+      "paths": [
+        "modules/foundups/simulator/economics/btc_anchor_connector.py",
+        "modules/foundups/simulator/economics/epoch_ledger.py",
+        "modules/foundups/simulator/economics/participation_sentinel.py",
+        "modules/foundups/simulator/mesa_model.py",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py",
+        "modules/foundups/simulator/tests/test_epoch_ledger_settlement_commitment.py",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py"
+      ]
+    },
+    "final_simulator": {
+      "count": 168,
+      "domains": {
+        "simulator": 125,
+        "agent_market": 43
+      },
+      "scope": "all simulator/FAM Python files measured by the external full runner, not168 changed files or proof every function executed"
+    },
+    "independent": {
+      "count": 4,
+      "pins": {
+        "modules/foundups/simulator/economics/btc_anchor_connector.py": "ec6c58b966bee0f78acfa34620ffb37b7f9744bc314f6270f176f54ab3da360b",
+        "modules/foundups/simulator/mesa_model.py": "6fb6d792058a926873e91bd54e7b7af024e0d2337ebe35b3bfe20469b3703758",
+        "modules/foundups/simulator/tests/test_btc_anchor_connector.py": "b8e87708981c3a0697030a2e9c5494c50b70f8268cd2eba176730108c204fb89",
+        "modules/foundups/simulator/tests/test_layer_d_anchor_runtime.py": "950fcc0ddaa74d8ee63f632ba7f5e06db60505145a970fc1da10cb5864e24f30"
+      },
+      "scope": "two changed source owners and two existing test owners"
+    },
+    "handoff_changed_paths": {
+      "count": 11,
+      "qualification": "Includes four Python/test owners, one plan and six simulator memory docs. Plan changes for packaging, other handoff bytes unchanged."
+    },
+    "run_snapshot_history": "Companion inventory preserves before/after maps for every recorded run; cross-stage intended changes differ from in-run drift."
+  },
+  "isolation": {
+    "qualified_python": "O:/Foundups-Agent/.venv/Scripts/python.exe",
+    "flags": [
+      "-B",
+      "-X",
+      "utf8"
+    ],
+    "recorded_environment": {
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1",
+      "PYTHON_DOTENV_DISABLED": "1",
+      "HF_HUB_OFFLINE": "1",
+      "HOLO_OFFLINE": "1",
+      "HOLO_SKIP_MODEL": "1"
+    },
+    "scratch": "External TEMP/TMP/SQLite DB and per-instance FAMDaemon data directories; exact paths preserved in recorded commands.",
+    "guard_scope": "Python-level socket/DNS instrumentation; not OS sandbox/network isolation or runtime admission",
+    "runner_helpers": "Existing external fam_adapter Holo/Qwen enrichment helpers return None; authorization/accounting/assertions unchanged.",
+    "independent_scope": "20 independently designed cases plus one supplied/corrupted SQLite schema repair witness; AST-isolated actual Mesa builder, no full Mesa runtime or real chain execution",
+    "instrumented_network_attempts": 0,
+    "bytecode_disabled": true,
+    "dependencies_installed": false,
+    "product_reexecution_during_packaging": false
+  },
+  "external_artifacts": [
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\handoff.json",
+      "sha256": "36a79b6c59ce6323d4cfdd10de88f2f0b0860376172b44b932d64a32496e154a",
+      "kind": "implementation handoff"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_offline.py",
+      "sha256": "152f2062ec49d7ab0faf6242ddd2c56e4716c95b9b16dfb60f30706c7033b44f",
+      "kind": "external seven-file offline runner"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\run_full_offline.py",
+      "sha256": "49aa1cd2a64d986c7bd8f0ccc7b1322a93bebadbba5c4abb3813457ff95bd193",
+      "kind": "external 168-file offline runner"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\full_runner_setup_note.txt",
+      "sha256": "c2392b823a388884d829511c3ee415e39e17c7b9b4d50e867848b93865d69cd1",
+      "kind": "setup history; not test execution"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-parent-schema-8hk6mqpt\\receipt.json",
+      "sha256": "3145707d6ce6def8ea73e7bb4cd358c432fbbec5ff32617f91b968a232f014c7",
+      "kind": "parent unsupported-schema witness"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-qualified-e27d3467bd534777a74ee3318f6c548a\\receipt.json",
+      "sha256": "28bc5b90320a18f6336b81536bc0f048572b643491e603d23dfe87397f241a18",
+      "kind": "qualified independent 21 receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-qualified-e27d3467bd534777a74ee3318f6c548a\\heldout_btc.py",
+      "sha256": "1e589e5ad8f21d6475d996aa5928125acdf9ae99f291655a3b420096b8735b75",
+      "kind": "qualified external probe, metadata only"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-qualified-e27d3467bd534777a74ee3318f6c548a\\probe_correction.json",
+      "sha256": "6bae85ee8678e4a4bcd85787784eefda1f08f836b27c0b464d11644bb3c9d4ed",
+      "kind": "external oracle correction metadata"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-repaired-b567f5f6fd244640bf152fe6cbe255fb\\receipt.json",
+      "sha256": "d9055cd6a17830803fd13b5e7f017bb5cb656c0cb7b795c2912bd9f6d43ab76c",
+      "kind": "initial independent 20/1 receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-repaired-b567f5f6fd244640bf152fe6cbe255fb\\heldout_btc.py",
+      "sha256": "868f434d8589dfa5f3a466c8dc1b49f80d7a007f0991249bb63a1c375df8d583",
+      "kind": "original external probe, metadata only"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-repaired-b567f5f6fd244640bf152fe6cbe255fb\\path_diagnostic.json",
+      "sha256": "e3566833ea524c24c792d586a2d5ccd978c16ad15653ff247e65815d32b61fcd",
+      "kind": "four rounds/eight workers physical-file diagnostic"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-independent-prep-10501773aa7240768f1845f3906d52e5\\first_candidate_preparation.json",
+      "sha256": "cdf9fa1992175bc7986c0781e1b7b6c6191e93408d25c2e4397655d30b855888",
+      "kind": "first candidate preparation, zero cases executed"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\baseline\\receipt.json",
+      "sha256": "21574cc5485c00f2e30b17ff800f662ee49c58ca6ebdf7e3c76a78a6ba43826c",
+      "kind": "exact baseline run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red\\receipt.json",
+      "sha256": "fede844e617c80774c7e95b4a165056c9c9c505598c5b9832396a9c12f56d122",
+      "kind": "exact red run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red_config\\receipt.json",
+      "sha256": "8d349ac5e19b0a3bb28247107f60e461e0abb1cac63127785c6ff39833d29474",
+      "kind": "exact red_config run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_initial\\receipt.json",
+      "sha256": "b0f8ac3f49ad71d8ea5b21c073355becdae1f4abb5dd87584155b863e779fe1c",
+      "kind": "exact green_initial run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red_corrected\\receipt.json",
+      "sha256": "581be335b24e6fc60787d645936cf94983e5751955388d7b20d7da2ec35769f3",
+      "kind": "exact red_corrected run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red_literal_types\\receipt.json",
+      "sha256": "e65935ba362308e80f6a00b3fa32101bc256d9cace3307879233e8bb74940f66",
+      "kind": "exact red_literal_types run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_focused\\receipt.json",
+      "sha256": "fc1b9105bca6f3cb178e1bafb19bd2cc68690923a6a969c5321a6bce25c8fbf0",
+      "kind": "exact green_focused run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_wal\\receipt.json",
+      "sha256": "2ba28b67ded87a37b0f9ef966fdbcc51479ff2b896ec060060201c9a509b4f12",
+      "kind": "exact green_wal run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_freeze\\receipt.json",
+      "sha256": "2ec04df97fe07fe90dd1b7c00a20a7d584014ee92d4338a57d9aba43870db4f4",
+      "kind": "exact green_freeze run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\simulator_closure\\receipt.json",
+      "sha256": "9ffba91232243cc256c026c0ee2a6efa226485ce24230d12dc3a26a4e8b1b5a5",
+      "kind": "exact simulator_closure run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\red_schema\\receipt.json",
+      "sha256": "0c5b18a245e0b7d29a1b11582ab5132cdf33f14eb1916a6e7bb92ffb19054ab1",
+      "kind": "exact red_schema run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\green_schema\\receipt.json",
+      "sha256": "a1a5b740906f5f7e8781b52dce573da848cc55ef1dfc696a4e7fe6005c2f630f",
+      "kind": "exact green_schema run receipt"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-btc-integrity-66ec354025ab428fb077504226ef6662\\simulator_closure_schema\\receipt.json",
+      "sha256": "97e1cd732dd152a208a8409b423cdbd89570f516cc19d5ec18e40d8be6a5f033",
+      "kind": "exact simulator_closure_schema run receipt"
+    }
+  ],
+  "source_stability": {
+    "handoff_four_file_freeze_matches": true,
+    "final168_current_bytes_match": true,
+    "handoff_nonplan_changed_files_match": true,
+    "python_test_or_structured_memory_mutated_by_packager": false
+  },
+  "validation_limits": [
+    "Local mock-only evidence; no credentials, signer, chain broadcast, real confirmations, provider, authentication or financial entitlement proof.",
+    "No OS-isolated/full-module statement/branch coverage or formal WSP6 promotion qualification claimed.",
+    "Exactly three SSE HTTP cases excluded; no live SSE proof.",
+    "Python guards and dependency/data-location isolation are not an OS sandbox or installed-runtime admission.",
+    "Two inherited inactive asyncio configuration warnings remain.",
+    "Force is exact-content mock replay only; this transaction fence is not future external-I/O crash/recovery design.",
+    "Legacy rows remain visible/unclassified; fresh format is v2, not an authenticated source or Merkle inclusion proof.",
+    "Earlier205/507 results precede schema repair; corrected original-source replay occurred after authoring.",
+    "Independent original argv not recorded; physical-samefile oracle correction only in external probe.",
+    "WSP97 validator checks structural/canonical-WSP/base ancestry only, not authenticity of non-WSP evidence.",
+    "Allocated b6d2 base remains until parent reconciliation; not execution evidence on later main."
+  ],
+  "publication": {
+    "terminal_state": "ACTIVE_OWNED_WORK",
+    "owner": "parent",
+    "requires": [
+      "source-manifest/pin closure",
+      "security review and exact-head CI",
+      "Git/PR publication",
+      "fresh-main reconciliation and exact main readback"
+    ],
+    "overall_goal_completed": false,
+    "real_chain_authorized_or_executed": false
+  },
+  "artifact_packaging": {
+    "safe_metadata_whitelist": true,
+    "raw_logs_or_source_or_opaque_attributes_copied": false,
+    "read_only_source_hash_count": 168,
+    "new_repo_paths": [
+      "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.json",
+      "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.testcases.json"
+    ],
+    "existing_doc_allocation": "docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md",
+    "validation": {
+      "command": [
+        "O:/Foundups-Agent/.venv/Scripts/python.exe",
+        "-B",
+        "-X",
+        "utf8",
+        "tools/wsp97_execution_validator.py",
+        "docs/architecture/receipts/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.json",
+        "--repo-root",
+        "C:\\Users\\user\\.codex\\worktrees\\foundups-anchor-integrity\\Foundups-Agent",
+        "--expected-base",
+        "b6d2cf31666e23707d84ca9adb154650cc2e1b24",
+        "--pretty"
+      ],
+      "mode": "repository_evidence_v1.1",
+      "is_compliant": true,
+      "structurally_complete": true,
+      "validated_base_commit": "b6d2cf31666e23707d84ca9adb154650cc2e1b24",
+      "repository_head_commit": "b6d2cf31666e23707d84ca9adb154650cc2e1b24",
+      "violations": [],
+      "truth_boundary": "WSP 97 receipt v1.1 validates structural completeness plus repository-bound Retrieve WSPs evidence; all other evidence references remain opaque and no reasoning quality or runtime side effect is proven.",
+      "qualification": "Validator uses read-only repository/WSP ancestry evidence; it does not validate opaque non-WSP evidence or confer publication/security approval."
+    }
+  }
+}

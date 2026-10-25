@@ -1,3 +1,34 @@
+## 2026-10-25 — Mock BTC content/realm replay integrity
+
+WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation14/P1 is recorded in
+`docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md`. Owner retrieval
+remained authority-head-mismatched with no reindex; current docs/consumers and
+degraded direct-source retrieval preceded edits. Optional mock infrastructure
+is not presented as an Algorand transfer prerequisite.
+
+The existing connector now stores a detached full-v2 canonical payload, realm,
+format and digest; serializes pure mock admission; rejects conflicting/unknown/
+legacy/unresolved identities; preserves same-content force and first confirmation
+history; and validates stored receipts before simulated confirmation. Selected
+non-mock modes and invalid Mesa modes reject rather than becoming simulation.
+Configured mode/path and singleton explicit selection cannot silently retarget.
+Legacy columns/rows remain visible and unclassified, without identity backfill.
+
+Parent review reproduced replay success from a supplied unsupported schema with
+two current rows and no business-key uniqueness. Six desired controls failed
+before the minimal constructor schema check. Required columns/types, primary key,
+nullability and full canonical uniqueness now validate before additive migration;
+no rebuild/drop occurs. Scope is unsupported persisted state, not an ordinary
+canonical-schema public mutation. Connector563→399 lines; its class435→161.
+Only Mesa's existing builder changes; no dependency, backend or financial policy.
+
+Repaired focused211, affected simulator513 and independent21 pass, with zero
+guarded network and stable source hashes. Exactly3 existing SSE HTTP cases remain
+excluded. Counts overlap. First-candidate205/507, initial fixture/runner failures,
+WAL initialization race and review history remain in tests/TestModLog.md.
+Parent verified prior epoch PR2192 main convergence; BTC publication/CI/readback
+remain parent-owned. No BTC/Algorand signer, transfer or confirmation is delivered.
+
 ## 2026-10-25 — P0C epoch commitment integrity
 
 WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation is
