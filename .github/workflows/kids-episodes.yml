@@ -33,6 +33,7 @@ jobs:
       - name: Install test and rendering dependencies
         run: |
           python -m pip install pytest==9.0.3 jsonschema==4.26.0 PyYAML==6.0.3
+          python -m pip install -r modules/communication/youtube_shorts/requirements-local-preview.txt
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core
       - name: Verify renderer, local editor, research contracts and registry
@@ -42,6 +43,7 @@ jobs:
           modules/communication/youtube_shorts/tests/test_kids_editor_server.py
           modules/communication/youtube_shorts/tests/test_kids_research.py
           modules/communication/youtube_shorts/tests/test_openrouter_storyboard.py
+          modules/communication/youtube_shorts/tests/test_little_shrew_preview.py
           modules/foundups/kids_episodes/tests
           modules/communication/moltbot_bridge/tests/test_openclaw_kids_story_route.py
           modules/foundups/tests/test_foundup_registry_schema.py

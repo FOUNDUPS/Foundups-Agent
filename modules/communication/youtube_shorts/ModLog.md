@@ -1,5 +1,9 @@
 # YouTube Shorts AI Generator - ModLog
 
+## 2026-10-25 — First Little Shrew animated episode
+
+Reused the shared SVG rig, canonical first segment and existing FFmpeg renderer to produce three five-second shots with original code-composed instrumental/foley and timed captions. Added an optional local command with exclusive outputs, source/asset provenance and explicit unreviewed status. 140 focused tests pass; independent actual-frame/technical review passed. Audio listening remains unverified. See YouTube Shorts docs/KIDS_LOCAL_PRODUCTION.md for measured artifact evidence and exact autonomy owner/gap map, including the mock wallet boundary. Updated the disabled research-scout state; no WRE/provider/spending/upload activation.
+
 **Module**: `youtube_shorts`
 **Domain**: `communication/`
 **WSP Compliance**: WSP 3, 22, 49, 80, 54
