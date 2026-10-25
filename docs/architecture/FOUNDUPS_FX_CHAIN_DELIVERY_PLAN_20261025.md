@@ -25,6 +25,21 @@ Stage the repaired source artifacts before the staged-index test; then run the
 existing generator check, focused Python and Node controls, independent review
 and new hosted gates. Do not reuse earlier CI success for a new head.
 
+Reconciliation: parallel main advanced to `03035b4f5` through PR2189. Merge its
+brand-grounding contracts and CI without alteration. Preserve both additive doc
+sections and the exact reviewed-finding union (1,853 main + this lane's five =
+1,858 unique bindings). Recompute the shared manifest digest for the combined
+source; the delta against new main remains one member/four source hashes.
+
+Fresh combined-source qualification: eight generator cases pass in 80.48 s
+(two inherited inactive asyncio config warnings), and all three existing Node
+compatibility/preflight/recovery entrypoints exit0. JUnit evidence:
+`foundups-fx-merged-manifest-9a4a69dab5874b698a6c92df77b8910e/results.xml`
+in host temp. Independent review verifies all 1,470 staged normalized source
+blobs, both digest pins, fixed byte caps, exact member/+1 control and the complete
+ledger union; no mismatches or unmerged paths. The earlier 80.23 s run and CLI
+generator check bind the pre-merge repair only. New-head hosted gates remain.
+
 Authority: operator requested completion, dedicated PRs and main delivery after
 verification. This lane owns FoundUps chain/FX work; unrelated concurrent changes
 remain in the original checkout. Base: `8b2fccf64251097b647b7fc5a45dad75706a9192`.

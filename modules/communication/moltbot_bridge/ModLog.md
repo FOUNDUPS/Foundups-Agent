@@ -1,3 +1,19 @@
+## PR1792 registered-target brand verification — 2026-10-25
+
+WSP00/11/22/50/71/97. Extend the existing verifier for the optional public brand
+context without creating execution authority. Recheck schema/content/identity,
+reject ambiguous children and known-child relabeling against matched_reference,
+and preserve old no-brand receipts with validated new fallback fields.
+UTF-8 hashing now matches the actual Node producer's schema-bound Unicode bytes;
+ASCII legacy receipts retain their digest. This is not general JCS compatibility.
+Public-path/component checks precede reads; no credential/config owner is loaded.
+Author repaired connected tests: 74 pass, zero skips. Four independent
+private-name read failures and malformed-Unicode rejection are repaired in the
+same owner. Independent repaired-core review accepts 36 Python and 16 Node
+positive cases plus one Node causal control, separately from author 74;
+see `refresh/pr1792-independent-core-review-20261025.json`. Final CI/package/
+generated and hosted gates remain pending; protected activation is unqualified.
+
 ## PR1648 shared transport containment — 2026-10-23
 
 WSP00/5/6/15/22/50/62/97: reuse three existing callers from the retained PR1648

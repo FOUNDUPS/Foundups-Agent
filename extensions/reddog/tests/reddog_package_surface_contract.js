@@ -34,6 +34,7 @@ const EXPECTED_RUNTIME_FILES = Object.freeze([
   'daemon_diagnostic_analysis.js',
   'daemon_diagnostic_secret_filter.js',
   'extension.js',
+  'foundup_brand_context.js',
   'foundup_target_phrase.js',
   'foundup_work_grounding.js',
   'foundup_work_runtime_binding.js',

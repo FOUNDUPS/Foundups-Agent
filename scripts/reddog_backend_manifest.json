@@ -2145,7 +2145,7 @@
     "modules/communication/moltbot_bridge/src/reddog_readonly_audit_decision_runtime.py": "8eb9a0fed9dcb11ab9cfc4108faf973276c6a734d8397c4dc81f9a86a19e8b21",
     "modules/communication/moltbot_bridge/src/reddog_readonly_audit_report_collection.py": "dbbaea52140b961308c1375c1ca1b4caf2790d9a4ef751f81342d3f5fd9735b4",
     "modules/communication/moltbot_bridge/src/reddog_readonly_audit_task_executor.py": "f6ab1106664961a244efbcb67992ea81eae463260888a580ab79e7ca1d39adea",
-    "modules/communication/moltbot_bridge/src/reddog_registered_foundup_target_verifier.py": "493528c70cf8c6d6250cde1a264895fe8ba8bcfdbaa6eac32f86e5767839dc9a",
+    "modules/communication/moltbot_bridge/src/reddog_registered_foundup_target_verifier.py": "696e733cd0f076a1d411de1e1d36855e1002a2f6d677779796a48d45988b94ce",
     "modules/communication/moltbot_bridge/src/reddog_repair_evidence_guard.py": "73dec4fb7f9e25ee425ec5cc4a3271dfdcc52e9558f487a9526734e97245b084",
     "modules/communication/moltbot_bridge/src/reddog_repo_audit_fallback_grounding.py": "c6f9bc8cc16e1b726d4aff100e367eb8362ed7fd06c0eae115a01ff68888b843",
     "modules/communication/moltbot_bridge/src/reddog_research_holoindex_promotion_gate.py": "7944201ced43f4184b55a5dddf8e3598583bf55ca8c251449ad380ec8587f0a1",

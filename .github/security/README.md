@@ -1,3 +1,21 @@
+## PR2189 brand-grounding metadata bindings - 2026-10-25
+
+Hosted security job 121022484911 on candidate 9fd2618 reported 39 unreviewed
+tracked-tree findings and zero introduced-history findings. Parent and
+independent review verified 38 unchanged generated public source digests and
+one unchanged historical bridge ModLog sentence against main 8b2fccf6.
+The hosted merge-tree finding blobs match the candidate; every prior exact
+fingerprint occurs once in the existing 1,814-entry ledger. Referenced source
+bytes, unique lines and surrounding documentation history were verified.
+
+Append only the 39 agreed whole-file/rule/line bindings, preserving all prior
+entries (1,853 total). No rule, exclusion, scanner scope, fingerprint function
+or unknown finding is approved. Independent receipt
+`pr2189-independent-security-binding-review-20261025.json` and parent
+`pr1792-root-security-binding-review-20261025.json` are retained in the
+existing PR-reconciliation evidence directory. Fresh exact-head tree/history
+scans are required; this review is not itself another scanner execution.
+
 ## PR2181 CI repair metadata review — 2026-10-23
 
 The source repair changes the generated manifest and historical documentation
