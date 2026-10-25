@@ -1,5 +1,11 @@
 # GitHub Integration Module
 
+For project-admission prerequisites, use the regular-file observation contract in
+[INTERFACE](INTERFACE.md). It retains repository IDs, visibility, immutable Git
+objects, file mode and bytes; it does not authorize ownership or tokenization.
+The old Contents tuple remains available for existing callers. Completeness and
+production-readiness assertions below are historical, not a current security audit.
+
 **Complete GitHub API integration and automation for FoundUps Agent**
 
 ---
