@@ -1,5 +1,16 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-10-25 — Selected numeric admission
+
+- [x] Strict work/stake/unstake quantities, at-use fee validation and pure
+  prospective-balance preflight; existing valid math and references retained.
+- [x] Focused226 and independent28 pass; combined current-main BTC/numeric
+  simulator736 pass with the same3 named SSE HTTP exclusions. Counts overlap.
+- [ ] Derived source closure, exact-head security/CI, dedicated PR and main
+  readback for the numeric layer.
+- [ ] Aggregate F_i issuance, CABR epoch allowances, explicit asset units and
+  funded/confirmed settlement remain separately governed accounting work.
+
 ## 2026-10-25 — Optional mock BTC replay integrity
 
 - [x] Local current-v2 content/realm identity, additive legacy classification,
@@ -7,8 +18,9 @@
 - [x] Preserve exact-content force behavior; replace unsafe selected-mode coercion.
 - [x] Repaired local focused211 and simulator513 pass, with the same3 named SSE
   HTTP exclusions; independent21 held-outs/source review pass. Counts overlap.
-- [ ] Parent-owned generated closure, hosted security/CI, dedicated publication
-  and main readback for this BTC candidate.
+- [x] PR2198 passed all22 hosted checks and exact main readback at
+  `6fe7eba424c17f7813043dfb104cd845617cab38`; historical local runs retain
+  their actual execution context.
 - [ ] Real BTC publishing/confirmation, legacy reconciliation and external-I/O
   recovery remain unimplemented. This is not an Algorand transfer prerequisite
   unless BTC evidence is explicitly chosen as downstream authority.

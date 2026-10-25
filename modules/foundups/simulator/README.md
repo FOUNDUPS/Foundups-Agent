@@ -2,6 +2,17 @@
 
 Visual simulation of the autonomous FoundUp ecosystem.
 
+## Work, stake and unstake numeric validation — 2026-10-25
+
+Selected economic operations now reject invalid quantities, mutable fees and
+overflowing prospective balances before participating mutations. Existing finite
+fee math, zero/fractional values and public signatures remain. A small private
+scalar owner shares preparation formulas with standalone mutators. See the
+[contract](INTERFACE.md#selected-economic-numeric-admission) and
+[allocated plan](../../../docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md).
+This is simulation arithmetic validation; asset units, aggregate issuance policy
+and funded blockchain settlement remain separate work.
+
 ## Mock BTC anchor integrity — 2026-10-25
 
 The existing optional connector now binds each FoundUp/epoch to the full known

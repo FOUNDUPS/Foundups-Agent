@@ -1,3 +1,48 @@
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## 2026-10-25 — Work/stake/unstake numeric admission candidate
+
+WSP00/6/11/15/22/50/62/84/97; pre-code15/P1 and revised pure extraction
+allocation are in docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md.
+Current contracts/consumers preceded edits; Holo authority mismatch remains
+explicit. Strict built-in quantities and at-use fees, prospective finite balances
+and pure shared preflight reject before selected mutations. Preserve valid fees,
+references, double-work math, float normalization after strict admission and
+insufficient-funds outcomes. Composite success logs now follow assignments;
+unknown valid-insufficient work defers registry insertion.
+
+Core shrinks1375->1351 lines; one private156-line scalar owner is required.
+Focused226 and independent28 pass. Initial full633 predates BTC main; fresh
+combined-main736 passes against merge89486886f, including all6 originals and8
+adjacent cases, with exactly3 inherited SSE HTTP exclusions. Counts overlap.
+Zero instrumented network/dotenv/checkout writes; all13532 SQLite connections
+scratch/memory, central source stable and default store stats unchanged. Guards
+are process instrumentation, not OS isolation. No new unit/aggregate-cap policy,
+concurrent or outer-batch atomicity, custody or funded settlement is claimed.
+
 ## 2026-10-25 — Reconciled BTC/Mesa runtime source closure
 
 WSP15 derived16/P0 (C2/I5/D5/Impact4) allocation precedes regeneration in the
