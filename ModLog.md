@@ -1,3 +1,14 @@
+## 2026-10-26 — Publish the existing FoundUp pitch/deck instruction
+
+WSP00/6/15/22/50/62/84/97;12/P2. Publish the existing module-owned pitch skill
+through canonical Claude discovery and the generated Codex mirror; preserve
+Outcome vision, Solution stages and Pain obstacles. Correct stale references.
+Unchanged projection owner passes17 with one existing Windows symlink capability
+skip, before and after; both wrappers validate. No runtime, registry, provider,
+paid generation, social/chain action or security-gate bypass. Mall/TestNet/codec
+holds remain separate. Scope, current video-model research and remaining gates:
+[FX delivery plan](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+
 ## 2026-10-26 — Connect project nominations to review drafts
 
 WSP00/3/6/11/15/22/49/50/62/84/97;15/P1. The existing public GitHub form now
