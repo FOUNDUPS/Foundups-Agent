@@ -31,6 +31,13 @@ review and direct bounded offline checks provide the relevant evidence.
 The four-owner selection now passes601 cases, including all9 new behaviors,
 after independent review approved the exact AST pin update. Original validation,
 auth and nonce oracles remain intact; desired RED and setup failures are retained.
+Published nomination main a44e7864 is reconciled without changing the tested module
+inputs. The existing mapper changes the sole resident source digest; membership
+stays1,471 and all caps remain fixed. Canonical f427e16b and both existing pins
+are updated. Seven generator cases pass initially; the old staged-manifest check
+fails until the actual bindings are staged, then its unchanged rerun passes.
+The three existing Node entrypoints pass. Current hosted/security publication
+gates remain required; neither source delivery nor a draft admits execution.
 
 ## Project nomination inbox allocation — 2026-10-25
 

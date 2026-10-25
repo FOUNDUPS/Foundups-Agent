@@ -1727,7 +1727,7 @@
     "modules/ai_intelligence/ai_overseer/src/foundup_genesis/envelope.py": "f7291ab939d8464e47509b4989c2558cc06df9329a274b6ee525b8a7e1969ad1",
     "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py": "ee0c515238fe2688ef35be9080a35e1c53ac8255b822dc6a3e89b25a6fe5fba0",
     "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_transport.py": "192db8a8351a3d5a76085dd14b155cb29d0b52857e06763632dd0ac3bdc66c5d",
-    "modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py": "96b6f0e533561544402bf5acee7330cbfe96e8b6ae3283cd902521297dead5a6",
+    "modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py": "38302d6c8a06635d80904597c9fefe6fee4ba376562448ff1dde67f079b406e3",
     "modules/ai_intelligence/ai_overseer/src/foundup_genesis/validator.py": "7a234e5c90278a29facd9af447aa35d050d4a7951a097b2bf1fca92294e3f921",
     "modules/ai_intelligence/ai_overseer/src/holo_adapter.py": "9457b71de9a667dfb591b51480f23cc5c0b17ae344a86fad71296ef482b35e66",
     "modules/ai_intelligence/ai_overseer/src/holo_memory_sentinel.py": "a47dd90f9caa721edeeb657cbac5d91055a79fa767e4c4df46257de91ae150fd",

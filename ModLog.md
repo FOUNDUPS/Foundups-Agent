@@ -62493,6 +62493,11 @@ desired behavior RED precedes the repair. Existing source AST pin requires expli
 single-keyword review before rebaseline. No new parser, service, control or authority.
 The four-owner selection now passes601 cases after the independent AST review;
 the five behavioral RED failures and intermediate old-pin failure are preserved.
+Reconciled published nomination main a44; retain1,471 members and unchanged caps,
+updating only the changed source digest and two canonical pins to f427e16b.
+Seven generator passes plus the staged-index pass after staging, and3 existing
+Node entrypoint passes, are separate from the601 intake result. Keep the original
+unstaged-manifest failure; current hosted/security gates remain pending.
 ## 2026-10-25 — project nomination inbox allocation
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean
