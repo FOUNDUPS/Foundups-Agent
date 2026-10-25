@@ -2,6 +2,19 @@
 
 This directory contains regression tests for the FoundUps simulator module.
 
+## Epoch evidence integrity
+
+`test_epoch_ledger_settlement_commitment.py` retains its original two cases and
+adds adversarial claim/context/root/path binding, invalid numbers/maps/epochs,
+large-integer normalization, exact/conflicting retries, monotonic gaps, nested
+snapshot ownership, hash-failure atomicity, concurrent finalization and stable
+versioned commitments. Existing `test_btc_anchor_connector.py` and
+`test_layer_d_anchor_runtime.py` remain adjacent regression owners. Local
+focused closure is106 cases, including two independently motivated private
+list/index corruption controls; exact RED/GREEN inventories and offline runner
+isolation are in [TestModLog.md](TestModLog.md). These tests do not establish
+funded balances, durable source consumption, non-mock migration or settlement.
+
 ## FAM authority compatibility
 
 `test_fam_lifecycle_flow.py` retains existing lifecycle behavior and checks that

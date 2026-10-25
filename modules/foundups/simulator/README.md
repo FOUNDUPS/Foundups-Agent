@@ -2,6 +2,17 @@
 
 Visual simulation of the autonomous FoundUp ecosystem.
 
+## Epoch commitment integrity — 2026-10-25
+
+The existing epoch ledger now uses `foundups.epoch.v2` context-bound hashes,
+immutable snapshots and atomic exact retries. Merkle verification requires an
+externally trusted root, FoundUp, epoch and participant; a proof's own root is
+not an authority source. Repeated commitment preparation retains its finalized
+timestamp. See [INTERFACE.md](INTERFACE.md#epoch-evidence-contract) for encoding
+and compatibility. This is process-local pre-settlement evidence, not a funded
+balance, unique work-receipt consumption or confirmed payment. Old BTC connector
+records have not been migrated to this changed hash format.
+
 ## FAM authorization compatibility — 2026-10-25
 
 The FAM bridge supplies explicit host-configured simulation identities

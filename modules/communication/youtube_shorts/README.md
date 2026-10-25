@@ -6,6 +6,10 @@
 
 > The Veo/Sora architecture and prices below describe legacy paths. For the current open-model Kids Episodes direction, existing components, verified gaps and release gates, read [Open video audit](docs/OPEN_VIDEO_AUDIT.md). No end-to-end autonomous open-model service is active.
 
+## Local Little Shrew production
+
+[Produce the first 15-second episode](docs/KIDS_LOCAL_PRODUCTION.md) using the shared vector rig and existing FFmpeg renderer. No generation account or paid API is required. The local preview and unqualified autonomous worker are separately labeled.
+
 ## Purpose
 
 Autonomous AI-powered YouTube Shorts creation and upload system for Move2Japan channel. Enables 012[U+2194]0102 interaction where human provides topic and AI generates, produces, and posts video Shorts automatically.

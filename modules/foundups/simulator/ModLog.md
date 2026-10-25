@@ -1,3 +1,50 @@
+## 2026-10-25 — P0C epoch commitment integrity
+
+WSP00/6/11/15/22/50/62/84/97; pre-authoring allocation is
+`docs/architecture/FOUNDUPS_EPOCH_COMMITMENT_HARDENING_20261025.md`, C3/I5/D5/Impact5=18/P0.
+The current Holo owner query remained authority-head-mismatched; direct source,
+live consumers and all six module memory owners preceded the change. Generated
+training JSON was duplicate/stale retrieval noise, not contract evidence.
+
+The existing ledger now binds v2 leaves/nodes/empty roots to their context and
+requires external root/FoundUp/epoch/participant expectations. It preserves exact
+large integers, rejects invalid amounts, freezes nested snapshots, builds before
+publishing under a lock, accepts exact old retries and rejects conflicting or
+out-of-order new epochs. Anchors reuse finalized time. The same owner shrank;
+no helper file, second ledger, connector or financial policy was introduced.
+
+Unchanged baseline:20 passes. New tests first:84 failures plus the two original
+passes. Candidate focused/adjacent closure:104 passes, zero guarded network
+attempts and no source drift. Exact inventory/isolation/artifacts are in
+tests/TestModLog.md. Original test docstring and both test bodies/oracles remain.
+Independent review, publication and main readback are parent-owned gates.
+
+Independent review then found a latent `verify_chain` checker defect: replacing
+a private list entry while retaining the original epoch index could certify the
+indexed entry instead of the listed one. Public frozen/tuple properties expose
+no write path and no persisted import exists; this was not a demonstrated public
+authorization bypass. Two appended controls, with stale and recomputed hashes,
+both failed against the first frozen candidate before correction. The checker
+now checks list/index cardinality and canonical-entry consistency plus the actual
+listed entry hash. Repaired focused/adjacent closure:106 passes (88 ledger+18
+adjacent), zero guarded network attempts and no in-run source drift. The earlier
+104-case and parent-reported30 held-out results qualify only the first candidate;
+they are not repair evidence. See the new raw receipt paths in tests/TestModLog.
+
+Final parent repaired-source qualification:410 simulator cases pass with3 named
+SSE HTTP exclusions; independent replay passes41 held-outs. Counts overlap.
+The changed ledger owner has205/213 statements covered over existing focused
+and independent publication cases; no whole-module coverage or OS-isolated
+promotion claim. Original two test ASTs and module docstring remain identical.
+The portable epoch receipt and test log bind exact IDs, source hashes and limits.
+Existing backend manifest/pins rebind only this owner with1470 members and all
+caps unchanged; eight generator cases and three Node entrypoints pass. Dedicated
+PR, new-head hosted gates and main readback remain pending.
+
+This is process-local pre-settlement evidence. Old connector rows/version
+migration, durable work-source replay protection, aggregate supply, CABR epoch
+allowance and confirmed settlement remain open. No chain/provider/signer call.
+
 ## 2026-10-25 — Explicit simulation authority at the FAM bridge
 
 WSP00/6/11/15/22/50/84/97; shared P0B C4/I5/D5/Impact5=19/P0 allocation.
