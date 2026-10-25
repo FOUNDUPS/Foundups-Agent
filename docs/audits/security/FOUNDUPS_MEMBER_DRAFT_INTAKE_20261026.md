@@ -125,3 +125,15 @@ Primary references: [Clerk verification](https://clerk.com/docs/guides/sessions/
 [session claims](https://clerk.com/docs/guides/sessions/session-tokens),
 [PyJWT API](https://pyjwt.readthedocs.io/en/stable/api.html),
 [security changelog](https://pyjwt.readthedocs.io/en/stable/changelog.html).
+
+## Independent configuration finding — pre-repair amendment
+
+Initial implementation frozen at `fff44de998c6e9eb13e78ad450173bcfa8cbd3d1`.
+Independent actual-ASGI/RSA review passed10 functions and found one configuration
+failure: the crypto parser accepts a public PEM followed by a private PEM, leaving
+the latter retained in the public-key field. This is server configuration hygiene,
+not a remote bearer bypass or observed exposure. Allocate four existing-owner
+regressions before repair: appended private/public/junk reject, ordinary CRLF
+public key remains accepted. Require a single canonical SubjectPublicKeyInfo
+public PEM, with CRLF normalization; no custom cryptography or private input
+retention. Existing product/test/file/function ceilings remain sufficient.

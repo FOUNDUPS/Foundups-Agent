@@ -305,3 +305,19 @@ def test_private_or_weak_server_key_rejected(owner, key, private, weak):
     with pytest.raises(ValueError, match="^invalid_clerk_intake_policy$"):
         owner.ClerkIntakePolicy(issuer=ISSUER, authorized_parties=(ORIGIN,),
                                 public_key_pem=pem.decode("ascii"))
+
+
+@pytest.mark.parametrize("suffix", ["private", "public", "junk"])
+def test_public_policy_accepts_exactly_one_public_document(owner, policy, key, suffix):
+    private = key.private_bytes(serialization.Encoding.PEM,
+        serialization.PrivateFormat.PKCS8, serialization.NoEncryption()).decode("ascii")
+    extra = {"private": private, "public": policy.public_key_pem, "junk": "ignored-trailer"}
+    with pytest.raises(ValueError, match="^invalid_clerk_intake_policy$"):
+        owner.ClerkIntakePolicy(issuer=ISSUER, authorized_parties=(ORIGIN,),
+                                public_key_pem=policy.public_key_pem + extra[suffix])
+
+
+def test_crlf_public_document_is_supported(owner, policy):
+    current = owner.ClerkIntakePolicy(issuer=ISSUER, authorized_parties=(ORIGIN,),
+        public_key_pem=policy.public_key_pem.replace("\n", "\r\n"))
+    assert current.issuer == policy.issuer

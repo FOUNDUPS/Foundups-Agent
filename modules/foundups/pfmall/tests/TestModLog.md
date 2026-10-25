@@ -22,6 +22,13 @@ Logs/JUnit/exact cases/source hashes are external under
 `foundups-member-intake-20261026`. No live identity, deployment, OS confinement
 or full-repository promotion claim. WSP6/22/50/84/97.
 
+Independent11-function ASGI/RSA review found public-PEM trailing private-material
+acceptance (10PASS/1FAIL), with a separate missing-optional-dependency import/503
+probe passing. Freeze initial productfff44de99; add three rejection regressions
+plus CRLF positive before repair. Their actual RED is783PASS/3FAIL, no errors/
+skips, with the one reviewed baseline dependency warning. No original test oracle
+or failure history is removed. This adds no bearer/identity or live exposure claim.
+
 ## 2026-10-25 — FX1 gateway link and public filter reuse
 
 Extended the existing `test_gateway_roc_shell.py` with HTML-parser coverage of
