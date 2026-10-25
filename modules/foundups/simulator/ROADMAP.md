@@ -1,5 +1,16 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-10-25 — Epoch evidence integrity layer
+
+- [x] Local v2 claim/context binding, immutable snapshots, atomic exact epoch
+  retries/conflict rejection and stable pre-settlement commitment preparation.
+- [x] Preserve original commitment oracles; repaired local focused106, independent41
+  and affected simulator410 pass, with3 named SSE HTTP exclusions. Counts overlap.
+- [ ] Dedicated-PR hosted gates and verified main convergence.
+- [ ] Resolve old connector content/version migration before non-mock activation.
+- [ ] Durable source-receipt consumption, aggregate F_i issuance, CABR epoch
+  allowance and funded/confirmed settlement remain separate accounting gates.
+
 ## 2026-10-25 — FAM authority compatibility
 
 - [x] Pass configured simulation caller contexts into the existing FAM boundary;

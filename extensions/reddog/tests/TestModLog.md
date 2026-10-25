@@ -1,3 +1,13 @@
+## FoundUps epoch source closure — 2026-10-25
+
+Reuse the same8 generator cases and3 Node compatibility/preflight/recovery
+entrypoints without test-oracle changes except the canonical Python digest pin.
+All pass on the repaired epoch source (generator79.64s,2 inherited warnings).
+Independent staged review verifies1470 normalized source blobs, exact pins and
+unchanged328KiB/2MiB/1470/32MiB caps, including retained1471-member rejection.
+The generated delta is one source hash; no installed runtime is promoted.
+Fresh hosted CI/security and main convergence remain required.
+
 ## FoundUps authorization closure — pre-verification inventory, 2026-10-25
 
 Reuse the eight existing Python generator cases and existing Node backend

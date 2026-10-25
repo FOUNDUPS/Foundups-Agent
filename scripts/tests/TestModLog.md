@@ -1,5 +1,13 @@
 # Script test inventory
 
+## 2026-10-25 — Epoch ledger source binding
+
+The existing8 generator cases pass on the one-hash epoch update in79.64s, with
+2 inherited inactive asyncio configuration warnings. Only the expected canonical
+digest fixture changes; independent generation, staged source/hash consistency,
+member sentinels and LF/CRLF caps remain intact. Three existing Node compatibility
+entrypoints also exit0. This qualifies source closure, not installed promotion.
+
 ## 2026-10-25 — FoundUps source-closure repair inventory
 
 Reuse all eight cases in `test_generate_reddog_backend_manifest.py`; only its
