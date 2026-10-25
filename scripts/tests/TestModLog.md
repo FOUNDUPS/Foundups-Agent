@@ -1,5 +1,23 @@
 # Script test inventory
 
+## 2026-10-26 — Mall/current-main source binding
+
+The unchanged eight generator cases pass in79.89s after staging actual combined
+source/manifest/two pin literals. Two inherited inactive asyncio config warnings
+remain. Existing three Node owners exit0; registry1772/273 is current. Canonical
+a64a876e retains1471 members,332650LF/335665CRLF and207 bytes of fixed headroom.
+All1614 source snapshots remain stable; zero instrumented network/dotenv/write
+denials. No new case, cap, member, source algorithm or installed-runtime grant.
+
+## 2026-10-26 — GitHub client source binding
+
+Rebind only the existing client's normalized hash in the1471-member manifest;
+two digest literals advance to c1f97e86, preserving all membership/cap assertions.
+Stage source+manifest+pins before the unchanged eight generator cases:8PASS,
+zero failures/errors/skips/warnings in the external development environment.
+Three existing Node contract/preflight/blocked-recovery owners exit0. No new
+test file, generator, member, byte cap, provider or installed-runtime admission.
+
 ## 2026-10-25 — Mall and published intake source binding
 
 Preserve the two parent source deltas under canonical5b933b75 and unchanged1,471

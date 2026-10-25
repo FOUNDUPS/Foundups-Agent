@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-09-30 JST
+Last verified: 2026-10-26 JST for targeted rechecks and newly recorded opportunities below; remaining legacy entries retain their own verification dates.
 
 ## Purpose and truth boundary
 
@@ -52,7 +52,7 @@ If repo and Drive disagree, **do not choose the more favorable number**. Re-veri
 ### F-01 — 地域共生を目指したデータセンター脱炭素化設備導入支援事業
 
 - Agency: 環境省 / 一般社団法人 地域循環共生社会連携協会 (RCESPA)
-- Status: **VERIFIED PROGRAM / FORMAL ELIGIBILITY INQUIRY SENT 2026-09-13**
+- Status: **CLOSED — third call ended 2026-10-09; eligibility inquiry sent 2026-09-13 remains unresolved, not an eligibility determination or award**
 - Current round: FY2025 supplementary budget, third call
 - Deadline: 2026-10-09 12:00 JST
 - Support: generally 1/2 of eligible costs; storage equipment 1/3; project cap up to ¥1,000,000,000 subject to the official guide
@@ -68,7 +68,7 @@ Do not state that Fukui City is participating in the project, that the project q
 ## F-02 — データセンターのゼロエミッション化・地域共生加速化事業
 
 - Agency: 環境省 / 一般社団法人 地域循環共生社会連携協会 (RCESPA)
-- Status: **VERIFIED LIVE PROGRAM / SECOND CALL OPENED 2026-09-17**
+- Status: **CLOSED — second call ended 2026-10-16 12:00 JST; YUMORI project eligibility not established**
 - Second-call deadline: 2026-10-16 12:00 JST
 - Inquiry window: 2026-09-18 through 2026-10-07 17:00 JST
 - Primary source: https://www.env.go.jp/press/press_05570.html
@@ -88,7 +88,7 @@ Potential eligible infrastructure includes renewable-energy equipment, storage/t
 ## F-07A — SHIFT: 省CO2型システムへの改修支援事業
 
 - Agency: 環境省 / 温室効果ガス審査協会 (GAJ)
-- Status: **VERIFIED LIVE PROGRAM / FIT REQUIRES BASELINE ELIGIBILITY CHECK**
+- Status: **CLOSED — third call ended 2026-10-15 12:00 JST; closed-facility baseline unresolved**
 - Third-round opening: 2026-09-11
 - Deadlines: 2026-10-01 12:00 JST and 2026-10-15 12:00 JST
 - Rate: 1/3
@@ -100,7 +100,7 @@ Potential YUMORI.me uses: heat recovery, heat exchangers, heat pumps, hot-water/
 ## F-08 — 令和8年度 官民連携基盤整備推進調査費 第3回案件募集
 
 - Agency: 国土交通省 国土政策局 地方政策課 調整室
-- Status: **VERIFIED LIVE PROGRAM / LOCAL-GOVERNMENT APPLICANT**
+- Status: **CLOSED — FY2026 third call ended 2026-10-08; local-government applicant only; future-round consultation remains available**
 - Application window: 2026-09-17 through 2026-10-08
 - Subsidy rate: up to 1/2 of eligible study costs
 - Applicant: prefectures, special wards, municipalities and specified inter-municipal bodies
@@ -133,7 +133,7 @@ The FY2026 call seeks private proposals that reduce City fiscal burden, improve 
 ## F-10 — 令和8年度 ZEB実証事業（三次公募）
 
 - Agency: 経済産業省 / 一般社団法人 環境共創イニシアチブ (SII)
-- Status: **VERIFIED PROGRAM / THIRD CALL OPEN 2026-09-18**
+- Status: **CLOSED — third ZEB demonstration call ended 2026-10-09 17:00 JST; separate diagnosis/planning call ended 2026-10-16 17:00 JST**
 - Third-call window: 2026-09-18 through 2026-10-09 17:00 JST
 - Expected award timing: early December 2026
 - Primary source: https://sii.or.jp/zeb08/jissho_public.html
@@ -162,7 +162,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - If Fukui City remains the building owner, the official SII FAQ says a local government cannot apply to the METI/SII ZEB demonstration program. In that structure, evaluate the Ministry of the Environment public-building ZEB/CO2 route instead.
 - If, through a lawful future PPP/property transaction, a registered nonprofit/private SPC becomes the building owner before application and satisfies the other requirements, an SII application may become possible. Do not assume that a long-term lease or operating right alone satisfies the ownership rule; obtain an SII determination.
 - SII says a registered nonprofit corporation or cooperative may apply when it is the building owner and the project otherwise qualifies.
-- For the separate `ZEB化診断・計画策定支援事業`, the applicant is a registered Phase-3 ZEB Planner and the building owner participates through a joint-project agreement. That program is open through 2026-10-16 17:00 JST and does not require the ZEB construction to proceed after the diagnostic/planning work. Confirm with SII whether a Fukui City-owned building can participate as the owner-side joint party before treating this as usable.
+- For the separate `ZEB化診断・計画策定支援事業`, the applicant is a registered Phase-3 ZEB Planner and the building owner participates through a joint-project agreement. That program's FY2026 round ended 2026-10-16 17:00 JST and does not require the ZEB construction to proceed after the diagnostic/planning work. Confirm with SII whether a Fukui City-owned building can participate as the owner-side joint party before treating this as usable.
 - SII states that pre-application consultation is generally handled by telephone rather than email. ZEB office: 03-5565-4063, weekdays 10:00-12:00 and 13:00-17:00.
 - ZEB demonstration applications use J-Grants and require a G-Biz ID Prime account. Joint applications cannot use the standard J-Grants route and require early coordination with SII.
 - Do not contract or start subsidy-scope design/construction before the award decision if those costs are intended to be subsidized; SII states such pre-award contracted/started scope is ineligible.
@@ -199,6 +199,37 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 **YUMORI fit:** the current Hanyu initial planning case is far below the ¥10B fixed-investment threshold and is not eligible on the present modeled scale. Do not aggregate unrelated Hanyu, Shimousaka and Sukatto budgets merely to manufacture the threshold. Re-evaluate only if verified demand, utility capacity, operator participation and finance justify a future buildingized investment at qualifying scale.
 
 **Municipal dependency:** the prefectural program notes tie the AI-DC cap to the host municipality's subsidy ceiling. Fukui City's 企業立地推進課 should therefore be included in any eligibility consultation before modeling a combined incentive stack. No prefectural or City amount is AWARDED to YUMORI.
+
+## F-11 — 令和7年度補正予算 省エネ・非化石転換補助金（設備単位型）第4次公募
+
+- Agency: 経済産業省 / 一般社団法人環境共創イニシアチブ (SII).
+- Status: **VERIFIED PROGRAM / FOURTH CALL OPEN; YUMORI ELIGIBILITY NOT ESTABLISHED**.
+- Open: 2026-10-05. Deadline: **2026-10-30 17:00 JST (physical receipt of application)**.
+- Official call: https://sii.or.jp/setsubi07r/overview4.html
+- Official guide: https://sii.or.jp/setsubi07r/uploads/r7h_st_01_kouboyouryou_4.pdf
+- Designated (III) high-efficiency equipment includes eligible classes of HVAC, heat pumps, commercial water heating, motors and transformers. Published ordinary equipment rate **1/3, maximum ¥100M**; GX category **1/3, maximum ¥300M**; GX top-performance category **1/2 (existing equipment changes) or 1/5 (new installations), maximum ¥300M** subject to conditions and actual eligible listed products. Separate (II) electrification/decarbonized fuel-conversion categories have their own conditional rates/caps; do not generalize any cap to a YUMORI budget.
+- **Possible component fit, not eligibility:** independently listed/qualifying onsen hot-water, heat-pump, HVAC, transformer, or related thermal equipment at a permitted operating site. DC GPU hardware and whole modular DCs are not assumed eligible in this track.
+- **Unresolved:** Can an operating applicant legally own eligible equipment on a City-approved lease/PPP site (or independently qualifying Hanyu node), establish required energy-use baseline and savings at a previously closed property, and satisfy completion, procurement and no-double-funding rules? Pre-award contracts for subsidized equipment are restricted. No YUMORI application/eligibility/award is established; short deadline does not overcome missing property rights.
+
+## F-12 — 令和8年度 低炭素型建材活用新築ZEB支援事業 第3次公募
+
+- Agency: 環境省 / 一般社団法人静岡県環境資源協会 (SERA).
+- Status: **VERIFIED PROGRAM / THIRD CALL OPEN; YUMORI ELIGIBILITY NOT ESTABLISHED**.
+- Open: 2026-10-16. Deadline: **2026-12-15**; verify exact submission method and cutoff with current guide before any action.
+- Official ministry release: https://www.env.go.jp/press/press_05673.html
+- Official administrator: https://siz-kankyou.com/2026co2/teitansokenzai3/
+- Official guide: https://siz-kankyou.com/wp-content/uploads/2026/10/r8teitanso3_yoryo.pdf
+- Supports eligible **newly built** ZEB buildings incorporating low-carbon structural materials, **not retrofit of closed Sukatto or former schools**. Published fractions depend on building classification, ZEB standard and materials; combined project cap **¥500M** subject to the current guide. Multi-year phasing requirements were eased in the third round.
+- **Possible fit, not eligibility:** a distinct future new-built ZEB/education/commercial building in the portfolio, if justified, with qualifying private/public applicant.
+- **Unresolved:** applicant ownership/legal land rights, City/core-city applicant restrictions, new-build use and materials, confirmed ZEB criteria, timeline and award-before-contracting requirements. A City lease or committee proposal alone is insufficient. No YUMORI selection or funding is established.
+
+## P-01 — 福井県 大型データセンター誘致可能性調査業務（フェーズ１） (procurement; NOT subsidy)
+
+- Agency: 福井県エネルギー環境部エネルギー課.
+- Status: **VERIFIED PROCUREMENT NOTICE / NO YUMORI CONTRACT OR AWARD**.
+- Published: 2026-10-14. Bidder eligibility submission closed **2026-10-23 17:00**; proposals due **2026-11-04 17:00** only for already-qualified bidders.
+- Official source: https://www.pref.fukui.lg.jp/doc/dengen/1014.html
+- Public research procurement ceiling **¥6,160,000 incl. tax** is NOT a grant cap or subsidy. Scope studies siting and infrastructure for very large data centers; no evidence any YUMORI site is selected or on the list. Possible complementary heat-reuse/decentralized-compute question is only a future inquiry hypothesis.
 
 ## Other tracked programs
 
@@ -243,7 +274,9 @@ across sites merely to meet a threshold or reuse the same eligible cost twice.
 | F-07B | DX operational CO2 measurement/improvement | Independently qualifying systems | Eligible entity under DX guide | Active baseline and applicant/system scope; no duplicate F-07A costs |
 | F-08 | Public/private infrastructure feasibility study, not construction | City-defined infrastructure linked to portfolio | Fukui City / eligible public body, not committee directly | City decision to apply, infrastructure nexus, one study covering several assets requires confirmation |
 | F-09 | School public-asset reuse procedure, **not a subsidy** | Hanyu and Shimousaka only in current call | Stable implementing entity/JV subject to City rules | One Form 1 per property or combined school consultation? Sukatto requires separate receiving route |
-| F-10 | Building-level ZEB retrofit / eligible technology | Each eligible school/Sukatto building independently | Eligible private/nonprofit building owner; City cannot apply in this METI/SII lane | Owner/leaseholder route, joint/multi-building application, track, equipment and pre-award procurement conditions require SII confirmation |
+| F-10 | Building-level ZEB retrofit / eligible technology (FY2026 round closed) | Each eligible school/Sukatto building independently | Eligible private/nonprofit building owner; City cannot apply in this METI/SII lane | Owner/leaseholder route, joint/multi-building application, track, equipment and pre-award procurement conditions require SII confirmation |
+| F-11 | Listed high-efficiency heat pumps/HVAC/hot water/transformers, ending 2026-10-30 | Lawful independently eligible buildings/equipment | Eligible operating applicant and equipment owner | City/site rights, listed equipment, savings and closed-facility baseline, timing and duplicate-subsidy rules |
+| F-12 | Low-carbon structural-material NEW-build ZEB only, ending 2026-12-15 | Distinct future qualifying new building | Eligible building owner/new-construction applicant | Municipality and applicant exclusion rules, land/title, ZEB performance and structural materials; not retrofit |
 
 Primary sources rechecked for the material mapping boundaries:
 - City school call and official guidelines: https://www.city.fukui.lg.jp/sisei/plan/reform/p073300.html
@@ -251,6 +284,10 @@ Primary sources rechecked for the material mapping boundaries:
 - ENV SHIFT third-call notice: https://www.env.go.jp/press/press_05521.html
 - MLIT local-government study call: https://www.mlit.go.jp/report/press/kokudoseisaku09_hh_000191.html
 - SII ZEB applicant FAQ: https://sii.or.jp/zeb08/faq.html
+- 2026-10-26 update, SII equipment fourth call: https://sii.or.jp/setsubi07r/overview4.html
+- 2026-10-26 update, MOE third new-build low-carbon ZEB call: https://www.env.go.jp/press/press_05673.html
+- 2026-10-26 update, Fukui large data-center site procurement (NOT grant): https://www.pref.fukui.lg.jp/doc/dengen/1014.html
+- 2026-10-26 update, MLIT closed FY2026 calls / future round consultation: https://www.mlit.go.jp/kokudoseisaku/kanminrenkei.html
 
 Other program rows retain their existing verification dates and status boundaries;
 this mapping does not certify a new round, site eligibility or multi-site permission.

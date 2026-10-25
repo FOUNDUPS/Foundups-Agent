@@ -2,6 +2,167 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## GitHub nomination review allocation — 2026-10-26, before authoring
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/84/97.
+Parent main531bd0341ef502b53c8913c9163963b03354f62c; reuse the clean owned
+repository-observation worktree on agent/foundups-project-admission-20261026.
+Need: the public issue form has no nomination-to-draft consumer. The simpler whole
+component is issue event -> bounded adapter -> existing mapper -> review artifact.
+Network reads in the pure mapper/unrelated writer would not close this gap.
+
+Execution plane: a single GitHub-hosted issue-review job, not a WRE worker or
+RedDog resident command. Only trusted default-branch source runs for issue events;
+no issue body/title interpolation into shell, credential checkout persistence,
+project code checkout, URL fetch, model/provider, database, comment or label writes.
+GitHub's event metadata attributes a nominator; it grants no project ownership,
+commander, registry, issuer, asset, reward or venue authority. Local event replays
+are unsigned development inputs, not provider authentication. Drafts retain
+IDEA/UNBOUND, external_repo_requested=False and missing acceptance criteria.
+
+One new <=300-line module under ai_overseer/src/foundup_genesis owns the pure
+adapter and bounded CLI. Require the exact repository, positive issue/author IDs,
+issue action, title prefix, matching canonical issue URL and exact ordered form
+headings/consent. Bound event bytes<=256KiB, body<=16KiB and each field; reject
+ambiguous/duplicate/unknown headings, invalid controls and credential-bearing URLs.
+Preserve Outcome (vision), Solution (PoC/Prototype/MVP as supplied), and Pain
+(obstacles) as redacted advisory text; unknown optional fields stay unknown.
+Reuse LaunchRequest mapping/redaction, without changing its seven-field contract,
+auth provider, validation or AST pin. Fixed output artifact, generic rejection,
+no raw input in logs/errors; artifact is for review, never executable admission.
+
+Test reuse: existing launch-request/transport owners cover mapper/auth semantics;
+the new issue-event/CLI contract is materially distinct and warrants one <=300-line
+test owner (<=24 methods/81 cases), plus its default allowlist and canonical test
+registry entry. Read their existing inventories/fixtures before authoring. Baseline
+the two existing owners first in the previously qualified external Python3.12.10 /
+pytest9.0.3 environment; record exact IDs/results, normal package imports and actual
+dependency versions. No shared install, package substitutions or skip-to-green.
+Freeze desired new acceptance before production code and retain RED. Then focused
+GREEN, unchanged adjacent intake owners, CLI replay and independent source review;
+add a <=130-line workflow for issue review and exact PR/main contract execution.
+Use hosted security/scope/current-head checks before merge and read back main.
+Budget: new source/test/workflow above; existing module README+20, INTERFACE+30,
+ROADMAP+20, ModLog+16, tests README+20/TestModLog+20, conftest one entry,
+canonical test registry only one new unit entry, this plan+85/root ModLog+16.
+No runtime manifest member/cap/source change, dependency, security exception,
+public API/server, token, signing or chain submission. If static closure shows
+otherwise, amend before that change. No new large receipt/testcase framework.
+Qwen/Gemma inference adds no value to deterministic form parsing; attributed
+parallel source/test review supplies the relevant architectural challenge.
+
+Retrieval evaluation: HoloIndex returned HEAD_MISMATCH/UNKNOWN with an index gap;
+direct main source/callsites replace semantic retrieval, not a CURRENT claim.
+Historical ProductionReady claims and older prototype trajectories are noise;
+current interface/source/tests outrank them. Parent module owns Tier0 documents;
+its memory README is absent. Deduplicated actual callers show no nomination
+consumer, Firebase handler or authenticated project-control principal bridge.
+Open Mall/TestNet/codec parents keep their unique work and security holds.
+
+Pre-authoring architect refinement: use issues.opened only, with exact repository
+ID956651858 and distinct positive issue/user IDs; sender ID must match the initial
+issue author. The pure adapter requires an explicit nomination-only trusted service
+context supplied by the host bootstrap, never constructed from parsed event/body.
+The existing session/invite provider remains sole authority for HTTP intake;
+this separate workflow host may assert its own fixed review-service context for
+draft creation only. Keep requested_by=github_nomination_review_service; nominator
+identity is separate advisory source metadata. Local CLI replay is explicitly
+unverified; Actions run provenance is external, not authenticated by a JSON field.
+No application API/network calls; checkout/setup/artifact use hosted transport.
+
+Baseline: unchanged owners pass387; frozen V1 RED80 missing-module failures/387pass.
+Replace the malformed-only CLI cap case with valid JSON at cap/cap+1 (+1 net case).
+Baseline uses normal
+package imports and unchanged source hashes in the qualified external environment.
+The distinct issue adapter avoids growing the existing1,012/1,427-line tests.
+Preserve multiline OSP in a redacted advisory sidecar;
+map only the safe name/reference to genesis rather than guessing how vision maps
+to problem_statement. No mapper control-character normalization or policy change.
+Replay metadata stays unverified; the Actions run supplies external provenance.
+Local result:682 cases/five owners pass, plus an actual synthetic CLI replay;
+resident1471/c1f97e86 unchanged. Current hosted/security/main gates remain required.
+
+## Repository file observation allocation — 2026-10-26, before authoring
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP00/6/11/22/50/62/84/97.
+Parent main5da187622d0076f6d53de79bf8e1bd1b93aa9bb5; isolated owned worktree.
+Need: project admission needs a committed regular-file reader, while the legacy
+Contents route can dereference symlinks and discards identity/mode/commit fields.
+Affordability: extend the existing GitHub client and test owner; no new service,
+dependency declaration, claim store or execution plane. Identity-only metadata
+does not establish file provenance; a full claim/issuer flow exceeds this layer.
+
+Add frozen13-field GitHubFileObservation (including private visibility) and
+get_file_observation(path, *, commit_sha=None).
+Keep the seven-field GitHubRepository and legacy content tuple unchanged. Read
+stable numeric repository/owner IDs and actual default branch; observe its commit,
+then resolve an optional exact commit through nonrecursive Git trees and a blob.
+Admit <=8 path components/1024 UTF-8 bytes, <=4096 entries per tree and <=16384
+decoded bytes. Require exact object IDs, unique selected entries, truncated=False,
+regular modes100644/100755, strict bounded wrapped base64, length and Git blob hash.
+Compare identity/name/branch/visibility again before returning; <=13 GET requests.
+Errors must identify fields without echoing response bodies or file contents.
+
+This is provider-response consistency, not atomic repository provenance. Matching
+identity brackets cannot exclude name reuse between calls, nor prove the initially
+observed tip is still current. Existing transport is not upgraded to an admitted,
+time/body-bounded provider. No caller may treat this DTO as a claim, permission,
+trusted fact, signer, token, reward, venue or agent-work grant. Later admission
+requires its own authenticated identity-bound observation and fresh challenge.
+
+Verification: inventory/reuse the existing26 client cases, baseline them first in
+a new external venv (pytest9.0.3, pytest-asyncio1.3.0, aiohttp3.13.5,
+aioresponses0.7.8; binary wheels only, record actual closure). No shared install.
+Permit only observed baseline repairs: PATCH dispatch for existing close_issue,
+unsupported-method oracle moves to TRACE; network fixture uses aiohttp.ClientError.
+Preserve failures and exact IDs. Freeze new acceptance in the same test file before
+product changes; run desired RED, focused GREEN, adjacent compatible unit shards,
+independent source review and current hosted/security/scope gates. Local mock runs
+are development evidence, not OS isolation or full-repository promotion evidence.
+
+Budget: existing client<=850 lines/new functions<=35; existing tests<=850/new
+methods<=35. Existing interface<=100, README+20, ModLog+20, tests README+30,
+TestModLog+25, this plan+65 and root ModLog+16. Add one focused CI workflow<=100
+lines and one portable receipt<=24KiB; optional module memory README<=35. No other
+source, registry membership, runtime manifest, dependency or security-ledger change.
+Holo owner query remains HEAD_MISMATCH; direct source/callsites/test inventory
+replace stale retrieval, without a CURRENT-index claim. Legacy doc assertions are
+historical; no production-ready or comprehensive coverage claim follows.
+
+Metadata dependency amendment before repair: WSP15 C2/I4/D4/Impact3=13/P1.
+The existing runtime manifest includes this client; leaving its old hash would
+break the source compatibility contract. Regenerate scripts/reddog_backend_manifest.json
+and update only the digest literals in extensions/reddog/backend_compatibility_constants.js
+and scripts/tests/test_generate_reddog_backend_manifest.py. No generator, member,
+cap or semantic assertion changes. Reuse all eight generator cases after staging
+source+manifest, plus the existing Node compatibility, preflight and blocked-recovery
+owners. Read their inventory first; scripts/tests/README.md is absent.
+Add at most10 lines each to scripts/tests/TestModLog.md and extension ModLog and
+tests/TestModLog; report the exact one-member hash delta and unchanged member list.
+This explicit dependency repair supersedes the earlier no-manifest-change budget;
+it grants no installed runtime or provider activation.
+
+Local result:135 module cases pass (120 client/15 permission-probe); eight existing
+generator cases and three Node owners pass. Runtime1471 members unchanged; only
+the client's source hash changes, canonical digest c1f97e86. Frozen RED and prior
+runner/long-ID errors remain in the [receipt](receipts/FOUNDUPS_GITHUB_FILE_OBSERVATION_20261026.json); hosted/main gates remain.
+
+Hosted-profile/security metadata amendment, before correction: WSP15
+C2/I4/D4/Impact4=14/P1. Preserve run40208878967:134PASS/1FAIL because empty
+GITHUB_TOKEN differs from absent in the legacy presence check. Unset GITHUB_TOKEN
+and GH_TOKEN for the mock test process and set an explicit workspace root;
+no product or assertion change. Retain fresh exact IDs/artifacts at the new head.
+Internal scanner run40208878992 reports41 tree and3 history rows, only in the
+source-hash manifest and new local receipt. Before adding any reviewed binding,
+derive exact fingerprints, prove unchanged parent review coverage and public
+hash/metadata origins, and obtain independent review. Append only individually
+verified bindings to .github/security/reviewed-findings.json; preserve its ordered
+prefix and scanner/rule/history semantics. Unknown findings still block.
+Extend this plan's allocation to+85, root ModLog+16 and test README+30; no new
+receipt, test case, runtime member, cap, secret, signer or provider activation.
+Independent reconstruction accepted exactly40 bindings (39 manifest/one receipt);
+append preserves all2260 prior entries/order/keys. Fresh hosted scan still required.
+
 ## Unsigned integration checkpoint allocation — before authoring
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.

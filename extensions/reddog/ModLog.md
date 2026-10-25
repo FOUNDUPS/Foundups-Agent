@@ -1,3 +1,22 @@
+## Mall/current-main source binding — 2026-10-26
+
+WSP6/15/22/50/97; preallocated14/P1. Combine main's GitHub client/six scheduler
+rows with Mall's gateway test row under canonicala64a876e. Existing1471 members,
+1472 refusal, all byte caps and generator/oracle logic remain unchanged; only
+two digest literals advance. Eight existing generator cases and three Node
+contract/preflight/blocked-recovery owners pass on the staged source. Stable1614
+snapshots and zero instrumented network/dotenv/write denials are local evidence,
+without installed-runtime or OS isolation admission. Hosted/security still gate.
+
+## GitHub file-reader source binding — 2026-10-26
+
+WSP6/15/22/50/97; metadata amendment13/P1 in the FoundUps delivery plan.
+Existing1471-member closure changes only the GitHub client's normalized source
+hash; JS and generator-test digest pins become c1f97e86. Membership,1472 refusal
+and328KiB/2MiB/32MiB caps remain unchanged. Eight generator cases and three Node
+compatibility/preflight/blocked-recovery owners pass. Source compatibility only;
+no extension installation, repository claim or issuer/provider authority follows.
+
 ## Mall/BTC combined source closure — 2026-10-25
 
 WSP6/15/22/50/97. Reconcile the verified BTC source with Mall's gateway test

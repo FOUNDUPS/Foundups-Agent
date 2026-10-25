@@ -11,6 +11,12 @@ WSP Compliance:
 """
 
 import json
+import base64
+import binascii
+import hashlib
+import re
+import unicodedata
+from urllib.parse import quote
 import asyncio
 import aiohttp
 import logging
@@ -50,6 +56,139 @@ class GitHubRepository:
     private: bool
     default_branch: str
     url: str
+
+
+@dataclass(frozen=True, slots=True)
+class GitHubFileObservation:
+    """Immutable response-consistency record; not a repository-control grant."""
+    repository_id: int
+    owner_id: int
+    repository_full_name: str
+    default_branch: str
+    private: bool
+    observed_default_commit_sha: str
+    commit_sha: str
+    tree_sha: str
+    path: str
+    mode: str
+    blob_sha: str
+    content: bytes
+    size_bytes: int
+
+
+def _observation_invalid(field: str):
+    raise GitHubAPIError(f"Invalid file observation: {field}") from None
+
+
+def _observation_text(value, field: str, limit: int) -> str:
+    if type(value) is not str or not value or len(value) > limit:
+        _observation_invalid(field)
+    try:
+        size = len(value.encode("utf-8"))
+    except UnicodeError:
+        _observation_invalid(field)
+    if size > limit or any(unicodedata.category(c) == "Cc" for c in value):
+        _observation_invalid(field)
+    return value
+
+
+def _observation_sha(value, field: str) -> str:
+    if type(value) is not str or re.fullmatch(r"[0-9a-f]{40}", value) is None:
+        _observation_invalid(field)
+    return value
+
+
+def _observation_endpoint(owner, repo) -> str:
+    if type(owner) is not str or re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9-]{0,38}", owner) is None:
+        _observation_invalid("repository.owner")
+    if (type(repo) is not str or re.fullmatch(r"[A-Za-z0-9_.-]{1,100}", repo) is None
+            or repo in {".", ".."}):
+        _observation_invalid("repository.name")
+    return f"repos/{owner}/{repo}"
+
+
+def _observation_path(value) -> List[str]:
+    path = _observation_text(value, "path", 1024)
+    parts = path.split("/")
+    if len(parts) > 8 or "\\" in path or any(p in {"", ".", ".."} for p in parts):
+        _observation_invalid("path")
+    return parts
+
+
+def _observation_metadata(data: Dict, endpoint: str) -> Tuple:
+    owner = data.get("owner")
+    if type(owner) is not dict:
+        _observation_invalid("repository.owner")
+    for value in (data.get("id"), owner.get("id")):
+        if type(value) is not int or value <= 0:
+            _observation_invalid("repository.id")
+    canonical = _observation_endpoint(owner.get("login"), data.get("name"))
+    full_name = canonical.removeprefix("repos/")
+    if canonical.casefold() != endpoint.casefold() or data.get("full_name") != full_name:
+        _observation_invalid("repository.full_name")
+    branch = _observation_text(data.get("default_branch"), "repository.default_branch", 1024)
+    if type(data.get("private")) is not bool:
+        _observation_invalid("repository.private")
+    return data["id"], owner["id"], full_name, branch, data["private"]
+
+
+async def _observation_read(client, endpoint: str, field: str) -> Dict:
+    try:
+        data = await client._make_request("GET", endpoint)
+    except (GitHubAPIError, aiohttp.ClientError, ValueError, TypeError, AttributeError, TimeoutError):
+        _observation_invalid(field)
+    if type(data) is not dict:
+        _observation_invalid(field)
+    return data
+
+
+def _observation_entry(data: Dict, tree_sha: str, name: str, final: bool) -> Dict:
+    if data.get("sha") != tree_sha or data.get("truncated") is not False:
+        _observation_invalid("tree.identity")
+    entries = data.get("tree")
+    if type(entries) is not list or len(entries) > 4096 or any(type(e) is not dict for e in entries):
+        _observation_invalid("tree.entries")
+    selected = [entry for entry in entries if entry.get("path") == name]
+    if len(selected) != 1:
+        _observation_invalid("tree.path")
+    entry = selected[0]
+    modes = {"100644", "100755"} if final else {"040000"}
+    if type(entry.get("mode")) is not str or entry["mode"] not in modes:
+        _observation_invalid("tree.mode")
+    if entry.get("type") != ("blob" if final else "tree"):
+        _observation_invalid("tree.type")
+    _observation_sha(entry.get("sha"), "tree.entry_sha")
+    return entry
+
+
+async def _observation_walk(client, endpoint: str, root_sha: str, parts: List[str]) -> Dict:
+    tree_sha = root_sha
+    for index, name in enumerate(parts):
+        tree = await _observation_read(client, f"{endpoint}/git/trees/{tree_sha}", "tree.response")
+        entry = _observation_entry(tree, tree_sha, name, index == len(parts) - 1)
+        tree_sha = entry["sha"]
+    return entry
+
+
+def _observation_blob(data: Dict, blob_sha: str) -> bytes:
+    size, encoded = data.get("size"), data.get("content")
+    if data.get("sha") != blob_sha or data.get("encoding") != "base64":
+        _observation_invalid("blob.identity")
+    if type(size) is not int or not 0 <= size <= 16384:
+        _observation_invalid("blob.size")
+    if type(encoded) is not str or len(encoded) > 32768:
+        _observation_invalid("blob.content")
+    compact = encoded.replace("\r\n", "\n").replace("\n", "")
+    try:
+        content = base64.b64decode(compact, validate=True)
+    except (ValueError, binascii.Error):
+        _observation_invalid("blob.content")
+    if len(content) != size or base64.b64encode(content).decode("ascii") != compact:
+        _observation_invalid("blob.content")
+    header = b"blob " + str(size).encode("ascii") + b"\0"
+    if hashlib.sha1(header + content, usedforsecurity=False).hexdigest() != blob_sha:
+        _observation_invalid("blob.hash")
+    return content
 
 
 @dataclass
@@ -136,9 +275,9 @@ class GitHubAPIClient:
         Make HTTP request to GitHub API
         
         Args:
-            method: HTTP method (GET, POST, PUT, DELETE)
+            method: HTTP method (GET, POST, PUT, PATCH, DELETE)
             endpoint: API endpoint (without base URL)
-            data: Request data for POST/PUT requests
+            data: Request data for POST/PUT/PATCH requests
             
         Returns:
             API response as dictionary
@@ -161,6 +300,9 @@ class GitHubAPIClient:
             elif method.upper() == "PUT":
                 async with self.session.put(url, json=data) as response:
                     response_data = await response.json()
+            elif method.upper() == "PATCH":
+                async with self.session.patch(url, json=data) as response:
+                    response_data = await response.json()
             elif method.upper() == "DELETE":
                 async with self.session.delete(url) as response:
                     response_data = await response.json() if response.status != 204 else {}
@@ -177,6 +319,33 @@ class GitHubAPIClient:
             raise GitHubAPIError(f"Request failed: {str(e)}")
             
     # Repository Operations
+    async def get_file_observation(self, file_path: str, *, commit_sha: Optional[str] = None) -> GitHubFileObservation:
+        """Read a regular Git file; identity brackets are non-atomic and advisory."""
+        endpoint = _observation_endpoint(self.owner, self.repo)
+        parts = _observation_path(file_path)
+        if commit_sha is not None:
+            _observation_sha(commit_sha, "commit_sha")
+        identity = _observation_metadata(await _observation_read(self, endpoint, "repository.response"), endpoint)
+        branch = identity[3]
+        ref = await _observation_read(self, f"{endpoint}/git/ref/heads/{quote(branch, safe='')}", "ref.response")
+        target = ref.get("object")
+        if ref.get("ref") != f"refs/heads/{branch}" or type(target) is not dict or target.get("type") != "commit":
+            _observation_invalid("ref.target")
+        tip = _observation_sha(target.get("sha"), "ref.sha")
+        selected = commit_sha if commit_sha is not None else tip
+        commit = await _observation_read(self, f"{endpoint}/git/commits/{selected}", "commit.response")
+        if commit.get("sha") != selected or type(commit.get("tree")) is not dict:
+            _observation_invalid("commit.identity")
+        root_sha = _observation_sha(commit["tree"].get("sha"), "commit.tree_sha")
+        entry = await _observation_walk(self, endpoint, root_sha, parts)
+        blob = await _observation_read(self, f"{endpoint}/git/blobs/{entry['sha']}", "blob.response")
+        content = _observation_blob(blob, entry["sha"])
+        after = _observation_metadata(await _observation_read(self, endpoint, "repository.response"), endpoint)
+        if after != identity:
+            _observation_invalid("repository.changed")
+        return GitHubFileObservation(*identity, tip, selected, root_sha, file_path,
+                                     entry["mode"], entry["sha"], content, len(content))
+
     async def get_repository(self) -> GitHubRepository:
         """Get repository information"""
         data = await self._make_request("GET", f"repos/{self.owner}/{self.repo}")

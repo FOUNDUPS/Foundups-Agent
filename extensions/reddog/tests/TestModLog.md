@@ -1,3 +1,18 @@
+## Mall/current-main source binding — 2026-10-26
+
+Existing three Node contract/preflight/blocked-recovery entrypoints each exit0
+at staged canonicala64a876e. Generator8PASS in79.89s; all1614 snapshot files stay
+stable, with zero instrumented network/dotenv/write denials. Keep1471 acceptance,
+1472 refusal and all caps/assertions unchanged. External local evidence is under
+`foundups-mall-reconcile-20261026`; no installed-runtime/OS isolation claim.
+
+## GitHub file-reader source binding — 2026-10-26
+
+Reuse the three existing Node contract/preflight/blocked-recovery owners:each
+exits0 at the new c1f97e86 pin. Existing eight Python generator cases also pass
+after source/manifest/pins are staged. Runtime1471 and1472 refusal stay fixed;
+no new cases, widened caps, native isolation or installed-runtime admission claim.
+
 ## Mall/published intake binding — 2026-10-25
 
 Canonical5b933b75 retains1,471 runtime members and all existing caps. Only the

@@ -3,6 +3,21 @@
 Scope: the `src/foundup_genesis/` intake trajectory (envelope -> validator -> gate -> builder ->
 scaffold). The broader AI Overseer roadmap lives in README.md / ModLog.md.
 
+## Public GitHub nomination review — 2026-10-26
+
+The issue form now feeds a bounded deterministic adapter and the existing public
+genesis mapper through a dedicated default-branch Actions workflow. Its fixed
+artifact preserves Outcome/Solution/Pain and source/nominator identity as advisory
+draft data. Local five-owner qualification682PASS and actual CLI replay pass;
+hosted/main convergence remain required. No resident admission is introduced.
+
+Next admission layer: select the authenticated project-control claimant and durable
+consumer, then bind fresh repository-control evidence. A nomination, issue author,
+service context or replay artifact grants neither ownership nor issuer/work rights.
+Acceptance criteria, namespace collision checks, reviewed catalog publication and
+chain issuance remain explicit later gates; reuse existing owners rather than
+attaching network or authority to the pure public mapper.
+
 ## Genesis prototype compatibility qualification — 2026-09-21
 
 Static C3/I3/D2/Impact2 = **10/P2** qualification after the consumer isolation

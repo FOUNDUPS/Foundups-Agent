@@ -61,7 +61,7 @@ breadcrumb + PatternMemory outcome and the JSON output. There is NO manual-012 m
 ## Why (the problem)
 
 The shorts daemon rotates across channels but had no signal for *where the gap is*. With
-the cap now `HARD_CAP_PER_DAY = 3` (`schedule_tracker.py`, landed #844), a channel that
+the channel cap resolved by `channel_daily_cap` (`schedule_tracker.py`), a channel that
 is empty for the next week is far more urgent than one already filled. This skill turns
 the persisted per-channel schedule tracker into a ranked need list so the daemon stops
 wasting work on already-covered channels.
@@ -81,13 +81,13 @@ Reads `memory/schedule_<CHANNEL_ID>.json` (map `date -> count`) via the existing
 
 For each channel, inspect the next `N` upcoming days (default 7):
 - `count` = scheduled videos that day (tracker).
-- per-day `deficit = max(0, HARD_CAP_PER_DAY - count)`.
+- per-day `deficit = max(0, channel_cap - count)`.
 - `total_deficit` = sum of per-day deficits.
 - `days_empty` = days with `count <= 0`.
 - `recommend = "schedule" if total_deficit > 0 else "sufficient"`.
 
 Channels are sorted by `total_deficit` desc, then `days_empty` desc, then name asc.
-An empty channel (max deficit) ranks first; a channel full at 3/day for every day ranks
+An empty channel (max deficit) ranks first; a channel full at its channel cap for every day ranks
 last with `recommend="sufficient"`.
 
 ---
@@ -188,3 +188,9 @@ python -m modules.platform_integration.youtube_shorts_scheduler.skillz.what_shou
 
 **WSP Compliance**: WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination),
 WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 27 (Phase 0 KNOWLEDGE).
+
+## Workflow handoff
+
+Follow the [shared scheduling workflow](../README.md) for ordered inputs,
+outputs, evidence gates and resume boundaries. This skill retains its own
+read/write permissions and prototype status; linkage does not expand authority.

@@ -1,3 +1,48 @@
+## 2026-10-26 — Mall current-main reconciliation
+
+WSP00/6/11/15/22/50/62/84/97;14/P1. Preserve every current Mall public/Firebase
+entry, historical evidence and main33f client/scheduler/nomination work. Resolve
+six metadata/log conflicts, retain both histories and union2538 existing approvals
+without granting a new approval. Regenerate1471-membera64a876e and two literal
+pins; all caps remain unchanged. Registry1772/273 includes main's nomination row.
+Fresh affected four-owner baseline/post merge are identical:445PASS/3FAIL/0SKIP
+over448 exact IDs; three missing media directories stay unsuppressed. Generator
+8PASS and three Node owners exit0; instrumented source maps stay stable with zero
+network/dotenv/write denials. The first overly broad preview precheck and aborted
+owned merge are retained; only two public logs differed, no served asset did.
+Independent review, fresh hosted/security and GitGuardian38958604 remain required
+before merge or production deployment. Detailed scope/evidence: Mall homepage plan.
+
+## 2026-10-26 — Connect project nominations to review drafts
+
+WSP00/3/6/11/15/22/49/50/62/84/97;15/P1. The existing public GitHub form now
+has an opened-issue review workflow and bounded adapter feeding the unchanged
+genesis mapper. Fixed service context and nominator identity remain separate;
+OSP is advisory, unknown stages remain unknown, acceptance criteria remain empty.
+Baseline387PASS; frozen RED81FAIL/387PASS; final five-owner682PASS and actual CLI
+replay pass. Original80-case RED is retained. One new test registry entry yields
+1772 files/273 quarantined; manifest1471/c1f97e86 and runtime caps are unchanged.
+No owner, registry, worker, token, reward or market grant. Evidence and remaining
+release gates: docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md.
+Hosted/security/main convergence remain required; parallel PR-cleanup state and
+the existing Mall/TestNet/codec security holds are preserved.
+
+## 2026-10-26 — FoundUps GitHub regular-file observation prerequisite
+
+WSP00/6/11/15/22/50/62/84/97; work15/P1, required manifest repair13/P1.
+Extend the existing client with immutable repository/Git-object/file evidence,
+strict regular-file/content checks and sanitized provider errors. Keep legacy
+record/tuple compatibility; repair the observed PATCH and network-fixture gaps.
+Final canonical unit shard135PASS; eight generator cases and three Node owners
+pass. Exact IDs, failures and hashes: [receipt](docs/architecture/receipts/FOUNDUPS_GITHUB_FILE_OBSERVATION_20261026.json).
+Runtime1471 members/caps unchanged; only client hash and two digest pins advance.
+Metadata brackets are non-atomic; no claim, trusted fact, issuer, signer, token,
+reward, trading or installed-runtime grant. Hosted/security/main remain separate.
+Initial hosted profile134PASS/1FAIL retained; unset empty credential variables
+and pin the workspace test root, preserving product/oracles. Source-manifest and
+receipt scanner findings require exact public-metadata review before rebinding.
+Independent review accepted40 exact bindings; the2260-entry prefix is preserved.
+
 ## 2026-10-25 — FoundUps unsigned integration checkpoint
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.

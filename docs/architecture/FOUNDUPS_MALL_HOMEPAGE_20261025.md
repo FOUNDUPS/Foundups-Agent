@@ -49,7 +49,8 @@ Existing security-ledger union grants no new approval: observe actual new scanne
 findings, reconstruct their exact public metadata origins, then separately allocate
 and independently review any necessary rebindings before adding fingerprints.
 Publish this same PR and inspect fresh hosted/scope/security/merge gates. Incident
-38958604 remains blocking; no production deployment or merge while it fails.
+38958604 now points to public Git-commit provenance at receipt line100; independent
+classification/disposition remain separate. No production or merge while it fails.
 
 Retrieval evaluation: owner Holo query again returns HEAD_MISMATCH/UNKNOWN/gaptrue;
 no retry/reindex. Current Git trees and module/test owners replace stale retrieval.
@@ -61,6 +62,13 @@ The first whole-public-tree precheck failed because it included those two logs
 (four/six added lines). Its shell continued into an uncommitted merge; that owned
 merge was aborted before resolution. Capture the exact current tree and the two
 explicit preview differences, then use exit-checked separate mutation calls.
+Fresh pre/post four-owner runs each collect448:445PASS/3FAIL/0SKIP, identical
+ordered IDs, phase outcomes and selected source maps; all three failures remain
+the absent media directories. Generator8PASS in79.89s and three Node owners exit0;
+1614 source snapshots stay stable, with zero instrumented network/dotenv/write
+denials. Canonicala64a876e retains1471 members,332650LF/335665CRLF bytes/all caps;
+registry1772/273 and exact2538 existing approval union are staged. External proof:
+`foundups-mall-reconcile-20261026/qualification-summary.json` (33bacc9d).
 
 ## Published intake-main convergence allocation — 2026-10-25
 

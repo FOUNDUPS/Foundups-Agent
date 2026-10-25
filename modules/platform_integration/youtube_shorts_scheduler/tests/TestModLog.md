@@ -1,3 +1,24 @@
+## 2026-10-25 — Move2Japan per-channel cadence
+
+## 2026-10-26 — Hosted metadata fixture correction
+
+The hosted selected-batch suite exposed four metadata-isolation fixtures using
+Move2Japan's ambient Tokyo timezone. Set their shared mocked scheduler to
+explicit America/New_York so these cases reach the metadata sinks under test;
+retain the separate missing/cross-date rejection tests and all write assertions.
+No runtime guard was relaxed.
+
+168 passed, 2 skipped (existing browser-dependent cases). Offline suites:
+`test_scheduler`, `test_peak_window`, `test_reschedule_planner`,
+`test_reschedule_applier`, `test_what_should_i_schedule`,
+`test_shorts_priority_wiring`, `test_unified_shorts_videos_priority`,
+`test_live_schedule_signal_priority`, `test_remote_cli`.
+New assertions cover eight exact ET slots then next-day rollover, full/partial
+summary, eight-slot planner and priority deficit, apply cap8, lower explicit cap2,
+and unknown-channel hard3. Added failure checks for unknown/Tokyo timezone
+and blocked unqualified live apply; same-date preview fixtures explicitly use ET. No live scheduling or model calls. Existing tests were
+extended, so test registry membership is unchanged.
+
 ## 2026-10-25 — Generated runtime closure repair
 
 CI required canonical test-registry and backend-manifest regeneration. Register

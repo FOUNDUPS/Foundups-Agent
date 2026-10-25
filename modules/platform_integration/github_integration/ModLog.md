@@ -1,5 +1,24 @@
 # GitHub Integration Module Log
 
+## 2026-10-26 — Immutable regular-file observation prerequisite
+
+WSP00/6/11/15/22/50/62/84/97; allocation15/P1. Extend the existing client with
+a frozen13-field GitHubFileObservation, exact Git ref/commit/tree/blob checks,
+regular-file modes, bounded paths/content, blob hash and sanitized errors.
+Before/after repository metadata rejects ordinary identity/branch/visibility drift;
+name-reuse races and current-tip freshness remain unproved. This is a consistency
+record, with no repository-control, work, issuer, signing or tokenization grant.
+Legacy seven-field repository and text/blob tuple remain unchanged. Repair PATCH
+dispatch for close_issue and its two stale fixture expectations; no broad catch.
+Fresh final canonical unit shard:135PASS (120 client,15 permission-probe), no
+errors/skips/warnings. Frozen desired RED:26PASS/94FAIL; retain earlier Windows
+parameter-ID setup errors separately, corrected by bounded IDs without oracle loss.
+All26 legacy methods remain;24 exact ASTs plus two allocated compatibility changes.
+New client748/test807 lines, new functions<=35. New focused hosted workflow and
+portable receipt bind current evidence; hosted/security/main gates are separate.
+Existing runtime member1471 remains; rebind only this client's hash and two pins.
+Eight manifest tests and three Node owners pass; no installed runtime activation.
+
 ## 2026-06-28 - REDDOG_GITHUB_PERMISSION_PROBE_PHASE1
 
 - ADD `src/reddog_github_permission_probe.py` — read-only `probe_repo_permission()` with gh CLI allowlist backend.

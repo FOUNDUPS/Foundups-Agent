@@ -67,7 +67,7 @@ logger = logging.getLogger(__name__)
 # single load-bearing knob (HARD_CAP_PER_DAY, schedule_tracker.py, landed #844).
 try:
     from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import (
-        HARD_CAP_PER_DAY,
+        HARD_CAP_PER_DAY, channel_daily_cap,
         ScheduleTracker,
     )
 except Exception:  # pragma: no cover - defensive import for isolated tests
@@ -78,7 +78,7 @@ except Exception:  # pragma: no cover - defensive import for isolated tests
 try:
     from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import (
         convert_et_to_channel_tz,
-        get_peak_slots_et,
+        get_peak_slots_et, require_same_date_cadence,
     )
 except Exception:  # pragma: no cover - defensive import for isolated tests
     def get_peak_slots_et() -> List[str]:  # type: ignore
@@ -226,14 +226,15 @@ def find_target_days(
 
 # === Malleable seam: peak-slot assignment (per channel tz) ====================
 
-def assign_peak_slot(slot_index: int, channel_tz: str, on_date: datetime) -> tuple:
+def assign_peak_slot(slot_index: int, channel_tz: str, on_date: datetime, channel_id: str = "") -> tuple:
     """Return (slot_et, slot_local) for the slot_index-th fill of a day.
 
     slot_index 0 -> morning (08:00 ET), 1 -> lunch (12:00 ET), 2 -> evening (20:00
     ET); beyond the list it clamps to the last slot. slot_local is the bare 12h
     wall-clock to type into Studio in the channel account tz (DST-aware, #847).
     """
-    et_slots = get_peak_slots_et()
+    require_same_date_cadence(channel_id, channel_tz, on_date)
+    et_slots = get_peak_slots_et(channel_id)
     idx = min(slot_index, len(et_slots) - 1)
     slot_et = et_slots[idx]
     slot_local = convert_et_to_channel_tz(slot_et, channel_tz, on_date)
@@ -267,7 +268,7 @@ def plan_channel_reschedule(
     schedule: Dict[str, int],
     *,
     video_ids: Optional[Dict[str, List[str]]] = None,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     today: Optional[datetime] = None,
     horizon_days: int = DEFAULT_HORIZON_DAYS,
 ) -> ChannelReschedulePlan:
@@ -292,6 +293,7 @@ def plan_channel_reschedule(
         ChannelReschedulePlan with moves + summary (days_over_cap, total_moves,
         unplaceable_moves).
     """
+    cap = channel_daily_cap(channel_id, cap)
     vids = video_ids or {}
     base = today or datetime.now()
 
@@ -322,7 +324,7 @@ def plan_channel_reschedule(
                 if used >= cap:
                     continue
                 slot_index = used  # 0->morning, 1->lunch, 2->evening
-                slot_et, slot_local = assign_peak_slot(slot_index, channel_tz, to_dt)
+                slot_et, slot_local = assign_peak_slot(slot_index, channel_tz, to_dt, channel_id)
                 moves.append(
                     MovePlan(
                         channel_id=channel_id,
@@ -375,7 +377,7 @@ def _default_load_schedule(channel_id: str) -> tuple:
 
 def plan_all_channels(
     *,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     channels: Optional[List[Dict[str, str]]] = None,
     load_schedule: Callable[[str], tuple] = _default_load_schedule,
     today: Optional[datetime] = None,

@@ -1,5 +1,15 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Channel cadence
+
+Omitted daily cap now resolves per channel: Move2Japan is eight/day at
+08:00,10:00,12:00,14:00,16:00,18:00,20:00,22:00 America/New_York;
+all other/unknown channels retain three/day. Explicit lower caps are preserved.
+The global ET environment override does not override this explicit Move2Japan
+policy. Its slots have no random jitter. Aggregate plan `cap: null` means
+per-channel policy; each channel plan contains its resolved numeric cap.
+
+
 Remote requirements and current gaps: [remote runbook](docs/REMOTE_SCHEDULING.md).
 
 ## CLI Interface (Agent-Callable)
@@ -179,3 +189,9 @@ outcome now additionally requires `details.requested_timezone` and independent
 `reported_success=true`, but no verified success or positive fidelity score.
 Audience performance is always marked unmeasured; no analytics/model promotion
 is connected here.
+
+Move2Japan cadence is not qualified for live reschedule apply: that legacy adapter
+skips it with `cadence_live_unqualified` until independent timezone and occupied-slot
+receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
+whose local date differs from its ET date (including Asia/Tokyo). This prevents
+clock-only conversion from silently publishing on the wrong calendar date.

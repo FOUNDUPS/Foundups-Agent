@@ -91,6 +91,9 @@ def _make_driver():
 def _make_scheduler():
     """Connected scheduler with a strict DOM double; dry_run=False (live path)."""
     scheduler = YouTubeShortsScheduler("move2japan", dry_run=False)
+    # Metadata isolation uses a qualified same-date Studio timezone; rollover
+    # rejection is covered separately by the cadence allocation regressions.
+    scheduler.channel_tz = "America/New_York"
     scheduler.driver = _make_driver()
     scheduler.dom = _make_strict_dom()
     return scheduler
