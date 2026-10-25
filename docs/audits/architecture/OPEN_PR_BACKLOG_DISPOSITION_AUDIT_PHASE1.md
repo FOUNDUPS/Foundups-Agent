@@ -1,6 +1,6 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-25 JST (00:57 UTC): 36 open PRs, 8 drafts. #2189 and #1355 are independently verified on main; #2188 merged through its separate owner. Select the existing Acoustic FFmpeg timeout-child repair at 13/P1. Newly opened #2190/#2191 require qualification; #2192 belongs to the active FoundUps owner. Original #1792 retains protected activation obligations. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-25 JST (01:12 UTC): 36 open PRs, 8 drafts. #2189 and #1355 are independently verified on main; #2188 and #2192 merged through their separate owner. The existing Acoustic FFmpeg timeout-child repair at 13/P1 is locally verified, with hosted acceptance pending. Newly opened #2190/#2191 require qualification. Original #1792 retains protected activation obligations. Historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-25
 
@@ -80,7 +80,9 @@ FastMCP 3.4.10 pin needs the existing launcher/version contract and the new
 `fastmcp-slim` distribution graph qualified together; a pin-only patch is not
 runtime readiness. #2191 is C2/I3/D3/Impact3=11/P2: only the root lock's
 fast-uri node changes, requiring full graph and focused URI/AJV acceptance.
-#2192 remains with its active epoch-commitment owner. Neither dependency
+#2192 merged as `7d3d7f64390762040bc2ca737ff0964d94d887c1`; all 19 incoming
+paths are preserved without overlap in the timeout branch. This is preservation,
+not independent epoch-product acceptance. Neither dependency
 establishes an immediate interrupt to the selected repair. Root undici alerts
 506/507 and older nested-version obligations need a separate source-backed
 security repair; no dedicated open PR was identified. Preserve Vercel 63.1.2:
