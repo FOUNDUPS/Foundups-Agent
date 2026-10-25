@@ -927,7 +927,7 @@ forced false; authentication alone grants no admission, execution or token right
 
 ## GitHub nomination review host contract — 2026-10-26
 
-Allocated for qualification: `foundup_genesis.github_nomination_review` connects
+Implemented, under publication qualification: `foundup_genesis.github_nomination_review` connects
 the public issue form to a review artifact through the unchanged LaunchRequest
 mapper. This is a separate draft-service host, not an HTTP authentication path.
 The session/invite provider remains the sole verifier for HTTP intake. Historical

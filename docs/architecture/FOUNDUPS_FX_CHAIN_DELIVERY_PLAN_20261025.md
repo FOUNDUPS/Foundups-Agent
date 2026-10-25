@@ -79,6 +79,8 @@ Preserve multiline OSP in a redacted advisory sidecar;
 map only the safe name/reference to genesis rather than guessing how vision maps
 to problem_statement. No mapper control-character normalization or policy change.
 Replay metadata stays unverified; the Actions run supplies external provenance.
+Local result:682 cases/five owners pass, plus an actual synthetic CLI replay;
+resident1471/c1f97e86 unchanged. Current hosted/security/main gates remain required.
 
 ## Repository file observation allocation — 2026-10-26, before authoring
 
