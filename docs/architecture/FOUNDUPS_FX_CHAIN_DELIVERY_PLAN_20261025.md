@@ -2,6 +2,18 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Published intake-main convergence allocation — 2026-10-25
+
+WSP15/22/50/84/97;14/P1. Reconcile main0909b941, whose entire Git tree equals
+reviewed intake99f81820 after38 successful hosted checks. Preserve codec edfd's
+product/tests/helper/lock/workflow and all historical receipts; retain main-only
+intake changes. Merge only existing exact ledger/proof metadata, preserving both
+parent sets/keys (expected2,261 prior fingerprints, no new approval). Keep main's
+f427 manifest/pins,1,471 members/caps and registry1,772/273. Scope stays22 paths.
+Require immutable parent-tree review, registry check and fresh hosted gates;
+GitGuardian38965909 remains separate. No runtime, source, dependency or authority
+extension is allocated by this convergence.
+
 ## Hosted codec checkpoint — 2026-10-25
 
 Distinct Windows pip run40173561283/job121109365468 passes all28 exact codec
