@@ -1,0 +1,175 @@
+{
+  "schema": "foundups-member-draft-intake-evidence-v1",
+  "date": "2026-10-26",
+  "status": "LOCAL_COMPONENT_TESTED_FINAL_REVIEW_AND_PUBLICATION_PENDING",
+  "parent": "4f37c8505c91f03d90c60ce835f1bc9b102491a8",
+  "allocation": "6efb68f50",
+  "frozen_initial_tests": "2e46fd2aa",
+  "initial_product": "fff44de998c6e9eb13e78ad450173bcfa8cbd3d1",
+  "frozen_pem_tests": "991bf7b7adfdbea9d98d71e8c63ad98d2df8d873",
+  "repaired_product": "6e9b13da637f82e11a13bf7155df0e2ea8da815b",
+  "source_lf_sha256": {
+    "modules/foundups/pfmall/http_api.py": "3401a09895e794e349d252b66eb392095a4a64152ab8d7d074500b2822a06680",
+    "modules/ai_intelligence/ai_overseer/src/foundup_genesis/clerk_intake.py": "03a47406796295a86b33510733a8bc034782c29703855866f51e35a280c65b92",
+    "modules/foundups/pfmall/tests/test_clerk_proposal_intake.py": "67bc2ea47754ae0d99d63da7addb3b70c300a771a0ab887166d662fcaec3d734",
+    "modules/foundups/pfmall/requirements.txt": "bbb7a24443e31d7028904a26a716b6f00b24bd94f5328531fe45455a786cbb51",
+    ".github/workflows/foundup-nomination-review.yml": "db8a1d65cd8a35f95f1edef2f55b0c094cebd34ad568189e3669a443d6bd7a38"
+  },
+  "development_environment": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "packages": {
+      "pytest": "9.0.3",
+      "PyJWT": "2.15.1",
+      "cryptography": "46.0.7",
+      "fastapi": "0.128.0",
+      "starlette": "0.50.0",
+      "httpx": "0.28.1"
+    }
+  },
+  "resolved_pip_report_sha256": "b2a5ebac8fc150807c4e199ca5f4a37144a4f8ed8ad8baaf95ab2d6de2865982",
+  "dependency_limit": "Top-level pins plus retained actual resolved inventory; not a complete lock or installed resident/runtime admission.",
+  "execution_plane": "normal in-process ASGI and real ephemeral RSA, credential-free; not OS/network confinement, live Clerk or deployment",
+  "original_cases_preserved": 695,
+  "new_cases": 91,
+  "exact_id_outcome_digest": "a87c50df80441004de42ac14262c146543545f5e69ecf1f54c96e7aac0921fb7",
+  "phases": {
+    "baseline": {
+      "head": "6efb68f50d9ff2156a735b546f79e1956316480e",
+      "exit": 0,
+      "outcomes": {
+        "passed": 695,
+        "failure": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "receipt_sha256": "9308786c4a4d4ad062daca4b8d9434a117122f641edf71bf1ce45a5ba1602e65",
+      "junit_sha256": "675263abc950c3b497ebe2376e43cc894eb1243308a089db0545af980b68abb5",
+      "source_unchanged": true
+    },
+    "red": {
+      "head": "6efb68f50d9ff2156a735b546f79e1956316480e",
+      "exit": 1,
+      "outcomes": {
+        "passed": 695,
+        "failure": 2,
+        "error": 78,
+        "skipped": 0
+      },
+      "receipt_sha256": "2c69e3859079980cbd7ca55757a586f7329aa01f435fd967d02f45720fb8adf7",
+      "junit_sha256": "aa8429e5f140416ff7cd5f18842815cb41eee14c1497ac128e41f05a0b27283b",
+      "source_unchanged": true
+    },
+    "red_frozen": {
+      "head": "6efb68f50d9ff2156a735b546f79e1956316480e",
+      "exit": 1,
+      "outcomes": {
+        "passed": 695,
+        "failure": 2,
+        "error": 83,
+        "skipped": 0
+      },
+      "receipt_sha256": "47d016c12f338fb00e66a306a979ad7f6caedacd0b1bdce973fdfae53a79a188",
+      "junit_sha256": "b48e6bc52d0d50e5fbc1c041ea599c93a84e46f5a0c715be57e5c0804fa24898",
+      "source_unchanged": true
+    },
+    "red_final": {
+      "head": "b25e1aff077cf532969a5c9b787da6cbeb3845f6",
+      "exit": 1,
+      "outcomes": {
+        "passed": 695,
+        "failure": 2,
+        "error": 85,
+        "skipped": 0
+      },
+      "receipt_sha256": "b4586507f81c9a7bcb135e3b415a30516c44b6dcff7f3f69dcd428942b56e3da",
+      "junit_sha256": "ecab1a3383887858e1b8aacc86d0940ea7673e1bbde22ceacd88039c42a916cc",
+      "source_unchanged": true
+    },
+    "green_initial": {
+      "head": "2e46fd2aaa6f1dbef00046ae23be3fc27f9b0ab0",
+      "exit": 0,
+      "outcomes": {
+        "passed": 782,
+        "failure": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "receipt_sha256": "4842cf978f654ddaae26d17ca87f61799463bf41be0a5aab5b6fa581e1676ead",
+      "junit_sha256": "5e1e2072355f3fa0adc311ebcc81b7120d14b929055b27021c3f16dd5b0743b5",
+      "source_unchanged": true
+    },
+    "green_review": {
+      "head": "2e46fd2aaa6f1dbef00046ae23be3fc27f9b0ab0",
+      "exit": 0,
+      "outcomes": {
+        "passed": 782,
+        "failure": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "receipt_sha256": "a0aac81e6eae205192cdfb8c60befbcf8f5b4c0e6f85307174ee61ef1e60f848",
+      "junit_sha256": "bca336c071da36e9943ac8ccbdbd34da41e33bbd1bd9c4cbe5b614a25d09ba78",
+      "source_unchanged": true
+    },
+    "final_local": {
+      "head": "2e46fd2aaa6f1dbef00046ae23be3fc27f9b0ab0",
+      "exit": 0,
+      "outcomes": {
+        "passed": 782,
+        "failure": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "receipt_sha256": "f015cc5a6fe4df03c9590c1df8e10222038bcefc02971af60c953ef3506198d5",
+      "junit_sha256": "08a69fae9b4cfbd54952835e5c16b4a9fa1275cefb68b8e9dd307e5bb37dab89",
+      "source_unchanged": true
+    },
+    "pem_red": {
+      "head": "fff44de998c6e9eb13e78ad450173bcfa8cbd3d1",
+      "exit": 1,
+      "outcomes": {
+        "passed": 783,
+        "failure": 3,
+        "error": 0,
+        "skipped": 0
+      },
+      "receipt_sha256": "497bc399c6342801c12a8e48ab30032e724e5f67761750acc1a5784c3a38f7ff",
+      "junit_sha256": "f674ce0711e2868ff45d67dbc97b537c9e63099df1392ebb1f1f8d378393c18c",
+      "source_unchanged": true
+    },
+    "pem_green": {
+      "head": "991bf7b7adfdbea9d98d71e8c63ad98d2df8d873",
+      "exit": 0,
+      "outcomes": {
+        "passed": 786,
+        "failure": 0,
+        "error": 0,
+        "skipped": 0
+      },
+      "receipt_sha256": "264f268d7705b4a5338f5d1cac2d62cff60fc4ddffc7c0242b6dca947ac84133",
+      "junit_sha256": "8b57d4b62eb8f4bff88aefdeef871c480f86ef97d50edbf89ee52f546a1799de",
+      "source_unchanged": true
+    }
+  },
+  "reviewed_warning": "Starlette0.50.0 uses AnyIO4.15 deprecated BlockingPortal alias; present in parent695 and final786. No suppression. Initial short synthetic HS256 fixture warning removed by lengthening only that rejection key, no assertion change.",
+  "independent_architecture_review_sha256": "02b2af0a2af533a7bf19ea244aa13211e37a58967246e03f0710c0fdcb7633c8",
+  "independent_initial_review_sha256": "5501b7eaa76f474fb31d380409a0cbaa5a2e4f077a1f55d607da3903d22200fb",
+  "independent_initial": "10 held-out functions pass; appended-private-PEM rejection fails. Separate fresh optional-dependency-denied import+ASGI503 passes. Repaired review pending.",
+  "compatibility": {
+    "manifest_cases": 8,
+    "node_commands": 3,
+    "hashed_source_files": 1615,
+    "source_unchanged_before_after": true,
+    "registry_total": 1773,
+    "registry_quarantined": 273,
+    "qualification": "Existing owners at2e46fd2aa with root overlay; changed new HTTP/auth owners are outside unchanged1471 resident manifest. No exact6e9b/full-repository or activation claim."
+  },
+  "limits": [
+    "Default503; server policy/provider inputs and real member-session smoke are not deployed.",
+    "Only DRAFT_ONLY genesis output; no durable nomination or challenge receipt, membership, repo control, registry/catalog or grant.",
+    "Offline signature/expiry verification does not prove current remote session revocation.",
+    "No network/JWKS, fetched code, storage/nonce consumption, worker, media provider, signing, mint or trading effect.",
+    "Independent final review, exact-head hosted/security checks and guarded main readback remain required.",
+    "Public deployment/protected runtime promotion additionally requires admitted release/runner, abuse/current-session policy and actual provider evidence."
+  ]
+}
