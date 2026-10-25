@@ -1,3 +1,14 @@
+## Numeric/current-main combined closure — 2026-10-25
+
+WSP6/15/22/50/97. Existing canonical generation combines mainc7f0d939's bootstrap
+source hash with numericc9bee55e's tested token source/private member. Only the
+bootstrap digest changes versus numeric; only token digest/private membership
+change versus main. Keep1471 acceptance/1472 rejection and all328KiB/2MiB/32MiB
+caps. Both existing pins advance by one digest literal, with no algorithm or
+installed authority change. Fresh write/check,8 generator cases and3 Node owners
+pass;1614 evidence snapshots remain stable, zero instrumented attempts. The2103
+existing security entries remain a union; new38 exact proposals are unapproved.
+
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required

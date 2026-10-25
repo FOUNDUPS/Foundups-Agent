@@ -376,3 +376,70 @@ assertion before validator invocation, not old-validator execution proof.
 Fresh hosted scans/CI, dedicated PR and main readback remain required.
 Independent report rawSHA256:
 dfc1b1093eb982f11d5e6ebb8b97cea82037e9fb7203946e231dee6bf8da22c2.
+
+## New main source-closure reconciliation allocation before merge
+
+Reconcile numericc9bee55e with current mainc7f0d939 (PR2199), under the same
+C2/I5/D5/Impact4=16/P0 derived-closure allocation. The exact main diff adds one
+optional parent_consensus_authority parameter and unchanged forwarding to the
+resident bootstrap resolver, with connected tests/docs and prior security
+review records. Retain those committed bytes and the already qualified numeric
+arithmetic/private-owner source. Before merge all169 simulator/FAM raw hashes
+and8 central hashes match the actual736 receipt; no simulator rerun is justified
+unless this reconciliation changes those source maps.
+
+Use --no-commit and FOUNDUPS_SKIP_POST_COMMIT=1. Preserve both portable receipts,
+prior review proofs and all existing ledger entries: numeric2026/main2065,
+intersection1988, union2103. Regenerate one canonical combined manifest and both
+existing pins, retaining1471 acceptance/1472 rejection and328KiB/2MiB/32MiB byte
+caps. Fresh write/check, unchanged generator8 and Node3 qualifications use the
+existing external guards and new scratch. No installed authority or API expansion.
+
+New exact38 whole-manifest metadata proposals require separate14/P1 independent
+review before ledger additions. Classify changed source/context metadata explicitly;
+never force an unchanged-source claim. Leave merge uncommitted and do not push,
+deploy, alter historical receipts, or touch the separate Mall worktree.
+
+### Current-main candidate qualification before independent metadata review
+
+The merge is uncommitted. Three conflicts were the existing ledger and two digest
+pins; no product/test/docs conflict occurred. Preserve all8 nonderived main-diff
+blobs exactly, including the resident bootstrap and new security README history.
+Retain numeric portable receipt/companion and prior review proof bytes exactly.
+The resolved ledger contains the exact2103 old-entry union, with no new approval.
+
+Canonical generation changes exactly the bootstrap hash versus numeric and the
+token hash/private member versus main. Runtime1471,1472 rejection and all byte
+caps remain fixed. Manifest332650 LF/335665 CRLF, source total19662966 and max
+154924 are within existing limits. Both pins change by one digest literal.
+Fresh write/check and Node3 exit0; all8 unchanged generator cases pass in77.50s,
+with2 inherited inactive asyncio warnings. Every phase's1614 evidence map remains
+stable; zero instrumented network/dotenv attempts. These are source/package checks,
+not installed runtime admission, native authority or financial activation.
+
+All169 simulator/FAM and8 central raw hashes still match the actual736 receipt;
+therefore no unchanged simulator rerun is claimed. Exact refs/query/merge, source
+maps, commands, case IDs, JUnit, ledger-union and proposed38 evidence are external
+under `foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934`.
+The canonical owner query remains authority-head-mismatched with UNKNOWN freshness
+and index gap; current Git/source/docs supplied the explicit degraded fallback,
+with no reindex or model execution. Historical counts/proofs are retained, not
+substituted for these fresh8+3 results. New38 proposals explicitly classify source/
+context differences and require independent review before ledger addition.
+Commit, current-head hosted CI/security and publication/readback remain parent gates.
+
+## Parent current-main reconciliation acceptance — 2026-10-25
+
+Preserve parallel PR2199 mainc7f0d939 authority forwarding. The only runtime
+change versus numericc9 is its exact main bootstrap digest; versus main, only
+token_economics plus the allocated private helper change. All169 simulator/FAM
+and8 central raw sources equal the736 run; no simulator rerun is claimed.
+Fresh write/check,8 generator cases and3 Node entrypoints pass,1614 evidence
+maps stable and zero instrumented network/dotenv attempts.1471/1472 and byte
+caps remain fixed. Exact ordered ledger union2103 preserves numeric2026 plus
+main2065 over1988 common; append only independently reverified38,2103->2141.
+The37 unchanged/1 known token-SHA classification is against current main; all38
+source contexts are unchanged against numericc9. Previous proof sections remain.
+Hosted security/CI and dedicated publication/main readback are still required.
+Independent review rawSHA256:
+a76ac8a3eed83db35c8bda3e28430a3351a8538f13e857b26d1630c20507aef5.

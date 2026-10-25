@@ -1,5 +1,17 @@
 # Script test inventory
 
+## 2026-10-25 — Numeric/current-main canonical binding
+
+Reuse the exact existing8 generator cases after mainc7f0d939 joins numericc9bee55e.
+All8 pass freshly in77.50s, with2 inherited inactive asyncio configuration warnings;
+canonical write/check and3 existing Node owners exit0. Keep every original parity,
+path/member and byte-cap assertion. Only the existing digest literal changes.
+Runtime1471 and1472 rejection remain fixed;1614 evidence maps remain stable.
+External receipts retain actual commands/IDs/hashes in
+`foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934`.
+Zero instrumented network/dotenv attempts. Merge is uncommitted pending exact
+metadata review; historical portable evidence is unchanged.
+
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required

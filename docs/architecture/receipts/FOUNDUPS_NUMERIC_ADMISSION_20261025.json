@@ -970,5 +970,270 @@
     "exact_new_count": 38,
     "classification": "37 unchanged source/context;1 exact known tested arithmetic source SHA substitution",
     "unknown_findings": "held"
+  },
+  "combined_current_main_reconciliation": {
+    "main": "c7f0d93928581d67f0304cc6623876f0cabe1c54",
+    "numeric_parent": "c9bee55e27b77ba4510e4b7d2d1122e67be131ef",
+    "source_delta": {
+      "canonical_new": "c755b9908559f1e7dda054f81c5cac3a1fd16d080631512e8f9b2cc52294bd4f",
+      "whole_lf_new": "2811662bfd2f7d59e37562d2b9cddcfeea14fa7ba9a660c77aef2132857b4b3d",
+      "members": 1471,
+      "manifest_lf_bytes": 332650,
+      "manifest_crlf_bytes": 335665,
+      "comparisons": {
+        "numeric": {
+          "canonical_old": "9dbe09a75cd5e4e8b572af5b37729396bd184542a2214c8997fa8072dfc71d0c",
+          "whole_lf_old": "e4416ceaafc4e9b335a8244223fa0e997873ba32cd87c2f30158a1df9c3e1849",
+          "added": [],
+          "removed": [],
+          "changed": [
+            {
+              "path": "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py",
+              "old": "54acd5def1b4ea1dfef0ceb2094d777fd2cfbc9aa52b14a62416c5a851b80500",
+              "new": "6062f7e3004ca03d731c7ef1cb23ebad985a2ff51b466168f5d25b8ac7881fcb"
+            }
+          ],
+          "other_fields_unchanged": true
+        },
+        "main": {
+          "canonical_old": "66c42117df6670d6258c7f4de86d7869fb893dd888479cb7e8178cbca521c8d5",
+          "whole_lf_old": "ae1c0a90485015d1d4f585c213586848576e8ff1407d190e2da3a60b55b3b2f0",
+          "added": [
+            "modules/foundups/simulator/economics/_token_numeric.py"
+          ],
+          "removed": [],
+          "changed": [
+            {
+              "path": "modules/foundups/simulator/economics/token_economics.py",
+              "old": "c1ffca9167b1ce1e335a0b7e41e982498941472535560e7a36dc5ad0680ac97a",
+              "new": "06fe0e57e5d633bfc9ce64891e332d606f8b51e9a124813d7861d89b7260bab5"
+            }
+          ],
+          "other_fields_unchanged": true
+        }
+      },
+      "total_source_bytes": 19662966,
+      "max_member_bytes": 154924,
+      "caps": {
+        "manifest": 335872,
+        "member": 2097152,
+        "total": 33554432,
+        "accept_count": 1471,
+        "reject_count": 1472
+      }
+    },
+    "unchanged_simulator": {
+      "169raw_maps_match_actual736": true,
+      "central8raw_maps_match_actual736": true,
+      "736_receipt_path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-combined-main-807cjgzp\\numeric_btc_combined_simulator\\receipt.json",
+      "736_receipt_raw_sha256": "c33f012407a75069f6b8fb1139b8b8fbc292975b70cd0a1d74e27b06f6347119",
+      "no_simulator_rerun": true
+    },
+    "qualification": {
+      "generate": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\closure_runner.py",
+          "generate",
+          "generator",
+          "--write"
+        ],
+        "entrypoint_argv": [
+          "scripts/generate_reddog_backend_manifest.py",
+          "--write"
+        ],
+        "exit_code": 0,
+        "seconds": 68.69720768928528,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\generate\\receipt.json",
+        "external_receipt_raw_sha256": "6d2dc47962e99e47da231fe8d2735b40c3101f5fa850ff113d788374c90581dd",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "check": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\closure_runner.py",
+          "check",
+          "generator",
+          "--check"
+        ],
+        "entrypoint_argv": [
+          "scripts/generate_reddog_backend_manifest.py",
+          "--check"
+        ],
+        "exit_code": 0,
+        "seconds": 75.95697259902954,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\check\\receipt.json",
+        "external_receipt_raw_sha256": "0ea00b7ccd6588e326b5d6187e728a288068bcebdc428562616448bc85a6b0e5",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "generator_cases": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\closure_runner.py",
+          "generator_cases",
+          "pytest",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "entrypoint_argv": [
+          "-q",
+          "-p",
+          "no:cacheprovider",
+          "-o",
+          "addopts=",
+          "--confcutdir",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\scripts\\tests",
+          "--basetemp",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\generator_cases\\pytest",
+          "--junitxml",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\generator_cases\\results.xml",
+          "scripts/tests/test_generate_reddog_backend_manifest.py"
+        ],
+        "exit_code": 0,
+        "seconds": 77.50458550453186,
+        "counts": {
+          "passed": 8
+        },
+        "collected": [
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_package_initializers_resolve_relative_imports_from_their_package",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_generated_closure_binds_executable_and_dynamic_load_sentinels",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_generated_closure_binds_isolated_acceptance_entrypoint",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_newly_tracked_imported_runtime_dependency_cannot_be_omitted",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_untracked_local_import_fails_closed",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_checked_in_manifest_matches_independent_generation",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_extension_javascript_is_package_bound_not_backend_materialized",
+          "scripts/tests/test_generate_reddog_backend_manifest.py::test_staged_index_manifest_is_self_consistent"
+        ],
+        "warnings": [
+          {
+            "category": "PytestConfigWarning",
+            "message": "Unknown config option: asyncio_default_fixture_loop_scope\n"
+          },
+          {
+            "category": "PytestConfigWarning",
+            "message": "Unknown config option: asyncio_mode\n"
+          }
+        ],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\generator_cases\\receipt.json",
+        "external_receipt_raw_sha256": "1f5a3ed5bdebcddb4433aa90342c08c2f12c2b2cae2010e11b1e0b4b6ef09114",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "node_contract": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\closure_runner.py",
+          "node_contract",
+          "node",
+          "extensions/reddog/tests/test_backend_compatibility_contract.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\extensions\\reddog\\tests\\test_backend_compatibility_contract.js"
+        ],
+        "exit_code": 0,
+        "seconds": 1.1843771934509277,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\node_contract\\receipt.json",
+        "external_receipt_raw_sha256": "f807b635434fcbbd06a136878c1d78740b0355e33f6a5668943ba402af88b36c",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "node_preflight": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\closure_runner.py",
+          "node_preflight",
+          "node",
+          "extensions/reddog/tests/test_backend_compatibility_preflight.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\extensions\\reddog\\tests\\test_backend_compatibility_preflight.js"
+        ],
+        "exit_code": 0,
+        "seconds": 45.88691163063049,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\node_preflight\\receipt.json",
+        "external_receipt_raw_sha256": "ef9620b5c080d01c7833adeac1e3669fa1fc3fd9cec4c1144adb0d6bd527c4fd",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      },
+      "node_recovery": {
+        "command": [
+          "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+          "-B",
+          "-X",
+          "utf8",
+          "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\closure_runner.py",
+          "node_recovery",
+          "node",
+          "extensions/reddog/tests/test_holoindex_blocked_request_recovery.js"
+        ],
+        "entrypoint_argv": [
+          "C:/Program Files/nodejs/node.exe",
+          "C:\\Users\\user\\.codex\\worktrees\\foundups-fx-chain-delivery\\Foundups-Agent\\extensions\\reddog\\tests\\test_holoindex_blocked_request_recovery.js"
+        ],
+        "exit_code": 0,
+        "seconds": 0.5090861320495605,
+        "counts": {},
+        "collected": [],
+        "warnings": [],
+        "source_snapshot_count": 1614,
+        "source_drift": false,
+        "external_receipt": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\node_recovery\\receipt.json",
+        "external_receipt_raw_sha256": "38d5d82f3633bc68e4fb447d710f2ec0909be85f49602532a04b4c941cfcbb13",
+        "python_network_attempts": 0,
+        "node_network_attempts": 0,
+        "dotenv_read_attempts": 0
+      }
+    },
+    "independent_review_raw_sha256": "a76ac8a3eed83db35c8bda3e28430a3351a8538f13e857b26d1630c20507aef5",
+    "ledger_union_prior": 2103,
+    "ledger_after_exact38": 2141,
+    "handoff_path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934\\handoff.json",
+    "handoff_raw_sha256": "16cd16ee59862d66347f57c666f0f0a0386a37509f433ca56e0cc8c251a3bfd5",
+    "truth": "No simulator rerun: actual169+8 raw maps equal736 receipt; fresh8+3 bind the one new main bootstrap source and existing numeric graph. Historical portable runs/proofs remain their actual source context."
   }
 }

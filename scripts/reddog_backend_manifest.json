@@ -2102,7 +2102,7 @@
     "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap.py": "e032415c31c3d87e9b6aa79a35c65d7e0dee03c9b5e6dd99b5f38bb6672257d9",
     "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap_result.py": "e8b6b379a5c95b80d55c14c04b2b89ab91620a92317bdca70931b9514e82a1cf",
     "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_runtime_dependency_bundle.py": "b4f496dbc19209cb79f8eb121c7385dcad30a92548985608e27276f4cd50ee04",
-    "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py": "54acd5def1b4ea1dfef0ceb2094d777fd2cfbc9aa52b14a62416c5a851b80500",
+    "modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py": "6062f7e3004ca03d731c7ef1cb23ebad985a2ff51b466168f5d25b8ac7881fcb",
     "modules/communication/moltbot_bridge/src/reddog_memex_snapshot_projection_supplier.py": "d8958c7215e5c81a5bdacd674d27bbdaae16e722b8b6c55c889a9a2d57128fe8",
     "modules/communication/moltbot_bridge/src/reddog_model_runtime_binding_query.py": "4971d4045aa3e31f2861c37fea139101770c0dcb65011de521a9ea604fddcb32",
     "modules/communication/moltbot_bridge/src/reddog_model_runtime_verifier_bootstrap.py": "bfed1ab9f6e854ef70a51faedf906ce0f707224b146bee6214a4ec02331047b9",

@@ -1,3 +1,17 @@
+## Numeric/current-main reconciliation qualification — 2026-10-25
+
+Fresh unchanged generator8 pass in77.50s with2 inherited inactive asyncio config
+warnings. Canonical write/check and existing Node contract/preflight/blocked-
+recovery commands each exit0. All1614 evidence snapshots remain stable in every
+phase, with zero instrumented Python/Node network or dotenv attempts. Runtime
+membership stays1471 and the explicit Node oracle still rejects1472. Manifest
+332650 LF/335665 CRLF bytes; source total19662966 and max154924 remain within
+existing328KiB/2MiB/32MiB limits. Exact commands/IDs/JUnit/maps remain in external
+`foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934`.
+No unchanged simulator rerun or new behavioral coverage is claimed. Existing169
+simulator/FAM plus8 central hashes still match the qualified736 source. New
+metadata bindings, hosted gates and publication remain separate parent actions.
+
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required

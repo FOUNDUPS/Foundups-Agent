@@ -1,3 +1,31 @@
+## Parent current-main reconciliation acceptance — 2026-10-25
+
+Preserve parallel PR2199 mainc7f0d939 authority forwarding. The only runtime
+change versus numericc9 is its exact main bootstrap digest; versus main, only
+token_economics plus the allocated private helper change. All169 simulator/FAM
+and8 central raw sources equal the736 run; no simulator rerun is claimed.
+Fresh write/check,8 generator cases and3 Node entrypoints pass,1614 evidence
+maps stable and zero instrumented network/dotenv attempts.1471/1472 and byte
+caps remain fixed. Exact ordered ledger union2103 preserves numeric2026 plus
+main2065 over1988 common; append only independently reverified38,2103->2141.
+The37 unchanged/1 known token-SHA classification is against current main; all38
+source contexts are unchanged against numericc9. Previous proof sections remain.
+Hosted security/CI and dedicated publication/main readback are still required.
+Independent review rawSHA256:
+a76ac8a3eed83db35c8bda3e28430a3351a8538f13e857b26d1630c20507aef5.
+
+## 2026-10-25 — Numeric source closure reconciled with current main
+
+WSP15/22/50/97. Reconcile numericc9bee55e with mainc7f0d939, preserving the
+committed arithmetic, resident bootstrap forwarding, tests and security history.
+All169 simulator/FAM plus8 central raw hashes still match the actual736 receipt;
+no simulator rerun is claimed or needed by this source-identity gate. Preserve
+portable receipt/companion and prior numeric review proof bytes. Existing security
+records union to2103, with no new approval. Fresh canonical write/check, unchanged
+generator8 and Node3 entrypoints pass;1471 members and fixed byte caps remain.
+New38 metadata proposals require independent review before binding. Merge remains
+uncommitted; no push/deploy/native runtime or financial activation.
+
 ## Parent independent acceptance — 2026-10-25
 
 Independent review rehashes all1471 staged normalized sources, both pins and
