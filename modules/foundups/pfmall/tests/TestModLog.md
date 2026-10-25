@@ -1,5 +1,18 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Isolated host acceptance frozen before authoring
+
+Allocationf8fa5b25c,15/P1. Reuse the patched Python3.12.10/pytest9.0.3 HTTP/RSA
+profile and all seven owners: fresh baseline786PASS. Add28 cases to the existing
+real-RSA owner for factory isolation, minimal routes, generic config rejection,
+public-policy validation and exact16KiB boundary. No new test file/fixture framework.
+First RED785PASS/28FAIL/1ERROR retains a Windows10055 socket-buffer setup error
+in one unchanged TestClient case. Correct only the new test's handler-module lookup
+before production; frozen RED786PASS/28FAIL/0ERROR/0SKIP. All old case IDs and
+oracles remain; the new host module does not yet exist. No filtering/quarantine,
+dependency install, provider call, deployment or authority assertion.
+Exact sources/cases/logs: external foundups-member-host-discovery-20261026.
+
 ## 2026-10-26 — Patched optional HTTP profile qualification
 
 Do not promote the initial profile below: public PyPI metadata found published
