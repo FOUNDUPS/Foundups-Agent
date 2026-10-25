@@ -98,7 +98,7 @@ def render_shot(scene, beat_index, output):
         os.link(temp / "shot.mp4", output)
 
 
-def compose_audio(output):
+def compose_audio(output, *, stomp=False):
     """Original 120 BPM flute-like score plus quiet synthesized snore/sniff/rumble.
 
     No sampled recordings, voices or borrowed melody. Returns actual cue windows.
@@ -123,21 +123,37 @@ def compose_audio(output):
     for start in (.15,):
         tone(start, .65, 115, .08)
         tone(start, .65, 145, .025)
-    for start in (5.8, 6.3, 6.8, 8.3, 8.8, 9.3, 11.3, 11.8, 12.3):
+    for start in ((5.8, 6.3, 6.8, 8.3, 8.8, 9.3) if stomp else (5.8, 6.3, 6.8, 8.3, 8.8, 9.3, 11.3, 11.8, 12.3)):
         n = int(.22 * rate)
         noise = rng.normal(0, .08, n)
         noise = np.convolve(noise, np.ones(8) / 8, mode="same")
         audio[int(start*rate):int(start*rate)+n] += noise * np.sin(np.linspace(0, np.pi, n)) ** 2
     tone(1.0, .9, 65, .08)
     tone(1.0, .9, 83, .035)
+    if stomp:
+        # Three original foley layers: foot landing, chamber crunch, soil squish.
+        tone(10.0, .35, 58, .12)
+        tone(10.0, .28, 87, .04)
+        # Muffled earth crunch, timed to the shared scene's instant collapse.
+        tone(10.56, .32, 75, .10)
+        n = int(.28 * rate)
+        crunch = rng.normal(0, .10, n)
+        crunch = np.convolve(crunch, np.ones(12) / 12, mode="same")
+        envelope = np.sin(np.linspace(0, np.pi, n)) ** 2
+        audio[int(10.56*rate):int(10.56*rate)+n] += crunch * envelope
+        n = int(.4 * rate)
+        t = np.arange(n) / rate
+        squash = np.sin(2 * np.pi * (180*t - 125*t*t))
+        audio[int(10.82*rate):int(10.82*rate)+n] += .06 * squash * np.sin(np.linspace(0, np.pi, n))**2
     # Leave headroom, never normalize a quiet event into a startling peak.
     if np.max(np.abs(audio)) >= .8:
         raise ValueError("Unexpected soundtrack peak")
     with Path(output).open("xb") as target, wave.open(target, "wb") as wav:
         wav.setparams((1, 2, rate, len(audio), "NONE", "not compressed"))
         wav.writeframes((audio * 32767).astype("<i2").tobytes())
-    return [{"start": .1, "end": .9, "text": "[soft snoring]"},
+    cues = [{"start": .1, "end": .9, "text": "[soft snoring]"},
             {"start": 1.0, "end": 1.9, "text": "[gentle rumble]"},
             {"start": 5.8, "end": 7.2, "text": "[sniff, sniff, sniff]"},
             {"start": 8.3, "end": 9.7, "text": "[sniff, sniff, sniff]"},
             {"start": 11.3, "end": 12.7, "text": "[sniff, sniff, sniff]"}]
+    return cues[:-1] + [{"start": 10, "end": 10.5, "text": "[stomp]"}, {"start": 10.56, "end": 10.82, "text": "[crunch]"}, {"start": 10.82, "end": 11.4, "text": "[squish]"}] if stomp else cues

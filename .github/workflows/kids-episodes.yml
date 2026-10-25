@@ -4,6 +4,8 @@ on:
     paths:
       - 'modules/communication/youtube_shorts/**'
       - 'modules/foundups/kids_episodes/**'
+      - 'modules/foundups/eduit/**'
+      - 'public/eduit/**'
       - 'modules/foundups/foundup_registry*'
       - 'modules/communication/moltbot_bridge/src/openclaw_execution_routes.py'
       - 'modules/communication/moltbot_bridge/tests/test_openclaw_kids_story_route.py'
@@ -13,6 +15,8 @@ on:
     paths:
       - 'modules/communication/youtube_shorts/**'
       - 'modules/foundups/kids_episodes/**'
+      - 'modules/foundups/eduit/**'
+      - 'public/eduit/**'
       - 'modules/foundups/foundup_registry*'
       - 'modules/communication/moltbot_bridge/src/openclaw_execution_routes.py'
       - 'modules/communication/moltbot_bridge/tests/test_openclaw_kids_story_route.py'
@@ -36,6 +40,11 @@ jobs:
           python -m pip install -r modules/communication/youtube_shorts/requirements-local-preview.txt
           sudo apt-get update -qq
           sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify Story Time interaction
+        run: node --test modules/foundups/eduit/tests/storytime.test.mjs
       - name: Verify renderer, local editor, research contracts and registry
         run: >-
           python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib

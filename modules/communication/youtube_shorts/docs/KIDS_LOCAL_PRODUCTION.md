@@ -9,8 +9,8 @@ command. It consumes the shared SVG rig and first segment of `build_pilot`, crea
 three five-second clips, synthesizes original instrumental music/foley, then calls
 the existing `kids_episode.render_episode` encoder. It is actual moving video,
 not a storyboard slideshow or a diffusion-model benchmark. The fixed set keeps
-all six family members visible. Little Shrew slides/tilts into the root pocket;
-the parents notice gently bouncing pebbles. No new character artwork is invented.
+all five family members visible. Little Shrew slides/tilts into the root pocket;
+the only the rightmost child wakes; parents stay asleep gently bouncing pebbles. No new character artwork is invented.
 
 ```bash
 python -m pip install -r modules/communication/youtube_shorts/requirements-local-preview.txt
@@ -166,3 +166,7 @@ and Kids owners; semantic freshness UNKNOWN, index gap true. Direct source/test
 reads filled the omitted test inventory; no duplicate owner added. WSP 00 V2 could
 not load torch; canonical tracker fallback passed, not detector execution. This
 change does not access credentials or activate runtime authority.
+
+## 2026-10-26 current revision
+
+Earlier artifact hashes and six-character reviews above are historical revision 1. Revision 2 has two parents and three equal children. The new EDUIT shared scene adds the operator-requested stomp/collapse and two-tap game; see `modules/foundups/eduit/DEPLOYMENT.md`. No live upload of this newest render claimed.

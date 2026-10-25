@@ -1,6 +1,6 @@
 # EDUIT — Education Using Information Technology
 
-**FoundUp status:** SPECIFIED_NOT_IMPLEMENTED  
+**FoundUp status:** local Story Time proof of concept implemented; domain deployment pending
 **Product module:** Play EDUIT — adaptive learning through play  
 **Historical educational vision:** eSingularity — learn anything, anytime, anywhere (LAAA)
 
@@ -22,7 +22,7 @@ A browser-first, device-independent adaptive learning game. The initial product 
 - Declared landing route: `/f/eduit`
 - Declared app mount: `/f/eduit/app`
 - Data namespace: `eduit`; no cross-tenant access to eSingularity or other FoundUps
-- **Runtime:** planned, not implemented; no route activation claimed
+- **Runtime:** local static proof of concept at `public/eduit`; no WSP 104 tenant route activation claimed
 
 ## AI hooks — contract only
 
@@ -49,8 +49,12 @@ No autonomous production worker exists. Planned outputs: health status, last act
 3. Review accessibility, age-appropriate design, data minimization and consent.
 4. Only then consider a public prototype. No DAO-driven model changes or child-data sharing in the MVP.
 
-**Evidence status:** documentation scaffold only. No runtime, validation study, game engine, child profiles, deployment, or token.
+**Evidence status:** local landing, shared story/video scene and two-tap game implemented and tested. No validation study, child profiles, public deployment, autonomous worker or token. Registry production status remains unchanged.
 
 ## Linked educational media
 
 [Kids Episodes](../kids_episodes/README.md) (`kids_episodes`) is the related story-to-linked-episodes FoundUp using existing YouTube production components. Future EDUIT games may link to episode learning objectives; no game integration or autonomous story-production runtime is claimed. EDUIT retains its existing ID and independent scope.
+
+## Story Time proof of concept
+
+Source: `public/eduit/`. Read [deployment and local Codex handoff](DEPLOYMENT.md). Canonical planned domains are `eduit.org`, `ourstorytime.eduit.org`, and the redirect `eduit.foundups.com`. Kids Episodes remains `kids_episodes`; EDUIT remains `eduit`. No new FoundUp registration.
