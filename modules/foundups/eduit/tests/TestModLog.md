@@ -17,6 +17,12 @@
   unresolved placeholders or material source/security/ownership blockers.
 - Existing Kids Episodes CI now includes all Story Time/PWA/review JavaScript
   checks and the Python packaging tests; renderer/editor/registry checks retained.
+- PR #2221 at `68af22d28` exposed the canonical test-registry freshness gate:
+  the new tracked `test_build_site.py` was absent from its generated projection.
+  Ran the existing `generate_test_registry.py --write` and `--check`: **1,773
+  registered / 273 quarantined; current**. The only added entry is EDUIT's
+  packaging test; no existing entry, quarantine, capability or execution policy
+  changed. Hosted CI rerun remains pending the follow-up commit.
 - Live provider URL redirects to /storytime/ and reports the same revision.
   Custom-domain DNS save awaits GoDaddy identity verification; HTTPS not verified.
 
