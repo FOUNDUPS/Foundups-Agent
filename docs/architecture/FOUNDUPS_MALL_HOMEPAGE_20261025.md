@@ -469,3 +469,21 @@ the three protected Mall receipt/testcase/proof artifacts are unchanged. No
 eight-plus-three, frontend suite, Hosting or production rerun is claimed.
 External snapshots, raw/Git-LF hashes, effect counts and validation are retained
 in `foundups-mall-about-ticker-ej8lllyy`. Parent review, commit and fresh preview remain pending.
+
+
+## Exact About identifier rebinding after the copy correction
+
+WSP15 allocation before ledger edit: C2/I4/D4/Impact4 = 14/P1, three existing
+metadata files, one observed finding only. Hosted job 121077933339 reports one
+unreviewed tree finding at About line 75 and zero unreviewed history findings.
+Parent and independent reviewer compare its unchanged frontend publishable
+identifier privately against both previously reviewed Git blobs and verify the
+exact gate fingerprint. Preserve all 2,300 entries and append only that one.
+No scanner, configuration, regression, public byte or protected evidence change.
+GitGuardian incident 38958604 remains unlocated and unclassified.
+
+Accepted one exact rebinding: ledger 2,300 -> 2,301. Independent report SHA256
+f333a0aea43b381ade879cafe7e8da92c14a197ff205cdd9d52b792bd3bdcc38.
+Parent report SHA256
+580826fa3e367da83c6f42b0faf1332c5386433865f3dcfe2b9b3b6e3bd98d7d.
+Fresh hosted security is required; this is no GitGuardian incident disposition.

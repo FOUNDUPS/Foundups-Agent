@@ -62537,3 +62537,13 @@ All 1,471 runtime hashes, manifest/pins and three protected Mall artifacts are
 unchanged. Historical preview/test receipts are preserved; no browser, Hosting,
 frontend suite or resident-closure rerun is claimed. Parent review/publication
 remain pending. Evidence: `foundups-mall-about-ticker-ej8lllyy`.
+
+
+## 2026-10-25 — Exact About identifier binding after counter correction
+
+WSP15/22/50/97; 14/P1 preallocated before one ledger append. Parent and
+independent review verify the previously classified frontend publishable
+identifier is unchanged; bind only its new whole-file context. Preserve 2,300
+entries and append one, for 2,301. Public source and protected Mall evidence,
+scanner/config/regressions remain unchanged. GitGuardian incident 38958604
+remains unlocated/unclassified; fresh hosted checks and review are required.
