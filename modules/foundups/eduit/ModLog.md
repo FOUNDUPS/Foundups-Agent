@@ -26,3 +26,25 @@ UNKNOWN, index gap true. Results identified the existing editor; optional
 roadmap/test README/memory artifacts absent. Exact files inspected directly.
 The bounded static tool is simpler than deploying the loopback render server
 as a public service; hosting remains a separate unverified gate.
+
+## 2026-10-26 — Composite episode architecture and continuity
+
+WSP 97/3/11/15/22/50/84: read EDUIT module and four historical audit documents,
+shared Mall/gesture/fullscreen/Red Dog contracts, registry and production owners.
+Captured one tile = video+game, direct watch/play entry, Next, reused gestures,
+locale sound words, parent membership hypothesis and privacy boundaries. Added
+INTERFACE/ROADMAP and inbound owner links; no new registry, shell or runtime.
+Lexical Holo bundle at a6fed6dd8: UNKNOWN freshness, index gap true. Semantic
+maintenance stays with the admitted owner; no Memex ingestion claimed. WSP00
+V2 could not import torch; documented tracker fallback opened the gate without
+a detector witness. This docs-only work does not require WRE activation.
+
+012 clarified the landing is the first episode tile and premium creators can
+make their own paired stories/games. Recorded separate library/creation access,
+bounded compute quotas, private draft tiles, reviewed publication and episode
+ratings. Existing Mall search found no episode-rating API; owner unresolved.
+No payment tier, generation cap, rating system or public editor implemented.
+
+012 corrected the canonical display name to Us Story Time. Updated current
+EDUIT/docs/review/game labels; preserved IDs, publisher key and channel handle.
+Historical proposed hostname needs deployment reconciliation; no DNS changed.
