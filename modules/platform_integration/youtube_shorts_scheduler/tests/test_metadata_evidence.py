@@ -7,7 +7,7 @@ from unittest.mock import Mock
 
 import pytest
 
-from modules.platform_integration.youtube_shorts_scheduler.src.metadata_evidence import validated_video_evidence
+from modules.platform_integration.youtube_shorts_scheduler.src.content_generator import validated_video_evidence
 from modules.platform_integration.youtube_shorts_scheduler.src.index_weave import build_index_metadata_context
 from modules.platform_integration.youtube_shorts_scheduler.src.content_generator import generate_clickbait_title_from_index
 from modules.platform_integration.youtube_shorts_scheduler.src.schedule_dba import record_schedule_outcome
