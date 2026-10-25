@@ -1,5 +1,19 @@
 # Mall homepage and About routing — 2026-10-25
 
+## Published intake-main convergence allocation — 2026-10-25
+
+WSP15/22/50/84/97;14/P1. Preserve reviewed5c3a Mall product, actual153 preview
+source and protected historical receipts. Reconcile published main0909b941,
+whose entire Git tree matches reviewed intake99f after38 successful checks.
+Retain every main-only input and all Mall product/test work. Combine only the
+existing ledger approvals (expected main-first2,420, no new finding approval),
+root logs and current registry metadata. Keep1,471 members/all caps unchanged;
+regenerate the existing manifest and two canonical pins for both actual source
+deltas. Scope remains39; inherit main's security README without a new PR delta.
+No new UI, auth, runtime member, dependency, signing or economic operation.
+Require staged-index/source-map review, registry/generator/Node checks and fresh
+hosted gates. Review only actual new scan rebindings; GitGuardian remains separate.
+
 ## Browser-discovered About initialization repair allocation
 
 WSP15 C1/I4/D5/Impact4=14/P1; WSP22/50/84/97. Preview9d912 renders About,
