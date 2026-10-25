@@ -62537,3 +62537,14 @@ Preallocate three existing security metadata owners to record only the exact
 line28 synthetic public-address fingerprint from job121109366122, after parent
 and independent review. Existing2220 entries, scanner/gate and frozen sources
 remain unchanged. GitGuardian disposition is separate; no merge waiver.
+
+## 2026-10-25 — project nomination inbox allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean
+checkpoint worktree from observed main e801 for a <=90-line GitHub issue form
+plus existing delivery plan/root log. Deliberate public submission and an issue
+permalink supply a usable nomination queue without another service. No automatic
+issue submission, control/admission, registry, token or market activation. Publish
+and verify the default-branch form before separately changing overlapping Mall UI.
+Implemented the55-line form; YAML/schema/required-field/order checks and independent
+source review pass. No issue submitted. Hosted publication gates remain pending.
