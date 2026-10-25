@@ -1,5 +1,25 @@
 # TestModLog
 
+## 2026-10-26 — Observation HTTP policy in the existing client owner
+
+- Pre-authoring allocation: FX delivery plan,11/P2; existing client/probe fixtures
+  retrieved before edits. Fresh original135-case baseline passes without skips.
+- Add13 methods/32 parameter cases to test_github_api_client.py; no new test file,
+  dependency, registry entry, workflow or provider call. Retain all120 old client
+  IDs/assertions; only the selector callback accepts a private transport keyword.
+- Frozen desired RED146PASS/20FAIL, then unchanged-test GREEN166PASS. Independent
+  review found duplicate encodings; allocated32nd case gives RED166PASS/1FAIL,
+  then final167PASS after checking all encoding headers. Earlier
+  context-manager construction and ineffective redirect/depth probes were fixed
+  before freezing; their runs remain separate and do not establish acceptance.
+- Use the actual ClientSession/aioresponses path, actual StreamReader read loop,
+  explicit redirect callback sentinel and cancellation/release events. Byte limits
+  test valid metadata plus whitespace below/at/above2MiB, not malformed JSON alone.
+- Local Python3.12.10, pytest9.0.3, pytest-asyncio1.3.0, aiohttp3.13.5,
+  aioresponses0.7.8; clean selected environment, credentials unset, no installs.
+  Mock policy evidence is not live GitHub, wire framing/retry or OS confinement.
+  Fresh exact-head hosted/security verification remains required. WSP6/22/50/97.
+
 ## 2026-10-26 — Client observation test inventory and baseline
 
 - Reuse test_github_api_client.py for request behavior and immutable Git-file

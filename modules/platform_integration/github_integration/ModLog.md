@@ -1,5 +1,25 @@
 # GitHub Integration Module Log
 
+## 2026-10-26 — Bound observation HTTP before project-control integration
+
+WSP00/6/11/15/22/50/62/71/84/97;11/P2. Extend the existing client with private
+observation-only GET policy: exact API origin, no redirects/decompression,
+identity encoding, JSON200 and looping2MiB raw-body cap before strict UTF-8.
+Per-request5/2/2/2s and whole30s deadlines preserve cancellation/cleanup; these
+are library limits, not hard wall-clock/RSS or TCP/DNS attempt guarantees.
+Retain zero application retries and aiohttp's possible single reconnect retry.
+Legacy method bodies and public observation signature/13-field DTO stay intact.
+Baseline135PASS; frozen desired RED146PASS/20FAIL; initial GREEN166PASS.
+Duplicate-header review RED166PASS/1FAIL; final167PASS preserves original
+135 exact IDs/outcomes. Test construction corrections precede the
+frozen acceptance run and remain recorded separately. No test oracles weakened.
+Existing client/test owners stay within allocated850/1020-line exceptions;
+new functions<=35. Rebind existing1471-member source closure hash and two pins;
+hosted/security checks and current-main reconciliation remain required.
+Hosted167PASS;39 observed manifest metadata bindings require separate source review
+before append to the2378-row ledger prefix. Fresh blocking scans remain required.
+No claim, provider admission, issuer, signing, mint, work or runtime activation.
+
 ## 2026-10-26 — Immutable regular-file observation prerequisite
 
 WSP00/6/11/15/22/50/62/84/97; allocation15/P1. Extend the existing client with

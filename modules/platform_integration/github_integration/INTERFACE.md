@@ -27,8 +27,23 @@ Malformed observation fields raise GitHubAPIError with a fixed field name.
 
 The record establishes response consistency, not atomic repository provenance.
 Before/after metadata checks catch ordinary drift but cannot exclude intervening
-name reuse or establish that a previously observed tip remains current. Existing
-HTTP authentication, redirect, timeout and response-body behavior is unchanged.
+name reuse or establish that a previously observed tip remains current.
+
+Observation-only HTTP policy: exact base https://api.github.com, GET, fixed-origin
+relative endpoints and no redirects. Request identity encoding, disable automatic
+decompression and reject nonidentity Content-Encoding. Require200 and a JSON
+application media type (application/json or application/*+json); count actual
+body bytes in a read loop up to2MiB before strict UTF-8 JSON decoding. Reject a
+declared oversize early; missing or misleading Content-Length cannot raise the
+actual-byte limit. Malformed JSON, including recursion errors, stays field-only.
+Each request has total5s/connect2s/socket-connect2s/socket-read2s; the complete
+observation has a30s timeout. Caller cancellation propagates and response context
+cleanup runs. Scheduling and cancellation cleanup can exceed these application
+deadlines; no hard process-time/RSS bound is implied. At most13 logical GET calls,
+zero application retries; pinned aiohttp3.13.5 may reconnect/retry an idempotent
+request once internally. No hard TCP/DNS attempt count is claimed.
+Legacy operations keep their prior redirect, timeout, body and authentication
+behavior; the new transport policy is a private observation-only request opt-in.
 An admitted provider boundary, fresh identity-bound control challenge and proof of
 key possession are required before repository claims; no permission, issuer,
 minting, reward, agent-work or trading grant follows from this record.
