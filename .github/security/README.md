@@ -1,3 +1,15 @@
+## PR2196 current-main manifest metadata review — 2026-10-25
+
+Hosted job121122335711 reports39 unreviewed tree findings and zero unreviewed
+history findings. Parent and independent review reconstruct all39 exact source
+digests and whole-file/rule/line fingerprints from reviewed head9d912f8e.
+Thirty-eight contexts retain their prior numeric evidence; the additional numeric
+source digest is independently classified. These are source integrity metadata.
+Preserve all2,340 entries and append only39 exact bindings (2,379 total).
+The existing Mall evidence records the measured manifest and independent report.
+No scanner, scope, rule, fingerprint function or GitGuardian disposition changes.
+Fresh current-head tree/history scans remain required; this review is not a scan.
+
 ## PR2204 scheduler manifest metadata review — 2026-10-25
 
 Hosted security job 121087044548 reported 39 unreviewed tracked-tree findings

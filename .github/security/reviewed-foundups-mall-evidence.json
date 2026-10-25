@@ -788,5 +788,278 @@
       "Public markdown differences are listed separately; product/public/firebase bytes must equal preview."
     ],
     "history": "Both old proof sections and all2030 ordered prior entries retained; historical candidate ancestry is not inferred across squash. Fresh hosted scan and GitGuardian remain separate gates."
+  },
+  "nomination_main_manifest_review": {
+    "status": "parent_and_independently_reviewed_exact_bindings_pending_fresh_hosted_scan",
+    "reviewed_source_commit": "9d912f8e0a22d91bf88e14c7b78a9205bae0c9fd",
+    "observed_run": 40177853287,
+    "observed_job": 121122335711,
+    "actual_hosted_counts": {
+      "current_fingerprints_already_in_ledger": 0,
+      "discord_api_token": 2,
+      "generic_api_key": 37,
+      "history_exact_reviewed": 3,
+      "history_unreviewed": 0,
+      "ledger_entries_preserved": 2340,
+      "new_context_independently_classified": 1,
+      "prior_38_binding_reconstructions": 38,
+      "tree_exact_reviewed": 133,
+      "tree_unreviewed": 39,
+      "unique_current_fingerprints": 39
+    },
+    "manifest": {
+      "all39_flagged_member_hashes_independently_reconstructed": true,
+      "both_existing_canonical_digest_pins_match": true,
+      "canonical_digest": "84fbe6a216c92e50947c194b68d47532d76c0fd1f1bee7ff90ebb23c1a1072f6",
+      "runtime_members": 1471,
+      "whole_committed_Git_blob_SHA256": "383703e0e9444b41297eddc6174cfe27b5d18ff0a3fe8e8bccda441d00c609f7"
+    },
+    "independent_reviewer": "/root/blockchain_architecture/btc_anchor_audit",
+    "independent_report_sha256": "1de33d99b9f2678687ceec8190dff577733591ed7722395ac2732bcfeed4675f",
+    "parent_reconstructed_all39_fingerprints_and_referenced_sources": true,
+    "prior_entries": 2340,
+    "final_entries": 2379,
+    "findings": [
+      {
+        "rule": "generic-api-key",
+        "line": 1594,
+        "source_path": "holo_index/memex_access_policy_receipt.py",
+        "fingerprint": "b0121a30f942258afe74076b995ebdbb4cbcf9d8dd9f402c75acdf23f77cc29a"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1728,
+        "source_path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py",
+        "fingerprint": "5ce8d7083a7117f0ba4622ed4e9b9f6dded484a2f5c897e35e2961c7845c5079"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1768,
+        "source_path": "modules/ai_intelligence/pqn_alignment/src/council/api.py",
+        "fingerprint": "14217c68346110f08088ab687da92d911e4a795bd3ccd1dc84fa4be24b40ba61"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1769,
+        "source_path": "modules/ai_intelligence/pqn_alignment/src/detector/api.py",
+        "fingerprint": "c1d5d91d709256ca25b00c3e45ee2bf94d792ea4d34ed8f1a401b244967b5fc1"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1771,
+        "source_path": "modules/ai_intelligence/pqn_alignment/src/io/api.py",
+        "fingerprint": "c2cce530555c4d47b3be632ac2ecae9372fd73f5c79f35c0c42c060744871250"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1776,
+        "source_path": "modules/ai_intelligence/pqn_alignment/src/sweep/api.py",
+        "fingerprint": "37017b14eb6b91a3beabc2e03772ee90634c90a352cc9c8940165a5767d7a1f9"
+      },
+      {
+        "rule": "discord-api-token",
+        "line": 1834,
+        "source_path": "modules/communication/livechat/src/discord_status_pusher.py",
+        "fingerprint": "5989a82c1f2a47cd46f019d39a28c9ab03091f749cf7e9470bf498ba4810fed3"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1878,
+        "source_path": "modules/communication/moltbot_bridge/src/foundup_memex_verified_outcome_authenticity.py",
+        "fingerprint": "2935cd08b7be7dcf1e221a59c83bea15120f78754510a16972c3d9581df3586c"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1956,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_architect_proposal_authenticity.py",
+        "fingerprint": "5f76efc94f0abcfca3d9a26b67b87e95dc90c52686a2427aa6133087a679cfff"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 1994,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_authentication.py",
+        "fingerprint": "9aed23a02a4642aa3c6372090e53d468a7017402763d2624e805b3399b28b30b"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2009,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_conversation_session_credential.py",
+        "fingerprint": "fc3141b48ae69f0599897fe9d033d25d61724d0a9563328efbf1e8df044eaa68"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2082,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+        "fingerprint": "8aa1bd23ca06574b6c5839dca6d4f0ecdbf61bb254210276d7a9b9bcf28d924b"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2083,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_event_log.py",
+        "fingerprint": "6da522ca1b6ff41f0eee2c5770d16d86fe6060939025386b6f4059138d019bfc"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2084,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+        "fingerprint": "a96eab2741edc84da957a4a10ffef5ef3506b5832708595e5f97623d79b80f6d"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2085,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_transport.py",
+        "fingerprint": "97e1f93129a55019190d894a92c336bb3684bc19ef901d801e98a8c4332df094"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2225,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_binding.py",
+        "fingerprint": "c0aa692ff241d81a829fd689a6a58d20a46627b21f3dbf123522f3cd328e70be"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2226,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_independent_secret_grant_provider.py",
+        "fingerprint": "65a9cdc23043ca8a39decfae4dee0e283ae0912ded103f639f81ea587b4242a9"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2229,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_key_provider_dryrun.py",
+        "fingerprint": "927ad0067da95e8a5851ee00d0ed6ce0b2fe1a459af6312ee40364ea511b9930"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2256,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant.py",
+        "fingerprint": "191ff24729f990d1d648a004177a35892a918157c777fa4ee80ec7bf83f2a292"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2257,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_access_grant_contract.py",
+        "fingerprint": "af5e2ffdf8c2409449f8945e5b03debf9c18752ca893f461215626a4d3f54a16"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2261,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_secret_grant_issuance.py",
+        "fingerprint": "f50d5c52090b3877c0bae37bc8f8d6db5da998d7882d1b777d1c95ce11716afd"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2273,
+        "source_path": "modules/communication/moltbot_bridge/src/reddog_signer_socket_peer_credential_attestor.py",
+        "fingerprint": "5b359e87fb574c4be7a3b620b075ae1d5a290c220bb721d7a6a33b32148e4d68"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2420,
+        "source_path": "modules/foundups/pfmall/api.py",
+        "fingerprint": "2171d58f681c8a58cef8f6e3f5a1149ae564ea64efaa60b8fd4e2b683a21e00c"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2444,
+        "source_path": "modules/foundups/simulator/economics/_token_numeric.py",
+        "fingerprint": "dd88a89ad237db8e7785aa929beece9f94904f09bbce507a7dfdd3bf12875489"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2477,
+        "source_path": "modules/foundups/simulator/economics/token_economics.py",
+        "fingerprint": "5ab1c6f03c51587fdb4c367fc19d38c86ceaa91366f72bb069de4e989523f436"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2716,
+        "source_path": "modules/infrastructure/oauth_management/src/oauth_manager.py",
+        "fingerprint": "999758e15fb1a35c812fabf5d2e3e4466c57260d5c2465e0715ccb88c7fab3f9"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2722,
+        "source_path": "modules/infrastructure/secrets_mcp/src/op_cli_secret_resolver.py",
+        "fingerprint": "30a3f5f9cbbfad8b32d6476250644546adf5122af746498484ebb1684ec07963"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2723,
+        "source_path": "modules/infrastructure/secrets_mcp/src/secrets_mcp.py",
+        "fingerprint": "4eb985d3dfb56fd7174755b4b25363f77a40a455d863d2b0c950f6019a21bc0d"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2724,
+        "source_path": "modules/infrastructure/secrets_mcp/src/systemd_credential_secret_resolver.py",
+        "fingerprint": "21da63000684faab4bb4a5e26344c11a4431cc8c84a5740e009befbe0e315e84"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2729,
+        "source_path": "modules/infrastructure/shared_utilities/key_hygiene.py",
+        "fingerprint": "893bb68e286dda92e6df7e9808c252ae4109224b4568c7905f9ded9f9ad04a16"
+      },
+      {
+        "rule": "discord-api-token",
+        "line": 2861,
+        "source_path": "modules/platform_integration/antifafm_broadcaster/src/discord_voice_output.py",
+        "fingerprint": "dc5b1769fac397d9ff8fa1d21f2d396724e6782eff7f03835fbb07b5be403d73"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2874,
+        "source_path": "modules/platform_integration/github_integration/src/github_api_client.py",
+        "fingerprint": "96f5122b244ab92c98a261a9907b3f04331820c51d8b1b6cd68a95858788851b"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2918,
+        "source_path": "modules/platform_integration/social_media_orchestrator/src/oauth/oauth_coordinator.py",
+        "fingerprint": "8a3ff4f5567266650657d977a893c0931e1e3d3e4dd4a98d101f2b1a14f86ed3"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2941,
+        "source_path": "modules/platform_integration/utilities/oauth_management/src/oauth_manager.py",
+        "fingerprint": "66ccbff9eb36de66e9d5cb3abae0f599f1f2833ffa7e377b83aa0c5f1a51491d"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2948,
+        "source_path": "modules/platform_integration/youtube_api_operations/src/youtube_api_operations.py",
+        "fingerprint": "3634a58757128cef470b55e4dc5e3001dd5ecd4074ca7473f27be729fdcb3df5"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2952,
+        "source_path": "modules/platform_integration/youtube_auth/src/oauth_browser.py",
+        "fingerprint": "299ab1e6c2dbc10d66ff26cbb456fd822936bfaa64cd8bef2053e43728106955"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2953,
+        "source_path": "modules/platform_integration/youtube_auth/src/oauth_health.py",
+        "fingerprint": "cb16451b01d53189de4380af5209c1fe7f22e7cf7c7d6771fe6bbf99bfaa8c68"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 2957,
+        "source_path": "modules/platform_integration/youtube_auth/src/youtube_auth.py",
+        "fingerprint": "ee236ddc51b57393a920e0210489511a0f4926e341029eb334a96d4054d92324"
+      },
+      {
+        "rule": "generic-api-key",
+        "line": 3007,
+        "source_path": "utils/oauth_manager.py",
+        "fingerprint": "3ff4158faacc994d6222017321e7617dd150bb314a9826e1ea0779b012e1bdb4"
+      }
+    ],
+    "limits": [
+      "Only these39 actual source-digest findings are classified; no value content retained.",
+      "The extra numeric source-digest context is independently classified, not inherited by approval.",
+      "No scanner, scope, rules, fingerprint function, product, oracle or GitGuardian disposition changes.",
+      "This review is not a scanner run; fresh current-head tree/history gates remain required."
+    ]
   }
 }

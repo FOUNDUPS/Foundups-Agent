@@ -1,5 +1,28 @@
 # Mall homepage and About routing — 2026-10-25
 
+## Browser-discovered About initialization repair allocation
+
+WSP15 C1/I4/D5/Impact4=14/P1; WSP22/50/84/97. Preview9d912 renders About,
+but the actual browser reports a null addEventListener at About line1951:
+showSignInModal is absent from the current DOM while its old binding is required
+unconditionally. This prevents later existing sign-in and concierge setup.
+Allocate only an optional binding at this existing statement (<=2 product lines),
+with existing member ModLog/TestModLog and this plan/root log, within39 paths.
+Do not add a new sign-in entry or alter terms, eligibility, callbacks, providers,
+permissions or analytics referer restrictions. Those restrictions remain intact.
+
+Fresh canonical Holo retrieval again fails HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH,
+UNKNOWN/gap (a519 authority versus canonical0c); no reindex. NAVIGATION and exact
+member README/INTERFACE/ROADMAP/test inventories identify About and the existing
+gateway terms/ROC tests. Search found no other showSignInModal binding owner.
+Retrieval is scoped source fallback: static tests miss actual initialization;
+the observed browser stack and absent DOM element supply the missing evidence.
+No model inference, new helper or mirrored assertion test adds value here.
+Preserve all existing tests; run the existing gateway terms/ROC owners, then
+verify a newly deployed exact-byte preview has no such initialization exception
+and can open/close the existing terms curtain without acknowledging it or login.
+Any subsequent distinct failure is recorded before deciding another change.
+
 ## Nomination links and current-main reconciliation allocation
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP22/50/84/97. Preserve reviewed Mall3767,

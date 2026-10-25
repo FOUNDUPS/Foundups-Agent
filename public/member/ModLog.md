@@ -1,5 +1,15 @@
 # Member Area Module Change Log
 
+## 2026-10-25 — About optional sign-in binding
+
+Actual preview browser logs identify a null listener binding at About1951: the
+legacy showSignInModal link is absent. Make only that binding optional so the
+remaining existing initialization can run. No terms, OAuth, permission or DOM
+entry change. The existing two gateway owners pass178 cases with zero skips or
+guarded network attempts. Browser verification of the repaired preview remains
+required; the pre-repair exception is preserved, not a static-test failure.
+WSP15/22/50/84/97:14/P1 allocation precedes the one-character product repair.
+
 ## 2026-10-25 — Fixed public project nomination links
 
 Add two native fixed GitHub links to the existing public INDEX header, reusing

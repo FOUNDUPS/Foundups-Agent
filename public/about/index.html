@@ -1948,7 +1948,7 @@
     const backToDisclaimer = document.getElementById('backToDisclaimer');
 
     // Show sign in modal
-    showSignInModalBtn.addEventListener('click', (e) => {
+    showSignInModalBtn?.addEventListener('click', (e) => {
       e.preventDefault();
       disclaimerModal.style.display = 'none';
       openModal(signInModal);

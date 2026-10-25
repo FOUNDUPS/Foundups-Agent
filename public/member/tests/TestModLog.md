@@ -1,3 +1,18 @@
+## 2026-10-25 | Actual About initialization exception
+
+Preview9d912 browser reports TypeError at About1951 when the absent legacy
+showSignInModal link is bound unconditionally. This is an observed browser RED,
+not a failure of the existing static gateway assertions. A one-character optional
+binding repairs only this absent-element case; every existing handler body stays.
+The two unchanged gateway ROC/terms owners pass178 cases,0failed/0skipped,
+with stable sources and zero instrumented Python/Node network attempts.
+Reuse the existing external Mall runner and preload unchanged except its receipt
+base_head literal is updated from c19 to actual9d912. Scratch and results:
+`C:/Users/user/AppData/Local/Temp/foundups-about-optional-binding-_olv1aq6/gateway-existing/results.json`.
+No new mirrored test or framework; deployed browser continuation and terms-modal
+open/close remain separate verification. Analytics referer denial is observed
+on the disposable preview and no authorization/configuration change is made.
+
 ## 2026-10-25 | Fixed public nomination links in the actual INDEX renderer
 
 Base `c19a5055b410e528cf2cc3df9eb5a4991c896707`; parent 15/P1 allocation precedes edits.

@@ -62583,3 +62583,16 @@ Nominate project/View nominations after the template reaches main; route220
 passes after the four missing-link RED cases. Independent reviews pass; protected
 historical receipts remain unchanged. Preview and current hosted/GitGuardian
 publication gates remain; no submission, owner, token or market rights are granted.
+
+## 2026-10-25 — Mall current-main hash review and About startup repair
+
+WSP15/22/50/84/97. Actual job121122335711 reports39 generated manifest hash
+findings; parent and independent review reconstruct every referenced source and
+exact fingerprint. Preserve2,340 prior bindings, append only39 (2,379 total);
+five unchanged security regressions pass. GitGuardian remains a separate gate.
+Preview9d912 passes13 exact-byte HTTP routes and desktop/mobile discovery/filter/
+About navigation checks. Browser logs additionally expose About1951's absent
+legacy sign-in link binding. Preallocate14/P1 and make only that listener optional;
+existing gateway ROC/terms suites pass178 cases with zero skips or guarded network
+attempts. Fresh repaired-preview initialization/terms checks and hosted gates
+remain required. No provider, referer restriction, terms or OAuth change is made.
