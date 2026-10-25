@@ -129,6 +129,10 @@ cloud-browser action does not qualify the local Chrome/9222 transport.
    without opening the editor. Inspect the settled row and click its actual edit
    button. Scope actions to its inline popup, not a different row.
 3. Expand **Schedule** and set the date and time in the displayed timezone.
+   In the observed date control, the nested date button opens a second dialog;
+   fill that dialog's date textbox and press Enter to commit/close the picker.
+   Then fill the time textbox in **Select video privacy**. Reinspect both values
+   after the picker closes rather than relying on the typed string.
 4. Inspect the entered values, then use the popup's visible **Schedule/Save**
    action. Unlike the detail route, do not search for a second page-level Save.
 5. Wait for the popup to settle and refresh the inventory if necessary. A video
