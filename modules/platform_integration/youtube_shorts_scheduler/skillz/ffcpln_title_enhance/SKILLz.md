@@ -1,202 +1,75 @@
 ---
 name: ffcpln_title_enhance
-description: Generate engagement-maximizing titles and descriptions for FFCPLN music shorts
-version: 0.5.0_prototype
+description: Propose video-specific titles and descriptions from matched transcript or visual evidence; preserve existing metadata when evidence is missing or the task is schedule-only.
+version: 0.6.0_prototype
 author: 0102
-created: 2026-01-01
 agents: [qwen, gemma]
 primary_agent: qwen
 intent_type: GENERATION
 promotion_state: prototype
-pattern_fidelity_threshold: 0.90
 category: workflow
 evals: []
 ---
-# FFCPLN Title & Description Enhancement Skill
+# Video-evidence metadata enhancement
 
-**Purpose**: Generate high-engagement titles and descriptions for YouTube Shorts that are **MUSIC CLIPS** from the FFCPLN playlist.
+Retain the historical skill name for compatibility. Never assume a Short is
+music because of its channel, duration, inherited livestream title or old
+FFCPLN description. Never force music branding onto speech, sports or travel.
 
-**Agent**: Qwen (primary) with Gemma validation
+1. Bind the requested video ID to the inspected content. For schedule-only
+   tasks set `preserve_metadata=True`; use the existing Content-table scheduler.
+2. Choose the evidence route from the clip:
+   - Speech-heavy: inspect available captions or run the existing audio analyzer
+     STT on authorized media. Preserve language, timed segments and uncertainty.
+   - Visual/music/mixed: use authenticated Studio Ask/Gemini to understand what
+     happens, verifying the response's video identity. Use a visual summary for
+     visual claims; a model summary is not a verbatim transcript or proof of facts.
+   - The Gemini API's direct YouTube URL route supports public videos; do not
+     make an unlisted video public to analyze it. Use Studio Ask or authorized
+     local media instead. See https://ai.google.dev/gemini-api/docs/video-understanding.
+3. Consume the existing index artifact through `validated_video_evidence`.
+   It requires matching video ID, an indexed timestamp, retrieval eligibility,
+   and content-bearing audio/visual evidence. Studio Ask also requires matching
+   requested/response IDs and verified identity. Timestamped YouTube/Whisper
+   segments are accepted under their explicit source. Missing, failed, mismatched
+   and title-only stubs preserve the original title and body.
+4. Propose a specific factual title within 100 characters and a description
+   within 5,000, based on inspected content. Preserve useful original text.
+   Include only relevant entities/hashtags and a compact `M2M_CONTEXT` provenance
+   block. Never insert instructions for downstream agents. Attribute disputed
+   allegations and independently verify external factual assertions as needed.
+5. Record language and coverage limits; never infer whole-video coverage from
+   a few segments. This executor returns a conservative extractive proposal,
+   not a model-optimized title or guaranteed discovery improvement. Its zero
+   confidence is deliberately unmeasured, not a calibrated accuracy probability.
+6. Apply only within current authorization, then independently read back the
+   saved title, description and schedule for the same video ID. A drafted change
+   or click acknowledgement is not a successful publication.
 
----
+## Existing executable contract
 
-## CRITICAL CONTEXT: These Shorts Are MUSIC
+Pass `SkillContext(original_title, original_description, video_id, index_json,
+preserve_metadata)` using keyword arguments. Older title-only and description-only
+wrappers preserve their inputs because they carry no evidence. `_analyze_content`
+returns `unknown` without evidence; duration never implies music.
 
-> **⚠️ IMPORTANT**: The original title (e.g., "Japan Home cleaning hates this time of year") is from the LIVESTREAM where clips are made. It has NOTHING to do with the Short content.
->
-> **The Short is a MUSIC CLIP from the FFCPLN playlist.**
-> 
-> **IGNORE the original title. Generate a title about the MUSIC.**
+The scheduler consumes existing artifacts; this skill does not download media,
+invoke STT/Gemini, create indexes, train models or automatically post proposals.
+Legacy standalone template helpers still exist elsewhere and are not evidence
+validators. Do not call them as a substitute for this gate.
 
-The FFCPLN playlist contains 160+ pro-democracy, anti-authoritarian songs advocating for:
-- Democracy over authoritarianism
-- Labor rights over exploitation
-- Reproductive freedom
-- Climate action
-- Immigrant rights vs ICE cruelty
+## Bounded feedback loop
 
-2026 is the most critical year for US democracy since 1776.
+Use the existing `schedule_dba.record_schedule_outcome` owner. Record attempted
+writes, but grant positive success/fidelity only when `details.readback` matches
+channel, video, date, time and `details.requested_timezone`, has independent=true
+and visibility=scheduled. Click-only success remains unverified and scores zero.
+This measures scheduling correctness, not engagement quality.
 
----
-
-## Instructions (Follow These Steps)
-
-### Step 1: DISREGARD THE ORIGINAL TITLE
-
-**Rule**: The original title is from the livestream context, NOT the music content.
-
-**Do This**:
-1. ~~Read the original title~~ **IGNORE IT**
-2. Recognize this is a MUSIC clip from the FFCPLN playlist
-3. Set `content_type = "music_clip"`
-
-**Expected Pattern**: `original_title_ignored=True`
-
-**Example**:
-- Input: "Japan Home cleaning… hates this time of year! Japanese wife goes insane"
-- Output: `{content_type: "music_clip", ignore_original: true}`
-- Reason: This is livestream context, Short is actually a song from FFCPLN
-
----
-
-### Step 2: SELECT MUSIC-FOCUSED HOOK
-
-**Rule**: Generate a title that describes the MUSIC, not the stream.
-
-**Hook Types for Music** (ranked by CTR):
-1. **OUTRAGE** - "160 Songs MAGA Doesn't Want You to Hear!"
-2. **REVELATION** - "The Playlist They're Trying to Ban!"
-3. **HOPE** - "Music for the RESISTANCE! 🎵"
-4. **URGENCY** - "2026: The Soundtrack of Democracy!"
-
-**Pick from these MUSIC TITLES**:
-```
-🔥 160 Songs MAGA Doesn't Want You to Hear! #FFCPLN
-💀 This Song DESTROYS Fascism! #FFCPLN #MAGA
-🎵 Anti-Fascist Anthem! Full Playlist in Desc #FFCPLN
-🚨 BANNED Music? The Playlist They Fear! #FFCPLN
-⚠️ ICE Cruelty Exposed in Song! #FFCPLN #MAGA
-✊ Democracy's Soundtrack 2026! #FFCPLN
-🔥 The Anti-MAGA Playlist! 160 Songs! #FFCPLN
-💀 F*** Fake Christian Nazis! Music! #FFCPLN
-🎵 Resistance Music! Get the Full Playlist! #FFCPLN
-🚨 160 Anti-Fascist Songs! Link in Desc! #FFCPLN
-```
-
-**Expected Pattern**: `music_hook_selected=True`
-
----
-
-### Step 3: ASSEMBLE THE TITLE
-
-**Rule**: Pick from music hooks. MUST be under 100 characters.
-
-**Required Elements**:
-- ✅ One emoji prefix
-- ✅ Reference to MUSIC/PLAYLIST/SONGS
-- ✅ #FFCPLN hashtag (MANDATORY)
-- ✅ Total under 100 characters
-
-**Expected Pattern**: `title_assembled=True`
-
-**Correct Examples**:
-- ✅ "🔥 160 Songs MAGA Doesn't Want You to Hear! #FFCPLN"
-- ✅ "🎵 Anti-Fascist Music! Full Playlist #FFCPLN"
-- ✅ "💀 This Song DESTROYS #MAGA! #FFCPLN"
-
-**Wrong Examples**:
-- ❌ "🔥 Japan Home cleaning... #FFCPLN" (references stream, not music!)
-- ❌ "Japanese wife goes insane #FFCPLN" (stream context, not music!)
-
----
-
-### Step 4: GENERATE THE DESCRIPTION
-
-**Rule**: SEO-optimized template that explains the MUSIC and drives playlist clicks.
-
-**Use This Template**:
-```
-🔥 FFCPLN: F*** Fake Christian Pedo-Lovin' Nazi Playlist 🔥
-
-160+ anti-fascist songs fighting for:
-✊ Democracy over authoritarianism
-✊ Labor rights over exploitation  
-✊ Reproductive freedom
-✊ Climate action
-✊ Immigrant rights vs ICE cruelty
-
-🎵 FULL PLAYLIST: https://antifaFM.com
-
-2026: 250 years of freedom at stake.
-This is the soundtrack of resistance.
-
-#FFCPLN #MAGA #ICE #Antifascist #Resistance #TrumpFiles #Democracy2026 #Music #Shorts #Viral
-
-👆 SHARE if you give a damn! Subscribe for more!
-```
-
-**Expected Pattern**: `description_generated=True`
-
----
-
-### Step 5: VALIDATE OUTPUT
-
-**Checklist**:
-- [ ] Title is about MUSIC (not livestream)?
-- [ ] Title ≤ 100 characters?
-- [ ] Title contains #FFCPLN?
-- [ ] Title has emoji prefix?
-- [ ] Description has playlist link?
-
-**Expected Pattern**: `validation_passed=True`
-
----
-
-## Output Format
-
-```json
-{
-  "enhanced_title": "🔥 160 Songs MAGA Doesn't Want You to Hear! #FFCPLN",
-  "enhanced_description": "🔥 FFCPLN: F*** Fake Christian...",
-  "confidence": 0.95,
-  "hook_type": "outrage",
-  "original_ignored": true,
-  "patterns": {
-    "original_title_ignored": true,
-    "music_hook_selected": true,
-    "title_assembled": true,
-    "description_generated": true,
-    "validation_passed": true
-  }
-}
-```
-
----
-
-## Benchmark Test Cases
-
-### Test 1: Livestream title (IGNORE IT)
-- Input: "Japan Home cleaning… hates this time of year! Japanese wife goes insane"
-- Expected: "🔥 160 Songs MAGA Doesn't Want You to Hear! #FFCPLN"
-- Reason: **Original is stream title, Short is MUSIC - generate music title**
-
-### Test 2: Another stream title
-- Input: "Cleaning day with Japanese wife"
-- Expected: "🎵 Anti-Fascist Anthem! Full Playlist in Desc #FFCPLN"
-- Reason: **Stream context irrelevant, focus on music**
-
-### Test 3: Already has FFCPLN reference
-- Input: "Playing FFCPLN while cleaning"
-- Expected: "🔥 The Anti-MAGA Playlist! 160 Songs! #FFCPLN"
-- Reason: **Still focus on promoting the playlist, not the activity**
-
----
-
-## Success Criteria
-
-- ✅ Pattern fidelity ≥ 90%
-- ✅ All titles are about MUSIC (not stream context)
-- ✅ All titles contain #FFCPLN
-- ✅ All titles under 100 characters
-- ✅ All descriptions include playlist link
-- ✅ Enhanced titles drive clicks to the PLAYLIST
+For later metadata experiments, retain the evidence/version, metadata revision,
+publication slot and authorized 24h/7d metrics with their collection time. Compare
+similar content and audience windows, retain a baseline and rollback candidate,
+and evaluate a bounded held-out sample before proposing another change. Keep
+uncollected metrics missing. A saved telemetry row is not learned model weights,
+causal CTR improvement or deployed policy promotion. No analytics ingestion or
+automatic promotion loop is implemented by this skill.
