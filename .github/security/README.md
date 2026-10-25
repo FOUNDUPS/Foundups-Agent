@@ -1,3 +1,17 @@
+## PR2204 scheduler manifest metadata review — 2026-10-25
+
+Hosted security job 121087044548 reported 39 unreviewed tracked-tree findings
+and zero introduced-history findings. Parent and implementation-agent reviews
+independently rehashed all 39 referenced source files, verified each finding is
+a unique unchanged generated SHA256 entry from base `5be89ae4`, and reconstructed
+its prior exact approval in the base ledger. Regenerating the manifest changed
+only the whole-file binding of these previously reviewed metadata findings.
+
+Append only the 39 exact file/rule/line fingerprints, retaining all prior entries.
+No scanner rule, path exclusion, scan scope, fingerprint algorithm or unknown
+finding is approved. Fresh hosted tree/history scans remain required; these
+source-integrity hashes are not credentials and this review is not a new scan.
+
 ## PR2189 brand-grounding metadata bindings - 2026-10-25
 
 Hosted security job 121022484911 on candidate 9fd2618 reported 39 unreviewed

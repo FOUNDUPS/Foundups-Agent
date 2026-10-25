@@ -1,3 +1,28 @@
+## 2026-10-25 — Generated runtime closure repair
+
+CI required canonical test-registry and backend-manifest regeneration. Register
+one new test file (1771 total,273 quarantined). Fold the evidence validator into
+the existing content_generator owner rather than growing the installed runtime
+closure: membership remains1471, count rejection remains1472, and all existing
+328KiB/2MiB/32MiB bounds remain unchanged. Refresh the canonical manifest and
+both existing Python/JavaScript digest pins. Stage the generated manifest before
+its independent staged-index parity test. All8 generator cases pass (58.98s),
+all3 Node compatibility entrypoints pass, and manifest/registry/projection
+checks pass. The88 metadata/selected-batch regressions pass after consolidation.
+No validator bypass or deployment.
+
+## 2026-10-25 — Metadata evidence and verified feedback
+
+**88 passed**. Offline pytest (plugin autoload/dotenv disabled, explicit pytest_asyncio):
+`test_metadata_evidence.py`, `test_index_metadata_decoupling.py`, `test_remote_cli.py`.
+Covers wrong-video/stub/failed evidence, Studio Ask identity, YouTube/Whisper
+segments, visual versus speech provenance, duration-not-music, legacy wrappers,
+schedule-only preservation, eligible edits, description opt-out, idempotence,
+platform limits and mismatched saved-slot learning rejection. Existing decoupling
+fixtures now carry actual producer provenance; positive edits remain asserted.
+Browser delays are replaced only in the mocked decoupling harness.
+No browser, API analysis, audience metrics or deployed model was exercised.
+
 ## 2026-10-22 — Selected-batch regression and closure evidence
 
 WSP 6/15/22/50/84/97. Reuse `test_remote_cli.py` and existing adapter,

@@ -159,3 +159,23 @@ sync unverified (`synced_to_youtube=false`, `independent_readback_required`);
 this is lack of verification, not proof of absence on YouTube.
 RedDog requires process success plus an explicit boolean success receipt, no
 errors, and no incomplete-batch marker. Missing/malformed receipts fail closed.
+
+
+## Evidence-bound metadata and learning (2026-10-25)
+
+`src/content_generator.py::validated_video_evidence(index, video_id)` is an offline
+identity/provenance gate, not a factual verifier. Metadata generation requires a
+matching, retrieval-eligible existing artifact containing explicit Studio Ask,
+Gemini video-summary, or timestamped YouTube/Whisper transcript evidence.
+Missing/ineligible evidence preserves existing metadata; schedule-only mode
+continues to bypass enrichment. No analyzer is launched by the scheduler.
+`YT_SCHEDULER_INDEX_INFORM_TITLE` retains its existing opt-in. Description opt-out
+preserves the complete description. Proposals reject platform-limit overflow.
+
+`record_schedule_outcome` retains its Boolean storage return. A positive learning
+outcome now additionally requires `details.requested_timezone` and independent
+`details.readback` with matching `channel_id`, `video_id`, `date_str`, `time_str`,
+`timezone` and `visibility="scheduled"`. Old callers remain recorded with
+`reported_success=true`, but no verified success or positive fidelity score.
+Audience performance is always marked unmeasured; no analytics/model promotion
+is connected here.

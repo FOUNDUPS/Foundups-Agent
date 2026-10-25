@@ -1,5 +1,25 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-10-25 — Evidence-gated metadata and verified scheduling feedback
+
+Replace unconditional channel/music templates in the scheduling metadata path
+with matched existing analyzer evidence. Preserve metadata for missing, stub,
+failed or mismatched artifacts; retain schedule-only and title/description opt-outs.
+Use conservative content extracts and bounded M2M provenance, not fabricated
+music themes or performance confidence. The legacy enhancement skill now shares
+this gate and its old string-only wrappers preserve their inputs.
+
+The existing DBA records reported success separately and grants positive outcome
+scores only for independent channel/video/date/time/timezone-matched readback.
+Audience-performance metrics remain unmeasured; no model training or automatic
+policy promotion is asserted. Updated both enhancement and scheduling-priority
+skill instructions, without invoking live analysis or publication.
+
+Validation: focused metadata/provenance/learning cases plus selected-batch and
+index-decoupling regressions. See tests/TestModLog.md. WSP 22/50/84/97; source-bound
+lexical retrieval retained UNKNOWN semantic freshness. Both existing analyzer
+schemas and scheduler write sinks were inspected before editing.
+
 ## 2026-10-22 — PR1860 current-main scheduling reconciliation
 
 WSP 00/6/10/11/15/22/50/84/97. C4/I4/D4/Impact4=16/P0.
