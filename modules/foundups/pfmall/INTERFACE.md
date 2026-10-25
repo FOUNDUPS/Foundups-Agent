@@ -57,10 +57,48 @@ runtime convenience, not durable state or cross-process authority.
 | `GET /pfmall/static/...` | Static assets |
 | `GET /f/{foundup_id...}` | HTTP 307 to the shell handoff UI |
 
-This FastAPI surface has no authentication. It is read-only except for
-process-local lazy shell caching and is not a production authority boundary.
+These GET routes have no authentication. They are read-only except for
+process-local lazy shell caching and are not a production authority boundary.
 Any public deployment requiring private catalog data must add authentication
 outside this module before admission.
+
+### Explicitly configured member draft intake — 2026-10-26
+
+`POST /pfmall/proposals` is a separate authenticated draft surface. By default
+it returns503 `{"detail":"intake_unavailable"}`. Only the server may set
+`app.state.clerk_intake_policy` to the exact immutable `ClerkIntakePolicy` type
+from `foundup_genesis.clerk_intake`; configuration accepts issuer, nonempty tuple
+of HTTPS frontend origins, and an RSA2048–4096 public PEM. No environment, body,
+UID, invite flag or forwarded host selects this policy. Optional dependencies
+are listed in this module's requirements; ordinary unconfigured imports do not
+load JWT/crypto packages. The existing GET contracts remain public.
+
+Send `Content-Type: application/json`, one `Authorization: Bearer <session>` and
+one matching allowed `Origin`. Cookies and HMAC invites cannot authenticate this
+route. Duplicate security headers, unsupported content/encoding, malformed or
+oversized declared length reject400. Actual streamed bytes are capped at16KiB
+before decoding, with a5-second application read deadline; these are not TCP,
+OS memory, hard CPU or proxy admission guarantees. UTF-8 charset may be explicit.
+The complete existing LaunchRequest allowlist runs before the verifier.
+
+The genesis-owned adapter verifies real RS256 signatures against the configured
+public key and exact issuer/Origin/azp, signed v2 user/session claims, required
+integer iat/nbf/exp, zero clock skew and TTL<=120seconds. Any aud, sts or act claim
+is unsupported and rejected; this profile has no audience or impersonation mode.
+All authentication failures return401 `{"detail":"not_authorized"}`; body/wire
+failures return400 `{"detail":"invalid_request"}`. Responses use `no-store`.
+There is no online session-revocation or membership lookup; later privileged
+claim use must establish fresh current-session/revocation evidence separately.
+
+Success201 is `{"status":"DRAFT_ONLY","genesis_envelope":{...}}` from the existing
+mapper, with IDEA/UNBOUND and external_repo_requestedFalse. requested_by is a
+domain-distinct hash of the verified issuer and case-sensitive subject, not a
+body handle; raw subject/session/bearer/key are not returned. This is a returned
+draft, not durable nomination/admission, repository/issuer control, registry or
+catalog publication, work dispatch, token creation, voice or model execution.
+No public deployment is established. The backend policy and real member-token
+smoke test, current membership/revocation, challenge+atomic receipt owner,
+rate/abuse limits and release qualification remain separate prerequisites.
 
 ## Explicit write surface
 

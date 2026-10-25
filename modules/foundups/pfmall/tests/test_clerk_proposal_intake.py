@@ -164,7 +164,7 @@ def test_other_private_key_rejected(client):
 
 @pytest.mark.parametrize("algorithm", ["none", "HS256"])
 def test_algorithm_confusion_rejected(client, algorithm):
-    token = jwt.encode(claims(), "synthetic-test-secret" if algorithm == "HS256" else None,
+    token = jwt.encode(claims(), "synthetic-test-secret-for-algorithm-confusion" if algorithm == "HS256" else None,
                        algorithm=algorithm)
     response = client.post(PATH, json=PROPOSAL,
                            headers={"Authorization": "Bearer " + token, "Origin": ORIGIN})

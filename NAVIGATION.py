@@ -30,6 +30,8 @@ NEED_TO = {
     "Shop clothing capture": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
     "AutoPost multiple item photos": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
     "private Mall listing": "modules/foundups/pfmall/INTERFACE.md",
+    "Clerk member authenticated FoundUp draft proposal": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/clerk_intake.py:intake_clerk_request()",
+    "Mall proposal HTTP bearer intake": "modules/foundups/pfmall/http_api.py:foundup_proposal()",
     "Shop capture implementation roadmap": "modules/foundups/pfmall/ROADMAP.md",
     # Human-operated conversation skill; distinct from the message-only dialer
     "kids educational episode editor": "modules/communication/youtube_shorts/src/kids_editor_server.py",

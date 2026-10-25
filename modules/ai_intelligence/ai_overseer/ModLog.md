@@ -1,3 +1,16 @@
+## 2026-10-26: Connect member-authenticated draft intake
+
+15/P1 allocation6efb68f50, frozen tests2e46fd2aa, WSP00/6/11/15/22/50/77/84/97.
+Add one explicit Clerk server-only provider wrapper around the existing body-first
+intake_request seam, consumed by PFMall's actual POST route. Fixed public RSA,
+issuer/origin/time/v2 session policy; generic failures and pseudonymous handle.
+Legacy HMAC behavior/source/oracles and package exports remain unchanged. Optional
+HTTP dependencies are outside resident imports; no environment secrets, JWT/JWKS
+network fetch, nonce/data writes, deployment, admission/ownership/work/token grant.
+PFMall TestModLog records exact RED/GREEN evidence; independent review and current
+hosted/security/main gates remain separate. Durable claim state and real-session
+qualification are still required.
+
 ## 2026-10-26: Consume public GitHub nominations as review drafts
 
 WSP00/3/6/11/15/22/49/50/62/84/97; C3/I4/D4/Impact4=15/P1.

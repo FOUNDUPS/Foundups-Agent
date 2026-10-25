@@ -930,8 +930,10 @@ forced false; authentication alone grants no admission, execution or token right
 Implemented, under publication qualification: `foundup_genesis.github_nomination_review` connects
 the public issue form to a review artifact through the unchanged LaunchRequest
 mapper. This is a separate draft-service host, not an HTTP authentication path.
-The session/invite provider remains the sole verifier for HTTP intake. Historical
-sole-provider statements apply to that session/invite contract; this host may
+The session/invite provider remains the sole verifier for the legacy HMAC HTTP
+intake contract. The separate Clerk draft host below is an explicit additional
+provider, not a fallback or relaxation. Historical sole-provider statements
+apply to that session/invite contract; this nomination host may
 supply `LaunchRequestIntakeContext(authenticated=True,
 requester_handle="github_nomination_review_service")` for draft creation only.
 Here `authenticated` asserts the host's fixed service context, never GitHub-user
@@ -953,3 +955,36 @@ input diagnostics. Event replay metadata stays explicitly unverified; JSON field
 cannot attest GitHub hosting. The Actions run supplies external provenance.
 No application API call, URL fetch, project checkout, queue, registry, comments,
 claims, token issuance or trading follows. This command is not a resident export.
+
+## Clerk member draft intake host — 2026-10-26
+
+`foundup_genesis.clerk_intake.ClerkIntakePolicy(issuer=..., authorized_parties=(...),
+public_key_pem=...)` is immutable, trusted server configuration. It accepts only
+HTTPS origins and an RSA2048–4096 public key, without environment, credentials,
+JWKS requests or default tenant selection. Optional dependency profile:
+`modules/foundups/pfmall/requirements.txt`; this is not an umbrella upgrade.
+
+`intake_clerk_request(headers, body, *, policy) -> IntakeResult` is the one
+explicitly authorized Clerk provider wrapper. It captures only transport metadata
+and invokes the existing `intake_request` provider seam after the unchanged full
+body preflight. That seam's historical test-only description does not authorize
+arbitrary body-supplied providers. The HMAC default, extractor, invite nonce
+store, signature and existing tests are unchanged. Sole-provider comments in the
+legacy auth source describe that `sess.v1`/`invite.v1` contract.
+
+The wrapper accepts only a short-lived signed v2 session bearer, fixed RS256
+public key/issuer, allowed matching Origin/azp, user subject and session ID,
+required strict integer times and<=120s lifetime with zero skew. It rejects any
+aud/sts/act claim; audience/impersonation support requires a separate policy.
+Cookies/invites/client UID/membership or body assertions cannot authenticate.
+Only authenticated draft context is returned, with an issuer+case-sensitive
+subject digest handle, never raw token/session/subject/key. Existing generic
+IntakeResult rejection and genesis IDEA/UNBOUND mapping are preserved.
+
+The concrete consumer is `POST /pfmall/proposals` in the existing FastAPI app,
+default503 until explicit server configuration. Its wire/read caps, no-store and
+response contract are in [PFMall INTERFACE](../../foundups/pfmall/INTERFACE.md#explicitly-configured-member-draft-intake--2026-10-26).
+No network, persistence, invite consumption, repo/control, catalog, registry,
+work/issuer/token/agent grant follows. This local component does not prove deployed
+member authentication or online revocation/membership; those checks plus durable
+challenge/receipt consumption remain required before any privileged claim.

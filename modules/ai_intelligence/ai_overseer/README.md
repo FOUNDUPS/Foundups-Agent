@@ -9,6 +9,15 @@
 
 ## Executive Summary
 
+The explicitly configured member draft component in
+`src/foundup_genesis/clerk_intake.py` now connects Clerk bearer verification to
+the existing genesis preflight/mapper through PFMall's local HTTP app. It adds
+no default provider, storage, membership, repo/issuer/work/token authority or
+deployment. Legacy HMAC intake remains unchanged. See INTERFACE.md and the
+[pre-authoring allocation](../../../docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md).
+The HTTP profile's optional dependencies live in PFMall requirements; base
+Overseer imports do not require them.
+
 AI Intelligence Overseer contains operational monitoring, security, M2M, and
 coordination surfaces alongside legacy heuristic paths. Qwen/Gemma labels do
 not by themselves prove a live model call, independent review, or production

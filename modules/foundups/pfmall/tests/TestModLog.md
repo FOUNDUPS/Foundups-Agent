@@ -9,8 +9,16 @@ minimization. Existing HTTP/nomination/HMAC/mapper/transport/validator owners ar
 unchanged. Allocation6efb68f50 precedes tests and product authoring.
 Credential-free Python3.12.10/pytest9.0.3/PyJWT2.15.1/cryptography46.0.7/
 FastAPI0.128.0/Starlette0.50.0/httpx0.28.1 baseline695PASS. Initial80-case RED:
-695PASS/2FAIL/78ERROR (missing adapter/route). Boundary additions follow before
-the final test freeze. Logs/JUnit/exact cases/source hashes are external under
+695PASS/2FAIL/78ERROR (missing adapter/route). Final frozen87-case RED at2e46fd2aa
+is695PASS/2FAIL/85ERROR; product's first GREEN is782PASS, no failures/errors/skips,
+with two warnings: baseline Starlette/AnyIO deprecated alias and a new short
+synthetic HMAC fixture. Increase only that rejection fixture's key length to
+remove the incidental warning; no assertion/oracle changes or warning filters.
+The one baseline dependency warning remains reviewed, not silently omitted.
+All695 original IDs/outcomes remain present. These scopes overlap;
+do not sum counts. The five boundary additions and two reviewer-requested act
+cases precede product authoring; earlier RED runs remain retained.
+Logs/JUnit/exact cases/source hashes are external under
 `foundups-member-intake-20261026`. No live identity, deployment, OS confinement
 or full-repository promotion claim. WSP6/22/50/84/97.
 

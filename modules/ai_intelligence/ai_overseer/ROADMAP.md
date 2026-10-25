@@ -11,8 +11,14 @@ artifact preserves Outcome/Solution/Pain and source/nominator identity as adviso
 draft data. Local five-owner qualification682PASS and actual CLI replay pass;
 hosted/main convergence remain required. No resident admission is introduced.
 
-Next admission layer: select the authenticated project-control claimant and durable
-consumer, then bind fresh repository-control evidence. A nomination, issue author,
+The next local ingress component is now implemented: the explicitly configured
+Clerk draft wrapper and concrete PFMall POST route reuse the current mapper.
+Offline RSA/HTTP qualification does not establish a deployed public claim host,
+membership or live session revocation. No production identity inputs are assumed.
+
+Next admission layer: qualify that actual provider/host and current-session policy,
+select the durable challenge/receipt consumer, then bind fresh repository-control
+evidence. A nomination, issue author,
 service context or replay artifact grants neither ownership nor issuer/work rights.
 Acceptance criteria, namespace collision checks, reviewed catalog publication and
 chain issuance remain explicit later gates; reuse existing owners rather than

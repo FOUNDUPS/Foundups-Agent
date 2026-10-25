@@ -1,3 +1,15 @@
+## 2026-10-26 — Explicit Clerk-authenticated draft intake component
+
+WSP00/3/6/11/15/22/49/50/62/77/84/97/109;15/P1 allocation6efb68f50.
+Connect one separate POST route in the existing development FastAPI app to a
+server-owned Clerk bearer policy and existing genesis body preflight/mapper.
+No default policy, environment secrets, legacy HMAC change, membership/client
+flag trust, data writes, repo/provider calls or runtime/token grant. Add an
+optional HTTP profile without migrating the shared/umbrella environment.
+Frozen RED and local GREEN evidence are in tests/TestModLog; independent review,
+hosted/security gates and exact main convergence remain separate. Deployment,
+live identity/current revocation, durable claim receipts and issuance are pending.
+
 ## 2026-10-25 — FX1 public directory entry
 
 Add a normal FX anchor to the current homepage navigation, retaining the gateway

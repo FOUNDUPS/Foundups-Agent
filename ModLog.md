@@ -1,3 +1,14 @@
+## 2026-10-26 — Connect Clerk member identity to draft intake
+
+Allocated15/P1 at6efb68f50, frozen tests2e46fd2aa before product authoring.
+Existing PFMall FastAPI host now has a separate, default-unavailable proposal
+route; one genesis-owned Clerk wrapper reuses the unchanged body preflight and
+mapper. Real ephemeral RSA/HTTP tests pass locally782, including all695 original
+cases. No live provider identity, deployed service, membership, online revocation,
+durable claim/registry/catalog, worker, financial signing or token effect is proved.
+Independent and publication gates remain pending; see
+`docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md` and owner TestModLog.
+
 ## 2026-10-26 — Bound GitHub observation HTTP for project admission
 
 WSP00/6/11/15/22/50/62/71/84/97;11/P2. Extend the existing client only: fixed

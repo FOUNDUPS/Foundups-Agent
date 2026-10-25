@@ -11,6 +11,10 @@ on:
       - 'modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py'
       - 'modules/ai_intelligence/ai_overseer/tests/test_github_nomination_review.py'
       - 'modules/foundups/agent/src/kanban_plugin_contract.py'
+      - 'modules/foundups/pfmall/http_api.py'
+      - 'modules/foundups/pfmall/requirements.txt'
+      - 'modules/foundups/pfmall/tests/test_http_api.py'
+      - 'modules/foundups/pfmall/tests/test_clerk_proposal_intake.py'
       - '.github/ISSUE_TEMPLATE/foundup-project-nomination.yml'
       - '.github/workflows/foundup-nomination-review.yml'
   push:
@@ -19,6 +23,10 @@ on:
       - 'modules/ai_intelligence/ai_overseer/src/foundup_genesis/**'
       - 'modules/ai_intelligence/ai_overseer/tests/test_*.py'
       - 'modules/foundups/agent/src/kanban_plugin_contract.py'
+      - 'modules/foundups/pfmall/http_api.py'
+      - 'modules/foundups/pfmall/requirements.txt'
+      - 'modules/foundups/pfmall/tests/test_http_api.py'
+      - 'modules/foundups/pfmall/tests/test_clerk_proposal_intake.py'
       - '.github/ISSUE_TEMPLATE/foundup-project-nomination.yml'
       - '.github/workflows/foundup-nomination-review.yml'
 
@@ -72,7 +80,9 @@ jobs:
       - name: Install the bounded test runner
         run: >-
           python -m pip --isolated --disable-pip-version-check install
-          --only-binary=:all: --report "$RUNNER_TEMP/nomination-pip.json" pytest==9.0.3
+          --only-binary=:all: --report "$RUNNER_TEMP/nomination-pip.json"
+          -r modules/foundups/pfmall/requirements.txt
+          pytest==9.0.3 httpx==0.28.1 starlette==0.50.0
       - name: Verify nomination and unchanged intake contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
@@ -88,6 +98,8 @@ jobs:
           modules/ai_intelligence/ai_overseer/tests/test_intake_transport.py
           modules/ai_intelligence/ai_overseer/tests/test_intake_auth_provider.py
           modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py
+          modules/foundups/pfmall/tests/test_http_api.py
+          modules/foundups/pfmall/tests/test_clerk_proposal_intake.py
       - name: Retain exact test cases and dependency report
         if: always()
         uses: actions/upload-artifact@v4

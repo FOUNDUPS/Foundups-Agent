@@ -24,7 +24,10 @@ execution, or FoundUp business logic.
 - `api.py` exposes a stable read-only Python adapter for catalog listing,
   FoundUp lookup, and route resolution.
 - `http_api.py` exposes an unauthenticated development/read surface and static
-  shell UI through FastAPI.
+  shell UI through FastAPI. Its separate `POST /pfmall/proposals` route returns
+  503 until a server-owned Clerk policy is explicitly configured; verified
+  bearers can produce only a genesis draft. See the interface below and
+  [the allocation](../../../docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md).
 - `member_catalog_export.py` explicitly generates
   `public/member/mall-catalog.json`; generation is a write operation and is
   never performed by the read API.
@@ -37,6 +40,15 @@ execution, or FoundUp business logic.
   browser contract remains in `public/member/INTERFACE.md`.
 
 ## RedDog, OpenClaw, and Hermes boundary
+
+The optional local HTTP/intake dependency profile is `requirements.txt`; it does
+not upgrade the FoundUps umbrella or install a server. Configure
+`app.state.clerk_intake_policy` with a `ClerkIntakePolicy` from
+`modules.ai_intelligence.ai_overseer.src.foundup_genesis.clerk_intake`, using an
+independently selected issuer, HTTPS frontend origins and that instance's RSA
+public key. There is no default policy, environment loader, JWKS request, browser
+submission button, persistence or deployment in this component. A short-lived
+signed-in session permits a draft, not Mall membership or project ownership.
 
 The current browser concierge is a shell-local FAQ IIFE: it makes no network
 call and is not an AI runtime. The `pfmall-control-dispatcher.js` message bridge

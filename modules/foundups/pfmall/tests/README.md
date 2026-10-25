@@ -11,6 +11,7 @@ mutate Holo replicas or trigger a Holo reindex.
 | `test_shell_core.py` | Manifest validation/discovery, catalog, route, tile, shell boot |
 | `test_api.py` | Dict adapter and default-shell behavior |
 | `test_http_api.py` | FastAPI JSON routes |
+| `test_clerk_proposal_intake.py` | Real RSA-signed Clerk-shaped session -> actual HTTP draft route, body/auth/wire bounds; no live provider identity |
 | `test_shell_ui.py` | Static shell and route handoff |
 | `test_member_catalog_export.py` | Canonical member projection/export |
 | `test_catalog_foundup_truth_gate.py` | Catalog entity/status truth |
@@ -45,6 +46,13 @@ For focused work, execute the nearest test file first and expand to the full
 module suite. A merged Holo documentation change additionally requires the
 governed exact-main maintenance/activation flow and a digest-stable owner query;
 pytest is not a substitute for that operational proof.
+
+The new draft-intake owner uses the optional `../requirements.txt` HTTP profile,
+pytest9.0.3 and httpx0.28.1/Starlette0.50.0 for local transport tests. Existing
+nomination-contract CI retains the resolved dependency report and exact JUnit
+cases. RSA keys and tokens are synthetic and never printed. Offline signatures
+do not qualify a production Clerk instance, membership, current revocation,
+repository control or a deployed service. Keep legacy HMAC owners unchanged.
 
 ## Original pre-rebase baseline
 
