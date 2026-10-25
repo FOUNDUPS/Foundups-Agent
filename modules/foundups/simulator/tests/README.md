@@ -2,6 +2,24 @@
 
 This directory contains regression tests for the FoundUps simulator module.
 
+## Mock BTC replay and realm integrity
+
+The existing `test_btc_anchor_connector.py` covers full-v2 field/type/version/hex
+and UTC validation, force semantics, immutable conflicts, legacy/partial migration,
+canonical schema constraints, failed/pending receipt gates, two-instance races,
+rollback/response loss and constructor/singleton configuration. Fifteen original
+case oracles remain; the TestNet-to-mock coercion expectation is deliberately
+replaced by unsupported-mode rejection. `test_layer_d_anchor_runtime.py` retains
+its two original runtime cases and adds selected-mode rejection through the real
+builder. No new test file or live backend is introduced.
+
+Current repaired selection:113 BTC,8 runtime,88 epoch and2 parameter cases =211.
+Affected simulator closure:513 pass with the same3 named SSE HTTP exclusions.
+Independent21 held-outs and source review pass. These counts overlap and must
+not be added. [TestModLog](TestModLog.md) preserves initial failures, the fixture
+timing correction and the supplied-schema review repair. No real network,
+funded transfer, source authenticity or future external-I/O recovery is qualified.
+
 ## Epoch evidence integrity
 
 `test_epoch_ledger_settlement_commitment.py` retains its original two cases and
