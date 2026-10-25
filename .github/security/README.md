@@ -555,3 +555,11 @@ Sanitized per-finding proof and independent review are retained under
 `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/` as
 `rsi-parent-bootstrap-security-proofs-20261025.json` and
 `rsi-parent-bootstrap-independent-security-review-20261025.json`.
+
+Subsequent integration of owner-merged #2198 at `6fe7eba4` preserved its
+22 changed paths, including all 1,988 incoming review records. The combined
+manifest at `1d73d8e7` required 38 further source-hash rebindings, individually
+rechecked against exact Git source and prior reviews. Retain the earlier 2,027
+records and append only those 38 (2,065 total); the changelog review remains
+valid. Independent evidence: `rsi-parent-bootstrap-independent-main-union-review-20261025.json`
+in the same evidence directory. Combined-source hosted acceptance remains required.
