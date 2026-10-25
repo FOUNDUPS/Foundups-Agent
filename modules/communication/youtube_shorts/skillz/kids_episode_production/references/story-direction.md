@@ -23,7 +23,7 @@ story contract, not hidden reasoning or a list of animation effects.
    and relevant environmental constraint visible before the payoff.
 7. Review a simple storyboard silently. Can a reviewer identify who noticed what,
    where they moved, what changed and why the result followed? Do not rely on
-   captions or sound to conceal ambiguous geometry. Reject inconsistent counts,
+   captions or sound to conceal ambiguous geometry. Freeze a material palette and reuse each material color across intact, moving and final states. Check sampled pixels in actual rendered frames, not just color names. Reject inconsistent counts,
    unexplained scale changes, floating props and incomplete world-state changes.
 8. Add original music/foley only after the event reads visually. Align each sound
    to its physical cause. Keep instructional cues intelligible; music supports
@@ -33,7 +33,7 @@ story contract, not hidden reasoning or a list of animation effects.
    separate from speed, and leave an untimed path. Do not infer ability from taps.
 10. Render, inspect the actual transitions and listen to actual audio. Have an
     independent reviewer describe causality without supplying the intended answer.
-    Preserve discrepancies and revise the responsible beat. Technical encoding
+    Inspect anticipation, contact, occlusion and reveal frames as well as playback. Give every affected character a visible response before occlusion; do not leave a living cast frozen while the environment changes. Preserve discrepancies and revise the responsible beat. Technical encoding
     checks and a written plan do not prove audience comprehension.
 
 ## Little Shrew: correction-to-principle record
@@ -46,6 +46,9 @@ story contract, not hidden reasoning or a list of animation effects.
 | Burrow remained visually legible after crushing | Chamber, floor and other figures disappear into uniform dark soil; only pocket remains | Recompute the whole affected world state |
 | Foot/shape ambiguous | Side-view foot descends, lifts, leaves readable imprint | Reveal evidence of the event from a consistent camera |
 | One generic impact noise | Stomp → crunch → squish tied to contact/compaction | Separate sound causes and synchronize them |
+| Soil changed hue during collapse | Keep roof, floor and compacted earth the same dark brown | Bind material identity across state changes; verify rendered pixels |
+| Family slept through an abrupt scene swap | Cracks travel with the falling roof; family wakes and starts moving before occlusion | Stage anticipation → reaction → occlusion → aftermath; inspect transitions, not only endpoints |
+| Sound cue had no learning word | Show THUMP at the first shake | Pair the visible word with its actual sound onset; assign one text owner so scene and subtitles never double-print |
 | Passive scene only | Tap shrew, then root, with retry | Derive interaction from the same causal sequence |
 
 Latest Little Shrew direction is a fictional sole-survivor scene, not the older

@@ -17,7 +17,7 @@ function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;
  if(!paused&&!document.hidden){clock+=dt;const old=state.phase;state=advance(state,'tick',dt,$('practice').checked);if(old!==state.phase){if(state.phase==='success')sound(784);update();}}
  const p=state.phase,e=state.elapsed;
  const moving=['walk','stomp','success'].includes(p),impact=p==='stomp'?Math.min(e/.7,1):p==='success'?1:0;
- stage.innerHTML=scene({t:clock,awake:['root','walk','stomp','success'].includes(p),progress:moving?(p==='walk'?Math.min(e/1.5,1):1):0,impact,lift:p==='stomp'?Math.max(0,(e-1.5)/1.3):p==='success'?1:0,shake:p==='wake'&&!matchMedia('(prefers-reduced-motion: reduce)').matches});
+ stage.innerHTML=scene({t:clock,awake:['root','walk','stomp','success'].includes(p),progress:moving?(p==='walk'?Math.min(e/1.5,1):1):0,impact,warning:state.phase==='ready'?0:1,reaction:p==='walk'?Math.max(0,(e-1.7)/.7):impact>0?1:0,collapse:impact,lift:p==='stomp'?Math.max(0,(e-1.5)/1.3):p==='success'?1:0,shake:p==='wake'&&!matchMedia('(prefers-reduced-motion: reduce)').matches});
  $('time').textContent=['wake','root'].includes(p)&&!$('practice').checked?`${Math.max(0,Math.ceil(4-e))} seconds`:$('practice').checked?'Practice · no timer':'';
  requestAnimationFrame(frame);
 }

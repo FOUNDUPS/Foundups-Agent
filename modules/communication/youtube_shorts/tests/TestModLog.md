@@ -39,3 +39,8 @@ control test verifies that silent scrubbing survives a mode switch and that
 refresh reloads media without autoplay. A build smoke with a mocked renderer
 verified all mounted review/scene/style/media paths; this does not review media
 quality or establish live hosting. JavaScript syntax and diff whitespace pass.
+
+## 2026-10-26 — Stomp-mode audio cue
+
+Extended test_little_shrew_preview.py with THUMP window, ordered foley captions,
+15-second sample count and bounded amplitude; non-stomp deterministic check retained.

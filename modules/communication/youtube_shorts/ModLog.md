@@ -825,3 +825,11 @@ UNKNOWN, index gap true. Results identified the existing editor; optional
 roadmap/test README/memory artifacts absent. Exact files inspected directly.
 The bounded static tool is simpler than deploying the loopback render server
 as a public service; hosting remains a separate unverified gate.
+
+## 2026-10-26 — Collapse sound word and production review lesson
+
+Stomp-mode early cue now reads THUMP! with a shorter low-frequency impact;
+legacy non-stomp audio/captions are preserved. Updated production skill v0.2.1
+and story-direction reference with material continuity, anticipation/reaction,
+transition-frame review and sound-word pairing. EDUIT owns the shared scene.
+Next actual episode remains the transfer test; no autonomous learning claim.

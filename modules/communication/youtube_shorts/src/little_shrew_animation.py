@@ -128,8 +128,8 @@ def compose_audio(output, *, stomp=False):
         noise = rng.normal(0, .08, n)
         noise = np.convolve(noise, np.ones(8) / 8, mode="same")
         audio[int(start*rate):int(start*rate)+n] += noise * np.sin(np.linspace(0, np.pi, n)) ** 2
-    tone(1.0, .9, 65, .08)
-    tone(1.0, .9, 83, .035)
+    tone(1.0, .32 if stomp else .9, 65, .08)
+    tone(1.0, .32 if stomp else .9, 83, .035)
     if stomp:
         # Three original foley layers: foot landing, chamber crunch, soil squish.
         tone(10.0, .35, 58, .12)
@@ -152,7 +152,7 @@ def compose_audio(output, *, stomp=False):
         wav.setparams((1, 2, rate, len(audio), "NONE", "not compressed"))
         wav.writeframes((audio * 32767).astype("<i2").tobytes())
     cues = [{"start": .1, "end": .9, "text": "[soft snoring]"},
-            {"start": 1.0, "end": 1.9, "text": "[gentle rumble]"},
+            {"start": 1.0, "end": 1.9, "text": "THUMP!" if stomp else "[gentle rumble]"},
             {"start": 5.8, "end": 7.2, "text": "[sniff, sniff, sniff]"},
             {"start": 8.3, "end": 9.7, "text": "[sniff, sniff, sniff]"},
             {"start": 11.3, "end": 12.7, "text": "[sniff, sniff, sniff]"}]
