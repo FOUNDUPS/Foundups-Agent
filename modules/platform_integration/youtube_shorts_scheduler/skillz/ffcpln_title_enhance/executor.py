@@ -6,7 +6,7 @@ import json
 from dataclasses import dataclass, field
 from typing import Dict, List
 
-from ...src.metadata_evidence import validated_video_evidence
+from ...src.content_generator import validated_video_evidence
 from ...src.content_generator import generate_clickbait_title_from_index
 
 
