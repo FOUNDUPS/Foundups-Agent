@@ -1,25 +1,3 @@
-## PR2196 optional-listener repair identifier binding — 2026-10-25
-
-Actual job121127379118 reports only one unreviewed tree finding at About75 and
-zero in history. Parent and independent review verify the previously classified
-frontend publishable identifier, original client-script context and exact old
-approval. The sole source change is one question mark at a different statement.
-Preserve2,379 records and append only this new whole-file/rule/line fingerprint
-(2,380 total). No source value, rule, scanner scope, fingerprint algorithm or
-GitGuardian disposition changes. Fresh hosted tree/history gates remain required.
-
-## PR2196 current-main manifest metadata review — 2026-10-25
-
-Hosted job121122335711 reports39 unreviewed tree findings and zero unreviewed
-history findings. Parent and independent review reconstruct all39 exact source
-digests and whole-file/rule/line fingerprints from reviewed head9d912f8e.
-Thirty-eight contexts retain their prior numeric evidence; the additional numeric
-source digest is independently classified. These are source integrity metadata.
-Preserve all2,340 entries and append only39 exact bindings (2,379 total).
-The existing Mall evidence records the measured manifest and independent report.
-No scanner, scope, rule, fingerprint function or GitGuardian disposition changes.
-Fresh current-head tree/history scans remain required; this review is not a scan.
-
 ## PR2204 scheduler manifest metadata review — 2026-10-25
 
 Hosted security job 121087044548 reported 39 unreviewed tracked-tree findings

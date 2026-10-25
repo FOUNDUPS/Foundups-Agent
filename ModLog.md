@@ -62602,3 +62602,6 @@ all work. Former TypeError is absent; unchanged analytics referer403 is separate
 No acknowledgment, authentication or message submission. The one unchanged
 publishable identifier has its exact new binding reviewed and recorded; fresh
 hosted tree/history scans and the separate GitGuardian gate remain required.
+Strict scope catches one redundant security README delta,40 actual/39 declared.
+Restore that file's exact9d/main bytes; retain the reviewed ledger/evidence and
+existing logs. No runtime/source/security cap is widened; strict scope is rechecked.

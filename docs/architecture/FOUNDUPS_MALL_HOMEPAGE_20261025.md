@@ -39,6 +39,11 @@ Parent and independent exact-source review verify the previously classified
 frontend publishable identifier and its context are unchanged. Within the same
 three existing metadata paths, preserve2,379 entries and append only its new
 whole-file/rule/line binding (2,380 total). No scanner/authority/GitGuardian waiver.
+Final scope check catches an extra security README path (40 actual/39 declared).
+Remove that redundant documentation delta, restoring its exact9d/main bytes;
+retain the proofs in the two existing ledger/evidence owners and these logs.
+This corrects the earlier assumed39-path claim without changing a runtime cap,
+scanner rule, fingerprint, source or historical receipt. Recheck strict scope.
 
 ## Nomination links and current-main reconciliation allocation
 
