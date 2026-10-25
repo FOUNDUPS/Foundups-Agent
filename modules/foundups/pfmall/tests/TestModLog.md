@@ -13,6 +13,12 @@ oracles remain; the new host module does not yet exist. No filtering/quarantine,
 dependency install, provider call, deployment or authority assertion.
 Exact sources/cases/logs: external foundups-member-host-discovery-20261026.
 
+GREEN:814PASS/0FAIL/0ERROR/0SKIP after the isolated factory and one request.app
+policy lookup change. Frozen acceptance bytes stay fixed; all786 baseline IDs
+and outcomes remain. Existing36 named test/helper definitions are AST-identical.
+No dependency install or changed old oracle. The initial resource error remains
+historical; independent source/held-out and hosted gates are separate.
+
 ## 2026-10-26 — Patched optional HTTP profile qualification
 
 Do not promote the initial profile below: public PyPI metadata found published
