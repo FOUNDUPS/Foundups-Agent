@@ -68,7 +68,9 @@ outside this module before admission.
 it returns503 `{"detail":"intake_unavailable"}`. Only the server may set
 `app.state.clerk_intake_policy` to the exact immutable `ClerkIntakePolicy` type
 from `foundup_genesis.clerk_intake`; configuration accepts issuer, nonempty tuple
-of HTTPS frontend origins, and an RSA2048–4096 public PEM. No environment, body,
+of HTTPS frontend origins, and a single canonical SubjectPublicKeyInfo
+RSA2048–4096 public PEM (CRLF or omitted final newline supported; extra documents/
+private material/trailers rejected). No environment, body,
 UID, invite flag or forwarded host selects this policy. Optional dependencies
 are listed in this module's requirements; ordinary unconfigured imports do not
 load JWT/crypto packages. The existing GET contracts remain public.

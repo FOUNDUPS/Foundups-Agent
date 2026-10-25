@@ -960,7 +960,9 @@ claims, token issuance or trading follows. This command is not a resident export
 
 `foundup_genesis.clerk_intake.ClerkIntakePolicy(issuer=..., authorized_parties=(...),
 public_key_pem=...)` is immutable, trusted server configuration. It accepts only
-HTTPS origins and an RSA2048–4096 public key, without environment, credentials,
+HTTPS origins and a single canonical SubjectPublicKeyInfo RSA2048–4096 public
+PEM, normalizing CRLF/optional final newline and rejecting extra/private documents
+or trailers, without environment, credentials,
 JWKS requests or default tenant selection. Optional dependency profile:
 `modules/foundups/pfmall/requirements.txt`; this is not an umbrella upgrade.
 

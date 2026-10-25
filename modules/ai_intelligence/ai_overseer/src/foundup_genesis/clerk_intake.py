@@ -46,11 +46,17 @@ class ClerkIntakePolicy:
                     or type(self.public_key_pem) is not str
                     or not 0 < len(self.public_key_pem) <= 8192):
                 raise ValueError
-            from cryptography.hazmat.primitives.serialization import load_pem_public_key
+            from cryptography.hazmat.primitives.serialization import (
+                Encoding, PublicFormat, load_pem_public_key,
+            )
             from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
             key = load_pem_public_key(self.public_key_pem.encode("ascii"))
             if not isinstance(key, RSAPublicKey) or not 2048 <= key.key_size <= 4096:
                 raise ValueError
+            canonical = key.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo).decode("ascii")
+            if self.public_key_pem.replace("\r\n", "\n") not in (canonical, canonical[:-1]):
+                raise ValueError
+            object.__setattr__(self, "public_key_pem", canonical)
             object.__setattr__(self, "_public_key", key)
         except Exception:
             raise ValueError("invalid_clerk_intake_policy") from None
