@@ -1,11 +1,11 @@
 # Algorand module roadmap
 
-1. **Current allocated layer:** author strict scalar-to-unsigned-byte codec and
-   test-first independent vectors. Qualification is pending the reviewed exact
-   SDK/source profile; no runtime or network readiness follows from authoring.
-2. Independently qualify ordinary package imports, all frozen unittest IDs,
-   hostile packets, exact origins and effect-denial controls in the pinned profile.
-   Register the canonical unit shard without skips, aliases or dependency stubs.
+1. **Locally qualified layer:** strict scalar-to-unsigned-byte codec and test-first
+   independent vectors; all 28 exact methods pass in the reviewed materialized
+   profile. Source authoring and local qualification grant no network authority.
+2. Dedicated PR/CI: canonical unit shard is registered without skips, aliases or
+   dependency stubs. Independently qualify the distinct Windows pip installation
+   through the committed workflow before merge; local materialization is separate.
 3. Allocate a consumer in the existing durable FAM TestNet intent owner. Bind
    admitted intent identity to immutable artifact, attempt and explicit reissue;
    do not add a second ledger or infer reward units from generic payout amounts.

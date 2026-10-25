@@ -60,6 +60,17 @@ generic installation framework or OS/native/concurrent-writer claim is allocated
 The final four-line increment is preallocated for an explicit repository namespace
 location fence and a readable canonical file-name check; it grants no extra import.
 
+Local qualification now passes all 28 exact unittest methods at committed source
+`444c9f147b6a603be57f4bfb51453cd99b1827a9`, after preserving main e801's scheduler
+and registry updates. Four expected denied controls, zero unexpected attempts,
+no skips/failures/errors; all 245 loaded origins and 5,263 profile files rehash.
+The original 1,505-file materialized environment is unchanged. Static adapter
+findings were fixed under preallocated scope before this first codec execution;
+old versions remain preserved. Receipt bindings are in the module TestModLog.
+Manifest check remains 1,471/canonical0fb3; no resident or cap change. A dedicated
+PR and distinct Windows pip CI qualification are next; local success does not
+admit ordinary installation, a node, signer, asset issuance or a paid transition.
+
 ## Current-state consolidation allocation (before authoring)
 
 WSP15 C2/I4/D4/Impact4 = **14/P1**. On main

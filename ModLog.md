@@ -1,3 +1,14 @@
+## 2026-10-25 — unsigned Algorand codec local qualification
+
+All 28 frozen methods pass at committed444c9f147 after reconciling main e801;
+four expected denied controls, zero unexpected attempts/skips/errors/failures.
+Parent and independent profile review bind5,263 files and245 loaded origins;
+the original1,505-file materialized environment remains unchanged. Pre-execution
+static findings repaired the separately allocated284-line adapter; no codec/oracle
+change or behavioral RED claim. Manifest check1471/canonical0fb3 stays fixed.
+Record receipt hashes in module TestModLog. Distinct pip CI/security/review gates
+remain pending; no resident, ledger, signer, provider, chain or paid state effect.
+
 ## 2026-10-25 — unsigned Algorand probe format allocation
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP3/6/12/22/49/50/62/84/97.

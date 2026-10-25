@@ -1,5 +1,16 @@
 # Algorand module memory
 
+## Qualification pattern — 2026-10-25
+
+One fixed local profile passes all 28 codec methods, four expected denied controls
+and zero unexpected attempts. Bind the actual venv launcher/config baseline as well
+as base/runtime, wheel payload and exact repository source bytes. Record refused
+source/chdir operations before raising, because dependencies can catch exceptions.
+Keep safe failure type/source-line evidence without supplied argument values.
+Preserve static findings separately from executed failures; no failed codec run
+occurred. Distinct pip CI installation is not the materialized candidate. Profile
+consistency is not external authority, financial policy or OS/native isolation.
+
 ## Retrieval and ownership — 2026-10-25
 
 Canonical Holo query is degraded with `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`,

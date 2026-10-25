@@ -3,8 +3,9 @@
 This module prepares and validates an unsigned ASA transfer **format** for
 `TEST_TRANSPORT_PROBE` on the documented Algorand TestNet realm. It returns
 immutable bytes, the SDK transaction ID and a separate digest of the declared
-request. Candidate execution and its dedicated dependency profile require
-independent qualification; source authoring alone is not a passing result.
+request. All 28 exact unittest methods pass in the independently reviewed local
+Windows CPython 3.12.10 materialized profile. CI uses a distinct pip installation
+and must qualify that environment separately; source authoring is not a test result.
 
 Import the public functions from
 `modules.platform_integration.algorand.src.unsigned_asa_probe`. Supply an exact

@@ -1,5 +1,21 @@
 # Algorand module change log
 
+## 2026-10-25 — local unsigned codec qualification passed
+
+Reconciled main e801 and committed source at `444c9f147b6a603be57f4bfb51453cd99b1827a9`.
+All 28 frozen ordinary unittest methods pass, with four expected denied controls,
+zero unexpected attempts and no skips/failures/errors. The initial 238-line adapter
+received static findings before execution; separately allocated repairs bind the
+venv launcher/config baseline, record guarded refusals and preserve safe failure
+metadata. Initial/intermediate source and review reports remain retained; no
+behavioral RED is claimed. Final adapter is 284 lines, separately reviewed.
+
+The admitted local materialized profile binds 5,263 files and 245 loaded origins;
+parent rehash and independent profile review pass. Original 1,505 candidate files
+remain unchanged. Root manifest check remains 1,471 files/canonical `0fb3c074`.
+See tests/TestModLog.md for immutable receipt hashes. Distinct pip CI qualification
+and hosted security/review gates remain pending; no signer/ledger/chain admission.
+
 ## 2026-10-25 — unsigned TestNet ASA format candidate
 
 Preallocated WSP15 C3/I4/D4/Impact4=15/P1 in the existing FX delivery plan;

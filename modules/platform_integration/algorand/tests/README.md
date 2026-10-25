@@ -19,6 +19,9 @@ strict scalar/realm/address/fee/round bounds, trusted-expected mismatch, immutab
 results, declarations absent from wire, hostile signed wrappers, duplicate/missing
 keys, bool/int confusion, trailing/oversize data and noncanonical encodings.
 
-Candidate execution is pending. Missing-source collection before implementation
-would be a prerequisite failure, not behavioral RED. Parent owns canonical registry,
-immutable wheel lock, workflow, actual test invocation and execution receipts.
+Local qualification passes all 28 methods: four expected denied controls, zero
+unexpected attempts/skips/failures/errors, and 245 loaded origins match the profile.
+The immutable 1,505-file materialized candidate is unchanged. See TestModLog.md
+for receipt hashes and the dedicated workflow for a distinct pip CI environment.
+Missing-source collection before implementation would be a prerequisite failure,
+not behavioral RED. No SDK/guard/oracle source changed after the passing run.
