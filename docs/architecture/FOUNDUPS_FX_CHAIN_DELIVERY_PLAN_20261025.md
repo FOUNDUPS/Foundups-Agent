@@ -2,6 +2,81 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Unsigned integration checkpoint allocation — before authoring
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.
+Publish the latest merged intake/nomination facts, exact open delivery heads and
+the bounded stored-intent/unsigned-codec experiment in this existing owner.
+Need: the checkpoint below predates these deliveries; local experiment evidence
+would otherwise be lost in temporary files or mistaken for production admission.
+Budget: this plan at most100 added lines, root ModLog at most18, and one new
+compact receipt at most24KiB. No product, test, dependency, runtime member/cap,
+security exception, provider, signer, asset, settlement or deployment change.
+Validate exact source/result IDs, retained failed run, hashes, scope and independent
+review; do not rerun unchanged component suites for documentation. Current CI and
+main readback remain publication gates. Local scripts/payloads are not bundled;
+the receipt must disclose that reproducibility limit and every unproved stage.
+Deterministic source/evidence reconciliation needs no Qwen/Gemma model execution.
+
+## Unsigned integration checkpoint — 2026-10-25
+
+This checkpoint supersedes older status prose below while retaining its chronology.
+Observed main `0909b9419f410e7da371dfbd6bf9738a229bf7a7` includes nomination
+PR2207 and reference-preservation PR2208. The entire merged intake tree equals
+its reviewed tree. Nomination creates a public proposal; intake keeps untrusted
+references in a detached draft list. Neither grants repository control or issuance.
+
+| Preserved PR | Reviewed current head | Publication state at this checkpoint |
+|---|---|---|
+| [Mall2196](https://github.com/FOUNDUPS/Foundups-Agent/pull/2196) | afc0e776 | 21 successful checks; GitGuardian remains failed |
+| [TestNet2202](https://github.com/FOUNDUPS/Foundups-Agent/pull/2202) | 12996b82 | 21 successful checks; GitGuardian remains failed |
+| [Unsigned codec2206](https://github.com/FOUNDUPS/Foundups-Agent/pull/2206) | adf9633b | 22 successful checks; GitGuardian remains failed |
+
+All three have zero pending checks at observation. The remaining incidents were
+source-classified as public commit identifiers or a synthetic public address;
+authenticated disposition is still required. No bypass, history rewrite or claim
+of merge/publication follows from that classification. Mall root/About/FX links
+have preview evidence; this does not establish production-root activation.
+
+The bounded local experiment connects the actual stored FAM TestNet intent to
+the unchanged unsigned Algorand codec in a separate SDK process. Its twenty
+frozen checks cover stored identity, retry/reopen, absent authority, tampering,
+strict requests/results and selected effect/resource controls. Two format calls
+match independent golden wire/transaction identity and whole-request binding.
+The preexisting accounting tables and reopened full snapshot stay unchanged;
+no database transaction spans formatter I/O. The nine total child launches
+include five denied effect controls and bounded overflow/timeout controls.
+
+Run001 remains rejected: its internal functional-pass label accompanied an
+unexpected host effect and outer exit1. A separate dependency diagnostic reproduced
+SQLAlchemy's local hostname lookup; it cannot retroactively identify the original
+caller. The revised host explicitly permits one pinned `platform._node` hostname
+metadata read, records no hostname, and still denies every other socket/DNS call.
+Run002 exits0, completes all twenty checks and records no unexpected host events.
+The raw results, source pins and independent-review disposition are bound in the
+[compact checkpoint receipt](receipts/FOUNDUPS_BLOCKCHAIN_CHECKPOINT_20261025.json).
+Independent review accepts this local known-code result. Raw before-snapshots and
+child format stdout packets were not separately retained; temporal/golden equality
+rests on pinned executed assertions plus inspected post-state corroboration.
+
+These twenty checks are not added to historical28/173/459 component counts;
+those unchanged suites were not rerun. The external scripts/profiles/payloads
+are not bundled, so hashes alone do not provide public reproduction. Selected
+byte pins and audit hooks do not prove full native/OS, concurrent-writer or
+SQLite ATTACH isolation. No deliberate source/profile/executable drift attack
+was newly executed. No durable artifact, production worker, signing or chain
+submission was introduced. Host dependency declarations remain unratified.
+
+Next: close the security publication gates, then allocate one consumer/artifact
+layer using revalidated intent and current host grants. Bind independently admitted
+fee/round facts and immutable request/wire identity; verify retry, reopen and
+conflict behavior before integrating a signer. Real pilot facts, funding, issuer
+authority, confirmations and reconciliation remain separate prerequisites.
+Repository-control challenges/admission, ratified reward units/funding, the full
+venture inventory, autonomous pitch/video/deck runtime and a funded trading venue
+remain open. Nineteen mixed catalog records/five cards do not verify115 FoundUps;
+the existing paper DEX/simulator does not establish live markets.
+
 ## Intake reference preservation allocation — 2026-10-25
 
 WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Source: main e801a412.
