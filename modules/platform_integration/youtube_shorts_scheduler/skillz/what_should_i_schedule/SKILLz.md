@@ -116,7 +116,11 @@ Every run emits BOTH:
 - **Breadcrumb** (WSP 91) via `get_breadcrumb_telemetry().store_breadcrumb(source_dae="youtube_shorts_scheduler", event_type="schedule_priority", ...)` with the full ranking in metadata.
 - **PatternMemory SkillOutcome** (WSP 60/48) via `PatternMemory().store_outcome(SkillOutcome(skill_name="what_should_i_schedule", ...))`.
 
-So the WRE learns from each scheduling-priority decision.
+These records support later evaluation; recording a priority decision alone does
+not prove learning, improved engagement or policy promotion. The signal ranks
+coverage deficits, not video relevance or predicted discovery. Require verified
+saved outcomes and separately collected audience metrics before evaluating a
+policy change; retain the baseline and use a bounded held-out comparison.
 
 ---
 
