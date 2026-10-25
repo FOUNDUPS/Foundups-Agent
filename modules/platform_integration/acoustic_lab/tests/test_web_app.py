@@ -99,7 +99,8 @@ class TestWebApp(unittest.TestCase):
 
     def test_multipart_oversized_metadata_returns_413(self):
         app, client, processor = self._controlled_upload_client()
-        self.assertEqual(app.request_class.max_form_memory_size, 500_000)
+        with app.test_request_context('/upload', method='POST') as context:
+            self.assertEqual(context.request.max_form_memory_size, 500_000)
         self.assertIsNone(app.config['MAX_CONTENT_LENGTH'])
         response = client.post('/upload', data={'metadata': json.dumps(
             {'padding': 'x' * 600_000})}, content_type='multipart/form-data')

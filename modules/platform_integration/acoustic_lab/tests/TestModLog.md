@@ -1,5 +1,41 @@
 # Acoustic Lab TestModLog
 
+## 2026-10-25 - PR1355 Flask request-instance compatibility inventory
+
+Before corrected execution: retain the existing 18 selected cases (seven X,
+five multipart and six Web3) and the separate six native Gunicorn cases.
+The first Flask 3.1.3 Windows run collected all 18: 17 passed, while the
+oversized-metadata test stopped before its POST because a class-level property
+was compared to 500000. Preserve that rejected run and its guard/JUnit output.
+Only that assertion now reads the real request instance in a test context;
+the 600000-byte multipart POST, 413/error checks and no-processor assertions
+are unchanged. The production limit/configuration is unchanged. Corrected author
+execution passes 18/18 with exact collected/passed/JUnit identities, zero
+failures/errors/skips and no unknown or duplicate effects (29.829 seconds).
+The real oversized POST executed and returned 413 before processor access.
+All 16 source hashes remained stable. Independent review passes: its separate
+18-case replay took 31.734 seconds; an in-memory 700000-byte limit caused only
+the intended existing limit assertion to fail, with the other 17 cases passing.
+All 16 source and 84 distribution metadata bindings stayed unchanged; no unknown
+effects occurred. Receipt `pr1355-independent-review-20261025.json` records the
+review. Fresh hosted Linux Python 3.11/3.12 plus native Gunicorn acceptance
+remain pending.
+
+Use pr1355-author-corrected-execution-20261025.json and the separate
+pr1355-author-corrected-20261025/ guard, XML and log in the existing external
+refresh directory. The rejected pr1355-author-20261025/ output remains intact.
+The existing Windows guarded harness clears application environment values,
+denies network/process/SQLite/private configuration effects and permits owned
+output writes only. It retains the documented processor-name/yt-dlp terminal
+adaptations, omits a proven absent interpreter ZIP and disables AVX probing.
+This instrumentation is not an OS sandbox or hosted Linux acceptance.
+
+All other test methods/fixtures and the six separate native Gunicorn cases
+remain unchanged. The prior four broader failures (triangulation, index,
+invalid upload type and geolocation failure) are historical and were not rerun
+or solved. No live X/RPC/account/transaction or model execution was performed.
+
+
 ## 2026-10-23 - PR1356 Web3 compatibility inventory before edits
 
 Preserve all seven existing processor/audio-library tests and their fixtures,

@@ -1,5 +1,35 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-10-25: PR1355 Flask 3.1.3 bounded compatibility qualification
+
+- WSP 00/15/22/50/97; C3/I3/D4/Impact3=13/P1. Carry forward the original
+  Flask pin against current requirements, preserving all other 13 direct pins.
+  No application handler, limit, configuration, wallet or transaction change.
+- Full binary-only resolution yields 76 packages; exact wheel-hash installation
+  and pip check pass in the reused Windows environment. Its 84 distributions
+  include seven preexisting packages outside the graph plus pip. Unpinned
+  multidict and certifi also advance; do not attribute their effects to Flask.
+- The first guarded run passed 17/18. The oversized multipart case stopped at
+  an obsolete class-level assertion: Flask 3.1 exposes max_form_memory_size as
+  a request-instance property. Preserve the rejected output. The only test
+  change reads that real request property; all POST/413/error/no-processor
+  assertions, test identities and production limits remain unchanged.
+- Corrected author execution passes exactly 18/18, zero failures/errors/skips,
+  in 29.829 seconds, with matching collection/JUnit identities, guard sanity
+  and stable 16-file source inventory. No unknown or duplicate effect probes.
+  Independent review and its separate 18-case replay pass; an altered-limit
+  control fails as intended. Fresh hosted Linux adapter/native Gunicorn gates
+  remain pending; this is local component evidence, not native AI acceptance.
+- Existing Windows processor/ZIP/console adaptations and Python guard limits
+  are disclosed in INSTALL/TestModLog. Four broader historical failures and
+  the separate timeout-child cleanup debt were not rerun or resolved. The
+  prior Web3/Gunicorn hosted evidence remains bound to its historical source.
+- External refresh evidence: pr1355-prequalification-20261025.json,
+  pr1355-approved-install-execution-20261025.json,
+  pr1355-author-corrected-execution-20261025.json and the preserved first
+  pr1355-author-20261025/ output. No repository cleanup or new environment.
+
+
 ## 2026-10-23: Qualify the bounded PR1356 Web3 compatibility repair
 
 - WSP 00/15/22/50/97; scope is the existing Web3 7.15.0 dependency proposal,

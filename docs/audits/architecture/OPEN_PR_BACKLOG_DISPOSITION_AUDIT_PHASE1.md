@@ -1,8 +1,45 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-25 JST: 34 open PRs, eight drafts. #2181, #2081, #1663, #1645, #2185 and #1356 are verified on main; original #1648 remains open for its unique product obligations. #2182/#2183/#2184/#2186/#2187 merged through separate owners. Select the bounded reusable #1792 core at 14/P1; protected activation remains with its original owner. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-25 JST (00:19 UTC): 35 open PRs, eight drafts. #2189 shared brand-grounding core is verified on main at 03035b4f with all 21 main checks passed. Original #1792 retains its protected activation obligations. Select #1355 Flask compatibility at 13/P1 after fresh source and ownership reconciliation. #2188 remains an active separate owner. Historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-25
+
+**#2189 MERGED_VERIFIED_MAIN — #1792 shared core:**
+The reviewed head `26602def98392ebbd37b087489e0464061cfaec9` passed all 23
+hosted checks and was squash-merged as `03035b4f5c92202c93bc6f1675a86eee4f10d50e`.
+The complete main tree `c452997e76af3c1bdead6dfd0d8e038cc41b6807` matches the
+reviewed source. All 21 exact-main checks passed, including CI40145619875 and
+CodeQL40145620001. [Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2189#issuecomment-6391370038)
+and independent main review agree. Independent main artifact review
+verifies all 74 exact connected cases, zero skips/failures and 37 unchanged
+source bindings, including the actual Node-to-Python receipt path. The initial
+head's CI security failure remains evidence: 39 unchanged public-source
+fingerprints were independently rebound without changing scanner rules.
+The completed remote branch is absent; local source remains recoverable.
+Original #1792 remains open for its 27 protected content/activation paths;
+[its carry-forward record](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792#issuecomment-6391083254)
+preserves those obligations. This is shared-core acceptance, not live brand
+activation, native worker admission or a completed RSI loop.
+
+**Selected: #1355, C3/I3/D4/Impact3=13/P1.** The fresh snapshot retains its
+original head `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` and confirms its
+Werkzeug prerequisite is already on main. Reuse the same owned checkout and
+preserve that original ancestry. Change only the Flask direct pin to 3.1.3;
+keep the other 13 current direct pins. The complete graph resolves to 76
+packages and installs with hashes and a passing `pip check` in the existing
+Windows environment. This in-place environment also retains seven preexisting
+orphans and pip; do not claim a fresh environment. Fresh resolution additionally
+updates unpinned multidict and certifi, so results are not an isolated Flask
+causal comparison. The unchanged guarded suite initially passed 17/18: the
+oversized multipart test inspected a class property instead of the actual
+request instance. Preserve that failed run; repair only that stale assertion,
+retaining the real oversized POST, 413/error checks and no-processor assertions.
+The corrected author and separate independent runs each pass the same 18 cases
+with no skips or unknown effects. An altered-limit control fails as intended.
+Require existing Linux Python
+3.11/3.12 18-case and separate six-case native Gunicorn acceptance, then exact
+head/main checks. Four broader historical failures and FFmpeg timeout-child
+debt remain. No new test family, scheduler, skill or environment is required.
 
 **#2081 MERGED_VERIFIED_MAIN:** squash
 `2952d8e2c639ea95a3d329e770409b79e5700b36` from reviewed head
@@ -88,7 +125,7 @@ is recoverable. Four historical broader failures and separate FFmpeg child-timeo
 debt remain. No deployment, live blockchain transaction or native RSI is proved.
 [Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356#issuecomment-6390857956).
 
-**Selected: #1792 reusable core, C4/I3/D3/Impact4=14/P1.** The merge of #2187
+**Historical #1792 pre-publication selection, C4/I3/D3/Impact4=14/P1.** The merge of #2187
 supersedes the earlier active-overlap blocker. The unchanged original proposal
 still has unique reusable brand-context loading and receipt-verification work.
 Allocate its 11 core paths plus the existing target-phrase owner for demonstrated

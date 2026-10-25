@@ -6,8 +6,9 @@
 
 `EthereumLogger` uses Web3 for connection and network-stat queries when available.
 The Web3 7.15.0 / eth-account 0.13.6 pair uses
-`ExtraDataToPOAMiddleware` at layer zero. Offline Windows compatibility checks
-pass; fresh hosted Python 3.11/3.12 acceptance remains pending.
+`ExtraDataToPOAMiddleware` at layer zero. Prior Web3 compatibility has local and hosted baseline evidence. The new
+Flask 3.1.3 graph passes the same 18 guarded cases in separate author and
+independent runs; fresh hosted Python 3.11/3.12 acceptance remains pending.
 Import, initialization or connection failure retains simulation fallback.
 `log_acoustic_analysis()` still returns `simulated_...` because `_real_logging`
 also delegates to simulation. The illustrative `ethereum_hash` fields below
@@ -23,6 +24,15 @@ does not qualify real-provider diagnostics, keys, signing or transaction access.
 
 #### `create_app() -> Flask`
 Creates and configures the Flask web application instance.
+
+Flask 3.1.3 retains the default 500000-byte non-file form-field limit. Read
+`request.max_form_memory_size` inside an active request context; Flask 3.1
+exposes this as a request-instance property backed by `MAX_FORM_MEMORY_SIZE`,
+not a numeric class attribute. The existing 600000-byte multipart metadata
+case returns JSON HTTP 413 before processing, while small/malformed requests
+retain their existing 400 contracts. This dependency/test correction does not
+set a new application limit or change the upload handler. Local Python guards
+and controlled fixtures do not establish live-provider or deployment safety.
 
 **Parameters**: None
 
