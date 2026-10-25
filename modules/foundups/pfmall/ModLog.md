@@ -12,6 +12,11 @@ the canonical public-PEM repair; initial10PASS/1FAIL finding remains retained.
 Hosted/security gates and exact main convergence remain separate. Deployment,
 live identity/current revocation, durable claim receipts and issuance are pending.
 
+Security closure: independently classify only the observed tree/history receipt
+line12 public HTTP source hash; append exactly two existing-ledger bindings,
+preserving2417 prefix entries and all other keys. No detector, scanner/scope or
+GitGuardian change. Current final-head gates remain required.
+
 ## 2026-10-25 — FX1 public directory entry
 
 Add a normal FX anchor to the current homepage navigation, retaining the gateway

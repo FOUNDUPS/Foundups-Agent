@@ -12,6 +12,12 @@ durable claim/registry/catalog, worker, financial signing or token effect is pro
 Publication gates remain pending; see
 `docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md` and owner TestModLog.
 
+Hosted secrets gate reported two whole-receipt-bound instances of the public
+HTTP source hash. Independent reviewe54eec4c approved only those two bindings;
+append2417→2419 preserves the ordered prefix/all other ledger keys, scanner,
+rules, fingerprint algorithm and scan scope. Fresh final-head gates are still
+required. The three older GitGuardian incident records remain untouched.
+
 ## 2026-10-26 — Bound GitHub observation HTTP for project admission
 
 WSP00/6/11/15/22/50/62/71/84/97;11/P2. Extend the existing client only: fixed
