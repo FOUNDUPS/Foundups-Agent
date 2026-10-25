@@ -1,6 +1,6 @@
 # EDUIT interfaces
 
-Status: source contracts observed at main a6fed6dd8; episode integration SPECIFIED.
+Status: standalone Story Time episode/PWA implemented; full Mall integration remains SPECIFIED.
 Canonical product design: [Episode Mall architecture](docs/EPISODE_MALL_ARCHITECTURE.md).
 
 ## Existing local prototype
@@ -46,3 +46,61 @@ Reuse `public/member/INTERFACE.md`, fullscreen/navigation contracts, product sta
 is not a composite episode queue. Preserve other products' behavior.
 PWA install/offline, public-product admission and authenticated conversation
 transport each need separate evidence; none is implied by a working static page.
+
+## Standalone Story Time PoC (2026-10-26)
+
+Entry: `https://storytime.eduit.org/` redirects to `/storytime/`. `/about/`
+retains EDUIT introduction; `/review/` mounts the existing Shorts review UI.
+These are public static documents. There is no public rendering, shell,
+provider API, voice dispatch, auth or interaction upload endpoint.
+
+Local integration references (not registered catalog records):
+
+| Reference | Value |
+|---|---|
+| foundupId / foundup_id | `eduit` |
+| productionFoundupId / production_foundup_id | `kids_episodes` |
+| publisherId / publisher_id | `us_story_time` (existing YouTube binding) |
+| collectionId / collection_id | `storytime` |
+| storyId / story_id | `little_shrew` |
+| episodeId / episode_id | `little_shrew_poc_001` |
+| locale | `en` |
+| revision | Immutable content digest; visible in episode/review, `/revision.json` |
+
+`game.js` exports frozen `episodeContext` and `storyTimeActivity`. This is a
+local page adapter using fixed DOM IDs, not a remote dispatch API or completed
+Mall product adapter. `activity.mjs` wraps the existing deterministic engine.
+
+| Method | Semantics |
+|---|---|
+| mount() | Idempotent mounted state; never starts cues; disposed instances cannot remount |
+| start() | Explicit transition from ready; pauses video before starting cues |
+| pause() | Freezes active cue/animation and sound; preserves remaining cue time |
+| resume() | Explicit continuation; pauses video, resets frame delta; hidden page cannot resume |
+| reset() | Pauses media; returns same episode to idle, clears the attempt; no start |
+| snapshot() | Frozen local state and refs; no persistence or network transmission |
+| dispose() | Idempotent frame/listener/audio cleanup; prevents subsequent activity/completion |
+
+Video play pauses the game. Play/Resume/Retry pause the video. Hidden pages and
+expand/back transitions pause; return requires explicit Resume. Pointer clicks
+and native keyboard buttons share the same handlers. Practice removes cue
+limits; timeout and success both permit unlimited retry. Replay story only
+restarts video. No Next destination exists; More stories coming is explicit.
+
+A successful attempt dispatches non-bubbling `storytime:complete` on `#game-panel`
+once, with frozen references above plus `status: completed`. No child identity,
+tap history, timing profile or analytics payload. Retry/reset allows one result
+for the next attempt. No completion after disposal. Current page has no network
+or memory listener for this event.
+
+The deployed return targets are fixed same-origin `/about/` and `/storytime/`,
+plus explicit ordinary project/channel links. No return URL is accepted from
+query parameters. Future Mall return must use its existing allowlisted return
+owner and state contract. New origin means independent storage, service workers
+and authentication; FoundUps login is not inherited. Future cross-origin
+messaging must validate exact origin, source and payload.
+
+Build `/revision.json` binds those same references to immutable asset paths.
+The worker caches only the bounded episode/game shell; video/range requests
+remain network-only. Updates wait for explicit Update & restart. See
+[DEPLOYMENT](DEPLOYMENT.md) for origins, retention and rollback requirements.

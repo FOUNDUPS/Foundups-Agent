@@ -1,3 +1,13 @@
+## 2026-10-26 — Story Time standalone PWA and isolated Firebase deployment
+
+WSP 00/15/22/50/84/97/99. Compose existing EDUIT scene/game and Shorts renderer,
+add bounded revisioned PWA packaging and verified dedicated hosting. App name
+Story Time; target storytime.eduit.org; existing IDs/YouTube binding preserved.
+Provider URL live after staging/browser checks, 21 JS + 6 packaging tests pass.
+GoDaddy DNS save awaits identity verification; custom-domain HTTPS not claimed.
+See modules/foundups/eduit/ModLog.md and its sanitized deployment receipt for
+current state, owner contracts and rollback. Main FoundUps hosting unchanged.
+
 ## 2026-10-26 — Publish the existing FoundUp pitch/deck instruction
 
 WSP00/6/15/22/50/62/84/97;12/P2. Publish the existing module-owned pitch skill

@@ -1,104 +1,118 @@
-# EDUIT / Us Story Time agent deployment runbook
+# Story Time deployment
 
-2026-10-26 JST. Operator explicitly requested landing/game and domain correction.
-Source owner: FOUNDUPS/Foundups-Agent; existing Firebase hosting architecture.
-Do not create an unrelated hosted Sites project or a second FoundUp identity.
+Final target: **https://storytime.eduit.org/**. App/codebase name: **Story Time**.
+**Us Story Time** remains the YouTube channel name; preserve `eduit`,
+`kids_episodes`, publisher `us_story_time` and `@Us_Story_Time`. Older hostnames
+are superseded. DNS points this subdomain at Firebase; Firebase hosts the files.
+This slice does not change the apex, aliases or FoundUps main hosting.
 
-## Built, not deployed
+## Verified connections and current status
 
-- `public/eduit/`: responsive EDUIT landing and `storytime/` two-tap game.
-- `scene.mjs` + copied shared vector rig: same scene for browser and movie.
-- `engine.mjs`: deterministic wake/root/timeout/retry/practice state machine.
-- Local-only state: no account, advertising, analytics, child profiles or storage.
-- `build_site.py`: renders three five-second clips with existing Shorts owners,
-  produces 15-second MP4 and provenance, packages complete static output.
-- Video/illustration assets are original code-generated; no third-party music.
-- 012 selected a fictional sole-survivor story: chamber/other characters vanish
-  into compacted brown earth. No bodies or injury shown. Parent note discloses
-  collapse. Missed game cue stops before impact. No claim everyone survives.
+[Sanitized receipt](docs/DEPLOYMENT_RECEIPT_20261026.json) records before-state,
+rollout and live verification. Check its final status before claiming HTTPS.
+Source baseline: main `2c9c93ead` including PRs #2215/#2219; isolated branch
+`agent/storytime-pwa-deploy-20261026`. No competing deployment PR was open.
 
-## Verified observations
+- Authenticated Firebase project: `gen-lang-client-0061781628`.
+- Dedicated created site: `storytime-eduit`; https://storytime-eduit.web.app/.
+- Seven-day preview: https://storytime-eduit--storytime-poc-jomd07zq.web.app/.
+- Module `.firebaserc` target `eduit-storytime` binds only that site.
+- GoDaddy connector/API absent; existing authenticated Chrome session verified.
+  Repository DNS provider is a scaffold, not a working mutation transport.
+- Authoritative NS: `ns41.domaincontrol.com`, `ns42.domaincontrol.com`.
+  Before-state: Story Time NXDOMAIN, no Story Time forwarding; zone 41 records,
+  nine unrelated subdomain forwards, apex forwarding Not set up. Preserve them.
 
-- HTTP and HTTPS `eduit.org` both resolved to
-  `https://www.patreon.com/profile/creators?u=195537551` on 2026-10-26 JST.
-- Main FoundUps hosting config uses Firebase site `foundupscom`, `public/`.
-- This session's GoDaddy plugin discovery returned no connection. 012 reports
-  GoDaddy is connected through local Codex; that installation is not disproven.
-- Repository `foundups-mcp-p1/servers/dns_ops/provider_godaddy.py` returns scaffold
-  responses, not actual mutations. Do not treat its return as applied DNS.
-- GoDaddy browser is at sign-in. No DNS or forwarding changed in this session.
+## Build, stage, publish
 
-## Build and verify on the connected host
+Reuse `requirements.txt`, Node, FFmpeg and system Cairo. Windows lacked Cairo;
+this run used Ubuntu-24.04 WSL and venv
+`/home/user/.local/share/storytime-build-venv`. No paid call or YouTube upload.
 
-Use current merged source, not an old or unrelated dirty checkout. Install the
-existing `youtube_shorts/requirements-local-preview.txt`, FFmpeg and Node.
-
+```powershell
+node --test modules/foundups/eduit/tests/*.test.mjs
+python -B -m unittest discover -s modules/foundups/eduit/tests -p "test_*.py"
+node --test modules/communication/youtube_shorts/tests/kids_review.test.mjs
+python -B modules/foundups/eduit/build_site.py --output-dir modules/foundups/eduit/build/eduit --pwa-origin https://storytime-eduit.web.app --pwa-origin https://storytime-eduit.firebaseapp.com --pwa-origin https://storytime-eduit--storytime-poc-jomd07zq.web.app
+firebase target:apply hosting eduit-storytime storytime-eduit --project gen-lang-client-0061781628 --config modules/foundups/eduit/firebase.eduit.json
+firebase hosting:channel:deploy storytime-poc --only eduit-storytime --project gen-lang-client-0061781628 --config modules/foundups/eduit/firebase.eduit.json --expires 7d
 ```
-node --test modules/foundups/eduit/tests/storytime.test.mjs
-python modules/foundups/eduit/build_site.py --output-dir build/eduit
+
+Output must be a new directory inside the module: Firebase rejects a public
+directory outside the selected config's project directory. Binding must use the same `--config` as deploy:
+a root-only binding was not found by this module config. Verify staging page,
+game/media, headers, worker, installability and video ranges before live publish:
+
+```powershell
+firebase deploy --only hosting:eduit-storytime --project gen-lang-client-0061781628 --config modules/foundups/eduit/firebase.eduit.json
 ```
 
-Output must be a NEW directory. Inspect MP4, listen to audio and test both inputs,
-retry, practice, keyboard and phone layout. Do not commit credentials or generated
-video intermediates. The source poster is SVG; MP4 is created at build time.
+Deploy only this target. Historical `eduit`/`eduit-alias` targets have no cutover
+authorization here. Do not deploy root functions/rules or `foundupscom`.
 
-## Concrete hosting targets (IDs must be observed, not invented)
+## DNS, HTTPS and rollback
 
-| Domain | Firebase target | Result |
-|---|---|---|
-| eduit.org (+ www if owned) | eduit | EDUIT landing |
-| ourstorytime.eduit.org | eduit-storytime | root redirects to /storytime/ game |
-| eduit.foundups.com | eduit-alias | permanent redirect to https://eduit.org/ |
+Domain resource:
+`projects/gen-lang-client-0061781628/sites/storytime-eduit/customDomains/storytime.eduit.org`.
+Firebase returned CNAME `storytime` → `storytime-eduit.web.app`. Apply only current
+provider-required records. Certificate DNS challenge TXT at
+`_acme-challenge.storytime` may also be requested; obtain its current exact value
+from Firebase. Record applied public DNS values in the receipt. No forwarding
+is needed. Preserve unrelated MX/SPF/DKIM/DMARC and records.
 
-`firebase.eduit.json` is a separate opt-in config: it does not alter existing
-FoundUps/eSingularity hosting. On the authenticated Firebase project, create or
-reuse three verified Hosting sites, and map these targets using the existing
-Firebase CLI. Its public paths are relative to this config directory and resolve
-to repository `build/eduit`. Deploy only these targets with this config after
-confirming project/site identity. Do not deploy root Firebase functions/rules.
+Verify authoritative/public DNS, Firebase ownership/host/certificate states,
+normal TLS, root redirect, /storytime/, /review/, /about/, media and range 206.
+Never bypass a certificate warning. DNS success does not prove HTTPS readiness.
 
-## GoDaddy work through local Codex's connected tool
+For later releases record this dedicated site's live release/version first;
+rollback via Firebase release history or clone that prior version to live.
+Never modify unrelated `foundupscom` baseline version `ff28e6dc9bc88a72`.
+Initial before-state had no Story Time site/domain/records: undo only the new
+`storytime` CNAME and exact challenge TXT added here, then detach this custom
+domain. Preserve unrelated resources; retaining/disabling this site is safer
+than deleting other resources.
 
-1. Read `eduit.org` and `foundups.com` records AND forwarding. Export a before
-   snapshot without secrets. Confirm nameservers/actual DNS owner.
-2. Provision hosting sites and attach intended domains; obtain exact provider
-   verification TXT and A/CNAME records. Do not guess IP addresses or set a CNAME
-   to a URL/path. DNS alone cannot implement a URL redirect.
-3. Remove only EDUIT's observed Patreon forwarding after staging is working.
-   Apply only provider-requested records for these three names. Preserve MX,
-   SPF/DKIM/DMARC, unrelated subdomains and unrelated FoundUps records.
-4. Follow existing DNS owner's approval/admission flow if required. A saved plan
-   is not authority; never fabricate an approval receipt. User authorized this
-   deployment, but runtime policy still needs its authentic binding.
-5. Verify TLS and final HTTP destinations for all three domains; verify landing,
-   playable assets, and video range requests. Record rollback values and results.
+## PWA and other-lane contracts
 
-BLOCKED: authenticated local Codex GoDaddy capability and Firebase target binding
-are unavailable in this workspace. No public deployment or domain cutover claimed.
-The landing currently uses relative game links so preview works before DNS; once
-TLS is verified, change its Story Time CTA to https://ourstorytime.eduit.org/.
+Root redirects to /storytime/; /about/ retains EDUIT introduction; /review/ mounts
+Shorts-owned review assets. Existing scene/rig/engine/Shorts renderer are reused.
+Provenance stays `rendered_unreviewed`; hosting does not promote editorial/audio
+review. No public renderer, shell, provider credentials or agent backend.
 
-## 012 experience and existing Moshpit ownership
+Visible episode/review markers and /revision.json bind matching assets to a
+16-hex revision under /revisions/<revision>/. Manifest scope /, start /storytime/,
+actual 192/512 PNGs. Exact build allowlisted HTTPS origins may register the
+worker; shared FoundUps origins cannot. Login, storage and SW scope do not carry
+between origins. No /member/ worker copy or second Mall shell.
 
-012 opens a browser URL; no download, build, ZIP extraction or manual deployment
-is part of the product flow. The connected deployment agent owns the commands
-above and verifies the live result before reporting completion. A local preview
-is not evidence of a public domain cutover.
+Only the fixed shell/game is cached. Video and ranges are network-only with an
+honest offline message. Auth/APIs/queries/arbitrary routes/child records are not
+cached. Offline game needs a successful first online install. Retain current
+plus one prior owned shell; Update & restart requires an explicit click.
+Install control only appears with a real browser prompt.
 
-EDUIT.org introduces Education Using Information Technology as the educational
-FoundUp. Us Story Time opens directly to Little Shrew's game, video and the
-existing YouTube channel link. Keep the proof of concept to this single story.
+For later builds pass `--previous-build <last-deployed-build>` to retain one prior
+immutable media revision (two total). Archive the deployed directory/receipt.
+Older tabs eventually need explicit refresh; never substitute newer scene/media
+at old immutable URLs. Creator Refresh latest reloads /review/ for its newest
+paired revision.
 
-Future story discovery belongs in the existing `public/member/` Moshpit PWA,
-using its shared catalog, category rows and product adapter filter contracts
-(see `public/member/README.md` and `INTERFACE.md`). Do not create a second catalog
-or independent PWA shell. Story/video filtering and automatic tile population
-remain planned; the current standalone game does not claim that integration.
+[INTERFACE](INTERFACE.md) documents refs and mount/start/pause/resume/reset/dispose
+and reference-only completion. Fixed return routes /about/ and /storytime/ accept
+no arbitrary return URL. Future Mall return and Red Dog presentation use existing
+owners; cross-origin messages require exact origin/source/payload validation.
+No fake voice, auth, catalog, executable game payload or child analytics exists.
 
-## Current entry design supersedes introduction-first landing
+Changed files are recorded in the PR and ModLog: EDUIT page/controller, small
+engine lifecycle adapter, PWA assets/build/config/docs/tests; Shorts review gets
+naming/revision and whole-document refresh only. Editor/annotation engine,
+renderer, uploader and scene ownership remain unchanged.
 
-The [episode architecture](docs/EPISODE_MALL_ARCHITECTURE.md) specifies video
-above game as EDUIT.org’s POC entry, with parent access to the catalog/about
-page. Implement through existing Mall owners before claiming shared-PWA
-integration. The current build/target files still package the earlier layout;
-this documentation does not change deployed routes or DNS.
+Retrieval evaluation: Holo failed `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`,
+freshness UNKNOWN/index_gap true. Exact current owner docs were inspected,
+narrowed and deduplicated; no reindex. README/INTERFACE/ROADMAP/ModLog present;
+tests README/TestModLog and requirements missing, added here; optional memory
+README absent. Semantic maintenance remains with admitted Holo/WRE/CI owner.
+Qwen/Gemma Python dependency analysis was evaluated; authenticated hosting/DNS
+and browser/JS behavior need direct provider/browser evidence. 0102 performed
+this bounded work with parallel implementation and independent review agents.

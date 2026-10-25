@@ -7,7 +7,7 @@ Decision date: 2026-10-26 JST. Source baseline: main `a6fed6dd8` (PR #2215).
 ## Intent and continuity
 
 EDUIT means **Education Using Information Technology**. `eduit` is the parent
-educational FoundUp and an educational sleeve of Play FoundUps Mall. Us Story
+educational FoundUp and an educational sleeve of Play FoundUps Mall. Story
 Time is its initial learning experience, using `kids_episodes` production.
 “Edjuit”, “Eduate”, “Play Founders”, and similar dictated variants in this
 conversation mean these existing names, not new products, domains or IDs.
@@ -17,13 +17,18 @@ This realizes the 2007 educational vision through a small working slice. See
 The Tool + The Content + The Experience. Historical proposals are not proof of
 learning outcomes. The current Fukui eSingularity application is separate.
 
-Canonical naming correction from 012: **Us Story Time**, matching the existing
-YouTube handle `@Us_Story_Time` and publisher key `us_story_time`. Earlier
-“Our Story Time” wording is a dictation artifact, not a second collection.
-Preserve `eduit`, `kids_episodes` and the publisher binding. The earlier planned
-`ourstorytime.eduit.org` hostname is not an active deployment or a newly approved
-canonical brand; reconcile the intended `usstorytime.eduit.org` name with actual
-hosting/DNS ownership before binding it. No DNS rename is performed by this spec.
+Current naming and deployment correction from 012: the app and codebase use
+**Story Time**. **Us Story Time** is the YouTube channel name; preserve
+`@Us_Story_Time`, publisher key `us_story_time`, `eduit` and `kids_episodes`.
+The final requested origin is **https://storytime.eduit.org/**. Older hostname
+proposals are superseded. DNS points this name to hosting; it does not host
+application files.
+
+The current first slice is a standalone watch/play page with scoped PWA
+packaging, using the existing static scene, engine, renderer and editor assets.
+It is independent of the full Mall adapter. The Mall, membership, ratings,
+languages and connected Red Dog controls below remain future contracts. No
+fake voice control, new agent backend or second catalog is authorized.
 
 ## Product decisions
 
@@ -32,9 +37,9 @@ hosting/DNS ownership before binding it. No DNS rename is performed by this spec
 - Opening a tile presents one page: video above, game below, then Next and the
   existing Red Dog control at the bottom. Mobile-first; retain this reading order
   on tablets/desktops. Do not make two unrelated playback/game queues.
-- `eduit.org` opens the first available watch/play episode for the initial POC,
-  not the earlier introduction landing. Us Story Time deep links open the same
-  experience. Introductory/about text moves behind For parents.
+- `storytime.eduit.org` opens the first watch/play episode for this PoC.
+  `eduit.org` itself is outside this deployment slice. Introductory/about text
+  remains reachable at `/about/`; a real parent catalog gate is later work.
 - The game waits for explicit Play; watching the video must not consume the
   game's reaction window. Only one video/game audio source plays at a time.
 - Next advances to the next released, available episode in this story collection.
@@ -67,8 +72,9 @@ wire that method directly to episode Next or inherit video-ended auto-advance
 that skips the game. General Mall tile tap currently starts autoplay; the EDUIT
 adapter must explicitly specialize its own tiles without changing other products.
 
-**OBSERVED:** Story Time currently shows the game before the video. The local
-review page is editor-owned and mounted by EDUIT's build. Neither is the shared
+**OBSERVED at PR #2215:** Story Time showed the game before the video. The current
+standalone PoC now places video above the idle game. The review page remains
+editor-owned and mounted by EDUIT's build. Neither is the shared
 Mall episode view. Registry contains `kids_episodes`; EDUIT has a module manifest
 but no canonical registry entry at this baseline. Category `ai-education` alone
 is not scope enforcement. Runtime admission is not paid membership entitlement.
@@ -124,7 +130,7 @@ projection, search, suggestions, Next, restored state and Red Dog discovery.
 Protected content still needs real authorization; filtering is not security.
 
 Use existing PWA assets/service-worker ownership and product adapter boundaries.
-No second installable shell. `eduit.org` is a separate origin from foundups.com:
+The separate-origin PoC only packages the existing episode; it does not copy the Mall shell. `eduit.org` is a separate origin from foundups.com:
 service-worker scope, browser storage, sign-in and offline cache do not transfer
 merely because source code is shared. Verify deployment and account handoff;
 keep optional child progress on device, separate from general Mall history.
@@ -139,7 +145,7 @@ No credentials, authoritative entitlement or payment decisions in browser storag
 
 012's latest clarification: **the landing is the first tile**, not a separate
 marketing product. Play FoundUps is the shared Mall; Play EDUIT is its education
-projection; Us Story Time is a collection/creation experience within EDUIT.
+projection; Story Time is a collection/creation experience within EDUIT.
 EDUIT has independent identity/content/domain presentation while sharing the
 platform. Each created episode pairs a video with an educational game.
 
@@ -220,8 +226,8 @@ semantic indexing or Memex ingestion. Exact-main semantic maintenance belongs to
 the existing post-merge controller/admitted WRE owner; no raw reindex or authority
 reset from this task. Recheck CURRENT/no-gap evidence after that owner runs.
 
-Next bounded implementation: add the EDUIT episode adapter/detail contract to
-existing Mall owners; keep the first story free, English, and one episode. Bind
+Current priority: deploy and verify the independent Story Time watch/play PWA.
+After that, add the EDUIT episode adapter/detail contract to existing Mall owners; keep the first story free, English, and one episode. Bind
 video/game layout and arrows, then verify gestures/return lifecycle. Language,
 membership and reports follow separate tested slices. No new story generator,
 payment backend, PWA shell or autonomous worker is authorized by this document.

@@ -1,0 +1,231 @@
+{
+  "schema": "eduit_storytime_deployment_receipt_v1",
+  "date_jst": "2026-10-26",
+  "status": "PROVIDER_LIVE_CUSTOM_DOMAIN_AWAITING_GODADDY_IDENTITY_VERIFICATION",
+  "target_hostname": "storytime.eduit.org",
+  "source": {
+    "repository": "FOUNDUPS/Foundups-Agent",
+    "base_revision": "2c9c93ead",
+    "worktree": "storytime-pwa-deploy",
+    "audit_mode": "READ_ONLY_BEFORE_STATE",
+    "deployed_content_revision": "a73aaf94b71cd2b1",
+    "branch": "agent/storytime-pwa-deploy-20261026"
+  },
+  "firebase_before": {
+    "cli_version": "14.26.0",
+    "authenticated_account_count": 1,
+    "account_identity": "OMITTED",
+    "project": {
+      "project_id": "gen-lang-client-0061781628",
+      "display_name": "Foundups-Agent",
+      "project_number": "56566376153",
+      "state": "ACTIVE"
+    },
+    "iam": {
+      "method": "projects.testIamPermissions",
+      "passed": true,
+      "allowed": [
+        "firebase.projects.get",
+        "firebasehosting.sites.get",
+        "firebasehosting.sites.create",
+        "firebasehosting.sites.update"
+      ],
+      "missing": [],
+      "ownership_note": "Authenticated access and listed permissions were verified; account identity and IAM role names were not captured."
+    },
+    "local_project_aliases": {},
+    "local_hosting_target_bindings": {},
+    "sites": [
+      {
+        "name": "projects/gen-lang-client-0061781628/sites/foundupscom",
+        "default_url": "https://foundupscom.web.app",
+        "type": "USER_SITE",
+        "custom_domains": [
+          {
+            "hostname": "foundups.com",
+            "host_state": "HOST_ACTIVE",
+            "ownership_state": "OWNERSHIP_ACTIVE",
+            "certificate_state": "CERT_ACTIVE",
+            "redirect_target": null,
+            "required_dns_updates": null
+          }
+        ]
+      },
+      {
+        "name": "projects/gen-lang-client-0061781628/sites/gen-lang-client-0061781628",
+        "default_url": "https://gen-lang-client-0061781628.web.app",
+        "type": "DEFAULT_SITE",
+        "custom_domains": []
+      }
+    ],
+    "foundupscom_baseline": {
+      "channel": "projects/gen-lang-client-0061781628/sites/foundupscom/channels/live",
+      "release": "projects/gen-lang-client-0061781628/sites/foundupscom/channels/live/releases/1792888875893000",
+      "version": "projects/gen-lang-client-0061781628/sites/foundupscom/versions/ff28e6dc9bc88a72",
+      "release_time": "2026-10-25T00:41:15.893Z",
+      "release_type": "DEPLOY",
+      "constraint": "Do not deploy Story Time content to this site or change this release."
+    },
+    "evidence": [
+      "firebase login:list --json, reduced to authenticated account count",
+      "firebase projects:list --json, reduced to public project resources",
+      "firebase hosting:sites:list --project gen-lang-client-0061781628 --json",
+      "Authenticated Firebase Hosting REST GET customDomains for both existing sites",
+      "Authenticated Firebase Hosting REST GET foundupscom/channels/live",
+      "Authenticated Cloud Resource Manager testIamPermissions"
+    ]
+  },
+  "dns_before": {
+    "zone": "eduit.org",
+    "authoritative_nameservers": [
+      "ns41.domaincontrol.com",
+      "ns42.domaincontrol.com"
+    ],
+    "soa": {
+      "primary_server": "ns41.domaincontrol.com",
+      "serial": "2026102501",
+      "ttl_seconds": 3600
+    },
+    "target": {
+      "hostname": "storytime.eduit.org",
+      "authoritative_server": "ns41.domaincontrol.com",
+      "queries": {
+        "A": "NXDOMAIN",
+        "AAAA": "NXDOMAIN",
+        "CNAME": "NXDOMAIN",
+        "TXT": "NXDOMAIN"
+      },
+      "second_authoritative_check": {
+        "server": "ns42.domaincontrol.com",
+        "query_type": "SOA",
+        "result": "NXDOMAIN"
+      },
+      "http": "DNS_RESOLUTION_FAILED",
+      "https": "DNS_RESOLUTION_FAILED"
+    },
+    "apex_a_records": [
+      "3.33.130.190",
+      "15.197.148.33"
+    ],
+    "constraint": "Preserve apex records and all unrelated DNS, mail and forwarding configuration."
+  },
+  "godaddy_before": {
+    "connector_tool_exposed": false,
+    "process_credentials_present": false,
+    "repository_provider_status": "PHASE_1_SCAFFOLD_NO_LIVE_PROVIDER_MUTATION",
+    "browser": {
+      "authenticated": true,
+      "observer": "ROOT_DEPLOYMENT_LANE",
+      "surface": "eduit.org GoDaddy domain settings and forwarding",
+      "apex_forwarding": "NOT_SET_UP",
+      "unrelated_subdomain_forwarding_count": 9,
+      "storytime_forwarding_present": false,
+      "evidence_note": "Root lane reported direct browser observations. No account identity or unrelated forwarding destinations are retained."
+    }
+  },
+  "rollout": {
+    "site_creation": {
+      "status": "VERIFIED_BY_ROOT_LANE",
+      "site_id": "storytime-eduit",
+      "default_url": "https://storytime-eduit.web.app",
+      "target": "eduit-storytime",
+      "target_binding_status": "SUCCESS",
+      "evidence_note": "Root lane reported successful provider site creation and local target binding after the read-only before-state audit."
+    },
+    "staging_deployment": {
+      "status": "SUCCESS",
+      "url": "https://storytime-eduit--storytime-poc-jomd07zq.web.app",
+      "expires": "2026-11-01T19:48:43Z"
+    },
+    "staging_validation": {
+      "status": "PASS",
+      "http_assets_checked": 24,
+      "video_duration_seconds": 15,
+      "video_resolution": "1920x1080",
+      "video_range_status": 206,
+      "video_range_bytes": 1024,
+      "worker_cache_control": "no-store",
+      "manifest_errors": [],
+      "chrome_installability_errors": [],
+      "browser_checks": [
+        "video above game",
+        "video ended at 15s while game remained ready",
+        "explicit Play and two ordered taps reached success",
+        "practice mode",
+        "expand game and back",
+        "phone-size layout without horizontal overflow",
+        "offline reload and game input",
+        "online networking and viewport restored"
+      ],
+      "limits": [
+        "physical touch device not exercised",
+        "actual audio listening not verified",
+        "real OS installation not performed",
+        "update waiting behavior verified by automated harness, no prior production revision existed"
+      ]
+    },
+    "custom_domain_attachment": {
+      "status": "CREATED",
+      "name": "projects/gen-lang-client-0061781628/sites/storytime-eduit/customDomains/storytime.eduit.org",
+      "host_state": "HOST_UNHOSTED",
+      "ownership_state": "OWNERSHIP_MISSING",
+      "certificate_state": "CERT_VALIDATING"
+    },
+    "dns_changes": [],
+    "final_https_validation": {
+      "status": "NOT_READY_DNS_UNSAVED"
+    },
+    "live_deployment": {
+      "status": "SUCCESS",
+      "url": "https://storytime-eduit.web.app",
+      "version": "projects/gen-lang-client-0061781628/sites/storytime-eduit/versions/65b8bea4508fca5a",
+      "release": "projects/gen-lang-client-0061781628/sites/storytime-eduit/channels/live/releases/1792957824258000",
+      "release_time": "2026-10-25T19:50:24.258Z",
+      "observed_revision": "a73aaf94b71cd2b1",
+      "root_final_url": "https://storytime-eduit.web.app/storytime/"
+    },
+    "pending_dns_records": [
+      {
+        "type": "CNAME",
+        "name": "storytime",
+        "value": "storytime-eduit.web.app",
+        "ttl_seconds": 1800
+      },
+      {
+        "type": "TXT",
+        "name": "_acme-challenge.storytime",
+        "value": "c8OqJsu0vHTfI4pCAjB7gRUKMJKYyBdFK1AKzeWNr_c",
+        "ttl_seconds": 1800,
+        "purpose": "Public certificate DNS challenge, not a credential"
+      }
+    ],
+    "godaddy_save": {
+      "status": "PENDING_IDENTITY_VERIFICATION",
+      "records_prepared": 2,
+      "browser_dialog": "Verify your identity",
+      "verification_requested_from_012": true,
+      "authoritative_records_present": false
+    },
+    "foundupscom_after": {
+      "version": "projects/gen-lang-client-0061781628/sites/foundupscom/versions/ff28e6dc9bc88a72",
+      "unchanged": true
+    }
+  },
+  "rollback": {
+    "dns": "Restore the exact before-state for only records created or changed by this rollout. The target hostname was NXDOMAIN before deployment; retain unrelated zone records, apex records and all existing forwarding.",
+    "hosting": "Use the dedicated Story Time site's release history to restore a known version if needed. Preserve the existing foundupscom site and its baseline release.",
+    "custom_domain": "Detach only the new storytime.eduit.org custom-domain attachment if reverting this rollout; do not detach existing FoundUps domains.",
+    "record_change_receipts_required": true
+  },
+  "sanitization": {
+    "credentials_tokens_cookies": "EXCLUDED",
+    "personal_emails_account_identity": "EXCLUDED",
+    "provider_project_and_site_resources": "PUBLIC_RESOURCE_REFERENCES_ONLY"
+  },
+  "updated_at": "2026-10-25T19:55:44.490Z",
+  "verification": {
+    "javascript_tests_passed": 21,
+    "python_packaging_tests_passed": 6,
+    "independent_review": "No remaining material code/security/ownership blocker; deployment docs corrected to module build directory"
+  }
+}

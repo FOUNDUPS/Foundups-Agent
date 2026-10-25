@@ -1,1 +1,74 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Us Story Time · Play EDUIT</title><meta name="description" content="Watch Little Shrew, then play the two-tap story. A playful EDUIT prototype for families."><link rel="stylesheet" href="../style.css"></head><body class="game-page"><header><a class="brand" href="../" aria-label="Exit the story and return to EDUIT">← Back to EDUIT</a><a href="https://foundups.com">A FoundUps project ↗</a></header><main><div class="game-heading"><div><p class="eyebrow">US STORY TIME</p><h1>Little Shrew</h1></div><p>Tap the shrew to wake it.<br>Tap the root to find shelter.</p></div><section class="play-panel" aria-label="Little Shrew game"><div class="play-stage"><div id="scene"></div><button id="wake" class="hotspot shrew" aria-label="Wake the little shrew" hidden><span>Tap me</span></button><button id="root" class="hotspot root" aria-label="Move to the root" hidden><span>Tap the root</span></button></div><div class="game-bar"><div><p id="message" role="status" aria-live="polite"></p><small id="time"></small></div><button id="start">Let's play →</button><button id="retry" hidden>Play again ↻</button><button id="pause" class="quiet" hidden>Pause</button></div></section><div class="preferences"><label><input id="practice" type="checkbox"> Practice without a timer</label><label><input id="sound" type="checkbox"> Gentle sounds</label></div><section class="watch"><div><p class="eyebrow">THE STORY</p><h2>Watch the story</h2><p>A faint tremor wakes a little shrew. It follows its nose to a root pocket—just before a giant foot presses into the earth.</p><p class="note">For grown-ups: play together. This fictional scene includes a stomp and a collapsed burrow; no injury is shown. A missed tap simply gives another try. Practice mode removes the time limit.</p><a href="https://www.youtube.com/@Us_Story_Time">Visit Us Story Time on YouTube ↗</a></div><video controls playsinline preload="metadata" poster="assets/poster.svg"><source src="assets/little-shrew.mp4" type="video/mp4">Your browser does not support video.</video></section></main><footer>EDUIT · Education Using Information Technology<br>No sign-in, ads, scores stored, or child profiles. Proof of concept.</footer><script type="module" src="game.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Story Time · Little Shrew</title>
+  <meta name="description" content="Watch Little Shrew, then play the two-tap story. An EDUIT story for families.">
+  <meta name="theme-color" content="#15232b">
+  <link rel="manifest" href="../manifest.json">
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body class="game-page episode-page">
+  <header>
+    <a class="brand" href="/about/" aria-label="Back to EDUIT">← EDUIT<span> / Story Time</span></a>
+    <nav aria-label="Episode navigation"><a href="#game-panel">Play the story ↓</a><a href="https://foundups.com">FoundUps ↗</a></nav>
+  </header>
+  <main>
+    <div class="game-heading">
+      <div><p class="eyebrow">STORY TIME · EPISODE 01</p><h1>Little Shrew</h1></div>
+      <p>Watch a tiny adventure.<br>Then step inside and play.</p>
+    </div>
+
+    <section id="watch" class="episode-watch" aria-labelledby="watch-title">
+      <div id="video-panel" class="episode-surface video-panel">
+        <div class="surface-toolbar">
+          <h2 id="watch-title">Watch the story</h2>
+          <button id="expand-video" class="quiet" aria-controls="video-panel" aria-expanded="false">Expand video ⛶</button>
+          <button id="back-video" class="quiet" hidden>← Back to episode</button>
+        </div>
+        <video id="episode-video" controls playsinline preload="metadata" poster="assets/poster.svg" aria-label="Little Shrew story">
+          <source src="assets/little-shrew.mp4" type="video/mp4">
+          Your browser does not support video. You can still play the story below.
+        </video>
+        <div class="episode-followup"><button id="replay-video" class="quiet">Replay story ↻</button><span>More stories coming</span></div>
+        <p id="video-status" class="note" role="status" hidden>The video could not load. Try again when connected; the game is still available below.</p>
+      </div>
+      <p class="story-description">A faint tremor wakes a little shrew. It follows its nose to a root pocket—just before a giant foot presses into the earth.</p>
+    </section>
+
+    <section id="game-panel" class="play-panel episode-surface" aria-labelledby="game-title">
+      <div class="surface-toolbar">
+        <div><p class="eyebrow">YOUR TURN</p><h2 id="game-title">Play the story</h2></div>
+        <button id="expand-game" class="quiet" aria-controls="game-panel" aria-expanded="false">Expand game ⛶</button>
+        <button id="back-game" class="quiet" hidden>← Back to episode</button>
+      </div>
+      <div class="play-stage">
+        <div id="scene"></div>
+        <button id="wake" class="hotspot shrew" aria-label="Wake the little shrew" hidden><span>Tap me</span></button>
+        <button id="root" class="hotspot root" aria-label="Move to the root" hidden><span>Tap the root</span></button>
+      </div>
+      <div class="game-bar">
+        <div><p id="message" role="status" aria-live="polite"></p><small id="time"></small></div>
+        <div class="game-actions"><button id="start">Play →</button><button id="retry" hidden>Try again ↻</button><button id="pause" class="quiet" hidden>Pause</button></div>
+      </div>
+      <div class="preferences"><label><input id="practice" type="checkbox"> Practice without a timer</label><label><input id="sound" type="checkbox"> Gentle sounds</label></div>
+    </section>
+
+    <aside class="episode-notes">
+      <p>Tap the shrew to wake it. Then tap the root to find shelter. The game waits until you press Play; watching uses none of your game time.</p>
+      <p class="note">For grown-ups: play together. This fictional scene includes a stomp and a collapsed burrow; no injury is shown. A missed tap simply gives another try. Practice mode removes the time limit.</p>
+      <a href="https://www.youtube.com/@Us_Story_Time">Visit Us Story Time on YouTube ↗</a>
+    </aside>
+  </main>
+  <footer>
+    <strong>Story Time</strong> · EDUIT · Education Using Information Technology<br>
+    No sign-in, saved play history, or child profiles. Proof of concept.<br>
+    <a href="/review/">Creator review</a> · Revision <span id="revision">__STORYTIME_REVISION__</span>
+    <div class="pwa-controls"><button id="install-app" class="quiet" hidden>Install Story Time</button><button id="update-app" class="quiet" hidden>Update & restart</button><p id="pwa-status" role="status"></p></div>
+  </footer>
+  <noscript><p class="episode-notes">Enable JavaScript to play the game. You can watch the video above without it.</p></noscript>
+  <script type="module" src="game.js"></script>
+  <script type="module" src="pwa.js"></script>
+</body>
+</html>

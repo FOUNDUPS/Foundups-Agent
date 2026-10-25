@@ -1,6 +1,6 @@
 # EDUIT — Education Using Information Technology
 
-**FoundUp status:** local Story Time proof of concept implemented; domain deployment pending
+**FoundUp status:** Story Time watch/play PWA implemented; see deployment receipt for live verification
 **Product module:** Play EDUIT — adaptive learning through play  
 **Historical educational vision:** eSingularity — learn anything, anytime, anywhere (LAAA)
 
@@ -12,7 +12,7 @@ EDUIT is the educational FoundUp and education-scoped sleeve of the existing Pla
 watch → play → Next direction, existing gestures, Red Dog, language cues and
 parent-only membership proposal. Read [INTERFACE](INTERFACE.md),
 [ROADMAP](ROADMAP.md) and [DEPLOYMENT](DEPLOYMENT.md) next.
-EDUIT.org is intended to open the episode directly; this is specified, not deployed.
+The current PoC targets `https://storytime.eduit.org/`, independently of the full Mall adapter. The latest 012 direction supersedes Mall-first ordering. `eduit.org` itself is outside this deployment slice.
 
 ## Purpose and history
 
@@ -57,7 +57,7 @@ No autonomous production worker exists. Planned outputs: health status, last act
 3. Review accessibility, age-appropriate design, data minimization and consent.
 4. Only then consider a public prototype. No DAO-driven model changes or child-data sharing in the MVP.
 
-**Evidence status:** local landing, shared story/video scene and two-tap game implemented and tested. No validation study, child profiles, public deployment, autonomous worker or token. Registry production status remains unchanged.
+**Evidence status:** video-first Story Time PWA is built and deployed to the verified Firebase provider URL, with shared story/video scene and two-tap game tested. Requested-domain DNS/TLS status is recorded in the deployment receipt. No validation study, child profiles, autonomous worker or token. Registry production status remains unchanged.
 
 ## Linked educational media
 
@@ -65,7 +65,7 @@ No autonomous production worker exists. Planned outputs: health status, last act
 
 ## Story Time proof of concept
 
-Source: `public/eduit/`. Read [deployment and local Codex handoff](DEPLOYMENT.md). Canonical planned domains are `eduit.org`, `ourstorytime.eduit.org`, and the redirect `eduit.foundups.com`. Kids Episodes remains `kids_episodes`; EDUIT remains `eduit`. No new FoundUp registration.
+Source: `public/eduit/`. Read [deployment and local Codex handoff](DEPLOYMENT.md). The current deployment target is `storytime.eduit.org`. Earlier `ourstorytime.eduit.org` and `usstorytime.eduit.org` proposals are superseded; no apex or alias cutover is included. Kids Episodes remains `kids_episodes`; EDUIT remains `eduit`. No new FoundUp registration.
 
 ## Education Mall sleeve — operator direction
 
@@ -91,13 +91,13 @@ claims; a fictional Little Shrew character is not proof of a specific ancestor.
 
 **Earlier slice:** retained one Little Shrew game/video and an introduction
 landing. The current architecture below supersedes introduction-first entry. Neither constitutes the integrated education Mall.
-Do not build a duplicate PWA, generic catalog, learner account or unlock service
-for this proof of concept. Future work should add a bounded EDUIT product adapter
+This PoC packages the existing static episode for its separate origin, without copying the Mall shell, catalog, learner account or unlock service. Future work should add a bounded EDUIT product adapter
 to the existing shell, with tests that out-of-scope catalog items cannot appear.
 
 **WSP 97 closure:** exact owner/adjacent product interfaces retrieved; existing
 product reuse chosen over a new shell. Documentation/design change only for the
-Mall sleeve. No production routing, PWA integration or unlock behavior claimed.
+Mall sleeve. Standalone origin packaging is implemented separately; shared-Mall
+integration and unlock behavior remain unimplemented.
 
 ## Watch, play, progress — local parent report proposal
 
@@ -154,7 +154,7 @@ for timing, difficulty bounds, pause/resume, deletion and no-network leakage.
 ## Child FoundUps, discovery scope and return navigation
 
 **012 direction:** the main Play FoundUps Mall shows EDUIT. EDUIT's education
-Mall shows its own educational child FoundUps, such as Us Story Time and a
+Mall shows its own educational child FoundUps, such as Story Time and a
 memory-game project once its existing identity is recovered. Educational child
 FoundUps should not independently populate the general Mall. They remain part
 of the same system; do not fork the platform or renumber existing canonical IDs.
@@ -176,8 +176,8 @@ its educational children are visible in EDUIT discovery. Keep `ai-education` as
 a descriptive category, not an authorization rule. Validate known parents,
 no cycles/self-parenting and stable IDs. Existing unrelated FoundUps retain their
 current behavior. Reconcile EDUIT's manifest into the canonical registry through
-its existing intake owner before creating child entries. Resolve whether Our
-Story Time is the public learning surface of `kids_episodes` or needs a distinct
+its existing intake owner before creating child entries. Resolve whether Story
+Time is the public learning surface of `kids_episodes` or needs a distinct
 identity; do not silently duplicate the production FoundUp to obtain a tile.
 
 Both shared-Mall and public-directory projections, search/Red Dog discovery,

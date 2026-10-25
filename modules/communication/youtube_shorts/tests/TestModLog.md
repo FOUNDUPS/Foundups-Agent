@@ -1,5 +1,13 @@
 # YouTube Shorts TestModLog
 
+## 2026-10-26 — Mounted review revision refresh
+
+`node --test modules/communication/youtube_shorts/tests/kids_review.test.mjs`:
+1 passed. Verify silent/rendered scrub continuity and Refresh latest pauses then
+reloads the mounted document to retrieve its current paired immutable assets.
+Import-strip fixture accepts LF and CRLF. No provider calls, render or upload.
+Included in EDUIT's 21 passing JS checks and six packaging checks.
+
 ## 2026-08-25 — AutoPost / Foundups Mall publisher boundary
 
 | Contract | Evidence |

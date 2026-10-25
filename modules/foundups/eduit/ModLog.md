@@ -1,5 +1,49 @@
 # EDUIT ModLog
 
+## 2026-10-26 — Standalone Story Time watch/play PWA deployment
+
+WSP 00/15/22/50/84/97/99. Final 012 correction: app/codebase **Story Time**;
+YouTube remains Us Story Time and publisher `us_story_time`. Final target
+`storytime.eduit.org` supersedes prior hostnames. Preserve `eduit`/`kids_episodes`.
+Latest direction delivers the first episode independently of full Mall work.
+
+Video now precedes the existing idle game; explicit Play/Resume/Retry pause
+video, watching/hidden/expand/back pause the game and pending sounds. Preserved
+unlimited retry, practice and touch/mouse/native keyboard controls. Added scoped
+expand/back, Replay, More stories coming, local lifecycle/completion contracts,
+visible revision, /about/ and Shorts-owned /review/. Scene/rig/engine untouched.
+
+Build reuses the existing Shorts renderer, creates immutable scene/media asset
+URLs, origin-specific manifest/icons and exact-origin worker. Bounded current
+and prior shell caches; network-only media/ranges; no forced update during play.
+`--previous-build` carries one previous immutable media revision. No second
+catalog/auth/renderer/backend, fake voice, cross-origin bridge or child telemetry.
+
+Verified one authenticated Firebase project and hosting permissions; created
+dedicated `storytime-eduit`, staged/tested then deployed revision
+`a73aaf94b71cd2b1` to https://storytime-eduit.web.app/. Corrected inherited Firebase
+config: module-local target binding and public directory are required by CLI.
+Existing `foundupscom` live version remained unchanged. GoDaddy connector absent;
+existing browser session authenticated. Prepared exact provider CNAME/certificate
+TXT; save is awaiting GoDaddy identity verification, requested from 012. DNS/TLS
+cutover is not claimed complete. [Receipt](docs/DEPLOYMENT_RECEIPT_20261026.json)
+and [runbook](DEPLOYMENT.md) preserve before-state, pending records and rollback.
+
+Validation: 21 JavaScript and 6 packaging tests pass; full Cairo/FFmpeg build
+produces 15s 1080p H.264/AAC. Staging checked 24 URLs, 206 media ranges and headers.
+Browser verified watch-with-idle-game, success, expand/back, phone layout, genuine
+install prompt, clean manifest/installability and offline game reload/input.
+Physical touch device, actual OS install and listening remain unverified.
+Independent review found no remaining material source blocker.
+
+Retrieval evaluation: exact Holo error `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`,
+freshness UNKNOWN/index gap true. Direct current-main must-include owner docs
+were narrowed/deduplicated; staleness labelled rather than treating historical
+receipts as current. No reindex; maintenance stays with existing admitted owner.
+Added missing requirements/test reproduction/verification artifacts. Qwen/Gemma
+Python dependency tooling cannot establish authenticated DNS/hosting or browser
+lifecycle behavior, so bounded manual execution and parallel review were used.
+
 ## 2026-10-26 — Story Time proof of concept
 
 Implemented parent-facing landing, browser-local two-tap game, shared SVG movie export and existing-renderer reuse. Four state/scene tests pass. Independent review checked actual rendered collapse and provenance; floating claw removed. No tracking or child profiles. Deployment handoff records observed Patreon forwarding, local Codex GoDaddy access boundary and isolated Firebase targets. Production domains unchanged.

@@ -1,0 +1,13 @@
+{
+  "projects": {},
+  "targets": {
+    "gen-lang-client-0061781628": {
+      "hosting": {
+        "eduit-storytime": [
+          "storytime-eduit"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
