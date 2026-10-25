@@ -1,4 +1,20 @@
 ﻿# ROADMAP - FoundUps Agent Market
+## Pre-chain safety delivery — 2026-10-25
+
+- [x] P0A: reject invalid/unavailable/disconnected requested or default token
+  backends; freeze chain identity through health checks and result validation.
+  Keep explicitly identified default/mock simulation; no fallback to simulation.
+- [x] P0B host-context boundary: default-deny exact caller/FoundUp role grants;
+  independent stored-proof checks before verification and payout, including
+  legacy records. Local 690-case connected and independent 115-case runs pass.
+- [ ] Authenticated transport/domain issuer and current-grant resolution. The
+  Python context itself supplies no signature, expiry or revocation mechanism.
+- [ ] Real testnet adapter, independently confirmed effects and settlement.
+
+The [delivery plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md)
+records pre-execution WSP 15 priorities and evidence. Existing atomic SQLite
+verification and pending-payout repairs below remain in place.
+
 ## Domain Alignment References
 - `modules/foundups/ROADMAP.md`
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md`

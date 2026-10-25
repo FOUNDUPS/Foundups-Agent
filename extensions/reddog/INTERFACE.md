@@ -1,5 +1,13 @@
 # RedDog Interface
 
+## FoundUps authorization source closure — 2026-10-25
+
+The source backend manifest includes `agent_market/src/authorization.py` and
+rebinds the four existing FAM/simulator members changed by PR2188. Its exact
+member ceiling is 1,470; the existing boundary test rejects 1,471. The 328 KiB
+LF/CRLF manifest, 2 MiB individual and 32 MiB aggregate byte limits stay fixed.
+This source closure grants no installed-runtime, signer or effect authority.
+
 ## PR1792 reusable brand grounding candidate — 2026-10-25
 
 An optional registry `brand_context_path` names public, tracked JSON validated

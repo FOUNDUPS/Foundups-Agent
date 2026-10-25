@@ -1093,17 +1093,18 @@
     }
 
     function renderShowcaseShell() {
+      document.title = 'FX — FoundUps Exchange | FoundUPS';
       var html = '<div class="portfolio-container">';
       html += '  <header class="portfolio-header">';
-      html += '    <h1 class="portfolio-title">FoundUps Public Showcase</h1>';
-      html += '    <p class="portfolio-tagline">Consolidated portfolio of active incubating platforms, candidates, and infrastructure substrate under development.</p>';
+      html += '    <h1 class="portfolio-title">FX — FoundUps Exchange</h1>';
+      html += '    <p class="portfolio-tagline">Explore FoundUps projects and declared token symbols.</p>';
+      html += '    <p class="portfolio-tagline">A declared ticker is not evidence of token deployment or trading availability.</p>';
       html += '  </header>';
 
-      // Read-only client-side filter: text search (display_name / public_summary)
-      // + readiness filter (poc_landing_status). Both fields are on the public
-      // allowlist; no member-scoped field is referenced.
+      // Read-only text search: name, summary, canonical ID and optional declared
+      // symbol, plus landing readiness. All fields are public-allowlisted.
       html += '  <div class="portfolio-filter-bar">';
-      html += '    <input type="text" id="showcaseSearch" class="portfolio-filter-search" placeholder="Search FoundUps..." aria-label="Search FoundUps" value="' + esc(showcaseFilter.query) + '">';
+      html += '    <input type="text" id="showcaseSearch" class="portfolio-filter-search" placeholder="Search projects or tickers..." aria-label="Search FoundUps projects or token symbols" value="' + esc(showcaseFilter.query) + '">';
       html += '    <select id="showcaseReadiness" class="portfolio-filter-select" aria-label="Filter by readiness">';
       html += '      <option value="">All readiness</option>';
       showcaseReadinessOptions().forEach(function(r) {
@@ -1140,7 +1141,9 @@
       }
       var q = (showcaseFilter.query || '').trim().toLowerCase();
       if (!q) return true;
-      var hay = ((entity.display_name || '') + ' ' + (entity.public_summary || '') + ' ' + (entity.foundup_id || '')).toLowerCase();
+      var tokenSymbol = typeof entity.token_symbol === 'string' ? entity.token_symbol.trim() : '';
+      var hay = ((entity.display_name || '') + ' ' + (entity.public_summary || '') + ' ' +
+        (entity.foundup_id || '') + (tokenSymbol ? ' ' + tokenSymbol + ' $' + tokenSymbol : '')).toLowerCase();
       return hay.indexOf(q) !== -1;
     }
 

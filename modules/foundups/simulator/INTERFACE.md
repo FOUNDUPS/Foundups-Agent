@@ -3,6 +3,17 @@
 ## Module Contract
 FoundUps Simulator provides real-time event streaming via Server-Sent Events (SSE) for the cube visualization frontend, bridging FAMDaemon observability data to the web UI.
 
+## FAM bridge authority boundary
+
+`FAMBridge.verify_task` and `trigger_payout` retain their existing signatures.
+They pass CallerAuthorization for the configured simulation host identities
+`verifier_0`/`treasury_0` and the stored task's exact FoundUp. Caller-supplied IDs
+must match that independent host context. Self-verification and unbound stored
+proofs are rejected by FAM; IDs and legacy role labels cannot grant authority.
+This does not implement a production principal resolver, issuer, revocation
+service, token mint or confirmed payment. In-memory completed rewards remain
+simulation; persistent initiation has separate pending semantics.
+
 ## CABR Canonical Intent
 - CABR = Consensus-Driven Autonomous Benefit Rate (also referred to as Collective Autonomous Benefit Rate).
 - WHY: CABR exists to power Proof of Benefit (PoB).

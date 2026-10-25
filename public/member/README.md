@@ -5,6 +5,15 @@
 
 ## Overview
 
+### Public FX directory
+
+The homepage's **FX** navigation link opens the existing public `/f/` directory.
+It searches public project IDs, names, summaries and optional declared tickers;
+landing-readiness filters remain available. Declared symbols do not establish
+token deployment or trading availability. This reads only the existing public
+projection and retains the ordinary member admission path. See
+[INTERFACE.md](INTERFACE.md#public-fx-directory--2026-10-25).
+
 `/member/` is no longer a placeholder member shell.
 
 It is now the admitted-user Mall experience that sits behind the existing FoundUPS invite gateway:

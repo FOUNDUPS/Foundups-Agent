@@ -2,9 +2,16 @@
 
 import pytest
 
+from modules.foundups.agent_market.src.exceptions import ValidationError
 from modules.foundups.agent_market.src.in_memory import InMemoryAgentMarket
 from modules.foundups.agent_market.src.models import Foundup, TokenTerms
 from modules.foundups.agent_market.src.orchestrator import LaunchOrchestrator, launch_foundup
+from modules.foundups.agent_market.src.token_factory import (
+    ChainAgnosticTokenFactory,
+    ChainBackend,
+    ChainType,
+    TokenDeploymentResult,
+)
 
 
 def test_launch_foundup_happy_path_full():
@@ -270,3 +277,283 @@ def test_repo_provision_emits_event():
     assert len(repo_events) == 1
     assert repo_events[0]["payload"]["repo_name"] == "event-repo"
     assert repo_events[0]["payload"]["default_branch"] == "develop"
+
+
+class RecordingChainBackend(ChainBackend):
+    """Offline adapter double; records effects without contacting a chain."""
+
+    def __init__(self, chain_type, connected=True, result_chain=None):
+        self.declared_chain = chain_type
+        self.connected = connected
+        self.result_chain = result_chain
+        self.calls = []
+
+    @property
+    def chain_type(self):
+        return self.declared_chain
+
+    def is_connected(self):
+        if isinstance(self.connected, Exception):
+            raise self.connected
+        return self.connected
+
+    def deploy_token(self, **kwargs):
+        self.calls.append(("deploy", kwargs))
+        return TokenDeploymentResult(
+            success=True,
+            chain_type=self.result_chain or self.declared_chain,
+            token_address="offline_test_token",
+        )
+
+    def configure_vesting(self, token_address, config):
+        self.calls.append(("vesting", token_address))
+        return True
+
+    def get_treasury_balance(self, token_address):
+        return 0
+
+
+@pytest.fixture
+def token_factory_request():
+    return (
+        Foundup("f_backend", "Backend Test", "owner_1", "BACKEND"),
+        TokenTerms("Backend Token", "BACKEND", 100, "test_treasury"),
+    )
+
+
+def run_token_operation(factory, operation, foundup, terms):
+    if operation == "deploy":
+        return factory.deploy_token(foundup, terms)
+    return factory.configure_vesting("offline_test_token", terms)
+
+
+@pytest.mark.parametrize("operation", ["deploy", "vesting"])
+@pytest.mark.parametrize("hint", ["algorand", "unknown", "", "   ", 42])
+def test_token_factory_rejects_unsupported_hint_without_fallback(
+    operation, hint, token_factory_request
+):
+    factory = ChainAgnosticTokenFactory()
+    mock = RecordingChainBackend(ChainType.MOCK)
+    factory.register_backend(mock)
+    foundup, terms = token_factory_request
+    terms.chain_hint = hint
+
+    with pytest.raises(ValidationError, match="chain"):
+        run_token_operation(factory, operation, foundup, terms)
+
+    assert mock.calls == []
+    assert factory.get_deployment_status(foundup.foundup_id) is None
+
+
+@pytest.mark.parametrize("operation", ["deploy", "vesting"])
+@pytest.mark.parametrize("chain", [ChainType.EVM, ChainType.HEDERA, ChainType.SOLANA])
+def test_token_factory_rejects_unregistered_backend(
+    operation, chain, token_factory_request
+):
+    factory = ChainAgnosticTokenFactory()
+    mock = RecordingChainBackend(ChainType.MOCK)
+    factory.register_backend(mock)
+    foundup, terms = token_factory_request
+    terms.chain_hint = chain.value
+
+    with pytest.raises(ValidationError, match="registered"):
+        run_token_operation(factory, operation, foundup, terms)
+
+    assert mock.calls == []
+
+
+@pytest.mark.parametrize("operation", ["deploy", "vesting"])
+@pytest.mark.parametrize(
+    "connected", [False, ValueError("offline health-check failure")]
+)
+def test_token_factory_rejects_unavailable_backend(
+    operation, connected, token_factory_request
+):
+    factory = ChainAgnosticTokenFactory()
+    mock = RecordingChainBackend(ChainType.MOCK)
+    backend = RecordingChainBackend(ChainType.EVM, connected=connected)
+    factory.register_backend(mock)
+    factory.register_backend(backend)
+    foundup, terms = token_factory_request
+    terms.chain_hint = "evm"
+
+    with pytest.raises(ValidationError, match="backend"):
+        run_token_operation(factory, operation, foundup, terms)
+
+    assert backend.calls == mock.calls == []
+
+
+@pytest.mark.parametrize("operation", ["deploy", "vesting"])
+@pytest.mark.parametrize("registered", [False, True])
+def test_token_factory_checks_configured_default(
+    operation, registered, token_factory_request
+):
+    factory = ChainAgnosticTokenFactory(default_chain=ChainType.EVM)
+    mock = RecordingChainBackend(ChainType.MOCK)
+    backend = RecordingChainBackend(ChainType.EVM, connected=False)
+    factory.register_backend(mock)
+    if registered:
+        factory.register_backend(backend)
+    foundup, terms = token_factory_request
+
+    with pytest.raises(ValidationError, match="backend"):
+        run_token_operation(factory, operation, foundup, terms)
+
+    assert backend.calls == mock.calls == []
+
+
+@pytest.mark.parametrize("operation", ["deploy", "vesting"])
+def test_token_factory_rejects_disconnected_mock(operation, token_factory_request):
+    factory = ChainAgnosticTokenFactory()
+    mock = RecordingChainBackend(ChainType.MOCK, connected=False)
+    factory.register_backend(mock)
+    foundup, terms = token_factory_request
+    terms.chain_hint = "mock"
+
+    with pytest.raises(ValidationError, match="disconnected"):
+        run_token_operation(factory, operation, foundup, terms)
+
+    assert mock.calls == []
+
+
+@pytest.mark.parametrize("hint", [None, "mock", " MOCK "])
+def test_token_factory_mock_remains_explicitly_identified(hint, token_factory_request):
+    default = ChainType.MOCK if hint is None else ChainType.EVM
+    factory = ChainAgnosticTokenFactory(default_chain=default)
+    foundup, terms = token_factory_request
+    terms.chain_hint = hint
+
+    address = factory.deploy_token(foundup, terms)
+    factory.configure_vesting(address, terms)
+    result = factory.get_deployment_status(foundup.foundup_id)
+
+    assert address.startswith("mock_token_")
+    assert result.chain_type == ChainType.MOCK
+    assert result.metadata["mock"] is True
+    assert result.transaction_id.startswith("mock_tx_")
+    assert result.explorer_url is None
+
+
+@pytest.mark.parametrize("hint", [None, " EVM "])
+def test_token_factory_dispatches_only_to_selected_backend(hint, token_factory_request):
+    default = ChainType.EVM if hint is None else ChainType.MOCK
+    factory = ChainAgnosticTokenFactory(default_chain=default)
+    mock = RecordingChainBackend(ChainType.MOCK)
+    backend = RecordingChainBackend(ChainType.EVM)
+    factory.register_backend(mock)
+    factory.register_backend(backend)
+    foundup, terms = token_factory_request
+    terms.chain_hint = hint
+
+    address = factory.deploy_token(foundup, terms)
+    factory.configure_vesting(address, terms)
+
+    assert [call[0] for call in backend.calls] == ["deploy", "vesting"]
+    assert mock.calls == []
+    assert factory.get_deployment_status(foundup.foundup_id).chain_type == ChainType.EVM
+
+
+@pytest.mark.parametrize("operation", ["deploy", "vesting"])
+@pytest.mark.parametrize("changed_chain", [ChainType.MOCK, "evm"])
+def test_token_factory_rejects_backend_identity_drift(
+    operation, changed_chain, token_factory_request
+):
+    factory = ChainAgnosticTokenFactory()
+    backend = RecordingChainBackend(ChainType.EVM)
+    factory.register_backend(backend)
+    backend.declared_chain = changed_chain
+    foundup, terms = token_factory_request
+    terms.chain_hint = "evm"
+
+    with pytest.raises(ValidationError, match="mismatch"):
+        run_token_operation(factory, operation, foundup, terms)
+
+    assert backend.calls == []
+
+
+@pytest.mark.parametrize("result_chain", [ChainType.MOCK, "evm"])
+def test_token_factory_rejects_result_chain_mismatch(result_chain, token_factory_request):
+    factory = ChainAgnosticTokenFactory()
+    backend = RecordingChainBackend(ChainType.EVM, result_chain=result_chain)
+    factory.register_backend(backend)
+    foundup, terms = token_factory_request
+    terms.chain_hint = "evm"
+
+    with pytest.raises(ValidationError, match="mismatch"):
+        factory.deploy_token(foundup, terms)
+
+    assert len(backend.calls) == 1
+    assert factory.get_deployment_status(foundup.foundup_id) is None
+
+
+def test_token_factory_rejects_non_enum_backend_registration():
+    factory = ChainAgnosticTokenFactory()
+
+    with pytest.raises(ValidationError, match="ChainType"):
+        factory.register_backend(RecordingChainBackend("evm"))
+
+    assert factory.list_supported_chains() == ["mock:connected"]
+
+
+@pytest.mark.parametrize("operation", ["deploy", "vesting"])
+def test_token_factory_rejects_identity_drift_during_connectivity(
+    operation, token_factory_request, monkeypatch
+):
+    factory = ChainAgnosticTokenFactory()
+    backend = RecordingChainBackend(ChainType.EVM)
+    factory.register_backend(backend)
+
+    def change_chain():
+        backend.declared_chain = ChainType.MOCK
+        return True
+
+    monkeypatch.setattr(backend, "is_connected", change_chain)
+    foundup, terms = token_factory_request
+    terms.chain_hint = "evm"
+
+    with pytest.raises(ValidationError, match="mismatch"):
+        run_token_operation(factory, operation, foundup, terms)
+
+    assert backend.calls == []
+    assert factory.get_deployment_status(foundup.foundup_id) is None
+
+
+def test_launch_rejects_unavailable_chain_before_downstream_effects(token_factory_request):
+    market = InMemoryAgentMarket()
+    factory = ChainAgnosticTokenFactory()
+    foundup, terms = token_factory_request
+    terms.chain_hint = "evm"
+
+    result = launch_foundup(
+        registry=market,
+        token_adapter=factory,
+        repo_adapter=market,
+        task_pipeline=market,
+        foundup=foundup,
+        token_terms=terms,
+        repo_name="must-not-provision",
+        initial_task_params={"task_id": "must-not-create"},
+        observability=market,
+    )
+
+    assert result.success is False
+    assert result.token_address is result.repo_url is result.initial_task is None
+    assert [event.event_type for event in result.events] == [
+        "launch.foundup_created", "launch.failed"
+    ]
+    assert factory.get_deployment_status(foundup.foundup_id) is None
+    # Registry creation precedes token deployment; rollback is a separate boundary.
+    assert market.get_foundup(foundup.foundup_id) == foundup
+
+
+def test_launch_with_actual_mock_factory_stays_simulated(token_factory_request):
+    market = InMemoryAgentMarket()
+    factory = ChainAgnosticTokenFactory()
+    foundup, terms = token_factory_request
+
+    result = launch_foundup(registry=market, token_adapter=factory,
+                           foundup=foundup, token_terms=terms)
+
+    assert result.success is True
+    assert result.token_address.startswith("mock_token_")
+    assert factory.get_deployment_status(foundup.foundup_id).metadata == {"mock": True}

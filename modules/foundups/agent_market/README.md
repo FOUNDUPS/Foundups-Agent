@@ -1,4 +1,4 @@
-﻿# FoundUps Agent Market (FAM)
+# FoundUps Agent Market (FAM)
 
 ## Purpose
 FoundUps Agent Market (FAM) is the outer layer for launching tokenized FoundUps and coordinating agent swarms through a task to proof to verification to payout pipeline.
@@ -67,6 +67,59 @@ cd o:\Foundups-Agent
 $env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
 python -m pytest modules/foundups/agent_market/tests -q
 ```
+
+## Token factory backend selection
+
+`ChainAgnosticTokenFactory` resolves exactly one backend for deployment and
+vesting. `TokenTerms.chain_hint=None` selects the configured default; the
+constructor/getter default remains `ChainType.MOCK` for local PoC compatibility.
+An explicit `chain_hint="mock"` also selects simulation. Mock results retain
+`chain_type=MOCK`, `metadata["mock"]=True` and synthetic addresses/transaction IDs.
+
+Chain names are case-insensitive with outer whitespace removed. Empty, unknown
+or non-string hints raise FAM `ValidationError`. A missing/disconnected selected
+backend, failed health check or changed chain identity also rejects, including
+when selecting the configured default. There is no fallback to another chain.
+Successful deployment results must report the selected `ChainType` before they
+are cached or returned as success. Only the mock backend ships here; a chain
+enum is not a real integration.
+
+This validates adapter selection and result consistency, not independently
+confirmed blockchain effects. Deployment caching and treasury-address helpers
+remain local PoC behavior. The launch orchestrator reports selection errors as
+failed launches before token-success/repo/task completion; its earlier registry
+creation is not rolled back by this change.
+
+## Privileged task operations
+
+Verification and payout initiation require explicit `CallerAuthorization` from
+the trusted host, in both memory and persistent implementations. Missing context
+denies by default. This changes callers that previously relied only on
+`actor_roles`, a supplied verifier ID or compute credits.
+
+```python
+from modules.foundups.agent_market.src.authorization import CallerAuthorization
+
+# Both inputs come from the authenticated host and approved grant policy.
+# They must not be copied from the submitted task/decision/profile payload.
+authority = CallerAuthorization(authenticated_subject, approved_frozen_role_grants)
+pipeline.verify_proof(task_id, decision, authorization=authority)
+# A treasury caller supplies its own exact FoundUp/treasury grant.
+pipeline.trigger_payout(task_id, treasury_subject, authorization=treasury_authority)
+```
+
+Grants are exact `(foundup_id, role)` pairs. Verification requires `verifier` and
+independence from the stored proof submitter/assignee; initiation requires
+`treasury`. Wildcards and administrator labels do not imply those permissions.
+Current context is required on retries as well. SQLite preserves its existing
+atomic operations and honest pending-payment state; this adds no settlement.
+The simulator bridge supplies explicitly configured simulation identities.
+The host must resolve current grants on every call; this class itself cannot
+detect expiry or revocation of a previously constructed context.
+
+An authenticated transport and signed/domain issuer remain separate integration
+work. This Python context is a host boundary, not a portable credential or a
+repository claim. See [the interface](INTERFACE.md#taskpipelineservice).
 
 ## OpenClaw Execution Arm Alignment
 OpenClaw remains the execution ingress for intent routing. FAM provides explicit contracts that OpenClaw/WRE can call for launch and execution flows.

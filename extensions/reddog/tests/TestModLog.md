@@ -1,3 +1,29 @@
+## FoundUps authorization closure — pre-verification inventory, 2026-10-25
+
+Reuse the eight existing Python generator cases and existing Node backend
+compatibility contract/preflight/recovery owners. The source change needs one
+additional runtime member, so the existing exact boundary accepts 1,470 and
+rejects 1,471; all LF/CRLF, byte, hash, path and staged-index assertions remain.
+Both digest pins must equal canonical generation, with source plus manifest and
+pins staged before the index test. No new test file or accepting fixture.
+This verifies source closure, not installed promotion or transaction authority.
+
+Fresh local results: all eight generator cases pass (80.23 s, two inherited
+inactive asyncio configuration warnings). The three existing Node entrypoints
+`test_backend_compatibility_contract.js`, `test_backend_compatibility_preflight.js`
+and `test_holoindex_blocked_request_recovery.js` exit0. Exact member/+1 and LF/CRLF
+size assertions remain effective. Python JUnit evidence is in external scratch
+`foundups-fx-manifest-f220070e36bf4ef69bb5c4184182eeb7/results.xml`.
+New-head hosted security/CI and independent source review remain required.
+
+After incorporating main `03035b4f5`, rerun all eight cases: eight pass in80.48s,
+two inherited warnings; the same three Node entrypoints exit0. Independent
+staged-source review verifies all1,470 normalized hashes and both pins without
+mismatch, while preserving main's verifier hash and exact ledger union. This
+combined result supersedes the preceding pre-merge fixture qualification.
+Fresh hosted gates remain required. See the FoundUps delivery plan for scope
+and external JUnit location.
+
 ## 2026-10-23 — Kids story route dependency closure
 
 Regenerated the backend manifest for the admitted kids story dispatch adapter and changed route/skill registry digests. Runtime file bound is now exactly 1,468; byte bounds remain unchanged. Pin `0bd8eb97c46f9f35072685d3a543c46433b7e24b76ea5038a65c1cb24d59a507`. Production admission and provider execution remain unactivated.

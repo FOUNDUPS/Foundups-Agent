@@ -1,5 +1,19 @@
 # Script test inventory
 
+## 2026-10-25 — FoundUps source-closure repair inventory
+
+Reuse all eight cases in `test_generate_reddog_backend_manifest.py`; only its
+canonical digest fixture changes after measured AST-only regeneration. Preserve
+independent generation, fixed LF/CRLF byte caps, executable/dynamic sentinel
+membership and staged-index source/hash consistency. The FoundUps delivery plan
+records WSP15 allocation before repair. Fresh results will be recorded after
+the coherent source/manifest/constants/test binding is staged.
+
+Fresh run after staging: eight passed, two inherited inactive asyncio config
+warnings, 80.23 seconds. No test body or oracle changed beyond the expected
+canonical digest pin. Node compatibility contract/preflight/recovery entrypoints
+also exit0. These are source-binding checks, not installed-runtime qualification.
+
 Existing suites inventoried before extending the security workflow contract (WSP 22/97).
 
 - `test_advisory_model_defensive_critic.py`: Focused defensive critic and abstention contracts.

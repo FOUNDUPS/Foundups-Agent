@@ -2,6 +2,14 @@
 
 Visual simulation of the autonomous FoundUp ecosystem.
 
+## FAM authorization compatibility — 2026-10-25
+
+The FAM bridge supplies explicit host-configured simulation identities
+`verifier_0` and `treasury_0` with exact per-FoundUp grants. Changing the wrapper's
+requested actor ID does not create matching authority. FAM enforces stored proof
+binding and independent verification; simulation completion is not on-chain
+settlement or production authentication. See [the FAM contract](../agent_market/INTERFACE.md#taskpipelineservice).
+
 ## Planning References
 - `modules/foundups/simulator/ROADMAP.md`
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md`

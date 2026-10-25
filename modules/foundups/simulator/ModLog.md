@@ -1,3 +1,17 @@
+## 2026-10-25 — Explicit simulation authority at the FAM bridge
+
+WSP00/6/11/15/22/50/84/97; shared P0B C4/I5/D5/Impact5=19/P0 allocation.
+The existing bridge passes fixed host simulation identities and exact FoundUp
+role grants to FAM's new default-deny verification/payout boundary. Existing
+lifecycle tests remain; impostor actor IDs and legacy-role overrides cannot
+supply authority. No schema, issuer, chain operation or new orchestration plane.
+
+Combined closure: 690 FAM/simulator passes, three unchanged SSE HTTP cases
+excluded, zero network attempts. Parent independently passed115 FAM authority/
+verification controls. Test inventory/isolation is in tests/TestModLog.md.
+Fresh simulator Markdown refresh occurred after compatibility authoring; source
+and callsites were inspected before. The timing gap is preserved in the receipt.
+
 ## 2026-10-22 — CA trust build protection
 
 WSP12/22/97. Container build dependency downloads now use the reviewed

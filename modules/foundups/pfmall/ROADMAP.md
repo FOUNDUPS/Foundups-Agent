@@ -1,5 +1,15 @@
 # p.fMALL Roadmap
 
+## FX1 public discovery — 2026-10-25
+
+- Implemented locally: homepage FX navigation to the existing public `/f/`
+  renderer, explicit declared-ticker framing and optional symbol search. No
+  registry, member catalog, router or trading surface is created.
+- Existing route/gateway test owners pass; details and limits are in
+  [tests/TestModLog.md](tests/TestModLog.md). Browser/deployment acceptance,
+  external project admission/claims, token confirmation and venue/liquidity
+  remain independent future layers.
+
 ## Current baseline
 
 - Implemented: manifest discovery/validation, catalog and tile projection,
