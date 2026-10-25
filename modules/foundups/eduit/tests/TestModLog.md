@@ -15,6 +15,8 @@
   Offline reload served game and input advanced; networking/viewport restored.
 - Independent audit: all 14 worker shell and 20 revision assets exist, no
   unresolved placeholders or material source/security/ownership blockers.
+- Existing Kids Episodes CI now includes all Story Time/PWA/review JavaScript
+  checks and the Python packaging tests; renderer/editor/registry checks retained.
 - Live provider URL redirects to /storytime/ and reports the same revision.
   Custom-domain DNS save awaits GoDaddy identity verification; HTTPS not verified.
 
