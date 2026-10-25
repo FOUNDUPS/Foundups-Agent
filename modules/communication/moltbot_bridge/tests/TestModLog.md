@@ -1,3 +1,34 @@
+## PR1792 producer/consumer candidate — 2026-10-25
+
+The existing target-verifier and FoundUp registry-schema selections pass 74
+cases with zero failures/skips in 4.27 seconds under CPython 3.12.10/pytest 8.0.0. Actual Node
+24.22.1 receipts carry Japanese metadata and a Unicode fixture root into the
+real Python verifier. Rehashed unknown/known-child relabels, changed evidence,
+ambiguous contexts, private paths, links and forged no-brand fields reject.
+Original verifier test functions remain; protected brand content is not copied.
+
+External evidence: `refresh/pr1792-core-source-freeze-repaired-20261025.json` and
+`pr1792-author-python-repaired-final-20261025/` in the existing reconciliation
+artifact root. An initial Windows audit-hook argument-format failure is retained;
+the corrected guard allows only exact Node producer and read-only Git commands.
+Fresh synthetic environment, Python audit hook and Node preload deny unrelated
+effects; instrumentation is not an OS sandbox. Windows Python uses a component
+link-check probe, while the Node suite exercises a real disposable junction.
+Independent review found four private filename variants and malformed
+Unicode requiring repair; these regressions are included in the fresh 74-case
+run, with all 12 source hashes unchanged before/after. The earlier 69-case pass
+was historically observed but its final output directory was partly overwritten
+by a rejected stale-output rerun after an author edit-script encoding error.
+It is not intact final acceptance evidence. The launcher now rejects existing
+output paths before execution; its negative control preserves all result hashes.
+Independent repaired-core receipt
+`refresh/pr1792-independent-core-review-20261025.json` accepts 36 Python cases
+with zero skips and 16 Node positive cases plus one Node causal control.
+Two Python causal controls detect removed private/evidence checks. These are
+separate case sets, not additions to author 74 or blinded evaluation. All 12
+core hashes are stable; instrumentation limits above still apply. Final CI,
+generated/index/package binding and hosted qualification remain pending.
+
 ## PR1648 shared transport qualification — 2026-10-23
 
 The frozen six-suite selection passes 130 cases with zero failures/skips in

@@ -1,5 +1,16 @@
 # FoundUps Domain
 
+## Optional reusable brand context — PR1792 candidate, 2026-10-25
+
+`brand_context.schema.json` describes a parent brand and child names/aliases.
+A registry entity may declare `brand_context_path`; absence keeps the existing
+contract. `public_discovery_alias` remains independent. Context is public
+branding data with `BRANDING_ONLY_NO_EXECUTION_AUTHORITY`; it does not add a
+registered principal, token, routing or mutation scope. The existing grounding
+and backend verifier validate it at use time. Synthetic schema and actual
+producer/consumer tests qualify the reusable core only. Production payloads,
+registry activation, website and skill propagation remain original PR1792 work.
+
 ## Canonical Planning References
 
 For active execution, use these first:

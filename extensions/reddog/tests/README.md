@@ -1,3 +1,20 @@
+## PR1792 reusable brand core selection — 2026-10-25
+
+Run `node extensions/reddog/tests/test_foundup_work_grounding.js` and the existing
+package-manifest/surface scripts explicitly; the current Node fast tier does
+not discover this grounding suite. Grounding tests snapshot public registry
+entities into owned fixtures rather than treating a dirty checkout as clean.
+They retain existing generic/unknown-reference, scope and integrity assertions,
+then exercise synthetic child identity, Japanese aliases, dirty/missing evidence,
+private-path preread denial, junction/symlink and hard-link rejection.
+
+The existing Python target-verifier suite invokes the actual Node producer;
+provide Node on PATH or `REDDOG_TEST_NODE`. Missing Node is a failure, not a skip.
+Backend/schema selection currently contains 74 cases. Qualification receipts
+bind exact case identities, normal imports and effect guards. Package surface
+also checks the Git index and must be run after the owner stages the candidate.
+No protected brand activation or deployed-host result is implied.
+
 ## Issuer composition closure count — 2026-10-16
 
 `node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduced

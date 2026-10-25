@@ -1781,6 +1781,125 @@ jobs:
             modules/infrastructure/shared_utilities/tests/test_runtime_operation_locking_posix.py \
             scripts/tests/test_generate_reddog_backend_manifest.py
 
+      - name: Set up Node for FoundUp grounding contracts
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.22.1'
+
+      - name: Run FoundUp grounding producer and consumer contracts
+        id: foundup_grounding
+        timeout-minutes: 4
+        shell: bash
+        run: |
+          set -euo pipefail
+          evidence="$RUNNER_TEMP/foundup-grounding"
+          mkdir -p "$evidence/home" "$evidence/temp"
+          env -i PATH="$PATH" HOME="$evidence/home" LANG=C.UTF-8 \
+            PYTHONDONTWRITEBYTECODE=1 PYTHON_DOTENV_DISABLED=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 \
+            TMP="$evidence/temp" TEMP="$evidence/temp" EVIDENCE="$evidence" \
+            REDDOG_TEST_NODE="$(command -v node)" python -B - <<'PY'
+          import hashlib, json, os, subprocess, sys
+          from pathlib import Path
+          root = Path.cwd()
+          out = Path(os.environ['EVIDENCE'])
+          sources = [
+              '.github/workflows/ci.yml',
+              'extensions/reddog/backend_compatibility_constants.js',
+              'extensions/reddog/backend_compatibility_filesystem.js',
+              'extensions/reddog/foundup_brand_context.js',
+              'extensions/reddog/foundup_target_phrase.js',
+              'extensions/reddog/foundup_work_grounding.js',
+              'extensions/reddog/foundup_work_runtime_binding.js',
+              'extensions/reddog/json_schema_subset_validator.js',
+              'extensions/reddog/target_read_path_policy.js',
+              'extensions/reddog/tests/test_foundup_work_grounding.js',
+              'modules/__init__.py',
+              'modules/communication/moltbot_bridge/src/__init__.py',
+              'modules/communication/moltbot_bridge/src/continuity_context.py',
+              'modules/communication/moltbot_bridge/src/openclaw_action_ledger.py',
+              'modules/communication/moltbot_bridge/src/openclaw_bootstrap_config.py',
+              'modules/communication/moltbot_bridge/src/openclaw_conversation_engine.py',
+              'modules/communication/moltbot_bridge/src/openclaw_dae.py',
+              'modules/communication/moltbot_bridge/src/openclaw_execution_bundle.py',
+              'modules/communication/moltbot_bridge/src/openclaw_execution_routes.py',
+              'modules/communication/moltbot_bridge/src/openclaw_identity_context.py',
+              'modules/communication/moltbot_bridge/src/openclaw_intent_planner.py',
+              'modules/communication/moltbot_bridge/src/openclaw_memory_queries.py',
+              'modules/communication/moltbot_bridge/src/openclaw_model_policy.py',
+              'modules/communication/moltbot_bridge/src/openclaw_permission_policy.py',
+              'modules/communication/moltbot_bridge/src/openclaw_process_loop.py',
+              'modules/communication/moltbot_bridge/src/openclaw_provider_chain.py',
+              'modules/communication/moltbot_bridge/src/openclaw_result_memory.py',
+              'modules/communication/moltbot_bridge/src/openclaw_runtime_support.py',
+              'modules/communication/moltbot_bridge/src/openclaw_social_controller.py',
+              'modules/communication/moltbot_bridge/src/openclaw_status_surface.py',
+              'modules/communication/moltbot_bridge/src/openclaw_turn_state.py',
+              'modules/communication/moltbot_bridge/src/reddog_registered_foundup_target_verifier.py',
+              'modules/communication/moltbot_bridge/tests/test_reddog_registered_foundup_target_verifier.py',
+              'modules/foundups/brand_context.schema.json',
+              'modules/foundups/foundup_registry.json',
+              'modules/foundups/foundup_registry.schema.json',
+              'modules/foundups/tests/test_foundup_registry_schema.py',
+          ]
+          def hashes():
+              return {p: hashlib.sha256((root/p).read_bytes().replace(b'\r\n', b'\n')).hexdigest() for p in sources}
+          before = hashes()
+          checkout = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          node = os.environ['REDDOG_TEST_NODE']
+          result = subprocess.run([node, 'extensions/reddog/tests/test_foundup_work_grounding.js'],
+              cwd=root, text=True, capture_output=True, timeout=120)
+          (out/'node.log').write_text(result.stdout + result.stderr, encoding='utf-8')
+          marker = 'PASS: registered FoundUp work grounding is generic, deterministic, and fail-closed'
+          node_ok = result.returncode == 0 and result.stdout.strip() == marker and not result.stderr.strip()
+          sys.path.insert(0, str(root))
+          import pytest
+          expected_count = 74
+          expected_digest = 'ccf7c60a4155e9a3930078bc9318adbb0cffc915f99c975b038b88b59d137a98'
+          class Evidence:
+              def __init__(self):
+                  self.collected, self.passed, self.skipped, self.failed = [], [], [], []
+              def pytest_collection_finish(self, session):
+                  self.collected = sorted(item.nodeid for item in session.items)
+                  digest = hashlib.sha256('\n'.join(self.collected).encode()).hexdigest()
+                  if len(self.collected) != expected_count or len(set(self.collected)) != expected_count or digest != expected_digest:
+                      raise pytest.UsageError('FoundUp grounding case inventory changed')
+              def pytest_runtest_logreport(self, report):
+                  if report.skipped: self.skipped.append(report.nodeid)
+                  if report.failed: self.failed.append(report.nodeid)
+                  if report.when == 'call' and report.passed: self.passed.append(report.nodeid)
+          evidence = Evidence()
+          code = int(pytest.main(['-q', '--tb=short', '-c', os.devnull, '--noconftest',
+              '--import-mode=importlib', '--rootdir='+str(root), '-o', 'pythonpath=.',
+              '-p', 'no:cacheprovider', '--basetemp='+str(out/'temp'/'pytest'),
+              '--junitxml='+str(out/'python.xml'),
+              'modules/communication/moltbot_bridge/tests/test_reddog_registered_foundup_target_verifier.py',
+              'modules/foundups/tests/test_foundup_registry_schema.py'], plugins=[evidence]))
+          after = hashes()
+          passed = (node_ok and code == 0 and not evidence.skipped and not evidence.failed
+                    and sorted(evidence.passed) == evidence.collected and len(evidence.passed) == expected_count
+                    and before == after)
+          report = dict(checkout_commit=checkout, python=sys.version, pytest=pytest.__version__,
+              node=subprocess.check_output([node, '--version'], text=True).strip(), node_exit=result.returncode,
+              node_success_marker=node_ok, pytest_exit=code, collected=evidence.collected,
+              passed=evidence.passed, skipped=evidence.skipped, failed=evidence.failed,
+              source_before=before, source_after=after, accepted=passed,
+              execution_scope='Trusted-source regression with cleared environment; not an OS sandbox or native author ticket')
+          (out/'receipt.json').write_text(json.dumps(report, indent=2)+'\n', encoding='utf-8')
+          raise SystemExit(0 if passed else 1)
+          PY
+
+      - name: Upload FoundUp grounding acceptance evidence
+        if: always() && steps.foundup_grounding.outcome != 'skipped'
+        uses: actions/upload-artifact@v4
+        with:
+          name: foundup-grounding-contracts
+          path: |
+            ${{ runner.temp }}/foundup-grounding/node.log
+            ${{ runner.temp }}/foundup-grounding/python.xml
+            ${{ runner.temp }}/foundup-grounding/receipt.json
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Run HoloIndex admitted recovery and lifecycle contracts
         timeout-minutes: 4
         env:

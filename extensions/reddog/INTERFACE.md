@@ -1,5 +1,28 @@
 # RedDog Interface
 
+## PR1792 reusable brand grounding candidate — 2026-10-25
+
+An optional registry `brand_context_path` names public, tracked JSON validated
+against `modules/foundups/brand_context.schema.json`. The existing resolver
+uses the declared parent/child names and aliases; `public_discovery_alias`
+retains its separate discovery meaning. The parent registry identity and
+manifest still determine mutation scope. Brand context grants no authority.
+
+Declared invalid/private paths, linked components, multiply linked files,
+untracked/dirty context or schema, duplicate child IDs and aliases belonging
+to different identities reject. Two selected child references are ambiguous.
+No-context legacy receipts remain valid; new fallback fields must agree with
+the parent registry. The backend rechecks current content and selected child
+against `matched_reference`. Its UTF-8 receipt hashing matches the existing
+Node producer for this schema, including Japanese strings; this is not a
+general cross-language canonical-JSON specification. File checks are use-time
+validation, not an atomic filesystem capability against hostile concurrent edits.
+
+The reusable helper is included through the existing package closure owner.
+The local candidate has 66 runtime members and 70 packaged files, with the
+unchanged 1 MiB package bound. Protected registry/payload, website and skill
+activation from original PR1792 remain separate and unqualified.
+
 ## PR841 backend closure boundary
 
 The exact runtime-file ceiling is 1,451, admitting only the newly imported

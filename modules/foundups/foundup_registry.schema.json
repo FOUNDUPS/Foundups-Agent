@@ -164,6 +164,10 @@
           "pattern": "^[a-z0-9_]+$",
           "description": "Canonical identifier (lowercase, underscores, digits)"
         },
+        "brand_context_path": {
+          "type": ["string", "null"],
+          "description": "Optional repo-relative brand context; branding only, no execution authority."
+        },
         "public_discovery_alias": {
           "type": "string",
           "pattern": "^[a-z0-9_]+$",

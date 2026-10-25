@@ -47,17 +47,17 @@ assert.deepStrictEqual(
   pkg.activationEvents
 );
 assert.deepStrictEqual(surface.deriveRuntimeFiles(), surface.EXPECTED_RUNTIME_FILES);
-assert.strictEqual(surface.EXPECTED_RUNTIME_FILES.length, 65);
-assert.strictEqual(surface.EXPECTED_PACKAGE_FILES.length, 69);
+assert.strictEqual(surface.EXPECTED_RUNTIME_FILES.length, 66);
+assert.strictEqual(surface.EXPECTED_PACKAGE_FILES.length, 70);
 const packageReceipt = surface.packageSurfaceReceipt(surface.EXPECTED_PACKAGE_FILES);
-assert.strictEqual(packageReceipt.file_count, 69);
+assert.strictEqual(packageReceipt.file_count, 70);
 assert(packageReceipt.raw_bytes > 0);
 assert.strictEqual(packageReceipt.raw_byte_cap, 1024 * 1024);
 assert.strictEqual(packageReceipt.within_cap, true);
 assert.strictEqual(packageReceipt.schema_version, 'reddog_package_surface_receipt.v2');
 assert.strictEqual(packageReceipt.text_eol_policy, 'reddog_package_eol_policy.v1');
 assert.strictEqual(packageReceipt.text_eol, 'lf');
-assert.strictEqual(packageReceipt.text_file_count, 68);
+assert.strictEqual(packageReceipt.text_file_count, 69);
 assert.strictEqual(packageReceipt.binary_file_count, 1);
 assert.match(packageReceipt.eol_policy_digest, /^sha256:[0-9a-f]{64}$/);
 assert.match(packageReceipt.content_digest, /^sha256:[0-9a-f]{64}$/);
