@@ -1,5 +1,30 @@
 # Mall homepage and About routing — 2026-10-25
 
+## Nomination links and current-main reconciliation allocation
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP22/50/84/97. Preserve reviewed Mall3767,
+its historical receipts/oracles and its unique product changes. Reconcile current
+main a44e7864 (including parallel scheduler work) before extending the UI.
+Merge only main's existing changes; preserve the exact ledger union, regenerate
+the existing registry/manifest and canonical digest pins if necessary. Keep1,471
+runtime members and all caps; review measured metadata rebindings separately.
+
+PR2207 is MERGED_VERIFIED_MAIN: its55-line nomination form and both documentation
+blobs equal reviewed aef3ac474 on main a44e7864. An unauthenticated browser reaches
+GitHub sign-in; the fully rendered form has not been inspected or submitted.
+After reconciliation add <=6 literal HTML-concat lines in renderShowcaseShell:
+fixed Nominate project and View nominations destinations, only on public index
+routes. GitHub owns deliberate submission and issue status; no local received,
+owner, admission, token or market state is inferred from a link or issue closure.
+
+Reuse the existing route VM/HTMLParser for <=80 added test lines covering index
+and detail/app paths; preserve every original route/auth/Move2Japan oracle.
+Extend only existing member interface/logs and this plan/root log. All changed
+owners remain within the original39-path PR scope; no new service, parser, catalog,
+provider or runtime member. Main-only paths remain inherited rather than new PR
+work. Require focused route tests, independent review, current publication gates
+and browser preview before production deployment. GitGuardian remains separate.
+
 ## Allocation before authoring
 
 Approved worker slice on `agent/foundups-mall-home-20261025`, base
