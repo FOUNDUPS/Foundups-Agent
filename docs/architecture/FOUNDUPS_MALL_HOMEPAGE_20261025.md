@@ -1,5 +1,23 @@
 # Mall homepage and About routing — 2026-10-25
 
+## Actual post-intake manifest bindings — before ledger edit
+
+WSP15 C1/I4/D4/Impact4=13/P1; WSP6/22/50/71/77/84/97. Actual candidate584fbad6d,
+hosted job121320364147 reports39 unreviewed manifest tree findings/136 reviewed;
+history0 unreviewed/3 reviewed,20 regressions pass. Root rehashes each source and
+reconstructs every exact prior mainfe approval;38 also match Mall9e. The client
+row differs in Mall, so no unchanged-Mall approval is claimed for that row.
+Before mutation require independent classification and exact39 fingerprint-set
+agreement. Append only those observed bindings to the existing2657 ordered prefix
+(planned2696); retain all other keys, scanner/rules/scope, source/oracles and pins.
+Budget amendment: this existing plan+18, root ModLog+14, ledger+39 rows; no new
+repository file, receipt rewrite, runtime/dependency change or incident action.
+Reuse the existing fingerprint/error regressions in the clean local profile;
+require fresh hosted tree/history scans and all current-head gates after append.
+Retrieval: Holo UNKNOWN/HEAD_MISMATCH/gaptrue; current gate/README and actual job
+metadata outrank stale index claims. Deduplicate39 identities; no missing owner
+contract; retain failed scan. No reindex/repair or semantic CURRENT claim.
+
 ## Post-intake main reconciliation — 2026-10-26, before mutation
 
 Self0102/architect/autonomous_trigger; WSP00 strict gate passed before retrieval.

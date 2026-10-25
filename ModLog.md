@@ -1,3 +1,16 @@
+## 2026-10-26 — Allocate actual post-intake manifest re-review
+
+WSP6/15/22/50/71/77/84/97;13/P1 before ledger mutation. Published Mall584fbad6d
+retains exact reviewed tree71a2 and protected historical artifacts. Actual hosted
+job121320364147 reports39 manifest tree findings, no unreviewed history;20 gate
+regressions pass. Root verifies each source/prior main approval; independent
+classification must agree before appending exactly39 to2657 (planned2696).
+Preserve ordered prefix/all other keys, scanner/rules/scope, product/oracles,
+runtime members/caps/pins and receipts. Reuse existing regressions; require fresh
+hosted/security. GitGuardian still reports only historical38958604; no external
+incident action or deployment. Allocation: existing Mall homepage plan; external
+evidence: post-intake-fe721d37. No new repository file or authority grant.
+
 ## 2026-10-26 — Reconcile Mall with authenticated-intake main
 
 WSP00/6/15/22/50/71/77/84/97;14/P1 allocation1d348fcba precedes mutation.
