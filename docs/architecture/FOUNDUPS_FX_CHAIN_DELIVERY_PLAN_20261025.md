@@ -2,6 +2,47 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Pitch skill publication allocation — 2026-10-26, before authoring
+
+WSP15 C2/I3/D4/Impact3=12/P2; WSP00/6/15/22/50/62/84/97.
+Parent main33f1442d76cca7fc084523355c6895964828258e; clean owned
+repository-observation worktree, agent/foundup-pitch-package-20261026.
+Need: the requested pitch/deck instruction already exists locally but is absent
+from main. Publish that owner and its discovery wrappers, correcting two stale
+references. This affordable local layer can proceed while higher-priority
+Mall/TestNet/codec GitGuardian holds remain unresolved; it does not clear them.
+
+Execution plane: local creative drafting by an instructed agent. Outcome is the
+vision; Solution nests PoC/Prototype/MVP; Pain describes obstacles to Solution.
+Preserve unknown stages, evidence/assumption separation, rendered-deck QA and
+truthful pending-media status. No executor, WRE registry, resident RedDog trigger,
+provider admission, paid generation, publication, claim, mint or reward grant.
+The current AntifaFM campaign prototype has distinct operations and grants;
+its former placeholder label and a missing local-only plan link must be corrected.
+
+Reuse the existing module Skillz and canonical .claude discovery mechanism;
+generate the byte-identical .agents mirror with the unchanged projection script.
+Budget: two wrappers<=24 lines each, module SKILLz<=150; this plan+60,
+module README+12/ModLog+16, root ModLog+16. Exactly seven paths; no other
+configuration, tests, dependencies, registries, manifest members, caps or pins.
+Stop and reallocate if generation changes an existing projection unexpectedly.
+
+Verification: fresh parent projection --check and unchanged existing18-case owner
+in the qualified external Python3.12.10/pytest9.0.3 clean process, preserving exact
+IDs/outcomes and any real-symlink capability skip. Then repeat after publication,
+validate both wrappers with the bundled skill validator, resolve local links,
+review the frozen seven-path candidate independently and require hosted gates.
+No new tests or package installs; local structural checks do not prove artifact
+generation, provider operation, runtime admission or OS/network isolation.
+Qwen/Gemma inference would add no evidence to this deterministic projection;
+attributed parallel source/test review supplies the useful challenge.
+
+Retrieval evaluation: Holo owner query returned HEAD_MISMATCH/UNKNOWN with an
+index gap; direct current source/docs replace it without reindexing or a CURRENT
+claim. Current campaign interfaces outrank old placeholder prose. Deduplicate
+wrappers into the module owner; module memory README and the legacy local plan
+are absent on main. Existing projection tests are the reusable contract.
+
 ## GitHub nomination review allocation — 2026-10-26, before authoring
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/84/97.
