@@ -586,3 +586,47 @@ updated docs agree. Both rejected drafts remain external. Review raw SHA256:
 Parent copies the exact reviewed receipt and case companion into
 `docs/architecture/receipts/`; hosted CI/security, final main reconciliation and
 dedicated PR publication/readback remain required. No new test run is claimed.
+
+## Hosted metadata and cross-platform binding follow-up
+
+Allocate C2/I4/D4/Impact4=14/P1 before further receipt or ledger changes.
+Hosted security job121070812778 reports 17 tracked-tree and the same 17 history
+contexts in the committed companion. Investigate exact whole-file/rule/line
+identities; no unknown finding, rule or path is approved. Keep that companion's
+Git LF blob frozen while parent and peer classify its recorded source hashes.
+
+Independent review also finds a packaging-domain limitation: the original
+Windows raw companion has 1,822,244 bytes / SHA256
+40c6465ebb1d66551797c5e30e65acf8e9c25718c82b99a2c4d3ebdd3709b530,
+while Git's committed LF blob has 1,770,340 bytes / SHA256
+63065bd6aaef171eced553b1163ac0cda3aff8fd8bd5324c14d54dce376b2776.
+JSON content is identical, and CRLF reconstruction matches exactly. The first
+published receipt binds host packaging bytes; it must not be reported as a
+Linux raw-file binding. Preserve that original provenance and add explicit
+committed Git LF integrity fields to the main receipt. This is metadata only;
+no underlying test run, case outcome, assertion or product source changes.
+
+GitGuardian separately flags the main receipt, incident38962564. Its exact
+location/value is not exposed by the check output. The portability repair and
+companion classification do not locate, approve or clear that separate hold;
+the existing pending GitGuardian access decision remains required.
+
+Parent and peer agree on exactly 17 companion source-SHA identities across 34
+descriptors. Twenty-six contexts rehash current raw sources; eight reconstruct
+the recorded Windows CRLF bytes of two older numeric sources from the preserved
+6fe Git LF blobs. This identifies metadata without attesting historical disk or
+execution. Append only those 17 to the 2,181 old ledger entries, 2,198 total.
+The companion remains byte-frozen, and scanner/rules/unknown findings are unchanged.
+Parent classification review SHA256:
+042bd59161d065352380d7a869535903ef2012af5d537719fb59360eb0b839dd.
+Peer classification review SHA256:
+4b710ca59de3ebb0aceef01aeaeb0947a35bc445d0643ede715472021729ff7e.
+
+Independent review passes the bounded main-receipt portability repair: only
+the inventory's explicit Git LF/host domains, hash-domain explanation and
+packaging bytes/chronology change. All source/test snapshots and case results
+stay unchanged; the original published host-bound receipt remains in history.
+Portability review SHA256:
+826d83576e145d973d618b88e7bcf61f8927f58027b6c2619000a66ded287e46.
+No new test run is claimed. Fresh hosted scans and GitGuardian review still gate
+merge; these metadata reviews provide no incident disposition.

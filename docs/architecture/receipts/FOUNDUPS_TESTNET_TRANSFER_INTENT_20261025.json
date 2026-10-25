@@ -278,11 +278,16 @@
   ],
   "exact_test_inventory": {
     "path": "docs/architecture/receipts/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.testcases.json",
-    "sha256": "40c6465ebb1d66551797c5e30e65acf8e9c25718c82b99a2c4d3ebdd3709b530",
+    "sha256": "63065bd6aaef171eced553b1163ac0cda3aff8fd8bd5324c14d54dce376b2776",
     "counts_overlap": true,
     "focused173_subset_of_final459": true,
     "first_and_final_agreed459_same_ordered_ids": true,
-    "format": "Per-run exact IDs, outcomes/phases and source-snapshot references; deduplicated source maps once in _source_snapshots."
+    "format": "Per-run exact IDs, outcomes/phases and source-snapshot references; deduplicated source maps once in _source_snapshots.",
+    "sha256_domain": "committed_Git_LF_blob",
+    "bytes": 1770340,
+    "packaged_host_raw_sha256": "40c6465ebb1d66551797c5e30e65acf8e9c25718c82b99a2c4d3ebdd3709b530",
+    "packaged_host_raw_bytes": 1822244,
+    "packaged_host_eol": "CRLF"
   },
   "source_snapshot": {
     "freeze_sha256": "b856ceac9217ad5e8fe5eca9e8927da1b708a54793a7582b6056937e0428d6dc",
@@ -459,7 +464,7 @@
     "qualified_all_sources_stable": true
   },
   "hash_domains": [
-    "Raw SHA-256 binds observed working bytes; LF-normalized hashes in freeze are separate and must not be substituted for raw Git/working hashes.",
+    "External raw SHA256 binds observed host bytes; source freeze LF-normalized digests are separate. Public companion integrity explicitly binds committed Git LF bytes, independent of checkout EOL conversion.",
     "Companion source-map references hash sorted compact UTF-8 JSON with ensure_ascii=False; actual source digest values remain raw bytes.",
     "Receipt/companion raw SHA-256 binds packaging bytes and does not prove host authority or historical execution."
   ],
@@ -619,12 +624,15 @@
   "artifact_packaging": {
     "format_source": "Existing published epoch/BTC WSP97 receipt plus exact-case companion; source maps deduplicated instead of repeated in every run.",
     "main_max_bytes": 262144,
-    "companion_bytes": 1822244,
+    "companion_bytes": 1770340,
     "correction_chronology": [
       "First and second external frozen drafts are retained intact in siblings portable_review_v1 and portable_review_v2; no runtime/test edits or reruns.",
       "Peer review found46 diagnostic source keys prefixed before Windows-separator normalization. Raw diagnostic receipt remains unchanged; companion _path_normalization records exact mapping and independent current raw-source equality for all46 normalized paths.",
       "First saved validator result used CRLF raw bytes (09edd27b547dda76523969ef319c9f9aefd667367ba7060bbaff92aa21eaffe5); packaging_checks had recorded its LF-normalized stdout SHA (bcc68cd4c5b689cbce96d7645eb3384ff971503ea988e7612f5eb960e2413e34). These are distinct domains, not validator disagreement. Fresh packaging checks must hash saved bytes explicitly.",
-      "Peer v2 review caught a repair regression: a shadowed local source path replaced12 run receipt descriptors/digests with source-file references. Raw receipts were never changed. V3 restores all12 descriptors and per-run receipt hashes against retained v1 and adds JSON receipt-kind/binding assertions."
-    ]
+      "Peer v2 review caught a repair regression: a shadowed local source path replaced12 run receipt descriptors/digests with source-file references. Raw receipts were never changed. V3 restores all12 descriptors and per-run receipt hashes against retained v1 and adds JSON receipt-kind/binding assertions.",
+      "Post-publication review found the v3 companion reference matched Windows CRLF host packaging bytes rather than the Git-normalized Linux file. Preserve the original raw SHA and byte count explicitly, and bind the unchanged committed companion through separate Git LF SHA/bytes. Original published v3 remains in Git history; no source/tests or execution evidence changed. This does not locate or clear the separate GitGuardian main-receipt incident."
+    ],
+    "companion_byte_domain": "committed_Git_LF_blob",
+    "host_packaging_companion_bytes": 1822244
   }
 }

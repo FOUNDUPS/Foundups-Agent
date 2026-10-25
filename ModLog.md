@@ -1,3 +1,13 @@
+## 2026-10-25 — TestNet evidence portability and exact metadata review
+
+WSP15/22/50/97; preallocated 14/P1. Preserve the companion's committed Git LF
+bytes and all source/test evidence. The main receipt now explicitly separates
+portable Git LF integrity from its original Windows raw packaging hash. Parent
+and peer approve only 17 recorded source-SHA fingerprints, retaining all 2,181
+old ledger entries (2,198 total). Both reviews and historical limits remain in
+the intent plan. No scanner rule, source behavior or unknown finding changes;
+the separate GitGuardian main-receipt incident remains unresolved.
+
 ## 2026-10-25 — Durable local TestNet probe preparation
 
 WSP00/6/11/15/22/50/62/97; runtime 16/P0, evidence/docs 14/P1. Add an explicit
