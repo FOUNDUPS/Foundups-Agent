@@ -1,5 +1,100 @@
 # Simulator Tests ModLog
 
+## 2026-10-25 — Derived source-binding qualification after reconciliation
+
+Original211 focused/513 simulator/21 independent runs remain at actual base
+b6d2cf316; those product tests were not rerun or relabeled after parent merged
+main f11d7559746 at d9a57ab1d. Fresh checks are canonical manifest --write/--check,
+the unchanged scripts/tests/test_generate_reddog_backend_manifest.py eight cases,
+and the existing Node backend compatibility contract/preflight/blocked recovery
+entrypoints. All pass; generator8 takes97.68s wrapper/96.64s pytest with two
+inherited inactive asyncio config warnings. Counts are not added to earlier
+product coverage and do not establish installed/runtime or real-chain behavior.
+
+Runtime member set stays1470 and only BTC/Mesa LF source digests change.
+All328KiB manifest,2MiB/source,32MiB total and1471-member rejection limits remain.
+The three existing manifest/pin files alone were staged for index consistency.
+All168 original raw simulator/FAM hashes still match. Qualification freezes1613
+files including existing extension JS and generator/pins as extra evidence;
+this does not expand runtime membership. Instrumented network/dotenv attempts0;
+Python/Node guards are not OS isolation.
+
+Exact commands, case IDs, warnings, staged delta and raw run receipts:
+C:/Users/user/AppData/Local/Temp/foundups-btc-source-closure-6b08022181194325a9f2eea110484734/.
+Prior epoch source-closure evidence retained JUnit8 but not exact argv, a preserved
+historical metadata gap. Current portable BTC receipt rebinds repository context
+to f11d7559 while preserving original b6 execution and parent merge provenance.
+The38 old reviewed metadata contexts have a proposal only; no scanner/ledger
+approval, source/member/cap expansion or additional test-coverage claim.
+
+## 2026-10-25 — BTC content/realm replay integrity,14/P1
+
+Pre-authoring plan: `docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md`.
+Only existing BTC/runtime test owners changed. Original unchanged baseline18 pass.
+Initial RED104 cases produced85 failures/19 passes:84 desired failures and one
+legacy-fixture SQL setup error. A separate read-only mode/path control also failed
+before product edits. Initial candidate105 produced104 passes plus that fixture
+setup error (13 values for12 columns), preserved rather than called product proof.
+
+After candidate authoring, the SQL fixture was corrected. Candidate bytes were
+saved externally; original source bytes were temporarily restored and the same
+105-case set produced86 failures/19 passes; finally restored exact candidate bytes.
+This is an effective corrected-fixture negative control AFTER candidate authoring,
+not retroactive test-first proof. Four later literal-string-subclass controls
+failed before their corresponding strict-type fix. All original artifacts remain.
+
+Transaction/response-loss and concurrent migration coverage exposed a real WAL
+initialization race: focused205 had204 passes/one SQLite BUSY failure. A bounded
+BUSY/LOCKED retry around journal initialization repaired it. First candidate then
+passed205 focused and507 affected simulator cases, with stable hashes and no
+guarded network. Parent review subsequently reproduced two independently valid
+current rows in an unsupported table without UNIQUE; replay selected one row.
+Six new schema controls all failed before constructor validation, then passed.
+Do not use the earlier205/507 as evidence for that repair.
+
+Final repaired source: **211 focused pass** (113 BTC+8 runtime+88 epoch+2 parameters),
+**513 simulator pass**,0 failures/skips and2 inherited inactive-asyncio warnings.
+The full run deselects exactly:
+
+- `test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key`
+- `test_sse_server.py::test_health_endpoint_denies_when_protected`
+- `test_sse_server.py::test_health_endpoint_allows_with_valid_invite`
+
+Independent source review and21 held-outs pass on the repaired freeze. An initial
+external probe had20 passes/one overly strict Windows path-spelling assertion:
+ordinary/extended Win32 spellings referred to the same physical SQLite file.
+The original receipt/script and4×8 samefile diagnostic are preserved; only that
+external oracle changed to physical file identity, then the exact21 IDs replayed.
+No product/test oracle was changed for it. No first-candidate independent held-outs
+executed; its preparation record explicitly records zero executed.
+
+All runs use qualified `O:/Foundups-Agent/.venv/Scripts/python.exe -B -X utf8`,
+disabled dotenv/plugin/cache/bytecode, HF/HOLO offline settings, external TEMP/DB/
+daemon paths and instrumented socket/DNS guards. Existing external FAM Holo/Qwen
+enrichment helpers return None; authorization/accounting/assertions are unchanged.
+Full closure hashes every simulator/FAM Python file; focused runs hash seven
+owned/adjacent sources/tests. These are Python guards, not OS sandbox proof.
+An initial full-runner preparation replacement error happened before pytest;
+`full_runner_setup_note.txt` preserves it. No product/test change resulted.
+
+External evidence root:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-integrity-66ec354025ab428fb077504226ef6662/`.
+Every run subdirectory stores exact commands, collected IDs/phase outcomes,
+warnings, source hashes, guard attempts and complete output:
+`baseline`, `red`, `red_config`, `green_initial`, `red_corrected`,
+`red_literal_types`, `green_focused`, `green_wal`, `green_freeze`,
+`simulator_closure`, `red_schema`, `green_schema`, `simulator_closure_schema`.
+Independent qualified receipt:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-independent-qualified-e27d3467bd534777a74ee3318f6c548a/receipt.json`.
+Parent supplied-schema witness:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-parent-schema-8hk6mqpt/receipt.json`.
+
+Public signatures and15 original BTC oracles remain; the non-mock coercion oracle
+is deliberately replaced and fixtures explicitly use current v2. No source
+authenticity/Merkle-entitlement, signing, broadcast, real finality or financial
+policy is added. Hosted CI, generated closure/security review and main readback
+for this candidate remain parent-owned.
+
 ## 2026-10-25 — P0C test-first epoch commitment integrity
 
 Final parent qualification of the repaired source:410 simulator cases pass in

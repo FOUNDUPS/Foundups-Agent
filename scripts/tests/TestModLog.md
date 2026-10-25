@@ -1,5 +1,17 @@
 # Script test inventory
 
+## 2026-10-25 — Combined Mall/BTC canonical bindings
+
+Reuse the exact existing8 generator cases after main6fe7eba4 joins Mallf3817bb7.
+All8 pass in83.23s, two inherited inactive asyncio configuration warnings, with
+both expected digest pins updated and all original parity/member/byte assertions
+retained. Canonical write/check and3 existing Node entrypoints also exit0.
+Zero instrumented network/dotenv attempts and stable1613-file evidence maps;
+1470 runtime membership is unchanged. External receipts retain exact IDs/argv
+in `foundups-mall-main-reconciliation-fbc3fb6b643c48e29068bcd480518961`.
+The merge remains uncommitted pending independent metadata review and parent
+publication gates; no historical Mall/BTC receipt is rewritten.
+
 ## 2026-10-25 — Mall gateway-source binding repair
 
 Hosted CI atf03bc5c83 exposed missing source parity. Fresh canonical generation
@@ -16,6 +28,31 @@ case, source member, cap or installed authority. Guarded external receipts retai
 exact8 IDs, commands, JUnit, source snapshots and zero instrumented network/
 dotenv attempts under `foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`.
 These Mall results do not reuse BTC evidence; fresh hosted gates remain required.
+
+## 2026-10-25 — Reconciled BTC/Mesa derived source closure
+
+Existing generator8 cases pass on merge d9a57ab1d over main f11d7559746,
+97.68s guarded wrapper/96.64s pytest, two inherited inactive asyncio warnings.
+Reuse all eight original case IDs and every oracle; only the existing expected
+canonical digest literal advances. Canonical generator --write and --check
+both pass. Manifest membership remains1470; only BTC connector/Mesa LF hashes
+change, with no generator, sentinel, member/+1 or byte-limit expansion.
+
+The three coordinated binding paths alone are staged: manifest, existing JS
+constant and Python test digest pin. Existing index test verifies all1470 staged
+source blobs plus the pin. Node compatibility/preflight/recovery entrypoints
+also exit0. Every corrected guard run reports zero network/dotenv-read attempts
+and stable1613 measured files (1470 runtime members plus existing extension JS
+and generator/pin evidence, not an installed-member increase).
+
+Exact observed commands,8 IDs, warnings, raw snapshots and outputs are external:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-source-closure-6b08022181194325a9f2eea110484734/`.
+The older epoch manifest folder retained JUnit8 but not original argv; no
+historical invocation was reconstructed. New commands use qualified Python
+-B/-Xutf8, external scratch, disabled plugin/bytecode/cache/dotenv and instrumented
+Python/Node entrypoints. This is source binding, not OS isolation, installed
+promotion or new BTC/chain/authentication coverage. WSP15 pre-allocation16/P0
+and separate unapproved38-metadata proposal14/P1 are in the BTC architecture plan.
 
 ## 2026-10-25 — Epoch ledger source binding
 

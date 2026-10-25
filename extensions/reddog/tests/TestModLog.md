@@ -1,3 +1,17 @@
+## Combined Mall/BTC closure — 2026-10-25
+
+Fresh merged-source canonical write/check exit0; all8 unchanged generator cases
+pass in83.23s with2 inherited inactive asyncio config warnings. Existing Node
+compatibility contract/preflight/blocked-request recovery entrypoints each exit0.
+No test oracle changes beyond the two existing digest pins. All1613 evidence
+files remain stable in-run; zero instrumented network/dotenv attempts. Preserve
+1470 acceptance/1471 rejection,328KiB LF/CRLF manifest,2MiB source and32MiB total
+caps. Actual manifest332458 LF/335471 CRLF bytes, runtime19657236 normalized bytes,
+maximum154924. Exact commands/IDs/JUnit/maps are external under
+`foundups-mall-main-reconciliation-fbc3fb6b643c48e29068bcd480518961`.
+These fresh checks qualify combined source closure, not installed promotion or
+browser/Hosting behavior. Independent38 metadata review and hosted gates remain.
+
 ## Mall closure qualification — 2026-10-25
 
 At the repaired f03bc5c83 Mall source, reuse8 unchanged generator cases and the
@@ -18,6 +32,30 @@ plugins/cache disabled and external scratch; guards do not establish OS isolatio
 External phase receipts retain exact argv,8 collected IDs, outcomes and hashes in
 `foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`. Hosted source/
 security scans, proposed38 metadata review and GitGuardian remain pending.
+
+## FoundUps BTC/Mesa source closure — 2026-10-25
+
+The same8 generator cases and three existing Node entrypoints pass on the
+reconciled source, with only the existing canonical Python digest literal changed.
+Node commands: test_backend_compatibility_contract.js,
+test_backend_compatibility_preflight.js and test_holoindex_blocked_request_recovery.js
+under extensions/reddog/tests; each exits0. Runtime1470/+1 and all LF/CRLF, source,
+total-byte, hash and path checks remain. Canonical generator --write/--check pass.
+
+New canonical digest is c97e153f6184bcc7f4232ae2d5b17e1af708ec2a104ce4119f549af4839d26cd;
+whole LF manifest hash is6b7144a0d847c7cc96aa095765c464667f0d684a2741cfbc532a227f6a7d6808.
+These are different hash domains. No members or other manifest keys changed;
+only BTC/Mesa source digests advance. Generator8 passes in97.68s wrapper/96.64s
+pytest with two inherited config warnings. Node3 results are commands, not three
+invented case counts; these checks overlap prior source qualification.
+
+External source snapshots and exact commands/results live under
+foundups-btc-source-closure-6b08022181194325a9f2eea110484734 in host scratch.
+All runs record stable1613 evidence files and zero Python/Node network or dotenv
+attempts; runtime membership remains1470. Guards are not an OS sandbox. No
+installed/runtime/chain/authentication result follows. Known38 metadata contexts
+are proposed for independent review only, with no ledger write or scanner run;
+fresh hosted security/CI and main readback remain parent gates.
 
 ## FoundUps epoch source closure — 2026-10-25
 

@@ -336,3 +336,73 @@ The allocated14/P1 review now permits appending exactly these38 metadata
 bindings to ledger1938, retaining every prior entry including About and three
 artifact-digest findings. Fresh current-head hosted checks remain required;
 GitGuardian's separate receipt finding remains unclassified and blocking.
+
+## Current-main reconciliation allocation before merge — 2026-10-25
+
+Reconcile Mall `f3817bb72d946eb44decf8ef1db58814797ad087` with verified main
+`6fe7eba424c17f7813043dfb104cd845617cab38`, tree
+`188c29aa4e38a5543a02d8f1971ef3549000d4f2`, under the same derived-closure
+WSP15 C2/I5/D5/Impact4=16/P0 allocation. Preserve all124 public/Firebase tree
+entries exactly at reviewed source `336c211cefac77b4d0c09a4c804bf085aa16b347`
+and all four BTC product/test blobs exactly at main. Resolve additive docs/logs
+and union every existing security-ledger entry and both Mall/BTC review proofs.
+Regenerate the existing canonical manifest to combine the gateway test and BTC/
+Mesa source hashes, retain1470 membership and all existing caps, and update only
+the two existing digest pins. Qualify the unchanged8 generator cases and3 Node
+entrypoints using prior guarded external-scratch execution, with fresh results.
+
+Use `FOUNDUPS_SKIP_POST_COMMIT=1` for every merge/commit. Leave this merge
+uncommitted until independent parent review of the new38 exact metadata
+proposals; separate14/P1 review is required before any new ledger binding.
+No historical receipt mutation, installed runtime promotion, public/source
+behavior changes, push, Hosting deployment or GitGuardian/configuration bypass.
+Exact pre-merge refs, blobs, query result and merge provenance remain external.
+
+### Combined candidate qualification before metadata review
+
+The merge uses the stated refs and remains uncommitted. Resolve five additive
+Markdown log conflicts by retaining both sides; retain both reviewed evidence
+JSONs and exact2030 existing security entries (1976 Mall/1988 main/1934 common).
+No new fingerprint is added. All124 public/Firebase index entries match reviewed
+336c211c; the four BTC source/test blobs match main. Historical portable receipts
+remain byte-identical to their committed owners.
+
+Canonical regeneration changes only two BTC/Mesa hash rows versus Mall and one
+gateway-test row versus main. The1470-member set and all caps remain unchanged.
+Manifest332458 LF/335471 CRLF bytes, normalized source total19657236 and maximum
+154924 are within existing limits. Both existing digest pins advance together;
+parent pin files were otherwise identical, and all original assertions remain.
+
+Fresh canonical write/check pass; all8 existing generator cases pass in83.23s,
+with2 inherited inactive asyncio warnings; all3 existing Node entrypoints exit0.
+1613-file evidence snapshots are stable and instrumented network/dotenv attempts
+are zero. These are source-closure checks, not a new simulator/browser/Hosting
+qualification or OS sandbox proof. Exact provenance, commands, IDs, JUnit, hashes
+and the external38 proposal are under
+`C:/Users/user/AppData/Local/Temp/foundups-mall-main-reconciliation-fbc3fb6b643c48e29068bcd480518961`.
+
+Mandatory owner query again returned authority-head mismatch/UNKNOWN/index gap;
+current source/docs and frozen Git refs supplied the explicit degraded fallback.
+No reindex or model execution. Two local packaging setup checks are preserved
+externally: an overbroad Markdown marker detector matched historical long equals
+separators before any write; a union hash assertion first compared Windows CRLF
+with expected LF, then explicit LF bytes matched the independent union proof.
+Neither was a test/product failure or grounds to weaken an oracle.
+
+The38 combined whole-manifest fingerprints remain PROPOSED, with unchanged
+contexts/source identities and UNASSESSED unknown findings. Parent independent
+review must precede any new ledger binding and merge commit. New-head hosted CI/
+security, unresolved GitGuardian and publication/main/readback remain required.
+
+## Parent independent metadata acceptance — 2026-10-25
+
+Independent review verifies all1470 indexed/working LF source digests, both
+pins, fixed caps, exact2030 ordered ledger union and38 exact known manifest
+metadata contexts/old approvals against main6fe and Mallf381. Exactly those38
+new bindings are appended,2030->2068. Existing proof sections remain; new review
+is additive. Public/Firebase bytes still equal tested preview336c. Historical
+d9 candidate provenance is not claimed as an ancestor across squash integration.
+No unknown finding, GitGuardian incident, scanner rule or path is exempted.
+Fresh hosted checks and the pending GitGuardian inspection remain required.
+Independent report rawSHA256:
+7dfb2d5a90c028aa9f6c77e36fbc2ca1211f556881c776b747caf52881d038be.

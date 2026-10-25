@@ -1,3 +1,29 @@
+## Parent independent metadata acceptance — 2026-10-25
+
+Independent review verifies all1470 indexed/working LF source digests, both
+pins, fixed caps, exact2030 ordered ledger union and38 exact known manifest
+metadata contexts/old approvals against main6fe and Mallf381. Exactly those38
+new bindings are appended,2030->2068. Existing proof sections remain; new review
+is additive. Public/Firebase bytes still equal tested preview336c. Historical
+d9 candidate provenance is not claimed as an ancestor across squash integration.
+No unknown finding, GitGuardian incident, scanner rule or path is exempted.
+Fresh hosted checks and the pending GitGuardian inspection remain required.
+Independent report rawSHA256:
+7dfb2d5a90c028aa9f6c77e36fbc2ca1211f556881c776b747caf52881d038be.
+
+## 2026-10-25 — Mall reconciliation with verified BTC main
+
+WSP15/22/50/97. Reconcile Mallf3817bb7 with main6fe7eba4, retaining both dated
+source/evidence histories and every existing security binding (2030 union).
+All124 public/Firebase index entries remain exact reviewed336c211c source;
+BTC connector/Mesa and their two test owners remain exact verified main blobs.
+Canonical closure combines both source sets with1470 members and unchanged caps.
+Fresh unchanged8 generator cases and3 Node entrypoints pass under instrumented
+external scratch. Exact refs/commands/hashes are in host scratch
+`foundups-mall-main-reconciliation-fbc3fb6b643c48e29068bcd480518961`.
+The38 new metadata fingerprints are external proposals, not approvals. Merge
+commit, current-head CI/security, GitGuardian and publication remain parent gates.
+
 ## 2026-10-25 — Play homepage and About routing candidate
 
 WSP00/15/22/50/97/102/104; existing15/P1 discovery allocation. Move the one
@@ -19,6 +45,26 @@ Prior layers: PR2188 merged92ae36900 and FX Hosting deployed/verified; PR2192
 epoch integrity merged7d3d7f643 after22 successful checks and exact-tree readback.
 Current reconciliation also preserves parallel Kids preview main7384448fb.
 No real chain, payout, reserve custody or whole-system completion is claimed.
+
+## 2026-10-25 — Mock BTC anchor replay integrity candidate
+
+WSP00/6/11/15/22/50/62/84/97;14/P1 optional mock infrastructure. Bind the
+existing connector's v2 payload and realm immutably; reject conflicting,
+legacy, unresolved and malformed stored evidence. Preserve exact-content
+force behavior and confirmation history, validate canonical SQLite constraints,
+and reject unsupported selected modes before database effects. Mesa never
+coerces an invalid selection into mock.
+
+Qualified211 focused cases are contained in513 simulator passes with three
+named SSE HTTP exclusions; independent21 held-outs pass. Counts overlap.
+The portable receipt retains fixture/runner/WAL/schema/Win32-probe corrections,
+original execution base and current-main reconciliation. Generated closure
+retains1470 members and fixed limits; eight generator cases and three Node
+entrypoints pass. Independently reviewed38 exact metadata bindings do not
+approve unknown findings; hosted security/CI and dedicated-PR/main gates remain.
+No real BTC publisher, custody, chain confirmation or reward transfer exists.
+This optional BTC layer is not required by a separate Algorand transfer pilot
+unless its evidence is explicitly selected as downstream authority.
 
 ## 2026-10-25 — RSI source closure and current input handoff
 

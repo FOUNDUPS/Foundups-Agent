@@ -1,13 +1,29 @@
 # ROADMAP - FoundUps Simulator
 
+## 2026-10-25 — Optional mock BTC replay integrity
+
+- [x] Local current-v2 content/realm identity, additive legacy classification,
+  canonical schema checks, atomic mock admission and honest confirmation gates.
+- [x] Preserve exact-content force behavior; replace unsafe selected-mode coercion.
+- [x] Repaired local focused211 and simulator513 pass, with the same3 named SSE
+  HTTP exclusions; independent21 held-outs/source review pass. Counts overlap.
+- [ ] Parent-owned generated closure, hosted security/CI, dedicated publication
+  and main readback for this BTC candidate.
+- [ ] Real BTC publishing/confirmation, legacy reconciliation and external-I/O
+  recovery remain unimplemented. This is not an Algorand transfer prerequisite
+  unless BTC evidence is explicitly chosen as downstream authority.
+
 ## 2026-10-25 — Epoch evidence integrity layer
 
 - [x] Local v2 claim/context binding, immutable snapshots, atomic exact epoch
   retries/conflict rejection and stable pre-settlement commitment preparation.
 - [x] Preserve original commitment oracles; repaired local focused106, independent41
   and affected simulator410 pass, with3 named SSE HTTP exclusions. Counts overlap.
-- [ ] Dedicated-PR hosted gates and verified main convergence.
-- [ ] Resolve old connector content/version migration before non-mock activation.
+- [x] Parent verified PR2192 hosted gates and squash-main convergence at
+  `7d3d7f64390762040bc2ca737ff0964d94d887c1`; this branch's local evidence still
+  originates at candidate `b6d2cf316`, not a new main execution claim.
+- [ ] Reconcile unclassified connector rows and design real effects/recovery
+  before non-mock activation; current local mock replay repair is above.
 - [ ] Durable source-receipt consumption, aggregate F_i issuance, CABR epoch
   allowance and funded/confirmed settlement remain separate accounting gates.
 
