@@ -197,3 +197,64 @@ on distinct authorized videos to avoid duplicate scheduling. Store successful
 verified outcomes through the existing `schedule_dba.py` / WRE PatternMemory
 owner when that integration is actually exercised; documentation alone is not
 an ingested training event.
+
+
+## Acting on today's uploads during a live session
+
+Treat source selection and publication timing as separate clocks. Freeze the
+requested source day in `Asia/Tokyo` as a half-open interval from local midnight
+to the next midnight. Convert actual upload timestamps to that zone; a Studio
+date rendered in another timezone is not enough to classify a midnight boundary.
+Use the explicit "today" override rather than the default last-hour window.
+
+1. Confirm channel and scan the requested Shorts/Videos surface. Select only
+   unlisted IDs whose verified upload time falls in the frozen source day.
+   Do not substitute older backlog, private drafts or already-scheduled IDs.
+   Record pagination coverage and uncertain timestamps; unresolved rows stay out.
+2. Freeze each scan's ID list before edits. Check the live schedule and the
+   checkpoint by video ID. Skip IDs already saved to the intended slot; inspect
+   mismatches instead of rescheduling them automatically.
+3. Analyze each selected clip before changing title/body. Speech-heavy clips use
+   captions/STT; music, visual and mixed clips may use authenticated Studio Ask
+   plus visual evidence. Apply the existing enhancement skill's provenance gate.
+   If evidence is absent, retain metadata and report that limit. Never copy a
+   livestream title or the previous clip's description as content evidence.
+4. Choose distinct titles from supported angles: a different question answered,
+   example shown, event, location or quoted statement actually present in that
+   clip. Keep titles factual and within 100 characters, descriptions within
+   5,000, with relevant hashtags and M2M provenance. Rewording an unsupported
+   claim does not make it grounded. If clips truly contain the same material,
+   do not invent differences merely to force title variety.
+5. Allocate collision-free future publication slots in the requested U.S.
+   audience timezone, converting to Studio's observed timezone for each date.
+   Honor the requested cadence; daylight-saving changes affect conversion.
+   Source day does not require publication on that same calendar day.
+6. Use Content-table scheduling for metadata-preserving items and the detail
+   page for authorized metadata edits. Independently read back saved ID, title,
+   body and slot as applicable before counting completion.
+
+### Bounded scanning and checkpoint contract
+
+A chat statement such as "while I am live" does not install an always-on worker.
+For an active-session scan, record start/end, source-day bounds, requested cadence
+and stop condition. Make a bounded scan, checkpoint, then rescan only at the
+agreed frequency while an actual runtime remains active. If no frequency was
+specified, use a single scan and report it; do not invent a background service.
+
+For a resident watch, establish the existing worker/service identity, installed
+revision, authenticated channel, reachable browser transport, scan interval,
+expiration/stream-end condition and durable checkpoint path before activation.
+Do not launch broad `main.py` merely to obtain this behavior: it also owns
+other actions. A stopped chat, detached browser or merged PR is not a worker
+heartbeat. Report pending items and the exact blocker if execution stops.
+
+Checkpoint each ID as discovered, evidence_ready, proposed, saved_verified or
+blocked, with source timestamp/zone, evidence provenance, metadata revision,
+requested/observed release slot, last observation and error. Keep private
+receipts off public repository history. Resume by reconciling live state and
+retry only missing/mismatched items; never replay all prior successful IDs.
+
+Current qualification: selected-ID scheduling and read-only preflight exist.
+The historical `publish_daily_clips` source and automatic today-window discovery
+remain unqualified here. These instructions define a bounded operator/handoff
+contract, not a newly deployed watcher or analytics-driven optimization loop.
