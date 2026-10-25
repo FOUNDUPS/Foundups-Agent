@@ -37,3 +37,13 @@ EDUIT is verified from its existing module and manifest. Ambiguous dictated phra
 ## First rendered episode
 
 The [local production command and autonomy audit](../../communication/youtube_shorts/docs/KIDS_LOCAL_PRODUCTION.md) generate the first three Little Shrew beats as actual deterministic animation, with original synthesized audio and timed captions. This local preview does not activate the autonomous production executor.
+
+## Story Time channel
+
+012 selected [**Us_Story_Time**](https://www.youtube.com/@Us_Story_Time) under the FoundUps YouTube account for headless Story Time. Use publisher key `us_story_time`; keep the existing `kids_episodes` identity. See the [channel binding and review upload contract](../../communication/youtube_shorts/docs/KIDS_LOCAL_PRODUCTION.md#us_story_time-publishing-destination--2026-10-26). FoundUps OAuth set 10 is selected; live channel identity and autonomous worker activation remain unverified.
+
+## EDUIT episode integration design
+
+See [EDUIT episode Mall architecture](../eduit/docs/EPISODE_MALL_ARCHITECTURE.md) for the specified shared-shell
+video/game tile, gestures, locale cues, parent area and next-session handoff.
+This is a design dependency, not evidence of an active EDUIT adapter.

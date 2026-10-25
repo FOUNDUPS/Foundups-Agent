@@ -63,7 +63,9 @@ def produce_preview(output_dir, *, preset="draft"):
               "status": "rendered_unreviewed", "execution_plane": "local_media_authoring",
               "method": "deterministic_2d_shared_svg_rig", "paid_calls": 0,
               "project_id": plan["project_id"], "episode_id": episode["episode_id"],
-              "plan_digest": plan["plan_digest"], "source_refs": plan["bible"]["reference_assets"],
+              "plan_digest": plan["plan_digest"],
+              "editorial_revision": "012 revision 2: two parents, three equal-sized children; early tremor wakes rightmost child only; faster root approach; others stay asleep",
+              "plan_relationship": "Local editorial override of first three beats; original nine-beat plan retained as source, not claimed to describe this revision exactly", "source_refs": plan["bible"]["reference_assets"],
               "source_code": {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                               for p in (Path(__file__), Path(animation.__file__), Path(renderer.__file__))},
               "assets_sha256": hashes, "result": result,

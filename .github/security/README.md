@@ -1,3 +1,13 @@
+## PR2215 Story Time manifest rebind — 2026-10-25
+
+Hosted job121251681796 reported39 manifest metadata findings. Author and
+independent reviewer each rehashed the referenced source, verified unchanged
+unique lines against main33f1442d76cca7fc084523355c6895964828258e, and reconstructed
+prior exact approvals. Append only these39 whole-file/rule/line bindings.
+No rules, exclusions, fingerprint algorithm or unknown findings changed.
+Evidence is appended to reviewed-kids-manifest-evidence.json. Fresh tree/history
+scans are required; source-hash review is not credential or deployment evidence.
+
 ## Move2Japan cadence manifest metadata review — 2026-10-25
 
 The checksum-pinned Gitleaks staged-tree scan reported 39 unreviewed manifest

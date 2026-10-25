@@ -60,6 +60,11 @@ historical completion prose. Deduplicate rename records, preserve both parents,
 and distinguish absent old requirements from main's new optional HTTP profile.
 Repeated long output was narrowed to owner inventories and exact path/hash maps.
 
+Local composition:448 identical ordered IDs/phase outcomes,445PASS/3 unchanged
+absent-media failures; generator8/Node3 pass. Actual261c9e65 retains1471/caps,
+registry1773/273 and all main-only/Mall product inputs. Separate reconciliation
+receipt carries the current overlay; historical receipts and external GG hold stay.
+
 ## Observed combined-manifest binding repair — 2026-10-26, before ledger edit
 
 WSP15 C1/I4/D4/Impact4=13/P1; WSP22/50/84/97. Actual hosted job121245486567

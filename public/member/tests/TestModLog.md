@@ -1,3 +1,14 @@
+## 2026-10-26 — Preserve current-main Mall composition
+
+Existing four-owner baseline/post results retain448 exact ordered IDs and phase
+outcomes:445PASS/3 unchanged absent-media failures, two reviewed config warnings,
+no skips/collection error/network attempts. No member/route VM body changes.
+Main's new EduIT files and Mall's prior public bodies remain intact; only the
+expected NAV metadata snapshot differs. Existing generator8/Node3 also pass.
+Evidence: external foundups-mall-reconcile-20261026/post-intake-fe721d37.
+Fresh independent/hosted/security and authenticated GitGuardian disposition remain
+required. This local merge overlay is not production or live media/auth evidence.
+
 ## 2026-10-25 | Actual About initialization exception
 
 Preview9d912 browser reports TypeError at About1951 when the absent legacy

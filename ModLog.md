@@ -1,13 +1,17 @@
-## 2026-10-26 — Allocate current-main Mall reconciliation
+## 2026-10-26 — Reconcile Mall with authenticated-intake main
 
-WSP00/6/15/22/50/71/77/84/97;14/P1 before mutation. Preserve existing MallPR2196
-and protected historical evidence; normally merge mainfe721d37 into Mall9e247f03.
-Keep all main-only work and Mall product/test blobs, combine existing approvals
-without new classification, and regenerate only existing registry/manifest pins.
-Fresh exact-ID four-owner, generator8/Node3 and independent source checks are
-required. Keep the PR draft until its existing GitGuardian incident is verified;
-no provider, deployment, signer, token or whole-system readiness follows.
-Full allocation: docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md.
+WSP00/6/15/22/50/71/77/84/97;14/P1 allocation1d348fcba precedes mutation.
+The owned combined candidate preserves mainfe721d37, including its auth/GitHub
+and eight new EduIT public files, plus Mall9e247f03 product/test behavior and three
+historical artifacts. Existing approvals compose2419+238=2657, no new approval.
+Actual generator261c9e65 retains1471 members/caps; registry1773/273 keeps both
+parents' rows. Baseline/post448 exact IDs and phase outcomes agree:445PASS/3FAIL,
+the same absent-media directories, two reviewed config warnings, no skips.
+Generator8 and Node3 pass;1614 selected source snapshots remain stable, with zero
+instrumented network/dotenv/write denials. Only the expected NAV snapshot changes.
+PR2196 stays draft pending independent final review, fresh hosted/security and
+verified GitGuardian disposition. No deployment, signer, token or overall readiness.
+Full allocation/evidence: docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md.
 
 ## 2026-10-26 — Mall current-main reconciliation
 
@@ -23,6 +27,69 @@ network/dotenv/write denials. The first overly broad preview precheck and aborte
 owned merge are retained; only two public logs differed, no served asset did.
 Independent review, fresh hosted/security and GitGuardian38958604 remain required
 before merge or production deployment. Detailed scope/evidence: Mall homepage plan.
+## 2026-10-26 — Hold intake promotion for patched optional dependencies
+
+All5134 hosted gates passed, but a separate public PyPI metadata audit found
+advisories for two original-profile packages. Do not use green functional/secret
+checks as a complete dependency-security claim. Pre-change15/P1 allocation3bbbb2
+selects a separate optional FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/
+cryptography50.0.2 profile; no shared/umbrella environment or product/oracle change.
+Same786 local cases pass; all25 resolved packages have zero advisories in the
+inspected registry metadata, with one reviewed HTTPX test-client warning.
+Independent inventory additionally found the bootstrap installer outside those25;
+allocationc6557db8b precedes its isolated/CI pip26.2.2 repair. Same786 cases pass;
+all26 installed distributions now show zero published registry advisories. Initial
+receipts remain historical. Independent requalification accepts the unchanged11
+held-outs plus separate optional-import-denied503 probe, all26 official reported
+wheel digests and final workflow source. The separate patched-profile receipt
+binds those reports and root786; fresh final-head gates/main readback remain
+required. No live identity, deployment or grant.
+
+## 2026-10-26 — Connect Clerk member identity to draft intake (initial profile)
+
+Allocated15/P1 at6efb68f50, frozen tests2e46fd2aa before product authoring.
+Existing PFMall FastAPI host now has a separate, default-unavailable proposal
+route; one genesis-owned Clerk wrapper reuses the unchanged body preflight and
+mapper. Real ephemeral RSA/HTTP tests pass locally786, including all695 original
+cases, with one reviewed baseline dependency warning. Independent11 held-outs
+and a separate optional-import-denied ASGI probe pass after the PEM repair;
+the initial configuration failure is retained. No live provider identity,
+deployed service, membership, online revocation,
+durable claim/registry/catalog, worker, financial signing or token effect is proved.
+Publication gates remain pending; see
+`docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md` and owner TestModLog.
+
+Hosted secrets gate reported two whole-receipt-bound instances of the public
+HTTP source hash. Independent reviewe54eec4c approved only those two bindings;
+append2417→2419 preserves the ordered prefix/all other ledger keys, scanner,
+rules, fingerprint algorithm and scan scope. Fresh final-head gates are still
+required. The three older GitGuardian incident records remain untouched.
+
+## 2026-10-26 — Bound GitHub observation HTTP for project admission
+
+WSP00/6/11/15/22/50/62/71/84/97;11/P2. Extend the existing client only: fixed
+API origin, GET/no redirects, identity/no decompression, counted2MiB JSON bodies,
+request and whole-observation timeouts, sanitized errors and cancellation cleanup.
+Legacy operations and public record/signature are preserved. Original135-case
+baseline passes; frozen desired RED146PASS/20FAIL; initial GREEN166PASS.
+Independent duplicate-encoding review: RED166PASS/1FAIL, then final167PASS.
+Existing1471 runtime members/caps stay fixed; client hash and two digest pins
+follow source. Hosted/security gates and main convergence remain separate.
+Hosted167PASS;39 observed manifest hash bindings require individual re-review;
+preserve the2378-row ledger prefix and fresh blocking scans after approved append.
+No repository claim, provider admission, work, token, signing or activation grant.
+See [FX delivery plan](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+
+## 2026-10-26 — Publish the existing FoundUp pitch/deck instruction
+
+WSP00/6/15/22/50/62/84/97;12/P2. Publish the existing module-owned pitch skill
+through canonical Claude discovery and the generated Codex mirror; preserve
+Outcome vision, Solution stages and Pain obstacles. Correct stale references.
+Unchanged projection owner passes17 with one existing Windows symlink capability
+skip, before and after; both wrappers validate. No runtime, registry, provider,
+paid generation, social/chain action or security-gate bypass. Mall/TestNet/codec
+holds remain separate. Scope, current video-model research and remaining gates:
+[FX delivery plan](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
 
 ## 2026-10-26 — Connect project nominations to review drafts
 

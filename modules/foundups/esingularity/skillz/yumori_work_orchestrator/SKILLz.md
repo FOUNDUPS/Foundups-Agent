@@ -1,7 +1,7 @@
 ---
 name: yumori_work_orchestrator
 description: Convert 012/Red Dog YUMORI planning conversations into a verified, deduplicated, WSP 15-ranked backlog and bounded ChatGPT Work / RedDog handoff, including a governed capital-network expansion workflow.
-version: 0.2.0
+version: 0.2.1
 author: 0102
 agents: [0102, qwen, gemma]
 primary_agent: 0102
@@ -69,6 +69,17 @@ Reconstruct current state before every planning/execution cycle from:
 Never infer "not done" from absence in chat. Never turn a stale backlog row into authority
 for an external effect.
 
+
+## Delegated 0102 operating mode — 2026-10-26
+
+The principal delegates partner research, Japanese stakeholder coordination, Gmail
+triage and continuity recovery to 0102. Read the canonical
+[`YUMORI_RESIDENT_0102_OPERATOR_HANDOFF_20261026.md`](../../docs/YUMORI_RESIDENT_0102_OPERATOR_HANDOFF_20261026.md)
+before proposing a resident cycle or external message. It defines distinct truthful
+AI-operator versus human/committee voices, budgets, privacy, and acceptance gates.
+This **does not** certify an installed or running service. Existing #1779 autonomous
+sender HOLD and all other effect boundaries remain in force. Use the existing Red Dog /
+OpenClaw control plane; Hermes is a replaceable sandbox worker, not a second daemon.
 
 ## Resident RSI canary — target autonomous loop
 

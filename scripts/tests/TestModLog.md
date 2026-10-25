@@ -1,5 +1,14 @@
 # Script test inventory
 
+## 2026-10-26 — Post-intake Mall source binding
+
+Allocation1d348fcba reuses all8 generator cases:8PASS, two reviewed inactive
+asyncio-config warnings. Actual261c9e65 keeps1471 members/caps and only updates
+the two existing pin literals. Three Node commands also exit0;1614 snapshots
+stay stable with zero instrumented network/dotenv/write denials. Registry1773/273
+retains both parents' rows. Evidence: external post-intake-fe721d37. No new oracle,
+runtime grant, incident disposition or release qualification follows.
+
 ## 2026-10-26 — Mall/current-main source binding
 
 The unchanged eight generator cases pass in79.89s after staging actual combined

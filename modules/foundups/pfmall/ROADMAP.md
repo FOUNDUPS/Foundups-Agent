@@ -1,5 +1,19 @@
 # p.fMALL Roadmap
 
+## Authenticated member draft component — 2026-10-26
+
+Locally implemented under15/P1 allocation: explicitly configured Clerk bearer
+verification at `POST /pfmall/proposals`, delegated to the existing genesis
+preflight/mapper. Default503; no client flags/cookies/UID authority. Qualification
+and publication are tracked in tests/TestModLog and the dedicated PR. This is
+not a deployed public claim host or durable project admission.
+
+Next: bind independently administered provider/issuer/origin/public key and prove
+one real member session in the selected deployed host; define current-session/
+revocation and abuse policy. Then issue a fresh repository challenge and persist
+its consumption plus immutable receipt atomically in the selected intake owner.
+Preserve draft versus membership/claim/issuer/work/token authority separation.
+Do not attach an inactive browser form or infer live authority from offline RSA.
 ## Mall home and About — 2026-10-25
 
 - Local source candidate: reuse the public directory at `/` with Play framing;

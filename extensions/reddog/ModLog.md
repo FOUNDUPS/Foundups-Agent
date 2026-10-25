@@ -1,3 +1,12 @@
+## Post-intake Mall source binding — 2026-10-26
+
+Allocation1d348fcba,14/P1. Actual canonical261c9e65 binds mainfe721d37 uploader
+and GitHub source with the existing Mall gateway row. All1471 members and caps
+stay fixed; only existing digest literals change. Generator8 and Node3 pass with
+1614 stable snapshots and zero instrumented network/dotenv/write denials.
+Evidence: external post-intake-fe721d37. No new runtime authority or test oracle;
+independent final, hosted/security and authenticated incident disposition remain.
+
 ## Mall/current-main source binding — 2026-10-26
 
 WSP6/15/22/50/97; preallocated14/P1. Combine main's GitHub client/six scheduler

@@ -22,7 +22,7 @@ WIDTH, HEIGHT, FPS = 960, 540, 30
 
 
 class ShrewScene:
-    """One fixed set and six instances of the same rig, sampled by absolute time."""
+    """One fixed set and five instances of the same rig, sampled by absolute time."""
 
     def __init__(self, rig_path):
         root = ET.fromstring(Path(rig_path).read_bytes())
@@ -32,40 +32,45 @@ class ShrewScene:
         if not math.isfinite(seconds) or not 0 <= seconds < 15:
             raise ValueError("Only first-episode times in [0, 15) are supported")
         t = seconds
-        # Smooth motion reaches the pocket before the third shot; no teleport.
-        progress = min(1, max(0, (t - 5) / 4))
+        # Revision 2: a brief tremor wakes only the rightmost of three children.
+        progress = min(1, max(0, (t - 3.2) / 2.3))
         progress = progress * progress * (3 - 2 * progress)
-        hero_x = 510 + 180 * progress
-        hero_y = 295 - (3 * math.sin((t - 5) * 5) if 5 < t < 9 else 0)
-        family_expression = "surprised" if t >= 10.4 else "sleepy"
-        hero_expression = "sleepy" if t < 5 else "neutral"
+        hero_x = 350 + 410 * progress
+        hero_y = 346 - (4 * abs(math.sin((t - 3.2) * 13)) if 3.2 < t < 5.5 else 0)
+        hero_expression = "sleepy" if t < 2.1 else "neutral"
+        tremor = 2.5 * math.sin(t * 42) * math.sin(math.pi * (t - 1) / .9) if 1 < t < 1.9 else 0
         bodies = []
         placements = [(75, 202, 1.12), (290, 192, 1.2),
-                      (120, 346, .42), (235, 346, .42), (350, 346, .42),
-                      (hero_x, hero_y, .85)]
+                      (120, 346, .42), (235, 346, .42), (hero_x, hero_y, .42)]
         for i, (x, y, scale) in enumerate(placements):
-            expression = hero_expression if i == 5 else family_expression
-            if i in (2, 3, 4):
-                expression = "sleepy"
+            expression = hero_expression if i == 4 else "sleepy"
             breathe = 1.3 * math.sin(t * math.pi + i * .4)
-            tilt = 3 * math.sin((t - 5) * 4) if i == 5 and 5 < t < 9 else 0
+            tilt = 0
+            if i == 4:
+                if 1.9 < t < 3.2:
+                    tilt = 8 * math.sin((t - 1.9) * 16) * math.sin(math.pi * (t - 1.9) / 1.3)
+                elif 3.2 <= t < 5.5:
+                    tilt = 4 * math.sin((t - 3.2) * 13)
+                elif 5.5 <= t < 14:
+                    tilt = 3 * max(0, math.sin((t - 5.5) * 7))
             bodies.append(f'<g data-character="{i}" transform="translate({x:.3f},{y+breathe:.3f}) '
                           f'scale({scale}) rotate({tilt:.3f},91,100)">'
                           f'<use href="#{expression}" xlink:href="#{expression}"/></g>')
         pebbles = []
         for i, x in enumerate((490, 555, 620)):
-            bounce = 8 * abs(math.sin((t - 10) * math.pi * 2)) if t >= 10 else 0
+            bounce = 3 * abs(tremor)
             pebbles.append(f'<ellipse cx="{x}" cy="{416-bounce:.3f}" rx="{6+i}" ry="4" fill="#9C724F"/>')
         return (f'<svg xmlns="{NS}" xmlns:xlink="http://www.w3.org/1999/xlink" '
                 f'width="{WIDTH}" height="{HEIGHT}" viewBox="0 0 {WIDTH} {HEIGHT}">{self.defs}'
                 '<rect width="960" height="540" fill="#D9B78B"/>'
+                f'<g transform="translate({tremor:.3f},0)">'
                 '<path d="M30 430 L30 260 Q30 95 230 100 L610 100 Q725 100 730 230 '
                 'Q900 200 930 325 L930 430 Z" fill="#FFF4D9"/>'
                 '<path d="M30 430 H930" stroke="#9C724F" stroke-width="5"/>'
                 '<path d="M850 235 Q825 290 834 370 M839 302 Q805 275 797 292 '
                 'M839 284 Q868 255 877 275" fill="none" stroke="#789468" '
                 'stroke-width="7" stroke-linecap="round"/>'
-                + "".join(pebbles + bodies) + '</svg>')
+                + "".join(pebbles + bodies) + '</g></svg>')
 
     def frame(self, seconds):
         png = cairosvg.svg2png(bytestring=self.svg(seconds).encode())
@@ -93,7 +98,7 @@ def render_shot(scene, beat_index, output):
         os.link(temp / "shot.mp4", output)
 
 
-def compose_audio(output):
+def compose_audio(output, *, stomp=False):
     """Original 120 BPM flute-like score plus quiet synthesized snore/sniff/rumble.
 
     No sampled recordings, voices or borrowed melody. Returns actual cue windows.
@@ -115,22 +120,40 @@ def compose_audio(output):
         tone(start, .8, 440 * 2 ** ((note - 69) / 12), .10)
     for start in np.arange(0, 10, .5):
         tone(float(start), .08, 180, .035)
-    for start in (1.1, 3.1):
+    for start in (.15,):
         tone(start, .65, 115, .08)
         tone(start, .65, 145, .025)
-    for start in (5.8, 7.3, 8.3):
+    for start in ((5.8, 6.3, 6.8, 8.3, 8.8, 9.3) if stomp else (5.8, 6.3, 6.8, 8.3, 8.8, 9.3, 11.3, 11.8, 12.3)):
         n = int(.22 * rate)
         noise = rng.normal(0, .08, n)
         noise = np.convolve(noise, np.ones(8) / 8, mode="same")
         audio[int(start*rate):int(start*rate)+n] += noise * np.sin(np.linspace(0, np.pi, n)) ** 2
-    tone(10.2, 2.4, 65, .10)
-    tone(10.2, 2.4, 83, .045)
+    tone(1.0, .9, 65, .08)
+    tone(1.0, .9, 83, .035)
+    if stomp:
+        # Three original foley layers: foot landing, chamber crunch, soil squish.
+        tone(10.0, .35, 58, .12)
+        tone(10.0, .28, 87, .04)
+        # Muffled earth crunch, timed to the shared scene's instant collapse.
+        tone(10.56, .32, 75, .10)
+        n = int(.28 * rate)
+        crunch = rng.normal(0, .10, n)
+        crunch = np.convolve(crunch, np.ones(12) / 12, mode="same")
+        envelope = np.sin(np.linspace(0, np.pi, n)) ** 2
+        audio[int(10.56*rate):int(10.56*rate)+n] += crunch * envelope
+        n = int(.4 * rate)
+        t = np.arange(n) / rate
+        squash = np.sin(2 * np.pi * (180*t - 125*t*t))
+        audio[int(10.82*rate):int(10.82*rate)+n] += .06 * squash * np.sin(np.linspace(0, np.pi, n))**2
     # Leave headroom, never normalize a quiet event into a startling peak.
     if np.max(np.abs(audio)) >= .8:
         raise ValueError("Unexpected soundtrack peak")
     with Path(output).open("xb") as target, wave.open(target, "wb") as wav:
         wav.setparams((1, 2, rate, len(audio), "NONE", "not compressed"))
         wav.writeframes((audio * 32767).astype("<i2").tobytes())
-    return [{"start": 1.1, "end": 3.8, "text": "[soft snoring]"},
-            {"start": 5.8, "end": 8.6, "text": "[sniff, sniff]"},
-            {"start": 10.2, "end": 12.6, "text": "[gentle rumble]"}]
+    cues = [{"start": .1, "end": .9, "text": "[soft snoring]"},
+            {"start": 1.0, "end": 1.9, "text": "[gentle rumble]"},
+            {"start": 5.8, "end": 7.2, "text": "[sniff, sniff, sniff]"},
+            {"start": 8.3, "end": 9.7, "text": "[sniff, sniff, sniff]"},
+            {"start": 11.3, "end": 12.7, "text": "[sniff, sniff, sniff]"}]
+    return cues[:-1] + [{"start": 10, "end": 10.5, "text": "[stomp]"}, {"start": 10.56, "end": 10.82, "text": "[crunch]"}, {"start": 10.82, "end": 11.4, "text": "[squish]"}] if stomp else cues

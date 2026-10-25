@@ -1,5 +1,86 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Post-intake main reconciliation, existing owners
+
+Reuse the four unchanged gateway/terms/media/route owners under allocation1d348fcba.
+Credential-free Python3.12.10/pytest9.0.3/Node24.11.1; baseline1fe9a9575 and
+staged mainfe721d37 merge both collect448, with identical ordered IDs and phase
+outcomes:445PASS/3FAIL/0SKIP, no collection error. Same three absent media dirs
+and two unknown asyncio-config warnings remain; no placeholder/filter/oracle
+change. Product snapshots agree except the explicitly combined NAV metadata.
+No instrumented Python/Node attempts; each run's source stays stable. Logs,
+exact IDs and composition proof: external post-intake-fe721d37. Generator8/Node3
+pass separately; no OS isolation, provider, deployment or release claim.
+
+## 2026-10-26 — Patched optional HTTP profile qualification
+
+Do not promote the initial profile below: public PyPI metadata found published
+advisories in its Starlette0.50.0 and cryptography46.0.7. This is package evidence,
+not proof that the selected JSON/RSA path was exploitable. After pre-change
+allocation3bbbb2ee4, qualify a separate environment with FastAPI0.162.0,
+Starlette1.10.0, PyJWT2.15.1 and cryptography50.0.2. The original environment,
+failures, scanner bindings and V1 receipt remain unchanged historical evidence.
+
+All786 identical cases pass locally, retaining all695 original IDs/outcomes,
+with zero failure/error/skip. The old AnyIO alias warning is gone; one new
+Starlette HTTPX test-client deprecation is explicitly reviewed, with no warning
+filter or changed test expectation. All25 newly resolved development packages
+have zero published advisories in the inspected public registry snapshot. A
+separate installed-inventory comparison found bootstrap pip25.0.1 outside those
+25 packages, with published advisories. Pre-change allocationc6557db8b authorizes
+repair only to pip26.2.2 locally and in existing CI; separate acquisition report
+retained. Identical786 cases pass again, with all26 installed distributions now
+showing zero published registry advisories. This does not certify installed
+binaries/platforms or whole-system security.
+Independent profile review accepts all26 reported official wheel digests and
+metadata contracts, unchanged11 held-outs and separate optional-import-denied
+actual-ASGI503. Separate static review accepts the final workflow/inventory line.
+Both reports are bound by the patched-profile receipt. Exact-head hosted/security/
+main gates remain required. Product logic, original and new test bodies, legacy HMAC and the
+resident manifest are unchanged. Full details: current allocation and the
+patched-profile receipt, superseding the V1 environment for this component.
+
+## 2026-10-26 — Member draft intake, test-first allocation
+
+The distinct `test_clerk_proposal_intake.py` owner covers real ephemeral RSA
+signatures through the actual FastAPI route, body-before-auth ordering, bearer/
+issuer/origin/time/session policy, wire caps, generic rejection and identity
+minimization. Existing HTTP/nomination/HMAC/mapper/transport/validator owners are
+unchanged. Allocation6efb68f50 precedes tests and product authoring.
+Credential-free Python3.12.10/pytest9.0.3/PyJWT2.15.1/cryptography46.0.7/
+FastAPI0.128.0/Starlette0.50.0/httpx0.28.1 baseline695PASS. Initial80-case RED:
+695PASS/2FAIL/78ERROR (missing adapter/route). Final frozen87-case RED at2e46fd2aa
+is695PASS/2FAIL/85ERROR; product's first GREEN is782PASS, no failures/errors/skips,
+with two warnings: baseline Starlette/AnyIO deprecated alias and a new short
+synthetic HMAC fixture. Increase only that rejection fixture's key length to
+remove the incidental warning; no assertion/oracle changes or warning filters.
+The one baseline dependency warning remains reviewed, not silently omitted.
+All695 original IDs/outcomes remain present. These scopes overlap;
+do not sum counts. The five boundary additions and two reviewer-requested act
+cases precede product authoring; earlier RED runs remain retained.
+Logs/JUnit/exact cases/source hashes are external under
+`foundups-member-intake-20261026`. No live identity, deployment, OS confinement
+or full-repository promotion claim. WSP6/22/50/84/97.
+
+Independent11-function ASGI/RSA review found public-PEM trailing private-material
+acceptance (10PASS/1FAIL), with a separate missing-optional-dependency import/503
+probe passing. Freeze initial productfff44de99; add three rejection regressions
+plus CRLF positive before repair. Their actual RED is783PASS/3FAIL, no errors/
+skips, with the one reviewed baseline dependency warning. No original test oracle
+or failure history is removed. This adds no bearer/identity or live exposure claim.
+
+Repair6e9b13da requires one canonical public SubjectPublicKeyInfo PEM, accepts
+CRLF/omitted final newline, rejects extra documents/material and stores only the
+canonical public text. Final local786PASS/0FAIL/0ERROR/0SKIP, one baseline warning;
+all695 parent IDs/outcomes retained. Identical independent held-out bytes now
+11/11PASS; separate fresh optional-import-denied ASGI503 probePASS. All13 selected
+source hashes stay stable. Final report SHA256
+`d49d1cfdd1d7a929cfe703857bd5b64c57fda3b5e635e9363b88ab4e406d5a79`.
+Existing manifest8 and Node3 commands pass with1615 source hashes unchanged;
+they bind their recorded allocation-HEAD/overlay, not a fresh full-repository or
+installed-runtime qualification. Canonical registry1773/273 quarantine; no old
+test removal, quarantine, skip or warning filter. Exact-head hosted/security and
+main convergence remain separate from these local results.
 ## 2026-10-25 — Root Play/About ownership and namespace-safe worker rollout
 
 Reused the existing three gateway/media owners and member route VM. Canonical

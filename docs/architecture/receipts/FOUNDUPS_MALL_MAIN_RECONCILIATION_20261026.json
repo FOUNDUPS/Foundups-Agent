@@ -1,0 +1,257 @@
+{
+  "schema": "foundups-mall-current-main-reconciliation-v1",
+  "status": "local-staged-composition-qualified-with-three-unchanged-media-failures",
+  "recorded_date": "2026-10-26",
+  "refs": {
+    "existing_pr": "https://github.com/FOUNDUPS/Foundups-Agent/pull/2196",
+    "mall_product_parent": "9e247f0327accf7aeef78cb3f21dbfd4d9f036c2",
+    "main_parent": "fe721d3778969f950dde3b291cf24724d018ee7d",
+    "prechange_allocation_commit": "1d348fcba",
+    "navigation_exception_allocation_commit": "969f8e2efea1c7af35d203c3f1a2a29b945593c4",
+    "execution_head_with_staged_main_overlay": "969f8e2efea1c7af35d203c3f1a2a29b945593c4",
+    "verified_product_tree_before_owner_log_updates": "cd08ee94addf9fab4cb627b5507e7a3d6c81a988",
+    "owner_documented_tree_before_this_receipt": "094269c857d0a1485e49193f94f924418da522fb",
+    "tree_scope": "Local staged objects; not a committed main revision or hosted replay."
+  },
+  "scope": {
+    "wsp15": "C2/I4/D4/Impact4=14/P1 before mutation",
+    "product_paths_rename_aware": 39,
+    "maximum_with_this_receipt_rename_aware": 40,
+    "maximum_physical_paths": 41,
+    "main_only_entries_preserved": true,
+    "main_eduit_public_assets_preserved": 8,
+    "existing_mall_product_and_test_bodies_preserved": true,
+    "permitted_metadata_exceptions": [
+      "combined NAVIGATION entries",
+      "two actual manifest digest literals"
+    ]
+  },
+  "behavior": {
+    "runtime": "O:\\Foundups-Agent\\.venv\\Scripts\\python.exe",
+    "existing_owner_files": 4,
+    "collected": 448,
+    "summary": {
+      "passed": 445,
+      "failed": 3,
+      "skipped": 0
+    },
+    "ordered_ids_and_all_phase_outcomes_equal_to_baseline": true,
+    "unchanged_failed_ids": [
+      "modules/foundups/pfmall/tests/test_video_mall_media_delivery.py::TestMediaDirectoryConvention::test_member_posters_dir_exists",
+      "modules/foundups/pfmall/tests/test_video_mall_media_delivery.py::TestMediaDirectoryConvention::test_member_thumbs_dir_exists",
+      "modules/foundups/pfmall/tests/test_video_mall_media_delivery.py::TestMediaDirectoryConvention::test_root_thumbs_dir_exists"
+    ],
+    "warnings": [
+      {
+        "category": "PytestConfigWarning",
+        "message": "Unknown config option: asyncio_default_fixture_loop_scope\n",
+        "when": "config"
+      },
+      {
+        "category": "PytestConfigWarning",
+        "message": "Unknown config option: asyncio_mode\n",
+        "when": "config"
+      }
+    ],
+    "source_stable_in_each_run": true,
+    "only_expected_between_run_source_difference": [
+      "NAVIGATION.py"
+    ],
+    "instrumented_python_and_node_network_attempts": 0,
+    "media_directories_not_created_as_placeholders": true
+  },
+  "derived_metadata": {
+    "manifest_members": 1471,
+    "manifest_canonical_digest": "261c9e65f4a226a42bd2e8ed4a23317f999d5bfc529a968e1d52584cc1a71874",
+    "all_staged_normalized_source_hashes_match": true,
+    "member_set_caps_and_generator_oracles_unchanged": true,
+    "existing_generator_tests_passed": 8,
+    "existing_node_entrypoints_passed": 3,
+    "selected_source_snapshots_each_closure": 1614,
+    "closure_source_drift": false,
+    "instrumented_closure_network_dotenv_write_denials": 0,
+    "registry_total": 1773,
+    "registry_quarantined": 273,
+    "registry_existing_mall_metadata_rows_retained": 2,
+    "existing_reviewed_finding_union": {
+      "main": 2419,
+      "mall_only": 238,
+      "combined": 2657
+    },
+    "new_finding_approvals": 0
+  },
+  "source_bindings_git_lf_sha256": [
+    {
+      "path": "firebase.json",
+      "sha256": "36481dea013f448ff1fa890e848828ee85bf0a76a00aef7920caf0e3e1cb5ee6"
+    },
+    {
+      "path": "NAVIGATION.py",
+      "sha256": "4be04a3b32efe7aaa5ee782b5f0b157ad22ba85e8c5a983070dc280cefac5346"
+    },
+    {
+      "path": "public/about/index.html",
+      "sha256": "13bf1b83a211cbf78d9e65801047c38175e280a572a1189b5fbcbde310d2a6a1"
+    },
+    {
+      "path": "public/member/index.html",
+      "sha256": "58236760f106d50070f90702a8cc55227f5744f801c500d17917f5343dc216b8"
+    },
+    {
+      "path": "public/sw.js",
+      "sha256": "ccb0c4f4afee47086cdbe6e7d422c5d8494ea0dd09d533bfe19c2378a3df2c33"
+    },
+    {
+      "path": "modules/foundups/pfmall/http_api.py",
+      "sha256": "3401a09895e794e349d252b66eb392095a4a64152ab8d7d074500b2822a06680"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/clerk_intake.py",
+      "sha256": "03a47406796295a86b33510733a8bc034782c29703855866f51e35a280c65b92"
+    },
+    {
+      "path": "modules/platform_integration/github_integration/src/github_api_client.py",
+      "sha256": "e0e906c197b5b3432a6e600ccb663051d6bc7d2e52e2587016f28f9fc455d4dc"
+    },
+    {
+      "path": "modules/communication/youtube_shorts/src/youtube_uploader.py",
+      "sha256": "3b678c3026f27353cf96f0b39dfffd1a0d58420b95e4423fc89ac9963d57536d"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/test_gateway_roc_shell.py",
+      "sha256": "86c69fde478d4cc85f71afa5dc440e53bf7635a9f26663ddfd468f546979252c"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/test_gateway_terms_gate.py",
+      "sha256": "1a69a2a6b6dc515df52f475dfd24f8fa701d7994c7caea92f7f5f0c5fdd2b89d"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/test_video_mall_media_delivery.py",
+      "sha256": "e25591d8701f3c73f2fb7669bf3bc4672303985d45c8c9c74f181878f4ed503e"
+    },
+    {
+      "path": "public/member/tests/test_route_contract_bridge.py",
+      "sha256": "74df439263ce647478dadd7b884ed8f8a7a3ef80379734f9aaa240fc95e59883"
+    },
+    {
+      "path": "scripts/reddog_backend_manifest.json",
+      "sha256": "dc5c39936e30b60d7205941217680bd3291c590772832af25599cc6c171a59b8"
+    },
+    {
+      "path": "extensions/reddog/backend_compatibility_constants.js",
+      "sha256": "36b49bd2f7aeb09391aca3ee404c89458f9beee3e9a2db444d26885a3a5074a4"
+    },
+    {
+      "path": "scripts/tests/test_generate_reddog_backend_manifest.py",
+      "sha256": "0c7d0ae024840e09910b277d92c44eec3087a1ec61df65038d4d250c18fd9b6b"
+    },
+    {
+      "path": "WSP_knowledge/WSP_Test_Registry.json",
+      "sha256": "0a0beb478f0ffa505c026137309ec4fbbf822e806c2279d688b83b2ab09a583d"
+    }
+  ],
+  "historical_artifacts_preserved": [
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_MALL_HOMEPAGE_20261025.json",
+      "raw_sha256": "5d61ec4df85f7d4079cc212795a91174c037f80519c4b9ca084d027f9439f00c",
+      "git_lf_sha256": "5d61ec4df85f7d4079cc212795a91174c037f80519c4b9ca084d027f9439f00c"
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_MALL_HOMEPAGE_20261025.testcases.json",
+      "raw_sha256": "7576063a16fcbd6bd845f12d544baac64bfe9f24621adba8189d6e36aba6f6dc",
+      "git_lf_sha256": "7576063a16fcbd6bd845f12d544baac64bfe9f24621adba8189d6e36aba6f6dc"
+    },
+    {
+      "path": ".github/security/reviewed-foundups-mall-evidence.json",
+      "raw_sha256": "37e2238b5831fd48e4860c37d163084b37b1bc1e89a87666f8fe6402248a0161",
+      "git_lf_sha256": "37e2238b5831fd48e4860c37d163084b37b1bc1e89a87666f8fe6402248a0161"
+    }
+  ],
+  "external_evidence_directory": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-reconcile-20261026\\post-intake-fe721d37",
+  "external_evidence_raw_sha256": [
+    {
+      "path": "preflight.json",
+      "sha256": "1b4c1171a427c9701577be8c386192f43dab5f56f6473b18948ae4ad0319c635"
+    },
+    {
+      "path": "premerge.json",
+      "sha256": "0d9ae51ef263236f402f0e5ea6734bb450243ccff2e530aeea425384591106b1"
+    },
+    {
+      "path": "resolution.json",
+      "sha256": "414c3defc76041ac350d9e3dfc77b4d0e2dc4ac2f5686bf260ecd16a06bcd18d"
+    },
+    {
+      "path": "independent-premerge-reconciliation-audit.json",
+      "sha256": "a6c23cc8b65e1c9a417001453785d5fb820eaf4090a776f1460d7484257c2581"
+    },
+    {
+      "path": "composition-verification.json",
+      "sha256": "5fa6ebc4f1ff4a3ace57eed1f77d1aa684cf11689da589c97db07cdfa0fdf9c6"
+    },
+    {
+      "path": "run_phase.py",
+      "sha256": "e6815567dd92ecd10b52dfe0b7da3043779bc106a08694a7547695d4801a6bc9"
+    },
+    {
+      "path": "run_mall_tests.py",
+      "sha256": "5bbc68138fee0694160c465b813e796ee2159799dcd45cb120d47246dee5a7bb"
+    },
+    {
+      "path": "closure_runner.py",
+      "sha256": "05abbd2eb79e073a4dbc947c0f8baf44064fd76d1174671b3cff247adbf35320"
+    },
+    {
+      "path": "node_guard.cjs",
+      "sha256": "cb5a853057f318ab6ca9f0679a1b5e47e8ce7758bfcd957445f4741d7870dcb6"
+    },
+    {
+      "path": "node_offline.cjs",
+      "sha256": "7a369806714bf9a434dfd59d45c7f233331c1b5ca30585df72ec778ba997fe63"
+    },
+    {
+      "path": "registry_step.py",
+      "sha256": "452f114ebe102134d62f3d3c1896f611cfbdbea2ff468bb698446515b4aa931e"
+    },
+    {
+      "path": "registry_write.json",
+      "sha256": "8afb604442d620dde674c8b6e225ad68cbc162b2bb9a77a6053de5ee7d978e46"
+    },
+    {
+      "path": "baseline/results.json",
+      "sha256": "41de23dac2ed45871f60434c8e21d56d4ecde678ad377f31331e059f94ffe89d"
+    },
+    {
+      "path": "after_merge/results.json",
+      "sha256": "c14279d1f7f52b8278cb88ae30331527b7ee8a41b74461449291e4c13cffb70d"
+    },
+    {
+      "path": "generator_write/receipt.json",
+      "sha256": "ee1288e9b849c71887cc66a831ce2385a9c7fc28412368910873cbe919fb0a0d"
+    },
+    {
+      "path": "generator_tests/receipt.json",
+      "sha256": "4775c018f65df16ee330cd9fd3eea185627b4c597973e112f70493e937b23333"
+    },
+    {
+      "path": "node_contract/receipt.json",
+      "sha256": "6c53a95a0a83553733df6768d7aba8bb309b797cad120d305fc202dcd5ae62b7"
+    },
+    {
+      "path": "node_preflight/receipt.json",
+      "sha256": "5e341b41b9eafc8a574b8a6271aea8231923dc7f45dbd28a9d72fd47a3240b92"
+    },
+    {
+      "path": "node_recovery/receipt.json",
+      "sha256": "9438c0c75c034d060707e27d885cffd872bf87283831126658c7da68161682de"
+    }
+  ],
+  "holds_and_limits": [
+    "Existing PR stays draft until authenticated disposition of its historical GitGuardian incident is verified.",
+    "Final independent composition review and fresh hosted security/CI are separate requirements.",
+    "Three absent-media failures remain incomplete media work; this is not a fully green media suite.",
+    "Local instrumentation is not OS confinement, a public hosted reproducer or installed-runtime admission.",
+    "No provider, media generation, authentication deployment, signer, mint, funding or token action occurred.",
+    "No production deployment or whole-goal completion is established."
+  ]
+}

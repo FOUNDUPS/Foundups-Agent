@@ -1,3 +1,11 @@
+## Post-intake Mall source binding — 2026-10-26
+
+Existing Node contract/preflight/blocked-recovery commands each exit0 at actual
+261c9e65; the unchanged generator8 also pass. Actual1614 selected snapshots stay
+stable, with zero instrumented network/dotenv/write denials. All1471 members,
+caps and assertions remain fixed. External post-intake-fe721d37 records this
+local composition; no new oracle, installed-runtime or release admission follows.
+
 ## Mall/current-main source binding — 2026-10-26
 
 Existing three Node contract/preflight/blocked-recovery entrypoints each exit0
