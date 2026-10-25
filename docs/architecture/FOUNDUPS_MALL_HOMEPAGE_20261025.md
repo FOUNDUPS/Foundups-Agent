@@ -1,5 +1,62 @@
 # Mall homepage and About routing — 2026-10-25
 
+## Post-intake main reconciliation — 2026-10-26, before mutation
+
+Self0102/architect/autonomous_trigger; WSP00 strict gate passed before retrieval.
+WSP15 C2/I4/D4/Impact4=14/P1; WSP6/11/22/50/62/71/77/84/97/102/104.
+Preserve existing PR2196/Mall9e247f0327accf7aeef78cb3f21dbfd4d9f036c2;
+integrate actual mainfe721d3778969f950dde3b291cf24724d018ee7d with a normal
+merge, no alternate PR, forced update or incident/gate bypass. Mark the existing
+PR draft while its reviewed GitGuardian record remains unauthenticated.
+
+Need: deliver the actual requested root Mall/About/FX release; reconciling its
+working implementation is more useful than another unused claim primitive.
+Affordability: metadata/contract composition and existing runners, no new product
+framework, model/provider invocation, shared install or runtime activation.
+Waiting for login alone leaves this independently available integration undone.
+The strongest alternative is a replacement PR; reject it because the existing
+unique work and security history must remain attached to their original owner.
+
+Read-only comparison: merge-base33f1442d; Mall39 rename-aware records/40 physical
+entries, including the moved gateway. Main has93 changed physical paths and14
+overlaps. No shared homepage/auth/GitHub/nomination implementation is edited on
+both sides. Preserve all main-only sources, StoryTime/EDUIT/YUMORI work and all
+Mall product/test blobs, plus both additive documentation histories.
+
+Existing-ledger composition is main-first2419 plus238 Mall-only existing entries
+=2657; this preserves old approvals, it approves no new finding. Keep the three
+historical Mall receipt/testcase/proof artifacts byte-identical. Regenerate the
+existing1471-member manifest and its two digest literals, preserving all members,
+caps and current-main client hashes plus the Mall gateway-test hash. Regenerate
+the existing registry to retain main's1773/273 and Mall's existing metadata rows.
+Do not change test bodies/oracles to fit integration or add placeholder media.
+
+Execution plane: local source/Git/build verification, not resident/WRE execution.
+Reuse the four existing route/gateway/media owners and unchanged offline runners;
+copy only to fresh external scratch and update their factual source-head field.
+Capture fresh exact-ID parent and combined results; retain any actual missing-
+media failures. Reuse generator8 and three Node closure entrypoints after staged
+bindings, recording Python/pytest/Node versions and runner hashes. Selected
+instrumentation is not OS isolation or installed-runtime/release admission.
+Qwen/Gemma inference cannot prove a Git merge or signature/provenance boundary;
+use deterministic Git/source checks and an attributed independent verifier.
+
+Budget: original39 rename-aware paths plus one separate <=400-line reconciliation
+receipt (40 records/41 physical paths); this plan+65/root ModLog+16, affected
+owner/test logs+16 each. No protected receipt rewrite, new test owner, source
+member, cap, dependency, scanner/rule/scope, authentication or authority change.
+Observe actual new scanner contexts before separately allocating/reviewing any
+fingerprint append. Require source-map/ledger-prefix/opaque-attribute review,
+current hosted checks and verified incident disposition before main/deployment.
+
+Retrieval evaluation: semantic owner query at mainfe fails exact
+HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH againsta519f0ad; no repair/reindex.
+Documented lexical fallback binds both mainfe and Mall9e, but remainsUNKNOWN/
+gaptrue, not semantic authority. Module/test contracts and current Git outrank
+historical completion prose. Deduplicate rename records, preserve both parents,
+and distinguish absent old requirements from main's new optional HTTP profile.
+Repeated long output was narrowed to owner inventories and exact path/hash maps.
+
 ## Observed combined-manifest binding repair — 2026-10-26, before ledger edit
 
 WSP15 C1/I4/D4/Impact4=13/P1; WSP22/50/84/97. Actual hosted job121245486567
