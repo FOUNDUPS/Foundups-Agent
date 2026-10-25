@@ -1,3 +1,15 @@
+## PR2208 intake reference metadata and fixture bindings — 2026-10-25
+
+Actual job121124347560 reports40 unreviewed tree findings and zero in history:
+39 generated source-digest entries and one unchanged synthetic hostile-input
+fixture, moved from line108 to150 by the new cases. Parent and source-bound
+review reconstruct every current/prior fingerprint and all39 referenced hashes.
+Preserve2,220 prior entries and append only40 exact bindings (2,260 total).
+The FX evidence records mapper authorship and the decoded-Git-blob correction;
+the initial raw-response test fingerprint is invalid and is not approved.
+No source, oracle, scanner, scope, rule or fingerprint function changes.
+Fresh current-head tree/history scans remain required; GitGuardian is separate.
+
 ## PR2204 scheduler manifest metadata review — 2026-10-25
 
 Hosted security job 121087044548 reported 39 unreviewed tracked-tree findings

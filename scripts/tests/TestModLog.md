@@ -1,5 +1,18 @@
 # Script test inventory
 
+## 2026-10-25 — Intake reference source binding
+
+The existing mapper remains one of1,471 runtime members; regenerate its source
+hash and update only the two canonical digest literals to f427e16b. All count/byte
+caps and the Node1,471-accept/1,472-reject oracle remain unchanged.
+The first existing8-case generator run gives7 passes/1 staged-index failure:
+the generated manifest had not yet been staged beside the committed mapper.
+After staging the actual bindings, the unchanged failed index case passes.
+Preserve that failed JUnit result; this is a staging repair, not a product RED.
+The three existing Node compatibility/preflight/blocked-recovery entrypoints
+also exit0. The separate four-owner intake run passes601 cases. No new test file,
+runtime member, dependency or installed-runtime promotion is introduced.
+
 ## 2026-10-25 — Numeric/current-main canonical binding
 
 Reuse the exact existing8 generator cases after mainc7f0d939 joins numericc9bee55e.
