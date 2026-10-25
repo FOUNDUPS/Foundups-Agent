@@ -3304,3 +3304,13 @@ from modules.platform_integration.youtube_auth.src.mcp_quota_server import MCPQu
 
 ### Outcome
 - 0102 now has a reusable diligence skill for evaluating external open-source tools such as `karpathy/autoresearch`.
+
+## 2026-10-25 - Preserve public intake reference metadata
+
+WSP15 13/P1 allocation in the FX delivery plan; WSP22/50/84/97.
+Added one `prior_art=list(...)` constructor keyword and an untrusted-reference
+comment in the existing mapper. No new parser/auth/store/control or runtime member.
+Nine test-first cases cover order, copies, defaults and transport representations.
+Retained clean RED 596P/5F and old-pin 600P/1F; independent review approved rebaseline.
+Final four-owner selection: 601P, no skips or instrumented network/process/write attempts.
+All existing bytes of this log, including its NUL byte, are preserved as a prefix.

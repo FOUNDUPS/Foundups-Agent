@@ -2,6 +2,36 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Intake reference preservation allocation — 2026-10-25
+
+WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Source: main e801a412.
+Existing authenticated LaunchRequest validates reference_urls but drops them
+while constructing its existing genesis envelope. Preserve their order/values
+in a detached prior_art list: one constructor keyword, <=4 production lines.
+References remain untrusted draft metadata; no fetch, source identity, repository
+control, claim, admission, registry, execution, token or publication authority.
+
+Reuse the two existing launch-request/transport test owners and their fixtures.
+Add <=90 lines for dict/dataclass/transport forms, empty defaults and list detachment;
+retain all validation/auth/provider/nonce oracles. First run desired behavior
+against unchanged production source and retain the actual RED. The existing
+whole-source AST pin intentionally changes: preserve the old pin/failure, and
+rebaseline only after independent review of the single added constructor keyword.
+Do not weaken the AST assertion, denial behavior or existing behavioral cases.
+
+The mapper is already resident: retain1,471 members and all byte/count caps.
+Root owns manifest regeneration, exact canonical digest pins and existing generator
+test log; qualify generator/parity and unchanged Node membership boundaries.
+Budget <=16 existing paths:7 module source/test/docs owners, this plan/root log,
+manifest/constants/generator-test/TestModLog, and at most3 existing exact security
+metadata owners if actual hosted findings require separately reviewed rebindings.
+No speculative exception, new runtime member, dependency, framework or service.
+Qwen/Gemma inference is unnecessary for this fixed mapping; attributed source/test
+review and direct bounded offline checks provide the relevant evidence.
+The four-owner selection now passes601 cases, including all9 new behaviors,
+after independent review approved the exact AST pin update. Original validation,
+auth and nonce oracles remain intact; desired RED and setup failures are retained.
+
 ## Current-state consolidation allocation (before authoring)
 
 WSP15 C2/I4/D4/Impact4 = **14/P1**. On main

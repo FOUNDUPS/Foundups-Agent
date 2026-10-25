@@ -323,5 +323,7 @@ def to_genesis_envelope(
         lifecycle_stage=LifecycleStage.IDEA,
         binding_state=BindingState.UNBOUND,
         external_repo_requested=False,  # FORCED -- public input can never request a repo
+        # Untrusted draft references only; copied as metadata, never fetched here.
+        prior_art=list(data.get("reference_urls", []) or []),
         notes=redact_sensitive(str(data.get("intended_users", ""))),
     )

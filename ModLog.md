@@ -62484,3 +62484,12 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+## 2026-10-25 — intake reference preservation allocation
+
+WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Preserve submitted references
+in the existing draft envelope rather than discard them. Allocate one constructor
+keyword, nearest existing tests/docs and unchanged-membership manifest derivatives;
+desired behavior RED precedes the repair. Existing source AST pin requires explicit
+single-keyword review before rebaseline. No new parser, service, control or authority.
+The four-owner selection now passes601 cases after the independent AST review;
+the five behavioral RED failures and intermediate old-pin failure are preserved.
