@@ -1,3 +1,14 @@
+## 2026-10-26 — Allocate current-main Mall reconciliation
+
+WSP00/6/15/22/50/71/77/84/97;14/P1 before mutation. Preserve existing MallPR2196
+and protected historical evidence; normally merge mainfe721d37 into Mall9e247f03.
+Keep all main-only work and Mall product/test blobs, combine existing approvals
+without new classification, and regenerate only existing registry/manifest pins.
+Fresh exact-ID four-owner, generator8/Node3 and independent source checks are
+required. Keep the PR draft until its existing GitGuardian incident is verified;
+no provider, deployment, signer, token or whole-system readiness follows.
+Full allocation: docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md.
+
 ## 2026-10-26 — Mall current-main reconciliation
 
 WSP00/6/11/15/22/50/62/84/97;14/P1. Preserve every current Mall public/Firebase
@@ -62703,14 +62714,3 @@ these39 exact bindings (2,459 total) within the two existing metadata paths.
 No README, source, oracle, scanner, cap or GitGuardian change; fresh gates remain.
 Independent final metadata-diff review passes; five unchanged security regression
 cases pass. Fresh hosted tree/history checks remain required after this binding.
-## 2026-10-26 — Allocate current-main Mall reconciliation
-
-WSP00/6/15/22/50/71/77/84/97;14/P1 before mutation. Preserve existing MallPR2196
-and protected historical evidence; normally merge mainfe721d37 into Mall9e247f03.
-Keep all main-only work and Mall product/test blobs, combine existing approvals
-without new classification, and regenerate only existing registry/manifest pins.
-Fresh exact-ID four-owner, generator8/Node3 and independent source checks are
-required. Keep the PR draft until its existing GitGuardian incident is verified;
-no provider, deployment, signer, token or whole-system readiness follows.
-Full allocation: docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md.
-
