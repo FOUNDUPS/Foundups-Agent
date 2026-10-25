@@ -462,12 +462,12 @@ class TestGitHubAPIClientErrorHandling:
         with aioresponses():
             async with github_client as client:
                 with pytest.raises(GitHubAPIError, match="Unsupported HTTP method"):
-                    await client._make_request("PATCH", "repos/test/test")
+                    await client._make_request("TRACE", "repos/test/test")
     
     @pytest.mark.asyncio
     async def test_network_error_handling(self, github_client):
         with aioresponses() as m:
-            m.get('https://api.github.com/repos/TestOwner/TestRepo', exception=Exception("Network error"))
+            m.get('https://api.github.com/repos/TestOwner/TestRepo', exception=aiohttp.ClientError("Network error"))
             
             async with github_client as client:
                 with pytest.raises(GitHubAPIError, match="Request failed"):

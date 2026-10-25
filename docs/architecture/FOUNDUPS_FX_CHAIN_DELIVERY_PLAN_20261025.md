@@ -49,6 +49,24 @@ Holo owner query remains HEAD_MISMATCH; direct source/callsites/test inventory
 replace stale retrieval, without a CURRENT-index claim. Legacy doc assertions are
 historical; no production-ready or comprehensive coverage claim follows.
 
+Metadata dependency amendment before repair: WSP15 C2/I4/D4/Impact3=13/P1.
+The existing runtime manifest includes this client; leaving its old hash would
+break the source compatibility contract. Regenerate scripts/reddog_backend_manifest.json
+and update only the digest literals in extensions/reddog/backend_compatibility_constants.js
+and scripts/tests/test_generate_reddog_backend_manifest.py. No generator, member,
+cap or semantic assertion changes. Reuse all eight generator cases after staging
+source+manifest, plus the existing Node compatibility, preflight and blocked-recovery
+owners. Read their inventory first; scripts/tests/README.md is absent.
+Add at most10 lines each to scripts/tests/TestModLog.md and extension ModLog and
+tests/TestModLog; report the exact one-member hash delta and unchanged member list.
+This explicit dependency repair supersedes the earlier no-manifest-change budget;
+it grants no installed runtime or provider activation.
+
+Local result:135 module cases pass (120 client/15 permission-probe); eight existing
+generator cases and three Node owners pass. Runtime1471 members unchanged; only
+the client's source hash changes, canonical digest c1f97e86. Frozen RED and prior
+runner/long-ID errors remain retained; hosted/security/main convergence is pending.
+
 ## Unsigned integration checkpoint allocation — before authoring
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.
