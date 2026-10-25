@@ -35,3 +35,11 @@ Reconciled the existing story controller, OpenRouter storyboard adapter, FFmpeg 
 ## 2026-10-26 — Us_Story_Time destination
 
 Registered the operator-selected Story Time channel in the existing publisher with FoundUps OAuth-set 10 reuse and an optional override and required channel-ID pinning. Added an unlisted, made-for-kids preschool review helper and documented headless/Kids ownership. No live account, upload or worker activation claimed. WSP 97 source/evidence notes are in Shorts KIDS_LOCAL_PRODUCTION.md.
+
+## 2026-10-26 — Production-first story direction
+
+Applied WSP 15 work-item scores: current episode delivery and reusable causal story direction precede next episode, hosting, Mall expansion and analytics. Expanded existing production skill with creator correction-to-principle examples, spatial state table, silent causality review and independent transfer-test requirement. Latest local MP4 duration rechecked at 15.000 seconds. No new render, audio-listening or publication claim.
+
+Connected collaborative correction capture to existing WRE/autoresearch evidence boundaries: freeze baseline/rubric, bounded candidate, held-out independent evaluation, retain/reject and rollback, later reuse. Legacy recursive proposal API is not an active promotion loop.
+
+012 corrected evaluation scope: use the next actual Little Shrew story, not an unrelated transfer exercise. Unrelated draft test interrupted. Working book title: How a Shrew Became a Human. Next-beat proposal is recorded separately from approved canon; generation and lineage facts still require verification.
