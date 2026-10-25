@@ -1,3 +1,65 @@
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## 2026-10-25 — Numeric admission chronology and combined closure
+
+Existing test_alignment_and_tokenomics.py retains its6 original function ASTs,
+imports and module docstring;223 new controls are added. The initial unchanged
+pure numeric baseline3 passes. Exact-AST projected RED phases:200 cases184F/16P,
+218 cases200F/18P,219 cases200F/19P,225 cases206F/19P. The225 inventory included
+one false negative: update_adoption(work_completed=None) means no increment.
+First candidate224P/1F exposed it. Only that pair changed to its positive existing
+contract; all13 other None controls remain. Corrected original-source replay
+AFTER authoring205F/20P is not retroactive test-first proof. Corrected225 passes.
+
+A real valid-integer normalization regression was then independently reproduced.
+New226 inventory225P/1F preceded the strict-admission-then-float correction;
+final focused226 passes. No assertion or economic substitution in projection.
+Three unrelated original cases were deferred only in these projected runs.
+Independent28 pass; an earlier external enum class-identity oracle25P/3F was
+corrected to compare name/value while preserving all numeric/state assertions.
+
+Fresh actual whole-simulator633 passes at oldf11 source. After numeric commit
+dc844e3ba and main6fe merge89486886f, combined736 passes in60.00s with all6
+originals and8 adjacent cases. Only a blank EOF line was removed before commit;
+complete test AST stayed identical. Exactly the existing SSE cases are excluded:
+- test_sse_server.py::test_sim_events_endpoint_denies_without_invite_key
+- test_sse_server.py::test_health_endpoint_denies_when_protected
+- test_sse_server.py::test_health_endpoint_allows_with_valid_invite
+
+Combined receipt root: C:/Users/user/AppData/Local/Temp/foundups-numeric-combined-main-807cjgzp/.
+All169 simulator/FAM and8 central source hashes stayed stable;13532 SQLite
+connections were scratch/memory. Real central singleton uses scratch data_dir
+before FAM construction; no start/callback replacement. Zero instrumented
+network/dotenv/checkout-write attempts; default central store stat comparison
+unchanged. Older runners without explicit central confinement are not relabeled.
+Inherited runner-only FAM directory redirect and Holo/Qwen enrichment None are
+disclosed; assertions, authority and arithmetic execute unchanged. Two inherited
+inactive asyncio warnings remain. Counts overlap; no full coverage, OS-isolated
+promotion, provider/chain effects or funded settlement claim.
+
 # Simulator Tests ModLog
 
 ## 2026-10-25 — Derived source-binding qualification after reconciliation

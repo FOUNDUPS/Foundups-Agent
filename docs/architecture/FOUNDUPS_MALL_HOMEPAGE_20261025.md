@@ -406,3 +406,38 @@ No unknown finding, GitGuardian incident, scanner rule or path is exempted.
 Fresh hosted checks and the pending GitGuardian inspection remain required.
 Independent report rawSHA256:
 7dfb2d5a90c028aa9f6c77e36fbc2ca1211f556881c776b747caf52881d038be.
+
+## Reconcile numeric main and preserve Mall qualification
+
+External preallocation 14/P1 precedes merging main5be89ae4 into Mall4723f6d5.
+Retain all eight conflict resolutions: five additive ModLogs, the exact ordered
+security-ledger union and two literal pins. Preserve both histories and current
+main's numeric helper, numeric operations, resident authority forwarding and
+1,471 acceptance / 1,472 rejection assertions. No cap is raised.
+
+Canonical generation/check and the unchanged eight generator cases pass;
+the same three Node entrypoints pass under the final frozen runner. Each phase
+has 1,614 stable evidence inputs and zero network/dotenv/write denials. Retain
+the setup-only pytest log failure, overstrict anonymous-pipe guard failure and
+earlier Node runner-hash uncertainty; only their explicitly corrected fresh
+phases establish this qualification. No frontend or browser rerun is claimed.
+
+The 1,471 runtime entries match indexed and working source hashes. Relative to
+main, only the existing gateway-terms test digest changes. The manifest remains
+332,650 LF / 335,665 CRLF bytes under the unchanged 335,872-byte limit; source
+limits remain 2 MiB each / 32 MiB total. The 124 public/Firebase Git entries and
+three protected Mall evidence artifacts still equal the previously tested state
+at this checkpoint. This does not cover the subsequent About ticker correction.
+
+Parent and worker independently verify exactly 39 known source-hash contexts:
+the prior 38 plus main's already approved private-helper context. All referenced
+source bytes and unique lines equal main; all old fingerprints occur once in
+both main and the preserved union. Retain 2,261 old entries and append only 39,
+for 2,300. No flagged proof/receipt is rewritten, and no unknown finding,
+GitGuardian incident, scanner scope or rule is approved.
+
+External handoff SHA256:
+f8529da84d71e9d9549b02d21446a90f040e6a10796d243cfbee1fb1f37ef684.
+Parent independent review SHA256:
+dc45b56b425441dcb2cbaaa537f4af6312e0775a1f812b0728ca99aa41176ca8.
+Fresh hosted security/CI and the pending GitGuardian review remain required.

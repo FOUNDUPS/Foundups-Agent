@@ -32,6 +32,44 @@ plugins/cache disabled and external scratch; guards do not establish OS isolatio
 External phase receipts retain exact argv,8 collected IDs, outcomes and hashes in
 `foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`. Hosted source/
 security scans, proposed38 metadata review and GitGuardian remain pending.
+## Numeric/current-main reconciliation qualification — 2026-10-25
+
+Fresh unchanged generator8 pass in77.50s with2 inherited inactive asyncio config
+warnings. Canonical write/check and existing Node contract/preflight/blocked-
+recovery commands each exit0. All1614 evidence snapshots remain stable in every
+phase, with zero instrumented Python/Node network or dotenv attempts. Runtime
+membership stays1471 and the explicit Node oracle still rejects1472. Manifest
+332650 LF/335665 CRLF bytes; source total19662966 and max154924 remain within
+existing328KiB/2MiB/32MiB limits. Exact commands/IDs/JUnit/maps remain in external
+`foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934`.
+No unchanged simulator rerun or new behavioral coverage is claimed. Existing169
+simulator/FAM plus8 central hashes still match the qualified736 source. New
+metadata bindings, hosted gates and publication remain separate parent actions.
+
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
 
 ## FoundUps BTC/Mesa source closure — 2026-10-25
 
