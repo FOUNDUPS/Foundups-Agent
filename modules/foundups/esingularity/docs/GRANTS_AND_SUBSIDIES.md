@@ -8,6 +8,14 @@ This file is the repository-side canonical registry for external grant/subsidy/P
 
 Never describe a program as project funding merely because the program exists. Track each item as: `VERIFIED PROGRAM`, `ELIGIBILITY INQUIRY`, `ELIGIBLE`, `APPLICATION`, `SELECTED`, `AWARDED`, or `CLOSED`. Only `AWARDED` may be booked as committed subsidy revenue.
 
+## Retained grant database and next-cycle preparation
+
+[GRANT_ROUND_HISTORY.md](GRANT_ROUND_HISTORY.md) is this registry's dated history/calendar companion. The existing FIN workbook has `Grants & Subsidies` for program summaries and `Grant Calendar` for fiscal-year/round history, official dates, internal review dates and preparation actions. Neither is an independent eligibility authority.
+
+Retain closed rounds and append each new official fiscal-year/call/track rather than replacing last year's dates. Record opening, inquiry/consultation/qualification and application deadlines separately in JST. Preserve extensions, source links and unresolved applicant/property/ownership/baseline questions. Keep round state separate from YUMORI project status: a closed call does not erase F-01's existing eligibility inquiry or prove non-submission/rejection. Do not mark a call missed by YUMORI without project-specific evidence.
+
+Future-year official dates remain **UNANNOUNCED / NOT VERIFIED** until a current primary announcement establishes them. Internal review/preparation dates are planning tasks, not government deadlines or proof that an automation was scheduled. The initial preparation queue starts before historically early calls (Cabinet Office January and MLIT February), not only the last autumn round. Program continuation, eligibility, rates/caps and property lists must be rechecked each cycle.
+
 ## Authority map: repository ↔ Google Drive
 
 Use this section to prevent drift between codebase truth and Drive working documents.
@@ -15,6 +23,7 @@ Use this section to prevent drift between codebase truth and Drive working docum
 ### Canonical repository authority
 
 - **Grant / subsidy / PPP-support status:** this file, `modules/foundups/esingularity/docs/GRANTS_AND_SUBSIDIES.md`.
+- **Retained round dates / internal preparation queue:** [GRANT_ROUND_HISTORY.md](GRANT_ROUND_HISTORY.md), subordinate to current official sources and this registry's project-status boundary.
 - **Public-claim admission:** `modules/foundups/esingularity/frontend/audit/SOURCE_OF_TRUTH.md`.
 - **Module direction / discoverability:** `README.md`, `ROADMAP.md`, `ModLog.md`.
 
@@ -37,7 +46,7 @@ Use this section to prevent drift between codebase truth and Drive working docum
 
 4. **Three-Site Portfolio, Demand-Led Financial Model & Grant Audit**
    Drive ID: `1w00eZcfUMyaNu_wwQEf_GVNHpQamYScRdpB_QGecFJ0`  
-   Tab: `Grants & Subsidies`  
+   Tabs: `Grants & Subsidies` (program summaries), `Grant Calendar` (retained round dates and internal preparation queue).  
    Purpose: scenario analysis, caps/rates, timing, model integration, audit notes.  
    Rule: analysis layer only. Maximum caps, model placeholders, or candidate programs are not committed funding unless this repo registry reaches `AWARDED`.
 
@@ -83,7 +92,7 @@ Current published subsidy structure:
 
 Potential eligible infrastructure includes renewable-energy equipment, storage/thermal storage, high-efficiency cooling, power-supply equipment and, depending on the track, temperature-difference heat utilization including onsen heat. The current YUMORI.me hypothesis is most naturally compared against the container/modular track for an initial small node, while the new-build track may matter for later expansion.
 
-**Critical boundary:** this live program does not establish that former Sukatto Land Kuzuryu, YUMORI.me, a future SPC, or any specific equipment package is eligible. Applicant identity, lawful site/use rights, DC ownership/operation, renewable-energy supply, CO2 methodology, financing, construction timing, and non-duplication with other national subsidies must be verified. Do not describe the maximum cap as expected funding.
+**Critical boundary:** this published program does not establish that former Sukatto Land Kuzuryu, YUMORI.me, a future SPC, or any specific equipment package is eligible. Applicant identity, lawful site/use rights, DC ownership/operation, renewable-energy supply, CO2 methodology, financing, construction timing, and non-duplication with other national subsidies must be verified. Do not describe the maximum cap as expected funding.
 
 ## F-07A — SHIFT: 省CO2型システムへの改修支援事業
 
@@ -97,6 +106,16 @@ Potential eligible infrastructure includes renewable-energy equipment, storage/t
 
 Potential YUMORI.me uses: heat recovery, heat exchangers, heat pumps, hot-water/HVAC electrification, fuel switching, pumps, circulation and related thermal retrofit. However SHIFT relies on qualifying existing-facility/baseline emissions and operating conditions. Because Sukatto Land is closed, this must not be presented as a current eligible funding line until the baseline/closure rules are resolved.
 
+## F-07B — SHIFT: DX型CO2削減対策実行支援事業
+
+- Agency: 環境省 / 温室効果ガス審査協会 (GAJ).
+- Round status: **CLOSED — September additional call ran 2026-09-11 to 2026-10-15 12:00 JST**.
+- YUMORI boundary: **VERIFIED PROGRAM; project eligibility, submission and award not established by this record**.
+- Published rate/cap: **3/4; up to ¥2,000,000**, subject to the controlling guide.
+- Primary source, rechecked 2026-10-26: https://www.env.go.jp/press/press_05521.html
+- Relevance: DX-based equipment-operation improvement and data-driven CO2 retrofit planning at an independently qualifying operating facility; not core data-center construction funding.
+- Unresolved: eligible applicant, usable operating baseline, measurement/system scope and separation from F-07A or other subsidized costs. Retain the closed round for future-cycle screening; no future call is assumed.
+
 ## F-08 — 令和8年度 官民連携基盤整備推進調査費 第3回案件募集
 
 - Agency: 国土交通省 国土政策局 地方政策課 調整室
@@ -109,7 +128,9 @@ Potential YUMORI.me uses: heat recovery, heat exchangers, heat pumps, hot-water/
 
 This is not YUMORI.me construction CAPEX. It supports local-government study of public infrastructure developed in coordination with private investment. Potential study content can include demand/feasibility work, project-scheme examination, public/private responsibility allocation and other work needed to move a PPP concept toward implementation.
 
-**YUMORI.me relevance:** YUMORI.me cannot apply directly. Fukui City would need to determine whether a Sukatto reuse/COGDC proposal, or associated public infrastructure such as power, roads, water, communications or other qualifying infrastructure, fits the program. The current action is to show the live national program to Fukui City and request a written determination or referral to the responsible department. Do not claim eligibility until MLIT/Fukui City confirms the scope.
+**YUMORI.me relevance:** YUMORI.me cannot apply directly. Fukui City would need to determine whether a Sukatto reuse/COGDC proposal, or associated public infrastructure such as power, roads, water, communications or other qualifying infrastructure, fits the program. The current action is to show the published national program and future-round consultation route to Fukui City and request a written determination or referral to the responsible department. Do not claim eligibility until MLIT/Fukui City confirms the scope.
+
+**Retained FY2026 windows, rechecked 2026-10-26:** first call 2026-02-10 to 2026-03-06; second 2026-06-11 to 2026-06-30; third 2026-09-17 to 2026-10-08. The official program page accepts future-year consultations. These historical windows do not establish FY2027 dates or a YUMORI/City application. See the retained-round calendar before planning the next cycle.
 
 ### F-08 form verification — 2026-10-05 JST
 
@@ -167,7 +188,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - ZEB demonstration applications use J-Grants and require a G-Biz ID Prime account. Joint applications cannot use the standard J-Grants route and require early coordination with SII.
 - Do not contract or start subsidy-scope design/construction before the award decision if those costs are intended to be subsidized; SII states such pre-award contracted/started scope is ineligible.
 
-**Immediate YUMORI action:** prepare a two-scenario eligibility package for SII and Fukui City: (A) City retains ownership -> SII demonstration ineligible / MOE public-building route to evaluate; (B) eligible private/nonprofit building-owner structure -> SII demonstration route to evaluate. In parallel, ask a Phase-3 ZEB Planner whether it can lead a `ZEB化診断・計画策定支援事業` application with the current owner. A telephone inquiry to SII changes the registry only to `ELIGIBILITY INQUIRY`; do not promote to `ELIGIBLE` unless SII or the controlling rule establishes the actual applicant/property structure as eligible.
+**Immediate YUMORI action:** prepare a two-scenario eligibility package for SII and Fukui City: (A) City retains ownership -> SII demonstration ineligible / MOE public-building route to evaluate; (B) eligible private/nonprofit building-owner structure -> SII demonstration route to evaluate. In parallel, ask a Phase-3 ZEB Planner whether it can lead a future officially announced `ZEB化診断・計画策定支援事業` application with the current owner; the recorded FY2026 round is closed. A telephone inquiry to SII changes the registry only to `ELIGIBILITY INQUIRY`; do not promote to `ELIGIBLE` unless SII or the controlling rule establishes the actual applicant/property structure as eligible.
 
 ## F-03 — GX地域共創補助金 / 脱炭素電源地域貢献型投資促進事業
 
@@ -200,6 +221,24 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 **Municipal dependency:** the prefectural program notes tie the AI-DC cap to the host municipality's subsidy ceiling. Fukui City's 企業立地推進課 should therefore be included in any eligibility consultation before modeling a combined incentive stack. No prefectural or City amount is AWARDED to YUMORI.
 
+## F-05 — 令和8年度PPP/PFI推進に資する支援措置
+
+- Agency: 内閣府 民間資金等活用事業推進室.
+- Annual round: **CLOSED**; menus 1–3 opened 2026-01-08 and closed 2026-02-28 12:00 JST.
+- Separate route: the official page identifies **year-round PPP/PFI expert dispatch and one-stop support**. Do not confuse this with the closed annual selection call.
+- YUMORI boundary: **VERIFIED PROGRAM**; public-body advisory/project-formation support, not a direct private construction grant or a YUMORI selection.
+- Primary source, rechecked 2026-10-26: https://www8.cao.go.jp/pfi/shien/r8/r8_index.html
+- Unresolved: which menu and eligible City/public-body sponsor can examine the portfolio/asset-specific PPP scope? Prepare before the historically early annual window; FY2027 dates are not established.
+
+## F-06 — ふくいDX加速化補助金
+
+- Agency: 福井県.
+- Round status: **CLOSED**; FY2026 submission deadline extended from 2026-06-10 to **2026-06-30**. Exact cutoff time and opening date are not reverified here. The official page explicitly says there will be **no FY2026 second call**.
+- Published support: **1/2**, or **2/3 for small businesses**; maximum **¥4,000,000**, minimum ¥300,000, subject to the guide.
+- YUMORI boundary: **VERIFIED PROGRAM**; possible future tenant/local-SME DX adoption, not assumed YUMORI campus/data-center construction funding.
+- Primary source, rechecked 2026-10-26: https://www.pref.fukui.lg.jp/doc/sinsan/dxkasoku.html
+- Unresolved: actual eligible Fukui SME/small-business applicant, its distinct DX project, expenditure timing and any new-year call. The 2027-01-31 implementation end date is not a new application deadline.
+
 ## F-11 — 令和7年度補正予算 省エネ・非化石転換補助金（設備単位型）第4次公募
 
 - Agency: 経済産業省 / 一般社団法人環境共創イニシアチブ (SII).
@@ -216,6 +255,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 - Agency: 環境省 / 一般社団法人静岡県環境資源協会 (SERA).
 - Status: **VERIFIED PROGRAM / THIRD CALL OPEN; YUMORI ELIGIBILITY NOT ESTABLISHED**.
 - Open: 2026-10-16. Deadline: **2026-12-15**; verify exact submission method and cutoff with current guide before any action.
+- Round clarification, rechecked 2026-10-26: SERA identifies this as the **final FY2026 call**. This does not establish a FY2027 successor or opening date.
 - Official ministry release: https://www.env.go.jp/press/press_05673.html
 - Official administrator: https://siz-kankyou.com/2026co2/teitansokenzai3/
 - Official guide: https://siz-kankyou.com/wp-content/uploads/2026/10/r8teitanso3_yoryo.pdf
@@ -239,7 +279,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 ## Financial-model integration
 
-The Google Sheet `YUMORI.me — eSingularity Phase 1 Functional Financial Model & Grant Audit — 2026-09-12` contains a `Grants & Subsidies` working tab. On 2026-09-13 F-01 was updated to `LIVE / FORMAL ELIGIBILITY INQUIRY SENT` with the closed-facility + future PPP/SPC question. Model placeholders such as “METI/NEDO Regional DC Decentralization Grant,” “MOE Decarbonized & Symbiotic DC Grant,” or a Fukui dormant-property grant remain **unverified model assumptions** unless mapped to an official program here.
+The Google Sheet `YUMORI.me — eSingularity Phase 1 Functional Financial Model & Grant Audit — 2026-09-12` contains a `Grants & Subsidies` working tab. On 2026-09-13 F-01 was updated to `LIVE / FORMAL ELIGIBILITY INQUIRY SENT` with the closed-facility + future PPP/SPC question. This is a historical receipt: its third call subsequently closed on 2026-10-09; retain the inquiry but do not carry the old LIVE label forward. Model placeholders such as “METI/NEDO Regional DC Decentralization Grant,” “MOE Decarbonized & Symbiotic DC Grant,” or a Fukui dormant-property grant remain **unverified model assumptions** unless mapped to an official program here.
 
 No financial model may double-count overlapping eligible equipment or treat a maximum statutory cap as the expected award. Funding scenarios should be calculated only after: applicant identity, property/use rights, eligible equipment ownership, eligible-cost basis, subsidy stacking rules, CO2 methodology, award probability, and timing are documented.
 
@@ -271,7 +311,7 @@ across sites merely to meet a threshold or reuse the same eligible cost twice.
 | F-05 | PPP/PFI project-formation advice, not private CapEx | City-defined umbrella plus asset annexes | Fukui City / eligible public body | Which support menu can cover the proposed study scope? |
 | F-06 | Historical SME DX support, not core campus CapEx | Eligible tenants/local firms | Eligible Fukui SME/small business | Closed-round reference; future call and beneficiary fit unresolved |
 | F-07A | Existing-system CO2 retrofit / electrification / heat recovery | Sukatto if baseline qualifies; schools independently screened | Eligible corporate equipment owner and any required building-owner/user/ESCO joint parties | Site/system baseline, closed buildings, reduction threshold, ownership and combined-site treatment unresolved |
-| F-07B | DX operational CO2 measurement/improvement | Independently qualifying systems | Eligible entity under DX guide | Active baseline and applicant/system scope; no duplicate F-07A costs |
+| F-07B | DX operational CO2 measurement/improvement; September call closed 2026-10-15 | Independently qualifying systems | Eligible entity under DX guide | Active baseline and applicant/system scope; no duplicate F-07A costs |
 | F-08 | Public/private infrastructure feasibility study, not construction | City-defined infrastructure linked to portfolio | Fukui City / eligible public body, not committee directly | City decision to apply, infrastructure nexus, one study covering several assets requires confirmation |
 | F-09 | School public-asset reuse procedure, **not a subsidy** | Hanyu and Shimousaka only in current call | Stable implementing entity/JV subject to City rules | One Form 1 per property or combined school consultation? Sukatto requires separate receiving route |
 | F-10 | Building-level ZEB retrofit / eligible technology (FY2026 round closed) | Each eligible school/Sukatto building independently | Eligible private/nonprofit building owner; City cannot apply in this METI/SII lane | Owner/leaseholder route, joint/multi-building application, track, equipment and pre-award procurement conditions require SII confirmation |
@@ -288,6 +328,9 @@ Primary sources rechecked for the material mapping boundaries:
 - 2026-10-26 update, MOE third new-build low-carbon ZEB call: https://www.env.go.jp/press/press_05673.html
 - 2026-10-26 update, Fukui large data-center site procurement (NOT grant): https://www.pref.fukui.lg.jp/doc/dengen/1014.html
 - 2026-10-26 update, MLIT closed FY2026 calls / future round consultation: https://www.mlit.go.jp/kokudoseisaku/kanminrenkei.html
+- 2026-10-26 retained history, Cabinet Office annual/ongoing PPP support: https://www8.cao.go.jp/pfi/shien/r8/r8_index.html
+- 2026-10-26 retained history, Fukui DX deadline extension/no second FY2026 call: https://www.pref.fukui.lg.jp/doc/sinsan/dxkasoku.html
+- 2026-10-26 round clarification, SERA final FY2026 new-build ZEB call: https://siz-kankyou.com/2026co2/teitansokenzai3/
 
 Other program rows retain their existing verification dates and status boundaries;
 this mapping does not certify a new round, site eligibility or multi-site permission.
