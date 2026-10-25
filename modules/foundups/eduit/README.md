@@ -4,7 +4,7 @@
 **Product module:** Play EDUIT — adaptive learning through play  
 **Historical educational vision:** eSingularity — learn anything, anytime, anywhere (LAAA)
 
-EDUIT is an independent educational FoundUp. The existing `modules/foundups/esingularity/` application is a separate, live Fukui campaign and must not be modified by EDUIT work.
+EDUIT is the educational FoundUp and education-scoped sleeve of the existing Play FoundUps Mall. Its own identity does not imply a separate platform or duplicated shell. The existing `modules/foundups/esingularity/` application is a separate, live Fukui campaign and must not be modified by EDUIT work.
 
 ## Purpose and history
 
@@ -58,3 +58,35 @@ No autonomous production worker exists. Planned outputs: health status, last act
 ## Story Time proof of concept
 
 Source: `public/eduit/`. Read [deployment and local Codex handoff](DEPLOYMENT.md). Canonical planned domains are `eduit.org`, `ourstorytime.eduit.org`, and the redirect `eduit.foundups.com`. Kids Episodes remains `kids_episodes`; EDUIT remains `eduit`. No new FoundUp registration.
+
+## Education Mall sleeve — operator direction
+
+**Observed:** `public/member/INTERFACE.md` and `public/member/index.html` already
+provide a registered product selection in the shared Mall shell. Move2Japan
+reuses the tile field, controllers, gestures and product-scoped state. This is
+the architectural precedent for EDUIT, not a second catalog application.
+
+**Specified by 012:** EDUIT itself is discoverable as a FoundUp in the main Mall.
+Inside EDUIT, discovery/search is restricted to educational content; unrelated
+FoundUps results must not leak through global search, restored state or Red Dog
+discovery. Some story records may be discoverable only within EDUIT's projection.
+This projection boundary is distinct from authorization: hiding a public JSON
+record is not access control. Reuse existing admission owners for protected data.
+
+**Proposed, not implemented:** rows represent linked stories/epochs, horizontal
+tiles their ordered playable episodes, and vertical travel moves through the
+chronology. Divergent branches may follow a common ancestor. Completing a story
+line could unlock the next level. Exact axes and progression rules remain open;
+012 is exploring the idea, not authorizing a full progression system now.
+Evolutionary ancestry and dates must be checked before becoming educational
+claims; a fictional Little Shrew character is not proof of a specific ancestor.
+
+**Current slice:** retain one Little Shrew game/video at Our Story Time and the
+EDUIT introduction landing. Neither constitutes the integrated education Mall.
+Do not build a duplicate PWA, generic catalog, learner account or unlock service
+for this proof of concept. Future work should add a bounded EDUIT product adapter
+to the existing shell, with tests that out-of-scope catalog items cannot appear.
+
+**WSP 97 closure:** exact owner/adjacent product interfaces retrieved; existing
+product reuse chosen over a new shell. Documentation/design change only for the
+Mall sleeve. No production routing, PWA integration or unlock behavior claimed.

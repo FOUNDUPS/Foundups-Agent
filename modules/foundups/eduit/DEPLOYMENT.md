@@ -1,4 +1,4 @@
-# EDUIT / Our Story Time deployment handoff
+# EDUIT / Our Story Time agent deployment runbook
 
 2026-10-26 JST. Operator explicitly requested landing/game and domain correction.
 Source owner: FOUNDUPS/Foundups-Agent; existing Firebase hosting architecture.
@@ -77,3 +77,20 @@ BLOCKED: authenticated local Codex GoDaddy capability and Firebase target bindin
 are unavailable in this workspace. No public deployment or domain cutover claimed.
 The landing currently uses relative game links so preview works before DNS; once
 TLS is verified, change its Story Time CTA to https://ourstorytime.eduit.org/.
+
+## 012 experience and existing Moshpit ownership
+
+012 opens a browser URL; no download, build, ZIP extraction or manual deployment
+is part of the product flow. The connected deployment agent owns the commands
+above and verifies the live result before reporting completion. A local preview
+is not evidence of a public domain cutover.
+
+EDUIT.org introduces Education Using Information Technology as the educational
+FoundUp. Our Story Time opens directly to Little Shrew's game, video and the
+existing YouTube channel link. Keep the proof of concept to this single story.
+
+Future story discovery belongs in the existing `public/member/` Moshpit PWA,
+using its shared catalog, category rows and product adapter filter contracts
+(see `public/member/README.md` and `INTERFACE.md`). Do not create a second catalog
+or independent PWA shell. Story/video filtering and automatic tile population
+remain planned; the current standalone game does not claim that integration.

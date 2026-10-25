@@ -1,3 +1,17 @@
+## 2026-10-26 — Connect project nominations to review drafts
+
+WSP00/3/6/11/15/22/49/50/62/84/97;15/P1. The existing public GitHub form now
+has an opened-issue review workflow and bounded adapter feeding the unchanged
+genesis mapper. Fixed service context and nominator identity remain separate;
+OSP is advisory, unknown stages remain unknown, acceptance criteria remain empty.
+Baseline387PASS; frozen RED81FAIL/387PASS; final five-owner682PASS and actual CLI
+replay pass. Original80-case RED is retained. One new test registry entry yields
+1772 files/273 quarantined; manifest1471/c1f97e86 and runtime caps are unchanged.
+No owner, registry, worker, token, reward or market grant. Evidence and remaining
+release gates: docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md.
+Hosted/security/main convergence remain required; parallel PR-cleanup state and
+the existing Mall/TestNet/codec security holds are preserved.
+
 ## 2026-10-26 — FoundUps GitHub regular-file observation prerequisite
 
 WSP00/6/11/15/22/50/62/84/97; work15/P1, required manifest repair13/P1.

@@ -690,3 +690,22 @@ no repository control, admission, execution, token or publication authority.
 The draft stays IDEA/UNBOUND with `external_repo_requested=False`.
 Qualification: all 601 cases pass after independent review approved the exact AST
 rebaseline. Earlier reference-loss RED and old-pin failure remain retained evidence.
+
+## GitHub project nominations — 2026-10-26
+
+The existing public issue form now has a nomination review consumer in
+`src/foundup_genesis/github_nomination_review.py`. The `FoundUp nomination review`
+workflow processes newly opened nomination issues using default-branch source.
+Its Actions artifact contains a redacted advisory Outcome/Solution/Pain brief,
+source issue/nominator metadata, and the existing IDEA/UNBOUND genesis draft.
+Unknown Solution/Pain stay null; acceptance criteria remain empty for review.
+
+The fixed review-service context is distinct from HTTP session/invite verification.
+Nominators are supporters, not verified project owners. Replay metadata remains
+unverified; the Actions run provides hosting provenance. No claim, catalog entry,
+agent-work enqueue, token, reward or market follows from an artifact.
+The CLI accepts explicit `--event-path`/`--output-path`; output is created exclusively.
+Malformed input produces a generic manual-review result without echoing input.
+Local qualification:682 cases across five owners and an actual CLI replay pass.
+Hosted checks and main convergence remain publication gates at this checkpoint.
+GitHub documents the [issues event's default-branch behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#issues).

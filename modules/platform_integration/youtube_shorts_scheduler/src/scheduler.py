@@ -89,7 +89,7 @@ class YouTubeShortsScheduler:
         # Canonical US-Eastern peak slots (morning/lunch/evening), env-configurable
         # via SHORTS_PEAK_SLOTS_ET. Defined ONCE in peak_window; these are ET and
         # get converted to the channel's Studio-account tz at allocation time.
-        self.time_slots = get_peak_slots_et()
+        self.time_slots = get_peak_slots_et(self.channel_id)
         # Channel Studio-account timezone (registry field). Used to convert the
         # ET peak slot to the local wall-clock the bare-time typer must enter.
         self.channel_tz = self.config.get("timezone")
