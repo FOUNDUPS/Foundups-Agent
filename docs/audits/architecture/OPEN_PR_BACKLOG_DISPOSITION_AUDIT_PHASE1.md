@@ -1,8 +1,34 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-25 JST (01:12 UTC): 36 open PRs, 8 drafts. #2189 and #1355 are independently verified on main; #2188 and #2192 merged through their separate owner. The existing Acoustic FFmpeg timeout-child repair at 13/P1 is locally verified, with hosted acceptance pending. Newly opened #2190/#2191 require qualification. Original #1792 retains protected activation obligations. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-25 JST (01:46:03 UTC): 36 open PRs, 8 drafts. #2181 source closure is verified; the current bounded RSI status reconciliation is 13/P1 within the unchanged 19/P0 umbrella. #2194 is MERGED_VERIFIED_MAIN with 20 source-acceptance checks and independent main Acoustic artifacts; separate unchanged-root Undici maintenance failed. #2193 Kids work remains its owner's contribution. #2190/#2191 require qualification; new #2195 (`30cbb21d281e1ee2096e623a20cc599a2d6ae6ac`) is untriaged and unscored. Protected lanes and original #1792 activation obligations remain. Counts are a dated observation, not a live inventory or execution authority.
 
 ### Current closure and selection — 2026-10-25
+
+**Current RSI owner/input reconciliation, C2/I4/D4/Impact3=13/P1:**
+#2181 is `MERGED_VERIFIED_MAIN`; its exact source, main CI/CodeQL, preserved failure
+history and today's executed diagnostic are in the
+[current dispatch](../../operations/RSI_SWARM_DISPATCH.md#current-owner-input-handoff--2026-10-25).
+Seven validator rejections and the separate eighth metadata absence do not establish
+global absence, usable keys or native admission. The existing 19/P0 umbrella remains;
+both authentic owner/E0/work/model/reviewer/budget inputs and existing resident
+caller/authority/issuer connection work remain. Preserve refusals and intentional
+pre-effect `lease=None`; #2178 stays protected. A compatible pinned runtime may be
+selected without reinstalling solely for unrelated merges. No execution authority is granted.
+
+**#2194 MERGED_VERIFIED_MAIN — Acoustic timeout-child ownership:**
+All 22 head checks passed; merge `f11d7559746bb64677e448ff8e4e24ebfcea8feb`
+has independently verified tree `76ceac76240b2ebff4f3840f0491c8950fd8c031`.
+Independent exact-main Acoustic artifacts verify, on each Python 3.11/3.12
+runtime, 18 adapter cases, one owned-child case and six native Gunicorn cases,
+plus the intended old-parser failure. Incoming #2193 Kids paths are preserved.
+All 20 original source-acceptance checks passed, including exact-main
+[CI40150759858](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40150759858) and
+[CodeQL40150759888](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40150759888).
+Separate later Dependabot maintenance passed for CairoSVG but failed for unchanged
+root Undici ([40151051274](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40151051274/job/121042502586));
+this remains an open security obligation, not an Acoustic regression or all-checks-green claim.
+[Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2194#issuecomment-6392093915) is recorded.
+Earlier local/hosted-pending paragraphs below are retained history.
 
 **#2189 MERGED_VERIFIED_MAIN — #1792 shared core:**
 The reviewed head `26602def98392ebbd37b087489e0464061cfaec9` passed all 23
@@ -47,7 +73,7 @@ The later root-npm Dependabot update40148177443 failed separately: undici
 downgrade. Root npm manifests were unchanged by this PR. Preserve this unresolved
 security-maintenance obligation; do not describe every attached check as green.
 
-**Selected: existing Acoustic FFmpeg child ownership, C3/I4/D3/Impact3=13/P1.**
+**Historical selection before #2194 merge: Acoustic FFmpeg child ownership, C3/I4/D3/Impact3=13/P1.**
 This reproduced pending repair wins the current executable tie with #1342:
 it directly closes an owned-process leak in the already-qualified surface;
 #1342 also needs public deployment-owner reconciliation. Reuse this checkout,
@@ -485,8 +511,9 @@ bindings, alert mapping and acceptance remain in the existing reconciliation
 receipt root (`dependency-alert-pr-mapping-20261023.json`). The old alert count
 is not a post-merge closure claim; refresh GitHub alerts before reporting change.
 
-**Acoustic residual: FFmpeg timeout child ownership**, C3/I4/D3/Impact3=13/P1,
-module owner/root, `SELECTED_REPAIR_IN_VALIDATION` (2026-10-25; see current selection).
+**Historical Acoustic residual selection before #2194 merge:** FFmpeg timeout
+child ownership, C3/I4/D3/Impact3=13/P1; the then-current state was
+`SELECTED_REPAIR_IN_VALIDATION`. See the current closure status above.
 In the pre-repair baseline, `process_x_video_url` removes its
 temporary file after `communicate(timeout=30)` raises but does not terminate and
 reap the child. A separate controlled negative fails in both dependency versions;
@@ -547,12 +574,13 @@ accepts bounded targets, not the entire backlog as one model context.
 No signed admission, paid budget, native model execution or RSI retention is
 asserted by source documentation. Independent checks here are Codex reviews.
 
-### Current queue
+### Historical queue rows — retained reconciliation evidence
 
-Scores: complexity/importance/deferability/impact under canonical WSP15.
-Heads are fresh metadata. Prior source audits carry forward only as evidence to
-recheck, not fresh tests or merge approval. Protected owners retain their lanes.
-Every execution requires current source, checks and authority.
+Scores use complexity/importance/deferability/impact under canonical WSP15.
+These accumulated rows retain earlier heads and dispositions, including since-closed
+PRs; they are not today's 36-open inventory or current selection. Use the dated
+current prefix and existing external queue observation, then recheck source, checks
+and authority. Protected owners retain their lanes.
 
 | PR / source head | WSP15 | Owner / state | Next executable step |
 |---|---|---|---|
