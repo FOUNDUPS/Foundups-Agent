@@ -62484,3 +62484,13 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+## 2026-10-25 — project nomination inbox allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean
+checkpoint worktree from observed main e801 for a <=90-line GitHub issue form
+plus existing delivery plan/root log. Deliberate public submission and an issue
+permalink supply a usable nomination queue without another service. No automatic
+issue submission, control/admission, registry, token or market activation. Publish
+and verify the default-branch form before separately changing overlapping Mall UI.
+Implemented the55-line form; YAML/schema/required-field/order checks and independent
+source review pass. No issue submitted. Hosted publication gates remain pending.
