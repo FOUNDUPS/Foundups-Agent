@@ -1,3 +1,17 @@
+## 2026-10-26 — Allocate isolated member host bootstrap
+
+WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 before authoring.
+Read-only cloud inventory verifies the existing Foundups-Agent project/site and
+six Node functions; their matching ignored shared entrypoint has no Clerk path.
+Preserve all existing services/shared work. Reuse the published Python verifier,
+mapper and HTTP handler in a separate server-configured ASGI app; bind request.app
+policy, expose proposal/health only and reject invalid policy files at startup.
+Freeze tests first using the existing real-RSA owner and patched profile; keep
+all786 old cases and their oracles. No dependency, cloud/IAM/deploy, storage,
+runtime/issuer or token grant. Serving/container, real member/session, same-origin
+UI, abuse/revocation and atomic repository claim remain required later layers.
+Allocation: existing FX/chain delivery plan; discovery evidence stays external.
+
 ## 2026-10-26 — Hold intake promotion for patched optional dependencies
 
 All5134 hosted gates passed, but a separate public PyPI metadata audit found
