@@ -15518,12 +15518,14 @@
       "owner": "modules/foundups/pfmall",
       "suite_class": "unit",
       "shard_id": "modules-foundups-pfmall-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Tests for ROC-first snap-shell gateway redesign.\n\nVerifies that public/index.html is a simplified, vertical snap-based\ngateway shell with ROC-first framing, required sections, and no stale\npublic-facing PoB hero language."
+      "description": "Tests for ROC-first snap-shell gateway redesign.\n\nVerifies that public/about/index.html is a simplified, vertical snap-based\ngateway shell with ROC-first framing, required sections, and no stale\npublic-facing PoB hero language."
     },
     {
       "id": "test::modules::foundups::pfmall::tests::test_gateway_terms_gate",
@@ -15692,7 +15694,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "Tests for video mall media delivery \u2014 Worker A phases 1-2.\n\nVerifies:\n- Firebase hosting cache headers differentiate media from HTML/JSON\n- The rewrite-trap (** -> /index.html) is documented and mitigated\n- Media directory conventions exist at both /media/ and /member/media/\n- Embed URL patterns are safe (no arbitrary external sources)\n- Service worker NEVER_CACHE excludes member media correctly\n- CSS theme fallback colors survive broken poster images\n- Video catalog media references use allowed"
+      "description": "Tests for video mall media delivery \u2014 Worker A phases 1-2.\n\nVerifies:\n- Firebase hosting cache headers differentiate media from HTML/JSON\n- The rewrite-trap (** -> /about/index.html) is documented and mitigated\n- Media directory conventions exist at both /media/ and /member/media/\n- Embed URL patterns are safe (no arbitrary external sources)\n- Service worker NEVER_CACHE excludes member media correctly\n- CSS theme fallback colors survive broken poster images\n- Video catalog media references use a"
     },
     {
       "id": "test::modules::foundups::portfolio_validator::tests::test_validator",

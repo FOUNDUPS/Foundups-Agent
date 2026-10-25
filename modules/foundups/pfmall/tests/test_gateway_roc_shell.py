@@ -3,19 +3,139 @@
 """
 Tests for ROC-first snap-shell gateway redesign.
 
-Verifies that public/index.html is a simplified, vertical snap-based
+Verifies that public/about/index.html is a simplified, vertical snap-based
 gateway shell with ROC-first framing, required sections, and no stale
 public-facing PoB hero language.
 """
 
 from pathlib import Path
 from html.parser import HTMLParser
+import json
+import os
+import shutil
+import subprocess
 
 import pytest
 
 
-GATEWAY = Path(__file__).resolve().parents[4] / "public" / "index.html"
+GATEWAY = Path(__file__).resolve().parents[4] / "public" / "about" / "index.html"
+PUBLIC_ROOT = Path(__file__).resolve().parents[4] / "public"
 MANIFEST = Path(__file__).resolve().parents[4] / "public" / "manifest.json"
+
+
+def test_about_gateway_move_keeps_absolute_assets_and_public_navigation():
+    about = PUBLIC_ROOT / "about" / "index.html"
+    class AboutAssets(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.urls = []
+            self.canonical = []
+        def handle_starttag(self, tag, attrs):
+            values = dict(attrs)
+            if tag in {"script", "link", "img", "a"}:
+                self.urls.extend(value for key, value in attrs if key in {"src", "href"})
+            if tag == "link" and values.get("rel") == "canonical":
+                self.canonical.append(values.get("href"))
+    parser = AboutAssets()
+    parser.feed(about.read_text(encoding="utf-8"))
+    assert parser.canonical == ["https://foundups.com/about/"]
+    assert "/js/foundup-cube.js?v=2" in parser.urls
+    assert {"/", "/f/", "/about/", "/member/"}.issubset(parser.urls)
+    assert all(value.startswith(("/", "#", "https://", "mailto:")) for value in parser.urls)
+
+
+_ROOT_WORKER_VM = r"""
+const {runInNewContext} = require('node:vm');
+const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
+const handlers = {}, deleted = [], added = [], puts = [], network = [];
+const stores = new Map(input.caches.map(name => [name, new Map()]));
+let claims = 0;
+const caches = {
+  keys: async () => Array.from(stores.keys()),
+  delete: async key => { deleted.push(key); return stores.delete(key); },
+  open: async key => {
+    if (!stores.has(key)) stores.set(key, new Map());
+    return {addAll: async urls => { added.push({key, urls}); },
+      put: async (request, response) => {
+        puts.push({key, url: request.url}); stores.get(key).set(request.url, response);
+      }};
+  },
+  match: async request => {
+    for (const store of stores.values()) if (store.has(request.url)) return store.get(request.url);
+    return undefined;
+  }
+};
+const self = {location: {origin: 'https://shell.invalid'},
+  addEventListener(type, handler) { handlers[type] = handler; }, skipWaiting() {},
+  clients: {claim() { claims++; return Promise.resolve(); }}};
+runInNewContext(input.script, {self, caches, URL, Promise,
+  fetch: async request => {
+    network.push(request.url);
+    return {ok: true, clone() { return this; }, label: 'fresh'};
+  }}, {filename: 'actual-root-worker.js', timeout: 500,
+  contextCodeGeneration: {strings: false, wasm: false}});
+async function lifecycle(name) {
+  const work = [];
+  handlers[name]({waitUntil(promise) { work.push(promise); }});
+  await Promise.all(work);
+}
+async function run() {
+  await lifecycle('install');
+  await lifecycle('activate');
+  const requests = [];
+  for (const path of input.paths) {
+    let response;
+    const request = {url: 'https://shell.invalid' + path, method: 'GET', mode: 'navigate',
+      headers: {get: () => 'text/html'}};
+    handlers.fetch({request, respondWith(promise) { response = Promise.resolve(promise); }});
+    requests.push({path, intercepted: !!response});
+    if (response) await response;
+    await new Promise(resolve => setImmediate(resolve));
+  }
+  process.stdout.write(JSON.stringify({deleted, added, puts, network, claims, requests,
+    caches: Array.from(stores.keys())}));
+}
+run().catch(error => { console.error(error.stack); process.exitCode = 1; });
+"""
+
+
+def _root_worker_vm(tmp_path, paths):
+    node = "C:/Program Files/nodejs/node.exe" if os.name == "nt" else shutil.which("node")
+    assert node and Path(node).is_file(), "Node is required for worker behavior coverage"
+    env = {key: value for key, value in os.environ.items() if key.upper() in {
+        "SYSTEMROOT", "WINDIR", "PATH", "PATHEXT", "NODE_OPTIONS", "MALL_NODE_NETWORK_LOG"}}
+    env.update(TEMP=str(tmp_path), TMP=str(tmp_path), HOME=str(tmp_path), USERPROFILE=str(tmp_path))
+    request = {"script": SW.read_text(encoding="utf-8"), "paths": paths,
+               "caches": ["foundups-root-v1", "foundups-root-v2", "pfmall-member-v5",
+                          "kosei-app-v1", "unrelated-origin-cache"]}
+    proc = subprocess.run([node, "--unhandled-rejections=strict", "-e", _ROOT_WORKER_VM],
+                          input=json.dumps(request), capture_output=True, text=True,
+                          encoding="utf-8", timeout=10, cwd=tmp_path, env=env)
+    assert proc.returncode == 0, proc.stderr
+    return json.loads(proc.stdout)
+
+
+def test_root_worker_upgrade_retires_only_its_old_namespace(tmp_path):
+    result = _root_worker_vm(tmp_path, ["/"])
+    assert result["deleted"] == ["foundups-root-v1"]
+    assert set(result["caches"]) == {"foundups-root-v2", "pfmall-member-v5",
+                                      "kosei-app-v1", "unrelated-origin-cache"}
+    assert result["claims"] == 1
+    assert any(item["key"] == "foundups-root-v2" and "/" in item["urls"] for item in result["added"])
+    assert result["requests"] == [{"path": "/", "intercepted": True}]
+    assert result["puts"] == [{"key": "foundups-root-v2", "url": "https://shell.invalid/"}]
+
+
+@pytest.mark.parametrize("path", [
+    "/about", "/about/", "/about/index.html", "/about/?signin=required",
+    "/?signin=required", "/?auth=failed", "/index.html?auth=error&msg=ignored",
+    "/member/", "/member/?foundup=move2japan", "/sso-callback/", "/sso-callback/?attempt=1",
+    "/f/synthetic_001/app", "/f/synthetic_001/app/deep",
+])
+def test_root_worker_does_not_intercept_auth_or_protected_handoff(tmp_path, path):
+    result = _root_worker_vm(tmp_path, [path])
+    assert result["requests"] == [{"path": path, "intercepted": False}]
+    assert result["network"] == [] and result["puts"] == []
 
 
 class TestFXDiscoveryNavigation:
@@ -66,7 +186,7 @@ class TestSnapShellStructure:
     """Gateway uses vertical scroll-snap sections."""
 
     def test_gateway_exists(self):
-        assert GATEWAY.is_file(), "public/index.html must exist"
+        assert GATEWAY.is_file(), "public/about/index.html must exist"
 
     def test_scroll_snap_type_on_html(self):
         """HTML element must have scroll-snap-type: y mandatory."""
@@ -354,11 +474,12 @@ class TestPWAPhase1:
         assert SW.is_file(), "public/sw.js must exist"
 
     def test_service_worker_registration_in_gateway(self):
-        """Gateway must register the service worker."""
-        html = GATEWAY.read_text(encoding="utf-8")
+        """The former root gateway's worker role belongs to public discovery."""
+        html = (PUBLIC_ROOT / "f" / "index.html").read_text(encoding="utf-8")
         assert "serviceWorker" in html
         assert "register" in html
         assert "sw.js" in html
+        assert "serviceWorker.register" not in GATEWAY.read_text(encoding="utf-8")
 
     def test_service_worker_does_not_cache_clerk(self):
         """Service worker must never cache Clerk SDK."""

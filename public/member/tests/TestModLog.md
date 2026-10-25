@@ -1,3 +1,57 @@
+## 2026-10-26 — Preserve current-main Mall composition
+
+Existing four-owner baseline/post results retain448 exact ordered IDs and phase
+outcomes:445PASS/3 unchanged absent-media failures, two reviewed config warnings,
+no skips/collection error/network attempts. No member/route VM body changes.
+Main's new EduIT files and Mall's prior public bodies remain intact; only the
+expected NAV metadata snapshot differs. Existing generator8/Node3 also pass.
+Evidence: external foundups-mall-reconcile-20261026/post-intake-fe721d37.
+Fresh independent/hosted/security and authenticated GitGuardian disposition remain
+required. This local merge overlay is not production or live media/auth evidence.
+
+## 2026-10-25 | Actual About initialization exception
+
+Preview9d912 browser reports TypeError at About1951 when the absent legacy
+showSignInModal link is bound unconditionally. This is an observed browser RED,
+not a failure of the existing static gateway assertions. A one-character optional
+binding repairs only this absent-element case; every existing handler body stays.
+The two unchanged gateway ROC/terms owners pass178 cases,0failed/0skipped,
+with stable sources and zero instrumented Python/Node network attempts.
+Reuse the existing external Mall runner and preload unchanged except its receipt
+base_head literal is updated from c19 to actual9d912. Scratch and results:
+`C:/Users/user/AppData/Local/Temp/foundups-about-optional-binding-_olv1aq6/gateway-existing/results.json`.
+No new mirrored test or framework; deployed browser continuation and terms-modal
+open/close remain separate verification. Analytics referer denial is observed
+on the disposable preview and no authorization/configuration change is made.
+Repaired15311925 preview: both About paths match raw15567ce0 (LF13bf1b83),
+HTTP200/no-cache. Fresh browser terms-open/Escape-close and later concierge
+open/close work; the prior TypeError is absent, analytics referer403 remains.
+No acknowledgment/login/message. Parent browser-after.json SHA
+`394ddd4fb3e0143331dde3c401ecdf9eedff6e44f2bd5d8e9c51135b7d4509b2`
+is an observation record; HTTP receipt is separate and no test count is added.
+
+## 2026-10-25 | Fixed public nomination links in the actual INDEX renderer
+
+Base `c19a5055b410e528cf2cc3df9eb5a4991c896707`; parent 15/P1 allocation precedes edits.
+PR2207 form merge/readback is parent evidence, not an authenticated form/submission test.
+
+Unchanged route owner: **212 passed**. Tests-first desired RED: **216 passed, 4 failed**;
+only the four INDEX cases failed for missing anchors before the product edit.
+Candidate: **220 passed, 0 failed, 0 skipped** in 13.03s; two inherited asyncio config warnings.
+All phases had zero Python/Node guarded network attempts and stable source hashes.
+
+Eight cases use four canonical INDEX paths and eligible synthetic/Move2Japan detail/app paths.
+HTMLParser checks actual rendered `entryContent`; the existing VM and guards are unchanged.
+All 60 original top-level definition ASTs and original 212 case IDs/assertions remain exact.
+Removing the four literal source additions restores the complete original renderer bytes.
+
+Exact execution: existing offline Mall runner/Node preload copied to external scratch;
+`O:/Foundups-Agent/.venv/Scripts/python.exe -B -X utf8 <scratch>/run_mall_tests.py <phase> public/member/tests/test_route_contract_bridge.py`
+Phases `baseline`, `red-desired`, `green` retain collected IDs, outcomes, args and before/after hashes.
+
+Scratch: `C:/Users/user/AppData/Local/Temp/foundups-nomination-links-zrudn3no`.
+No adjacent PWA suite ran; its prior three regex failures remain historical. Hosting/browser/login are separate.
+
 ## 2026-10-25 | FX1 public directory and actual filter events
 
 Independent closeout: the same 300 cases passed again in 6.63s, with two inherited
@@ -748,3 +802,113 @@ Validates entry-page Red Dog alignment with Mall Red Dog:
 | test_reddog_context_briefing_phase4.py | 48 | C | Context briefing |
 | (other member tests) | ~446 | B/mixed | Mall shell, tiles, etc. |
 | **Total** | **994** | | |
+## 2026-10-25 | Root Play discovery, single About gateway and root-cache boundaries
+
+Pre-authoring plan: `docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md`,
+approved15/P1 (C3/I4/D4/Impact4), base `c8eb983629454c6bef6e88d33826112ea19dc620`.
+WSP00 awakening/tracker passed. Canonical AGENTS Holo command returned
+`HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, UNKNOWN freshness/index gap; its
+canonical-main context and additional worktree lexical context are distinguished
+in the plan. No reindex, model/provider/OAuth/deployment effect.
+
+Preserved the four existing test owners and every original case ID/assertion
+after canonical path normalization. Gateway readers now use
+`public/about/index.html`; catch-all expectation migrates to that same owner.
+The old root-worker registration oracle now reads the shared public directory,
+retaining its three assertions and adding About non-registration. Existing
+missing-media/header/embed/legal/admission/app/product oracles remain active.
+
+Extended the existing route VM with optional worker registration and actual
+load callbacks; API absence remains supported. Added root/FX titles, visible
+navigation, public-only reads and private-field exclusion, fixed lossless root
+admission/anchor forwarding, unknown/duplicate markers, app-before-fetch, exact
+PWA path scope and worker-failure cases. An actual root-worker lifecycle/fetch
+VM in `test_gateway_roc_shell.py` verifies namespace-only cache retirement,
+fresh root caching and auth/member/callback/protected-app bypass. No new test
+file, browser router, catalog or source authorization plane.
+
+External evidence root:
+`C:/Users/user/AppData/Local/Temp/foundups-mall-home-695e26d23253404fac695e8fa797a5a3`.
+Each phase has `results.json` (exact collected/executed IDs, args, outcomes,
+source hashes, warnings, guard observations) and `pytest.log`.
+
+| Phase | Result | Qualification |
+|---|---|---|
+| `baseline` |365 passed,3 failed,0 skipped | Unchanged four owners,368 cases |
+| `red` |257 passed,183 failed | Invalid setup run: Windows backslashes in NODE_OPTIONS prevented the external Node preload from loading; not desired RED evidence |
+| `red-desired` |400 passed,40 failed,0 skipped | Corrected preload path;37 new contract failures plus the same3 baseline failures before product edits |
+| `green-candidate` |437 passed,3 failed,0 skipped | All new controls pass |
+| `green-final` |437 passed,3 failed,0 skipped | After bounded About navigation wrap; no new failures |
+| `adjacent` |164 passed,3 failed,0 skipped | Separate167-case PWA/projector/product/auth selection |
+
+The three baseline/affected failures all belong to
+`modules/foundups/pfmall/tests/test_video_mall_media_delivery.py::TestMediaDirectoryConvention`:
+
+- `test_root_thumbs_dir_exists`
+- `test_member_posters_dir_exists`
+- `test_member_thumbs_dir_exists`
+
+Those absent media prerequisites were not created, suppressed or weakened.
+The three adjacent failures are unchanged source-regex expectations in
+`modules/foundups/pfmall/tests/test_member_pwa_hardening.py::TestServiceWorker`:
+
+- `test_catalog_is_network_first`
+- `test_catalog_offline_fallback`
+- `test_poster_cache_is_separate`
+
+Parent independently reproduced the same three failures in untouched epoch
+worktree head `b6d2cf316`, confirming the member-worker/test blobs match this
+baseline/candidate. Evidence:
+`C:/Users/user/AppData/Local/Temp/foundups-mall-parent-pwa-baseline-fc2f35db89b249a38459a51812fa579c`.
+Parent's earlier wrong-path attempt exited4 before collection and is preserved
+separately, not counted. Actual product-state/service-worker and member
+boot/account transition harnesses pass, as do projector controls. Overlapping
+phase counts and internal Node check counts are not added together.
+
+Exact external runner command (from repo root):
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+O:/Foundups-Agent/.venv/Scripts/python.exe -B -X utf8 C:/Users/user/AppData/Local/Temp/foundups-mall-home-695e26d23253404fac695e8fa797a5a3/run_mall_tests.py green-final
+```
+
+The default runner selection is exactly:
+
+```text
+modules/foundups/pfmall/tests/test_gateway_roc_shell.py
+modules/foundups/pfmall/tests/test_gateway_terms_gate.py
+modules/foundups/pfmall/tests/test_video_mall_media_delivery.py
+public/member/tests/test_route_contract_bridge.py
+```
+
+Adjacent invocation uses that same runner with phase `adjacent` and these exact
+explicit arguments:
+
+```text
+modules/foundups/pfmall/tests/test_member_pwa_hardening.py
+modules/foundups/public_catalog_projector/tests/test_projector.py
+public/member/tests/test_mall_product_state.py
+public/member/tests/test_localhost_dev_harness.py
+```
+
+Pytest arguments: `--import-mode=importlib -o addopts= -p no:cacheprovider
+--basetemp <phase>/pytest -q`. Plugin/dotenv autoload and bytecode/cache writes
+are disabled; TMP/TEMP/DB/daemon scratch is outside the checkout. Python parent
+socket/DNS and Node entry points are guarded, with zero recorded attempts in
+the corrected runs. The original baseline route helper did not inherit the
+Node preload; it used the existing controlled VM fetch instead. Projector CLI
+children are pure local reads, not provider tests. Two inherited inactive
+asyncio config warnings remain. No whole-module green claim is made.
+
+`original-oracle-preservation.json` confirms all368 original case IDs and
+original assertions survive after the documented About path normalization;
+72 cases were added. Opaque frontend attribute comparison passed without
+displaying the value. Source/test hashes are frozen for parent independent
+review. A later auxiliary-only correction changes visual QA's three defaults
+to the local HTTP About URL and removes direct-file examples: absolute `/js/`
+assets cannot work from file URLs. This correction is statically inspected;
+no Playwright/provider call was run.
+
+Hosting precedence, actual response headers, mobile/desktop rendering, real
+login, installed-worker upgrade and publication remain parent gates. The VM
+does not establish those outcomes or live media/voice/token/trading readiness.

@@ -22,7 +22,7 @@ SCREENSHOT_DIR = Path(__file__).parent / "screenshots"
 
 
 def capture_screenshot(
-    url: str = "file:///O:/Foundups-Agent/public/index.html",
+    url: str = "http://localhost:5000/about/",
     name: str = "cube_qa",
     wait_sec: float = 5.0,
     scroll_to: str = "buildCanvas",
@@ -56,7 +56,7 @@ def capture_screenshot(
 
 
 def capture_sequence(
-    url: str = "file:///O:/Foundups-Agent/public/index.html",
+    url: str = "http://localhost:5000/about/",
     count: int = 3,
     interval: float = 10.0,
 ) -> list:
@@ -92,7 +92,7 @@ def capture_sequence(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Visual QA for cube animation")
-    parser.add_argument("--url", default="file:///O:/Foundups-Agent/public/index.html")
+    parser.add_argument("--url", default="http://localhost:5000/about/")
     parser.add_argument("--wait", type=float, default=5.0, help="Seconds to wait before capture")
     parser.add_argument("--sequence", action="store_true", help="Capture sequence of phases")
     parser.add_argument("--count", type=int, default=3, help="Number of screenshots in sequence")

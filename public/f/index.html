@@ -53,6 +53,14 @@
     }
     .entry-back:hover { color: #7c5cfc; }
     .entry-back svg { width: 16px; height: 16px; }
+    .public-nav {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem 0.75rem;
+    }
+    .public-nav .entry-back { padding: 0.6rem 0.75rem; }
 
     .entry-hero {
       padding: 2rem 1.5rem 1.5rem;
@@ -801,10 +809,13 @@
 </head>
 <body>
   <div class="entry-shell">
-    <nav>
+    <nav class="public-nav" aria-label="FoundUps navigation">
+      <a href="/" class="entry-back">Play</a>
+      <a href="/f/" class="entry-back" aria-label="FX — FoundUps Exchange">FX</a>
+      <a href="/about/" class="entry-back">About</a>
       <a href="/member/" class="entry-back">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
-        Back to Mall
+        Member Mall
       </a>
     </nav>
 
@@ -935,6 +946,17 @@
 
     // WSP 104: Parse foundup_id from pathname, not query params
     var path = window.location.pathname;
+    var isMallHome = path === '/' || path === '/index.html';
+    var signInMarkers = searchParams.getAll('signin');
+    var authMarkers = searchParams.getAll('auth');
+    var legacyAdmission = (signInMarkers.length === 1 && signInMarkers[0] === 'required') ||
+      (authMarkers.length === 1 && (authMarkers[0] === 'failed' || authMarkers[0] === 'error'));
+    var legacyAboutAnchor = ['#how', '#roc', '#build', '#terms'].indexOf(window.location.hash) !== -1;
+    // Fixed compatibility destination only; query/hash bytes never select authority.
+    if (isMallHome && (legacyAdmission || legacyAboutAnchor)) {
+      window.location.href = '/about/' + window.location.search + window.location.hash;
+      return;
+    }
     var match = path.match(/^\/f\/([^\/]+)/);
 
     // Consolidated Portfolio Index Surface
@@ -942,7 +964,18 @@
     var isPortfolioIndex = !match || !match[1] || match[1] === 'index.html';
 
     if (isPortfolioIndex) {
-      document.title = 'FoundUps | Public Portfolio Showcase';
+      if (isMallHome || path === '/f/' || path === '/f/index.html') {
+        var manifest = document.createElement('link');
+        manifest.rel = 'manifest';
+        manifest.href = '/manifest.json';
+        document.head.appendChild(manifest);
+        if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+          window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').catch(function() {});
+          });
+        }
+      }
+      document.title = isMallHome ? 'Play FoundUps Mall | FoundUPS' : 'FX — FoundUps Exchange | FoundUPS';
       // Read ONLY the scope-free public projection (no member runtime catalog).
       fetch(PUBLIC_CATALOG_URL)
         .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
@@ -1093,12 +1126,19 @@
     }
 
     function renderShowcaseShell() {
-      document.title = 'FX — FoundUps Exchange | FoundUPS';
+      var title = isMallHome ? 'Play FoundUps Mall' : 'FX — FoundUps Exchange';
+      document.title = title + ' | FoundUPS';
       var html = '<div class="portfolio-container">';
       html += '  <header class="portfolio-header">';
-      html += '    <h1 class="portfolio-title">FX — FoundUps Exchange</h1>';
-      html += '    <p class="portfolio-tagline">Explore FoundUps projects and declared token symbols.</p>';
-      html += '    <p class="portfolio-tagline">A declared ticker is not evidence of token deployment or trading availability.</p>';
+      html += '    <h1 class="portfolio-title">' + title + '</h1>';
+      html += '    <p class="portfolio-tagline">' + (isMallHome ? 'Discover FoundUps projects and explore what is ready to try.' : 'Explore FoundUps projects and declared token symbols.') + '</p>';
+      if (!isMallHome) {
+        html += '    <p class="portfolio-tagline">A declared ticker is not evidence of token deployment or trading availability.</p>';
+      }
+      html += '    <nav class="portfolio-card-links" aria-label="Project nominations">';
+      html += '      <a class="portfolio-link-btn portfolio-link-btn-sec" href="https://github.com/FOUNDUPS/Foundups-Agent/issues/new?template=foundup-project-nomination.yml" target="_blank" rel="noopener noreferrer">Nominate project</a>';
+      html += '      <a class="portfolio-link-btn portfolio-link-btn-sec" href="https://github.com/FOUNDUPS/Foundups-Agent/issues?q=is%3Aissue+in%3Atitle+%22%5BFoundUp+nomination%5D%22" target="_blank" rel="noopener noreferrer">View nominations</a>';
+      html += '    </nav>';
       html += '  </header>';
 
       // Read-only text search: name, summary, canonical ID and optional declared

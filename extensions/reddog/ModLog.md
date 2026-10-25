@@ -1,3 +1,22 @@
+## Post-intake Mall source binding — 2026-10-26
+
+Allocation1d348fcba,14/P1. Actual canonical261c9e65 binds mainfe721d37 uploader
+and GitHub source with the existing Mall gateway row. All1471 members and caps
+stay fixed; only existing digest literals change. Generator8 and Node3 pass with
+1614 stable snapshots and zero instrumented network/dotenv/write denials.
+Evidence: external post-intake-fe721d37. No new runtime authority or test oracle;
+independent final, hosted/security and authenticated incident disposition remain.
+
+## Mall/current-main source binding — 2026-10-26
+
+WSP6/15/22/50/97; preallocated14/P1. Combine main's GitHub client/six scheduler
+rows with Mall's gateway test row under canonicala64a876e. Existing1471 members,
+1472 refusal, all byte caps and generator/oracle logic remain unchanged; only
+two digest literals advance. Eight existing generator cases and three Node
+contract/preflight/blocked-recovery owners pass on the staged source. Stable1614
+snapshots and zero instrumented network/dotenv/write denials are local evidence,
+without installed-runtime or OS isolation admission. Hosted/security still gate.
+
 ## GitHub file-reader source binding — 2026-10-26
 
 WSP6/15/22/50/97; metadata amendment13/P1 in the FoundUps delivery plan.
@@ -7,6 +26,35 @@ and328KiB/2MiB/32MiB caps remain unchanged. Eight generator cases and three Node
 compatibility/preflight/blocked-recovery owners pass. Source compatibility only;
 no extension installation, repository claim or issuer/provider authority follows.
 
+## Mall/BTC combined source closure — 2026-10-25
+
+WSP6/15/22/50/97. Reconcile the verified BTC source with Mall's gateway test
+binding using the existing canonical generator and two digest pins. The combined
+manifest changes exactly two BTC/Mesa rows versus Mall and one gateway-test row
+versus main. All1470 members, generator logic, caps and installed authority stay
+unchanged. Canonical write/check,8 unchanged generator cases and3 existing Node
+entrypoints pass freshly on this staged candidate. Existing ledger union2030 and
+both prior review proofs are preserved;38 new whole-manifest fingerprints remain
+proposed for independent parent review. No new approval, scanner or deployment.
+
+## Mall gateway test source closure — 2026-10-25
+
+WSP00/6/15/22/50/97. Repair the missing derived binding exposed by hosted Mall
+CI jobs121046694299/121046761948 atf03bc5c83. Canonical generation measures one
+changed member hash: the existing pfmall gateway terms test's About source path.
+The initially suspected simulator URL files are not members. Retain all1470
+members, all caps and the generator algorithm; change only the manifest and its
+two existing digest pins. Canonical digest is
+`3db551ebd6dffc4afb0dc0ea7bd361dbca821448778c911715e7300fca43e1a7`.
+
+Fresh Mall canonical write/check,8 unchanged generator cases and3 existing Node
+entrypoints pass under external Python/Node effect instrumentation. No source
+drift or instrumented network/dotenv attempts. Exact commands/IDs/hash domains
+are in external `foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`.
+38 unchanged manifest metadata contexts have proposed exact rebindings only;
+ledger1938, the Mall3 receipt bindings and About binding remain untouched.
+Independent review, current-head CI/security and GitGuardian remain parent gates.
+This is source closure, without installed-runtime or transaction authority.
 ## Numeric/current-main combined closure — 2026-10-25
 
 WSP6/15/22/50/97. Existing canonical generation combines mainc7f0d939's bootstrap

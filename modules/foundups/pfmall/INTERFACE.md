@@ -110,6 +110,22 @@ called by catalog reads or Holo queries.
 
 ## Browser/member interface
 
+The local routing candidate serves `/` and `/index.html` with the existing
+`public/f/index.html` owner, framed as **Play FoundUps Mall**. `/f/` remains
+**FX — FoundUps Exchange**. Both read only `/f/public_catalog.json`; no catalog
+or Python API is added. The gateway moves once to `/about/`, retaining Clerk
+callback `/sso-callback/`, completion `/member/`, legal gate and existing install
+identity. Root forwards only recognized legacy admission markers or explanatory
+anchors to fixed `/about/` while preserving the original query/hash. Queries
+cannot supply a destination or grant member admission.
+
+The root worker registers only on the four exact home/directory paths, retires
+only obsolete `foundups-root-*` caches and bypasses About, admission queries,
+member/callback paths and protected app handoff. Explicit Hosting no-cache rules
+cover root, FX and About paths. Actual Hosting/browser behavior and provider
+authentication remain separate validation gates. See the
+[member route contract](../../../public/member/INTERFACE.md#public-home-and-about--2026-10-25).
+
 The static homepage's FX anchor targets the existing `/f/` public directory.
 Its project/ticker search consumes only the scope-free public projection; no
 Python/HTTP API or router is added. See

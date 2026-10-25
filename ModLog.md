@@ -1,3 +1,45 @@
+## 2026-10-26 — Review actual post-intake manifest bindings
+
+WSP6/15/22/50/71/77/84/97;13/P1 allocation7a7ecf9b2 precedes ledger mutation.
+Actual hosted job121320364147 supplies39 manifest tree findings, no unreviewed
+history;20 gate regressions pass. Root and independent source/prior-context
+reviews agree on exactly39. Append only those bindings:2657→2696, exact ordered
+prefix/all other keys retained. Five existing fingerprint/error regressions pass,
+with1614 stable snapshots and zero instrumented network/dotenv/write denials.
+Scanner/rules/scope, product/oracles, runtime members/caps/pins and receipts stay
+unchanged. Fresh hosted/security remain required; GitGuardian still reports only
+historical38958604. No external incident action or deployment. Allocation: Mall
+homepage plan; evidence: external post-intake-fe721d37. No new authority grant.
+
+## 2026-10-26 — Reconcile Mall with authenticated-intake main
+
+WSP00/6/15/22/50/71/77/84/97;14/P1 allocation1d348fcba precedes mutation.
+The owned combined candidate preserves mainfe721d37, including its auth/GitHub
+and eight new EduIT public files, plus Mall9e247f03 product/test behavior and three
+historical artifacts. Existing approvals compose2419+238=2657, no new approval.
+Actual generator261c9e65 retains1471 members/caps; registry1773/273 keeps both
+parents' rows. Baseline/post448 exact IDs and phase outcomes agree:445PASS/3FAIL,
+the same absent-media directories, two reviewed config warnings, no skips.
+Generator8 and Node3 pass;1614 selected source snapshots remain stable, with zero
+instrumented network/dotenv/write denials. Only the expected NAV snapshot changes.
+PR2196 stays draft pending independent final review, fresh hosted/security and
+verified GitGuardian disposition. No deployment, signer, token or overall readiness.
+Full allocation/evidence: docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md.
+
+## 2026-10-26 — Mall current-main reconciliation
+
+WSP00/6/11/15/22/50/62/84/97;14/P1. Preserve every current Mall public/Firebase
+entry, historical evidence and main33f client/scheduler/nomination work. Resolve
+six metadata/log conflicts, retain both histories and union2538 existing approvals
+without granting a new approval. Regenerate1471-membera64a876e and two literal
+pins; all caps remain unchanged. Registry1772/273 includes main's nomination row.
+Fresh affected four-owner baseline/post merge are identical:445PASS/3FAIL/0SKIP
+over448 exact IDs; three missing media directories stay unsuppressed. Generator
+8PASS and three Node owners exit0; instrumented source maps stay stable with zero
+network/dotenv/write denials. The first overly broad preview precheck and aborted
+owned merge are retained; only two public logs differed, no served asset did.
+Independent review, fresh hosted/security and GitGuardian38958604 remain required
+before merge or production deployment. Detailed scope/evidence: Mall homepage plan.
 ## 2026-10-26 — Hold intake promotion for patched optional dependencies
 
 All5134 hosted gates passed, but a separate public PyPI metadata audit found
@@ -107,6 +149,64 @@ No runtime, cap, scanner, dependency, signing, issuance, payment or deployment
 change. The existing delivery plan/compact receipt retain unfinished work and
 the next separately allocated consumer/artifact layer.
 
+## 2026-10-25 — Mall source closure reconciled with numeric main
+
+WSP15/22/50/97; preallocated 14/P1. Preserve main5be safety/authority changes
+and all Mall public bytes through the reconciliation checkpoint. Fresh eight
+generator cases and three Node entrypoints pass under the frozen final runner;
+earlier external setup/guard/provenance corrections remain recorded. Verify all
+1,471 indexed/working runtime hashes and unchanged byte/count limits. Preserve
+the exact 2,261-entry ledger union and append only 39 independently agreed
+source-hash metadata fingerprints. Protected evidence remains byte-frozen.
+The Mall plan records both reviews; hosted and GitGuardian gates remain.
+
+## Parent independent metadata acceptance — 2026-10-25
+
+Independent review verifies all1470 indexed/working LF source digests, both
+pins, fixed caps, exact2030 ordered ledger union and38 exact known manifest
+metadata contexts/old approvals against main6fe and Mallf381. Exactly those38
+new bindings are appended,2030->2068. Existing proof sections remain; new review
+is additive. Public/Firebase bytes still equal tested preview336c. Historical
+d9 candidate provenance is not claimed as an ancestor across squash integration.
+No unknown finding, GitGuardian incident, scanner rule or path is exempted.
+Fresh hosted checks and the pending GitGuardian inspection remain required.
+Independent report rawSHA256:
+7dfb2d5a90c028aa9f6c77e36fbc2ca1211f556881c776b747caf52881d038be.
+
+## 2026-10-25 — Mall reconciliation with verified BTC main
+
+WSP15/22/50/97. Reconcile Mallf3817bb7 with main6fe7eba4, retaining both dated
+source/evidence histories and every existing security binding (2030 union).
+All124 public/Firebase index entries remain exact reviewed336c211c source;
+BTC connector/Mesa and their two test owners remain exact verified main blobs.
+Canonical closure combines both source sets with1470 members and unchanged caps.
+Fresh unchanged8 generator cases and3 Node entrypoints pass under instrumented
+external scratch. Exact refs/commands/hashes are in host scratch
+`foundups-mall-main-reconciliation-fbc3fb6b643c48e29068bcd480518961`.
+The38 new metadata fingerprints are external proposals, not approvals. Merge
+commit, current-head CI/security, GitGuardian and publication remain parent gates.
+
+## 2026-10-25 — Play homepage and About routing candidate
+
+WSP00/15/22/50/97/102/104; existing15/P1 discovery allocation. Move the one
+explanatory/admission page to About and reuse the public directory at root;
+FX remains discoverable. Preserve callback/member/app admission and the exact
+public Move2Japan exception. Correct virtual-route freshness and scope root
+worker cleanup to its own cache namespace. No new catalog, voice, media, token
+issuer, trading or authenticated worker runtime is introduced.
+
+Parent affected validation repeats437 passes with3 inherited missing-media
+prerequisites; adjacent164 passes retain3 stale PWA regex failures reproduced
+on unchanged source. Counts overlap. Hosting preview verifies12 exact archived
+responses, root/About/FX navigation, phone search/empty state, preserved legacy
+query/hash, eligibility curtain before sign-in, and cache upgrade preserving
+member/tenant contents; disposable test caches are removed. Production and
+dedicated-PR/main gates remain pending. Portable receipt records exact limits.
+
+Prior layers: PR2188 merged92ae36900 and FX Hosting deployed/verified; PR2192
+epoch integrity merged7d3d7f643 after22 successful checks and exact-tree readback.
+Current reconciliation also preserves parallel Kids preview main7384448fb.
+No real chain, payout, reserve custody or whole-system completion is claimed.
 ## 2026-10-25 — FoundUps delivery and research checkpoint
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP22/50/97. Reconcile existing delivery/research
@@ -62593,6 +62693,27 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+
+## 2026-10-25 — About synthetic counter removed
+
+WSP15/22/50/97; parent preallocated 13/P1 in the existing Mall plan before edit.
+About now links `Browse FoundUPS` to the Mall without an invented count. Remove
+only the deterministic ticker IIFE; preserve all other About/auth/script bytes.
+Local HTML/JSON-LD structure checks and four inline JavaScript syntax checks pass.
+All 1,471 runtime hashes, manifest/pins and three protected Mall artifacts are
+unchanged. Historical preview/test receipts are preserved; no browser, Hosting,
+frontend suite or resident-closure rerun is claimed. Parent review/publication
+remain pending. Evidence: `foundups-mall-about-ticker-ej8lllyy`.
+
+
+## 2026-10-25 — Exact About identifier binding after counter correction
+
+WSP15/22/50/97; 14/P1 preallocated before one ledger append. Parent and
+independent review verify the previously classified frontend publishable
+identifier is unchanged; bind only its new whole-file context. Preserve 2,300
+entries and append one, for 2,301. Public source and protected Mall evidence,
+scanner/config/regressions remain unchanged. GitGuardian incident 38958604
+remains unlocated/unclassified; fresh hosted checks and review are required.
 ## 2026-10-25 — intake reference preservation allocation
 
 WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Preserve submitted references
@@ -62623,3 +62744,53 @@ issue submission, control/admission, registry, token or market activation. Publi
 and verify the default-branch form before separately changing overlapping Mall UI.
 Implemented the55-line form; YAML/schema/required-field/order checks and independent
 source review pass. No issue submitted. Hosted publication gates remain pending.
+
+## 2026-10-25 — Mall nomination links and current main preserved
+
+WSP15/22/50/84/97. Reconcile main a44 with protected Mall work: exact2340 prior
+ledger union, current1771/273 registry,1,471 resident members and unchanged caps.
+Fresh generator8 and3 Node entrypoints pass. Four fixed-link HTML lines provide
+Nominate project/View nominations after the template reaches main; route220
+passes after the four missing-link RED cases. Independent reviews pass; protected
+historical receipts remain unchanged. Preview and current hosted/GitGuardian
+publication gates remain; no submission, owner, token or market rights are granted.
+
+## 2026-10-25 — Mall current-main hash review and About startup repair
+
+WSP15/22/50/84/97. Actual job121122335711 reports39 generated manifest hash
+findings; parent and independent review reconstruct every referenced source and
+exact fingerprint. Preserve2,340 prior bindings, append only39 (2,379 total);
+five unchanged security regressions pass. GitGuardian remains a separate gate.
+Preview9d912 passes13 exact-byte HTTP routes and desktop/mobile discovery/filter/
+About navigation checks. Browser logs additionally expose About1951's absent
+legacy sign-in link binding. Preallocate14/P1 and make only that listener optional;
+existing gateway ROC/terms suites pass178 cases with zero skips or guarded network
+attempts. Fresh repaired-preview initialization/terms checks and hosted gates
+remain required. No provider, referer restriction, terms or OAuth change is made.
+Repaired15311925 is now preview-verified: two About paths match exact raw bytes,
+and fresh-browser initialization/terms open-Escape-close/late concierge open-close
+all work. Former TypeError is absent; unchanged analytics referer403 is separate.
+No acknowledgment, authentication or message submission. The one unchanged
+publishable identifier has its exact new binding reviewed and recorded; fresh
+hosted tree/history scans and the separate GitGuardian gate remain required.
+Strict scope catches one redundant security README delta,40 actual/39 declared.
+Restore that file's exact9d/main bytes; retain the reviewed ledger/evidence and
+existing logs. No runtime/source/security cap is widened; strict scope is rechecked.
+
+## 2026-10-25 — Mall convergence with published intake main
+
+WSP15/22/50/84/97; preallocated14/P1. Preserve main0909 and all reviewed Mall
+product/oracles/receipts. Five metadata/log conflicts retain both parent inputs
+and exact2,420 prior approvals, with no new finding approval. Canonical5b933b75
+binds both source deltas;1,471 members and all caps remain fixed. Registry1,771/273
+passes, generator8 passes in72.06s, and three Node entrypoints exit0. Actual public
+source remains preview153; these ordinary local checks add no network-isolation
+claim. Independent immutable review and fresh hosted/GitGuardian gates remain.
+Actual8bf security job121136810765 reports39 manifest metadata findings and zero
+unreviewed history findings. Parent and source-bound review reconstruct all39
+current/prior fingerprints and referenced source hashes, including the disclosed
+adjacent mapper-context difference. Preserve2,420 prior records and append only
+these39 exact bindings (2,459 total) within the two existing metadata paths.
+No README, source, oracle, scanner, cap or GitGuardian change; fresh gates remain.
+Independent final metadata-diff review passes; five unchanged security regression
+cases pass. Fresh hosted tree/history checks remain required after this binding.

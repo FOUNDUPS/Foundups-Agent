@@ -13,6 +13,13 @@ execution, or FoundUp business logic.
 
 ## Implemented surfaces
 
+- The local homepage candidate serves **Play FoundUps Mall** at `/` through the
+  existing public directory renderer and public projection. `/f/` retains FX;
+  `/about/` owns the explanatory/admission gateway. Known legacy admission
+  markers and explanatory anchors forward only to that fixed About destination.
+  Member/SSO routes retain their owners. Hosting/browser rollout remains a
+  separate gate; see [the allocation and evidence](../../../docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md).
+
 - The public homepage links **FX** to the existing `/f/` directory, which searches
   public project identity, summary and optional declared ticker with landing
   readiness filters. This is project/token discovery, not observed asset or

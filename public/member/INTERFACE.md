@@ -5,6 +5,54 @@
 
 ## Public Interface
 
+### Public project nominations — 2026-10-25
+
+The Mall and FX INDEX headers provide fixed **Nominate project** and
+**View nominations** GitHub links. Nominate selects the merged public issue form;
+GitHub sign-in and deliberate submission remain on GitHub. No current page,
+query, hash or catalog field supplies either destination.
+View nominations searches issue titles for `[FoundUp nomination]`, including
+open and closed matches. Editable titles are an inbox aid, not complete provenance.
+An issue, submission or closure grants no repository control, registry admission,
+token entitlement or market rights. Detail/app routes and existing member,
+About/auth and Move2Japan handoffs keep their existing owners.
+
+### Public home and About — 2026-10-25
+
+Local source candidate, with independent Hosting/browser rollout still required:
+
+| Path | Owner and behavior |
+|---|---|
+| `/`, `/index.html` | Existing `public/f/index.html`, **Play FoundUps Mall** framing |
+| `/f/`, `/f/index.html` | Same public renderer/projection, **FX — FoundUps Exchange** |
+| `/about/` | Single moved explanatory/legal/admission gateway |
+| `/sso-callback/` | Existing Clerk callback, success to `/member/` |
+| `/member/` | Existing ordinary admission and exact registered public-product exception |
+| `/f/{id}/app[/…]` | Existing member handoff before public catalog fetch |
+
+Only the four exact home/directory paths attach the root manifest and register
+`/sw.js`. The unchanged manifest installation identity remains `/`, start URL
+`/` and scope `/`. About retains its manifest/install affordances, but does not
+register a worker. Root scope alone is not authorization: its worker bypasses
+About/member/callback navigations, admission query keys and protected app paths.
+Version `foundups-root-v2` deletes only obsolete `foundups-root-*` caches; member,
+tenant and unrelated caches survive. Explicit Hosting no-cache rules cover root,
+FX and About request paths; media TTL/HTML/JSON policies remain in place.
+
+Only root `/` or `/index.html` forwards one recognized `signin=required` marker,
+one `auth=failed`/`auth=error` marker, or exact `#how/#roc/#build/#terms` to
+`/about/` plus the original search/hash. Duplicate values for a marker do not
+recognize that marker; unknown markers remain discovery. No query provides a
+destination, account scope or token permission. Callback failures and member
+guest bounce keep their existing root marker URLs, then use this compatibility
+step. About's existing terms curtain remains before OAuth. Simulator SSE options
+belong on About and do not activate a connection from public discovery.
+
+Both public indexes fetch only `/f/public_catalog.json`. The public allowlist,
+search/readiness/error paths, exact Move2Japan registered handoff and member/app
+admission remain unchanged. This source change adds no video/voice generation,
+repository claim, chain asset, exchange market or trading operation.
+
 ### Public FX directory — 2026-10-25
 
 The homepage navigation links **FX** to `/f/`, whose existing index renderer

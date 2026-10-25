@@ -1,5 +1,23 @@
 # Script test inventory
 
+## 2026-10-26 — Post-intake Mall source binding
+
+Allocation1d348fcba reuses all8 generator cases:8PASS, two reviewed inactive
+asyncio-config warnings. Actual261c9e65 keeps1471 members/caps and only updates
+the two existing pin literals. Three Node commands also exit0;1614 snapshots
+stay stable with zero instrumented network/dotenv/write denials. Registry1773/273
+retains both parents' rows. Evidence: external post-intake-fe721d37. No new oracle,
+runtime grant, incident disposition or release qualification follows.
+
+## 2026-10-26 — Mall/current-main source binding
+
+The unchanged eight generator cases pass in79.89s after staging actual combined
+source/manifest/two pin literals. Two inherited inactive asyncio config warnings
+remain. Existing three Node owners exit0; registry1772/273 is current. Canonical
+a64a876e retains1471 members,332650LF/335665CRLF and207 bytes of fixed headroom.
+All1614 source snapshots remain stable; zero instrumented network/dotenv/write
+denials. No new case, cap, member, source algorithm or installed-runtime grant.
+
 ## 2026-10-26 — GitHub client source binding
 
 Rebind only the existing client's normalized hash in the1471-member manifest;
@@ -9,6 +27,56 @@ zero failures/errors/skips/warnings in the external development environment.
 Three existing Node contract/preflight/blocked-recovery owners exit0. No new
 test file, generator, member, byte cap, provider or installed-runtime admission.
 
+## 2026-10-25 — Mall and published intake source binding
+
+Preserve the two parent source deltas under canonical5b933b75 and unchanged1,471
+members/caps. The two existing pin literals are the only test/oracle edits.
+Resolve/stage all actual bindings before running the unchanged staged-index case.
+All8 generator cases pass in72.06s, with two inherited inactive asyncio config
+warnings. Three existing Node entrypoints exit0; registry1,771/273 is current.
+Manifest LF332,650/CRLF335,665 retains207 bytes below the fixed328KiB limit.
+JUnit: `C:/Users/user/AppData/Local/Temp/foundups-mall-intake-bindings-8497da4f4aa643a799602ffe70ed0084/generator.xml`.
+These ordinary local checks add no instrumented network/isolation claim or new
+runtime membership. Parent-tree review and fresh hosted/security gates remain.
+
+## 2026-10-25 — Current main and Mall source union
+
+At c19a5055, all8 existing generator cases pass in69.95s; the three existing
+Node compatibility/preflight/blocked-recovery entrypoints also exit0. This fresh
+ordinary local run makes no additional effect-hook/isolation claim. Manifest
+canonical84fbe6a binds1,471 members,332650LF/335665CRLF bytes; all byte/count caps
+and the explicit1,471-accept/1,472-reject oracle are unchanged. Registry is current
+at1771/273. The later four-line nomination UI and its tests/docs are outside the
+resident closure. Historical receipts and earlier failures remain unmodified.
+
+## 2026-10-25 — Combined Mall/BTC canonical bindings
+
+Reuse the exact existing8 generator cases after main6fe7eba4 joins Mallf3817bb7.
+All8 pass in83.23s, two inherited inactive asyncio configuration warnings, with
+both expected digest pins updated and all original parity/member/byte assertions
+retained. Canonical write/check and3 existing Node entrypoints also exit0.
+Zero instrumented network/dotenv attempts and stable1613-file evidence maps;
+1470 runtime membership is unchanged. External receipts retain exact IDs/argv
+in `foundups-mall-main-reconciliation-fbc3fb6b643c48e29068bcd480518961`.
+The merge remains uncommitted pending independent metadata review and parent
+publication gates; no historical Mall/BTC receipt is rewritten.
+
+## 2026-10-25 — Mall gateway-source binding repair
+
+Hosted CI atf03bc5c83 exposed missing source parity. Fresh canonical generation
+measures only `modules/foundups/pfmall/tests/test_gateway_terms_gate.py` changed;
+simulator SSE/visual QA URL files are not in the1470 runtime closure. Preserve
+all8 existing generator cases and every assertion; update only their existing
+canonical digest literal to
+`3db551ebd6dffc4afb0dc0ea7bd361dbca821448778c911715e7300fca43e1a7`.
+
+After staging only the manifest and its two pins, the same8 cases pass in121.30s,
+with2 inherited inactive asyncio config warnings. Canonical `--write`/`--check`
+and3 existing Node compatibility/preflight/recovery entrypoints exit0. No new
+case, source member, cap or installed authority. Guarded external receipts retain
+exact8 IDs, commands, JUnit, source snapshots and zero instrumented network/
+dotenv attempts under `foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`.
+These Mall results do not reuse BTC evidence; fresh hosted gates remain required.
 ## 2026-10-25 — Intake reference source binding
 
 The existing mapper remains one of1,471 runtime members; regenerate its source

@@ -3,6 +3,21 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## Mall home and About — 2026-10-25
+
+- Implemented locally: root Play discovery and `/f/` FX share the existing
+  public renderer/catalog. About is the single moved explanatory/admission
+  gateway; known root sign-in/error/section links preserve query/hash on the
+  fixed About destination. Ordinary admission and public product selection
+  retain the existing member owner.
+- Root PWA registration is limited to actual home/directory paths. Cache
+  retirement preserves member/tenant namespaces and bypasses authentication
+  surfaces; Hosting headers explicitly address extensionless route freshness.
+- Pending parent gates: Hosting/emulator/preview route precedence, response
+  Cache-Control, actual desktop/mobile navigation and cache-upgrade behavior,
+  independent acceptance and publication. Source results and inherited
+  prerequisites remain explicit in [tests/TestModLog.md](tests/TestModLog.md).
+
 ## FX1 Public Directory — 2026-10-25
 
 - Implemented locally: homepage FX link to the existing `/f/` public directory,

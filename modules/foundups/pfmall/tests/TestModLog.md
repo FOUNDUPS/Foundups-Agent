@@ -1,5 +1,17 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Post-intake main reconciliation, existing owners
+
+Reuse the four unchanged gateway/terms/media/route owners under allocation1d348fcba.
+Credential-free Python3.12.10/pytest9.0.3/Node24.11.1; baseline1fe9a9575 and
+staged mainfe721d37 merge both collect448, with identical ordered IDs and phase
+outcomes:445PASS/3FAIL/0SKIP, no collection error. Same three absent media dirs
+and two unknown asyncio-config warnings remain; no placeholder/filter/oracle
+change. Product snapshots agree except the explicitly combined NAV metadata.
+No instrumented Python/Node attempts; each run's source stays stable. Logs,
+exact IDs and composition proof: external post-intake-fe721d37. Generator8/Node3
+pass separately; no OS isolation, provider, deployment or release claim.
+
 ## 2026-10-26 — Patched optional HTTP profile qualification
 
 Do not promote the initial profile below: public PyPI metadata found published
@@ -69,6 +81,31 @@ they bind their recorded allocation-HEAD/overlay, not a fresh full-repository or
 installed-runtime qualification. Canonical registry1773/273 quarantine; no old
 test removal, quarantine, skip or warning filter. Exact-head hosted/security and
 main convergence remain separate from these local results.
+## 2026-10-25 — Root Play/About ownership and namespace-safe worker rollout
+
+Reused the existing three gateway/media owners and member route VM. Canonical
+gateway readers and missing-media catch-all oracle move to About. Root PWA
+registration is tested through the shared directory; legal/admission and all
+original assertions remain. New behavior controls cover root/FX framing,
+fixed query/hash compatibility, exact directory registration, protected handoff,
+explicit route headers and actual root-worker lifecycle/cache isolation.
+
+Unchanged baseline:365 pass/3 absent-media prerequisites. Correct desired
+RED:400 pass/40 fail (37 new controls plus the same3). Final four owners:
+437 pass/the same3 failures, zero new failures or skips. Separate adjacent
+selection:164 pass/3 unchanged member-worker regex failures, independently
+reproduced by parent on untouched source; actual product/account/state and
+projector controls pass. No empty media directories, quarantine or weakened
+oracle was introduced. Phase counts overlap and are not cumulative.
+
+Full exact case IDs, two inherited config warnings, commands/environment,
+initial invalid preload setup, SHA snapshots, opaque attribute comparison and
+limits are in `public/member/tests/TestModLog.md` from repository root and in
+external `foundups-mall-home-695e26d23253404fac695e8fa797a5a3/*/results.json`.
+All368 original IDs/assertions retained;72 added cases. Corrected guarded runs
+record no network attempts. Local source verification is not Hosting/browser,
+authentication-provider, media/voice, deployment or trading acceptance. Parent
+owns independent review, generated registry/security artifacts and publication.
 
 ## 2026-10-25 — FX1 gateway link and public filter reuse
 

@@ -1,3 +1,14 @@
+## 2026-10-26 — Preserve Mall and current-main intake composition
+
+Under14/P1 pre-change allocation1d348fcba, combine the existing Mall2196 with
+mainfe721d37 without changing their product/test behavior. Fresh four-owner
+baseline/post agree on all448 IDs/phase outcomes:445PASS/3 identical absent-media
+failures, two reviewed config warnings, no skips or instrumented network calls.
+Main's default503 Clerk draft owner remains byte-identical; no deployed claim
+host follows. Generator8/Node3 pass with1471 members/caps retained. Existing
+security approvals only; historical receipts stay frozen. Independent final and
+fresh hosted/security/GitGuardian gates still precede merge/deployment.
+
 ## 2026-10-26 — Replace the initial optional dependency profile before promotion
 
 Fresh public registry metadata found advisories for the initial Starlette/crypto
@@ -215,3 +226,30 @@ This is a **stacked review**, not a production cutover.
   retain strict fail-closed retrieval; no special case or downgrade was added.
 - Remaining WSP 49/60/12 structure debt is explicit in `ROADMAP.md` and was not
   mixed into this documentation transaction.
+## 2026-10-25 — Play homepage, single About gateway and bounded cache rollout
+
+WSP 00/15/22/50/84/97/102/104; approved C3/I4/D4/Impact4 =15/P1 allocation in
+`docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md`, base `c8eb983629`.
+Move the existing gateway once to `public/about/index.html`, correct its cube
+asset URL and retain legal/Clerk/member behavior. Reuse the public `/f/` owner
+for Play home and FX, with visible navigation and fixed known query/hash
+compatibility. No second catalog/router or member-data import.
+
+Move root worker registration to exact home/directory paths, scope obsolete
+cache cleanup to `foundups-root-*`, and bypass About/admission/member/callback/
+protected app requests. Add explicit no-cache Hosting headers for virtual root,
+FX and About paths, preserving existing media/HTML/JSON policies. Update only
+allocated current navigation/cube/simulator path pointers; simulator memory
+integration belongs to the parent lane.
+
+Original four-owner baseline:365 pass/3 missing-media-directory failures.
+Desired RED:400 pass/40 fail, including37 new contract failures. Final:437
+pass/the same3 failures, zero new failures/skips/network attempts. Original368
+case IDs and original assertion oracles remain after documented path migration.
+Adjacent owners:164 pass/3 unchanged member-worker regex extraction failures;
+actual product/auth/runtime and projector checks pass. Exact IDs, invocation,
+external receipts, invalid initial runner setup and limitations are in
+`tests/TestModLog.md` and the allocation. Source/test hashes are frozen.
+Opaque frontend attribute comparison passed without displaying its value.
+Parent owns independent review, Hosting/browser evidence, generated artifacts,
+security fingerprint review and publication; none is claimed here.

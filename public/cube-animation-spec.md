@@ -230,7 +230,7 @@ async function fetchSimulatorState() {
 ```
 
 ## File Location
-Modify: `public/index.html` lines 1830-2110 (buildCanvas IIFE)
+Modify: `public/about/index.html` (buildCanvas IIFE). The root `/` is public Play discovery; the explanatory cube lives on About.
 
 ## Success Criteria
 1. Animation tells clear story of FoundUP lifecycle

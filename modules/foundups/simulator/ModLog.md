@@ -1,3 +1,25 @@
+## 2026-10-25 — Preserve BTC source during Mall reconciliation
+
+The Mall branch incorporates verified main6fe7eba4. BTC connector/Mesa and both
+existing test owners retain main's exact Git blobs; additive simulator memory
+retains the Mall HTTP tooling pointers and BTC contract/history. Public/Firebase
+sources remain exact reviewed336c211c. Fresh8 generator/3 Node checks qualify the
+combined source binding only. No simulator suite rerun is claimed by this merge;
+the separately retained BTC qualification remains bound to its actual source.
+No Python product/test behavior, historical receipt, provider or chain action.
+
+## 2026-10-25 — About route compatibility for simulator tools
+
+The public homepage becomes Play discovery; the explanatory cube moves once
+to public/about/index.html. Update only the visual QA tool's three defaults to
+http://localhost:5000/about/, SSE documentation and current INTERFACE/cube-spec
+examples. A running local Hosting server is required; direct-file preview is
+not claimed because About loads the root-relative cube script. Custom SSE
+examples include sim=1. No simulator economics, event or auth behavior changes.
+
+WSP15/22/50/97; public route tests and actual Hosting preview qualify the route
+move, not a fresh Playwright visual-QA or live SSE invocation. Existing epoch
+and FAM authority contracts and evidence remain intact.
 ## FoundUps selected numeric source closure — 2026-10-25
 
 Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required

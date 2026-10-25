@@ -1,5 +1,56 @@
 # Member Area Module Change Log
 
+## 2026-10-25 — About optional sign-in binding
+
+Actual preview browser logs identify a null listener binding at About1951: the
+legacy showSignInModal link is absent. Make only that binding optional so the
+remaining existing initialization can run. No terms, OAuth, permission or DOM
+entry change. The existing two gateway owners pass178 cases with zero skips or
+guarded network attempts. Browser verification of the repaired preview remains
+required; the pre-repair exception is preserved, not a static-test failure.
+WSP15/22/50/84/97:14/P1 allocation precedes the one-character product repair.
+Repaired15311925 preview now serves both About routes as exact source bytes.
+Fresh browser verifies initialization continues, terms open/Escape close and
+later concierge open/close. Former TypeError is absent; analytics referer403
+remains separately observed. No terms acknowledgment, login or message sent.
+
+## 2026-10-25 — Fixed public project nomination links
+
+Add two native fixed GitHub links to the existing public INDEX header, reusing
+its button CSS. GitHub owns sign-in, deliberate issue submission and issue status.
+Title-search matches are editable inbox entries; they do not prove repository
+control, registry admission or token/market rights. Existing route owners remain.
+
+WSP00/15/22/50/84/97: parent 15/P1 allocation; degraded Holo evidence retained.
+Unchanged route baseline 212 passed; desired RED 216 passed/4 missing-link failures;
+candidate 220 passed, zero skipped/network attempts and two inherited warnings.
+All original definitions/oracles retained; exact receipts are in tests/TestModLog.md.
+
+## 2026-10-25 — Public Play home and canonical About admission page
+
+Reuse the public directory at root with Play framing, retain `/f/` FX and move
+the existing gateway once to `/about/`. Public top navigation exposes Play/FX/
+About/member. Only known root admission/section links forward to fixed About,
+preserving raw query/hash without accepting a destination. Clerk callback/member
+completion, ordinary admission, account return and the Move2Japan exception keep
+their existing owners. Shared discovery still reads only the public projection.
+
+Keep manifest identity and About install UI. Register root worker only from
+exact home/directory paths; retire only root cache versions and bypass new About,
+admission/member/callback/protected-app requests. Explicit virtual-route no-cache
+headers address the observed pre-change one-hour root/FX Hosting policy. No
+member source, catalog, provider, live media, voice, token or trading change.
+
+WSP 00/15/22/50/84/97/102/104: pre-authoring15/P1 allocation, canonical Holo
+authority mismatch retained, exact-source fallback and existing test owners.
+Baseline365/3 inherited failures; desired RED400/40; final437/3 with the same
+three media prerequisites and all original cases/oracles retained. Adjacent
+164/3 includes three unchanged member-worker regex extraction failures, while
+actual product/account/state/runtime and projector checks pass. No skips or
+guarded network attempts. See tests/TestModLog.md for exact IDs and receipts.
+Source/test frozen for independent parent review; Hosting/browser/provider/
+publication completion is not inferred from controlled VM execution.
+
 ## 2026-10-25 — FX1 public directory discovery
 
 Expose the existing `/f/` public directory through a normal homepage FX link.

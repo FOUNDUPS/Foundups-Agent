@@ -1,3 +1,19 @@
+## Post-intake Mall source binding — 2026-10-26
+
+Existing Node contract/preflight/blocked-recovery commands each exit0 at actual
+261c9e65; the unchanged generator8 also pass. Actual1614 selected snapshots stay
+stable, with zero instrumented network/dotenv/write denials. All1471 members,
+caps and assertions remain fixed. External post-intake-fe721d37 records this
+local composition; no new oracle, installed-runtime or release admission follows.
+
+## Mall/current-main source binding — 2026-10-26
+
+Existing three Node contract/preflight/blocked-recovery entrypoints each exit0
+at staged canonicala64a876e. Generator8PASS in79.89s; all1614 snapshot files stay
+stable, with zero instrumented network/dotenv/write denials. Keep1471 acceptance,
+1472 refusal and all caps/assertions unchanged. External local evidence is under
+`foundups-mall-reconcile-20261026`; no installed-runtime/OS isolation claim.
+
 ## GitHub file-reader source binding — 2026-10-26
 
 Reuse the three existing Node contract/preflight/blocked-recovery owners:each
@@ -5,6 +21,50 @@ exits0 at the new c1f97e86 pin. Existing eight Python generator cases also pass
 after source/manifest/pins are staged. Runtime1471 and1472 refusal stay fixed;
 no new cases, widened caps, native isolation or installed-runtime admission claim.
 
+## Mall/published intake binding — 2026-10-25
+
+Canonical5b933b75 retains1,471 runtime members and all existing caps. Only the
+existing digest literal changes in constants and its generator test. All8
+generator cases pass in72.06s (two inherited config warnings); the three existing
+Node contract/preflight/blocked-recovery entrypoints each exit0. Registry1,771/273
+is current. LF332,650/CRLF335,665 retains207 bytes of fixed manifest headroom.
+These are ordinary local checks, not instrumented external-effect qualification.
+Independent source-map review and fresh hosted gates remain required.
+
+## Combined Mall/BTC closure — 2026-10-25
+
+Fresh merged-source canonical write/check exit0; all8 unchanged generator cases
+pass in83.23s with2 inherited inactive asyncio config warnings. Existing Node
+compatibility contract/preflight/blocked-request recovery entrypoints each exit0.
+No test oracle changes beyond the two existing digest pins. All1613 evidence
+files remain stable in-run; zero instrumented network/dotenv attempts. Preserve
+1470 acceptance/1471 rejection,328KiB LF/CRLF manifest,2MiB source and32MiB total
+caps. Actual manifest332458 LF/335471 CRLF bytes, runtime19657236 normalized bytes,
+maximum154924. Exact commands/IDs/JUnit/maps are external under
+`foundups-mall-main-reconciliation-fbc3fb6b643c48e29068bcd480518961`.
+These fresh checks qualify combined source closure, not installed promotion or
+browser/Hosting behavior. Independent38 metadata review and hosted gates remain.
+
+## Mall closure qualification — 2026-10-25
+
+At the repaired f03bc5c83 Mall source, reuse8 unchanged generator cases and the
+existing Node `test_backend_compatibility_contract.js`,
+`test_backend_compatibility_preflight.js` and
+`test_holoindex_blocked_request_recovery.js` entrypoints. All8 cases pass in
+121.30s with2 inherited inactive asyncio configuration warnings; all3 Node
+entrypoints exit0. Canonical generator write/check also exit0. These are fresh
+Mall runs, not borrowed epoch or BTC results. The only test-source edit during
+repair is the existing canonical digest literal; no acceptance oracle changes.
+
+Manifest1470 membership and1471 rejection remain intact, as do328KiB LF/CRLF,
+2MiB member and32MiB total caps. Measured sizes:332458 LF/335471 CRLF manifest,
+19656160 normalized source bytes,154924 maximum member. Each phase snapshots1613
+files (1470 runtime members plus generator/pin/extension-JS evidence); before/
+after maps are identical. Zero instrumented network/dotenv attempts, bytecode/
+plugins/cache disabled and external scratch; guards do not establish OS isolation.
+External phase receipts retain exact argv,8 collected IDs, outcomes and hashes in
+`foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`. Hosted source/
+security scans, proposed38 metadata review and GitGuardian remain pending.
 ## Numeric/current-main reconciliation qualification — 2026-10-25
 
 Fresh unchanged generator8 pass in77.50s with2 inherited inactive asyncio config
@@ -2926,3 +2986,12 @@ node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
 ```
 ## 2026-08-12 - Independent grant-provider compatibility pin (0.4.87)
 - Updated exhaustive contract fixtures to the exact extension/backend version.
+## 2026-10-25 — Current main and nomination-link source closure
+
+Main a44e7864 joins Mall without changing1,471 membership or byte/count caps.
+Independent immutable review verifies all source hashes, exact2340 prior ledger
+union,17 main-only paths and the complete root-log insertion union. The canonical
+digest is84fbe6a. Existing generator8 and three Node compatibility/preflight/
+blocked-recovery entrypoints pass; this ordinary local run claims no new effect
+hook/native/installed qualification. Public nomination UI changes are outside
+the resident closure; original acceptance/rejection oracles remain intact.

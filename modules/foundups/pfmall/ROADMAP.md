@@ -14,6 +14,20 @@ revocation and abuse policy. Then issue a fresh repository challenge and persist
 its consumption plus immutable receipt atomically in the selected intake owner.
 Preserve draft versus membership/claim/issuer/work/token authority separation.
 Do not attach an inactive browser form or infer live authority from offline RSA.
+## Mall home and About — 2026-10-25
+
+- Local source candidate: reuse the public directory at `/` with Play framing;
+  retain `/f/` FX and move the single explanatory/admission gateway to `/about/`.
+  Keep fixed legacy query/hash compatibility, public projection isolation,
+  callback/member authority and the existing protected app handoff.
+- Root cache rollout is namespaced and excludes auth/handoff. Extensionless
+  routes receive explicit no-cache headers. Existing source controls pass;
+  unchanged media prerequisites and stale member-worker regex tests remain
+  reported in [tests/TestModLog.md](tests/TestModLog.md).
+- Pending: parent Hosting preview/browser/Cache-Control and cache-upgrade
+  verification, independent review and publication. No live media, voice,
+  catalog expansion, claim, token or trading feature is implied.
+
 
 ## FX1 public discovery — 2026-10-25
 
