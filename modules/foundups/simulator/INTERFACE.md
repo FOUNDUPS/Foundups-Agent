@@ -22,6 +22,49 @@ simulation; persistent initiation has separate pending semantics.
 
 ## Core Schemas
 
+### Epoch evidence contract
+
+`economics/epoch_ledger.py` owns the existing process-local ledger. Recording and
+commitment method signatures remain; `MerkleProof.verify` now requires all four
+keyword arguments:
+
+```python
+proof.verify(expected_root=trusted_root, expected_foundup_id="project_a",
+             expected_epoch=1, expected_participant_id="alice")
+```
+
+Verification recomputes the amount/participant leaf and binds FoundUp, epoch and
+`foundups.epoch.v2`. The expected root/context must come from a trusted checkpoint,
+not from the submitted proof. Missing arguments cannot pass. Unknown formats,
+malformed hashes/path directions, mismatched contexts and altered claims reject.
+This proves inclusion of the proof's amount, not work eligibility or settlement.
+
+Amounts accept exact built-in int/float only, excluding bool, negative values,
+NaN and infinities. Integers remain exact; integral floats become integers and
+signed zero becomes zero. Fractional floats retain their value. Hash JSON uses
+sorted keys, compact separators and `allow_nan=False`; leaves, nodes, empty roots
+and entries have explicit domains/context. No financial precision, rounding,
+tolerance, conservation equation or chain unit conversion is added. Individual
+finite values do not establish safe aggregate arithmetic for every magnitude.
+
+`record_epoch` validates and builds before publishing under its instance lock.
+An exact normalized retry returns the original frozen entry/time/hash/tree,
+including after newer epochs. Conflicts reject without mutation. New epochs
+increase with gaps allowed. Entries are tuple snapshots, recorded mappings are
+read-only copies, tree levels/proof paths are tuples, and `to_dict`/commitment
+results are detached ordinary dictionaries. These are in-process guarantees;
+there is no durable epoch recovery or cross-epoch work-source consumption here.
+`verify_chain` checks the listed snapshots themselves and their canonical epoch
+index consistency; a separate valid indexed entry cannot mask list corruption.
+
+Commitments retain `status=pre_settlement`, `wsp_78_layer=D_pending`, the existing
+summary fields and an added `format_version`. Anchors use the finalized entry
+timestamp/context, so repeated preparation is stable. V2 digests differ from the
+old format. Existing BTC connector rows are not migrated; its content-blind
+FoundUp/epoch replay guard remains a blocker before non-mock activation. Pool
+distribution evidence retains its current units, including the historical
+`total_fi_distributed` field name; it is not a canonical spendable F_i ledger.
+
 ### SSE Event Envelope
 ```python
 SSEEventEnvelope(

@@ -1,5 +1,88 @@
 # Simulator Tests ModLog
 
+## 2026-10-25 — P0C test-first epoch commitment integrity
+
+Final parent qualification of the repaired source:410 simulator cases pass in
+55.18s; exactly3 named SSE HTTP cases are deselected, with zero guarded network
+attempts and168 stable source hashes. Independent replay passes41 held-outs on
+the repaired freeze. Counts overlap with106 focused/adjacent cases and are not
+added. Portable commands, IDs, source snapshots and exclusions are in the
+[epoch receipt](../../../../docs/architecture/receipts/FOUNDUPS_EPOCH_COMMITMENT_20261025.json)
+and its companion inventory.
+
+Changed-owner statement coverage is205/213 (96.24%), measured over the existing
+106-case selection plus an unchanged copy of the existing independent11-case
+publication probe. The106-only measurement was86%; an earlier inherited
+livechat configuration collected no data and supports no coverage claim.
+No coverage-driven product or test edits were made. This is neither whole-module
+coverage nor formal WSP6 OS-isolated promotion qualification.
+
+Derived source-closure qualification:8 unchanged generator cases pass in79.64s
+with2 inherited inactive asyncio warnings;3 existing Node compatibility entrypoints
+exit0. Independent review verifies all1470 staged normalized blobs, both pins and
+unchanged caps. Canonical registry is current (1769 files/273 quarantined).
+The owned branch parent is verified squash-main92ae36900; alignment preserved
+the index, working diff and status because its source tree equals reviewed352fab3bb.
+Fresh dedicated-PR hosted security/CI and main readback remain required.
+
+The following entries preserve test-first and first-candidate history.
+
+Baseline unchanged three-file owner set:20 passed. Added84 adversarial cases in
+the existing commitment test file, preserving its module docstring and both
+original test bodies/oracles; desired RED:84 failed,2 passed. Only then changed
+the existing ledger. Candidate GREEN:104 passed (86 commitment plus18 unchanged
+connector/runtime cases), zero failures/skips, two inherited inactive asyncio
+option warnings, zero guarded network attempts and stable in-run source hashes.
+
+Independent review found a private list/index divergence in `verify_chain` on
+the first frozen product hash `93461746ab3cda4cacef387242d21a98219689cf8c78c6ab36ec026d4a1ba61d`.
+It could check the original indexed entry while a different listed entry carried
+either a stale or recomputed hash. No public mutation/import path was found;
+scope is a latent integrity-checker limitation, not an authorization bypass.
+Two controls were appended without changing the existing86 cases:
+
+- `test_verify_chain_rejects_private_list_index_divergence[stale-hash]`
+- `test_verify_chain_rejects_private_list_index_divergence[recomputed-hash]`
+
+Both failed before product correction (`red_chain_index/receipt.json`). The
+minimal checker correction validates list/index cardinality and canonical entry
+consistency and recomputes the listed entry's hash. Repaired GREEN:
+**106 passed** (88 ledger+18 unchanged adjacent), zero failures/skips, two
+inherited inactive asyncio warnings, zero guarded network attempts and stable
+in-run hashes (`green_chain_index/receipt.json`,1.65s). Both directories are under
+the same external scratch root below and preserve full outputs/inventories.
+Repaired raw product hash:
+`970a8faaf2127db2c2c89160c109d9c6e1a05fc1db6a66935af31fb08350469f`;
+test hash `d89bcf1503bd9e77a3f0e263c60ad6280ad2cb70f94d76ffcf3ee84c086a2751`.
+The original104 and parent-reported30 independent held-outs belong to the old
+candidate; repaired independent acceptance/publication remain parent-owned.
+
+Runner: existing `O:/Foundups-Agent/.venv/Scripts/python.exe -B -X utf8`;
+`PYTHONDONTWRITEBYTECODE=1`, plugin autoload/dotenv reads disabled, cacheprovider
+off, `-o addopts=`, `--confcutdir <root>/modules/foundups`, per-run external
+TEMP/TMP/DB/pytest/FAMDaemon paths, socket/DNS guards. As in the prior simulator
+closure, runner-only FAM adapter Holo/Qwen enrichment returns None; authorization,
+accounting and assertion paths are unchanged. This is an instrumented Python
+boundary, not an OS network sandbox. No model/provider/chain/signer call.
+
+Exact external artifacts under host temporary storage:
+`foundups-p0c-b7a84ca3c2834328b35bddbc18eee168/{baseline,red,green_candidate}/receipt.json`
+and `output.txt`; `run_offline.py` records full command arguments, every collected
+node/phase/outcome, failure details, warnings and before/after hashes. Baseline
+and GREEN nodes: this file's sibling `test_epoch_ledger_settlement_commitment.py`,
+`test_btc_anchor_connector.py`, `test_layer_d_anchor_runtime.py`. RED selected
+only the commitment owner. An initial runner import named the wrong FAM adapter
+before pytest; it was corrected and recorded in `runner_setup_note.txt` before
+the successful baseline. No product defect or test result is attributed to it.
+
+Coverage includes actual claim tampering, absent/wrong trusted checkpoints,
+odd-sized trees, malformed paths, bool/nonfinite/negative/coercible inputs,
+canonical equivalent numbers without integer rounding, epoch replay/order,
+exposed mutable references, injected tree-build failure and concurrent conflicts.
+V2 remains pending evidence; old connector migration and economic conservation
+are separate gates. Parent independent review/held-out checks and publication
+are not claimed by this candidate run.
+
 ## 2026-10-25 — FAM host-context compatibility
 
 Existing `test_fam_lifecycle_flow.py` covers the normal bridge flow plus wrong
