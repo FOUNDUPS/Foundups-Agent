@@ -2,6 +2,23 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Observation manifest finding allocation — before ledger mutation
+
+WSP15 C1/I4/D5/Impact4=14/P1; WSP6/15/22/50/71/97. Candidate1d2d6a07,
+hosted CI40229328761/job121277457907 reports39 manifest tree findings plus
+one history row repeating the client hash:40 rows/39 unique bindings. Root
+verified38 unchanged parent lines and one new reproducible client source hash;
+all1471 normalized source hashes match. Hosted client167PASS; GitGuardian passes.
+Need: independently classify each observed line/rule/whole-file binding before
+publication. Reuse .github/security/reviewed-findings.json with its exact2378-row
+ordered prefix. Append only the39 agreed bindings after separate source review.
+No detector, fingerprint algorithm, scan scope, manifest/source/test oracle or
+external incident change. Preserve initial failed scan; fresh tree/history scans
+remain required. This metadata repair grants no provider/runtime/token authority.
+Budget amendment: this existing plan+18 additional lines (83 total for this work),
+root ModLog+2/module ModLog+2 within original limits, ledger+39 rows; no new file.
+Root proposal is external/source-bound; verifier must derive the exact same set.
+
 ## Observation HTTP allocation — 2026-10-26, before authoring
 
 Review amendment: add32nd case for duplicate encoding; retain all existing budgets.

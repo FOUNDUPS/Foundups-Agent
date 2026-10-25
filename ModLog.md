@@ -8,6 +8,8 @@ baseline passes; frozen desired RED146PASS/20FAIL; initial GREEN166PASS.
 Independent duplicate-encoding review: RED166PASS/1FAIL, then final167PASS.
 Existing1471 runtime members/caps stay fixed; client hash and two digest pins
 follow source. Hosted/security gates and main convergence remain separate.
+Hosted167PASS;39 observed manifest hash bindings require individual re-review;
+preserve the2378-row ledger prefix and fresh blocking scans after approved append.
 No repository claim, provider admission, work, token, signing or activation grant.
 See [FX delivery plan](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
 

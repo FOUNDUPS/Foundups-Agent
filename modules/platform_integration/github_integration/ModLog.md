@@ -16,6 +16,8 @@ frozen acceptance run and remain recorded separately. No test oracles weakened.
 Existing client/test owners stay within allocated850/1020-line exceptions;
 new functions<=35. Rebind existing1471-member source closure hash and two pins;
 hosted/security checks and current-main reconciliation remain required.
+Hosted167PASS;39 observed manifest metadata bindings require separate source review
+before append to the2378-row ledger prefix. Fresh blocking scans remain required.
 No claim, provider admission, issuer, signing, mint, work or runtime activation.
 
 ## 2026-10-26 — Immutable regular-file observation prerequisite
