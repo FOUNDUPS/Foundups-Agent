@@ -4,6 +4,7 @@
 
 Remote use: [host requirements and command receipts](docs/REMOTE_SCHEDULING.md)
 and the [existing Work skill audit](docs/PRIOR_WORK_AUDIT_2026-09-22.md).
+For schedule-only versus metadata-edit tasks, use the [dual-surface training procedure](docs/REMOTE_SCHEDULING.md#dual-surface-scheduling-practice--2026-10-25).
 Start with `youtube action scheduling channel=move2japan preflight=true` through
 the existing agent adapter. A one-shot command does not require `main.py`.
 
