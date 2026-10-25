@@ -1,5 +1,14 @@
 # ModLog - FoundUps Agent Market
 
+## 2026-10-25 — Existing-only revalidation contract documentation
+
+- WSP11/15/22/50/62/84/97; existing-owner15/P1 allocation. Document the captured
+  exact DTO/full-identity baseline and current independently resolved host grants
+  and policy; missing or changed rows deny without allocation, repair or accounting.
+- Preserve prepare/get-or-create and schema3. Revalidation is point-in-time, with
+  no continuous-presence or future signer guarantee. No formatter is added.
+- Added the local API through shared admission; measured qualification is in TestModLog.
+
 ## 2026-10-25 — Opt-in local TestNet probe intents
 
 - WSP00/15/22/50/62/97; pre-runtime C3/I4/D5/Impact4=16/P0. Added one

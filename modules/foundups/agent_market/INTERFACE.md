@@ -414,6 +414,25 @@ conflict remains unresolved. Local qualification and corrections are recorded in
 [TestModLog](tests/TestModLog.md) and the
 [allocated plan](../../../docs/architecture/FOUNDUPS_TESTNET_TRANSFER_INTENT_20261025.md).
 
+#### Existing-only revalidation contract
+
+```python
+revalidate_existing(expected: PreparedTestnetIntent, actor_id: str,
+    binding: SubmittedTestnetBinding, *, authorization=None) -> PreparedTestnetIntent
+```
+
+`expected` must be the exact captured DTO with exact builtin scalar types,
+checked before rich equality. All fields bind: ID, scope, canonical identity JSON,
+content hash, state, creation time and expiry. It supplies no authority.
+The host independently resolves current policy and caller grants before each
+call, including after later I/O; an old immutable context cannot detect revocation.
+Reuse the current schema-3, payout/proof/decision/history, binding, actor and expiry
+admission in one transaction. Require the row already exists and matches the full
+captured DTO; absence, replacement or tampering rejects without insert or repair.
+Success and denial preserve database/accounting state. `prepare` keeps its existing
+get-or-create contract. This check proves only current admitted state, not continuous
+presence or future signer authority; no formatter or resident consumer is added.
+
 ### DistributionService
 - `build_milestone_payload(task_id: str) -> dict[str, object]`
 - `publish_verified_milestone(task_id: str, actor_id: str, channel: str = "moltbook", cabr_threshold: float = 0.0) -> DistributionPost`

@@ -84,6 +84,15 @@ def _require(condition, message):
         raise ValidationError(f"TestNet probe intent rejected: {message}")
 
 
+def _validate_expected(expected):
+    """A captured scalar baseline is compared as data, never as authority."""
+    _require(type(expected) is PreparedTestnetIntent, "exact original intent required")
+    for name in PreparedTestnetIntent.__dataclass_fields__:
+        value = getattr(expected, name)
+        scalar_type = int if name in ("created_at_epoch_s", "expires_at_epoch_s") else str
+        _require(type(value) is scalar_type, "invalid original intent scalar")
+
+
 def _validate(policy, binding):
     """Admit builtins before serialization; field objects are never deep-copied."""
     _require(type(policy) is HostTestnetPolicy and type(binding) is SubmittedTestnetBinding,
@@ -175,14 +184,17 @@ def _result(row, identity, encoded, digest, now):
     return PreparedTestnetIntent(**{key: getattr(row, key) for key in PreparedTestnetIntent.__dataclass_fields__})
 
 
-def _store_or_replay(adapter, sess, identity, now):
+def _store_or_replay(adapter, sess, identity, now, expected=None):
     """Write only the new intent, or compare the complete immutable prior record."""
     encoded = _canonical(identity)
     digest = sha256(encoded.encode()).hexdigest()
     rows = sess.query(TestnetTransferIntentRow).filter_by(payout_id=identity["payout_id"], purpose=_PURPOSE).all()
     _require(len(rows) <= 1, "duplicate intent history")
     if rows:
-        return _result(rows[0], identity, encoded, digest, now)
+        current = _result(rows[0], identity, encoded, digest, now)
+        _require(expected is None or current == expected, "original intent changed")
+        return current
+    _require(expected is None, "original intent missing")
     scope = {key: identity[key] for key in
              ("payout_id", "purpose", "format_version", "foundup_id", "task_id", "actor_id")}
     row = TestnetTransferIntentRow(intent_id=adapter._next_id("tprobe"), state="PREPARED", **scope,
@@ -204,6 +216,17 @@ class TestnetTransferIntentService:
         self, payout_id: str, actor_id: str, binding: SubmittedTestnetBinding,
         *, authorization: object = None,
     ) -> PreparedTestnetIntent:
+        return self._admit(payout_id, actor_id, binding, authorization)
+
+    def revalidate_existing(
+        self, expected: PreparedTestnetIntent, actor_id: str, binding: SubmittedTestnetBinding,
+        *, authorization: object = None,
+    ) -> PreparedTestnetIntent:
+        """Recheck the original existing intent without allocation or replacement."""
+        _validate_expected(expected)
+        return self._admit(expected.payout_id, actor_id, binding, authorization, expected)
+
+    def _admit(self, payout_id, actor_id, binding, authorization, expected=None):
         _require(self.adapter.engine.dialect.name == "sqlite", "SQLite required")
         _require(all(type(value) is str and 0 < len(value) <= 64 and value.strip()
                      for value in (payout_id, actor_id)), "invalid payout/caller identity")
@@ -230,4 +253,4 @@ class TestnetTransferIntentService:
             if event.actor_id != actor_id:
                 raise PermissionDeniedError("TestNet caller differs from initiation actor")
             identity = _identity(task, payout, event, actor_id, policy, submitted)
-            return _store_or_replay(self.adapter, sess, identity, now)
+            return _store_or_replay(self.adapter, sess, identity, now, expected=expected)
