@@ -2,6 +2,84 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## GitHub nomination review allocation — 2026-10-26, before authoring
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/84/97.
+Parent main531bd0341ef502b53c8913c9163963b03354f62c; reuse the clean owned
+repository-observation worktree on agent/foundups-project-admission-20261026.
+Need: the public issue form has no nomination-to-draft consumer. The simpler whole
+component is issue event -> bounded adapter -> existing mapper -> review artifact.
+Network reads in the pure mapper/unrelated writer would not close this gap.
+
+Execution plane: a single GitHub-hosted issue-review job, not a WRE worker or
+RedDog resident command. Only trusted default-branch source runs for issue events;
+no issue body/title interpolation into shell, credential checkout persistence,
+project code checkout, URL fetch, model/provider, database, comment or label writes.
+GitHub's event metadata attributes a nominator; it grants no project ownership,
+commander, registry, issuer, asset, reward or venue authority. Local event replays
+are unsigned development inputs, not provider authentication. Drafts retain
+IDEA/UNBOUND, external_repo_requested=False and missing acceptance criteria.
+
+One new <=300-line module under ai_overseer/src/foundup_genesis owns the pure
+adapter and bounded CLI. Require the exact repository, positive issue/author IDs,
+issue action, title prefix, matching canonical issue URL and exact ordered form
+headings/consent. Bound event bytes<=256KiB, body<=16KiB and each field; reject
+ambiguous/duplicate/unknown headings, invalid controls and credential-bearing URLs.
+Preserve Outcome (vision), Solution (PoC/Prototype/MVP as supplied), and Pain
+(obstacles) as redacted advisory text; unknown optional fields stay unknown.
+Reuse LaunchRequest mapping/redaction, without changing its seven-field contract,
+auth provider, validation or AST pin. Fixed output artifact, generic rejection,
+no raw input in logs/errors; artifact is for review, never executable admission.
+
+Test reuse: existing launch-request/transport owners cover mapper/auth semantics;
+the new issue-event/CLI contract is materially distinct and warrants one <=300-line
+test owner (<=24 methods/81 cases), plus its default allowlist and canonical test
+registry entry. Read their existing inventories/fixtures before authoring. Baseline
+the two existing owners first in the previously qualified external Python3.12.10 /
+pytest9.0.3 environment; record exact IDs/results, normal package imports and actual
+dependency versions. No shared install, package substitutions or skip-to-green.
+Freeze desired new acceptance before production code and retain RED. Then focused
+GREEN, unchanged adjacent intake owners, CLI replay and independent source review;
+add a <=130-line workflow for issue review and exact PR/main contract execution.
+Use hosted security/scope/current-head checks before merge and read back main.
+Budget: new source/test/workflow above; existing module README+20, INTERFACE+30,
+ROADMAP+20, ModLog+16, tests README+20/TestModLog+20, conftest one entry,
+canonical test registry only one new unit entry, this plan+85/root ModLog+16.
+No runtime manifest member/cap/source change, dependency, security exception,
+public API/server, token, signing or chain submission. If static closure shows
+otherwise, amend before that change. No new large receipt/testcase framework.
+Qwen/Gemma inference adds no value to deterministic form parsing; attributed
+parallel source/test review supplies the relevant architectural challenge.
+
+Retrieval evaluation: HoloIndex returned HEAD_MISMATCH/UNKNOWN with an index gap;
+direct main source/callsites replace semantic retrieval, not a CURRENT claim.
+Historical ProductionReady claims and older prototype trajectories are noise;
+current interface/source/tests outrank them. Parent module owns Tier0 documents;
+its memory README is absent. Deduplicated actual callers show no nomination
+consumer, Firebase handler or authenticated project-control principal bridge.
+Open Mall/TestNet/codec parents keep their unique work and security holds.
+
+Pre-authoring architect refinement: use issues.opened only, with exact repository
+ID956651858 and distinct positive issue/user IDs; sender ID must match the initial
+issue author. The pure adapter requires an explicit nomination-only trusted service
+context supplied by the host bootstrap, never constructed from parsed event/body.
+The existing session/invite provider remains sole authority for HTTP intake;
+this separate workflow host may assert its own fixed review-service context for
+draft creation only. Keep requested_by=github_nomination_review_service; nominator
+identity is separate advisory source metadata. Local CLI replay is explicitly
+unverified; Actions run provenance is external, not authenticated by a JSON field.
+No application API/network calls; checkout/setup/artifact use hosted transport.
+
+Baseline: unchanged owners pass387; frozen V1 RED80 missing-module failures/387pass.
+Strengthen the CLI cap oracle with valid JSON at cap/cap+1 (+1 case, no removals).
+Baseline uses normal
+package imports and unchanged source hashes in the qualified external environment.
+The distinct issue adapter avoids growing the existing1,012/1,427-line tests.
+Preserve multiline OSP in a redacted advisory sidecar;
+map only the safe name/reference to genesis rather than guessing how vision maps
+to problem_statement. No mapper control-character normalization or policy change.
+Replay metadata stays unverified; the Actions run supplies external provenance.
+
 ## Repository file observation allocation — 2026-10-26, before authoring
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP00/6/11/22/50/62/84/97.
