@@ -62498,6 +62498,12 @@ updating only the changed source digest and two canonical pins to f427e16b.
 Seven generator passes plus the staged-index pass after staging, and3 existing
 Node entrypoint passes, are separate from the601 intake result. Keep the original
 unstaged-manifest failure; current hosted/security gates remain pending.
+Actual hosted job121124347560 reports40 tree findings and zero in history:
+39 unchanged generated source digests and one unchanged hostile-input fixture
+shifted108 to150. Parent reconstructs all40 exact current/prior bindings and39
+source hashes; append only these after source-bound review, preserving2,220 prior
+entries (2,260 total). Five unchanged security regressions pass; no scanner,
+rule, source or oracle changes. Fresh hosted gates remain required.
 ## 2026-10-25 — project nomination inbox allocation
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean

@@ -38,6 +38,16 @@ are updated. Seven generator cases pass initially; the old staged-manifest check
 fails until the actual bindings are staged, then its unchanged rerun passes.
 The three existing Node entrypoints pass. Current hosted/security publication
 gates remain required; neither source delivery nor a draft admits execution.
+Actual current-head security job121124347560 reports40 tree findings and zero
+unreviewed history findings. All39 manifest source-digest entries reconstruct;
+the additional preexisting hostile-input fixture line108 moves to150 unchanged.
+Parent rederives every current/prior file/rule/line fingerprint and source hash.
+Use only decoded Git blob identity; discard the review's initial raw-response
+test fingerprint. Preserve2,220 prior bindings and append only40 (2,260 total)
+within the three preallocated security metadata owners. Mapper authorship is
+disclosed; independent metadata-diff review passes. Fresh hosted scans remain gates.
+Five unchanged security regression cases pass; no scanner, scope, rules, source,
+or oracle change is made. The initial hosted failure remains historical evidence.
 
 ## Project nomination inbox allocation — 2026-10-25
 
