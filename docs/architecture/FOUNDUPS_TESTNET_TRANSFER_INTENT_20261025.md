@@ -1,5 +1,20 @@
 # FoundUps restricted TestNet transfer-intent plan — 2026-10-25
 
+## Current-main reconciliation allocation — 2026-10-25
+
+WSP15 C1/I4/D5/Impact4=14/P1; WSP22/50/84/97. Preserve frozen8723 product,
+oracles and historical receipts. Reconcile published main0909b941 after PR2208's
+38 successful checks and16-file/whole-tree readback against reviewed99f81820.
+Read-only three-way review finds only ledger/root ModLog/test-registry shared;
+no FAM adapter/ORM/migration source intersection. Retain all main-only changes.
+Expected main-first exact approval union2,277; this approves no new finding.
+Regenerate the existing registry for both new test owners, expected1,772/273.
+Retain main's newest f427 manifest/pins and fixed1,471 member/cap boundary;
+intent ownership is still outside that resident list. No source/caller/effect,
+signer, schema, authority or oracle extension is allocated. Scope stays17 paths.
+Require immutable parent-blob review, registry check and fresh hosted gates;
+GitGuardian38962564 remains a separate unresolved public-commit classification.
+
 Status: repaired local runtime candidate frozen after173 passing controls; independent
 review pending. No transport activation, publication or settlement qualification.
 
