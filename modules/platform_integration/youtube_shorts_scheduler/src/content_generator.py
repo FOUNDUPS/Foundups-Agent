@@ -442,47 +442,21 @@ def extract_title_hint_from_index(index_json: Dict[str, Any], fallback_title: Op
 
 
 def generate_clickbait_title_from_index(
-    *,
-    original_title: str,
-    index_json: Dict[str, Any],
+    *, original_title: str, index_json: Dict[str, Any], video_id: str = "",
 ) -> str:
+    """Use matched analyzer content; preserve the title without evidence.
+
+    Historical function name retained for callers. No random hooks, invented
+    topics or title-derived fallback are used in this path.
     """
-    Generate a clickbait title where the index artifact informs the hint.
-
-    Content-type aware: uses different templates for music vs speech vs news.
-    Uses 3-tier agentic classification (title heuristics → metadata → audio).
-    """
-    import logging
-    logger = logging.getLogger(__name__)
-
-    hint = extract_title_hint_from_index(index_json, fallback_title=original_title)
-    # Pass original_title for Tier 1 title-based detection (works even with stub index)
-    content_type = detect_content_type(index_json, title_hint=original_title)
-    logger.info(f"[CONTENT-GEN] Detected content_type={content_type} for '{original_title[:40]}...'")
-
-    # Select template set based on content type
-    if content_type == "news":
-        templates = NEWS_TITLE_TEMPLATES
-        logger.debug("[CONTENT-GEN] Using NEWS_TITLE_TEMPLATES")
-    elif content_type == "speech":
-        templates = SPEECH_TITLE_TEMPLATES
-    else:  # music or default
-        templates = MUSIC_TITLE_TEMPLATES
-
-    # If we have a meaningful hint, use content-aware templates
-    if hint and len(hint) > 5 and hint.lower() not in {"ffcpln", "music", "shorts"}:
-        emoji = random.choice(EMOJI_PREFIXES)
-        template = random.choice(templates)
-        title = f"{emoji} {template.replace('{hint}', hint)}"
-
-        # Ensure under 100 chars
-        if len(title) > 100:
-            title = title[:97] + "..."
-
-        return title
-
-    # Fallback to generic FFCPLN templates
-    return generate_clickbait_title(original_title=original_title, song_hint=hint or None)
+    from .metadata_evidence import validated_video_evidence
+    evidence = validated_video_evidence(index_json, video_id)
+    if evidence is None:
+        return original_title
+    text = evidence["text"]
+    if len(text) <= 100:
+        return text
+    return text[:97].rsplit(" ", 1)[0].rstrip(".,;:") + "..."
 
 
 def get_ai_driven_template(
