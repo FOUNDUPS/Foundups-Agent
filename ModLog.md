@@ -9,6 +9,12 @@ Preserve all old receipt/companion fields and document the four handoff decision
 This is a stacked local component pending parent/security gates, with no formatter,
 signer, chain, issuance, payment or production-site activation.
 
+Security follow-up14/P1: hosted job121179224336 found17 unchanged companion
+source-digest mappings with stale full-file bindings; zero history findings.
+Root and peer proved historical source bytes and every prior fingerprint.
+Retain2277 records, append only17 exact bindings (2294); no scanner relaxation.
+Fresh hosted scans required; parent GitGuardian remains separate.
+
 ## 2026-10-25 — FoundUps unsigned integration checkpoint
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.
