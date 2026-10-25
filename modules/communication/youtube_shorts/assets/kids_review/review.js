@@ -8,7 +8,7 @@ video.addEventListener('timeupdate',()=>{if(!silent)clock(video.currentTime);});
 video.addEventListener('loadedmetadata',()=>{$('status').textContent=`Rendered review cut loaded · ${video.duration.toFixed(2)} seconds · stomp / crunch / squish`;});
 video.addEventListener('error',()=>{$('status').textContent='The rendered video is unavailable here. Use Show silent scene to review the animation.';});
 $('loop').onchange=()=>{video.loop=$('loop').checked;};
-$('refresh').onclick=()=>{playing=false;video.pause();video.src=`../storytime/assets/little-shrew.mp4?revision=${Date.now()}`;video.load();$('status').textContent='Reloading rendered cut…';$('play').textContent='Play scene';};
+$('refresh').onclick=()=>{playing=false;video.pause();window.location.reload();};
 $('mode').onclick=()=>{if(!silent)time=video.currentTime||0;silent=!silent;playing=false;video.pause();video.hidden=silent;$('scene').hidden=!silent;$('scene-controls').hidden=!silent;$('mode').textContent=silent?'Show rendered video':'Show silent scene';$('play').textContent='Play scene';if(silent)draw();else{video.currentTime=time;clock(time);}};
 $('play').onclick=()=>{if(time>=15)time=0;playing=!playing;$('play').textContent=playing?'Pause scene':'Play scene';};
 $('scrub').oninput=()=>{playing=false;time=Number($('scrub').value);$('play').textContent='Play scene';draw();};

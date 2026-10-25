@@ -1,0 +1,2 @@
+# Reuse the existing local renderer; also requires system Cairo, Node and FFmpeg.
+-r ../../communication/youtube_shorts/requirements-local-preview.txt

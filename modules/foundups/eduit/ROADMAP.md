@@ -14,7 +14,26 @@ Kids Episodes' production priority and the existing renderer/Mall ownership.
 4. Use governed Holo retrieval; UNKNOWN freshness must stay UNKNOWN. No child
    data belongs in agent memory. Link source decisions instead of duplicating them.
 
-## Bounded implementation order — WSP 15
+## Current PoC priority — supersedes Mall-first ordering
+
+012's latest deployment instruction targets `storytime.eduit.org`. The name in
+the app/codebase is Story Time; Us Story Time remains the YouTube channel.
+
+1. Compose and test the existing single episode: video above idle game, explicit
+   Play, pause/retry/practice, expand/back, Replay and More stories coming.
+2. Package bounded revisioned PWA assets for this separate origin; preserve the
+   Shorts-owned creator review. No Mall shell, renderer or backend duplication.
+3. Verify Firebase site ownership and GoDaddy session/zone/forwarding, preserve a
+   sanitized before-state, deploy/test the provider preview, then deploy the same
+   artifact live and apply only the provider-required Story Time DNS records.
+4. Verify real HTTPS, media ranges, touch/mouse, installation, offline game and
+   explicit update behavior. Record any pending certificate or device checks.
+
+MPS: composition/packaging 3/5/5/4=17 P0; verified deployment 3/5/5/5=18 P0.
+Hosting and DNS are dependency gates, not substitutes for a completed app.
+Full Mall adapter, membership, ratings, locales and next episodes remain deferred.
+
+## Later integration order — WSP 15 (historical Mall sequence)
 
 C/I/D/Impact are complexity, importance, urgency and impact (1–5 each).
 Scores are planning judgments, not runtime admission or billing authority.
@@ -33,8 +52,7 @@ Dependencies override score order: do not ship a payment plan before a useful
 released library, or promise a public link before hosting is verified. Do not
 build the entire education catalog to deliver the first episode.
 
-Current external blockers: authenticated Firebase/domain bindings unavailable
-in the reviewed workspace. Shared-Mall episode adapter, child/parent boundary,
+Current connection/deployment evidence is recorded in [DEPLOYMENT](DEPLOYMENT.md) and its linked sanitized receipt. Historical workspace access observations are not current account state. Shared-Mall episode adapter, child/parent boundary,
 locale variants and paid entitlement are implementation gaps, not access excuses.
 
 ## Creator expansion after first playable proof

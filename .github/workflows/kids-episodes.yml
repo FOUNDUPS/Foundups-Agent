@@ -44,7 +44,9 @@ jobs:
         with:
           node-version: '22'
       - name: Verify Story Time interaction
-        run: node --test modules/foundups/eduit/tests/storytime.test.mjs
+        run: node --test modules/foundups/eduit/tests/*.test.mjs modules/communication/youtube_shorts/tests/kids_review.test.mjs
+      - name: Verify Story Time PWA packaging
+        run: python -B -m unittest discover -s modules/foundups/eduit/tests -p 'test_*.py'
       - name: Verify renderer, local editor, research contracts and registry
         run: >-
           python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib

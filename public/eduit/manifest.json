@@ -1,0 +1,15 @@
+{
+  "id": "./storytime/",
+  "name": "Story Time · EDUIT",
+  "short_name": "Story Time",
+  "description": "Watch Little Shrew, then play and explore its story.",
+  "start_url": "./storytime/",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#faf7ef",
+  "theme_color": "#15232b",
+  "icons": [
+    {"src": "./icons/storytime-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "./icons/storytime-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ]
+}
