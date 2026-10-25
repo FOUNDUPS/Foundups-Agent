@@ -163,7 +163,7 @@ errors, and no incomplete-batch marker. Missing/malformed receipts fail closed.
 
 ## Evidence-bound metadata and learning (2026-10-25)
 
-`src/metadata_evidence.py::validated_video_evidence(index, video_id)` is an offline
+`src/content_generator.py::validated_video_evidence(index, video_id)` is an offline
 identity/provenance gate, not a factual verifier. Metadata generation requires a
 matching, retrieval-eligible existing artifact containing explicit Studio Ask,
 Gemini video-summary, or timestamped YouTube/Whisper transcript evidence.
