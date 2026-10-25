@@ -1,3 +1,22 @@
+## Mall gateway test source closure — 2026-10-25
+
+WSP00/6/15/22/50/97. Repair the missing derived binding exposed by hosted Mall
+CI jobs121046694299/121046761948 atf03bc5c83. Canonical generation measures one
+changed member hash: the existing pfmall gateway terms test's About source path.
+The initially suspected simulator URL files are not members. Retain all1470
+members, all caps and the generator algorithm; change only the manifest and its
+two existing digest pins. Canonical digest is
+`3db551ebd6dffc4afb0dc0ea7bd361dbca821448778c911715e7300fca43e1a7`.
+
+Fresh Mall canonical write/check,8 unchanged generator cases and3 existing Node
+entrypoints pass under external Python/Node effect instrumentation. No source
+drift or instrumented network/dotenv attempts. Exact commands/IDs/hash domains
+are in external `foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`.
+38 unchanged manifest metadata contexts have proposed exact rebindings only;
+ledger1938, the Mall3 receipt bindings and About binding remain untouched.
+Independent review, current-head CI/security and GitGuardian remain parent gates.
+This is source closure, without installed-runtime or transaction authority.
+
 ## FoundUps epoch evidence source closure — 2026-10-25
 
 WSP00/6/15/22/50/97. Rebind only the existing epoch_ledger.py source hash after

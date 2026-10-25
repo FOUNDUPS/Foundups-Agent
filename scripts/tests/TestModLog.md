@@ -1,5 +1,22 @@
 # Script test inventory
 
+## 2026-10-25 — Mall gateway-source binding repair
+
+Hosted CI atf03bc5c83 exposed missing source parity. Fresh canonical generation
+measures only `modules/foundups/pfmall/tests/test_gateway_terms_gate.py` changed;
+simulator SSE/visual QA URL files are not in the1470 runtime closure. Preserve
+all8 existing generator cases and every assertion; update only their existing
+canonical digest literal to
+`3db551ebd6dffc4afb0dc0ea7bd361dbca821448778c911715e7300fca43e1a7`.
+
+After staging only the manifest and its two pins, the same8 cases pass in121.30s,
+with2 inherited inactive asyncio config warnings. Canonical `--write`/`--check`
+and3 existing Node compatibility/preflight/recovery entrypoints exit0. No new
+case, source member, cap or installed authority. Guarded external receipts retain
+exact8 IDs, commands, JUnit, source snapshots and zero instrumented network/
+dotenv attempts under `foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`.
+These Mall results do not reuse BTC evidence; fresh hosted gates remain required.
+
 ## 2026-10-25 — Epoch ledger source binding
 
 The existing8 generator cases pass on the one-hash epoch update in79.64s, with

@@ -1,3 +1,24 @@
+## Mall closure qualification — 2026-10-25
+
+At the repaired f03bc5c83 Mall source, reuse8 unchanged generator cases and the
+existing Node `test_backend_compatibility_contract.js`,
+`test_backend_compatibility_preflight.js` and
+`test_holoindex_blocked_request_recovery.js` entrypoints. All8 cases pass in
+121.30s with2 inherited inactive asyncio configuration warnings; all3 Node
+entrypoints exit0. Canonical generator write/check also exit0. These are fresh
+Mall runs, not borrowed epoch or BTC results. The only test-source edit during
+repair is the existing canonical digest literal; no acceptance oracle changes.
+
+Manifest1470 membership and1471 rejection remain intact, as do328KiB LF/CRLF,
+2MiB member and32MiB total caps. Measured sizes:332458 LF/335471 CRLF manifest,
+19656160 normalized source bytes,154924 maximum member. Each phase snapshots1613
+files (1470 runtime members plus generator/pin/extension-JS evidence); before/
+after maps are identical. Zero instrumented network/dotenv attempts, bytecode/
+plugins/cache disabled and external scratch; guards do not establish OS isolation.
+External phase receipts retain exact argv,8 collected IDs, outcomes and hashes in
+`foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`. Hosted source/
+security scans, proposed38 metadata review and GitGuardian remain pending.
+
 ## FoundUps epoch source closure — 2026-10-25
 
 Reuse the same8 generator cases and3 Node compatibility/preflight/recovery

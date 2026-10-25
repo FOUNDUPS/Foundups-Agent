@@ -239,3 +239,100 @@ The separate GitGuardian high-entropy finding identifies this receipt file but
 exposes no line through its check API. Its details require dashboard access;
 it remains unclassified and blocking. These three digest comparisons do not
 establish the identity or resolution of that external finding.
+
+## CI-discovered source-closure dependency allocation before repair
+
+At headf03bc5c83e4e264178b944571a42029692180cd2, hosted test jobs fail the
+unchanged canonical-generation and staged-index manifest parity controls.
+The auxiliary simulator source URL edits affect source hashes even though
+their intended behavior is limited to tooling/examples. The parent had not
+qualified those bindings before publication; that omission is preserved here.
+
+WSP15 C2/I5/D5/Impact4=16/P0 allocates canonical AST-only regeneration/check,
+the two existing digest pins and existing closure test/log evidence. Retain
+the1470-member set and all byte/member limits. Inspect exact source-row deltas
+before retention; do not weaken parity or alter installed-runtime authority.
+Stage only coherent bindings for the existing8 generator and3 Node controls.
+The separate14/P1 exact metadata review applies only after the38 known old
+manifest contexts/source identities have been independently verified against
+the new whole-file binding. No blanket hash exemption or unknown approval.
+Fresh current-head hosted tests, tree/history scans and GitGuardian resolution
+remain required before merging or production delivery.
+
+### Measured closure correction after canonical generation
+
+Canonical regeneration at the same `f03bc5c83e4e264178b944571a42029692180cd2`
+base disproves the preceding suspected auxiliary-source attribution: neither
+`simulator/sse_server.py` nor `simulator/visual_qa.py` belongs to this manifest.
+The only stale member hash is the already committed gateway test owner,
+`modules/foundups/pfmall/tests/test_gateway_terms_gate.py`, whose canonical
+About file-reader migration changed its source bytes. Its normalized SHA-256
+changes from `1eb08d41862d43d459701413da1a8d63eca9164216891c8607cb024ad351df4c`
+to `1a69a2a6b6dc515df52f475dfd24f8fa701d7994c7caea92f7f5f0c5fdd2b89d`.
+The original omission and failed hosted controls remain repair history; the
+16/P0 allocation covers this measured existing-owner binding, with no new
+product or test behavior. All1470 paths and every other manifest field/hash
+remain unchanged. Stage only the manifest and its existing JavaScript/Python
+digest pins for the unchanged index-parity control.
+
+Canonical compact-JSON digest becomes
+`3db551ebd6dffc4afb0dc0ea7bd361dbca821448778c911715e7300fca43e1a7`.
+The distinct whole-file LF digest becomes
+`5c8ddf132bee44e95731b1affaf926c4c0183e4133d6e8f0a5c6e1272d400010`;
+only that exact staged file hash belongs in any proposed scanner fingerprint.
+Measured manifest sizes are332458 LF/335471 CRLF bytes, within328KiB;
+normalized runtime source totals19656160 bytes, maximum member154924 bytes,
+within32MiB total/2MiB per file. Keep1470 acceptance/1471 rejection unchanged.
+
+Retrieval evaluation: the mandatory Git-common-dir-derived owner query still
+returns `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, `ok=false`, freshnessUNKNOWN,
+index gaptrue. Its exact result is retained externally; no reindex or current
+generation claim. Direct generator, existing test/constants, module memory and
+NAVIGATION evidence provide the degraded fallback. Structured-memory ordering
+prioritized the actual owner and parity tests; historic epoch/authorization
+entries were deduplicated as context, not Mall qualification. No missing source
+owner is inferred from a search result. Manual deterministic inspection is used
+because this repair requires exact Git/source-byte comparison; no model runs.
+
+### Fresh Mall closure qualification and handoff
+
+Canonical `--write` and `--check` exit0. After staging only the manifest and its
+two existing pins, all8 unchanged cases in
+`scripts/tests/test_generate_reddog_backend_manifest.py` pass in121.30s with2
+inherited inactive asyncio configuration warnings. The existing Node contract,
+preflight and blocked-request recovery entrypoints each exit0. Exact argv,
+collected IDs, phase outcomes, JUnit and source snapshots are retained under
+`C:/Users/user/AppData/Local/Temp/foundups-mall-source-closure-471faa1028fe40b08fcaf482d41fc4a5`.
+These are fresh Mall qualifications. Earlier BTC/epoch results are not substituted.
+
+Each phase's1613-file evidence map remains unchanged before/after execution;
+this includes the1470 runtime members plus generator/pin/extension-JS evidence,
+without increasing runtime membership. Python socket/DNS, Node network entrypoint
+and dotenv-read instrumentation record zero attempts. Plugins, bytecode and
+pytest cache are disabled, and temporary/database files stay outside checkout.
+These are process-level guards, not OS isolation, provider or installed-runtime
+qualification. Manifest caps,1470 acceptance and1471 rejection remain intact.
+The existing Mall public assets, portable receipt/testcases, original CI failure
+history and all1938 security ledger entries remain unchanged.
+
+The external `proposed_metadata_rebindings.json` contains38 exact proposals
+(36generic-api-key/2discord-api-token), keyed to the prior epoch evidence and the
+actual staged whole-file LF hash. All five-line contexts and source blob
+identities match; ledger1938, Mall3 receipt fingerprints and About fingerprint
+are preserved. This document does not approve or apply them. Independent review,
+fresh current-head hosted tests/tree/history scans, unresolved GitGuardian and
+parent publication/readback remain required. Unknown findings are UNASSESSED.
+No new registry/matrix qualification is claimed by this repair.
+
+## Parent source-closure metadata binding after independent review
+
+Parent independently rehashed every1470 staged runtime source blob, verified
+unchanged membership and caps, both one-literal pins and the sole gateway-test
+digest delta. It separately recomputed each of the38 prior reviewed bindings,
+unique unchanged five-line contexts, exact source blob equality and proposed
+new whole-manifest fingerprints. Stage snapshot remained stable.
+
+The allocated14/P1 review now permits appending exactly these38 metadata
+bindings to ledger1938, retaining every prior entry including About and three
+artifact-digest findings. Fresh current-head hosted checks remain required;
+GitGuardian's separate receipt finding remains unclassified and blocking.
