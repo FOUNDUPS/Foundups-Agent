@@ -23,6 +23,10 @@
   registered / 273 quarantined; current**. The only added entry is EDUIT's
   packaging test; no existing entry, quarantine, capability or execution policy
   changed. Hosted CI rerun remains pending the follow-up commit.
+- Merged main `4f37c8505` after the shared root ModLog conflicted; retained both
+  lane entries and main's GitHub integration/manifest/security changes unchanged.
+  Registry remains current at **1,773 / 273**; impacted checks **21 JS + 6 build
+  tests passed**, and `git diff --check` passed. Fresh hosted CI remains pending.
 - Live provider URL redirects to /storytime/ and reports the same revision.
   Custom-domain DNS save awaits GoDaddy identity verification; HTTPS not verified.
 

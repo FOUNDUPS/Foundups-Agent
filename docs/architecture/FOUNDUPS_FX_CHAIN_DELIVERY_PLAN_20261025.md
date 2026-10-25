@@ -2,6 +2,88 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Observation manifest finding allocation — before ledger mutation
+
+WSP15 C1/I4/D5/Impact4=14/P1; WSP6/15/22/50/71/97. Candidate1d2d6a07,
+hosted CI40229328761/job121277457907 reports39 manifest tree findings plus
+one history row repeating the client hash:40 rows/39 unique bindings. Root
+verified38 unchanged parent lines and one new reproducible client source hash;
+all1471 normalized source hashes match. Hosted client167PASS; GitGuardian passes.
+Need: independently classify each observed line/rule/whole-file binding before
+publication. Reuse .github/security/reviewed-findings.json with its exact2378-row
+ordered prefix. Append only the39 agreed bindings after separate source review.
+No detector, fingerprint algorithm, scan scope, manifest/source/test oracle or
+external incident change. Preserve initial failed scan; fresh tree/history scans
+remain required. This metadata repair grants no provider/runtime/token authority.
+Budget amendment: this existing plan+18 additional lines (83 total for this work),
+root ModLog+2/module ModLog+2 within original limits, ledger+39 rows; no new file.
+Root proposal is external/source-bound; verifier must derive the exact same set.
+
+## Observation HTTP allocation — 2026-10-26, before authoring
+
+Review amendment: add32nd case for duplicate encoding; retain all existing budgets.
+Local result: original135PASS; frozen RED146PASS/20FAIL; initial GREEN166PASS.
+Duplicate-header RED166PASS/1FAIL; final167PASS preserves original exact IDs.
+32 new HTTP cases; no live provider/control/issuance or runtime claim. Hosted
+gates, independent review and current-main convergence remain required.
+
+WSP15 C3/I3/D2/Impact3=11/P2; WSP00/6/11/15/22/50/62/71/84/97.
+Parent main2c9c93ead0ee146da8b18078129e4b7059fd4cc8; clean owned
+repository-observation worktree, agent/foundups-observation-transport-20261026.
+Need: the existing Git-object reader parses an unbounded HTTP body and inherits
+redirect/time defaults before validating object limits. Bound this prerequisite
+before connecting repository-control evidence. It has no production consumer,
+so it is deferrable; higher-priority GG dispositions await authenticated access.
+Reuse the existing client/HTTP fixtures, with no new service or provider framework.
+
+Execution plane: observation-only async GitHub reads. Keep the public signature,
+13-field DTO, identity checks, legacy verbs and legacy Contents tuple unchanged.
+Use a private request opt-in; permit only GET against the exact configured
+https://api.github.com base, fixed same-origin relative endpoints, no redirects.
+Request identity encoding, disable automatic decompression and reject compressed
+responses. Require200 and application/json or application/*+json; decode UTF-8
+only after a looping raw-body ceiling of2MiB, independent of Content-Length.
+Reject a declared oversize early; count actual chunks when absent or misleading.
+
+Operational budgets: per request total5s/connect2s/socket-connect2s/socket-read2s;
+whole observation timeout30s, with caller cancellation propagated and response
+cleanup retained. These are application/library deadlines, not a hard OS/RSS or
+latency guarantee. At most13 logical GET calls; preserve zero application retries
+and pinned aiohttp3.13.5's possible one reconnect retry per call. No hard TCP/DNS
+attempt cap is claimed. Retain field-only errors, including JSON recursion errors.
+No authenticated-provider admission, atomic name-reuse proof, repository claim,
+work/issuer/signing/token grant or current-tip freshness follows from these bounds.
+
+Verification: reuse both canonical unit owners in the existing qualified external
+Python3.12.10/pytest9.0.3/pytest-asyncio1.3.0/aiohttp3.13.5/aioresponses0.7.8
+environment, clean process/no credentials/no installs. Baseline original135 IDs
+first; freeze desired new tests before product edits and retain actual RED.
+Then focused GREEN, exact old-ID/outcome preservation, full two-owner shard and
+independent source review. HTTP mocks prove application policy, not real wire
+retry/decompression, provider identity, network denial or OS isolation.
+
+Budget: existing client<=850 lines/+100, new functions<=35; existing request
+function<=55 for the opt-in, with unchanged legacy body. Existing807-line test
+owner<=1020/+210, <=32 new parameter cases and new methods<=35; retain all120
+old client cases/oracles, allowing only the callback's private-option signature.
+WSP62 advisory exceptions keep these cohesive existing owners and fixtures rather
+than duplicate them. Module README+16/INTERFACE+32/ROADMAP+16/ModLog+20,
+tests README+24/TestModLog+24/memory README+10, this plan+65/root ModLog+16.
+Derived: client already belongs to1471-member runtime closure; regenerate only its
+hash and two existing digest pins, same members/caps; reuse eight generator cases
+and three Node owners. Actual scanner findings need source-bound review before
+any individual ledger append; no predicted exceptions, detector/scope relaxation,
+registry/workflow/dependency changes or source/runtime activation.
+
+Retrieval evaluation: exact-task Holo owner query and this turn's query both show
+HEAD_MISMATCH/UNKNOWN/index gap; no retry/reindex or CURRENT claim. NAV points to
+legacy WSP automation, so direct definitions/callers and all module-memory docs
+provide current evidence. README completion/security claims and historical test
+file lists are noise; current source/interface/two-owner inventory take precedence.
+ROADMAP is a stub; memory README exists. No duplicate bounded observation path or
+non-test consumer was found. Deterministic transport/cleanup needs source and real
+client-path tests; Qwen/Gemma inference adds no evidence to these policy decisions.
+
 ## Pitch skill publication allocation — 2026-10-26, before authoring
 
 WSP15 C2/I3/D4/Impact3=12/P2; WSP00/6/15/22/50/62/84/97.

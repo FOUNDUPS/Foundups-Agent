@@ -8,6 +8,21 @@ GoDaddy DNS save awaits identity verification; custom-domain HTTPS not claimed.
 See modules/foundups/eduit/ModLog.md and its sanitized deployment receipt for
 current state, owner contracts and rollback. Main FoundUps hosting unchanged.
 
+## 2026-10-26 — Bound GitHub observation HTTP for project admission
+
+WSP00/6/11/15/22/50/62/71/84/97;11/P2. Extend the existing client only: fixed
+API origin, GET/no redirects, identity/no decompression, counted2MiB JSON bodies,
+request and whole-observation timeouts, sanitized errors and cancellation cleanup.
+Legacy operations and public record/signature are preserved. Original135-case
+baseline passes; frozen desired RED146PASS/20FAIL; initial GREEN166PASS.
+Independent duplicate-encoding review: RED166PASS/1FAIL, then final167PASS.
+Existing1471 runtime members/caps stay fixed; client hash and two digest pins
+follow source. Hosted/security gates and main convergence remain separate.
+Hosted167PASS;39 observed manifest hash bindings require individual re-review;
+preserve the2378-row ledger prefix and fresh blocking scans after approved append.
+No repository claim, provider admission, work, token, signing or activation grant.
+See [FX delivery plan](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+
 ## 2026-10-26 — Publish the existing FoundUp pitch/deck instruction
 
 WSP00/6/15/22/50/62/84/97;12/P2. Publish the existing module-owned pitch skill

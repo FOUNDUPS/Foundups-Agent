@@ -28,6 +28,10 @@ import os
 from pathlib import Path
 
 
+_OBSERVATION_BODY_LIMIT = 2 * 1024 * 1024
+_OBSERVATION_TIMEOUT = 30
+
+
 class GitHubAPIError(Exception):
     """Custom exception for GitHub API errors"""
     pass
@@ -134,7 +138,7 @@ def _observation_metadata(data: Dict, endpoint: str) -> Tuple:
 
 async def _observation_read(client, endpoint: str, field: str) -> Dict:
     try:
-        data = await client._make_request("GET", endpoint)
+        data = await client._make_request("GET", endpoint, _observation=True)
     except (GitHubAPIError, aiohttp.ClientError, ValueError, TypeError, AttributeError, TimeoutError):
         _observation_invalid(field)
     if type(data) is not dict:
@@ -270,7 +274,8 @@ class GitHubAPIClient:
         if self.session:
             await self.session.close()
             
-    async def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None) -> Dict[str, Any]:
+    async def _make_request(self, method: str, endpoint: str, data: Optional[Dict] = None,
+                            *, _observation: bool = False) -> Dict[str, Any]:
         """
         Make HTTP request to GitHub API
         
@@ -285,6 +290,10 @@ class GitHubAPIClient:
         Raises:
             GitHubAPIError: If request fails
         """
+        if _observation:
+            if method != "GET":
+                _observation_invalid("request.method")
+            return await self._read_observation_response(endpoint)
         if not self.session:
             raise GitHubAPIError("Client not initialized. Use async context manager.")
             
@@ -317,7 +326,38 @@ class GitHubAPIClient:
             
         except aiohttp.ClientError as e:
             raise GitHubAPIError(f"Request failed: {str(e)}")
-            
+
+    async def _read_observation_response(self, endpoint: str) -> Dict[str, Any]:
+        """Bound observation HTTP only; never follow a provider redirect."""
+        if (self.base_url != "https://api.github.com" or not self.session
+                or type(endpoint) is not str or not endpoint.startswith("repos/")
+                or any(c in endpoint for c in "?#\\")):
+            _observation_invalid("request.origin")
+        timeout = aiohttp.ClientTimeout(total=5, connect=2, sock_connect=2, sock_read=2)
+        async with self.session.get("https://api.github.com/" + endpoint,
+                allow_redirects=False, auto_decompress=False,
+                headers={"Accept-Encoding": "identity"}, timeout=timeout) as response:
+            mime = response.content_type
+            if (response.status != 200
+                    or any(value.strip().lower() != "identity"
+                           for value in response.headers.getall("Content-Encoding", ["identity"]))
+                    or not (mime == "application/json" or (mime.startswith("application/") and mime.endswith("+json")))):
+                _observation_invalid("response.headers")
+            if response.content_length is not None and response.content_length > _OBSERVATION_BODY_LIMIT:
+                _observation_invalid("response.size")
+            body = bytearray()
+            while True:
+                chunk = await response.content.read(min(65536, _OBSERVATION_BODY_LIMIT + 1 - len(body)))
+                if not chunk:
+                    break
+                body.extend(chunk)
+                if len(body) > _OBSERVATION_BODY_LIMIT:
+                    _observation_invalid("response.size")
+            try:
+                return json.loads(body.decode("utf-8"))
+            except (ValueError, UnicodeError, RecursionError):
+                _observation_invalid("response.json")
+
     # Repository Operations
     async def get_file_observation(self, file_path: str, *, commit_sha: Optional[str] = None) -> GitHubFileObservation:
         """Read a regular Git file; identity brackets are non-atomic and advisory."""
@@ -325,6 +365,15 @@ class GitHubAPIClient:
         parts = _observation_path(file_path)
         if commit_sha is not None:
             _observation_sha(commit_sha, "commit_sha")
+        try:
+            return await asyncio.wait_for(self._observe_file(endpoint, parts, file_path, commit_sha),
+                                          timeout=_OBSERVATION_TIMEOUT)
+        except asyncio.TimeoutError:
+            _observation_invalid("request.deadline")
+
+    async def _observe_file(self, endpoint: str, parts: List[str], file_path: str,
+                            commit_sha: Optional[str]) -> GitHubFileObservation:
+        """Use snapshotted selectors inside the whole-observation deadline."""
         identity = _observation_metadata(await _observation_read(self, endpoint, "repository.response"), endpoint)
         branch = identity[3]
         ref = await _observation_read(self, f"{endpoint}/git/ref/heads/{quote(branch, safe='')}", "ref.response")
