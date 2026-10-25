@@ -1,3 +1,18 @@
+## 2026-10-25 — FoundUps unsigned integration checkpoint
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.
+Observed main0909 includes nomination2207 and intake-reference2208; preserve
+Mall2196/TestNet2202/codec2206 exact open heads and their GitGuardian gates.
+Record the bounded stored-intent/unsigned-codec experiment: twenty frozen cases,
+two real fixture format/reopen calls and nine child launches. Run001 stays rejected;
+the revised explicit local-hostname grant precedes run002's exit0/no unexpected
+host effects. Preserve source/result/review identities and unchanged accounting.
+Historical28/173/459 counts are nonadditive and were not rerun. External scripts
+and payloads are unbundled; no public reproduction/native/OS/ATTACH proof follows.
+No runtime, cap, scanner, dependency, signing, issuance, payment or deployment
+change. The existing delivery plan/compact receipt retain unfinished work and
+the next separately allocated consumer/artifact layer.
+
 ## 2026-10-25 — hosted interpreter alias accommodation allocation
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/97. The912c artifact observes only the
