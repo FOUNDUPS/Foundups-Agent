@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 36517)
-Total output lines: 2841
-
 # YouTube Shorts Scheduler - ModLog
 
 ## 2026-10-25 — Dual-surface scheduling training procedure
@@ -20,6 +17,7 @@ removed noisy general WSP hit by direct module reads. No semantic freshness or
 training promotion claimed. V2 bootstrap attempted but torch unavailable; tracker
 check returned compliant from its existing state. Documentation validation only:
 relative links and git diff whitespace check; no live scheduler executed here.
+
 
 ## 2026-10-22 — PR1860 current-main scheduling reconciliation
 
@@ -376,7 +374,1883 @@ master gate stays DEFAULT OFF — 012 enables it deliberately.
   to `foundups` (`:85`) and `antifafm` (`:102`) `content_types`, so all 4 channels are
   long-form-eligible when the flag is enabled.
   - **RUNTIME SHADOW (deployment note):** the persisted `memory/youtube_channels.json` is
-    gitignored and holds `foundups`/`antifafm` at `["short"]`. `_merge_defaults…24517 tokens truncated…lane enables high-impact work sequencing without destabilizing Shorts PoC
+    gitignored and holds `foundups`/`antifafm` at `["short"]`. `_merge_defaults` is
+    NON-destructive (only adds missing channels, never updates existing), so the persisted
+    file SHADOWS this default at runtime. Ops must regenerate it (delete the file so
+    `load_registry` rebuilds from defaults) or edit those two `content_types` in place; the
+    file is NOT committed.
+- **Rotation budget for long-form** (mirror of the shorts #858 fix): new env knob
+  `YT_VIDEO_PER_CHANNEL_PER_PASS` (default `8` = 2 days x `max_per_day=4`), parsed once with
+  safe fallback on garbage/non-positive. The per-channel call now uses
+  `max_videos = min(max_per_channel, vps_per_pass)` so long-form ROTATES instead of draining
+  the first eligible channel; the daemon's next PHASE 3 continues draining round-robin.
+- **Master gate unchanged & DEFAULT OFF.** Long-form does NOT auto-enable.
+- **Breadcrumbs:** `[VIDEO][LONG-FORM] <ch>: pass START (budget=..,max_per_day=4,tz=..)` and
+  `[VIDEO][LONG-FORM] <ch>: scheduled N/budget this pass -> rotating`.
+
+### TZ / window finding (#847 follow-up — STOP-and-reported, NOT silently enabled)
+The shorts path publishes at US-ET peak everywhere: `scheduler.py` uses
+`get_peak_slots_et()` (`:90`) AND passes `channel_tz=self.channel_tz` into
+`tracker.get_next_available_slot(...)` (`:457-460`), which DST-aware-converts ET ->
+Studio-account tz (`schedule_tracker.py:250-252`, `peak_window.convert_et_to_channel_tz`).
+The long-form path does NOT: `ContentPageScheduler.schedule_all_visible` calls
+`tracker.get_next_available_slot(time_slots, max_per_day)` WITHOUT `channel_tz`
+(`content_page_scheduler.py:896`), and the bare `time_slots` are typed AS-IS in the
+account's own tz. Consequence:
+- `foundups`/`antifafm` (America/New_York): tz-coherent (ET account == ET slots), though the
+  default fallback slot list (`_DEFAULT_TIME_SLOTS_FALLBACK`, 8 slots incl. overnight) is not
+  the #847 peak set.
+- `move2japan`/`undaodu` (Asia/Tokyo): bare times are typed in Tokyo-local -> NOT the US-ET
+  peak wall-clock.
+Full tz-correctness requires forwarding `channel_tz` through `schedule_all_visible`
+(`content_page_scheduler.py`) — OUT OF SCOPE for this slice (touch only registry + launch.py
++ tests + ModLog). Mitigation in scope: the gate is DEFAULT OFF (nothing publishes until 012
+enables), and a `[VIDEO][TZ-WARN]` breadcrumb fires for any non-ET account at runtime.
+**Required follow-up (LONG_FORM_TZ_PEAK_WINDOW_PHASE1):** forward `channel_tz` + use
+`get_peak_slots_et()` for long-form before enabling the Tokyo channels.
+
+### Tests (mock-only, non-vacuous, NO browser)
+`tests/test_long_form_scheduling_enable.py` (10 tests, green in ~0.7s):
+- registry: `foundups` AND `antifafm` defaults include `"upload"` (MUST-FAIL on origin/main
+  `["short"]` — verified: restoring origin/main registry made both params FAIL with
+  `assert 'upload' in ['short']`); pre-existing upload channels not regressed;
+- flag DEFAULT OFF -> long-form `ContentPageScheduler` NEVER constructed, `schedule_all_visible`
+  NEVER called (explicit-`false` variant too);
+- flag ON (`YT_VIDEO_PROCESSING_ENABLED=1`) -> `schedule_all_visible` runs once per channel for
+  ALL FOUR keys incl. `foundups`/`antifafm`, navigating the Videos tab (`content_type="upload"`);
+- rotation budget: every channel called with `max_videos == 8` (not 9999); each schedules
+  exactly 8 of a 100-video backlog (mock honors `max_videos` -> non-vacuous); MUST-FAIL drain
+  probe (`first_max < backlog`); env override + invalid-env fallback.
+Existing `test_schedule_rotation_fairness.py` (#858) still green (no regression).
+
+### Scope
+Touched: `youtube_channel_registry.py` (defaults), `scripts/launch.py` (long-form block only),
+the new test, this ModLog. Did NOT touch: private path, indexing, the detector, shorts path
+internals, `content_page_scheduler.py`. The persisted gitignored registry json is NOT committed.
+
+---
+
+## 2026-06-19 - Rotate ~3 days per channel per pass (fairness) instead of draining one fully
+
+**By:** 0102 (Worker-Lane SCHED-ROTATION)
+**Slice:** SHORTS_SCHEDULE_ROTATION_FAIRNESS_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse: max_videos already a pure count limiter; daemon already re-invokes PHASE 3 per cycle), WSP 97 (truth signaling)
+
+### Why (the drain-one-fully bug)
+`run_multi_channel_scheduler` looped over a browser's channels and called
+`scheduler.run_scheduling_cycle(max_videos=max_per_channel)` per channel
+(`scripts/launch.py:966-968` on origin/main). `max_per_channel` defaults to `9999`
+(`:754`), and the DAE passes `YT_SHORTS_PER_CYCLE` default `9999`
+(`auto_moderator_dae.py:1613,1629`). Inside the scheduler, `max_videos` ONLY limits the
+count (`scheduler.py:336` `unlisted[:max_videos]`, stop at `:341-342`); the per-day cap is
+`HARD_CAP_PER_DAY=3` which merely SPREADS dates across a 60-day window
+(`schedule_tracker.py:186,197,205`). Net effect: the FIRST channel in the for-loop
+(`launch.py:888`) drained its ENTIRE backlog (up to ~180 videos / 60 days) before the loop
+ever reached the next channel -> channel starvation / unfair.
+
+### What changed (minimal, launch.py only)
+- New env knob `YT_SHORTS_PER_CHANNEL_PER_PASS` (default `"9"` = 3 days x 3/day), parsed
+  once per pass with a safe fallback to 9 on garbage / non-positive values.
+- The per-channel call now passes `max_videos = min(max_per_channel, per_channel_per_pass)`,
+  so each channel schedules at most ~9 (≈3 days) then the loop ROTATES to the next channel.
+  The daemon re-invokes PHASE 3 every cycle (`auto_moderator_dae.py:1592-1640`), so the
+  remaining backlog drains round-robin across subsequent passes until empty — for free, with
+  NO change to `run_scheduling_cycle` internals, the cap, the window, or the priority wiring
+  (#854/#856).
+- Breadcrumbs: a per-pass `[ROTATION]` line announcing the budget + that rotation is active,
+  and a per-channel `[ROTATION] <ch>: scheduled N/budget this pass` line.
+- Default-ON (this is 012's requested rotation behavior). Tunable: set
+  `YT_SHORTS_PER_CHANNEL_PER_PASS` very high to restore the old drain-one-fully behavior.
+
+### Tests (mock-only, non-vacuous, no browser)
+`tests/test_schedule_rotation_fairness.py` (4 tests, all green in 0.67s):
+- each channel's `run_scheduling_cycle` is called with `max_videos == 9` (not 9999), all
+  channels touched in one pass, neither drained to its 100-video backlog;
+- MUST-FAIL probe: asserts `max_videos <= 9` — FAILS on the old `max_videos=max_per_channel`
+  (verified: reverting the call to the old drain made 3/4 tests fail, output showed
+  `Scheduled 100` per channel);
+- env override restores the large (9999) budget;
+- garbage/non-positive env falls back to the default-9 budget.
+The mock `run_scheduling_cycle` honors `max_videos` against a real 100-video backlog, so a
+stub ignoring the arg could not produce the asserted partial-drain numbers.
+
+### Out of scope (unchanged)
+- `run_scheduling_cycle` internals, `HARD_CAP_PER_DAY=3`, the 60-day window, the priority
+  wiring (#854/#856), indexing, long-form/video pass, private, the detector. Only the
+  per-pass budget passed into each channel's cycle.
+
+## 2026-06-19 - Auto-fire reschedule_plan + live-signal from the WRE trigger (live-signal self-gated)
+
+**By:** 0102 (Worker-Lane SKILLZ-REGISTER)
+**Slice:** SHORTS_SKILLZ_AUTONOMOUS_REGISTRATION_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse: existing domain-trigger + adapter wiring), WSP 91 (Observability), WSP 95 (SKILLz Wardrobe), WSP 97 (truth signaling: UNKNOWN never false-0)
+
+### Why (the orphaning gap)
+The WRE skill-trigger discovers + fires skills whose SKILLz.md frontmatter carries
+`domain: youtube` (`skill_trigger.py:91-115`, match at `:103`; discovery glob
+`modules/*/*/skillz/**/SKILLz.md`). `what_should_i_schedule` was given `domain: youtube`
+in the prior slice and now auto-fires; the other two read-only scheduling SKILLz
+(`reschedule_plan`, `shorts_live_schedule_signal`) LACKED `domain:` -> orphaned (never
+fired by the daemon, only reachable by `--agent-command`/`run_skill`). 012's rule:
+everything runs from the daemon autonomously, 012 observes. So these must auto-register.
+
+### What changed (minimal)
+- `skillz/reschedule_plan/SKILLz.md`: added `domain: youtube` (Skills 2.0 fields intact).
+  Cheap + offline + dry-run -> safe to auto-fire every cadence cycle. No executor change.
+- `skillz/shorts_live_schedule_signal/SKILLz.md`: added `domain: youtube` + an
+  "Auto-fire self-gate (cost control)" section.
+- `skillz/shorts_live_schedule_signal/executor.py`: NEW self-gate. `run_skill()` checks
+  `YT_LIVE_SCHEDULE_SIGNAL_ENABLED` (default `"0"`); when not `"1"` it returns a NO-OP
+  immediately (no driver/filter/scrape; `skipped=true`, `skip_reason="disabled_by_flag"`,
+  `scheduled_count=null` UNKNOWN never false-0) and still emits breadcrumb/PatternMemory
+  so the WRE records the fired-but-skipped run. When `=1` it runs the live DOM read as
+  before. Rationale: a live DOM round-trip every ~10m is costly and contends with the
+  daemon browser, so it auto-fires DEFAULT-OFF until 012 enables it.
+- `modules/communication/moltbot_bridge/src/youtube_automation_adapter.py`: mapped a new
+  `live_schedule_signal` action (+ aliases `shorts_live_schedule_signal`/`live_signal`/
+  `schedule_signal`, a `_build_live_schedule_signal_command`, and the dispatch branch),
+  mirroring the `reschedule_plan`/`schedule_priority` wiring, so it is `--agent-command`
+  invocable (it was previously only reachable via `python -m ...run_skill`).
+
+### Out of scope (unchanged)
+- `reschedule_apply` (MUTATING) stays manual / `--agent-command` + its `YT_RESCHEDULE_APPLY`
+  gate; it is NOT auto-registered (no `domain: youtube`).
+- priority/music wiring (prior slices); the executor business logic; no mutation anywhere.
+
+### Tests (mock-only, NON-VACUOUS, no live browser/daemon/models)
+- `tests/test_shorts_skillz_domain_registration.py` (NEW): both SKILLz parse via the SAME
+  parser the trigger uses (`WRESkillsDiscovery._extract_frontmatter`) with `domain==youtube`
+  and Skills 2.0 fields intact; a real `discover_all_skills()` scan surfaces both as
+  youtube; guard asserts `reschedule_apply` is NOT youtube-registered.
+- `tests/test_shorts_live_schedule_signal.py` (EXTENDED): flag-OFF run NO-OPs and the
+  filter/scrape MagicMocks are `assert_not_called()` (MUST FAIL if the DOM is scraped while
+  disabled -- verified by a gate-mutation that flips the no-op test to FAIL); flag-ON run
+  calls the (mock) scrape and returns the accurate count; existing live-path tests pin the
+  flag ON.
+- `tests/test_youtube_automation_adapter.py` (EXTENDED): `live_schedule_signal` is supported;
+  command + alias parse; builder targets the live-signal `run_skill` with `--channel/--connect/
+  --low-view-threshold/--json`; `execute_youtube_action` routes to the live-signal command.
+- Scoped run: 53 passed (`--import-mode=importlib`).
+
+### Live gap
+The live DOM read path remains mock-tested only; 012 enables it with
+`YT_LIVE_SCHEDULE_SIGNAL_ENABLED=1` and live-validates the chip-bar / "Has schedule" /
+views selectors before graduation.
+
+## 2026-06-19 - OBSERVE-mode acoustic music/talk label log (no scheduling gate)
+
+**By:** 0102 (Worker-Lane MUSIC-OBSERVE)
+**Slice:** SHORTS_MUSIC_LABEL_OBSERVE_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (read-only observe), WSP 84 (Code Reuse: existing `load_index_json` read path), WSP 91 (Observability), WSP 97 (truth signaling -- observe vs gate)
+
+### Why
+PHASE 2 indexing (video_indexer) can now write an acoustic `audio_label` sibling of
+`content_category` into the index artifact (flag `YT_AUDIO_LABEL_OBSERVE`). The
+scheduler already reads that artifact read-only; this slice LOGS the acoustic label
+so 012 can observe acoustic-vs-LLM agreement in the scheduling signal. OBSERVE-ONLY:
+it must NEVER change a scheduling decision.
+
+### What changed (minimal, observe-only)
+- `src/scheduler.py`:
+  - NEW method `_observe_audio_label_log(video_id) -> None`: reads the index artifact
+    via the existing `load_index_json` (read-only) and, if `metadata.audio_label` is
+    present, emits `[MUSIC-OBSERVE] {video_id} audio_label=... content_category=...`.
+    ALWAYS returns None and NEVER raises -- it carries no value the loop can branch on,
+    so it is structurally incapable of gating scheduling.
+  - Per-video loop (`run_scheduling_cycle`, ~:446): a bare `self._observe_audio_label_log(video_id)`
+    call between the resume-check and slot allocation. No assignment, no branch.
+  - Does NOT touch the existing FFCPLN content-channel gate or any scheduling decision.
+
+### Tests (mock-only, NON-VACUOUS, no live browser)
+- `tests/test_audio_label_observe_log.py` (7 tests): logs the label content when present
+  (asserts the message text); no log when label absent / artifact missing; read error
+  never raises; empty video_id is a no-op (no artifact read); REGRESSION GUARD -- a
+  deterministic scheduling-decision proxy yields the SAME outcome with and without an
+  audio_label artifact (FAILS if observe ever gates scheduling); helper returns None for
+  every label value.
+
+### Live gap
+The full `run_scheduling_cycle` requires a live signed-in browser; the observe LOG path
+is unit-tested in isolation (mocked `load_index_json`). End-to-end observation is by 012
+running the daemon with `YT_AUDIO_LABEL_OBSERVE=1`.
+
+## 2026-06-19 - shorts priority wiring: auto-fire what_should_i_schedule + flag-gated channel priority
+
+**By:** 0102 (Worker-Lane PRIORITY-WIRE)
+**Slice:** SHORTS_PRIORITY_WIRING_PHASE1
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability breadcrumb), WSP 60/48 (Pattern Memory via the existing skill), WSP 84 (Code Reuse: existing SkillTriggerMixin + rank_channels_by_need), WSP 50 (flag-gated, default-off, read-only steering), WSP 27 (Phase 0 KNOWLEDGE), WSP 22 (ModLog), WSP 49 (Structure)
+
+### Problem
+
+`what_should_i_schedule` (the read-only schedule-priority ranking skill, landed earlier)
+was an ORPHAN on two fronts: (1) its `SKILLz.md` frontmatter had no `domain:` field, so the
+DAE's existing WRE skill-trigger (`SkillTriggerMixin`, domain-discovery by frontmatter `domain`,
+`skill_trigger.py:91-115`; initialized `domain="youtube"` at `auto_moderator_dae.py:221`, fired
+`:1788`) never auto-fired it; and (2) the scheduler's channel rotation
+(`run_multi_channel_scheduler`, `scripts/launch.py`) ignored the ranking entirely -- it walked
+channels in static registry order with no need signal. 012's rule: everything runs from the
+daemon autonomously; 012 observes.
+
+### What changed (minimal, default-off, fallback-safe)
+
+1. **REGISTER (orphaning fix)** -- `skillz/what_should_i_schedule/SKILLz.md`: added
+   `domain: youtube` to the frontmatter. The existing youtube-domain skill-trigger now discovers
+   and auto-fires this skill every cadence cycle (emitting its breadcrumb + PatternMemory outcome
+   for 012 to observe). Skills 2.0 fields (`category`/`evals`/`retirement_date`) intact; YAML still
+   parses. Executor logic UNCHANGED.
+
+2. **STEER (flag-gated)** -- `scripts/launch.py`: new `_prioritize_channels(channels)` helper,
+   called once in `run_multi_channel_scheduler` right after `channels = BROWSER_CHANNELS[browser]`,
+   BEFORE the rotation loop. When `YT_SCHEDULE_PRIORITY_ENABLED == "1"`: call
+   `rank_channels_by_need()` (read-only), map ranking `channel_id -> registry key`, REORDER the
+   rotation highest-need-first, and DROP channels whose `total_deficit == 0` (already at the hard
+   cap -> nothing to schedule, no work lost). Any rotation key the ranking didn't cover is kept in
+   original order (no silent work loss). Wrapped in try/except -> on ANY error (or if the result is
+   empty) it returns the ORIGINAL `channels` unchanged. A WSP 91 breadcrumb
+   (`schedule_priority_order`) records the chosen order + skips. **Default-off => zero behavior
+   change** unless 012 sets the flag. No scheduling content is mutated; this only orders/skips.
+
+### Tests (mock-only, non-vacuous, NO browser)
+
+`tests/test_shorts_priority_wiring.py` (8 tests, all passing):
+- flag off (unset + explicit `0`) -> original order, no skip
+- flag on -> reorder by injected need + `deficit==0` channel dropped; breadcrumb asserted
+- NON-VACUITY: swapping which channel has the top deficit swaps the chosen head (a
+  ranking-ignoring impl FAILS -- verified by injection: 2 tests fail when the ranking is ignored)
+- rank error -> fallback to original order, no exception escapes
+- all-at-cap -> fallback to original (never hand the scheduler an empty list)
+- uncovered rotation key kept
+- `SKILLz.md` has `domain: youtube` and still parses with Skills 2.0 fields
+
+### Out of scope (separate slices)
+
+Music-vs-talk wiring, reschedule plan/apply wiring, live-signal wiring, and the executor logic
+itself. Touched ONLY `SKILLz.md` + `scripts/launch.py` (+ the new test + this ModLog).
+
+## 2026-06-19 - reschedule_apply: flag-gated MUTATING apply of the #851 plan (Mode B Phase 2, DEFAULT DRY-RUN)
+
+**By:** 0102 (Worker-Lane RESCHED-APPLY)
+**Slice:** SHORTS_RESCHEDULE_APPLY_PHASE2
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 84 (Code Reuse: planner + date/time picker + shadow_dom_finder + cap), WSP 50 (flag-gated mutation, default read-only), WSP 27 (Phase 0 KNOWLEDGE), WSP 22 (ModLog), WSP 49 (Structure)
+
+### Problem
+
+The #851 `reschedule_plan` SKILLz produces a dry-run rebalance PLAN (move rows
+`{channel_id, channel_name, from_date, to_date, slot_et, slot_local, video_id}`) for
+over-crowded days, but had no applier. Phase 2 is the MUTATING apply -- built FLAG-GATED
+and DEFAULT DRY-RUN so merging this code mutates NOTHING.
+
+### What changed (default dry-run; merge mutates nothing)
+
+1. **`src/reschedule_applier.py`** -- `apply_moves` / `apply_plan` consume the #851 plan rows.
+   DEFAULT DRY-RUN: each eligible move is only LOGGED as `would move <video> <from> -> <to>
+   @ <slot_local>` plus a per-move breadcrumb (WSP 91) + PatternMemory SkillOutcome (WSP 60/48,
+   status `dry_run`). The DOM picker/save helpers are NEVER called in dry-run. Real apply happens
+   ONLY when env `YT_RESCHEDULE_APPLY == "1"` (default `"0"`) AND a live driver is connected.
+   Safety: `(needs-live-list)` rows -> skipped (`needs_live_list`); per-channel target-day cap
+   re-checked, over-cap -> skipped (`cap`); per-move try/except so one failure never aborts the batch.
+2. **`src/dom_automation.py`** -- reschedule-popup entry helpers (WSP 84 reuse):
+   `open_scheduled_edit_popup(video_id)` clicks the list row's "Scheduled" `span.label-span`
+   (shadow-pierced via `shadow_dom_finder.first_deep`) to open `ytcp-video-visibility-edit-popup`,
+   then `reschedule_open_set_save(date, time, video_id)` reuses the EXISTING `set_schedule_date`
+   (`:2947`), `set_schedule_time` (`:3098`), `click_done` (`:3200`), `click_save` (`:2703`)
+   UNCHANGED -- the popup exposes the same `ytcp-datetime-picker`. `slot_local` is the
+   ready-to-type bare 12h Studio time (ET->channel-tz, #847), typed directly.
+3. **`skillz/reschedule_apply/`** -- `executor.run_skill` (wraps `apply_plan`) + `run_skill.py`
+   (`--json`, dry-run by construction over the subprocess surface) + `SKILLz.md`. Mirrors the
+   #850/#851 read-only/agent-invoked pattern; 012 only observes outcomes and flips the env flag.
+4. **`youtube_automation_adapter.py`** -- `reschedule_apply` action + aliases
+   (`apply_reschedule`, `rebalance_apply`, `reschedule_apply_plan`) + `_build_reschedule_apply_command`
+   + dispatch branch (`youtube action reschedule_apply`).
+
+### Live gap (honest)
+
+The DOM apply path is MOCK-TESTED only (no live browser run). 012 enables `YT_RESCHEDULE_APPLY=1`,
+supplies a connected driver through the daemon, and live-validates the popup picker against real
+Studio before trusting apply.
+
+### Tests (mock-only, NON-VACUOUS, no live browser)
+
+`tests/test_reschedule_applier.py` (15 tests, all pass): dry-run default -> picker/save NOT called,
+moves logged; `YT_RESCHEDULE_APPLY=1` -> picker called with the EXACT date+time per move;
+over-cap -> skipped (`cap`); `(needs-live-list)` -> skipped; per-move error -> batch continues;
+signals emitted per move. Non-vacuity proven: temporarily disabling the dry-run guard FAILS
+`test_dryrun_must_not_call_dom_helpers` + `test_dryrun_default_logs_moves_without_dom`, then reverted.
+
+### Out of scope (NOT built here)
+
+The planner (done #851); wiring into the scheduler loop/cadence; view-based ("low-viewed first")
+selection; the music-vs-talk gate; naming `(needs-live-list)` videos from the live list.
+
+---
+
+## 2026-06-19 - shorts_live_schedule_signal SKILLz: live "Has schedule" count fix + per-video view signal (read-only)
+
+**By:** 0102 (Worker-Lane LIVE-SIGNAL)
+**Slice:** SHORTS_LIVE_SCHEDULE_AND_VIEW_SIGNAL_PHASE1
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 84 (Code Reuse: shadow_dom_finder), WSP 27 (Phase 0 KNOWLEDGE), WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action)
+
+### Problem (the false-0 audit bug)
+
+`content_page_scheduler.audit_calendar()` (`[CPS-AUDIT]`) reports "Total scheduled: 0"
+(`src/content_page_scheduler.py:992`) for Edge channels (foundups/antifaFM) even though the tracker
+holds 131 / 55. Root cause: it filters to Scheduled via the OLD sidebar flow
+`#filter-icon -> "Visibility" -> "Has schedule"` in `_apply_visibility_filter_via_ui`
+(`src/content_page_scheduler.py:313-412`). That flow TIMES OUT on those channels; the filter never
+lands, `navigate_to_content` "continues unfiltered" (`:276`), and `get_scheduled_videos_detailed`
+(`src/dom_automation.py:2466`) then scrapes 0 Scheduled rows on an unfiltered page -> a FALSE 0.
+012's reliable path is the **chip-bar "Filter" input -> "Has schedule" checkbox in the filter dialog**.
+
+### What changed (read-only; NO scheduling mutation)
+
+New SKILLz `skillz/shorts_live_schedule_signal/` mirroring the `what_should_i_schedule` (#850) +
+`reschedule_plan` (#851) read-only/agent-invoked pattern (`executor.py` + `run_skill.py` + `SKILLz.md`):
+
+1. **Accurate "Has schedule" count** -- `read_live_schedule_signal()` clicks the chip-bar filter input
+   and ticks the "Has schedule" label in `ytcp-filter-dialog tp-yt-paper-dialog#dialog`, then scrapes
+   `ytcp-video-row` for scheduled rows. **Fail-safe**: if the filter cannot be applied it returns
+   `scheduled_count = None` (UNKNOWN, status `unknown_filter_not_applied` / `unknown_no_driver`),
+   **NEVER a false 0**.
+2. **Per-video view signal** -- each row's views cell is parsed (`parse_view_count`: "1.2K views" ->
+   1200, "-"/"" -> None UNKNOWN, distinct from 0) into `{video_id, scheduled, scheduled_date, views}`;
+   `summarize_rows` derives the low-viewed list (views known AND < threshold; UNKNOWN never low-viewed).
+3. **WSP 84 reuse**: Studio is shadow-rooted, so the chip-bar / dialog / rows are reached with the
+   EXISTING `modules/infrastructure/foundups_selenium/src/shadow_dom_finder.py`
+   (`first_deep`/`find_deep`, from the Studio-Ask #825/#827 work), not flat CSS.
+4. **WRE signals**: every run emits a `live_schedule_signal` breadcrumb (WSP 91) + a PatternMemory
+   SkillOutcome (WSP 60/48). Agent-invoked via `--agent-command` -> `run_skill.py`; no manual-012 menu.
+
+Malleable: parsing is behind pure functions; the DOM scrape + "Has schedule" applier are injectable
+seams (`scrape_fn` / `apply_filter_fn`) so tests are mock-only.
+
+### Scope / out of scope
+
+ONLY touches `youtube_shorts_scheduler` (+ new skillz/tests/ModLog) and REUSES `shadow_dom_finder`.
+No mutation. OUT: Mode B apply, wiring into the scheduler order / ranking, music gate. The existing
+timing-out `_apply_visibility_filter_via_ui` is left intact (no behavior change there this phase);
+this skill is the accurate read-only signal the audit/daemon consumes.
+
+### Live gap (honest)
+
+DOM read path is **mock-tested only** (simulated Studio DOM); no live browser ran. 012 live-validates
+the real chip-bar / "Has schedule" / views selectors on the Edge channels before graduation. Selectors
+are 012-grounded but the live structure must be re-confirmed in-code.
+
+### Tests (mock-only, non-vacuous) -- 27 passed
+
+`tests/test_shorts_live_schedule_signal.py`. Non-vacuity proven: regressing the executor to the old
+false-0 behavior RED-fails `test_filter_fail_returns_unknown_not_zero`,
+`test_old_path_produces_false_zero_then_new_path_returns_unknown`, and
+`test_accurate_scheduled_count_when_rows_exist` (`assert 0 is None`).
+
+---
+
+## 2026-06-19 - reschedule_plan SKILLz: dry-run rebalance PLAN for over-cap days (Mode B Phase 1)
+
+**By:** 0102 (Worker-Lane RESCHED-PLAN)
+**Slice:** SHORTS_RESCHEDULE_PLAN_PHASE1
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse)
+
+### Problem
+
+Before the per-day cap landed (`HARD_CAP_PER_DAY = 3`, `src/schedule_tracker.py:30`, #844), the
+historical backlog was scheduled at up to 8/day. Those over-crowded days are now over the cap. The
+agent needs a PREVIEW PLAN that proposes moving the excess (`count > 3`) off each over-crowded day
+onto under-target upcoming days, into the US-ET peak slots converted per channel tz. This is the
+decision layer; the mutating DOM apply is a separate Phase-2 follow-up.
+
+### Phase 0 confirmation (verified, not assumed)
+
+1. **Tracker DATA MODEL = video<->date AND counts.** `ScheduleTracker` stores BOTH
+   `schedule: Dict[date_str, int]` (`src/schedule_tracker.py:100`) AND
+   `video_ids: Dict[date_str, List[str]]` (`:101`); both persisted (`:127-128`). So the plan NAMES
+   which videos move when ids are recorded. BUT `count` is authoritative and can exceed the recorded
+   id list (`set_count()` `:185-193` and `sync_from_youtube()` can leave `video_ids` incomplete, and
+   the historical 8/day backlog predates id tracking). Surplus moves beyond recorded ids are labelled
+   `video_id="(needs-live-list)"` -- naming those specific videos needs the LIVE Studio list (Phase 2).
+2. **Peak slots + per-channel tz CONFIRMED (#847).** `src/peak_window.py`: `get_peak_slots_et()`
+   returns ET `["08:00","12:00","20:00"]`; `convert_et_to_channel_tz(et_time, channel_tz, on_date)`
+   does the DST-aware ET->account-tz wall-clock conversion (verified: NY 08:00->8:00 AM identity,
+   Tokyo 08:00->10:00 PM JST, NY 20:00->8:00 PM).
+3. **SKILLz pattern CITED + mirrored (#850).** `skillz/what_should_i_schedule/{SKILLz.md, executor.py,
+   run_skill.py, __init__.py}` -- Skills 2.0 frontmatter, pure executor + lazy-imported breadcrumb /
+   PatternMemory emit helpers, JSON-tail `run_skill` entrypoint, `--agent-command` wiring in
+   `modules/communication/moltbot_bridge/src/youtube_automation_adapter.py` (action +
+   `_build_*_command` + dispatch). New skill mirrors this exactly.
+
+### Changes (DRY-RUN / read-only, agent-invoked -- NO manual-012 apply path)
+
+1. **New pure planner** `src/reschedule_planner.py`:
+   - `find_over_cap_days(schedule, cap)`: days with `count > cap`; `excess = count - cap`.
+   - `find_target_days(...)`: under-cap upcoming days (after today, within horizon), excluding the
+     over-crowded source days; nearest-first.
+   - `assign_peak_slot(slot_index, channel_tz, on_date)`: maps fill-index 0/1/2 to ET morning/lunch/
+     evening, converted to the channel tz (#847).
+   - `plan_channel_reschedule(...)`: for each over-cap day, place the excess on the nearest target
+     with free capacity, filling each target up to (NEVER over) the cap, assigning peak slots. Returns
+     `ChannelReschedulePlan` (moves + days_over_cap, total_moves, unplaceable_moves).
+   - `plan_all_channels(...)`: aggregates across registry shorts channels; `dry_run: True` always.
+2. **New SKILLz** `skillz/reschedule_plan/{SKILLz.md, executor.py, run_skill.py, __init__.py}`:
+   - `run_skill(...)`: runs the planner and emits a breadcrumb (`source_dae=youtube_shorts_scheduler`,
+     `event_type=reschedule_plan`, full plan in metadata) + a PatternMemory `SkillOutcome` per run.
+   - `DRY_RUN = True` constant pins the preview contract; the apply is Phase 2.
+3. **--agent-command wiring** in `youtube_automation_adapter.py`: `reschedule_plan` action +
+   aliases (`reschedule`/`rebalance`/`rebalance_plan`) + `_build_reschedule_plan_command` + dispatch.
+   `youtube action reschedule_plan [horizon_days=N] [no_signals=true]`.
+
+### Documented Phase-2 / future seams (NOT built here)
+
+- **DOM apply / mutation**: the `ytcp-video-visibility-edit-popup` date/time-picker applier that
+  consumes the plan rows (each row is a complete move instruction). Gated behind its own slice.
+- **View-based ("low-viewed first") prioritization**: choosing WHICH videos move by per-video view
+  counts -- needs view data NOT in the tracker (separate Phase-2 signal). Target-DAY selection here
+  is date-driven; the `find_target_days` / `_video_ids_for_excess` seams are where it would plug in.
+
+### Tests (mock-only, NON-VACUOUS)
+
+`tests/test_reschedule_planner.py` (14 tests, all pass): day at 5 -> exactly 2 moves with no target
+over cap; near target at cap-1 takes only 1; fully-<=cap schedule -> empty plan; NY identity +
+Tokyo-offset peak/tz assignment; recorded surplus ids NAMED + missing surplus -> `(needs-live-list)`;
+no-target-within-horizon -> unplaceable; breadcrumb + PatternMemory emit invoked; `--no-signals`
+skips emit. Non-vacuity PROVEN: sabotaging the planner to ignore over-cap days fails 9/14 (incl.
+`test_planner_must_not_ignore_over_cap`). Existing adapter suite still 9/9 green.
+
+## 2026-06-19 - what_should_i_schedule SKILLz: channel scheduling-priority (Phase 1)
+
+**By:** 0102 (Worker-Lane SCHED-PRIORITY)
+**Slice:** WHAT_SHOULD_I_SCHEDULE_SKILLZ_PHASE1
+**WSP References:** WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 91 (Observability), WSP 60/48 (Pattern Memory), WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse)
+
+### Problem
+
+The shorts daemon rotates across the 4 channels but had no signal for WHERE the scheduling gap
+is. With the cap now `HARD_CAP_PER_DAY = 3` (`src/schedule_tracker.py:30`, landed #844), a channel
+empty for the next week is far more urgent than one already filled. The agent needs an answer to
+"which channel should I schedule next?" so the daemon works the most-needed channel first instead
+of wasting work on already-covered channels.
+
+### Phase 0 confirmation (verified, not assumed)
+
+1. **Data source CONFIRMED.** `ScheduleTracker(channel_id)` loads
+   `memory/schedule_<channel_id>.json` (`src/schedule_tracker.py:74-90`); `get_count(date_str)`
+   returns the per-date int (`:123-133`); tracker date keys use the format
+   `f"{d.strftime('%b')} {d.day}, {d.year}"` (`:212`). `HARD_CAP_PER_DAY = 3` at `:30`.
+2. **SKILLz pattern CITED + mirrored.** `skillz/gemma_content_type_classifier/{SKILLz.md,executor.py}`
+   -- Skills 2.0 frontmatter (`category`, `evals`, `retirement_date`), micro chain-of-thought,
+   pure executor + `__init__` re-export. New skill mirrors this structure.
+3. **Signal APIs CONFIRMED.** breadcrumb via
+   `modules/communication/livechat/src/breadcrumb_telemetry.py` `get_breadcrumb_telemetry().store_breadcrumb(...)`
+   (`:102`, singleton `:339`); pattern memory via
+   `modules/infrastructure/wre_core/src/pattern_memory.py` `PatternMemory().store_outcome(SkillOutcome(...))`
+   (`SkillOutcome` `:35`, `store_outcome` `:331`).
+4. **--agent-command surface CONFIRMED.** `main_menu.py --agent-command` (`:153`) routes to
+   `modules/communication/moltbot_bridge/src/action_cli.py::run_action_command` (`:460`), which
+   dispatches `"youtube action <action> ..."` to `youtube_automation_adapter.execute_youtube_action`.
+
+### Changes (read-only, agent-invoked -- NO manual-012 path)
+
+1. **New SKILLz** `skillz/what_should_i_schedule/{SKILLz.md, executor.py, run_skill.py, __init__.py}`:
+   - `rank_channels_by_need(upcoming_days=7)`: pure function. For each channel, inspect the next N
+     upcoming days from the tracker; per-day `deficit = max(0, HARD_CAP_PER_DAY - count)`;
+     `total_deficit` = sum; `days_empty` = days with count<=0; `recommend = schedule|sufficient`.
+     Ranked by total_deficit desc, days_empty desc, name asc. Empty channel ranks HIGHEST; a
+     cap-full channel ranks LOWEST (sufficient).
+   - `run_skill(...)`: runs the ranking and emits a breadcrumb (`source_dae=youtube_shorts_scheduler`,
+     `event_type=schedule_priority`, full ranking in metadata) + a PatternMemory `SkillOutcome` per
+     run (WRE self-improvement testbed).
+   - `run_skill.py`: `python -m ...skillz.what_should_i_schedule.run_skill --upcoming-days N --json`
+     entrypoint that the agent/adapter spawns; prints a single JSON line for deterministic parse.
+2. **--agent-command wiring** (`moltbot_bridge/src/youtube_automation_adapter.py`): added
+   `schedule_priority` action (+ aliases `what_should_i_schedule`, `schedule_next`,
+   `scheduling_priority`) that spawns the read-only SKILLz entrypoint and returns the parsed JSON.
+   Invoke: `--agent-command "youtube action schedule_priority upcoming_days=7"`.
+
+### Malleable seams (intentional)
+
+- **Data source** injected via `count_fn` (default `ScheduleTracker.get_count`) -- a future LIVE
+  `[CPS-AUDIT]` 'Has schedule' DOM verify or engagement-learning signal plugs in here WITHOUT
+  touching the ranking math.
+- **Need formula** injected via `deficit_fn` (default hard-cap deficit) -- swap the rule without
+  touching data loading or the sort.
+
+### Out of scope (separate follow-ups -- NOT built here)
+
+- Live `[CPS-AUDIT]` 'Has schedule' DOM filter-fix (live coverage verification).
+- Mode B re-schedule (mutating) -- this skill is strictly read-only.
+- music-vs-talk content gate wiring.
+
+### Tests (mock-only, NON-VACUOUS)
+
+`tests/test_what_should_i_schedule.py` -- 11 tests, all passing. Empty channel ranks highest;
+cap-full channel ranks lowest (sufficient); exact deficit math; over-cap never negative; ordering
+by deficit; breadcrumb + PatternMemory emission invoked (mocked + asserted); no-signals path skips
+emission; formula seam. **Non-vacuity proven**: forcing `_default_deficit_fn` to ignore counts
+(`return 1`) makes 5 count-sensitive tests FAIL; reverting restores 11/11 green.
+
+## 2026-06-19 - US-ET peak slots + per-channel Studio-tz conversion (Phase 1)
+
+**By:** 0102 (Worker-Lane SCHED-WINDOW)
+**Slice:** SHORTS_SCHEDULE_US_PEAK_WINDOW_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+
+### Problem
+
+The prior slice (#844) capped the day at 3 but DEFERRED the publish window because the Studio
+timezone was unverified. Shorts target the US audience, but 012 posts from Japan and two of four
+channels run on Asia/Tokyo Studio accounts. The old `_DEFAULT_TIME_SLOTS` was a 24h grid whose
+first three slots (12AM/3AM/6AM ET-ish) were graveyard hours for US viewers, and a bare time typed
+into a Tokyo Studio account publishes at that time IN JST -- the wrong US wall-clock.
+
+### Phase 0 confirmation (verified, not assumed)
+
+1. **Bare-time-in-account-tz model CONFIRMED.** `src/dom_automation.py` `set_schedule_time`
+   (~3098) types the bare time string via `slow_type` (~3196) and never touches the timezone
+   selector; `click_done` explicitly guards against the timezone-select-button (~3214, ~3226-3232).
+   Studio interprets the typed time in each ACCOUNT's own tz.
+2. **Registry tz == Studio ACCOUNT tz CONFIRMED.** The `timezone` field in
+   `youtube_channel_registry.py` (Move2Japan/UnDaoDu = `Asia/Tokyo`; FoundUps/antifaFM =
+   `America/New_York`) is the Studio account tz -- corroborated by the #844 commit body, which
+   states Studio "interprets it in each account's own tz (Asia/Tokyo for Move2Japan/UnDaoDu vs
+   America/New_York for FoundUps/antifaFM)". This is the authoritative source; we did NOT have to
+   STOP.
+3. **Python tz support.** `zoneinfo` requires `tzdata` on Windows, which is NOT installed; `pytz`
+   IS installed (2026.1) and is already a repo dependency (stream_resolver, social_media_orchestrator,
+   foundups). Used `pytz` to avoid a runtime ModuleNotFoundError on the Windows host (WSP 84 reuse).
+
+### Changes (minimal)
+
+1. **Canonical ET peaks defined ONCE.** New pure module `src/peak_window.py` holds the research-
+   backed US-Eastern peaks -- morning ~08:00, lunch ~12:00, evening ~20:00 ET -- configurable via
+   env `SHORTS_PEAK_SLOTS_ET` (e.g. "08:00,12:00,20:00"). Three slots match the landed 3/day cap.
+2. **Pure DST-aware conversion.** `convert_et_to_channel_tz(et_time, channel_tz, on_date)` and
+   `get_peak_slots_for_channel(...)` map an ET target to the channel account-tz wall-clock using
+   the publish date (DST correct: 08:00 ET -> 21:00 JST in summer, 22:00 JST in winter; -> 08:00
+   for NY). Returns the bare 12h string the typer consumes.
+3. **Allocator wired (reuses cap + jitter).** `schedule_tracker.get_next_available_slot` gained an
+   optional `channel_tz`; when set it converts the ET base slot to channel-local BEFORE the existing
+   jitter. `HARD_CAP_PER_DAY` / `effective_cap` clamp is UNCHANGED. `channel_tz=None` stays
+   backwards-compatible (identity).
+4. **Scheduler passes the channel tz.** `scheduler.py` sources `self.time_slots` from
+   `peak_window.get_peak_slots_et()` and passes `channel_tz=self.config["timezone"]` at both
+   allocator call sites.
+5. **Registry grid replaced.** `_DEFAULT_TIME_SLOTS` is now the 3 ET peaks `["08:00","12:00","20:00"]`
+   (inert default mirror; the authoritative/env-config + conversion live in `peak_window.py` to
+   avoid an infra->platform import).
+
+### Future WRE enhancement (extension seam)
+
+The ET defaults are RESEARCHED static defaults. A future WRE skill can LEARN the optimum per-channel
+publish times from real engagement data (impressions/CTR/retention by hour) and replace
+`get_peak_slots_et()` or override slots per channel -- feeding through the SAME conversion path so
+the bare-time-in-account-tz contract is preserved. Seam documented in `peak_window.py` header.
+
+### Tests (unit, mock-only, non-vacuous)
+
+`tests/test_peak_window.py`: pins the ET peaks (08/12/20), proves NY=identity and Tokyo summer/winter
+offsets with explicit DST divergence, guards the old bare-time bug (Tokyo 08:00 ET is typed ~9:00 PM
+JST, NOT 8:00 AM), and proves cross-channel divergence. Non-vacuity verified by temporarily removing
+the conversion -> 3 allocator tests FAIL (Tokyo guard, NY check, divergence), restored after.
+Scoped run: 47 passed, 2 skipped (includes the #844 density-cap suite, still green).
+
+---
+
+## 2026-06-19 - Cap shorts at 3/day + 1-6am window decision (was 8/day) (Phase 1)
+
+**By:** 0102 (Worker-Lane SCHED-DENSITY)
+**Slice:** SHORTS_SCHEDULE_DENSITY_AND_WINDOW_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 49 (Structure), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+
+### Problem
+
+The scheduler over-schedules: the registry defaulted `max_per_day: 8` for all 4 channels
+and the live persisted `memory/youtube_channels.json` carries `max_per_day: 8` with an 8-slot
+24h grid. The only per-day enforcement was `if count < max_per_day:` in the allocator, which
+honored whatever value the config passed (8), so the running system schedules up to 8 shorts/day.
+
+### Changes (minimal)
+
+1. **Authoritative clamp (load-bearing).** Added module constant `HARD_CAP_PER_DAY = 3` in
+   `src/schedule_tracker.py` and clamped at the allocator:
+   `effective_cap = min(max_per_day, HARD_CAP_PER_DAY)`. This holds even when a caller passes a
+   stale `max_per_day=8` (e.g. from the untracked runtime JSON), so it fixes the running system
+   regardless of config drift.
+2. **Registry/config defaults 8 -> 3.** `youtube_channel_registry.py` (4 channel entries +
+   `_normalize_channel` fallback) and `channel_config.py` `_build_channel_config` fallback now
+   default `max_per_day` to 3.
+3. **Persisted `memory/youtube_channels.json` NOT committed.** It is gitignored
+   (`.gitignore:143:memory/`) and absent from a fresh checkout; it still carries `max_per_day: 8`
+   in the runtime repo. Per scope, it is NOT committed -- the HARD_CAP_PER_DAY clamp covers the
+   stale value at allocation time.
+4. **Stale report fixed.** `get_summary` / `has_sufficient_coverage` / `log_schedule_report`
+   previously hard-coded the "full day" threshold to 3 (and printed a literal "Full days (3/3)").
+   These now use `HARD_CAP_PER_DAY`, so the report stops lying if the cap changes.
+
+### Window (1-6am): DEFERRED -- timezone unverified
+
+The 8-slot `_DEFAULT_TIME_SLOTS` grid was intentionally LEFT UNCHANGED. The scheduler types the
+bare time string into YouTube Studio and deliberately never sets the timezone selector
+(`src/dom_automation.py` set_schedule_time ~3196; timezone-select guard ~3226-3232). Studio
+interprets that time in each account's own configured timezone, which the code does not read or
+verify. The registry timezones disagree (Move2Japan/UnDaoDu = Asia/Tokyo; FoundUps/antifaFM =
+America/New_York), so a fixed "1:30 AM" would publish at different wall-clocks per channel and 2 of
+4 would be wrong for a JST-based 012. Wrong tz = videos publish at the wrong outward-facing time, so
+per the slice's safety rule the grid change is deferred until the Studio timezone is verified. The
+clamp still concentrates publishing into the first 3 grid slots (12AM/3AM/6AM) per day.
+
+### Tests (unit, mock-only, non-vacuous)
+
+`tests/test_scheduler.py` -> new `TestScheduleDensityCap`:
+- `test_allocator_caps_at_three_per_day`: 4 videos at max_per_day=3 roll the 4th to the next day
+  (counts == [3, 1]).
+- `test_clamp_authority_overrides_caller_max_per_day_eight`: 9 videos with max_per_day=8 yield
+  exactly 3 days of 3 (NON-VACUITY: reverting the clamp to `effective_cap = max_per_day` makes this
+  fail with "got 8 (>3)" -- verified by temporary revert, then restored).
+- `test_report_threshold_matches_effective_cap`: full/partial day counts track HARD_CAP_PER_DAY.
+- `test_hard_cap_constant_is_three`.
+Also corrected two pre-existing flaky exact-time assertions (jitter randomizes the slot) to use a
+bounded `_within_jitter` helper, and updated `test_get_channel_config_move2japan` to assert
+`max_per_day == 3` (slot count not asserted since the grid is unchanged this slice).
+
+Scoped pytest: 34 passed, 2 skipped (browser integration, correctly skipped).
+
+## 2026-06-16 - Pin video-index context consumption on the scheduling path (Phase 1)
+
+**By:** 0102 (Worker-Lane SSVCC-AUTHOR)
+**Slice:** SHORTS_SCHEDULER_VIDEO_INDEX_CONTEXT_CONSUMPTION_COVERAGE_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+**Basis:** #820 ALREADY built the artifact-consumption path; this slice PINS it with tests (no rebuild).
+
+### Tests (deliverable)
+
+Added scheduling-path consumption coverage to `tests/test_index_metadata_decoupling.py` (reusing the
+existing harness): TEST A (MISSING artifact -> base content, no enhancement, no scheduler-owned
+indexing) and TEST B (PRESENT artifact -> index context + woven hashtags + `0102 DIGITAL TWIN INDEX`
+block applied; `schedule_video` only on the explicit scheduling path), plus an env-gate complement and
+an observability-marker test. See `tests/TestModLog.md` for details and non-vacuity notes.
+
+### Production (observability only - the single permitted touch)
+
+`_update_video_metadata` now emits ONE behaviour-neutral log line
+`index_context=present|missing|disabled` (present = `ctx` not None; missing = artifact absent/`ctx`
+None; disabled = `YT_SCHEDULER_INDEX_WEAVE_ENABLED` false). This unifies/replaces the prior
+"No index artifact ... skipping enhancement" debug line. No response body, no transcript, no secrets.
+Control flow (consumption logic) is UNCHANGED - the `present`/`missing` branches still set the same
+`new_title`/`new_description` as before; only the log output differs.
+
+## 2026-06-16 - Decouple Index Read-for-Context from Live Metadata Write (Phase 1)
+
+**By:** 0102 (Worker-Lane SSIMD-AUTHOR)
+**Slice:** SHORTS_SCHEDULER_INDEX_METADATA_DECOUPLING_PHASE1
+**WSP References:** WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 84 (Code Reuse), WSP 97 (Truth Signaling)
+**Decision basis:** merged audit #818; producer precondition #819.
+
+### Problem
+
+The scheduler entangled "READ the video index for context" with "WRITE live YouTube
+metadata". The indexing path (`run_indexing_cycle`, INDEXING-ONLY MODE) called
+`_update_video_metadata` (live `edit_title`/`edit_description`) and `self.dom.save_video()`,
+and the read path called scheduler-owned `ensure_index_json` (stub/Gemini). A bounded index
+pass or artifact refresh could silently overwrite production metadata.
+
+### Resolution (read/write split)
+
+- Added a PURE, read-only context builder `build_index_metadata_context(...) -> Optional[MetadataContext]`
+  in `index_weave.py`. It only `load_index_json` + the existing pure builders
+  (`build_human_description_context`, `inject_context_into_description`, `build_topic_hashtags`,
+  `build_digital_twin_index_block`, `weave_description`, optional `generate_clickbait_title_from_index`).
+  It takes NO dom/driver, NEVER calls `ensure_index_json`/`save_index_json`/`create_stub_index_json`,
+  and NEVER imports/instantiates `GeminiVideoAnalyzer`. Returns None on a MISSING artifact ->
+  caller "skip enhancement", NOT "index now".
+- `_update_video_metadata` (scheduling read path) now consumes the pure builder. The
+  scheduler-owned `ensure_index_json` create/Gemini calls were removed from this read path.
+  Live `edit_title`/`edit_description` order and the env gates
+  (`YT_SCHEDULER_INDEX_WEAVE_ENABLED`/`_INDEX_MODE`/`_INDEX_INFORM_TITLE`/`_INDEX_ENHANCE_DESCRIPTION`)
+  are preserved; artifact-present bytes are unchanged.
+- The content-channel gate's delete+Gemini-reindex branch is now READ-ONLY: it reads an
+  EXISTING artifact for transcript-refined classification (no unlink, no `ensure_index_json`,
+  no Gemini coupling).
+- `run_indexing_cycle` is now a READ-ONLY artifact/context VALIDATION path (marked
+  deprecated/read-only in its docstring). It no longer calls `_update_video_metadata`,
+  `edit_title`/`edit_description`/`schedule_video`, or `save_video`. It records artifact
+  presence/absence per video.
+
+### save_video resolution
+
+`self.dom.save_video()` was a LATENT AttributeError: `dom_automation.py` defines no
+`def save_video`; `YouTubeStudioDOM` (class at `dom_automation.py:336`) has no base class and no
+`__getattr__`/`__getattribute__`. The only reference was `scheduler.py` (indexing path). The real
+page-level save is `click_save` (`dom_automation.py:2703`), reached on the scheduling path via
+`schedule_video`. The call was removed from the indexing path (no save implementation added).
+Recorded: SAVE_VIDEO_LATENT_BUG_REMOVED_FROM_INDEXING_PATH.
+
+### Behavior preservation
+
+INDEXING is now read-only; SCHEDULING still writes (unchanged). The explicit scheduling/publish
+path (`run_scheduling_cycle` -> `_update_video_metadata` -> `schedule_video`), per-video order,
+visibility guards, dry_run short-circuit, post-schedule artifact bookkeeping, and
+`record_schedule_outcome` are untouched. External callers use `run_scheduler_dae` only
+(`multi_channel_coordinator.py`); `run_indexing_cycle`/`run_indexer_dae` are not exported and have
+no external runtime callers.
+
+### Tests
+
+- `tests/test_index_metadata_decoupling.py` (7 controls + 1 Control-4 discrimination test + 2
+  pure-builder cases). Negative controls 1/2/4/5 demonstrably FAIL on the old coupled code; control
+  3 is honestly paired with control 7 (positive scheduling-write regression anchor). Strict
+  `spec_set` DOM double of `YouTubeStudioDOM` (no invented `save_video`).
+
+- Control 4 hardened (non-vacuous): the per-video loop in `run_indexing_cycle` swallows each video
+  body exception into `results["errors"]` (inner `except`), and only the OUTER except sets
+  `results["fatal_error"]`. A swallowed `save_video` `AttributeError` therefore lands in
+  `results["errors"]` (mentioning `save_video`) and NEVER in `fatal_error`. Control 4 now asserts
+  REACHABILITY (`navigate_to_video` called with the video id) and NON-VACUOUS DETECTION
+  (`results["errors"] == []` AND no error references `save_video`), keeping `not hasattr(dom,
+  "save_video")` as documentation only. Asserting `"fatal_error" not in results` alone would be
+  VACUOUS because the inner except hides the access.
+
+- Discrimination test `test_control4_detection_channel_surfaces_save_video` PROVES the channel has
+  teeth: it monkeypatches the bound `scheduler.build_index_metadata_context` (the loop's call at
+  `scheduler.py:1107`, imported `scheduler.py:29`) with a stand-in that calls
+  `scheduler.dom.save_video()`, then asserts the swallowed `AttributeError` SURFACES via
+  `any("save_video" in e["error"] for e in results["errors"])` (still no `fatal_error`). No product
+  code is edited. Verified: under this injection the hardened Control 4 raises `AssertionError`.
+
+---
+
+## 2026-06-15 - UNLISTED Filter Enforcement (Scheduled vs Unlisted)
+
+**By:** 0102
+**WSP References:** WSP 22, WSP 97 (Truth Signaling)
+
+### Problem
+
+Shorts scheduler could run on **Scheduled** / **Has schedule** filter instead of **Unlisted**
+(e.g. antifaFM after prior audit/sync). F5 refresh does not switch filters — unlisted rows
+stay invisible and processing silently finds zero videos or wrong rows.
+
+### Solution
+
+- Clear **Has schedule** chips before applying Unlisted
+- Uncheck other visibility checkboxes in filter dialog when switching to Unlisted
+- URL-first UNLISTED navigation (`YT_SCHEDULER_URL_FILTER_FIRST=true` default)
+- Abort scheduler cycle if list filter is still SCHEDULED
+- Skip videos whose edit page shows Scheduled (not Unlisted)
+- Strict row scrape rejects Scheduled-looking rows
+
+### Tests
+
+- `tests/test_visibility_filter_enforcement.py`
+
+---
+
+## 2026-05-04 - OC21: Agentic Content-Channel Verification Gate
+
+**By:** 0102 (Worker AW3)
+**WSP References:** WSP 22 (ModLog), WSP 97 (Truth Signaling), WSP 77 (Agent Coordination)
+
+### Problem
+
+Scheduler was not agentic - blindly scheduled videos without verifying content matches channel:
+- UnDaoDu (mindfulness) could schedule FFCPLN music content
+- No re-indexing when classification conflicts with channel
+- Index stale data was trusted without verification
+
+### Solution
+
+**Agentic Content-Channel Gate** in `scheduler.py`:
+1. Before scheduling, classify video by title
+2. If FFCPLN classification on non-FFCPLN channel (undaodu, foundups):
+   - Delete stale index
+   - Re-index with Gemini (reads actual video content)
+   - Re-classify with fresh transcript
+   - If STILL FFCPLN: skip (content truly doesn't belong)
+   - If NOT FFCPLN: proceed (title was misleading, content is fine)
+
+### Key Insight
+
+The problem wasn't "wrong channel upload" but **lack of verification**. The indexer wasn't checking if content matches channel - it assumed content type from channel name alone. Now the system:
+- READs actual video content via Gemini
+- VERIFIES content-channel fit
+- RE-INDEXES when mismatch detected
+
+### Files Changed
+- `src/scheduler.py`: 
+  - Added `classify_content` import
+  - Added content-channel gate with re-index logic (~50 lines)
+
+### Dependencies
+- `skillz/gemma_content_type_classifier/executor.py` - pure regex classification (no AI model)
+- `index_weave.ensure_index_json(mode="gemini")` - Gemini API re-indexing
+
+---
+
+## 2026-03-30 - YouTube Domain Agent Phase 3 (G4 Schedule Reconciliation)
+
+**By:** 0102
+**WSP References:** WSP 22 (ModLog), WSP 77 (Agent Coordination), WSP 91 (Observability)
+
+### Problem
+
+Schedule audit in `run_scheduling_cycle()` logs warnings but does not emit breadcrumbs for AI Overseer sentinel detection.
+
+### Solution
+
+**G4: Schedule Reconciliation Breadcrumb**
+- Added breadcrumb emission to post-audit block in `scheduler.py`
+- Emits `schedule_audit_unhealthy` when `audit_report["healthy"] == False`
+- Uses existing gate: `YT_SCHEDULER_POST_AUDIT=true` (default: false)
+- Breadcrumb metadata includes:
+  - `channel_key`, `channel_id`
+  - `false_positives`, `time_collisions`, `missing_from_tracker` (counts)
+  - `auto_heal`, `healed` (count)
+
+### Design Decisions
+
+- **Reuses existing audit**: No changes to `schedule_auditor.py`
+- **Gate preserved**: Default remains opt-in (false) to avoid noise
+- **Raw facts only**: Counts are integers, not full report objects
+
+### Files Changed
+- `scheduler.py`: Added breadcrumb emission in post-audit block (~15 lines)
+
+### Tests Added
+- `test_schedule_audit_breadcrumb.py`: 5 tests covering breadcrumb emission, metadata, gating
+
+---
+
+## 2026-03-18 - Hardened Tab Close for Chrome 146
+
+**WSP References**: WSP 97 (CoT/CoR), WSP 91 (Observability)
+
+### Problem
+Chrome 146 throws "failed to close window in 20 seconds" during session restore tab cleanup:
+```
+selenium.common.exceptions.WebDriverException: Message: unknown error: failed to close window in 20 seconds
+```
+
+### Root Cause
+`driver.close()` can timeout when tabs are unresponsive or Chrome is under load.
+
+### Fix
+Changed `launch.py:730` from `driver.close()` to `driver.execute_script("window.close()")` with try-except:
+```python
+try:
+    driver.switch_to.window(handle)
+    driver.execute_script("window.close();")  # More reliable than driver.close()
+except Exception as close_err:
+    print(f"[WARN] Tab close failed (non-fatal): {close_err}")
+```
+
+### Files Changed
+- `scripts/launch.py`: Lines 723-737 - hardened tab cleanup
+
+---
+
+## 2026-02-27 - Browser Rotation Fix: Add close() Method
+
+**WSP References**: WSP 84 (Code Reuse), WSP 27 (DAE Lifecycle)
+
+### Problem
+Browsers (Edge/Chrome) not rotating after commenting completes into scheduling/indexing:
+- `multi_channel_coordinator.py:674` calls `shorts_scheduler.close()` - **method didn't exist**
+- `run_scheduler_dae()` and `run_indexer_dae()` used `disconnect()` which only clears reference
+- Browsers stayed locked, preventing next automation cycle
+
+### Root Cause
+`disconnect()` only sets `self.driver = None` - it doesn't call `driver.quit()` to actually release the browser for rotation.
+
+### Fix
+1. Added `close()` method to `YouTubeShortsScheduler`:
+   ```python
+   def close(self):
+       """Close browser and release for rotation."""
+       if self.driver:
+           self.driver.quit()  # Actually close browser
+           self.driver = None
+           self.dom = None
+   ```
+
+2. Updated DAE entry points to use `close()`:
+   - `run_scheduler_dae()` finally block: `disconnect()` → `close()`
+   - `run_indexer_dae()` finally block: `disconnect()` → `close()`
+
+### Files Changed
+- `src/scheduler.py`: Added `close()` method (lines 150-166)
+- `src/scheduler.py`: `run_scheduler_dae()` finally uses `close()` (line 1148)
+- `src/scheduler.py`: `run_indexer_dae()` finally uses `close()` (line 1198)
+
+### Expected Result
+After scheduling/indexing completes, browser is properly closed and available for next DAE rotation cycle.
+
+---
+
+## 2026-02-25 - Edge Browser Hover Fix for Filter Dropdown (ADR-009)
+
+**WSP References**: WSP 77 (Agent Coordination), WSP 84 (Code Reuse)
+
+### Problem
+FoundUps shorts scheduler failing on Edge browser:
+```
+[DOM] Dropdown not visible yet (attempt 1)
+[DOM] Dropdown not visible yet (attempt 2)
+[DOM] Dropdown not visible yet (attempt 3)
+[DOM] Visibility menu item not found/clickable
+```
+
+Move2Japan (Chrome) succeeds, FoundUps (Edge) fails. Same code, different browsers.
+
+### Root Cause
+The filter dropdown is **hover-dependent**. After clicking the filter:
+1. Dropdown opens
+2. Mouse stays at click point (not in dropdown)
+3. On Edge (slow), dropdown closes before JS scan completes
+4. On Chrome (fast), scan completes in time
+
+### Fix
+Added mouse hover behavior to `_open_filter_ui()` in `dom_automation.py`:
+- After clicking filter, move mouse **80px down** into dropdown area
+- Keeps dropdown open while waiting for `tp-yt-paper-listbox` to render
+- Pattern modeled after edit button hover (line 1723-1727)
+
+### Files Changed
+- `src/dom_automation.py`: `_open_filter_ui()` - Added hover fix with ActionChains
+
+### Testing
+- FoundUps (Edge): Should now keep dropdown open during retry loop
+- Move2Japan (Chrome): No change (already fast enough)
+
+---
+
+## 2026-02-24 - AI-Driven Content Type Classification Skill (gemma_content_type_classifier)
+
+**WSP References**: WSP 95 (SKILLz Wardrobe), WSP 77 (Agent Coordination), WSP 27 (Phase 0 KNOWLEDGE)
+
+### What
+Created `gemma_content_type_classifier` skill to replace static `description_template` config with AI-driven classification.
+
+### Why
+012's insight: "isnt description_template = skillz?" - YES! Content type should be determined by AI analyzing video content, not hardcoded per-channel config.
+
+**Problem Solved**:
+- Static `description_template` in `youtube_channels.json` assigns templates at channel level
+- But channels may have mixed content (e.g., Move2Japan has FFCPLN music AND personal vlogs)
+- AI should classify EACH VIDEO, not use channel-wide defaults
+
+### Key Files Created
+
+**Skill (WSP 95 structure)**:
+- `skillz/gemma_content_type_classifier/SKILLz.md` - Skill definition with micro chain-of-thought
+- `skillz/gemma_content_type_classifier/executor.py` - Classification implementation
+- `skillz/gemma_content_type_classifier/__init__.py` - Module exports
+
+**Integration**:
+- `src/content_generator.py` - Added `get_ai_driven_template()` function
+
+### Classification Taxonomy
+
+| Content Type | Template | Channels | Indicators |
+|-------------|----------|----------|------------|
+| `ffcpln_music` | ffcpln | move2japan, ravingantifa | FFCPLN markers, Suno lyrics |
+| `ffcpln_news` | ffcpln | move2japan, ravingantifa | ICE, protest, raid, breaking |
+| `startup_tech` | foundups | foundups | pAVS, startup, AI, entrepreneur |
+| `mindfulness` | undaodu | undaodu | meditation, zen, mindfulness |
+
+### Usage
+
+```python
+# Before (static config):
+template = channel_config.get("description_template", "ffcpln")
+
+# After (skill-driven):
+from modules.platform_integration.youtube_shorts_scheduler.src.content_generator import get_ai_driven_template
+template = get_ai_driven_template(title=video_title, channel=channel_key, metadata=index_json)
+```
+
+### Test Results
+All 5 test cases pass with correct classification:
+- `#FFCPLN Burns MAGA` → ffcpln_music (marker detected)
+- `Building AI Agents with pAVS` → startup_tech (pAVS detected)
+- `Morning Meditation Music` → mindfulness (meditation detected)
+- `BREAKING: ICE Raids Chicago` → ffcpln_news (news detected)
+- `Random video` → channel baseline fallback
+
+---
+
+## 2026-02-04 - CPS Agentic Navigation + Schedule Thinning + Inline Rescheduling
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 84 (No Vibecoding)
+
+### What
+Major CPS overhaul: agentic sidebar navigation (no URL filter params), schedule thinning algorithm, inline popup rescheduling, and live DOM selector verification for scheduled video popups.
+
+### Why
+1. **URL filter params cause blank screen** in YouTube Studio. Must navigate via base URL + sidebar Filter UI.
+2. **8+ videos per day on same date** (e.g., Apr 3, 2026 had 8 shorts at same time). YouTube algorithm works best with 1-3 shorts/day, spaced 4+ hours apart.
+3. **Edit page rescheduling is slow** (per-video navigation). Inline popup rescheduling stays on content table.
+
+### Key Changes
+
+**Navigation (`navigate_to_content`)**:
+- Removed URL filter params (`?filter=...`) that caused blank screen
+- Added `_apply_visibility_filter_via_ui()` — clicks Filter icon > Visibility > checkbox > Apply
+- Added `_switch_content_tab()` — switches Shorts/Videos/Live tabs without page reload
+- Smart detection: if already on Studio content page, just switch tab
+
+**Schedule Thinning (`thin_schedule`)**:
+- Detects overcrowded days (>max_per_day, default 3)
+- Redistributes excess videos to future dates via `tracker.get_next_available_slot()`
+- Uses inline popup rescheduling (fast, stays on content page)
+- Falls back to edit page navigation if row not found on page
+
+**Inline Popup Rescheduling (`reschedule_row_inline`)**:
+- Opens visibility edit popup on row, changes date/time, clicks Schedule
+- No page navigation required — operates directly on content table rows
+- For scheduled videos, popup opens with schedule already expanded
+
+**Audit Fixes (`audit_calendar`)**:
+- `max_per_day` now configurable (default 3, was hardcoded 8)
+- `heavy_days` threshold uses `max_per_day` parameter
+- Added `excess` count per heavy day and `date_map` to audit result
+
+**Selector Additions (ContentPageSelectors)**:
+- `FILTER_ICON_CSS`, `FILTER_ITEM_TAG`, `FILTER_CHECKBOX_TAG`, `FILTER_APPLY_BUTTON_XPATH`
+- `VISIBILITY_FILTER_MAP`: maps "SCHEDULED" -> "Has schedule", etc.
+- `SIDEBAR_CONTENT_XPATH`, `CONTENT_TAB_*` selectors for agentic tab navigation
+
+### Live DOM Verification (Scheduled Video Popup)
+All selectors verified on live scheduled video (Apr 3, 2026, 6:00 PM):
+- `POPUP_DIALOG_CSS` -> FOUND
+- `POPUP_DATE_TRIGGER_CSS` -> FOUND ("Apr 3, 2026")
+- `POPUP_TIME_INPUT_CSS` -> FOUND ("6:00 PM")
+- `POPUP_SAVE_BUTTON_CSS` -> FOUND (text "Schedule")
+- `ytcp-datetime-picker` -> FOUND (verification element)
+- `#second-container-expand-button` -> hidden (expected: schedule already expanded)
+
+### Files
+- **MODIFIED**: `src/content_page_scheduler.py` — All changes above
+
+---
+
+## 2026-02-04 - Live DOM Selector Audit + Fixes (--chrome inspection)
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action Verification)
+
+### What
+Audited all scheduling popup DOM selectors against the live YouTube Studio page using Claude Code `--chrome` browser integration. Fixed 5 broken selectors in `dom_automation.py` and `content_page_scheduler.py`.
+
+### Why
+Multiple XPath selectors referenced elements that don't exist in the current YouTube Studio DOM (e.g., `name="SCHEDULE"` radio button). The scheduling flow relied on timeout fallbacks to work around broken selectors. Live inspection confirmed the correct element names and structure.
+
+### Key Findings
+- **No `name="SCHEDULE"` radio exists** — scheduling is triggered by expanding `#second-container` which contains `name="PUBLISH_FROM_PRIVATE"` and `name="PUBLISH_FROM_SPONSORS_ONLY"` radios
+- **`target="_blank"` on OOPS "Switch account"** — confirmed and fixed in previous session
+- **Visibility popup structure**: `ytcp-video-visibility-edit-popup > tp-yt-paper-dialog#dialog > ytcp-video-visibility-select`
+- **Working selectors confirmed**: `#datepicker-trigger`, `#time-of-day-container input`, `#save-button`, `#cancel-button`
+
+### Files
+- **MODIFIED**: `src/dom_automation.py` — Fixed `SCHEDULE_EXPAND_XPATH`, `SCHEDULE_RADIO_XPATH`, `RADIO_SCHEDULE`, `SCHEDULE_EXPAND`, `SCHEDULE_RADIO` (V1+V2 selectors), hardcoded fallback XPaths at line ~2433, and `?next=` redirect loop fix in `handle_oops_page()` + `_click_oops_switch_account()`
+- **MODIFIED**: `src/content_page_scheduler.py` — Fixed `SCHEDULE_RADIO_XPATH` from `name='SCHEDULE'` to `name='PUBLISH_FROM_PRIVATE'`
+
+---
+
+## 2026-02-02 - Channel Registry Integration
+
+**WSP References**: WSP 22 (ModLog), WSP 60 (Memory), WSP 84 (No Vibecoding)
+
+### What
+Replaced hard-coded channel config and browser rotation lists with registry-driven data.
+
+### Why
+New channels should be added once (registry) and automatically show up in shorts scheduling and rotation.
+
+### Files
+- **MODIFIED**: `src/channel_config.py` - builds CHANNELS from registry
+- **MODIFIED**: `scripts/launch.py` - browser rotation reads registry
+
+---
+
+## 2026-02-03 - OOPS Page Switchboard Telemetry in dom_automation
+
+**WSP References**: WSP 22 (ModLog), WSP 77 (Agent Coordination)
+
+### What
+Added orchestration switchboard OOPS breadcrumb emission to `dom_automation.py`'s `handle_oops_page()` method.
+
+### Why
+OOPS page recovery events were invisible to the orchestration layer. The switchboard now receives `oops_page_detected` and `oops_page_recovered` signals from the scheduler's DOM automation, enabling pattern tracking and intelligent escalation (e.g., recommend alternate browser after repeated OOPS).
+
+### Files
+- **MODIFIED**: `src/dom_automation.py` - Added `_emit_oops_signal()` helper + switchboard import + emission points in `handle_oops_page()`
+
+---
+
+## 2026-02-01 - Content Page Scheduler (Inline Popup + Calendar Audit)
+
+**WSP References**: WSP 22 (ModLog), WSP 49 (Module Structure), WSP 3 (Organization)
+
+### What
+New `ContentPageScheduler` class that schedules videos directly from the YouTube Studio Content table (video list view) instead of navigating to individual video edit pages.
+
+### Why
+1. **Faster**: No per-video page navigation — stays on content table, clicks inline visibility popup
+2. **Reschedule**: Can change dates on already-scheduled videos (calendar slot optimization)
+3. **Calendar Audit**: Reads scheduled dates from table, detects conflicts (same time slot) and clustering (>8/day)
+4. **Fallback**: When per-video `schedule_video()` fails (click_save timeout), falls back to Content Page approach
+
+### Files
+- **NEW**: `src/content_page_scheduler.py` (~580 lines) — ContentPageScheduler class, calendar audit, standalone entry point
+- **MODIFIED**: `scripts/launch.py` — CPS fallback on per-channel errors, CLI `--content-page` / `--audit` flags
+
+### CLI
+```bash
+python -m ...launch --content-page --browser edge --channel-key foundups --mode schedule
+python -m ...launch --audit --browser edge --channel-key move2japan
+```
+
+---
+
+## 2026-02-01 - Cooperative Stop Signal for Thread Safety
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action)
+
+### Problem
+`run_multi_channel_scheduler()` runs inside `asyncio.to_thread()`. When the DAE's `asyncio.wait_for()` timeout fires, the Python thread can't be interrupted — it keeps driving the browser, causing contention with the next cycle's comment engagement.
+
+### Fix
+- `scripts/launch.py`: Added `stop_event: threading.Event` parameter to `run_multi_channel_scheduler()`
+- Two cooperative check points in the channel loop:
+  1. Before each channel starts (aborts before account swap)
+  2. After each channel completes (aborts before next channel)
+- When `stop_event.is_set()`, scheduler logs `[STOP]` and breaks out of the channel loop
+- Origin URL restore still runs (after the loop, not inside it)
+- Backward compatible: `stop_event=None` (default) preserves existing behavior
+
+---
+
+## 2026-01-31 - Time Jitter Fix: Snap to :15 Intervals
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action)
+
+### Problem
+YouTube Studio only accepts schedule times on 15-minute boundaries (:00, :15, :30, :45). The `_add_time_jitter()` function used `random.randint(-20, +20)` producing arbitrary minutes like `:09`, `:47` which YouTube Studio rejected or rounded unpredictably.
+
+### Fix
+- `src/schedule_tracker.py`: Replaced minute-based jitter with **15-minute step jitter**
+  - `MAX_JITTER_STEPS = 2` (replaces `MAX_JITTER_MINUTES = 20`)
+  - Jitter now picks random steps in `[-2, +2]`, each step = 15 minutes
+  - From base "3:00 PM" can produce: 2:30, 2:45, 3:00, 3:15, 3:30 PM
+  - All outputs guaranteed on :00/:15/:30/:45 boundaries
+
+---
+
+## 2026-01-31 - Schedule Auditor + Slot Spread + Stale Video Recovery
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action), WSP 80 (DAE Pattern)
+
+### Context
+Multiple issues discovered during production scheduling:
+- RavingANTIFA stuck at batch 112 (infinite loop on stale videos)
+- Tracker recorded false positives (DOM reported success, YouTube didn't schedule)
+- 3 slots/day too few for high-volume channels
+- No independent verification of scheduled state
+- PRIVATE videos not processable after UNLISTED exhausted
+
+### Changes
+
+**`src/schedule_tracker.py`**:
+- Added **global dedup guard** in `increment()`: prevents duplicate video IDs across dates
+- Added **`remove_video(video_id)`** method: purges false positives from tracker, decrements date count, cleans empty dates safely (dict mutation guard via `list(keys())`)
+- Fixed existing duplicate in Move2Japan tracker (`kYneETZCt0Y` on Jan 19)
+
+**`src/scheduler.py`**:
+- **Stale-video detection + auto-purge** (lines 445-492): When all videos in a batch are skipped as "already scheduled" but YouTube still shows them as unlisted:
+  1. First detection: Purges stale IDs from tracker via `remove_video()`, retries next batch
+  2. Second detection (same cycle): Breaks with clear error (prevents infinite loop)
+  - Safety: `_stale_purged` flag ensures only one purge per cycle
+- **Post-cycle audit integration** (opt-in via `YT_SCHEDULER_POST_AUDIT=true`):
+  - Imports `ScheduleAuditor`, runs audit after scheduling
+  - Reports false positives, time collisions, auto-healed count
+  - Auto-heal via `YT_SCHEDULER_AUDIT_AUTO_HEAL=true`
+
+**`src/schedule_auditor.py`** (NEW):
+- **Independent Layer 2 verification** — reads YouTube Studio SCHEDULED filter via DOM
+- `run_audit(auto_heal=False)`: Full audit comparing YouTube state vs tracker JSON
+  - Detects: false positives, missing from tracker, time collisions
+  - Optional auto-heal: purges false positives from tracker
+- `check_tracker_integrity()`: Offline check for count mismatches, duplicate IDs, past dates
+- `run_schedule_audit()`: Standalone entry point with browser connection
+- Scrapes scheduled video rows: video_id, title, date, time from visibility column
+
+**`src/channel_config.py`**:
+- **8 slots per day** (every 3 hours) replaces 3 slots/day:
+  - All channels: 12AM, 3AM, 6AM, 9AM, 12PM, 3PM, 6PM, 9PM
+  - `max_per_day` changed from 3 to 8
+- Move2Japan/UnDaoDu: Asia/Tokyo timezone
+- FoundUps/RavingANTIFA: America/New_York timezone
+
+**`src/dom_automation.py`**:
+- Added `"PRIVATE"` to supported visibility filter options
+- Updated docstrings for `navigate_to_shorts_with_fallback()` and `_apply_filter_via_dom()`
+
+### Architecture
+
+```
+Layer 1: SCHEDULING (existing)
+  scheduler.py -> schedule_tracker.py -> memory/*.json
+  Writes: schedules videos, tracks in JSON + DBA
+
+Layer 2: AUDITING (new)
+  schedule_auditor.py -> reads YouTube DOM + tracker JSON
+  Reads: compares actual vs tracked, detects discrepancies
+  Optional: auto-heals tracker (purge false positives)
+```
+
+### Production Data (as of 2026-01-31)
+- Move2Japan: 192 videos scheduled, Jan 28 -> Apr 2 (8 slots/day going forward)
+- UnDaoDu: 33 videos scheduled, Jan 30 -> Feb 9
+- RavingANTIFA: 4 videos scheduled, Jan 31 -> Feb 1 (2 false positives purged)
+
+### ADR-021: Stale Video Recovery Pattern
+- When tracker says "scheduled" but YouTube says "unlisted", the prior DOM action failed silently
+- `schedule_video()` returned True but YouTube didn't actually commit the schedule
+- Fix: Purge from tracker and retry ONCE per cycle, break on second failure
+- Future: Post-cycle auditor provides independent verification
+
+---
+
+## 2026-01-30 - Edge Filter Click Hardening (6-Step Retry)
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action Verification)
+
+### Problem
+Edge browser stuck in filter click loop — clicking filter but NOT clicking Visibility.
+Edge shadow-DOM takes 800-1500ms to render dropdowns vs Chrome's ~300ms.
+
+### Fix
+`src/dom_automation.py` — All 6 filter steps hardened with retry+verify:
+
+| Step | Action | Retries | Wait | Verification |
+|------|--------|---------|------|-------------|
+| 2 | Visibility click | 3 | 1.5s/2.5s/4.0s | Dropdown visible |
+| 3 | Dialog open | 3 | 2.0s/3.5s/5.0s | Force-open fallback |
+| 4 | Checkbox click | 3 | 1.0s/2.0s/3.0s | State changed |
+| 5 | Apply button | 3 | 1.0s/2.0s/3.0s | Dialog dismissed |
+| 6 | Chip verify | 3 | 1.0s/2.0s/3.0s | Chip text found |
+
+---
+
+## 2026-01-29 - Fluid Dual-Browser Architecture
+
+**WSP References**: WSP 22 (ModLog), WSP 72 (Module Independence)
+
+**Context**
+- Both Google accounts are now logged into BOTH browsers (Chrome & Edge)
+- This enables any browser to access any channel via account picker
+- Previous architecture locked channels to specific browsers unnecessarily
+
+**Changes**
+`src/channel_config.py`:
+- Added `CHROME_PORT = 9222`, `EDGE_PORT = 9223`, `ALL_PORTS` constants
+- Added `preferred_port` (optimization) and `available_ports` (fluid access) to each channel
+- Added `account_section` for account picker index mapping
+- Added helper functions:
+  - `is_port_available(port)`: Check if browser debug port is responding
+  - `get_available_browsers()`: Return list of running browser ports
+  - `select_browser_for_channel(channel_key, current_port)`: Smart browser selection
+
+**Browser Selection Strategy**:
+1. Reuse current browser if it can access the target channel (minimize switches)
+2. Use preferred_port if available
+3. Fall back to any available port
+
+**Account Picker Structure** (same on both browsers):
+```
+Section 0 (Google Account A): UnDaoDu, Move2Japan
+Section 1 (Google Account B): FoundUps, RavingANTIFA
+```
+
+**Result**
+- Chrome (9222) can access ALL 4 channels
+- Edge (9223) can access ALL 4 channels
+- System automatically selects best browser based on availability
+- Legacy `chrome_port` field preserved for backward compatibility
+
+---
+
+## 2026-01-29 - Infinite Loop Bug Fix (Slots Exhausted)
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action Verification)
+
+**Problem**
+- Scheduler stuck in infinite loop at BATCH 107
+- When scheduling slots were exhausted, `break` only exited inner `for` loop
+- Outer `while True` loop continued indefinitely, repeating same batch
+
+**Root Cause**
+- Line 320: `break` inside `if not slot:` only exits `for video in videos_to_process:`
+- The `while True:` loop has no check for "slots exhausted" condition
+- Result: Loop keeps navigating back and retrying with no slots available
+
+**Fix**
+`src/scheduler.py`:
+- Added `slots_exhausted = False` flag before inner for loop (line 282)
+- Set `slots_exhausted = True` when no slots available (line 321)
+- Added check after for loop (lines 431-435):
+  ```python
+  if slots_exhausted:
+      results["message"] = f"All scheduling slots filled after {batch_num} batches"
+      logger.info(f"[SCHEDULER] Slots exhausted - stopping continuous processing")
+      break
+  ```
+
+**Result**
+- Scheduler now exits cleanly when all scheduling slots are filled
+- Clear log message: "Slots exhausted - stopping continuous processing"
+- Results include meaningful message about batches processed
+
+---
+
+## 2026-01-28 - Sort by Oldest First Feature
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action Verification)
+
+**Problem**
+- After filtering for UNLISTED visibility, videos were processed in default order (newest first)
+- FIFO principle violated: oldest uploaded videos should be scheduled first
+
+**Solution**
+`src/dom_automation.py`:
+- Added `DATE_HEADER_SORT_CSS` and `DATE_HEADER_SORT_XPATH` selectors
+- Added `sort_by_date_oldest()` method that:
+  - Finds the Date column header sort button
+  - Checks current sort state (ascending/descending/none)
+  - Clicks to sort ascending (oldest first) if not already sorted
+- Integrated into `navigate_to_shorts_with_fallback()`:
+  - Called after filter is applied
+  - Called at all three return points (filter already applied, UI-TARS verified, fallback)
+
+**Flow After Fix**
+1. Navigate to shorts page
+2. Apply UNLISTED visibility filter
+3. **NEW**: Sort by date (oldest first)
+4. Get videos → now in oldest-first order
+5. Process videos sequentially
+
+**Result**
+- Oldest unlisted videos are now scheduled first (FIFO order)
+- Videos waiting the longest get priority
+
+---
+
+## 2026-01-28 - Index Weaving Silent Failure Fix + Enhanced Stubs
+
+**WSP References**: WSP 22 (ModLog), WSP 50 (Pre-Action Verification), WSP 73 (Digital Twin)
+
+**Problem**
+- Index weaving was failing silently for unlisted videos
+- `YT_SCHEDULER_INDEX_MODE=gemini` was configured, but Gemini API CANNOT access unlisted videos
+- No fallback to stub mode when Gemini failed
+- No logging when indexing skipped
+- Stub indexes had empty `key_points` producing minimal description context
+- FFCPLN acronym order was incorrect ("F*** Fake" vs "Fake F***")
+
+**Root Cause**
+1. **Gemini API limitation**: Cannot analyze UNLISTED YouTube videos (requires public URL)
+2. **Silent failure**: When `ensure_index_json()` failed, no logging, no fallback
+3. **Minimal stub data**: Stub index had `key_points: []` - no description context
+
+**Fix**
+`src/scheduler.py`:
+- Added Gemini-to-stub fallback when Gemini fails
+- Added warning log when indexing fails: `[SCHEDULER] Gemini indexing failed ({error}), falling back to stub`
+- Added warning log when indexing skipped entirely
+
+`src/index_weave.py`:
+- Added `_extract_topics_from_title()` - extracts FFCPLN, MAGA, ICE, etc. from title
+- Added `_generate_key_point_from_title()` - creates meaningful key point from title
+- Enhanced `create_stub_index_json()` to populate `key_points` and `topics` from title
+- Stub now produces richer description context even without Gemini
+
+`src/content_generator.py`:
+- Fixed all 5 instances of FFCPLN acronym: "Fake F*** Christian Pedo-Lovin' Nazi"
+
+**Recommendation**
+For unlisted video scheduling, use `YT_SCHEDULER_INDEX_MODE=stub` (default).
+Only use `gemini` mode for PUBLIC videos or post-publish enrichment.
+
+**Result**
+- Indexing no longer fails silently - proper fallback and logging
+- Stub indexes now produce meaningful description context from title
+- FFCPLN acronym is correct throughout
+
+---
+
+## 2026-01-27 - Scheduler Loop Fix + UI-TARS Verification
+
+**WSP References**: WSP 22 (ModLog), WSP 84 (Reusable Patterns), WSP 91 (Observability)
+
+**Problem**
+- Scheduler only processing ONE video per run and exiting
+- After `_sync_scheduled_videos()`, browser was on SCHEDULED page, not UNLISTED
+- Loop continued with stale video list but wrong page context
+- No verification to check if shorts were actually listed before applying filter
+
+**Root Cause**
+The `_sync_scheduled_videos()` method navigates to SCHEDULED filter to sync existing schedule,
+but never navigated back to UNLISTED before the video processing loop started.
+
+**Fix**
+`src/scheduler.py`:
+- Added Step 3.5: Navigate back to UNLISTED after sync completes
+- Log message: "Returning to unlisted Shorts after sync..."
+- Scheduler now processes ALL unlisted videos in one run
+
+`src/dom_automation.py`:
+- Added `verify_shorts_listed(use_ui_tars=True)` method
+  - Quick DOM check for video rows and filter chips
+  - Optional UI-TARS visual verification if DOM check uncertain
+  - Returns dict with: shorts_visible, count, method, needs_filter, filter_applied
+- Integrated verification into `navigate_to_shorts_with_fallback()`
+- If shorts already visible with filter applied, skip redundant filter application
+
+**Result**
+- Scheduler now processes ALL unlisted videos in one run (not just 1)
+- UI-TARS can verify page state when DOM is uncertain
+- Faster navigation when filter already applied
+- Better observability of page state
+
+---
+
+## 2026-01-27 - Content-Aware Title Generation + Resume Capability
+
+**WSP References**: WSP 22 (ModLog), WSP 84 (Reusable Patterns), WSP 77 (AI Overseer)
+
+**Problem**
+- Title generation was purely template-based with no content awareness
+- FFCPLN titles incorrectly used "vs #MAGA" (FFCPLN describes MAGA, not versus)
+- No resume capability - system would reprocess already-scheduled videos on restart
+- No trending hashtag support for ICE resistance content
+
+**Fix**
+`src/schedule_tracker.py`:
+- Added `is_video_scheduled(video_id)` - checks if video already in tracker
+- Added `get_all_scheduled_video_ids()` - returns list of all scheduled IDs
+- Enables resume capability: skip videos that were already processed
+
+`src/scheduler.py`:
+- Integrated `is_video_scheduled()` check in video processing loop
+- Logs skipped videos with reason "Already scheduled"
+- System now picks up where it left off on restart
+
+`src/content_generator.py`:
+- Fixed FFCPLN title templates: removed "vs" (FFCPLN describes MAGA, not versus MAGA)
+- Added `detect_content_type(index_json)` - detects music/speech/news from index
+- Enhanced `extract_title_hint_from_index()` to extract from:
+  - Audio transcript summary (Priority 1)
+  - Key points metadata (Priority 2)
+  - Visual description (Priority 3)
+- Added content-type specific templates: `MUSIC_TITLE_TEMPLATES`, `NEWS_TITLE_TEMPLATES`, `SPEECH_TITLE_TEMPLATES`
+- Added `TRENDING_ICE_HASHTAGS` with #StopICE #ICEout #ResistICE etc.
+- Added `get_trending_ice_hashtags()` and `get_combined_hashtags()`
+- Updated `generate_clickbait_title_from_index()` to use content-aware templates
+
+**Result**
+- Resume capability: restart won't reprocess videos
+- Content-aware titles using actual video index data
+- Music vs speech vs news detection for appropriate templates
+- Trending ICE resistance hashtags available for descriptions
+- FFCPLN correctly describes MAGA (not versus)
+
+---
+
+## 2026-01-27 - Page Content Wait + Retry on Empty Page
+
+**WSP References**: WSP 22 (ModLog), WSP 84 (Reusable Patterns)
+
+**Problem**
+- Diagnostic screenshot revealed page loading with **empty content area** (no videos, no filter bar)
+- ChromeDriver crash during `wait_for_element(VIDEO_TABLE)` prevented page from fully rendering
+- DOM fallback filter can't work when page structure isn't loaded
+
+**Root Cause Analysis**
+Screenshot `diag_url_filter_failed_20260127_132846.png` showed:
+- Shorts tab selected ✓
+- Content area completely empty ✗
+- No filter bar visible ✗
+- No video table visible ✗
+
+**Fix**
+`src/dom_automation.py`:
+- Added `_wait_for_page_content(timeout)` - waits for video table OR filter bar OR chip bar
+- Added retry mechanism (3 attempts with page refresh) in `navigate_to_shorts_with_fallback()`
+- Uses JavaScript to check multiple indicators simultaneously (faster than individual element waits)
+
+**Page Ready Indicators**
+```javascript
+{
+  hasVideoTable: !!document.querySelector('ytcp-video-row'),
+  hasFilterBar: !!document.querySelector("input[placeholder='Filter']"),
+  hasChipBar: !!document.querySelector('ytcp-chip-bar'),
+  hasContentHeader: !!document.querySelector('.video-table-content, #video-list')
+}
+```
+
+**Result**
+- Page refresh on empty content (up to 3 retries)
+- Better diagnostic: "Page content ready: table=True, filter=True, chips=True"
+- Falls back to DOM filter only after confirming page structure loaded
+
+---
+
+## 2026-01-27 - Diagnostic Screenshot & UI-TARS Integration
+
+**WSP References**: WSP 22 (ModLog), WSP 91 (Observability), WSP 77 (AI Overseer)
+
+**Problem**
+- When Selenium/WebDriver errors occur, no visual context is captured
+- Difficult to diagnose what the browser UI looked like when failures happen
+- No way to leverage UI-TARS vision model for visual debugging
+
+**Fix**
+`src/dom_automation.py`:
+- Added `DIAGNOSTIC_DIR` for storing diagnostic screenshots
+- Added `capture_diagnostic_screenshot(context)` - saves screenshots on errors
+- Added `get_browser_state()` - captures URL, title, viewport info
+- Added `diagnose_failure(context, error)` - full diagnostic capture (screenshot + state)
+- Added `diagnose_with_ui_tars(question)` - async UI-TARS visual analysis
+- Integrated diagnostics into `navigate_to_shorts_with_fallback()` and `_apply_filter_via_dom()`
+
+**Usage**
+```python
+# Automatic - diagnostics captured on filter failures
+dom.navigate_to_shorts_with_fallback(channel_id, "UNLISTED")
+
+# Manual diagnostic
+diagnostic = dom.diagnose_failure("custom_context", error)
+print(f"Screenshot: {diagnostic['screenshot']}")
+
+# UI-TARS visual analysis
+result = await dom.diagnose_with_ui_tars("Is the visibility filter dropdown open?")
+```
+
+**Screenshot Location**
+`modules/platform_integration/youtube_shorts_scheduler/memory/diagnostics/`
+
+---
+
+## 2026-01-27 - WebDriver Health Check & Recovery (Symbols not available fix)
+
+**WSP References**: WSP 22 (ModLog), WSP 91 (Observability)
+
+**Problem**
+- Shorts Scheduler crashing with "Symbols not available. Dumping unresolved backtrace" errors
+- ChromeDriver native crashes during `wait_for_element()` and `execute_script()` operations
+- Basic health check (`current_url`) passed but element operations still failed
+
+**Fix**
+1. `src/dom_automation.py`:
+   - Enhanced `check_driver_health(thorough=True)` to test both URL access AND element finding
+   - Added thorough health check to `wait_for_element()` and `wait_for_clickable()`
+   - Catches stale WebDriver connections before expensive operations crash
+
+2. `src/scheduler.py`:
+   - Added `reconnect_browser(max_retries=3)` with exponential backoff
+   - Added `ensure_healthy_connection()` that auto-reconnects on health check failure
+   - Added health check at start of `run_scheduling_cycle()` and `run_indexing_cycle()`
+
+**Result**
+- Stale WebDriver connections detected early with clear error messages
+- Auto-reconnection attempts before failing hard
+- "Symbols not available" crashes should be caught and recovered from
+
+---
+
+## 2026-01-27 - Navigation Robustness Fix (WebDriverException Prevention)
+
+**WSP References**: WSP 22 (ModLog), WSP 84 (Reusable Patterns)
+
+**Problem**
+- `scheduler.py` used basic `navigate_to_shorts()` which crashes on filter rendering issues.
+- `launch.py` already used robust `navigate_to_shorts_with_fallback()` but scheduler did not.
+
+**Fix**
+- `src/scheduler.py`:
+  - `run_scheduling_cycle()`: Replaced `navigate_to_shorts()` with `navigate_to_shorts_with_fallback()` (line 179)
+  - `_sync_scheduled_videos()`: Same fix (line 333)
+  - Both now return gracefully on navigation failure instead of crashing
+
+**Result**
+- DAE no longer crashes with WebDriverException during navigation cycle
+- Consistent with `launch.py` approach (URL-first + DOM fallback)
+
+## 2026-01-21 - Digital Twin Index Utility Routing (Documented)
+
+
+**WSP References**: WSP 22 (ModLog), WSP 73 (Digital Twin), WSP 60 (Memory)
+
+**Changes Made**
+1. Documented index utility routing (012 voice → Digital Twin, music/video → RavingANTIFA/faceless pipeline).
+
+## V0.1.0 - Initial Module Creation (2025-12-31)
+
+### Created
+- Module structure following WSP 49
+- README.md with architecture overview
+- INTERFACE.md with public API documentation
+- Channel configuration for Move2Japan, UnDaoDu, FoundUps
+- DOM automation layer with comprehensive selectors
+- Schedule tracker with JSON persistence
+- Core scheduler orchestrator
+
+### Architecture Decisions
+- **ADR-001**: Use Selenium over YouTube API for scheduling
+  - Reason: YouTube Data API doesn't support scheduling - only visibility changes
+  - Trade-off: More fragile (DOM changes) but enables full automation
+
+- **ADR-002**: Time slots based on audience geography
+  - Move2Japan/UnDaoDu: Japan timezone, targeting US viewers
+  - FoundUps: EST timezone, targeting US viewers
+
+### WSP Compliance
+- WSP 3: Platform Integration domain
+- WSP 49: Standard module structure
+- WSP 80: DAE pattern ready
+- WSP 22: This ModLog
+
+### Implementation Complete
+- [x] channel_config.py - Multi-channel support (Move2Japan, UnDaoDu, FoundUps)
+- [x] dom_automation.py - Comprehensive Selenium selectors for YouTube Studio
+- [x] schedule_tracker.py - JSON persistence with smart slot allocation
+- [x] content_generator.py - FFCPLN clickbait titles/descriptions
+- [x] scheduler.py - Main orchestrator with DAE entry point
+- [x] tests/test_scheduler.py - Unit tests (integration tests require browser)
+
+### Next Steps
+- [x] Integration with existing Chrome debug sessions (port 9222/9223)
+- [ ] UI-TARS visual verification for complex dialogs
+- [ ] Queue management for multi-channel scheduling
+- [ ] Add memory/ directory for schedule persistence
+
+## V0.8.1 - Filter UI Regression Fix (2026-01-17)
+
+### Problem
+- Shorts Scheduler failed at Layer 1 fallback with: `[DOM] Filter input not found after waiting`.
+- Root cause: production fallback in `src/dom_automation.py` relied on a **single** selector (`input[placeholder='Filter']`) while Studio UI variants sometimes render a different filter control (or require a coordinate click to open the dropdown).
+
+### Fix
+- `src/dom_automation.py`:
+  - `navigate_to_shorts_with_fallback()` now waits longer (up to ~8s) for the **Visibility chip** to appear before declaring URL-filter failure.
+  - `_apply_filter_via_dom()` now uses a multi-strategy opener (`_open_filter_ui()`):
+    - multiple selectors for the filter input
+    - coordinate click fallback (`FILTER_ICON_COORDS`)
+    - JS `elementFromPoint` fallback
+  - Added best-effort chip verification after DOM fallback.
+ - `scripts/launch.py`:
+   - Hot-reload `src/dom_automation.py` inside `run_shorts_scheduler()` to prevent stale in-memory imports when running from a long-lived `main.py` menu session.
+
+## V0.8.2 - Schedule Inputs Stabilized + Schedule DBA Write (2026-01-18)
+
+### Scheduling Fix (Current Studio DOM)
+- Scheduling date/time inputs are not reliably exposed as aria-labeled inputs until clicked.
+- Implemented selector-backed flow:
+  - Click date trigger (`ytcp-text-dropdown-trigger#datepicker-trigger div.left-container`)
+  - Type into date picker popup (`ytcp-date-picker ... input.tp-yt-paper-input`) using Ctrl+A replace
+  - Type into time-of-day input (`ytcp-form-input-container#time-of-day-container ... input.tp-yt-paper-input`) using Ctrl+A replace
+
+### DBA Write (PatternMemory)
+- Added `src/schedule_dba.py` to record scheduling outcomes to the existing WRE SQLite DBA:
+  - DB: `modules/infrastructure/wre_core/data/pattern_memory.db`
+  - Skill name: `youtube_shorts_scheduler_schedule`
+- Wired into:
+  - `src/scheduler.py` (DAE orchestration path)
+  - `scripts/launch.py` (main.py submenu path)
+
+### WSP Notes
+- Uses SKILLz naming (WSP 95) for fast skill discovery.
+- Adds machine-readable recall of schedule events for 0102 (WSP 60 / WSP 48 via PatternMemory).
+
+## V0.8.3 - Schedule → Index Weave (Digital Twin Description Block) (2026-01-18)
+
+### Added
+- `src/index_weave.py`:
+  - Ensures `memory/video_index/{channel}/{video_id}.json` exists (Gemini Tier 1) when enabled
+  - Builds compact `0102 DIGITAL TWIN INDEX v1` JSON block for description-as-cloud-memory
+  - Updates index JSON with `scheduling` + `description_sync` after successful schedule
+
+### Changed
+- `src/scheduler.py`:
+  - When `YT_SCHEDULER_INDEX_WEAVE_ENABLED=true` (default), scheduler weaves index block into the description during metadata update.
+  - After successful schedule, updates the local index JSON with scheduling fields.
+
+### Tests
+- `tests/test_scheduler.py`:
+  - Added unit tests for `index_weave` helpers (no browser required).
+
+### WSP Compliance
+- **WSP 60**: Index JSON is a memory artifact (`memory/video_index/...`)
+- **WSP 73**: Digital Twin memory block embedded in description (“cloud memory”)
+- **WSP 27**: Scheduler triggers indexing as a secondary layer (Occam layering)
+
+## V0.8.4 - Dialog Done/Save Click Scoped (Avoid Timezone Misclick) (2026-01-18)
+
+### Problem
+- In some current Studio variants, after setting date/time, the script could click the **timezone selector** instead of the dialog’s **Done/Save** action.
+- This blocks completion of the schedule layer (dialog never commits).
+
+### Fix
+- `src/dom_automation.py` `click_done()`:
+  - Scoped dialog Save selector to `tp-yt-paper-dialog#dialog div.button-area ytcp-button#save-button` (the actual dialog action area)
+  - Added a safety guard to skip any element inside `#timezone-select-button`
+  - Tightened the JS fallback to only click `#done-button` or dialog `#save-button` (no generic “Save” text search)
+
+### Test
+- `tests/test_layer3_schedule.py`:
+  - Added `--click-done` flag to click dialog Done/Save **without** performing page-level Save (safe validation of dialog action)
+
+### WSP Notes
+- WSP 50: Pre-action verification using DOM-path evidence from live Studio
+- WSP 22: This ModLog memory artifact for DOM drift + mitigation
+
+## V0.8.5 - 012 Digital Twin Interaction Wiring (human_behavior) (2026-01-18)
+
+### Problem
+- Several UI actions still used raw Selenium `.click()` / direct field `.click()` patterns.
+- This produces brittle interaction timing and a detectable automation signature.
+
+### Fix
+- `src/dom_automation.py`:
+  - `YouTubeStudioDOM` now binds to `modules.infrastructure.foundups_selenium.src.human_behavior` when available.
+  - `safe_click()` now prefers `human_behavior.human_click()` (+ human scroll) and falls back to Selenium/JS only when needed.
+  - Added a 012-modeled coordinate click path for viewport clicks (Bezier cursor path), used by legacy coordinate fallbacks.
+  - Scheduling flow (date/time) and metadata edits now use `safe_click()` for focus/click.
+
+### WSP Notes
+- WSP 91: anti-detection + observability alignment via reusable 012 interaction lego block
+- WSP 84: reuse infrastructure behavior module rather than re-implementing ad hoc click logic
+
+## V0.8.6 - 012 Scheduler Speed + Date-First Precise Click (2026-01-18)
+
+### Problem
+- With 012-modeled movement enabled, the schedule UI is dense (date/time/timezone adjacent).
+- Observed behavior: scheduler sometimes clicks **time/timezone before date**, causing the date picker not to open and Ctrl+A/select-all to target the wrong surface.
+
+### Fix
+- `src/dom_automation.py`:
+  - Added scheduler-scoped tuning:
+    - `YT_SCHEDULER_O12_SPEED_MULT` (default `0.75`) to speed up 012 movement pauses without impacting other DAEs.
+    - `YT_SCHEDULER_O12_PRECISE_CLICK` (default `true`) to use a position-stable click path.
+  - `set_schedule_date()` now uses a **precise date-trigger click** first to avoid drifting onto time/timezone.
+
+## V0.8.7 - Occam 012: Deterministic Clicks (No Mouse Jumping) (2026-01-18)
+
+### Problem
+- Bezier/jitter-based mouse paths can “jump” across dense schedule UI (date/time/timezone cluster).
+- This can mis-target controls and destabilize the date picker open → type cycle.
+
+### Fix
+- `src/dom_automation.py`:
+  - Removed scheduler coupling to `human_behavior` for clicks (kept slow/steady 012 cadence).
+  - `safe_click()` now uses:
+    - `scrollIntoView` → delay → `.click()` → delay
+    - ActionChains/JS fallbacks only if needed
+  - Added scheduler knobs:
+    - `YT_SCHEDULER_PRE_CLICK_DELAY_SEC` (default `0.25`)
+    - `YT_SCHEDULER_POST_CLICK_DELAY_SEC` (default `0.25`)
+
+### Result
+- Live Layer 3 `--click-done` validated: date/time set, then dialog Done/Save clicked (no timezone misclick).
+
+## V0.8.8 - Page Save Button Hardening + Full-Cake Runner Uses Production Scheduler (2026-01-18)
+
+### Problem
+- Full-cake automation could complete indexing + title + description + schedule dialog Done/Save, but fail at the final **page-level Save** due to DOM drift (custom elements, missing stable ids).
+
+### Fix
+- `src/dom_automation.py`:
+  - Hardened `click_save()`:
+    - waits for dialog close
+    - multi-selector cascade (`ytcp-button#save-button` wrappers + `button#save-button`)
+    - JS fallback: find visible elements with text `Save` and click inner button if present
+  - Added `YT_SCHEDULER_PRE_SAVE_DELAY_SEC` to let dialog close animation complete before save attempt.
+- `tests/test_full_chain.py`:
+  - Now runs the production orchestrator (`run_scheduler_dae`) with feature flags enabled (no duplicated selectors).
+
+### Result
+- Live full cake validated: scheduler returned `total_scheduled: 1` (includes save).
+
+## V0.8.9 - Launcher Stability: Close Session-Restore Extra Tabs (2026-01-18)
+
+### Problem
+- Chrome/Edge session restore can open multiple tabs, which can confuse Selenium focus and cause DOM actions to target the wrong tab.
+
+### Fix
+- `scripts/launch.py`:
+  - Close all extra tabs on connect and keep only the primary tab handle before starting automation.
+
+## V0.9.1 - Oops Page Recovery Layer (Account Switching) (2026-01-19)
+
+### Problem
+- When navigating to YouTube Studio for a channel, the browser may land on an "oops" error page if the wrong Google account is logged in.
+- This blocks all automation until manually fixed.
+- Chrome/Edge browser-channel mapping:
+  - **Chrome (9222)**: Move2Japan, UnDaoDu
+  - **Edge (9223)**: FoundUps, RavingANTIFA
+
+### Fix
+- `src/dom_automation.py`:
+  - Added **Oops Page selectors** to `DOMSelectors`:
+    - `OOPS_SWITCH_ACCOUNT` - Switch account link on oops page
+    - `CHANNEL_SWITCHER_AVATAR` - Avatar button
+    - `SWITCH_ACCOUNT_MENU_XPATH` - Switch account menu item
+    - `ACCOUNT_ITEM_BY_NAME_TEMPLATE` - Account selection by name
+  - Added **`CHANNEL_ACCOUNT_MAP`** mapping channel IDs to account names:
+    - `UC-LSSlOZwpGIRIYihaz8zCw` → Move2Japan
+    - `UCfHM9Fw9HD-NwiS0seD_oIA` → UnDaoDu
+    - `UCSNTUXjAgpd4sgWYP0xoJgw` → FoundUps
+    - `UCVSmg5aOhP4tnQ9KFUg97qA` → RavingANTIFA
+  - Added **`detect_oops_page()`** - Detects oops page via `#selectaccount-link`
+  - Added **`handle_oops_page(target_channel_id)`** - Automated recovery flow:
+    1. Click "Switch account" on oops page
+    2. Click avatar button on YouTube
+    3. Click "Switch account" in menu
+    4. Select target account from list
+    5. Navigate back to target channel
+  - Added **`navigate_with_oops_recovery(channel_id, url)`** - Wrapper with auto-recovery
+
+### Flow Diagram
+```
+Oops Page → Click "Switch account" → YouTube Page
+    ↓
+Click Avatar → Click "Switch account" Menu → Account List
+    ↓
+Select Account → Navigate to Target Channel → Verify (no oops)
+```
+
+### WSP Notes
+- WSP 50: Pre-action detection before proceeding with navigation
+- WSP 84: Reusable recovery pattern for all browser automation
+- WSP 22: This ModLog documents the recovery layer
+
+### Testing
+- Requires Chrome/Edge with debug port (9222/9223) active
+- Test via: Navigate to wrong-account channel, verify recovery
+
+## V0.9.0 - Scheduler Control Plane (Content-Type Placeholder + Index Switches) (2026-01-18)
+
+### Problem
+- Scheduler switches were scattered (some in module submenu, some in main controls), increasing the odds of misconfigured runs.
+- Next layer requires a **content-type selection** surface (Shorts vs Videos) before implementing new DOM selectors.
+
+### Fix
+- `main.py`:
+  - Added a dedicated `Scheduler Controls` submenu under YouTube Controls.
+  - Introduced placeholder control-plane env vars:
+    - `YT_SCHEDULER_CONTENT_TYPE=shorts|videos` (videos is placeholder until implemented)
+    - `YT_SCHEDULER_VERIFY_MODE=none|wre-tars` (intent flag; production does not hard-require UI‑TARS)
+  - Centralized index weave switches: enable/disable, mode, description weave, title hint, and pre-save delay.
+
+### WSP Notes
+- WSP 15: Control-plane enables high-impact work sequencing without destabilizing Shorts PoC
 - WSP 22: ModLog captures control-plane memory for 0102 recall
 
 ## V0.2.0 - Layer Cake Testing (2026-01-01)
