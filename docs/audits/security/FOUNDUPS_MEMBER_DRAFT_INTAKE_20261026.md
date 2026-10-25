@@ -156,3 +156,38 @@ ledger. Preserve every prefix entry/other key. No detector, rule, fingerprint
 algorithm, scan/history scope, test oracle, unknown finding or GitGuardian record
 change is permitted. Fresh exact-head security and all other gates must pass;
 this allocation is not itself a passing scan or disposition.
+
+## Patched optional HTTP profile — pre-change amendment
+
+Do not merge the5134 candidate on green functional/secrets checks alone. A fresh
+public PyPI metadata audit of its24 resolved development distributions found
+published advisories for Starlette0.50.0 and cryptography46.0.7. For example,
+Starlette GHSA-82w8-qh3p-5jfq is fixed in1.3.1; cryptography
+GHSA-g6cj-pr64-35w5 is fixed in50.0.0. These advisories do not by themselves prove
+this JSON-only RSA route exploitable, but do not introduce those versions in a
+new optional profile. Initial environment/results remain historical evidence.
+
+Allocate C3/I4/D4/Impact4=15/P1, before changing pins. Select current stable
+FastAPI0.162.0, Starlette1.10.0, PyJWT2.15.1 and cryptography50.0.2, verified from
+their official PyPI metadata (no published advisories there at inspection).
+FastAPI's current dependency contract permits Starlette1.10.0; do not force an
+unsupported newer Starlette under old FastAPI0.128. Keep minimal package extras;
+no provider, telemetry exporter, resident/umbrella or shared-venv migration.
+
+Create a separate external qualification environment, retaining the first one
+unchanged. Rerun the identical786 cases and independently authored11 ASGI/RSA
+held-outs plus optional-import probe; compare exact IDs/outcomes and all legacy
+source/test oracles. Inspect the entire newly resolved package inventory against
+current public registry advisory metadata. This is not a complete security,
+installed binary/platform, or live deployment qualification.
+
+Only optional requirements, its existing CI install line and owner docs/evidence
+may change; no product logic or test expectation changes to accommodate pins.
+One additional patched-profile evidence receipt is permitted within the original
+22-path ceiling. The older receipt is a retained V1 environment experiment, not
+the final profile; do not rewrite it or its reviewed fingerprint contexts.
+Fresh exact-head hosted/security/main-convergence gates remain required.
+
+Primary advisory references:
+[Starlette](https://github.com/Kludex/starlette/security/advisories/GHSA-82w8-qh3p-5jfq),
+[cryptography](https://github.com/pyca/cryptography/security/advisories/GHSA-g6cj-pr64-35w5).
