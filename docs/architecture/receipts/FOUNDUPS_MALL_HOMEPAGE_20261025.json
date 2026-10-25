@@ -1,0 +1,821 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "f11d7559746bb64677e448ff8e4e24ebfcea8feb"
+  },
+  "execution_id": "FOUNDUPS_MALL_HOMEPAGE_20261025",
+  "execution_plane": "Local repository implementation and offline validation; separately bounded Hosting-only preview and actual browser verification; no WRE runtime activation.",
+  "outcome": "completed",
+  "scope": "Portable packaging of the existing local Mall-home implementation and scoped preview evidence. This completed local evidence scope does not declare PR, main, production or full-suite completion.",
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_15",
+    "WSP_22",
+    "WSP_50",
+    "WSP_62",
+    "WSP_87",
+    "WSP_97",
+    "WSP_102",
+    "WSP_104"
+  ],
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+      "WSP_framework/src/WSP_102_FoundUps_Web_Design_Protocol.md",
+      "WSP_framework/src/WSP_104_FoundUp_Route_Namespace_and_Tenant_Isolation_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md",
+      "modules/foundups/pfmall/README.md",
+      "modules/foundups/pfmall/INTERFACE.md",
+      "modules/foundups/pfmall/ROADMAP.md",
+      "modules/foundups/pfmall/ModLog.md",
+      "modules/foundups/pfmall/tests/README.md",
+      "modules/foundups/pfmall/tests/TestModLog.md",
+      "public/member/README.md",
+      "public/member/INTERFACE.md",
+      "public/member/ROADMAP.md",
+      "public/member/ModLog.md",
+      "public/member/tests/README.md",
+      "public/member/tests/TestModLog.md",
+      "NAVIGATION.py",
+      "Historical Holo evidence: worktree-local lexical query first, canonical owner query failed before product edits; HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH, ok=false, freshness=UNKNOWN, index_gap_detected=true. No CURRENT proof or reindex."
+    ],
+    "research": [
+      "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md documents existing shared directory, gateway/admission, Firebase and worker owners.",
+      "Existing catalog has5 public cards from19 mixed registry records. About simulated125 counter is not actual project or token inventory."
+    ],
+    "micro_pass": [
+      "public/f/index.html shared renderer distinguishes root Play FoundUps Mall from /f/ FX; old gateway moves once to public/about/index.html.",
+      "firebase.json explicit root/index rewrites, no-cache public routes, fixed lossless legacy forwarding and root-worker cache namespace."
+    ],
+    "macro_pass": [
+      "Existing four test owners reused; original368 IDs retained and72 added. Parent adjacent evidence164 pass/3 unchanged regex failures.",
+      "Existing callback/member admission, Terms-before-auth and exact public Move2Japan exception retained by offline contracts and scoped browser checks. Real authenticated handoff remains unverified."
+    ],
+    "hard_think": [
+      "Tests actual authoring base c8eb983629454c6bef6e88d33826112ea19dc620 and preview336c211cefac77b4d0c09a4c804bf085aa16b347 remain historical identities. Parent reconciled new main f11d7559746bb64677e448ff8e4e24ebfcea8feb at daeb4ac0cc7c9da2396faec82f61ae1b02affc6e; these historical runs are not relabeled as merged-source reruns.",
+      "Initial RED257/183 was invalid Node preload setup; desired RED400/40 contains37 new failures plus3 inherited. No all-green claim."
+    ],
+    "dialectic_sweep": [
+      "Reuse the existing directory and retain one About admission owner instead of introducing a new homepage/application owner.",
+      "Separate scoped preview evidence from production readback and raw Hosting CRLF from scanner Git LF identity."
+    ],
+    "first_principles": [
+      "Smallest visible layer: root discovery plus About gateway, existing catalog/filter/detail routes and isolated root-worker cache upgrade. No token/economics/backend expansion."
+    ],
+    "execute": [
+      "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md",
+      "Worker frozen26 present files and deleted public/index.html; source and test hashes retained in companion inventory.",
+      "Parent final offline437 pass/3 inherited failures; Hosting preview12 HTTP checks match archive; actual browser10 scoped checks plus cache upgrade evidence supplied by parent.",
+      "Only these2 portable JSON receipt files authored by this packaging helper."
+    ]
+  },
+  "compliance_evidence": [
+    "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md",
+    "Existing module README/INTERFACE/ROADMAP/ModLog and test memory are the retrieval owners; no new test file.",
+    "Recorded oracle-preservation metadata reports no missing original assertions after intended About path normalization and no missing original IDs.",
+    "Metadata whitelist only: no raw HTML, stdout, frontend identifier values, credentials or provider payloads copied."
+  ],
+  "allocations": {
+    "implementation": {
+      "owner_plan": "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md",
+      "wsp15": {
+        "complexity": 3,
+        "importance": 4,
+        "deferability": 4,
+        "impact": 4,
+        "total": 15,
+        "priority": "P1"
+      },
+      "branch": "agent/foundups-mall-home-20261025",
+      "authoring_base_commit": "c8eb983629454c6bef6e88d33826112ea19dc620"
+    },
+    "receipt_packaging": {
+      "owner_plan": "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md",
+      "allowed_paths": [
+        "docs/architecture/receipts/FOUNDUPS_MALL_HOMEPAGE_20261025.json",
+        "docs/architecture/receipts/FOUNDUPS_MALL_HOMEPAGE_20261025.testcases.json"
+      ],
+      "restriction": "No other file edits, Git mutations, scanner, tests, deployment or provider action by packaging helper."
+    }
+  },
+  "retrieval_evaluation": {
+    "ordering": "Worktree-local lexical query then canonical failure before product edits, as parent attested. External command-history JSON groups canonical/additional entries and does not itself timestamp ordering.",
+    "noise": "Semantic authority mismatch prevented generation-current admission; direct exact-path research used.",
+    "missing_artifacts": "No new missing-artifact claim established by packaging; module-doc inventory is recorded in parent plan.",
+    "staleness_risk": "Holo authority failed; current main advanced during work. Historical tests and preview are not relabeled.",
+    "duplication": "Existing renderer, four test owners and one admission owner reused.",
+    "evidence": {
+      "original-oracle-preservation.json": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\original-oracle-preservation.json",
+        "sha256": "7e413b693516424357ac789af8969b8dcdff4994ef64afc7debea99a327a5cc3"
+      },
+      "canonical-holo-result.json": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\canonical-holo-result.json",
+        "sha256": "741318b3d260f78346e299dbd7354420327a720450a47759f3777b89a34cbdff"
+      },
+      "retrieval-command-history.json": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\retrieval-command-history.json",
+        "sha256": "2b17d71e801ed2e8a664712ee74ba084ecae573815084e22c5bfd385e2232c9d"
+      }
+    }
+  },
+  "test_runs": {
+    "baseline": {
+      "summary": {
+        "passed": 365,
+        "failed": 3,
+        "skipped": 0
+      },
+      "collected": 368,
+      "exit_code": 1,
+      "seconds": 8.105045795440674,
+      "network_attempts": {
+        "python": 0,
+        "node": 0
+      },
+      "source_stable": true,
+      "external_evidence": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\baseline\\results.json",
+        "sha256": "bb163c873e4f3ccbbc35a152c5559ab68222f5ebc27cdd54ab4c0e2d2c4b5a0b"
+      },
+      "qualification": "Original 368 IDs before product implementation; child route helper strips NODE_OPTIONS, so controlled VM fetch and Python parent guard apply. No general child-Python network isolation claim."
+    },
+    "red": {
+      "summary": {
+        "passed": 257,
+        "failed": 183,
+        "skipped": 0
+      },
+      "collected": 440,
+      "exit_code": 1,
+      "seconds": 17.40772008895874,
+      "network_attempts": {
+        "python": 0,
+        "node": 0
+      },
+      "source_stable": true,
+      "external_evidence": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\red\\results.json",
+        "sha256": "0db31e697134a6ef6d3549c21ac08b1c12d9d0a22da6c765044f7543c5e7da0d"
+      },
+      "qualification": "INVALID DESIRED-RED EVIDENCE: malformed Node preload path caused 183 failures. Retained as setup history only."
+    },
+    "red_desired": {
+      "summary": {
+        "passed": 400,
+        "failed": 40,
+        "skipped": 0
+      },
+      "collected": 440,
+      "exit_code": 1,
+      "seconds": 16.448087453842163,
+      "network_attempts": {
+        "python": 0,
+        "node": 0
+      },
+      "source_stable": true,
+      "external_evidence": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\red-desired\\results.json",
+        "sha256": "ea9ab5d460a116817c636cf0a2e048dc4ab85a8fc5d87f1c9897c6f0b4f34c79"
+      },
+      "qualification": "Corrected runner: 37 added cases fail desired behavior plus the same 3 inherited media failures. 400 pass."
+    },
+    "green_candidate": {
+      "summary": {
+        "passed": 437,
+        "failed": 3,
+        "skipped": 0
+      },
+      "collected": 440,
+      "exit_code": 1,
+      "seconds": 16.860034942626953,
+      "network_attempts": {
+        "python": 0,
+        "node": 0
+      },
+      "source_stable": true,
+      "external_evidence": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\green-candidate\\results.json",
+        "sha256": "5f4494b2b0de70565ab833af3002689d0af88ab9224af8c6bf0bc8cfcd4d1b1d"
+      },
+      "qualification": "437 pass; only the 3 inherited media directory failures remain."
+    },
+    "green_final": {
+      "summary": {
+        "passed": 437,
+        "failed": 3,
+        "skipped": 0
+      },
+      "collected": 440,
+      "exit_code": 1,
+      "seconds": 15.342682123184204,
+      "network_attempts": {
+        "python": 0,
+        "node": 0
+      },
+      "source_stable": true,
+      "external_evidence": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\green-final\\results.json",
+        "sha256": "27aa9e2389466dbf312d7f2892d7b3bf204f5932e557807a33b429fce51fb824"
+      },
+      "qualification": "437 pass; only 3 inherited media failures; before pointer-only visual_qa and simulator INTERFACE corrections."
+    },
+    "adjacent": {
+      "summary": {
+        "passed": 164,
+        "failed": 3,
+        "skipped": 0
+      },
+      "collected": 167,
+      "exit_code": 1,
+      "seconds": 2.03315806388855,
+      "network_attempts": {
+        "python": 0,
+        "node": 0
+      },
+      "source_stable": true,
+      "external_evidence": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\adjacent\\results.json",
+        "sha256": "783d369a0720f3b03a2b963f2110c215c55bf63eb97ea4fbc6fca4ed0f324b33"
+      },
+      "qualification": "Separate 167-case adjacent run:164 pass and 3 unchanged PWA worker regex failures; not additive to focused counts."
+    },
+    "parent_final_20261025": {
+      "summary": {
+        "passed": 437,
+        "failed": 3,
+        "skipped": 0
+      },
+      "collected": 440,
+      "exit_code": 1,
+      "seconds": 13.889330863952637,
+      "network_attempts": {
+        "python": 0,
+        "node": 0
+      },
+      "source_stable": true,
+      "external_evidence": {
+        "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\parent-final-20261025\\results.json",
+        "sha256": "72677170418518af15f18ab8ca2695027c0211b1c15b24bf44d3211e58a869d4"
+      },
+      "qualification": "Independent parent replay after pointer corrections:437 pass and same3 inherited media failures;13 recorded source hashes stable."
+    }
+  },
+  "exact_test_inventory": {
+    "path": "docs/architecture/receipts/FOUNDUPS_MALL_HOMEPAGE_20261025.testcases.json",
+    "sha256": "7576063a16fcbd6bd845f12d544baac64bfe9f24621adba8189d6e36aba6f6dc",
+    "counts_overlap": true
+  },
+  "oracle_preservation": {
+    "original_ids": 368,
+    "final_ids": 440,
+    "added_ids": 72,
+    "missing_original_ids": [],
+    "new_final_failures": [],
+    "existing_assertion_check": {
+      "modules/foundups/pfmall/tests/test_gateway_roc_shell.py": {
+        "original_test_functions": 144,
+        "current_test_functions": 147,
+        "missing_original_assertions_after_path_normalization": []
+      },
+      "modules/foundups/pfmall/tests/test_gateway_terms_gate.py": {
+        "original_test_functions": 18,
+        "current_test_functions": 19,
+        "missing_original_assertions_after_path_normalization": []
+      },
+      "modules/foundups/pfmall/tests/test_video_mall_media_delivery.py": {
+        "original_test_functions": 50,
+        "current_test_functions": 50,
+        "missing_original_assertions_after_path_normalization": []
+      },
+      "public/member/tests/test_route_contract_bridge.py": {
+        "original_test_functions": 68,
+        "current_test_functions": 78,
+        "missing_original_assertions_after_path_normalization": []
+      }
+    },
+    "notes": [
+      "Gateway existence messages and catch-all destination intentionally migrate to About.",
+      "The root worker registration oracle now reads public discovery; its three assertions are retained.",
+      "Original node IDs remain present; source snapshots and opaque frontend attribute checks are in run receipts."
+    ],
+    "external_evidence": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\original-oracle-preservation.json",
+      "sha256": "7e413b693516424357ac789af8969b8dcdff4994ef64afc7debea99a327a5cc3"
+    }
+  },
+  "source_snapshot": [
+    {
+      "path": "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md",
+      "freeze_working_sha256": "883913a4abc82f0d217be57a84179111c6bf1214ab67b6319f6cd9dc324a4363",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/about/index.html",
+      "freeze_working_sha256": "2b6fde37ec895036286e3e9a1a95890c938e717dc1526a76c60405547328c6f4",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/f/index.html",
+      "freeze_working_sha256": "589c51d4e753c533cd43b73f687e67e77d7f5d2244322da5eb753265f28f227e",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/sw.js",
+      "freeze_working_sha256": "1f077433f7b449b7df9d37fcb6d6f10a0cb2553246bf251f2cecb932c3547037",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "firebase.json",
+      "freeze_working_sha256": "d11de66f7ddca6e5c0ca0d30ad7523a0428138b46c19d82faa6b516592cf7588",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "NAVIGATION.py",
+      "freeze_working_sha256": "565e586edc17fe2e59f6e5f64557b22f6f3f5a4ee74c1c3a799ac37249dc9450",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/simulator/visual_qa.py",
+      "freeze_working_sha256": "b772bfc4ec3a260c7879ba7b4dc1d093dd610ffcf2c3452eacb78a67b9574f67",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/simulator/sse_server.py",
+      "freeze_working_sha256": "aa427d67365c595454dd34382057899090abdb149f7f9ab62df29698622e9409",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/simulator/INTERFACE.md",
+      "freeze_working_sha256": "04fa168fb15ad9e400148c5a63722d907b89c7f97c39f86212203e6aa364e632",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/cube-animation-spec.md",
+      "freeze_working_sha256": "0b737f6ddc60c29a532a56b041a00461060f70c72f83d3417fc4d5a9d8af134f",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/test_gateway_roc_shell.py",
+      "freeze_working_sha256": "0086376a56194074324514c0eb9e318e3e7ac521ef5278398d30b240f997c62e",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/test_gateway_terms_gate.py",
+      "freeze_working_sha256": "70d2f4b10ee31cb392e1c6ec8a0d7de37f1ea1ed5fce176ea6a49a472ca4a9d5",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/test_video_mall_media_delivery.py",
+      "freeze_working_sha256": "bfcafd34b517df12e2bd79ea63a7f1b3c71a9451c4238b8e023e89a9dfa433ff",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/member/tests/test_route_contract_bridge.py",
+      "freeze_working_sha256": "2e465112ba99fd5caf5040e5092c6cbabc8ea5dd61747e7652f2cfb210a44610",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/README.md",
+      "freeze_working_sha256": "24152f07b1ba3bb5fb89c774d0019b6b2dccdaaa73455f94f3855f722b6e0728",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/INTERFACE.md",
+      "freeze_working_sha256": "1b10a89511b179d746c7a1a99d675411fe669c523f632949a23b769daf41c734",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/ROADMAP.md",
+      "freeze_working_sha256": "7c1bce822ebced7d7e1a467410ea50cff4644b4855b4e9c2669b80d34823f4ee",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/ModLog.md",
+      "freeze_working_sha256": "2081b966d6f00aa0ccb693f2277a2ac087bb1473db4e29fb112decabdbefc51c",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/README.md",
+      "freeze_working_sha256": "14e9b9152cc4db3cc656db3f5f63787d5dce46a332218643a2130aaed3469928",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/TestModLog.md",
+      "freeze_working_sha256": "bc505cc8b2f41f4bc97c067aa4fcb441288391d78646b244b7d99a26972ff71b",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/member/README.md",
+      "freeze_working_sha256": "9a9b7358c0cf8490c40552e61705935f695fb92b055cd4ddbc29b61ef7ae2f9e",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/member/INTERFACE.md",
+      "freeze_working_sha256": "8c587e316edb95ed1d61b8695b1607d46b30ca00d104e7e9bf91b76c1870a3e9",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/member/ROADMAP.md",
+      "freeze_working_sha256": "e16bdcff9c1d5931423f1f0d698a963a939c0aae462e4a3513d20f4555c238e3",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/member/ModLog.md",
+      "freeze_working_sha256": "86ce53bc58a63ccf8da7d729f125087c290a11b3f4c8053865a9c9116817bdef",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/member/tests/README.md",
+      "freeze_working_sha256": "cd509744c88634afa4982d86524416a641100a874da0f1d52fefede72929b591",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    },
+    {
+      "path": "public/member/tests/TestModLog.md",
+      "freeze_working_sha256": "b0a1d5c8462327147272cb21f31d3b4520fd1b81ea447cdf894f099a2486c00b",
+      "binding": "historical 26-present-file worker freeze; raw working/Hosting bytes"
+    }
+  ],
+  "source_binding": {
+    "freeze_evidence": {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-home-695e26d23253404fac695e8fa797a5a3\\freeze.json",
+      "sha256": "f1b5f1865c8f6fa1709b27c0fb61d56c5087b770ae6240484e4b7dfda45c901c"
+    },
+    "present_count": 26,
+    "deleted": [
+      "public/index.html"
+    ],
+    "core_and_test_freeze_matches_final_worker_run": true,
+    "parent_final_binding": "13 source entries before/after, stable; includes pointer-only corrections absent from worker green-final. See companion exact maps.",
+    "auxiliary_compatibility_after_worker_final": {
+      "visual_qa_default_http_literal_count": 3,
+      "local_hosting_prerequisite": "Running HTTP Hosting on localhost:5000",
+      "simulator_interface": "HTTP About examples; custom sse_url also supplies sim=1",
+      "qualification": "Static syntax/literal inspection only; no Playwright/provider/HTTP execution"
+    },
+    "post_freeze_documentation_observation": [
+      {
+        "path": "docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md",
+        "freeze_sha256": "883913a4abc82f0d217be57a84179111c6bf1214ab67b6319f6cd9dc324a4363",
+        "packaging_observed_sha256": "5ca4218b104bff7125dd60bfae435322d92a3d2171b35c69eb580d10f0d5c323",
+        "qualification": "Post-freeze documentation update; not folded into historical test or freeze identity."
+      },
+      {
+        "path": "modules/foundups/simulator/INTERFACE.md",
+        "freeze_sha256": "04fa168fb15ad9e400148c5a63722d907b89c7f97c39f86212203e6aa364e632",
+        "packaging_observed_sha256": "d37ea08030c106e64582cfd21711ee5cfe5aead3f2964c3f47093b5250486239",
+        "qualification": "Post-freeze documentation update; not folded into historical test or freeze identity."
+      }
+    ]
+  },
+  "preview": {
+    "qualification": "Hosting-only disposable candidate preview, independently supplied by parent; no production completion.",
+    "artifact": {
+      "external_path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-preview-artifact-7qshlqlm\\artifact-receipt.json",
+      "sha256": "513a62c79b65cf845e37fe7fa2087713f19fc756ce3bb5cc4f2e0757941ca9ca",
+      "metadata": {
+        "source_commit": "336c211cefac77b4d0c09a4c804bf085aa16b347",
+        "source_tree": "fdfbdf26490e0e87cb3a833393686485feb62a8a",
+        "hosting_only": true,
+        "site": "foundupscom",
+        "public_files": 123,
+        "file_sha256": {
+          "public/404.html": "75ed016f53c98209dc0024d8bec35b9bcea2f0e8c9a1820ec014af27203823d2",
+          "public/alpha-access.html": "3f8200cb88f009c0cce341354a111c4b82b3e49133d58c0ae6be37b4788b4ae2",
+          "public/cube-animation-spec.md": "0b737f6ddc60c29a532a56b041a00461060f70c72f83d3417fc4d5a9d8af134f",
+          "public/cube-story-spec.md": "9774abb15cf2ee909a7e78971a3a05a3484273e0ec2d206e0ce0f048f587a3e1",
+          "public/ecosystem.html": "c29987de10f45b4a82b0c3ef3cf6c278d328dc02811da254d510bbad7a6f25a7",
+          "public/favicon-32x32.png": "bacfd852c4d4d4c6f3a8353ee46343c5871081c1c49c127f335043ba4537f04b",
+          "public/founder.jpg": "e63c0d3f4b184335cdefb70cd6b55fcf11be7ea4196117c822d58d8c8dff1ba0",
+          "public/litepaper.html": "570914e81a51a88109078dec761a7572667d7ab176a8433c46458785404b45c9",
+          "public/logo-dog.png": "9b1c09d534e64e1151515c7d336a7b6b05d26a4204e7888e5e800753bd05d472",
+          "public/logo-foundups-test.svg": "381d615288c67643dd1296064e3f8913049bdf26315753fabca00eef2929ad75",
+          "public/logo-foundups-with-dog.svg": "5aaa95facf3a752412e5c7df3c8a8401b50ffe3941107a6700aa42585a9f84c7",
+          "public/logo-foundups.svg": "131a58be31dfef612ca154ac0e52f1d9221a4f1f7dcb145f60fd0e1b6f97c681",
+          "public/manifest.json": "104be8aeec8b3ff4ac54fe879878c0cc6887aa9930f91588ad2dad9e2ed0ba78",
+          "public/sw.js": "1f077433f7b449b7df9d37fcb6d6f10a0cb2553246bf251f2cecb932c3547037",
+          "public/about/index.html": "2b6fde37ec895036286e3e9a1a95890c938e717dc1526a76c60405547328c6f4",
+          "public/data/ten_year_projection.json": "3ae9e03b6a1a1a8496a3e92310f3a81470ecd0257f18fbba76acfab4d7d77b0b",
+          "public/f/index.html": "589c51d4e753c533cd43b73f687e67e77d7f5d2244322da5eb753265f28f227e",
+          "public/f/portfolio_data.json": "46e282c66011dab146027aa840cd64bc8762b3fb21ff9f138c160924cc6ba099",
+          "public/f/public_catalog.json": "1b6ac81f53c1a9bc5aaf94aba8311c4c22755994192d95862d75048a1f901a21",
+          "public/js/ecosystem-growth.js": "a83a48c6d4ecf9389e04376a68cf8ff4f6a5bb14764086903e1900a2c6cc1944",
+          "public/js/firebase-runtime-config.js": "1585f0750f4026765e9dc5e0747b65bcc002759c942998fb84103744605f50a4",
+          "public/js/foundup-cube.js": "ccbdfd46c947d43a6f5b3aa4703c3a3da39f077b806a38ebf5a77ef8a861b33c",
+          "public/kosei/index.html": "f47b6b12a56ac432f76dc07464cc8f864257680a4b491236b7d900f22dfbff0a",
+          "public/kosei/manifest.json": "29bb1f7dd2d907e90e1fcf4ffb7ceba72c8bc0222e1ca987d9e63dfcb0914b74",
+          "public/kosei/sw.js": "5f8464b744f7496f43d843f95c34051cc2483807fbf976bedc005468c47ed47d",
+          "public/legal/alpha-nda.html": "bf6705c3e365c9c3463dbedbf4a45e51faad3f73a243921669c01320bab973ad",
+          "public/legal/terms-of-access.html": "c7941b456b8e6934d7089ea39066dad52a02ecf29f34ccba73fbebd0fc412290",
+          "public/media/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "public/member/foundup.html": "2a26210878aa8d4d717f8a7422ca88c2847caee330516b5c27fa65effb76e63b",
+          "public/member/index.html": "7e2203ea89328be4d39fee7c0a4df3c3df7f369aac59d3a080a6ac8a4b364a1f",
+          "public/member/INTERFACE.md": "8c587e316edb95ed1d61b8695b1607d46b30ca00d104e7e9bf91b76c1870a3e9",
+          "public/member/mall-catalog.json": "4a283170749c2d4046f0e99969f3110605052a746e652dc875afceb8b06a1173",
+          "public/member/mall-video-catalog.json": "1295357e3125b9e2527f3b8fa005761ca99890c2f187c96549aaaf7561301de1",
+          "public/member/manifest.json": "0b31680a1e4f2dae0fc786d3fab6eb74f543158f6909436b97330e6eaa728a54",
+          "public/member/member-sw.js": "a4b982211abe67cfe6d41f9a74a26ecdd67df11a8df540573e97192a5da9c4b0",
+          "public/member/ModLog.md": "86ce53bc58a63ccf8da7d729f125087c290a11b3f4c8053865a9c9116817bdef",
+          "public/member/README.md": "9a9b7358c0cf8490c40552e61705935f695fb92b055cd4ddbc29b61ef7ae2f9e",
+          "public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md": "a98119b5f4dbbee81373ad5f78db60b25732726fb14ab918dcefa5488e5f3f4f",
+          "public/member/ROADMAP.md": "e16bdcff9c1d5931423f1f0d698a963a939c0aae462e4a3513d20f4555c238e3",
+          "public/move2japan/index.html": "6afe0f2b959688865ce46ea3c6b7116800abd819cbb06edf0e474f5183c9d204",
+          "public/move2japan/move2japan.css": "1ec108584f6802bba0a03149889c150499faaae86a30fcb6d8c1470dabaadd3c",
+          "public/move2japan/properties.json": "5768231fdaf1e7b24516b4dfe7f2bb997d0c898097526e238cfd9843e4909277",
+          "public/move2japan/property-search.js": "24fc2fd5fb360e27c13c6209f7ee8581c4fd073b62dd6bee664627e1699f8037",
+          "public/sso-callback/index.html": "f33e6a2c384f9dd89d04569c37d16dfb1f984cfea89b7e2664f25edfb85c522a",
+          "public/f/holoindex_prod_01/index.html": "0543139cf453fbad3ab4738753cdaa503e6c2a9e79015c96c78c7a54604c4436",
+          "public/f/holoindex_prod_01/css/style.css": "078198c50c34e2cc70281c7a74dd6d8be890aafeec2a62067e0499ab19adf159",
+          "public/f/holoindex_prod_01/js/connector.js": "5566ddf19461c1954caaac418469bfc14dcb637c8ceeaab782b4351f39a62520",
+          "public/kosei/app/index.html": "89d8360eb67f95b0390a26cedfd9177238f7d366f32a6871905e2cc406adfd31",
+          "public/kosei/assets/kosei-icon-192.svg": "f47b58d624b4ffc0554fc5db0a2baaef11f7d33c5dd8f7200dd0722b0b16802b",
+          "public/kosei/assets/kosei-icon-32.svg": "14afd2d4c2845f6ef43bf486c95f93c6b0043b8643f1520457ed5c38d6a9f278",
+          "public/kosei/assets/kosei-icon-512.svg": "53b7e43478f9d850f11ef706289d5f5f3f88e34ffc5b71a2114932e6dd7b69fb",
+          "public/kosei/css/kosei.css": "4623c0ff04bd6b64f0324a77ddd5213bbb65a9a6beb51f93826ef54e6aab31d7",
+          "public/kosei/js/kosei-i18n.js": "1c1f02bc3ebec3175862d2b00d24f8667448840880bd20650eaca75fbbab4e09",
+          "public/kosei/js/kosei-intake.js": "b7e0645b60aadf8358bd00b02ed670a09fa899355254a6bf14b17ea06e0eec4d",
+          "public/kosei/app/css/kosei-app.css": "4e0ec2d5c7738a86853eed350ae4d63a238e305f5a9c077289811eb5a9ab28ed",
+          "public/kosei/app/js/kosei-app-auth.js": "ffcbb153992f6824b2f054646caca8c360139410ec60fd34cdde18c0e48b27d2",
+          "public/kosei/app/js/kosei-app-data.js": "b3846c13f4a29c6daa2940be896a86c5fa3e5b9db70214fdedce2c3350298370",
+          "public/kosei/app/js/kosei-app-ui.js": "4b0410adf9787632c4671a45a78112334029a04e3577818c840dc7d582ffb22e",
+          "public/media/posters/antifafm.jpg": "f4835c889469fc8a8c13b27d4fb594643bd5cc5d8274bcee75a871706f8226fd",
+          "public/media/posters/eduit.jpg": "c7d899a9bc06d56a93b25ef32e21212a4381ed3fcc95f52b2745acf3f88824e7",
+          "public/media/posters/esingularity.jpg": "c7d899a9bc06d56a93b25ef32e21212a4381ed3fcc95f52b2745acf3f88824e7",
+          "public/media/posters/foundups-ln.jpg": "6fdffc37e84919629288b92c9c81c4a72e1662f26f16afc447f2d0ddea5ac952",
+          "public/media/posters/foundups_main.jpg": "de7ca7ccbf7f411c4cdfd81bbc338e6e5b05832ab1f7dba2b8c2270944462579",
+          "public/media/posters/holoindex.jpg": "5c622583f150503ec7ac1e94a3a0e2be45b50164123707421014c821678d4b8e",
+          "public/media/posters/linkedin-012.jpg": "28eea41e39c2120c20a6ee35654ef9d1b93a052e38a7779253d9b42aa28b2e77",
+          "public/media/posters/move2japan.jpg": "e30ac36911bfc7189f68f54bef4fe73f62aefdd700fde698740bc36a3d1f9348",
+          "public/media/posters/tsingularity.jpg": "214367f59c20cb4e279100e2539e3c53f7bc1e40805e15800dbb1a37eba0cee8",
+          "public/media/posters/undaodu.jpg": "2fbec16a9bd3069cfe13ac3e5821278d62718abb39da6dd1879a1a5228b0d624",
+          "public/member/css/account-concierge.css": "a541a9bd4178c34195313a61bbe298d56f7632308a29d499c22a7f737bdd6031",
+          "public/member/css/mall-planes.css": "11c3e677ad36455120bd2e91b0f34fe7a7fd34d751290af04b977e1c2fd44113",
+          "public/member/css/mall-tile-field.css": "a015fd0f717930b4b688d30605993ff90e19e6cef871441563e5faff00497581",
+          "public/member/css/mall-video-player.css": "7541ca657591b74b56368e7fc342fbdccece655c1bb8443de810992fbe11ccdb",
+          "public/member/css/member.css": "01f13672eda5967ed873632e09f455a4bdb482be6765de93aed573447122ef97",
+          "public/member/js/account-concierge.js": "b2bd7f692a1c9f4cb040e73362f639e75c6727a3b4e7610a8cc26f18799320f7",
+          "public/member/js/gesture-engine.js": "18b1b0d6f3070b62512b668c3339ea86f55c99a46143258ce748ae1d6826fc5b",
+          "public/member/js/gesture-hints.js": "045323df73a04c4b25f7307680a191dd00aedff36ff1a33ebf445fb05d66b384",
+          "public/member/js/mall-planes.js": "eaeceaf12fff810cb6e00848c3739c5f88af5f700c1bd64b609cb85781f5e404",
+          "public/member/js/mall-state-restore.js": "dab838332d9ce5afde24ab1410cffaafddcee68ddfe82ef54036349cbf8dbe91",
+          "public/member/js/mall-tile-field.js": "cab80f29559bdbee5d3cf234350ba75335f46ea80c02e2d2beffe170117d3cc0",
+          "public/member/js/mall-video-player.js": "0349777e8b2487bed87f6791c12ade5f0856087299d56f1474bdc27fa1bd0bb0",
+          "public/member/js/pfmall-control-dispatcher.js": "7713ec01a8782dce732a6475206da6088aa65be148f08fbfefb28b9e824e2c97",
+          "public/member/js/red-dog-concierge.js": "ea7fa1062cb2d61c3633de52021ee476f1e5885e3afa1676220bfaf850bc37a0",
+          "public/member/js/shell-bridge-interceptor.js": "ebe2c928082a866c87e6a99457fbf4549ae7f9e9b1ed29d1d8e78ebfecb4246e",
+          "public/member/media/.gitkeep": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "public/member/tests/mall_product_state_vm.mjs": "17c0078d00d39eb64e99622ba56609f38d92c58a95782a1ff71e16fc21cbff32",
+          "public/member/tests/mall_property_listing_vm.mjs": "206009f69097144b4c0e4bb423a73327dba2fcd9d208d41248d0db4bee20fc03",
+          "public/member/tests/mall_responsive_browse.mjs": "b5076ba7d5be3528a90206dd329f23a6fccf303e2ddd81f7cfb7b1d84a3227d3",
+          "public/member/tests/member_product_boot_vm.mjs": "240ecd3175553798accff609bf06fd04ba30b60d838061953f6406fff5fb5ffa",
+          "public/member/tests/pfmall_control_dispatcher_vm.mjs": "03475d33e52936e73da4d824db3062479cec8f9670865ed364d0a71f8952767c",
+          "public/member/tests/public_discovery_concierge_vm.mjs": "697528e3d34f40683db1b8ba54577ee2f8d9cba8894bfa68a784c92ccb893ff4",
+          "public/member/tests/README.md": "cd509744c88634afa4982d86524416a641100a874da0f1d52fefede72929b591",
+          "public/member/tests/shell_bridge_interceptor_vm.mjs": "411c0b09b42b4e04489ab35350fd5e9dc95596a62af1b4979bca83b173576674",
+          "public/member/tests/TestModLog.md": "0f9f3f6eeccc36ff5e813f437973f651523d9590ee366e1c536ee2706465d0d8",
+          "public/member/tests/test_account_concierge.py": "35cdc7f79be936d6d104009df467f8a1e287e91a8dece53e5d36eb98138d0feb",
+          "public/member/tests/test_concierge_channel_attachment_phase1.py": "f8b72c67fc4150b6fd04b0ea9dc8f9380fafa08d68b268e019fb16ac87ae731a",
+          "public/member/tests/test_foundup_entry_shell.py": "5deb4cf07379fab15add39547c4bdeffc90ef63f12574aeefd338809130b3fd5",
+          "public/member/tests/test_grid_loading_intersection_observer.py": "ed69eef6e649f8d59b8cc11fc91de7fc8a03db20a59a806050fc0f3d0ba95a10",
+          "public/member/tests/test_intelligent_grid_loading.py": "61bcf85b44d8dd0b1fc247aa84c1a1156791799ddbb5ad2cac6c1a0751ecb479",
+          "public/member/tests/test_kosei_shell_route.py": "e18dfd16910afaca281530352665c34a3663f9f20debf14a1ff3baae86d8aba2",
+          "public/member/tests/test_localhost_dev_harness.py": "150182dbd9c698a7d0dcca56c2cebd665f3aa14bf30a02f8d3632a8317608fab",
+          "public/member/tests/test_mall_product_state.py": "c185a2245c4ced669c59b37b2f8c13a462b31dedee7522a380d85c2367fa1d37",
+          "public/member/tests/test_mall_tile_field.py": "185bd6044506991e32d8ead183639330516dedf71e97ce665536b7739b24b46e",
+          "public/member/tests/test_mobile_blockers.py": "aa8a5b3bc5544815bec37d93357cd80358a93c5a279be1c41d299241844aaaa0",
+          "public/member/tests/test_navigation_planes.py": "9c5e9a994adba2f95a6adcdcb2222cf389dbddcf5f7da96e7af14ec9ffa8eb27",
+          "public/member/tests/test_non_video_action_surfaces.py": "dbd2dbbc66dec1630b9e1d205a0e8c1ce79a85df09e2623be8a5a6818b5b04dd",
+          "public/member/tests/test_non_video_quickview_actions.py": "e2a73742b89af3e5ffb6ce42a0be04d37f0a089b4c435db48464b1b5a3e53e63",
+          "public/member/tests/test_public_discovery_concierge.py": "3acd01faf8b7623b106c52f61366a72f137dc2e51972c6f68fb3fffff25fdf48",
+          "public/member/tests/test_reddog_anchor_phase2.py": "edbdfae7a54b536e3259900a81eb598008b3a32fcc1a86738bb17c596d96b3a5",
+          "public/member/tests/test_reddog_context_briefing_phase4.py": "3875895b686b8c001f7d9b7de78d3f54f562057ff76298811c323d4bbc2e5f18",
+          "public/member/tests/test_reddog_foundup_entry_alignment_phase7.py": "98275b498630005041a86fd08db9952348d1a4e1c8b6d84ef478cf14ed03eb93",
+          "public/member/tests/test_reddog_mall_controls_phase1.py": "d7c375c8b29d3936c35dc4c0f99204129945068cd09718f042bdcaddeae4306b",
+          "public/member/tests/test_reddog_mobile_ergonomics_phase6.py": "ad8294569f049f81496ac5af5b75d92886aa81e01f8c3e0f97bd17ca4c8378c5",
+          "public/member/tests/test_reddog_mode_sheet_phase3.py": "c258ee30cad739c608b8a6aff33eed5ecabb8aa6b1c8efe6823520319d849e48",
+          "public/member/tests/test_reddog_recommended_actions_phase5.py": "5d6c804f02d4bf2aedd3017a58e015f41252a16c6538b372c96faeb09831c8ba",
+          "public/member/tests/test_reddog_unified.py": "4af69e92af63ffe581a9876a73d51056fd241719558939d8f6761e4ec8fa0ffe",
+          "public/member/tests/test_reddog_verification_alerts_phase1.py": "f156a7bd57bdf9497e7dc285ac1d450d69f156f9e5b57d459f69da3c8d919c48",
+          "public/member/tests/test_red_dog_concierge.py": "618d96012776957ab21571639b9d44a2ce308e4a5aa7a284e3f6f525d408a5fb",
+          "public/member/tests/test_refresh_catalog_safety.py": "29229ab7fc9cfee005e00d8191c9052ec6053261692d019467b3f710c01b6a7c",
+          "public/member/tests/test_route_contract_bridge.py": "2e465112ba99fd5caf5040e5092c6cbabc8ea5dd61747e7652f2cfb210a44610",
+          "public/member/tests/test_search_mall_concierge_wiring_phase1.py": "d25cd77e50b8ed6ce587435d3ba7280a74076cba5a36e6b504c25035a9bba9b1",
+          "public/member/tests/test_shell_bridge_interceptor.py": "759cd975b43d2ebf446014b66058513723ac9428f3b892e3bcdbf8671804d139",
+          "public/member/tests/test_tile_keyboard_a11y.py": "0f6efb8c97d4fd65a5711c3389cad4651f6164d3409aac4874830956d0fbb9a5",
+          "public/member/tests/test_video_mall_field_runtime.py": "4f5f1e8430a1dd4007add32680d1d27bef84f146babe116b6b868bc9ee09369a"
+        },
+        "root_has_no_static_index": true,
+        "candidate_not_main": true,
+        "functions_firestore_auth_domains_changed": false
+      }
+    },
+    "http": {
+      "external_path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-preview-artifact-7qshlqlm\\http-verification.json",
+      "sha256": "920f3b9ba2d3182d90e89e5a999a756ed574942272267654d010dd57a1af28a6",
+      "metadata": {
+        "preview_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app",
+        "source_commit": "336c211cefac77b4d0c09a4c804bf085aa16b347",
+        "checks": [
+          {
+            "path": "/",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/",
+            "cache_control": "no-cache",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "589c51d4e753c533cd43b73f687e67e77d7f5d2244322da5eb753265f28f227e",
+            "artifact_matches": true
+          },
+          {
+            "path": "/index.html",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/index.html",
+            "cache_control": "no-cache",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "589c51d4e753c533cd43b73f687e67e77d7f5d2244322da5eb753265f28f227e",
+            "artifact_matches": true
+          },
+          {
+            "path": "/f/",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/f/",
+            "cache_control": "no-cache",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "589c51d4e753c533cd43b73f687e67e77d7f5d2244322da5eb753265f28f227e",
+            "artifact_matches": true
+          },
+          {
+            "path": "/f/kosei",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/f/kosei",
+            "cache_control": "no-cache",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "589c51d4e753c533cd43b73f687e67e77d7f5d2244322da5eb753265f28f227e",
+            "artifact_matches": true
+          },
+          {
+            "path": "/f/kosei/app",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/f/kosei/app",
+            "cache_control": "no-cache",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "589c51d4e753c533cd43b73f687e67e77d7f5d2244322da5eb753265f28f227e",
+            "artifact_matches": true
+          },
+          {
+            "path": "/about/",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/about/",
+            "cache_control": "no-cache",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "2b6fde37ec895036286e3e9a1a95890c938e717dc1526a76c60405547328c6f4",
+            "artifact_matches": true
+          },
+          {
+            "path": "/about/index.html",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/about/index.html",
+            "cache_control": "no-cache",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "2b6fde37ec895036286e3e9a1a95890c938e717dc1526a76c60405547328c6f4",
+            "artifact_matches": true
+          },
+          {
+            "path": "/f/public_catalog.json",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/f/public_catalog.json",
+            "cache_control": "no-cache",
+            "content_type": "application/json",
+            "sha256": "1b6ac81f53c1a9bc5aaf94aba8311c4c22755994192d95862d75048a1f901a21",
+            "artifact_matches": true
+          },
+          {
+            "path": "/sw.js",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/sw.js",
+            "cache_control": "max-age=3600",
+            "content_type": "text/javascript; charset=utf-8",
+            "sha256": "1f077433f7b449b7df9d37fcb6d6f10a0cb2553246bf251f2cecb932c3547037",
+            "artifact_matches": true
+          },
+          {
+            "path": "/js/foundup-cube.js?v=2",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/js/foundup-cube.js?v=2",
+            "cache_control": "max-age=3600",
+            "content_type": "text/javascript; charset=utf-8",
+            "sha256": "ccbdfd46c947d43a6f5b3aa4703c3a3da39f077b806a38ebf5a77ef8a861b33c",
+            "artifact_matches": true
+          },
+          {
+            "path": "/sso-callback/",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/sso-callback/",
+            "cache_control": "max-age=3600",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "f33e6a2c384f9dd89d04569c37d16dfb1f984cfea89b7e2664f25edfb85c522a",
+            "artifact_matches": true
+          },
+          {
+            "path": "/member/",
+            "status": 200,
+            "final_url": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app/member/",
+            "cache_control": "max-age=3600",
+            "content_type": "text/html; charset=utf-8",
+            "sha256": "7e2203ea89328be4d39fee7c0a4df3c3df7f369aac59d3a080a6ac8a4b364a1f",
+            "artifact_matches": true
+          }
+        ]
+      },
+      "qualification": "12 archive-exact HTTP checks. Route HTML/catalog paths explicitly no-cache; sw.js, cube JS, callback and member retain observed max-age3600."
+    },
+    "browser": {
+      "external_path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-mall-preview-artifact-7qshlqlm\\browser-verification.json",
+      "sha256": "2f148155a7c7cc79b21265c6c77507e4d4ca4e64bcccd2b5067d23fede09ef32",
+      "metadata": {
+        "schema_version": "foundups_browser_verification.v1",
+        "origin": "https://foundupscom--mall-home-20261025-ud0v4rfd.web.app",
+        "candidate_source_commit": "336c211cefac77b4d0c09a4c804bf085aa16b347",
+        "method": "Actual Codex in-app browser, tab3; UI actions and scoped developer CDP checks",
+        "checks": [
+          "Root displays Play FoundUps Mall and five existing public project cards.",
+          "About navigation displays existing explanatory gateway at /about/.",
+          "FX navigation displays FoundUps Exchange at /f/ with five cards.",
+          "$kosei search returns Kosei only; Polished readiness in combination produces explicit empty state; filters restored.",
+          "Phone viewport390x844: innerWidth390, document width375, navigation fits without horizontal overflow; override reset.",
+          "Root /?signin=required&keep=1#roc forwards exactly to /about/?signin=required&keep=1#roc.",
+          "SIGNUP/ENTER opens Alpha Access Requirements curtain before authentication; Escape closes it.",
+          "Public Browse houses opens /member/?foundup=move2japan and displays eight homes and five areas without member admission.",
+          "Kosei View Details opens /f/kosei and displays its About, PoC and App links.",
+          "Play navigation returns to root directory."
+        ],
+        "cache_upgrade": {
+          "baseline": "Exact92ae production artifact deployed first to this disposable preview origin; old root-v1 worker and gateway cache observed.",
+          "action": "Deploy candidate to same preview origin, request normal service-worker update and reload.",
+          "result": "Root-v1 retired and root-v2 present; synthetic member and tenant cache response contents preserved exactly.",
+          "cleanup": "Both disposable probe caches removed after comparison; normal application root-v2 cache retained.",
+          "production_browser_storage_modified": false
+        },
+        "limits": [
+          "No Terms confirmation, OAuth login, provider consent or microphone/location permission accepted.",
+          "Protected application handoff is covered by existing offline contracts and HTTP retrieval, not a completed real provider login.",
+          "Five public cards are discovery entries; ticker labels do not establish issued tokens, balances, liquidity or trading.",
+          "Legacy About simulated125 growth counter is not actual project inventory.",
+          "No generated media, pepper ratings, AI voice filtering, repository claims or chain transaction was tested or activated."
+        ]
+      },
+      "qualification": "Actual browser facts copied from parent receipt; packaging helper did not rerun browser actions."
+    }
+  },
+  "line_ending_identity": {
+    "path": "public/about/index.html",
+    "scanner_git_lf_sha256": "4b59768407253e7909f964f9a55173b5234aa7c870465aaef2a1412ccccd0da3",
+    "hosting_archive_crlf_sha256": "2b6fde37ec895036286e3e9a1a95890c938e717dc1526a76c60405547328c6f4",
+    "qualification": "Different exact byte identities. core.autocrlf conversion observed with no explicit attributes; identifier metadata not copied."
+  },
+  "validation_limits": [
+    "This receipt packages existing evidence; structural validator resolves only repository-bound Retrieve WSPs evidence. Other claims are opaque and unauthenticated by that validator.",
+    "Focused and adjacent runs retain known failures; no full-green or full-repository pass claim.",
+    "All corrected recorded parent/Python and Node network attempt lists are empty, with recorded source stability. Baseline strips Node preload in a route child; projector Python CLI children do pure local reads but are not guarded by the parent Python socket patch.",
+    "Two inherited inactive asyncio configuration warnings persist. Failed initial Node setup and wrong-path PWA baseline attempt are not product proof.",
+    "No Terms confirmation, OAuth login, provider consent, microphone/location permission or real protected provider handoff was completed.",
+    "Five public cards and19 registry records do not prove115 issued FoundUps tokens. Legacy About125 is simulated.",
+    "No generated Netflix media,1-7 pepper rating, press-hold RedDog AI voice filter, repository claim, real chain, balances, liquidity or trades was activated or tested.",
+    "Source freeze is historical. Two later documentation hashes are separately observed. Main reconciliation completed at parent merge daeb4ac0cc7c9da2396faec82f61ae1b02affc6e; no merged-source product test rerun is performed by this packaging helper. PR/main convergence and production readback remain parent gates.",
+    "Parent merged new main f11d75597, which includes unrelated FFmpeg/CI work. Packaging helper authored only these two receipt files and performed no Git mutation."
+  ],
+  "foundation_publication": {
+    "historical_parent_base": "7384448fb7da797fc7a811d04cad963436e4e6cc",
+    "new_main_context": "f11d7559746bb64677e448ff8e4e24ebfcea8feb",
+    "packaging_observed_candidate_head": "daeb4ac0cc7c9da2396faec82f61ae1b02affc6e",
+    "test_authoring_base_commit": "c8eb983629454c6bef6e88d33826112ea19dc620",
+    "reconciliation": "Parent reports clean merge of f11d7559746bb64677e448ff8e4e24ebfcea8feb; packaging helper observes HEAD daeb4ac0cc7c9da2396faec82f61ae1b02affc6e and repository-bound validator confirms base ancestry. Historical tests and preview retain their actual source bindings.",
+    "preview_source_commit": "336c211cefac77b4d0c09a4c804bf085aa16b347"
+  },
+  "publication": {
+    "terminal_state": "ACTIVE_OWNED_WORK",
+    "owner": "parent /root",
+    "completed_scoped_gates": [
+      "local implementation/offline evidence",
+      "Hosting-only preview archive and12 HTTP checks",
+      "actual desktop/mobile and cache-upgrade browser facts",
+      "parent fresh-main reconciliation observed at daeb4ac0cc7c9da2396faec82f61ae1b02affc6e"
+    ],
+    "requires": [
+      "parent final repository-bound receipt validation and review after docs commit",
+      "fresh generated/security/CI closure as applicable",
+      "specialized PR and verified main convergence",
+      "authorized production deployment and exact production readback"
+    ],
+    "parent_alignment": "Local packaging completed; full work remains active with parent."
+  }
+}
