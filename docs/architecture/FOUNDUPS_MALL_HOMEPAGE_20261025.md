@@ -19,6 +19,10 @@ No source, oracle, scanner/rule/scope, cap, member or GitGuardian disposition ed
 Require independent root-proof agreement before append, existing five fingerprint/
 fail-closed regression cases, exact39-path scope, and fresh hosted tree/history
 checks. This classification does not clear the separate GitGuardian hold.
+Independent6a07cb77 agrees on exact39; ledger2577 preserves2538-prefix/other keys.
+Existing five fingerprint/error casesPASS;1614 snapshots stable/zero hook denials.
+Protected3 remain unchanged; fresh hosted tree/history and GitGuardian still gate.
+
 
 ## Current-main release reconciliation — 2026-10-26, before mutation
 
