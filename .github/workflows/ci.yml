@@ -334,6 +334,10 @@ jobs:
           config.write_text('[pytest]\n', encoding='utf-8')
           file_events = []
           hashing = False
+          native_constructor, native_null_opens = None, 0
+          native_null_open_flags = []
+          devnull_code = subprocess.Popen._get_devnull.__code__
+          subprocess_sha256 = hashlib.sha256(Path(subprocess.__file__).read_bytes()).hexdigest()
 
           def deny_file(event, path=None):
               frames, frame = set(), sys._getframe(1)
@@ -358,7 +362,7 @@ jobs:
               return Path(os.fsdecode(path)).resolve().is_relative_to(output_root)
 
           def file_audit(event, args):
-              global hashing
+              global hashing, native_null_opens
               if event == 'sqlite3.connect':
                   deny_file('sqlite3.connect')
               if event == 'import' and str(args[0]).split('.')[0] in ('dotenv', 'openai', 'anthropic', 'boto3', 'google'):
@@ -371,6 +375,14 @@ jobs:
                   mode, flags = args[1] or '', args[2] or 0
                   writing = any(x in mode for x in 'wax+') or flags & (os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_TRUNC | os.O_APPEND)
                   if writing:
+                      caller = sys._getframe(1)
+                      if (phase == 'owned_child' and native_constructor is not None and native_null_opens == 0
+                              and caller.f_code is devnull_code and caller.f_locals.get('self') is native_constructor
+                              and p == Path(os.devnull).resolve() and args[1] is None
+                              and flags == (os.O_RDWR | os.O_CLOEXEC)):
+                          native_null_opens += 1
+                          native_null_open_flags.append({'flags': flags, 'mode': args[1]})
+                          return  # Exact stderr=DEVNULL open inside the admitted Linux constructor.
                       if not owned(p):
                           deny_file('write_outside_owned_output', p)
                   else:
@@ -447,6 +459,7 @@ jobs:
                        'gethostbyname_ex', 'gethostbyaddr', 'getnameinfo'):
               setattr(socket, name, reject('socket.' + name))
           # Preserve the Popen class for asyncio and yt-dlp subclass declarations.
+          original_popen_init = subprocess.Popen.__init__
           subprocess.Popen.__init__ = reject('subprocess.Popen')
           for name in dir(os):
               if (name in ('system', 'popen', 'fork', 'forkpty', 'startfile')
@@ -563,7 +576,119 @@ jobs:
                         workflow_sha256=runner_sha256, scope='Linux Python API guards; not OS confinement or live RPC')
           Path(os.environ['ACOUSTIC_CI_REPORT']).write_text(json.dumps(report, indent=2) + '\n')
           print(json.dumps(report, indent=2))
-          raise SystemExit(0 if passed else (status or 1))
+          if not passed:
+              raise SystemExit(status or 1)
+
+          # Separate real-child proof, only after the original 18 deny-all cases.
+          # Retain the same file/account/network guards; allow one exact fixture.
+          import inspect
+          phase, launches = 'owned_child', []
+          native_report = output_root / 'acoustic-ffmpeg-child.json'
+          native_xml = native_report.with_suffix('.xml')
+          child_report = output_root / 'acoustic-ffmpeg-child-process.json'
+          os.environ['ACOUSTIC_FFMPEG_REPORT'] = str(child_report)
+          test_file = (root / path).resolve()
+          native_expected = [path + '::TestFFmpegChildOwnership::test_timeout_reaps_owned_child_before_return']
+          native_source_before = dict(source_after)
+
+          def owned_child_init(self, command, *args, **kwargs):
+              global native_constructor
+              frame = sys._getframe(1)
+              valid = (not launches and not args
+                       and Path(frame.f_code.co_filename).resolve() == test_file
+                       and frame.f_code.co_name == '_start_owned_child')
+              if not valid:
+                  return reject('subprocess.Popen')(self, command)
+              helper = frame.f_globals['_ffmpeg_timeout_fixture']
+              program = inspect.getsource(helper) + '\nimport sys\n_ffmpeg_timeout_fixture(sys.argv[1])\n'
+              valid = isinstance(command, list) and len(command) == 7
+              valid = valid and command[:6] == [sys.executable, '-I', '-S', '-B', '-c', program]
+              ready = Path(command[-1]).resolve() if valid else output_root
+              temporary = ready.parent
+              expected_env = dict(HOME=str(temporary), TMP=str(temporary), TEMP=str(temporary),
+                                  PYTHONDONTWRITEBYTECODE='1', PYTHON_DOTENV_DISABLED='1')
+              valid = (valid and ready.name == 'child-ready.txt'
+                       and temporary.is_relative_to(owned_temp) and temporary != owned_temp
+                       and set(kwargs) == {'cwd', 'env', 'stdin', 'stdout', 'stderr'}
+                       and kwargs.get('cwd') == str(temporary) and kwargs.get('env') == expected_env
+                       and kwargs.get('stdin') == subprocess.PIPE and kwargs.get('stdout') == subprocess.PIPE
+                       and kwargs.get('stderr') == subprocess.DEVNULL
+                       and hashlib.sha256(test_file.read_bytes()).hexdigest() == native_source_before[path])
+              if not valid:
+                  return reject('subprocess.Popen')(self, command)
+              launch = dict(executable=sys.executable, flags=command[1:5], cwd=str(temporary),
+                            environment=expected_env, program_sha256=hashlib.sha256(program.encode()).hexdigest(),
+                            stdin='PIPE', stdout='PIPE', stderr='DEVNULL')
+              launches.append(launch)  # A failed launch cannot retry under this gate.
+              native_constructor = self
+              try:
+                  result = original_popen_init(self, command, **kwargs)
+              finally:
+                  native_constructor = None
+              launch['pid'] = self.pid
+              return result
+
+          subprocess.Popen.__init__ = owned_child_init
+          phase = 'owned_child_sanity'
+          try:
+              subprocess.Popen(['ci-owned-child-denied-probe'])
+          except PermissionError:
+              pass
+          else:
+              raise AssertionError('Owned-child gate admitted an unrelated launch')
+          assert not launches
+          assert [event['api'] for event in events if event['phase'] == phase] == ['subprocess.Popen']
+          try:
+              os.open(os.devnull, os.O_RDWR)
+          except PermissionError:
+              pass
+          else:
+              raise AssertionError('Null-device write allowed outside the owned constructor')
+          assert native_null_opens == 0
+          assert [event['event'] for event in file_events if event['phase'] == phase] == ['write_outside_owned_output']
+          phase = 'owned_child'
+          native_evidence = Evidence()
+          native_evidence.collected, native_evidence.passed = [], []
+          native_status, native_error = 2, None
+          try:
+              native_status = int(pytest.main([
+                  '-q', '--tb=short', '--capture=sys', '-c', str(config), '--rootdir=.',
+                  '--confcutdir=.', '--noconftest', '--import-mode=importlib', '-p', 'no:cacheprovider',
+                  '-o', 'log_file=' + str(owned_temp / 'ffmpeg-pytest.log'),
+                  *native_expected, '--junitxml=' + str(native_xml),
+              ], plugins=[native_evidence]))
+          except BaseException as exc:
+              native_error = type(exc).__name__
+          finally:
+              subprocess.Popen.__init__ = reject('subprocess.Popen')
+          native_source_after = {p: hashlib.sha256((root / p).read_bytes()).hexdigest() for p in source_before}
+          child = json.loads(child_report.read_text()) if child_report.exists() else {}
+          native_cases = list(ET.parse(native_xml).getroot().iter('testcase')) if native_xml.exists() else []
+          native_xml_ok = (len(native_cases) == 1
+              and native_cases[0].get('classname') == path[:-3].replace('/', '.') + '.TestFFmpegChildOwnership'
+              and native_cases[0].get('name') == 'test_timeout_reaps_owned_child_before_return'
+              and not any(native_cases[0].find(tag) is not None for tag in ('failure', 'error', 'skipped')))
+          native_effects = [event for event in events + file_events if event['phase'] == 'owned_child']
+          native_passed = (native_status == 0 and native_error is None and native_xml_ok
+              and native_evidence.collected == native_expected and native_evidence.passed == native_expected
+              and native_source_before == native_source_after and not native_effects and len(launches) == 1
+              and native_null_opens == 1 and native_constructor is None
+              and child.get('pid') == launches[0].get('pid') and type(child.get('returncode')) is int
+              and child.get('communication_timeouts') == [{'timeout': 30}, {'timeout': 5}]
+              and child.get('reaped_before_return') is True and child.get('owned_pipes_closed') is True
+              and child.get('outer_rescue') is False and child.get('real_ffmpeg') is False)
+          native_report.write_text(json.dumps(dict(passed=native_passed, pytest_exit_code=native_status,
+              exception_type=native_error, expected_ids=native_expected, collected_ids=native_evidence.collected,
+              passed_ids=native_evidence.passed, junit_identities_verified=native_xml_ok,
+              launches=launches, child=child, unexpected_effects=native_effects,
+              native_null_opens=native_null_opens, subprocess_sha256=subprocess_sha256,
+              native_null_open_flags=native_null_open_flags,
+              native_sanity_events=[event for event in events + file_events if event['phase'] == 'owned_child_sanity'],
+              source_before=native_source_before, source_after=native_source_after,
+              checkout_commit=checkout_commit, workflow_sha256=runner_sha256,
+              scope='One disposable Python child through actual timeout cleanup; no live FFmpeg, network or OS confinement'),
+              indent=2) + '\n', encoding='utf-8')
+          raise SystemExit(0 if native_passed else (native_status or 1))
           PY
       - name: Verify native Gunicorn target and parser baseline control
         shell: bash
@@ -772,6 +897,9 @@ jobs:
             ${{ runner.temp }}/acoustic-tmp/acoustic-adapter.json
             ${{ runner.temp }}/acoustic-tmp/acoustic-adapter.xml
             ${{ runner.temp }}/acoustic-tmp/file-events.json
+            ${{ runner.temp }}/acoustic-tmp/acoustic-ffmpeg-child.json
+            ${{ runner.temp }}/acoustic-tmp/acoustic-ffmpeg-child.xml
+            ${{ runner.temp }}/acoustic-tmp/acoustic-ffmpeg-child-process.json
             ${{ runner.temp }}/acoustic-gunicorn/
             ${{ runner.temp }}/acoustic-target-install.json
             ${{ runner.temp }}/acoustic-baseline-install.json

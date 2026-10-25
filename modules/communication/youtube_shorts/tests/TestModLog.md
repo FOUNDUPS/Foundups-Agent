@@ -19,3 +19,7 @@ Focused repository gate: 9 passed. All services/files are fakes or temporary fix
 Added offline tests for reference-byte requests, output/provenance, denied admission, changed references, invalid IDs/directories, malformed responses, redacted transport errors, replay refusal, review failure, reviewed-frame handoff and post-review mutation. Included the suite in Kids Episodes CI. Fixtures are local images and fake transport/review/video callbacks; tests do not establish live quality or account access.
 
 Validation: 266 selected tests passed, including the existing renderer/editor/research, all Kids story contracts, OpenClaw route, registry loader/schema and CI security gate. The regenerated global test registry adds only this new test module.
+
+## 2026-10-25 — Local Little Shrew animation
+
+140 focused tests passed, including 3 new real authoring cases for six-character motion/joins, deterministic bounded audio and overwrite refusal, plus a real three-shot render with asset hashes, timed SRT and 450-frame output. Existing renderer, OpenRouter and Kids suites included. Independent final-frame inspection and technical audio decoding passed; no perceptual audio listening or publication approval claimed.

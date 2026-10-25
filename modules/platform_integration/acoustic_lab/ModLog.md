@@ -1,5 +1,66 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-10-25: Bound timeout cleanup to the owned FFmpeg child
+
+- WSP 00/15/22/50/97; C3/I4/D3/Impact3=13/P1. Reuse the existing X adapter
+  and test file. Preserve the 30-second processing deadline, FFmpeg arguments,
+  response semantics, all dependency pins and the original 18 selected cases.
+- A small same-file helper kills the owned child after a timeout, then allows
+  at most five seconds for communication/drain and reaping. Failed kill, drain
+  or reaping is reported explicitly as timeout cleanup failure. Temporary-file
+  unlink failure retains the primary exception and adds a cleanup note.
+  No unbounded context-manager wait or manual Windows reader-thread join is added.
+- The strengthened existing timeout case first failed against the original
+  adapter (17/18 passed; kill was never called). The repaired author run passes
+  18/18 with zero errors/skips, including cleanup-failure and unlink subcases.
+  All other prior test methods and the six Gunicorn cases are unchanged.
+- A separate actual disposable Python-child case passes: kill, bounded drain,
+  closed pipes and reaping precede adapter return, with no outer rescue. This
+  exercises one owned child, not FFmpeg, process trees or a provider. A prior
+  native-phase attempt was rejected before spawning because the file guard
+  denied subprocess's null-device open; retain that failure. The corrected
+  gate admits only the exact constructor-owned open and rejects a generic one.
+- Evidence: external refresh/acoustic-timeout-positive-v3-execution-20261025.json
+  and its raw two-phase outputs (18 cases: 32.216s; one child: 0.294s), plus the
+  preserved baseline/v2 failures. All 16 source bindings stayed unchanged.
+  Independent source/outcome review accepts the bounded repair: a separate
+  one-child positive passes; missing-kill and missing-drain controls each fail
+  the selected case and record intentional rescue teardown failure. Fresh hosted
+  Linux/Gunicorn remains pending. Python guards are not OS confinement or AI acceptance.
+  See acoustic-timeout-independent-outcome-review-20261025.json.
+- The four broader historical failures were not rerun or resolved. Earlier
+  dependency qualification entries below retain their original dated status.
+
+## 2026-10-25: PR1355 Flask 3.1.3 bounded compatibility qualification
+
+- WSP 00/15/22/50/97; C3/I3/D4/Impact3=13/P1. Carry forward the original
+  Flask pin against current requirements, preserving all other 13 direct pins.
+  No application handler, limit, configuration, wallet or transaction change.
+- Full binary-only resolution yields 76 packages; exact wheel-hash installation
+  and pip check pass in the reused Windows environment. Its 84 distributions
+  include seven preexisting packages outside the graph plus pip. Unpinned
+  multidict and certifi also advance; do not attribute their effects to Flask.
+- The first guarded run passed 17/18. The oversized multipart case stopped at
+  an obsolete class-level assertion: Flask 3.1 exposes max_form_memory_size as
+  a request-instance property. Preserve the rejected output. The only test
+  change reads that real request property; all POST/413/error/no-processor
+  assertions, test identities and production limits remain unchanged.
+- Corrected author execution passes exactly 18/18, zero failures/errors/skips,
+  in 29.829 seconds, with matching collection/JUnit identities, guard sanity
+  and stable 16-file source inventory. No unknown or duplicate effect probes.
+  Independent review and its separate 18-case replay pass; an altered-limit
+  control fails as intended. Fresh hosted Linux adapter/native Gunicorn gates
+  remain pending; this is local component evidence, not native AI acceptance.
+- Existing Windows processor/ZIP/console adaptations and Python guard limits
+  are disclosed in INSTALL/TestModLog. Four broader historical failures and
+  the separate timeout-child cleanup debt were not rerun or resolved. The
+  prior Web3/Gunicorn hosted evidence remains bound to its historical source.
+- External refresh evidence: pr1355-prequalification-20261025.json,
+  pr1355-approved-install-execution-20261025.json,
+  pr1355-author-corrected-execution-20261025.json and the preserved first
+  pr1355-author-20261025/ output. No repository cleanup or new environment.
+
+
 ## 2026-10-23: Qualify the bounded PR1356 Web3 compatibility repair
 
 - WSP 00/15/22/50/97; scope is the existing Web3 7.15.0 dependency proposal,

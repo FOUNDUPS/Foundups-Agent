@@ -1,8 +1,92 @@
 # Open-PR backlog reconciliation
 
-Current planning snapshot, 2026-10-25 JST: 34 open PRs, eight drafts. #2181, #2081, #1663, #1645, #2185 and #1356 are verified on main; original #1648 remains open for its unique product obligations. #2182/#2183/#2184/#2186/#2187 merged through separate owners. Select the bounded reusable #1792 core at 14/P1; protected activation remains with its original owner. Historical rows and search excerpts are not execution authority.
+Current planning snapshot, 2026-10-25 JST (01:12 UTC): 36 open PRs, 8 drafts. #2189 and #1355 are independently verified on main; #2188 and #2192 merged through their separate owner. The existing Acoustic FFmpeg timeout-child repair at 13/P1 is locally verified, with hosted acceptance pending. Newly opened #2190/#2191 require qualification. Original #1792 retains protected activation obligations. Historical rows and search excerpts are not execution authority.
 
 ### Current closure and selection — 2026-10-25
+
+**#2189 MERGED_VERIFIED_MAIN — #1792 shared core:**
+The reviewed head `26602def98392ebbd37b087489e0464061cfaec9` passed all 23
+hosted checks and was squash-merged as `03035b4f5c92202c93bc6f1675a86eee4f10d50e`.
+The complete main tree `c452997e76af3c1bdead6dfd0d8e038cc41b6807` matches the
+reviewed source. All 21 exact-main checks passed, including CI40145619875 and
+CodeQL40145620001. [Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2189#issuecomment-6391370038)
+and independent main review agree. Independent main artifact review
+verifies all 74 exact connected cases, zero skips/failures and 37 unchanged
+source bindings, including the actual Node-to-Python receipt path. The initial
+head's CI security failure remains evidence: 39 unchanged public-source
+fingerprints were independently rebound without changing scanner rules.
+The completed remote branch is absent; local source remains recoverable.
+Original #1792 remains open for its 27 protected content/activation paths;
+[its carry-forward record](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792#issuecomment-6391083254)
+preserves those obligations. This is shared-core acceptance, not live brand
+activation, native worker admission or a completed RSI loop.
+
+**#1355 MERGED_VERIFIED_MAIN — Flask compatibility, 13/P1:**
+Reviewed head `fe64fe624814a534d31f8d803142c114af60cc4f` passed all 22 head
+checks; squash `c8eb983629454c6bef6e88d33826112ea19dc620` passed all 21
+source acceptance checks, including CI40147748128 and CodeQL40147747935.
+Independent combined-tree review proves parent
+`92ae3690073fc66c05a29975952aee53a16f08b1` plus the seven reviewed blobs,
+preserving all 61 nonoverlapping incoming #2188 paths. The combined main tree
+is `6b61c3b05f16f7ebc6b6bbd11ab963b0007c4b26`; it differs from the earlier
+reviewed head tree because of that incoming work.
+Actual main artifacts verify 18 guarded adapter/multipart/Web3 cases and six
+separate native Gunicorn cases on each Linux Python 3.11/3.12 runtime, full
+pin/install/graph checks, the intended old-parser failure, and owned-server
+cleanup without survivors. Independent local 18-case and altered-limit control
+results remain separate. Preserve the initial 17/18 failure: only the obsolete
+class-property assertion changed, retaining the real oversized POST, 413 and
+no-processor checks. The reused Windows environment retains seven orphans and
+pip, and unpinned multidict/certifi also changed; this is neither a fresh
+environment nor an isolated Flask causal comparison. Linux resolution also
+changed multidict. The completed remote branch is absent with no dependent PRs;
+local source and receipts remain recoverable.
+[Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355#issuecomment-6391662425).
+The later root-npm Dependabot update40148177443 failed separately: undici
+6.29.0 could not resolve fixed 6.29.1 through the current Vercel graph without a
+downgrade. Root npm manifests were unchanged by this PR. Preserve this unresolved
+security-maintenance obligation; do not describe every attached check as green.
+
+**Selected: existing Acoustic FFmpeg child ownership, C3/I4/D3/Impact3=13/P1.**
+This reproduced pending repair wins the current executable tie with #1342:
+it directly closes an owned-process leak in the already-qualified surface;
+#1342 also needs public deployment-owner reconciliation. Reuse this checkout,
+module and test/CI owners. Preserve the original 18 deny-all cases and separate
+six native Gunicorn cases; add a separate one-child lifecycle proof with exact
+source/launcher/environment scope. Acceptance requires bounded kill/drain,
+reaping and closed owned pipes before return, explicit cleanup failure, preserved
+primary errors, and independent missing-cleanup controls. No real download,
+FFmpeg binary, account, or live deployment is part of this qualification.
+Four broader historical module failures remain. No native AI author admission
+or completed RSI loop is established by this code-maintenance slice.
+
+Local repair evidence now passes: the author runs the original 18 cases and
+a separate real-child case; an independent invocation passes that one-case
+positive and rejects missing-kill and missing-drain controls. Each control
+selects one test and records a call failure plus intentional rescue teardown
+error, not two independent cases. Handles, pipes and reader threads settle
+after control rescue; that rescue is never product success. All 16 source and
+84 installed-distribution metadata bindings remain unchanged. Preserve the
+pre-repair missing-kill failure and the rejected native null-device guard
+attempt. The final guard admits one exact constructor-owned null open and
+rejects unrelated launches/writes. Existing registry and backend-manifest
+checks pass without generated changes. Fresh hosted Linux, exact-head and
+main convergence remain pending. Independent outcome receipt:
+`acoustic-timeout-independent-outcome-review-20261025.json` in the existing
+external reconciliation evidence directory.
+
+New dependency triage: #2190 is provisionally C3/I4/D3/Impact3=13/P1. Its
+FastMCP 3.4.10 pin needs the existing launcher/version contract and the new
+`fastmcp-slim` distribution graph qualified together; a pin-only patch is not
+runtime readiness. #2191 is C2/I3/D3/Impact3=11/P2: only the root lock's
+fast-uri node changes, requiring full graph and focused URI/AJV acceptance.
+#2192 merged as `7d3d7f64390762040bc2ca737ff0964d94d887c1`; all 19 incoming
+paths are preserved without overlap in the timeout branch. This is preservation,
+not independent epoch-product acceptance. Neither dependency
+establishes an immediate interrupt to the selected repair. Root undici alerts
+506/507 and older nested-version obligations need a separate source-backed
+security repair; no dedicated open PR was identified. Preserve Vercel 63.1.2:
+one failed automatic resolution does not prove a downgrade is necessary.
 
 **#2081 MERGED_VERIFIED_MAIN:** squash
 `2952d8e2c639ea95a3d329e770409b79e5700b36` from reviewed head
@@ -88,7 +172,7 @@ is recoverable. Four historical broader failures and separate FFmpeg child-timeo
 debt remain. No deployment, live blockchain transaction or native RSI is proved.
 [Terminal closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356#issuecomment-6390857956).
 
-**Selected: #1792 reusable core, C4/I3/D3/Impact4=14/P1.** The merge of #2187
+**Historical #1792 pre-publication selection, C4/I3/D3/Impact4=14/P1.** The merge of #2187
 supersedes the earlier active-overlap blocker. The unchanged original proposal
 still has unique reusable brand-context loading and receipt-verification work.
 Allocate its 11 core paths plus the existing target-phrase owner for demonstrated
@@ -402,7 +486,8 @@ receipt root (`dependency-alert-pr-mapping-20261023.json`). The old alert count
 is not a post-merge closure claim; refresh GitHub alerts before reporting change.
 
 **Acoustic residual: FFmpeg timeout child ownership**, C3/I4/D3/Impact3=13/P1,
-module owner/root, `REPRODUCED_PENDING_REPAIR`. `process_x_video_url` removes its
+module owner/root, `SELECTED_REPAIR_IN_VALIDATION` (2026-10-25; see current selection).
+In the pre-repair baseline, `process_x_video_url` removes its
 temporary file after `communicate(timeout=30)` raises but does not terminate and
 reap the child. A separate controlled negative fails in both dependency versions;
 preserve that process-ownership evidence and do
@@ -479,7 +564,7 @@ Every execution requires current source, checks and authority.
 | [#1356](https://github.com/FOUNDUPS/Foundups-Agent/pull/1356) `055cda32a0c2bff70a469aea7d967d20c61a7f42` | 4/3/4/3=14 P1 | Dependency lane/root: STILL_CURRENT | Resolve full set; offline transaction/hash interface tests. |
 | [#2113](https://github.com/FOUNDUPS/Foundups-Agent/pull/2113) `e455fd0190b0c35302a3a5776529a221c3123888` | 4/3/2/4=13 P1 | Japan Compute owner: STILL_CURRENT / DRAFT | Owner reconciles homepage/hosting; preserved-copy and economics gates. |
 | [#1729](https://github.com/FOUNDUPS/Foundups-Agent/pull/1729) `724f465bd35ac1be5e9a91f41d0721da383c67d8` | 4/3/3/3=13 P1 | eSingularity surface owner: ACTIVE_OWNER_PROTECTED | Existing eSingularity owner coordinates convergence: preserve post-vote state, valid fixes and carried article; current routes/locales/build acceptance. |
-| [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `e54c25a567c9b87d2cc8c5f80f7161da8a2613ae` | 3/3/4/3=13 P1 | Dependency lane/root: ELIGIBLE_CURRENT_MANIFEST_QUALIFICATION | #2081 is verified on main; qualify proposed Flask against the full current manifest and existing offline health/upload/error baseline. |
+| [#1355](https://github.com/FOUNDUPS/Foundups-Agent/pull/1355) `c8eb983629454c6bef6e88d33826112ea19dc620` | 3/3/4/3=13 P1 | MERGED_VERIFIED_MAIN | 22 head/21 main acceptance checks and independent source/artifact closure. Separate root-npm maintenance failure retained; do not repeat Flask qualification. |
 | [#1342](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342) `df0a9af87ed3aa086a218fe8f61ef392634042f8` | 4/3/3/3=13 P1 | Dependency lane/root: PARTIALLY_SUPERSEDED | Current-main migration carrying #800/#1360; preserve missing libc selectors if Rollup remains, otherwise qualify replacement GNU/musl native closure; Node/config/build/PWA checks. |
 | [#2102](https://github.com/FOUNDUPS/Foundups-Agent/pull/2102) `e9294fd00c4e728b1b489627d32c4db2fd557650` | 3/3/3/3=12 P2 | EDuIT owner: PARTIALLY_SUPERSEDED | Reconcile owner-merged #2182 EDuIT README/registry and current manifest; preserve unique packet and additive schema tests. |
 | [#1762](https://github.com/FOUNDUPS/Foundups-Agent/pull/1762) `4a6df453f611fa62122a6cdb88a616b57fd7756c` | 3/3/3/3=12 P2 | Dependency lane/root: PARTIALLY_SUPERSEDED / DRAFT | Reconcile only remaining lint/config/fastq changes; test both current apps; explicitly classify two obsolete branch workflows. |
