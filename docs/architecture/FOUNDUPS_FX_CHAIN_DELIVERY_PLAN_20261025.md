@@ -64,6 +64,16 @@ facts, admitted producer provenance and existing-intent revalidation after I/O.
 Fresh strict scope and hosted/security checks remain publication gates; no parent
 merge, main/runtime readiness or broader native/OS isolation claim is allocated.
 
+### Local framing result — 2026-10-25
+
+Source242a819c4 passes52 exact methods in the existing materialized profile;
+original28 ASTs/oracles remain unchanged. Desired RED retained28PASS/20ERROR/4FAIL;
+64 retained AttributeErrors and79 unclassified overflow diagnostics are historical.
+GREEN has four expected denials, zero unexpected attempts/diagnostics,5263 stable
+files and286 loaded origins. Three pre-import refusals are separate controls.
+See receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json for literal IDs,
+source/profile/release/review bindings. Hosted/security/main gates remain separate.
+
 ## Unsigned integration checkpoint allocation — before authoring
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.

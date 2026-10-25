@@ -1,0 +1,261 @@
+{
+  "allocation": {
+    "parent_commit": "24fb851d1d1e1be4b1e1b51420483c5f0d8689a6",
+    "parent_pr": 2206,
+    "pr_base": "agent/foundups-algorand-probe-codec-20261025",
+    "preflight_sha256": "ebf43c478957b0dec8ba9cf795540231c83a28f62a5a740efa729331773ab938",
+    "receipt_sha256": "ee4db4dc99e36a1f5449394aa36c7199a42d2a9ee731e474e02a1313e66bd5f5",
+    "score": {
+      "complexity": 2,
+      "deferability": 3,
+      "impact": 4,
+      "importance": 4,
+      "priority": "P1",
+      "sum": 13
+    }
+  },
+  "contract": {
+    "binding": "source_binding_sha256 is existing domain+all15-request digest, not producer/profile/grant identity. No declaration becomes current fact or authority.",
+    "canonical": "sort_keys=True, compact comma/colon separators, ensure_ascii=True, allow_nan=False, no whitespace or terminal newline; parsed equivalence alone insufficient.",
+    "effect": "Pure ephemeral output only; current grants/facts/producer admission and post-I/O FAM checks remain separate.",
+    "input": "Exact builtin bytes length1..4096; one canonical ASCII JSON object, exact15 existing request fields, duplicate/escaped-duplicate/extra/missing/nonfinite/wrong scalar kinds refused with fixed field-name ValueError. Existing annotations supply scalar kinds before DTO construction; existing _check_request remains semantic owner. JSON recursion/decoding errors sanitized.",
+    "operation": "Reuse existing duplicate-map helper, build_unsigned_asa_probe, then unchanged general validate_unsigned_asa_probe using independently parsed expected request. Use the validated artifact sidecars, not unvalidated builder metadata. Preserve original core codec helper behavior/ASTs where possible.",
+    "output": "Exact immutable canonical ASCII bytes <=16384 with schema=foundups-unsigned-probe-worker-result-v1, request_sha256, unsigned_hex, unsigned_sha256, transaction_id, source_binding_sha256. Wire1..1024, lowercase hex."
+  },
+  "date": "2026-10-25",
+  "hosted": {
+    "artifact_retention_days": 14,
+    "installation": "distinct ci-pip; cannot inherit local evidence",
+    "status": "PENDING_FRESH_HOSTED_RUN",
+    "workflow": ".github/workflows/algorand-probe-codec.yml"
+  },
+  "independent_reviews": [
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-probe-json-20261025-c38yzrk4\\root-qualifier-static-review.json",
+      "raw_sha256": "95ad68cc8396d46ec3515b811b86e866ffaef9a2bce956cee95b9fd56e988eb4"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-probe-json-20261025-c38yzrk4\\root-test-static-review.json",
+      "raw_sha256": "39050325d883c682e98d6975486c3afa8a51d8d2e3d7921ec9e5a322dee9059a"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-probe-json-20261025-c38yzrk4\\independent-test-static-review.json",
+      "raw_sha256": "c8c8fe246d438a12ed09c738fa5252aaf801e1721115ab7ddc410393777bab09"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-probe-json-20261025-c38yzrk4\\independent-source-review.json",
+      "raw_sha256": "7d05e64d0b8a5ec37d6d806b1061935678573b2673521f756838cb8e5f29334c"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-probe-json-20261025-c38yzrk4\\red\\profile-independent-review.json",
+      "raw_sha256": "136816093094ea6975bd2432aaf36e04b865a59564330189a445f9a3f393d12b"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-probe-json-20261025-c38yzrk4\\red\\result-independent-review.json",
+      "raw_sha256": "eba9fc2461f638d5c458fff464b81a90ec35b809520c257a3213c3f81235a3f9"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-probe-json-20261025-c38yzrk4\\green\\profile-independent-review.json",
+      "raw_sha256": "32dc879ae655fddbeb61b742f223f2c77719218e86b2bd997ed1167eb3ee2edb"
+    },
+    {
+      "path": "C:\\Users\\user\\AppData\\Local\\Temp\\foundups-probe-json-20261025-c38yzrk4\\green\\result-independent-review.json",
+      "raw_sha256": "148cb645f79419a208c61ad8431977789f8ee7b37cf47c011a11fa751046d8e0"
+    }
+  ],
+  "limits": [
+    "Pure ephemeral framing only; no FAM/controller/launcher/SQL/CLI/provider/signing/key generation/client/issuance/reward/payment/DEX/runtime activation.",
+    "All15 declared request values are data, not host facts, repository control, producer/profile admission or grants.",
+    "Python hooks are not OS/native/startup/concurrent-writer isolation. No broader authority inferred.",
+    "Old28 local/hosted evidence stays immutable and overlaps this52 suite; counts are not summed.",
+    "Local external evidence paths are temporary, not a public permanent archive. This compact receipt preserves literal IDs/outcomes and digest bindings without embedding5263 file maps.",
+    "Parent/current security and hosted gates govern main; no merge or main-readiness claim."
+  ],
+  "local": {
+    "desired_red": {
+      "diagnostic_overflow": 79,
+      "errors": 20,
+      "explanation": "Four methods with subtests classify errors as FAIL in unchanged reporter; all24 new methods nonpassing. No rerun or test/guard weakening.",
+      "failures": 4,
+      "overflow_type": "unclassified; not inferred from retained sample",
+      "passes": 28,
+      "profile_sha256": "5b7191ff1c50d8d0bdc1ce8f55c1dbb591857b5d9edbe207497bdcc5bf657879",
+      "qualification_status": "FAILED",
+      "receipt_sha256": "f95e4cc674b33245c0a9cc6d51c70963c8933376300a9878b1584c2326aa7453",
+      "release_sha256": "45372f10ec7e6a76e5a8659b2c3f921290ee459e610d4f4946f90ac4a1222177",
+      "retained_diagnostic_type": "AttributeError at absent API callsites",
+      "retained_diagnostics": 64
+    },
+    "environment": "Existing materialized interpreter/base/site/archive environment reused read-only; no installs/downloads.5256 nonrepository bindings match historical v1; seven repo source/lock bindings target this branch.",
+    "fixed_wheel_archives": 15,
+    "frozen_files": 5263,
+    "green": {
+      "diagnostic_overflow": 0,
+      "diagnostics": 0,
+      "errors": 0,
+      "expected_denials": [
+        {
+          "expected": true,
+          "kind": "account_sign_client"
+        },
+        {
+          "expected": true,
+          "kind": "dns"
+        },
+        {
+          "expected": true,
+          "kind": "subprocess"
+        },
+        {
+          "expected": true,
+          "kind": "socket"
+        }
+      ],
+      "failures": 0,
+      "ordinary_methods": 52,
+      "passes": 52,
+      "post_file_venv_origin_rehash": "parent and independent reviewer PASS",
+      "profile_sha256": "9e54e669491c5a3ee1ec1f82b0b0cfd5bef7e9990116cf79a70a82f4e2478be6",
+      "receipt_sha256": "89a7ce9df6be38ca79de9aa3fefbb713b09a9cf68ef6920ce55224953a556449",
+      "release_sha256": "06190de1b05cfa3207127a6768e399cf76c633b24ac2dd1373f7167ec7de4fb0",
+      "skips": 0,
+      "status": "PASS",
+      "unexpected_attempt_count": 0
+    },
+    "installation": "local-materialized",
+    "loaded_origins": 286,
+    "preflight_controls": {
+      "controls": [
+        {
+          "candidate_import": "No candidate import path reached: refusal in ordered preflight before new phase/guard/test loader; Python startup is separately controlled.",
+          "case": "negative-schema",
+          "phase_created": false,
+          "reason_code": "profile_binding",
+          "status": "EXPECTED_PREFLIGHT_REFUSAL",
+          "stdout_sha256": "f5c617ce51809ba12933b8c0d3841d4584a1f760543581bc948937bb46a22679"
+        },
+        {
+          "candidate_import": "No candidate import path reached: refusal in ordered preflight before new phase/guard/test loader; Python startup is separately controlled.",
+          "case": "negative-ids",
+          "phase_created": false,
+          "reason_code": "test_inventory",
+          "status": "EXPECTED_PREFLIGHT_REFUSAL",
+          "stdout_sha256": "ca6eb8e358cf7296a64c9c85621aba575ef1ee9d141592a38c1c2248591273c5"
+        },
+        {
+          "candidate_import": "No candidate import path reached: refusal in ordered preflight before new phase/guard/test loader; Python startup is separately controlled.",
+          "case": "negative-release",
+          "phase_created": false,
+          "reason_code": "release_binding",
+          "status": "EXPECTED_PREFLIGHT_REFUSAL",
+          "stdout_sha256": "236b9c2744654210e9e0295d6f40ebf9d1c37a144fc9194c3807e658755c704b"
+        }
+      ],
+      "ordinary_test_count_unchanged": 52,
+      "status": "PASS"
+    },
+    "preparation": "RED and GREEN exit0, no stdout/stderr, before candidate import",
+    "python": "Windows CPython3.12.10 x64",
+    "sdk": "py-algorand-sdk2.12.0"
+  },
+  "retained_chronology": [
+    "Root static review first-class selection error; corrected explicit test owner/all-class IDs before approval.",
+    "Root profile Git-path separator lookup error; corrected only readback script before approval.",
+    "Root first RED review expected24ERROR; actual unchanged subtest reporter yields20ERROR+4FAIL. Acceptance records actual result, not prediction.",
+    "Independent reviewer initial RED diagnostic count assertion corrected to64 retained plus79 overflow; no receipt or test changes."
+  ],
+  "schema": "foundups-algorand-format-protocol-receipt-v1",
+  "source_history": {
+    "all_original_codec_owners_unchanged": true,
+    "original161_raw_prefix_preserved": true,
+    "original28_test_asts_oracles_controls_unchanged": true,
+    "qualified_product_commit": "242a819c4ffae62501774ff6595964c3c828701f",
+    "test_first_commit": "1fdd98bdb01423bc50203c2c23bed12b81a1659d"
+  },
+  "source_pins": [
+    {
+      "git_lf_sha256": "d44a6589610f94f9cd3ad29b96df439521c72d462c5e7ae372b319798476d8e7",
+      "lines": 204,
+      "path": "modules/platform_integration/algorand/src/unsigned_asa_probe.py",
+      "raw_sha256": "04f36e53172b45d7c48cbb69a3911b693ffea8a7f88d53637c0a803cda1f152a"
+    },
+    {
+      "git_lf_sha256": "58c897a07b0120876c219cd710da79d3b5c5771af98ffc61eac047ae795474ed",
+      "lines": 512,
+      "path": "modules/platform_integration/algorand/tests/test_unsigned_asa_probe.py",
+      "raw_sha256": "312659e31cfad5c6261aea5d681aa600fbf848214ad5661b06093c5095f43d48"
+    },
+    {
+      "git_lf_sha256": "d50d56f6706465fd724b8eddb20bd2a14a53e3fd598031e87a79db15040e9e36",
+      "lines": 295,
+      "path": "modules/platform_integration/algorand/tests/qualify_sdk.py",
+      "raw_sha256": "3cfd0156f6e550a319851d56bec461cc0462732495446e6c6990c1a8d02a11f0"
+    },
+    {
+      "git_lf_sha256": "73d0ac89b0fab2181e239dc736b0241de23bf45d5feb395ad0284d423d5c8abb",
+      "lines": 182,
+      "path": ".github/workflows/algorand-probe-codec.yml",
+      "raw_sha256": "cbb57b86d616b5fd376b712c8077e7de48e9d01cb578578161f8c1cd2fb82617"
+    }
+  ],
+  "status": "LOCAL_COMPONENT_QUALIFIED_HOSTED_PENDING",
+  "test_inventory": {
+    "count": 52,
+    "ids": [
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_account_negative_control_and_flat_fee_build",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_asset_decimals_exact_bounds",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_canonical_nonzero_checksum_addresses",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_declared_metadata_changes_binding_not_wire_authority",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_declared_source_hash_requires_lowercase_hex",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_dns_negative_control",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_duplicate_keys_even_when_equal_rejected",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_errors_never_echo_supplied_values",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_every_wire_field_required",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_exact_probe_realm_and_public_genesis",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_exact_request_type_required",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_expected_request_wire_mismatch",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_forbidden_and_unknown_wire_fields",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_bool_float_and_numeric_strings",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_canonical_escapes_and_negative_zero",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_canonical_key_order_and_whitespace",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_changed_request_not_fixed_golden",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_declaration_binding_does_not_authorize_wire",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_deterministic_immutable_bytes_and_exact_request_hash",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_duplicate_equal_conflicting_and_escaped_keys",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_errors_do_not_echo_input",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_exact_bytes_input_type",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_exact_fifteen_fields",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_exact_integer_and_decimal_bounds",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_exact_top_level_object",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_existing_realm_address_fee_round_rules",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_golden_six_field_output",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_independent_boundary_six_field_output",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_input_size_checked_before_parse",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_malformed_and_unbounded_emitted_wire_rejected",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_malformed_truncated_and_trailing_input",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_maximum_real_valid_output_bounds",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_nonascii_bom_and_nul_input",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_nonfinite_literals_and_exponent_overflow",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_null_nested_and_wrong_scalar_kinds",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_validated_artifact_sidecars_are_used",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_format_wrong_expected_request_wire_rejected",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_golden_packet_and_actual_sdk_transaction_id",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_independent_boundary_vector",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_noncanonical_order_width_and_bin_forms_rejected",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_nonstring_map_key_rejected",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_positive_integer_fields_reject_coercion_and_overflow",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_process_negative_control",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_request_and_artifact_are_immutable_scalar_records",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_round_span_and_fee_cap",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_signed_and_nested_wrappers_rejected",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_socket_negative_control",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_string_subclasses_are_not_scalar_contract_values",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_trailing_truncated_oversize_and_nonbytes_rejected",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_txid_is_transaction_hash_not_request_digest",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_wire_binary_and_realm_types",
+      "modules.platform_integration.algorand.tests.test_unsigned_asa_probe.UnsignedASAProbeTests.test_wire_integer_types_before_equality"
+    ],
+    "ids_sha256": "8dc3199b3e49348552bd871a9265842d11356986e2718241931c6aae2b5f03d7",
+    "schema": "asa-codec-tests-v2"
+  }
+}

@@ -1,5 +1,20 @@
 # Algorand unsigned probe codec
 
+### Canonical JSON framing
+
+`format_unsigned_probe_request(request_json: bytes) -> bytes` exposes the same
+unsigned format through bounded canonical ASCII JSON. It accepts the15 existing
+request fields and returns six fields describing immutable bytes and their hashes.
+It builds and generally validates the packet through the existing codec; it adds
+no alternative wire decoder. See INTERFACE.md for exact byte and scalar bounds.
+
+All52 methods pass in the local materialized profile; exact bindings are recorded
+in tests/TestModLog.md. Old28-method results remain historical. Output hashes bind
+declared request data and wire bytes; they grant no producer or account authority.
+This API adds no FAM caller, process launch, durable artifact, signing or settlement.
+
+## Original codec layer — historical28-method qualification
+
 This module prepares and validates an unsigned ASA transfer **format** for
 `TEST_TRANSPORT_PROBE` on the documented Algorand TestNet realm. It returns
 immutable bytes, the SDK transaction ID and a separate digest of the declared

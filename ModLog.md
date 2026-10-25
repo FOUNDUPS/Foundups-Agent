@@ -1,3 +1,15 @@
+## 2026-10-25 — unsigned Algorand JSON format locally qualified
+
+WSP00/3/11/15/22/50/62/84/97;13/P1. Reused existing codec for bounded canonical
+15-field request/six-field output, real general validation and validated sidecars.
+Test-first source1fdd98bdb; reviewed product242a819c4. All52 exact methods PASS;
+original28 ASTs/oracles unchanged, four expected denials, zero unexpected attempts.
+Desired RED and three separately refused profile/release controls are retained.
+No SDK install, FAM launcher, signer, current fact, issuance, reward or DEX effect.
+Parent2206 and current hosted/security gates govern publication/main; local
+qualification grants no runtime/producer authority. Portable evidence:
+`docs/architecture/receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json`.
+
 ## 2026-10-25 — FoundUps unsigned integration checkpoint
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.

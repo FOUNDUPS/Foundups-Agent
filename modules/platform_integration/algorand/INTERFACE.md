@@ -48,3 +48,28 @@ the transaction ID may remain the same. The caller must supply trusted expected
 declarations; validation does not make them trusted. Errors are `ValueError`
 containing field names only and do not echo supplied values. This is a new format
 contract without a persisted artifact migration or a settlement state transition.
+
+### Canonical JSON entrypoint
+
+`format_unsigned_probe_request(request_json: bytes) -> bytes` accepts exact
+builtin bytes, length1..4096: one ASCII JSON object with exactly the15 fields
+above. Duplicate keys (including escaped collisions), missing/unknown keys,
+nonfinite numbers and wrong builtin scalar kinds reject before DTO construction.
+Existing request validation retains semantic ownership of all field bounds.
+Canonical input/output uses sorted keys, compact comma/colon separators,
+`ensure_ascii=True`, `allow_nan=False`, and no terminal whitespace or newline.
+Equivalent parsed values do not make differently spelled input canonical.
+
+Build through `build_unsigned_asa_probe`, then pass its wire and the parsed
+expected request to the unchanged `validate_unsigned_asa_probe`. Use the
+validated artifact's sidecars. Output is exact immutable ASCII bytes<=16384:
+
+- `schema`: `foundups-unsigned-probe-worker-result-v1`.
+- `request_sha256`: SHA256 of the exact canonical input bytes.
+- `unsigned_hex`: lowercase hex of canonical unsigned wire, length1..1024 bytes.
+- `unsigned_sha256`: SHA256 of that raw wire.
+- `transaction_id`: actual SDK transaction ID for that wire.
+- `source_binding_sha256`: existing domain+all15-request digest described above.
+
+Errors are field-name-only `ValueError`, with parser diagnostics suppressed.
+The envelope supplies no executable/profile/grant authority or current ledger fact.
