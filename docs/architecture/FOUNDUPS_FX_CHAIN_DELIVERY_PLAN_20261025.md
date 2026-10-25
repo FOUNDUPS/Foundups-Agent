@@ -2,6 +2,29 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## CI integration dependency allocation (before repair)
+
+At candidate `9b9784770`, the hosted security gate passes. The bounded worker
+step fails the two existing generated backend manifest parity/index tests.
+The changed FAM import closure must be reflected in the existing source
+manifest before main convergence; this is part of the original source change.
+
+WSP15: complexity 2, importance 5, deferability 5, impact 4 = 16/P0. Need:
+source hashes and runtime membership must remain exact. Affordability: use the
+canonical AST-only generator, its existing eight tests and Node compatibility
+controls. Deferral would leave CI blocked. The competing move, excluding FAM
+from closure or weakening parity, would conceal a real dependency and is rejected.
+
+Execution plane: local generated-source maintenance, not installed activation.
+Budget: existing source manifest, shared digest/member constants, existing digest
+and exact-boundary test fixtures only as measured, and relevant module/test logs.
+No generator algorithm, runtime authority, installed descriptor, release, byte
+limit or global scan rule changes. Inspect the generated delta before retaining
+it. Keep exact member/+1 rejection if one required dependency grows the closure.
+Stage the repaired source artifacts before the staged-index test; then run the
+existing generator check, focused Python and Node controls, independent review
+and new hosted gates. Do not reuse earlier CI success for a new head.
+
 Authority: operator requested completion, dedicated PRs and main delivery after
 verification. This lane owns FoundUps chain/FX work; unrelated concurrent changes
 remain in the original checkout. Base: `8b2fccf64251097b647b7fc5a45dad75706a9192`.

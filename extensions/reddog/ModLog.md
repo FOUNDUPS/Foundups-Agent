@@ -1,3 +1,14 @@
+## FoundUps authorization source-closure dependency — 2026-10-25
+
+PR2188 hosted CI exposed stale generated FAM source bindings. Use the existing
+AST generator and two digest pins; add only the newly imported authorization
+owner and rehash four changed existing members. Closure 1,469→1,470; retain the
+existing exact member/+1 rejection and all byte limits. No installed descriptor,
+runtime promotion, generator algorithm or authority is changed. Pre-repair
+WSP15 allocation 16/P0 is in the FoundUps FX delivery plan. WSP00/6/15/22/50/97.
+Fresh generator, Python, Node, independent and hosted results belong in the
+test log; earlier PR2188 CI success does not qualify this repaired head.
+
 ## PR1645 Moshpit runtime-closure binding — 2026-10-23
 
 WSP00/6/10/22/50/62/97. The existing query seam imports the new unmounted
