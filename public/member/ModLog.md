@@ -9,6 +9,10 @@ entry change. The existing two gateway owners pass178 cases with zero skips or
 guarded network attempts. Browser verification of the repaired preview remains
 required; the pre-repair exception is preserved, not a static-test failure.
 WSP15/22/50/84/97:14/P1 allocation precedes the one-character product repair.
+Repaired15311925 preview now serves both About routes as exact source bytes.
+Fresh browser verifies initialization continues, terms open/Escape close and
+later concierge open/close. Former TypeError is absent; analytics referer403
+remains separately observed. No terms acknowledgment, login or message sent.
 
 ## 2026-10-25 — Fixed public project nomination links
 

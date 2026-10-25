@@ -1061,5 +1061,30 @@
       "No scanner, scope, rules, fingerprint function, product, oracle or GitGuardian disposition changes.",
       "This review is not a scanner run; fresh current-head tree/history gates remain required."
     ]
+  },
+  "about_optional_listener_identifier_review": {
+    "status": "parent_and_independent_exact_source_review_complete_fresh_hosted_scans_required",
+    "source_head": "15311925eb764a165e27372fdb8c578c2b290d74",
+    "prior_head": "9d912f8e0a22d91bf88e14c7b78a9205bae0c9fd",
+    "observed_job": 121127379118,
+    "actual_tree_unreviewed": 1,
+    "actual_history_unreviewed": 0,
+    "path": "public/about/index.html",
+    "line": 75,
+    "rule": "generic-api-key",
+    "whole_source_git_lf_sha256": "13bf1b83a211cbf78d9e65801047c38175e280a572a1189b5fbcbde310d2a6a1",
+    "prior_fingerprint": "21f6daf7cd36c544ed08f48c50f1876ffbccb0929addb7ddbfc995213f0d2f4d",
+    "fingerprint": "40a73b9fd420f9dc709886c4664ffbcb4f1fab67f3c554c3c3a5077c3a71d1d6",
+    "prior_entries": 2379,
+    "final_entries": 2380,
+    "verification": "The full source differs only by one optional-chain question mark elsewhere. Line75, the single opaque frontend attribute and its original client-script context are byte-identical. Exact prior approval is independently reconstructed.",
+    "parent_receipt_sha256": "dbf0703bdaf57a2805ed149b69b58ed40680420769faba92f284cbe2afbf4517",
+    "independent_report_sha256": "7e2088b85b540b97a3832d3d953d128ef47af8485adadf56772c589c5a958a16",
+    "independent_reviewer": "/root/blockchain_architecture/btc_anchor_audit",
+    "limits": [
+      "No value content retained; this is the unchanged previously reviewed publishable identifier.",
+      "No source, rules, scanner scope, fingerprint function or GitGuardian disposition changes.",
+      "Only this actual finding is bound; fresh tree/history gates remain required."
+    ]
   }
 }

@@ -12,6 +12,12 @@ base_head literal is updated from c19 to actual9d912. Scratch and results:
 No new mirrored test or framework; deployed browser continuation and terms-modal
 open/close remain separate verification. Analytics referer denial is observed
 on the disposable preview and no authorization/configuration change is made.
+Repaired15311925 preview: both About paths match raw15567ce0 (LF13bf1b83),
+HTTP200/no-cache. Fresh browser terms-open/Escape-close and later concierge
+open/close work; the prior TypeError is absent, analytics referer403 remains.
+No acknowledgment/login/message. Parent browser-after.json SHA
+`394ddd4fb3e0143331dde3c401ecdf9eedff6e44f2bd5d8e9c51135b7d4509b2`
+is an observation record; HTTP receipt is separate and no test count is added.
 
 ## 2026-10-25 | Fixed public nomination links in the actual INDEX renderer
 

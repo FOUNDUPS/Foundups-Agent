@@ -1,3 +1,13 @@
+## PR2196 optional-listener repair identifier binding — 2026-10-25
+
+Actual job121127379118 reports only one unreviewed tree finding at About75 and
+zero in history. Parent and independent review verify the previously classified
+frontend publishable identifier, original client-script context and exact old
+approval. The sole source change is one question mark at a different statement.
+Preserve2,379 records and append only this new whole-file/rule/line fingerprint
+(2,380 total). No source value, rule, scanner scope, fingerprint algorithm or
+GitGuardian disposition changes. Fresh hosted tree/history gates remain required.
+
 ## PR2196 current-main manifest metadata review — 2026-10-25
 
 Hosted job121122335711 reports39 unreviewed tree findings and zero unreviewed

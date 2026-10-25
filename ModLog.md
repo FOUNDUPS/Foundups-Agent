@@ -62596,3 +62596,9 @@ legacy sign-in link binding. Preallocate14/P1 and make only that listener option
 existing gateway ROC/terms suites pass178 cases with zero skips or guarded network
 attempts. Fresh repaired-preview initialization/terms checks and hosted gates
 remain required. No provider, referer restriction, terms or OAuth change is made.
+Repaired15311925 is now preview-verified: two About paths match exact raw bytes,
+and fresh-browser initialization/terms open-Escape-close/late concierge open-close
+all work. Former TypeError is absent; unchanged analytics referer403 is separate.
+No acknowledgment, authentication or message submission. The one unchanged
+publishable identifier has its exact new binding reviewed and recorded; fresh
+hosted tree/history scans and the separate GitGuardian gate remain required.

@@ -23,6 +23,23 @@ verify a newly deployed exact-byte preview has no such initialization exception
 and can open/close the existing terms curtain without acknowledging it or login.
 Any subsequent distinct failure is recorded before deciding another change.
 
+Repaired source15311925 is deployed to the isolated nomination preview only.
+Both About paths return200/no-cache and exact raw source hash15567ce0; LF13bf1b83
+is separately recorded. A fresh browser tab has no former null-listener exception:
+the terms curtain opens/Escape closes and the later concierge opens/closes.
+No acknowledgment, OAuth or message submission is performed. The only captured
+error is the existing analytics installation403 for the disposable referer;
+do not change its authorization. Source review and178 unchanged tests pass.
+Parent browser before/after and HTTP receipts remain external. This is preview
+evidence, not production/authentication qualification or GitGuardian clearance.
+
+Post-repair security allocation, before any further ledger edit:14/P1. Actual
+job121127379118 reports only About line75 (one tree/zero history unreviewed).
+Parent and independent exact-source review verify the previously classified
+frontend publishable identifier and its context are unchanged. Within the same
+three existing metadata paths, preserve2,379 entries and append only its new
+whole-file/rule/line binding (2,380 total). No scanner/authority/GitGuardian waiver.
+
 ## Nomination links and current-main reconciliation allocation
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP22/50/84/97. Preserve reviewed Mall3767,
