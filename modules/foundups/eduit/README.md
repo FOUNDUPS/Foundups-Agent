@@ -6,6 +6,14 @@
 
 EDUIT is the educational FoundUp and education-scoped sleeve of the existing Play FoundUps Mall. Its own identity does not imply a separate platform or duplicated shell. The existing `modules/foundups/esingularity/` application is a separate, live Fukui campaign and must not be modified by EDUIT work.
 
+## Start here — current episode architecture
+
+[Episode Mall architecture](docs/EPISODE_MALL_ARCHITECTURE.md) records 012’s
+watch → play → Next direction, existing gestures, Red Dog, language cues and
+parent-only membership proposal. Read [INTERFACE](INTERFACE.md),
+[ROADMAP](ROADMAP.md) and [DEPLOYMENT](DEPLOYMENT.md) next.
+EDUIT.org is intended to open the episode directly; this is specified, not deployed.
+
 ## Purpose and history
 
 The 2007 EDUIT mission proposed freely accessible online education. The 2007 eSingularity initiative described **The Tool + The Content + The Experience**; the 2009 book and 2010 Malaysian prize proposal described adaptive games, learning-object assessment and identifying underserved talent. The 2023 EDUIT AI Teaching Touch Tablet and Baby0 discussions explored infant multilingual learning and explicitly proposed starting with an app. In the project's operator interpretation, Baby0 is an early conceptual ancestor of the OBAI/0102/Red Dog lineage; this is not a verified claim of uninterrupted software or model identity since 2001–2003. These are **historical proposals**, not evidence of measured outcomes.
@@ -42,7 +50,7 @@ No autonomous production worker exists. Planned outputs: health status, last act
 
 0102 / Red Dog owns the next small verified implementation slices, WSP 97 closure and merge-to-main receipts. README and other module documentation are machine-operational context, not required reading for 012. Keep decisions, evidence, current state, and next steps inside the repository. No background execution is implied by this instruction.
 
-## Next implementation slice
+## Earlier implementation slice (superseded by current roadmap)
 
 1. Verify current FoundUp registry and schema; do not create a duplicate ID or public route.
 2. Define a deterministic adaptive-difficulty game and synthetic tests.
@@ -81,8 +89,8 @@ line could unlock the next level. Exact axes and progression rules remain open;
 Evolutionary ancestry and dates must be checked before becoming educational
 claims; a fictional Little Shrew character is not proof of a specific ancestor.
 
-**Current slice:** retain one Little Shrew game/video at Our Story Time and the
-EDUIT introduction landing. Neither constitutes the integrated education Mall.
+**Earlier slice:** retained one Little Shrew game/video and an introduction
+landing. The current architecture below supersedes introduction-first entry. Neither constitutes the integrated education Mall.
 Do not build a duplicate PWA, generic catalog, learner account or unlock service
 for this proof of concept. Future work should add a bounded EDUIT product adapter
 to the existing shell, with tests that out-of-scope catalog items cannot appear.
@@ -146,7 +154,7 @@ for timing, difficulty bounds, pause/resume, deletion and no-network leakage.
 ## Child FoundUps, discovery scope and return navigation
 
 **012 direction:** the main Play FoundUps Mall shows EDUIT. EDUIT's education
-Mall shows its own educational child FoundUps, such as Our Story Time and a
+Mall shows its own educational child FoundUps, such as Us Story Time and a
 memory-game project once its existing identity is recovered. Educational child
 FoundUps should not independently populate the general Mall. They remain part
 of the same system; do not fork the platform or renumber existing canonical IDs.

@@ -1,4 +1,4 @@
-# EDUIT / Our Story Time agent deployment runbook
+# EDUIT / Us Story Time agent deployment runbook
 
 2026-10-26 JST. Operator explicitly requested landing/game and domain correction.
 Source owner: FOUNDUPS/Foundups-Agent; existing Firebase hosting architecture.
@@ -86,7 +86,7 @@ above and verifies the live result before reporting completion. A local preview
 is not evidence of a public domain cutover.
 
 EDUIT.org introduces Education Using Information Technology as the educational
-FoundUp. Our Story Time opens directly to Little Shrew's game, video and the
+FoundUp. Us Story Time opens directly to Little Shrew's game, video and the
 existing YouTube channel link. Keep the proof of concept to this single story.
 
 Future story discovery belongs in the existing `public/member/` Moshpit PWA,
@@ -94,3 +94,11 @@ using its shared catalog, category rows and product adapter filter contracts
 (see `public/member/README.md` and `INTERFACE.md`). Do not create a second catalog
 or independent PWA shell. Story/video filtering and automatic tile population
 remain planned; the current standalone game does not claim that integration.
+
+## Current entry design supersedes introduction-first landing
+
+The [episode architecture](docs/EPISODE_MALL_ARCHITECTURE.md) specifies video
+above game as EDUIT.org’s POC entry, with parent access to the catalog/about
+page. Implement through existing Mall owners before claiming shared-PWA
+integration. The current build/target files still package the earlier layout;
+this documentation does not change deployed routes or DNS.
