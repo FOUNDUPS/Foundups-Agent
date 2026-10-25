@@ -1,4 +1,54 @@
+## Current owner input handoff — 2026-10-25
+
+[#2181 closure](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181#issuecomment-6357450863)
+verified merge `cfa632775f2b13034320d45559cdc77d46e3ead6`, tree
+`228b4f0091a40f7f6363d9abf48c0a1844aa68ed`, and successful exact-main
+[CI39899710212](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/39899710212) /
+[CodeQL39899710236](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/39899710236).
+Hosted startup passed 1,003 cases / one Windows-only skip across 47 selectors;
+independent local process controls are separate; earlier failures remain historical.
+
+Today's guarded [artifact validator](../../modules/communication/moltbot_bridge/src/reddog_resident_runtime_artifact_readiness.py)
+exited zero with `accepted=false` and seven `artifact_missing_or_symlink` rejections.
+Empty queue ID meant diagnosis only; eighth-file `authority_profile_source.json`
+absence was separate known-path metadata, not a validator result/global absence proof.
+Role directories and legacy/public metadata do not prove usable keys or HIGH authority.
+The receipt retains parsed result/stdout hash, not raw stdout. No denied-attempt
+counter exists: zero attempted effects and OS confinement are not proved.
+
+**Input gate:** existing enrollment/installation identifies or assembles authentic
+protected owner/E0 selection and custody, handing off its protected path and public
+IDs, source/runtime/generation/expiry bindings, scoped work/order/source, distinct
+author/reviewer model selections, budget and verifier reservation. Parent models
+require v13. Retain the [bridge interface](../../modules/communication/moltbot_bridge/INTERFACE.md).
+**Separate caller connection gate:** even otherwise valid artifacts retain three
+missing authenticated-selection/replay/generation reasons, blocking the current
+[canary](../../modules/communication/moltbot_bridge/src/reddog_resident_live_canary.py).
+The existing [serial bootstrap](../../modules/communication/moltbot_bridge/src/reddog_main_resident_queue_serial_loop_bootstrap.py) and main callsite need verified peer-grant,
+parent consensus and external lease-issuer wiring; HIGH service composition alone does not
+connect the author loop. Preserve refusals and the [post-valve issuer/revalidation order](../../modules/communication/moltbot_bridge/src/reddog_resident_queue_execution_valve_handler.py):
+resolver `lease=None` is intentional before the final accepted valve. Connect and
+exercise existing owners, without a new orchestrator or fabricated authority.
+Keep #2178 memory/scheduler ownership protected; this lane reconciles it read-only.
+
+Compatible pinned `174955143d` may be selected if source/descriptor/root bindings,
+current generation/lease, signatures, expiry, revocation, scope and installed inventory
+pass the existing [verifier](../../modules/communication/moltbot_bridge/src/reddog_grant_authority_service_manifest_verifier.py) / [runtime guard](../../modules/communication/moltbot_bridge/src/reddog_grant_authority_installed_runtime_guard.py).
+Unrelated merges alone do not require reinstalling. Preserve frozen LOW `294195cdb`.
+The [dependency loader](../../modules/communication/moltbot_bridge/src/reddog_grant_authority_runtime_dependencies.py) is not effect-free; the full canary is not qualified offline.
+No invocation is authorized here. Native admission/evaluation, activation/rollback
+and retained improvement remain unproved. Umbrella **19/P0 (C4/I5/D5/Impact5)**;
+this reconciliation **13/P1 (C2/I4/D4/Impact3)**; [packets](../roadmaps/rsi_swarm_backlog.json) remain planning.
+Evidence in existing `pr-reconciliation-20261021/refresh/`:
+`pr2181-merged-main-closure-20261023.json`, `rsi-independent-spawn-main-acceptance-20261023.json`,
+`rsi-post2181-native-input-gate-20261025.json` (proposal, pinned-runtime and source-seam reviews),
+`rsi-resident-artifact-diagnostic-20261025.json` (executed result and receipt review).
+This is internal Codex documentation, not OpenClaw/Hermes execution.
+
 ## Installed HIGH source integration — 2026-10-23
+
+**Historical checkpoint:** the current handoff above supersedes pending
+publication and installation-next-step wording below; preserve its evidence.
 
 PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
 The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
@@ -33,7 +83,7 @@ remain required. Production/runtime bytes and the manifest are unchanged, so
 the installed result remains explicitly bound to `174955143d`, not relabeled
 as authenticated execution or a final-main installation.
 
-Current repaired binding: 1,467 members, canonical digest
+Historical #2181 repaired binding: 1,467 members, canonical digest
 `92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`,
 331,870 LF / 334,877 CRLF bytes under the measured 328 KiB ceiling.
 The boundary accepts 1,467 members and rejects 1,468; 2 MiB per-file and
