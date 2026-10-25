@@ -1,0 +1,102 @@
+{
+  "doc_index_version": "1.0",
+  "collection": "modules/foundups/docs/mobile_studio",
+  "generated_at": "2026-10-18T11:42:08Z",
+  "documents": [
+    {
+      "path": "modules/foundups/docs/mobile_studio/PFMALL_CREATOR_LIVE_API_CONSTRAINTS.md",
+      "doc_type": "analysis",
+      "module_hint": "pfmall",
+      "wsp_refs": [
+        "WSP 97"
+      ],
+      "hash_sha256": "12501fc727a4190b57e299c193538a260659f3de610e6907ecf35e73f69d48e5",
+      "size_bytes": 11455,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "modules/foundups/pfmall/README.md",
+          "modules/foundups/pfmall/ModLog.md",
+          "modules/foundups/ModLog.md"
+        ],
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ]
+      }
+    },
+    {
+      "path": "modules/foundups/docs/mobile_studio/PFMALL_MOBILE_STUDIO_CONTRACT.md",
+      "doc_type": "architecture",
+      "module_hint": "pfmall",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 97"
+      ],
+      "hash_sha256": "1094864913ec8d6d889cfc7d14447d7751482535b4fc6bf130617a614b7008a8",
+      "size_bytes": 25013,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "modules/foundups/pfmall/README.md",
+          "modules/foundups/pfmall/ModLog.md",
+          "modules/foundups/ModLog.md"
+        ],
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ]
+      }
+    },
+    {
+      "path": "modules/foundups/docs/mobile_studio/mobile_studio_outcome.v1.json",
+      "doc_type": "other",
+      "module_hint": "pfmall",
+      "wsp_refs": [],
+      "hash_sha256": "c441781944b4566994ed10059c6df67bdd8cc0cff95311b3c0e5dbc7d6019b2c",
+      "size_bytes": 27296,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "modules/foundups/pfmall/README.md",
+          "modules/foundups/pfmall/ModLog.md",
+          "modules/foundups/ModLog.md"
+        ],
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ]
+      }
+    },
+    {
+      "path": "modules/foundups/docs/mobile_studio/wsp97_execution_receipt.json",
+      "doc_type": "other",
+      "module_hint": "pfmall",
+      "wsp_refs": [
+        "WSP 00",
+        "WSP 10",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 57",
+        "WSP 83",
+        "WSP 84",
+        "WSP 97"
+      ],
+      "hash_sha256": "0d8e71834c735f92f97612d3470ec8177adb2ab983af8fc61454e8855c327929",
+      "size_bytes": 10338,
+      "status": "active",
+      "links": {
+        "entry_points": [
+          "modules/foundups/pfmall/README.md",
+          "modules/foundups/pfmall/ModLog.md",
+          "modules/foundups/ModLog.md"
+        ],
+        "automation": [
+          "doc_dae",
+          "holo_index"
+        ]
+      }
+    }
+  ]
+}

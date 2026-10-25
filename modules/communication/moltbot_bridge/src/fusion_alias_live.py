@@ -172,6 +172,50 @@ def _build_receipt(
     )
 
 
+def _post_alias_advisory(
+    gate: Any, context: object, api_key: str, bounded_timeout: int,
+    max_tokens: int, task_id: str, slice_id: Optional[str],
+) -> AliasLiveResult:
+    """Send the already authorized, redacted request once and retain only a receipt."""
+    # 6. Build the request from the REDACTED text ONLY (redacted prompt + redacted context, if any).
+    #    No streaming, single request.
+    messages: List[Dict[str, str]] = []
+    if context is not None and gate.redacted_context:
+        messages.append({"role": "system", "content": gate.redacted_context})
+    messages.append({"role": "user", "content": gate.redacted_prompt})
+    body: Dict[str, Any] = {
+        "model": OPENROUTER_ALIAS_MODEL,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "stream": False,
+    }
+    headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
+
+    # 7. One bounded POST. No retry storm. Every error path is fail-closed advisory.
+    try:
+        resp = requests.post(
+            OPENROUTER_URL, headers=headers, json=body,
+            timeout=bounded_timeout, allow_redirects=False,
+        )
+    except requests.exceptions.Timeout:
+        return _blocked(REASON_TIMEOUT, made_network_call=True)
+    except Exception:
+        return _blocked(REASON_HTTP_ERROR, made_network_call=True)
+
+    if getattr(resp, "status_code", 500) != 200:
+        return _blocked(REASON_HTTP_ERROR, made_network_call=True)
+
+    try:
+        data = resp.json()
+        response_text = data["choices"][0]["message"]["content"]
+        token_usage = data.get("usage")
+    except Exception:
+        return _blocked(REASON_MALFORMED_RESPONSE, made_network_call=True)
+
+    receipt = _build_receipt(task_id, slice_id, gate.prompt_digest, response_text, token_usage, None)
+    return AliasLiveResult(status=STATUS_ADVISORY_OK, reason=REASON_OK, made_network_call=True, receipt=receipt)
+
+
 def run_alias_live(
     prompt: object,
     context: object = None,
@@ -218,40 +262,9 @@ def run_alias_live(
         return _blocked(REASON_BUDGET_EXCEEDED)
     bounded_timeout = min(max(1, int(timeout_seconds)), MAX_TIMEOUT_SECONDS)
 
-    # 6. Build the request from the REDACTED text ONLY (redacted prompt + redacted context, if any).
-    #    No streaming, single request.
-    messages: List[Dict[str, str]] = []
-    if context is not None and gate.redacted_context:
-        messages.append({"role": "system", "content": gate.redacted_context})
-    messages.append({"role": "user", "content": gate.redacted_prompt})
-    body: Dict[str, Any] = {
-        "model": OPENROUTER_ALIAS_MODEL,
-        "messages": messages,
-        "max_tokens": max_tokens,
-        "stream": False,
-    }
-    headers = {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
-
-    # 7. One bounded POST. No retry storm. Every error path is fail-closed advisory.
-    try:
-        resp = requests.post(OPENROUTER_URL, headers=headers, json=body, timeout=bounded_timeout)
-    except requests.exceptions.Timeout:
-        return _blocked(REASON_TIMEOUT, made_network_call=True)
-    except Exception:
-        return _blocked(REASON_HTTP_ERROR, made_network_call=True)
-
-    if getattr(resp, "status_code", 500) != 200:
-        return _blocked(REASON_HTTP_ERROR, made_network_call=True)
-
-    try:
-        data = resp.json()
-        response_text = data["choices"][0]["message"]["content"]
-        token_usage = data.get("usage")
-    except Exception:
-        return _blocked(REASON_MALFORMED_RESPONSE, made_network_call=True)
-
-    receipt = _build_receipt(task_id, slice_id, gate.prompt_digest, response_text, token_usage, None)
-    return AliasLiveResult(status=STATUS_ADVISORY_OK, reason=REASON_OK, made_network_call=True, receipt=receipt)
+    return _post_alias_advisory(
+        gate, context, api_key, bounded_timeout, max_tokens, task_id, slice_id,
+    )
 
 
 def run_manual_smoke(argv: Optional[List[str]] = None) -> int:

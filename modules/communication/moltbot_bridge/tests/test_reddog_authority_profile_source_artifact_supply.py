@@ -6,17 +6,18 @@ import ast
 import json
 from pathlib import Path
 
-from modules.communication.moltbot_bridge.src import (
-    reddog_architect_fix_signed_wsp15_work_order_promotion as promotion,
+import pytest
+
+from prompt.swarm.m2m_compiler import encode_m2m_envelope
+from modules.communication.moltbot_bridge.tests.test_reddog_authority_profile_exact_schema import (
+    _invalid_m2m, _m2m_envelope,
 )
+
 from modules.communication.moltbot_bridge.src.reddog_authority_profile_source_artifact_supply import (
     AUTHORITY_PROFILE_SOURCE_SUPPLY_ACCEPT,
     AUTHORITY_PROFILE_SOURCE_SUPPLY_REJECT,
     AuthorityProfileSourceSupplyReason,
     run_reddog_authority_profile_source_artifact_supply,
-)
-from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
-    InMemoryAuthoritativeWorkStateStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     PrincipalAuthorityRecord,
@@ -28,10 +29,9 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_OPEN_WORKTREE_CREATE,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
-    _determination,
-    _memex_supply,
-    _model_selection,
-    _work_state,
+    _PRINCIPAL_PUBLIC_KEY,
+    _REDDOG_PUBLIC_KEY,
+    _promote,
 )
 
 
@@ -45,16 +45,18 @@ MODULE_PATH = (
     / "reddog_authority_profile_source_artifact_supply.py"
 )
 NOW = 1_800_000_000
+PERMISSION_DIGEST = "sha256:" + ("a" * 64)
+SUBJECT_DIGEST = "sha256:" + ("b" * 64)
 
 
 def _principal() -> PrincipalAuthorityRecord:
     return PrincipalAuthorityRecord(
         principal_id="github:mjtrout",
         principal_provider="github",
-        principal_public_key="pub:principal",
+        principal_public_key=_PRINCIPAL_PUBLIC_KEY,
         repo_scope=("FOUNDUPS/Foundups-Agent",),
         foundup_scope=("paccess_001",),
-        verified_subject_digest="sha256:verified-subject",
+        verified_subject_digest=SUBJECT_DIGEST,
         reward_account="reward:paccess",
         owner_dae="dae:paccess",
     )
@@ -62,7 +64,7 @@ def _principal() -> PrincipalAuthorityRecord:
 
 def _snapshot(**overrides) -> PermissionSnapshot:
     payload = {
-        "evidence_digest": "sha256:permission",
+        "evidence_digest": PERMISSION_DIGEST,
         "expires_at": NOW + 3600,
         "can_write": True,
         "can_admin": False,
@@ -77,13 +79,13 @@ def _seed(**overrides):
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
         "reddog_id": "reddog:architect",
-        "reddog_public_key": "pub:reddog",
+        "reddog_public_key": _REDDOG_PUBLIC_KEY,
         "repo_full_name": "FOUNDUPS/Foundups-Agent",
         "foundup_id": "paccess_001",
         "allowed_paths": ["modules/foundups/paccess_001/**"],
         "denied_paths": ["modules/foundups/paccess_001/secrets/**"],
         "requested_operation": "create_foundup",
-        "permission_snapshot_digest": "sha256:permission",
+        "permission_snapshot_digest": PERMISSION_DIGEST,
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
         "issued_at": NOW,
@@ -93,8 +95,8 @@ def _seed(**overrides):
         "key_epoch": "epoch-1",
         "required_tests": ["pytest modules/communication/moltbot_bridge/tests"],
         "required_policy_gates": ["signed_work_order_authority", "execution_valve"],
-        "consensus_receipt_digest": "sha256:consensus",
-        "sovereign_authorization_digest": "sha256:012-token",
+        "consensus_receipt_digest": "sha256:" + ("c" * 64),
+        "sovereign_authorization_digest": "sha256:" + ("d" * 64),
         "holoindex_evidence": {
             "holoindex_query": "RedDog architect FIX promotion",
             "holoindex_status": "bundle_json_ok",
@@ -110,12 +112,16 @@ def _seed(**overrides):
     return payload
 
 
-def test_supplier_writes_profile_source_consumable_by_fix_promotion(tmp_path: Path) -> None:
+@pytest.mark.parametrize("with_m2m", (False, True))
+def test_supplier_writes_profile_source_consumable_by_fix_promotion(tmp_path: Path, with_m2m: bool) -> None:
     output = tmp_path / "runtime" / "authority_profile_source.json"
+    seed = _seed()
+    if with_m2m:
+        seed["bounded_worker_plan"] = {"m2m_envelope": _m2m_envelope()}
 
     result = run_reddog_authority_profile_source_artifact_supply(
         repo_root=REPO_ROOT,
-        authority_seed=_seed(),
+        authority_seed=seed,
         principal_authority_record=_principal(),
         permission_snapshot=_snapshot(),
         output_path=output,
@@ -128,25 +134,44 @@ def test_supplier_writes_profile_source_consumable_by_fix_promotion(tmp_path: Pa
         "sha256:"
     )
     profile = json.loads(output.read_text(encoding="utf-8"))
-    assert profile["principal_public_key"] == "pub:principal"
+    assert profile["principal_public_key"] == _PRINCIPAL_PUBLIC_KEY
     assert profile["no_signing_performed"] is True
     assert profile["no_holoindex_reindex_performed"] is True
     assert profile["source_authority_basis"]["permission_snapshot_can_write"] is True
 
-    promoted = promotion.promote_reddog_architect_fix_to_signed_wsp15_work_order(
-        architect_determination=_determination(),
-        work_state_store=InMemoryAuthoritativeWorkStateStore(_work_state()),
-        authority_profile=profile,
-        model_selection_receipt=_model_selection(),
-        memex_supply_receipt=_memex_supply(),
-        worker_id="reddog-worker-1",
-        now_iso="2026-07-16T00:00:00+00:00",
-    )
+    promoted, _ = _promote(authority_profile=profile)
     assert promoted.accepted is True
     assert promoted.authority_profile is not None
     assert promoted.authority_profile["authority_profile_source_receipt_id"] == profile[
         "authority_profile_source_receipt_id"
     ]
+    if with_m2m:
+        expected = encode_m2m_envelope(_m2m_envelope())
+        for preserved in (profile, promoted.authority_profile):
+            assert encode_m2m_envelope(preserved["bounded_worker_plan"]["m2m_envelope"]) == expected
+        seed["bounded_worker_plan"]["m2m_envelope"]["I"]["fixture"].append("late mutation")
+        assert encode_m2m_envelope(profile["bounded_worker_plan"]["m2m_envelope"]) == expected
+
+
+@pytest.mark.parametrize("case", ("null", "wire_string", "partial", "depth", "cycle", "bytes", "secret", "digest", "non_ascii"))
+def test_supplier_m2m_rejects_before_publication(tmp_path, monkeypatch, case) -> None:
+    from modules.communication.moltbot_bridge.src import reddog_authority_profile_source_artifact_supply as supplier
+    packet = _invalid_m2m(case)
+    if case == "non_ascii":
+        packet["A"] = "validate \u2603"
+    def forbidden_write(*args, **kwargs):
+        pytest.fail("invalid M2M reached publication")
+    monkeypatch.setattr(supplier, "_write_json_atomic", forbidden_write)
+    output = tmp_path / "runtime" / "authority_profile_source.json"
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT, authority_seed=_seed(bounded_worker_plan={"m2m_envelope": packet}),
+        principal_authority_record=_principal(), permission_snapshot=_snapshot(),
+        output_path=output, now_epoch=NOW,
+    )
+    assert result.accepted is False
+    expected = AuthorityProfileSourceSupplyReason.SEED_NON_ASCII if case == "non_ascii" else AuthorityProfileSourceSupplyReason.TYPED_SCHEMA
+    assert expected in result.rejection_reasons
+    assert not output.exists()
 
 
 def test_supplier_rejects_output_inside_repo(tmp_path: Path) -> None:
@@ -284,6 +309,80 @@ def test_supplier_rejects_holoindex_gap_authority(tmp_path: Path) -> None:
     assert AuthorityProfileSourceSupplyReason.HOLOINDEX_EVIDENCE_INVALID in result.rejection_reasons
 
 
+def test_supplier_rejects_nested_secret_field_before_write(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "runtime" / "authority_profile_source.json"
+    seed = _seed(extra_runtime={"private_key": "must-not-persist"})
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=seed,
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=output,
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert any(
+        reason.startswith(AuthorityProfileSourceSupplyReason.SECRET_FIELD)
+        for reason in result.rejection_reasons
+    )
+    assert not output.exists()
+
+
+def test_supplier_rejects_unknown_metadata_and_malformed_digest(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "runtime" / "authority_profile_source.json"
+    seed = _seed(
+        metadata={"value": "sk-example-secret"},
+        private_key_digest="raw-private-key-material",
+    )
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=seed,
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=output,
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert any(
+        reason.startswith(AuthorityProfileSourceSupplyReason.UNKNOWN_FIELD)
+        for reason in result.rejection_reasons
+    )
+    assert any(
+        reason.startswith(AuthorityProfileSourceSupplyReason.DIGEST_FORMAT)
+        for reason in result.rejection_reasons
+    )
+    assert not output.exists()
+
+
+def test_supplier_rejects_type_confused_seed_before_write(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "runtime" / "authority_profile_source.json"
+
+    result = run_reddog_authority_profile_source_artifact_supply(
+        repo_root=REPO_ROOT,
+        authority_seed=_seed(allowed_paths={"attacker_extra": "value"}),
+        principal_authority_record=_principal(),
+        permission_snapshot=_snapshot(),
+        output_path=output,
+        now_epoch=NOW,
+    )
+
+    assert result.accepted is False
+    assert AuthorityProfileSourceSupplyReason.TYPED_SCHEMA in (
+        result.rejection_reasons
+    )
+    assert not output.exists()
+
+
 def test_supplier_rejects_principal_foundup_scope_mismatch(tmp_path: Path) -> None:
     principal = PrincipalAuthorityRecord(
         principal_id="github:mjtrout",
@@ -291,7 +390,7 @@ def test_supplier_rejects_principal_foundup_scope_mismatch(tmp_path: Path) -> No
         principal_public_key="pub:principal",
         repo_scope=("FOUNDUPS/Foundups-Agent",),
         foundup_scope=("other_foundup",),
-        verified_subject_digest="sha256:verified-subject",
+        verified_subject_digest=SUBJECT_DIGEST,
     )
 
     result = run_reddog_authority_profile_source_artifact_supply(

@@ -2,6 +2,53 @@
 
 This log tracks changes specific to the **idle_automation** module in the **infrastructure** enterprise domain.
 
+### 2026-10-07 — Preserve internal-audit measurement status
+
+WSP 00/5/11/15/22/48/50/97. Selected14/P1 (C2/I4/D4/impact4).
+The existing research consumer dropped scanner coverage and failure diagnostics.
+Six regressions failed before repair. It now preserves `scan_status` and unknown
+event counts; malformed historical summaries remain separately unavailable.
+Independent source review found numeric-history overflow; reproduced1fail/2pass,
+then repaired. Connected final140pass; no worker inference or paid provider call.
+CI now includes the producer/consumer regressions. Local tests are not native RSI.
+
+Live observation at base453f6c357: existing scanner read3193log files, produced20
+dry-run proposals, and emitted0new events on its second pass. All20 requested scope
+context; none were executable tickets. Existing OpenClaw/WRE exact-main maintenance
+completed and stopped its owned runtimes. Hermes0.20.4 passed authenticated
+read-only preflight after bounded startup readiness; initial connection refusal
+was not evidence of missing enrollment. Patched report persistence retained the
+scan snapshot,20historical signatures and3ranked candidates;0tasks published.
+Evidence: `outputs/rsi-permission-evidence-20261006/internal-audit-*` and
+`O:/RedDog-Builder-Artifacts/rsi-internal-audit-20261007/`.
+Coordinator-authored repair; independent source review is not independent execution.
+
+### 2026-08-29 - Pre-owner exact-main live acceptance
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- PR #1591 merged as exact main `09e98fff`; the existing one-task-per-SHA
+  coordinator accepted the independently reproduced pre-owner stale-HEAD
+  incident and completed the real OpenClaw/WRE transaction at generation
+  `sha256:7869f238...`.
+- A fresh governed owner query returned CURRENT/no-gap/no-reindex on attempt
+  one. Production verification retained 33 artifacts / 222,719,702 bytes and
+  unchanged descriptor, replica, and path identities.
+- This closes only the exact-commit maintenance ingress. Runtime exact closure,
+  A-grade, retrieval RSI, and horizontal scale remain unproven.
+
+### 2026-08-29 - Pre-owner exact-HEAD incident kind
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- Added `REPO_HEAD_MISMATCH` to the immutable incident contract so the
+  communication bridge can route an independently reproduced pre-owner
+  exact-main freshness transition into the existing task.
+- Durable normalization treats it like other non-authority-root incidents:
+  observed authority HEAD must equal target HEAD. No new task family or
+  maintenance authority was introduced.
+- Shared focused incident/root/coordinator result: 75 passed.
+
 ## WSP 22 ModLog Protocol
 - **Purpose**: Track module-specific changes and evolution per WSP 22
 - **Format**: Reverse chronological order (newest first)
@@ -11,6 +58,152 @@ This log tracks changes specific to the **idle_automation** module in the **infr
 ---
 
 ## MODLOG ENTRIES
+
+### 2026-08-28 - Linked control checkout resolves canonical dependency runtime
+
+**WSP Protocol:** WSP 00, WSP 6, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 87, WSP 97
+
+- Reproduced the exact-main OpenClaw repair from a clean linked control
+  checkout. The sealed executor failed before maintenance because that checkout
+  had no `.venv`; the dedicated authority checkout still advanced, but the
+  isolated final snapshot probe correctly rejected the missing runtime.
+- Reused `resolve_holoindex_runtime_root()` in the existing post-merge executor
+  so the same-repository primary checkout supplies dependencies while the
+  dedicated clean authority checkout remains the only indexed source.
+- The manual recovery transaction then refreshed exact main `8842cbcd...` to
+  generation `sha256:cd6a5c41...`; an independent owner query returned CURRENT,
+  no gap, no reindex, first attempt, and post-query verification retained all
+  33 artifacts / 222,595,640 bytes unchanged. This proves recovery and the
+  resolver inputs separately; the new automatic executor wiring remains
+  focused-test evidence until another stale-main event exercises it live.
+- Added a bounded executor-runtime-root regression module covering argument
+  separation, resolver-failure finalization, and five pre-transaction no-effect
+  gates. No production module or authority API was created.
+
+### 2026-08-27 - Exact-main OpenClaw acceptance completed
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 34, WSP 50, WSP 62, WSP 83, WSP 97, WSP 108
+
+- At exact main `cfd1e0051ea0e5624c7a7fcc8f7e2bc4e442aae9`, the governed
+  incident bridge queued the canonical post-merge task and the real
+  broker-managed OpenClaw supervisor claimed it with AgentDB CAS and completed
+  it through the sealed Holo executor. Retry count remained zero.
+- Completion binds generation `sha256:60d062749983...06f3c66` and freshness
+  receipt `sha256:74be7db6ba21...ed0fa`. The request event is resolved
+  completed; the completion event's pending ledger status remains intentional
+  downstream-consumption state, not incomplete execution.
+- A subsequent normal owner query returned CURRENT/no-gap/no-reindex. Full
+  production revalidation preserved the exact 33-artifact / 220,800,343-byte
+  immutable replica binding. This closes the candidate gate only for the exact
+  accepted commit.
+- Secret-free read-only AgentDB row evidence is attached at
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json`.
+
+### 2026-08-27 - Post-merge activation order and durable completion truth
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 84, WSP 87, WSP 97
+
+- Split the exact-SHA authority lease so canonical refresh completes and
+  releases before query-replica activation; one process lock still serializes
+  the entire transaction. A second authority lease then proves final clean
+  HEAD/origin/main and exact generation/receipt binding.
+- The executor now composes the existing real activation controller and cannot
+  complete a task on missing, substituted, or failed operational proof.
+  Production dependency injection is sealed behind private test adapters.
+- FakeDB and real SQLite AgentDB regressions prove failure leaves the task
+  failed, the request pending, and the completion event absent. The prior
+  `a7302344` task remains historically failed; a new merged exact-main task is
+  the live acceptance gate. Focused cross-module result: **62 passed**.
+- Removed unbounded live self-research/training execution from the startup unit
+  tests while retaining exact dispatcher and call-contract assertions. The
+  complete idle/AgentDB selection now passes **204/204 in 12.71s**.
+
+### 2026-08-09 - Incident-bound post-merge maintenance admission
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 97
+
+- Added an immutable AgentDB association from an authenticated HoloIndex
+  incident to the existing canonical exact-SHA post-merge transaction. The
+  canonical task, request, and completion remain incident-agnostic so an
+  ordinary in-flight or completed maintenance transaction can be reused
+  without rewriting its authority context.
+- The coordinator now rejects unknown incident kinds, target/origin drift, and
+  tampered incident associations before recovery staging. Existing ordinary
+  post-merge behavior remains compatible and query-time callers gain no
+  indexing authority.
+
+### 2026-08-08 - Lightweight package boundary for post-merge contracts
+
+**WSP Protocol:** WSP 00, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- Replaced eager package exports with the repository's existing lazy-export
+  pattern so importing the pure HoloIndex post-merge contract does not require
+  optional vector dependencies. Public runtime exports remain available on
+  first use.
+
+### 2026-08-02 - Runtime compatibility evidence publication
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 84, WSP 97
+
+- The existing OpenClaw ecosystem watchlist runner can now compose the cached
+  runtime compatibility evidence consumed by the nonblocking startup advisory.
+- Official network scope is limited to OpenClaw and Hermes latest-release API
+  documents; Qwen/backend expectations remain promotion-receipt inputs.
+- Publication is optional, off-repo, fail-closed, and has no install/update or
+  runtime route authority.
+- Publication is explicitly integrity-only: component observations may show
+  match/drift, but overall state remains `NOT_READY` pending signed source
+  admission.
+
+**WSP_15 MPS:** Complexity 3 + Importance 4 + Deferability 4 + Impact 4 = 15
+(P1).
+
+### 2026-08-01 - Protected post-merge AgentDB namespace
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 78, WSP 87, WSP 97
+
+- The coordinator now creates, retries, and requeues exact-SHA maintenance
+  tasks only through AgentDB's protected post-merge operations.
+- Generic task mutation APIs cannot pre-seed, steal, complete, retry, or
+  requeue the reserved task namespace.
+- Stored task bindings are revalidated before retry/requeue effects, and
+  malformed or cross-namespace reclamation fails closed.
+- Retry can update only its monotonic counter and retry timestamp; independent
+  assurance cannot claim or mutate a post-merge task through another lane.
+
+### 2026-07-30 - Post-merge Holo owner runtime binding
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 87, WSP 97
+
+- The exact-SHA authority transaction now forwards the canonical workspace as
+  the nonsealed Holo maintenance and query-owner runtime root.
+- This keeps the detached authority checkout as the indexed repository while
+  using only the separately validated canonical `.venv` for Python
+  dependencies.
+- No query-time indexing, new maintenance authority, or sealed-runtime trust
+  expansion was introduced.
+
+### 2026-07-26 - Exact-SHA HoloIndex Post-Merge WRE Coordinator
+
+**WSP Protocol:** WSP 00, WSP 15, WSP 22, WSP 50, WSP 62, WSP 87, WSP 97
+
+- Added a durable one-task-per-main-SHA coordinator and exact OpenClaw
+  maintenance route without query-time indexing.
+- Added CAS claim, bounded retry, supersession, and atomic task/request/proof
+  completion semantics.
+- Added a bounded assignment lease so process interruption cannot leave a
+  post-merge task permanently assigned.
+- Added a separate authority-update lease around clean non-rewind detached
+  checkout updates while retaining `MaintenanceSession` as the canonical SSD
+  writer and receipt transaction.
+- Allows recovery only when the trusted blocker marker is the sole dirty
+  authority path; all other dirty worktree states remain rejected.
+- Required canonical exact-HEAD admission proof before reporting `CURRENT`;
+  self-hashed AgentDB events alone are never operational authority.
+- Moved network polling off the synchronous supervisor observation path.
+
+**WSP_15 MPS:** Complexity 4 + Importance 5 + Deferability 5 + Impact 5 = 19
+(P0).
 
 ### 2026-07-24 - Daily OpenRouter Catalog Schedule POC
 

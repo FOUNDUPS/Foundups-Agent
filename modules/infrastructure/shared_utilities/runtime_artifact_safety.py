@@ -6,15 +6,21 @@ import hashlib
 import os
 import re
 import stat
+import sys
 import tempfile
 import unicodedata
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterator, Mapping
 
+from .runtime_operation_locking import (
+    exclusive_runtime_lock as _exclusive_lock,
+    validated_lock_timeout as _validated_lock_timeout,
+    windows_runtime_mutex_name as _windows_runtime_mutex_name,
+)
 
-_DEVICE_PATH_PREFIXES = ("\\\\", "//?/", "//./")
+
 _WINDOWS_RESERVED_NAMES = {
     "CON",
     "PRN",
@@ -23,6 +29,7 @@ _WINDOWS_RESERVED_NAMES = {
     *(f"COM{index}" for index in range(1, 10)),
     *(f"LPT{index}" for index in range(1, 10)),
 }
+_UNSAFE_RUNTIME_NAMESPACE = re.compile(r"^(?://|/\?\?/|GLOBALROOT/)", re.IGNORECASE)
 _PRIVATE_KEY_BLOCK = re.compile(
     r"-----BEGIN [^-\r\n]*PRIVATE KEY-----.*?"
     r"(?:-----END [^-\r\n]*PRIVATE KEY-----|\Z)",
@@ -76,7 +83,7 @@ def validate_runtime_artifact_path(
     """Resolve a writable artifact path outside source and within its runtime root."""
 
     raw = str(path or "").strip()
-    if not raw or "\x00" in raw or raw.startswith(_DEVICE_PATH_PREFIXES):
+    if not raw or "\x00" in raw or _UNSAFE_RUNTIME_NAMESPACE.match(raw.replace("\\", "/")):
         raise ValueError("runtime_artifact_path_invalid")
     _validate_path_components(raw)
 
@@ -243,14 +250,75 @@ def secure_replace_runtime_text(
 
 
 @contextmanager
-def runtime_operation_lock(identity: Path | str) -> Iterator[None]:
+def runtime_operation_lock(
+    identity: Path | str, *, timeout_seconds: float | None = None
+) -> Iterator[None]:
     """Serialize a bounded runtime operation without creating repo lock files."""
 
     raw = str(identity or "").strip()
     if not raw or len(raw) > 8192 or "\x00" in raw:
         raise ValueError("runtime_operation_lock_identity_invalid")
-    with _exclusive_lock(Path(raw)):
+    timeout = _validated_lock_timeout(timeout_seconds)
+    with _exclusive_lock(Path(raw), timeout_seconds=timeout):
         yield
+
+
+@contextmanager
+def confined_runtime_operation_lock(
+    path: Path | str,
+    *,
+    repo_root: Path | str,
+    allowed_root: Path | str,
+) -> Iterator[None]:
+    """Lock one canonical runtime file after confinement and descriptor checks."""
+
+    target = validate_runtime_artifact_path(
+        path,
+        repo_root=repo_root,
+        allowed_root=allowed_root,
+    )
+    target.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+    target = validate_runtime_artifact_path(
+        target,
+        repo_root=repo_root,
+        allowed_root=allowed_root,
+    )
+    initialization_lock = _exclusive_lock(target) if os.name == "nt" else nullcontext()
+    with initialization_lock:
+        descriptor, _ = _open_runtime_file(target)
+        try:
+            opened_stat = os.fstat(descriptor)
+            _require_private_regular_file(opened_stat)
+            final_path = _descriptor_final_path(descriptor)
+            _verify_descriptor_path(
+                final_path,
+                expected=target,
+                repo_root=repo_root,
+                allowed_root=allowed_root,
+            )
+            if opened_stat.st_size == 0:
+                os.write(descriptor, b"\0")
+                os.fsync(descriptor)
+            os.lseek(descriptor, 0, os.SEEK_SET)
+            if os.name == "nt":
+                import msvcrt
+
+                msvcrt.locking(descriptor, msvcrt.LK_LOCK, 1)
+                try:
+                    yield
+                finally:
+                    os.lseek(descriptor, 0, os.SEEK_SET)
+                    msvcrt.locking(descriptor, msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+
+                fcntl.flock(descriptor, fcntl.LOCK_EX)
+                try:
+                    yield
+                finally:
+                    fcntl.flock(descriptor, fcntl.LOCK_UN)
+        finally:
+            os.close(descriptor)
 
 
 def redact_runtime_text(value: object, *, max_chars: int = 4096) -> RuntimeTextRedaction:
@@ -304,8 +372,31 @@ def secure_read_confined_bytes(
 ) -> tuple[bytes, int]:
     """Read a source file only after its descriptor proves root confinement."""
 
+    from .runtime_artifact_confined_byte_reader import (
+        secure_read_confined_bytes_impl,
+    )
+
+    return secure_read_confined_bytes_impl(
+        path, allowed_root=allowed_root, offset=offset, max_bytes=max_bytes
+    )
+
+
+def secure_read_confined_text(
+    path: Path | str,
+    *,
+    allowed_root: Path | str,
+    max_bytes: int = 8 * 1024 * 1024,
+) -> str:
+    """Read bounded UTF-8 text from one verified, stable file descriptor."""
+
     raw = str(path or "").strip()
-    if not raw or "\x00" in raw or raw.startswith(_DEVICE_PATH_PREFIXES):
+    limit = int(max_bytes)
+    if (
+        not raw
+        or "\x00" in raw
+        or _UNSAFE_RUNTIME_NAMESPACE.match(raw.replace("\\", "/"))
+        or limit < 0
+    ):
         raise ValueError("confined_read_path_invalid")
     root_candidate = Path(os.path.abspath(Path(allowed_root).expanduser()))
     expected_candidate = Path(raw).expanduser()
@@ -329,19 +420,41 @@ def secure_read_confined_bytes(
     flags = os.O_RDONLY | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
     descriptor = os.open(expected, flags)
     try:
-        metadata = os.fstat(descriptor)
-        if not stat.S_ISREG(metadata.st_mode):
-            raise ValueError("confined_read_target_not_regular")
+        before = os.fstat(descriptor)
+        _require_private_regular_file(before)
+        if before.st_size > limit:
+            raise ValueError("confined_read_size_limit")
         final_path = _descriptor_final_path(descriptor)
         final_resolved = _without_windows_extended_prefix(final_path.resolve(strict=True))
         if not _is_relative_to(final_resolved, root):
             raise ValueError("confined_read_descriptor_outside_root")
         if os.path.normcase(str(final_resolved)) != os.path.normcase(str(expected)):
             raise ValueError("confined_read_descriptor_path_mismatch")
-        position = min(max(int(offset), 0), int(metadata.st_size))
-        os.lseek(descriptor, position, os.SEEK_SET)
-        data = os.read(descriptor, max(min(int(max_bytes), 1024 * 1024), 0))
-        return data, int(os.lseek(descriptor, 0, os.SEEK_CUR))
+
+        os.lseek(descriptor, 0, os.SEEK_SET)
+        payload = _read_descriptor_text(descriptor, before.st_size)
+        after = os.fstat(descriptor)
+        if (
+            len(payload.encode("utf-8")) != before.st_size
+            or (
+                after.st_dev,
+                after.st_ino,
+                after.st_size,
+                int(getattr(after, "st_nlink", 1)),
+                int(getattr(after, "st_mtime_ns", 0)),
+                int(getattr(after, "st_ctime_ns", 0)),
+            )
+            != (
+                before.st_dev,
+                before.st_ino,
+                before.st_size,
+                1,
+                int(getattr(before, "st_mtime_ns", 0)),
+                int(getattr(before, "st_ctime_ns", 0)),
+            )
+        ):
+            raise ValueError("confined_read_target_changed")
+        return payload
     finally:
         os.close(descriptor)
 
@@ -402,11 +515,16 @@ def _contains_secret_shape(text: str) -> bool:
 
 
 def _is_relative_to(path: Path, parent: Path) -> bool:
-    try:
-        path.relative_to(parent)
-        return True
-    except ValueError:
-        return False
+    candidate = Path(
+        os.path.normcase(str(_without_windows_extended_prefix(path)))
+    )
+    root = Path(
+        os.path.normcase(str(_without_windows_extended_prefix(parent)))
+    )
+    return candidate.is_relative_to(root) if os.name == "nt" else (
+        candidate.anchor == root.anchor
+        and candidate.parts[:len(root.parts)] == root.parts
+    )
 
 
 def _without_windows_extended_prefix(path: Path) -> Path:
@@ -465,13 +583,34 @@ def _require_private_regular_file(metadata: os.stat_result) -> None:
 
 def _open_runtime_file(path: Path) -> tuple[int, bool]:
     common = os.O_RDWR | getattr(os, "O_BINARY", 0) | getattr(os, "O_NOFOLLOW", 0)
+    open_path = _runtime_open_path(path)
     try:
-        return os.open(path, common), False
+        return os.open(open_path, common), False
     except FileNotFoundError:
         try:
-            return os.open(path, common | os.O_CREAT | os.O_EXCL, 0o600), True
+            return os.open(
+                open_path,
+                common | os.O_CREAT | os.O_EXCL,
+                0o600,
+            ), True
         except FileExistsError:
-            return os.open(path, common), False
+            return os.open(open_path, common), False
+
+
+def _runtime_open_path(path: Path) -> Path | str:
+    if os.name != "nt":
+        return path
+    raw = os.path.abspath(path)
+    if raw.startswith("\\\\?\\"):
+        return raw
+    if raw.startswith("\\\\"):
+        return "\\\\?\\UNC\\" + raw[2:]
+    return "\\\\?\\" + raw
+
+
+def _resolve_runtime_path(path: Path, *, strict: bool) -> Path:
+    candidate = Path(_runtime_open_path(path))
+    return _without_windows_extended_prefix(candidate.resolve(strict=strict))
 
 
 def _descriptor_final_path(descriptor: int) -> Path:
@@ -499,6 +638,12 @@ def _descriptor_final_path(descriptor: int) -> Path:
         if length <= 0 or length >= len(buffer):
             raise OSError("runtime_artifact_final_path_unavailable")
         return _without_windows_extended_prefix(Path(buffer.value))
+    return _linux_descriptor_final_path(descriptor)
+
+
+def _linux_descriptor_final_path(descriptor: int) -> Path:
+    if not sys.platform.startswith("linux"):
+        raise OSError("runtime_artifact_final_path_unsupported_platform")
     proc_path = Path(f"/proc/self/fd/{descriptor}")
     if proc_path.exists():
         return proc_path.resolve(strict=True)
@@ -535,75 +680,23 @@ def _read_descriptor_text(descriptor: int, size: int) -> str:
 
 def _remove_created_file(path: Path, expected: os.stat_result) -> None:
     try:
-        current = path.stat()
+        open_path = _runtime_open_path(path)
+        current = os.stat(open_path, follow_symlinks=False)
         if (current.st_dev, current.st_ino) == (expected.st_dev, expected.st_ino):
-            path.unlink(missing_ok=True)
+            os.unlink(open_path)
     except OSError:
         pass
 
 
-@contextmanager
-def _exclusive_lock(path: Path) -> Iterator[None]:
-    lock_key = hashlib.sha256(os.path.normcase(str(path)).encode("utf-8")).hexdigest()
-    if os.name == "nt":
-        import ctypes
-        from ctypes import wintypes
-
-        kernel32 = ctypes.windll.kernel32
-        create_mutex = kernel32.CreateMutexW
-        create_mutex.argtypes = [wintypes.LPVOID, wintypes.BOOL, wintypes.LPCWSTR]
-        create_mutex.restype = wintypes.HANDLE
-        wait_for_single = kernel32.WaitForSingleObject
-        wait_for_single.argtypes = [wintypes.HANDLE, wintypes.DWORD]
-        wait_for_single.restype = wintypes.DWORD
-        release_mutex = kernel32.ReleaseMutex
-        release_mutex.argtypes = [wintypes.HANDLE]
-        release_mutex.restype = wintypes.BOOL
-        close_handle = kernel32.CloseHandle
-        close_handle.argtypes = [wintypes.HANDLE]
-        close_handle.restype = wintypes.BOOL
-        handle = create_mutex(None, False, f"Local\\FoundupsRuntime-{lock_key}")
-        if not handle:
-            raise OSError("runtime_artifact_mutex_create_failed")
-        wait_result = wait_for_single(handle, 0xFFFFFFFF)
-        if wait_result not in (0x00000000, 0x00000080):
-            close_handle(handle)
-            raise OSError("runtime_artifact_mutex_wait_failed")
-        try:
-            yield
-        finally:
-            release_mutex(handle)
-            close_handle(handle)
-        return
-
-    import fcntl
-
-    lock_root = Path(tempfile.gettempdir()) / "foundups-runtime-locks"
-    lock_root.mkdir(mode=0o700, parents=True, exist_ok=True)
-    lock_path = lock_root / f"{lock_key}.lock"
-    descriptor = os.open(
-        lock_path,
-        os.O_CREAT | os.O_RDWR | getattr(os, "O_NOFOLLOW", 0),
-        0o600,
-    )
-    try:
-        _require_private_regular_file(os.fstat(descriptor))
-        fcntl.flock(descriptor, fcntl.LOCK_EX)
-        try:
-            yield
-        finally:
-            fcntl.flock(descriptor, fcntl.LOCK_UN)
-    finally:
-        os.close(descriptor)
-
-
 __all__ = [
     "RuntimeTextRedaction",
+    "confined_runtime_operation_lock",
     "redact_runtime_text",
     "redact_runtime_value",
     "runtime_operation_lock",
     "secure_append_runtime_text",
     "secure_read_confined_bytes",
+    "secure_read_confined_text",
     "secure_replace_runtime_text",
     "validate_runtime_artifact_path",
     "validate_runtime_root_path",

@@ -1,4 +1,4456 @@
+## PR1792 registered-target brand verification — 2026-10-25
+
+WSP00/11/22/50/71/97. Extend the existing verifier for the optional public brand
+context without creating execution authority. Recheck schema/content/identity,
+reject ambiguous children and known-child relabeling against matched_reference,
+and preserve old no-brand receipts with validated new fallback fields.
+UTF-8 hashing now matches the actual Node producer's schema-bound Unicode bytes;
+ASCII legacy receipts retain their digest. This is not general JCS compatibility.
+Public-path/component checks precede reads; no credential/config owner is loaded.
+Author repaired connected tests: 74 pass, zero skips. Four independent
+private-name read failures and malformed-Unicode rejection are repaired in the
+same owner. Independent repaired-core review accepts 36 Python and 16 Node
+positive cases plus one Node causal control, separately from author 74;
+see `refresh/pr1792-independent-core-review-20261025.json`. Final CI/package/
+generated and hosted gates remain pending; protected activation is unqualified.
+
+## PR1648 shared transport containment — 2026-10-23
+
+WSP00/5/6/15/22/50/62/97: reuse three existing callers from the retained PR1648
+proposal. The manual ALIAS path disables redirects after its unchanged redaction,
+default-off, typed authorization and budget gates. The advisory caller uses a
+no-redirect opener and withholds error bodies/reasons; AI Gateway preserves
+OpenRouter timeout classification with a fixed transport diagnostic.
+The private ALIAS send/receipt extraction reduces the edited entry function
+from 80 to 49 lines without another public route. ALIAS remains a separately
+tested manual path, absent from the installed startup manifest. Its typed local
+guard is not authenticated native admission. TestModLog owns measured results.
+The original PR1648 reader, skill, Gmail-policy and product requirements remain
+open; this shared fix does not claim their completion or activate paid calls.
+
+## PR1645 bounded Moshpit projection — 2026-10-23
+
+WSP00/5/6/10/15/22/50/62/95/97. Reconcile the existing proposal at
+`4b316c976aa3cdba21b901191159716f3d58631d` as a four-Python-path layer:
+canonical `moshpit` projector/renderer, current memory query seam and tests.
+The source-read expiry defect is reproduced before repair. No host, private
+store, website, skill registry, account effect or native worker is activated.
+The original skill/discovery assertion, unique Gmail-receipt policy and reader
+acceptance are retained in [existing PR1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590).
+TestModLog owns original inventory and qualification results. Interface, README
+and roadmap reconcile existing descriptions without increasing their line count;
+the obsolete V2 sender description now points to current Python V3 authority.
+The 87-case candidate passes guarded Windows and minimal Linux qualification;
+separate clock/privacy/escaping faults are detected. A bounded focused workflow
+runs the exact suite with normal imports and no database/network/process effects.
+Independent probes confirm expiry, disclosure, pagination identity and escaping;
+workflow review confirms actual assertions and effect-denial controls. The existing
+backend manifest gains exactly the projector; its member bound and digest pins
+are qualified without changing byte limits or WSP62 exemptions. Hosted checks
+and the final complete-source review remain required before publication.
+
+## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
+
+WSP00/6/10/15/22/50/97; preserve both hosted failures at `174955143d`.
+The 47-suite startup selection reached 1,001 passed / two failed / one skipped;
+both actual process-fence cases failed child import before lock observation.
+Keep spawn, real POSIX locks, inode assertions and bounded cleanup. Reuse the
+existing test-support owner for a canonical child import; no production change.
+
+Separate credential-free installed qualification passed both profiles at that
+exact source. Independent live byte/ownership and cleanup review checked all
+2,701 installed files, 22 required source members, 18 imports and four rejecting
+absent-owner entrypoints. Both owned units are absent with PID zero. The rejected
+first export and all failure evidence remain. No native author or authenticated
+HIGH job is claimed; protected owner/current-generation inputs remain required.
+Repaired local Linux selection: 1,003 passed / one Windows-only skip across all
+47 workflow-selected suites; both actual process cases pass. Independent Linux
+review passes two unchanged positives and two effective lock-removal controls.
+The earlier focused seven cases overlap and are not added. Source hashes remain
+stable; no production or manifest bytes changed. Local --confcutdir=. prevents
+DrvFS ancestor collection; final hosted acceptance and publication remain required.
+
+## PR2181 hosted regression repair — 2026-10-23
+
+WSP00/6/10/15/22/50/62/97; existing 19/P0 integration. Hosted run39892207131
+found two failures before the Linux startup step: the current-selection module
+exceeded its retained 200-line cap, and a malformed schema raised TypeError.
+Preserve that failed run. Extract the existing opaque lease into one private
+95-line owner, retaining canonical aliases, one registry/lock and every use-time
+check. Keep source caps at 200/50 lines. Reject non-string schema values with
+contract errors; move the unknown-version sentinel from supported v11 to v12.
+The positive v11 check validates shape/domain/scope, not cryptographic authority.
+
+The repaired source passes 410 cases with four platform skips across 15 distinct
+suites; independent review passes 21 separate cases with stable source bindings.
+Eight manifest cases and three Node compatibility commands pass separately.
+Windows skips retain two POSIX fence, one symlink and one Unix descriptor gate;
+fresh hosted Linux execution is required. No native author or retained RSI gain.
+The existing machine backlog preserves the failed selection and source lesson.
+
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+WSP00/10/15/22/50/97; existing 19/P0 integration. Retain the preserved installed
+HIGH and live-lease history together with main's startup-clock repair, operations
+policy and selected-clip protections. Historical source/tests and timestamped
+input observations below remain distinct from current acceptance. Native author
+admission, evaluation and retained use are pending; LOW stays preserved.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## 2026-10-22 — CA trust build protection
+
+WSP12/22/97. Container build dependency downloads now use the reviewed
+incident-fixed runtime/trust bootstrap; build contexts and entrypoints remain.
+See `docs/audits/security/PYTHON_CA_TRUST_20261022.md` for scope and checks.
+No production image rebuild or rollout is claimed.
+
+## PR2150 operations policy binding repair — 2026-10-21
+
+## 2026-10-22 — PR1860 current-main scheduling reconciliation
+
+WSP 00/6/10/11/15/22/50/84/97. C4/I4/D4/Impact4=16/P0.
+Main `be7ce629b5f36382466432987eaf279b0e5bbc5c`; original PR
+`d0c3c16f93d3956083a7ab8341de531e43cc7abd`. Isolated source maintenance,
+not native worker execution or live publishing. Holo retrieval rejected the
+checkout/head binding (UNKNOWN freshness/index gap); exact Git, module docs,
+NAVIGATION and prior all-file audit supply the bounded fallback.
+
+Preserves selected-clip CLI/adapter, nonpersistent preview, transcript language
+and offsets, and dated source audits. Adds strict selected edit-page/visibility
+checks, a 100-page discovery bound, attempt limits shared across visibility
+passes, suppression of channel-wide sync for selected/preview requests, restored
+preview tracker state, and explicit success receipts. Preserve-metadata leaves
+prior description-sync evidence unchanged; changed metadata requires independent
+readback before claiming sync. Failed selected metadata updates do not schedule.
+An obsolete rotation-test double now accepts the actual driver keyword without
+weakening its budget assertions. Omitted `.en` model language remains English;
+explicit incompatible language still fails through the existing factory.
+
+The original hosted failure was a backend manifest digest-pin mismatch.
+Regenerate current registry/manifest and both digest pins, retaining current
+main's runtime members. Dedicated offline CI covers the connected path.
+Validation evidence and remaining acceptance are recorded in tests/TestModLog.md;
+merge/CI/main readback receipts belong to PR1860. No deployment/account effect.
+
+Preserve the exact sender/receipt policy and version1.1.1 from PR2150 head
+`4ec562fd669e63dc3c53f97ec625d2dd256b4c15` while reconciling main `a41a76053`.
+Align the existing registry/runtime version pins and regenerate the skill and
+backend manifests with their existing generators. The 1,449-member backend
+inventory is unchanged; only the policy, loader version and registry hashes
+change. Both existing consumer/test digest pins follow generated content.
+Strict version, receipt, tamper and manifest checks remain intact. Reused suites
+pass101/2 platform skips; three Node compatibility commands exit0. Full evidence
+and earlier failures are in tests/TestModLog.md. No Gmail action, installed
+runtime qualification or deployment is claimed. WSP00/15/22/50/71/95/97.
+
+## Grant startup time sampled inside revocation fence — 2026-10-21
+
+Reused `authorize_current_key_epoch_use` during installed dependency revalidation
+to avoid rejecting valid startup when the wall clock crosses a second between
+caller sampling and durable lock admission. Existing expiry/revocation/rollback
+checks and explicit-epoch equality remain intact. Deterministic regression
+extends the existing custody composition test; no native deployment is claimed.
+See tests/TestModLog.md for WSP97 research, allocation and validation evidence.
+
+## Installed HIGH closure reconciliation — 2026-10-22
+
+WSP00/5/6/10/15/22/50/97; existing 19/P0 lane. Preserved all 17 unfinished
+paths before reconciliation. The service entrypoint and HIGH leaf already exist;
+no replacement service was created. Independent import tracing justifies all 11
+added runtime members. The generated 1,462-member closure was current, but its
+consumer/test pins, 1,451-member cap and indexed manifest were stale. The LF
+artifact is 330,756 bytes; CRLF is 333,753, above the old 331,776-byte contract.
+The paired limit becomes 326 KiB (333,824), the smallest whole-KiB limit covering
+both. Exact digest, count, path, per-file/total bounds and authority checks stay.
+
+Existing CI startup selection now includes installed work admission and both HIGH
+service suites. Independent binding review accepted the frozen source: Python manifest8 pass,
+JS contract/preflight/async exit0, registry1,745/270 current. Fresh connected
+six-suite result153 passed/1 Windows skip in128.67s. The first run152/1skip/1fail
+is retained: its second fixture reached261 characters; the file existed and
+read through the Windows extended-length path. Shortening only external basetemp
+resolved the harness boundary; no source or assertion changed. Counts overlap.
+No native author, installation or retained RSI gain is claimed. Fresh-main
+reconciliation, hosted checks and publication remain open.
+
+## Installed HIGH service connection — 2026-10-20
+
+WSP00/5/6/11/15/22/50/62/71/77/97; 19/P0 prerequisite. Rebased metadata checkpoint onto live-lease prerequisite with all eleven source/test blobs preserved. Existing service/dependency/model/permission owners now connect distinct V11 scope; one narrow HIGH leaf keeps the LOW service at 296 lines without cap inflation. Full runtime validation precedes custody; the self-leasing nonce loader remains outside the request fence.
+
+Actual fixture parent/effect factory signatures and durable nonce/replay controls pass. Initial installation/current-input, OS custody, permission/root oracle and clock seams are synthetic; model/approval signatures, canonical scope and MAC/SQLite are real. Focused core: 83 passed/1 Windows Unix skip/0 failures in 76.271s; independent ingestion5 pass. Connected exact results are retained externally; counts overlap. No real runtime/service/credential/grant/provider effects. Authentic current non-initial policy/manifest/selection, signed model/parent/effect inputs, custody and budget admission remain required. Known-path missing metadata and expired LOW drafts do not supply them. Historical checkpoint follows.
+
+Known exact setup gaps are retained externally: Windows native-owner configuration
+was unset (`windows-native-owner-configuration-readiness.json`, SHA256
+`21949d844b851e0a2ed061bf6126bb65081642cff4b50bc52239cfa19dc619f3`),
+and lstat found both canonical issuer/target `signed_runtime_artifact_manifests`
+directories missing (`canonical-manifest-directory-availability.json`). These
+are timestamped known-path observations, not global absence or authority checks.
+Connected six-suite validation passed153/skipped1/failed0 in182.559s; the earlier
+83/1 focused count overlaps. Root publication/base reconciliation remains pending.
+
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+WSP00/5/6/11/22/50/62/71/77/97. Seven existing production owners and four
+test/support files provide distinct v11 signed policy and generic work-manifest
+installed-source metadata binding. Existing v10 initial LOW restrictions retain
+their AST. Real fixture signatures, audit attestation and artifact hashes are
+checked; OS provenance/current selection seams remain synthetic. No native HIGH
+activation or work authority is established. Permission/live-lease integration,
+parent/model ingestion and service dispatch remain closed pending composition.
+
+Original connected run: 450 passed/3 failed, zero skips. One stale unsupported-v11
+fixture now uses unsupported v12; its affected suite passes 102. The two remaining
+failures are unchanged baseline startup-test size debts (712>675 and 89>60), with
+no cap changes. Eight independent controls passed on the production freeze;
+counts overlap and must not be summed. Exact receipts are under the existing
+external `current-time-independent-review/high-installed-admission-author-review`
+and `high-installed-admission-independent-review` evidence directories.
+
+This is an unpublished recoverable checkpoint. Generated integrity, registry and
+runtime qualification remain pending after root-owned base/live-lease integration.
+Metadata-only inspection found the known real owner/E0/target/issuer input files
+absent at `/var/lib/foundups-rsi-handshake/20261016`; the Windows preparation draft
+is expired initial LOW with no queued work. This is not a global absence claim or
+proof about unread budgets, parent evidence or credential availability.
+
+## Live authenticated generation scope — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Reused nine existing owners to avoid
+nested generation flock while repeating actual current parent/effect/model and
+nonce checks. Public self-leasing and LOW remain unchanged. Connected 390/9
+platform skips, Linux process 2/0 and independent 16 controls validate the core
+with synthetic admission seams. Failed exit withholds the result; durable effects
+are not rolled back by that claim. Installed HIGH selection/model ingestion and
+genuine admission remain next. Historical checkpoints below retain their tested
+source and publication state. Integration base 6dd48a5a inherits the corrected
+nonce compatibility history and byte contract; all 17 core Git-LF blobs match.
+Generated runtime 1,451; registry 1,742/270; both generators check clean. Binding
+36 tests pass without skips and all three Node checks exit 0.
+[Receipts and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
+
+## Consensus nonce publication compatibility repair — 2026-10-20
+
+Hosted PR2165 CI39289991059 found a real regression: a trailing comma made
+the modern-owner version predicate an always-truthy tuple. Legacy owners
+entered per-selection validation. The unchanged 10-case model-pair family
+reproduces seven failures; removing the tuple tail makes all 10 pass.
+The existing signed-model gate now covers both v12 and complete v13 owners.
+The full hosted-startup selection runs locally: 901 passed, 5 platform skips, zero failures/errors.
+Source hashes remain stable.
+Independent review passes three legacy/v12/v13 behavior controls and
+verifies the one-source-digest change with unchanged pins policy.
+Regenerated digest pins retain the 1,449-file inventory and unchanged limits.
+Both generators check current, 36 binding tests pass without skips, and
+the three backend compatibility Node checks exit zero.
+These synthetic fixture checks
+do not establish installed HIGH authority or native worker execution.
+WSP00/5/6/10/15/22/50/62/71/97. Exact receipts and commands are in dispatch.
+
+## Protected consensus nonce prerequisite — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Opt-in v13 reuses protected custody,
+current E0 and provisioned MAC/SQLite stores; no service is activated. Connected
+437/3 platform skips and independent 21 controls validate the synthetic component.
+Reviewed helper extraction preserves behavior and original caps; inherited test
+size debt remains explicit. Next is the existing single-lease HIGH composition,
+with genuine admission still required. Runtime inventory 1,449 includes custody
+only; registry 1,737/270 and both generators check clean. Binding tests 36 pass
+without skips and three Node checks exit 0. See [dispatch](../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+
+## Parent-consensus publication structural repair — 2026-10-20
+
+PR2164 CI39281556290 exposed the owner loader at682 lines against its unchanged
+675-line guard. Moved the existing outcome-authority root-separation helper into
+the existing owner-input module; loader import preserves its original access path.
+The helper and remaining module ASTs are unchanged. Independent review passes57
+before/after cases and both cold import orders; loader652/owner263. Runtime1448
+inventory/caps stay fixed; regenerate source digest pins. This repairs a structural
+publication gate, not installed HIGH admission. WSP00/5/6/10/22/50/62/71/97.
+
+## Parent-consensus connection — 2026-10-20
+
+WSP00/5/6/10/11/15/22/48/50/62/71/77/97. Extended existing owner/principal,
+model-verifier, parent/effect, signer and current-use contracts; no new orchestrator.
+V12/v3 separate reviewer domains and exact model selections. Proof v2 retains the
+16-KiB cap and policy; parent-v2 RPC avoids same-lock recursion then reverifies.
+Independent review caught and repaired late expiry/rollback gaps in the collector.
+Twenty model/current-use and17 Linux RPC/nonce held-outs pass on44 frozen files;
+connected59 suites pass1,545/22 platform skips after fixing pytest root isolation.
+Production guards are unchanged; original failures are retained. Six suites join
+existing CI; generated runtime1448 and registry1731/270 retain exact checks.
+Installed HIGH custody/nonce supply and authentic inputs remain open; LOW and
+qualified runtime294195cdb stay unchanged. See tests/TestModLog and the current
+[dispatch evidence](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
+
+## Parent-consent connection — 2026-10-19
+
+WSP00/11/15/22/48/50/77/97. Existing parent resolution lacked an authenticated
+consent provider. Added two narrow leaves for the distinct parent privilege and
+connected them through the existing current-principal facade and owner loader.
+Opt-in v11 preserves v1-v10 contracts, including v10 socket ancestry and separate
+rate stores. Detached signatures bind the canonical parent, policy, owner and
+generation; principal/owner/time changes and failed lease exit reject.
+
+Independent review reproduced policy loss in the draft legacy result. The final
+`ParentConsentEvidence` retains the policy and existing execution consumers reject
+it. Its data still requires trusted current-use composition. Connected512 passed,
+2 existing Windows skips; independent37 passed. See tests/TestModLog and the
+existing RSI dispatch receipts. Runtime manifest now includes the two leaves
+(1441 total), with an exact cap and cap+1 rejection. No native service, grant,
+provider call, route promotion or frozen-runtime change occurred.
+
+## Native audit codec correction and response-path evidence — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. Existing disposable preparation incorrectly encoded
+two audit credentials as hex. Canonical decoder controls reproduce rejection;
+the reviewed fixture-only repair preserves integrity formats and all authority
+limits. V32 now observes accepted inner signing and outer authorization. Later
+sendall fails and the requester rejects; timeout/errno remain unobserved.
+All seven units absent, observation/cleanup complete. No worker admission or RSI
+gain. V33's canonical Protocol class was rejected by the observer setup; a
+candidate correction passes actual installed-module setup controls. Separately,
+authenticated timeout30 silently used nested-client default5. The existing supply
+loader now accepts a bounded timeout keyword and the initial backend forwards
+its authenticated setting. Default5 and signed expiry remain unchanged. Windows
+validation166 passed/2 skips. Exact294195cdb runtime independently qualifies;
+v34 receives accepted inner signing with issuer/target exit0. Outer handshake
+rejects RESPONSE_INVALID; all7 services absent, observation/cleanup complete.
+V35 localizes the target factory result type/ok gate; no factory exception is
+observed. Offline profile60/custody300 mismatch is reproduced, but the actual
+v35 provider code remains unknown. V36 accepts the synthetic LOW handshake and
+independently verifies both signatures; target factory returns ok=true/NONE.
+Profile ceiling60 becomes validated args.ttl300, with absolute expiry/signed30
+unchanged. All7 units absent/no cleanup errors, but root2 leaves clean service
+closure false. Next18/P0 resolves authentic parent/work/model/verifier/budget
+admission through existing owners; no author execution or retained gain. LOW
+no-effect review remains distinct from upstream author
+and elevated materialization. [Receipts](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+PR2162 CI39257095414 stopped before the signing suite because the Linux reviewer
+runner selected obsolete schema-only test IDs. Its selector now includes all nine
+timeout/schema cases plus the five reviewer cases; exact count/set checks remain.
+Independent collection passes; full 14-case remote execution remains required.
+
+## Exact runtime and v29 lifecycle reconciliation — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. Published ec7a source/runtime remains independently
+qualified; exact-main CI/CodeQL passed. Preserve historical v28 and component-only
+ABBA measurements. V29 confirms rejected backend status before resident sendall
+C_RAISE; the rejection branch remains unknown. All seven units are independently
+absent. The harmless oneshot control separately proves a launcher wait cycle.
+V30 independently evidences the lifecycle correction: observation/cleanup complete,
+target exits zero before cleanup, no cleanup errors and all seven units absent.
+Handshake still rejects; no timeout, authority, observer or acceptance change.
+Next: identify then repair the backend rejection branch. Author admission remains unproved.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#qualified-runtime-and-v29-handshake--2026-10-19).
+
+## Native requester rejection after descriptor publication — 2026-10-19
+
+WSP00/5/10/15/22/48/71/97. PR2159 mergedbb9d3f802 with all 19 recorded exact-head
+check runs passing (12 distinct check names), plus main CI/CodeQL; treec7045432
+equals reviewed1e203d5. Independent
+qualification verifies2683 files/358 directories,1246 exact Git sources and1437
+runtime files; deny/Unix profiles preserve confinement and four absent-owner
+entrypoints reject. Optional lazy imports are explicitly outside this proof.
+
+Synthetic v21 passes installation/revocation. Root/issuer/target reach readiness;
+target serves1/exits0 and requester exits2 with REJECT_SIGNER_RESPONSE_INVALID.
+No underlying target exception is captured. Root timeout is later; target
+reset-failed_exit_1 remains failure evidence, while current7-unit absence is
+independently verified. No author ticket or retained gain. Existing launcher
+diagnostics are the next18/P0 slice; guards and timeout limits stay fixed.
+V22 repeats rejection and exposes observer coverage debt: its event cap was
+consumed by handled containment checks. Revised actual-interpreter controls
+cover noise, null-line offsets and exact client return observations. V24 records
+TimeoutError -> CONNECT_FAILED -> inner verification rejection. Its unwind
+offset does not establish the socket operation or issuer cause. All7 units are
+independently absent. The separate credential-free runtime guard observation
+measures3.769s/2.706s; it is not a request-latency or retained-benefit measurement.
+See existing dispatch and tests/TestModLog for source-bound evidence.
+V25 retains the originating RAISE at client304 (`recv`), then observes issuer
+root-client412 rejecting zero-or-over-limit response bytes. The branch and
+causality are unknown. All7 units are independently absent. V26 extended only
+diagnostic observation; v27 disabled issuer/target observers and still rejected
+the requester after installation/revocation pass. All seven v27 units are absent;
+no inner socket operation is proved by v27 and the different-boot pair establishes
+no causal gain. Next: qualify the independently reviewed containment candidate
+and measure full native cost. Connected 111 passed/8 Windows skips; candidate
+native runtime remains unqualified. Signed lifetimes and authority stay fixed.
+
+## Installed descriptor validation cost — 2026-10-16
+
+WSP00/5/15/22/48/50/71/84/97. Existing descriptor owner now checks immediate
+parent closure for validated paths and reuses validated installed-source suffixes,
+retaining exact-string rejection. Full ancestor closure, detached output, digest,
+ordering and caps are preserved; filesystem verification is not cached or removed.
+Author native focused suite:128 passed. Three paired public-descriptor measurements
+averaged0.18158s baseline versus0.10162s candidate (44% reduction for this pure
+function). Independent275 differential controls passed;217 connected cases eventually passed
+with an initial socket-path harness failure preserved. See TestModLog;
+this is not evidence of faster native admission or retained RSI benefit.
+
+PR2147 is merged with passing exact-main checks. Frozen88690 qualification and
+v19/v20 failures are reconciled in the existing dispatch/roadmap. Native author,
+activation/rollback and later measured retained use remain open.
+
+## AntifaFM SOCIAL campaign routing — 2026-10-18
+
+Reuse the explicit campaign adapter for `antifafm`, delegating to the social
+orchestrator owner. The new campaign rejects unknown keys, duplicate parameters,
+stray tokens and malformed quoting before effects. Existing research-campaign
+behavior is preserved. The OpenClaw workspace prompt points to the canonical
+prototype/runbook; manifest verification and existing permission routing remain
+in force. No new daemon, native executor or production registration was added.
+Default adapter CLI retains scan/audit; `--via-dae` selects DAE permission routing.
+Offline command-route coverage is in `tests/test_social_campaign_adapter.py`;
+the connected selection is documented in the social orchestrator tests README.
+
+## Enrollment artifact read bounds — 2026-10-16
+
+WSP00/5/11/15/22/50/62/84/97. Actual disposable installation rejected approval
+182,859 bytes, descriptor 685,781 bytes and 26 source files above 64 KiB. Existing initial
+approval, installed-bundle and source reads now explicitly select the existing
+1 MiB artifact limit; generic owner reads retain 64 KiB and all protection checks.
+Author 131 and independent 87 Linux cases pass; connected CI selection passed
+689 with 3 skips. PR 2145 merged at 7a9fe8602 with passing exact-main checks.
+Runtime 34eed remains frozen. V18 closes installer receipt/source-path repairs and
+passes revocation, then LOW handshake rejects at durable `_checked_now`. Current-time
+use samples/rechecks inside the fence; explicit stale epochs and observed rollback/expiry
+reject. Late rejection withholds results without undoing effects. Author 207 and
+separate independent 17 passed; counts are not additive. Native admission and retained benefit remain unproved.
+Current integration evidence and limits: docs/operations/RSI_SWARM_DISPATCH.md.
+
+Source-bound receipts and preserved failures: tests/TestModLog.md.
+
+## Initial control identity bootstrap — 2026-10-16
+
+WSP00/5/10/11/15/22/48/50/62/71/84/97. Fixed a demonstrated bootstrap cycle in
+existing root initialization, revocation and protected-use clients: initial
+control identity may have no outcome grants. Exact descriptor v2, LOW, integer
+generation1 and empty list may explicitly carry null consensus. Full outcome
+validation still requires a consensus digest and independently signed grants.
+E0 v10 gates target control factories; signed revocation advancement remains
+available because protected use requires an established witnessed anchor.
+Issuer role remains LOAD-only. No fabricated outcome or consensus was supplied.
+
+Independent review accepted188 cases with one unchanged documentation-size
+failure (INTERFACE3305>1511). Connected author run:377 passed, one same failure,
+one root-only skip; that socket case separately passed as Linux root. These are
+synthetic authority tests, not native admission. Existing source/test size
+regressions were repaired without changing limits. See the canonical dispatch
+and tests/TestModLog.md for source-bound evidence and remaining execution gates.
+
+## Installed consumer and runtime startup integration — 2026-10-16
+
+WSP00/5/10/11/15/22/48/50/62/71/84/97. Reused current enrollment, manifest,
+permission, durable-store and bounded service owners. Added authenticated
+installed consumption, issuer runtime checks and fixed loader-to-service startup.
+Independent review repaired legacy missing evidence and root-LOAD guard gaps;
+consumer209/guard62/wiring18 cases passed, plus174 connected cases. Actual
+guard qualification remains credential-free; native admission and retained RSI
+gain remain open. PR2142 main CI/CodeQL passed and four completed lanes retired.
+Independent rate255/socket159 cases passed. Remaining native installation gates and source-bound evidence are in the
+existing RSI dispatch/backlog; no second orchestrator or roadmap was created.
+
+## Initial enrollment and target grant integration — 2026-10-16
+
+WSP00/15/22/48/50/71/97. Integrated independently reviewed initial installed
+manifest enrollment and target-internal LOW grant acquisition. Existing approval,
+generation, grant-provider, revocation and signing owners remain authoritative.
+Fourteen Linux suites passed459 cases. Separate issuer rate storage and installed
+consumer/runtime checks are required before native execution; no live grant or
+retained improvement is claimed. See tests/TestModLog.md and the existing backlog.
+
+## Installed issuer artifact and policy preparation — 2026-10-16
+
+WSP00/15/22/48/50/62/71/84/97. Added inert canonical installed-source bundle
+validation and explicit initial-only E0 v10 descriptor binding. Preserved legacy
+archive schemas, signing projections and fail-closed runtime rejection. Reused
+existing contract/custody/permission owners; no deployment or grant issued.
+Independent artifact250/policy161 cases and real F runtime qualification support
+only their bounded scopes. Next: authenticated enrollment/consumer and target
+internal grant acquisition before the native R15 experiment.
+
+## Protected independent issuer custody — 2026-10-16
+
+WSP00/5/6/11/15/22/48/50/71/84/97. Explicit owner v9 supplies protected
+issuer signing/audit and separate loader signing/replay bindings. Reused the
+existing systemd resolver, replay materializer, E0 lease and issuer-only LOAD
+oracle. Actual refs match signed hashes; requester roles remain distinct;
+isolation precedes credential resolution. RPC releases the generation lease,
+then owner/policy/custody/time are revalidated. Prior owner schemas and model,
+effect, reviewer and grant consumers retain their checks. No installed authority
+is created. Full contract is in the existing key-provider contract document.
+
+Author9-suite Linux run244pass and independent63pass (12 held-outs) preserve
+explicit synthetic OS custody/owner/isolation boundaries. Source-bound receipts:
+E15 `next-startup/grant-custody-source-inventory.json` and
+`custody-review/independent-grant-custody-review.json`. The integration base also
+contains the independently qualified empty-source reader; native runtime and
+initial installed-issuer enrollment remain the next dependency before R15.
+
+## Protected empty source qualification — 2026-10-16
+
+WSP00/5/6/15/22/50/71/84/97. A real confined import of the exact grant service
+loaded220 repository modules with all six package initializers. Source admission
+then rejected the tracked zero-byte `modules/__init__.py`: the shared protected
+reader required nonempty owner JSON for every source file. The source inventory
+now explicitly permits empty bytes while requiring the exact approved digest.
+The reader remains nonempty by default; ownership, ancestry, descriptor binding,
+symlink rejection and64KiB bound are unchanged. Literal `True` is required.
+
+Three connected Linux suites passed84 cases. The existing privileged selection
+fixture now pins its signed test clock, retaining real ownership checks; its
+previous stale clock failure is preserved in evidence. Independent confined
+qualification remains separate from runtime enrollment and native admission.
+Evidence: E15 `next-startup/empty-source-before.xml`, `empty-source-after.xml`,
+and `empty-source-final-84.xml`. Independent confined rerun accepted the220-module
+source inventory and passed19 real-file security controls; network syscalls were
+denied. See `installed-source-qualification/empty-source-candidate/independent-qualification-receipt.json`.
+The188 observed runtime files and26 native mappings are not a complete future
+Linux runtime binding. This is a dependency repair, not retained RSI gain.
+
+## Issuer root LOAD and permission fence — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Added an explicit issuer-only
+root LOAD v2 role using existing signed wire/client/service/oracle owners.
+Legacy v1 bytes and target behavior remain unchanged. Current issuer identity,
+kernel peer, E0 and target descriptor bindings are required; mutation and target
+protected-use operations reject this role. The permission owner releases its
+generation lease for root RPC and revalidates before/after the fenced action.
+
+The two-process regression preserves the old-order timeout control and tests
+repaired operation plus changed policy/generation/expiry rejection. The runtime
+materializer's startup composition moved to a cohesive119-line owner while
+preserving its public import and function behavior; the original owner is197
+lines versus296 at the exact base. No exemption or gate changed. Protected issuer
+custody and installed deployment remain required before native admission.
+
+## Callable LOW grant service — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Documented the independently reviewed
+bounded issuer composition over existing owner, permission, revocation, ephemeral
+custody, durable rate and socket owners. The callable restricts scope to LOW
+handshake grants and rechecks permission/current bindings before secret use.
+Transport completion is explicitly separate from grant acceptance.
+
+Added its focused test to the existing CI signing selection and registered it
+with the canonical test-registry generator. Service bytes remain unchanged;
+the socket test now reports its safe rejection code on failure. [TestModLog](tests/TestModLog.md#callable-low-grant-service--2026-10-15)
+records rebased connected results and synthetic-authority limits. Root LOAD
+identity is covered by the companion slice; installed custody and deployment remain gates;
+no CLI, credentials, runtime installation or paid calls were added here.
+
+Connected validation exposed two parent-base resident transport failures. The
+fixture now uses genuine kernel peer attestation and the current fingerprint
+contract. The resident owner retains the POSIX listener through cleanup and adds
+change-time identity checking. The original replacement test remains unchanged;
+new process tests cover normal/exception cleanup and foreign replacement without
+claiming timestamp-based atomicity. Service composition bytes remain frozen.
+
+## Grant bootstrap binding and LOW RPC — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Combined two reviewed repairs in
+existing owners: explicit E0 v9 prebinding excludes only the two future permission
+fields in addition to v8 exclusions, while full signed policy and admission retain
+them; LOW issuance releases the generation lock around RPC and rechecks fresh
+owner/binding/expiry under the caller-use fence. Legacy schemas and elevated paths
+remain unchanged. Independent review found and corrected comparison of refreshed
+selection timestamps; every other selection field remains compared.
+
+Added the native two-process RPC suite to the existing CI signing selection.
+[TestModLog](tests/TestModLog.md#grant-bootstrap-and-low-rpc--2026-10-15) records
+source-bound component evidence and synthetic authorization limits. No native
+issuer enrollment, runtime admission, new authority store or paid call occurred.
+
+## Initial handshake configuration — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Reused existing configuration,
+E0 selection and per-request backend for one initial LOW handshake. Distinct
+schema prevents mixed policy admission; separate socket root preserves immutable
+artifacts. Scope rejects before grants/keys and during current owner lease.
+Connected testing repaired frozen-policy tuple comparison. Independent74 held-out
+cases passed; no native handshake/worker/RSI claim. Production grant issuer
+composition is the next19/P0 dependency. Existing runbook holds exact evidence
+and prior PR2136 merged/main-validated/owned-cleanup closure.
+
+## Initial manifest and Linux activation — 2026-10-15
+
+WSP00/5/6/10/11/15/22/48/50/62/71/84/97. Reused same-nonce atomic recovery;
+added exact root-approved initial attestation rather than fake work/consensus.
+Initial manifests are generation1-only, including recovery and selection.
+Approval is rechecked around custody/publication; Linux immutable leases and
+separate anchor roots preserve artifact stability and writable store ownership.
+Independent review repaired generation2 recovery, expired publication and FIFO
+blocking. Real isolated signer -> generation activation -> credential-free reader
+passed; a separate repeat read agreed. Source/fixture boundaries and failed probes
+remain in the existing RSI dispatch runbook. Native service/worker admission is
+still the next18/P0 dependency; source publication is separately verified.
+
+## Protected initial writer — 2026-10-14
+
+Added the missing bounded issuer over existing generation/witness stores; guarded
+scope/expiry/order and extended existing SQLite opening/transaction guards. Repaired
+held-out equality, expiry, recreation and callback-exposure failures before acceptance.
+Connected294pass/1Windows skip; independent115pass; corrected isolated four-process
+writer/persistence/public-reader trial passed. Real fsync/reopen qualification,
+fixture manifest, no generation activation/native author/retained benefit. Prior
+PR2133 merged5dd7b7b9f with exact-main checks and owned cleanup verified. Current
+publication is separate. WSP00/5/6/10/11/15/22/48/50/62/71/84/97.
+Details: docs/operations/RSI_SWARM_DISPATCH.md#protected-initial-writer--2026-10-14.
+
+## Initial high-water signing — 2026-10-14
+
+WSP00/5/6/10/15/22/48/71/84/97; base1af66972c. Reused existing bootstrap signer,
+pending codec and transaction/witness stores. Separate v2 schema/purpose/loader
+bind initial record contents while v1 stays anchor-only. Worker source review plus
+eight held-out negative checks found no blocker; cases retained in the same suite.
+Focused76pass; connected256pass/1platformskip. Real systemd prepare/abort/commit
+and separate credential-free public reader passed after correcting external probe
+import packaging. No capability, native ticket or retained RSI benefit claimed.
+Prior PR2132 closure and current Holo timeout/lease-recovery limits are preserved
+in the existing RSI dispatch runbook; protected writer issuance is the next layer.
+
+## Initial anchor bootstrap signer — 2026-10-14
+
+WSP00/15/22/48/50/71/84/97; base a3f656700. Audit found only abstract/test
+generation signers and writable-authority implementations; protected public
+reader factories already exist. Added the smallest private administrative adapter
+inside that subsystem: exact initial record signing from root policy and fresh
+systemd custody. No new scheduler or activation route. Independent review found
+scope mutation and policy-read expiry gaps; frozen state/protected comparisons
+and time rechecks close both, with regressions. Focused37pass; connected217pass/
+1Windows skip. Real Linux systemd final component signature verified with a
+disposable binding. Full enrollment, high-water writer and native ticket remain
+pending. Updated canonical planning/dispatch evidence and explicit CI selection;
+publication pending. TestModLog and dispatch runbook hold evidence boundaries.
+
+## Canary provider publication closure — 2026-10-13
+
+WSP00/10/15/22/97; base `53bb8814494989548fcb3fd65de0f33331a5734f`.
+Extracted the provider-selection source/tests and contract corrections from
+historical checkpoint `29bd97d44`; its planning and experiment records are not
+replayed wholesale. The canary preserves configured Hermes/OpenClaw selection
+without relaxing signed admission or invocation-time provider checks.
+New-base local validation: 133 passed, 2 Windows skips in 191.81s. Registry
+regenerated/checked at 1,700 tests; runtime manifest unchanged at 1,426 members.
+Hosted checks and publication remain pending; see tests/TestModLog.md.
+
+## Proposal packet and public startup composition — 2026-10-07
+
+WSP00/6/15/22/50/84/97;16/P0 (C4/I4/D4/impact4). Base main5fd833646
+closes PR2099; branch/main CI and CodeQL passed and reviewed/main trees match.
+The existing startup materializer already supplies current principal resolution,
+proposal high-water storage and grant admission after isolation. Reuse those owners.
+The old unconditional proposal-packet rejection is removed after a reproduced
+failure and positive public-entrypoint test. Packet creation never grants authority
+or starts a service; all existing startup/use-time gates remain in force.
+
+Final connected113pass,0skip (86.34s): real packet producer, manifest generation,
+public entrypoint, startup materializer, proposal signature and replay rejection.
+Missing/empty proposal stores reject with zero service entries, no target-key reads,
+no root operations and unchanged missing/empty files. Enrollment, OS custody,
+isolation and transport are explicit test fixtures, not native qualification.
+Independent source review cleared the change after strengthening the callback-entry
+oracle. Review did not execute tests independently.
+
+Earlier connected111pass/2fail: old fixture wrote a packet above its repo (runtime
+path rejection); moved it into its existing runtime directory. Windows spawn could
+not import the test package; final runner explicitly adds the bridge package root
+to PYTHONPATH. No production gate or acceptance criterion was weakened.
+Regenerated resident manifest is unchanged (1426 members); packet emission is
+outside that resident dependency closure. No package pin or runtime update required.
+
+Governed OpenClaw/WRE Holo maintenance completed at this exact base and stopped both
+owned runtimes. Subsequent owner query CURRENT/no-gap; retrieval top result is the
+expected materializer, with noisy ancillary results and tests supplemented directly.
+Evidence: outputs/rsi-permission-evidence-20261006/proposal-startup-closure.json.
+No local-worker inference requested; coordinator/reviewer usage unmeasured.
+Next: close publication, then inspect current native admission readiness and select
+an admitted bounded local-worker canary. Retention/rollback and later-use benefit
+remain required; test success is not RSI completion.
+
+## Deferred handshake and admitted proposal regression — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97. Existing16/P0 selection retained.
+The saved integration reproducer reached a valid handshake signature, but the
+resolve-per-sign validator rejected its nonempty response attestation. The existing
+canonical handshake verifier now checks both signatures and request freshness;
+other operation shapes remain closed. Seven controls cover valid evidence,
+substituted/missing signatures, wrong binding, expiry and unrelated operations.
+The owner/grant fixture now completes handshake, proposal signing, outer-grant
+replay rejection and inner proposal replay rejection. Selection/OS transport and
+pre-issued grants remain synthetic; this is not native admission or retained RSI.
+
+Connected119pass/2skip (42.32s). Skips: Windows symlink privilege and AF_UNIX.
+The first connected run found an inherited337-line factory against its200-line
+limit. Proposal authority helpers were extracted without intended semantic change;
+all moved definitions were independently AST-compared. Review caught a missing
+factory time import; repaired before the passing run. The new helper is included
+in the existing200-line/50-line-function and prohibited-import checks.
+
+Runtime closure1426 members, digest27c2486858303bd6d9f7aaccbebbe6aff5ac259cd89d555c8378a28926155827.
+Extension fast tier15groups passed after correcting local CRLF package bytes.
+Evidence: outputs/rsi-permission-evidence-20261006/proposal-handshake-closure.json.
+Independent source review only; no independent test execution or native qualification.
+No local-model or paid-worker calls; coordinator/reviewer usage unmeasured.
+Next: exact-source publication, then existing packet-supply principal/replay adapters.
+No automatic retry, promotion, merge or runtime grant follows from these tests.
+
+## Cost-bounded admitted proposal diagnostic — 2026-10-07
+
+WSP15/22/50/97; existing16/P0 selection retained. Source f4087d8b42207f797736670e872c7c8d83930955.
+The saved integration fixture corrected its consumed-grant observer and captured
+clocks. The real owner/grant composition under synthetic selection/transport
+reaches successful handshake signing, then rejects at deferred response validation;
+signature verification and the proposal phase are not reached. The existing
+attestation-shape check permits nonempty evidence only for authoritative-use leases,
+not peer handshakes. Next: reuse the canonical handshake verifier and test the
+response boundary without weakening rejection of unsupported operations.
+
+Latest targeted run:1failed/28deselected,4.34s; no local-model or paid-worker calls.
+Coordinator usage unknown. Reproducer and failure evidence saved under
+outputs/rsi-permission-evidence-20261006/proposal-admitted-cost-checkpoint.json.
+Only the owned unfinished test was restored to its committed version after a
+byte-for-byte diagnostic backup. No runtime change, independent review, remote
+publication, native admission or retained RSI benefit is claimed for this diagnostic.
+
+## Deferred proposal activation checkpoint — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97;16/P0 (C4/I4/D4/impact4). Base main
+1e220147c20dbe733e8673e46ac391ff2277651d closes PR2098; tested/main trees
+match87dd5d72246e629f55f7d8bb41fbef2926ff47c4. Branch CI37550952810 and
+CodeQL37550949998 passed; main CI37551876853 and CodeQL37551877035 passed.
+
+Existing deferred factory and runtime now compose proposal activation inside the
+owner lease. Keys resolve afresh; only a bound activation digest survives calls.
+Current principal/policy checks surround resolution and each key signature.
+A live thread-bound scope invalidates copied contexts on exit. Durable policy
+activation occurs once; a fresh factory cannot reconstruct it from consumed state.
+The startup gate defers activation only for the matching existing backend/factory,
+config and high-water store. Other specialized modes remain rejected.
+
+IMPLEMENTED_NOT_VALIDATED for native admission. Component/regression72pass/1skip;
+these include real cryptography and durable nonce-store controls but inject a
+synthetic owner scope for proposal factory cases. Full grant/root-owner/runtime
+proposal composition is still required. The run-packet supplier remains closed.
+No native enrollment, worker improvement or retained RSI benefit is demonstrated.
+
+Independent review found copied-context lifetime and expiry-during-commit defects;
+both reproduced (2fail), repaired, and included in the passing connected result.
+An intermediate59pass/1fail/1skip exposed the key adapter's missing public-key API;
+repaired without weakening signature verification. A further principal-I/O expiry gap
+reproduced in two cases and is repaired by final monotonic/deadline checks.
+A separate clock-composition rollback reproduced1fail; all leased verification
+samples now share one checked clock. Final changed factory/structural35pass12.97s
+follows connected72pass/1skip34.93s. The skip is Windows symlink creation privilege
+(WinError1314). Independent source recheck cleared these repaired deltas; it did
+not execute tests. Packaging integrity8pass65.49s, extension15groups pass6.977s,
+registry1695/270 current. Manifest1425 files, digest9879095d4b038967c6d5a4de9cde381204c325be1fcf8112f8c074c629379a8a.
+This is a recoverable local checkpoint, not native qualification or publication.
+
+The exact-main Holo maintenance transaction rejected `workspace_changed_during_transaction`
+after coordinator edits overlapped its workspace check; both owned runtimes stopped.
+This is a coordinator sequencing error, not fresh retrieval evidence. Retry only
+from a clean frozen checkout of the exact target main, without an overlapping writer. Preserve the failure.
+Next: test actual admitted proposal composition and all grant/replay failures,
+then qualify packet supply. No broad reaudit, failed-worker retry or paid fallback.
+Evidence: `outputs/rsi-permission-evidence-20261006/proposal-activation-execution.json`.
+
+## Current-generation Memex use-time verification — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
+Existing producer, collector and valve now recheck retained proposal signatures
+using selected runtime configuration and manifest-bound principal records. Exact
+work, signer, principal ID/provider/key, revocation, lifetime and mutation bindings
+are checked. Independent source review found a same-ID/different-provider gap;
+the authenticated fixture reproduced it (1fail), and the identity join repaired it.
+Nondecreasing time is checked across verification and final collection.
+
+Local connected168pass plus the separately added valve-routing case1pass; no
+failures/skips in these final runs. Tests use real signatures/generation records,
+but provision the proposal packet explicitly in fixtures; OS/peer seams are
+substituted. Source review was independent; test execution was not independent.
+The valve-routing case is a routing test, not evidence authenticity proof.
+No effect authority, native enrollment or retained autonomous benefit is claimed.
+
+Native run-packet supply still rejects proposal policies with
+`signer_run_packet_proposal_runtime_adapters_unavailable`; the existing ephemeral
+backend factory rejects them with `signer_grant_profile_scope_unsupported`.
+Re-observe those existing owners next; do not remove guards without admitted
+principal/replay adapters. Reuse before extending; no new orchestrator or store.
+Evidence: `outputs/rsi-permission-evidence-20261006/memex-current-use-execution.json`.
+Packaging: integrity8pass66.90s; extension15groups pass9.109s; registry current
+1695 files/270 quarantined. Manifest1425 files, digest79d3798f92fe8abea185e5ede72563557ee619b867f8bcde67f5d3fa2738fb47.
+Publication pending. Coordinator/worker cost remains separately accounted: no
+coordinator-initiated model calls in this slice; coordinator/reviewer tokens unknown.
+
+## Retention closure and native Holo maintenance — 2026-10-07
+
+WSP00/15/22/50/97. PR2097 merged15089a44fe2ffc7150e7cd09688260fa3560e607;
+reviewed1319907e2372c0529b570c700d635df4cb7f4958 and main have equal trees.
+Final branch CI37546071345/CodeQL37546067553 and main
+CI37547076619/CodeQL37547076345 passed. Recovery bundle verified; old owned lane
+retired. Earlier pending/retry entries below are historical.
+
+Reused `reddog_holoindex_postmerge_runtime_once.py` for the exact-main queued
+maintenance task. An initial resume invocation correctly rejected the unequal
+authority/workspace heads; the normal entry reconciled the same task and ran it
+through OpenClaw and its supervisor. COMPLETED, no rejection, both owned runtimes
+stopped. Subsequent owner query CURRENT/no-gap agreed with the runtime generation
+and freshness receipt. The controller did not reindex; the existing maintenance
+owner performed the governed transaction. No new module, authority or scheduler.
+
+Evidence: `outputs/rsi-permission-evidence-20261006/`:
+`memex-retention-2097-merge-closure.json`, `memex-current-use-holo-runtime-initial.json`,
+`memex-current-use-restored-holo.json`, `memex-current-use-next-slice.json`.
+No coordinator-initiated local/paid model calls; total inference/coordination cost
+unmeasured. No repeated broad tests. Next15/P1 is existing current-generation Memex
+consumption; no native worker improvement, retention or later benefit is claimed.
+
+## Retained proposal verification inputs — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97; selected14/P1 (C2/I4/D4/impact4).
+PR2096 merged0383b9804ce08fffaac6cf74fb0aeedd93eb04d2; equal reviewed/main trees,
+branch/main CI and CodeQL passed. Holo query still reports authority-root/head
+mismatch; source-pinned fallback is not CURRENT index evidence.
+
+The existing promotion/publication path retains the original signed attestation,
+source profile, admission, determination, queue candidate and typed Memex receipt
+inside the existing runtime profile artifact. Inputs are detached before signature
+verification; current runtime configuration and keys are supplied separately when
+rechecking. Runtime-profile validation binds the bundle to its outer digests;
+source/seed profiles reject it. Legacy retries preserve original bytes/revision.
+No new store, orchestrator, worker call or admission capability is created.
+
+Corrected baseline reached missing retained field (1fail). Initial test setup had
+stale work-state/Memex revision bindings; those were corrected before claiming a
+product defect. First connected218pass/1 Windows temp-length setup failure;
+review found legacy retry rejection (1fail), repaired with exact old-digest matching.
+Final connected222pass42.60s across six existing suites, including21 publication
+roundtrip cases. Independent source review cleared the replay repair; it did not
+independently execute tests. Final manifest integrity8pass63.74s; extension15pass8.137s; registry1695/270
+current. Manifest1425 binds two existing newly reachable modules; exact cap
+accepts1425/rejects1426. CI includes all six suites. Publication pending.
+
+This is disposable-fixture verification, not native RSI. It clears no resident
+trust reason. Current-generation authenticated supply/live-time consumption,
+scoped worker improvement, independent baseline/held-out validation and later
+retained benefit remain outstanding. No local-model or paid-provider calls;
+coordinator/review usage unmeasured. Evidence:
+`outputs/rsi-permission-evidence-20261006/memex-retention-execution.json`.
+
+PR2097 first CI37543877695 passed702/3skip but failed the existing60-line WSP62
+bound: `_visit_type_paths` had61 lines. Combined equivalent early returns without
+changing the bound or allowed paths; independent delta review found no issue.
+Revalidated all six connected suites plus the missed structural suite:229pass48.02s.
+Revised manifest integrity8pass63.36s; extension15pass8.738s. Hosted retry pending.
+
+Second hosted CI37545061909 passed the size/signing gate, then startup reported
+588pass/1skip/28 main-entry failures because ChromaDB was not installed yet.
+Moved only the main-bootstrap suite after the existing pinned ChromaDB install
+in resident-chain tests. All six suites remain selected exactly once; YAML and
+ordering checks passed, independent delta review found no issue. No runtime or
+dependency changes; third hosted run pending. Do not repeat unchanged local tests.
+
+## Current-generation model consumption — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
+PR2095 merged c83ff5c840a69174e20836758cb650457adbdec9; reviewed/main trees
+match. Branch and main CI/CodeQL passed (main37538959066/37538959007);
+owned branch retired with verified recovery bundle.
+
+Existing generation binding now snapshots the exact work-order model pair,
+binds both IDs/digests to signed work authority, loads protected owner v8 inputs
+inside the selected generation lease, executes Ed25519 verification and consumes
+the one-shot capability. Missing/rejected model inputs preserve other evidence.
+The existing collector carries this proof into the valve; only the two model
+reasons can clear, with an exact current work-order match. Peer RPC stays outside
+the generation fence; both snapshots and final model/owner/generation expiry are
+checked. No effect lease or credentials are minted.
+
+Baseline missing API:8fail9.07s. First connected77pass/6fail (size limit plus five
+stale call assertions); corrected without widening limits. Review found a clock
+rollback across crypto:1fail4.18s reproduced, then fixed with an invocation-wide
+monotonic clock and receipt start/end checks. Repaired connected88pass79.73s;
+additional real collector/mutation check1pass4.58s. Independent source recheck
+found no blocker; it did not independently execute tests. Real producer/collector
+fixtures substitute principal validation; valve/peer projection substitutes the
+producer. Native enrollment, admitted worker improvement and retained later benefit
+remain unproven. Conditional model acceptance leaves consensus, sovereign and
+Memex reasons; unprovisioned native runtimes still fail closed.
+
+Evidence: `outputs/rsi-permission-evidence-20261006/model-consumer-execution.json`.
+A later real-collector test reproduced rollback after producer return (1fail4.58s).
+The collector now shares a monotonic clock across all phases; connected89pass79.56s.
+Review required an external assertion to prove the negative reached a valid producer;
+that oracle was strengthened: final8 integrity tests plus corrected case9pass69.96s;
+extension15pass15.625s, registry1695/270 current. Runtime manifest1423 files.
+Exact bindings and test IDs are in the receipt.
+No local-model or paid-provider calls; coordinator/review usage is unmeasured.
+
+## Protected model verifier input supply — 2026-10-07
+
+Real-signature acceptance added before promotion: disposable Ed25519 keys feed
+the existing evidence fixtures; the protected loader's fixed production verifier
+accepts valid evidence, rejects a canonical record with an invalid signature at
+the real backend, and rejects a wrong trusted key. One-shot consumption/replay
+is checked. Strict3pass5.64s; final startup file38pass48.71s. Independent recheck
+confirms the crypto path. Root-file provenance remains a fixture seam; production
+runtime source and generated manifest were unchanged at that test-only checkpoint.
+
+CI then caught the existing 675-line source limit. The reviewed repair moves
+owner input loading into `reddog_signer_system_service_owner_inputs.py` within
+the existing module, preserving the public loader exports. The owner loader is
+668 lines and the extracted leaf108; the limit is unchanged. Moved crypto
+fixtures reuse the existing test helper. Connected extraction validation:
+90passed/1skip79.38s, including both structural suites. Review found no blocker.
+Generated runtime closure is now1423 files; final integrity results are recorded
+in the existing execution receipt: integrity8pass63.62s; extension15pass9.716s.
+No native admission claim.
+
+WSP00/6/15/22/50/62/84/97; selected15/P1 (C3/I4/D4/impact4).
+The existing protected owner loader adds v8, inheriting v1-v7 checks and binding
+six exact input paths/raw digests plus a maximum one-hour interval into config_id.
+It constructs the existing model verifier from the checked bytes, with fixed
+Ed25519 verification and no injected-verifier path. Each use checks in-memory
+input digests, current owner identity and strict time after owner-file IO.
+Adjacent consent/reviewer/grant/startup readers retain v7 behavior for v8.
+
+Independent review caught mutable snapshots and time sampled before owner IO.
+Eight regression cases fail on reconstructed pre-repair source; repaired connected
+validation97passed/3platform skips; adjacent compatibility128passed, including
+both v7/v8 public startup, grant signature and replay controls. OS custody and
+transport use existing test seams: this is source qualification, not enrollment.
+Review recheck found no remaining blocker. Evidence:
+`outputs/rsi-permission-evidence-20261006/model-owner-execution.json`.
+
+No resident gate clears in this slice. The caller must bind the expected owner ID
+to the current generation under its existing lease, then consume an actual model
+verification capability. Five resident trust reasons remain. Native worker,
+independent retained improvement and later benefit remain unproven. No local
+model or paid-provider call; coordinator/review cost is unmeasured. Initial generated closure was1422 files. Initial integrity7pass/1staging failure;
+corrected staged-manifest case1pass. Extension fast15pass; registrycurrent1695/270.
+Publication remains pending until recorded in the closure receipt.
+
+## Fresh peer resident connection — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97: existing bootstrap supplies an optional grant callback
+to the resident resolver. Its existing generation collector authenticates
+principal/process/profile, runs the existing OS-bound signed challenge, then
+re-observes stable generation/owner/artifact/endpoint identity. No fence crosses
+RPC. Final trusted time must precede both selection and manifest deadlines and
+peer expiry. No callback means no peer grant; malformed callbacks fail closed.
+Only the peer missing-evidence reason can additionally clear. Five others remain.
+
+Independent review reproduced two defects: renewed selection expiry changed
+whole-result equality; final freshness omitted the manifest deadline. Real
+selection-producer regression2fail before repair. Process/profile and handshake
+are substituted in these controls; they are not native enrollment evidence.
+Recheck found no further blocker. Connected123pass/1 fixture failure/5skip; corrected
+affected pair2pass on unchanged production source. Original failed run retained.
+Evidence: `outputs/rsi-permission-evidence-20261006/peer-consumer-independent-recheck.json`.
+The previously published prerequisite head passed CI and CodeQL; consumer diff
+requires its own validation. No worker retry, runtime grant or live effect.
+
+## Signer peer prerequisites — 2026-10-07
+
+WSP00/6/15/22/50/62/84/97, selected15/P1: extend existing generation/owner
+loader and healthcheck. Optional process identity binds the same root-loaded
+owner ID to the current selection. Reuse existing socket UID/GID/root checks;
+forward supplied secret grants without silent bare-sign fallback. Append audit
+session/socket/epoch fields. No new module, authority enrollment or gate removal.
+
+Windows82 passed/5 skipped; Linux29 passed/0 skipped, including three real socket
+identity cases. Grant fixtures prove forwarding only, not grant authorization.
+Baseline4 missing-API failures and intermediate41pass/2 fixture failures/1skip
+remain recorded. Independent source review found no prerequisite blocker.
+Full fresh resident peer consumer remains open; native RSI unproven. Evidence:
+`outputs/rsi-permission-evidence-20261006/peer-preconditions-execution.json`.
+PR2092 main CI37525762999 and CodeQL37525764472 now both pass.
+No worker/provider retries; coordinator/reviewer cost remains unmeasured.
+Generated bindings1422; integrity8 passed, extension fast15 passed, registry1695/270 current.
+
+## Principal connection closure / peer selection — 2026-10-07
+
+WSP00/15/22/50/97: PR2092 merged e3894546f, exact reviewed/main tree match.
+Branch CI320 startup plus566 resident/1skip and four CodeQL analyses passed;
+main checks pending. Owned lane retired with verified recovery; shared owners
+preserved. Re-observed socket-client and mutual-handshake owners; select15/P1
+peer consumer connection with current root/transport binding, retaining five
+other trust gates. No new module or runtime admission. Native18/P0 remains blocked.
+Saved receipts, focused local evidence and unknown coordinator cost retained.
+
+## Principal current-generation consumer — 2026-10-07
+
+WSP00/15/22/50/84/97, selected15/P1: reuse existing signed-generation principal
+records in the resident use-time check. Validate identity/provider/key and work
+principal/repo/FoundUp scope under the existing selection lease. Bind the checked
+snapshot to the audit receipt; reject mutations during artifact IO and retain
+six unrelated trust reasons. No new module, scheduler, store or runtime grant.
+
+Corrected baseline10 missing-API failures; connected100 passed/1 platform skip
+in40.44s. Independent review found a mutable-input race; same-snapshot checking
+and post-read comparison repair it. Recheck found no further concrete blocker.
+Initial invalid fixture and intermediate failures remain in saved evidence.
+Evidence: `outputs/rsi-permission-evidence-20261006/principal-generation-connected-execution.json`.
+Native RSI is unproven. No worker/provider retry; coordinator/review cost unknown.
+Generated manifest remains1422 files; integrity8/8 and extension fast15 members pass.
+Initial JS newline failure was corrected before the passing fast rerun. Registry
+current1695/270; all connected source hashes unchanged after validation. Publication pending.
+
+## RSI closure and next verified-owner connection — 2026-10-07
+
+WSP00/15/22/50/97: PR2091 merged6ad4ee360; exact reviewed/main tree match,
+branch CI37520547883 and main CI37521571358 passed (resident566/1skip).
+Main CodeQL Actions check failed during upload; available evidence gives no
+cause and GitHub rejects generated-workflow retry. Three other language jobs pass. Recoverable
+owned branch retired; no other owner changed. Re-observed resolver retains seven
+unconditional non-generation reasons. Select principal-generation verifier
+connection15/P1 (3/4/4/4) using existing owners, retaining the other six gates.
+Source work does not enroll authority or prove native RSI. Preserve local
+Linux86/14 failed broad-run evidence for separate triage; focused repaired pair2/2.
+Details and exact sources remain in the existing roadmap/backlog and RSI receipts.
+
+## PR2091 Linux fixture closure — 2026-10-07
+
+Hosted CI37517696484: bounded resident regression564 passed/2 failed/1 skipped.
+Both failures were Windows-skipped fixture drift. Symlink test now supplies its
+canonical work-order inventory so the actual symlink guard is reached. Socket
+test uses a short pytest-owned runtime root, a confined socket, profile work-order
+materialization and the existing bounded resident service for both signing RPCs.
+The preflight nonce assertion now matches the canonical non-consuming phase;
+exactly one issued authority and both verified signatures remain required.
+No production source, admission check or runtime authority was changed.
+
+Local Linux affected pair:2 passed/0 skipped in13.43s. Evidence and exact command:
+`resident-join-linux-pair-qualified-execution.json`, XML/log in the existing RSI
+evidence directory. Ubuntu system Python3.12 and cryptography, read-only reused
+pure-Python pytest; no package installs or gateway changes. Broader local run:
+86 passed/14 failed (12 missing-pip main-import failures, two unchanged socket
+unit cases); it is not a passing full-suite result. Those failures are preserved
+in `resident-join-linux-qualified.xml`, not suppressed or bundled into this fix.
+Test registry remains current1695/270. Independent nonce/source recheck:
+`resident-join-linux-nonce-followup-review.json`, SHA256
+`27793f978e652f328a9f10464efe0cd357a87beb7292cd5e0484e1caeeabfb36`.
+Hosted rerun pending. WSP00/6/15/22/50/84/97. No local-worker/OpenRouter retries;
+Codex architecture/review token use remains unmeasured. Native RSI remains unproven.
+
+## Resident final-decision effect join — 2026-10-07
+
+WSP00/6/11/15/22/50/62/84/97: existing bootstrap/registry now forward an explicit
+issuer to the resident valve owner. Approval binds the final decision, order,
+plan, signed authority, identity and expected bindings before one-use admission.
+After issuance, reload source/authority and repeat canonical evaluation with
+fresh trusted time. Independent review found strict permission expiry during
+approval; the repair rejects expired permission even with a live opaque lease.
+All seven unresolved trust reasons remain enforced. No new module or store.
+
+Local connected qualification:229 passed/2 skipped in79.67s. Source-bound evidence:
+`outputs/rsi-permission-evidence-20261006/resident-join-qualified-execution.json`
+and XML/log. Real disposable signatures, synthetic owner/runtime inputs. Windows
+skips: symlink privilege and AF_UNIX. Earlier failed fixtures and a stopped
+recursive test-clock stall are retained. CI now selects four resident wiring
+suites. Production classification: IMPLEMENTED_NOT_VALIDATED; no native RSI claim.
+
+WSP15: join16/P0 (4/4/4/4) locally qualified; publication/hosted CI pending.
+Native18/P0 remains blocked on authentic admission, fixed independent baseline/
+held-out evaluation, retention/rollback and later benefit. Next prerequisite:
+authenticated supply/verifier connection14/P1 (2/4/4/4), using existing owners.
+No further model calls or service changes. Reuse saved receipts and rerun only
+affected checks; the exhausted Qwen route stays paused. Architect cost unmeasured.
+
+Independent recheck: `resident-join-independent-recheck.json`, SHA256
+`ae409ebe72670d88d56cb1e861875cc5d5b0277150aa7986ad98b56166affd2e`.
+Generated binding review: `resident-join-generated-binding-review.json`, SHA256
+`0c14cc2e53ec2ee2fa5fa9ac9df56d37e275d6909388fe8983f1dd7c2b72a175`.
+Integrity8/8 passed in63.04s after staging source and generated bindings together;
+extension fast15/15 passed in12.624s. Manifest adds the existing issuer only:
+1422 files, exact digest0d1364227d76606d7329e4101911c491f487c36927bb074f3e425e48dd4508f8.
+Initial integrity attempt correctly rejected stale staged bindings. Test registry
+current:1695 files/270 quarantined. Hosted results remain pending.
+
+
+## PR2090 CI structural correction — 2026-10-07
+
+Exact-head CI37505730046 failed the existing conversation-authentication bound:
+signer backend678 lines exceeded675; its regression step otherwise had676 passes
+and3 skips. Move the pre-sign approval guard and pure attestation selection into
+the existing consensus-flow owner, preserving rejection/rollback/commit behavior.
+Backend is674 lines; no limit or existing assertion changed. This was a gap in the
+local test selection; include `test_reddog_conversation_scope_durable_authentication_wsp62.py`
+whenever this shared backend changes.
+
+Expanded local selection:707 passed in40.85s, including3 callback-invocation cases.
+Independent bounded review found no behavioral discrepancy; receipt
+`effect-signing-ci-structure-review.json`, SHA256
+`0925addac58381bdad69d4e9ea0be22ea94379254f673d5b3370e931b3621d57`.
+Updated-head manifest integrity8/8 passed in61.19s; registry current. Hosted
+checks pending. No runtime activation or native
+RSI claim. WSP00/6/15/22/50/62/84/97.
+
+## Effect approval lifetime repair — 2026-10-07
+
+At checkpoint982a74cf9, frozen lifetime regression: 3 failed, 1 passed. Verified
+reviewer expiry1001 still allowed a grant lasting to1030 and target use at1002.
+The provider now consumes the registered permit expiry and caps the unsigned
+grant before its ID/signing request. The independent signer separately requires
+an integer grant expiry after now and no later than its freshly verified approval
+minimum. Missing, boolean, float, text and out-of-range bounds reject before nonce
+reservation. Existing delegated approval behavior is unchanged.
+
+Connected Windows suite: 697 passed in35.53s (includes frozen cases and 7 malformed
+lifetime cases). Independent bounded review found no new concrete defect; receipt
+`effect-expiry-independent-review.json`, SHA256
+`f6dfc88449f9127a085086dea8c0b62a64579541445d0f1d818e320d733f497d`.
+This closes the prior source blocker, not native RSI. Fixtures remain synthetic
+at owner/runtime seams; no Linux-root execution or real service transport claim.
+Generated manifest integrity: 8 passed in61.88s; registry current (1695 files,
+270 quarantined). Publication pending. WSP00/6/15/22/50/84/97.
+
+## Single-effect grant composition — 2026-10-07 checkpoint
+
+Connect current-owner consent and reviewer quorum to one target permission,
+independent grant signing and the existing authoritative-use lease issuer.
+The target keeps its null consensus digest; the outer grant binds a distinct
+bounded effect proof. Legacy delegated approval remains unchanged.
+
+Local Windows connected regression: 687 passed in 34.90s. Generated manifest
+integrity: 8 passed in 64.61s. Test registry current (1695 files, 270 quarantined). Tests use real disposable
+signatures with synthetic owner/runtime provenance and in-process socket transport;
+they do not qualify native admission or an OS service. Dedicated Linux-root tests
+are excluded from this Windows run. Independent review blocks promotion: grant
+expiry can exceed verified approval lifetime. Cap it through independently verified
+evidence and test delayed target use before activation/publication.
+No local model retry or paid provider call was made for this slice; architect and
+review compute remain separate, unmeasured costs. WSP00/6/15/22/50/84/97.
+
+PR2089 is closed at ac645be6a6a30913381edc97ef93595ee20af76e, equal reviewed/main
+tree 8fecfc991ce7896a967c1a6f690888cca90f4bae. Main CI37498282161 and
+CodeQL37498284318 succeeded. The pending publication entries below are historical.
+
+
+## Bind grant consensus metadata to its verified proof — 2026-10-07 candidate
+
+Final connected63/63 pass in15.16s; manifest integrity8/8 pass in61.49s.
+Independent source/saved-result review found no concrete blocker; receipt
+`grant-digest-independent-review.json`, SHA256
+`8fa883a1f9571f6b55893ff2efa7519bf341952c0fb1589e6b3afb47e5831a56`.
+The test observes empty nonce state, not a reservation invocation counter;
+early rejection is also supported by source ordering. Publication pending.
+
+WSP15 selects14/P1 (2/4/4/4): observed grant metadata substitution is accepted
+by the existing signer path. Add one guard before nonce reservation, preserving
+independent proof verification and legacy two-child permission. Frozen baseline
+4pass/1fail; coordinator repair63 connected passes. Local worker failed5/5 and
+was rejected; no retry. No native RSI claim. See tests/TestModLog and INTERFACE.
+
+Previous PR2088 merged91ba0bd05; head/main trees equalb2cf3e62. Exact-main
+CI37494466573 and CodeQL37494466969 passed. Recovery bundle and source/CI binding
+receipt are retained in the20261006 evidence directory. WSP00/6/15/22/50/84/97.
+
+## Reviewer runtime artifact connection — 2026-10-07 candidate
+
+Independent review found no concrete blocker in the documented trusted-input
+boundary (`reviewer-artifact-independent-review.json`, SHA256
+`aaa7185e968a9ff91ec0cdbba538e4d732cd158ea538fa5af97404ce7976fc64`).
+Generated runtime manifest/pins verified:8 integrity cases pass in65.06s;
+test registry check passes at1692 files. Publication remains pending.
+
+Extend existing verifier bootstrap with bounded reviewer resolver. Reverify exact
+artifacts and consume registered capabilities; preserve review signatures, roles,
+independence, expiry and no-permit boundaries. No new designation/store/orchestrator.
+Local502 cases pass;24 new IDs added to CI. Independent source review found no blocker; publication pending.
+Native trust enrollment/wiring and model authorship remain separate gates.
+See INTERFACE and tests/TestModLog. WSP00/6/15/22/50/84/97/99.
+
+## Effect issuer publication — 2026-10-07
+
+PR2087 merged atbbb975b4f20fec5981a85a971f55fd26e3c7c6e8. Checked
+ff1fdd504 and merge have tree d10f4e91051009d5eb025ac80499a65ac58f5888.
+Exact-head CI37485625238/CodeQL37485619460 passed. Independent source
+review and184 local cases qualify this source repair. Exact-main CI37486916613
+and CodeQL37486916968 passed.
+PR2086 host recovery was preserved during the sole ModLog merge conflict.
+Recovery bundle: `outputs/rsi-permission-evidence-20261006/effect-issuer-pr2087.bundle`.
+WSP15/97 re-observation selects authenticated effect-review runtime evidence
+before permit issuance. Independent design check clarifies: signed reviews already
+bind identity/model claims; verify their referenced artifacts through existing
+use-time verifier capabilities, without another designation schema. Artifact
+verification alone does not prove model execution. No retained RSI claim.
+
+## Effect issuer handoff — 2026-10-06 (historical implementation checkpoint)
+
+WSP00/15/22/50/97/99:15/P1 (C3/I4/D4/impact4), base2837b0db3.
+Two local Qwen proposals failed; coordinator implements the bounded source
+prerequisite instead of spending more calls. Frozen ordering/failure tests remain
+unchanged: baseline3fail/1pass, repaired4/4. Connected80pass in15.24s. Update
+existing inert issuance tests for provider exit before signing, including target
+interrupt propagation regardless of the exited provider's suppression setting.
+No new owner/module or runtime grant. Independent review found no blocker; no native
+worker success or retained RSI benefit claimed. Evidence: existing
+`outputs/rsi-permission-evidence-20261006/effect-issuer-*` and frozen
+`effect-handoff-*` inputs. Holo lexical bundle has unknown semantic freshness and
+index gap; exact-source docs/tests supply this bounded review, not semantic proof.
+Additional boundary104pass in5.32s; total184 local cases. Existing manifest
+check passes unchanged; issuer outside its1419-file closure. Reviewed head46e9eb816
+passed CI37483954789 and CodeQL37483627186. Main advanced through PR2086;
+preserve its host recovery entry and refresh hosted validation after reconciliation.
+Review receipt: `effect-issuer-independent-review.json`, SHA256
+`da3f2520f817854bcd1c04b8654ab37d2a58576bbe3abb0a70dda07d726a3874`.
+
+## Public host recovery salvage — 2026-10-06
+
+WSP00/5/6/10/15/22/34/50/62/97:14/P1 (C3/I4/D4/impact3), base2837b0db3. Salvage #1680 host leases; fence unconfigured recovery, legacy completion and absent lease proof; preserve Lick/quotas.210tests pass,95% coverage; hosted/main gates pending. No activation/provider-death proof. [Audit](../../../docs/audits/architecture/REDDOG_HOST_RECOVERY_RECONCILIATION_20261006.md).
+
+## Provider issuance handoff — 2026-10-06 (historical PR2084)
+
+WSP00/15/97: PR2083 prerequisite merged at4e00032cf with exact-main CI success. Select14/P1 (C2/I4/D4/impact4).
+Independent frozen regression completes the synthetic HIGH chain then fails because both target calls hold the provider lease.
+Reuse the existing provider lease in `issue_grant`; return only after successful exit. Existing consensus client dispatches afterward.
+Legacy lease, one-use permit checks, provider independence and target admission are preserved. No new module or runtime authority.
+Manual coordinator repair is necessary while legitimate model/runtime admission is unverified; this is not a local-agent RSI success.
+Independent source review found no concrete defect. Initial36pass; expanded91pass in24.49s including clean/failed lease exit controls.
+Final adapter controls pass; connected94/94 in26.13s. Integrity8/8 passed in63.61s; publication pending.
+Evidence: `outputs/rsi-permission-evidence-20261006/provider-handoff-*`.
+
+## Authenticated target owner prerequisite — 2026-10-06 (historical)
+
+WSP00/15/97: PR2082 merged at5420b85a; exact-main CI37397915051 passed.
+Select15/P1 (C3/I4/D5/impact3) before provider handoff. Independent baseline
+found absent/no-op owner hooks permit resolution/signing. Extend existing
+WSP71 factory and resolve-per-sign backend to require exact factory type,
+authenticated owner context and matching fresh binding while the lease is held.
+Class-directed lease dispatch prevents an instance-shadowed method from
+substituting a no-op. Root ACQUIRE/FINISH ordering is preserved.
+
+Initial focused18pass; connected diagnostic19fail/103pass/1skip exposes existing
+ownerless fixture assumptions. Runtime test source was edited during that
+connected run, so it is not exact-source qualification and must be rerun.
+Additional ownerless, shadowed-method and binding-mismatch coverage passed.
+Independent review then found a consuming-boundary substitution; the frozen
+regression reproduced accepted=True/two resolutions/one build. Bind boundary
+store/oracle to authenticated admission and use class-directed protected-use
+dispatch. Latest two-owner70pass/1skip in31.46s. The old fake-crypto matrix uses
+an explicit test-only unit seam; unchanged exact production negatives and real
+admission fixtures cover owner enforcement. Four other composed fixture owners
+were reconciled: factory and root paths use admitted construction; HIGH/effect
+paths explicitly separate synthetic unit acceptance from exact-production denial.
+Final connected134pass/1skip in70.46s; manifest/integrity8pass in68.70s.
+Independent production review: target-owner-independent-final-review.json,
+SHA2563bdbd46a84d484994896cd6a55fd15cb9dda29343184b20da251694d0f03dda8.
+Publication remains pending. No admitted HIGH/effect execution or native RSI claim.
+Evidence: outputs/rsi-permission-evidence-20261006/target-owner-*.xml and
+target-owner-lease-baseline-review.json. Existing assertions and frozen negatives
+are retained; no production bypass is admitted to make legacy tests pass.
+
+## Generation-fenced response commit — 2026-10-06
+
+WSP15 selects14/P1 (C3/I4/D4/impact3) after PR2078 merged at a2a45ddec;
+exact-main CI37396021088 passed. Reuse current-generation selection lease in the
+existing runtime-binding owner and consume it through the existing authoritative
+use rehydrator. Signature verification, durable replay consumption and capability
+issuance remain inside that local fence; no remote signer call is added inside it.
+Fresh time checks reject expiry before replay commit and before capability issue.
+Snapshot resolve preserves rejected-binding behavior for selection-exit errors.
+An outer ExitStack also releases the boundary on validation-time interrupts;
+KeyboardInterrupt/SystemExit cleanup is covered without suppressing interruption.
+CI explicitly selects all five connected generation/lease test owners.
+
+Frozen independent expiry regression: baseline1pass/1intended failure, candidate
+2pass with unchanged oracle. Expired handles were not claimed usable. Connected
+candidate56pass in29.27s, including actual selection-boundary lifetime and exit
+failure, plus synthetic rehydrator lease scope. Evidence under
+outputs/rsi-permission-evidence-20261006: generation-commit-expiry-baseline-review.json,
+generation-commit-expiry-candidate-review.json, generation-commit-connected3.xml.
+The fixture now explicitly supplies synthetic lease evidence; it does not claim
+authentic enrollment or cross-process rotation coverage. Holo query rejected
+HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH (authority a3def2a83, shared host0c81418fe);
+exact-source fallback used, no reindex. Bounded source review approved; publication remains pending.
+Provider issuance handoff, effect permits, native G1 and retained RSI remain open.
+Independent review receipt: generation-commit-final-source-review.json, SHA256
+`a3984454d6704ff50cd4a711bacc8d0fe229bc0919a807cb7cf966f2a298c128`.
+Production structural checks pass. Existing external-issuer test owner grows
+from676to684lines for its explicit synthetic lease seam; no whole-test-tree
+WSP62 compliance is claimed. Registry remains1690files/270quarantined unchanged.
+
+## Native admission lock-topology diagnostic — 2026-10-06
+
+WSP15/97: preserve18/P0 startup publication gate;15/P1 issuer wiring stays
+blocked by elevated-permit compatibility and lock ownership. Existing13/P1
+prerequisite now has a Windows real-generation-lock discriminator: held synchronous
+wait times out, diagnostic release lets consumer finish; release-before-call
+control completes normally. All4 children exit0/reaped, exact owned temp removed,
+source hashes stable;1.140s. Parent inspected event protocol and results. This is
+synthetic topology, not actual issuer admission, Linux coverage or a safe repair.
+Evidence: `outputs/rsi-permission-evidence-20261006/generation-lock-progress-result.json`
+SHA256 `d491a984f3d659f74cff14667b7ee6d9df3c004d6e17ee1a9aeb551436800bf4`.
+Root roadmap/backlog now reflect this dependency rather than direct wiring.
+Independent review of19dd fixture repair preserved83 assertions and confirmed562
+production pins match actual41cf OS qualification; no OS rerun needed for that
+test-only delta. Review receipt SHA256
+`603e33bb4b57e899e93f73b1b59f4a44fda50103355b35f6163ee971b7fe9de5`.
+
+## Startup fixture cleanup discrimination — 2026-10-06
+
+Hosted PR2078 at41cf91cfe:667passed/3skipped/1failed; the failing negative
+materializer test lost only setup SQLite WAL/SHM sidecars. Forced collection
+reproduces that exact signature on unchanged source; settling setup finalizers
+before the inventory snapshot passes the matched control. Add test-only
+`gc.collect()` after fixture construction, preserving all83 assertion ASTs,
+parameterization, no-secret/no-RPC checks, target bytes and full inventory equality.
+Five focused cases pass (pytest XML7.129s; runner8.031s); repaired forced-collection
+probe also passes. No production edits or inventory filtering. This does not
+explain the separate historical positive credential rejection. Hosted GC timing
+was not traced; reproduction establishes fixture sensitivity, not a directly
+observed hosted cause. Evidence: `outputs/rsi-permission-evidence-20261006/`
+`startup-fixture-sqlite-cleanup-review.json`, SHA256
+`9ce36ec07109cdb69773b68d87fc7710747cf08772f1abb52e869f927ac1f685`.
+WSP15/97: close existing startup slice before blocked native worker wiring.
+Remote verification of this repair and native RSI remain pending.
+
+## Authenticated startup integration in progress — 2026-10-06
+
+Hosted `11b8bd56d` passed the earlier registry/consensus gates, then exposed
+bootstrap691lines against675 (667other cases passed,3skipped). Relocate the unchanged
+dependency-supply helper into the existing bootstrap admission owner; bootstrap
+becomes666lines. Parent independently verified every top-level definition AST
+unchanged across both owners. All48 bootstrap tests pass, as do the exact structural
+oracle and qualified cold-import check. Regenerated runtime manifest remains1,419
+files; new canonical digest37bfeb1c5a9e41dbd8d737a32819028d4906bad17f50a9f4f8bcfc960f3bafba.
+Manifest/index tests8/8 and extension fast tier15members pass. Wider structural
+inspection also found entrypoint tests1010lines and one61line test; their bounded
+test-owner extraction preserves675/60limits and the public fixture import surface.
+Original hosted evidence remains in `startup-grant-composition-failure.log`.
+
+Follow-up CI at `14e6c023a` correctly rejected the stale canonical test registry
+after the test split. Regenerated using the existing WRE generator; `--check`
+reports current at1,689files with270quarantined unchanged. Diff adds only the
+new test owner plus deterministic shard-boundary shifts. No registry policy or
+quarantine change; runtime manifest excludes this registry. Evidence:
+`startup-test-registry-failure.log` in the same20261006 evidence directory.
+
+PR2078 hosted qualification at `025626636` exposed a reproducible structural
+failure: effect-consent owner tests grew to267lines against the200line bound
+(674other cases passed). Extract v7 startup checks into the same effect-consent
+family's bounded startup-owner test module, retaining v6 in its existing owner.
+Both remain under200lines; function limits remain50. Structural membership changes
+37to38, not the limits. CI explicitly selects both owners. Parent AST comparison
+confirms all11 original test functions, parameter decorators and assertions remain.
+No production code changes; the original intermittent credential failure remains
+separate. Hosted failure evidence: `startup-hosted-failure.log` in the existing
+20261006 evidence directory.
+
+Finite regression investigation at `438a20113`: full seven-file diagnostic run
+and original `-S`/PYTHONPATH bootstrap each pass275/skip3 with unchanged production
+and test bytes. Original274pass/1fail/3skip remains preserved and unexplained;
+no fixture correction is claimed. A diagnostic run lacking Git PATH produced49
+setup failures and is classified separately as runner failure. Evidence:
+`materializer-clock-baseline5.json` and `materializer-clock-baseline6.json` in
+the existing20261006 evidence directory. Draft publication may expose this for
+review/hosted validation; merge remains gated. G1 audit additionally finds no
+production construction of the existing independent grant provider or lease issuer;
+qualify their real composition before claiming queue execution capability.
+
+Combined merged-source regression:274passed/3skipped/1failed. The positive
+runtime-dependency materializer fixture rejects its replay credential. Investigation
+is checking the frozen fixture clock against the resolver's import-captured default;
+no cause or repair is claimed before reproduction. Preserve `startup-merged-connected.xml`.
+Publication remains pending. WSP97 reconciliation updates the backlog's stale
+next action: public OS startup has passed, regression closure precedes the existing
+issuer-to-valve connection. This does not establish admitted worker execution.
+
+Merged-source requalification: exact prior OS driver passes once at `9039bead9`
+in35.550s; six real root RPCs, one valid target signature, nonce-replay rejection,
+normal service exits, actual isolation and complete cleanup. Manifest regeneration
+is unchanged at1,419files. `public-startup-merge-requalification.json` binds the
+current head separately from the unchanged driver's historical metadata.
+Additional WSP62 check:11pass/5fail. Four failures are expired2026-09-30 exemptions;
+one is an exact INTERFACE.md ceiling1517 versus current2818. Main already has2771
+lines; test and exemption policies match main byte-for-byte. This source comparison
+establishes inherited debt, not an executed main baseline. No dates/limits changed.
+Keep that14/P1 reconciliation separate from startup and native G1 claims.
+
+Actual OS qualification passes at `50008b241` in34.012s: real DynamicUser,
+systemd credential delivery, unchanged public entrypoints/isolation/provider,
+real Unix peer transport and six root RPCs. Missing v2 grant rejects at parsing;
+one valid target signature verifies; replay records NONCE_REPLAY with no repeat
+target signing or protected-use acquisition. Both services exit0; unit ends
+not-found/inactive, no sockets remain and owned directory is removed. Parent
+readback checked1,023 Python hashes against current source, with zero mismatch;
+driver matches and copied dependencies stayed stable. Synthetic test identities
+and authorities only: no native G1 enrollment or RSI benefit claim. Failed
+identity/interpreter/timing/lock/TTL fixture attempts remain separately preserved.
+Evidence: `outputs/rsi-permission-evidence-20261006/linux-public-startup-20261005T231947/`.
+
+Post-checkpoint G1 reconciliation at `bf4aa1aaf`: seven historical blocker labels
+are not seven absent modules. Existing consensus, consent, model verification
+and handshake implementations require authentic inputs and connected consumers.
+The governed valve resolver still retains seven reasons and returns no use lease;
+the existing external lease issuer has no production caller found by inspection.
+Its existing contract/adversarial baseline passes23/23 in5.75s.
+Two existing resolver tests also pass, confirming current-generation proof removes
+only three generation blockers and leaves missing authority inputs rejected
+(`valve-consumer-baseline.xml`,3.76s). This verifies the blocker behavior, not G1.
+The roadmap and backlog now record the conditional15/P1 connection after startup; missing
+capabilities must remain rejected. Evidence: `native-admission-reconciliation.json`
+and `existing-use-lease-baseline.json` under the existing20261006 output root.
+This is a source-bound next-action audit, not native admission or retained RSI.
+
+Generated runtime bindings refreshed through the existing generator:1,419 files,
+canonical digest `dc4a72b48f0288b0b543da05b14a168a0fdafb9ff41b0609f4b018be97d485f0`.
+Manifest contracts pass8/8 including independent staged-index closure. Existing
+CI includes startup composition; add explicit full owner-version and policy
+consumer suites to cover the new v7/v8 paths. Remote execution remains unverified.
+The first extension fast run rejected the stale1,418-member bound. New startup
+imports add the existing resolver-supply module to the transitive closure, so
+raise the exact bound to1,419 and retain rejection at1,420. The failed run is
+preserved separately; no runtime member or digest validation was removed.
+Corrected extension fast tier passes15members; full owner/policy CI selection
+passes135cases with1platform skip in203.90s. Workflow/backlog parsing and diff
+whitespace checks pass. This is a local source checkpoint, not publication.
+
+Continuation after local checkpoint `f0b33d5e8`: the full public fixture reached
+real manifest/E0/dependency admission and exposed a selected-config attachment
+failure. The E0 lease returns four extra authority fields while the existing
+peer validator expects the launch projection. Reuse `_legacy_launch_values`
+only for peer attachment, retaining the full current lease for E0 checks.
+WSP15 prerequisite15/P1 (C1/I5/D5/Impact4) advances parent18/P0; no validator
+relaxation. Public integration now passes1/1 with1,030 stable source pins;
+separate Linux authority qualification passes8/8 with stable source hashes.
+Neither result establishes live public startup or native worker admission.
+Post-projection entrypoint/resolver-supply/bootstrap regression:104pass/2platform
+skips in45.59s; `startup-connected-public.xml` records all106 cases. This run
+does not provide a new whole-dependency source-freeze or OS startup proof.
+The public test's original no-additional-credential-read replay observation was
+corrected after tracing existing verify/consume revocation checks: exactly two
+authenticated LOAD proof reads are expected, with no additional target signing
+or ACQUIRE/FINISH. Original failures and criteria migration remain preserved in
+`public-startup-result-review.json`; this is not evidence of learned RSI gain.
+
+Linux qualification first stopped on the cross-OS worktree pointer, then on
+missing jsonschema in the existing test venv; the second run also had source
+drift and is invalid evidence. Process-local Git mount mapping resolves the
+correct head. An isolated test venv preserves pytest9.1.1/cryptography50.0.0 and
+adds the canonical FoundUps jsonschema requirement, with download hashes saved.
+No shared environment was modified. These are test prerequisites, not native
+signer or worker admission. Evidence stays under the existing20261006 output root.
+
+Owned branch `codex/rsi-authenticated-startup-20261006`, base `a3def2a83`.
+WSP00/15/71/97: resume existing18/P0 startup objective after PR2075 closure.
+Bootstrap now accepts one deferred dependency supply only after config admission
+and required process isolation. Mixed eager/deferred inputs, malformed supply and
+supplier failure reject; existing runtime authority and replay checks still apply.
+The existing bootstrap suite passes48/48, including18 new ordering/negative cases.
+Fixtures substitute selection/isolation; this is not real OS startup admission.
+
+Purpose-limited request signing and authenticated public-entrypoint assembly are
+part of this same unmerged integration. Do not publish a supplier-only completion.
+Required before closure: versioned owner permission contract, connected public
+consumer, real protocol acceptance, adversarial checks, generated binding refresh,
+independent review and normal publication. No runtime grant or native RSI claimed.
+Evidence: `outputs/rsi-permission-evidence-20261006/bootstrap-deferred.xml`.
+
+Continuation: the public entrypoint now consumes a deferred v7 dependency
+supplier. Existing root runtime materialization composes E0-authenticated
+custody, pre-provisioned replay stores and existing revocation/protected-use
+clients. Root RPC is outside the current-owner lease. Integration remains WIP.
+Independent review reproduced two request-signing defects (numeric-type policy
+equality and expiry during final owner reread); canonical comparison and final
+lifetime checks repair those boundaries. Diagnostic entrypoint/supplier run:
+52 passed, 2 platform skips. Source was being integrated concurrently, so this
+is not the final exact-source publication receipt. Connected materializer tests,
+stable-source rerun, generated bindings and independent final review remain open.
+
+Stable modified-source checkpoint: entrypoint/supplier/bootstrap suites now
+100passed/2platform skips in38.69s, with zero changed modified-Python pins across
+the run (`startup-connected-result.json`). Independent materializer acceptance
+initially reproduced a frozen-policy/list-format mismatch; thawing the policy
+at the existing validator boundary repaired both positive cases. The same five
+tests then passed, exercising real LOAD/ACQUIRE/FINISH and three missing-store
+failures without credential reads or implicit provisioning. OS custody and
+owner fixture substitutions remain explicit. Full public v7 success acceptance
+is still being constructed; no native worker or retained improvement claimed.
+
+That construction exposed a pre-existing hash cycle: the config authority
+binding included `target_signer_generation_id`, which admission equates to the
+digest of artifacts including the config. Explicit E0 v8 now excludes only that
+derived alias from the config binding while retaining it in the signed policy
+and current-generation checks. v5-v7 retain their original digest semantics.
+Three provenance/permission consumers accept v8 with the same checks as v7.
+Construction/alias tests:3pass with stable pins. Connected legacy/v7/v8 consumer
+selection:88pass/1existing platform skip, including16 added cases. Initial
+fixture-construction failures are preserved separately; no source checks were
+weakened. This is a recoverable local WIP checkpoint, not a published or admitted
+runtime: full public success, generated manifest/digest refresh, final independent
+review and publication remain pending. Generated bindings still describe base.
+
+## 2026-10-06 — Reconcile #1779 sender authority onto current main
+
+- Preserved the valid security delta from draft PR #2031 while discarding its stale base/document snapshots.
+- Quarantined the composer-loadable V2 host authority and restored the service-owned Python V3 sender boundary with canonical recipient preflight, correspondence-state gating, durable receipt/transaction claims and exact provider Sent verification.
+- Rebased only non-overlapping executable/test artifacts plus the architecture audit; current main documentation is amended additively rather than overwritten.
+- Repository enforcement remains distinct from external ChatGPT/Work capability isolation. Direct Gmail tools outside this runtime are not intercepted by this code.
+
+## Permission evidence type boundary — 2026-10-05
+
+WSP00/15/50/71/97 selects14/P1 (C1/I4/D5/Impact4) as an executable repair
+found while tracing authenticated startup. The existing provider accepted truthy
+non-boolean permission evidence, including the string "false", and read both
+credentials. Tighten its shared guard to literal `True`; valid boolean callers
+are unchanged. Baseline:6/12 regression failures and8/8 independent held-out
+failures. Candidate connected196:193pass/3platform skips; unchanged independent
+held-out8/8 pass, no errors/skips or audit denials. Publication remains pending.
+
+Two bounded local Qwen3.5-4B proposals through the existing WRE adapter both
+inverted the rejection guard. Both were rejected without application:0/2 accepted,
+556 reported inference tokens,0 paid calls. The correction is coordinator-authored.
+No native ticket admission, autonomous retained improvement or new authority is
+claimed. Preserve evidence under `outputs/rsi-startup-custody-20261005/permission-input-audit`.
+Authenticated startup still requires separately authorized purpose-limited custody;
+metadata/ACLs and a freshness boolean cannot supply that permission.
+
+## Composition clock fixture closure — 2026-10-05
+
+PR2073 CI37269273608 exposed a second-boundary sampling race in the existing
+root-composed oracle test (598pass/3skip/1fail). Freeze only that test's wall clock
+before fixture construction; retain an explicit mismatched-epoch rejection.
+Production clocks and authority checks are unchanged. The complete hosted signer
+selection passes locally:602 cases,595pass/7platform skips, source stable.
+An earlier local concurrency timeout and its successful targeted rerun remain in
+`outputs/rsi-startup-custody-20261005/connected`; no passing-only history is claimed.
+WSP00/15/22/97; hosted validation of this repair remains pending.
+
+## Explicit systemd custody provider supply — 2026-10-05
+
+Existing resolver factory accepts an explicit `SystemdCredentialBinding`, without
+op runner fallback or credential reads during construction. The lower key profile
+accepts homogeneous systemd reference pairs; malformed/mixed pairs and stale
+permission evidence reject before resolution. Public config/readiness and startup
+remain fail-closed pending authenticated versioned supply; this is not native
+activation. Existing grant-aware CI includes the new resolver and op regressions.
+
+Focused206:204pass/2skip; connected152:151pass/1skip. Actual local nonroot provider
+read/expiry/cleanup qualified with a public canary after correcting a preserved
+ACL-shape failure. See secrets_mcp ModLog and `outputs/rsi-startup-custody-20261005`.
+Independent saved-evidence review is not an independently executed worker run.
+WSP00/15/22/71/97. PR2072's preceding bootstrap repair is main-verified at4241b10;
+its earlier pending wording below is historical.
+
+## Bootstrap grant-admission forwarding — 2026-10-05
+
+WSP15 selects14/P1 (C2/I4/D5/Impact3) at main4d03a0f1. The existing runtime
+bootstrap now forwards optional `secret_grant_admission` unchanged to the
+existing grant-aware runtime after selection and isolation. Default `None`
+preserves legacy behavior. Two frozen integration cases previously rejected the
+keyword; both now pass. Two gate-order cases also pass; connected479:472pass/7skip.
+The positive fixture substitutes outer selection/peer attachment, while executing
+actual lower grant validation, protected use, signature verification and replay
+rejection. Independent source/log review is distinct from independent execution.
+
+One bounded local Qwen3.5 proposal was rejected unchanged (incorrect plumbing);
+the four-line repair is coordinator-authored. No criteria were relaxed. Actual
+public startup still lacks authenticated dependency supply and credential custody.
+Evidence: `outputs/rsi-local-custody-20261005`; canonical backlog
+`bootstrap_grant_forwarding_20261005`. Publication pending; native RSI incomplete.
+
+## Retain the direct revocation proof regression — 2026-10-05
+
+WSP00/15/50/62/97 selects13/P1 (C2/I4/D4/Impact3) at main724bb684.
+Reuse the existing composition test owner; append one team-authored regression
+for a work-signed LOAD positive control and control-signed LOAD rejection, with
+unchanged durable state. All57 earlier top-level AST nodes are unchanged; the
+new behavioral body matches the independently frozen oracle. File811 lines is
+within the WSP62 cohesion-review range; the new function spans17 lines (19 added lines). No runtime,
+interface, manifest, skill, store or scheduler is added or changed.
+
+Correct source:48/48; the identical process-local fault:47pass/1expected failure
+at the new rejection assertion, no errors/skips. The original47 passed with and
+without that fault. This is measured coverage gain on one seeded fault, not a
+production vulnerability or model fitness result. Connected475:468pass/7platform
+skips, no failures/errors; source stable. Publication remains pending. Evidence: `outputs/rsi-control-regression-20261005`.
+
+Two preceding local Qwen2.5-Coder7B proposals were rejected unchanged:0/2 accepted,
+first dict-attribute misuse, second duplicate fixture setup. SDK totals1838 input
+and622 output tokens;206.843s summed parent duration;0 paid inference API calls.
+Coordination cost is unknown. One packet revision exposed the real typed helper;
+no acceptance criterion was relaxed. Neither proposal is retained in source.
+Next: qualify an installed alternative on the same frozen task through the
+existing adapter before selecting a model; do not infer native admission from a
+local callable. Native18/P0 remains blocked by authentic runtime/custody inputs.
+
+## Separate protected-use control proof — 2026-10-05
+
+**Closure verified:** PR2068 merged at `724bb684e5e46302a6e7cd2cf9473e1db661650b`.
+Hosted474:471pass/3skip; exact-main CI37254048948 and CodeQL37254048507 succeeded.
+Later merged-source19/19 passed. Governed OpenClaw/WRE refresh completed442.5s;
+CURRENT/no-gap query took44.615s, one attempt/no retry. Historical6task/18event
+rows are unchanged, now7/21. Independent maintenance review and normal owned-lane
+retirement are complete; branch, bundle and ignored-file archive are preserved.
+This closes source/retrieval retention, not native worker admission or key custody.
+
+Earlier source-qualification record (historical):
+
+WSP00/15/50/62/97: selected13/P1 (C3/I4/D3/Impact3) at main975fe7c.
+The legacy root request uses the work key before the protected callback may
+resolve it. Two dependency controls confirm safe rejection without that signer
+and success with a pre-provisioned synthetic signer; this is an operating
+limitation, not a regression in v1 authentication.
+
+Extend two existing owners only. Descriptor v2 adds a strict, distinct control
+identity committed by descriptor and authority-context digests. Only protected-use
+ACQUIRE/FINISH verifies that key. Reserve/commit and revocation proofs keep their
+work-key contract; default v1 and public startup remain unchanged. No new runtime
+module, skill, store, provider or enrollment flow.
+
+Initial17 cases failed at unsupported v2 shape; candidate17 pass. These are not17
+independent security defects. Independent review identified a masked negative
+oracle; identity-only validation now precedes retained full-grant assertions.
+Final connected474:467pass/7platform skips,0fail/errors; exact selected tests
+are hash-bound. Manifest8/8 and extension fast15 members pass. Independent
+source review approves; publication pending. Injected test callbacks
+are not purpose-limited secret custody, actual resolver execution, operating key
+enrollment or native RSI. Evidence: `outputs/rsi-control-auth-20261005`; current
+backlog key `protected_use_control_authentication_20261005`.
+
+Hosted CI37252460162 exposed a pre-existing Windows-only mocked socket path in
+the newly selected authority-service suite:42fail/90setup errors,339pass/3skip.
+Both substituted-transport paths now use the platform filesystem anchor; all
+163 assertion ASTs and production validation remain unchanged. Preserve the
+failed run; require the corrected head to pass Linux CI before publication.
+
+PR2067 is closed at975fe7c: hosted281/281, exact-main CI/CodeQL and retained24/24
+passed; OpenClaw/WRE maintenance527.453s and CURRENT/no-gap query independently
+verified. Historical5task/15event rows preserved, now6/18. Recovery retained and
+completed worktree retired normally.
+
+## Owner-bound lazy signer composition — 2026-10-05
+
+WSP15 selects15/P1 (C3/I4/D4/Impact4) at main904ae72e. Extend the existing
+runtime, factory, grant and root-use owners: one explicit admission composes a
+lazy backend; legacy/default startup remains unchanged. Verify owner/oracle/store
+provenance before serving, consume the grant before root ACQUIRE, then hold a
+fresh generation lease only across resolution, exact-request signing and response
+verification. Release it before root FINISH. A post-resolution lifetime/local
+revocation check rejects before signing. No new module, skill or scheduler.
+
+Independent review refuted the initial service-wide lease: a real two-process
+generation-lock probe reproduced blocking until release. Tests also exposed
+foreign replay-store acceptance and signing after expiry/local revocation. Repairs
+retain those rejection oracles. Final connected281 cases:277pass/4 Windows skips,
+0fail/errors; CI selects the same14 suites. Synthetic owner/keys/transport prove
+source composition, not authentic enrollment or an operating system service.
+Whole-file AST-identical reflow closes two inherited WSP62 bounds failures;
+no threshold or exemption expiry was relaxed. Generated closure grows1408→1417
+through nine existing lazy-path dependencies; exact digest/count consumers are
+updated and reject1418. The old manifest test forbidding the newly connected
+backend is explicitly migrated to required inclusion, not silently discarded.
+
+Earlier fixture, observer and harness failures remain in the evidence history.
+In particular the original service-wide lock criteria were corrected only after
+the independent two-process result. FINISH retry failure means cleanup unknown;
+bounded service completion never establishes successful signing or zeroization.
+Independent semantic review passed; exact-head publication remains a separate gate.
+PC evidence: `outputs/rsi-admission-unblock-20261005`; canonical observation:
+`current_observation.signer_lazy_owner_composition_20261005` in the RSI backlog.
+
+GitHub admin permission was actually observed; that expired snapshot is not a
+principal-key designation. Existing suppliers already serialize configuration.
+The public system-service entrypoint still needs authentic owner/admission
+composition, principal-key enrollment and role-specific model evidence before
+the first native canary. Native RSI18/P0 remains incomplete. No provider call,
+live key, deployment or unattended improvement occurred in this source slice.
+WSP00/5/6/11/15/22/48/50/62/71/84/97/99.
+
+## Factory peer-instance propagation — 2026-10-05
+
+Selected13/P1 (C2/I4/D4/Impact3) after PR2065 merged/main verification and one
+independently reviewed governed maintenance run. Extend only the existing factory:
+append optional typed peer-instance binding and forward it to every fresh backend.
+Old positional fields/defaults, provider checks and deferred resolution remain.
+No routing, service startup, new module or skill changed.
+
+Separate test worker froze six new cases; all20 existing test AST nodes remain.
+Baseline10pass/4 missing-keyword failures becomes14/14 with identical criteria.
+Actual signatures, fresh backends and session/generation/profile rejection are
+checked. Independent source/oracle review passed. A focused harness could not
+run all connected tests (119pass/8fail/4skip); its SQLite-URI and help-subprocess
+restrictions remain recorded. Conventional connected pytest passes127/131,
+with4 Windows platform skips and unchanged source/tests. CI selects nine suites.
+
+PR2065 closure: merged `fc6f6e021033af21556be3cca64f8e9c9e43fca3`, hosted111/111,
+main CI/CodeQL success, merged factory8/8. Maintenance435.453s preserves old3 tasks/
+9 events and adds one completed task/3 events; queryCURRENT/no-gap. Prior owned
+worktree retired normally with verified recovery. The current slice still needs
+exact-head publication; production composition and authentic native admission
+remain open. No local generative provider call, live secret or native RSI claim.
+Evidence/commands: backlog `signer_factory_peer_binding_20261005` and
+`outputs/rsi-holo-grounding-20261005/signer-peer-binding`. WSP00/5/6/11/15/22/48/
+50/62/71/84/97/99.
+
+## WSP71 factory grant-digest composition — 2026-10-05
+
+Selected15/P1 (C2/I4/D5/Impact4). A frozen real-factory/socket-v2 test exposed
+short audit-reference hashes being compared with full E0 grant digests after
+durable grant consumption. Baseline:1 pass/1 fail; unchanged acceptance after
+repair:2/2 pass. The existing factory now checks exact reference identity and
+expected short/full hash before normalizing successful resolution metadata to
+the canonical full digest. Original resolver-mode checks run before wrapping;
+global audit hashing and legacy provider behavior are unchanged.
+
+Six additive rejection cases cover reference/hash substitution, swapped metadata,
+mock mode, denial and expiry before secret extraction. Focused8/8 and initial connected
+107 pass/3 Windows platform skips. Hosted CI37235749458 then failed11 existing
+Windows-path fixture cases, with99passes. Repairing the helper and its sole
+importer preserves all92 assertions, explicit overrides and production guards.
+Final connected108pass/3skip has no failures/errors. Independent source/test
+review verified frozen ASTs and evidence bindings. CI now selects eight
+connected suites; hosted verification remains a publication gate.
+
+This is coordinator-authored source repair with synthetic keys, principal/peer
+bindings, clock and vault resolver. It does not authenticate a production
+resolver or wire/start the system service. Native zeroization, lifecycle,
+principal enrollment and retained autonomous benefit remain open. The backend
+manifest correctly excludes this still-uncomposed factory. WSP00/5/6/11/15/22/
+48/50/62/71/84/97/99. Evidence and exact commands:
+`current_observation.signer_factory_composition_20261005` in the RSI backlog.
+
+## Existing Holo grounding completed — 2026-10-05
+
+PR2063 merged/main-verified at `2eaa6de7` with 11 PR checks and 181 hosted recovery
+cases. Normal new-head admission completed maintenance in 500.797s; both owned
+runtimes stopped in reverse order. Separate clean-checkout query: CURRENT/no-gap,
+generation `b90d637c…`. The old failed task/full three-event history is unchanged;
+new task retry count is 0. This does not exercise live pointer resume. Four prior
+attempts, rejected Qwen and initial registry CI failure remain preserved. The stale
+shared checkout was not repaired; existing CLAUDE guidance was already correct.
+Next 10/P2 is closure/re-observation; native 18/P0 and genuine input handoff 15/P1
+remain blocked/unresolved. WSP00/15/22/97. See the
+[P16 checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#existing-holo-grounding--p16-checkpoint).
+
+## Authenticated effect consent — 2026-10-04
+
+Selected15/P1 (C3/I4/D4/Impact4). Opt-in owner v6 now registers a distinct
+HIGH/worktree_create consent privilege. The existing principal resolver exposes
+a detached Ed25519 consent verifier under one current lease, using the existing
+principal artifact, target binding, codecs and P12 evidence matcher. Owner v1-v5,
+principal artifact v1/v2 and existing reviewer/grant privileges remain.
+
+Original frozen95-case baseline failed only on missing APIs; initial95/326
+passed. Independent source review then found two sampled-state gaps. Two added
+cases reproduced false acceptance before repair. The repair snapshots original
+inputs before the first clock callback and rechecks all three relevant principal
+records after final owner/time sampling. Final97/97 and connected328/328 pass,
+with zero errors/skips and original95 criteria preserved. These are sampled
+checks, not continuous immutability or change-and-restore protection.
+
+One local Qwen call supplied the interval helper from a coordinator-supplied
+formula; its integrated AST is unchanged. Raw format and scope were accepted.
+SDK:688 input/126 output tokens;63.344s parent,52.656s child;0 paid calls; total
+cost unknown. The coordinator wrote the authentication and repairs. Source
+qualification uses disposable signatures and substituted owner/lease provenance.
+No native admission, deployed authority, parent sovereignty, execution permit,
+model learning or new retained RSI benefit is claimed.
+
+Initial PR2060 CI37209280885 passed675 effect cases but failed the existing
+extension fast tier: the runtime manifest grew1404→1406 while its consumer
+ceiling remained1404. The extension ModLog records the reproduced defect and
+narrow count-boundary repair; all15 fast-tier members now pass locally. Fresh
+replacement-head hosted checks remain required.
+
+Publication remains a separate gate. Exact evidence/commands and review hashes:
+`current_observation.authenticated_effect_consent_20261004` in the canonical RSI
+backlog; PC artifacts `outputs/rsi-authenticated-effect-consent-20261004`.
+Next prerequisite: effect-specific permit/provider composition under the same
+held lease, followed by use-time resolver and compatible host admission.
+WSP00/5/6/11/15/22/48/50/62/84/97/99.
+
+## Supplied effect-sovereign evidence — 2026-10-04
+
+Selected14/P1 (C3/I4/D4/Impact3), extending only the existing consensus policy
+and evidence owners. The new frozen record and matcher bind supplied approval
+references to the recomputed parent, full signing target, effect and policy,
+with exact types, bounded identity text and complete lifetime coverage.
+A true match authenticates nothing and grants no permission. Trusted production
+provenance, effect permits and native admission remain separate work.
+
+Independent frozen baseline:83 missing-API failures; candidate83/83 pass.
+Connected242/242 pass, including the83; zero errors/skips and unchanged criteria.
+Existing function/class ASTs are unchanged; both runtime files remain within
+200 lines and functions within50. One local Qwen call supplied only the lifetime
+helper, whose integrated AST is unchanged. Its prospective format and static
+scope pass; the coordinator supplied the formula and wrote the outer matcher.
+SDK telemetry:642 input/81 output tokens;53.281s parent elapsed;0 paid calls.
+Total cost and retained gain are unknown. No automatic learning or runtime grant.
+
+Exact-source review and publication are separate gates. Canonical evidence:
+`current_observation.effect_sovereign_binding_20261004` in the RSI backlog;
+PC artifacts: `outputs/rsi-effect-sovereign-binding-20261004`. WSP00/5/6/11/15/
+22/48/50/62/84/97/99. Next: authenticate supplied effect evidence through the
+existing owner, then qualify the effect-specific permit/provider composition.
+
+## Canonical effect request preparation — 2026-10-04
+
+The existing issuer now exposes `prepare_request(payload=..., authority_tier=...)`
+and `issue` reuses it after its original owner check and clock sample. This
+returns replay-bound canonical data before effect authorization; it does not
+grant freshness, signing permission or a runtime lease. Exact-type rejection,
+input preservation, Exception/interrupt handling and provider cleanup remain.
+
+Independent frozen43-case baseline:11 pass/32 missing-API failures; candidate43
+pass. Connected78 cases pass, including those43, with zero errors/skips. Two
+earlier wrapper/setup failures remain recorded. The same assertions and test
+bytes were used before and after; no new runtime module or trust domain.
+
+One local Qwen proposal supplied the method body but failed the raw format
+requirement. Coordinator fence removal/indentation preserved its AST; coordinator
+also integrated the caller. This is supervised reuse, not autonomous acceptance.
+One SDK event:948 input/124 output tokens;70.031s parent elapsed;0 paid inference
+calls; total cost unknown. No retry, promotion, grant or model-learning claim.
+
+Closure: PR2058 merged at00e0c044f;11 PR checks and both exact-main workflows succeeded (495 effect-boundary/49 MCP cases). Owned lane retired with recovery preserved. Evidence and exact
+commands: `current_observation.effect_request_preparation_20261004` in the
+canonical RSI backlog and `outputs/rsi-effect-request-preparation-20261004` on
+the execution PC. Native18/P0 remains blocked on authentic effect authority and
+producer/permit/provider/resolver composition. WSP00/5/6/11/15/22/48/50/62/84/97/99.
+
+## Offline scanner environment — 2026-10-04
+
+The existing scanner child environment now fixes dotenv disabled, LiteLLM
+production/local-cost-map mode and bytecode suppression. Parent values cannot
+override these controls. Launch allowlist, private TMP/TEMP, UTF-8, real scanner,
+manifest and severity/verdict gates remain. These dependency controls are not
+an OS network/filesystem sandbox. No new module or admission bypass.
+
+Independent corrected baseline:4 failures/8 passes; repaired:12/12.
+Connected scanner/manifest/admission contracts:64 passes,3 skips. Selections overlap.
+Initial baseline5 failures/7 passes is retained: an old missing-scanner fixture
+mocked only PATH discovery and unexpectedly invoked a real scanner; its exact
+binary was not observed. Installed fallback is one source-supported route.
+Its lookup-boundary mock is corrected without changing expected assertions;
+network effects from that initial invocation are unknown.
+
+WSP00/5/6/11/15/22/48/50/84/95/97/99. C2/I4/D5/Impact3=14/P1.
+Local Qwen supplied the four fixed entries after independent criteria freeze;
+the coordinator specified the defect. This is supervised implementation, not
+autonomous discovery. Independent review/publication are separate gates.
+Evidence: canonical backlog `offline_skill_scanner_20261004` and
+`O:/Foundups-Agent/outputs/rsi-offline-skill-scanner-20261004/`.
+
+## Current-generation effect-review quorum — 2026-10-04
+
+Selected14/P1 (C3/I4/D4/Impact3), extending the existing leased owner and facade.
+The plural API holds one current-generation lease, authenticates scoped reviewer
+keys and verifies all reviews, then rechecks every retained runtime evidence
+reference/snapshot and key expiry. Input comparison now follows the final owner
+reread and trusted clock sample, closing the existing single-review timing gap.
+The runtime snapshot rejects a ninth call before invoking its supplied resolver.
+
+Independent baseline48 cases:45 missing-API failures (one capability), one late
+input-mutation failure, one missing snapshot bound, and one unchanged-single pass.
+Candidate153 selected and466 connected cases pass locally, zero errors/skips;
+these counts overlap. Tests were frozen before source edits and remain unchanged.
+Two runtime owners stay within200 lines/50 per function; thin wrappers are
+re-exported compatibly. No new runtime module, issuer or orchestration layer.
+
+This authenticates current scoped keys, not the supplied runtime producer or
+sovereign effect permission. Sampled mutation checks are not continuous atomic
+immutability. Effect permits, native admission and retained RSI gain remain open.
+Hosted publication/main closure remain separate gates. WSP00/5/6/10/11/15/22/48/
+49/50/62/84/97. Evidence: canonical backlog `current_generation_quorum_20261004`
+and `O:/Foundups-Agent/outputs/rsi-current-generation-quorum-20261004/`.
+
+## 2026-10-04 — Bounded effect-review quorum
+
+Selected 14/P1 (C3/I4/D4/Impact3) after closing PR2047 at `f1c183173`.
+The existing consensus owners now verify every member of a bounded effect-review
+set, policy quorum/roles and distinct reviewer IDs, keys, models and runtimes.
+No new runtime module, authority issuer or orchestrator was added. Independent
+acceptance preceded implementation: 63 expected missing-API failures; all 63
+now pass. The connected consensus/signing/replay/structure suite passes 315
+cases locally, zero failures/errors/skips. These are overlapping selections.
+
+Source review found no blocker. Publication/main evidence is a separate gate.
+Supplied resolver evidence is not authenticated runtime provenance or sovereign
+approval. Effect permission, native worker admission and retained RSI benefit
+remain open. Reuse the existing current-generation reviewer composition next,
+then qualify the effect-specific sovereign proof/provider handoff. WSP00/5/6/
+11/15/22/48/49/50/62/84/97. Canonical backlog observation:
+`effect_review_quorum_20261004`; local evidence:
+`O:/Foundups-Agent/outputs/rsi-review-quorum-20261004/`.
+
+
+## 2026-10-02 — Mechanical correspondence sender boundary (#1779)
+
+- Added the dependency-free host adapter
+  `host/reddog_correspondence_sender_boundary.mjs` as the mandatory final seam
+  between recipient preflight and provider mutation.
+- Bound each receipt to operation, purpose/scope, Contact identities, exact
+  To/CC/BCC, content, draft/reply/thread identity and fresh Sent coverage.
+- The boundary fails closed before provider submission on missing/BLOCK/stale/
+  mismatched receipts, changed Sent coverage, or changed draft recipients/body.
+- Provider success is not `VERIFIED_SENT`: the exact Sent message/thread and
+  To/CC/BCC must read back identically. Provider ambiguity requires Sent
+  reconciliation before retry; readback mismatch is an integrity incident.
+- The host source is Node- and code-mode-V8 compatible so the live connected
+  operator can execute the checked-in boundary around Gmail rather than relying
+  on prompt-only compliance.
+- No external correspondence was sent by this repository change. WSP15/50/97.
+
+## 2026-10-02 — Reviewer authority closed; next RSI test narrowed
+
+- PR #2014 merged/main-verified at `44d833c`; owned lane recovered and removed.
+  Exact PR/main evidence: 331 authority,8 Linux,74 correspondence,308 measurement,
+  85 caller cases, no failures/errors/skips; CodeQL passed. Local 198 and integrity 8
+  plus Node contract are separate overlapping evidence, not an aggregate score.
+- Preserved three failed hosted attempts, the erroneous v1 Path-rejection oracle,
+  its corrected 20-case v2 qualification and the fail-closed log-parser correction.
+- Registry-audit preparation is objective-inconclusive. Frozen 13/P1 next preflight
+  targets the prior actual scope-rejected proposal through existing WRE owners.
+  No model calls, generated-code execution, production Skillz/PatternMemory
+  mutation, native admission or retained-benefit claim. Unseeded sampling and
+  method-specific AST validation limit what the next observation could prove.
+- WSP00/15/22/48/50/97: existing roadmap/backlog checkpoints reconciled; historical
+  observations retained. Evidence: backlog reviewer_authority_closure_20261002
+  and O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/.
+
+## 2026-10-01 — Connect scoped reviewer authority through existing owners
+
+- Reconciled PR #2013 closed at `c9d1273`; implemented the selected 15/P1 connected
+  key layer across 13 production files, including two bounded leaves. Existing
+  owner v5, principal v2, supplier/readiness and coupled consumers now compose
+  scoped reviewer designation with distinct identities and manifest expiry.
+- Public `verify_current_effect_reviewer_decision` uses one leased generation,
+  actual Ed25519 designation/review checks, complete policy-role containment,
+  owner/time/input rechecks and private resolver cleanup. No live configuration.
+- Local candidate-4: 198 passed, 0 failures/errors/skips; exact cases, stable source
+  samples, no unexpected denials. Earlier 196-case attempts (183/13 and 193/3)
+  retain their import-guard failure evidence; fixture/import closure was repaired.
+- Hosted 331 portable plus 8 Linux cases remain pending. Linux five actual-root
+  controls plus transport v3/v4/v5 do not prove valid signed-generation rotation.
+  Publication/merge/main/owned closure remain separate gates.
+- Independent runtime provenance, quorum, effect permission, native admission and
+  retained RSI benefit remain open. WSP00/5/6/11/15/22/49/50/62/84/95/97.
+  Evidence: `O:/Foundups-Agent-audits/20261001-rsi-reviewer-authority-composition/`.
+  Earlier planned/pending log entries below preserve their historical scope.
+
+## 2026-10-01 — Exercise real effect-review signatures
+
+- Reconciled PR #2012 merge/main/owned closure; selected the first runnable crypto
+  prerequisite of the 15/P1 connected key layer, preserving full implementation
+  as outstanding. Independent author froze 6 tests; separate reviewer qualified
+  their oracles/runner before execution.
+- Local 95 passes, 0 failures/errors/skips:6 real Ed25519 cases,82 prior conditional
+  cases,7 structural controls. No production source change or measured RSI gain.
+- CI 222→228; source inventory 14 unchanged, test inventory 19→20; canonical test
+  registry 1666/269 quarantined. Ephemeral test-only signing; no live authority.
+- Captured readiness/v2, signing-input size and trusted manifest-expiry
+  dependencies for the connected implementation. WSP00/5/6/15/22/49/50/62/84/95/97.
+- Publication pending; exact receipts and owned-lane closure belong to
+  `O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-implementation/`.
+
+## 2026-10-01 — Specify explicit reviewer-key authority contract
+
+- Reconciled PR #2011 merged/main/clean owned closure at `1ff01a9`.
+- Extended the existing interface with an opt-in root-owned designation block,
+  versioned principal-artifact reviewer permissions and connected use-time scope,
+  role and generation rules. Existing identity is not reviewer authorization.
+- Recorded counterexamples for role projection, cross-policy reuse, stale owner/
+  boundary mixing and non-atomic revocation; mapped v3/v4-only consumer closure.
+- Documentation only; no new source, fixture, signature, runtime grant or module.
+  Static packet/source checks and independent review; hosted evidence separate.
+- Next15/P1 is connected key composition after independent test qualification.
+  Native RSI/AmIBot remain blocked. WSP00/15/22/50/84/97. Evidence:
+  `O:/Foundups-Agent-audits/20261001-rsi-reviewer-key-contract/`.
+
+## 2026-10-01 — Qualify effect-authority owners and reconcile RSI closure
+
+- Reconciled PR #2010 at `f4978e12`, exact PR/main checks and clean owned-lane
+  closure. Historical publication-pending prose is explicitly superseded.
+- Read actual signed runtime and current-generation principal owners; documented
+  why their outputs cannot directly supply reviewer/effect authority. Existing
+  interface owns the missing field map and concrete next contract-design gate.
+- Documentation-only qualification; no runtime adapters, source/test/manifest
+  changes, operational calls or new modules. Local validation checks the packet
+  and source references; previous regression counts remain historical evidence.
+- Native RSI/AmIBot remain blocked; no retained gain claimed. WSP00/15/22/50/84/97.
+  Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-authority-qualification/`.
+
+## 2026-10-01 — Verify conditional effect-specific reviewer decisions
+
+- Reconciled PR #2009 merged/main/owned-closure evidence at `f0224007`.
+- Extended four existing consensus leaves with strict effect-domain review
+  decoding and connected policy, actual-input, key/runtime and independence
+  checks. Delegated defaults remain; no runtime wiring or new authority owner.
+- Frozen 82-case baseline: expected missing-API failures; candidate: 82 passes,
+  zero errors/skips, no unexpected guard denials or database opens. Local source
+  samples stable, not immutable execution. Seven structural checks retained.
+- CI140 → 222; source/test inventories14/19; registry1665/269
+  quarantined. Hosted publication pending; final accounting supplies closure.
+- No authentic producer, quorum, permit, worker activation or retained RSI gain.
+  WSP 00/5/6/10/11/15/22/49/50/62/84/95/97. Evidence:
+  `O:/Foundups-Agent-audits/20261001-rsi-effect-reviewer/`.
+
+## 2026-10-01 — Correlate effect context with actual inputs
+
+- Reconciled PR #2008 closure and superseded the duplicate broad producer row.
+- Added one pure predicate to the existing context source; reused B/target
+  validators. Added a focused 154-line test sibling because existing test
+  owners are 180/200 lines; no unrelated extraction or new module.
+- Frozen 43-case baseline: expected missing API failures; candidate: 43 passes,
+  zero errors/skips. Source samples stable; no unexpected denial/database open.
+- Existing CI 97 → 140; seven structural checks retained, source inventory stays
+  14 and test inventory becomes 17. Test registry 1663 / 269 quarantined.
+- No authentication, signing, runtime activation or retained RSI gain; hosted
+  publication remains pending. WSP 00/5/6/10/11/15/22/49/50/62/84/95/97.
+- Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-context-correlation/`.
+
+## 2026-10-01 — Inert effect-approval context
+
+- Closed PR#2005 bookkeeping; independently qualified the next concrete gap
+  without duplicating the existing broad handoff design (WSP15:13/P1).
+- Added one focused context/decoder leaf and independent pure test owner inside
+  existing moltbot_bridge. Existing contract/rehydrator owners are near200 lines;
+  no unrelated extraction or compression, new module, orchestrator or store.
+- Frozen47-case baseline:47 expected missing-API failures; candidate47passes,
+  zero errors/skips, stable source samples/no unexpected denial/database open.
+- Existing CI50→97; structural inventory13→14 source/15→16 test leaves, with
+  unchanged200-line/50-function limits. Canonical registry1662/269 quarantined.
+- No authentic approval, runtime activation or retained RSI gain. Hosted checks
+  pending. WSP00/5/6/10/11/15/22/49/50/62/84/95/97; evidence:
+  `O:/Foundups-Agent-audits/20261001-rsi-effect-context/`.
+
+## 2026-10-01 — Retain existing consensus structural checks in CI
+
+- Reconciled PR#2003 as merged, exact-main CI/CodeQL verified, owned lane closed.
+- Independent source qualification confirms injected approval seams and no
+  production effect-binding consumer in inspected source; authentic producer
+  contract remains prerequisite, without widening delegated authority.
+- Selected7/P3 debt: one blank line removed from the existing201-line helper.
+  AST and all test assertions unchanged; direct static baseline6/1 → candidate7/0.
+- Added the seven existing structure nodes to the existing CI selection (43→50).
+  Hosted checks pending; no production Python, runtime registry or manifest change.
+- WSP00/5/6/15/22/50/62/84/97; current backlog `consensus_structure_20261001`.
+  Evidence: `O:/Foundups-Agent-audits/20261001-rsi-consensus-structure/`.
+
+
+## Pure effect-target binding checkpoint — 2026-10-01
+
+Base `252f700fbac4c4adb98f3dd81c3d05eadb8fce66`; PR#2002 is merged,
+main-verified and its owned lane closed. Two existing consensus owners now
+construct/recompute `reddog_effect_target_binding.v1` for HIGH/worktree_create.
+The32 independent frozen cases changed from expected missing-API failures to
+32pass/0fail/0error/0skip; no unexpected guarded operation or source drift.
+This is structural qualification, not authenticated approval or measured RSI gain.
+Original delegated APIs and four canonicalization tests remain unchanged.
+
+CI extends its existing selection from11 to43 cases. Exact PR/main execution is
+pending; publication/closure receipts live at
+`O:/Foundups-Agent-audits/20261001-rsi-effect-binding/`.
+Re-observed next14/P1: qualify authentic effect-approval provenance and exact
+binding consumption in existing owners. Source evidence must identify the
+smallest reusable gap before another implementation. No producer, permit,
+worker, service or model is admitted. Holo retrieval still reports authority
+root/head mismatch; pinned-source fallback is not semantic freshness.
+See backlog `current_observation.effect_target_binding_20261001`.
+
+WSP00/5/6/15/22/48/50/62/84/97; reuse before extension.
+
+## 2026-10-01 — Single-effect authorization handoff design
+
+- Reconciled PR#2001 exact main/CI/CodeQL and owned closure;11/11 qualification
+  controls remain rejection/domain evidence, not successful worker admission.
+- Specified proposed HIGH/worktree_create target binding in the existing
+  interface; preserve delegated v1, exact request bytes and independent proof
+  provenance. Pure binding qualification is the next13/P1 layer; authentic
+  producer/permit/signer composition and resident prerequisites remain gated.
+- WSP00/10/15/22/48/50/84/97/99. Documentation-only; no new runtime API, authority
+  policy, model execution or test result. Holo authority-root/head mismatch
+  preserved; exact-source fallback is not semantic freshness.
+- Evidence: `O:/Foundups-Agent-audits/20261001-rsi-effect-proof-design/`;
+  canonical backlog observation `effect_proof_design_20261001`.
+
+## 2026-10-01 — Effect-lease domain qualification
+
+- Added eleven bounded cases in three existing test owners and explicit guarded
+  CI selection. Local retry:11pass/0fail/0error/0skip; first collection failure
+  preserved. Existing registry remains current (1661 files,269 quarantined).
+- Qualified current rejection boundaries without changing production authority,
+  signing, model behavior or claiming an admitted lease/RSI gain.
+- WSP00/5/6/15/22/48/50/84/97. Evidence and independent review:
+  `O:/Foundups-Agent-audits/20261001-rsi-effect-consensus/`.
+
+## 2026-10-01 — Existing admission-owner prerequisite map
+
+- Source-only producer/consumer trace separates work identity, generation,
+  readiness, trust anchors, exact effect leases, skill safety and supervision.
+- Found real issuer/grant-provider elevated-consensus domain mismatch; current
+  positive fixtures substitute the provider. No runtime failure claim or repair.
+- Next13/P1 finite actual-owner qualification; preserve existing role/tier and
+  consensus guards, blocked supervisor prerequisites and other ownership lanes.
+- WSP00/15/22/48/50/84/97; existing docs/backlog only. No model, authority,
+  operational-store or application-test invocation. Evidence:
+  `O:/Foundups-Agent-audits/20261001-rsi-admission-prerequisites/`.
+
+## 2026-09-30: Post-development correspondence contract coverage
+
+The existing recipient-preflight test owner now has74 cases: original48 unchanged
+plus26 frozen cases. Sixteen combine all eight cached-state validation errors
+with invalid list/bytes observations; ten cover opaque Unicode equality/difference,
+tuple/complex/nonfinite-number spelling collisions and literal positive controls.
+
+Same suite on isolated real-leaf SQLite: defective62pass/12fail (old40/8,new22/4),
+generated74pass and reference74pass. Exact predicted failure IDs matched; no
+errors/skips or unexpected denied effects. Separate author and verifier; candidate
+was visible, so this is post-development validation, not a blinded benchmark.
+No production method change or model call. Existing CI already runs this file;
+hosted/source closure is recorded in RSI backlog `current_observation.contract_transfer_20260930`.
+WSP00/5/6/15/22/48/50/97. Evidence `O:/Foundups-Agent-audits/20260930-rsi-contract-transfer/`.
+
+## 2026-09-29: Reject missing provider freshness evidence
+
+- WSP00/15/22/50/78/84/97; C2/I4/D4/Impact3=13/P1. Source trace reconciles the prior proposal-consumer hypothesis: WRE already quarantines local text; no production correspondence proposal consumer found.
+- Repair the existing watermark comparison without coercion or empty-token acceptance. Preserve opaque equality, state-integrity errors and all 29 prior tests. Frozen baseline 40pass/8fail; same 48candidate cases pass on disposable SQLite with actual leaf imports and isolated package initializers.
+- Next 15/P1: qualify one technical RSI canary under coordinator supervision before broader FoundUp rollout. No model/provider actions, production promotion or retained-gain claim. Canonical backlog holds exact source/tests, independent review and separate publication/closure receipts.
+
+## 2026-09-28: Validate persisted correspondence before reuse
+
+Reads now require an explicit supported payload schema, reuse the writer's state validation and bind the returned scope to the requested scope. Existing digest rejection and valid roundtrip remain. Cached state never authorizes a send; rejected cache state requires provider reconciliation.
+
+The unchanged production baseline `55649b08dd` ran29 case IDs:22 passed and7 failed in [CI36440777022](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36440777022). The identical fixture against `0f8b3047c8` passed29/29 with zero failures, errors or skips in [CI36442000632](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36442000632) (0.97s). Independent review checked original output, implementation hashes, fixed IDs, matching digests and unchanged persisted rows/events. All ten candidate PR checks and CI/CodeQL passed.
+
+Final-head/main checks and owned closure remain bound to the canonical backlog publication receipt. These are synthetic SQLite regression results; provider delivery, PostgreSQL, concurrency, held-out generalization, native admission and retained RSI improvement are not established. Local application tests:0.
+
+## 2026-09-28: RSI qualifies correspondence CI coverage
+
+- Fresh PR1930 inspection found no normal CI selection for its existing 20-case Python recipient/correspondence test owner. Select C1/I3/D3/Impact3=10/P2 to establish the hosted baseline before changing state-read behavior.
+- Extend the existing CI job and test documentation; preserve all production source, 20 test cases and the prototype registry entry. Hosted checks, independent evidence review and closure are tracked in the canonical RSI backlog.
+- Record a separate11/P2 load-validation follow-on: a valid digest does not reapply schema/state invariants or bind the returned scope. This source finding does not establish a live failure, send authority, R25 consent or retained RSI. WSP00/15/22/50/97.
+
+## 2026-09-28: Add native Red Dog correspondence continuity
+
+- Added a generic provider-agnostic correspondence continuity store under moltbot_bridge using existing WSP78 ModuleDB persistence instead of extending the AgentDB compatibility monolith.
+- Persist only privacy-bounded provider event metadata, stable ask/status accounting, materialized scope state, watermarks and digests; raw mailbox bodies, recipient dumps, credentials and hidden reasoning remain outside the store.
+- Added reusable Skillz + operator projections. Provider truth still wins, cached state never authorizes send, and existing recipient preflight remains mandatory.
+- YUMORI consumes this capability as a domain adapter; Google Sheets/Docs stay optional human projections rather than Red Dog's memory substrate.
+
+## 2026-09-28: Close manager-backend qualification state
+
+- WSP00/15/22/50/83/97; C1/I3/D3/Impact3=10/P2. Reconcile PR1924's verified merge and reviewed source-only backend failures in the existing contract/checkpoint/backlog; no new document or interface.
+- Three compositions across two dependencies remain unqualified. The remaining supervisor integration is14/P1, blocked on strict-decoder evidence; native authority, deployment visibility and effect-use lease remain separate.
+- No source, test, registry, dependency, service or privilege changes. Source-review sprints ran zero tests/runtime; current documentation publication and existing CI regression are recorded separately in the bound closure receipt.
+
+## 2026-09-27: Separate supervisor observation from handshake requester
+
+- WSP00/15/22/50/84/97;13/P1. Correct the existing INTERFACE contract: current default observer and healthcheck share requester identity; a supervisor needs an authenticated observation handoff, not identity relabeling or a serialized lifecycle handle.
+- Name existing service/config producer ownership and lifecycle verifier/issuance/consumer seams; preserve strict default/audit semantics. Transport, canonical registration, replay ownership and deployment visibility remain specified prerequisites, not implemented authority.
+- Reconcile PR1922/1923 completion in active guidance, freeze connected future acceptance and update existing roadmap/backlog. No source, test, registry, service, privilege or native execution change.
+
+## 2026-09-27: Qualify cross-process socket visibility
+
+- WSP00/6/15/22/50/62/84/97;14/P1. Extend existing observer/support tests with two bounded same-UID child conditions. Positive uses default discovery/cookie continuity; negative requires live nondumpable child and real permission errors. No production or workflow changes.
+- Registry declares process capability; fixed child source, IPC/timeouts/cleanup and independent original-stat evidence are documented before hosted execution. No host candidate tests, signer activation or authority grant.
+- Reconcile PR1922 exact-main closure and retain52-row planning authority. Authenticated cross-UID supervision and native admission remain separate.
+
+## 2026-09-27: Connect bounded Linux socket/VFS association
+
+- WSP00/6/15/22/50/62/84/97;15/P1. Replace the existing pathname-inode/FD-inode equality check with an immediately consumed private kernel association helper. Preserve public policy, receipt and authority flags; expand backend methods and documented kernel-only boundary explicitly.
+- Bound process FD discovery, exact kernel messages and acceptance time; preserve selected concrete cookie/FD and compare procfs/PID/namespace views. No wildcard rediscovery on recheck, target connection, namespace switch or authority issuance.
+- Existing test owner gains inert negatives and one bounded hosted production-seam case. Independent original stat evidence supports artifact recomputation. All188 prior selected IDs remain expected; no host tests. PR1921 closure and current52-row ranking are reconciled in the existing backlog.
+
+## 2026-09-27: Characterize kernel socket identity before bridge repair
+
+- WSP00/6/15/22/50/62/84/97;14/P1. Extend existing OS observer tests with two explicitly admitted hosted cases, preserving28 old cases. Use exact test-owned kernel requests, distinct VFS/sockfs fields and fixed unlink/rebind/cookie oracles; no production implementation.
+- Registry declares network capability. Existing hosted differential selection becomes186 parent/188 candidate; xunit1 retains bounded kernel-evidence properties. Unsupported capability fails the experiment. No host tests, process launch, signer/key/provider/service action or authority claim.
+- Close PR1920 design status drift and document the remaining production/cross-process boundary. Independent source/effect review and actual CI/main closure remain pending at preparation; existing backlog binds the evidence.
+
+## 2026-09-27: Specify existing-owner supervision contract
+
+- WSP00/15/22/50/84/97;13/P1 (2+4+3+4). Reuse existing service loader, OS policy boundary and lifecycle consumer; document field provenance, manager/pidfd lifetime and resident handoff limits in INTERFACE.
+- Independent primary-source review found filesystem/socket inode conflation masked by the current fixture. Record14/P1 qualification prerequisite and fixed adversarial controls; no speculative netlink adapter or production change.
+- PR1919 exact-main closure is reconciled. This slice changes documentation only; no new tests, runtime activation, trust-anchor discharge or effect lease. Acceptance, reviews, publication and closure evidence live in the canonical RSI backlog.
+
+## 2026-09-27: Correct effective requester selection
+
+- WSP00/6/15/22/50/62/84/97; C2/I3/D3/Impact3=11/P2. Reuse the healthcheck helper and peer-policy parser; omitted identity maps effective UID/GID instead of the first configured entry. Invalid explicit identity no longer falls back.
+- Existing API, receipt schema and server attestation remain. Document the actual requester owner and future per-attempt handoff in INTERFACE; no new module, registry, runtime or authority.
+- Extend the existing test suite with14 cases and a module-only synthetic OS fixture; all seven old test bodies remain. Existing hosted lifecycle regression adds this suite, with144 parent/158 candidate expected. Source prepared; results/closure in the canonical RSI backlog. No host candidate execution.
+- Independent review caught the pinned backend dependency before publication. Regenerate its existing manifest and two digest pins; runtime membership and schema stay unchanged. Preserve the initial finding receipt and correct inherited peer-document overlap metadata.
+
+## 2026-09-27: Qualify lifecycle dependency selection
+
+- WSP00/6/15/22/50/62/84/97; C2/I4/D3/Impact4=13/P1. Capture original observer/healthcheck selection and absent clock overrides in the existing private boundary registry. Add exact-bool `require_default_dependencies=False` to the existing verified consumer; strict rejection precedes consumption.
+- Existing factory/audit schema/digests and default consumer behavior remain. Preserve all resident reasons and absent effect lease; this is dependency selection, not production trust.
+- Extend only the generation-race suite with24 cases; preserve admission suite and prior case IDs, changing only the intentional consumer-signature expectation. Source remains674 lines; inherited private constructor shrinks60 to54. No new module/skill/test owner.
+- Existing CI adds parent/candidate connected regression artifacts. Fixtures use disposable files/SQLite/Git and ephemeral test-key signing; no live signer/socket/provider/native execution. Candidate results pending; exact receipts in the canonical RSI backlog.
+
+## 2026-09-27: Discoverable runner compatibility lessons
+
+- WSP 00/15/22/34/50/84/97 selected 11/P2 documentation retention after PR1902 closure and fresh main/95-peer reconciliation. Existing tests/README and TestModLog now connect four historical failures to their reviewed corrections and evidence, without adding a runner, module or skill.
+- Static-only validation preserves production source, tests and acceptance criteria. Historical fixture passes do not establish OS confinement, native admission or retained learning. The system backlog owns exact evidence and the freshly reconciled next-action blockers.
+
+## 2026-09-23: Suppress generation acquisition after use-time rejection
+
+- WSP00/6/15/22/50/84/97; C2/I3/D3/Impact3=11/P2. The existing resolver enables the current-generation collector only after signature re-verification and an empty preceding rejection list. Signature truth, rejection diagnostics and the absent effect lease are unchanged.
+- Final fixed baseline: four expected rejection failures/eleven passes; repaired15 cases pass locally and independently, plus eight existing queue/resolver regressions. The seven generation-result scenarios now use internally consistent disposable artifacts; the original incomplete fixture remains a negative. Initial fixture and runner dependency failures are retained separately. No acceptance criteria changed after the final baseline.
+- Backend membership remains1401; one runtime digest and two pins refreshed. Canonical backlog closes PR1888, preserves26 packets/31 ranked rows, and identifies the remaining persistent-verification ingress/entitlement decision. No live provider, signer, nonce consumption, native RSI retention, reward or AmIBot dispatch.
+
+## 2026-09-23: Canary registered-worktree evidence qualification
+
+- WSP00/15/22/34/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing canary integration tests with10 direct cases using disposable real Git repositories and linked worktrees. Production, shared fixtures and previous definitions are unchanged.
+- Fixed12 cases pass locally and independently:10 new registry/isolation/HEAD cases plus two existing blocked-callback controls. Accepted external registration, rejected stage/result/path, foreign/non-Git roots, repository-local and relative paths, and mismatched expected HEADs have exact blocker/head assertions. Input stages, repository/worktree HEAD and registry remain unchanged by the evidence reader.
+- PR1882 PatternMemory qualification is closed. The new result proves local structural evidence consistency, not authenticated worker creation, native execution, race-proof confinement or retained improvement. Canonical backlog records current source/ownership, diagnostic runner limits and re-scored next work. Registry remains current1656/quarantined269.
+
+## 2026-09-23: Canary PatternMemory receipt and readback projection
+
+- WSP00/15/22/34/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing canary test owner with19 direct PatternMemory projection cases plus two unchanged blocked-callback controls; all original definitions, production and shared fixtures remain unchanged.
+- Fixed21 cases pass locally and independently. Existing fixture records, canonical IDs/digests and real explicit-path sink readback verify synthetic success, missing/incorrect identities, absent/deleted storage, independent context mismatches and stage flags. Inputs and logical skill_outcomes rows remain unchanged by projection; the absent database stays absent.
+- Readback constructs PatternMemory and may initialize/migrate schema or seed metadata. Effects are bounded to disposable external databases; fixture seeding is not authorized activation, retained learning or native execution. PR1880 final-receipt scope is closed; separate PR1881 LinkedIn docs preserved. The canonical backlog records current source/ownership and next ranking; registry remains current1656/quarantined269.
+
+## 2026-09-23: Resident final-receipt transition controls
+
+- WSP00/15/22/34/50/62/97; C3/I4/D3/Impact3=13/P1. Extended the existing canary integration test owner with16 direct in-memory receipt/preceding-plan controls; production, shared fixtures and all original definitions remain unchanged.
+- Fixed21 cases pass locally and independently:16 new structural success/rejection controls plus five existing callback/chain checks. Canonical receipt IDs, real frozen plan projections and exact rejection tuples expose previously unreachable receipt mutations; input state remains unchanged. These are component predicates, not authentic execution, planner-produced acceptance, native admission or retained learning.
+- PR1879 generation/readiness qualification is closed. Current ownership/source evidence and re-scored next work are in the canonical backlog. Registry remains current1656/quarantined269. AmIBot is still undispatched; no runtime/provider changes.
+
+## 2026-09-23: Core generation evidence and resident readiness contract
+
+- WSP00/15/22/34/50/62/97; C3/I4/D4/Impact4=15/P1. Extended the existing use-time test owner with seven cross-owner controls; production, shared fixtures and all original definitions are unchanged.
+- Eleven frozen cases pass locally and independently. The real collector/resolver projects only three generation reasons away for a typed accepted digest; seven other anchors and no effect lease remain. The real readiness validator retains its three generation reasons and peer-handshake blocker without additional verifier/clock calls. These are synthetic boundary results, not native admission or freshness/replay proof.
+- The minimal fixture also retains independent binding errors even when signature verification succeeds and collection occurs. This acquisition behavior is characterized, not repaired or certified as valid authority. Canonical backlog records fresh priority/ownership, PR1877 closure, separate LinkedIn PR1878 and the next scored action. Registry remains current1656/quarantined269.
+
+## 2026-09-23: Core RSI canary callback and chain-evidence qualification
+
+- WSP 00/15/22/34/50/62/97; C3/I4/D4/Impact4 = 15/P1. Reused the resident canary integration suite; production and shared fixtures are unchanged.
+- Fifteen frozen cases pass locally and independently: ten existing blocked-path cases, two callback/constructor witnesses, and three direct chain-validator controls. Admission rejection leaves the runner, evidence mutations and PatternMemory constructor uncalled; schema/revision mutations are separately checked by the real pure validator. This does not prove a completed native canary or retained learning.
+- Runner qualification exposed Windows capture, logging, subprocess class/argument and extended-path compatibility failures before product assertions. Reviewed runner corrections changed no oracle; all attempts are retained. Existing roadmap/backlog records AmIBot's undispatched registry state, separately owned Memory Horizon PR #1822, and distinct WRE ROC/model AutoResearch boundaries. Registry remains current at 1,656 files / 269 quarantined.
+
+## 2026-09-23: DAE branch-local acquisition repair
+
+- WSP00/6/10/15/22/50/62/97; C3/I3/D3/Impact3=12/P2. Existing adapter rejects unresolved/unauthorized requests before acquisition, then obtains only the required collaborator. Bounded same-file helpers preserve parser, response, callback, actor, cursor and required creating-getter semantics.
+- Frozen28 regressions: baseline26fail/2pass; candidate28pass and independent same28pass; original13 definitions preserved/deselected. Inert getters and import sentinel only; no live service/provider/defaultDB or OS-isolation proof.
+- Regenerated one runtime digest and two existing pins;1401 members unchanged. Eight manifest checks,67-file package surface and canonical test registry verified. Existing roadmap/backlog/interface converge; next executable qualification is ambiguous LinkedIn acknowledgment11/P2. OpenClaw/Hermes readiness and higher-ranked authority/deployment blockers remain explicit.
+
+## 2026-09-23: DAE adapter acquisition qualification
+
+- WSP00/6/10/15/22/50/62/97; C3/I3/D3/Impact3=12/P2. Extend the existing adapter test owner; production source unchanged, original13 definitions preserved. Matched commands acquire both collaborators before branch selection and unresolved/unauthorized rejection.
+- Fixed28 inert cases pass locally and independently;13 original cases deselected. Both getters replaced, eager bridge initializer/daemon imports forbidden; exact responses and callback traces retained. No real services, provider, defaultDB or OS-isolation claim.
+- Canonical RSI backlog and existing interface record the separate branch-local repair oracle and next12/P2 action. Passing current-behavior characterizations does not close the production defect or establish retained learning.
+
+## 2026-09-22: LinkedIn session configuration preview
+
+- WSP00/10/15/22/50/62/84/97;13/P1. Extend existing direct adapter helper: session dry-run validates configuration and returns before browser import/construction; fake-live controls preserve parsing/results/cleanup.
+- Fixed77 cases: baseline15fail/62pass; candidate and independent replay each pass77. Existing54 definitions and18 legacy tests preserved;18deselected/two warnings. No live execution or broader safety claim.
+- Dispatch313→304, adapter670 lines; focused session test owner reuses the existing inert fixture. Manifest/pins and canonical test registry updated. Current backlog closes PR1867 and selects connection policy/history qualification12/P2.
+
+## 2026-09-22: Dominant dry-run flags and early direct-like previews
+
+- WSP00/15/22/50/62/97;14/P1. Reuse existing wrapper/adapter; outer default/true overrides nested false without caller mutation. Direct-like previews precede browser import/construction and preserve declared parsing, agentic routing and live error/close semantics.
+- Fixed54 cases: baseline29fail/25pass; candidate54pass, independent54pass (same cases). Original18 unchanged/deselected; two configuration warnings per run. Tests use inert collaborators only.
+- Executor97→33 and adapter dispatch343→313 via same-file helpers; inherited remaining debt stays explicit. Current API/review docs and root backlog record scope, manifest binding and next engagement-session13/P1 gap. No live authority or runtime readiness claim.
+
+## 2026-09-22: LinkedIn dry-run characterization
+
+- WSP00/15/22/50/62/97; add11 synchronous fake-only cases to the existing adapter suite, preserving its original18 tests. No production source change, real browser import, account action or WRE job.
+- Record wrapper nested-flag precedence, direct like writes, reply guard after construction, read control and unchanged caller inputs. Current unsafe observations are evidence, not normative safety assertions for a repair.
+- Existing LinkedIn review workflow and root RSI backlog define prospective zero-import/construction/write direct previews, next14/P1 repair, exact validation and closure. Source methods' inherited size debt remains explicit.
+
+## 2026-09-22: Report bounded self-audit scan outcomes
+
+- WSP00/15/22/49/50/62/91/97; C3/I4/D3/Impact3 = 13/P1. Extends existing scanner and supervisor after PR1856 qualification; no parallel monitor or new execution authority.
+- Add per-attempt detached status and validated monotonic success age while preserving integer/exception callers. Partial reads retain known counts; raised scans retain unknown counts. The supervisor consumes the same attempt and does not rescan malformed results.
+- 71 fixed ordinary cases pass locally and independently. Initial baseline:8passed/10failed/32API-absence fixture assertions across two runs. Independent review exposed a remaining cross-field gap:18added cases failed/3controls passed before correction. Original30 unrelated definitions and all prior fault inputs preserved;13 prior cases extracted into the focused test owner.
+- No TTL or healthy verdict invented. No-input/partial/failed scans do not refresh bounded-input success. No live daemon/provider/default DB, native worker activation, financial effect or retained RSI claim.
+- Existing API/test indexes and monitor map updated; canonical test registry and backend manifest/digest bindings regenerated and verified separately. Exact sizes, tests, hashes and publication state are in the current backlog evidence.
+- Re-observe after closure; native18/P0 and FAM domain mapping14/P1 remain blocked, PostgreSQL13 unqualified and LinkedIn13 separately owned. The structural-diagnostic/repair-success distinction remains a separately re-scored11/P2 candidate.
+
+## 2026-09-22: Registered signer lifecycle consumer
+
+- WSP00/11/15/22/50/62/97; C3/I4/D4/Impact4=15/P1. PR1849 is closed on main with both workflows successful and its owned lane retired.92 peer heads unchanged.
+- Extend the existing lifecycle owner with captured registry/exact-type consumption and exact requester/profile correlation. Preserve one-shot, foreign-owner, expiry, generation and false authority flags; consolidate existing forwarding/validation wrappers. No new owner, resident gate change or effect lease.
+- Identical connected selection: baseline65pass/37fail; candidate102pass.37 new adversarial cases;19 existing producer identity cases relocated unchanged into the existing race suite, restoring the existing675-line test guard. Source674/admission tests656/race tests322 lines.
+- Packaging/registry, independent review and exact closure are recorded in the canonical backlog. Resident correlation qualification found missing production OS-policy/dependency provenance and exact profile supply; no reason-removal patch is qualified. Re-score selects existing payout transaction/idempotency qualification13/P1 next; seven trust-anchor reasons/lease remain unchanged. No live RSI or retained-learning claim.
+
+## 2026-09-22: Preserve signer identity in lifecycle audit receipts
+
+- WSP00/11/15/22/50/62/97; bounded producer repair C2/I4/D4/Impact4=14/P1 after 15/P1 contract qualification. Extend the existing receipt/payload with requester and signer profile; reject matching malformed configured/health identities. No new module, consumer or authority.
+- Corrected baseline: 34 pass/16 failures across 50 cases; initial 48 failures were a confined SQLite URI guard mismatch and remain separate. Candidate: 64 connected passes, including two additional exact-string subclass cases and generation/replay/valve regression coverage. Source is 674 lines.
+- Backend manifest regeneration preserves its 1,400 members and digest; this lifecycle owner is not yet in that bridge closure. No packaging membership or pins added to imply admission. Independent evidence and final closure live in the canonical RSI backlog.
+- All receipt authority flags remain false; all seven resident blockers and absent effect lease remain. Next: qualify registered-boundary consumption with exact requester/profile correlation before any gate change.
+
+## 2026-09-21: Close optional wardrobe cache qualification
+
+- WSP00/15/22/50/62/84/97/99: independently reviewed existing scanner, manifest and WRE cache; retain rescanning. Four-file bundle identity is not recursive scanner coverage; no measured optimization benefit or source slice qualified.
+- Existing owners and future synthetic oracles are mapped in the module roadmap. Zero tests/runtime calls; source, tests, manifest and registry unchanged. Full source-bound receipts and next selection are in the canonical RSI backlog.
+
+## 2026-09-21: Preserve call-local OpenClaw safety explanations
+
+- WSP00/11/15/22/50/62/84/95/97/99;10/P2 same-owner repair. Existing Boolean API gains literal details=True pair; process validates and uses local fields across all four projections, without changing admission/scanner policy or latest-status rendering.
+- Focused141pass/one existing link skip/two child cases excluded, independently replayed. Preserve qualified59-failure baseline and earlier26-event Windows self-pipe harness failure; no product/runtime failure count inflation.
+- Three source spans remain unchanged; two test owners,1400-member manifest and two pins updated; registry1651/269 unchanged. Shared external preflight hunk and98peer heads reconciled; no runtime/service/AmIBot activation or retained-learning claim.
+- Exact source, packaging, independent review, publication state and fresh next action are in the current RSI backlog; prior PR1829 contract observation archived verbatim.
+
+## 2026-09-20: Qualify call-local OpenClaw safety explanations
+
+- Completed the 10/P2 static contract in six existing documents. Existing Boolean verdict is call-local; four route projections still read latest shared text. Chose literal details=True local pair on the existing method, retaining default Boolean/force semantics.
+- Qualified explicit unpack/strict Boolean-and-text checks, false-pair rejection, nested publication/log/action oracle and intentional existing boundary-test migration. Preserve inherited DAE 1580/process 216 spans and current policy/scanner/status behavior; no new helper/skill/owner.
+- Verified three source members in the 1400-file backend manifest; future exact ownership, canonical generation and two digest pins remain entry requirements. No source/test/package change, tests, runtime or retention activation in this plan.
+- Both PR1828 main workflows passed; 98 peer heads unchanged. Preserve 26 packets/42 histories and archive prior observation; distinct next 10/P2 repair makes 43, over optional cache planning 9/P3. WSP00/11/15/22/50/62/84/95/97/99. Exact receipts in current backlog.
+
+## 2026-09-20: Qualify R25 feedback approval owners and preserve host boundary
+
+- WSP00/15/22/50/62/84/97/99/103/104; seven existing documents only. Compared current record, turn and scoped-receipt options; prefer conditional explicit record version while preserving v4 signatures/CAS/recovery exactly.
+- Exact-summary authenticated issuer and pre-projection consumer remain missing. Three admission aggregates are host-unwired; preserve external durable-adapter ownership. Existing architect disclosure and work promotion are not feedback permission. No complete source packet qualified.
+- Record source revision/digest, canonical preapproval bytes, purpose/FoundUp/version/window, current revoke/expiry checks and retry semantics; include legacy/negative oracles. Independent source review only: zero tests/probes/source edits/runtime calls.
+- Both PR1819 main workflows passed.95 existing peer heads unchanged;3 external peers added. Preserve26 packets/39 histories, add one independently scored12/P2 AutoResearcher recovery-oracle plan; actual cache plan also12/P2, higher broad/blocked scopes retained. Exact publication remains in the current backlog.
+
+## 2026-09-20: Correct parent-only Hermes rejection evidence
+
+- WSP 00/15/22/50/62/84/97/99; C2/I4/D4/Impact3 = 13/P1. Existing stop and noncompleted/forbidden terminal rejection now report incomplete effect observation and unconfirmed abort. Best-effort stop/status, reasons, effects-possible flags and artifact withholding remain; successful acceptance is unchanged.
+- Existing fake-provider tests cover 24 stop variants and three terminal variants, including receipt rehydration and provider-effect propagation. Qualified red-v2 10 failed/98 passed becomes green 108 passed. The earlier misplaced assertion was restored before that baseline and remains separate fixture evidence.
+- Connected-v2 passes 114 after correcting only the external Windows extended-path containment guard; initial seven failures/107 passes are retained as harness evidence. Independent review accepts 117 passes, repeating the 108 focused cases plus nine external controls; do not sum repeats. No real provider, child, service or sandbox ran.
+- Manifest check/eight generator tests, 15 extension fast groups and the 67-file package pass; 1,400 members retain one changed source hash. Independent JUnit classname accounting was corrected against unchanged XML without rerunning tests. Exact evidence and publication are tracked in the current RSI backlog.
+- Conditional next action is R25 approval-owner planning at 13/P1 after closure and fresh re-observation. No detached cancellation/delivery repair, AmIBot build, WRE admission or retained learning is claimed.
+
+## 2026-09-20: Qualify Hermes lifecycle and parent-only stop evidence (historical)
+
+- WSP 00/15/22/50/62/84/97/99; six existing docs only. Exact pinned API session can enable background wake dispatch despite async_delivery=False; original parent terminal and detached completion queue have distinct ownership. Preserve event gates and unresolved full child-input/delivery contracts.
+- Parent interrupt/stop does not establish detached-child quiescence. Independently qualify a narrow correction to existing stop and non-completed terminal rejection receipt flags; no schema or consumer change. Actual source repair ranks 13/P1, tied with eligible R25 design and selected for verified receipt correctness.
+- Preserve 26 packets and 38 histories, add one distinct repair row. Three bounded official dependency reads, no source edits/tests/probes/live provider or runtime changes. PR1817 main CI and CodeQL now pass; protected checkout and 95 peer heads unchanged.
+- Source maps, independent qualification, precise limitations and next packet are linked in the current backlog. No AmIBot build, WRE admission or retained RSI completion claimed.
+
+## 2026-09-20: Qualify pinned Hermes child-input observability
+
+- Six existing docs only; WSP00/15/22/50/62/84/97/99. Current /v1/runs source at official e624e9fde561e1add9388384012b295fde669ade/API0.20.4 omits full child context/accepted input. Existing lifecycle checks remain useful but cannot prove content fidelity; no consumer patch qualified.
+- Raw-host429 recovered by one exact-commit official API read; five of six source requests used. Preserve original failure and corrected background-request-versus-fallback wording. No tests, synthetic probes, source/runtime changes or live provider calls.
+- New dispatcher/delivery compatibility evidence independently selects14/P1 lifecycle qualification ahead of R25approval-owner13/P1. Preserve36prior histories and add both distinct actions; one next planning packet, no new module/skill/authority.
+- PR1816 postmerge CI and CodeQL now pass. Current documentation publication remains separate; protected shared checkout/95peer heads unchanged. Exact receipts and limitations are in the current backlog.
+
+## 2026-09-20: Bind prepared raw context before provider effects
+
+- WSP00/15/22/50/62/84/97/99; selected13/P1 repair extends five source/four test owners. No new module, skill or runtime policy.
+- Exact prepared raw-context digest is sealed before opaque capability issuance; all three adapters check it before effects. Legitimate redaction/all-absent legacy/one-use behavior remain; partial canonical bindings reject.
+- Red45 failures resolved; focused247/connected39 pass. Independent247 overlap plus26 new probes pass; two real-process cases excluded. Exact receipts, source hashes and inherited packaging baseline retained in the current backlog.
+- Manifest1400 members unchanged, eight generator tests,15 extension groups,67-file package and unchanged1651-entry test registry pass. Current repair still awaits exact-head remote closure; no live runtime, AmIBot or retained-RSI claim.
+- Re-observed35 histories and added one independently scored conditional13/P1 native-child contract plan. Preserve R25 eligible planning, protected owners and Remote AutoPost.
+
+## 2026-09-20: Qualify prepared-context binding and reconcile RSI status
+
+- Closed local 13/P1 contract qualification: 12 synthetic cases / 27 mocked adapter calls; 4 altered context forms pass under unchanged sealed prompt. Existing redaction/prompt negatives, size and one-shot checks remain. Initial harness typo retained; no source/test changes.
+- Independent review qualifies an existing-owner raw-context digest repair, preserving legitimate redaction and legacy absence. Exact next packet, size/test/manifest budgets and evidence remain in the current backlog; no live provider or native-child proof.
+- Fresh accounting: 126 merged / 21 closed-unmerged since September 9 UTC; 95 open, 12 drafts, 15 failing-check, 20 all-success, 59 success/neutral/skipped and 1 unchecked. Both PR1814 main workflows pass. Peer heads/shared checkout preserved.
+- Reconciled daily-work/retention and PC metadata; native OpenClaw 2026.5.2, current WSL/Hermes sandbox unverified. AmIBot main registration absent; existing PR1751/issue1750 retained. Corrected stale typed-genesis/receipt-forwarding and historical-test roadmap wording.
+- Prior observation archived intact; 26 original packets and 34 prior candidate histories retained, one source successor independently scored. WSP00/15/22/50/62/84/97/99; no runtime activation or retained-RSI claim.
+- Actual M2M codec rejected the first next-packet draft: invalid lane, WSP-reference types and extra top-level metadata. Corrected within the existing schema; exact encode/decode/re-encode passes at 9,578 UTF-8 bytes. Initial receipt and failures retained; source contract unchanged.
+
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
+## 2026-09-20: Commander genesis envelope handoff; baseline validation debt retained
+
+- WSP00/15/22/50/62/84/95/97/99/109: repaired the existing metadata-to-job owner; explicit commander authority precedes draft validation, and detached envelope/tenant/session/FoundUp lineage reaches the dry-run queue. No new module/skill, action, public entitlement or worker activation.
+- Local focused111pass; connected1048pass/4fail. All4failures reproduce on untouched main d00b156f (stale launch error category;3legacy Hermes fixtures missing manifests). They remain separate visible validation debt.
+- Independent review rejected3defects, then accepted the corrected source with99overlapping tests and31adversarial cases. Kept rejection/red evidence. Source1016to990; dispatcher85to40/handler90to78. Eight manifest tests and15fast groups pass; registry1651/269 has one description update.
+- Exact hashes, complete prior PR accounting, the existing onboarding skill, authority limits and subsequent remote closure are recorded in docs/roadmaps/rsi_swarm_backlog.json#current_observation. Daily work becomes an RSI candidate through R25 consent/admission and independently verified outcomes; conversation activity alone is not retained learning.
+
+## 2026-09-20: Preserve canonical proposal bytes in actual determinations
+
+- Composed the existing proposal and queue serializers in ArchitectDeterminationReceipt.to_dict; result and persistence reuse this seam. Absent/None plans stay omitted, empty/full plans remain explicit, and invalid wire null still rejects. No migration or authority change. WSP15/22/50/62/84/97/99.
+- Actual fake-model producer/store regressions reproduced2 failures/84passes, then86passes. External identical-input oracles retain all proposal/determination/candidate IDs and child/queue bytes. Connected617 pass; focus86 overlap. Source1532/serializer4 unchanged, tests411; no new module or exemption.
+- Canonical1400member closure retains every member; only this source hash and existing derived pins change. Exact packaging, independent review and remote closure are in docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+- Fresh audit distinguishes conversation previews from verified RSI retention; existing R25 proposal/consent/admission is the reuse path. Native OpenClaw exists but live WSL/Hermes/sandbox and effect admission remain unqualified. Existing AmIBot draft1751 and protected product owners remain separate.
+
+## 2026-09-20: Direct profile/proposal plan agreement before promotion effects
+
+- Reused the existing profile, promotion controller and bootstrap preparation owners. A declared proposal plan requires an explicit canonically equal profile plan and matching declared execution constraints. Typed snapshots precede direct store reads and bootstrap capability/probe/lock/recovery; legacy absence is frozen too. WSP00/15/22/50/62/84/97/99.
+- Independent review passes 318 overlapping tests plus 177 asserted probes; it caught generic traversal before packet validation, repaired with four regressions. Eight manifest tests, 15 fast groups and registry 1651/269 pass. Runtime closure and pins are unchanged.
+- Kept one receipt-wrapper selection and all downstream current-state, Holo, signature and admission checks. Moved existing profile validation into its existing owner: controller 690 to 624 lines; no new module, skill, exemption or startup wiring.
+- Local connected tests: 571; publication tests: 32. New regressions first failed 28/46 against the unchanged source. Exact evidence, independent review and subsequent remote closure are tracked in docs/roadmaps/rsi_swarm_backlog.json#current_observation.
+- This qualifies local ingress consistency. It does not admit live OpenClaw/Hermes jobs or retain learned runtime capabilities. Finish owned validation/closure, then re-observe WSP15/97 before automatic plan forwarding.
+
+## 2026-09-19: Plan-bearing seed lineage prerequisite
+
+- Seed supply requires explicit agreement with the declared proposal plan, snapshots lineage before later callbacks, validates existing candidate/receipt identities and checks effective operation/tests/path constraints. Rejection preserves output; plain-dict legacy receipt bytes remain.
+- Reused candidate gate and typed rehydration for lineage/scope. Proposal 708 -> 670; seed 675/candidate 341/rehydration 537. No exemption, new module or main.py change. Three runtime member hashes change, no new closure member.
+- Local 553 tests pass; independent 471 plus 139 asserted probes overlap. Eight manifest tests, 15 fast groups and registry 1651/269 pass. Rejected iterations and repairs remain in the current backlog evidence. No automatic extraction, main wiring, live worker admission or retained-learning claim. AmIBot registry remains draft PR1751 under detect_ai with an external protected validation failure. WSP00/15/22/50/62/84/97/99.
+
+## 2026-09-19: Bind explicit worker plans to existing proposal receipts
+
+- Extended five existing admission/profile owners and two existing test files. Optional normalized plans are detached before callbacks, validated with existing codec/closed schemas and included in the v3 receipt digest. None retains legacy bytes; empty plans remain explicit. No new module, skill, parser or startup wiring. WSP00/15/22/50/62/84/97/99.
+- Independent review rejected wildcard/deny overlap and non-plain ancestor coercion; both were repaired, with path-alias cases and three unchanged legacy byte oracles. Two final 395-case reviews overlap; backend fake persistence adds 14 bounded checks. Reviewed normalized hashes survive reconciliation from 46f656033 onto main 123d86263.
+- Current-main validation: 524 passes/five filesystem failures/one platform skip; all 64 serial cases pass/one skip using a short external temp root. Eight manifest tests, 15 fast groups and registry 1651/269 pass. The 1400-member closure retains every member; four runtime hashes and existing digest pins change. Original test/review failures, stale digest assertion and a packaging write/test overlap are preserved in the existing backlog observation.
+- Next 18/P0: qualify the receipt-to-seed provenance/consistency contract before forwarding. AmIBot registration remains in draft PR1751 (detect_ai); protected eSingularity CI still fails. No live build, public route, provider/runtime update or retained-improvement claim.
+
+## 2026-09-18: Fail closed on sent-only recipient evidence
+
+- Hardened the existing RedDog recipient preflight rather than creating a YUMORI-specific duplicate. Route evidence now carries an explicit verification bit; current but unverified address history returns `UNVERIFIED_ROUTE` and blocks the whole transaction.
+- Documented that prior Sent mail, no-bounce state and old BCC lists are not recipient authority. Past BCC inclusion is purpose-specific unless a current routing policy explicitly grants standing BCC status.
+- Added focused regressions for sent-only Contacts evidence and independently verified public-directory recovery. Routing-policy closures remain independently enforced even when address evidence changes. WSP15/22/95/97.
+
+## 2026-09-15: Resolve the RSI producer contract boundary
+
+- Closed PR #1763 at `da79e5efa` after ten exact-head checks; reviewed merge tree verified. A concurrent fetch ref update was reconciled by read-back without deleting locks or retrying the merge.
+- Two read-only audits (40/32 scoped file hashes, overlapping) found the missing plan at existing proposal admission, not a handoff field drop. Recorded a bounded 18/P0 source packet covering explicit typed input, old-receipt compatibility, scope validation and digest lineage. Startup remains unwired; no new input route or source/runtime change.
+- Reconciled the 17/P0 genesis alternative: declared intent lacks the future payload attachment; a NOT_READY-only assertion can accept commander denial. Existing roadmap/backlog holds the evidence and next work. No tests were rerun or acceptance criteria changed. WSP00/15/22/50/84/97/99.
+
+## 2026-09-15: Explicit normalized seed input
+
+- Reused the supplier/bootstrap and existing typed profile/ASCII owners. Both entries snapshot before receipt work; the seed hash includes the plan, None preserves legacy bytes, empty mappings remain explicit, and nonce basis is unchanged. No new module, skill, parser, env route or runtime authority. WSP00/15/22/34/50/62/84/97/99.
+- Baseline 47 failures/22 passes; final 69 focused passes; independent 320 includes 52 external cases. Stable hashes, prior byte oracle and rejected-input output preservation verified. Packaging: 8 passes, 15 fast groups, registry 1650/269 current. Initial expected-two-member manifest assertion failed before writing: these two seed owners are outside its 1,400-member closure, so manifest/pins correctly remain unchanged.
+- Prior PR #1761 merged as 8da0551f after 10 exact-head checks; main CI/CodeQL passed. Next 18/P0: retrieve the real normalized-plan producer/caller contract; main startup still omits it. Scope/evidence: `docs/roadmaps/rsi_swarm_backlog.json#current_observation`, artifact ID `m2m_seed_input_continuation_20260915`. No live AmIBot build, promotion or retained-learning claim.
+
 # ModLog - moltbot_bridge
+
+## 2026-09-22 - Reuse existing YouTube scheduling command
+
+Forwarded preflight, metadata preservation and exact video-ID selection to
+the existing scheduler CLI. Removed the default five-clip cap; explicit
+invalid limits fail instead of widening scope. Preserve structured failures
+even with exit zero. No resident worker, indexing or RSI routing changes.
+Local transport was unavailable; this is not live scheduling proof.
+WSP 11/22/50/84/97.
+
+## 2026-09-15: Preserve canonical M2M instructions through local provider delivery
+
+- Extended six existing owners: detached canonical request before authority use; paired schema/prompt digest before model issuance; raw/redacted wire checks before all three adapters' effects. Reused codec, digest, profile, output and one-shot owners; no new module/skill/test file or runtime grant.
+- 692 connected passes/one platform skip; independent 309 checks plus 31 Fusion checks, generation 105. Review repaired directory-before-check, callback mutation and rejected-handle reuse. Fusion 206→200; two unrelated inherited WSP62 checks remain failing. Eight manifest tests/15 fast groups pass; registry 1650/269 unchanged, 1,400 runtime members / six changed hashes.
+- Recorded one local artifact-name collision and regenerated separate author evidence. Existing backlog current observation holds exact commands, hashes and failure receipts. WSP15/97 retains explicit seed-supplier input 18/P0; AmIBot PR1751 remains draft with protected eSingularity CI debt. No live worker, public route or retained learning. WSP00/15/22/50/62/84/97/99.
+
+## 2026-09-15: Preserve explicit M2M envelopes in authority profiles
+
+- Extended five existing owners with one optional field and shared bounded codec preflight; no new module/skill/provider. Source supply and direct materializer checks now precede generic traversal. All existing outer authority/ASCII gates remain.
+- 582 connected passes / three existing platform skips. Independent review identified scoring-context predicate bypass and stringified root-key alias; repaired before promotion, with regression coverage. Final signing binds complete packet contents and rejects later action/type mutations.
+- Re-observed WSP15/97 keeps normalized producer/provider handoff at 18/P0. Evidence and exact validation are in `m2m_profile_admission_continuation_20260915` in the existing backlog. No live AmIBot job, runtime update or retained-learning claim. WSP00/15/22/50/62/84/97/99.
+
+## 2026-09-15: Bind generation to the admitted full work order
+
+- Reused the existing full-work-order digest in the resident generation handler. A detached snapshot must match signed admission before model verification/issuance/generation. Missing, changed and unserializable orders reject; injected artifacts retain their prior writer path.
+- Fourteen reproduced regressions are repaired; 115 connected local tests pass, including two additional signer-backed final-order tamper cases. Existing fixtures now bind finalized orders before mutation. Source 576→592 lines; no new module, skill or test file. Provider code and runtime authority are unchanged.
+- Canonical codec PR1757 and both merged-main workflows are verified. WSP15/97 retains shared M2M handoff qualification at 18/P0; admitted normalization and provider prompt/context binding remain open. Evidence: `m2m_admission_continuation_20260915` in the existing backlog's current observation. WSP00/15/22/50/62/84/97/99.
+
+## 2026-09-15: Per-call workspace verdict and observed policy drift
+
+- Existing permission policy returns local verdicts across scan success/failure, unavailable scanner and import failure. Snapshots REQUIRED/ENFORCED/MAX_SEVERITY and rejects observed drift before diagnostics; no new module, lock, cache or runtime grant.
+- Six nested-call and fourteen policy/control cases extend existing guard fixtures. Before: 18 failures/61 passes/one skip; after: 211 connected passes/four existing skips. Eight manifest tests and 15 fast groups pass; registry 1650/269 unchanged. Policy 326→322, tests 650→658; two duplicate fixture pairs consolidated.
+- One runtime hash and both pins updated; 1400 members. Canonical digest `5904c3b0665451b4abf2be354afbf78d7b4a59d421e4e3c057d3ddf4ac4f9d43`. Initial layout rejected before write and mistyped fast-runner path preserved; corrected validations pass.
+- Shared route messages remain latest diagnostics; atomic/ABA policy, file stability, dispatch binding and production concurrency are not established. Prior PR1748/main CI/CodeQL closed; fresh WSP15 selects existing AutoResearcher report completeness 15/P1. Evidence: `workspace_verdict_handoff_continuation_20260915`; WSP00/15/22/50/62/84/95/97.
+
+## 2026-09-15: Remove unbound workspace scan reuse
+
+- Deleted the TTL shortcut in the existing permission-policy owner. Every call runs current manifest/scanner checks; force/TTL/ALWAYS inputs remain compatible but cannot reuse a workspace verdict. WRE's single-skill cache is unchanged. No new module, cache, skill or runtime grant.
+- Twelve regressions reproduced cached pass/fail, future/recent timestamps and changed wardrobe/manifest failures. Final connected selection: 191 passed/four existing link skips; eight manifest tests and 15 fast groups pass. Source/test shrink 333→326 and 668→650. Existing availability cases are consolidated; current gate failure replaces a cached test shortcut.
+- Canonical manifest digest `b563011dd2c66729377aab1c2fb5d3416289f9ac8c1e56ea532e6084b1c500f0`; 1,400 members, two source hashes (policy and caller docstring) and both pins updated. Initial registry-description and raw-vs-canonical-digest validation failures are preserved and corrected; no check weakened.
+- More scans may cost time; reintroducing caching requires whole-wardrobe/policy/scanner and concurrency qualification. Fresh WSP 15 selects per-call shared-verdict handoff 16/P0. PR #1747 closed under actual required-check policy with neutral advisory CodeQL preserved. Evidence: `workspace_scan_cache_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97. Runtime RSI remains incomplete.
+
+## 2026-09-15: Isolate scanner report ownership
+
+- Extended the existing bridge guard with per-invocation report/TMP directories. Verdicts read private evidence before atomic publication of the existing latest diagnostic. Normal returns/errors/cancellation clean only owned temporary files; allocation/publication failures cannot admit. No immutable report or crash-scavenging claim.
+- Twelve regressions failed before repair. Final local validation: 166 connected passes/four existing link skips, including 40/one skip in the scanner suite; 8 manifest tests and 15 fast groups pass. Two real Python processes use injected scanner output. Original test/helper names and severity/manifest assertions remain; the TMP assertion now binds the private path. Source/test sizes are 394/668, with no new file or exemption.
+- One runtime hash and both existing pins change; 1,400 runtime members and registry 1,650/269 remain. Initial stale-pin validation is retained and corrected. Fresh selection: per-execution fingerprint handoff 17/P0; OpenClaw workspace cache gap 16/P0. Evidence: `scan_report_ownership_continuation_20260915`; WSP 00/15/22/50/60/62/84/95/97. Runtime admission remains closed.
+
+## 2026-09-14: Recover exact authority activation after interrupted acknowledgment
+
+- Existing authority-store activation now pins the envelope digest, reconciles durable ACTIVE state and current accepted memory, and retries only revision conflicts up to three commits. Lost replies and identical winners recover; cancellation, substitution and uncertain state fail closed.
+- Reused the existing adversarial suite and real store/PatternMemory fixtures: 23 new cases, 13 failures before repair; 204 connected tests, 8 manifest tests and 15 fast groups pass. Original test definitions are preserved; source/test files are 306/416 lines. One runtime hash and both existing pins changed; no new module, file or exemption.
+- R11-B remains partial. Its existing runbook now specifies a future atomic memory decision/row commitment under independent current write authority; production composition and activation remain closed. Fresh selection is that contract at 16/P0. Evidence: `activation_recovery_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
+## 2026-09-14: Gate authority activation and reads on accepted memory
+
+- `AuthorityRuntimeVerifiedOutcomeStore` now requires a configured source returning the exact canonical accepted record before activation, after a new commit and at each envelope read. Staged/readiness-only, absent, conflicting or unreadable evidence rejects; cancellation and publication retry remain intact. Current production factories stay unbound.
+- Reused the existing runtime-authority tests and real PatternMemory seed fixture: 15 new cases; 181 connected cases pass, plus 8 manifest tests and 15 fast groups. Source/test files are 285/927 lines; no new module, test file or exemption. One runtime manifest hash and both existing pins changed.
+- This closes the reproduced local exposure guard, not recoverable agreement or live activation. Next existing R11-B decision work remains 16/P0. Evidence: `acceptance_visibility_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
+## 2026-09-14: Verify competing full-response writer processes
+
+- Added identical/conflicting response races using the existing record fixture, root handler and disposable stores. Two distinct spawned PIDs, exact winner/retry behavior, reopened bytes, terminal mirrors and consumed authorization are verified.
+- Consolidated duplicate bare-reservation child setup into `_state`/`_stores`; its eight attempts/four workers remain. Full service plus three unchanged guards: 138 passed / one Linux-only skip in 76.65s. Test file remains 1,497 lines; 64 other definitions unchanged; no runtime/API/manifest or size-exemption change.
+- Fresh selection is existing R11-B recoverable acceptance/visibility 16/P0. Its current composed failure must be reproduced before repair; live sink activation and read permission remain separately gated. Evidence: `process_race_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
+## 2026-09-14: Verify root response recovery across writer process exit
+
+- Reused the existing signed record and real root stores in four spawned-child cases: clean return, exit after payload persistence, primary terminal write, and built reply. Reopened exact-request retries preserve payload, mirrored terminal digest and consumed authorization.
+
+- Full service suite plus three unchanged guards: 136 passed / one Linux-only skip in 71.44s. All 64 original definitions are preserved; the test file is 1497 lines. No runtime implementation/API/manifest change. This is local process proof with injected peer identity; physical-volume and privileged-service proof remain open.
+
+- Evidence: `process_exit_continuation_20260914` in the existing RSI baseline; WSP 00/15/22/50/62/84/97.
+
+## 2026-09-14: Root-owned committed-response storage read
+
+- Added `load_committed_response_for_root()` to the existing root state owner. Reused fixed pending storage, installed ownership, lock, exact generation/selection/terminal state and historical signature/current original-window validation. Healthy reads retain payload/state; one-sided mirror recovery uses the existing path.
+- Added 30 cases to the existing root service suite. Connected root/signing/revocation/provisioning/runtime/protected-use and unchanged size guards pass 348 tests / one Linux-only skip. Root source is 675 lines; no guard, public wire protocol, authority policy or new module changed.
+- This method is a storage primitive, not current read admission. The existing router rejects the proposed read operation; no grant is minted, no reservation reopened, and no signer/publisher activation occurs. Independent current read authorization/service wiring remains next at 16/P0. Evidence: `root_record_read_continuation_20260914`; WSP 00/15/22/50/62/84/97.
+
+## 2026-09-14: Recover exact later-sequence state from an existing mirror
+
+- Remote closure: PR #1734 merged as `7f4f49b79692a1aa6484544c4e46115fe6690027` after ten successful exact-head checks. The 18 owned Git blobs match the merge. Post-merge WSP 15/WSP 97 re-observation retains authenticated readback 16/P0; local test counts below are preserved evidence, not a new run.
+- Added `SqliteMonotonicAuthorityStore.restore_missing_from_witness()` in the existing store owner; exact reader/identity/context/domain and checkpoint checks surround a missing-only SQLite transaction and verified readback. Identical retries are harmless, conflicting state is preserved, and post-commit failure is not acknowledgment.
+- The existing root state's two missing-side branches call it under the existing root lock. Ordinary `advance()` and readonly reader source are unchanged. Existing principal/installation checks remain; the store operation creates no grant or API for reading signed responses.
+- Reused service/store tests for either-side loss at sequences 1/2/5, v1/v2 terminal retry, identity/context substitution, stale source, conflicts, cancellation and concurrent copies. Final connected/guard selection: 318 passed / one Linux-only skip; packaging 8 tests / 15 fast groups passed. Two runtime hashes changed; no new module, test file or exemption.
+- This proves local reopened-store recovery, not physical volume/Linux service acceptance. Both mirrors lost, unavailable payload bytes, independent read authority, normal v2 caller wiring and retained activation remain separate. Canonical next action is readback 16/P0. WSP 00/15/22/50/62/84/97; `mirror_restoration_continuation_20260914`.
+
+## 2026-09-14: Commit complete outcome responses through the existing root owner
+
+- Added strict canonical v2 COMMIT_RECORD requests/acknowledgments and domain-separated signer proof to the existing protocol/client/service. V1 serialization/parsers remain separate. The root checks current owner/peer/proof/grant and exact inner/outer reservation context before using the pending writer.
+- The shared state lock now permits a terminal transition only after durable exact-byte verification, with sequence 2 bound to the complete record digest. Exact retries and competing responses preserve the winner; no reservation reset or read grant. Pure pending JSON validation moved into the existing wire codec without changing bytes, capacity or state exports.
+- Local evidence: 279 passed / one Linux-root skip across eight suites. The new recovery matrix exposed whole-mirror deletion at sequence 2: unchanged generic CAS rejects restoration from None. A v1 control confirms it; WSP 15 rescores authenticated restoration at 17/P0 ahead of readback at 16/P0.
+- Ordinary signer finalization is still v1; readback, independent activation, real process/volume recovery and retained benefit remain open. No new module, skill, live runtime or protected FoundUp work. Evidence: `full_record_commit_continuation_20260914`. WSP 00/15/22/50/60/62/71/84/97.
+
+## 2026-09-14: Root-owned pending response bytes
+
+- Added `persist_pending_response` to the existing root state class: current generation/exact reservation, full-record digest selection in both mirrors, fixed primary-root atomic storage, eight-record/512 KiB bounds, full retained-row validation and exact retry. No RPC, owner schema, terminal grant transition or publisher call site changed.
+- Twenty-two disposable fixture cases cover interruptions, witness/file loss, conflict, capacity, context, concurrency and injected ownership decisions. Connected root selection: 116 passed / one Linux-only skip. Real process/volume recovery and Linux isolation remain unproven.
+- WSP 62/97: preserved the full existing outcome interface contract verbatim in the canonical runbook and reduced the module summary and exemption. Existing runtime methods are unchanged; source stays under 675 lines / 50 per function. Next: existing root service/client commitment, then independently authorized readback. WSP 00/15/22/50/60/62/71/84/97.
+
+## 2026-09-14: Bound immutable outcome response history
+
+- Added pure record build/parse and immutable public binding data in the existing outcome-signing owner. Reused root JSON/co-signature validators and shared response verification; enforced complete 64 KiB messages and strict anchor identifiers. No root RPC, owner configuration, publisher call site or persistence change.
+- Added 51 cases to the existing suite; connected result 294 passed / one Linux-root skip. Three malformed anchor-shape cases caught and corrected in the new layer. Next: root-owner-bound pending durability, then terminal commitment/readback. WSP 00/15/22/50/60/71/84/97.
+
+## 2026-09-14: Share outcome response validation and define durable handoff
+
+- Moved the publisher's receipt/audit verification into the existing outcome-signing module and kept the publisher wired to it. Exact boolean assertions/results and noncontradictory rejection are now required. Thirteen malformed-response counterexamples reproduced the prior acceptance gap.
+- Extended the existing outcome-signing suite with real root-store composition, interruption/reconstruction, issuance-retry and typed-validation cases. Final connected result: 207 passed / one Linux-root skip. Restored the publisher's fingerprint import after connected retry tests exposed its remaining use; no assertion was weakened.
+- Recorded the ordered R11-A immutable-record, pending-byte, commitment, readback and publication contracts. Full-response durability/readback remain unimplemented; root and secret-access grants never reopen. Protected FoundUps and live runtimes are unchanged. WSP 00/15/22/50/60/71/84/97.
+
+## 2026-09-14: Recover exact root commit acknowledgments
+
+- Existing root service acknowledges only its exact durable terminal marker after fresh authority validation; the existing client retries identical COMMIT bytes once on ConnectionError/TimeoutError. Burned reservations, rejection, cancellation and protocol boundaries remain intact. No new schema, method or state owner.
+- Extended the existing root-service tests; 17 focused cases and 115 connected cases pass, with one Linux-root skip. Corrected the existing process-pool canonical import without changing its single-winner assertion. Each RPC retains its per-call timeout; no combined deadline or production isolation proof is claimed.
+- R11-A still needs full outcome-response durability and authenticated restart readback through existing owners. Root digest storage and conversation response replay are distinct contracts. Roadmap, runbook and baseline preserve that boundary; no protected FoundUp or live runtime changed. WSP 00/15/22/50/60/71/84/97.
+
+## 2026-09-14: Reconcile signed publication commit failures
+
+- Existing authority-store publication now retries only revision conflicts, up to three commits with identical signed bytes and fresh unrelated state. Existing publisher reloads and validates durable evidence after a publication error, preserving the winner without another signing use, rewrite or activation. Missing/invalid evidence, signer rejection and cancellation stay closed or propagate.
+- Reproduced six recovery failures plus the planned retry-bound assertion; focused 49 / connected 118 tests pass. Real disposable stores, injected authorities and controlled interleavings do not establish production crash recovery or global single-signing behavior.
+- Next R11-A action is the durable outcome-response handoff before publication, starting from existing root outcome and conversation replay owners. Burned reservations, independent authority, legacy event recovery, R11-B–F and retained benefit remain open. WSP 00/15/22/48/50/60/71/84/97.
+
+## 2026-09-14: Retain the admitted event timestamp
+
+- Added optional `recorded_at` to the existing chain receipt; new accepted stage writes persist a timezone-aware recording clock in the same atomic snapshot. Existing transition IDs, historical receipt shape and earlier receipts are preserved. Admission reuses a unique matching held-out receipt's time after canonical/scope/ID validation; bootstrap/snapshot time never replaces missing history.
+- Reused the existing planner fixture for stale store tests, retained the legacy rejection, and corrected spawn's canonical callable import. Final connected selection: 214 passed / four platform skips. Original bootstrap rejection reporting is preserved; no authority guard was weakened.
+- Updated the authoritative roadmap and evidence. R11-A remains partial for pre-publication signing/competing-writer recovery; legacy event recovery, independent activation and later benefit remain open. No new module, scheduler, live runtime or protected FoundUp change. WSP 00/15/22/50/60/71/84/97.
+
+## 2026-09-14: Preserve signed publication on retry
+
+- Extended the existing publisher/store to validate and acknowledge the original STAGED/ACTIVE envelope without another signing use, durable rewrite, timestamp refresh or activation. Invalid/changed evidence, publisher identity, key/epoch and signatures reject; initial signing/attestation and fresh runtime use checks remain in their existing owners.
+- Three failures reproduced before the repair; the connected selection passes 91 tests in 13.08s, including two actual child-process retries with unchanged bytes. Fixtures use digest signer/verifier doubles; no production root, signer service or memory was activated.
+- Updated the canonical R11 roadmap/evidence. R11-A remains partial because queue bootstrap still changes `verified_at`; that immutable event binding is next. No new module, schema, record-ID algorithm or packet permission. WSP 00/15/22/50/60/71/84/97.
+
+## 2026-09-14: Authority/memory connection audit
+
+- Verified existing queue-to-publisher and authority-to-Memex connections; recorded the staging-only sink and missing production callers for existing protected-use/WSP 71 factory components. Source was read at PR1718/main `5c29a0af`; no runtime implementation changed.
+- Existing authority/startup/protected-use selection: 46 passed / one Linux ownership skip. Reusing existing publisher/store and test doubles, a failed memory callback leaves the envelope ACTIVE, and a retry one second later conflicts. The actual sink remains activation-ineligible; these are latent composition findings, not live production effects.
+- Canonical R11-A–F implementation sequence and evidence: `docs/operations/RSI_SWARM_DISPATCH.md`, `docs/roadmaps/rsi_swarm_backlog.json`, and baseline observations. Next is immutable publication/retry; preserve current authorization and conflict checks. WSP 22/48/50/60/71/95/97.
+
+## 2026-09-14: Active-row retry preserves canonical identity
+
+- Extended the existing sink comparison and two existing tests after WSP 00/97 retrieval. Python dictionary equality allowed boolean/integer, integer/float and signed-zero mismatches under a different canonical record ID. Compare with the existing canonical serializer; record IDs and schema remain unchanged.
+- Before: 3 failed / 18 passed in 1.62s. After: 55 sink/admission/handler cases passed in 4.15s. Conflicting fixture rows remain unchanged; matching active/staged retries still succeed. Canonical registry remains current at 1,650 / 269 quarantined.
+- Local R11 preparation only: activation remains blocked, fixture insertion is not production authority, and no retained-benefit claim is made. WSP 11/22/48/50/60/84/95/97.
+
+## 2026-09-14: Staging snapshot and competing replay
+
+- Extended the existing sink and test suite after WSP 00/97 retrieval. Deep snapshots bind record ID and stored payload; record-key conflict handling preserves the winning row and checks exact payload/agent before commit. Identical competing retries succeed; conflicting winners use the existing rejection.
+- Four failures / 13 passes before; 51 sink/admission/handler cases pass after, including two commit-boundary recovery cases. Staging remains outside recall and the real sink remains activation-ineligible. Schema, authority and direct-activation policy are unchanged. WSP 22/48/50/60/95/97.
+
+## 2026-09-14: Final RSI memory-admission acknowledgment
+
+- The existing queue memory-admission adapter now passes a deep copy to its injected sink and requires a nonempty string record acknowledgment. Missing acknowledgments use the existing `SINK_WRITE_FAILED` rejection; callback mutation cannot change the local receipt's evidence. No live queue, provider, service or production PatternMemory was invoked.
+- Extended existing admission tests to cover four bad acknowledgments, callback mutation and four complete synthetic recorder/retention/admission paths. Updated one shared held-out fixture to carry the exact verification digest already emitted by the real recorder. All 34 admission/handler and 39 neighboring queue tests pass; WRE's related selections add 205 passing cases.
+- Downstream review adds 37 passing disposable real-sink/canary tests after another existing shared fixture supplied the same producer fields. Existing idempotent staging and recall isolation are confirmed; the live activation boundary remains closed. The complete selected set totals 315 cases.
+- The source callback remains a trust boundary: an exception or invalid acknowledgment is not proof of no remote effect or exactly-once storage. Canonical RSI evidence and WRE's current interface retain that limitation. WSP 22/48/50/60/95/97.
+
+## 2026-09-13: R01 production Skillz exact-byte integrity
+
+- Regenerated both production Skillz manifests against unchanged committed content and pinned only those two Skillz files to LF checkout bytes. Strict guard behavior and unsigned inventory status are preserved.
+- Both manifest checks and Windows Git materialization pass. The isolated documented WRE execution-truth tier passes 235 tests with four platform-limited skips. No runtime activation, provider call, signature authentication or complete RSI claim.
+- Updated R01 planning evidence; remaining enforcement, retrieval-entry and independent RSI composition gates stay open. WSP 22, 50, 84, 97.
+
+
+## 2026-09-08: Open-source non-biometric RedDog Lick PoC
+
+- Added an opt-in AutoPost Lick at the existing fail-closed public boundary:
+  exact consent shape, guest/display-name claim, randomized single-use
+  continuity challenge, provisional encounter profile, and bounded receipt.
+- Lick-bound turns remain blocked until the challenge is consumed. Expiry,
+  withdrawal, replay rejection, quotas, and public-only effect ceiling are
+  inherited from the existing persistent session gate.
+- No biometric field is accepted or stored. Challenge and bearer values are
+  stored only as digests/in memory; every receipt states identity and human
+  presence are unverified and `authority_granted: none`.
+- The implementation is open source and makes no patent-status claim.
+  (WSP 22/50/62/71/97)
+
+## 2026-09-05: RedDog surface / 0102 deep-layer documentation alignment
+
+- Corrected the active gateway topology so RedDog owns the lightweight
+  interaction/exchange surface, 0102 owns deep cognition/orchestration, and
+  OpenClaw remains the admitted-work supervisor behind that boundary.
+- No runtime identifier, signer contract, worker authority, or execution path
+  changed. (WSP 22/50/73/97)
+
+## 2026-08-29: Pre-owner exact-main live acceptance
+
+- PR #1591 merged as exact main `09e98fff`; the governed controller admitted
+  the independently reproduced pre-owner stale-HEAD binding into exactly
+  `holoindex_postmerge_refresh:09e98fff...` and completed it through the real
+  OpenClaw/WRE path.
+- Owned resident and supervisor runtimes started and stopped cleanly. A fresh
+  governed owner query returned CURRENT/no-gap/no-reindex on attempt one with
+  equal workspace/authority HEADs and no overlay.
+- Production verification retained 33 artifacts / 222,719,702 bytes at
+  generation `sha256:7869f238...`, descriptor `sha256:af0e9a2a...`, replica
+  `sha256:fb03a1db...`, and path identity `sha256:4d5c10b7...`.
+- Runtime exact closure remains false. This is not A-grade, retrieval RSI,
+  horizontal scale, or future-commit authority. (WSP 00/15/22/50/62/84/87/97)
+
+## 2026-08-29: Pre-owner exact-HEAD repair admission candidate
+
+- Added the canonical `REPO_HEAD_MISMATCH` incident kind for the exact-main
+  freshness transition that rejects before owner acquisition.
+- Admission now requires exact zero-attempt query/authority/root/generation/
+  freshness/no-effect evidence and one independent reproduction of the same
+  stale HEAD/generation/freshness/reason binding before the existing OpenClaw
+  post-merge task can be reconciled. The shared owner classifier and all
+  receipt-bound owner transient rules are unchanged.
+- Coordinator receipts now require exact `holoindex_postmerge_refresh:<HEAD>`
+  task identity. Focused incident/root/coordinator result: 75 passed. Exact-main live replay
+  and immutable post-query verification remain pending merge.
+- WSP: 00, 06, 15, 22, 50, 62, 84, 87, 97.
+
+## 2026-08-28: Merged owner-query root-separation live acceptance
+
+- Ran the merged controller from the clean control checkout at exact main
+  `da558d5187013dc77cb2fdc2ebfaaa2fe68dcaa6` against the distinct clean authority.
+  Its first real OpenClaw transaction completed maintenance, activation,
+  verification, atomic AgentDB completion, and reverse-order owned-runtime
+  shutdown at generation `sha256:9c7e3ab6...`; the controller accepted it.
+- A fresh governed query was CURRENT/no-gap/no-reindex on attempt one. Full
+  post-query verification rehashed 33 artifacts / 222,647,465 bytes and retained
+  descriptor `sha256:87990aba...`; both canonical worktrees remained clean at
+  exact main. This closes only the root-separation replay gate. Runtime exact
+  closure, retrieval RSI, A-grade, scale, and future-commit authority remain
+  false or unproven. (WSP 00/06/15/22/50/62/84/87/97)
+
+## 2026-08-28: Owner-query workspace/authority root separation
+
+- Preserved exact-main `724954fa` evidence: the real OpenClaw transaction
+  completed maintenance and atomic completion at generation `sha256:4ede3b9d...`,
+  but the controller rejected `owner_result_invalid_after_completion`. Exact
+  reproduction proved its post-completion query passed the selected authority
+  back as the workspace entry root; the authority resolver correctly rejected
+  configured authority equal to workspace. An independent governed query was
+  CURRENT/no-gap/no-reindex in 35.3 seconds, and full immutable verification
+  retained 33 artifacts / 222,617,459 bytes.
+- Made the original `workspace_repo_root` mandatory at the shared classifier and
+  carried it through post-merge proof, incident recheck, CURRENT coordination,
+  and blocked-request recovery. The independently captured clean authority
+  remains the result-verification target. Query payloads gain no root-selection,
+  maintenance, reindex, route, Git, model, Hermes, or promotion authority.
+- Added direct/caller root-forwarding falsifiers and preserved the resolver's
+  same-root rejection. The focused affected surface is **190 passed** and a
+  production-shaped CURRENT proof passes. Merged exact-main replay remains the
+  acceptance gate; runtime exact closure, retrieval RSI, and A-grade remain
+  false. (WSP 00/06/15/22/50/62/84/87/97)
+
+## 2026-08-28: Exact-task liveness and owner-reacquisition closure
+
+- Preserved exact-main `db44f8be` evidence: OpenClaw completed maintenance and
+  atomic completion at generation `sha256:b5a138e0...`; the controller rejected
+  its immediate proof, while a fresh governed query returned the same CURRENT
+  binding in 3.812 seconds and immutable verification retained 33 artifacts /
+  222,033,165 bytes. This was a controller false-negative, not failed repair.
+- Passed the admitted task and sealed authority digest through broker launch,
+  same-root/Holo-only acknowledgment, and every liveness read. Pre-existing
+  bindings release exactly; owned supervisors remain bound until thread-dead
+  stop. The full supervisor/dispatch/executor import chain now fails before task
+  creation. Runtime/task/claim drift rejects on 60-second admission bounds or
+  the canonical 7,500-second v2 integrity-bound AgentDB claim lease instead of
+  the four-hour ceiling. Claim identity/issued time/expiry now share the digest,
+  stored assignment time must match issuance, and first late completion rejects
+  atomically; this is deterministic integrity, not a MAC against a DB writer.
+- Reused the two-attempt owner policy while adding deterministic acquisition
+  cycles. Controller proof zero and proof one use four distinct process shards;
+  cycle telemetry is integrity-bound into result and receipt and independently
+  revalidated. Holo-family selection no longer recursively loads HoloIndex.
+- Added bounded exact-cycle, admission, liveness, launch, supervisor, selector,
+  receipt, owner-proof, claim-fence, and package-path regressions; the affected
+  Python surface is **303 passed** before the independent manifest shard.
+  The pytest-only top-level `scripts` alias appends exactly the repository-root
+  scripts directory; normal imports do not extend the namespace and foreign
+  `sys.path` script trees are rejected.
+  Merged exact-main replay remains required. No route, maintenance, Git, model,
+  Hermes, or promotion authority was added. Runtime exact closure and retrieval
+  RSI remain open. An in-flight external authority effect is not yet renewable,
+  cancellable, or rechecked at every route CAS. (WSP 00/05/06/15/22/34/50/62/64/84/97)
+
+## 2026-08-27: Exact-main post-merge operator hardening
+
+- Closed incidental bootstrap effects by replacing main bootstrap plus ambient
+  autostart overrides with direct registration of only the resident and
+  supervisor specs. No MCP registration/start or process-environment mutation
+  occurs.
+- Replaced generic latest-100 completed-row truth for the Holo post-merge family
+  with the canonical exact task/request/completion transaction validator.
+- Added one bounded clean-main controller and JSON CLI. It starts only owned
+  broker runtimes, preserves pre-existing ones, binds the final CURRENT owner
+  generation to the completion receipt, and rejects unless owned threads are
+  proven dead after cleanup.
+- Replaced process-global transaction flags with an explicit
+  `holoindex_postmerge_only` supervisor mode, serialized controllers with the
+  existing cross-process lease primitive, rejected every ownership race, and
+  added final Git revalidation to both OWNER_READY paths. The mode cannot
+  restart, self-audit, claim non-Holo work, evolve skills, emit nudges, or write
+  continuity breadcrumbs.
+- Recorded exact-main `5e0835c6` live evidence without calling it A-grade:
+  maintenance self-repair works, while exact runtime closure and retrieval RSI
+  remain false/blocked. (WSP 00/15/22/50/62/77/87/97)
+- Repository-bound execution evidence is attached at
+  `docs/audits/infrastructure/REDDOG_HOLO_POSTMERGE_RUNTIME_CONTROLLER_WSP97_EXECUTION_RECEIPT_PHASE1.json`.
+
+## 2026-08-27: Runtime-environment receipt and resident-owner truth
+
+- Preserved the child-computed runtime-environment digest and exact-closure
+  assurance through the loopback client, generation-bound adapter, and rebuilt
+  query receipt. Missing/malformed digests reject; false exact closure remains
+  measurable but cannot satisfy A-grade admission.
+- Distinguished the 60-second Python worker adapter from the bounded
+  300-second CLI/asynchronous VSIX cold path. Current post-restart semantic
+  startup failed closed at 60 and 180 seconds; historical exact-commit timing
+  is not current availability evidence. Resident owner reuse remains P0.
+- No Holo maintenance, repository, dispatch, promotion, or package-install
+  authority was added. (WSP 00/15/22/50/62/83/87/97)
+- Extracted the shared retrieval-runtime evidence projection into HoloIndex;
+  the communication client is 672 lines, below its 675-line domain ceiling,
+  and no candidate-grown function exceeds the WSP_62 limit.
+
+## 2026-08-27: Exact-main cold owner readiness closure
+
+- Ran the real broker-managed OpenClaw maintenance path at exact main
+  `66526ae5c`, producing generation `sha256:f2013aeb...` through an AgentDB task
+  claimed by `openclaw_supervisor` with no retry.
+- Three fresh governed owner queries returned CURRENT/no-gap/no-reindex in
+  about 34 seconds. A warm governed query took 10.3 seconds after a 25.5-second
+  bootstrap; full verification preserved 33 artifacts / 221,204,272 bytes.
+- Closed the phase-1 cold availability P0 while retaining the 60-second wall.
+  This does not establish A-grade retrieval quality, runtime-environment
+  identity, independent evaluator trust, or horizontal scale.
+  (WSP 00/15/22/50/83/87/97)
+
+## 2026-08-27: Owner-loaded ranker receipt propagation
+
+- Required a canonical owner-emitted runtime ranker digest and carried it
+  through the resident safe projection and rebuilt receipt.
+- Added malformed/missing and end-to-end preservation regressions. A-grade
+  evaluation compares the emitted digest with its clean authority candidate.
+- Recorded that source equality does not yet bind the owner executable or exact
+  dependency/build environment; that remains P1 before reproducible A-grade.
+- Current live cold-start validation failed closed twice at 60 seconds; a
+  bounded diagnostic established no readiness proof inside 300 seconds. This
+  is recorded as P0 availability debt, not current Holo usability.
+  (WSP 00/15/22/50/62/87/97)
+
+## 2026-08-27: Exact-main automatic OpenClaw acceptance
+
+- The governed authority mismatch at exact main `cfd1e0051` was bound to the
+  canonical post-merge task. The real broker-managed OpenClaw supervisor then
+  claimed it through AgentDB CAS and the sealed production executor completed
+  generation `sha256:60d06274...` with exact freshness-receipt binding.
+- A normal governed query subsequently returned CURRENT/no-gap/no-reindex; the
+  production verifier preserved the exact 33-artifact / 220,800,343-byte
+  immutable binding. AgentDB task/request completion is independently valid;
+  the completion event remains pending only for downstream ledger consumption.
+- A wrong ambient interpreter lacked FastAPI and failed before task claim. The
+  repository `.venv` satisfied the declared runtime and completed the bounded
+  transaction. The resident stopped cleanly after verification. No Holo,
+  repository, model, or secret authority was added to OpenClaw.
+  Secret-free local evidence is attached at
+  `docs/audits/infrastructure/REDDOG_EXACT_MAIN_LIVE_ACCEPTANCE_EVIDENCE_PHASE1.json`.
+  (WSP 00/15/22/34/50/62/83/97/108)
+
+## 2026-08-27: Stable-route post-merge handoff truth
+
+- Aligned OpenClaw/RedDog documentation with the exact boundary: OpenClaw owns
+  durable task execution, while the separately governed Holo authority and
+  activation controllers own refresh, replica publication, and stable-route
+  commit. OpenClaw is scaffolding, not the Holo store or RedDog identity.
+- The exact `a7302344` route is live from manual recovery; its historical
+  post-merge task remains failed. At that candidate point, the split-lease
+  automatic composer still required a new merged exact-main task; the newer
+  entry above records its completion. Direct-root routing remains a mutually
+  exclusive migration path. (WSP 00/15/22/50/62/87/97)
+
+## 2026-08-27: Resident governed Holo usability repair
+
+- Reproduced three distinct boundaries instead of treating fail-closed output
+  as usability: the stable route bound to historical exact commit
+  `61c2c3003bc4c2086f105f4c39effd499a026627` returned CURRENT; the resident
+  normalizer rejected its valid configured `committed_head_only` authority;
+  and the default cold child exceeded the former 27-second operation budget.
+- Preserved every exact HEAD/root/generation/replica/receipt/no-mutation check.
+  `clean_workspace_head` still requires no caller overlay; committed-head
+  evidence now permits either caller state because authority may be a separate
+  clean same-HEAD checkout. Windows venv callers reuse the supervisor's vetted
+  base runtime/site-packages, while its scrubber removes ambient credentials
+  and Python overrides before restoring only exact Holo configuration. The bounded budgets
+  are now 60/57 seconds with the existing three-second cleanup reserve.
+- RED reproduced authority rejection, missing trusted-path propagation, ambient
+  credential forwarding, and runtime selection; GREEN is 25 focused
+  tests. A real default adapter query returned CURRENT, two scoped hits, no gap,
+  no reindex, and one owner attempt in 32.5 seconds. This commit-bound evidence
+  does not authorize the candidate or any later commit. Per-query cold startup and
+  process-local serialization remain scale debt. (WSP 00/15/22/34/50/62/87/97)
+- After environment hardening, the candidate-overlay adapter returned CURRENT
+  with three scoped hits, no gap/reindex, and one attempt in 31.6 seconds. The
+  query remained bound to exact committed authority
+  `61c2c3003bc4c2086f105f4c39effd499a026627`; it is not future-commit evidence.
+
+## 2026-08-26: OpenClaw refactor-status truth correction
+
+- Corrected the touched README/INTERFACE current line-count claim: the active
+  `openclaw_dae.py` is 1,580 lines, not the historical 1,342-line extraction
+  result. It remains inherited WSP 62 hard-limit debt and the facade split is
+  incomplete; no source growth or exemption was added in this transaction.
+  (WSP 00/22/50/62/97)
+
+## 2026-08-26: Exact Skillz scanner contract selection
+
+- Corrected the shared Cisco Skill Scanner adapter to use `scan` for one exact
+  Skillz bundle and `scan-all --recursive` only for wardrobe roots. Direct
+  `SKILLz.md` bundles pass the explicit `--skill-file` contract; manifest
+  verification, stale/malformed report rejection, typed severity parsing,
+  timeout normalization, and unknown-threshold handling fail closed. Scanner
+  processes receive a minimal credential-free environment and raw process
+  streams are not returned.
+- Both registered production RedDog/WRE Skillz passed the installed scanner's
+  real exact-bundle path. This grants no execution, model, worker, Git, Holo,
+  network, or promotion authority. (WSP 00/15/22/50/62/95/97)
+
+## 2026-08-26: Main bootstrap WSP 62 result extraction
+
+- Extracted the stable 53-field main read-only bootstrap result schema and its
+  ready/not-ready projections into one 286-line sibling. The original module
+  re-exports the exact class/constants and aliases the bounded builders, so
+  public imports and output semantics are unchanged.
+- Extracted only the authority-profile mapping-list recursion needed to reduce
+  `_visit_type_paths` from 61 to 59 lines. List/tuple/empty/invalid and nested
+  ordering regressions preserve strict fail-closed behavior.
+- Reduced the bootstrap host from 858 to 615 lines without raising an
+  exemption. Its unchanged 432-line orchestration entrypoint now has an exact
+  explicit legacy no-growth ratchet and remains a separate decomposition debt.
+- Rebound the authenticated RedDog backend closure to 1,385 files at
+  `6e022fb56e5e8775eac9814654fcaf4b338a699a8c91829edb96c9e5b868fa32`.
+  No model, worker, OpenClaw, Hermes, queue, repository, or HoloIndex authority
+  changed. (WSP 00/15/22/50/62/84/97)
+
+## 2026-08-26: Durable first-TURN resolution link
+
+- Added an explicit v2 `RESOLVED_INITIAL_TURN` journal contract that preserves
+  the original empty-ID request digest independently from the derived resolved
+  conversation/revision-0 digest. Reused the existing AgentDB journal rather
+  than creating a parallel link table.
+- One current-generation credential lease now atomically delegates two
+  separately registered one-use FoundUp authorities. E0 create/exact recovery
+  and journal binding cannot reuse or copy one verified authority. Exact replay
+  derives the ID only after authentication and validates the stored E0 receipt
+  against the current signed revision chain.
+- Added crash, concurrency, divergent-key/nonce, later-revision replay, tamper,
+  content-disclosure, one-use, and WSP 62 regressions. The aggregate remains
+  host-unwired and grants no handler, CAS, model, worker, repository, or Holo
+  effect. (WSP 00/15/22/50/62/84/97)
+- Independent WSP 97 falsification then proved that self-hashed journal fields
+  did not authenticate a rewritten idempotency identity and that replay viewed
+  an authority before retiring it. The repaired scope schema v4 commits the
+  exact source/resolved request pair into signed immutable E0 state; replay
+  verifies that commitment and atomically pops-and-verifies its authority.
+  Full-row rehash tamper and synchronized two-caller regressions now fail
+  closed without weakening the one-use or no-effect boundaries.
+- The expanded conversation matrix is **149 passed** with two unchanged
+  legacy WSP 62 ratchet failures outside this candidate. Their exact 61/60
+  function and 858/857 file deltas are recorded in ROADMAP for a separate
+  WSP 15 refactor transaction; no ceiling was relaxed.
+
+## 2026-08-26: Trusted new-conversation scope admission Phase 1
+
+- Added the inert empty-ID `TURN` resolution and current-generation admission
+  aggregate. Exact `reddog_intent.v2`, request/work-focus, grounding receipt,
+  and registered FoundUp equality are established before credential use; the
+  E0 signer and signed-generation lease then cover one authority-native AgentDB
+  scope create or authenticated exact recovery.
+- Extracted signer-context loading from the session authority source to retain
+  WSP 62 bounds. The new aggregate requires a real record-signing context but
+  does not request Principal Memex, journal or execute the first turn, reserve
+  conversation CAS, invoke a model/worker, expose traffic, or grant effects.
+- Independent WSP 97 falsification returned **NO-GO** because the initial tests
+  fixed the session binding while production derived it from intent. Divergent
+  first turns could therefore create different conversation IDs with one nonce.
+  The repair uses the signed credential's stable session ID only on the new
+  authority-native path, preserves legacy/root-create identity behavior, and
+  adds real signed-session divergence tests. The audit also prompted an explicit
+  scope-lifetime check against request expiry; no limit was weakened.
+- The repaired-byte independent audit returned **GO** with 46 focused passes.
+  The local repaired authenticated state/session/signing/tamper/admission/
+  binding/journal matrix is **127 passed** and Ruff is clean. The staged
+  registry is current at **1,581 / 268 quarantined**. The extension backend
+  closure is **1,384 files** at `3211a4e5...c8498`; only the extracted signing
+  context is imported there, while this unwired aggregate remains outside it.
+- WSP 15: C4/I5/D4/Impact5 = **18/P0**. The governed Holo query failed closed
+  once on authority/workspace HEAD mismatch (`e656fd76...` versus
+  `10d85a92...`); no retry, reindex, route repair, or mutation occurred. Direct
+  exact retrieval supplied the bounded evidence set. WSP
+  00/15/22/50/62/84/97.
+
+## 2026-08-26: Current-session resident admission aggregate Phase 1
+
+- Added one inert host operation for existing conversations that composes the
+  strict resident request preflight, current-generation principal-signed
+  session lease, exact authenticated AgentDB scope binding, and durable
+  content-free replay reservation. The signed-generation lease remains held
+  through journal completion; no host traffic or handler calls this API yet.
+- Added an authority-native binder for the session source's already-consumed
+  `VerifiedConversationScopeAuthority`. It accepts only a live registered
+  authority matching the current authenticated record, atomically retires it
+  while issuing at most one reservation child, and retires it on rejection.
+- Independent WSP 97 falsification reproduced concurrent double-use of the
+  initially non-atomic parent, arbitrary typed-error text propagation, and an
+  exact-type malformed request exception. The repair moves child issuance and
+  parent retirement under one capability-registry lock with record
+  re-verification, allowlists public session-source reasons, and makes request
+  prevalidation total and fail closed.
+- The fresh audit then reproduced a direct E0 cross-session record/parent
+  transplant against the new atomic primitive. The deepest operation now
+  enforces the complete record-to-seal identity tuple before issuing a child;
+  mismatched E0 session and hostile Mapping inputs burn the parent and return
+  no child without leaking an exception.
+- A fresh-context independent WSP 00/WSP 97 audit returned **GO** on the final
+  five implementation/test hashes with `36 passed`; no requested correctness
+  invariant remained unproven.
+- Malformed, stale, and new-scope requests reject before credential leasing;
+  stable authority-source failures remain typed and unexpected failures close
+  to one public admission-unavailable reason. The aggregate stores or returns
+  no credential, operator text, principal, or FoundUp identity and grants no
+  conversation CAS, model, worker, repository, or effect authority.
+- WSP 15: C4/I5/D4/Impact5 = **18/P0**. The governed Holo query failed closed
+  once on authority/workspace HEAD mismatch; no retry, reindex, route repair,
+  or Holo mutation occurred. Direct must-include source and document retrieval
+  grounded the bounded slice. WSP 00/15/22/50/62/84/97.
+
+## 2026-08-26: Resident conversation request idempotency Phase 1
+
+- Added a bounded AgentDB request journal after the existing authenticated
+  request-to-scope binding. The binder now atomically consumes the live
+  registered secret-backed scope authority to issue a non-constructible one-use
+  child and binds it
+  to the canonical reservation identity, and excludes it from serialization.
+  The store consumes that proof before database access and uses its owned clock
+  to recheck request/scope expiry plus the exact current scope revision, record
+  digest, and latest revision receipt under backend-specific locks. Exact
+  retries with a fresh proof replay the original record; altered key/request/
+  nonce reuse, stale state, capacity, corruption, expiry, and database failure
+  reject closed.
+- Independent WSP 97 review returned NO-GO on positional unified-cursor access,
+  SQLite-only SQL, scope-expiry drift, constructible binding evidence, index-
+  column tampering, malformed injected store output, and missing capacity/race
+  tests. Storage was split into contract/service/backend LEGO modules, SQLite
+  and PostgreSQL locking were made explicit, all indexed columns bind to the
+  stored record, and a serialized global counter closes horizontal cap races.
+- A second independent NO-GO proved that an underscore-only digest registrar
+  was forgeable inside Python. That registrar/module was removed. Journal
+  authority now comes from atomically consuming the pre-existing live verified authority registry;
+  unregistered-parent minting, direct-store bypass, one-use behavior, and
+  backdated expiry are falsified explicitly.
+- Production-shaped mapping rows exposed the same older positional-access drift
+  in signed pending scope staging/finalization; that adjacent authenticated path
+  now uses named rows and its oversized stage function was extracted below the
+  WSP 62 function limit without changing signing authority.
+- Reservation records exclude operator text, principal, and FoundUp IDs and
+  grant no conversation CAS, identity, effect, model, dispatch, or HoloIndex
+  authority. This is not a live TURN/STATUS/CANCEL handler or transport adapter.
+- WSP 15 rescore: complexity 5, importance 5, deferability 5, impact 5 =
+  **20/P0**. The governed Holo query failed closed on an authority-HEAD mismatch;
+  no retry, reindex, route change, or Holo maintenance was performed.
+- The authenticated conversation/journal/signing matrix is **94 passed**; the
+  extended RedDog/WSP-62 matrix is **110 passed**, Digital Twin transport is
+  **36 passed**, and registry governance is **45 passed** in isolated package
+  processes. Six touched/new sources are at most **394 lines** with functions
+  at most **41 lines**; Ruff and compile checks are clean.
+  The release gate is **4/4 PASS**; package closure is **67 files / 965,192
+  bytes** under the 1 MiB cap. Exact-final timing belongs in the external
+  WSP-97 receipt so documentation does not create a self-referential rerun.
+- Linux fast-tier CI then correctly rejected stale backend-manifest hashes for
+  the two modified files already inside its authenticated runtime closure. The
+  governed generator rebound only those hashes; the closure remains 1,383
+  files with no widened dependency or authority surface.
+  WSP 00/15/22/50/62/84/97.
+
+## 2026-08-23: Cross-platform OpenClaw dry-run worktree binding repair
+
+- A RedDog routing matrix proved the dry-run adapter rejected the executor's
+  canonical external `<repo>/<work-order>/<nonce>` worktree shape on Windows.
+  The adapter had drifted to an obsolete shape that omitted the repository slug.
+- Added exact equality with the executor-owned canonical worktree constructor,
+  binding repository root and slug, work-order ID, and sanitized nonce after
+  absolute component validation. Relative, alternate-root, traversal,
+  duplicated-marker, missing-segment, and mismatched-order paths remain closed;
+  no enqueue, worktree creation, OpenClaw, Hermes, Git, or model call was added.
+  (WSP 00/15/22/50/62/84/97)
+
+## 2026-08-23: Resident generation-bound Holo owner binding implementation
+
+- Replaced the resident audit worker's ambient handoff-only default with a
+  focused adapter over the existing governed one-shot owner bridge. A fresh
+  resident/OpenClaw process now inspects the verified replica route instead of
+  returning `HOLOINDEX_QUERY_SERVICE_NOT_CONFIGURED` without reading it.
+- WSP_97 falsification found and closed an owner cleanup race, unscoped raw and
+  nested receipt leakage, split HEAD/root/generation/replica admission,
+  pre-filter result starvation, hostile timeout exceptions, unbounded captured
+  output, and adapter-only serialization. The shared one-shot now owns the
+  lifecycle lock; the resident adapter restores the process boundary and
+  enforces a 30-second parent wall with at most 27 seconds for the child
+  operation and a three-second cleanup reserve. The budget is above the
+  documented 14.5-18.5 second cold-owner range that made 15 seconds unsafe.
+- The one-shot retains a 60-second default for extension/direct callers and
+  propagates remaining time into configured health, owner startup, query, and
+  retry. Its CLI accepts only the exact internal timeout flag. No reindex,
+  route recovery/publication, Fusion route disclosure, or Hermes dispatch was
+  added.
+- Current focused owner/adapter/bootstrap result: **128 passed**. Canonical
+  read-only audit worker: **75 passed**. Exact inherited WSP_62 guard: **16
+  passed**. The legacy diagnostic adapter export is retained and its four
+  adjacent direct/query/receipt/transport suites pass **49/49**. A
+  production-shaped probe reached the one-shot boundary and failed
+  closed on the independently dirty authority root with zero owner attempts and
+  no reindex; it did not regress to service-not-configured.
+- This is local code evidence, not a live-success claim. A clean/current
+  post-merge owner canary remains required before activation. Per-query child
+  startup and process-local-only serialization remain P1 cross-process and
+  horizontal-throughput debt; no timeout or trust proof was weakened.
+- The exact generated candidate passed the isolated four-group RedDog release
+  in **288,505 ms**. A concurrent-audit run first timed out core/governed Git at
+  the unchanged ceiling and remains explicit P1 contention evidence.
+- WSP 00/15/22/50/62/84/87/97.
+
+## 2026-08-23: FoundUp Memex learning-candidate fail-closed hardening
+
+- Removed caller-asserted governed-research receipt IDs from the admission
+  decision. The declared source class now fails closed until an authenticated
+  authority-bound receipt verifier exists.
+- Canonicalized human-authored text with NFKC, aware timestamps to UTC seconds,
+  and numeric scores to floats; bounded evidence/supersession inputs before
+  deduplication and removed fallback object-to-string digest coercion.
+- Reconstruction now requires and exactly replays the original proposal plus
+  evidence closure. Memex views require the exact invariant set and a
+  self-consistent assembly receipt before structural projection. This proves
+  structure, not authenticated provenance; later admission must supply that
+  independent authority.
+- This remains `STRUCTURAL_ONLY`: no runtime admission, persistence, Brain or
+  Breadcrumb write, HoloIndex/roadmap mutation, or work authority.
+- An independent exact-commit review returned NO-GO on exception leaks and
+  late rehydrated-collection bounds. The repair converts extreme timestamp and
+  nested hostile-value failures into deterministic rejection, removes
+  validation-time dataclass deep copying, and applies limits before traversal,
+  sorting, or deduplication. The repaired commit requires a fresh review.
+- The fresh review found one remaining callback-bearing nested source-receipt
+  path. Plain-data view-source validation was extracted into a bounded module,
+  and public gate/reconstruction boundaries now convert any unanticipated
+  nested validation exception into stable rejection. Another exact-commit
+  review remains required before delivery.
+- The next release review found unsafe fallback attribute access, incomplete
+  whole-view plain-data coverage, post-rejection batch traversal, and a
+  reconstruction verifier that tolerated unrelated evidence. The final repair
+  makes fallback reads exception-safe, validates and cumulatively bounds every
+  nested view container before hashing, returns immediately on gate-input
+  failure, and requires exact proposal-evidence closure.
+- The final bound review found that mapping-key characters were not included in
+  the cumulative pre-hash budget. Keys and values now share one total character
+  budget, individual strings remain bounded, and integer magnitude is capped.
+- WSP 00/10/15/22/50/60/62/79/84/87/97.
+
+## 2026-08-23: FoundUp Memex structural learning-candidate gate
+
+- Implemented the roadmap's bounded candidate layer as a pure transformation
+  over one exact FoundUp Memex view and receipt-bound Breadcrumb or
+  verified-outcome evidence. Governed research was declared for later
+  authenticated authority integration.
+- Candidates preserve supporting and contradicting evidence independently,
+  carry proposal-only salience/confidence and supersession pointers, and bind a
+  deterministic evidence manifest that can be reconstructed without storing
+  raw evidence in the gate.
+- The output is `STRUCTURAL_ONLY`, non-runtime-admissible, and explicitly grants
+  no persistence, Brain/Breadcrumb/HoloIndex/roadmap mutation, or work
+  authority. The legacy cross-platform JSON memory and disabled Holo adaptive
+  consolidation prototypes were not imported or modified.
+- WSP 15 score: 17/20 (P0 architecture: C4/I5/D3/Impact5). WSP 00/10/15/22/50/
+  60/62/79/84/87/97.
+
+## 2026-08-22: Resident conversation request-to-scope binding
+
+- Added an admission-only bridge from the strict Digital Twin `TURN`,
+  `STATUS`, and `CANCEL` envelope to one authenticated current AgentDB scope
+  revision.
+- The bridge consumes the existing opaque one-use capability, verifies record
+  shape/digest/authentication plus principal/session/scope equality, expiry,
+  exact revision, and turn lineage, then emits content-free non-authoritative
+  evidence without reserving CAS or mutating state.
+- Empty conversation IDs remain fail closed pending trusted scope resolution;
+  durable idempotency and operation handlers remain required before a live
+  VSIX/PFMall adapter.
+- A WSP 62 test exposed that adding the bridge to the existing lifecycle file
+  would push it to 490 lines. Extracted the distinct admission boundary into a
+  243-line module with a 37-line maximum function and no exemption.
+- Compressed the legacy interface registry from 1,529 to 1,502 lines while
+  adding the contract, and ratcheted its exact temporary ceiling down from
+  1,519 to 1,502; no exemption was added or widened.
+- Added the WSP 97 high-risk assumption audit and synchronized working,
+  contract, intent, navigation, and verification memory. WSP 00/15/22/50/62/
+  84/97.
+
+## 2026-08-22: Holo owner replica response binding
+
+- Preserved the service's exact four-field query-replica capability through
+  the loopback client instead of dropping it during response normalization.
+- A successful client response now requires a complete built-in replica tuple;
+  the one-shot owner wrapper independently compares it with the already
+  verified route and fails closed on absence or mismatch.
+- Added focused missing-field and different-replica regressions. No query,
+  maintenance, model, index, signer, or action authority was added.
+  WSP 00/15/22/50/62/97.
+
+## 2026-08-21: WSP 62 production-authority decomposition
+
+- Split architect FIX promotion into a stable public adapter, bounded input
+  preparation, and bounded locked execution while preserving fail-closed
+  HoloIndex owner verification and publication behavior.
+- Extracted signed-worker queue-loop environment projection from effectful
+  dependency construction; both source modules now have functions at most 50
+  lines and require no temporary exemption.
+- Moved integration-only receipt/Fusion setup and static trust-boundary checks
+  into focused test support/modules, reducing all three inherited test ceilings.
+- Archived the historical OpenClaw DAE/ExecutionBundle example and retained a
+  concise authoritative interface route with no contract loss.
+- WSP 15 classification: P0 (`C4/I5/D5/Impact5 = 19`) because stale exemptions
+  blocked the production-authority merge gate. WSP 00/97 evidence remained
+  fail-closed after the owner query reported an authority-HEAD mismatch; no
+  query retry, re-index, or replica maintenance was performed.
+
+## 2026-08-21: Shared verified artifact-model topology consumers
+
+- Connected bounded FoundUps Fusion, OpenClaw gateway, and Hermes API artifact
+  providers to the shared one-shot AI Gateway resolver. Each provider defaults
+  to an empty availability inventory and can use only the exact configured
+  provider/model route carried by verified runtime evidence.
+- Propagated explicit provider inventory and trusted use-time clocks through
+  the resident queue bootstrap. Stale, replayed, unavailable, payload-mismatch,
+  and retargeted routes reject before network, secret access, or worker process
+  execution. WSP 00/15/22/50/62/97.
+
+## 2026-08-21: RedDog advisory bridge WSP 62 containment repair
+
+- Extracted pure bounded input, telemetry, prompt, and result formatting into
+  `reddog_advisory_bridge_support.py` without moving provider calls, authority,
+  or stdin/stdout ownership.
+- Reduced `advisory_model_once.py` from the inherited 1,288-line over-ceiling
+  state to 1,169 lines; its two exempt functions are now 189 and 176 lines,
+  below the unchanged 1,200/201 containment ceilings. WSP 15/22/62/97.
+
+## 2026-08-21: Promotion-time query-replica owner proof
+
+- Architect FIX promotion now snapshots its supplied environment, resolves the
+  active query replica against the freshness receipt's canonical SSD, and
+  passes the sealed route into exact owner binding verification.
+- Missing/stale route proof rejects before owner verification and profile/queue
+  publication. The resident claim runtime forwards its already closed
+  environment; no materialization, re-index, or fallback was added.
+  (WSP 00/5/6/15/22/50/64/84/97)
+
+## 2026-08-21: Current upstream Hermes/OpenClaw worker proof
+
+- Upgraded the production Hermes contract from API `0.19.1` text-only inference
+  to API `0.20.4` native single-leaf `delegate_task` proof. Exact child identity,
+  completion, explicit zero child reads/writes, ordered delegate-only telemetry,
+  final terminal output, and postflight confinement now fail closed.
+- Reused one shared signed-principal route extractor. OpenClaw now derives its
+  provider-prefixed runtime model from the signed provider/model pair, accepts
+  the stable `2026.7.1-2` revision, rejects service/plugin version drift, and
+  orders its RPC probe last to reduce the observed WSL cold-start race while
+  preserving fail-closed behavior; scalable readiness amortization remains open.
+- Both upstream providers now reuse one bounded artifact-map validator for
+  canonical relative paths, non-empty UTF-8 text, Windows device-name defense,
+  and per-file/aggregate size limits.
+- Actual bounded GotJunk canaries returned one accepted in-memory artifact from
+  each upstream runtime. No repository artifact was materialized. The full
+  diagnostic/negative evidence is under `docs/audits/openclaw_hermes/`.
+  (WSP 00/15/22/50/84/97)
+
+## 2026-08-21: Governed repository-state v2 strict intake
+
+- Replaced permissive body-hash-plus-minimal-binding acceptance with exact,
+  bounded validation of the digest-only executable v1 public receipt.
+- Empty/partial/mismatched identities, bool numeric fields, malformed digests,
+  bad sizes/link counts, minimal Windows signatures, verifier substitution or
+  containment drift, non-Windows shape drift, unknown fields, and raw paths now
+  reject before repo-state consumption. Python remains subprocess-free.
+- Receipt hashing remains necessary but is not described as origin
+  authentication; Git DLL/helper closure remains outside direct proof.
+  (WSP 00/15/22/50/62/97)
+- Focused snapshot/start/bootstrap validation passed 105 tests with one skip;
+  the final snapshot/generator matrix passed 24/24 and the hostile extension
+  promotion passed 4/4 in 283,268 ms.
+
+## 2026-08-15: Grant-profile atomic runtime provisioning
+
+- Extended the existing atomic signer-generation transaction with one fixed
+  exact-Git grant-authority context; no second provisioner or trust model was
+  created.
+- Bound owner config v4 and grant config v2 through exact repository/source-
+  policy evidence into manifest v3 and durable generation activation. Dynamic
+  profile artifacts now drive leases, activation, and recovery.
+- Added a shared root-owner operation fence plus source-policy revalidation at
+  production, commit guard, and recovery. Alternate committed source maps,
+  config downgrade, owner replacement at the final commit guard, and concurrent
+  compliant rotation fail closed; the transactional guard proves rollback.
+- This is artifact provisioning only. Service launch, secret resolution,
+  external lifecycle supervision, live authority, repository work, and merge
+  remain blocked, and no production bootstrap invokes the foundation. WSP 15
+  score: C4 + I5 + D5 + Im5 = 19/20, P0.
+  (WSP 00/15/22/50/62/71/97)
+
+## 2026-08-14: Root-owned grant-service source-policy authority
+
+- Extended the existing root-owned signer configuration to v4 with the exact
+  canonical archive-to-repository source map, repository-root digest, and
+  source-policy digest.
+- Added an opaque, non-copyable, non-serializable capability whose use-time
+  revalidation rejects root-config replacement, cross-repository use, source
+  substitution, stale digests, and capabilities from another boundary.
+- Preserved v3 grant-client compatibility while preventing v3 from issuing
+  build-source authority. Archive construction, signer launch, secrets,
+  repository effects, and HoloIndex mutation remain blocked.
+  (WSP 00/15/22/50/62/71/97)
+
+## 2026-08-14: Grant-authority exact-Git effect admission
+
+- Extended signed owner E0 policy to v7 and runtime-artifact manifests to v3,
+  binding the exact repository root, authorized commit, Git object format,
+  canonical source policy, and archive source descriptor.
+- Reused the existing exact-Git archive validator at manifest production,
+  signer request admission, current E0 use-time rehydration, and the final WSP
+  71 effect fence. The authorized commit must match all three authority-profile
+  locations; v6/v2 remains diagnostic-only and cannot invoke the callback.
+- Added v3 signer-domain support and corrected binary archive description so
+  provenance zipapps are never treated as JSON. No service, socket, secret,
+  worker, repository, PR, merge, or HoloIndex effect was added.
+  (WSP 00/15/22/50/62/71/97)
+
+## 2026-08-14: Grant-authority exact-Git archive provenance foundation
+
+- Extended the canonical archive contract with a separate v2 provenance block
+  whose non-synthetic members bind archive path, repository path, exact commit,
+  Git object format, blob object ID, byte count, and content digest.
+- Reused the WRE exact-tree and bounded Git-object readers; archive construction
+  reads committed blobs rather than checkout files, and independent validation
+  compares every member with the object database under an exact source policy.
+- Disabled Git replacement refs, sanitized inherited Git authority variables,
+  batch-bounded aggregate reads, and required independently supplied repository
+  root, commit, object-format, and source-policy bindings. Generic production
+  validation rejects v2 until those inputs are bound by signed owner policy.
+- Preserved legacy v1 validation without treating its claimed commit as
+  provenance. Production owner-policy admission, manifest activation, service
+  launch, secret resolution, and repository authority remain blocked.
+  (WSP 00/15/22/50/62/71/97)
+
+## 2026-08-14: Grant-authority executable archive validation
+
+- Replaced arbitrary service-archive bytes with one deterministic ZIP_STORED
+  contract whose canonical inner manifest binds every Python member, exact
+  entrypoint shim, claimed source commit metadata, and source-descriptor digest.
+- Enforced the same validator before signed runtime-manifest production and
+  again during current E0-bound use-time rehydration.
+- Added fail-closed ZIP metadata, package/static-import reference, common
+  loader-alias, standard-library shadowing, beyond-top-level relative-import,
+  control-path, and non-generator callable-entrypoint checks. This remains an
+  inert validation layer: it launches no process, resolves no secret, opens no
+  socket, and grants no worker or repository effect. Claimed source metadata is
+  not independently verified Git provenance, and AST inspection is not a
+  Python sandbox. (WSP 00/15/22/50/62/71/97)
+
+## 2026-08-14: Grant-authority WSP 71 permission rehydration
+
+- Replaced trust in two SHA-shaped permission identifiers with an exact
+  canonical `SECRETS_READ` receipt bound through the root-selected signer
+  config, current E0 authority digest, and grant-service manifest.
+- Removed the draft's cyclic receipt/manifest binding and public mint path. The
+  acyclic chain is receipt -> config -> manifest -> E0; one callback runs under
+  the same current-generation lease and matching durable revocation lock.
+- Extended the existing root-composed revocation oracle with domain-correct,
+  pre/post issuer-key-epoch and expiry checks; permission receipt IDs are not
+  inserted into the secret-grant revocation namespace.
+- Bound the root-owned generation public key into private current selection and
+  require it to differ from grant, revocation and target-signer keys.
+- Added no vault resolution, socket, service startup, worker dispatch,
+  repository effect, or HoloIndex mutation. (WSP 00/15/22/50/62/71/97)
+
+## 2026-08-14: Authenticated grant-service manifest binding
+
+- Extended the existing runtime-artifact manifest additively: v1 remains
+  compatible, while v2 binds the grant-authority service profile and a bounded
+  content-addressed archive plus exact public config and inert run packet under
+  the same signer, nonce, and signed E0 generation fence.
+- Extended signed owner E0 policy to v6 with grant signer/profile identity,
+  public fingerprint, distinct key-reference hashes, permission evidence, and
+  exact manifest/config/run-packet bindings. V5 remains verifiable, but the new
+  grant-service adapter requires v6 plus manifest v2.
+- Added a hash-only immutable binding that reloads current authenticated E0,
+  the exact manifest, and all artifact bytes under the existing runtime lock.
+  It returns no raw secret references and performs no
+  secret resolution, socket, process, worker, repository, PR, merge, or
+  HoloIndex effect. Permission-receipt rehydration and lifecycle composition
+  remain fail closed. (WSP 00/15/22/50/62/71/97)
+- Removed silent one-MiB truncation from the shared confined byte reader so
+  callers' explicit bounds are honored; same-prefix archive-tail substitution
+  now rejects. Target and grant signing/audit key references are pairwise
+  distinct, including cross-role aliases.
+- Constrained public service agent, profile, and epoch fields to exact inert
+  grammars so secret-reference-shaped values cannot enter a public binding.
+- Kept grant-manifest selection fields in the full signed E0 policy but out of
+  the target signer's config-binding digest, avoiding a hash dependency cycle
+  while preserving identity, key-reference, permission, and target authority.
+
+## 2026-08-14: Independent grant-authority client supply
+
+- Extended the existing signer owner configuration to v3 with one disjoint,
+  root-bound grant-authority Unix transport and exact non-root UID/GID.
+- Hardened the shared isolated-signer client with link-component rejection,
+  protected ancestry, pinned socket identity, and connected Linux `SO_PEERCRED`
+  verification; authenticated mode forbids injected connectors.
+- Added an uncomposed supply that holds authenticated current-generation E0
+  admission while binding transport to owner policy v5. It rejects overlap with
+  signer, outcome, replay, and revocation authority before any request. No signer,
+  secret resolution, worker, repository, HoloIndex, or activation effect was
+  added; service lifecycle and production composition remain fail closed.
+- Extracted the provider's existing public binding into a shared contract so
+  transport validation does not pull the resolve-per-sign effect plane into
+  RedDog's backend compatibility closure; the provider re-exports it unchanged.
+
+## 2026-08-14: Signer system-service WSP 71 resolver supply
+- Reused the existing `OpCliSecretResolver` behind a signer-owned factory
+  that binds an authenticated owner-configuration identifier.
+- Production accepts only the fixed `/usr/bin/op` executable when it is a
+  root-owned regular executable with secure ancestry and no group/other write
+  bits. Invalid owner identity, missing binary, unsafe permissions, and vault
+  failures remain fail closed without secret persistence or shell execution.
+- The production entrypoint remains fail closed. Grant-aware resolve-per-sign
+  composition, lifecycle deployment, live worker authority, merge authority,
+  and HoloIndex mutation remain unavailable.
+  (WSP 00/15/22/50/62/71/97)
+## 2026-08-14: Progressive-policy resident-chain regression repair
+- Reconciled resident-chain test fixtures with the existing signed progressive
+  execution-stage policy. Valid fixtures now model genuinely bounded FoundUp
+  work, include the exact-SHA stage before verification, and reject accidental
+  no-effect progressive receipts during fixture construction.
+- Added a CI-visible modular regression covering the bounded chain from real
+  OpenClaw/Hermes artifact providers through dispatch, isolated worktree work,
+  exact-SHA commit, independent verification, draft PR, verified outcome,
+  held-out admission and PatternMemory. Promotion integration now carries one
+  authenticated allocation through determination, profile publication, queue
+  materialization and provider invocation. Runtime policy was not weakened and
+  no execution authority was added. The CI slice installs the canonical pinned
+  HoloIndex vector-store, scheduler timezone and process-monitor dependencies
+  needed to collect the real promotion and `main.py` preflight paths. OpenClaw
+  transport coverage now verifies Windows/WSL and POSIX command construction
+  explicitly. The Linux socket-chain fixture pins its historical authority to
+  an explicit test clock, uses a future claim, canonical work-order-bound
+  governed valve environment, and the existing test-only consensus and one-use
+  authority-lease seams; it does not claim the external production trust anchor
+  is implemented. Artifact-generation request ownership now remains solely in
+  the bounded-worker stage at use time; the bootstrap no longer pre-derives a
+  competing request schema, while explicit caller input still receives the
+  existing fail-closed conflict check.
+  (WSP 00/15/22/50/62/97)
+## 2026-08-12: Canonical HIGH-tier consensus capability foundation
+- Review hardening verifies exact canonical signed bytes, rejects duplicate
+  JSON keys and socket-v1 proof downgrade, requires author model-runtime
+  evidence, routes principal and RedDog children through distinct grant
+  providers, and commits signer-owned consensus replay only after an accepted
+  signature. Rate and signing failures roll back the reservation.
+- Independent review then hardened provider-qualified reviewer membership,
+  authoritative author-runtime resolution, false-reservation rejection before
+  rate/private-key use, distinct grant-provider identities, restart-persistent
+  authority-store composition, and broader queue/runtime regressions.
+- Final trust review requires the two grant services to represent distinct
+  declared authority identities as well as distinct keys and service IDs.
+  The resident registry reloads authoritative work state at signing use time,
+  and the existing dependency bundle now threads only an explicitly injected
+  consensus-capability supplier. Missing production supply remains fail closed.
+- HIGH authority now requires the current-state supplier at handler use time;
+  only LOW preserves the inherited startup-snapshot fallback. Authority-tier
+  derivation is shared with the signer runtime rather than duplicated.
+- Extracted bounded signing-plan and execution modules from the inherited
+  delegated-authority runtime. A composed regression reaches role-specific E0
+  grant authorities, strict socket v2, Ed25519 signing, resolve-per-sign and an
+  atomic authority-store commit that survives store reconstruction. Production
+  composition remains blocked.
+- Extended delegated-authority signing with exact identity/work-authority child
+  request binding and a process-local, non-copyable two-use capability. Signed
+  reviewer decisions, reviewer/model/runtime independence, sovereign request
+  binding, policy/TTL checks, strict wire rehydration and signer-side durable
+  replay admission all fail closed at the independent secret-grant boundary.
+- Split contract, rehydration, policy, receipt authority, reviewer evidence,
+  capability, client and signer verification into bounded modules. Production
+  authority remains unavailable until signed E0 supplies authenticated reviewer,
+  runtime, sovereign and nonce authority and composes the signer service. No
+  worker, repository, PR, merge, key-generation, or HoloIndex authority was
+  added. (WSP 00/15/22/50/62/71/97)
+## 2026-08-12: Root-bound grant-authority key epoch
+- Extended the exact signed owner E0 policy to v5 with the independent grant
+  authority key epoch. Policy identity and the owner-config authority-binding
+  digest now cover public key plus epoch.
+- The provider compares its immutable runtime binding to the signed epoch and
+  fails before signer invocation on same-key stale-epoch substitution. Missing
+  and look-alike schema fields also fail closed. No key, signer lifecycle,
+  consensus, worker, repository, PR, merge or HoloIndex authority was added.
+  (WSP 00/15/22/50/62/71/97)
+## 2026-08-12: Independent LOW-tier signer secret-grant provider
+- Extended the existing E0 signer with a strict grant domain and context-managed
+  provider. Signed owner policy drives exact target, replay, operation, tier,
+  TTL and durable rate admission; caller and beneficiary remain distinct, and
+  both response signatures are verified before use.
+- Reused Ed25519, WSP 71 and durable nonce/high-water components. Elevated tiers
+  remain closed because digest shape is not consensus. No worker, repository,
+  PR, merge or HoloIndex effect was added. (WSP 00/15/22/50/62/71/97)
+- Review hardening advanced signed owner policy to v4, binding the actual grant
+  requester principal and canonical LOW/HIGH/ULTRA tiers. Socket admission now
+  proves the requester is distinct from grant authority, target and beneficiary.
+## 2026-08-12: Root-linearized signer protected use
+- Extended the existing root authority socket/state and durable revocation
+  foundation with signed ACQUIRE/FINISH operations. Each exact grant, key
+  epoch, request digest, policy/generation, peer and expiry binding receives a
+  durable one-use marker; one global odd/even high-water blocks revocation
+  advancement while the signing callback may execute.
+- Composed only the factory-issued root capability into the secret-grant
+  boundary. A lost exact ACQUIRE response converges while post-finish replay,
+  substituted replies, generation rotation, revocation-first/acquire-first
+  races, and unfinished-use restart states fail closed. No new database,
+  queue, signer, key, secret resolver, repository
+  effect, PR/merge authority, or HoloIndex mutation was added. (WSP
+  00/15/22/50/62/71/97)
+## 2026-08-12: Root-service signer-revocation transport
+- Extended the existing root verified-outcome Unix service with an exact,
+  domain-separated revocation load/advance protocol and opaque process-local
+  client. The root independently revalidates the current E0 lease, signed
+  policy, authorities, topology, signed local snapshot, witness and monotonic
+  transition; callers supply no expected/next root state.
+- Added signed per-request nonces, bounded strict wire decoding, response
+  context binding, lost-response idempotency, concurrent exact-request
+  convergence, and factory-only non-copyable service/client authorities.
+- Production E0 protected use remains uncomposed until a root-authorized use
+  lease closes the revocation-check race. No key generation, secret resolution,
+  signer activation, worker/repository/PR/merge effect, or HoloIndex mutation
+  was added. (WSP 00/15/22/50/62/71/97)
+## 2026-08-12: Root-anchored signer revocation foundation
+- Extended owner E0 policy to v3, binding the root anchor store identity,
+  durability receipt, and existing three-domain state topology digest.
+- Reused the root-owned verified-outcome monotonic state as a domain-separated
+  revocation high-water anchor. Publication now orders primary prepare, local
+  witness advance, root-anchor advance, and primary finalize; recovery handles
+  each exact crash window and the oracle requires three-way equality before
+  and after protected use.
+- Added coordinated primary+witness rollback, anchor-substitution,
+  self-asserted look-alike, and rollback-domain-overlap regressions. This
+  remains an uncomposed foundation: root-service transport,
+  independently administered grant issuance, E0 factory composition, WSP 71
+  secret resolution, and signer activation remain unavailable. (WSP
+  00/15/22/50/62/71/97)
+  The root authority has two mutable high-water mirrors plus a static
+  installation witness; coordinated rollback of both mutable root mirrors is
+  explicitly retained as root-authority compromise outside this slice.
+## 2026-08-12: Durable signer revocation authority foundation
+- Extended the signed owner E0 policy to v2 so it freezes the revocation
+  snapshot/store schemas, separate local witness identity and path, both
+  durability receipts, and one shared cross-process operation lock.
+- Added an append-only SQLite primary log, detached read-only reader, monotonic
+  witness publication, deterministic recovery across both crash windows, and
+  an uncomposed read-only oracle that holds the same lock across protected use.
+- Rejected status/metadata/topology substitution, unrevocation, sequence forks,
+  unsigned pending recovery, expired use, and witness rollback. Locked
+  publication can authenticate an expired predecessor only to append a fresh
+  monotonic successor, preventing expiry from wedging the authority log.
+  Canonical validation and authority verification remain bounded modules.
+  This slice does not
+  compose E0, activate the stable signer, or claim coordinated two-domain
+  rollback resistance; independent grant authority and an external anchor are
+  still required. (WSP 00/15/22/50/62/71/97)
+## 2026-08-12: Independent signer revocation contract prerequisite
+- Extended the existing owner-controlled E0 boundary with an exact signed
+  revocation snapshot contract bound to the current policy,
+  generation, authority, target signer, and durable store identities.
+- Required grant authority, revocation authority, and target signer keys to be
+  distinct, and required grant and revocation authority principals to differ.
+- Added no revocation store/reader/oracle, grant issuer, WSP 71 resolver
+  activation, stable-service composition, secret resolution, signer start,
+  worker/repository/PR/merge effect, or HoloIndex mutation. Production signing
+  remains blocked. (WSP 00/15/22/50/62/71/97)
+## 2026-08-12: Live-canary contract fixture reconciliation
+- Reprojected the resident live-canary fixtures through the current canonical
+  queue WSP_15 allocation and progressive-stage binding instead of retaining
+  pre-stage scalar authority fields. The manifest fixture now binds one exact
+  edit operation, selected slice, and file path.
+- Kept signer behavior unchanged while extracting the prepared-response call
+  below the WSP 62 function limit. Regenerated the checked-in RedDog backend
+  manifest for that exact source digest.
+- Restored the current signer/manifest/provisioning/canary matrix without
+  activating a signer, issuing authority, mutating a repository, publishing a
+  PR, or claiming that the production live canary ran. (WSP 00/15/22/50/62/97)
+## 2026-08-12: External-signer authoritative-use lease primitive
+- Added a strict typed exact-effect request and opaque one-shot process capability; the signer recomputes effect identity, rejects noncanonical JSON, and binds current manifest, generation, owner config, run packet, session, socket, profile, and key.
+- Extended the existing socket client v2 grant envelope and durable E0 replay store. Lease-domain socket v1 rejects, and client rehydration has no injected verifier, replay, time, or parent-authority verdict; the existing E0 exact-request grant remains the only signing authority.
+- Root current-generation resolution now selects the exact signer profile, public key, and key epoch from the authenticated config. The signed request binds all four E0 replay identities, both signer and client enforce the same store, lease expiry cannot exceed selection expiry, and monotonic process-local deadlines prevent clock-rollback revival.
+- Added a composed socket-v2 -> durable E0 grant -> resolve-per-sign Ed25519 signer -> external issuer -> real WRE effect regression, plus local-key, split-root, generation-overrun, and rollback attacks; split contract and adversarial cases into bounded test modules.
+- Bound real leases through both worktree admission registries and the direct WRE spine using the exact executor-plan and valve-decision digests.
+- No issuer, resolver activation, worker, repository, PR, merge, HoloIndex, or live-canary effect was added; other effects and crash recovery remain blocked. (WSP 00/15/22/50/62/71/97)
+## 2026-08-11: Architect and verifier contract reconciliation
+- Replaced the retired literal `AUDIT` bootstrap default with the canonical
+  `AUDIT_NO_EFFECT` progressive-stage constant. Read-only architect `FIX`
+  determinations remain audit evidence; signed plans can carry exact test scope.
+- Forwarded exact work order, commit, signed policy, and resolved test scope into
+  the independent producer and verifier without changing execution authority.
+- Local differential evidence is diagnostic only; autonomous admission still
+  requires an external verifier authority and reservation. (WSP 00/15/22/50/62/97)
+## 2026-08-11: Bounded iterative repository grounding
+- Extended the existing transport-neutral grounding service with at most two
+  deterministic HoloIndex owner queries per semantic target under one global
+  16-query, 30-second budget. Repeated evidence, stale generations, root or
+  HEAD drift, and evaluator failures stop fail closed before any model call.
+- Converted semantic Holo hits into candidate paths read from verified regular
+  current-HEAD Git blobs. Broad audits require implementation plus independent
+  test, contract, or WSP evidence; one target-bound ledger consumes the shared
+  byte budget even when content is rejected or a query round is repeated.
+- Preserved legacy receipt v1 and introduced bounded receipt v2 with selected
+  evidence, retrieval attempts, generation, root, exact HEAD, Git mode, blob
+  OID, and resource policy. The worker rehydrates and passes only v2 exact-HEAD
+  content to Fusion; legacy v1 remains passive compatibility data.
+- Reused the existing entity-audit fallback only after bounded semantic
+  retrieval fails. Git is resolved from an OS-owned path; no model-selected
+  query, query-time index, repository mutation, or new orchestrator was added.
+- Bound every explicit and semantic direct-read path into the assignment and
+  canonical WSP_15 allocation before worker planning. Model-backed audits now
+  require verified v2 grounding; missing or widened scope stops before Fusion.
+- Split exact-HEAD evidence rehydration into a bounded cohesive module and
+  charged rejected binary/prefix reads against the same signed 96 KB ledger.
+- Reused the transport-neutral service to ground already-authorized explicit
+  target sets before E2E WSP_15 allocation and at signed 0102 review use time;
+  missing or over-limit exact-HEAD targets stop before model execution.
+
+## 2026-08-09: Progressive RedDog execution-stage authority binding
+- Added a signed, canonical stage receipt spanning architect proposal, queue,
+  signer request, delegated work authority, and worker-dispatch equality.
+- Audit-stage queue admission accepts only signed strict read-only audit tasks
+  with canonical WSP_15 allocation, empty changed paths, and no effect
+  authority. Audit/review failures project as `WOULD_BLOCK` without effects.
+  Only valid low-complexity WSP_15 `FIX` work can enter bounded execution;
+  high-risk, create-new, merge, external, and production work remain blocked.
+- Kept the editor-selected stage as a requested ceiling and enforced a
+  separate root-owned runtime ceiling at the valve. Neither ceiling is an
+  authority source.
+- Corrected WSP_15 complexity so module names and authority sensitivity affect
+  priority/reasoning without falsely making every one-file RedDog repair
+  complexity 5. Independent verification remains mandatory. (WSP 00/15/22/50/62/97)
+- Hardened the exact signed stage receipt through queue consumption, signer
+  materialization, work-authority verification, and use-time valve admission.
+  Read-only audit chains now terminate after signed worker dispatch; every
+  effect valve requires a rehydrated admitted `BOUNDED_EXECUTION` receipt.
+- Narrowed delegated effect authority to the exact stage-admitted paths;
+  broader profile globs cannot survive signer materialization. Traversal paths
+  and non-empty audit allow/deny lists fail closed. Legacy dispatch tests now
+  construct genuine signed envelopes instead of rewriting intents after signing.
+- Carried the complete canonical WSP_15 allocation through queue consumption,
+  signer materialization, work authority, and use-time verification. Signer
+  and verifier independently recompute its digest and stage decision; scalar
+  IDs or attacker-rehashed wildcard/protected-path stages cannot authorize work.
+- Kept resident editor activation at audit until a root-owned runtime ceiling
+  exists. Signed no-effect audits use the dry-run valve at claim-time restart;
+  bounded authority remains exact-path, separately verified, and unavailable
+  from the editor setting alone.
+- Closed independent-review findings by including FoundUp and selected-slice
+  identity in risk classification and by requiring the effect valve to match
+  an independently verified work-authority digest before revalidating the
+  complete allocation, stage, operation, and exact path set.
+- Preserved the authenticated model-runtime receipt in the signed AgentDB
+  restart envelope. A full signer -> verifier -> AgentDB -> OpenClaw claim ->
+  read-only 0102 audit regression now proves pathless audit completion with no
+  work-order invocation, repository mutation, shell, worktree, or PR effect.
+- Bound `selected_slice` to the current authoritative queue item before signer
+  admission and carried it in the signed work authority through use-time valve
+  verification. The resident handler alone mints a one-use opaque admission;
+  caller-rehashed stage and queue receipts, missing admission, and replayed
+  admission all reject before signing or authority-store effects.
+- Recompute the complete current queue receipt immediately before effects and
+  reject queue metadata, selected-slice, or progressive-stage substitution.
+
+## 2026-08-09: RedDog stale Holo authority recovery binding
+- Extended the existing incident and blocked-request contracts for the proven
+  authority-root HEAD mismatch. The deferred receipt now binds the incident
+  kind, independently observed workspace/stale HEADs, exact post-merge task
+  and request event, authority digest, and canonical self-digest.
+- Staging requires the root-owned AgentDB task/request pair and the exact stale
+  authority observation. Claim and one-use retry remain blocked until current
+  authority, completion, generation, and freshness proofs all pass. No new
+  queue, signer, mutation path, or query-time reindex was added.
+  (WSP 00/15/22/50/62/97)
+
+## 2026-08-08: RedDog startup queue runtime-root contract repair
+- Completed the existing `runtime_allowed_root` startup contract instead of
+  dropping the caller's confinement argument. The WRE queue dry-run now
+  validates an external runtime root and reads work state through the shared
+  descriptor-confined runtime-artifact helper.
+- Added regressions for missing roots, out-of-root work state, and the exact
+  `main.py` root/path forwarding pair. Enforced rejection is now reported as
+  `FAIL`, while non-enforced degraded startup remains `WARN`. No queue
+  mutation, worker dispatch, HoloIndex maintenance, or execution authority was
+  added. (WSP 00/15/22/50/97)
+
+## 2026-08-07: HoloIndex blocked-request recovery binding
+- Added an immutable digest-only stage event before claim admission. The
+  stable request+incident identity rejects timestamp restamping and a
+  rehashed SecretStorage substitution without a matching AgentDB commitment.
+- Added a bounded admission verifier that rehydrates the existing Holo incident
+  receipt, validates the existing AgentDB maintenance task and atomic
+  completion event, and independently verifies the exact active semantic
+  generation before advisory retry admission.
+- Reused the coordination-event primary key for cross-process one-use retry
+  admission and persisted only digests/proof bindings, never the request.
+- Added no recovery table, lifecycle, queue, signer, verifier framework,
+  PatternMemory path, or HoloIndex write authority. The request remains in
+  extension SecretStorage and is not persisted to AgentDB
+  (WSP 00/15/22/50/62/97).
+
+## 2026-08-06: Principal Memex live resident source supply
+- Bound one pre-issued principal disclosure to the current signed session,
+  AgentDB revision, runtime generation, exact architect cycle, and model
+  binding; no issuer, work authority, or HoloIndex mutation was added.
+- Deferred one-use admission until the final architect checkpoint and kept
+  Principal content out of intents, audit workers, status, logs, and receipts.
+- Hardened durable output after independent review: direct reproduction is
+  rejected, all model-authored free text/proposals are omitted from persistent
+  Memex-informed determinations, and no queue candidate can be emitted.
+- Required explicit negative consumption acknowledgement for retry; unknown or
+  failed bridge outcomes retire the local disclosure fail closed.
+
+## 2026-08-06: Exact-request signer policy gate
+- Closed the policy-less Ed25519 signing path. Delegated identity and work
+  authority now require either a signer-owned policy or one exact E0
+  secret-access-grant request binding.
+- Added explicit identity/work-authority domain separation and immutable
+  request-digest binding for real ephemeral Ed25519 backends.
+- Preserved specialized signer policies and the resolve-per-sign one-use grant
+  boundary; no key generation, Principal Memex issuance, execution, or
+  repository authority was added (WSP 00/15/22/50/62/97).
+
+## 2026-08-06: Authenticated Principal Memex resident admission
+- Added principal-signed one-use disclosure and opaque resident context
+  admission for the backend architect model.
+- Derived content only from the current signed principal conversation record;
+  caller-supplied structural projections are not accepted.
+- Added atomic revocation plus replay admission to the existing authority store
+  and bound the exact model-runtime receipt, accepted decisions, TTL, and
+  conversation revision.
+- Deep-froze admitted evidence, bound its canonical context digest, and made
+  duplicate-cycle identity depend on stable cognition rather than disclosure time.
+- Added no worker, repository, signer, merge, FoundUp, or HoloIndex authority.
+
+## 2026-08-06: Principal and comparison conversation-scope boundary
+- Extended the authenticated conversation contract with immutable `foundup`,
+  `principal`, and `comparison` scope kinds. Principal/comparison state carries
+  no repository, snapshot, HoloIndex, or pending-work bindings; comparison is
+  limited to FoundUps already in the signed principal credential.
+- The existing conversation-work promotion path now explicitly accepts only
+  `foundup` scope. E0 signer validation, AgentDB CAS, resume, and projection all
+  bind the exact scope kind and one-FoundUp discussion set. Native JSON types
+  and the consumed authority seal are checked before signing; no Principal
+  Memex or new authority was added (WSP 00/15/22/50/62/97).
+## 2026-08-06: Durable E0 conversation-scope authentication
+- Replaced process-local session authentication by extending the existing
+  isolated Ed25519 signer. Exact scope state binds the current credential,
+  signer key epoch, and E0 audit attestation; the bearer is never persisted.
+- Added a signer-owned monotonic conversation head; restarts, rollback, forks,
+  nonce reuse, and concurrent successors fail closed. Runtime requires a current
+  principal resolver, exact policy, confined anchor, kernel peer source, and a
+  reviewed request budget.
+- Added exact AgentDB pre-sign staging and signed atomic finalization. Later-clock
+  recovery can only replay the signer-anchored response and cannot mint a fresh
+  signature; altered pending state fails and principal resolution stays leased.
+- Extended staging to proposal previews. A post-anchor crash leaves active state
+  unchanged, fences other writers, and replays only the anchored response.
+- Preserved legacy HMAC without recovery authority: it signs before direct
+  create/CAS; only E0 state may consume exact signer-anchor replay.
+- Extracted signer config rehydration, principal parsing, and conversation-domain
+  signing from WSP 62 hosts. The bounded supplier and split fixtures retain an
+  AST gate. No state grants work, repository, signer, merge, or HoloIndex writes.
+- Exact-SHA review froze config output, applied the shared public-profile
+  allowlist, unified config/runtime proposal verification, and extended the
+  same gate to exact schemas for embedded model, WSP 15, proposal, and
+  operational-context receipts. Architect FIX promotion now rejects raw nested
+  receipt injection before publication and persists canonical receipts only.
+- Added one shared seed/source/runtime authority-profile rehydrator. It rejects
+  native JSON type confusion before source supply, promotion, publication,
+  signer configuration, valve use, manifest authority, queue materialization,
+  readiness, or live-canary evidence can produce an effect.
+- Preserved the older queue materializer projection through a bounded typed
+  effect view instead of conflating it with the signed public-profile schema.
+- Folded the exact-SHA security review into that boundary: null path sets,
+  false nested `no_*` claims, and malformed runtime digests now fail before
+  publication, queue materialization, or any other effect-bearing consumer.
+- Preserved exact single-model nullable aggregate fields and canonical
+  `panel_topology:<hex>` identifiers without restoring broad null acceptance.
+- Legacy callers retain 16 KiB; only the explicit conversation bootstrap uses
+  160 KiB. Stale v2, nested profile injection, and artifact collisions fail
+  before writes or signer invocation (WSP 00/15/22/50/62/97).
+## 2026-08-06: Current-generation conversation session authority source
+- Replaced the rejected symmetric resident path with a strict principal-signed
+  conversation credential verified by the existing Ed25519 backend and
+  signer-owner E0 principal artifact loader.
+- Resident editor sessions now derive principal and FoundUp scope from a
+  verified subject plus one signed current-generation authority artifact;
+  environment labels are consistency checks only.
+- No HMAC or private signing material enters the resident process. The bearer
+  crosses one-shot stdin, is removed before resident work, and never enters
+  AgentDB, model prompt, durable intent, logs, or output. The current generation
+  remains leased through cycle admission and its public digests are persisted.
+  This grants no work, worker, repository, merge, signer, or HoloIndex authority
+  (WSP 00/15/22/50/62/97).
+## 2026-08-06: Authenticated conversational scope and proposal promotion
+- Added HMAC-authenticated AgentDB scope, opaque one-use capabilities, snapshot/HEAD/Holo/FoundUp/intent binding, exact proposal-preview CAS, backend pre-model rejection, and signed WSP 15 pending-authority consumption; no editor session issuer, worker dispatch, repository/merge authority, or HoloIndex mutation was added (WSP 00/15/22/50/62/97).
+## 2026-08-05: Resident live-canary current-generation trust concatenation
+- Extended the canonical use-time authority resolver to consume the existing
+  root-owned system-service manifest selection after signed work-authority
+  re-verification. The new read-only adapter binds exact manifest, config,
+  run-packet, durable replay/high-water, generation, root, path, and freshness
+  evidence into an audit-only receipt using the resolver's trusted clock.
+- Removed only the three satisfied current-generation blockers. Mutual peer
+  handshake and six other trust anchors remain fail-closed, so this slice
+  cannot issue an authority lease, run a live canary, mutate a repository,
+  enqueue a worker, or grant signer authority.
+- Current-generation evidence cannot mint effect authority. Worktree,
+  live-enqueue, and spine paths now reject every production lease until the
+  isolated signer peer supplies the missing external issuer. Wrong types,
+  malformed IDs, expiry, or changed config/run-packet bytes fail closed. No signer,
+  schema, replay store, provider, lifecycle service, or trust model was added
+  (WSP 00/15/22/50/62/97).
+## 2026-08-05: Upstream agent runtime truth registry
+- Upgraded the existing OpenClaw integration manifest to a static provenance
+  v2 ledger with stable integration IDs, exact checked-in implementation and
+  test evidence paths, and explicit upstream CLI/API versus Foundups-local
+  classifications.
+- Bound the only two accepted upstream artifact providers to the canonical
+  `openclaw_gateway` and `hermes_api` runtime modes while recording that both
+  remain default-off, fail-closed, text-only, and tool-free. No upstream hook
+  is currently claimed.
+- Split the previous aggregate Hermes label into the WRE dry-run executor,
+  FoundUp builder, and resident transport surfaces so each records its actual
+  owner, controls, consumers, and capability boundary. The structured registry
+  remains readable and below the WSP 62 configuration threshold.
+- The ledger is explicitly non-authoritative: it does not prove installation,
+  health, version freshness, live execution, or grant any worker authority
+  (WSP 00/15/22/50/62/97). WSP 15 classified the correction P1 at 14/20.
+
+## 2026-08-04: Verified-outcome root authority service
+- Replaced the signer-owned outcome replay database with a separately launched,
+  root-owned Unix-socket authority service. The root process owns disjoint
+  primary, witness, and one-time installation CAS stores and authenticates the
+  non-root E0 signer with kernel peer credentials; the signer verifies the
+  service UID on every connection.
+- Added a separately invoked root provisioning primitive, generation rollback
+  fence, exact one-step witness repair, and `RESERVED_BURNED -> COMMITTED`
+  transition. The runtime service has no state-reset/bootstrap option. The
+  E0 signer buffers its signature and releases it only after root commit rechecks
+  the current descriptor, revocation state, generation, owner config, grant,
+  reservation, and signature digest.
+- Removed caller-injected transport from production authority minting. Only an
+  opaque exchange created by the protected root-socket builder can create the
+  signer capability; non-root exchange identities and recomputed responses fail.
+- Removed the process-local test authority from production code. Reserve and
+  commit now require both fresh kernel UID/GID and a domain-separated E0 signer
+  proof over every request field; malformed clients are isolated per connection.
+- Added a bounded root service entrypoint and extended the existing v2 root owner
+  config with exact socket, signer principal, primary, witness, and installation
+  bindings. A separate one-time provisioning entrypoint cannot reopen a committed
+  installation after replay-store loss.
+- Bound every live snapshot to the exact roots, paths, store IDs, and durability
+  receipts opened at startup. A rotated store configuration now requires a
+  supervised service restart and cannot silently reuse old open stores.
+- Added the executable E0 pre-key process gate to the existing isolated signer:
+  production WSP71 resolution now requires the exact root-owned non-root signer
+  UID/GID, YAMA ptrace enforcement, no `CAP_SYS_PTRACE`, disabled core
+  dumps/dumpability, and a cleared inherited environment.
+- Retired the old CLI and one-shot WSP71 composer; only the stable service is
+  production. One v2 read supplies manifest, lazy outcome authority, owner ID,
+  and UID/GID; only selected policy touches the socket and v1 is migration-only.
+- Production remains fail closed until the root service is deployed with a
+  root-owned config and independently co-signed verifier grants. This slice adds
+  no learning candidate, Brain/roadmap write, HoloIndex mutation, repository,
+  OpenClaw/Hermes, PR, merge, reward, or key-custody authority
+  (WSP 00/15/22/50/62/97).
+
+## 2026-08-04: Verified-outcome root authority supply (partial)
+- Extended the existing E0 signer and root-owned system-service owner config;
+  no second signer framework, database abstraction, or orchestrator was added.
+- Added an exact root-published authority descriptor with independent verifier
+  and held-out signatures over FoundUp/snapshot/work/slice/job/head/content,
+  runtime, PatternMemory, key, revocation, freshness, and replay bindings.
+- Bound authority admission to the authenticated owner-config ID and exact
+  signer run packet, config, session, manifest, and artifact generation.
+- Bound both verifier signatures to an immutable digest of the complete root,
+  signer, runtime, replay-anchor, and policy context so a co-signed grant cannot
+  be transplanted into another root-published descriptor.
+- Moved registry-backed root-authority verification into the shared signer
+  key-provider core, closing alternate production/test constructors and
+  unregistered same-type objects before any key material is resolved.
+- The initial draft reused a signer-owned SQLite monotonic store. Independent
+  review rejected that trust model; the root service above supersedes it.
+- Re-read the root-owned authority descriptor at every reservation and used a
+  signer-side trusted clock, so post-launch revocation and expiry fail before
+  signing even when a caller supplies an earlier request timestamp.
+- Extracted exact runtime/policy/peer matching into a bounded module. The new
+  authority modules remain below WSP 62 limits; inherited signer transaction
+  hosts carry exact, expiring no-growth ceilings.
+- Preserved unrelated signer operations when a generation omits the outcome
+  policy; the root-owned v2 config remains mandatory for production OS identity.
+- Hardened the backend manifest generator so Python files named as static
+  runtime roots contribute their complete import closure. Signer authority
+  dependencies are now content-bound rather than merely reachable.
+- The initial slice truth was `VERIFIED_OUTCOME_RUNTIME_BINDING_PARTIAL`.
+  Root-service deployment and independently issued verifier grants are still
+  required for production activation. No PatternMemory,
+  learning, Brain/roadmap, HoloIndex, repository, or merge authority was added
+  (WSP 00/15/22/50/62/97).
+
+## 2026-08-04: Verified-outcome runtime authority binding (partial)
+- Extended the draft verified-outcome rehydration foundation with a root-confined
+  evidence and replay namespace in the existing authority runtime store. Signed
+  publication is staged and non-consumable until its exact activation transition.
+- Removed the unauthenticated legacy queue downgrade. Publisher-backed outcomes
+  can stage in an invisible table inside the existing PatternMemory database.
+  Conflicting pre-seeded rows fail exact canonical readback instead of satisfying
+  admission by identifier alone.
+- The real PatternMemory sink remains explicitly non-activation-ready until it
+  can independently revalidate a durable authority source. Direct store and
+  caller-known identifiers cannot expose staged rows; injected test sinks do not
+  claim production authority.
+- Added committed-profile key resolution, revocation/freshness checks, exact
+  FoundUp/snapshot/head/content/work/slice/job/worker/verifier/runtime lineage, and
+  opaque one-use capabilities consumed by resident FoundUp Brain assembly.
+- Added atomic batch capability consumption after complete Brain validation and
+  one trusted runtime clock for issuance and consumption. Missing queue bindings
+  no longer downgrade silently to legacy admission.
+- Security review proved current autonomous-verifier receipts are canonical
+  self-hashes, not independently signed verifier authority. The signer now
+  requires a separately supplied durable authorization boundary and rejects
+  absent or replayed authorization. No production boundary exists yet, so
+  activation remains fail closed: `BLOCKED_BY_DURABLE_AUTHORITY_SOURCE`.
+- WSP 62 review split outcome schema/lineage validation and signer request
+  validation/reservation into focused helpers. The signer backend, authenticity
+  gate, helpers, and their focused test modules now remain below the 675-line
+  communication threshold without new exemptions.
+- Boundary remains narrow: no learning candidates, Brain or roadmap writes,
+  HoloIndex mutation, new database, new orchestrator, voting, or CABR governance
+  (WSP 00/15/22/50/62/97).
+## 2026-08-04: Memex supply authenticity gate
+- Replaced the promotion path's `sha256:` prefix check with exact typed Memex supply
+  receipt rehydration, canonical digest verification, scope/lineage and
+  freshness checks, and strict unknown-field/type rejection.
+- Upgraded architect proposal attestations to v2 so the isolated signer binds the
+  exact full Memex receipt digest. Attacker-rehashed substitutions now fail against
+  independently signed proposal authority before artifact, seed,
+  queue, profile, or state mutation. Proposal signing rehydrates even a
+  manually constructed typed receipt; receipt age is capped at 300 seconds and
+  policy lifetime at 600 seconds. Added canonical verifier/held-out rehydration and
+  one-use signed-bundle capability primitives. Resident outcome admission stays
+  fail-closed pending root-owned durable trust/replay wiring (WSP 00/15/22/50/62/97).
+
+## 2026-08-03: Extension resident model-runtime authority binding
+- Reused the `main.py` authenticated BOUND model-runtime loader in the extension
+  bridge; invalid audit/architect receipts reject before client construction,
+  with no executable or repository authority (WSP 00/15/22/50/62/97).
+## 2026-08-03: Actual upstream Hermes API artifact provider
+- Replaced the production-blocked `hermes_api` placeholder with a real
+  authenticated loopback adapter for upstream Hermes Agent `/v1/runs`.
+- Consumes the signed principal model/provider route before secret access or
+  transport and reuses the existing Foundups artifact writer, worktree,
+  exact-SHA commit, and independent verifier.
+- Requires Hermes release `2026.7.30` / API runtime `0.19.1`, the dedicated
+  `reddogartifact` profile, bearer
+  enforcement, all API-server toolsets disabled, zero visible skills, and an
+  unchanged tool/skill surface after generation. The complete upstream SSE
+  event history must contain no tool, approval, or subagent event and its
+  terminal output must match the polled terminal status. Tool, approval, subagent,
+  malformed-output, timeout, and uncertain-stop paths fail closed.
+- Added a fixed loopback stdlib transport and a confined outside-repository
+  secret source. No secret is accepted from prompts, argv, repository files,
+  or provider receipts. Hermes receives no shell, worktree, Git, GitHub, PR,
+  merge, HoloIndex, PatternMemory, or reward authority (WSP 00, 15, 22, 50, 62, 97).
+
+## 2026-08-02: Actual OpenClaw provider and truthful Hermes boundary
+- Added a production adapter for the installed upstream OpenClaw Gateway CLI;
+  no repository-local OpenClaw-name wrapper is used as the execution engine.
+- Reused the signed model-runtime binding, AgentDB/WRE work order, canonical
+  Foundups artifact materializer, isolated worktree, exact-SHA commit, and
+  independent verifier instead of creating a second authority or writer.
+- OpenClaw requires a fixed dedicated agent, unique exact-session sandbox,
+  live version-matched loopback Gateway, one canonical read-only sandbox
+  workspace mount, no elevation, and a wildcard tool deny policy. Hermes
+  production dispatch remains blocked because the
+  current upstream API does not prove authenticated split-runtime confinement.
+- Bound complete provider-effect truth to stage and resident-cycle receipts, canonical
+  provider-mode admission, trusted WSL command transport, and fail-closed
+  queue admission for all unsupported or unconfined modes.
+- Verified installed and latest upstream versions match: OpenClaw `2026.7.1`
+  and Hermes Agent `v0.19.1 (2026.7.30)`. Retired constructor-based FoundUp
+  live authority and environment-enabled legacy shell dispatch. Hardened the
+  external OpenClaw service and dedicated agent without changing repository
+  source outside this slice; Hermes remains installed but unconfigured.
+  (WSP 00/15/22/50/62/84/97)
+- Receipt rehydration now rejects attacker-recomputed semantic contradictions,
+  malformed nested effect receipts block chain persistence, and Fusion network
+  invocation is reported as an external effect on success and failure.
+
+## 2026-08-02: OpenClaw ingress and FoundUp mutation fail-closed hardening
+- Removed the known webhook-token fallback and made unconfigured webhook
+  authentication reject with constant-time comparison for configured tokens.
+- Prevented advisory and unauthenticated OpenClaw intents from reaching
+  mutating FoundUp queue/build/create/launch paths, including direct-dispatch
+  bypass attempts.
+- Made FoundUp policy flags dry-run by default and normalized object and
+  serialized representations through one routing rule so serialization cannot
+  silently change live-write classification. (WSP 15/22/50/97)
+
+## 2026-08-02: Generic HoloIndex incident repair coordination
+- Extended the existing start-operations/post-merge Holo repair architecture
+  with `reddog_holoindex_incident_repair_runtime.py`.
+- Authenticated exhausted owner failures are now routed to the protected
+  exact-HEAD AgentDB/OpenClaw maintenance task and its existing retry/cooldown
+  semantics. Before any effect, Python independently reproduces the owner
+  failure and validates its canonical receipt, evidence, HEAD, and root.
+- Repair exhaustion emits a non-authority coding-candidate requirement; model
+  selection and execution remain separate signed WSP 15 decisions.
+- `REDDOG_FOUNDUP_WORK_SKILL_GROUNDING_PHASE1`: extended the provider-neutral
+  `reddog_operations` Skillz with a canonical registered-FoundUp procedure.
+  Existing FoundUps resolve through registry evidence and WSP 15; unknown
+  identities route to WSP 109 intake. The Skillz remains model-neutral and
+  grants no execution authority. Wardrobe selection now also requires the
+  extension's current-checkout verification flag before carrying a registered
+  FoundUp target into an action-plane receipt. A shared Python verifier now
+  independently rechecks registry, schema, entity, evidence, manifest, root,
+  selection, and work-order scope at WRE and OpenClaw IPC boundaries.
+- `HOLOINDEX_POSTMERGE_OWNER_ACTIVATION_PHASE1`: made the exact-SHA HoloIndex post-merge owner active by default
+  under OpenClaw supervision. General maintenance remains opt-in; when it is
+  disabled, only tasks issued by the canonical post-merge coordinator are
+  eligible. The generic autonomous executor excludes it from the exact-SHA
+  claim contract. Added explicit
+  scheduled/disabled telemetry and preserved the query-side prohibition on
+  re-indexing plus all freshness gates. A lock-owned poller waits during
+  shutdown and binds selection to the coordinator's exact canonical task ID.
+- `REDDOG_SIGNER_E0_AUTHENTICATED_SECRET_LEASE_GATE_PHASE1`: upgraded the
+  signed signer secret-access grant to v2, binding the issuer, profile, exact
+  key-reference hashes, permission snapshot, owner configuration, generation,
+  complete signing request, operation, authority tier, kernel-attested peer,
+  nonce, and bounded lifetime. Socket v2 consumes the noncopyable one-shot
+  capability before a fresh WSP 71 ephemeral backend resolves and signs once;
+  substitution, replay, concurrent reuse, resolution failure, and forged
+  signatures reject without secret-derived output. Production admission binds
+  pre-provisioned, disjoint replay roots and one atomic revocation fence; missing
+  state and non-static backend rejection payloads reject. Socket v1 cannot use it.
+  The public service remains fail closed pending independent grant
+  supply, authenticated revocation supply, strict native-memory zeroization,
+  and lifecycle supervision (WSP 00/15/22/50/62/71/97).
+- `REDDOG_SIGNER_SYSTEM_SERVICE_STABLE_ENTRYPOINT_PHASE1`: replaced the
+  generation-specific signer launch command with a v2 run packet that binds a
+  stable signer-owned system-service entrypoint and the exact root-owned owner
+  configuration path. The entrypoint reconstructs and consumes the current
+  authenticated generation, validates the packet and its stable command,
+  and gives that single one-shot capability to the existing bootstrap.
+  Production service composition remains fail closed pending authenticated
+  grant/revocation supply; injected tests prove only signer-side E0 ordering.
+  Rotating config, packet, session, and resolver values remain signed data and
+  are not service-manager arguments. Serialized argv is never executed.
+  RedDog, `main.py`, OpenClaw, and Hermes still cannot spawn the signer.
+  Service installation, E0 composition, durable resident
+  supervision, and live Linux activation remain separate fail-closed slices.
+- `REDDOG_CURRENT_GENERATION_MANIFEST_LAUNCH_SELECTION_PHASE1`: added a
+  verifier-only external-signer launch selector that ignores caller-supplied
+  manifest payloads, reads the authenticated durable current generation, opens
+  its content-addressed signed manifest, applies the canonical Ed25519
+  verifier, verifies the domain-separated audit attestation, and checks all
+  seven current runtime artifact bytes before minting a process-local,
+  immutable, one-shot launch capability. The activated generation, repository
+  root, runtime root, manifest ID, generation digest, signer configuration
+  digest, raw configuration digest, and run-packet digest must all agree.
+  Canonical manifest freshness is checked at selection and consumption; a
+  committed generation is not treated as a fresh restart authorization. This
+  slice does not spawn or supervise the signer. Added the signer-owned CLI
+  adapter for a root-owned, non-writable Linux/WSL service configuration
+  outside the repository. It reads that configuration through one no-follow
+  directory/file descriptor chain, rejects writable ancestry and overlapping
+  trust roots, then mints an opaque owner authority instead of passing
+  caller-selected trust strings. The public CLI exposes no manifest-selection
+  injection seam. It reconstructs only
+  verifier/read-only generation capabilities, pins the generation key, anchor,
+  high-water and monotonic witness identities, and rejects caller path
+  substitution before handing the one-shot selection to the existing CLI.
+  The peer-instance packet validator accepts only its prior exact selection
+  shape or the exact generation-bound extension; arbitrary extra authority
+  fields and malformed generation/TTL values reject. Production signer
+  bootstrap requires the generation-bound extension, so legacy selection
+  compatibility cannot reach service startup.
+  RedDog and `main.py` still cannot spawn or stop the signer; system-service
+  deployment under the distinct principal remains a separate operator action.
+- `REDDOG_SIGNER_RUNTIME_ATOMIC_PROVISIONING_PHASE1`: added one
+  generation-root-first coordinator that signs the seven canonical artifacts
+  in their final inactive runtime root and advances the independently stored
+  authenticated generation anchor only after manifest publication,
+  current-authority revalidation, a manifest-bound cooperative writer seal,
+  a Windows deny-write/delete activation lease, and a final byte/signature commit
+  guard before the high-water transaction can activate. Guard failure restores
+  the prior authenticated anchor and aborts the pending high-water advance.
+  A typed witness binding ties the signer key epoch, runtime root, anchor,
+  local high-water state, and signer-side monotonic witness into one canonical
+  namespace. Those three persistence roots must be pairwise disjoint. SQLite
+  initialization and compare-and-swap are transactional and tolerate bounded
+  first-open contention without accepting two winners. The coordinator
+  rejects copied/replayed artifact generations, fake or
+  overlapping anchor/high-water roots, stale work state, changed artifacts,
+  activation-window write attempts, expired system time, and generation
+  compare-and-swap conflicts. A signed
+  published-but-inactive manifest can complete after restart. An expired
+  manifest can roll forward only when the independent monotonic witness
+  already proves that exact generation committed; otherwise freshness remains
+  mandatory and recovery rolls back. Typed recovery distinguishes a committed witness when restart sees its anchor first. Canonical Ed25519 verification discards caller-selected verifiers, so forged signer/permissive-verifier pairs cannot activate. Python closure opacity is not claimed as hostile-code isolation. Malformed or ambiguous preseeds cannot
+  recover. Failed activation reports preservation only after manifest binding,
+  signatures, and all seven current bytes verify. Coordinator
+  receipts claim only coordinator-scoped no-service/no-work/no-repository
+  effects; they do not infer behavior of injected signers. Authenticated current-generation launch
+  selection and external lifecycle supervision remain separate fail-closed
+  follow-ons. The cooperative seal is not claimed as protection against a
+  privileged or same-principal adversary after the activation lease closes;
+  current bytes must still be verified at every use. POSIX/WSL activation now
+  fails closed until an externally owned signer lifecycle supplies a genuine
+  distinct-principal immutability boundary.
+  The SQLite witness proves persistence mechanics only. Independent production
+  freshness authority remains blocked until an externally supervised signer
+  principal owns and authenticates that witness.
+- `REDDOG_SIGNER_RUNTIME_GENERATION_AUTHORITY_PHASE1`: hardened signer
+  generation activation with an authenticated, independently stored
+  high-water transaction journal. Prepare, commit, abort, and restart
+  recovery are atomic and cross-process serialized; recovery requires the
+  authenticated pending record and never infers authority from a missing
+  high-water value. Deleted or rolled-back high-water state therefore remains
+  fail closed. Signing and verification are separate capabilities. The
+  external lifecycle now consumes a factory-issued public-key verifier and
+  confined read-only generation stores; it cannot reach a signer or mutable
+  authority store. Reader and high-water authorities must come from their
+  canonical factories; structural protocol lookalikes are rejected.
+  Nontransactional high-water implementations are rejected,
+  and post-commit recovery verifies durable state before returning. This is generation-authority
+  infrastructure only: production authority issuance, immutable generation
+  bundle activation, service supervision, and effect authority remain blocked.
+  Factory boundaries, verifier handles, generation readers, and high-water
+  readers retain no caller-mutable payload slots. Closure-private weak
+  registries hold their validated dependencies and expose no module-global
+  mutation surface, so post-mint replacement cannot attach a signer or
+  retarget a lifecycle authority. Public constructors, factories, verifier
+  calls, reader calls, and lifecycle calls expose no caller-supplied registry
+  lookup or issuance hook; attempted injection fails at the API boundary.
+  Verifier-only high-water readers now retain a dedicated read-only SQLite
+  witness view with no `advance()` method; the mutable signer-side witness is
+  rejected at the reader boundary. Lifecycle admission and one-shot consumption each revalidate the current
+  authenticated generation, closing concurrent generation-advance races.
+- `REDDOG_SIGNER_MUTUAL_PEER_HANDSHAKE_PHASE1`: replaced the forgeable
+  signer healthcheck with a fresh, short-lived, domain-separated Ed25519
+  challenge verified against the configured signer key, fingerprint, epoch,
+  requester attestations, and exact request bytes.
+  The production signer CLI now requires a process-local, non-copyable,
+  non-serializable, one-shot selection minted by the existing signed
+  runtime-manifest verifier. The signer validates exact config/run-packet
+  bytes, roots, generation, packet ID, session, socket, profile/key/epoch
+  tuples, CLI bindings, and fixed safety fields before reading caller-selected
+  artifacts, constructing the secret resolver, resolving keys, or exposing a
+  handshake-capable backend. Production bootstrap rejects all provider modes
+  except `WSP71_PERMISSIONED`; test-only key material cannot bypass launch
+  admission.
+  Kernel peer credentials continue to authenticate client -> signer; the
+  signed challenge authenticates signer -> client. Rehashed packet
+  substitution, copied responses, expired/future requests, fake acceptance
+  flags, key/epoch/profile substitution, unsigned audit metadata, and
+  malformed domains fail closed. A second domain-separated signer signature
+  covers the response audit metadata and attestations.
+  The healthcheck remains evidence only. Opaque generation high-water and OS
+  policy authorities, Linux kernel process/socket ownership, protected cleanup,
+  and one-shot lifecycle admission now bind it to current manifest truth.
+- `REDDOG_SIGNED_RUNTIME_ARTIFACT_MANIFEST_PHASE1`: added the
+  content-addressed signed-manifest foundation for the seven canonical
+  resident runtime artifacts.
+  Manifest authority is a closure-confined process-local proof minted only
+  after the existing delegated work-authority verifier confirms principal trust,
+  signatures, revocation, permission freshness, FoundUp/path scope, queue
+  state, independently recomputed committed-publication binding, and signer
+  policy.
+  The isolated signer rereads the artifact bytes, enforces an exact signing
+  domain plus a manifest-specific audit-attestation domain, and reserves the
+  manifest nonce through the existing transactional replay store before
+  returning a signature.
+  Manifests are create-only under the outside-repository runtime root; final
+  publication uses OS-level no-replace semantics, so a concurrent or
+  pre-seeded target is never overwritten.
+  All seven canonical artifact producers and manifest publication share one
+  runtime-generation fence. The signed manifest binds that generation digest,
+  and publication re-derives it while fenced before creating the immutable
+  content-addressed artifact.
+  Runtime activation remains fail closed until a production durable replay
+  high-water provider, authenticated manifest selection, use-time current
+  generation verification, and mutual signer peer handshake are wired.
+- `REDDOG_ARTIFACT_GENERATION_BOUND_MODEL_RUNTIME_PHASE1`: provider effects require canonical SINGLE or signed PANEL evidence rehydrated against current keys, revocation, topology, policy, and trusted time.
+  Exact `(role, fingerprint, key_epoch)` resolution and independent benchmark, promotion, panel-authority, and panel-member signers prevent identity substitution.
+  Opaque capabilities retain no caller-mutable binding state; registry admission binds the exact issued object identity.
+  Promotion requires the exact artifact-generation runtime surface and binds the canonical selection, runtime, and verification lineage.
+  Provider topology is re-derived from that verified lineage; substituted invocation topology rejects before network effects.
+  Provider metadata and the durable receipt retain all six selection, runtime-binding, and verification IDs/digests.
+  Missing, stale, revoked, tampered, replayed, copied, or caller-minted evidence fails closed.
+  Persisted verification mappings remain audit lineage only; no second signature trust model was introduced.
+  Adversarial regressions cover copied-token substitution, topology retargeting, replay, and mutable-state probing.
+  Signed bounded-plan promotion reaches one queue claim, materialized order, assigned stage, exact provider call, and receipt.
+- `REDDOG_OPERATIONS_SKILLZ_PHASE1`: Start Operations binds a manifest-authenticated, provider-neutral Operations Skillz receipt and revalidates it on submit/resume.
+  Resident audit, architect, and artifact-generation paths reuse canonical runtime-binding admission, so weak or recomputed evidence cannot become authority.
+  Brain, Breadcrumb, and Memex remain lower-authority receipt-bound planning inputs and are never claimed when absent.
+- `REDDOG_START_OPERATIONS_HOLO_REPAIR_RESUME_PHASE1`: start operations reuses a process-private Holo owner or creates one exact-HEAD durable AgentDB repair task for OpenClaw.
+  The task invokes the canonical maintenance handshake, re-proves generation/freshness, and permits one grounding retry.
+  Semantic misses do not trigger re-indexing; malformed handoffs, substitutions, repository changes, and proof mismatches fail closed.
+- The canonical operations profile exposes owner health through a semantic readiness target.
+  Dispatch uses a one-shot capability after exact assignment, rejects replay/wrong assignees, and retains exact-assignment CAS recovery plus truthful refresh reporting.
+- Start-operations authorization rejection preserves validated intent IDs for status, cancel, and resume correlation.
+- `START_OPERATIONS_CONTROL_ADAPTER_PHASE1`: extracted the main-host dual model-binding loader into a shared fail-closed module and added a profile-bound resident-client adapter.
+  It binds clean HEAD, authenticated FoundUp scope, strict budgets, and both BOUND model receipts to independent host-pinned IDs.
+  Fresh control IDs prevent replay; terminal hashes cover every field, typed progress/results are emitted, and no execution authority is granted.
+- Signed Memex lineage now survives the full authority and dispatch chain.
+  Signer invocation validates the exact dry-run request digest before effects;
+  resident verification replaces packet authority with recorded chain truth.
+  Rehashed pre/post-signing substitutions now reject before worker evidence.
+  The two current absent encodings (`None` and empty text) normalize without
+  raising while malformed or half-populated bindings still fail closed.
+- Exact-SHA review follow-up removed the importable process-local envelope
+  seal as an authority primitive. Signed-worker admission now re-verifies the
+  persisted AgentDB envelope against fresh authority inside the atomic claim
+  transaction, and returns verification evidence only after that transition.
+  Every direct signed-worker rejection owns finalization; the generic task
+  finalizer refuses the signed namespace so a completion race cannot be
+  overwritten. Windows publication also exercises valid runtime roots whose
+  internal temp, lock, and immutable-artifact paths exceed 260 characters.
+- Final exact-SHA repair requires a sealed canonical envelope at every
+  signed-worker claim boundary, rejects stale assignments before effect
+  admission, and reconstructs runner context only from signed authority plus
+  independently validated durable result history. Finalization now checks the
+  same claim/use lease inside the database transaction; expired recovery is a
+  separate negative-only path. Invalid assignments quarantine task and
+  verifier reservation atomically, and poisoned rows no longer block the next
+  valid OpenClaw claim.
+- Exact-SHA security review now requires recovery race winners to prove the
+  terminal task against the independently durable result-ledger tail and the
+  exact terminal assurance row. A self-hashed task-context marker alone can
+  no longer report a recovered execution.
+- Independent exact-SHA review hardening now reserves signed-worker assignment
+  for a task-bound principal, quarantines malformed pending tasks, requeues
+  stale pre-admission assignments by exact CAS, and keeps active verifier
+  reservations pinned. Executing workers use a durable, bounded-renewal
+  heartbeat; restart recovery honors the renewed lease and quarantines
+  positive, corrupt, missing, or otherwise unverifiable evidence without
+  creating a success result. Quarantined tasks no longer block unrelated valid
+  signed work.
+- Exact-SHA review hardening now protects the full signed-worker namespace
+  from generic creation/retry/requeue as well as completion. Result
+  finalization derives capability from the signed envelope, persists
+  canonical identity after verified execution, retains exact admitted
+  identity for pre-verification failure, and binds task/claim/assurance
+  terminal states. Independent verifier `REJECT` completion is rehydrated
+  from its durable AgentDB stage even when the chain-results writer rejects
+  the stage result. Claims now carry a 15-minute lease; supervisor recovery
+  never replays an unknown worker effect, rolls forward only exact negative
+  assurance, and refuses digest-only positive assurance.
+- Follow-up hardening accepts an exact all-pending batch only when durable
+  publication is already APPLIED, closing the post-activation return-crash
+  window. Mixed-status, partial, or field-mismatched recovery remains rejected.
+  Task finalization and nonce state now use bounded internal WSP_62 siblings.
+  The immutable reserved task namespace keeps stripped signed-worker tasks on
+  the signed path; admission now owns and exactly finalizes pre-verification
+  rejection, so mutable marker removal cannot fall through to arbitrary WRE
+  execution and a competing claimant cannot be overwritten. Admission returns
+  the exact context, skills, and discovery binding won by its database CAS;
+  neither the direct task runner nor the OpenClaw supervisor can execute an
+  earlier caller snapshot. Supervisor completion, failure, assurance
+  completion, and requeue persistence now use the same exact assignee/context
+  CAS; a concurrent owner is never overwritten. Requeue admission replaces only the
+  superseded claim/use pair while retaining a canonical ten-entry result tail.
+  The independently durable append-only AgentDB ledger retains every attempt,
+  and task context must match its exact tail before supervisor or direct
+  execution; malformed durable state, truncation, legacy context-only history,
+  and complete attacker re-hashing therefore fail closed. Both execution paths
+  append one shared result receipt in the same task-transition transaction;
+  persistence failure leaves the exact task executing and never creates an
+  unreceipted terminal state. Verifier completion preserves trusted timestamp
+  precision and atomically commits the durable reservation; detached completion is forbidden. Transactional execution logic was extracted from the touched `AgentDB` monolith into bounded database siblings, reducing the monolith while making the security boundary explicit. Publication recovery never creates the
+  derived authority cache, even from internally self-consistent COMMITTED
+  packets; only a fresh normal publish call that re-verifies proposal
+  authorization may recreate that cache.
+## 2026-07-27: REDDOG_ARCHITECT_FIX_PROMOTION_TWO_PHASE_PUBLICATION_PHASE1 - Replaced mutable profile-first publication with `PREPARED -> immutable content-addressed inert artifact -> COMMITTED state CAS -> derived fixed-path inert cache`. Recovery never advances PREPARED, never lets unanchored packets delete immutable artifacts, preserves concurrent refresh data, and requires an authenticated publish retry to rebuild the cache after a COMMITTED crash. Added forged-self-hash, crash/interleaving, concurrency, idempotency, runtime-lock, and valve/signer use-time COMMITTED gates. Both signer consumers now require the explicitly selected durable authoritative-work-state file; injected state can only corroborate it, and any durable architect promotion makes missing/ambiguous profile provenance fail closed. The resident queue now reloads current state in serial and one-shot paths, derives a current-revision publication-effect binding before authority-request persistence, revalidates it before signing, includes it in the signed work authority, and binds verification to the exact signed work-authority digest. A canonical verification receipt now persists through dry-run intents, runtime receipts, and AgentDB task context; immediately before the writer, dispatch reloads both recorded stages, obtains fresh time from a required production clock, binds the effective task to the signed work order and authoritative WSP 15 worker plan, and preflight-verifies the signed authority. AgentDB publication advances the existing durable nonce state through digest-bound `RESERVED -> AUTHORIZED -> APPLIED`; tasks remain `publication_held` and unclaimable until the exact APPLIED batch is activated by a field-complete CAS. Recovery handles both zero-row AUTHORIZED crashes and APPLIED-before-activation crashes, while partial, altered, prematurely assigned, or completed batches reject. Dispatch admission requires exact allowlisted receipt and intent schemas, persists only canonical projections, and derives principal and RedDog identities solely from the reverified signed authority; attacker-added identity or metadata fields reject before nonce reservation. Worker execution separately performs an atomic `assigned -> executing` CAS, stores receipt-linked claim/use digests, and finalizes through an exact assignee/context CAS. Post-claim runner exceptions become terminal failures, concurrent state changes are never overwritten, and the generic task finalizer cannot finalize signed-worker tasks. PREPARED state, missing verifier/clock dependencies, synthetic dry-runs, attacker-recomputed receipts around a forged signature or substituted operation, role/capability substitution, extra-field identity injection, replay, old environment epochs, and authority substitution cannot reach dispatch effects. Split publication validation, signer persistence, optional signed bindings, request materialization, worker-dispatch authority binding, publication admission, and execution admission into bounded sibling modules so affected files satisfy WSP 62. COMMITTED remains local publication integrity, not publication authentication; `main.py` keeps the inert cache separate from the active profile, and signer-owned publication activation remains unimplemented (WSP 00, 15, 22, 50, 62, 78, 97).
+- Security correction: recovery no longer rebuilds the derived cache from
+  serialized COMMITTED packets. A fresh normal publish call must reverify the
+  signed proposal authorization before a missing cache can be recreated.
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_ATTESTATION_PROMOTION_BINDING_PHASE1
+- Added direct promotion-time verification of the principal signature over the
+  exact signer policy and the RedDog signature over the exact proposal payload.
+  The verifier reconstructs current proposal and signer-runtime bindings and
+  resolves the principal key independently; caller-supplied trust keys,
+  caller-profile identity/scope substitution, test-only signer mode, stale
+  policies, signer-context substitution, and altered signatures fail closed.
+- Removed the first draft's forgeable opaque-proof registry and process-local
+  one-use state. Successful authoritative work-state CAS now persists the
+  attestation ID as the durable replay guard, including after process restart.
+  Failed profile or work-state writes do not consume the signed evidence.
+- Bound signed receipt IDs/digests and signer-runtime context into the worker
+  claim, queue item, records, receipts, authority profile, and context. Profile
+  identity fields come only from verified authorization, and the source
+  receipt is recomputed. WSP 15 promotion and queue CAS remain the mutation engine.
+- Decomposed promotion record/profile/state assembly into a bounded transaction
+  module. The inherited prewrite-then-CAS limitation was subsequently closed
+  by `REDDOG_ARCHITECT_FIX_PROMOTION_TWO_PHASE_PUBLICATION_PHASE1`.
+- Kept startup fail closed: `main.py` does not choose its own trust key and
+  cannot promote without an attestation, production signer-runtime config, and
+  independently supplied principal-key resolver. Production signer-to-startup
+  input supply and current revocation-state composition remain
+  SPECIFIED_NOT_IMPLEMENTED (WSP 00, 15, 22, 50, 62, 97).
+
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_SIGNER_POLICY_RUNTIME_PHASE1
+- Extended the existing signer config, bootstrap, key-provider, and runtime
+  wiring so one exact architect-proposal signer policy can be provisioned only
+  against the configured RedDog signer profile.
+- Added a signer-owned atomic proposal nonce store bound to an independently
+  injected monotonic high-water authority outside the nonce-state rollback
+  domain. Production requires a matching configuration-bound durability
+  receipt and rejects the volatile in-memory implementation. The signed
+  authority identifier, MAC, sequence, revision, distinct proposal-transaction
+  lock, and one-step crash roll-forward make rollback, deletion, mismatched
+  authority, nested-lock deadlock, lock-path substitution, and tampering fail
+  closed while bounded retention prevents unbounded growth. The proposal
+  transaction lock is a descriptor-verified file beside the canonical nonce
+  state, so Windows sessions and POSIX processes with different temporary
+  namespaces serialize against the same signer-owned runtime artifact.
+- Required the proposal payload identity, signer key, key epoch, consensus
+  receipt, authority-profile source, and TTL to match the supplied authority
+  profile before a signer configuration can be written, with a fixed
+  protocol-level TTL ceiling and an exact RedDog signer profile.
+- Required a fresh principal-signed, domain-separated authorization over the
+  exact proposal policy, signer instance, replay namespace, and normalized
+  runtime security context. An independent principal resolver supplies only
+  the trusted public verification key; WSP71 resolves only the RedDog 0102
+  proposal profile, so no principal private key enters the proposal service.
+- Rehydrated and revalidated the exact serialized proposal policy at bootstrap;
+  launch requires an expected digest supplied outside the config file, and
+  partial, unsigned, expired, tampered, self-consistently re-digested,
+  mismatched-key, profile-substituted, or out-of-root pairs never reach the
+  signer backend.
+- Restricted a proposal-enabled signer backend to the proposal domain only.
+  Unknown, generic, and control-loop signing operations cannot reuse that
+  private key during the proposal service run. Removed architect-proposal
+  parameters from the public key-provider API; only the verified internal
+  runtime constructor can attach the canonical proposal policy and nonce store.
+- Consumed principal policy authorization before exposing the signer backend.
+  Reservation and commit independently reject expired authorization. A service
+  rejection or exception after signing cannot roll authorization back or reuse
+  it on another launch. Runtime receipts stop claiming no file I/O once
+  injected proposal trust, key, or replay dependencies have been invoked, and
+  all other unobservable negative side-effect attestations become false after
+  any injected dependency call.
+- Rejected proposal-enabled signer run packets until production principal and
+  replay adapters are composed into the CLI sidecar, rather than emitting an
+  accepted packet that the shipped CLI must reject.
+- Preserved the authority boundary: this slice provisions signer policy and
+  durable replay state only. It does not derive proposal facts from
+  authoritative work state, produce an attestation in the resident loop,
+  produce the principal policy authorization in the resident loop,
+  configure the production principal-key resolver,
+  supply the independently administered production high-water authority and
+  its durability receipt,
+  satisfy the proposal-admission capability, promote a queue item, execute a
+  worker, or grant merge authority (WSP 00, 15, 22, 50, 62, 97).
+
+## 2026-07-27: REDDOG_AUTHORITY_RUNTIME_STORE_CONFINEMENT_PHASE1
+- Required every atomic authority runtime store to bind an explicit repository
+  root and runtime root, then revalidate the target before reads, writes, and
+  atomic replacement.
+- Rejected missing out-of-root targets, hard links, repository-contained or
+  repository-containing roots, Windows namespaces, and linked path components;
+  atomic replacement now pins the verified parent against swap races.
+- Split the platform replacement adapters, scrubbed rejected temporary payloads,
+  restored the previous authority snapshot after post-replace verification
+  failure, and rejected POSIX parent relocation before accepting a write.
+- Bound authority commits to a platform-level revision witness, recovered
+  interrupted authority artifacts only when the caller supplies the exact
+  expected revision, and made snapshot revisions independent of a prior
+  embedded revision.
+- Moved Linux payload staging to an `O_TMPFILE` unnamed inode with mode-zero
+  rename, descriptor-backed rollback, and inode/directory fsync. Unsupported
+  filesystems fail closed rather than falling back to pathname temp files.
+- Kept the security boundary explicit: descriptor and compare-and-swap checks
+  protect cooperative runtime access, while hostile same-principal filesystem
+  writers remain excluded by the signer service's distinct OS-principal
+  isolation contract.
+- Preserved the exact authenticated runtime root through control-receipt reads
+  and appends, required schema-v2 signer anchor and authority-policy bindings,
+  confined socket/anchor paths at supply, bootstrap, and public runtime wiring,
+  and aligned readiness around the same direct-child root contract.
+- Required run-packet supply to pass the same canonical schema-v2 config
+  rehydration as the signer bootstrap, so an accepted launch artifact cannot
+  omit runtime roots, signer roots, the control anchor, or a fully validated
+  authority policy, peer policy, and signer profile set. Canonical profile
+  validation is shared by config supply, run-packet admission, and provider
+  admission; malformed public keys, bounded service limits, and
+  policy-to-profile identity are rejected before config write or launch
+  acceptance, with strict finite JSON numbers and string-only policy bindings
+  for both mapping and typed runtime inputs.
+- Threaded independent repository/runtime roots through queue dependencies,
+  signer config, control-loop heads, signer anchors, and live-canary verification
+  without enabling proposal authority, queue promotion, worker execution, or repository
+  mutation (WSP 00, 15, 22, 50, 62, 97).
+
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_AUTHENTICITY_ATTESTATION_PHASE1
+- Added a domain-separated architect-proposal Ed25519 attestation that binds
+  the complete proposal, determination, queue candidate, snapshot, exact SHA,
+  work state, HoloIndex, WSP 15, policy, path/test/gate, principal, RedDog,
+  signer-key, consensus, nonce, and expiry context.
+- Required an exact immutable signer-owned proposal policy and transactional
+  nonce reservation; malformed, partial, expired, replayed, cross-domain, or
+  policy-mismatched requests fail before signing.
+- Added strict serialized-attestation integrity validation for exact fields,
+  signatures, TTL, and key-epoch revocation. The returned typed attestation is
+  evidence only and cannot satisfy proposal admission or promotion.
+- Kept independent trust-root resolution, startup signer provisioning, durable
+  replay state, opaque authority proof, attestation artifact supply, and
+  production promotion wiring explicitly unimplemented. This slice creates no
+  queue item and performs no repository effect (WSP 00, 15, 22, 50, 64, 97).
+
+## 2026-07-27: REDDOG_ARCHITECT_PROPOSAL_EXECUTABILITY_ADMISSION_PHASE1
+- Added a deterministic post-Fusion proposal admission receipt that binds the
+  audit finding, operational snapshot, repository HEAD, work-state revision,
+  HoloIndex generation/freshness, WSP 15 allocation, reuse decision, paths,
+  tests, policy gates, capabilities, expected evidence, and stop conditions.
+- Separated proposal validity from execution readiness so prerequisite work is
+  retained as `BLOCKED_CANDIDATE` without becoming authoritative queue work.
+- Revalidated current trust anchors, platform, HEAD, HoloIndex freshness
+  receipt, canonical candidate/determination IDs, and work-state revision in
+  the existing signed WSP 15 promotion seam; model readiness claims,
+  underdeclared effect capabilities, and produced capabilities cannot
+  self-authorize.
+- Restricted stale-index admission to direct-read-grounded HoloIndex
+  maintenance whose exact non-wildcard write paths equal the cited direct-read
+  paths; ordinary coding, live Windows canaries, merge, and external effects
+  remain fail closed.
+- Bound claims, queue items, and authority profiles to one immutable base SHA,
+  and held repository-promotion plus profile locks across profile snapshot,
+  prewrite, queue commit, and rollback. Rollback is digest-CAS guarded and
+  reports failure rather than overwriting a newer profile.
+- Required the live HoloIndex query owner to prove the exact repository root,
+  HEAD, generation, and on-disk freshness-receipt digest inside the promotion
+  lock; an arbitrary valid historical receipt path is insufficient.
+- Certified that SHA-bound proposal receipts provide integrity but not
+  authenticity. Production admission remains blocked on a separate trusted
+  proposal-authenticity verifier; no caller-supplied policy can enter the
+  promotion side-effect boundary.
+- Split prompt, contract, and evaluator modules to honor WSP 62 and lowered
+  the inherited architect runtime/test no-growth ceilings (WSP 00, 15, 22, 50,
+  62, 97).
+- Reconciled the stale WSP 62 ceilings left by merged exact-SHA commit PR #1398
+  to its already-landed file and test sizes; no #1398 runtime code was changed.
+
+## 2026-07-27: REDDOG_RESIDENT_QUEUE_EXACT_SHA_COMMIT_STAGE_PHASE1
+- Inserted an exact-SHA commit stage between the bounded author and the
+  independent verifier in the resident RedDog queue.
+- Reused the existing injected `RealWorktreeRunner.commit_all()` operation;
+  the stage rejects pre-staged or extra paths, validates the bounded artifact
+  digest, commits only the authorized path set, and proves exact base, parent,
+  head, tree, branch, and clean-worktree state.
+- Bound a deterministic commit-attempt trailer for crash reconciliation and
+  required downstream canonical receipt revalidation so serialized base,
+  head, path, or worktree tampering cannot reach verification.
+- Assigned write plus commit to one bounded author claim while preserving the
+  independent verifier as a distinct AgentDB claim and principal.
+- Kept push, PR publication, merge, HoloIndex mutation, PatternMemory writes,
+  and reward settlement outside this stage (WSP 00, 15, 22, 50, 64, 97).
+
+## 2026-07-27: REDDOG_MAIN_MENU_BINDING_PREFLIGHT_BOUNDARY_FIX
+- Missing or invalid model bindings now stop the resident cycle but block interactive startup only under explicit enforced mode; WARN/FAIL and menu-continuity regressions cover the boundary (WSP 00, 5, 15, 22, 50, 64, 97).
+## 2026-07-26: OpenClaw exact-SHA HoloIndex maintenance route
+- Added a dedicated low-risk maintenance family for post-merge HoloIndex work.
+- OpenClaw now uses an exact-binding CAS claim; competing supervisors cannot
+  execute the same SHA task.
+- Each claim carries an immutable context digest and one-use execution ID;
+  direct or duplicate invocation is rejected before authority effects.
+- OpenClaw passes that capability explicitly through `run_task`; the executor
+  will not recover it implicitly from AgentDB for an untrusted caller.
+- The domain executor owns atomic finalization, so generic `run_task`
+  completion/failure writes cannot split the receipt transaction.
+- Dispatch exceptions immediately release the exact claim into retryable
+  failure; process crashes are recovered by the coordinator's bounded lease.
+- Moved remote polling to one bounded background worker so the supervisor
+  observation loop never waits on `git fetch`.
+
+## 2026-07-25: Independent assurance capacity admission
+
+- Inserted a durable assurance-capacity gate between worktree creation and
+  bounded coding in the resident RedDog queue.
+- Bound author and independent verifier task identities, WSP 15 allocation,
+  operational snapshot, work order, and reservation digest through the slice
+  verifier receipt.
+- Deferred unavailable capacity with a persisted retry window instead of
+  busy-looping or treating CI as an independent reviewer.
+- Made successful admission a persisted yield boundary so the queue-stage
+  owner cannot execute either the author or verifier stage.
+- Added separate OpenClaw claims for the bounded author and reserved verifier,
+  author-failure revocation, and stage-gated bounded verifier-lease renewal.
+- Hardened review findings by requiring exact accepted upstream decisions,
+  rejecting already-claimed authors, binding renewed verification to the
+  immutable admission digest, and validating terminal receipt lineage before
+  releasing capacity.
+- Kept HoloIndex query-only and blocked code execution when assurance
+  admission, rehydration, or terminal receipt binding fails.
+
+## 2026-07-25: Daemon self-audit runtime nudge alignment
+
+- Switched supervisor-escalation memory scans from the obsolete tracked report
+  to the same validated external runtime root used by the daemon producer.
+- Reads now use bounded, descriptor-confined chunks over one stable file
+  identity; links, replacements, oversized files, and invalid UTF-8 fail closed.
+- Kept runtime provenance path-independent and rejected any injected runtime
+  root inside the repository.
+
+## 2026-07-25: RedDog HoloIndex receipt-bound semantic evidence
+
+- Preserved the owner's bounded flattened hits in the normalized client response so canonical query receipts expose the evidence list they summarize.
+- Kept the full semantic-evidence serialization digest and item count as the enforcement boundary.
+
+## 2026-07-25: RedDog HoloIndex authority-root client proof
+
+- The loopback owner client now sends the selected repository-root digest, requires the service to echo the same digest, and preserves it in the normalized generation-bound response.
+- Existing pre/post clean-HEAD checks remain in force; a same-HEAD response from a foreign owner root now fails closed.
 
 ## 2026-07-25: REDDOG_WORK_STATE_AUTHORITATIVE_GROUNDING_GATE_PHASE1
 
@@ -8833,3 +13285,8 @@ openclaw onboard
 
 ### Outcome
 - The task consumer pipeline is now wired securely. Autonomous loop execution (Producer -> AgentDB -> Supervisor -> Consumer) has deterministic boundaries.
+## 2026-09-20: Omission-aware seed bootstrap
+
+- Reused the existing raw determination read, typed plan snapshot and candidate-lineage validator. Omitted input selects the declared plan; explicit None/empty retains lower-supplier semantics. Freeze legacy absence too before later receipt callbacks; wrappers remain rejected and execution scope is never inferred. WSP00/15/22/50/62/84/97/99.
+- Nonplain ancestors reject before methods/copy. Independent review first exposed copy coercion; two red regressions precede the repair. Final638 connected tests pass; independent43 overlapping tests and69 boundary cases/191assertions qualify exact source. Existing legacy bytes remain unchanged.
+- Source220→215, public function111 unchanged; tests383 and interface1592. No new module, skill, main.py read or effect authority. Existing manifest membership/pins remain unchanged;8 packaging tests,15 fast groups and registry1651/269 pass. Exact artifacts and PR closure: root backlog current_observation.

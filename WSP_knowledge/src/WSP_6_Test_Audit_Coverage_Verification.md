@@ -26,9 +26,94 @@ The rigor of this audit should be scaled based on a module's LLME score, with fo
 -   **Goal**: Remediate all `STRUCTURE_ERROR` and `NO_TEST` warnings. Every source file must have a corresponding test file.
 
 ### C. Step 2: Test Suite Execution Sweep
--   **Action**: Run the entire test suite, paying close attention to failures, errors, and warnings.
--   **Command**: `pytest -ra modules/`
+-   **Action**: Verify the canonical registry, then plan explicit automated
+    module shards. Execute them only through an independently authenticated,
+    OS-isolated runner.
+-   **Registry command**: `python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check`
+-   **Prohibition**: Do not use `pytest .` or `pytest -ra modules/` as repository
+    evidence. The Phase 1 WRE planner emits explicit canonical shard paths but
+    performs no test execution. An independently authenticated OS-isolated
+    execution plane remains required.
 -   **Goal**: A clean run with zero `F` (Failures), `E` (Errors), or unaddressed `W` (Warnings). Skips (`s`) and expected failures (`x`/`X`) should be reviewed to ensure they are still valid.
+
+#### C.1 Tiered Verification During Development
+
+The full sweep is the promotion/release audit boundary. It is not the default
+inner-loop command after every edit. WRE and builders MUST use the smallest
+test tier that proves the current claim, then escalate when impact or evidence
+requires it:
+
+1. **Focused inner loop**: tests for the changed function, file, or explicit
+   acceptance criterion.
+2. **Module closure**: all tests and public-interface contracts owned by the
+   changed module.
+3. **Dependency closure**: tests for known consumers and shared contracts
+   reached by the changed surface.
+4. **Security and held-out closure**: applicable adversarial, authority,
+   safety, and independently maintained regression suites.
+5. **Full repository promotion**: the complete suite for SYSTEMIC changes,
+   uncertain/stale dependency closure, protected authority surfaces, release
+   candidates, and periodic health audits.
+
+The complete automated suite MUST be resolved from the Git-tracked canonical
+registry at `WSP_knowledge/WSP_Test_Registry.json`. It is the aggregate of
+explicit module-owned shards; `pytest .` is not an acceptable proof because
+repository discovery includes manual and operational programs with import-time
+effects. Every tracked `test_*.py` file remains visible in the registry.
+Manual, operational, archived, or malformed files are explicit quarantined
+entries with an owner and reason, never a silent ignore list. Their required
+execution receipts are separate from the automated pytest aggregate.
+
+Registry generation and `--check` validation MUST be deterministic from
+Git-tracked source. The exact-SHA planner MUST independently regenerate and
+byte-compare parent and candidate registries, require declared changed paths
+to equal the Git diff, verify recognized dependency/config parity, and resolve
+explicit bounded shard paths independently at each SHA. Exact commit identity
+MUST resolve before diffing, and Git output MUST terminate at its byte ceiling.
+Materialized files MUST match the exact Git-tree path and blob ID; committed
+archive attributes and filesystem case collisions MUST NOT filter or rewrite
+the evidence view.
+Changed quarantined tests MUST reject with an explicit obligation; sibling tests
+MUST NOT silently substitute for them. Caller-provided pytest
+paths and broad `.` execution are forbidden. SYSTEMIC scope is represented as
+bounded batches of explicit shard IDs, never as a pytest `.` argument.
+
+The planner MUST NOT import candidate tests, invoke pytest, or claim signed
+authority, collector integrity, OS isolation, execution authority, promotion
+authority, or a verification capability. Execution results become evidence
+only after a separately reviewed OS-isolated runner binds exact node IDs and
+per-shard outcomes without erasing successful siblings.
+
+The registry layer MUST project scope into the existing canonical impact-plan
+contract rather than defining a parallel WSP 15 or impact schema. An impact
+plan MUST bind the changed-path digest, impact class, selected test
+scope, omitted-scope rationale, WSP 15 allocation receipt, runner digest, and
+environment digest. Selection and dependency digests MUST be derived from the
+projected shards and inspected dependency set, not supplied as caller claims.
+If the dependency graph or HoloIndex evidence is stale,
+the plan escalates; it does not guess a narrower scope.
+
+#### C.2 Parent Baseline Receipt Reuse
+
+When `main` has known failures, acceptance is differential rather than
+count-based. The independent evidence plane records outcomes by exact test
+identifiers, not aggregate counts. A candidate MUST introduce no new failure,
+error, skip, xfail, xpass, deselection, or removed test unless a separately
+authorized expectation change governs it. Exact collection manifests and
+selection arguments are evidence inputs; a caller-applied `FULL_REPOSITORY`
+label is not proof that the full repository was collected.
+
+Parent baseline receipt reuse is permitted only when all of these bindings are
+exactly equal: parent SHA, suite-scope digest, runner digest, dependency-lock
+digest, environment digest, and test-selection policy. One immutable parent
+receipt may therefore serve many branches from the same parent; engineers and
+workers MUST NOT rerun the parent full suite for every branch merely to restate
+the same baseline.
+
+Candidate tests must later run against the exact candidate SHA. The differential
+receipt records unchanged failures, resolved failures, added passing tests,
+removed tests, and every newly non-passing or deselected state. A summary such as
+`4618 passed / 40 failed` is supporting telemetry, not sufficient evidence.
 
 ### D. Step 3: Interface Contract Testing (WSP 12)
 -   **Action**: For each module with a defined interface, run its specific contract tests. This verifies that the module adheres to its public-facing promises.

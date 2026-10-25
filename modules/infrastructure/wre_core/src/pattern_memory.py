@@ -28,6 +28,11 @@ from datetime import datetime, timedelta
 import json
 import logging
 
+from modules.infrastructure.wre_core.src.pattern_ab_evidence import (
+    PatternABEvidenceMixin,
+    initialize_ab_schema,
+)
+
 logger = logging.getLogger(__name__)
 
 
@@ -53,7 +58,7 @@ class SkillOutcome:
     notes: Optional[str] = None
 
 
-class PatternMemory:
+class PatternMemory(PatternABEvidenceMixin):
     """
     Pattern Memory - SQLite storage for skill outcomes and recursive learning
 
@@ -74,19 +79,14 @@ class PatternMemory:
 
     def __init__(self, db_path: Optional[Path] = None):
         """
-        Initialize pattern memory database
+        Own a connection for one work item on the creating thread.
+
+        Instances may share a database path, never a transaction or close
+        lifecycle. Construct and close each instance in its worker thread.
 
         Args:
             db_path: Path to SQLite database file
         """
-        # Reuse shared singleton only for default production path.
-        # Tests and explicit db paths must get isolated storage.
-        self._uses_shared_singleton = db_path is None
-        if self._uses_shared_singleton and getattr(PatternMemory, "_initialized", False):
-            self.__dict__.update(getattr(PatternMemory, "_shared_state", {}))
-            logger.debug("[PATTERN-MEMORY] Reusing existing singleton instance")
-            return
-
         if db_path is None:
             self.db_path = Path(__file__).parent.parent / "data" / "pattern_memory.db"
         else:
@@ -95,21 +95,14 @@ class PatternMemory:
         # Ensure data directory exists
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
 
-        self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)
+        self.conn = sqlite3.connect(str(self.db_path))
         self.conn.row_factory = sqlite3.Row  # Access columns by name
         self.false_positive_columns: set = set()
 
         self._initialize_schema()
         self._seed_false_positive_memory()
 
-        # Log init once per process to reduce telemetry spam for shared instance.
-        if self._uses_shared_singleton:
-            if not getattr(PatternMemory, "_initialized", False):
-                logger.info(f"[PATTERN-MEMORY] Initialized - db={self.db_path}")
-            PatternMemory._shared_state = dict(self.__dict__)
-            PatternMemory._initialized = True
-        else:
-            logger.info(f"[PATTERN-MEMORY] Initialized (isolated) - db={self.db_path}")
+        logger.info(f"[PATTERN-MEMORY] Initialized - db={self.db_path}")
 
     def _initialize_schema(self) -> None:
         """
@@ -195,23 +188,7 @@ class PatternMemory:
         except sqlite3.OperationalError as exc:
             logger.warning("[PATTERN-MEMORY] Learning events schema upgrade failed: %s", exc)
 
-        # A/B test assignments table (Sprint 1 - TT-SI closure)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS ab_test_assignments (
-                test_id TEXT PRIMARY KEY,
-                skill_name TEXT NOT NULL,
-                control_version TEXT NOT NULL,
-                treatment_version TEXT NOT NULL,
-                start_time TEXT NOT NULL,
-                end_time TEXT,
-                status TEXT DEFAULT 'running',
-                sample_size_target INTEGER DEFAULT 20,
-                control_successes INTEGER DEFAULT 0,
-                control_trials INTEGER DEFAULT 0,
-                treatment_successes INTEGER DEFAULT 0,
-                treatment_trials INTEGER DEFAULT 0
-            )
-        """)
+        initialize_ab_schema(self.conn)
 
         # Telemetry counters table (Sprint 1 - observability)
         cursor.execute("""
@@ -556,6 +533,7 @@ class PatternMemory:
             SELECT * FROM skill_outcomes
             WHERE skill_name = ?
               AND pattern_fidelity <= ?
+              AND success = 0
             ORDER BY pattern_fidelity ASC, timestamp DESC
             LIMIT ?
         """, (skill_name, max_fidelity, limit))
@@ -801,156 +779,6 @@ class PatternMemory:
 
         rows = cursor.fetchall()
         return [dict(row) for row in rows]
-
-    # ------------------------------------------------------------------ #
-    #  A/B Testing & Variation Promotion (Sprint 1 - TT-SI Closure)      #
-    # ------------------------------------------------------------------ #
-
-    def schedule_ab_test(
-        self,
-        skill_name: str,
-        control_version: str,
-        treatment_version: str,
-        sample_size_target: int = 20
-    ) -> str:
-        """
-        Schedule A/B test between control and treatment variation.
-
-        Per WRE_COT_DEEP_ANALYSIS.md Gap D: Close TT-SI loop
-
-        Args:
-            skill_name: Skill being tested
-            control_version: Current production version ID
-            treatment_version: New variation ID to test
-            sample_size_target: Min samples before promotion decision
-
-        Returns:
-            test_id for tracking
-        """
-        import uuid
-        test_id = f"ab_{skill_name}_{uuid.uuid4().hex[:8]}"
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            INSERT INTO ab_test_assignments (
-                test_id, skill_name, control_version, treatment_version,
-                start_time, sample_size_target
-            ) VALUES (?, ?, ?, ?, ?, ?)
-        """, (
-            test_id, skill_name, control_version, treatment_version,
-            datetime.now().isoformat(), sample_size_target
-        ))
-        self.conn.commit()
-        logger.info(f"[PATTERN-MEMORY] Scheduled A/B test {test_id}")
-        return test_id
-
-    def get_active_ab_test(self, skill_name: str) -> Optional[Dict]:
-        """Get active A/B test for skill if exists."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            SELECT * FROM ab_test_assignments
-            WHERE skill_name = ? AND status = 'running'
-            ORDER BY start_time DESC LIMIT 1
-        """, (skill_name,))
-        row = cursor.fetchone()
-        return dict(row) if row else None
-
-    def record_ab_outcome(
-        self,
-        test_id: str,
-        variant: str,
-        success: bool
-    ) -> None:
-        """
-        Record outcome for A/B test variant.
-
-        Args:
-            test_id: A/B test identifier
-            variant: 'control' or 'treatment'
-            success: Whether execution met fidelity threshold
-        """
-        cursor = self.conn.cursor()
-        if variant == 'control':
-            cursor.execute("""
-                UPDATE ab_test_assignments
-                SET control_trials = control_trials + 1,
-                    control_successes = control_successes + ?
-                WHERE test_id = ?
-            """, (1 if success else 0, test_id))
-        else:
-            cursor.execute("""
-                UPDATE ab_test_assignments
-                SET treatment_trials = treatment_trials + 1,
-                    treatment_successes = treatment_successes + ?
-                WHERE test_id = ?
-            """, (1 if success else 0, test_id))
-        self.conn.commit()
-
-    def check_ab_promotion(self, test_id: str, min_margin: float = 0.10) -> Optional[str]:
-        """
-        Check if treatment should be promoted.
-
-        Args:
-            test_id: A/B test identifier
-            min_margin: Minimum win margin (default 10%)
-
-        Returns:
-            'treatment' if should promote, 'control' if treatment lost, None if inconclusive
-        """
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM ab_test_assignments WHERE test_id = ?", (test_id,))
-        row = cursor.fetchone()
-        if not row:
-            return None
-
-        test = dict(row)
-        total_trials = test['control_trials'] + test['treatment_trials']
-
-        if total_trials < test['sample_size_target']:
-            return None
-
-        control_rate = test['control_successes'] / max(test['control_trials'], 1)
-        treatment_rate = test['treatment_successes'] / max(test['treatment_trials'], 1)
-
-        margin = treatment_rate - control_rate
-
-        if margin >= min_margin:
-            return 'treatment'
-        elif margin <= -min_margin:
-            return 'control'
-        return None
-
-    def promote_variation(self, variation_id: str) -> None:
-        """Promote variation to production."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            UPDATE skill_variations
-            SET promoted = 1, test_status = 'promoted'
-            WHERE variation_id = ?
-        """, (variation_id,))
-        self.conn.commit()
-        logger.info(f"[PATTERN-MEMORY] Promoted variation {variation_id}")
-
-    def archive_variation(self, variation_id: str) -> None:
-        """Archive losing variation."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            UPDATE skill_variations
-            SET test_status = 'archived'
-            WHERE variation_id = ?
-        """, (variation_id,))
-        self.conn.commit()
-        logger.info(f"[PATTERN-MEMORY] Archived variation {variation_id}")
-
-    def close_ab_test(self, test_id: str, winner: str) -> None:
-        """Close A/B test with winner."""
-        cursor = self.conn.cursor()
-        cursor.execute("""
-            UPDATE ab_test_assignments
-            SET status = 'completed', end_time = ?
-            WHERE test_id = ?
-        """, (datetime.now().isoformat(), test_id))
-        self.conn.commit()
-        logger.info(f"[PATTERN-MEMORY] Closed A/B test {test_id}, winner={winner}")
 
     # ------------------------------------------------------------------ #
     #  Telemetry Counters (Sprint 1 - Observability)                     #
@@ -1264,19 +1092,9 @@ class PatternMemory:
     # ------------------------------------------------------------------ #
 
     def get_skill_fidelity_stats(self, skill_name: str, days: int = 30) -> Dict:
-        """
-        Get historical fidelity statistics for a skill.
-
-        Per WRE_COT_DEEP_ANALYSIS.md Gap B: ToT skill selection
-
-        Returns:
-            {
-                "skill_name": str,
-                "total_executions": int,
-                "avg_fidelity": float,
-                "success_rate": float,  # fidelity >= 0.7
-                "recent_trend": float   # last 7 days vs previous
-            }
+        """Return fidelity statistics without treating measured zero as missing.
+        Absent means use 0.5 overall, or the overall mean for empty time windows.
+        success_rate counts fidelity >= 0.7, independently of execution success.
         """
         cursor = self.conn.cursor()
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
@@ -1294,7 +1112,7 @@ class PatternMemory:
         row = cursor.fetchone()
 
         total = row['total'] or 0
-        avg_fidelity = row['avg_fidelity'] or 0.5
+        avg_fidelity = row['avg_fidelity'] if row['avg_fidelity'] is not None else 0.5
         success_rate = (row['successes'] or 0) / max(total, 1)
 
         # Recent trend (last 7 days vs previous)
@@ -1303,14 +1121,16 @@ class PatternMemory:
             FROM skill_outcomes
             WHERE skill_name = ? AND timestamp >= ?
         """, (skill_name, recent_cutoff))
-        recent_avg = cursor.fetchone()['recent_avg'] or avg_fidelity
+        recent_avg = cursor.fetchone()['recent_avg']
+        recent_avg = avg_fidelity if recent_avg is None else recent_avg
 
         cursor.execute("""
             SELECT AVG(pattern_fidelity) as older_avg
             FROM skill_outcomes
             WHERE skill_name = ? AND timestamp >= ? AND timestamp < ?
         """, (skill_name, cutoff, recent_cutoff))
-        older_avg = cursor.fetchone()['older_avg'] or avg_fidelity
+        older_avg = cursor.fetchone()['older_avg']
+        older_avg = avg_fidelity if older_avg is None else older_avg
 
         recent_trend = recent_avg - older_avg
 
@@ -1377,11 +1197,8 @@ class PatternMemory:
         return scored
 
     def close(self) -> None:
-        """Close database connection"""
+        """Close only this instance's connection, on its creating thread."""
         self.conn.close()
-        if getattr(self, "_uses_shared_singleton", False):
-            PatternMemory._initialized = False
-            PatternMemory._shared_state = {}
         logger.debug("[PATTERN-MEMORY] Connection closed")
 
 
@@ -1392,8 +1209,8 @@ if __name__ == "__main__":
 
     logging.basicConfig(level=logging.INFO)
 
-    # Initialize pattern memory
-    memory = PatternMemory()
+    # Demonstration is always in-memory; never touch the production database.
+    memory = PatternMemory(db_path=Path(":memory:"))
 
     print("[EXAMPLE 1] Store skill execution outcome:")
     outcome = SkillOutcome(
@@ -1402,13 +1219,16 @@ if __name__ == "__main__":
         agent="qwen",
         timestamp=datetime.now().isoformat(),
         input_context=json.dumps({"files_changed": 14, "lines_added": 250}),
-        output_result=json.dumps({"action": "push_now", "mps_score": 14}),
+        output_result=json.dumps({
+            "success": True,
+            "effect_receipts": [{"receipt_id": "demo-1", "effect_type": "demo"}],
+        }),
         success=True,
         pattern_fidelity=0.92,
-        outcome_quality=0.95,
+        outcome_quality=0.0,
         execution_time_ms=1200,
         step_count=4,
-        notes="Successful git push with P1 priority"
+        notes="Demonstration effect record; independent quality unavailable"
     )
     memory.store_outcome(outcome)
     print(f"  Stored: exec_id={outcome.execution_id[:8]}...")
@@ -1439,8 +1259,8 @@ if __name__ == "__main__":
     memory.record_learning_event(
         event_id=str(uuid.uuid4()),
         skill_name="qwen_gitpush",
-        event_type="variation_promoted",
-        description="Promoted v1.1 after 65% → 78% fidelity improvement",
+        event_type="variation_candidate_ready",
+        description="Nominated v1.1 for independent verification",
         before_fidelity=0.65,
         after_fidelity=0.78,
         variation_id="qwen_gitpush_v1.1_improved"

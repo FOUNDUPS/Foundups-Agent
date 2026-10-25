@@ -4,11 +4,11 @@ const BACKEND_MANIFEST_SCHEMA = 'reddog_backend_manifest.v3';
 const BACKEND_PRODUCT = 'foundups-agent-reddog-backend';
 const BACKEND_API_VERSION = 2;
 const BACKEND_MANIFEST_PATH = 'scripts/reddog_backend_manifest.json';
-const EXPECTED_MANIFEST_SHA256 = 'f988a5364909fbc2252395269e0a888f5065e0d9aff3b8ae3b05609a0c923675';
+const EXPECTED_MANIFEST_SHA256 = 'e5c05868ad51b5dea34a1aec08e74f20dbd184bf9ec8a0d008c6050706b30141';
 const RUNTIME_DEPENDENCY_GRAPH_VERSION = 2;
-const MAX_MANIFEST_BYTES = 256 * 1024;
+const MAX_MANIFEST_BYTES = 328 * 1024;
 const MAX_RUNTIME_FILE_BYTES = 2 * 1024 * 1024;
-const MAX_RUNTIME_FILES = 1024;
+const MAX_RUNTIME_FILES = 1469;
 const MAX_RUNTIME_TOTAL_BYTES = 32 * 1024 * 1024;
 const REQUIRED_BRIDGE_FILES = Object.freeze([
   'scripts/advisory_model_once.py',
@@ -16,11 +16,18 @@ const REQUIRED_BRIDGE_FILES = Object.freeze([
   'scripts/reddog_extension_live_enqueue_invoke_once.py',
   'scripts/reddog_extension_wre_spine_invoke_once.py',
   'scripts/reddog_github_permission_probe_once.py',
+  'scripts/reddog_holoindex_incident_repair_once.py',
+  'scripts/reddog_holoindex_blocked_request_recovery_once.py',
+  'scripts/reddog_holoindex_candidate_acceptance.py',
+  'scripts/reddog_holoindex_postmerge_runtime_once.py',
   'scripts/reddog_holoindex_owner_query_once.py',
   'scripts/reddog_judgment_verifier_once.py',
+  'scripts/reddog_model_freshness_query_once.py',
+  'scripts/reddog_model_runtime_binding_query_once.py',
   'scripts/reddog_operator_wardrobe_selection_once.py',
   'scripts/reddog_repair_guard_once.py',
-  'scripts/reddog_resident_architect_session_once.py'
+  'scripts/reddog_resident_architect_session_once.py',
+  'scripts/reddog_start_operations_control_once.py'
 ]);
 const REQUIRED_EXECUTABLE_FILES = Object.freeze([
   ...REQUIRED_BRIDGE_FILES,

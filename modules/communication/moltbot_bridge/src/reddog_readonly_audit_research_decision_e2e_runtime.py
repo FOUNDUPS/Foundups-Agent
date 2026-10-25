@@ -25,6 +25,9 @@ from modules.communication.moltbot_bridge.src.reddog_backend_architect_determina
     ArchitectModelRunner,
     BackendArchitectDeterminationResult,
 )
+from modules.communication.moltbot_bridge.src.reddog_explicit_read_target_grounding import (
+    ground_explicit_read_targets,
+)
 from modules.communication.moltbot_bridge.src.reddog_main_readonly_operational_bootstrap import (
     DEFAULT_BOOTSTRAP_CHANGED_PATHS,
     DEFAULT_BOOTSTRAP_READ_TARGETS,
@@ -231,6 +234,16 @@ def run_reddog_readonly_audit_research_decision_e2e(
     capture_writer = _CapturingReadOnlyAuditTaskWriter(delegate_writer)
     executor = task_executor if task_executor is not None else DirectReadOnlyAuditTaskExecutor()
 
+    grounding = ground_explicit_read_targets(
+        repo_root=root,
+        targets=allowed_read_targets,
+        foundup_id="foundups_agent",
+        principal_id="reddog-main-readonly-bootstrap",
+        source_surface="main_resident_host",
+        request_id="readonly-audit-e2e-grounding",
+        action=prompt_text,
+    )
+
     initial = run_reddog_main_readonly_operational_bootstrap(
         repo_root=root,
         work_state_path=work_state_path,
@@ -252,6 +265,8 @@ def run_reddog_readonly_audit_research_decision_e2e(
         architect_model_runtime_binding_receipt_override=(
             architect_model_runtime_binding_receipt
         ),
+        grounding_receipt=grounding.receipt if grounding.accepted else {},
+        grounding_work_focus=grounding.work_focus,
     )
     if not initial.ready or initial.status != REDDOG_MAIN_BOOTSTRAP_READY:
         return _result(
@@ -358,6 +373,8 @@ def run_reddog_readonly_audit_research_decision_e2e(
         architect_model_runner=architect_model_runner,
         architect_model_runtime_binding_receipt_override=architect_model_runtime_binding_receipt,
         architect_determination_store=architect_determination_store,
+        grounding_receipt=grounding.receipt if grounding.accepted else {},
+        grounding_work_focus=grounding.work_focus,
     )
     if final.swarm_id != initial.swarm_id:
         return _result(

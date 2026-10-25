@@ -1,0 +1,53 @@
+{
+  "reviewed_at_utc": "2026-10-18",
+  "pull_request": 2151,
+  "source_commit": "57a2a7a3e3b4fb41b7562585966e11b7d5384033",
+  "base_commit": "b9051be28be1d55908b05c65fcb7ba8766edb577",
+  "independent_reviewer": "shared_membership_review",
+  "root_independently_recomputed": true,
+  "file": "public/member/index.html",
+  "rule": "generic-api-key",
+  "start_line": 25,
+  "member_file_sha256": "58236760f106d50070f90702a8cc55227f5744f801c500d17917f5343dc216b8",
+  "reviewed_fingerprint": "0e88aea0d04cd17f970ca741772a7deb0ae5a5022e147b14531af379fac47a34",
+  "prior_start_line": 23,
+  "prior_member_file_sha256": "35c31053ae83207914c17a6fc0c40c381f63acbf3122effb975feb9b5c57b86a",
+  "prior_reviewed_fingerprint": "833500e4db70b5bbc0a202632273548e7c129c09e8501a7fbc6c49c604d87ced",
+  "prior_fingerprint_was_reviewed": true,
+  "classification": "unchanged public Clerk frontend identifier",
+  "comparison": {
+    "identifier_unchanged": true,
+    "complete_sdk_block_unchanged": true,
+    "attribute_count": 1,
+    "documented_public_prefix": true,
+    "secret_prefix_absent": true
+  },
+  "references": [
+    "https://clerk.com/docs/guides/development/clerk-environment-variables",
+    "https://clerk.com/docs/js-frontend/getting-started/quickstart"
+  ],
+  "ci_failure": {
+    "run_id": 39172564800,
+    "job_id": 117808506171,
+    "tree_unreviewed": 1,
+    "tree_exact_reviewed": 108,
+    "introduced_history_unreviewed": 0
+  },
+  "independent_scanner": {
+    "version": "8.30.1",
+    "archive_sha256_verified_against_workflow": true,
+    "scope": "exact committed member HTML only",
+    "existing_config": true,
+    "full_redaction": true,
+    "inline_allowances_ignored": true,
+    "implicit_ignore_disabled": true,
+    "finding_count": 1,
+    "exit_code": 1,
+    "stderr_bytes": 0,
+    "temporary_report_removed": true
+  },
+  "retained_review_records": 828,
+  "added_review_records": 1,
+  "resulting_review_records": 829,
+  "scope_boundary": "Only this exact whole-file/rule/line binding is reviewed. No scanner rule, scan scope, fingerprint function, error handling, runtime source or other finding is changed or approved. No matched identifier value is retained."
+}

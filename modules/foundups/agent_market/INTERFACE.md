@@ -184,7 +184,13 @@ FAMEvent(
 - `trigger_payout(task_id: str, actor_id: str) -> Payout`
 - `get_task(task_id: str) -> Task`
 - `get_trace(task_id: str) -> dict[str, object]`
-- Invariant: transitions are strictly `open -> claimed -> submitted -> verified -> paid`.
+- In-memory simulation: `open -> claimed -> submitted -> verified -> paid` with a simulated completed payout.
+- Persistent SQLite initiation: `trigger_payout` delegates to `SQLiteAdapter.initiate_payout(task_id, actor_id)`. One write transaction binds task/proof/approved verification, pending payout, configured compute debit and correlated event. The task stays `VERIFIED`, payout `INITIATED`, with no settlement reference or `paid_at`.
+- Exact same-actor retry returns the persisted initiation without another debit/event, using its original cost snapshot. Conflicting or incomplete lineage and ambiguous legacy history reject before effects; missing scope cannot be guessed unrelated. No historical repair or settlement is performed. See [R24 acceptance](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-reward-initiation-contract--2026-09-22).
+
+- Persistent SQLite verification uses one transaction for decision, debit, correlated event and approved task state. Rejection records its result once before raising `ValidationError`; exact rejected retries repeat that error without writes. Exact accepted retries return the current task and preserve pending payout linkage.
+- Verification ID binds task/FoundUp/proof/artifact/verifier/approval/reason and normalized decision time. New naive times mean UTC; aware times convert to UTC with microseconds preserved. Replay uses original cost, without current-policy recharging. Conflicts, incomplete lineage and ambiguous relevant legacy history require reconciliation before further effects. See [fixed acceptance](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#atomic-verification-acceptance--2026-09-23).
+- This operation rejects non-SQLite before session/compute effects, leaves schema and adapter CRUD APIs unchanged, and confers no verifier/domain entitlement. SQLite history scans are complete rather than limited to the public ledger's 100-row view; large-history capacity is unqualified.
 
 ### TreasuryGovernanceService
 - `propose_transfer(foundup_id: str, amount: int, reason: str, proposer_id: str) -> str`
@@ -241,6 +247,10 @@ FAMDaemonHealth(
 
 ### Persistence Repository Layer (Prototype Tranche 2)
 
+**Shared persistence mappings:**
+- `src/persistence/orm_models.py` owns the single Base and13 row declarations. Existing `sqlite_adapter.Base` and row imports re-export identical objects; PostgreSQL retains that compatibility path.
+- Mapping definitions, metadata inventory, schema/migrations and adapter method behavior are unchanged. Legacy pickle globals resolve; newly emitted row pickles name `orm_models` and require that module when loading, including rollback. No repository FAM pickle consumer was found; this is not a durable serialization-format guarantee.
+
 **SQLiteAdapter:**
 - Primary persistence adapter for local/dev and deterministic test execution.
 - Methods include CRUD coverage for:
@@ -248,7 +258,7 @@ FAMDaemonHealth(
   - Events, Distribution posts, Agent profiles, Token terms
 
 **PostgresAdapter:**
-- Contract-compatible adapter using the same ORM model set and method surface as `SQLiteAdapter`.
+- CRUD adapter using the same ORM model set; atomic payout initiation rejects non-SQLite before session/compute effects. PostgreSQL compute initialization and backend locking require separate qualification.
 - Selected through repository factory (`backend=postgres`).
 - Requires a valid Postgres SQLAlchemy URL.
 
@@ -352,6 +362,16 @@ The `FAMAdapter` in `moltbot_bridge/src/fam_adapter.py` provides the OpenClaw ->
 
 OpenClaw routes `IntentCategory.FOUNDUP` intents to `fam_adapter` domain.
 
+## Persistent verification integration boundary (planned)
+
+The [R24 handoff contract](../../../docs/roadmaps/R24_AGENT_PRODUCTION_LINE_PACKET.md#persistent-proof-verification-handoff-contract--2026-09-23) specifies a future internal call to the existing
+`PersistentTaskPipeline.verify_proof` after durable independent terminal WRE ACCEPT.
+Staged assurance, repository-write grants and compute debit are insufficient.
+The domain entitlement issuer/delegation decision remains unresolved; no route or
+bridge is enabled. Local SQLite proof binding, atomic decision/debit/event and replay acceptance are
+qualified in 164 cases. Cross-store delivery, signed domain authorization and runtime
+admission still require qualification before integration. Payout is separate.
+
 ## Optional API Surface (Future)
 - `POST /foundups`
 - `PATCH /foundups/{foundup_id}`
@@ -374,6 +394,7 @@ Every mutation emits an event containing:
 - `payload` (small structured dict)
 
 ## Permission Rules (PoC)
+- These role checks describe the in-memory PoC. Persistent pipeline compute access does not authenticate verifier/treasury roles; production role admission and settlement remain separate unresolved gates.
 - Task verification allowed only for actor role `verifier`.
 - Payout trigger allowed only for actor role `treasury`.
 - Distribution publish allowed only for actor role `distribution`.

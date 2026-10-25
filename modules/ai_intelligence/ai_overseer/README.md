@@ -1,15 +1,18 @@
 # AI Intelligence Overseer - WSP 77 Agent Coordination
 
-**Status**: POC
-**Version**: 0.1.0
-**Date**: 2025-10-17
+**Status**: Active mixed-maturity module; production RSI is not proven
+**Version**: 0.10.5
+**Date**: 2026-08-27
 **WSP Compliance**: WSP 77 (Agent Coordination), WSP 54 (Role Assignment), WSP 96 (MCP Governance)
 
 ---
 
 ## Executive Summary
 
-AI Intelligence Overseer is the **NEW** multi-agent coordination system that replaces the deprecated 6-agent architecture (WINSERV, RIDER, BOARD, FRONT_CELL, BACK_CELL, GEMINI). It coordinates Qwen + Gemma AI agents using WSP 77 patterns with proper WSP 54 role assignments.
+AI Intelligence Overseer contains operational monitoring, security, M2M, and
+coordination surfaces alongside legacy heuristic paths. Qwen/Gemma labels do
+not by themselves prove a live model call, independent review, or production
+effect. Current callable truth is defined in INTERFACE.md.
 
 **Key Innovation**: MCP-based orchestration where Holo Qwen/Gemma can spawn specialized agent teams for different tasks using WRE (Windsurf Recursive Engine).
 
@@ -597,6 +600,17 @@ Boot prompts contain content that M2M's K:V transform destroys:
 - **Threshold**: cosine sim >= 0.5 for HoloIndex discoverability
 - **P0 hardening**: Full headers (no truncation), 30-char keys, 80-char values
 
+These historical metrics do not prove instruction preservation. The 2026-09-13
+[RSI reference-context experiment](../../../docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13)
+lost eight declared boundary passages. Its actual runbook candidate failed the
+shim's YAML gate; a synthetic valid-YAML candidate passed while omitting the
+worker/verifier independence rule. `compile_to_staged` checks structure;
+`m2m_compile_gate` additionally checks YAML parsing. Neither currently evaluates
+semantic fidelity, required-reference retention or a section-coverage threshold.
+Keep executable Skillz verbatim and use original reference context until the
+task's separately defined preservation checks pass. A compression percentage,
+embedding similarity or `gate_status=PASS` is not promotion authority.
+
 ---
 
 ## Strategic Diligence Gate SKILLz
@@ -618,6 +632,37 @@ This skill standardizes:
 
 Use it for architecture, product positioning, security, and governance decisions where bad choices are expensive to reverse.
 
+## Generation-bound Holo retrieval benchmark
+
+`m2m_holo_retrieval_benchmark` uses the canonical governed owner-query
+lifecycle and exact authority root. It is read-only, rejects query-time reindex,
+and preserves owner failures instead of replacing them with a generic error.
+The live fixed corpus on 2026-08-27 achieved recall@8 `1.0`, MRR `0.9167`,
+nDCG `0.8718`, mean latency `3770ms`, and p95 `4250ms`. The truthful outcome is
+`quality_below_policy` because nDCG remains below `0.95`; this is a retrieval
+quality baseline, not successful AutoResearch or promotion evidence.
+
+The backend-content-bound callable `evaluate_m2m_holo_retrieval_a_grade(...)`
+benchmark facade delegates to `m2m_holo_retrieval_grade_gate`, which composes a passing public
+run with a caller-supplied signature-verifier-approved sealed-corpus
+evaluation. The facade re-runs the fixed public corpus through the governed
+owner instead of trusting a
+caller-supplied public result. It requires evaluator/proposer separation,
+at least 30 cases disjoint from the public corpus, Recall/MRR/nDCG >= `0.95`,
+and p95 latency <= `5000ms`. Its receipt can accept A-grade evidence but always
+keeps promotion unauthorized. The gate performs no ranker, index, route, or
+file effect; effects of the injected verifier are explicitly not attested.
+These are fixed non-downgradable floors. The facade is authenticated as a
+backend dependency, but no AI Overseer/VSIX operation or non-test caller uses
+it yet; independent evaluator key/signing-trust administration is still
+missing. Every public query must carry the ranker digest emitted by the owner
+from the retrieval modules it actually loaded; a digest from another clean
+checkout cannot satisfy the candidate binding.
+Source equality is necessary but incomplete: the candidate does not yet bind
+the owner executable, ABI/platform, exact package/build manifest, or
+deterministic execution knobs. Independent evidence must include a sealed
+runtime-environment digest before A-grade/RSI is reproducible.
+
 ---
 
 ## Related Documentation
@@ -631,6 +676,7 @@ Use it for architecture, product positioning, security, and governance decisions
 
 ---
 
-**Status**: 🟡 POC - Ready for initial implementation
-**Next Step**: Create core `ai_overseer.py` with WSP 77 coordination
-**Mission Control**: AI Intelligence Overseer replacing deprecated 6-agent system [ROCKET]
+**Status**: Active mixed-maturity module; production RSI is not proven.
+**Current boundary**: Mixed operational and legacy surfaces; see INTERFACE.md
+for callable truth. The core exists, but model-labeled heuristic paths are not
+independent reviewer or production RSI evidence.

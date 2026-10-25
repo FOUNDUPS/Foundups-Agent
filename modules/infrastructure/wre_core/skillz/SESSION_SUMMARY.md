@@ -1,5 +1,10 @@
 # WRE Skills System - Complete Implementation Summary
 
+> **Historical session summary — superseded and non-authoritative.**
+> Infrastructure and automated-gate claims below are retained as 2025 memory,
+> not current production truth. Consult current WRE docs and WSP 95 v2.1; the
+> evaluator, promoter, activator, and rollback authorities remain unimplemented.
+
 **Session Date**: 2025-10-20
 **Continuation From**: Previous context (skills architecture discussion)
 **Status**: Infrastructure complete, critical fixes documented, ready for Qwen baseline generation

@@ -3,7 +3,8 @@
 HoloIndex CLI package.
 
 This package was extracted from the monolithic holo_index/cli.py.
-It re-exports all public symbols for backward compatibility.
+It re-exports public symbols for backward compatibility without importing the
+semantic backend when a bounded command module is imported directly.
 
 Consumers:
   - holo_index.py (root entrypoint): from holo_index.cli import main
@@ -12,20 +13,34 @@ Consumers:
   - wre_master_orchestrator holoindex_plugin: from holo_index.cli import HoloIndex
 """
 
-# Re-export main entrypoint and public symbols from the core CLI module.
-from holo_index._cli_main import main  # noqa: F401
+from __future__ import annotations
 
-# Re-export classes that consumers import from holo_index.cli
-# HoloIndex is always available (from holo_index.core.holo_index)
-from holo_index._cli_main import HoloIndex  # noqa: F401
+from typing import Any
 
-# QwenAdvisor may be None when advisor dependencies are unavailable.
-# Import the module-level name (which may be None) for backward compat.
-try:
-    from holo_index._cli_main import QwenAdvisor  # noqa: F401
-except ImportError:
-    QwenAdvisor = None  # type: ignore
+__all__ = [
+    "HoloIndex",
+    "QwenAdvisor",
+    "_is_fast_search_enabled",
+    "_render_fast_search_summary",
+    "main",
+]
 
-# Re-export internal functions used by tests
-from holo_index._cli_main import _is_fast_search_enabled  # noqa: F401
-from holo_index._cli_main import _render_fast_search_summary  # noqa: F401
+_LAZY_EXPORTS = frozenset(__all__) - {"main"}
+
+
+def main(*args: Any, **kwargs: Any) -> Any:
+    """Run the full CLI, loading semantic dependencies only on invocation."""
+    from holo_index._cli_main import main as _main
+
+    return _main(*args, **kwargs)
+
+
+def __getattr__(name: str) -> Any:
+    """Resolve legacy semantic exports without taxing command-only imports."""
+    if name not in _LAZY_EXPORTS:
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    from holo_index import _cli_main
+
+    value = getattr(_cli_main, name)
+    globals()[name] = value
+    return value

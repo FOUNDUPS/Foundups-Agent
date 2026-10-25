@@ -36,15 +36,51 @@ def _invoke_main(payload: dict) -> tuple[int, dict]:
     fake_stdin = mock.Mock()
     fake_stdin.buffer = io.BytesIO(json.dumps(payload).encode("utf-8"))
     stdout = io.StringIO()
+    lead = str(payload.get("lead_model") or payload.get("model") or "")
+    mode = str(payload.get("mode") or "")
+    panel = tuple(
+        bridge._panel_models(payload.get("panel_models"))
+        if mode in {"foundups_fusion", "openrouter_fusion_alias"}
+        else ()
+    )
+    receipt = mock.Mock(
+        status=bridge.MODEL_RUNTIME_BINDING_READY,
+        accepted=True,
+        principal_model=lead,
+        panel_models=panel,
+        role_bindings=tuple(
+            [{"role": "principal", "provider": "openrouter", "model_id": lead}]
+            + [{"role": f"critic_{index}", "provider": "openrouter", "model_id": model}
+               for index, model in enumerate(panel, 1)]
+        ),
+        binding_receipt_id="binding:test",
+        topology_resolution_receipt_id="verified_model_runtime_topology:test",
+        topology_verification_receipt_id="verified_model_runtime_binding:test",
+        topology_valid_until=1_900_000_000,
+    )
     with mock.patch("sys.stdin", fake_stdin), mock.patch("sys.stdout", stdout), mock.patch.dict(
         os.environ, {bridge.ENV_API_KEY: "test-key"}, clear=False
-    ):
+    ), mock.patch.object(bridge, "query_model_runtime_binding", return_value=receipt):
         rc = bridge.main()
     return rc, json.loads(stdout.getvalue())
 
 
 class FusionPanelInputHardeningTests(unittest.TestCase):
     _MISSING = object()
+
+    def test_system_prompt_always_retains_one_terminal_evidence_rule(self) -> None:
+        rule = bridge.UNTRUSTED_EVIDENCE_SYSTEM_RULE
+        prompts = (
+            "a" * 6001 + rule,
+            "b" * (6000 - len(rule) // 2) + rule,
+            rule + "\n" + ("c" * 6001) + rule,
+        )
+        for prompt in prompts:
+            with self.subTest(length=len(prompt)):
+                assembled = bridge._system_prompt({"system": prompt})
+                self.assertLessEqual(len(assembled), 6000)
+                self.assertTrue(assembled.endswith(rule))
+                self.assertEqual(assembled.count(rule), 1)
 
     @staticmethod
     def _fusion_chat(api_key, model, messages, **kwargs):  # noqa: ANN001, ARG004
@@ -166,6 +202,11 @@ class FusionPanelInputHardeningTests(unittest.TestCase):
                         panel_models=expected,
                         truncated=truncated,
                     )
+                    self.assertTrue(out["redacted_task_prompt_digest"].startswith("sha256:"))
+                    if expected:
+                        self.assertEqual(out["redacted_task_prompt"], "redacted-prompt")
+                    else:
+                        self.assertNotIn("redacted_task_prompt", out)
                     self.assertEqual(out["review_packet"]["fusion_panel_quorum"]["passed"], bool(expected))
         post_mock.assert_not_called()
 
@@ -190,9 +231,24 @@ class FusionPanelInputHardeningTests(unittest.TestCase):
                         panel_models=expected,
                         truncated=truncated,
                     )
+                    self.assertTrue(out["redacted_task_prompt_digest"].startswith("sha256:"))
+                    if expected:
+                        self.assertEqual(out["redacted_task_prompt"], "redacted-prompt")
+                    else:
+                        self.assertNotIn("redacted_task_prompt", out)
                     self.assertNotIn("fusion_panel_quorum", out["review_packet"])
                     if expected:
                         self.assertEqual(post_mock.call_args.args[1]["plugins"][0]["analysis_models"], expected)
+                        system = post_mock.call_args.args[1]["messages"][0]
+                        self.assertEqual(system["role"], "system")
+                        self.assertIn("untrusted evidence", system["content"])
+                        self.assertEqual(
+                            out["review_packet"]["evidence_boundary_scope"],
+                            "outer_request_system_and_user_evidence_only",
+                        )
+                        self.assertFalse(
+                            out["review_packet"]["internal_panel_role_prompts_observable"]
+                        )
         chat_mock.assert_not_called()
 
     def test_extension_overflow_sentinel_yields_truthful_final_receipts(self) -> None:
@@ -218,6 +274,19 @@ class FusionPanelInputHardeningTests(unittest.TestCase):
                 packet = out["review_packet"]
                 self.assertEqual(packet["panel_models"], sentinel[: bridge.MAX_PANEL_MODELS])
                 self.assertTrue(packet["panel_models_truncated"])
+
+    def test_exact_redacted_task_prompt_excludes_context_in_manual_fusion(self) -> None:
+        gate = _passed_gate()
+        gate.redacted_prompt = "task-only-sentinel"
+        gate.redacted_context = "context-only-sentinel"
+        with mock.patch.object(bridge, "evaluate_redaction_gate", return_value=gate), mock.patch.object(
+            bridge, "_chat_completion", side_effect=self._fusion_chat
+        ):
+            _rc, out = _invoke_main(self._payload("foundups_fusion", ["critic-model"]))
+        self.assertEqual(out["redacted_task_prompt"], "task-only-sentinel")
+        self.assertTrue(out["redacted_task_prompt_digest"].startswith("sha256:"))
+        self.assertNotIn("context-only-sentinel", out["redacted_task_prompt"])
+        self.assertIn("context-only-sentinel", out["review_packet"]["redacted_prompt"])
 
     def test_fusion_alias_function_stays_within_fifty_lines(self) -> None:
         source_lines, _line = inspect.getsourcelines(bridge._openrouter_fusion_alias)

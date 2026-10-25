@@ -1,5 +1,10 @@
 # WRE Core: Recursive Skills Orchestration System
 
+> **Historical architecture record — superseded and non-authoritative.**
+> This WSP 96-era design does not describe current production authority. Current
+> execution truth and known gaps live in `README.md`, `INTERFACE.md`,
+> `ROADMAP.md`, the recursive-improvement docs, and WSP 95 v2.1.
+
 **Version**: 2.0 - Gemma Libido Monitor + Skill Evolution
 **Status**: Architectural Design Complete - Ready for Phase 1
 **Authority**: WSP 96 (Wardrobe Skills) + WSP 77 (Agent Coordination)

@@ -35,12 +35,10 @@ from modules.communication.moltbot_bridge.src.reddog_work_order_runtime_invocati
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_executor_dryrun import (
     EXECUTOR_PLAN_ACCEPT,
-    WREExecutorDryRunResult,
     plan_wre_isolated_worktree_execution_dryrun,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import (
     WORKTREE_CREATE_ACCEPT,
-    RedDogWorktreeCreateResult,
     create_reddog_wre_worktree,
 )
 
@@ -211,9 +209,8 @@ def run_reddog_wre_worktree_create_spine(
     now: Optional[datetime] = None,
     locks: Optional[MutableSet[str]] = None,
     intake_target: str = INTAKE_FOUNDUP_JOB,
-    permission_ttl_seconds: int = 300,
-    permission_expires_at: Optional[str] = None,
-    admission_consumer: Optional[Callable[[], bool]] = None,
+    permission_ttl_seconds: int = 300, permission_expires_at: Optional[str] = None,
+    admission_consumer: Optional[Callable[[], bool]] = None, admission_consumer_factory: Optional[Callable[[Mapping[str, Any], Mapping[str, Any]], Optional[Callable[[], bool]]]] = None,
 ) -> RedDogWREOperationalSpineResult:
     """Run the RedDog worktree-create spine and stop before task execution."""
     checked = _utc_now(now)
@@ -307,6 +304,7 @@ def run_reddog_wre_worktree_create_spine(
             created_at=created_at,
         )
 
+    effect_consumer = _effect_consumer(admission_consumer, admission_consumer_factory, executor_dict, valve_dict)
     worktree = create_reddog_wre_worktree(
         work_order,
         executor_dict,
@@ -315,7 +313,7 @@ def run_reddog_wre_worktree_create_spine(
         repo_root=repo_root,
         now=checked,
         locks=locks,
-        admission_consumer=admission_consumer,
+        admission_consumer=effect_consumer,
     )
     worktree_dict = worktree.to_dict()
     if worktree.decision != WORKTREE_CREATE_ACCEPT:
@@ -347,6 +345,20 @@ def run_reddog_wre_worktree_create_spine(
         rejection_reasons=[],
         created_at=created_at,
     )
+
+
+def _effect_consumer(
+    fallback: Optional[Callable[[], bool]],
+    factory: Optional[Callable[[Mapping[str, Any], Mapping[str, Any]], Optional[Callable[[], bool]]]],
+    executor: Mapping[str, Any],
+    valve: Mapping[str, Any],
+) -> Optional[Callable[[], bool]]:
+    if factory is None:
+        return fallback
+    try:
+        return factory(executor, valve)
+    except Exception:
+        return None
 
 
 __all__ = [

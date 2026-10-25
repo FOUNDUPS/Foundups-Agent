@@ -23,6 +23,7 @@ from modules.infrastructure.wre_core.src.foundup_job_router import (
     RouteReasonCode,
     RouteEnvelope,
 )
+from modules.communication.moltbot_bridge.src.foundup_job_contract import PolicyFlags
 
 
 # ---------------------------------------------------------------------------
@@ -132,14 +133,18 @@ class TestCreateFoundUpRouting:
         )
         assert reason_fragment in envelope.reason_human
 
-    def test_create_requires_explicit_dry_run(self):
+    def test_public_policy_flags_cannot_assert_live_security_authority(self):
         job = _create_foundup_job()
-        job.policy_flags = MockPolicyFlags(dry_run_mode=False)
+        job.policy_flags = PolicyFlags(
+            dry_run_mode=False,
+            security_gate_checked=True,
+            security_gate_passed=True,
+        )
 
         envelope = route_foundup_job(job)
 
         assert envelope.route_status == RouteStatus.BLOCKED
-        assert "dry_run_mode=True" in envelope.reason_human
+        assert "security gate passed" in envelope.reason_human
 
     def test_create_rejects_genesis_identity_mismatch(self):
         job = _create_foundup_job()

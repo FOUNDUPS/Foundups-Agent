@@ -23,12 +23,34 @@ from holo_index.cli.commands.bundle_json import (
     _split_path_symbol,
     _locate_symbol_line,
     _read_symbol_window,
+    build_wsp_memory_bundle,
     DIRECT_READ_PER_FILE_BYTES,
     DIRECT_READ_TOTAL_BUDGET_BYTES,
     DIRECT_READ_SYMBOL_SCAN_BYTES,
 )
 
 EXTENSION_JS = REPO_ROOT / "extensions" / "reddog" / "extension.js"
+
+
+def test_bundle_command_import_is_closed_environment_safe():
+    """The direct-read command must not import the semantic/vector runtime."""
+    code = (
+        "import sys; "
+        f"sys.path.insert(0, {str(REPO_ROOT)!r}); "
+        "import holo_index.cli.commands.bundle_json; "
+        "assert 'holo_index._cli_main' not in sys.modules; "
+        "assert 'holo_index.core.holo_index' not in sys.modules"
+    )
+    result = subprocess.run(
+        [sys.executable, "-S", "-B", "-c", code],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
 
 # REDDOG_TARGET_RECALL_PATH_AWARE_PHASE1 (slice 1/3): the detector under test is
 # evaluateTargetRecall in extension.js. These required targets mirror the
@@ -270,8 +292,38 @@ def test_direct_read_deny_reason_lexical_gate():
     assert _direct_read_deny_reason("home/id_rsa") == "denied_basename"
     assert _direct_read_deny_reason(".git/config") == "denied_segment"
     assert _direct_read_deny_reason("config/my_secret_thing.py") == "denied_secret_like"
+    assert _direct_read_deny_reason("auth/credentials.py") == "denied_secret_like"
+    assert _direct_read_deny_reason("secrets/api_keys.py") == "denied_segment"
+    assert _direct_read_deny_reason("credentials/token_manager.py") == "denied_segment"
+    assert _direct_read_deny_reason("secrets_store/values.py") == "denied_segment"
+    assert _direct_read_deny_reason("credential_cache/client.py") == "denied_segment"
+    assert _direct_read_deny_reason("token_data/state.py") == "denied_segment"
+    assert _direct_read_deny_reason("prod-secrets/db.py") == "denied_segment"
+    assert _direct_read_deny_reason("auth/token_manager.py") is None
+    assert _direct_read_deny_reason("modules/infrastructure/token_efficiency/src/telemetry_service.py") is None
+    assert _direct_read_deny_reason("docs/token_rotation.md") is None
     assert _direct_read_deny_reason("auth/access_token.json") == "denied_secret_like"
     assert _direct_read_deny_reason("vault/user_credential.yaml") == "denied_secret_like"
+    assert _direct_read_deny_reason(".git./config") == "denied_segment"
+    assert _direct_read_deny_reason(".venv./pyvenv.cfg") == "denied_segment"
+    assert _direct_read_deny_reason("node_modules./package.json") == "denied_segment"
+    assert _direct_read_deny_reason("COM\u00b9/payload.txt") == "denied_segment"
+    assert _direct_read_deny_reason("LPT\u00b2.txt/payload.txt") == "denied_segment"
+    assert _direct_read_deny_reason("keys/private.pem.bak") == "denied_extension"
+    assert _direct_read_deny_reason("keys/store.keystore.backup") == "denied_extension"
+    assert _direct_read_deny_reason("home/.npmrc.backup") == "denied_basename"
+    assert _direct_read_deny_reason("home/.pypirc.bak") == "denied_basename"
+    assert _direct_read_deny_reason("home/.netrc.old") == "denied_basename"
+    assert _direct_read_deny_reason("home/.dockerconfigjson.backup") == "denied_basename"
+    assert _direct_read_deny_reason("keys/id_dsa") == "denied_basename"
+    assert _direct_read_deny_reason("keys/id_ecdsa.pub") == "denied_basename"
+    assert _direct_read_deny_reason("keys/id_rsa_backup") == "denied_basename"
+    assert _direct_read_deny_reason("keys/id_ecdsa-old") == "denied_basename"
+    assert _direct_read_deny_reason("keys/key") == "denied_extension"
+    assert _direct_read_deny_reason("keys/key.backup") == "denied_extension"
+    assert _direct_read_deny_reason("keys/private.pem.py") == "denied_extension"
+    assert _direct_read_deny_reason("keys/id_rsa.py") == "denied_basename"
+    assert _direct_read_deny_reason("artifacts/reddog.vsix.bak") == "denied_extension"
     # A benign in-repo source file passes the lexical gate.
     assert _direct_read_deny_reason("modules/foundups/agent/src/source_authority.py") is None
 
@@ -364,8 +416,8 @@ def test_direct_read_windows_namespace_and_ads_rejected(tmp_path):
     )
 
 
-def test_direct_read_secret_fixtures_never_read(tmp_path, monkeypatch):
-    """.env and *.key synthetic fixtures are hard-denied and never read."""
+def test_direct_read_secret_data_and_secret_named_source_are_denied(tmp_path, monkeypatch):
+    """Secret containers and secret-named source stay outside model egress."""
     # Build a synthetic repo root so real repo secrets are never touched.
     fake_root = tmp_path / "repo"
     (fake_root / "modules").mkdir(parents=True)
@@ -381,6 +433,7 @@ def test_direct_read_secret_fixtures_never_read(tmp_path, monkeypatch):
     assert reasons.get(".env") == "denied_basename"
     assert reasons.get("server.key") == "denied_extension"
     assert reasons.get("app_secret.py") == "denied_secret_like"
+    assert "app_secret.py" not in tel["direct_read_paths"]
     # No secret content ever appears in any fetched hit.
     joined = "\n".join(h.get("content", "") for h in result["hits"])
     assert "synthetic-not-a-real-secret" not in joined
@@ -439,6 +492,24 @@ def test_direct_read_symlink_escape_rejected(tmp_path):
     assert reasons.get("escape_link.txt") == "outside_root"
     joined = "\n".join(h.get("content", "") for h in result["hits"])
     assert "SYNTHETIC-outside-do-not-read" not in joined
+
+
+def test_direct_read_hardlink_escape_rejected(tmp_path):
+    """A hard-linked external file is not repository-owned direct-read evidence."""
+    fake_root = tmp_path / "repo"
+    fake_root.mkdir(parents=True)
+    outside = tmp_path / "outside_hardlink.md"
+    outside.write_text("SYNTHETIC-hardlink-do-not-read\n", encoding="utf-8")
+    alias = fake_root / "innocent.md"
+    try:
+        os.link(outside, alias)
+    except (OSError, NotImplementedError):
+        pytest.skip("hard links unavailable on this runner")
+    result = _direct_read_fetch(fake_root, ["innocent.md"])
+    reasons = _rejected_reasons(result["telemetry"])
+    assert reasons.get("innocent.md") == "hardlink_denied"
+    joined = "\n".join(hit.get("content", "") for hit in result["hits"])
+    assert "SYNTHETIC-hardlink-do-not-read" not in joined
 
 
 # --- REDDOG_SYMBOL_AWARE_EXCERPT_DEPTH_PHASE1 (slice 3/3): symbol line windows ----------------
@@ -692,3 +763,80 @@ def test_direct_read_cli_end_to_end(monkeypatch):
     dr_hit_locs = {h["location"] for h in dr_hits}
     for target in FOUNDUP_ACCEPTANCE_TARGETS:
         assert target in dr_hit_locs
+
+
+def test_public_bundle_builder_is_lexical_store_free_and_bounded(tmp_path):
+    (tmp_path / "README.md").write_text("RedDog bundle marker\n", encoding="utf-8")
+    bundle = build_wsp_memory_bundle(
+        tmp_path, "RedDog bundle", retrieval_mode="lexical",
+        must_include=["README.md"], bundle_only=True,
+    )
+    assert bundle["schema_version"] == "wsp_memory_bundle_v1"
+    assert bundle["ok"] is True and bundle["bundle_only"] is True
+    meta = bundle["task_retrieval"]["metadata"]
+    assert meta["retrieval_mode"] == "lexical"
+    assert meta["no_holoindex_store_access"] is True
+    assert bundle["direct_read"]["per_file_cap"] == 12_000
+    assert bundle["direct_read"]["total_budget"] == 96_000
+
+
+def test_public_bundle_builder_uses_descriptor_reader(monkeypatch, tmp_path):
+    target = tmp_path / "source.py"
+    target.write_text("def marker():\n    return 1\n", encoding="utf-8")
+    calls = []
+    from holo_index.cli.commands import bundle_json
+    original = bundle_json.secure_read_repo_file
+
+    def observed(*args, **kwargs):
+        calls.append((args[1], kwargs.get("byte_cap")))
+        return original(*args, **kwargs)
+
+    monkeypatch.setattr(bundle_json, "secure_read_repo_file", observed)
+    bundle = build_wsp_memory_bundle(
+        tmp_path, "marker", must_include=["source.py", "source.py#marker"],
+        bundle_only=True,
+    )
+    assert bundle["ok"] is True
+    assert ("source.py", 12_000) in calls
+    assert ("source.py", DIRECT_READ_SYMBOL_SCAN_BYTES) in calls
+
+
+@pytest.mark.parametrize("kwargs,error", [
+    ({"task": ""}, "task_invalid"),
+    ({"task": object()}, "task_invalid"),
+    ({"task": "x" * 16_001}, "task_invalid"),
+    ({"task": "ok", "limit": True}, "limit_invalid"),
+    ({"task": "ok", "limit": 21}, "limit_invalid"),
+    ({"task": "ok", "retrieval_mode": "raw"}, "retrieval_mode_invalid"),
+    ({"task": "ok", "module_hint": object()}, "module_hint_invalid"),
+    ({"task": "ok", "module_hint": "x" * 513}, "module_hint_invalid"),
+    ({"task": "ok", "must_include": ("README.md",)}, "must_include_invalid"),
+    ({"task": "ok", "must_include": ["x"] * 41}, "must_include_invalid"),
+    ({"task": "ok", "must_include": ["x" * 1025]}, "must_include_invalid"),
+    ({"task": "ok", "bundle_only": 1}, "bundle_flag_invalid"),
+    ({"task": "ok", "retrieval_mode": "semantic"}, "semantic_payload_required"),
+    ({"task": "ok", "retrieval_mode": "semantic", "semantic_payload": []},
+     "semantic_payload_invalid"),
+    ({"task": "ok", "retrieval_mode": "semantic", "semantic_payload": {str(i): i for i in range(65)}},
+     "semantic_payload_invalid"),
+    ({"task": "ok", "retrieval_mode": "semantic", "semantic_payload": {"code_hits": [0] * 20_001}},
+     "semantic_payload_invalid"),
+    ({"task": "ok", "retrieval_mode": "semantic", "semantic_payload": {"score": float("nan")}},
+     "semantic_payload_invalid"),
+    ({"task": "ok", "retrieval_mode": "semantic", "semantic_payload": {"score": float("inf")}},
+     "semantic_payload_invalid"),
+    ({"task": "ok", "retrieval_mode": "semantic", "semantic_payload": {"count": 1 << 64}},
+     "semantic_payload_invalid"),
+])
+def test_public_bundle_builder_rejects_malformed_requests(tmp_path, kwargs, error):
+    assert build_wsp_memory_bundle(tmp_path, **kwargs)["error"] == error
+
+
+def test_public_bundle_builder_rejects_cyclic_semantic_payload(tmp_path):
+    semantic_payload = {"code_hits": []}
+    semantic_payload["code_hits"].append(semantic_payload)
+    bundle = build_wsp_memory_bundle(
+        tmp_path, "ok", retrieval_mode="semantic",
+        semantic_payload=semantic_payload,
+    )
+    assert bundle["error"] == "semantic_payload_invalid"

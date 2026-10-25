@@ -7,8 +7,10 @@ from typing import Any, Mapping
 
 import pytest
 
-from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_service import (
+from modules.infrastructure.foundups_mcp_bridge.src.holo_query_service import (
     BASELINE_COLLECTIONS,
+)
+from modules.infrastructure.foundups_mcp_bridge.tests.test_holo_query_service import (
     _Backend,
     _query,
     _raw_result,
@@ -126,7 +128,7 @@ def test_resident_backend_is_pinned_to_first_proven_generation(
         owner.close()
 
 
-def test_generation_change_during_query_fails_closed_with_raw_result(
+def test_generation_change_during_query_fails_closed_without_raw_result(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     receipts = iter([_receipt(generation="generation-1"), _receipt(generation="generation-2")])
@@ -143,6 +145,7 @@ def test_generation_change_during_query_fails_closed_with_raw_result(
         assert result["freshness"] == "STALE"
         assert "freshness_generation_changed_during_query" in result["stale_reasons"]
         assert "freshness_receipt_digest_changed_during_query" in result["stale_reasons"]
-        assert result["raw_result"] == raw
+        assert result["raw_result"] == {}
+        assert result["hits"] == []
     finally:
         owner.close()

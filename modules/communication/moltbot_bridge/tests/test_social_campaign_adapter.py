@@ -7,6 +7,7 @@ from unittest.mock import AsyncMock, patch
 
 from modules.communication.moltbot_bridge.src.social_campaign_adapter import (
     _parse_campaign_command,
+    execute_social_campaign,
     handle_social_campaign_intent,
 )
 
@@ -33,6 +34,28 @@ class TestSocialCampaignAdapter(unittest.IsolatedAsyncioTestCase):
     def test_parse_non_campaign(self):
         parsed = _parse_campaign_command("social action post now")
         self.assertIsNone(parsed)
+
+    async def test_antifafm_real_route_defaults_to_preview(self):
+        result = await execute_social_campaign("antifafm", {})
+        self.assertEqual(result["status"], "preview")
+        self.assertTrue(result["no_publication_performed"])
+        self.assertFalse(result["api_called"])
+
+    async def test_antifafm_targeting_parameter_is_rejected(self):
+        result = await execute_social_campaign("antifafm", {"keywords": "MAGA"})
+        self.assertEqual(result["error"], "campaign_parameter_unsupported")
+
+    async def test_antifafm_malformed_tokens_never_default_to_execution(self):
+        for command in (
+            'social campaign antifafm action=publish dry_run=true dry_run=false',
+            'social campaign antifafm action=publish stray-token',
+            'social campaign antifafm content="unterminated',
+        ):
+            with self.subTest(command=command):
+                campaign, params = _parse_campaign_command(command)
+                result = await execute_social_campaign(campaign, params)
+                self.assertFalse(result["success"])
+                self.assertTrue(result["no_publication_performed"])
 
     async def test_handle_campaign_success(self):
         mock_result = {

@@ -28,6 +28,9 @@ from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_
     validate_grounded_target_receipt,
 )
 from modules.ai_intelligence.ai_gateway.src.model_runtime_binding import ModelRuntimeBindingDecision
+from modules.ai_intelligence.ai_gateway.src.model_runtime_binding_digest import (
+    canonical_model_runtime_binding_digest,
+)
 from modules.ai_intelligence.ai_gateway.src.model_signed_evidence import (
     rehydrate_model_runtime_binding_receipt,
 )
@@ -264,7 +267,7 @@ def plan_reddog_openclaw_readonly_audit_swarm(
         else:
             grounding_id = grounding_validation.verified.receipt_id
             grounding_receipt_digest = grounding_digest(grounding_data)
-            targets = _normalize_targets((*targets, *grounding_validation.verified.repo_file_targets))
+            targets = _normalize_targets((*targets, *grounding_validation.verified.allowed_read_targets))
     if len(targets) > MAX_ASSIGNMENT_TARGETS:
         reasons.append("too_many_allowed_read_targets")
 
@@ -551,7 +554,7 @@ def _runtime_binding(
     ):
         reasons.append("model_runtime_binding_surface_mismatch")
         return {}, "", ""
-    return data, receipt.receipt_id, _digest(data)
+    return data, receipt.receipt_id, canonical_model_runtime_binding_digest(receipt)
 
 
 def _validate_binding(

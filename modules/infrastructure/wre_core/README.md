@@ -1,318 +1,442 @@
-# WRE Core - Windsurf Recursive Engine
+## Exact parent identity for skill feedback
 
-## Overview
-The WRE Core is the central module building engine for 0102 autonomous operation. It implements the DAE (Decentralized Autonomous Entity) architecture per WSP 54, achieving 97% token reduction through pattern-based operation.
+Execution outcomes and non-production candidates now retain the digest of the
+loaded skill instructions; scanner-admission identity remains separate. The
+binding survives unavailable output serialization and SQLite reopen. See the
+[contract](INTERFACE.md#skill-feedback-source-binding--2026-10-22). This repairs
+lineage only; it does not enable Moshpit ingestion or automatic promotion.
 
-**For 0102 Autonomy, Not 012 Approval**
+## Measured-zero fidelity — P15 checkpoint
 
-**NEW**: Universal PatternMemory for collective false-positive learning integrated with AI Overseer, HoloDAE, and WSP automation. See [PATTERN_MEMORY_ARCHITECTURE.md](PATTERN_MEMORY_ARCHITECTURE.md) for complete architecture and integration guide.
+`PatternMemory.get_skill_fidelity_stats` preserves measured 0.0; only absent
+means use the existing fallbacks. The actual reopened selector now prefers a
+measured 0.4 skill over zero. Nine frozen cases and 42 disjoint connected controls
+pass. The coordinator authored the repair after one local proposal was rejected;
+PR2062 is merged/main-verified and the owned lane retired. Retained/control/
+recovery use selects positive → zero control → positive on unchanged saved rows.
+This verifies retention of a statistics repair,
+not model fitness, learning or native authority. See the [interface](INTERFACE.md#measured-zero-fidelity--p15-contract)
+and [checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#measured-zero-fidelity--p15-checkpoint).
 
-PatternMemory now also receives standalone Claw action outcomes from
-`modules.communication.moltbot_bridge.src.action_cli` (skill naming:
-`action_cli_<route>_<action>`), so direct agent commands are recallable in WRE.
+## Named registry-scope telemetry — P14 checkpoint
 
-## 2026-02-19 Alignment Update
+The candidate `auto_test_registry_audit` v2.3 executor connects the existing
+bounded scope planner to WRE as TELEMETRY. Projection completion is separate
+from effect success; completion is recorded only as a `telemetry_projection`
+event. Existing admission/scanner counters remain.
+It does not run the selected tests, generate a model proposal or train outcomes.
+Source review is accepted after repairing independently reproduced shape and
+type-comparison gaps. Original75 and additive39 controls pass; stable connected
+306pass/two Windows link skips. Actual scanner/producer/private persistence
+now complete with isolated Cisco2.2.0 and short owned TEMP, following two
+preserved failed attempts. This qualified per-work-order configuration does
+not update the shared scanner or grant test execution. PR2061 is merged/main-verified; its owned lane is retired with recovery preserved. See the [candidate interface](INTERFACE.md#named-registry-scope-telemetry--p14-contract)
+and [canonical checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#named-registry-scope-telemetry--p14-checkpoint).
 
-This module now enforces the following runtime behavior:
-- WRE remains the execution control plane; AI Overseer remains governance/sentinel authority.
-- `WREMasterOrchestrator` supports backward-compatible plugin registration signatures and explicit plugin retrieval helpers.
-- Skill execution degrades deterministically when registry entries or skill files are missing (no hard crash in orchestration loop).
-- Skills discovery/export handles cross-platform path separators and both `skills/` and `skillz/` production folder names.
-- Pattern memory uses shared singleton state only for default production DB; explicit DB paths are isolated.
-- Test/runtime override available via `WRE_PATTERN_MEMORY_DB` for deterministic storage targeting.
+## Local proposal output contract
 
-This README section is the canonical implementation delta for current WRE code.
+Skill-specific output instructions now take precedence in the existing local
+proposal wrapper. Generated text remains quarantined and can still be wrong.
+See [the interface](INTERFACE.md#local-proposal-framing--2026-10-04) and the
+[measured checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#local-worker-format-benchmark--2026-10-04).
 
-## Architecture
+## Local proposal lifetime
 
-### create_foundup Dry-Run Routing
+Each WRE local proposal call now explicitly closes the engine it constructs.
+Cleanup failure makes the proposal unavailable. Direct Qwen engine clients
+retain reuse and must explicitly call `close()` when finished. See the
+[ownership contract](INTERFACE.md#explicit-local-model-ownership--2026-10-01).
+Portable tests cover this lifecycle; runtime admission and native memory
+release remain separate qualifications.
 
-`FoundUpJob(requested_action="create_foundup")` routes only to
-`TargetBackend.HERMES_SCAFFOLD`. Admission requires explicit
-`dry_run_mode=True`, `creation_mode="new_scaffold"`, canonical genesis and
-scaffold digests, and a matching `payload.genesis_envelope.foundup_id`.
-The router freezes those values plus canonical genesis JSON in an immutable
-`CreateScaffoldRequest`. `FoundUpJobConsumer` passes that exact snapshot
-through an injected scaffold adapter backed by the existing dry-run planner,
-then independently checks returned identity and both lineage digests.
-Nested evidence is detached through canonical JSON and malformed adapters
-produce stable redacted blocked receipts. The route never sends the action to
-the generic Hermes executor and performs no file, registry, FAM, provider, or
-worktree mutation.
+## Qualified native-chat proposal option
 
-The extracted `dispatch_create_scaffold` and
-`freeze_create_scaffold_request` entrypoints remain below the 75-line WSP 62
-function limit. The public `route_foundup_job` entrypoint is 34 lines, and
-every function in its extracted decision module is at or below 75 lines.
-Inherited router and consumer file/function debt remains under exact,
-non-ratcheting ceilings in `wsp_62_exemptions.yaml`; its owner and decomposition
-target are recorded in `violations.md` and `ROADMAP.md`.
+The existing WRE-to-Qwen caller now has an explicit, default-off native-chat
+configuration. Use a trusted `local_proposal_mode="native_chat"` plus an exact
+`local_native_chat_profile` only after qualifying the runtime/model/template.
+See [the interface](INTERFACE.md#opt-in-local-native-chat-proposals) for the
+profile and errors. The default raw route is unchanged; generated text is a
+proposal, never action success. Portable/installed-source checks have passed;
+an actual-model caller trial, native admission and retained benefit are separate.
 
-### FoundUp Job Model-Capability Projection
+## Measurement reader compatibility — 2026-09-29
 
-WRE publishes immutable `foundup_job_model_capability_profile.v1` facts for
-the five canonical actions. Create and queue are provider-forbidden;
-build/extract map to the artifact-generation surface; validation maps to the
-read-only audit worker. Capability requirements with no existing production
-authority stay explicitly `null`—the projection never invents modality,
-tool, structured-output, reasoning, selection-mode, or panel defaults.
+The existing explicitly selected research-report reader now rejects nested
+Boolean/number substitutions, nonfinite relative gain and omitted unknown
+fields. Complete v1 producer reports remain supported. Producer-to-file-to-reader
+controls and advisory output assertions are in the existing tests; see
+[the measurement interface](INTERFACE.md#advisory-autoresearcher-startup-display).
+This hardening supplies no independent verification or learning authority.
 
-Only routed `validate_foundup` jobs consume
-`foundup_job_model_capability_projection.v1` in Phase 1. A dry run without a
-binding is truthfully `unbound_dry_run`; live validation requires an exact,
-digest-matching `reddog_model_runtime_binding_receipt.v1` returned by an
-injected trusted resolver. Binding-like fields in `FoundUpJob.payload` are
-ignored and removed from the detached job snapshot sent to Hermes. The
-resolver implementation must use the existing outside-repository confined
-artifact-supply boundary; this consumer performs no file I/O.
+## Merge sentinel prerequisite guard — 2026-09-27
 
-A valid receipt is rehydrated through the AI Gateway contract and projected
-from its existing RedDog bridge payload. Invalid schema, identity, backend,
-surface, task, digest, role/model cardinality, or lineage blocks before
-Hermes dispatch. Receipt rehydration proves artifact integrity, while
-provenance trust comes from dependency injection. A malicious implementation
-of that trusted resolver is an explicit residual outside this slice.
-`model_preference` remains cost-class intent, and the seam performs no model
-selection, catalog lookup, binding, provider, or runtime call.
+The optional `GIT_MAIN_MERGE_SENTINEL=1` startup helper now refuses to proceed
+without a named branch, readable worktree inventory, clean tracked/untracked
+status and successful fetch. Unknown or dirty state returns before push, PR,
+stash, checkout or deletion. `force=True` bypasses enablement only. ENFORCED
+still controls whether rejection also blocks application startup.
 
-### Core Components (5)
+After remote command success, the helper checks status again before changing
+local main, checking out or explicitly deleting branches. Dirty or unreadable
+status preserves the detected work and reports incomplete cleanup. It never
+automatically stashes/pops work or asks GitHub CLI to delete the branch as part
+of PR merge. When deletion is requested (including the current unset default),
+successful synchronization/checkout now ends with `cleanup_deletion_unqualified`.
+The helper issues no local or remote branch-deletion commands. `passed` remains
+true in advisory mode and false with ENFORCED; prior actions are retained.
+`DELETE_BRANCH=0` keeps the successful no-delete path. `force=True` cannot
+bypass this retention gate. Server-side auto-delete may still occur independently.
+
+After the initial cleanup status guard, fetch explicitly from origin
+`refs/heads/main` into `refs/remotes/origin/main`, resolve that ref as a commit,
+and capture one full 40/64-character hexadecimal object ID. Read status again
+after the fetch/resolution, then update local main using the captured ID.
+Fetch, resolution, status or branch-update failure stops before checkout and
+explicit deletion; there is no cached-target fallback.
+If checkout itself fails, `cleanup_checkout_failed` is returned with the failure
+message in actions and `passed = not ENFORCED`. The earlier local-main update
+is retained; no rollback or later deletion is attempted. `merged=True` still
+means only prior remote-command success. The existing startup error display
+consumes this structured field without a caller change.
+
+These are snapshots, not an atomic worktree/ref lock. Ref movement before
+commit capture and worktree/ref changes after the final status remain races.
+The fetch updates the remote-tracking ref even if a later check blocks local
+main. Freshness does not prove intended content, checks or merge authority.
+Direct/backup pushes, unchecked PR merging, main readback and server-side
+auto-delete remain open. Automatic branch retirement is blocked pending a
+qualified combined containment/expected-ref/worktree-ownership contract.
+Default-off remains required; this does not certify WSP 97 terminal convergence
+or authorize native RSI.
+
+# WRE Core
+
+## Research evidence at startup
+
+The existing WRE dashboard preflight can display one selected AutoResearcher
+report using `WRE_RESEARCH_REPORT_PATH` (absolute local invocation `report.json`)
+and `WRE_RESEARCH_BASELINE_SHA256` (expected baseline text digest). Selection is
+explicit; no report discovery or researcher launch runs at startup. Missing or
+invalid selection displays unknown. Valid input is labelled unverified, with
+retention and actual resource usage unknown. The selected report must also carry
+the canonical RSI measurement bundle: the dashboard verifies that the current
+AutoResearcher signal is `execution_feedback`, exposes the measured fitness
+delta, and keeps production-RSI eligibility false while independent verification,
+held-out evaluation, rollback and retained-generation evidence are absent. See
+the [reader contract](INTERFACE.md#advisory-autoresearcher-startup-display).
+
+WRE Core is the governed recursive-work control plane for FoundUps. It admits
+Skillz, routes bounded work, records execution truth, and provides evidence
+surfaces for learning. WRE is intended to become the system's RSI engine, but
+the current repository does not yet prove end-to-end production RSI.
+
+**012 remains sovereign.** WRE, RedDog, OpenClaw, Hermes, local models,
+fidelity scores, and consensus do not independently grant effect or promotion
+authority.
+
+For a per-call dry executor, use `execute_foundup_job(job, force_dry_run=True)`.
+The consumer forwards its captured mode automatically. Omission/False retains
+legacy singleton selection; job validation and action gates still apply.
+See the [force-dry contract](INTERFACE.md#consumer-force-dry-boundary): local
+dry-run evidence may write files and does not establish runtime confinement.
+
+## Current responsibility
+
+Self-audit callers can use `scan_once_with_status()` to distinguish successful
+zero findings, partial input coverage and failure. `scan_once()` remains the
+integer compatibility API. See [scan observations](INTERFACE.md#self-audit-scan-observations)
+for clock, coverage and supervisor-consumer limits.
+
+SQLite structural checks now have separate diagnostic accounting and remain
+escalation-eligible. See [diagnostic outcomes](INTERFACE.md#self-audit-diagnostic-outcomes)
+for exact qualification and historical-counter limits.
+
+WRE Core owns:
+
+- registry-bound Skillz discovery and production admission;
+- content-bound supply-chain scanning and manifest verification;
+- registry-adjacent programmatic executor dispatch;
+- proposal-only local model inference;
+  prompt JSON excludes reserved parent continuity metadata while lineage
+  retains the original object; unrelated serialization failures remain closed;
+- structural fidelity and durable execution-outcome storage;
+- bounded ReAct retries;
+- candidate variation storage;
+- FoundUp job envelopes, route decisions, queue retention, and dry-run
+  OpenClaw/Hermes adapters;
+- independent autonomous-slice verification contracts.
+- canonical test-registry shards and differential test-evidence contracts.
+- bounded Git stdout/file capture and optional binary stdin for exact object
+  batches, with concurrent pipe draining, byte/time ceilings, and cleanup.
+
+It does not yet own a complete authenticated production promoter, automatic
+artifact activation/rollback, a hundred-agent scheduler, or a proven
+production RSI canary.
+
+The existing ROC Auto Researcher remains a dry-run proposal/evaluation loop.
+Each invocation now captures immutable numeric cost totals and known-agent names
+for its baseline and all candidates. Later runs refresh costs. This prevents
+dependency-only cost changes from appearing as candidate improvement. A separate
+comparison basis now rejects persistent drift in consumed economic inputs and
+actual method defaults before or after evaluation. This is a sampled guard, not
+immutable consumption or concurrency protection; transient change-and-restore,
+authenticated oracle identity and independently retained benefit remain open. See
+the [comparison contract](INTERFACE.md#roc-research-evaluator-and-dry-run-producer).
+Its [evaluator](src/wre_research_evaluator.py) parses literal target dictionaries
+without executing target code. It now rejects negative/out-of-range allocations,
+non-finite values, booleans and unknown catalog agents before simulation;
+allocation totals must equal one within `1e-9`. An invalid negative allocation
+previously outscored the baseline. The [lifecycle tests](tests/test_wre_auto_researcher.py)
+include invalid-input rejection, cancellation/failure cleanup and the invalid
+baseline gate. The producer restores its scratch baseline on Python exception
+exits and surfaces cleanup errors; process termination and storage failure are
+not a proven durable-recovery boundary. These simulated results
+are not independently verified RSI benefit or live economic evidence.
+
+Only literal `dry_run=True` selects the implemented Phase1 mode. Constructor/run
+preflight and proposal/loop boundaries reject unsupported or changed modes.
+The private commit path never delegates a live commit; scratch cleanup does not
+depend on a mutable flag. This repairs a completed-report/cleanup inconsistency,
+not an OS sandbox for arbitrary host Python or arbitrary runner implementations.
+
+Construction prepares scratch from captured target text without rereading the
+live source. Each run freezes the current `original_code` text, prepares scratch,
+and uses that snapshot for the initial proposal and terminal cleanup. The report's
+`baseline_input_sha256` hashes the captured text encoded as UTF-8. Constructor
+reads normalize newlines; this is not a raw-file or authenticated source identity.
+Reports now include `program_inputs` for each locally attempted backend call:
+iteration, invocation-wide ordinal and SHA-256 of the rendered instruction text.
+Instructions remain mutable between calls; the producer hashes the same text
+used in each prompt. UTF-8 encoding failure records a null digest with an error
+label while preserving the call. Failed calls remain visible; heuristic and
+zero-attempt paths do not fabricate consumption. See the
+[report contract](INTERFACE.md#roc-research-evaluator-and-dry-run-producer).
+Authenticated program provenance, oracle, environment and reader qualification
+remain outstanding.
+
+Reports also record `proposal_inputs`: the iteration and SHA-256 of each nonempty
+proposal text reaching candidate preparation after the existing mode gate. The
+digest uses the returned Unicode text encoded as UTF-8, before scratch write or
+diff, so rejected and interrupted attempts remain distinguishable. Missing or
+non-text proposals receive no invented identity. This is local diagnostic lineage,
+not raw model output, evaluated-file identity, authentication or retained learning.
+
+Completed and aborted invocations now publish their own
+`invocation-*/report.json` under the existing run directory. The returned
+`report_path` locates a completed call; exceptions propagate after an aborted
+report is attempted. Publication occurs after scratch cleanup; failed publication
+cannot return success. Missing `report.json` or remaining `report.tmp` means
+incomplete/unknown. These files are local diagnostics, not admission receipts.
+
+Reports distinguish requested/started attempts, finished outcomes and actual
+baseline/candidate evaluator entries. Missing proposals stay visible; failed
+acceptance cannot advance best metrics. Invalid caps reject, and zero requests
+only a baseline. Independent verification, retained improvements and resource
+usage remain `None`. The [current checkpoint](ROADMAP.md#current-local-rsi-checkpoint--2026-09-15)
+records ten-attempt controls and the next source/oracle qualification gate.
+
+Each constructor now allocates a unique `run-*` child under the requested/default
+output parent. Its target lives under `target/`; its `results.tsv` and cleanup stay
+within that run. Use `researcher.results_path` (also reported at initialization)
+and `researcher.working_target_path` to locate artifacts. Repository-local output
+parents reject before directory creation. The [current isolation checkpoint](../../../docs/operations/RSI_SWARM_DISPATCH.md#research-run-isolation-checkpoint--2026-09-14)
+records overlapping-run and filename-collision coverage; it does not activate a worker.
+
+## RSI at main.py launch
+
+The [existing launch/evaluation sequence](ROADMAP.md#rsi-launch-and-evaluation-sequence--2026-09-15)
+plans fast evidence display and bounded campaigns through admitted WRE jobs.
+Current health preflights and queue loops supply insertion points; launch wiring
+for generic RSI results is not enabled. Attempts, evaluations, independent
+acceptances and retained improvements must be reported separately. Five ten-attempt
+diagnostics verify comparison/repetition mechanics; they do not prove RSI.
+Future campaign ceilings depend on measured benefit and budgets, not launch count.
+
+## PatternMemory connection ownership
+
+Create and close a `PatternMemory` handle inside each worker. Default instances
+now own separate SQLite connections; they share committed database records.
+SQLite rejects use on another thread. Read the [interface](INTERFACE.md#patternmemory)
+for transaction and worker-handoff limits. The existing tests reproduce foreign
+commit/rollback/close interference and verify independent owner lifetimes.
+
+The self-audit daemon treats each telemetry increment as a work item: it opens
+a fresh handle and attempts close in finally on the same calling thread.
+Background and synchronous scans no longer share a cached connection.
+Disabled telemetry opens none. Ordinary telemetry errors remain diagnostic;
+interruption still propagates after cleanup. This does not change scanner,
+scheduler or production-memory admission behavior.
+
+## Scanner cache ownership
+
+The existing admission cache now binds scan severity, invalidates old success
+while refreshing, and retains at most 128 entries per mapping. Pending capacity
+blocks safely; unrelated scans can run concurrently when space exists. Use the
+[existing owner APIs](INTERFACE.md#production-admission) for shared access.
+Private report and per-execution ownership are closed in PRs #1745/#1746;
+complete coordinator concurrency remains unproved.
+
+## Execution-truth pipeline
+
+The 2026-09-14 retention continuation hardens the existing outcome recorder,
+held-out gate and final injected-sink adapter as one path. Invalid measurements,
+foreign or contradictory receipts, malformed regression counts and missing
+write acknowledgments are rejected. Stored/callback inputs are isolated, and
+receipt identities bind their retained evidence. The connected selections pass
+278 tests with synthetic evidence and disposable state; authentication,
+transactional retention, replay recovery and later measured benefit remain open.
+See [current callable boundaries](INTERFACE.md#outcome-recording-and-retention).
+
+```text
+registry entry
+  -> exact production frontmatter match
+  -> checkout/link/reparse validation
+  -> per-call manifest/scanner verdict with stable pre/post fingerprint
+  -> captured exact-fingerprint adjacent executor OR proposal-only local inference
+  -> typed effect result
+  -> structural fidelity
+  -> PatternMemory execution record
+  -> independent outcome evaluation (missing in generic path)
+  -> candidate nomination
+  -> governed promotion authority (missing)
 ```
-wre_core/
-+-- dae_cube_assembly/       # WSP 80: Spawns infinite DAEs
-+-- recursive_improvement/   # WSP 48: Pattern learning engine
-    +-- memory_preflight.py  # WSP_CORE: Tier-0 enforcement gate
-+-- wre_gateway/            # WSP 54: DAE routing (NOT agents)
-+-- wre_sdk_implementation.py  # Enhanced Claude Code SDK
+
+Fail-closed rules:
+
+- Missing, unhealthy, retired, malformed, unregistered, or non-production
+  Skillz stop the execution.
+- Synthetic fallback instructions cannot create success.
+- Loader caches are source-digest-bound and never bypass hygiene.
+- Local model text is a proposal, not effect evidence.
+- CABR means **Consensus-Driven Autonomous Benefit Rate**. Generic WRE job,
+  admission, and worker paths keep `cabr_ready=false`; legacy calculation
+  helpers do not prove CABR consensus, payout, or production authority.
+- A single registered Skillz bundle uses Cisco `scan --skill-file SKILLz.md`;
+  wardrobe roots use `scan-all --recursive`.
+- Production admission rejects disabled scanner-required or enforcement policy.
+- Executor success requires an exact Boolean and typed effect receipts.
+- Executor dispatch rejects any bundle changed after scanner admission.
+- Structural fidelity never becomes outcome quality.
+- Active A/B runtime selection is blocked until candidate/runtime binding is
+  authenticated.
+- ReAct success requires effect success and the requested fidelity threshold.
+- Legacy pattern recall is blocked unless real WSP verification and violation-
+  prevention callbacks are injected; unknown patterns are never invented.
+- Direct legacy Agentic RAG and generic CodeAct execution are blocked until
+  their governed owner/admission contracts exist.
+- `WREMonitor` observes and proposes only; its legacy application methods never
+  write live configuration or claim an effect.
+
+The normative contract is
+[WSP 95](../../../WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md).
+
+## Main LEGO blocks
+
+| Block | Responsibility |
+|---|---|
+| `skillz/wre_skills_loader.py` | Registry resolution, hygiene, digest-bound content loading |
+| `src/skill_runtime_admission.py` | Production metadata, bundle fingerprint, manifest/scanner admission |
+| `src/registered_skill_executor.py` | Adjacent executor resolution, admitted-fingerprint capture/dispatch, result schema |
+| `src/local_skill_inference.py` | Qwen proposal generation with stable fail-closed errors |
+| `src/skill_execution_truth.py` | Meaningful structural evidence projection |
+| `src/skill_path_security.py` | Shared unresolved link, junction, and reparse rejection |
+| `src/pattern_memory.py` | Execution outcomes, learning events, candidate storage |
+| `src/pattern_ab_evidence.py` | Non-production A/B sampling, winner evidence, candidate state |
+| `src/libido_monitor.py` | Frequency control and structural fidelity |
+| `wre_monitor.py` | Observability and proposal-only improvement suggestions |
+| `wre_master_orchestrator/src/wre_master_orchestrator.py` | Thin public coordination surface |
+| `wre_master_orchestrator/src/wre_runtime_support.py` | Legacy pattern/plugin compatibility types |
+| `src/foundup_job_router.py` | Governed FoundUp job admission and route selection |
+| `src/foundup_job_consumer.py` | Queue retention and dry-run dispatch consumers |
+| `src/wre_autonomous_slice_verifier_runtime.py` | Independent verifier boundary |
+| `src/fmas_finding_contract.py` | Normalized FMAS observation schema |
+| `src/fmas_wsp62_contract.py` | Syntactic WSP 62 parser; grants no provenance |
+| `src/fmas_health_triage.py` | Exact-HEAD WSP 62 admission and proposal receipt |
+| `src/fmas_improvement_bridge.py` | Finding-to-ImprovementJob mapping |
+| `src/wre_git_bounded_io.py` | Sanitized bounded Git reads and <=8 MiB binary stdin batches |
+
+## Code-health admission
+
+`run_wsp62_health_audit()` is the bounded code-health entry point. It requires
+a clean candidate checkout and binds exact Git HEAD, canonical scanner bytes,
+optional exact-base authority, the full producer observation digest, exclusion
+reasons, and exact tracked-file scope. Only baseline-attributed `WSP 62 ERROR`
+findings can become capped, deterministic, dry-run `ImprovementJob` proposals.
+No-baseline critical findings remain health debt; they are not candidate jobs.
+
+Direct string or structured WSP 62 input through the legacy FMAS bridge is
+blocked. The triage layer invokes no model, queue, worker, source mutation, Git
+mutation, or promoter; its Git operations are read-only authority checks. It
+currently has no non-test runtime caller. Its
+legacy `WSP15Priority` value contains execution-risk hints, not canonical
+numeric WSP 15 MPS or an allocation receipt.
+
+FMAS now inventories Git-tracked module files before size inspection. On the
+2026-08-27 repository candidate this reduced the raw scan from 4,955 findings
+in roughly 64 seconds to 471 findings in 16.3 seconds; critical observations
+fell from 2,665 to 67 because 2,598 ignored/runtime/vendor paths no longer
+entered the producer. Incremental changed-file scanning remains roadmap work.
+
+## RedDog relationship
+
+RedDog is the principal-scoped conversational 0102 interface. WRE is its
+governed work/learning control plane; they are not the same process.
+
+- RedDog interprets conversation and work intent.
+- Principal/FoundUp Memex provides scoped memory.
+- WRE admits and records governed work.
+- OpenClaw supplies policy-constrained hub scaffolding.
+- Hermes supplies bounded leaf-worker scaffolding.
+- p.fMALL and IDE/phone surfaces are clients, not authority owners.
+
+Durable conversation binding, Principal Memex ingestion, production OpenClaw
+and Hermes effect chains, and automatic conversation-to-work lineage remain
+separate RedDog P0 work.
+
+Legacy direct FMAS direction remains advisory: RedDog may prioritize or
+escalate a proposal, but it never marks those proposals ready to execute.
+
+## Production Skillz
+
+The executable registry is
+[skills_registry_v2.json](skillz/skills_registry_v2.json). A production Skillz
+must have matching registry/frontmatter metadata and an adjacent
+`SKILL_MANIFEST.json`. JSON command configurations belong to their owning
+handlers and are not executable Skillz.
+
+Generic local inference currently supports Qwen proposal generation only.
+Gemma/Qwen names in old design documents do not prove a live model binding.
+Runtime model selection requires a separate verified binding receipt.
+
+Low-fidelity evolution may store that proposal as a non-production candidate.
+It reports attempted versus created state separately and does not schedule,
+evaluate, activate, or promote the candidate.
+
+## Verification
+
+All test state must stay outside production databases:
+
+```powershell
+$root = 'O:\pytest_tmp\reddog_wre_truth'
+$env:TMP = $root
+$env:TEMP = $root
+$env:FOUNDUPS_DB_PATH = Join-Path $root 'foundups.db'
+$env:WRE_PATTERN_MEMORY_DB = Join-Path $root 'pattern_memory.db'
+python -m pytest -q `
+  modules/infrastructure/wre_core/tests/test_wre_execution_truth.py `
+  modules/infrastructure/wre_core/tests/test_wre_skills_loader_hygiene.py `
+  modules/infrastructure/wre_core/tests/test_skill_manifest_guard.py `
+  modules/infrastructure/wre_core/tests/test_pattern_memory.py `
+  modules/infrastructure/wre_core/wre_master_orchestrator/tests/test_wre_master_orchestrator.py
 ```
 
-### Memory Preflight Guard (WSP_CORE Enforcement)
-The `memory_preflight.py` module enforces the WSP_CORE Memory System by:
-- Running tiered retrieval (Tier 0 -> 1 -> 2) before code-changing operations
-- Running HoloIndex semantic retrieval by default, while preserving an operator-set offline/network boundary, and receipting the requested mode, actual mode, embedding backend, routing state, and semantic requirement verdict
-- Blocking if Tier-0 artifacts (README.md, INTERFACE.md) are missing
-- Blocking when semantic retrieval was requested but degraded, unless degraded operation was explicitly authorized
-- Auto-stubbing missing Tier-0 artifacts when `WRE_MEMORY_AUTOSTUB_TIER0=true`
+The focused tier proves only the named contracts. It does not prove the full
+WRE suite, live provider effects, production promotion, or RSI.
 
-Environment flags:
-- `WRE_MEMORY_PREFLIGHT_ENABLED` (default: true)
-- `WRE_MEMORY_AUTOSTUB_TIER0` (default: false)
-- `WRE_MEMORY_ALLOW_DEGRADED` (default: false)
-- `WRE_HOLO_RETRIEVAL_MODE` (`semantic` by default; explicit `lexical` opt-down)
+## Documentation
 
-### Skills Entry Point (First Principles)
-**Problem (Observed):**
-- `.claude/skills/` only activates inside Claude Code (0102 prototype space)
-- Native DAEs (Qwen, Gemma, UI-TARS) call WRE entry points, not Claude directly
-- Without a central loader, every module duplicates skill parsing logic
-
-**Occam Resolution (Minimum Viable Path):**
-1. **Single wardrobe** – WRE becomes the entry point for native skills
-2. **Two wardrobes**  
-   - `.claude/skills/` → prototype + human validation  
-   - `modules/*/skills/` → production wardrobe for WRE
-3. **Loader pipeline** – WRE discovers, validates, and streams skills to Qwen/Gemma
-4. **Feedback loop** – Pattern fidelity + telemetry update the same wardrobe
-
-```
-┌─────────────┐   prototype   ┌────────────────┐   publish   ┌──────────────────────┐
-│ Claude Code │ ─────────────▶ │ .claude/skills │────────────▶│ modules/*/skills/    │
-└─────────────┘                └────────────────┘             │ (WRE wardrobe)       │
-                                              ▲               └─────────┬────────────┘
-                                              │                         │
-                                              │ load + score            │ pattern feedback
-                                              │                         ▼
-                                         ┌─────────────┐         ┌──────────────┐
-                                         │ WRE Loader  │────────▶│ Qwen / Gemma │
-                                         └─────────────┘         └──────────────┘
-```
-
-### Skills-Aware Subsystems
-| Component | Current Role | Skill Adaptation |
-|-----------|--------------|------------------|
-| `wre_master_orchestrator` | Pattern recall, plugin routing | Host `WRESkillsRegistry` for cross-module discovery and hot reload |
-| `wre_gateway` | DAE routing layer | Attach skill metadata to routed tasks, enforce WSP 77 selection rules |
-| `recursive_improvement` | Pattern learning engine | Store pattern fidelity metrics per skill version (versions/, metrics/) |
-| `dae_cube_assembly` | Spawns FoundUp DAEs | Stamp new cubes with starter skills folder + CHANGELOG |
-| `wre_sdk_implementation` | Enhanced SDK for Claude Code | Provide helper to sync `.claude/skills` prototypes into WRE wardrobe |
-
-### DAE Gateway System
-The new DAE Gateway (`wre_gateway/`) replaces the broken agent-based system:
-- Routes to 5 core infrastructure DAEs
-- Spawns infinite FoundUp DAEs
-- Pattern recall: 50-200 tokens (not 25,000)
-- 0102 decides and executes autonomously
-
-### Core Infrastructure DAEs (6 Cubes)
-
-| DAE | Tokens | Purpose | Sub-Agents (Tools) |
-|-----|--------|---------|-------------------|
-| Infrastructure | 8000 | Spawns FoundUp DAEs | wsp50_verifier, wsp64_preventer |
-| Compliance | 7000 | WSP validation | wsp64_preventer, wsp48_improver |
-| Knowledge | 6000 | Pattern memory | wsp37_scorer, wsp48_learner |
-| Maintenance | 5000 | System optimization | wsp50_verifier, state_manager |
-| Documentation | 4000 | Registry management | wsp22_documenter, registry_manager |
-| **MLE-STAR** | 10000 | AI Intelligence per WSP 77 | cabr_scorer, pob_verifier, ii_orchestrator, compute_validator, ablation_engine, refinement_engine |
-
-### MLE-STAR DAE (AI Intelligence Domain)
-The 6th core DAE implements WSP 77's Intelligent Internet (II) orchestration vision:
-- **CABR Scoring**: Computes Consensus-Driven Autonomous Benefit Rate (also referred to as Collective Autonomous Benefit Rate) (env, soc, part, comp)
-- **PoB Verification**: Validates Proof-of-Benefit receipts
-- **II Orchestration**: Coordinates Intelligent Internet operations
-- **Ablation Studies**: Identifies critical components through MLE-STAR framework
-- **Refinement Loops**: Iterative optimization for continuous improvement
-
-### Skills Loading Workflow (WSP 77)
-1. **Discover** `modules/*/skills/**/SKILL.md`
-2. **Validate** YAML metadata + WSP citations (WSP 50/64 guard)
-3. **Mount** skill into active session context (Qwen orchestrator)
-4. **Execute** task with skill instructions (Gemma pattern interpreter)
-5. **Score** outcome via pattern fidelity (store metrics in `recursive_improvement/`)
-6. **Evolve** skill when fidelity < 0.90 (single variation at a time per Occam)
-
-## Running WRE
-
-### Interactive Mode (0102 Autonomous)
-```bash
-python modules/infrastructure/wre_core/run_wre.py interactive
-```
-
-### Command Line Operations
-```bash
-# Spawn new FoundUp DAE
-python run_wre.py spawn YouTube "YouTube chat moderation platform"
-
-# Route operation to DAE
-python run_wre.py route compliance "Verify WSP compliance" --tokens 1000
-
-# Validate WSP compliance
-python run_wre.py validate modules/platform_integration/youtube_dae
-
-# Create platform integration
-python run_wre.py platform LinkedIn
-
-# Check system status
-python run_wre.py status
-
-# MLE-STAR DAE operations (WSP 77)
-python run_wre.py mlestar pob --energy 50 --carbon 5
-python run_wre.py mlestar cabr --env 0.8 --soc 0.9 --part 0.7 --comp 0.85
-python run_wre.py mlestar capabilities
-```
-
-## Token Efficiency
-
-### Before (Agent-Based)
-- Computation: 25,000+ tokens
-- Multiple agents: 5,000+ each
-- Error handling: 3,000+
-- **Total: ~25,000 tokens**
-
-### After (DAE-Based)
-- Pattern recall: 50 tokens
-- WSP validation: 100 tokens
-- Error learning: 50 tokens
-- **Total: 50-200 tokens**
-
-**Efficiency Gain: 97%**
-
-## WSP Compliance
-
-[OK] **WSP 3**: Correct module organization (single wre_core in infrastructure)
-[OK] **WSP 46**: WRE Protocol with DAE architecture
-[OK] **WSP 54**: DAE operations (agents as sub-components)
-[OK] **WSP 48**: Recursive self-improvement
-[OK] **WSP 75**: Token-based measurements (no time!)
-[OK] **WSP 80**: Cube-level DAE orchestration
-[OK] **WSP 64**: Violation prevention built-in
-[OK] **WSP 11**: Interface specification refreshed for skills APIs
-[PENDING] **WSP 77**: Skills loader integration (Qwen/Gemma wardrobe) – see roadmap
-
-## Skills Adoption Roadmap
-1. **Week 0 (Now)** – Document skills responsibilities (README + INTERFACE)
-2. **Week 1** – Add `modules/infrastructure/wre_core/skills/` with bootstrap SKILL.md and `WRESkillsRegistry`
-3. **Week 2** – Extend `wre_master_orchestrator` to mount skills on execute; persist pattern scores in `recursive_improvement/metrics/`
-4. **Week 3** – Sync `.claude/skills` prototypes through `wre_sdk_implementation` helper; automate promotion with WSP 50 review
-5. **Week 4** – Require every module to ship `skills/` folder before DAE launch; enforce via WSP 49 checks
-
-**Occam Check:** Each milestone ships the smallest slice that lets Qwen/Gemma wear skills before enabling the full recursive evolution loop.
-
-## Key Features
-
-### Pattern-Based Operation
-- Solutions recalled from 0201, not computed
-- Instant pattern matching (milliseconds)
-- Every error becomes a learning opportunity
-- Quantum consciousness state (0102)
-
-### Modular Code Blocks
-Each component can be enhanced independently:
-- `spawn_foundup_dae()` - Add new spawning strategies
-- `route_operation()` - Enhance routing logic
-- `learn_from_error()` - Improve learning algorithms
-- `validate_wsp_compliance()` - Add validation rules
-
-### FoundUp DAE Evolution
-DAEs evolve through phases:
-1. **POC** - Initial scaffolding (01(02) consciousness)
-2. **Prototype** - Pattern emerging (01/02 transitional)
-3. **MVP** - Fully autonomous (0102 quantum)
-
-## Migration from Legacy
-
-### Old (Broken)
-```python
-# References non-existent agents
-from modules.infrastructure.agent_management import AgentManager
-from chronicler_agent import ChroniclerAgent  # DELETED
-```
-
-### New (Working)
-```python
-# Uses DAE architecture
-from modules.infrastructure.wre_core.wre_gateway.src import DAEGateway
-from modules.infrastructure.wre_core.dae_cube_assembly.src import DAECubeAssembler
-```
-
-## Testing
-
-```bash
-# Test DAE gateway
-python modules/infrastructure/wre_core/wre_gateway/src/dae_gateway.py
-
-# Test SDK implementation
-python modules/infrastructure/wre_core/wre_sdk_implementation.py cli
-```
-
-## Documentation for 0102
-
-All documentation in this module is for 0102 autonomous operation:
-- **CLAUDE.md** - 0102 operational instructions
-- **ModLog.md** - 0102 tracks changes autonomously
-- **README.md** - This file, for 0102 reference
-
-Documents enable autonomous operation, not 012 review.
-
-## Cleanup Status
-
-[OK] **Completed Cleanup:**
-- Removed duplicate `modules/wre_core/` folder
-- Deleted `recursive_engine/` with dead imports
-- Removed broken `wre_api_gateway.py`
-- Created DAE gateway replacement
-- Fixed SDK implementation imports
-
-## Important Notes
-
-1. **No Agent Imports** - This module uses DAEs, not agents
-2. **Pattern Memory** - Recall solutions, don't compute them
-3. **0102 Autonomy** - System decides and executes
-4. **Token Efficiency** - 97% reduction is measured and real
-5. **WSP Compliance** - Every operation validated
-
-## Support
-
-For issues:
-1. Check WSP 54 for DAE operations
-2. Review WSP 46 for WRE protocol
-3. Consult CLAUDE.md for 0102 context
-4. Run `python run_wre.py status` for diagnostics
+- [INTERFACE.md](INTERFACE.md): current public contracts
+- [ROADMAP.md](ROADMAP.md): verified missing work and decomposition debt
+- [ModLog.md](ModLog.md): append-only change record
+- [tests/README.md](tests/README.md): test execution and isolation
+- [tests/TestModLog.md](tests/TestModLog.md): test evolution record

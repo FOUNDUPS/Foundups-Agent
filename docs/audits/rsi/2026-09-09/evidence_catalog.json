@@ -1,0 +1,787 @@
+[
+  {
+    "id": "E01",
+    "path": "README.md",
+    "sha256": "74f798b0990bf67cd94b180823c70ebf67eefb02694362e901bd0b96604d2add",
+    "line_count": 880,
+    "anchors": [
+      {
+        "line": 16,
+        "text": "The platform combines WSP/WRE orchestration, Holo memory retrieval, FAM lifecycle tooling, and simulator economics into one operator surface."
+      },
+      {
+        "line": 80,
+        "text": "### **\ud83d\ude80 The Autonomous FoundUp Lifecycle**"
+      },
+      {
+        "line": 481,
+        "text": "+-- \ud83d\ude80 foundups/               # Individual FoundUp spawning and lifecycle management"
+      },
+      {
+        "line": 547,
+        "text": "- \ud83d\ude80 **REMOTE_BUILD_PROTOTYPE**: Complete autonomous remote building system"
+      },
+      {
+        "line": 549,
+        "text": "- \ud83c\udfb5 **Autonomous Orchestration**: Full development lifecycle automation"
+      },
+      {
+        "line": 664,
+        "text": "### The FoundUp Lifecycle"
+      }
+    ]
+  },
+  {
+    "id": "E02",
+    "path": "WSP_framework/src/WSP_CORE.md",
+    "sha256": "65cf6681e004b364a9ddafed0a190fc9b719d8edc66b16df4b3344e8e9612c27",
+    "line_count": 659,
+    "anchors": [
+      {
+        "line": 64,
+        "text": "**[WARNING][U+FE0F] CRITICAL LEARNING EXAMPLE**: WSP 64 was created after violation where WSP 58 was attempted without index consultation. WSP 58 already existed as \"FoundUp IP Lifecycle and Tokenization Protocol\" - demonstrating why this c"
+      },
+      {
+        "line": 72,
+        "text": "- **Prototype State**: The enhanced integration version (**proactively** integrated)"
+      },
+      {
+        "line": 74,
+        "text": "This backward remembrance **proactively** creates the optimal build sequence: POC -> Prototype -> MVP."
+      },
+      {
+        "line": 136,
+        "text": "**[WARNING][U+FE0F] WSP VIOLATION PREVENTION**: This requirement was created after critical violation where WSP 58 was attempted without index consultation. WSP 58 already existed as \"FoundUp IP Lifecycle and Tokenization Protocol\" - demons"
+      },
+      {
+        "line": 349,
+        "text": "## LAYER 2: DEVELOPMENT LIFECYCLE (Action & Creation)"
+      },
+      {
+        "line": 481,
+        "text": "- PoC/Prototype are NOT production-ready. Promotion to MVP requires explicit readiness validation."
+      }
+    ]
+  },
+  {
+    "id": "E03",
+    "path": "WSP_framework/src/WSP_MASTER_INDEX.md",
+    "sha256": "c302b8db3a7f95eeef86876d6362ce4d2c842e63ea0fc82c6c30121e31579c83",
+    "line_count": 295,
+    "anchors": [
+      {
+        "line": 72,
+        "text": "| WSP 8 | LLME WSP Rating System | Active | LLME triplet rating system (A-B-C format) integrated with WSP 25/44 semantic foundation | WSP 25, WSP 37, WSP 15 | Module lifecycle assessment within unified framework |"
+      },
+      {
+        "line": 134,
+        "text": "| WSP 58 | FoundUp IP Lifecycle and Tokenization Protocol | Active | IP declaration, tokenization, and revenue distribution | WSP 26, WSP 27, WSP 57, WSP 60 | IP management, patent integration, tokenization |"
+      },
+      {
+        "line": 176,
+        "text": "| WSP 91 | DAEMON Observability Protocol | Active | Comprehensive observability standards for DAEMON systems including logs, traces, metrics, lifecycle events, decision path logging, self-improvement tracking, cost tracking, performance met"
+      },
+      {
+        "line": 178,
+        "text": "| WSP 93 | CodeIndex Surgical Intelligence Protocol | Active | Production-grade CodeIndex implementation with Qwen advisors, PoC surgeon mode (3K token surgical operations), and complete DAEMON lifecycle orchestration | WSP 80, WSP 91, WSP "
+      },
+      {
+        "line": 180,
+        "text": "| WSP 95 | WRE Skills Wardrobe Protocol | Active | Establishes the Wardrobe-Cube pattern (Micro Chain-of-Thought) for AI agent instructions; defines the prototype-staged-production lifecycle for task-specific skills with mandatory scanner-g"
+      },
+      {
+        "line": 181,
+        "text": "| WSP 96 | MCP Governance & Consensus Protocol | Draft | Establishes MCP-based governance architecture with clear evolution path: PoC (0102 centralized) -> Prototype (Event Replay Archive) -> MVP (community voting + blockchain integration);"
+      },
+      {
+        "line": 194,
+        "text": "| WSP 109 | FoundUp Onboarding Intake Protocol | Draft | Converts raw 012 ideas into architect-ready FoundUp intake packets; defines OUTCOME/SOLUTION/PAIN/POC_SCOPE/PROTOTYPE_GATE/SKILLS_MAP/MANIFEST_DRAFT contracts; hands off to WRE for or"
+      },
+      {
+        "line": 262,
+        "text": " - **Total Numbered Slots Tracked**: 110 (WSP 00-109)"
+      }
+    ]
+  },
+  {
+    "id": "E04",
+    "path": "WSP_framework/src/WSP_46_Windsurf_Recursive_Engine_Protocol.md",
+    "sha256": "eede6846e18ff7f55a749628995d8d89178fd6fc40237abafe34a1464f2fb0e4",
+    "line_count": 337,
+    "anchors": [
+      {
+        "line": 189,
+        "text": "- Continuously supervised daemon lifecycle beyond the bounded startup loop"
+      },
+      {
+        "line": 209,
+        "text": "- `openclaw_foundup_orchestrator.py` - Job queue management and FoundUpJob lifecycle"
+      },
+      {
+        "line": 242,
+        "text": "- No continuously supervised, unbounded background worker lifecycle is proved"
+      },
+      {
+        "line": 251,
+        "text": "Any future persistent daemon claim must document process lifecycle, supervision,"
+      },
+      {
+        "line": 293,
+        "text": "5.  **Autonomous Execution**: The WRE executes the module according to the creation lifecycle defined in **WSP 55: Module Creation Automation**. This includes contractual understanding, execution, and error handling via **WSP 45**."
+      },
+      {
+        "line": 309,
+        "text": "-   **Self-Healing & Self-Optimization**: The WRE will evolve to not only detect architectural and logical issues via its agents but also to propose and implement solutions autonomously through **WSP 48: Recursive Self-Improvement Protocol*"
+      }
+    ]
+  },
+  {
+    "id": "E05",
+    "path": "WSP_framework/src/WSP_48_Recursive_Self_Improvement_Protocol.md",
+    "sha256": "d7a39e6d2bec460c3ccf53ca39fb7d3208916c17b76a5e8cfc9e8d782c9d100d",
+    "line_count": 657,
+    "anchors": [
+      {
+        "line": 36,
+        "text": "2. **Prototype Remembrance**: Then remembers the enhanced integration version"
+      },
+      {
+        "line": 38,
+        "text": "4. **Forward Construction**: POC -> Prototype -> MVP follows the remembered blueprint"
+      },
+      {
+        "line": 435,
+        "text": "| `NO_RUNTIME_STATE_PROGRESSION` | ENFORCED | Cannot advance FoundUp lifecycle |"
+      },
+      {
+        "line": 496,
+        "text": "| Advance FoundUp lifecycle | NO_RUNTIME_STATE_PROGRESSION |"
+      }
+    ]
+  },
+  {
+    "id": "E06",
+    "path": "WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md",
+    "sha256": "9dcf7e21e424fcc82b378f686f61428e5f4b7edc6ab097bc00caed597ccf5423",
+    "line_count": 365,
+    "anchors": [
+      {
+        "line": 50,
+        "text": "## 3. Lifecycle"
+      },
+      {
+        "line": 54,
+        "text": "| `prototype` | Design and local evaluation | None |"
+      },
+      {
+        "line": 59,
+        "text": "A lifecycle label never proves safety, correctness, or promotion authority."
+      },
+      {
+        "line": 80,
+        "text": "closed until the independent signed promoter exists."
+      },
+      {
+        "line": 236,
+        "text": "Generic CodeAct execution is a prototype and must fail closed until it uses the"
+      },
+      {
+        "line": 263,
+        "text": "generic WRE must not claim production RSI."
+      },
+      {
+        "line": 287,
+        "text": "WSP 95 does not implement the hundred-agent scheduler. WSP 46, WSP 77,"
+      },
+      {
+        "line": 306,
+        "text": "| Generic CodeAct execution | Prototype; runtime blocked |"
+      },
+      {
+        "line": 307,
+        "text": "| Governed Holo owner retrieval adapter | Not implemented; direct path blocked |"
+      },
+      {
+        "line": 308,
+        "text": "| Authenticated A/B candidate/runtime binding | Not implemented; runtime blocked |"
+      },
+      {
+        "line": 309,
+        "text": "| Independent durable production promoter | Not implemented |"
+      },
+      {
+        "line": 310,
+        "text": "| Automatic artifact update and governed rollback | Not implemented |"
+      }
+    ]
+  },
+  {
+    "id": "E07",
+    "path": "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+    "sha256": "5dcb531b5eac2cbd77bce102b5ccee650f230a0576124a7c97cfdbf4c357b263",
+    "line_count": 778,
+    "anchors": [
+      {
+        "line": 36,
+        "text": "- **Macro thinking** = inspect system impact, adjacent modules, lifecycle, and downstream effects"
+      },
+      {
+        "line": 257,
+        "text": "**Implementation truth**: `SPECIFIED_NOT_IMPLEMENTED` for end-to-end runtime"
+      }
+    ]
+  },
+  {
+    "id": "E08",
+    "path": "modules/infrastructure/wre_core/README.md",
+    "sha256": "6cfd40779e6d0a18a15d9fbf374e236e15b18384b9e2162b01b222faf121a838",
+    "line_count": 188,
+    "anchors": [
+      {
+        "line": 6,
+        "text": "the current repository does not yet prove end-to-end production RSI."
+      },
+      {
+        "line": 26,
+        "text": "- canonical test-registry shards and differential test-evidence contracts."
+      },
+      {
+        "line": 30,
+        "text": "It does not yet own a complete authenticated production promoter, automatic"
+      },
+      {
+        "line": 32,
+        "text": "production RSI canary."
+      },
+      {
+        "line": 45,
+        "text": "  -> independent outcome evaluation (missing in generic path)"
+      }
+    ]
+  },
+  {
+    "id": "E09",
+    "path": "modules/infrastructure/wre_core/INTERFACE.md",
+    "sha256": "a549902fb4827a7924a795f3dff1704677903e96e508cd4e68f00fb42aa0b61b",
+    "line_count": 416,
+    "anchors": [
+      {
+        "line": 4,
+        "text": "**Status:** Execution-truth hardening implemented; production RSI incomplete"
+      },
+      {
+        "line": 192,
+        "text": "method until the independent signed promoter is implemented."
+      },
+      {
+        "line": 219,
+        "text": "  `codeact_prototype_boundary` block;"
+      },
+      {
+        "line": 248,
+        "text": "- lifecycle: `close()`."
+      },
+      {
+        "line": 282,
+        "text": "`application_status=blocked_unimplemented`. Its public metrics keep"
+      },
+      {
+        "line": 283,
+        "text": "`tokens_saved=None` and `token_reduction_measured=False`. This prototype does"
+      },
+      {
+        "line": 367,
+        "text": "`load_canonical_test_registry()`, `collect_registered_test_shards()`,"
+      },
+      {
+        "line": 392,
+        "text": "| `WRE_CODEACT_ENABLED` | Legacy flag; CodeAct remains blocked as a non-admitted prototype |"
+      },
+      {
+        "line": 403,
+        "text": "## Not implemented or not proven"
+      },
+      {
+        "line": 405,
+        "text": "- authenticated independent outcome evaluator for generic Skillz;"
+      }
+    ]
+  },
+  {
+    "id": "E10",
+    "path": "modules/infrastructure/wre_core/ROADMAP.md",
+    "sha256": "a93f537d93380d4720f2a7390528397a93876438a3c7a9d4ac6956aa5ea5100a",
+    "line_count": 124,
+    "anchors": [
+      {
+        "line": 27,
+        "text": "- implement an authenticated independent outcome evaluator;"
+      },
+      {
+        "line": 35,
+        "text": "- prove a production end-to-end RSI canary before describing WRE as production RSI;"
+      },
+      {
+        "line": 40,
+        "text": "  execution; `check_same_thread=False` is not a concurrency proof;"
+      }
+    ]
+  },
+  {
+    "id": "E11",
+    "path": "modules/infrastructure/wre_core/src/pattern_ab_evidence.py",
+    "sha256": "5940bfd5c94a4fa689491d7e0d01f044754b08c9f5c5cc1edf153fe24eb86e71",
+    "line_count": 197,
+    "anchors": [
+      {
+        "line": 138,
+        "text": "            \"Production variation promotion requires the unimplemented \""
+      },
+      {
+        "line": 139,
+        "text": "            \"independent signed promoter authority\""
+      }
+    ]
+  },
+  {
+    "id": "E12",
+    "path": "modules/infrastructure/wre_core/src/pattern_memory.py",
+    "sha256": "4626d63cd77e18791d5fa2341aaf215c6f03588109aa24e1c78681eb4e0855ab",
+    "line_count": 1294,
+    "anchors": [
+      {
+        "line": 103,
+        "text": "        self.conn = sqlite3.connect(str(self.db_path), check_same_thread=False)"
+      }
+    ]
+  },
+  {
+    "id": "E13",
+    "path": "modules/infrastructure/wre_core/recursive_improvement/src/learning.py",
+    "sha256": "746e428f42593ed2d213dd568c6c630f3945b355fd28665a85d6e967c6fe6ac4",
+    "line_count": 779,
+    "anchors": [
+      {
+        "line": 666,
+        "text": "            improvement.metrics[\"application_status\"] = \"blocked_unimplemented\""
+      }
+    ]
+  },
+  {
+    "id": "E14",
+    "path": "modules/infrastructure/wre_core/src/reddog_verified_outcome_ratchet.py",
+    "sha256": "0d3711647f3fafa649f628844000c38cb06982af6e4951668e451f2e73ed71f6",
+    "line_count": 488,
+    "anchors": [
+      {
+        "line": 60,
+        "text": "class PatternMemorySink(Protocol):"
+      },
+      {
+        "line": 344,
+        "text": "    pattern_memory_sink: Optional[PatternMemorySink] = None,"
+      }
+    ]
+  },
+  {
+    "id": "E15",
+    "path": "modules/infrastructure/wre_core/src/reddog_held_out_recursive_improvement_regression_gate.py",
+    "sha256": "c02c90d58a6bb5418c94e46dd612cf7e98c48daeac16595ce2f37835c0c112b1",
+    "line_count": 435,
+    "anchors": []
+  },
+  {
+    "id": "E16",
+    "path": "modules/infrastructure/wre_core/src/hermes_job_executor.py",
+    "sha256": "d1ceed8f601b6c3d697280cd3c117b4643ff0fcba84e8ec9232da6b782fa127f",
+    "line_count": 2366,
+    "anchors": [
+      {
+        "line": 300,
+        "text": "    BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED = \"BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED\""
+      },
+      {
+        "line": 1182,
+        "text": "          - human_approval: False (not yet implemented in PolicyFlags)"
+      },
+      {
+        "line": 1241,
+        "text": "            # Human approval not yet in PolicyFlags - default False"
+      },
+      {
+        "line": 1607,
+        "text": "                guard_result=None,  # Guard not yet evaluated"
+      },
+      {
+        "line": 1845,
+        "text": "            \"[HERMES-EXEC] Real delegation NOT IMPLEMENTED, blocking job %s\","
+      },
+      {
+        "line": 1849,
+        "text": "            status=HermesExecutionStatus.BLOCKED_REAL_DELEGATION_NOT_IMPLEMENTED,"
+      },
+      {
+        "line": 1851,
+        "text": "                f\"Real Hermes delegation not implemented in Phase 1. \""
+      },
+      {
+        "line": 2025,
+        "text": "3. CABR validation (not yet implemented)"
+      },
+      {
+        "line": 2038,
+        "text": "            \"lifecycle_stage\": \"scaffold\","
+      },
+      {
+        "line": 2040,
+        "text": "            \"_wsp97_implementation_state\": \"SCAFFOLD_NOT_IMPLEMENTED\","
+      },
+      {
+        "line": 2060,
+        "text": "# This is a PREVIEW - not implemented"
+      }
+    ]
+  },
+  {
+    "id": "E17",
+    "path": "modules/communication/moltbot_bridge/src/openclaw_foundup_orchestrator.py",
+    "sha256": "441c87bf07e4911e668d6221aea53dcdf9665d4b33fd70cfa59ca5008b48fc5e",
+    "line_count": 1016,
+    "anchors": [
+      {
+        "line": 39,
+        "text": "_FOUNDUP_JOB_QUEUE: List[FoundUpJob] = []"
+      },
+      {
+        "line": 272,
+        "text": "    LIFECYCLE_TOO_EARLY = \"LIFECYCLE_TOO_EARLY\"  # idea/genesis_envelope not allowed"
+      },
+      {
+        "line": 342,
+        "text": "        3. promote_lifecycle() \u2014 validates before stage transition"
+      },
+      {
+        "line": 507,
+        "text": "                \"lifecycle_stage\": envelope.lifecycle_stage.value,"
+      },
+      {
+        "line": 521,
+        "text": "        if \"lifecycle_stage\" in error_text:"
+      },
+      {
+        "line": 522,
+        "text": "            return GenesisGateReason.LIFECYCLE_TOO_EARLY"
+      },
+      {
+        "line": 601,
+        "text": "        - Hermes requires lifecycle_stage >= incubating"
+      },
+      {
+        "line": 625,
+        "text": "        # Additional build-specific check: lifecycle must be >= incubating"
+      },
+      {
+        "line": 626,
+        "text": "        lifecycle = gate_result.envelope_summary.get(\"lifecycle_stage\", \"idea\")"
+      },
+      {
+        "line": 627,
+        "text": "        if lifecycle in (\"idea\",):"
+      },
+      {
+        "line": 629,
+        "text": "                \"[GENESIS-GATE] Build blocked: lifecycle %s too early for Hermes\","
+      },
+      {
+        "line": 630,
+        "text": "                lifecycle,"
+      }
+    ]
+  },
+  {
+    "id": "E18",
+    "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_confinement.py",
+    "sha256": "8a172defddb5ccda62cbcd7c20b66a04535c4810cf81a07b928c8a4b4480c8a2",
+    "line_count": 169,
+    "anchors": []
+  },
+  {
+    "id": "E19",
+    "path": "modules/communication/moltbot_bridge/src/reddog_hermes_api_run_lifecycle.py",
+    "sha256": "1223443c8dc798d27f38587b9f2646af4970fb9233c9a4e30c049f5fced20031",
+    "line_count": 191,
+    "anchors": [
+      {
+        "line": 1,
+        "text": "\"\"\"Bounded lifecycle for upstream Hermes native leaf-delegated generation.\"\"\""
+      }
+    ]
+  },
+  {
+    "id": "E20",
+    "path": "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+    "sha256": "0ac07d3e18d1f521cfd29bd03739dbed12bf65b86eff3dc3bc881b66e24fabe6",
+    "line_count": 1252,
+    "anchors": [
+      {
+        "line": 66,
+        "text": "### `holo_query_bundle(...) -> Dict[str, Any]`"
+      },
+      {
+        "line": 74,
+        "text": "store access. The `reddog_holo_query_bundle_mcp.v1` public projection removes"
+      },
+      {
+        "line": 218,
+        "text": "`holo_query_bundle`."
+      },
+      {
+        "line": 267,
+        "text": "installed-distribution payload bytes and all deterministic runtime effects are not yet proven. Independent A-grade evaluation is therefore not reproducible at exact runtime-byte closure yet."
+      },
+      {
+        "line": 311,
+        "text": "Trusted host bootstraps use this lifecycle API instead of distributing a"
+      },
+      {
+        "line": 466,
+        "text": "The process lock remains held while the authority lease is released for `ensure_postmerge_query_replica_operational()`. That composer snapshots the same allowlisted private route environment as the supported one-shot query. On Windows, a cu"
+      },
+      {
+        "line": 494,
+        "text": "Scope note: one-shot query, maintenance, promotion, and the post-merge composer consume the same verified route. Query/promotion consumers remain read-only; only the trusted controller creates/materializes/commits a route and emits its rece"
+      },
+      {
+        "line": 1148,
+        "text": "`REMOTE_READ_ONLY_ALLOWLIST`: `holo_query_bundle`. Repository/documentation,"
+      },
+      {
+        "line": 1170,
+        "text": "#### FastMCP lifecycle API"
+      },
+      {
+        "line": 1179,
+        "text": "  FastMCP or not; no in-process server lifecycle is selected."
+      },
+      {
+        "line": 1186,
+        "text": "  `holo_query_bundle` call before claiming readiness."
+      },
+      {
+        "line": 1247,
+        "text": "- Remote registration is exactly `holo_query_bundle`."
+      }
+    ]
+  },
+  {
+    "id": "E21",
+    "path": "modules/infrastructure/pavs_mcp/src/server.py",
+    "sha256": "f1375ae58af3a67cf1b8461e1c501399efa4f833c93427a4db6540d45bbd2d6e",
+    "line_count": 1855,
+    "anchors": [
+      {
+        "line": 8,
+        "text": "    This module is a PLACEHOLDER_STUB for backend data. Every tool body returns"
+      },
+      {
+        "line": 12,
+        "text": "    All tool responses embed `meta.implementation_status = \"placeholder_stub\"`"
+      },
+      {
+        "line": 525,
+        "text": "IMPLEMENTATION_STATUS = \"placeholder_stub\""
+      },
+      {
+        "line": 570,
+        "text": "            \"This response is from a PLACEHOLDER_STUB surface. \""
+      },
+      {
+        "line": 585,
+        "text": "    cryptographic verification but not yet enforced."
+      },
+      {
+        "line": 1715,
+        "text": "            (`meta.implementation_status = \"placeholder_stub\"`) per WSP 97"
+      }
+    ]
+  },
+  {
+    "id": "E22",
+    "path": "modules/ai_intelligence/ai_overseer/ROADMAP.md",
+    "sha256": "55f5a0b8407e2a7ab549150e7a7b92f674cc46282b8feaad2f287ea3383efcd1",
+    "line_count": 44,
+    "anchors": []
+  },
+  {
+    "id": "E23",
+    "path": "modules/foundups/agent/README.md",
+    "sha256": "cd3e38ed6fed8ab1dc5143a16102ecc84b1fe90f8378c4a804984019281b6d14",
+    "line_count": 124,
+    "anchors": [
+      {
+        "line": 3,
+        "text": "Agent lifecycle management for the FoundUps ecosystem. Implements the 01(02) -> 0102 -> 01/02 state machine for 0102 agents."
+      },
+      {
+        "line": 8,
+        "text": "- Agent join/leave lifecycle"
+      },
+      {
+        "line": 65,
+        "text": "- **Animation**: Ticker displays agent lifecycle in `foundup-cube.js`"
+      },
+      {
+        "line": 124,
+        "text": "- **Last Updated**: 2026-07-04"
+      }
+    ]
+  },
+  {
+    "id": "E24",
+    "path": "modules/foundups/agent_market/README.md",
+    "sha256": "62a950b9837c19d386c2d849f87f1e5b4c044888b982bb0efd204664e57f78cf",
+    "line_count": 66,
+    "anchors": [
+      {
+        "line": 13,
+        "text": "This module is intentionally generic and chain-agnostic through Prototype, with persistence adapters behind stable contracts."
+      },
+      {
+        "line": 33,
+        "text": "- Task lifecycle: `open -> claimed -> submitted -> verified -> paid`."
+      },
+      {
+        "line": 55,
+        "text": "- `tests/`: schema, lifecycle, and permission tests."
+      }
+    ]
+  },
+  {
+    "id": "E25",
+    "path": "modules/foundups/esingularity/README.md",
+    "sha256": "c0ec102118f278e671ea8ceddaab8eaa5289efb739b33500376183e35a3d150c",
+    "line_count": 71,
+    "anchors": [
+      {
+        "line": 11,
+        "text": "**Lifecycle**: Internal Proto"
+      }
+    ]
+  },
+  {
+    "id": "E26",
+    "path": "modules/foundups/foundup_registry.json",
+    "sha256": "c47813f1de1b6c916ae2d6f14640ab3560c5b5fb41d316b941c7e082444662bf",
+    "line_count": 693,
+    "anchors": [
+      {
+        "line": 16,
+        "text": "      \"prototype_gate_status\": \"passed\","
+      },
+      {
+        "line": 58,
+        "text": "      \"prototype_gate_status\": \"passed\","
+      },
+      {
+        "line": 100,
+        "text": "      \"prototype_gate_status\": \"pending\","
+      },
+      {
+        "line": 114,
+        "text": "      \"notes\": \"SPECIFIED_NOT_IMPLEMENTED per manifest. Architecture and AI hooks spec complete. No runnable implementation.\","
+      },
+      {
+        "line": 140,
+        "text": "      \"prototype_gate_status\": \"pending\","
+      },
+      {
+        "line": 180,
+        "text": "      \"prototype_gate_status\": \"pending\","
+      },
+      {
+        "line": 220,
+        "text": "      \"prototype_gate_status\": \"pending\","
+      },
+      {
+        "line": 260,
+        "text": "      \"prototype_gate_status\": \"not_applicable\","
+      },
+      {
+        "line": 299,
+        "text": "      \"prototype_gate_status\": \"not_applicable\","
+      },
+      {
+        "line": 338,
+        "text": "      \"prototype_gate_status\": \"not_applicable\","
+      },
+      {
+        "line": 352,
+        "text": "      \"notes\": \"ACCESS_SERVICE: YouTube monitor + stakeholder funnel. BC0 state machine implemented. DO NOT DELETE. 1500+ lines of code.\","
+      },
+      {
+        "line": 378,
+        "text": "      \"prototype_gate_status\": \"not_applicable\","
+      }
+    ]
+  },
+  {
+    "id": "E27",
+    "path": "docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md",
+    "sha256": "3bca1bbd1391247e641bf2ff950599d9d218e44593b4388a5c080ad40038d688",
+    "line_count": 216,
+    "anchors": [
+      {
+        "line": 4,
+        "text": "**Updated**: 2026-04-21 (LEDGER-RECON3 post-PR-queue-cleanup)"
+      },
+      {
+        "line": 92,
+        "text": "| `chrome_146_pin_workaround` | (local) | Pinned `version_main=146` in news_maps executor; Chrome 147 not yet rolled out |"
+      },
+      {
+        "line": 97,
+        "text": "| `pfmall_state_overlay_contract` | `14e8c6063` | `PFMALL_STATE_OVERLAY_CONTRACT.md` \u2014 state provider interface, overlay lifecycle |"
+      },
+      {
+        "line": 113,
+        "text": "| `pqn_wsp97_prototype_downgrade` | `343848ad5` (PR #394) | Doc-only PQN skills downgraded to prototype per WSP 97 |"
+      },
+      {
+        "line": 162,
+        "text": "| `softproto` | ARCHIVE_RECONCILE_NEEDED | read-only reconciliation only, not implementation | PMCTRL1 contract stabilization |"
+      },
+      {
+        "line": 171,
+        "text": "**Not an active implementation lane.** Do not revive as priority wave until reconciled against PMCTRL1 and current WRE contracts."
+      },
+      {
+        "line": 179,
+        "text": "Do NOT re-implement any slice in the Closed table above."
+      }
+    ]
+  },
+  {
+    "id": "E28",
+    "path": "modules/infrastructure/wre_core/tests/README.md",
+    "sha256": "5d9516549eced629ef0a3da34807f1b6c7a78689e4a54898fb807fbb4830ca76",
+    "line_count": 145,
+    "anchors": [
+      {
+        "line": 119,
+        "text": "promotion, or production RSI."
+      }
+    ]
+  },
+  {
+    "id": "E29",
+    "path": ".github/workflows/ci.yml",
+    "sha256": "55f64eddff1dd25063182787a7d42bbba2814ab07a4ce07e2e140930b7539313",
+    "line_count": 262,
+    "anchors": [
+      {
+        "line": 38,
+        "text": "      - name: Verify canonical test registry"
+      }
+    ]
+  }
+]

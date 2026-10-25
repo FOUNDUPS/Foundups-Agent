@@ -10,6 +10,14 @@
 
 Public API for AI Intelligence Overseer - MCP coordinator for Holo Qwen/Gemma agent teams.
 
+Current Holo A-grade composition is evidence-only. It reruns the public corpus,
+requires fixed quality floors, owner-loaded source-ranker identity, and one
+authenticated runtime-environment digest. The public benchmark keeps a single
+owner resident across its probe and corpus. The A-grade gate rejects unless
+every query receipt also asserts exact runtime closure. Installed dependency
+payload bytes are not yet verified, and there is no non-test caller or
+independent deployed signing trust; retrieval-quality RSI is unavailable.
+
 **Key Features**:
 - WSP 77 agent coordination (Qwen + Gemma + 0102)
 - WSP 54 role assignment (Agent Teams variant)
@@ -65,6 +73,14 @@ Execute one of the module-local M2M workflow skillz by name.
 - `payload`: skill-specific execution payload
 - `m2m`: when `True`, wrap response in WSP 99-style M2M envelope
 
+**Compile gate boundary**: `m2m_compile_gate` stages candidate content and checks
+YAML parsing. `gate_status=PASS` reports that check only. Required-reference
+retention, section coverage and semantic/instruction fidelity are not currently
+implemented gates. The direct sentinel call has structural validation only.
+The shim writes its existing JSONL outcome record in module memory and removes
+the staged file on YAML failure; it does not promote it. Boot/Skillz rejection
+remains in the sentinel. See the [dated preservation counterexample](../../../docs/operations/RSI_SWARM_DISPATCH.md#baseline-and-context-preservation-checkpoint--2026-09-13).
+
 **Returns (m2m=False)**:
 ```python
 {
@@ -91,6 +107,37 @@ Execute one of the module-local M2M workflow skillz by name.
 **Safety**:
 - SKILL/boot-prompt content is rejected by compile gate (must remain verbatim).
 - Stage promotion requires explicit `target_path` (no inferred wildcard target).
+- `m2m_holo_retrieval_benchmark` is query-only. It rejects `reindex=true`,
+  requires non-empty relevance judgments, binds every query to the current
+  HoloIndex generation/freshness receipt, and returns benchmark plus verifier
+  receipts. It does not write reports or promote a generation.
+  The runtime derives the canonical authority root and executes the governed
+  owner lifecycle through `scripts/reddog_holoindex_owner_query_once.py`.
+  Callers cannot inject an arbitrary callback, query a mismatched root, or
+  trigger query-time maintenance. Exact owner failure details are preserved.
+
+`evaluate_m2m_holo_retrieval_a_grade(...)` in the backend-content-bound callable
+`src/m2m_holo_retrieval_benchmark.py` facade delegates to the pure
+`src/m2m_holo_retrieval_grade_gate.py` composition gate. It accepts
+the repository root and fixed benchmark payload, re-runs the governed public
+corpus itself, then composes a separately produced sealed-corpus evaluation,
+its signature envelope, and an injected independent signature verifier. The
+default policy requires 30 disjoint cases, Recall/MRR/nDCG >= `0.95`, and p95
+latency <= `5000ms`. An accepted result is eligibility evidence only;
+`promotion_authorized` and `promotion_to_holoindex_performed` remain `false`.
+Those values are non-downgradable floors; injected policy may only strengthen
+them. The facade is content-bound and callable by backend composition, but is
+not registered as an AI Overseer/VSIX Skillz operation and has no non-test
+caller while independent evaluator trust administration remains absent.
+The candidate pins semantic retrieval mode and hashes the explicit Holo
+retrieval/ranking implementation surface, including the extracted
+`core/search_engine.py`; repository HEAD and replica generation bind the
+surrounding code and indexed data. Each owner query receipt must report that
+same digest from the runtime modules actually loaded by the owner process.
+It must also preserve the child-computed runtime-environment digest. A-grade
+composition separately requires
+`runtime_environment_exact_closure_verified=true`; current production owners
+emit false until installed distribution payload bytes are sealed and verified.
 
 ---
 
@@ -830,7 +877,7 @@ from modules.ai_intelligence.ai_overseer.src.holo_adapter import HoloAdapter
 
 `src/foundup_genesis/intake_packet_builder.py` -- **dry-run** intake: chat/idea text ->
 `FoundUpGenesisEnvelope` -> the existing OpenClaw genesis gate. It fills the builder/populator gap so
-the already-built genesis gate is reachable end-to-end. It never scaffolds, enqueues, or mutates.
+the existing genesis gate can evaluate a draft. It never scaffolds, enqueues, or mutates.
 
 ```python
 from modules.ai_intelligence.ai_overseer.src.foundup_genesis.intake_packet_builder import (
@@ -851,6 +898,15 @@ result = build_intake_packet_dry_run(idea_text, actor_id="0102", source_channel=
 `acceptance: observable | method | oracle | pass_condition` lines. Empty or unstructured input ->
 `NO_ENVELOPE`. The genesis validator (strict mode) is the authority on `GATE_PASSED`. Dry-run only:
 never calls FAM, Hermes, registry, or any writer (AST-guarded).
+
+**Commander data handoff:** an independently authorized `OpenClawIntent` may carry this draft in
+`metadata.genesis_envelope`. The existing orchestrator revalidates and detaches it into
+`FoundUpJob.payload.genesis_envelope`, retaining tenant/session/FoundUp identity. Malformed input,
+conflicting legacy payload copies, or conflicting parsed targets return `NOT_READY`. The job stays
+queued and dry-run; action/mode and server-authored policy flags retain their existing meaning.
+Public intake authentication permits a draft only. Neither this builder nor `requested_by`
+establishes commander entitlement, scaffold admission, registry publication, or worker execution.
+Typed genesis/scaffold digests remain unset here; the existing scaffold planner owns those recipes.
 
 ---
 

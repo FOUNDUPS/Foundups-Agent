@@ -1,0 +1,82 @@
+{
+  "schema": "0102_m2m_v1",
+  "ROLE": "verifier",
+  "ORIGIN": "internal_handoff",
+  "PRINCIPAL_REF": "012",
+  "L": "QA",
+  "S": {
+    "owner": "modules/platform_integration/elevenlabs_calls",
+    "read": [
+      "modules/platform_integration/elevenlabs_calls/README.md",
+      "modules/platform_integration/elevenlabs_calls/INTERFACE.md",
+      "modules/platform_integration/elevenlabs_calls/docs/SETUP.md",
+      "modules/platform_integration/elevenlabs_calls/tests/README.md"
+    ],
+    "write": []
+  },
+  "M": "qa",
+  "T": "JP-CALL-06",
+  "R": [
+    0,
+    5,
+    6,
+    21,
+    22,
+    34,
+    84,
+    97,
+    99
+  ],
+  "I": {
+    "shared_contract": "CONTRACT.md",
+    "single_carrier_adapter": true,
+    "delivery_requires_external_confirmation": true,
+    "automatic_redial": false,
+    "effect_boundary": "Each live scenario requires a concrete controlled target and instruction; no ambient or batch calling."
+  },
+  "O": [
+    "end-to-end acceptance report",
+    "redacted correlation references",
+    "host installation/run instructions",
+    "work_orders/results/JP-CALL-06.json (redacted; coordinator integrates)"
+  ],
+  "F": [
+    "Unresolved required dependency",
+    "Scope or authority mismatch",
+    "Credential disclosure risk",
+    "Attempt to claim unobserved live success"
+  ],
+  "X": {
+    "status": "waiting_dependencies",
+    "created_utc": "2026-09-11T00:00:00Z",
+    "timestamp_precision": "date; midnight is a date marker, not execution time",
+    "baseline_commit": "196976aea3516426552238e70be54e015c397999",
+    "depends_on": [
+      "JP-CALL-05"
+    ],
+    "objective": "Verify the full speak-to-0102, call-in-Japanese, report-result prototype in its actual host.",
+    "steps": [
+      "Identify the actual host and prove phone tool discovery, authenticated route and persistent journal availability.",
+      "Capture a real microphone instruction, inspect resolved recipient and Japanese message, and execute under the bound instruction authority.",
+      "Test both human and voicemail delivery with controlled recipients; correlate host request, provider conversation and recipient evidence.",
+      "Use isolated offline failure injection for crash/timeout/negation paths; verify live duplicate suppression without additional dialing.",
+      "Report outcome honestly to 012, including unconfirmed delivery when no direct confirmation exists."
+    ],
+    "acceptance": [
+      "Real microphone capture and real model inference reach the governed phone tool.",
+      "Human and mailbox confirm full Japanese message delivery through this host path.",
+      "The returned result correlates with the actual request and does not overclaim success."
+    ],
+    "token_budget": {
+      "analysis": 2500,
+      "planning": 1500,
+      "implementation": 2500,
+      "documentation": 2000
+    },
+    "coherence": {
+      "required_threshold": 0.618,
+      "measured": null
+    },
+    "rollback": "Revert only owned changes; preserve journal and evidence. Reconcile any external effects; never automatically redial."
+  }
+}

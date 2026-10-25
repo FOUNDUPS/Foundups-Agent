@@ -83,6 +83,7 @@ class VulnerabilityFinding:
     # Metadata
     scanner: str = ""                     # snyk, trivy, or semgrep
     raw_data: Dict[str, Any] = field(default_factory=dict)  # Original scanner output
+    finding_type: str = "dependency"
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
@@ -98,6 +99,7 @@ class VulnerabilityFinding:
             "fix_available": self.fix_available,
             "fix_version": self.fix_version,
             "scanner": self.scanner,
+            "finding_type": self.finding_type,
         }
 
 
@@ -174,6 +176,23 @@ class VulnerabilityReport:
         return json.dumps(self.to_dict(), indent=indent)
 
 
+def _records(payload: Dict[str, Any], key: str, *, nullable: bool = False) -> List[Dict[str, Any]]:
+    """Require recognized report collections; arbitrary JSON is not scan evidence."""
+    if not isinstance(payload, dict) or key not in payload:
+        raise ValueError("Missing scanner result collection")
+    records = payload[key]
+    if nullable and records is None:
+        return []
+    if not isinstance(records, list) or any(not isinstance(item, dict) for item in records):
+        raise ValueError("Invalid scanner result collection")
+    return records
+
+
+def _require_text(record: Dict[str, Any], key: str) -> None:
+    if not isinstance(record.get(key), str) or not record[key]:
+        raise ValueError("Invalid scanner finding field")
+
+
 def normalize_snyk_output(raw_json: Dict[str, Any], scan_id: str, target: str) -> VulnerabilityReport:
     """
     Normalize Snyk JSON output to VulnerabilityReport.
@@ -194,9 +213,15 @@ def normalize_snyk_output(raw_json: Dict[str, Any], scan_id: str, target: str) -
     }
     """
     findings = []
-    vulnerabilities = raw_json.get("vulnerabilities", [])
+    vulnerabilities = _records(raw_json, "vulnerabilities")
+    if raw_json.get("error") or raw_json.get("errors"):
+        raise ValueError("Scanner reported an error")
+    if raw_json.get("ok") is False and not vulnerabilities:
+        raise ValueError("Unsuccessful scanner report")
 
     for vuln in vulnerabilities:
+        _require_text(vuln, "id")
+        _require_text(vuln, "severity")
         fixed_versions = vuln.get("fixedIn", [])
         finding = VulnerabilityFinding(
             vuln_id=vuln.get("id", "UNKNOWN"),
@@ -246,13 +271,18 @@ def normalize_trivy_output(raw_json: Dict[str, Any], scan_id: str, target: str) 
     }
     """
     findings = []
-    results = raw_json.get("Results", [])
+    results = _records(raw_json, "Results", nullable=True)
+    if raw_json.get("error") or raw_json.get("errors"):
+        raise ValueError("Scanner reported an error")
 
     for result in results:
-        target_file = result.get("Target", "")
-        vulnerabilities = result.get("Vulnerabilities") or []
+        _require_text(result, "Target")
+        target_file = result["Target"]
+        vulnerabilities = _records(result, "Vulnerabilities", nullable=True) if "Vulnerabilities" in result else []
 
         for vuln in vulnerabilities:
+            _require_text(vuln, "VulnerabilityID")
+            _require_text(vuln, "Severity")
             fixed_version = vuln.get("FixedVersion")
             finding = VulnerabilityFinding(
                 vuln_id=vuln.get("VulnerabilityID", "UNKNOWN"),
@@ -268,6 +298,37 @@ def normalize_trivy_output(raw_json: Dict[str, Any], scan_id: str, target: str) 
                 raw_data=vuln,
             )
             findings.append(finding)
+
+        for category, finding_type, id_key in (
+            ("Secrets", "secret", "RuleID"),
+            ("Misconfigurations", "config", "ID"),
+            ("Licenses", "license", "Name"),
+        ):
+            for item in _records(result, category, nullable=True) if category in result else []:
+                _require_text(item, id_key)
+                _require_text(item, "Severity")
+                # Misconfiguration passes/exceptions are not vulnerabilities.
+                if category == "Misconfigurations":
+                    status = item.get("Status", "FAIL")
+                    if status not in {"PASS", "FAIL", "EXCEPTION"}:
+                        raise ValueError("Invalid configuration result status")
+                    if status != "FAIL":
+                        continue
+                cause = item.get("CauseMetadata") or {}
+                if not isinstance(cause, dict):
+                    raise ValueError("Invalid configuration location")
+                # Never retain secret Match/Code/Content or raw data. Reports are
+                # evidence about locations, not a second credential store.
+                findings.append(VulnerabilityFinding(
+                    vuln_id=item[id_key],
+                    title="Exposed secret" if finding_type == "secret" else item.get("Title", item[id_key]),
+                    severity=SeverityLevel.from_trivy(item["Severity"]),
+                    finding_type=finding_type,
+                    file_path=target_file,
+                    line_number=item.get("StartLine", cause.get("StartLine")),
+                    description="" if finding_type == "secret" else item.get("Description", ""),
+                    scanner="trivy",
+                ))
 
     return VulnerabilityReport(
         scan_id=scan_id,
@@ -298,10 +359,18 @@ def normalize_semgrep_output(raw_json: Dict[str, Any], scan_id: str, target: str
     }
     """
     findings = []
-    results = raw_json.get("results", [])
+    results = _records(raw_json, "results")
+    errors = _records(raw_json, "errors") if "errors" in raw_json else []
+    if raw_json.get("error"):
+        raise ValueError("Scanner reported an error")
 
     for result in results:
+        _require_text(result, "check_id")
+        _require_text(result, "path")
         extra = result.get("extra", {})
+        if not isinstance(extra, dict):
+            raise ValueError("Invalid Semgrep metadata")
+        _require_text(extra, "severity")
         start = result.get("start", {})
 
         finding = VulnerabilityFinding(
@@ -313,6 +382,7 @@ def normalize_semgrep_output(raw_json: Dict[str, Any], scan_id: str, target: str
             description=extra.get("message", ""),
             fix_available=False,  # Semgrep doesn't provide fix versions
             scanner="semgrep",
+            finding_type="sast",
             raw_data=result,
         )
         findings.append(finding)
@@ -323,4 +393,6 @@ def normalize_semgrep_output(raw_json: Dict[str, Any], scan_id: str, target: str
         scan_target=target,
         scan_timestamp=datetime.utcnow().isoformat() + "Z",
         findings=findings,
+        scan_success=not errors,
+        error_message="Semgrep reported incomplete scan coverage" if errors else None,
     )

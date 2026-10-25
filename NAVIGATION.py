@@ -5,8 +5,8 @@ NAVIGATION.py - WSP 87 Code Navigation Protocol Implementation
 This file maps problems to existing solutions to prevent vibecoding.
 0102 agents MUST consult this file BEFORE creating any new code.
 
-Status: ACTIVE - Fully functional with HoloIndex integration
-Last Updated: 2026-02-18 - Added Member Area (auth, dashboard shell, navigation)
+Status: ACTIVE curated map - Holo semantic retrieval remains fail-closed when stale
+Last Updated: 2026-08-29 - Added inert RedDog query-runtime builder authority components
 WSP Compliance: WSP 87 (Code Navigation), WSP 50 (Pre-Action Verification)
 
 COVERAGE:
@@ -26,6 +26,25 @@ ACHIEVEMENTS:
 # === NEED_TO: Problem -> Solution Mapping ===
 # Direct mapping of problems to existing code solutions
 NEED_TO = {
+    # AutoPost owns capture; shared Mall handoff is specified, not a live upload API.
+    "Shop clothing capture": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
+    "AutoPost multiple item photos": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
+    "private Mall listing": "modules/foundups/pfmall/INTERFACE.md",
+    "Shop capture implementation roadmap": "modules/foundups/pfmall/ROADMAP.md",
+    # Human-operated conversation skill; distinct from the message-only dialer
+    "kids educational episode editor": "modules/communication/youtube_shorts/src/kids_editor_server.py",
+    "15 second kids music captions": "modules/communication/youtube_shorts/src/kids_episode.py",
+    "kids video trend research": "modules/communication/youtube_shorts/src/kids_research.py",
+    "kids episodes foundup": "modules/foundups/kids_episodes/README.md",
+    "RedDog phone conversation skill": ".claude/skills/reddog-phone-conversation/SKILL.md",
+    "create Japanese call conversation brief": ".claude/skills/reddog-phone-conversation/SKILL.md",
+    "two phone translate English resume": ".claude/skills/reddog-phone-conversation/SKILL.md",
+
+    # Japanese message-call prototype and agent build assignments
+    "make a phone call in Japanese": "modules/platform_integration/elevenlabs_calls/README.md",
+    "Japanese call roadmap": "modules/platform_integration/elevenlabs_calls/ROADMAP.md",
+    "Japanese call M2M Prometheus work orders": "modules/platform_integration/elevenlabs_calls/work_orders/README.md",
+
     # GotJunk Classification Logic
     "handle item classification": "modules/foundups/gotjunk/frontend/App.tsx:handleClassify()",
     "prevent duplicate item creation": "modules/foundups/gotjunk/frontend/App.tsx:handleClassify() - race condition guards",
@@ -35,7 +54,7 @@ NEED_TO = {
 
     # Generic duplicate prevention (existing implementations)
     "duplicate item prevention": "modules/platform_integration/social_media_orchestrator/src/core/duplicate_prevention_manager.py",
-    "social media duplicate posting": "modules/platform_integration/social_media_orchestrator/src/core/duplicate_prevention_manager.DuplicatePreventionManager.mark_as_posted()",
+    "social media duplicate posting": "modules/platform_integration/social_media_orchestrator/src/core/duplicate_prevention_manager.py:DuplicatePreventionManager.mark_as_posted()",
 
     # Other common patterns
     "user location detection": "modules/foundups/gotjunk/frontend/App.tsx:getCurrentPositionPromise()",
@@ -116,6 +135,38 @@ NEED_TO = {
     "openclaw security tests": "modules/ai_intelligence/ai_overseer/tests/test_openclaw_security_sentinel.py",
     "openclaw dae tests": "modules/communication/moltbot_bridge/tests/test_openclaw_dae.py",
     "moltbot bridge digital twin": "modules/communication/moltbot_bridge/README.md",
+    "reddog holo exact main postmerge controller": "modules/communication/moltbot_bridge/src/holoindex_postmerge_runtime_controller.py:run_holoindex_postmerge_runtime_once()",
+    "reddog holo postmerge cli": "scripts/reddog_holoindex_postmerge_runtime_once.py",
+    "reddog holo postmerge completion policy": "modules/communication/moltbot_bridge/src/holoindex_postmerge_supervisor_policy.py:validate_supervisor_holoindex_postmerge_completion()",
+    "reddog holo query builder authority receipt": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_contract.py:builder_authority_receipt()",
+    "reddog holo query builder process proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_process.py:prove_builder_process_authority()",
+    "reddog holo query base prefix consumers": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_base_prefix_consumers.py",
+    "reddog holo query builder packaging proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging.py:prove_builder_packaging_authority()",
+    "reddog holo query builder packaging wheel admission": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_wheel.py:admit_pinned_builder_packaging_wheel()",
+    "reddog holo query builder packaging source generation": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_materializer.py:materialize_pinned_builder_packaging_source()",
+    "reddog holo query builder packaging source verification": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_verifier.py:verify_builder_packaging_source_generation()",
+    "reddog holo query builder packaging source topology": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_packaging_source_topology_windows.py:pinned_builder_packaging_source_generation()",
+    "reddog holo query builder dependency composition": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_dependency_composition.py:compose_pinned_builder_dependency_runtime()",
+    "reddog holo query builder dependency composition contract": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_dependency_composition_contract.py:BuilderDependencyCompositionBinding",
+    "reddog holo query builder runtime composition": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition.py:compose_pinned_builder_runtime()",
+    "reddog holo query builder runtime composition contract": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_runtime_composition_contract.py:BuilderRuntimeCompositionBinding",
+    "reddog holo query builder pinned git proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_git.py:prove_pinned_git_authority()",
+    "reddog holo query builder source proof": "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_runtime_builder_source.py:prove_builder_source_authority()",
+    "reddog holo query builder scale proof": "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_runtime_builder_scale.py",
+    "reddog main readonly operational bootstrap": "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap.py:run_reddog_main_readonly_operational_bootstrap()",
+    "reddog main bootstrap result projection": "modules/communication/moltbot_bridge/src/reddog_main_readonly_operational_bootstrap_result.py:RedDogMainReadonlyBootstrapResult",
+    "reddog authority profile typed rehydration": "modules/communication/moltbot_bridge/src/reddog_authority_profile_rehydration.py:rehydrate_authority_profile_runtime()",
+    "reddog authenticated conversation scope": "modules/communication/moltbot_bridge/src/reddog_authenticated_conversation_scope_state.py",
+    "reddog resident conversation request scope binding": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_scope_binding.py:bind_resident_conversation_request_to_authenticated_scope()",
+    "reddog resident conversation request idempotency": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_request_journal.py:reserve_bound_resident_conversation_request()",
+    "reddog resident conversation request journal store": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_request_journal_store.py:AgentDbResidentConversationRequestJournal",
+    "reddog resident conversation admission proof": "modules/communication/moltbot_bridge/src/reddog_conversation_scope_capability.py:consume_verified_scope_authority_for_request_journal()",
+    "reddog current conversation session authority": "modules/communication/moltbot_bridge/src/reddog_conversation_session_authority_source.py:lease_current_generation_conversation_session()",
+    "reddog trusted new conversation scope resolution": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_new_scope_resolution.py:resolve_resident_conversation_new_scope_request()",
+    "reddog current session new conversation scope admission": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_new_scope_admission.py:create_current_generation_resident_conversation_scope()",
+    "reddog durable first turn resolution link": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_first_turn_resolution.py:resolve_current_generation_resident_conversation_first_turn()",
+    "reddog first turn resolution contract": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_first_turn_contract.py",
+    "reddog current session conversation admission": "modules/communication/moltbot_bridge/src/reddog_resident_conversation_admission.py:reserve_current_generation_resident_conversation_request()",
     "moltbot bridge workspace skills": "modules/communication/moltbot_bridge/workspace/AGENTS.md",
 
     # M2M Compression (Machine-to-Machine 0102-0102 Documentation)
@@ -137,12 +188,20 @@ NEED_TO = {
     "coordinate qwen and gemma agents": "modules/infrastructure/wsp_orchestrator/src/wsp_orchestrator.py:WSPOrchestrator.route_to_agent()",
     "mcp server management": "modules/infrastructure/mcp_manager/src/mcp_manager.py:MCPManager",
     "auto-start mcp servers": "modules/infrastructure/mcp_manager/src/mcp_manager.py:MCPManager.ensure_server_running()",
+    "codex lifecycle hooks": "modules/infrastructure/codex_hooks/src/codex_hooks.py:dispatch_hook()",
+    "codex prompt secret guard": "modules/infrastructure/codex_hooks/src/codex_hooks.py:handle_user_prompt_submit()",
+    "codex tool safety guard": "modules/infrastructure/codex_hooks/src/codex_hooks.py:handle_pre_tool_use()",
     "wre skills loading": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:WRESkillsLoader",
     "progressive disclosure for skills": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:WRESkillsLoader.load_skill_on_demand()",
     "skillz wardrobe": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:WRESkillsLoader - Wardrobe Skills = advanced prompting system (see WSP 96)",
     "wardrobe skills": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:WRESkillsLoader - Like clothing outfits the agent wears for specific tasks",
     "load skillz": "modules/infrastructure/wre_core/skillz/wre_skills_loader.py:WRESkillsLoader.load_skill_on_demand()",
     "wre skillz protocol": "WSP_framework/src/WSP_95_WRE_SKILLz_Wardrobe_Protocol.md - Micro Chain-of-Thought paradigm (canonical WSP 95)",
+    "wre fmas finding contract": "modules/infrastructure/wre_core/src/fmas_finding_contract.py:FMASFinding",
+    "wre wsp62 finding parser": "modules/infrastructure/wre_core/src/fmas_wsp62_contract.py:parse_wsp62_finding_text()",
+    "wre wsp62 health audit": "modules/infrastructure/wre_core/src/fmas_health_triage.py:run_wsp62_health_audit()",
+    "wre improvement job contract": "modules/infrastructure/wre_core/src/improvement_job_contract.py:ImprovementJob",
+    "reddog improvement direction": "modules/infrastructure/wre_core/src/reddog_direction.py:RedDogDirector",
 
     # Centralized DAEmon (Cardiovascular System)
     "centralized daemon monitoring": "modules/infrastructure/dae_daemon/src/dae_daemon.py:CentralDAEmon",
@@ -163,6 +222,7 @@ NEED_TO = {
     "wsp_00 awakening script": "WSP_agentic/scripts/functional_0102_awakening_v2.py",
 
     # Digital Twin (Core Components)
+    "digital twin resident conversation transport": "modules/ai_intelligence/digital_twin/src/resident_conversation_transport_contract.py:request_from_mapping()",
     "digital twin voice memory": "modules/ai_intelligence/digital_twin/src/voice_memory.py:VoiceMemory",
     "build voice memory index": "modules/ai_intelligence/digital_twin/src/voice_memory.py:VoiceMemory.build_index()",
     "query voice memory": "modules/ai_intelligence/digital_twin/src/voice_memory.py:VoiceMemory.query()",
@@ -277,7 +337,7 @@ NEED_TO = {
 
     # WRE Skills - Autonomous Engagement (NEW - 2025-12-05)
     "autonomous youtube engagement": "modules/communication/video_comments/skillz/qwen_studio_engage/ - Agentic Studio comment engagement",
-    "youtube studio skillz": "modules/communication/video_comments/skillz/qwen_studio_engage/SKILL.md - Qwen+Gemma autonomous engagement",
+    "youtube studio skillz": "modules/communication/video_comments/skillz/qwen_studio_engage/SKILLz.md - Qwen+Gemma autonomous engagement",
     "studio comment like reply": "modules/communication/video_comments/skillz/qwen_studio_engage/executor.py - Vision-based engagement execution",
     "youtube studio ui reference": "modules/communication/video_comments/skillz/qwen_studio_engage/VISION_UI_REFERENCE.md - Precise Vision targeting",
 
@@ -337,12 +397,12 @@ NEED_TO = {
     "score viral potential": "modules/ai_intelligence/video_indexer/src/clip_generator.py:ClipGenerator._score_virality()",
     "video index storage": "modules/ai_intelligence/video_indexer/src/video_index_store.py:VideoIndexStore",
 
-    # Foundups(R)Agent / RedDog external extension lane (012-facing)
-    "foundups agent extension Copy MD Work Trail Run Trace": "extensions/foundups_advisory_workers/extension.js",
-    "foundups advisory workers extension Copy MD": "extensions/foundups_advisory_workers/extension.js",
-    "buildCopyMarkdown Redaction Gate Report Governed Handoff": "extensions/foundups_advisory_workers/extension.js:buildCopyMarkdown",
-    "extension.js WSP_97 truth label compliance review": "extensions/foundups_advisory_workers/extension.js",
-    "RedDog external worker acceptance baseline": "extensions/foundups_advisory_workers/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md",
+    # RedDog extension lane (012-facing)
+    "foundups agent extension Copy MD Work Trail Run Trace": "extensions/reddog/extension.js",
+    "foundups advisory workers extension Copy MD": "extensions/reddog/extension.js",
+    "buildCopyMarkdown Redaction Gate Report Governed Handoff": "extensions/reddog/extension.js:buildCopyMarkdown symbol",
+    "extension.js WSP_97 truth label compliance review": "extensions/reddog/extension.js",
+    "RedDog external worker acceptance baseline": "extensions/reddog/docs/REDDOG_EXTERNAL_ACCEPTANCE_BASELINE_PHASE1.md",
     "advisory_model_once redaction gate bridge OpenRouter": "scripts/advisory_model_once.py",
     "Foundups Agent OpenRouter bridge redaction": "scripts/advisory_model_once.py",
 }
@@ -467,8 +527,6 @@ DAE_ARCHITECTURE = {
     "dMRV integration": "WSP_framework/src/WSP_29_CABR_Engine.md - Section 2.5: Digital MRV Framework 3.0 attestation",
     "participation score definition": "WSP_framework/src/WSP_29_CABR_Engine.md - Section 2.4: FAM-derived part_score components",
     "anti-sybil agent identity": "WSP_framework/src/WSP_29_CABR_Engine.md - Section 6: Layered Sybil defense (L1-L5)",
-    "foundup death sunset protocol": "WSP_framework/src/WSP_27_pArtifact_DAE_Architecture.md - Section 13: 3-phase sunset (WARNING→WIND-DOWN→DISSOLUTION)",
-
     # WSP 26: 21M Token Model + Subscription + Blockchain (v3.0)
     "21M token model every foundup bitcoin": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.7.1: 21M fixed supply per FoundUp, divisible to 8 decimals",
     "ubiquitous gateway any token BTC": "WSP_framework/src/WSP_26_FoundUPS_DAE_Tokenization.md - Section 4.8: Any token → converted to BTC inside ecosystem",

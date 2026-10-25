@@ -1,0 +1,7 @@
+{
+  "test_phone": {
+    "enabled": false,
+    "phone_number": "REPLACE_WITH_YOUR_TEST_RECIPIENT_IN_+81_FORMAT",
+    "recipient_name_ja": "テスト受信者"
+  }
+}

@@ -1,0 +1,155 @@
+# Project eSingularity interface
+
+## Domain identity contract — non-negotiable
+
+This is one FoundUp and one deployed frontend with two deliberately different public homepages:
+
+| Concern | eSingularity.ai | YUMORI.me / www.YUMORI.me |
+| --- | --- | --- |
+| Public purpose | Fukui project and vision | National YUMORI movement, case for support, and preparatory-committee conversion |
+| Root-page source | `frontend/app/page.tsx` | `frontend/app/yumori/page.tsx` |
+| Root selection | Normal filesystem `/` route | Internal hostname-specific `/` → `/yumori` rewrite |
+| Browser hostname | Remains eSingularity.ai | Remains YUMORI.me; no cross-domain redirect |
+| Safe edit boundary | May evolve without replacing the movement page | May evolve without replacing the project page |
+
+Agents resolving merges or synchronizing a Sites checkout must preserve **both** page files and verify both hostnames. Similar subject matter, shared components, or one shared deployment never authorizes collapsing the pages. `yumori.info` is a separate external forwarding rule and is not an alternate YUMORI content source.
+
+## Website task scope and navigation goal
+
+Apply the website operations skill to the named site or the site established by the active task. eSingularity.ai explains the Fukui project and directs participation to YUMORI; YUMORI.me builds the movement and preparatory committee. A page-specific change preserves the other homepage; shared ticker edits intentionally reach both. Audit shared dependencies without expanding the redesign scope.
+
+The current eSingularity redesign brief calls for three to four primary content tabs, with supporting detail grouped beneath a clear visitor journey. Preserve JHR access, participation actions, language controls and the shared ticker. Labels/grouping remain part of the active redesign; this is a specified target, not an implemented navigation change. It does not change YUMORI.me's WHY / WHAT / HOW funnel.
+
+## Filesystem routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | eSingularity project/vision landing on eSingularity.ai |
+| `/yumori` | YUMORI movement, case for support, participation and evidence; also served internally at YUMORI.me `/` |
+| `/vote-no` | YUMORI.me civic-action record: historical September 25 VOTE NO campaign, current post-vote PPP/PFI request, privacy-bounded council/mayor messages, and official contact routes |
+| `/future` | 福井の未来 / community-benefit explanation |
+| `/team` | Verified public team directory |
+| `/team/[slug]` | Individual public profile |
+
+## YUMORI presentation contract
+
+- eSingularity.ai is the canonical home of the project vision; YUMORI.me remains the movement/join surface.
+- The landing page mounts the presentation at `#yumori-deck`, immediately after the existing hero.
+- The existing campaign ticker contains exactly one `NEW` notification linking to that anchor; the ticker itself is not replaced or duplicated.
+- `frontend/content/yumori-vision.ts` is the canonical content boundary for the current real-building 10-slide vision. Japanese is authored first; English and Portuguese are derived states.
+- `frontend/content/yumori-presentation.ts` remains the legacy/detail presentation source used by existing campaign evidence and translation contracts; do not silently merge the two truth layers.
+- The visual deck is built from the 2026-09-11 real Sukatto Land Kuzuryu photo set and generated adaptive-reuse concepts. The runtime serves one optimized vertical sprite at `frontend/public/vision/vision-sprite.jpg`; structured text/evidence stays in HTML/TypeScript for accessibility, search, translation and RedDog grounding.
+- The component presents ten 16:9 slides with previous/next controls, direct slide selectors, touch swiping, play/pause, reduced-motion handling and keyboard Left/Right/Escape support.
+- `?vision=1&slide=N#yumori-deck` is the canonical deep-link form for opening the deck full screen at a specific slide. Full-screen rendering uses `contain`/whole-slide semantics: no slide text may be cropped.
+- Slide 01 is the real-building reuse vision. Slide 02 separates reported demolition cost from modeled five-year revenue/FCFE. Slides 03-10 cover D-K culture, onsen/wellness, AI rice field, COG DC heat reuse, 60 FoundUps/eSingularity Lab plus B1 gym/recovery, local problem-to-FoundUp, Fukui distributed-compute prototype, and the closing choice.
+- Bathing visuals must remain private/screened and non-sexualized; public circulation and bath zones are not depicted as mixed.
+- D-K visual language may be inspired by Akira Hasegawa's Digital Kakejiku work, but Hasegawa participation or headquarters status is never represented as committed without separate agreement.
+- The full design/provenance record is `docs/YUMORI_VISION_DECK_20260911.md`.
+
+## Japanese-first public copy contract
+
+- Japanese (`html lang="ja"`) is the canonical public reading experience. English-only structural labels are not allowed to leak into the Japanese tab except proper names, the approved bilingual campaign phrases, or technical identifiers such as `COG DC`, `D-K`, `AI`, `eSingularity`, and a defined `FoundUp` term.
+- The [shared branding and language section](skills/website-update/SKILL.md#shared-branding-and-language--both-sites) is authoritative for branded public labels on both sites, including YUMORI.me's `.me`, the JOIN action, the Japanese-first guardian lockup and the katakana JHR series name. Supporting explanations must not replace those labels. English selection must render the affected content in English; `html.lang` alone is not translation. This specifies required behavior and does not assert that legacy surfaces already comply.
+- Public-facing `Innovation Hub` wording is replaced by `イノベーション・スペース` / `Innovation Space`. The space is for people and teams; a person is not a FoundUp.
+- `FoundUp` names a problem-solving project. Japanese copy should introduce it as `FoundUpプロジェクト` or `課題解決プロジェクト` when the audience may not know the term. Do not use `FoundUps` as a label for people.
+- Floor labels in Japanese are purpose-based: `下層階 · 温泉・地域スペース`, `3階 · 挑戦・育成スペース`, `最上階 · 実証・発展スペース`, and `別棟 · COG DC`.
+- The Japanese surface uses Japanese section labels for building value, visitor economy, council decision, AI rice-field explanation, community participation, meetings, and calls to action instead of decorative English headings.
+- `frontend/components/JapaneseSurfacePolisher.tsx` is the bounded compatibility layer for legacy hard-coded labels while route-by-route copy is migrated to a true structured locale source. It must preserve English and Portuguese equivalents when the language switcher changes `html.lang`.
+
+## YUMORI economic and node-sizing contract
+
+The repository calculation authority is `src/yumori_economic_model.py`; the current Drive FIN workbook is the formula-driven working projection and feasibility-interview surface.
+
+The current sizing chain is:
+
+`customer/service demand → annual revenue/resource demand → GPU/CPU/storage/network → IT kW → facility kW → utility-confirmed capacity`.
+
+- No current site has a confirmed deliverable kW/MW value.
+- Hanyu is the conditional initial-priority grid-first candidate, not a 5 MW commitment.
+- Shimousaka is the second/future expansion candidate; its larger site does not establish electrical capacity.
+- Sukatto remains the regional human-facing hub; its compute size is also demand-led.
+- The financial-floor facility-kW output is a viability metric under the current pricing/Opex/debt scenario, not a build target.
+- The legacy 1 MW / 384-GPU scenario remains only for audit parity.
+- Heat value is capped by recoverable, deliverable, actually demanded thermal energy.
+- The JHR infrastructure-flow ledger keeps undisclosed amounts null and does not convert relationships into YUMORI revenue or funding.
+
+## FoundUps shell contract
+
+| Field | Value |
+| --- | --- |
+| `foundup_id` | `esingularity_001` |
+| Landing namespace | `/f/esingularity_001` |
+| App namespace | `/f/esingularity_001/app` |
+| Tenant data namespace | `idb_esingularity_001` |
+| External entry URL | `https://esingularity.ai/` |
+
+The Foundups shell owns discovery and routing. The eSingularity module owns campaign content, product UI, public routes, and its deployment.
+
+## Shared campaign ticker
+
+Both homepages render the same `CampaignTicker.tsx`. The project page uses `<CampaignTicker />`; the movement page uses `<CampaignTicker movement />`, placing it in normal flow and resolving project-only fragment links to eSingularity.ai. The component polls the dedicated `live/yumori-field-status` branch's `content/current-field-status.json` once per minute; one payload contains authored Japanese, English and Portuguese labels/messages, an allowed HTTPS destination, visibility, and explicit Japan-time update/expiry timestamps. Invalid, hidden or expired data falls back to the durable VOTE NO action. The copy on `main` is the compiled safety fallback and schema example, not a second independently maintained live source. The ticker owns its localized rendering and is excluded from the legacy DOM translation map. Do not copy ticker text into either page.
+
+The YUMORI language controls occupy a dedicated header slot above the ticker. Scrolling duration is calculated from rendered content width, targeting 10 px/s up to 600px, 20 px/s up to 1200px and 32 px/s above that; a 48-second minimum loop duration may slow short content further. On phones the ticker is fixed to the safe-area-aware bottom edge; stopping it exposes a horizontally swipeable, snap-aligned action strip. Tablet and desktop placement remains unchanged. The desktop read-all control wraps the primary set, and reduced motion disables animation. Council, mayor and contact actions link to the canonical YUMORI.me `/vote-no` record; obsolete monk-status promotion is not part of the ticker.
+
+## Shared external actions
+
+- Canonical LINE invitation: `https://line.me/ti/p/baXEozL_Q6`
+- Header and campaign LINE actions use the same shared URL.
+- Event state is centralized in `frontend/lib/event.ts`.
+- The existing `music.yumori.me` playlist route remains the soundtrack destination until approved local media exists.
+
+## Hosting contract
+
+The Sites project configuration remains at `frontend/.openai/hosting.json`. The frontend uses Vinext/Next App Router with Cloudflare-compatible output and the existing D1 binding declared by Sites.
+
+### Domain roles — one deployment, separate front pages
+
+| Public entry | Required behavior |
+| --- | --- |
+| `https://yumori.me/` | Serve the existing `app/yumori/page.tsx` movement/case-for-support page internally; keep YUMORI.me visible |
+| `https://www.yumori.me/` | Same movement page when this alias is bound to the project |
+| `https://esingularity.ai/` | Keep the existing `app/page.tsx` project/vision page |
+| `https://yumori.info/` | Preserve the existing external redirect to eSingularity.ai |
+
+`frontend/next.config.ts` owns the executable host mapping. A host-restricted `beforeFiles` rewrite maps only `/` on YUMORI.me/www to `/yumori`, before the existing project homepage is selected. It does not redirect visitors to another origin, copy either page, change a database, or rewrite all paths. JHR, API, asset and explicit `/yumori` paths remain unchanged. Other hosts, including preview hosts, keep their normal routes.
+
+**Publication gate:** committed configuration is not proof that production is fixed. The existing Sites project must receive the patch and bind the intended YUMORI host(s), with HTTPS and original-host forwarding verified. Retrieve the DNS records required by Sites rather than guessing them; preserve nameservers, mail records and unrelated subdomains. Leave YUMORI.info forwarding intact. Compare live Sites source with GitHub before publishing so newer live content is not overwritten by an older checkout. Record the deployed version/source receipt and verify direct plus client-side navigation, canonical metadata, query strings, signup, JHR and cache behavior on both hosts before reporting restoration.
+
+**Merge/deployment gate:** any branch that changes `frontend/app/page.tsx`, `frontend/app/yumori/page.tsx`, or `frontend/next.config.ts` must be checked against the domain matrix above. A valid change may update one experience while the other is being developed in another branch or session; reconciliation must keep both latest intended surfaces. Never solve a conflict by choosing one landing page for both hostnames.
+
+## Safety boundary
+
+- No secrets belong in the frontend or module manifests.
+- No token or investment surface is enabled.
+- Public financial claims remain governed by `frontend/audit/SOURCE_OF_TRUTH.md`.
+- The slide-02 financial figures are explicitly modeled feasibility outputs, not forecasts or guarantees; they must not be combined with the municipal demolition estimate as though they were the same accounting measure.
+- Unverified event details stay disabled rather than being inferred.
+- COG DC capacity, heat recovery, demand, economics, 24-hour onsen operations, bath scale, 60-FoundUp occupancy, basement program and national reuse remain proposals pending validation.
+- Akira Hasegawa is not represented as committed to the project.
+- Public academic profiles are labeled as outreach candidates only; no membership or support is implied.
+
+## Three-site portfolio allocation interface
+
+`src/yumori_economic_model.py` exposes `SiteCost`, `GrantAllocation`,
+`SiteFinancialInputs`, `AnnualCashInputs`, `PortfolioInputs`, `PortfolioResult`,
+`default_portfolio_sites()` and `run_portfolio_model()`. The implementation resides
+in `src/yumori_portfolio_model.py` to keep legacy and demand-sizing logic bounded.
+
+`None` is missing, never zero. Independent costs retain evidence classes and
+sources. Grants require exact AWARDED status and award evidence; duplicate
+allocation IDs fail. Excluded-site funding cannot silently transfer to another
+site. Hanyu cash is computed without depending on Sukatto inclusion or gate status.
+Economic affordability and gated deployment are separate outputs. All 24 services
+and legacy five-year parity outputs remain unchanged.
+
+## Costed planning API
+
+`load_planning_assumptions()` reads the versioned planning data; `run_planning_scenario(name="base", data=None)` returns demand-derived design, independent cost lines, debt/cash driver schedules, later-site standalone cash and the canonical portfolio result. Evidence readiness remains separate from numeric scenario results. `yumori_fin_projection.build_projection()` emits bounded native FIN batches and performs no network mutation.
+
+## Community interest security contract — 2026-10-10
+
+POST `/api/interest` accepts JSON only, streams at most 8 KiB before parsing, rejects cross-origin browser requests, and preserves the existing consent/field validation and honeypot. Responses are noncacheable. Invalid JSON/fields return 400, oversized input 413, wrong content type 415, origin rejection 403, durable admission rejection 429 with Retry-After, and storage failure 503.
+
+D1 admits at most five submissions per ingress client in a rolling hour and 100 globally per hour, and one normalized email per 24 hours. The guarded insert and admission receipt run in one transaction. Current/previous daily client digests preserve the rolling window across UTC midnight; no raw IP is stored and stale admission metadata is pruned. These application limits bound stored submissions, not volumetric traffic or D1 request charges; edge-level abuse controls remain an operations concern. Missing Cloudflare ingress metadata shares a conservative quota; forwarded headers are not trusted. Existing interest records are preserved.
+
+Unpublished portraits and unused unblurred originals are staged outside `public/`. This stops new static serving but does not erase Git history or previously fetched copies. Approved 012/0102 profile imagery stays published.

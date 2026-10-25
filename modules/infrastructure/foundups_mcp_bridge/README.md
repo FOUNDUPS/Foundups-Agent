@@ -4,6 +4,474 @@ Private, read-only MCP bridge for AI-assisted architectural execution.
 
 **Version**: 1.4.0 (perception + recall + state compression)
 
+## MCP runtime compatibility
+
+The HTTP launcher requires the exact quartet in `requirements.txt`: FastMCP
+3.2.0, MCP 1.30.0, Pydantic 2.12.3 and Uvicorn 0.38.0. Update these declarations
+and `scripts/launch.py:MCP_RUNTIME_VERSIONS` together. Older environments fail
+the capability gate; changing source does not upgrade or activate an installed
+service.
+
+On Windows, server and readiness children use the direct base interpreter for
+process ownership and explicitly process the selected virtual environment's
+site-packages startup hooks. This preserves dependencies such as PyWin32 that
+`PYTHONPATH` alone cannot initialize. The capability probe suppresses bytecode
+explicitly with `-B`, including when Python's isolated mode ignores environment
+settings. See [test setup and scope](tests/README.md#mcp-runtime-compatibility)
+and the existing [runtime assumption audit](docs/clarity/REDDOG_CHATGPT_HOLO_QUERY_BUNDLE_MCP_ASSUMPTION_AUDIT_20260821.md).
+
+## Governed Holo evidence and clean-runtime boundary
+
+Static documentation is not live route authority. Consult generation-bound
+query, activation, and WSP_97 receipts for the current head. Retrieval and
+maintenance-replica RSI are usable, but A-grade and retrieval-quality RSI stay
+false until quality floors, independent promotion/rollback, candidate-bound
+learning, and exact runtime closure all pass.
+
+Phase 2A defines an inert clean query-runtime candidate schema and positive
+distribution graph over one composition, exact dependency bytes, declarations,
+clean exact-HEAD source identity, and selected modules/origins. Identity,
+markers, wheels, executable roles, and subprocess declarations fail closed.
+Public build/reproof reject until a sealed builder is bound. Phase 2B adds inert
+process/packaging/pinned-Git/source/receipt components but still supplies no
+authenticated producer; see the [roadmap](ROADMAP.md) and [assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_AUTHORITY_ASSUMPTION_AUDIT_PHASE2B.md).
+
+Phase 2C1 adds only an inert source-wheel admission prerequisite. On Windows,
+`admit_pinned_builder_packaging_wheel(...)` holds the exact O:/E: source parent
+and file from before its single bounded read through raw ZIP/distribution proof
+and final identity reproof. It accepts only the repository-reviewed filename,
+74,366-byte size, and SHA-256 for `packaging==26.0`; the exact member set,
+deflate streams, Windows-safe names, METADATA, WHEEL, and RECORD must agree.
+The production API performs no network access, download, extraction,
+installation, publication, import, or execution. The PyPI comparison is not a
+signature or durable authenticated upstream-provenance proof. Builder-runtime,
+loader/native/subprocess/exact-runtime, write-denial, activation, A-grade, and
+retrieval-RSI authority remain false. Persistent source generation is the
+separate [Phase 2C2a interface gate](docs/clarity/REDDOG_BUILDER_PACKAGING_SOURCE_INTERFACE_PHASE2C2A.md); see the
+[Phase 2C1 assumption audit](../../../docs/audits/security/HOLOINDEX_QUERY_RUNTIME_BUILDER_PACKAGING_WHEEL_ASSUMPTION_AUDIT_PHASE2C1.md).
+
+Phase 2C2a now persists the exact retained-handle-read wheel bytes and only the
+already-admitted member bytes as one wheel-bound, content-addressed inert
+source generation. The generation identity cross-binds the reviewed wheel,
+strict archive/distribution digests, and the exact extracted dependency-tree
+digest, so a different wheel encoding cannot alias an identical tree. Windows
+writes use create-new files and O(depth) directory leases; staging and the
+atomic no-replace target each receive two consecutive complete full-byte
+wheel-to-tree passes. During pass two, bounded raw handles retain every admitted
+file and child directory; exit reproves each handle and complete live topology
+before release. Owned failures are preserved by no-delete quarantine.
+Public verification independently requires the fixed reviewed wheel bytes but
+never trusts a persisted lease boolean. Durable reproof returns both lease
+claims false. The live public materializer reports current-verification lease
+authority on every call and publication-time authority only for a generation
+that call actually publishes; reuse cannot inherit the historical claim.
+The private synthetic seam remains explicitly non-authoritative.
+Public bindings are path-free and expose every authority/nonclaim field. The
+destination is restricted to O:/E: before mutation. The exact O: artifact
+passed first publication plus 200 full reuses
+in 105.09 seconds with unchanged source bytes and bounded handles/RSS.
+
+Phase 2C2b sequentially proves source S1, its inert dependency, then source S2
+with durable S1/S2 identity and exact tree-generation equality; it adds no
+cross-store lock or rollback. Phase 2C3a now passes that exact dependency into
+the existing base/runtime-composition materializer and cross-binds all durable
+dependency fields. The [focused interface](docs/clarity/REDDOG_BUILDER_RUNTIME_COMPOSITION_INTERFACE_PHASE2C3A.md)
+keeps the result path-free and does not carry source live-proof truth forward.
+The join launches nothing and creates no artifact beyond the existing
+descriptor-only composition. Real base layouts use
+`<generation>/python-runtime/python.exe`; Phase 2C3b makes both older
+process/candidate consumers use the exact `base_prefix_root` and rejects the
+obsolete topology. Phase 2C3c adds one held, isolated, fixed-path, bounded child with full surrounding reproof.
+Its result is evidence, not authority; 3.12.10 patch debt, provenance, closure, effects, write denial, activation, A-grade, and RSI remain false.
+
+## Holo retrieval runtime identity
+
+The shared owner-acquisition policy owns the two-attempt ceiling, 300-second
+operation ceiling, PID-sharded ports, and exact transient allowlist. Policy is
+no longer duplicated in the root script. Thirty-two bounded acquisition cycles
+form one deterministic 64-port permutation per process; cycle zero preserves
+the original pair. The one-shot binds a caller-selected cycle into its result
+and query receipt. The activation controller still calls the default cycle for
+candidate and immediate post-commit proofs, so disjoint post-completion cycle
+allocation remains a focused reliability repair. No arbitrary invalid result
+is retryable: only independently verified exhausted allowlisted transients may
+enter the bounded second proof.
+
+The private query owner emits a secret-free
+`runtime_environment_digest` computed inside the authenticated child. It binds
+the exact executable content, ABI/platform, verified backend source closure,
+installed distribution build records, immutable replica/model artifacts, and
+observed allowlisted behavior controls. Required CPU/offline/read-only settings
+must already be effective; the manifest never invents forced values. Parent
+prediction is not accepted for production, including sealed or alternate
+interpreters.
+
+This is not yet exact dependency-byte assurance. Installed package payload
+files are not all rehashed, so queries explicitly report
+`runtime_environment_exact_closure_verified=false` and A-grade admission
+rejects. Earlier post-restart diagnostics exceeded 60/180 seconds; the latest
+base-bound governed query passed on attempt one inside the 300-second CLI wall.
+Resident exact-current-main owner activation and dependency-byte sealing remain
+P0. Query-time reindex and environment repair remain forbidden.
+
+The first dependency-byte layer now exists as an inert, content-addressed
+materializer. It hashes every admitted `site-packages` file and every directory
+name, preserves empty directories, bounds file/directory/depth/path/inventory
+resources, copies with `O(depth)` retained Windows directory handles, and fully
+reproves staging plus the no-replace published generation. Literal links,
+reparse points, hardlinks, aliases, alternate data streams, mutation, and
+unlisted topology fail closed. Public materialization is serialized per proved
+store device/inode across processes so equivalent path spellings converge and
+concurrent builders wait before reusing the exact
+generation instead of duplicating payload copies. Windows creation,
+enumeration, metadata, stream, and confined-digest operations retain one
+extended-length spelling for valid payload paths beyond legacy `MAX_PATH`.
+Its descriptor deliberately reports
+`write_denial_verified=false` and `activation_eligible=false`; it is not yet
+selected by the owner and does not inspect dependency payload content for
+secrets. Interpreter/standard-library/native-library closure, signing,
+write-denial, resident-owner binding, and retrieval-quality promotion remain
+separate P0 layers. Therefore the exact-closure and A-grade statements above
+remain unchanged.
+
+The next inert prerequisite now also exists for the Windows Python base
+runtime. `materialize_base_runtime(...)` preserves the runnable base-prefix
+topology for the interpreter, Python/VCRuntime libraries, `Lib`, `DLLs`, and
+`tcl`, while excluding development/documentation roots and
+`Lib/site-packages`. Every admitted file byte, file role, directory (including
+empty directories), and policy root is content-addressed and fully reproved.
+It reuses the hardened bounded tree-copy primitives and a read-only source
+lease mode that does not demand DELETE authority from protected installed-Python
+roots. Production shape passed 4,068 files / 372 child directories /
+81,515,843 bytes as generation `sha256:3efe4fba...`, including exact reuse.
+
+This base-runtime generation is also intentionally inert. Its descriptor
+reports native-loader closure, deterministic effects, signature, write denial,
+activation eligibility, and exact runtime closure as false. It does not change
+the owner, supervisor, route, replica, VSIX, or query-time behavior. A protected
+stage-zero admission must compose this generation with the exact dependency
+generation and independently prove external loader closure, deterministic
+controls, signing, and empirical write denial before route-v2 can exist.
+
+The first inert composition prerequisite now exists as a third, tiny
+content-addressed generation. It contains only a canonical path-free descriptor
+and independently reruns both full-byte component verifiers. Its identity binds
+both generation, descriptor, inventory, and tree digests; file/directory/byte
+counts; the Windows platform; the exact `python.exe` row, bytes, and size; the
+separate `site-packages` role; and fixed `-I -S -B` isolation topology. It does
+not copy either payload. Reuse fully reproves the selected component roots, so
+base/dependency substitution fails closed. ABI/native-loader compatibility,
+deterministic effects, pre-import safety, signature, empirical write denial,
+activation eligibility, and exact closure remain false. The composition is a
+future proof/signing target, not an owner or route.
+
+Canonical verification uses a bounded reverse-order `B1 -> D1 -> D2 -> B2`
+full reproof and requires exact equality of both component bindings. This
+detects one-shot cross-pass mutation but does not prove ABA resistance,
+immutability, or durable write denial.
+
+The O:-local production shape passed: 72,261 dependency files / 11,639
+directories / 1,853,891,335 bytes materialized in 2,856.73 seconds; composition
+publication took 588.32 seconds. A fresh repaired-verifier process then accepted
+generation `sha256:44e21db7...` / descriptor `sha256:cbbfe268...` in 579.54
+seconds with the descriptor unchanged and every activation-grade flag false.
+This full-tree proof is an offline release gate and never query-time work.
+
+The next inert prerequisite is a composition-bound Windows/CPython ABI attestation.
+`materialize_runtime_abi_attestation(...)` reproves the composition, parses every
+admitted `.exe`, `.dll`, and `.pyd` without loading it, and publishes path-free
+evidence in a separate store. It admits only AMD64 PE32+ and modern RVA delay
+descriptors, validates loader-table structure and forwarders, and enforces
+per-image/aggregate bounds. Compatible wheel tags and unique RECORD rows bind
+each admitted dependency-native byte by exact SHA-256 and size.
+
+This earns only declared PE/machine, wheel/RECORD, and reachable non-forwarded
+CPython export facts. Its basename graph is not Windows loader resolution.
+Search order, API sets, KnownDLLs, SxS, loaded modules, dynamic loading,
+signatures, determinism, bootstrap, write denial, activation, and exact closure
+remain schema-forced false.
+
+A read-only production scan found 396 native-suffix artifacts: 384 AMD64
+PE32+, four ARM64 PE32+, eight PE32, and one duplicate RECORD path. Phase 2A
+can exclude them only from a physically separate positive candidate, never by
+logical filename rules over the broad tree. Import, DLL, subprocess, loader,
+determinism, signing, write-denial, activation, and exact closure remain open.
+
+## Canonical ChatGPT transport boundary (implementation complete; live acceptance pending)
+
+The bundled server is loopback-only and serves MCP Streamable HTTP at exact
+path `/mcp`. A Secure MCP Tunnel or another external OAuth 2.1/auth proxy owns
+public HTTPS and ChatGPT authorization; that external control plane is not
+implemented or claimed live here. The optional static bearer is only a local
+development defense. Legacy SSE is removed; deprecated launcher names route to
+the same HTTP runtime and lock.
+
+The remote allowlist contains exactly one tool: `holo_query_bundle`. It
+delegates to the generation-bound one-shot owner/bundle adapter. Repository,
+documentation, Overseer/SQLite, dependency, raw Holo, Git, RedDog-state, and
+signal-normalization tools remain internal/local bridge APIs and are not MCP
+remote authority. Public bundle output is secret-redacted,
+repository-relative, cycle-safe, and capped at 256 KiB. Readiness uses the
+official MCP client for initialize, initialized, tools/list, and one lexical
+bundle call. Linked worktrees resolve the capable main MCP environment through
+file-only `.git`/`commondir` evidence. Startup always uses one owned subprocess
+with the direct interpreter PID; there is no second in-process lifecycle.
+Interpreter admission also verifies the exact four versions declared in
+`requirements.txt`; an import-capable but version-drifted environment is not a
+valid MCP runtime.
+
+## Immutable query replica and owner routing
+
+`reddog_holoindex_query_replica_plan.py` is the read-only trusted-host planner
+for an explicit activation transaction. It requires a clean exact repository
+HEAD and a CURRENT canonical freshness proof, resolves only the selected
+`all-MiniLM-L6-v2` snapshot, and descriptor-hashes that complete model plus the
+exact 22-file query-snapshot set twice. Three enumerations bracket those
+digest passes; full file and directory identities, generation binding, and
+canonical freshness must remain unchanged through the final observation. Links,
+reparse points, hardlinks, special files, aliases, hostile scalar/container
+shapes, or observed source mutation fail closed. The materializer revalidates
+the returned expected manifests against any later source change. The planner
+performs no copy, route change, maintenance, owner launch, or activation.
+
+The planner, compact materializer, private route record/CAS store, crash
+journal, and inert-by-default activation controller are completed layers. The
+broker-managed OpenClaw/AgentDB path completed at exact main
+`66526ae5cdd0467ce264c1db4122ab82eadb7733`, selected generation
+`sha256:f2013aeb...`, passed fresh and pre-warmed stable-route queries, and left
+the immutable replica unchanged. That receipt is exact-commit evidence; it does
+not attest a later commit or retrieval-quality A-grade/RSI.
+
+`reddog_holoindex_query_route_contract.py`,
+`reddog_holoindex_query_route_store.py`, and the extracted confined
+`reddog_holoindex_query_route_io.py` implement the private stable-route state
+layer. One no-replace `EMPTY` record anchors the file; every `CURRENT`
+transition requires the exact prior revision and record digest, increments by
+one, and binds its predecessor. A machine-wide lock serializes activators. The
+store writes a private `PREPARED` journal before selecting the candidate. A
+normal context exit finalizes `COMMITTED` only after an explicit commit request;
+exceptions and uncommitted exits restore and re-prove the exact previous record.
+Recovery treats `PREPARED` as rollback-only, compares the structurally valid
+route digest before selected-root liveness, and therefore restores the exact
+predecessor even if a selected candidate root vanished after replacement. It
+fails terminally when the route matches neither recorded state. Records and
+journals use strict canonical ASCII JSON, copied immutable nested bindings,
+duplicate-key rejection, bounded descriptor-confined reads, and private
+regular-file/link/path checks. WSP_62 keeps route policy and persistence in
+separate sub-200-line classes.
+
+The route store alone does not alter the user environment, resolve semantic
+authority, materialize a replica, query an owner, publish an activation
+receipt, or activate the current machine. Those duties are composed only by
+the explicit activation controller.
+The high-risk assumptions and fail-closed decision are attached at
+[`docs/clarity/REDDOG_HOLO_QUERY_ROUTE_CONSUMER_ASSUMPTION_AUDIT_20260823.md`](docs/clarity/REDDOG_HOLO_QUERY_ROUTE_CONSUMER_ASSUMPTION_AUDIT_20260823.md).
+
+`reddog_holoindex_query_replica_activation.py` composes the existing
+maintenance-only proof, planner, materializer, route CAS, one-shot query, and
+private JSON publisher. Default invocation is inert. Real mode first proves
+the exact clean repository and a new receipt target, refreshes without starting
+an owner, materializes an absent immutable root, validates a fixed semantic
+canary before commit, and re-proves the exact clean repository both immediately
+after materialization/before route transition and after that canary/immediately
+before commit. It then commits the revision/digest-bound route, repeats the
+canary through normal route-file resolution, and revalidates the replica after
+each query. A typed validation failure on that post-commit canary gets exactly
+one fresh read-only proof attempt; candidate/pre-commit admission is never
+retried. Two failed proofs remain `COMMITTED_UNVERIFIED`, while a recovered
+proof still requires the same full immutable revalidation before PASS.
+Normal route resolution replaces any caller-supplied route mapping with the
+single committed route-file capability; it does not expand an existing
+`environment` keyword or allow a legacy direct replica root to compete.
+Authority selection rereads the exact workspace state instead of
+fabricating a receipt. A post-commit failure is reported as
+`COMMITTED_UNVERIFIED`; a committed route whose receipt publication was
+interrupted is finalized on the next identical invocation after a fresh stable
+query and immutable revalidation. No file is overwritten or deleted.
+The separate assumption audit is
+[`docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md`](docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md).
+
+`reddog_holoindex_postmerge_replica.py` is the bounded post-merge composer. It
+first builds the same allowlisted private route environment used by the
+supported one-shot query: on Windows, a current non-empty user route pointer
+replaces an inherited legacy replica root without mutating `os.environ` or
+copying unrelated values. It then asks the normal owner path to prove the
+canonical refresh identity. When
+the stable route still names an older generation, it derives new/no-overwrite
+replica and receipt targets from the configured stable route, reuses
+`activate_query_replica()`, and reproves the owner. HEAD, generation, and
+freshness-receipt digest must exactly equal the canonical refresh proof; a
+ready owner with any substituted binding fails closed. The authority
+transaction releases its first authority-update lease before this composer,
+then reacquires the lease and revalidates authority, repository, and
+`origin/main` before durable completion. This ordering passed the real
+broker-managed OpenClaw/AgentDB path at exact main `cfd1e0051`: generation
+`sha256:60d06274...` was activated, the task completed, and a later governed
+owner query plus full immutable revalidation remained unchanged. The same path
+later completed at exact main `66526ae5`, generation `sha256:f2013aeb...`, with
+retry count zero. Three fresh-process queries completed in about 34 seconds
+each and a pre-warmed governed query in 10.3 seconds; all 33 artifacts /
+221,204,272 bytes then reverified unchanged. Each gate is closed only for its
+named commit.
+
+At later exact main `a48e9b61`, the route-continuity repair reached canonical
+generation `sha256:7102c478...` and committed route revision 5. The first
+post-commit stable proof returned `ACTIVATION_QUERY_PROOF_INVALID`, so the
+historical AgentDB task and activation receipt correctly remain failed/
+`COMMITTED_UNVERIFIED`. Subsequent supported and activation-shaped queries were
+CURRENT/no-gap/no-reindex against the same replica. The bounded second proof
+was retained as bounded transient resilience. Exact-main `f058f87b` proved the
+underlying failure was deterministic instead: the stable callback duplicated
+the caller's `environment` keyword before route resolution, so both attempts
+returned the generic activation failure even though revision 6 was usable.
+The callback now supersedes caller route inputs with the exact committed route
+file, without relabeling either failed task or adding query-time maintenance,
+unbounded retry, or mutation authority.
+
+`reddog_holoindex_query_replica.py` can materialize one immutable
+`holoindex_query_replica.v1` generation into a new, disjoint replica-root
+capability. Its two sorted logical manifests are exactly `model` and
+`snapshots`: one complete selected `all-MiniLM-L6-v2` model snapshot plus the
+generation-bound 22-file sealed set rooted at `vectors/query_snapshots/`.
+Model resolver markers must be direct children of the selected model root.
+The snapshot-set manifest must bind the canonical generation and contain the
+exact seven-collection topology, and every inner path/size/digest must equal
+the outer copy manifest before copy begins. Roots, receipt paths, artifact
+paths, scalar types, ordering, aliases, and full descriptor-path bounds fail
+closed before the first replica-root mutation. New generations contain no
+Chroma database, SQLite, HNSW, or other legacy vector-tree payload. The sealed
+production API nonmutating-locks the already existing authority-update then
+maintenance sentinels, retains both exact sentinel identities/bytes plus the
+freshness-receipt descriptor through source snapshot, copy, generation
+publication, active publication, and final validation, and then releases in
+reverse order. Callers cannot inject copier, lease, receipt, or publisher
+authority into the public API.
+
+Phase 2 adds one canonical descriptor parser/verifier and an explicit
+`QueryReplicaOwnerRoute`. The resident owner receives the canonical SSD path
+only for freshness receipts, leases, and repository/generation proof; its
+semantic backend receives only the verified immutable replica generation.
+Neither path is inferred from ambient `HOLOINDEX_SSD_PATH`. The descriptor is
+reproved before spawn and again before authenticated health. Health and reuse
+bind all four public replica fields (descriptor digest, generation ID, replica
+ID, and path-identity digest); any missing field or drift fails closed and a
+changed exact binding cannot hot-swap a live owner. Absolute replica paths are
+not returned in public responses.
+
+Every owner process also imports and hashes one fixed twelve-module retrieval
+policy closure. Query and health responses expose only its SHA-256 manifest
+digest as `retrieval_runtime_ranker_digest`. Health and the loopback client
+reject a missing or malformed digest; retrieval evaluation additionally
+requires it to equal the clean authority candidate. This prevents a benchmark
+from attesting clean authority files while a configured, reused, or newly
+started owner executes different runtime bytes.
+The digest uses raw source bytes intentionally: line-ending or other byte drift
+between authority and executing runtime is rejected rather than normalized
+away. This is distinct from the VSIX packaging manifest's text normalization.
+It intentionally does not yet attest the Python executable, ABI/platform,
+exact dependency/build manifest, or deterministic execution knobs; consumers
+must not treat the source digest alone as reproducible A-grade runtime proof.
+
+Governed Holo maintenance publishes a deterministic immutable snapshot set for
+the seven baseline collections before its PASS receipt. The materializer copies
+only that exact set from `vectors/query_snapshots/`. The resident owner never
+starts Chroma against the replica: it validates every snapshot artifact, loads
+the existing bounded exact-vector adapter, and requires the embedded generation
+ID to equal the active descriptor. SQLite and HNSW are absent from new replica
+generations. Snapshot artifact payload is preflight-bounded to 384 MiB before
+publication and again before any query artifact is loaded.
+
+Replica proof is intentionally two-tiered. Initial route resolution and the
+isolated owner each perform one complete manifest/digest admission over the
+selected model and sealed snapshots. After that admission, route reuse,
+startup health, and queries revalidate the unchanged descriptor, canonical
+repository/receipt/leases, and the same runtime closure. The sealed backend has
+no Chroma/SQLite/HNSW path. The 15-second query deadline is unchanged. The
+adapter's only query metadata filter is exact string equality on `record_kind`;
+unsupported keys, values, and compound expressions fail closed. The adapter is
+included in the owner-emitted twelve-module retrieval-ranker digest. The
+previous full-tree live replica demonstrated why this narrowing is necessary:
+its 8.33 GB closure produced 122--153 second cold owner queries. The narrow
+materializer is synthetically verified and has completed live exact-main
+materialization/activation at `cfd1e0051` and `66526ae5`. The latter
+33-artifact, 221,204,272-byte acceptance replica returned fresh and pre-warmed CURRENT
+queries and passed full unchanged post-query proof. This is correctness and
+single-owner readiness evidence, not a horizontal throughput claim.
+
+R16-R19 made route, binding fields, and health containers exact. R20 makes
+health transport scalars exact before any conversion: literal `127.0.0.1`,
+port 1..65535, trimmed printable token >=32 characters, and finite positive
+timeout <=300 seconds. Bool/subclasses/aliases/containers reject before calls.
+Only an exact built-in JSON `dict` reaches health access; Mapping substitutes,
+dict subclasses, and arbitrary containers reject before any attacker method.
+Binding parsing accepts only an exact built-in four-item tuple of exact
+built-in, trimmed, printable strings. Expected canonical fields alone may be
+explicit empty wildcards;
+actual canonical and replica fields are nonempty. No value is coerced and
+hostile boolean/string/equality methods are not invoked. R21 parses expected
+canonical fields first and the mandatory exact replica tuple second, before
+transport validation or HTTP construction; wrappers retain that ordering and
+only the already parsed tuple reaches response helpers. Malformed expected
+values fail before connection, hashing, route validation, verifier, stop,
+spawn, health, or handoff; malformed actual JSON/proof returns not-ready with
+`HOLOINDEX_QUERY_SERVICE_BINDING_MISMATCH`. R22 makes JSON representation
+unambiguous: duplicate member names at any nesting level and NaN/Infinity
+constants reject, while unique exact dictionaries remain valid. A byte-level
+string-aware structural guard caps JSON nesting at 128 before parsing, so an
+ambiently raised Python recursion limit cannot weaken admission. Parse,
+Unicode, depth, recursion, primitive, and bounded-size failures return unavailable;
+the 65,537-byte read and close contract is unchanged. Repeated exact values
+across distinct binding fields remain allowed. R23 contains stdlib HTTP
+protocol failures from request, response acquisition, and bounded read as
+unavailable. Expected HTTP/OSError failures during close are contained only
+after a proof has been decided, so they never mask ready or unavailable;
+  unexpected/resource exceptions still surface. At R23, the historical
+  governed backend closure was 1,360 runtime files at
+  `fdf3643a2cb8...befc3592129e`; registry remained 1,527/265.
+R24 closes acceptance drift: the slow synthetic loopback probe now carries the
+full canonical/query-replica route, binding, split argv, and scrubbed child
+environment. Shutdown/close/context behavior moved unchanged into one internal
+`Self`-typed lifecycle base; route-less context entry still fails closed.
+
+Phase 2 now wires the three production callers through the same verified route:
+one-shot ChatGPT/MCP owner query, maintenance owner startup, and promotion-time
+owner verification. The preferred trusted-host configuration is the stable
+private `REDDOG_HOLOINDEX_QUERY_ROUTE_FILE`; the legacy explicit
+`REDDOG_HOLOINDEX_QUERY_REPLICA_ROOT` remains a migration path, and configuring
+both is rejected as ambiguous. Route-file resolution is serialized with the
+activation lock but uses the store's nonmutating terminal read. A no-journal
+record is admissible only for the initial `EMPTY` state; every `CURRENT` record
+requires a `COMMITTED` or `ROLLED_BACK` journal whose selected digest matches.
+`PREPARED` fails pending and is never recovered or rewritten by a query
+consumer; explicit activation/controller recovery uses the separate mutating
+store load. After terminal admission, the resolver requires `CURRENT` and
+exact-matches the record's authority, canonical binding, replica root, and all
+four public replica fields against a fresh active-descriptor proof. Missing,
+relative, stale, ambiguous, uncommitted, or unprovable configuration fails
+closed with no owner start, query, promotion, replica creation, or re-index.
+This plumbing does **not** delete
+old/orphan generations, define rollback/retention, or automatically materialize
+from a live store, so operational availability still requires a separately
+authorized current-generation materialization transaction. Historical
+full-tree live transactions remain valid immutable evidence only when their
+descriptor proves one coherent model plus SQLite and complete legacy HNSW
+segment cores. They remain audit-readable but are rejected by retained modern
+runtime revalidation. The narrow
+closure in this working tree is not active production proof until it is merged
+and rebuilt at the resulting exact `main`. Phase 1 performs no content
+deletion. Failed publication temps, staging trees,
+and a failed active name are atomically moved without replacement into an
+owned orphan root; the active name is absent only after a successful move.
+Rename failure leaves the source name and reports only a relative unsafe path.
+Windows copy failure closes all handles and preserves its bounded partial
+destination; query materialization quarantines the enclosing staging root.
+Direct copy callers retain responsibility for their isolated partial output.
+Retention/deletion of preserved objects is a future governed policy.
+
+The owner response flattener treats `limit <= 0` as an empty result and never
+admits a first hit through the loop termination check. Explicit module Tier-0
+reservation remains bounded by positive caller K.
+
 ## Purpose
 
 This module provides the **perception layer** for the AI architect workflow:
@@ -12,14 +480,21 @@ This module provides the **perception layer** for the AI architect workflow:
 MCP Bridge (perception) → 0102 (reasoning) → 012 (decision) → Cursor (execution)
 ```
 
-The bridge allows 0102 (ChatGPT) to:
+Trusted in-process callers can use the wider bridge to:
 - Inspect repository structure and files
 - Access WSP protocol documents
 - Read module documentation (README, INTERFACE, ModLog)
 - Query AI Overseer state (missions, patterns, failures)
 - Generate precise Windsurf prompts based on real repo state
 
-## v1 Capabilities
+ChatGPT's `/mcp` registration does not expose those legacy tools; it exposes
+only the governed `holo_query_bundle` contract described above.
+
+## Local/internal bridge capabilities
+
+The capability catalog below describes direct `FoundUpsMCPBridge` calls only.
+It is not the Streamable HTTP tool inventory. Only `holo_query_bundle` is
+registered remotely.
 
 ### Repo Perception (Active)
 | Tool | Description |
@@ -103,14 +578,74 @@ at literal `127.0.0.1` instead of opening Chroma directly. Trusted host
 bootstraps own its lifecycle
 through HoloQueryServiceSupervisor, which generates an ephemeral token, proves
 authenticated semantic readiness, can supply a trusted child environment, and
-cleans up the process. Automatic in-process startup keeps the URL/token in a
+cleans up the process. Before expensive semantic startup it rejects an occupied
+loopback port. Direct/resident bootstrap retains port 8127 by default. The
+supported one-shot wrapper instead selects one of 64 process-sharded ports
+(8127--8190) and gives every process-owned second attempt a diversified shard.
+That bounded retry set includes the stable
+`HOLOINDEX_QUERY_SERVICE_PORT_IN_USE` acquisition failure, startup exit, and
+the existing poisoned-owner/semantic-backend/Tier-0 transient failures. Every
+shard still receives its own process-private token and exact authenticated
+binding; the caller never intentionally adopts or kills a known pre-existing
+listener and never treats a port probe as identity. A post-probe bind race is
+outside the same-user hostile-squatter claim and must fail authenticated health.
+Automatic startup binds the child to the exact supervisor
+process, so the child exits after an abruptly terminated parent without a
+blocking stdin reader.
+Replica-routed startup requires explicit `--canonical-ssd-path` and
+`--query-replica-root` arguments plus a retained verified route capability.
+The child environment deliberately omits `HOLOINDEX_SSD_PATH`.
+Ordinary authenticated semantic health probes use up to 30 seconds. During
+supervisor startup, the first cold semantic canary may use the owner's
+270-second warmup budget within the unchanged 300-second total deadline.
+Automatic in-process startup keeps the URL/token in a
 private handoff resolved by resolve_reddog_holoindex_owner_handoff(); it never
 exports the generated secret to the parent environment. See
 [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md).
 
-The RedDog read-only operational preflight now calls the process-lifetime
+On Windows, the one-shot wrapper privately rereads only the current-user
+authority-root and stable-route-file values. A non-empty user route pointer
+supersedes an inherited legacy replica-root value in that copied mapping; the
+process environment is unchanged and the low-level resolver still rejects
+dual configuration. Pointer precedence grants no authority: the existing
+private-path, terminal-journal, repository, receipt, generation, descriptor,
+and immutable-replica proofs must all pass before owner startup. This removes
+the former restart/manual-sanitation dependency for long-lived IDE and MCP
+processes without reading user-scope credentials.
+
+Port sharding is bounded multi-caller availability, not horizontal scale. Each
+independent process still initializes a model-backed owner. The next scaling
+layer is one per-user resident broker with authenticated, current-user local
+IPC and an in-memory bearer; it requires a separate security and lifecycle
+acceptance slice.
+
+For basename queries, HoloIndex resolves intent against a complete bounded Git
+HEAD module catalog rather than top-K hits. Full module paths bypass that
+catalog. The catalog rejects Unicode control, format, and surrogate code
+points on every record and treats NFC-equivalent case-folded paths as
+duplicates without rewriting visible Unicode. The owner reserves flattened Tier-0 slots only for one complete,
+singular README/INTERFACE pair when canonical metadata `tier0_module_target`,
+query intent, root paths, and `exact_metadata` provenance all agree. Missing,
+unrelated, ambiguous, multi-module, partial, mixed-module, duplicate, or forged
+claims keep global score order. Exact provenance alone does not attest intent;
+the owner does not synthesize evidence or promote nested test docs.
+
+Strict catalog failure is
+`HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE`; non-strict HoloIndex logs one
+stable warning and continues with basename promotion suppressed. The owner
+also preserves `HOLOINDEX_TIER0_INCOMPLETE` and
+`HOLOINDEX_TIER0_LOOKUP_FAILED`, while rejecting all non-allowlisted producer
+detail as generic semantic unavailability. Deterministic catalog/incomplete
+failures are not retried; lookup failure retains one bounded process-owned
+retry.
+
+The RedDog read-only operational preflight calls the process-lifetime
 bootstrap automatically for E2E, report collection, audit enqueue, and
-OPENCLAW_AUTO_TASKS_ENABLED paths. Set
+OPENCLAW_AUTO_TASKS_ENABLED paths. Replica routing is mandatory and fail-
+closed: preflight resolves a verified `QueryReplicaOwnerRoute` from the stable
+private route file, or from the isolated legacy-root migration input when the
+route file is absent. Synthetic owner proof is not live ChatGPT/MCP
+availability. Set
 REDDOG_HOLOINDEX_OWNER_AUTO_START=0 to opt out. An already configured HTTP
 service URL using literal `127.0.0.1` and a strong token bypass process creation only after its
 authenticated health endpoint proves semantic readiness and the expected
@@ -127,6 +662,44 @@ request through governed WRE dispatch, while maintenance authority remains
 with the trusted host. It never stops a stale externally configured owner.
 A legacy blank embedding-space fingerprint is not accepted as historical
 compatibility: it makes the receipt stale and triggers this maintenance path.
+
+The trusted launcher removes ambient Python overrides and resolves at most one
+checkout-local dependency directory. It conveys that directory separately as
+`HOLOINDEX_MAINTENANCE_PROBE_SITE_PACKAGES`; the maintenance process
+revalidates it before invalidation and creates a fresh in-memory proof of the
+actual process image. `MaintenanceSession` forwards the path/proof pair
+unchanged only to the existing fresh-process snapshot verifier. The proof is
+never serialized or logged, and no provider credential crosses the child
+boundary. Only a direct caller with no governed runtime input retains the
+runtime-free contract. A governed invalid/ambiguous/link runtime is never
+silently omitted: the launcher returns
+`HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED` before spawn. Child-side
+path, process-image, or partial-pair rejection uses stable detail
+`RUNTIME_DEPENDENCY_UNAVAILABLE`. There is no retry or vector-proof downgrade.
+
+For one-shot owner routing, `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` must name a
+dedicated clean authority checkout, not the active caller worktree. Keep that
+checkout immutable and reserve an exclusive repository-writer window through
+refresh and final receipt publication. The parent retains at most 16 KiB of
+child stdout in memory, writes no capture file, discards stderr and diagnostic
+detail, and propagates only an allowlisted stable error from the final JSON
+line; every untrusted shape falls back to the generic refresh-failed code.
+On Windows, the child starts suspended, is assigned to a private kill-on-close
+Job Object, and is resumed only after assignment. Closing the final job handle
+explicitly terminates the direct child and every descendant even if the parent
+already exited, then releases the handle; no PATH-resolved external executable
+participates. Guard creation, assignment, resume, termination, or close failure
+stops the operation. POSIX
+signals the exact isolated process group, but a descendant that starts a new
+session escapes it. The reader exclusively owns pipe closure. This remains a
+trusted-host containment boundary, not an OS-privilege or hostile-kernel claim.
+
+Direct shared-runner callers may set `job_memory_limit_bytes` to a positive
+exact integer within `SIZE_T_MAX` on Windows. The limit applies to aggregate
+Job committed memory and is configured before the suspended child resumes.
+Invalid or unsupported explicit requests fail before process creation; omitted
+or `None` keeps existing behavior. It does not bound RSS or native file reads,
+and grants no model execution authority; see [the API contract](INTERFACE.md).
 
 For manual diagnostics only, set a strong shared token outside the repository,
 then launch the host-owned process:
@@ -146,6 +719,13 @@ when all seven baseline collection proofs match the exact caller repository
 HEAD before and after retrieval; health also requires a non-empty semantic
 canary. FastAPI is optional; the same command uses the stdlib HTTP runtime when
 FastAPI is unavailable.
+
+Successful responses first pass the producer-owned executable HoloIndex result
+contract, then project every canonical path/location under the proven
+repository root to repository-relative POSIX form. Unknown, incomplete,
+cross-bucket, alias/count-divergent, or Unicode-control-bearing evidence fails
+closed with empty raw and flattened results. Indexed text remains untrusted
+evidence, never instructions, and query handling never reindexes the store.
 
 The owner forces the authoritative sentence_transformers backend, discovers
 complete flat and Hugging Face models--.../snapshots/<revision> caches for
@@ -168,6 +748,8 @@ isolation is required. The legacy `src/holo_tools.py` MCP surface remains a
 direct-store consumer outside this Phase-1 migration. Full refresh also
 requires an exclusive writer window because unleased legacy writers and a
 transient edit/revert are not excluded by the cooperative maintenance lease.
+Maintenance re-proves clean exact HEAD at the final publication boundary; a
+dirty or changed checkout leaves the IN_PROGRESS receipt in place.
 After a successful refresh, owner lifecycle failure can leave the receipt
 CURRENT while preflight remains non-operational. Abrupt host death can leave an
 orphan owner until verified process cleanup and token rotation.
@@ -312,11 +894,116 @@ Disabled tool responses:
 
 ## Security
 
-- **Private only** - Not exposed publicly
-- **Read-only** - No writes, no execution
-- **Path filtering** - Blocks .env, credentials, secrets
-- **Size limits** - 200KB max file read
-- **No secrets** - Explicit pattern blocking
+- **Remote surface** - Exactly one bounded `holo_query_bundle` tool
+- **Private transport** - Loopback only; public control plane remains external
+- **No remote repository/SQLite walkers** - Legacy perception APIs stay local
+- **Closed child environment** - Only allowlisted OS/runtime fields plus exact
+  repository/package/token fields reach server and readiness children
+- **No remote mutation or execution** - Tool annotations match the admitted path
+
+## Isolated HoloIndex Candidate Acceptance
+
+The trusted-host adapter can validate one exact clean candidate SHA without
+promoting or writing the canonical HoloIndex store. Its default CLI mode is
+import-inert as well as effect-inert: help, malformed input, and omission of
+`--real` do not import the acceptance runtime. `--real` is the only authority
+for the isolated model copy, full refresh, private owner start, two direct
+queries, and cleanup.
+
+The adapter requires a distinct clean detached authority worktree at the exact
+candidate SHA and a third clean, related dependency-only runtime checkout with
+exactly one verified checkout-local `.venv/Lib/site-packages`. The runtime HEAD
+need not equal the candidate SHA and never becomes source authority. A new store
+disjoint from all three repositories and the canonical store, a new receipt
+target, a locally resolvable canonical model snapshot, and an available literal
+`127.0.0.1:8127` private port with no existing private handoff are also required.
+One non-blocking in-process lock and one host-local cross-process lease
+serialize the canonical-store/port acceptance session. Port availability is not
+owner identity: a pre-existing handoff, known foreign listener, post-check bind
+race, or missing newly created handoff fails closed without killing or reusing
+it. The boundary is not hardened against a hostile same-user process.
+
+The final fresh-process snapshot separates source authority from dependency
+authority. It runs the resolved base interpreter from the candidate cwd with
+`-S -B`, an exact `PYTHONPATH` containing only the already-proven runtime
+site-packages, no user site, and the standard child-environment scrub. Before
+opening the store, it proves candidate module origin plus ChromaDB 1.5.5 origin
+under that runtime. `CANDIDATE_SOURCE_ORIGIN_INVALID`,
+`RUNTIME_DEPENDENCY_UNAVAILABLE`, and `UNSUPPORTED_CHROMADB_VERSION` are stable,
+generation-bound failures; the deterministic snapshot has no transient retry.
+The base interpreter is not selected from mutable `sys.executable` or
+`sys._base_executable`. Runtime admission obtains the actual current-process
+image from the OS, rejects alias/link/reparse/hardlink ambiguity, and binds its
+case-preserving final path plus stable file identity in an in-memory proof.
+At the runtime-bound isolated-probe runner boundary, a fresh verified descriptor
+is retained until the runner returns or raises. Windows launches the exact path
+while the non-sharing handle denies write/delete replacement. Linux launches
+`/proc/self/fd/<fd>` and passes that descriptor into the child, so pathname
+replacement cannot select a different image. Revalidation failure prevents the
+runner call; the descriptor closes on every exit. The legacy runtime-free probe
+does not consume this proof. The shared child scrubber also removes
+`PYTHONINSPECT` along with home/path/startup/user-base overrides.
+
+The model copy uses bounded descriptor I/O. On Windows, source/destination files
+and every traversed parent are pinned and re-proved through live handles using
+the repository's established verified-handle/no-replace pattern; artifact
+digests are computed from those descriptors. Live per-file or aggregate growth,
+parent/root replacement, any bound overrun, or digest drift fails closed. The
+adapter hashes the canonical freshness receipt before and after and never
+downloads or installs a model.
+
+Success requires `REFRESHED`, exact SHA, one generation/receipt binding across
+both direct queries, explicit private-owner cleanup, and then one K=1 query
+through the supported extension wrapper using candidate self-selection. The
+activation receipt must bind the candidate root/SHA and the same generation;
+canonical rehydration and a fresh-process collection snapshot must still pass
+after that wrapper has cleaned up. Receipts retain only the activation receipt
+digest/count, semantic-store verdict, and one-way owner-session digest, never
+query results, paths, URLs, or tokens. The session digest is captured when the
+exact handoff is acquired and survives cleanup without retaining another copy
+of the secret tuple. The rehydrated freshness receipt remains open through one
+confined descriptor: strict bounded parsing and exact SSD/root/SHA/generation/
+file-digest binding are revalidated immediately before and after the isolated
+snapshot probe.
+Cleanup uses an atomic expected-handoff comparison, so a replaced owner is not
+stopped. Receipts are immutable, bounded, deterministic, secret-free JSON; an
+unsafe target is never written and publication failure cannot report PASS.
+
+The isolated store is semantic-path-bound. A detached worktree at the same SHA
+is not interchangeable because the freshness receipt binds the repository root.
+Do not set `REDDOG_HOLOINDEX_AUTHORITY_REPO_ROOT` for acceptance activation;
+the clean candidate must select itself and resolve the primary runtime through
+the supported wrapper. ChromaDB 1.5.5 inserts one `acquire_write` lifecycle row
+when `PersistentClient` opens, including logical read-only queries. Acceptance
+therefore proves semantic non-mutation through unchanged generation/root/
+receipt and collection snapshots, not byte-for-byte SQLite identity. The
+unbounded lifecycle-row growth is unresolved scale debt, not a correctness
+failure and not a resolved capacity claim.
+One authorized live attempt at `fb72cbd99bc9499545823fa1849fc4597b8d71ec`
+failed and did not establish acceptance. Its immutable FAIL receipt has SHA-256
+`f9b5e18ce62e63af3bbbf0e0f3d36def5614216fafadca8872703f519be43a78`, reports
+`NEW_PRIVATE_OWNER_HANDOFF_MISSING`, zero queries, and an unchanged canonical
+receipt. Audit found that a primary `HOLOINDEX_MAINTENANCE_REFRESH_FAILED` result
+was masked by the missing-handoff check and that candidate/authority worktrees
+lacked runtime dependencies. Both defects are hardened. The failed store is
+retained as evidence and is never reusable: any authorized retry requires a new
+store and receipt target. No current-contract live PASS, promotion, or capacity
+claim exists.
+The later R7 attempt at `220fdd9febbac00ddde9acbf7d8673ef0888b367`
+completed two direct queries and one activation query but failed the semantic
+snapshot after 917.4 seconds because the child inherited user-site ChromaDB
+1.3.0 instead of the validated runtime's 1.5.5. Its retained 1,155-byte FAIL
+receipt has SHA-256
+`305a53b7c63b64762bb3706fb03bec76c35c3358fbc4a607c89567c7a6c1bd78`.
+R8 closes that runtime-selection defect in code only; it makes no live-PASS,
+promotion, or scale claim.
+A PASS retained for `b482fdaed4932a15b2b195c256761cfd1053f053` is historical
+pre-R5 evidence only: it did not include the post-cleanup supported-wrapper
+activation and semantic revalidation now required, so it cannot activate or
+promote the current code.
+
+See [HOLO_QUERY_OWNER_RUNBOOK.md](HOLO_QUERY_OWNER_RUNBOOK.md#isolated-candidate-acceptance)
+for STOP conditions, commands, and RED/GREEN evidence.
 
 ## Architecture
 
@@ -364,7 +1051,20 @@ Disabled tool responses:
 
 ## Future (v2)
 
-- HoloIndex semantic search integration
+- Live semantic Holo availability is accepted at exact main `cfd1e0051` with a
+  generation-bound CURRENT freshness receipt and unchanged immutable replica.
+  The governed bundle tool is implemented. Public ChatGPT/tunnel acceptance
+  remains a separate deployment boundary.
 - Gated execution capabilities
 - Agent team spawning
 - Skill dispatch with approval workflow
+
+## Streamable HTTP migration status
+
+The former SSE surface is retired. The canonical local endpoint is exact
+Streamable HTTP `/mcp`, loopback-only, with one bounded read-only tool.
+`run_mcp_bridge_sse` and `stop_mcp_bridge_sse` remain deprecated name aliases
+for the same HTTP runtime and lock; they do not expose an SSE route. Public
+HTTPS plus OAuth 2.1 authorization belongs to an external tunnel/control plane
+and remains live-acceptance work. Local protocol validation does not claim a
+public tunnel or ChatGPT app connection.

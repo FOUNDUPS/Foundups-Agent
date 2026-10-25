@@ -1,92 +1,82 @@
 # shared_utilities Test Suite
 
-**Test Coverage:** 0% (implementation needed)
-**Last Run:** Never
-**Framework:** pytest
+Offline pytest coverage for shared model, runtime-artifact, registry, policy,
+validation, and environment utilities. Network/model/process effects must be
+mocked in unit tests.
 
-## [TEST] Test Categories
+`test_local_llm_backends.py` verifies explicit native `reasoning=None` omits
+the unsupported wire field while `off` is preserved, including exact instance,
+bounded response and no-storage assertions. Run it with
+`test_lm_studio_model_lifecycle.py` and the AI Gateway
+`test_model_topology_proposal_lm_studio.py`:61passed locally on2026-10-11.
+These are offline contract tests; live calibration evidence is in the RSI
+dispatch runbook and must not be represented as accepted model work.
 
-### Unit Tests (test_*.py)
-- test_[module_name].py - Core functionality tests
-- test_integration.py - Integration tests (when applicable)
+`test_runtime_artifact_safety.py` covers confined streaming-digest success,
+strict expected-identity/bound types, same-size restored-mtime mutation,
+replacement/link rejection, and descriptor/path stability with disposable
+files only.
 
-### Test Structure
+`test_runtime_artifact_windows_safety.py` covers the Windows executable-suffix
+mode projection and bounded file/directory alternate-stream behavior. It uses
+disposable O:-local files, asserts named streams reject, and does not treat the
+stream helper as a substitute for outer no-follow topology validation.
+The RedDog dependency-runtime integration suite additionally proves the shared
+extended-length spelling through materialization, verification, and reuse of a
+valid payload path beyond legacy Windows `MAX_PATH`.
+
+`test_runtime_operation_locking_posix.py` proves a symlinked or broadly
+permissioned POSIX lock namespace rejects and an owner-private namespace works.
+These tests are platform-gated on Windows and run in POSIX CI.
+
+## LM Studio lifecycle coverage
+
+`test_lm_studio_model_lifecycle.py` proves native installed-versus-resident
+truth, exact borrowed and managed leases, cross-process operation ownership,
+node/port alias serialization, occupied-capacity and maximum-context rejection,
+load/unload verification, timeout observation without blind retry, durable
+restart recovery versus ambiguous-load quarantine, cancellation cleanup,
+authentication redaction, loopback confinement, and content-addressed receipt
+integrity. Both governed native openers prove environment proxy inheritance is
+disabled. `test_runtime_artifact_safety.py` includes a real spawned-process
+lock-timeout contract whose target lives in the import-stable
+`runtime_lock_test_support.py` module so the Windows spawn proof also works
+under the documented pytest importlib mode.
+
+`test_local_llm_backends.py` proves backend selection and that initialization
+requires one exact native resident instance. Native and legacy OpenAI-compatible
+calls revalidate that exact instance before and after use; governed lifecycle
+claims require the native response identity/JIT evidence contract.
+
+`test_lm_studio_dependency_boundary.py` proves resolver and required-backend
+paths never start LM Studio or invoke subprocess launch machinery.
+
+## Canonical LM Studio lifecycle release gate
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+$reddogTestTemp = Join-Path ([IO.Path]::GetTempPath()) `
+  ('reddog-lifecycle-' + [guid]::NewGuid().ToString('N'))
+python -m pytest -q --import-mode=importlib --basetemp $reddogTestTemp `
+  modules/infrastructure/shared_utilities/tests/test_lm_studio_model_lifecycle.py `
+  modules/infrastructure/shared_utilities/tests/test_local_llm_backends.py `
+  modules/infrastructure/shared_utilities/tests/test_lm_studio_dependency_boundary.py `
+  modules/infrastructure/shared_utilities/tests/test_runtime_artifact_safety.py `
+  modules/ai_intelligence/ai_gateway/tests/test_model_topology_proposal_lm_studio.py `
+  modules/ai_intelligence/ai_gateway/tests/test_model_topology_proposal_admission.py `
+  modules/ai_intelligence/ai_gateway/tests/test_model_topology_proposer_authenticated_provenance.py
 ```
-tests/
-„¥„Ÿ„Ÿ __init__.py              # Test package
-„¥„Ÿ„Ÿ README.md               # This file
-„¥„Ÿ„Ÿ test_[module_name].py   # Main test file
-„¤„Ÿ„Ÿ TestModLog.md          # Test evolution log
-```
 
-## [RUN] Running Tests
+The unique outside-repository base directory prevents unrelated concurrent
+pytest runs from contending for pytest's shared Windows temp-root numbering.
+Current result: `121 passed, 1 skipped`.
 
-### All Tests
-```bash
-cd modules/infrastructure/shared_utilities
-python -m pytest tests/
-```
+The legacy aggregate command over this entire directory is not a truthful
+release gate today: the inherited
+`navigation/test_navigation_schema.py` contains an internal U+FEFF and cannot
+be collected; removing that character exposes separate NAVIGATION registry
+drift. That independent navigation transaction is not silently ignored or
+folded into the LM Studio lifecycle layer.
 
-### Specific Test
-```bash
-cd modules/infrastructure/shared_utilities
-python -m pytest tests/test_[module_name].py
-```
-
-### With Coverage
-```bash
-cd modules/infrastructure/shared_utilities
-python -m pytest --cov=src --cov-report=html tests/
-```
-
-## [COVERAGE] Coverage Requirements
-
-**WSP 13 Compliance Target:** >=90% coverage
-
-### Current Status
-- **Lines:** 0%
-- **Functions:** 0%
-- **Branches:** 0%
-
-### Coverage Areas Required
-- [ ] Core functionality
-- [ ] Error handling
-- [ ] Edge cases
-- [ ] Integration points
-
-## [CONFIG] Test Configuration
-
-### pytest.ini (if needed)
-```ini
-[tool:pytest]
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
-addopts = -v --tb=short
-```
-
-## [CASES] Test Cases (TODO)
-
-### Basic Functionality
-- [ ] Test initialization
-- [ ] Test main methods
-- [ ] Test configuration handling
-
-### Error Conditions
-- [ ] Test invalid inputs
-- [ ] Test missing dependencies
-- [ ] Test network failures (if applicable)
-
-### Integration Tests
-- [ ] Test with dependent modules
-- [ ] Test end-to-end workflows
-- [ ] Test performance requirements
-
-## [EVOLUTION] Test Evolution Log
-
-See TestModLog.md for detailed test development history.
-
----
-
-**WSP 13 Testing Compliance:** Structure Complete, Implementation Pending
+Record material test changes in `TestModLog.md`. See WSP 13, WSP 22, WSP 34,
+WSP 50, WSP 62, WSP 77, WSP 91, and WSP 97.

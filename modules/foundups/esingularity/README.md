@@ -1,0 +1,221 @@
+## Japan compute feasibility research — 2026-10-01
+
+- [Operating models and dated public benchmarks](docs/JAPAN_COMPUTE_COMPARABLES_20261001.md): school reuse, modular hosting, GPU rental and regional DR; explicit limits on pricing, power and cooling comparisons
+- [Japanese inquiry reference pack](docs/JAPAN_COMPUTE_INQUIRIES_JA_20261001.md): eight official organization routes and seven unsent draft templates with placeholder signatures
+- [Economic-model authority and evidence use](docs/YUMORI_ECONOMIC_MODEL.md#japan-grounded-feasibility-evidence--2026-10-01): no numerical model changes, customer commitments or send-completion claims
+
+# Project eSingularity FoundUp
+
+Project eSingularity combines a Japanese-first community campaign with a staged three-site distributed AI infrastructure / public-asset reuse program for Fukui. Hanyu is Priority 1 (Site 3), Shimousaka Priority 2 (Site 2), and Sukatto Priority 3 (Site 1), an optional onsen/community/education/thermal-reuse opportunity rather than a prerequisite for compute launch.
+
+**FoundUp ID**: `esingularity_001`
+
+**Canonical module**: `modules/foundups/esingularity`
+
+**Public site**: https://esingularity.ai/
+
+**Canonical LinkedIn project page**: https://www.linkedin.com/company/esingularity/  
+**LinkedIn company ID**: `2199715`
+
+The LinkedIn company page is a **social/publishing surface of `esingularity_001`**, not a separate FoundUp. Current partner-facing content should route through the eSingularity.ai project identity when the topic is AI Koban, regional/sovereign AI infrastructure, JHR, three-site feasibility, community-first compute, or strategic partner development. YUMORI.me remains the civic/community implementation surface. Historical Educational Singularity material is provenance, not the default scope of the current company page.
+
+The legacy pfMALL identifier `linkedin_esingularity` may remain temporarily as a compatibility/source alias, but it must not be treated as an independent venture beside `esingularity_001`. Migrate or retire that alias only through an explicit catalog change with regression coverage.
+
+LinkedIn mutation still requires live signed-in identity verification. Public naming and repository intent use **eSingularity.ai**; cached LinkedIn surfaces may lag, so a desired or cached label alone is not publication proof.
+
+**Lifecycle**: Internal Proto
+**Deployment**: OpenAI Sites
+
+## Website operations skill
+
+For “apply the website skill” or “eSingularity skill”, use [esingularity-website](skills/website-update/SKILL.md). For “YUMORI.me skill”, use the [yumori-website entrypoint](../../../.agents/skills/yumori-website/SKILL.md); both read the same FoundUp-owned workflow. Its [shared branding and language rules](skills/website-update/SKILL.md#shared-branding-and-language--both-sites) preserve the `.me` brand, JOIN label, Japanese-first guardian lockup and katakana JHR name across both sites. Context supports those brands instead of replacing them.
+
+The WSP 97 workflow also covers bounded history/research, distinct homepage ownership, shared ticker preservation, validation and publication. Codex/Claude entrypoints and the existing FoundUp registry expose it to agent and Red Dog discovery. Skill updates alone do not publish website or form changes.
+
+## Government and correspondence operations skills
+
+- [MLIT F-08 official forms and verification](docs/official/mlit_ppp_study_20261005/README.md): preserved official ZIP, inventory, October 5 verification and unresolved Form 2-4 requirement.
+
+YUMORI operations use repository-owned skills instead of rebuilding procedure from chat memory:
+
+- [Fukui City procedure](skillz/fukui_city_procedure/SKILLz.md): Council 請願/陳情, exact official forms, executive PPP/PFI, information disclosure, procurement stages, meetings/access, routing and legal handoff.
+- [Recipient document audit](skillz/recipient_document_audit/SKILLz.md): mandatory subordinate review of proposals, PDFs/forms and linked packages for the intended reader, total reading burden, internal artifacts and exact final rendering; review-only remains unsent.
+- [YUMORI.me correspondence / contact ledger](skillz/yumori_contact_ledger/SKILLz.md): YUMORI adapter over native Red Dog correspondence continuity, adding live provider/CRM reconciliation, routing consent, 0102 proxy voice, receipts and reusable operator learning.
+- `reddog_correspondence_state` in `modules/communication/moltbot_bridge/skillz/`: generic private runtime correspondence continuity; compact provider events + one materialized scope state per stakeholder/topic, with provider-watermark refresh and no raw mailbox bodies.
+- `reddog_recipient_preflight` in `modules/communication/moltbot_bridge/skillz/`: mandatory fail-closed recipient authorization before send-ready correspondence, including exact To/CC/BCC and provider read-back.
+- [YUMORI funding / PPP intelligence](skillz/yumori_funding_ppp_intelligence/SKILLz.md): current grant/subsidy/PPP status with primary-source and no-false-funding boundaries.
+- [YUMORI Moshpit](skillz/yumori_moshpit/SKILLz.md): campaign-history versus 0102-learning routing and JST ordering.
+- [YUMORI Work orchestrator](skillz/yumori_work_orchestrator/SKILLz.md): 012/Red Dog conversation → live-state reconciliation → WSP 15 work queue → 012 physical-action split → bounded ChatGPT Work handoff. The same registered owner now defines the YUMORI resident RSI canary: daily Memex/Brain/Breadcrumb/provider-state recovery, autonomous Gmail triage, independent partner discovery through existing Contacts/Gmail/LinkedIn, effect-level authority gates, provider outcome verification and later-cycle retained-improvement measurement.
+
+The live YUMORI.me Contacts / Correspondence Routing sheet remains the current recipient-state authority. Skills govern how to query and validate it; they do not create a second contact database.
+
+## Public architecture — one project, two focused sites
+
+YUMORI.me is the civic and preservation movement / preparatory committee within the eSingularity.ai effort. It has its own public homepage, not a separate product repository. The September 25 demolition-preparation budget vote is now historical. The current executive-side request is a **PPP/PFI public-private comparison and project-formation route for Sukatto before irreversible demolition procurement or physical demolition proceeds**, including lawful access to the information needed for feasibility review. Fukui City's FY2026 財産有効活用民間提案制度 is a separate asset-proposal lane and is not the requested Sukatto route. See [the September 13 alignment audit](docs/VOTE_NO_ALIGNMENT_20260913.md) only as the historical pre-vote record.
+
+The module deliberately publishes two different public experiences from one canonical frontend and one existing Sites project. Shared hosting does **not** mean a shared homepage.
+
+| Public entry | Focus | Homepage owner |
+| --- | --- | --- |
+| `https://esingularity.ai/` | Project vision: preserve and regenerate Sukatto Land Kuzuryu through the eSingularity/COG DC proposal | `frontend/app/page.tsx` |
+| `https://yumori.me/` and `https://www.yumori.me/` | YUMORI movement: understand the wider case, join the preparatory committee, and reach the supporting evidence | `frontend/app/yumori/page.tsx` via the hostname-only root rewrite |
+| `https://yumori.info/` | Existing external redirect to eSingularity.ai | Outside this frontend; do not modify here |
+
+Non-negotiable invariants:
+
+- Never replace either homepage with the other, and never redirect YUMORI.me to eSingularity.ai.
+- Reuse the same application, components, assets, reports, and hosting project without creating a drifting second copy of YUMORI content.
+- A redesign of `app/page.tsx` is an eSingularity.ai change. It must not overwrite, absorb, or repurpose `app/yumori/page.tsx`.
+- A YUMORI movement-page change is confined to `app/yumori/page.tsx` unless a shared dependency is intentionally required. It must not alter the eSingularity.ai homepage.
+- Treat Git merge completion as source integration only. Production acceptance requires fresh-host verification against both domains.
+
+The executable routing and publication contract is in [INTERFACE.md](INTERFACE.md). The permanent regression and production-verification gates are in [tests/README.md](tests/README.md).
+
+## eSingularity.ai project surface
+
+The current public journey is deliberately simple. The existing hero is followed by a ten-slide YUMORI presentation, while the existing campaign ticker carries one `NEW` notification linking to it:
+
+1. Understand what is at risk.
+2. See the alternative to demolition.
+3. Understand the potential benefit to Fukui.
+4. Understand how students and FoundUps could use our COG DC compute.
+5. Become a YUMORI or join the LINE community without financial obligation.
+
+The financial models, engineering research, and source audits support the public claims but are not the main public experience.
+
+## Grants, subsidies, and PPP support
+
+Use [docs/GRANTS_AND_SUBSIDIES.md](docs/GRANTS_AND_SUBSIDIES.md) as the repository-side canonical registry for grant/subsidy/PPP-support status. It is reconciled against the Drive `FIN — YUMORI Three-Site Portfolio, Demand-Led Financial Model & Grant Audit` workbook but remains the truth boundary for project status labels.
+
+A program's existence is not project funding. Keep the progression explicit: verified program → eligibility inquiry → eligible → application → selected → awarded. Only an awarded amount may be represented as committed subsidy revenue. The current highest-priority inquiry concerns the MOE/RCESPA regional-coexistence data-center decarbonization program and whether a currently closed municipal onsen can qualify after Fukui City accepts a lawful PPP/lease/use structure and an eligible operator/SPC satisfies the program conditions.
+
+## Economic and node-sizing authority
+
+YUMORI compute capacity is **demand-led, not MW-first**.
+
+- Canonical calculation/sizing code: [src/yumori_economic_model.py](src/yumori_economic_model.py).
+- Model contract and evidence boundary: [docs/YUMORI_ECONOMIC_MODEL.md](docs/YUMORI_ECONOMIC_MODEL.md).
+- Candidate-site status: [docs/CANDIDATE_SITE_REGISTRY.md](docs/CANDIDATE_SITE_REGISTRY.md).
+- Drive FIN workbook: formula-driven working projection / feasibility-interview surface.
+
+The sizing path is customer/service demand → revenue/resource demand → compute/storage/network requirements → IT kW → facility kW → utility-confirmed cap. A separately calculated financial-floor kW is a viability metric under the current scenario, not a build target. No current site has utility-confirmed deliverable kW/MW.
+
+The same repository model also keeps demand-capped heat-recovery calculations and the sourced JHR Japan infrastructure-flow ledger. Heat value is limited by usable thermal demand; infrastructure relationships with undisclosed amounts remain null and do not become YUMORI revenue or funding.
+
+The legacy 1 MW / 384-GPU workbook scenario is retained for audit continuity only. Current public/project truth must not present a fixed 1→5→10→20 MW rollout.
+
+## Google Drive document authority
+
+Use [docs/DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md) before creating, renaming, deleting, or searching for YUMORI Drive material. It maps the numbered 01–06 spine plus `PICS`, `CONTACTS`, `LOG`, `COMMITTEE`, finance, press, landowner and legal lanes to their stable Drive IDs and roles.
+
+Repository state is canonical for project status and source-of-truth labels. Drive is the working drafting/evidence layer. If repo, Drive and a primary government source disagree, re-verify the primary source first, update the repo authority, then reconcile Drive. Do not create another Drive file merely because an existing file is hard to find.
+
+## YUMORI Moshpit logging
+
+Use the module-owned [YUMORI Moshpit Skillz](skillz/yumori_moshpit/SKILLz.md) for campaign activity, stakeholder/procedural milestones, monk field activity, and 0102 learning-log routing. It is registered in the WRE Skillz/Rolodex registry at `modules/infrastructure/wre_core/skillz/skills_registry_v2.json`; the `.agents` and `.claude` files are thin operator projections, not separate authorities.
+
+The campaign Moshpit is reverse chronological within each JST day. Agent-internal repairs and learning belong in the private 0102 Moshpit unless the same event materially changes campaign history.
+
+## Campaign ticker updates
+
+Use [esingularity-ticker](../../../.agents/skills/esingularity-ticker/SKILL.md) for field-status updates. A routine verbal update becomes one Japanese/English/Portuguese `frontend/content/current-field-status.json` payload on the dedicated `live/yumori-field-status` branch; the deployed shared `CampaignTicker.tsx` polls it for both eSingularity.ai and YUMORI.me. Each item is explicitly time-limited in Japan time and falls back safely after expiry.
+
+The public civic-action record lives at `https://YUMORI.me/vote-no`. It publishes privacy-bounded transcripts of the committee's sent council and mayor messages, clearly labels superseded historical requests, and links visitors to official Fukui contact channels.
+
+## Japan Hyperscaler Report (JHR)
+
+JHR is the eSingularity research/publication lane for tracking Japan's hyperscale data-center expansion, policy, grid constraints, land-use effects, community response, and implications for Fukui and distributed COG DC infrastructure.
+
+- Runtime: `jhr/src/jhr_agent.py`
+- Launch adapter: `jhr/scripts/launch.py`
+- Agent skill: `.agents/skills/japan_hyperscaler_report/SKILL.md`
+- Public route: `/reports/jhr`
+- First report: `jhr/reports/JHR_001_2026-09_JAPAN_HYPERSCALER_REPORT.md`
+
+JHR is significance-gated. A research cycle may return `NO_REPORT`; no publication is implied merely because a cycle ran. Public claims require provenance and WSP_97 evidence.
+
+## Module structure
+
+```text
+modules/foundups/esingularity/
+├── frontend/               # Live Japanese-first Vinext/Sites PWA
+│   ├── content/            # Canonical Japanese deck and derived language states
+│   ├── audit/              # Public-claim evidence ledger
+│   └── app/reports/jhr/    # Public Japan Hyperscaler Report route
+├── jhr/                    # Japan Hyperscaler Report research + publish gate
+│   ├── src/                # Significance and truth-boundary logic
+│   ├── scripts/            # Launch adapter
+│   ├── reports/            # Verified reference reports
+│   └── tests/              # Publish/no-publish gate tests
+├── src/                    # Stable FoundUp identity contract
+├── tests/                  # Manifest, registry, route, and hosting checks
+├── docs/                   # Migration, architecture, Drive index, grant and evidence records
+├── memory/                 # WSP 60 module memory documentation
+├── foundup_manifest.json   # p.fMALL/FoundUps discovery contract
+├── module.json             # Module discovery metadata
+├── README.md
+├── INTERFACE.md
+├── ROADMAP.md
+└── ModLog.md
+```
+
+## Local workflow
+
+```powershell
+cd modules/foundups/esingularity/frontend
+npm ci
+npm run lint
+npm run build
+npm run dev -- --host 127.0.0.1
+```
+
+JHR assessment only:
+
+```powershell
+python modules/foundups/esingularity/jhr/scripts/launch.py
+```
+
+With no research retriever connected, JHR fails closed and returns `NO_REPORT` rather than pretending research occurred.
+
+## Architectural boundaries
+
+- `esingularity.ai` is the project/vision surface; YUMORI.me is the movement/join surface. They are peers with different jobs, not aliases for the same homepage.
+- Foundups.com discovers the project through the registry and `/f/esingularity_001` namespace.
+- The Foundups.com shell does not own or duplicate eSingularity product logic.
+- The site remains inside the monorepo until it passes the FoundUp exfoliation readiness gate.
+- No token, investment offer, or fundraising claim is created by this module registration.
+- The deck is additive: it does not replace the existing hero, ticker, campaign actions, or deeper public sections.
+- Contact candidates remain in the ignored RedDog manual-alpha store until a governed Contact Memory runtime exists.
+- JHR public publication remains fail-closed until retrieval, verification, drafting, image provenance, and publication adapters are verified together.
+- Grant maximums, open calls and eligibility inquiries are not awards. Public funding claims remain fail-closed until the grant registry and source-of-truth ledger admit them.
+- Drive artifacts do not outrank repository authority merely because they are newer or longer; durable status changes must be reconciled into the repo.
+
+## WSP alignment
+
+- WSP 3: FoundUp ownership under `modules/foundups/`
+- WSP 22: module change documentation
+- WSP 49/60: module structure and memory
+- WSP 97: truth-boundary labels, evidence gates, and no implied activation
+- WSP 104: stable `/f/{foundup_id}` namespace and tenant isolation
+
+
+## Drive knowledge boundary — current project vs historical eSingularity
+
+Current Fukui work uses the **YUMORI × eSingularity.ai × AI Koban** project family. Mutable correspondence/editorial/partner drafts live under the Drive container `CURRENT — YUMORI × eSingularity.ai × AI Koban — Working Documents` using semantic folder prefixes. Numeric prefixes remain reserved for the canonical project-document spine in [DRIVE_DOCUMENT_INDEX.md](docs/DRIVE_DOCUMENT_INDEX.md).
+
+Historical Educational Singularity / eSingularity material (including 2007–2010-era work) is long-term provenance, not current Fukui authority. Agents must not mix it into current retrieval solely because the `eSingularity` term matches; promotion into current work requires an explicit current citation/verification path.
+
+## Three-site portfolio finance
+
+The existing FIN workbook and [economic contract](docs/YUMORI_ECONOMIC_MODEL.md)
+now distinguish stable site identities from priorities, independent site costs,
+committed sources, investor distributions and retained reinvestment. The bounded
+portfolio engine is `src/yumori_portfolio_model.py`, exposed through the canonical
+economic module. Current self-funding output is **INSUFFICIENT EVIDENCE**; no site
+cost, grid capacity, financing terms or grant award is invented. Document 05 is the
+umbrella PPP/PFI/asset-procedure master; 07 retains technical evidence and photos.
+This rebaseline does not publish website changes or rewrite campaign history.
+
+## Costed planning scenarios (2026-09-29)
+
+The canonical [economic document](docs/YUMORI_ECONOMIC_MODEL.md#costed-planning-cases--2026-09-29) now contains independent low/base/high site CapEx tables and calculated downside/base/upside cash scenarios. `run_planning_scenario()` reads `data/yumori_planning_assumptions.json`; all project estimates are MODEL ONLY and all deployment gates remain unverified. The existing FIN workbook is the native formula projection.

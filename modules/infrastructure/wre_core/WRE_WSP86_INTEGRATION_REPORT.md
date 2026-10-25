@@ -1,4 +1,8 @@
 # WRE + WSP 86 Integration Report
+
+> **Historical report, not current activation or metric authority.** Fingerprint
+> suggestions do not prove execution, and token-reduction claims below were not
+> measured from authenticated runtime receipts.
 **Date**: 2025-09-16
 **Status**: ACTIVATED - Modular Fingerprints Operational
 

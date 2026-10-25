@@ -1,4 +1,207 @@
+## 2026-10-23 | Bounded request normalization in the existing Mall field
+
+Source baseline: `a048c24071e1a651b161025ba3342f14f3047280`; existing field blob
+`966e59f748422a5aed2cf24694d01c6fe6636626` and property harness blob
+`7cd57d0dcab2682906c20e6da4d2b5611ecb7622`. Read the module interface, roadmap,
+this test inventory and the existing actual-field harness before extending it.
+No test file, external dependency or separate search runtime was added.
+
+Release-cache follow-up verified current main
+`f2e9408ba950a80fe549887db39289e6aff04f27`: member worker blob
+`89393c6f0ef95b6150873d819bb6ce5f45cc2be4` is unchanged from the baseline.
+The matcher is a precached, cache-first shell asset, so advance only its existing
+shell cache from v4 to v5. The existing product state/service-worker harness now
+expects v5 installation and retirement of v4 while retaining poster/property
+cache generations. Its original blob is
+`a7efa398b9a34c27f0acdca2144ac75ef029bbbb`; only version-bound assertions changed.
+
+The unchanged property harness passed first. The added “I'm looking for clothing”
+regression then failed on unchanged source with zero results instead of the three
+synthetic clothing records. After the bounded matcher repair, the same harness
+passes straight/curly contractions, case/spacing, addressed request prefixes,
+reciprocal clothing aliases, retained red/dog qualifiers, original query retention,
+and literal unsupported negation/budget/size terms. The grouped-product cases
+also refuse the new phrases without changing their declared projection.
+
+Fresh Node v24.19.0 execution:
+
+- `node public/member/tests/mall_property_listing_vm.mjs`: exit 0, all checks pass.
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs`: exit 0, all checks pass.
+- `node public/member/tests/public_discovery_concierge_vm.mjs`: 21 passed, 0 failed,
+  0 skipped.
+- `node public/member/tests/mall_product_state_vm.mjs`: 17 passed; this was the
+  only harness rerun for the subsequent cache-generation change.
+
+The first two harnesses do not emit numeric test totals. Existing navigation,
+grouping, video compatibility and domain-isolation assertions were retained.
+These receipts prove offline source behavior with bounded DOM fixtures, not
+browser layout, deployed inventory, semantic shopping filters, speech, uploads,
+payments or public release. Synthetic clothing records remain test data only.
+
+## 2026-10-21 | CodeQL fixture repair and main reconciliation
+
+Existing property VM now rejects raw script/image markup case-insensitively and
+exercises lower-, upper- and mixed-case payloads through the real field/detail
+owners. Leaf text reads decode escaped text without regex tag stripping; the
+fixture explicitly rejects unsupported non-leaf reads. No production sanitizer,
+scanner policy or suppression changed. The existing domain alias test extracts
+its trusted inline script case-insensitively with tag boundaries.
+
+Research: CodeQL `js/bad-tag-filter` and
+`js/incomplete-multi-character-sanitization` query documentation; existing
+module test inventories and the shared field/plane implementations.
+WSP 00 canonical attempt failed because torch is absent; tracker check passes,
+but no detector witness is claimed. WSP 97 lexical retrieval is bound to
+`c1a4a7eb16afc4f0e51d20797ad3ac88589a7812`, freshness UNKNOWN/index gap true.
+Missing semantic retrieval was supplemented by exact owner reads.
+
+WSP 15 allocation: C2/I4/D4/Impact3 = 13 (P1), bounded CI repair. Execution
+plane is repository maintenance; no WRE service or runtime activation.
+Verification starts with both existing Node fixtures, expands to shared member,
+projector, registry and security-gate tests, then requires exact-head CI.
+Main `1c277a3c0d0524e450ed1dd56d2373480d640ebd` conflicts were limited to
+security records and the generated test registry. Preserve the union of reviewed
+bindings; regenerate the registry with its existing owner. No new exception.
+Deployment and browser interaction remain separate, unverified gates.
+
+Integrated replay (Python 3.12, pytest 9.1.1, plugin auto-load disabled,
+`--import-mode=importlib`): **1673 passed, 3 failed, 0 skipped** across member,
+property wrapper, projector, registry-schema and security-gate suites. The three
+failure IDs are `TestFoundUpHandoff::test_open_link_exists`,
+`TestFoundUpHandoff::test_routing_prefix_surfaced` and
+`TestGestureHints::test_hint_items_present` in `test_navigation_planes.py`.
+All three also fail on exact main `1c277a3c` in the same environment (41 other
+navigation checks pass). No xfail/exclusion added. Initial collection without
+importlib collided on test package names; initial dependency-limited replay had
+missing-jsonschema failures/skips. Installing the declared test dependency and
+using isolated imports removed those coverage gaps. Registry: 1740 tracked test
+files, 270 quarantined; these are inventory counts, not executed test counts.
+
+## 2026-10-18 | Recovered actual Mall product integration
+
+Fresh final recovered-source command:
+
+```bash
+/tmp/move2japan-tests/bin/python -B -m pytest --import-mode=importlib \
+  public/member/tests modules/foundups/move2japan/tests \
+  modules/foundups/public_catalog_projector/tests/test_projector.py \
+  modules/foundups/tests/test_foundup_registry_schema.py -q
+```
+
+Result: **1698 passed, 4 failed, 0 skipped in 11.52 seconds**. The four failures
+are unchanged baseline expectations: navigation's `fv-open-link`,
+`routing_prefix`, obsolete `Tap to play/pause`, and BC0 intent classification of
+“is it expensive to live there”. The original tests and BC0 handler remain
+unchanged from main. No suppression or unrelated repair was added.
+
+Actual source VM receipts (counts overlap with Python wrappers):
+
+- `member_product_boot_vm.mjs`: 21 checks, complete `memberRuntime` inline script
+  with only dynamic imports routed to controlled test modules. Guest startup,
+  Clerk failure/timeout, actual stored admission, no public account writes,
+  missing invite status, sign-out and reversed account reads, same-account
+  generation races, ordinary gate, account return and explicit video entry.
+  Executed from the existing `test_localhost_dev_harness.py` owner.
+- `public_discovery_concierge_vm.mjs`: 21 checks against the actual member plane
+  and product template, real concierge and gestures. Includes visible shared
+  briefing/recommendations, invite action, focus/profile handoff, strict guest
+  revocation, captured callbacks and independent product filters.
+- `mall_product_state_vm.mjs`: 17 checks on actual state/SW source. Separate
+  namespaces, loading captures, bounded returns, deferred video restoration,
+  explicit public caching, network fallback and HTML rejection.
+- `mall_property_listing_vm.mjs`: actual field/plane/gesture behavior, both axes,
+  stable listing identity, empty filters, source safety, modal scroll/focus,
+  restored offsets and preserved ordinary category/grid behavior.
+- Dispatcher VM and independent actual-field/dispatcher composition: geography
+  refuses populated/empty global queries without mutation or success event;
+  shared density and ordinary queries remain functional.
+- Domain `property_search.cjs`: 28 factual catalog, geography, land, price, route
+  and alias checks.
+
+Independent reviewers replayed the field/state, concierge, boot and dispatcher
+boundaries and found no remaining material blocker. The restored field is exact
+blob `966e59f748422a5aed2cf24694d01c6fe6636626`; regenerated harness/account segments
+have fresh receipts, not claims of identical lost bytes. Canonical registry:
+1722 test files, 270 quarantined; generator output matches the previously uploaded
+blob `1af2a9330d932d9d121331152f0d1ac3ddc1e03c`. No registry gate is weakened.
+
+Browser layout, production auth, source availability, payments, live playback and
+real offline browser operation remain outside these VM receipts. The historical
+records below retain their original stage/source scope.
+
+## 2026-10-18 | Responsive shared Mall discovery
+
+Validation on the proposed branch:
+- 251 passed across test_video_mall_field_runtime.py, test_search_mall_concierge_wiring_phase1.py and test_mobile_blockers.py. Two environment config warnings for unavailable asyncio plugin options.
+- Existing pfmall_control_dispatcher_vm.mjs passed.
+- New mall_responsive_browse.mjs passed in headless Chromium: 390/768/1024/1440 viewport widths, both scroll axes, stable grouped indexes, desktop card dragging, query aliases/location, truthful empty results, search during expansion, vertical collapse restoration, saved horizontal position, dispatcher payload validation and legacy grid switching.
+- JavaScript syntax and git diff whitespace checks passed. Independent read-only review found no remaining material regressions after stable-index, category attribute and vertical restoration fixes.
+
+Browser fixture uses 60 synthetic channels and intercepts network requests. This does not establish real authentication, provider playback, Safari/iPad hardware behavior, voice conversation, or personalized ranking. Runtime-owned browser dependencies were used; repository dependencies unchanged.
+
+## 2026-10-17 | Property tiles and shared quick-view runtime
+
+Extended `test_non_video_quickview_actions.py` with a Node runtime check using
+`mall_property_listing_vm.mjs`. Existing dispatcher VM tests stub the render
+APIs and cannot cover this seam; the new fixture executes the actual shared
+gesture/tile/plane scripts with a bounded DOM. It requires only Node built-ins.
+
+Covered: two properties under one FoundUp; separate selection/focus keys;
+wrong-tenant/missing/duplicate identity rejection; tap/Enter/Space/pinch detail;
+arrow navigation; repeated filter/reorder/empty updates without added page
+listeners; inert state and Tab wrapping; HTTPS/no-userinfo source URLs; escaped
+hostile text; ignored property video/token/poster fields; and retained video
+Enter/fullscreen dispatch. Source checks and existing quick-view fixtures are
+retained. First adversarial execution failed on raw angle brackets in an
+attribute; escaping was fixed and the complete runtime replay passed.
+
+Independent review exposed detached focus after detail replacement and vertical
+scroll gestures closing long property details. The DOM fixture now models focus
+loss when innerHTML removes its target; that regression failed before the repair.
+Real gesture-engine touch events verify property scrolling remains open, lateral
+navigation still works, and non-property swipe-up still closes. Outside-dialog
+Tab/Shift-Tab recovery and the property-specific hint are checked as well.
+
+Command: `node public/member/tests/mall_property_listing_vm.mjs`.
+Focused pytest replay: **277 passed** across `test_non_video_quickview_actions.py`
+(including the Node runtime), `test_video_mall_field_runtime.py`,
+`test_tile_keyboard_a11y.py`, and `test_non_video_action_surfaces.py`.
+Two initial source-window regressions were resolved by keeping Enter on the
+existing fullscreen dispatch function and putting preview cleanup first;
+the original assertions were retained.
+Scope: local JavaScript behavior, no network, browser layout, live listings,
+authentication, payment, production deployment or media permission proof.
+
+## 2026-09-21 | Optional public discovery alias behavior (local and independent replay passed)
+
+Extend test_route_contract_bridge.py with the actual inline JavaScript in an isolated Node VM,
+synthetic Promise-based catalog responses and ordered history/render/context observations.
+Final author replay:128 passed; exact base HTML:62 failed/66 passed, with zero forbidden effects.
+The 48 existing cases remain intact;80 new cases cover aliases, paths, ambiguity, eligibility,
+failed history/catalog and membership-before-fetch. Pending/rejected discovery exports a null
+identity; successful canonical identity is preserved. Independent three-owner replay passed271overlapping cases, including these128; CI remains separate.
+No real browser/authentication, external scripts, network, provider or tenant runtime is exercised.
+
 # TestModLog — public/member/tests/
+
+## 2026-09-21 | Public discovery / participation route contract reconciliation
+
+`test_route_contract_bridge.py`: 34 passed / 11 failed on main `f7307291`;
+the final corrected suite has 48 passing tests, no skips (three parser cases added). Retain canonical
+identity, Firebase rewrite ordering, transitional member entry and tenant
+catalog checks. Replace retired public iframe/entry_url/deep-link launch
+expectations with the existing `/member/` participation handoff, scope-free
+public catalog, sanitized projection and safe public-link contracts.
+Inline-script checks exclude full-line comments and retired CSS, which had
+made member-catalog and launch checks pass without testing executable code.
+All HTML, JavaScript, catalogs and auth behavior remain byte-identical to main.
+Initial replay:45 pass. Hosted CodeQL rejected regex extraction of uppercase
+SCRIPT tags; replaced it with stdlib HTMLParser and three casing/attribute
+controls. Final independent replay:48 pass. All11 in-memory mutations rejected; mocked
+Node VM:6 route controls and4 mutations pass. These overlap the same contract;
+no real browser, sign-in or tenant execution. Registry generator updates only
+this module description;1651 entries/269 quarantined, classification unchanged.
+Exact-head CI remains separate. Evidence: canonical RSI backlog. WSP 15/22/97/104.
 
 Test evolution log for the p.fMALL member shell test suite.
 

@@ -8,8 +8,8 @@ outside the repository checkout, builds the injected handler registry with the
 dependencies this bootstrap owns today, and advances through the serial loop up
 to a bounded max step count.
 
-This slice does not introduce a production signer, runner, PR, PatternMemory,
-OpenClaw, Hermes, or HoloIndex dependency. Work-order and valve artifacts are
+This bootstrap does not grant signer, runner, PR, PatternMemory, OpenClaw,
+Hermes, or HoloIndex authority. Work-order and valve artifacts are
 loaded only from outside-repo JSON snapshots. Public signature verification can
 be enabled only through the explicit runtime dependency bundle. Missing
 later-stage dependencies fail closed through the registry and dispatcher.
@@ -24,7 +24,11 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from fnmatch import fnmatchcase
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Callable, Mapping, Optional, Sequence
+
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    snapshot_authority_profile_m2m,
+)
 
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     validate_runtime_artifact_path,
@@ -34,6 +38,7 @@ from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     AtomicJsonResidentQueueChainResultsStore,
 )
+from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import AtomicJsonAuthoritativeWorkStateStore
 from modules.communication.moltbot_bridge.src.reddog_main_resident_queue_runtime_dependency_bundle import (
     REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED,
     load_reddog_main_resident_queue_runtime_dependency_bundle,
@@ -64,7 +69,23 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun import (
     plan_reddog_wre_queue_consumer_dry_run,
 )
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import build_work_order_materialization_binding
+from modules.communication.moltbot_bridge.src.reddog_model_runtime_verifier_bootstrap import (
+    ModelRuntimeVerifierConfig,
+    build_model_runtime_verifier,
+)
+from modules.communication.moltbot_bridge.src.reddog_artifact_generation_provider_bootstrap import (
+    ArtifactProviderDependencies,
+    build_artifact_generator as _build_artifact_generator,  # noqa: F401
+    build_generation_dependencies as _build_generation_dependencies,
+    read_artifact_provider_effects as _artifact_provider_effects,
+)
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    materialized_model_runtime_authority_fields,
+)
 from modules.communication.moltbot_bridge.src.reddog_runtime_json_read import (
+    read_reddog_authority_profile_effect_scope_outside_repo,
+    read_reddog_runtime_json_outside_repo as _read_json_outside_repo,
     read_reddog_runtime_json_mapping,
 )
 from modules.ai_intelligence.ai_gateway.src.model_feedback_ledger import (
@@ -73,6 +94,7 @@ from modules.ai_intelligence.ai_gateway.src.model_feedback_ledger import (
 from modules.infrastructure.wre_core.src.reddog_verified_outcome_ratchet import (
     JsonlOutcomeRatchetStore,
 )
+from modules.communication.moltbot_bridge.src import foundup_memex_verified_outcome_queue_binding as _outcome_binding
 
 
 REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED = "REDDOG_RESIDENT_QUEUE_SERIAL_LOOP_BOOTSTRAP_APPLIED"
@@ -94,14 +116,23 @@ class RedDogMainResidentQueueSerialLoopBootstrapResult:
     chain_results_path: Optional[str]
     store_revision: Optional[str]
     rejection_reasons: tuple[str, ...]
+    queue_chain_requeue_required: bool = False
+    retry_at: Optional[str] = None
     runtime_dependency_bundle_status: str = REDDOG_RUNTIME_DEPENDENCY_BUNDLE_NOT_REQUESTED
     runtime_dependency_bundle_requested: bool = False
     no_signing_performed: bool = True
     no_signature_verification_performed: bool = True
     no_worker_spawn_performed: bool = True
+    no_upstream_agent_invocation_performed: bool = True
+    artifact_provider_runtime: str = "none"
+    worker_process_spawn_count: int = 0
+    no_artifact_provider_file_write_performed: bool = True
+    artifact_provider_effect_observation_complete: bool = True
+    artifact_provider_run_abort_confirmed: bool = True
     no_worktree_created: bool = True
     no_bounded_task_execution_performed: bool = True
     no_bounded_file_edit_performed: bool = True
+    no_exact_sha_commit_performed: bool = True
     no_slice_verification_performed: bool = True
     no_verified_draft_pr_publish_performed: bool = True
     no_verified_outcome_ratchet_performed: bool = True
@@ -138,7 +169,6 @@ class JsonResidentQueueWorkOrderResolver:
         _ = (queue_item_id, selected_slice)
         return self._work_orders.get(str(work_order_id), {})
 
-
 def run_reddog_main_resident_queue_serial_loop_bootstrap(
     *,
     repo_root: Path | str,
@@ -171,12 +201,19 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     signer_socket_max_response_bytes: int = DEFAULT_SIGNER_SOCKET_MAX_RESPONSE_BYTES,
     signer_socket_connector: Optional[SignerSocketConnector] = None,
     signature_verifier_backend: str | None = None,
+    elevated_consensus_capability_supplier: Any = None,
+    worktree_lease_issuer: Any = None,
+    signer_peer_secret_access_grant_supplier: Any = None,
     worktree_runner: Any = None,
     pilot_dryrun_binding_enabled: bool = False,
     worktree_runner_mode: str | None = None,
     worktree_runner_timeout_s: int = 120,
     artifact_generator: Any = None,
     artifact_generator_mode: str | None = None,
+    artifact_model_available_providers: Sequence[str] = (),
+    artifact_provider_dependencies: ArtifactProviderDependencies | None = None,
+    model_runtime_binding_verifier: Any = None,
+    model_runtime_verifier_config: ModelRuntimeVerifierConfig | Mapping[str, Any] | None = None,
     evidence_command_runner: Any = None,
     slice_verifier_request_binding_enabled: bool = False,
     evidence_command_runner_mode: str | None = None,
@@ -191,14 +228,20 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     ratchet_pattern_memory_sink: Any = None,
     pattern_memory_admission_sink: Any = None,
     worker_dispatch_writer: Any = None,
+    assurance_reservation_store: Any = None,
     requested_queue_item_id: str | None = None,
     now_iso: str | None = None,
     now_epoch: int | None = None,
+    trusted_now_epoch: Optional[Callable[[], int]] = None,
     max_steps: int = 1,
 ) -> RedDogMainResidentQueueSerialLoopBootstrapResult:
     """Load runtime inputs and run the bounded resident queue serial loop."""
-
     root = Path(repo_root).resolve()
+    authority_clock = trusted_now_epoch or (lambda: int(datetime.now().timestamp()))
+    try:
+        fresh_now_epoch = int(authority_clock())
+    except (TypeError, ValueError, OverflowError):
+        return _not_ready(("trusted_now_epoch_invalid",), chain_results_path=None)
     if runtime_allowed_root is None:
         return _not_ready(("missing_runtime_artifact_root",), chain_results_path=None)
     runtime_root = Path(os.path.abspath(Path(runtime_allowed_root).expanduser()))
@@ -217,8 +260,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if snapshot_reasons:
         return _not_ready(snapshot_reasons, chain_results_path=None)
     assert snapshot is not None
-
-    profile, profile_reasons = _read_json_outside_repo(
+    profile, profile_reasons = read_reddog_authority_profile_effect_scope_outside_repo(
         root,
         runtime_root,
         authority_profile_path,
@@ -229,7 +271,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if profile_reasons:
         return _not_ready(profile_reasons, chain_results_path=None)
     assert profile is not None
-
     chain_path, chain_reasons = _resolve_output_outside_repo(
         root,
         runtime_root,
@@ -240,7 +281,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if chain_reasons:
         return _not_ready(chain_reasons, chain_results_path=None)
     assert chain_path is not None
-
     work_orders, work_order_reasons = _load_or_materialize_work_orders(
         root,
         runtime_root,
@@ -253,7 +293,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if work_order_reasons:
         return _not_ready(work_order_reasons, chain_results_path=None)
-
     valve_environment, valve_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -271,8 +310,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(
             ("governed_execution_valve_environment_required",),
             chain_results_path=None,
-        )
-
+    )
     generic_writer_dryrun_result, generic_writer_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -284,7 +322,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if generic_writer_reasons:
         return _not_ready(generic_writer_reasons, chain_results_path=None)
-
     governed_shell_dryrun_result, governed_shell_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -296,7 +333,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if governed_shell_reasons:
         return _not_ready(governed_shell_reasons, chain_results_path=None)
-
     artifact_contents, artifact_contents_reasons = _read_json_outside_repo(
         root,
         runtime_root,
@@ -406,17 +442,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         return _not_ready(admission_request_reasons, chain_results_path=None)
 
     chain_state = _read_existing_chain_state(chain_path, runtime_root)
-    if (
-        artifact_generation_request_binding_enabled
-        and artifact_contents is None
-        and artifact_generation_request is None
-    ):
-        artifact_generation_request = _derive_artifact_generation_request_from_chain(
-            chain_state=chain_state,
-            work_orders=work_orders,
-            repo_root=root,
-            holoindex_evidence=holoindex_evidence,
-        )
     if outcome_ratchet_request_binding_enabled and ratchet_request is None:
         ratchet_request = _derive_outcome_ratchet_request_from_chain(
             chain_state,
@@ -425,8 +450,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     if held_out_gate_request_binding_enabled and held_out_gate_request is None:
         held_out_gate_request = _derive_held_out_gate_request_from_chain(chain_state)
     if pattern_memory_admission_request_binding_enabled and admission_request is None:
-        admission_request = _derive_pattern_memory_admission_request_from_chain(chain_state)
-
+        admission_request = _outcome_binding.derive_verified_outcome_admission(chain_state, snapshot, now_iso or "")
     resolved_outcome_ratchet_store, ratchet_store_reasons = _build_outcome_ratchet_store(
         root,
         runtime_root,
@@ -435,7 +459,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if ratchet_store_reasons:
         return _not_ready(ratchet_store_reasons, chain_results_path=None)
-
     resolved_model_feedback_store, model_feedback_store_reasons = _build_model_feedback_ledger_store(
         root,
         runtime_root,
@@ -444,7 +467,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if model_feedback_store_reasons:
         return _not_ready(model_feedback_store_reasons, chain_results_path=None)
-
     resolved_worktree_runner, runner_reasons = _build_worktree_runner(
         root,
         injected_runner=worktree_runner,
@@ -453,21 +475,22 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
     )
     if runner_reasons:
         return _not_ready(runner_reasons, chain_results_path=None)
-
-    resolved_artifact_generator, artifact_generator_reasons = _build_artifact_generator(
-        injected_runner=artifact_generator,
-        mode=artifact_generator_mode,
+    generation = _build_generation_dependencies(
+        root, runtime_root, artifact_generator, artifact_generator_mode,
+        model_runtime_binding_verifier, model_runtime_verifier_config, authority_clock,
+        provider_dependencies=artifact_provider_dependencies,
+        available_model_providers=artifact_model_available_providers,
+        verifier_builder=build_model_runtime_verifier,
     )
-    if artifact_generator_reasons:
-        return _not_ready(artifact_generator_reasons, chain_results_path=None)
-
+    resolved_artifact_generator, resolved_model_verifier, generation_reasons = generation
+    if generation_reasons:
+        return _not_ready(generation_reasons, chain_results_path=None)
     resolved_evidence_command_runner, evidence_runner_reasons = _build_evidence_command_runner(
         injected_runner=evidence_command_runner,
         mode=evidence_command_runner_mode,
     )
     if evidence_runner_reasons:
         return _not_ready(evidence_runner_reasons, chain_results_path=None)
-
     dependency_bundle = load_reddog_main_resident_queue_runtime_dependency_bundle(
         repo_root=root,
         runtime_allowed_root=runtime_root,
@@ -479,7 +502,8 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         signer_socket_max_response_bytes=signer_socket_max_response_bytes,
         signer_socket_connector=signer_socket_connector,
         signature_verifier_backend=signature_verifier_backend,
-        now_epoch=now_epoch,
+        elevated_consensus_capability_supplier=elevated_consensus_capability_supplier,
+        now_epoch=(fresh_now_epoch if authority_state_path else None),
     )
     if dependency_bundle.accepted is not True:
         return _not_ready(
@@ -488,7 +512,7 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             runtime_dependency_bundle_status=dependency_bundle.status,
             runtime_dependency_bundle_requested=dependency_bundle.requested,
         )
-
+    resolved_outcome_publisher = _outcome_binding.resolve_verified_outcome_publisher(dependency_bundle, profile, snapshot, authority_clock)
     governed_environment = None
     governed_authority_resolver = None
     if isinstance(valve_environment, Mapping):
@@ -515,19 +539,18 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             revocation_oracle=dependency_bundle.revocation_oracle,
             now_epoch=int(dependency_bundle.now_epoch or 0),
             required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
-            trusted_now_epoch=lambda: int(datetime.now().timestamp()),
+            trusted_now_epoch=authority_clock,
+            signer_peer_secret_access_grant_supplier=signer_peer_secret_access_grant_supplier,
         )
-
     store = AtomicJsonResidentQueueChainResultsStore(
         chain_path,
         allowed_root=runtime_root,
     )
     run_now = _parse_datetime(now_iso) if now_iso else None
     registry = build_reddog_resident_queue_stage_handler_registry(
-        work_state_snapshot=snapshot,
-        chain_results_store=store,
-        authority_profile=profile,
-        now_iso=now_iso or "",
+        work_state_snapshot=snapshot, chain_results_store=store,
+        authoritative_work_state_store=AtomicJsonAuthoritativeWorkStateStore(_runtime_input_path(root, work_state_path), allowed_root=runtime_root, repo_root=root),
+        authority_profile=profile, now_iso=now_iso or "",
         authority_store=dependency_bundle.authority_store,
         signer=dependency_bundle.signer,
         principal_resolver=dependency_bundle.principal_resolver,
@@ -537,12 +560,14 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         principal_key_resolver=dependency_bundle.principal_key_resolver,
         nonce_store=dependency_bundle.nonce_store,
         revocation_oracle=dependency_bundle.revocation_oracle,
+        elevated_consensus_capability_supplier=dependency_bundle.elevated_consensus_capability_supplier,
         work_order_resolver=(
             JsonResidentQueueWorkOrderResolver(work_orders) if work_orders is not None else None
         ),
         repo_root=root,
         valve_environment=governed_environment,
         governed_use_time_authority_resolver=governed_authority_resolver,
+        worktree_lease_issuer=worktree_lease_issuer,
         worktree_runner=resolved_worktree_runner,
         pilot_dryrun_binding_enabled=pilot_dryrun_binding_enabled,
         generic_writer_dryrun_result=generic_writer_dryrun_result,
@@ -551,6 +576,9 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         artifact_generation_request=artifact_generation_request,
         artifact_generation_request_binding_enabled=artifact_generation_request_binding_enabled,
         artifact_generator=resolved_artifact_generator,
+        model_runtime_binding_verifier=resolved_model_verifier,
+        commit_runner=draft_pr_runner,
+        commit_evidence_runner=resolved_evidence_command_runner,
         holoindex_evidence=holoindex_evidence,
         verifier_request=verifier_request,
         evidence_producer_request=evidence_producer_request,
@@ -567,7 +595,10 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         ratchet_pattern_memory_sink=ratchet_pattern_memory_sink,
         admission_request=admission_request,
         pattern_memory_admission_sink=pattern_memory_admission_sink,
+        verified_outcome_evidence_publisher=resolved_outcome_publisher,
         worker_dispatch_writer=worker_dispatch_writer,
+        trusted_now_epoch=authority_clock,
+        assurance_reservation_store=assurance_reservation_store,
         now_datetime=run_now,
         permission_expires_at=(
             str(valve_environment.get("permission_expires_at"))
@@ -593,7 +624,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
             runtime_dependency_bundle_status=dependency_bundle.status,
             runtime_dependency_bundle_requested=dependency_bundle.requested,
         )
-
     return _from_loop(
         loop,
         accepted=True,
@@ -602,42 +632,6 @@ def run_reddog_main_resident_queue_serial_loop_bootstrap(
         runtime_dependency_bundle_status=dependency_bundle.status,
         runtime_dependency_bundle_requested=dependency_bundle.requested,
     )
-
-
-def _read_json_outside_repo(
-    repo_root: Path,
-    allowed_root: Path,
-    value: Path | str | None,
-    *,
-    missing_reason: str,
-    inside_reason: str,
-    unreadable_reason: str,
-    required: bool = True,
-) -> tuple[Optional[Mapping[str, Any]], tuple[str, ...]]:
-    if not value:
-        return None, (missing_reason,) if required else ()
-    raw_path = Path(value)
-    candidate = raw_path if raw_path.is_absolute() else repo_root / raw_path
-    candidate = Path(os.path.abspath(candidate.expanduser()))
-    if _is_inside(candidate, repo_root):
-        return None, (inside_reason,)
-    if not candidate.exists() or not candidate.is_file():
-        return None, (missing_reason,)
-    try:
-        validate_runtime_artifact_path(
-            candidate,
-            repo_root=repo_root,
-            allowed_root=allowed_root,
-        )
-        payload = read_reddog_runtime_json_mapping(
-            candidate,
-            allowed_root=allowed_root,
-        )
-    except Exception:
-        return None, (unreadable_reason,)
-    if not isinstance(payload, Mapping):
-        return None, (unreadable_reason,)
-    return payload, ()
 
 
 def _runtime_input_path(repo_root: Path, value: Path | str | None) -> Optional[Path]:
@@ -729,15 +723,14 @@ def _materialize_work_orders_from_authority_profile(
 
     queue_receipt = queue_result.receipt.to_dict() if queue_result.receipt is not None else {}
     queue_item_id = str(queue_receipt.get("queue_item_id") or "")
-    materialization_binding_seed = {
-        "schema_version": "reddog_work_order_materialization_binding_seed.v1",
-        "work_order_id": str(
+    materialization_binding_seed = build_work_order_materialization_binding(
+        work_order_id=str(
             authority_profile.get("work_order_id")
             or "wre-queue-" + hashlib.sha256(queue_item_id.encode("utf-8")).hexdigest()[:16]
         ),
-        "base_ref": authority_profile.get("base_ref"),
-        "queue_consumer_receipt_digest": _canonical_digest(queue_receipt),
-    }
+        base_ref=str(authority_profile.get("base_ref") or ""),
+        queue_consumer_receipt=queue_receipt,
+    )
     authority_request = plan_reddog_wre_queue_authority_request_dry_run(
         queue_consumer_result=queue_result.to_dict(),
         authority_profile=authority_profile,
@@ -785,6 +778,10 @@ def _materialize_work_orders_from_authority_profile(
     )
     if bounded_worker_plan_reasons:
         return None, bounded_worker_plan_reasons
+    slice_verifier_plan, slice_verifier_plan_reasons = _optional_profile_plan(
+        authority_profile, "slice_verifier_plan")
+    if slice_verifier_plan_reasons:
+        return None, slice_verifier_plan_reasons
 
     evidence_seed = {
         "queue_receipt": queue_receipt,
@@ -856,18 +853,32 @@ def _materialize_work_orders_from_authority_profile(
         "wsp15_priority": str(queue_receipt.get("wsp15_priority") or ""),
         "wsp15_mps_total": queue_receipt.get("wsp15_mps_total"),
         "wsp15_reasoning_tier": str(queue_receipt.get("reasoning_tier") or ""),
-        "model_selection_receipt": _nested_mapping(authority_profile, "model_selection_receipt"),
-        "model_selection_receipt_id": str(authority_profile.get("model_selection_receipt_id") or ""),
-        "model_selection_digest": str(authority_profile.get("model_selection_digest") or ""),
-        "model_runtime_binding_receipt": _nested_mapping(authority_profile, "model_runtime_binding_receipt"),
-        "model_runtime_binding_receipt_id": str(
-            authority_profile.get("model_runtime_binding_receipt_id") or ""
-        ),
-        "model_runtime_binding_digest": str(authority_profile.get("model_runtime_binding_digest") or ""),
+        **materialized_model_runtime_authority_fields(authority_profile),
+        "memex_supply_receipt_id": str(queue_receipt.get("memex_supply_receipt_id") or ""),
+        "memex_supply_digest": str(queue_receipt.get("memex_supply_digest") or ""),
     }
     if bounded_worker_plan:
         work_order["bounded_worker_plan"] = bounded_worker_plan
+    if slice_verifier_plan:
+        work_order["slice_verifier_plan"] = slice_verifier_plan
     return {work_order_id: work_order}, ()
+
+
+def _optional_profile_plan(
+    authority_profile: Mapping[str, Any],
+    field_name: str,
+) -> tuple[dict[str, Any], tuple[str, ...]]:
+    raw_plan = authority_profile.get(field_name)
+    if raw_plan is None:
+        return {}, ()
+    if not isinstance(raw_plan, Mapping):
+        return {}, (f"work_order_materializer_{field_name}_invalid:type",)
+    plan = dict(raw_plan)
+    if not plan:
+        return {}, ()
+    if not _is_ascii_json_safe(plan):
+        return {}, (f"work_order_materializer_{field_name}_non_ascii",)
+    return plan, ()
 
 
 def _bounded_worker_plan_from_authority_profile(
@@ -879,6 +890,10 @@ def _bounded_worker_plan_from_authority_profile(
     raw_plan = authority_profile.get("bounded_worker_plan")
     if raw_plan is not None and not isinstance(raw_plan, Mapping):
         return {}, ("work_order_materializer_bounded_worker_plan_invalid:type",)
+    try:
+        authority_profile = snapshot_authority_profile_m2m(authority_profile)
+    except ValueError:
+        return {}, ("work_order_materializer_bounded_worker_plan_invalid:m2m_envelope",)
     plan = _nested_mapping(authority_profile, "bounded_worker_plan")
     if not plan:
         return {}, ()
@@ -992,93 +1007,6 @@ def _read_existing_chain_state(
 def _chain_stage_results(chain_state: Mapping[str, Any]) -> Mapping[str, Any]:
     stages = chain_state.get("stage_results")
     return stages if isinstance(stages, Mapping) else {}
-
-
-def _derive_artifact_generation_request_from_chain(
-    *,
-    chain_state: Mapping[str, Any],
-    work_orders: Mapping[str, Mapping[str, Any]] | None,
-    repo_root: Path,
-    holoindex_evidence: Mapping[str, Any] | None,
-) -> Mapping[str, Any] | None:
-    if not work_orders:
-        return None
-    stages = _chain_stage_results(chain_state)
-    worktree_stage = _nested_mapping(stages, "worktree_create")
-    worktree_result = _nested_mapping(worktree_stage, "worktree_create_result")
-    work_order_id = str(worktree_result.get("work_order_id") or "")
-    worktree_path = str(worktree_result.get("worktree_path") or "")
-    if not work_order_id or not worktree_path:
-        return None
-    work_order = JsonResidentQueueWorkOrderResolver(work_orders).resolve(
-        work_order_id=work_order_id,
-        queue_item_id=None,
-        selected_slice=None,
-    )
-    plan = _nested_mapping(work_order, "bounded_worker_plan")
-    planned_artifacts = _string_list(plan.get("planned_artifacts"))
-    signed_receipt_chain = _nested_mapping(plan, "signed_receipt_chain")
-    authority_stage = _nested_mapping(stages, "authority_runtime")
-    authority_result = _nested_mapping(authority_stage, "authority_result")
-    work_authority = _nested_mapping(authority_result, "work_authority")
-    authority_receipt = _nested_mapping(authority_result, "receipt")
-    if (
-        not plan
-        or not planned_artifacts
-        or not signed_receipt_chain
-        or authority_result.get("accepted") is not True
-        or not work_authority
-    ):
-        return None
-    evidence = (
-        (holoindex_evidence if isinstance(holoindex_evidence, Mapping) else {})
-        or _nested_mapping(work_order, "holoindex_evidence")
-        or _derived_holoindex_evidence(stages)
-    )
-    task_summary = str(work_order.get("task_summary") or "")
-    if not task_summary:
-        return None
-    signed_authority = {
-        **dict(work_authority),
-        "accepted": True,
-        "signature_gate_digest": str(
-            authority_receipt.get("work_authority_digest")
-            or authority_receipt.get("receipt_id")
-            or ""
-        ),
-    }
-    request = {
-        "explicit_artifact_generation_requested": True,
-        "work_order_id": work_order_id,
-        "slice_name": str(work_order.get("requested_operation") or plan.get("operation") or ""),
-        "task_summary": task_summary,
-        "planned_artifacts": planned_artifacts,
-        "evidence_context": json.dumps(
-            {
-                "task_summary": task_summary,
-                "holoindex_evidence": dict(evidence),
-                "holoindex_evidence_refs": _string_list(
-                    work_order.get("holoindex_evidence_refs")
-                ),
-            },
-            sort_keys=True,
-            separators=(",", ":"),
-            ensure_ascii=True,
-        ),
-        "repo_root": str(repo_root),
-        "worktree_path": worktree_path,
-        "holoindex_evidence": dict(evidence),
-        "signed_authority": signed_authority,
-        "signed_receipt_chain": dict(signed_receipt_chain),
-        "timeout_seconds": 30,
-    }
-    model_runtime_binding = _nested_mapping(work_order, "model_runtime_binding_receipt")
-    if model_runtime_binding:
-        request["model_runtime_binding_receipt"] = dict(model_runtime_binding)
-    model_selection = _nested_mapping(work_order, "model_selection_receipt")
-    if model_selection:
-        request["model_selection_receipt"] = dict(model_selection)
-    return request
 
 
 def _derive_outcome_ratchet_request_from_chain(
@@ -1198,37 +1126,6 @@ def _derive_held_out_gate_request_from_chain(
             "candidate_head_sha": head_sha,
         },
         "holoindex_evidence": _derived_holoindex_evidence(stages),
-    }
-
-
-def _derive_pattern_memory_admission_request_from_chain(
-    chain_state: Mapping[str, Any],
-) -> Mapping[str, Any] | None:
-    stages = _chain_stage_results(chain_state)
-    held_out_stage = _nested_mapping(stages, "held_out_regression_gate")
-    gate_result = _nested_mapping(held_out_stage, "gate_result")
-    gate_receipt = _nested_mapping(gate_result, "receipt")
-    if (
-        not gate_result
-        or not gate_receipt
-        or gate_result.get("accepted") is not True
-        or gate_receipt.get("pattern_memory_admission_allowed") is not True
-    ):
-        return None
-    work_order_id = str(gate_receipt.get("work_order_id") or "")
-    if not work_order_id:
-        return None
-    return {
-        "work_order_id": work_order_id,
-        "admission_metadata": {
-            "source": "resident_queue_derived_pattern_memory_admission",
-            "gate_id": str(gate_receipt.get("gate_id") or ""),
-            "ratchet_id": str(gate_receipt.get("ratchet_id") or ""),
-            "verifier_receipt_id": str(gate_receipt.get("verifier_receipt_id") or ""),
-            "held_out_suite_id": str(gate_receipt.get("held_out_suite_id") or ""),
-            "held_out_suite_digest": str(gate_receipt.get("held_out_suite_digest") or ""),
-            "candidate_head_sha": str(gate_receipt.get("candidate_head_sha") or ""),
-        },
     }
 
 
@@ -1580,26 +1477,6 @@ def _build_evidence_command_runner(
     return SubprocessEvidenceCommandRunner(), ()
 
 
-def _build_artifact_generator(
-    *,
-    injected_runner: Any,
-    mode: str | None,
-) -> tuple[Any, tuple[str, ...]]:
-    if injected_runner is not None:
-        return injected_runner, ()
-    normalized = str(mode or "").strip().lower()
-    if not normalized:
-        return None, ()
-    if normalized not in {"foundups_fusion", "fusion"}:
-        return None, ("unsupported_artifact_generator_mode",)
-    from modules.communication.moltbot_bridge.src.reddog_bounded_artifact_generation_runtime import (
-        FoundupsFusionArtifactGenerationRunner,
-        RUNTIME_MODE_FOUNDUPS_FUSION,
-    )
-
-    return FoundupsFusionArtifactGenerationRunner(runtime_mode=RUNTIME_MODE_FOUNDUPS_FUSION), ()
-
-
 def _build_outcome_ratchet_store(
     repo_root: Path,
     allowed_root: Path,
@@ -1728,6 +1605,7 @@ def _from_loop(
     last_dispatch = loop.dispatch_results[-1] if loop.dispatch_results else None
     record = last_dispatch.record_result if last_dispatch else None
     receipt = record.receipt if record else None
+    effects = _artifact_provider_effects(chain_results_path)
     return RedDogMainResidentQueueSerialLoopBootstrapResult(
         accepted=accepted,
         status=status,
@@ -1741,10 +1619,21 @@ def _from_loop(
         runtime_dependency_bundle_status=runtime_dependency_bundle_status,
         runtime_dependency_bundle_requested=runtime_dependency_bundle_requested,
         rejection_reasons=tuple(loop.rejection_reasons),
+        queue_chain_requeue_required=loop.queue_chain_requeue_required,
+        retry_at=loop.retry_at,
         no_signature_verification_performed="authority_verification" not in loop.dispatched_stages,
+        no_worker_spawn_performed=not effects["worker_process_started"],
+        no_upstream_agent_invocation_performed=not effects["invoked"],
+        artifact_provider_runtime=effects["runtime"],
+        worker_process_spawn_count=effects["worker_process_spawn_count"],
+        no_artifact_provider_file_write_performed=not effects["file_write_performed"],
+        artifact_provider_effect_observation_complete=effects["effect_observation_complete"],
+        artifact_provider_run_abort_confirmed=effects["run_abort_confirmed"],
+        no_hermes_dispatch_performed=not effects["hermes"],
         no_worktree_created="worktree_create" not in loop.dispatched_stages,
         no_bounded_task_execution_performed="bounded_worker_pilot" not in loop.dispatched_stages,
         no_bounded_file_edit_performed="bounded_worker_pilot" not in loop.dispatched_stages,
+        no_exact_sha_commit_performed="exact_sha_commit" not in loop.dispatched_stages,
         no_slice_verification_performed="slice_verifier" not in loop.dispatched_stages,
         no_verified_draft_pr_publish_performed=(
             "verified_draft_pr_publish" not in loop.dispatched_stages

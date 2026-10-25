@@ -1,13 +1,166 @@
+## Native proposal caller contracts — 2026-09-30
+
+The existing WRE test owner `modules/infrastructure/wre_core/tests/test_wre_execution_truth.py` adds33 parameterized cases. The local
+35-case selection includes2 existing controls: proposal quarantine and error
+redaction. Coverage spans raw/default/legacy calls,15 invalid profiles, copied
+configuration,12 native branch cases, unchanged handler state and error redaction.
+Real master/helper/adapter/engine methods run with inert collaborators and native
+boundaries. The initial runner failed collection before any selected case; its
+reviewed alias/diagnostic correction passed35/35 with unchanged19 source pins.
+
+Separately,4 cases passed using installed0.3.20 formatter/handler source with
+synthetic tokens/output. No model loaded. The scopes are not39 native-model
+tests. Existing test definitions remain unchanged. CI explicitly runs the full
+execution-truth file (plus existing import/measurement regressions); exact-head
+hosted counts and later main verification are recorded in publication receipts.
+Evidence: RSI backlog `current_observation.native_proposal_caller_20260930` and
+`O:/Foundups-Agent-audits/20260930-rsi-native-caller-contract/`.
+
 # HoloIndex Tests
+
+## Qwen package import boundary
+
+Run `python -I -S -B holo_index/tests/test_qwen_package_import.py -v`.
+Eight fixed controls use fresh children with scratch directories and a minimal
+environment. Real package/engine imports reject other application modules before
+execution; no model, coordinator constructor or service is invoked. Synthetic
+owners test all 20 public exports, original module mapping, identity caching,
+`dir`, unknown attributes, from/star imports and dependency failure propagation.
+They do not certify the real exported providers. Python effect guards supplement
+the reviewed source boundary; they are not an operating-system sandbox.
+
+## R03 source and entry qualification
+
+The three existing suites named in the [entry matrix](../CLI_REFERENCE.md#qualification-matrix-and-evidence-scope)
+cover source selection, root binding, dirty-context labels, source-change
+rejection and no-owner local bundles. Their 81-test result is a contract
+selection; semantic service readiness and current-main runtime receipts must
+be established separately. Fixtures must not refresh a live index to make an
+entry test pass.
+
+## Current-truth document retrieval
+
+`test_document_truth.py` proves low-cardinality current, implementation,
+history, vision, and unknown classification plus the broad-current versus
+exact/historical/temporal query boundary. It also proves authority ordering
+before K truncation and a filtered summary stream that preserves path diversity
+when one document has many section hits.
+
+`test_indexer_zero_docs_observability.py` proves canonical Holo contracts gain
+only for an exact per-path heading allowlist while historical or generic status
+sections cannot inherit current authority. Historical audit docs remain one
+summary record. All indexing tests use temporary repositories,
+deterministic fake embeddings, and fake collections; they never open, mutate,
+or refresh a live Holo generation. The same suite requires the parent indexing
+engine to remain below 1,500 lines and every extracted function at or below 50.
+
+## Model source-path provenance
+
+`test_holoindex_embedding_space.py` proves the opt-in planner mode preserves an
+available model-directory alias for link/junction inspection while the default
+resolver behavior remains unchanged.
+
+## Closed command-import regression
+
+`test_reddog_extension_bundle_recall.py` starts a `-S -B` child and imports the
+bundle command from the repository alone. The owner-script suite repeats that
+proof across the exact `scripts.reddog_holoindex_owner_query_once` entrypoint
+and additionally excludes ChromaDB and NumPy. RedDog's bounded direct-read path
+therefore cannot silently inherit semantic/vector dependencies.
+
+## Existing maintenance-sentinel lease
+
+Freshness-receipt tests cover the noncreating retained lease used by RedDog
+query-replica materialization. Tests operate only on temporary sentinels and
+prove exact bytes/identity plus cross-contender exclusion; they never access a
+live Holo store.
 
 ## Test Strategy (WSP 34)
 - Focus on intent routing, output composition, and HoloDAE orchestration behavior.
 - Keep unit tests deterministic; avoid external model/network dependencies.
 - Integration tests run only when model assets are available and explicitly enabled.
 
+`test_holoindex_query_receipt.py` proves valid owner attempt/retry/cycle
+telemetry is inside the receipt digest. Root one-shot and communication tests
+separately prove malformed, out-of-range, unequal, or top-level-only telemetry
+cannot authorize a controller reproof. Query-receipt plus one-shot cycle
+coverage is 77 passed.
+
+### Query replica boundary
+
+Materializer tests live with the owning bridge at
+`modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica.py`.
+They use synthetic vector/model trees and prove canonical bytes unchanged.
+They also prove failed replica objects are quarantined without deletion. Holo
+tests must not infer owner routing or live-store acceptance from them.
+
 ## How to Run
 - Unit tests: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest holo_index/tests`
 - Focused: `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 pytest holo_index/tests/test_output_composer.py`
+
+### Tier-0 retrieval hardening
+
+`test_tier0_retrieval_hardening.py` falsifies explicit-module inference,
+exact root README/INTERFACE lookup, bounded ordering, deduplication, invalid
+module paths, docs-only inference, exact non-vector provenance/vector-floor
+exemption, and strict/non-strict incomplete-pair behavior. It uses only fake
+collections and a supplied fake embedding; it must not contact a model,
+network, persistent index, or resident owner.
+It also pins strict replacement of duplicate vector Tier-0 rows, exact WSP_62
+ceilings, non-strict exception warnings, and full-path case normalization.
+`test_indexer_zero_docs_observability.py` additionally runs the real docs
+index transform into the strict Tier-0 injection seam. It requires producer
+metadata to be repository-relative POSIX and proves the resulting root pair is
+queryable without normalization. The test uses only a temporary tree and fake
+collection; it does not open or mutate a live index.
+The WSP 62 check is not an exemption: it requires `search_engine.py < 1500`,
+`_search_collection <= 50`, and every function in the two new extraction
+helpers to remain `<= 50` lines.
+
+The same suite now proves exact indexed `symbol` metadata outweighs a nearby
+semantic registry result without a path-specific exception. Retrieval
+AutoResearch coverage also statically includes the independent AI Overseer
+A-grade gate so it cannot acquire process/index mutation surfaces unnoticed.
+`test_retrieval_runtime_binding.py` proves the owner ranker digest changes with
+source bytes, accepts one exact runtime root, and rejects mixed roots or linked
+ranker files. Owner-client and benchmark regressions reject missing, malformed,
+or candidate-mismatched runtime ranker attestations.
+
+`test_graphrag_exporter.py` proves repository-relative hits resolve from the
+Holo authority root even under a foreign CWD and that `..` escapes are not
+read. Relative hits without an explicit root also fail closed; absolute legacy
+fixtures inside the authority root retain their existing behavior, while
+absolute escapes are rejected. GraphRAG currently consumes code/WSP hits, so
+this is adjacent path-contract coverage rather than a docs-index test.
+
+`test_module_intent_snapshot.py` proves closed Git authority, HEAD pinning,
+deterministic ordering, NUL-framed directory projection, invalid paths,
+normalized duplicates, 4,096/4,097 caps, cache bounds, and full-path/catalog
+failure behavior. `test_module_intent_evidence_projection.py` proves exact
+candidate-tree framing, direct `src/tests` or regular root-contract admission,
+and false data-container exclusion. It falsifies object ID/type/size/mode,
+truncated/extra/raw-object bytes, symlinked contracts, invalid UTF-8/names, and
+nonzero/oversize behavior. Its real-repository case preserves HoloDAE and the
+doc-only consciousness engine while excluding telemetry feedback. Hostile Git
+authority is removed and commands force no-replacement/no-lock options. The
+8 MiB bound has an exact cap-plus-one rejection.
+`test_machine_spec_contract.py` binds canonical nullable
+`tier0_module_target` metadata and rejects noncanonical target paths.
+
+```powershell
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD = '1'
+python -m pytest `
+  holo_index/tests/test_tier0_retrieval_hardening.py `
+  holo_index/tests/test_module_intent_snapshot.py `
+  holo_index/tests/test_module_intent_evidence_projection.py `
+  holo_index/tests/test_machine_spec_contract.py `
+  modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service.py `
+  modules/infrastructure/foundups_mcp_bridge/tests/test_holo_query_service_edges.py `
+  scripts/tests/test_reddog_holoindex_owner_query_once.py `
+  -q
+```
+
+The exact command above passed 334 tests in 4.94 s on this candidate.
 
 ## Test Data
 - Synthetic fixtures are preferred to keep tests fast and reproducible.

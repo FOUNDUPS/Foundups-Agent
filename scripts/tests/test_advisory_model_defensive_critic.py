@@ -39,3 +39,10 @@ def test_critic_prompt_uses_defensive_critical_review_wording():
     assert "identifying, preventing, or remediating" in source
     assert "omit exploit details" in source
     assert "attack the lead answer" not in source
+
+
+def test_critic_retry_uses_defensive_provider_safe_wording():
+    source = inspect.getsource(bridge._defensive_critic_retry_messages)
+    assert "Independent defensive evidence review" in source
+    assert "never fabricate a defect" in source
+    assert "adversarial" not in source.lower()

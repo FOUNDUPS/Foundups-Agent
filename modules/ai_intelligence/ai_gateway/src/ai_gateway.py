@@ -23,7 +23,7 @@ import os
 import time
 import logging
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import requests
 
 # Import model registry for centralized model management
@@ -35,6 +35,10 @@ from .model_registry import (
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+KIMI_K3_MODEL = 'moonshotai/kimi-k3'
+KIMI_K3_MIN_COMPLETION_TOKENS = 4096
+KIMI_K3_MAX_COMPLETION_TOKENS = 131072
 
 
 @dataclass
@@ -52,7 +56,7 @@ class GatewayResult:
 class ProviderConfig:
     """Configuration for AI provider"""
     name: str
-    api_key: Optional[str]
+    api_key: Optional[str] = field(repr=False)
     base_url: str
     models: Dict[str, str]  # task_type -> model_name
     cost_per_token: float
@@ -60,6 +64,28 @@ class ProviderConfig:
     timeout: int = 30
     output_cost_per_token: float = 0.0
     automatic_routing_enabled: bool = True
+
+
+def _post_openai_request(provider: ProviderConfig, headers: dict, data: dict):
+    """Keep OpenRouter credentials and upstream diagnostics at this transport."""
+    try:
+        response = requests.post(
+            f"{provider.base_url}/chat/completions",
+            headers=headers,
+            json=data,
+            timeout=provider.timeout,
+            **({'allow_redirects': False} if provider.name == 'openrouter' else {}),
+        )
+        if provider.name == 'openrouter' and 300 <= getattr(response, 'status_code', 200) < 400:
+            raise requests.HTTPError('openrouter_redirect_rejected')
+        response.raise_for_status()
+        return response
+    except requests.RequestException as exc:
+        if provider.name != 'openrouter':
+            raise
+        # Preserve timeout classification without retaining raw request details.
+        error_type = requests.Timeout if isinstance(exc, requests.Timeout) else requests.RequestException
+        raise error_type('openrouter_request_failed') from None
 
 
 class AIGateway:
@@ -455,6 +481,27 @@ class AIGateway:
         else:
             raise ValueError(f"Unknown provider: {provider.name}")
 
+    def _openai_completion_tokens(
+        self,
+        provider: ProviderConfig,
+        model: str,
+        explicit: Optional[int],
+    ) -> int:
+        """Resolve a completion budget and enforce the exact K3 endpoint caps."""
+
+        is_kimi_k3 = provider.name == 'openrouter' and model == KIMI_K3_MODEL
+        default = KIMI_K3_MIN_COMPLETION_TOKENS if is_kimi_k3 else 1000
+        requested = (
+            self._bounded_exact_completion_tokens(explicit)
+            if explicit is not None
+            else self._get_provider_max_tokens(provider.name, default)
+        )
+        if not is_kimi_k3:
+            return requested
+        if not 1 <= requested <= KIMI_K3_MAX_COMPLETION_TOKENS:
+            raise ValueError("invalid max_completion_tokens")
+        return max(requested, KIMI_K3_MIN_COMPLETION_TOKENS)
+
     def _call_openai(
         self,
         provider: ProviderConfig,
@@ -465,13 +512,10 @@ class AIGateway:
         reasoning_effort: Optional[str] = None,
     ) -> str:
         """Call OpenAI API"""
-        default_max_tokens = 4096 if provider.name == 'openrouter' and model == 'moonshotai/kimi-k3' else 1000
-        max_tokens = (
-            self._bounded_exact_completion_tokens(max_completion_tokens)
-            if max_completion_tokens is not None
-            else self._get_provider_max_tokens(provider.name, default_max_tokens)
+        is_kimi_k3 = provider.name == 'openrouter' and model == KIMI_K3_MODEL
+        max_tokens = self._openai_completion_tokens(
+            provider, model, max_completion_tokens
         )
-        temperature = self._get_provider_temperature(provider.name, 0.7)
         headers = {
             'Authorization': f'Bearer {provider.api_key}',
             'Content-Type': 'application/json'
@@ -482,24 +526,16 @@ class AIGateway:
             'messages': [{'role': 'user', 'content': prompt}],
             'max_tokens': max_tokens,
         }
-        if provider.name == 'openrouter' and reasoning_effort is not None:
+        if is_kimi_k3:
+            data['reasoning'] = {'effort': 'max'}
+        elif provider.name == 'openrouter' and reasoning_effort is not None:
             data['reasoning'] = {
                 'effort': self._bounded_exact_reasoning_effort(reasoning_effort)
             }
-        elif provider.name == 'openrouter' and model == 'moonshotai/kimi-k3':
-            # OpenRouter lists Kimi K3 with mandatory max reasoning and without
-            # temperature support. Preserve the published request contract.
-            data['reasoning'] = {'effort': 'max'}
         else:
-            data['temperature'] = temperature
+            data['temperature'] = self._get_provider_temperature(provider.name, 0.7)
 
-        response = requests.post(
-            f"{provider.base_url}/chat/completions",
-            headers=headers,
-            json=data,
-            timeout=provider.timeout
-        )
-        response.raise_for_status()
+        response = _post_openai_request(provider, headers, data)
 
         result = response.json()
         return result['choices'][0]['message']['content'].strip()

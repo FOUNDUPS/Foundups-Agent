@@ -1,7 +1,7 @@
 # p.fMALL Media Delivery Contract
 
-**Version**: 1.0.0
-**Date**: 2026-04-03
+**Version**: 1.0.1 (privacy clarification; delivery behavior unchanged)
+**Date**: 2026-10-23
 **Status**: Locked
 **Owner**: 0102
 **Test Suite**: `modules/foundups/pfmall/tests/test_video_mall_media_delivery.py` (50 tests)
@@ -52,6 +52,13 @@ public/member/media/
 ```
 
 **Usage**: Reserved for future member-specific media. Currently empty convention directories.
+
+**Privacy boundary (2026-10-23):** These are static Hosting paths with public
+cache conventions. The name `/member/media/` does not enforce per-principal
+asset access. Do not place private AutoPost clothing/item captures here or in
+the public catalogs. The [private item handoff](../pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md)
+requires a separately authenticated shared-media adapter and permitted read
+projection; that adapter is not implemented by this static delivery contract.
 
 ### 2.3 Naming Rules
 
@@ -307,4 +314,6 @@ This contract does NOT cover:
 
 ---
 
-*Locked by Worker A. 50 tests passing.*
+*Runtime conventions originally locked by Worker A; the 50-test result above
+is the historical acceptance record. The 2026-10-23 clarification adds no media
+runtime and does not claim a fresh execution of that suite.*

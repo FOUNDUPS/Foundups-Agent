@@ -3,14 +3,15 @@ Comment Engagement Execution Strategy Interface
 ================================================
 
 WSP 27/80 Compliant execution modes for comment engagement:
-- subprocess: Safest (SIGKILL guarantee, process isolation)
+- subprocess: Terminates and reaps its owned child before releasing the await
 - thread: Fast startup (<500ms), thread isolation
 - inproc: Dev debugging only (blocks event loop)
 
 Architecture Rationale:
 Selenium/WebDriver is synchronous and blocks. asyncio.wait_for() can timeout
 the await, but CANNOT interrupt blocked C/IO calls inside Selenium. Only
-subprocess termination guarantees recovery of Chrome control.
+subprocess mode can terminate its owned worker. This does not terminate an
+externally managed browser or prove that browser-side actions were rolled back.
 
 Thread mode trades guaranteed kill switch for fast startup. Acceptable when:
 - Selenium usually returns (empirically true)
@@ -34,6 +35,9 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 from modules.communication.livechat.src.automation_gates import stop_active, stop_file_path
+from modules.communication.livechat.src.engagement_lifecycle import (
+    _await_owned_completion, _finish_subprocess, await_thread_worker,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -110,6 +114,8 @@ def _get_comment_engagement_switches() -> _CommentEngagementSwitches:
 class EngagementRunner(ABC):
     """Abstract base for comment engagement execution strategies."""
 
+    supports_settled_cancellation = False
+
     @abstractmethod
     async def run_engagement(
         self,
@@ -140,7 +146,7 @@ class SubprocessRunner(EngagementRunner):
     Subprocess execution mode (DEFAULT, SAFEST).
 
     Pros:
-    - ✅ SIGKILL guarantee (always recovers Chrome control)
+    - ✅ Child termination, exit wait, and pipe cleanup before returning
     - ✅ Process isolation (crash doesn't kill main DAE)
     - ✅ JSON output parsing
 
@@ -148,6 +154,8 @@ class SubprocessRunner(EngagementRunner):
     - ❌ 2-3s startup overhead
     - ❌ State sharing requires serialization
     """
+
+    supports_settled_cancellation = True
 
     def __init__(self, repo_root: Path):
         self.repo_root = Path(repo_root).resolve()
@@ -167,6 +175,17 @@ class SubprocessRunner(EngagementRunner):
             self.repo_root,
             self.engagement_script,
         )
+
+    def _timeout_seconds(self, max_comments):
+        # Calculate timeout (unified default: 3600s = 1 hour)
+        if max_comments == 0:
+            timeout = int(os.getenv("COMMUNITY_UNLIMITED_TIMEOUT", "3600"))
+            logger.info(f"[DAEMON][CARDIOVASCULAR] ⏱️ UNLIMITED mode - timeout: {timeout}s ({timeout/3600:.1f} hours)")
+        else:
+            timeout = (max_comments * 240) + 60
+            logger.info(f"[DAEMON][CARDIOVASCULAR] ⏱️ Limited mode - timeout: {timeout}s for {max_comments} comments")
+
+        return timeout
 
     async def run_engagement(
         self,
@@ -275,23 +294,7 @@ class SubprocessRunner(EngagementRunner):
         logger.info(f"[DAEMON][CARDIOVASCULAR] 🚀 Launching subprocess...")
         logger.info(f"[SUBPROCESS] Command: {' '.join(cmd)}")
 
-        # Start subprocess
-        env = os.environ.copy()
-        process = await asyncio.create_subprocess_exec(
-            *cmd,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd=str(self.repo_root),
-            env=env
-        )
-
-        # Calculate timeout (unified default: 3600s = 1 hour)
-        if max_comments == 0:
-            timeout = int(os.getenv("COMMUNITY_UNLIMITED_TIMEOUT", "3600"))
-            logger.info(f"[DAEMON][CARDIOVASCULAR] ⏱️ UNLIMITED mode - timeout: {timeout}s ({timeout/3600:.1f} hours)")
-        else:
-            timeout = (max_comments * 240) + 60
-            logger.info(f"[DAEMON][CARDIOVASCULAR] ⏱️ Limited mode - timeout: {timeout}s for {max_comments} comments")
+        timeout = self._timeout_seconds(max_comments)
 
         # Stream logs
         stream_logs = os.getenv("COMMUNITY_DEBUG_SUBPROCESS", "true").lower() in ("1", "true", "yes")
@@ -335,32 +338,43 @@ class SubprocessRunner(EngagementRunner):
                         # Log everything else (errors, warnings, info)
                         logger.info(f"[REPLY] {text}")
 
-        stdout_task = asyncio.create_task(_drain_stream(process.stdout, stdout_lines, "STDOUT"))
-        stderr_task = asyncio.create_task(_drain_stream(process.stderr, stderr_lines, "STDERR"))
-
+        # Shield creation so cancellation cannot lose a child before its handle arrives.
+        spawn_task = asyncio.create_task(asyncio.create_subprocess_exec(
+            *cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+            cwd=str(self.repo_root),
+            env=os.environ.copy(),
+        ))
+        drains = []
+        wait_task = None
         try:
+            process = await asyncio.shield(spawn_task)
+            drains.extend([
+                asyncio.create_task(_drain_stream(process.stdout, stdout_lines, "STDOUT")),
+                asyncio.create_task(_drain_stream(process.stderr, stderr_lines, "STDERR")),
+            ])
+            wait_task = asyncio.create_task(process.wait())
             logger.info(f"[DAEMON][CARDIOVASCULAR] ⏳ Subprocess running (PID: {process.pid})...")
-            await asyncio.wait_for(process.wait(), timeout=timeout)
+            await asyncio.wait_for(asyncio.shield(wait_task), timeout=timeout)
             logger.info(f"[DAEMON][CARDIOVASCULAR] ✓ Subprocess completed (PID: {process.pid})")
         except asyncio.TimeoutError:
+            if wait_task is None:
+                raise  # A spawn failure is not an engagement deadline.
             logger.error(f"[DAEMON][CARDIOVASCULAR] ⏰ TIMEOUT after {timeout}s - terminating process")
             logger.error("[SUBPROCESS] Timeout - terminating process")
-            try:
-                process.terminate()
-                await asyncio.sleep(2)
-                process.kill()  # SIGKILL guarantee
-                logger.warning("[SUBPROCESS] Process killed (SIGKILL)")
-            except ProcessLookupError:
-                pass
-
             return {
                 'error': 'timeout',
                 'stats': {'comments_processed': 0, 'errors': 1},
                 'timeout_seconds': timeout
             }
 
-        # Wait for log streaming to complete
-        await asyncio.gather(stdout_task, stderr_task, return_exceptions=True)
+        finally:
+            cleanup = asyncio.create_task(_finish_subprocess(spawn_task, drains, wait_task))
+            cancelled = await _await_owned_completion(cleanup)
+            cleanup.result()
+            if cancelled:
+                raise asyncio.CancelledError()
 
         # Parse JSON output
         json_output = None
@@ -398,6 +412,7 @@ class SubprocessRunner(EngagementRunner):
             }
 
 
+
 class ThreadRunner(EngagementRunner):
     """
     Thread execution mode (FAST STARTUP, ACCEPTABLE RISK).
@@ -412,8 +427,11 @@ class ThreadRunner(EngagementRunner):
     - ⚠️ If thread hangs permanently, Chrome locked until restart
 
     Safety: Selenium runs in dedicated thread via asyncio.to_thread(),
-    so main event loop never blocked. Timeout still works at supervisor level.
+    so the main event loop stays available. Cancellation and timeout retain
+    ownership until the worker actually finishes; they cannot bound a stuck thread.
     """
+
+    supports_settled_cancellation = True
 
     def __init__(self, repo_root: Path):
         self.repo_root = Path(repo_root)
@@ -447,30 +465,11 @@ class ThreadRunner(EngagementRunner):
 
         logger.info(f"[THREAD] Starting engagement (timeout: {timeout}s, port: {browser_port})")
 
-        try:
-            # Run in thread to prevent Selenium from blocking event loop
-            result = await asyncio.wait_for(
-                asyncio.to_thread(self._execute_sync, channel_id, max_comments, switches, browser_port),
-                timeout=timeout
-            )
-            logger.info(f"[THREAD] Complete: {result.get('stats', {})}")
-            return result
+        worker = asyncio.create_task(asyncio.to_thread(
+            self._execute_sync, channel_id, max_comments, switches, browser_port
+        ))
+        return await await_thread_worker(worker, timeout)
 
-        except asyncio.TimeoutError:
-            logger.error(f"[THREAD] Timeout after {timeout}s")
-            logger.warning("[THREAD] Thread may continue in background (cannot force-kill)")
-            return {
-                'error': 'timeout',
-                'stats': {'comments_processed': 0, 'errors': 1},
-                'timeout_seconds': timeout
-            }
-
-        except Exception as e:
-            logger.error(f"[THREAD] Error: {e}", exc_info=True)
-            return {
-                'error': str(e),
-                'stats': {'comments_processed': 0, 'errors': 1}
-            }
 
     def _execute_sync(self, channel_id: str, max_comments: int, switches: _CommentEngagementSwitches, browser_port: int = 9222) -> Dict[str, Any]:
         """

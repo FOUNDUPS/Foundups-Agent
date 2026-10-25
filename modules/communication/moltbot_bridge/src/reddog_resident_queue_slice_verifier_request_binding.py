@@ -16,6 +16,16 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any, Dict, Mapping
 
+from modules.communication.moltbot_bridge.src.reddog_exact_sha_commit_receipt import (
+    validate_exact_sha_commit_receipt,
+)
+from modules.communication.moltbot_bridge.src.reddog_worker_dispatch_authority_binding import (
+    recorded_authority_verification_binding,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+
 
 SLICE_VERIFIER_REQUEST_BINDING_ACCEPT = "SLICE_VERIFIER_REQUEST_BINDING_ACCEPT"
 SLICE_VERIFIER_REQUEST_BINDING_REJECT = "SLICE_VERIFIER_REQUEST_BINDING_REJECT"
@@ -25,11 +35,17 @@ FAIL_SLICE_VERIFIER_PLAN_INVALID = "FAIL_SLICE_VERIFIER_PLAN_INVALID"
 FAIL_AUTHORITY_RUNTIME_MISSING = "FAIL_AUTHORITY_RUNTIME_MISSING"
 FAIL_AUTHORITY_VERIFICATION_MISSING = "FAIL_AUTHORITY_VERIFICATION_MISSING"
 FAIL_SIGNED_AUTHORITY_MISSING = "FAIL_SIGNED_AUTHORITY_MISSING"
+FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH = "FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH"
 FAIL_WORKTREE_CREATE_MISSING = "FAIL_WORKTREE_CREATE_MISSING"
 FAIL_BOUNDED_WORKER_PILOT_MISSING = "FAIL_BOUNDED_WORKER_PILOT_MISSING"
 FAIL_BOUNDED_WORKER_PILOT_REJECTED = "FAIL_BOUNDED_WORKER_PILOT_REJECTED"
+FAIL_EXACT_SHA_COMMIT_MISSING = "FAIL_EXACT_SHA_COMMIT_MISSING"
+FAIL_EXACT_SHA_COMMIT_REJECTED = "FAIL_EXACT_SHA_COMMIT_REJECTED"
+FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID = "FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID"
+FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH = "FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH"
 FAIL_SIGNED_RECEIPT_CHAIN_MISSING = "FAIL_SIGNED_RECEIPT_CHAIN_MISSING"
-
+FAIL_ASSURANCE_RESERVATION_MISSING = "FAIL_ASSURANCE_RESERVATION_MISSING"
+FAIL_ASSURANCE_RESERVATION_MISMATCH = "FAIL_ASSURANCE_RESERVATION_MISMATCH"
 
 @dataclass(frozen=True)
 class ResidentQueueSliceVerifierRequestBindingResult:
@@ -57,6 +73,7 @@ def build_resident_queue_slice_verifier_request(
     stage_results: Mapping[str, Mapping[str, Any]],
     repo_root: Path,
     holoindex_evidence: Mapping[str, Any] | None = None,
+    assurance_reservation_store: Any = None,
 ) -> ResidentQueueSliceVerifierRequestBindingResult:
     """Build an evidence-producer request from resident queue chain state."""
 
@@ -68,7 +85,6 @@ def build_resident_queue_slice_verifier_request(
     authority_runtime = _mapping(stage_results.get("authority_runtime"))
     authority_result = _mapping(authority_runtime.get("authority_result"))
     work_authority = _mapping(authority_result.get("work_authority"))
-    authority_receipt = _mapping(authority_result.get("receipt"))
     if not authority_runtime or authority_result.get("accepted") is not True:
         reasons.append(FAIL_AUTHORITY_RUNTIME_MISSING)
     if not work_authority:
@@ -78,6 +94,11 @@ def build_resident_queue_slice_verifier_request(
     verification = _mapping(authority_verification.get("verification_result"))
     if not authority_verification or verification.get("accepted") is not True:
         reasons.append(FAIL_AUTHORITY_VERIFICATION_MISSING)
+    recorded_signed_authority = verified_signed_authority_from_stage_results(
+        stage_results
+    )
+    if work_authority and verification.get("accepted") is True and not recorded_signed_authority:
+        reasons.append(FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH)
 
     worktree_create_stage = _mapping(stage_results.get("worktree_create"))
     worktree_create = _mapping(worktree_create_stage.get("worktree_create_result"))
@@ -95,47 +116,143 @@ def build_resident_queue_slice_verifier_request(
     elif pilot_result.get("accepted") is not True:
         reasons.append(FAIL_BOUNDED_WORKER_PILOT_REJECTED)
 
+    commit_stage = _mapping(stage_results.get("exact_sha_commit"))
+    commit_receipt = _mapping(commit_stage.get("commit_receipt"))
+    if not commit_stage or not commit_receipt:
+        reasons.append(FAIL_EXACT_SHA_COMMIT_MISSING)
+    elif (
+        commit_stage.get("decision") != "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT"
+        or commit_stage.get("accepted") is not True
+        or commit_stage.get("effect_commit_state") != "COMMITTED"
+        or commit_stage.get("reconciliation_required") is not False
+    ):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_REJECTED)
+
     signed_receipt_chain = _mapping(plan.get("signed_receipt_chain")) or _mapping(
         _mapping(work_order.get("bounded_worker_plan")).get("signed_receipt_chain")
     )
     if not signed_receipt_chain:
         reasons.append(FAIL_SIGNED_RECEIPT_CHAIN_MISSING)
 
+    admission = _mapping(stage_results.get("assurance_capacity_admission"))
+    recorded_reservation = _mapping(admission.get("reservation"))
+    reservation_id = str(recorded_reservation.get("reservation_id") or "")
+    durable_reservation = {}
+    if (
+        admission.get("decision") != "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
+        or not reservation_id
+        or assurance_reservation_store is None
+    ):
+        reasons.append(FAIL_ASSURANCE_RESERVATION_MISSING)
+    else:
+        durable_reservation = _mapping(
+            assurance_reservation_store.get_independent_assurance_reservation(
+                reservation_id
+            )
+        )
+        if _mapping(durable_reservation.get("reservation")):
+            durable_reservation = _mapping(
+                durable_reservation.get("reservation")
+            )
+        durable_admission_digest = str(
+            durable_reservation.get("admission_reservation_digest")
+            or durable_reservation.get("reservation_digest")
+            or ""
+        )
+        if (
+            not durable_reservation
+            or str(durable_reservation.get("status") or "").upper()
+            != "RESERVED"
+            or durable_admission_digest
+            != str(recorded_reservation.get("reservation_digest") or "")
+            or str(durable_reservation.get("work_order_id") or "")
+            != str(work_order.get("work_order_id") or "")
+        ):
+            reasons.append(FAIL_ASSURANCE_RESERVATION_MISMATCH)
+
     for field_name in (
         "slice_name",
-        "worker_id",
-        "verifier_id",
-        "base_sha",
-        "head_sha",
         "required_checks",
     ):
         if field_name not in plan or plan.get(field_name) in (None, "", (), [], {}):
             reasons.append(f"{FAIL_SLICE_VERIFIER_PLAN_INVALID}:{field_name}")
 
+    commit_base_sha = str(commit_receipt.get("base_sha") or "")
+    commit_head_sha = str(commit_receipt.get("head_sha") or "")
+    commit_paths = _string_list(commit_receipt.get("changed_paths"))
+    commit_worktree_path = str(commit_receipt.get("worktree_path") or "")
+    try:
+        current_work_order_digest = canonical_full_work_order_digest(work_order)
+    except (TypeError, ValueError):
+        current_work_order_digest = ""
+    executor_stage = _mapping(stage_results.get("executor_plan"))
+    executor_result = _mapping(executor_stage.get("executor_plan_result"))
+    executor_plan = _mapping(executor_result.get("plan"))
+    executor_work_order_digest = str(
+        executor_plan.get("work_order_digest") or ""
+    )
+    if commit_receipt and (
+        not validate_exact_sha_commit_receipt(commit_receipt)
+        or len(commit_base_sha) != 40
+        or len(commit_head_sha) != 40
+        or commit_base_sha == commit_head_sha
+        or not commit_paths
+        or not commit_worktree_path
+        or not str(commit_receipt.get("receipt_id") or "").startswith("sha256:")
+    ):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID)
+    if commit_receipt and (
+        str(commit_receipt.get("work_order_id") or "")
+        != str(work_order.get("work_order_id") or "")
+        or str(commit_receipt.get("bounded_worker_receipt_id") or "")
+        != str(pilot_receipt.get("receipt_id") or "")
+        or Path(commit_worktree_path).resolve() != Path(worktree_path).resolve()
+        or not current_work_order_digest
+        or str(commit_receipt.get("work_order_digest") or "")
+        != current_work_order_digest
+        or executor_work_order_digest != current_work_order_digest
+    ):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+    plan_base_sha = str(plan.get("base_sha") or "")
+    if plan_base_sha and plan_base_sha != commit_base_sha:
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+    plan_head_sha = str(plan.get("head_sha") or "")
+    if plan_head_sha and plan_head_sha != commit_head_sha:
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+    plan_expected_paths = _string_list(plan.get("expected_changed_paths"))
+    if plan_expected_paths and sorted(plan_expected_paths) != sorted(commit_paths):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+    if pilot_receipt and sorted(_string_list(pilot_receipt.get("written_artifacts"))) != sorted(
+        commit_paths
+    ):
+        reasons.append(FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH)
+
     if reasons:
         return _reject(reasons)
-
-    signed_authority = {
-        **dict(work_authority),
-        "accepted": True,
-        "signature_gate_digest": str(
-            authority_receipt.get("work_authority_digest")
-            or authority_receipt.get("receipt_id")
-            or ""
-        ),
-    }
+    signed_authority = recorded_signed_authority
     evidence = _mapping(holoindex_evidence) or _mapping(work_order.get("holoindex_evidence"))
-    expected_paths = _string_list(plan.get("expected_changed_paths")) or _string_list(
-        pilot_receipt.get("written_artifacts")
-    )
+    expected_paths = commit_paths
     request = {
         "explicit_evidence_production_requested": True,
         "work_order_id": str(work_order.get("work_order_id") or ""),
         "slice_name": str(plan.get("slice_name") or ""),
-        "worker_id": str(plan.get("worker_id") or ""),
-        "verifier_id": str(plan.get("verifier_id") or ""),
-        "base_sha": str(plan.get("base_sha") or ""),
-        "head_sha": str(plan.get("head_sha") or ""),
+        "worker_id": str(durable_reservation.get("author_principal_id") or ""),
+        "verifier_id": str(
+            durable_reservation.get("verifier_principal_id") or ""
+        ),
+        "assurance_reservation_id": str(
+            durable_reservation.get("reservation_id") or ""
+        ),
+        "assurance_reservation_digest": str(
+            durable_reservation.get("admission_reservation_digest")
+            or durable_reservation.get("reservation_digest")
+            or ""
+        ),
+        "verifier_task_id": str(
+            durable_reservation.get("verifier_task_id") or ""
+        ),
+        "base_sha": commit_base_sha,
+        "head_sha": commit_head_sha,
         "repo_root": str(repo_root),
         "worktree_path": worktree_path,
         "operation_cwd": str(plan.get("operation_cwd") or worktree_path),
@@ -149,7 +266,9 @@ def build_resident_queue_slice_verifier_request(
         "signed_receipt_chain": dict(signed_receipt_chain),
         "worktree_receipt": dict(pilot_receipt),
         "bounded_worker_pilot_receipt": dict(pilot_receipt),
+        "exact_sha_commit_receipt": dict(commit_receipt), "bound_work_order": dict(work_order),
         "holoindex_evidence": dict(evidence),
+        "test_impact_policy": dict(_mapping(plan.get("test_impact_policy"))),
         "pattern_memory_write_performed": False,
         "draft_pr_published": False,
         "merge_performed": False,
@@ -164,6 +283,25 @@ def build_resident_queue_slice_verifier_request(
         evidence_producer_request=request,
         rejection_reasons=[],
     )
+
+
+def verified_signed_authority_from_stage_results(
+    stage_results: Mapping[str, Mapping[str, Any]],
+) -> Dict[str, Any]:
+    """Return only authority that matches signer and verification records."""
+
+    runtime = _mapping(stage_results.get("authority_runtime"))
+    verification = _mapping(stage_results.get("authority_verification"))
+    binding = recorded_authority_verification_binding(runtime, verification)
+    if not binding:
+        return {}
+    authority = _mapping(runtime.get("authority_result"))
+    work_authority = _mapping(authority.get("work_authority"))
+    return {
+        **dict(work_authority),
+        "accepted": True,
+        "signature_gate_digest": binding["verified_work_authority_digest"],
+    }
 
 
 def _reject(reasons: list[str]) -> ResidentQueueSliceVerifierRequestBindingResult:
@@ -204,12 +342,20 @@ def _dedupe(values: list[str]) -> list[str]:
     return ordered
 
 
+
 __all__ = [
     "FAIL_AUTHORITY_RUNTIME_MISSING",
+    "FAIL_ASSURANCE_RESERVATION_MISMATCH",
+    "FAIL_ASSURANCE_RESERVATION_MISSING",
     "FAIL_AUTHORITY_VERIFICATION_MISSING",
     "FAIL_BOUNDED_WORKER_PILOT_MISSING",
     "FAIL_BOUNDED_WORKER_PILOT_REJECTED",
+    "FAIL_EXACT_SHA_COMMIT_BINDING_MISMATCH",
+    "FAIL_EXACT_SHA_COMMIT_MISSING",
+    "FAIL_EXACT_SHA_COMMIT_RECEIPT_INVALID",
+    "FAIL_EXACT_SHA_COMMIT_REJECTED",
     "FAIL_SIGNED_AUTHORITY_MISSING",
+    "FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH",
     "FAIL_SIGNED_RECEIPT_CHAIN_MISSING",
     "FAIL_SLICE_VERIFIER_PLAN_INVALID",
     "FAIL_SLICE_VERIFIER_PLAN_MISSING",
@@ -218,4 +364,5 @@ __all__ = [
     "SLICE_VERIFIER_REQUEST_BINDING_ACCEPT",
     "SLICE_VERIFIER_REQUEST_BINDING_REJECT",
     "build_resident_queue_slice_verifier_request",
+    "verified_signed_authority_from_stage_results",
 ]

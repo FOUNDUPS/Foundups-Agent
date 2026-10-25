@@ -43,6 +43,7 @@ from holo_index.storage_contract import (
     resolve_holoindex_ssd_path,
     storage_path_identity,
 )
+from holo_index.vector_segment_durability import durable_hnsw_configuration
 
 # Dependency bootstrap for this module
 # HOLOINDEX_AUTO_PIP_OPT_IN_PHASE1: Auto-install is now EXPLICIT OPT-IN only.
@@ -64,28 +65,34 @@ def _is_pip_install_allowed() -> bool:
     allow_val = os.getenv("HOLO_ALLOW_PIP_INSTALL", "").strip().lower()
     return allow_val in ("1", "true", "yes")
 
-try:
-    import chromadb
-except ImportError as exc:
-    if _is_pip_install_allowed():
-        # Explicit opt-in: auto-install chromadb
-        print("[HOLO] HOLO_ALLOW_PIP_INSTALL=1: Installing chromadb via pip...")
-        import subprocess
-        subprocess.check_call([__import__('sys').executable, "-m", "pip", "install", "chromadb"])
-        import chromadb
-    else:
-        # Fail-closed: no network call, actionable error message
-        raise ImportError(
-            "chromadb is required but not installed.\n"
-            "\n"
-            "To install manually (recommended):\n"
-            "    pip install chromadb\n"
-            "\n"
-            "To enable auto-install (network-capable, not recommended):\n"
-            "    Set HOLO_ALLOW_PIP_INSTALL=1\n"
-            "\n"
-            "HoloIndex requires chromadb for vector storage. Install it and retry."
-        ) from exc
+chromadb = None
+
+
+def _require_chromadb():
+    """Load the maintenance-only Chroma dependency on first use."""
+
+    global chromadb
+    if chromadb is not None:
+        return chromadb
+    try:
+        import chromadb as loaded_chromadb
+    except ImportError as exc:
+        if _is_pip_install_allowed():
+            print("[HOLO] HOLO_ALLOW_PIP_INSTALL=1: Installing chromadb via pip...")
+            import subprocess
+
+            subprocess.check_call(
+                [__import__('sys').executable, "-m", "pip", "install", "chromadb"]
+            )
+            import chromadb as loaded_chromadb
+        else:
+            raise ImportError(
+                "chromadb is required but not installed for HoloIndex maintenance.\n"
+                "Install it manually with: pip install chromadb\n"
+                "Or explicitly opt in to installation with HOLO_ALLOW_PIP_INSTALL=1."
+            ) from exc
+    chromadb = loaded_chromadb
+    return chromadb
 
 # Lazy load sentence_transformers to prevent crash on import
 SentenceTransformer = None
@@ -263,15 +270,16 @@ class HoloIndex:
         self._log_agent_action(f"Initializing HoloIndex on SSD: {resolved_ssd_path}", "INIT")
 
         # Persistent storage layout (mirrors pre-rebuild behaviour)
-        self.project_root = Path(__file__).parent.parent.parent
+        from holo_index.repository_state import runtime_repository_root
+        self.project_root = runtime_repository_root(Path(__file__).parent.parent.parent)
         self.ssd_path = resolved_ssd_path
         self.vector_path = self.ssd_path / "vectors"
         self.cache_path = self.ssd_path / "cache"
         self.models_path = self.ssd_path / "models"
         self.indexes_path = self.ssd_path / "indexes"
         if readonly_query_enabled():
-            database_path = self.vector_path / "chroma.sqlite3"
-            required_paths = (self.ssd_path, self.vector_path, database_path)
+            snapshot_path = self.vector_path / "query_snapshots"
+            required_paths = (self.ssd_path, self.vector_path, snapshot_path)
             missing_paths = [path for path in required_paths if not path.exists()]
             if missing_paths:
                 missing = ",".join(str(path) for path in missing_paths)
@@ -281,7 +289,11 @@ class HoloIndex:
                     operation="open_readonly_store",
                     detail=f"missing_required_path={missing}",
                 )
-            if not self.ssd_path.is_dir() or not self.vector_path.is_dir() or not database_path.is_file():
+            if (
+                not self.ssd_path.is_dir()
+                or not self.vector_path.is_dir()
+                or not snapshot_path.is_dir()
+            ):
                 raise HoloIndexStorageError(
                     STORAGE_UNAVAILABLE_CODE,
                     path=self.ssd_path,
@@ -299,25 +311,50 @@ class HoloIndex:
                     operation="create_storage_layout",
                 ) from exc
 
-        self._log_agent_action("Setting up persistent ChromaDB collections...", "INFO")
+        storage_message = (
+            "Opening immutable query snapshots..."
+            if readonly_query_enabled()
+            else "Setting up persistent ChromaDB collections..."
+        )
+        self._log_agent_action(storage_message, "INFO")
+        if readonly_query_enabled():
+            from modules.infrastructure.foundups_mcp_bridge.src.holo_query_snapshot_store import (
+                open_query_snapshot_client,
+            )
         try:
-            self.client = chromadb.PersistentClient(path=str(self.vector_path))
+            if readonly_query_enabled():
+                self.client = open_query_snapshot_client(self.vector_path)
+                self.query_snapshot_generation_id = self.client.generation_id
+            else:
+                self.client = _require_chromadb().PersistentClient(path=str(self.vector_path))
         except Exception as exc:
             raise classify_storage_exception(
                 exc,
                 path=self.ssd_path,
-                operation="open_chromadb",
+                operation=(
+                    "open_query_snapshot"
+                    if readonly_query_enabled()
+                    else "open_chromadb"
+                ),
             ) from exc
-        self.code_collection = self._ensure_collection("navigation_code")
-        self.wsp_collection = self._ensure_collection("navigation_wsp")
-        self.test_collection = self._ensure_collection("navigation_tests")
-        self.skill_collection = self._ensure_collection("navigation_skills")
-        self.symbol_collection = self._ensure_collection("navigation_symbols")
-        # CFZ4: New collections for semantic separation
-        self.docs_collection = self._ensure_collection("navigation_docs")
-        self.knowledge_collection = self._ensure_collection("navigation_knowledge")
-        # Work Ledger: Slice tracking for WSP 15/60/70 work state queries
-        self.work_ledger_collection = self._ensure_collection("navigation_work_ledger")
+        try:
+            self.code_collection = self._ensure_collection("navigation_code")
+            self.wsp_collection = self._ensure_collection("navigation_wsp")
+            self.test_collection = self._ensure_collection("navigation_tests")
+            self.skill_collection = self._ensure_collection("navigation_skills")
+            self.symbol_collection = self._ensure_collection("navigation_symbols")
+            # CFZ4: New collections for semantic separation
+            self.docs_collection = self._ensure_collection("navigation_docs")
+            self.knowledge_collection = self._ensure_collection("navigation_knowledge")
+            # Work Ledger: Slice tracking for WSP 15/60/70 work state queries
+            self.work_ledger_collection = (
+                None
+                if readonly_query_enabled()
+                else self._ensure_collection("navigation_work_ledger")
+            )
+        except Exception:
+            self.close()
+            raise
 
         self._log_agent_action("Loading sentence transformer (cached on SSD)...", "MODEL")
         os.environ['SENTENCE_TRANSFORMERS_HOME'] = str(self.models_path)
@@ -574,7 +611,10 @@ class HoloIndex:
                     detail=f"{type(exc).__name__}: {str(exc).strip()}",
                 ) from exc
         try:
-            return self.client.get_or_create_collection(name)
+            return self.client.get_or_create_collection(
+                name,
+                configuration=durable_hnsw_configuration(),
+            )
         except Exception as exc:
             raise classify_storage_exception(
                 exc,
@@ -596,7 +636,11 @@ class HoloIndex:
             "embedding_model": self.index_embedding_model_id,
             "embedding_space_fingerprint": self.index_embedding_space_fingerprint,
         }
-        return self.client.create_collection(name, metadata=metadata)
+        return self.client.create_collection(
+            name,
+            metadata=metadata,
+            configuration=durable_hnsw_configuration(),
+        )
 
     # --------- Data Loading --------- #
 
@@ -722,6 +766,11 @@ class HoloIndex:
         """
         from .search_engine import execute_search
         return execute_search(self, query, limit, doc_type_filter)
+
+    def close(self) -> None:
+        """Release the vector client."""
+        if callable(close := getattr(self.client, "close", None)):
+            close()
 
     # --------- CLI Helpers --------- #
 

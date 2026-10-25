@@ -79,6 +79,53 @@ class LinkedInActionResult:
         }
 
 
+def _connection_result(profile_slug, error=None, start_time=None, *, success=False, **details):
+    """Project connection outcomes without granting UI admission or mutating work."""
+    return LinkedInActionResult(
+        success=success, action="send_connection_request", post_id=profile_slug,
+        error=error, details=details,
+        duration_ms=int((datetime.now() - start_time).total_seconds() * 1000) if start_time else 0,
+    )
+
+
+def _connection_policy_result(
+    profile_slug: str, metadata: Dict[str, str], policy: Any, start_time: datetime,
+    *, dry_run: bool = False, request_status: Optional[str] = None,
+) -> LinkedInActionResult:
+    """Project policy-only previews and the existing live rejection schema."""
+    allowed_preview = dry_run and policy.allowed
+    return _connection_result(
+        profile_slug, None if allowed_preview else f"policy_blocked: {policy.reason}",
+        start_time, success=allowed_preview, policy_reason=policy.reason,
+        matched_allow=policy.matched_allow, matched_deny=policy.matched_deny,
+        profile=metadata,
+        **({"dry_run": True} if dry_run else {"request_status": request_status}),
+    )
+
+
+async def _connection_invitation_clicks(router: ActionRouter, message: Optional[str]) -> tuple:
+    """Attempt explicit Send only after any requested note was entered."""
+    async def click(description: str, **payload) -> RoutingResult:
+        return await router.execute(
+            'click_by_description', {'description': description, **payload},
+            driver=DriverType.VISION,
+        )
+
+    add_note_result = None
+    type_result = None
+    if message:
+        add_note_result = await click('Add a note button in Connect dialog')
+        if not add_note_result.success:
+            return None, add_note_result, type_result
+        type_result = await click(
+            'Invitation note text input field', text=message, slow_type=True,
+        )
+        if not type_result.success:
+            return None, add_note_result, type_result
+    send_result = await click('Send invitation button in Connect dialog')
+    return send_result, add_note_result, type_result
+
+
 class LinkedInActions:
     """
     LinkedIn vision-based engagement actions.
@@ -810,12 +857,7 @@ class LinkedInActions:
         profile_slug = self._profile_slug_from_url(profile_url)
 
         if not self._connection_manager or not self._connection_profile_cls:
-            return LinkedInActionResult(
-                success=False,
-                action="send_connection_request",
-                post_id=profile_slug,
-                error="connection_policy_manager_unavailable",
-            )
+            return _connection_result(profile_slug, "connection_policy_manager_unavailable")
 
         nav = await self.navigate_to_profile(profile_url)
         if not nav.success:
@@ -841,14 +883,8 @@ class LinkedInActions:
             metadata["industry"] = metadata["industry"] or extracted.get("industry", "")
 
         if not (metadata["headline"] or metadata["company"] or metadata["industry"]):
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-            return LinkedInActionResult(
-                success=False,
-                action="send_connection_request",
-                post_id=profile_slug,
-                error="policy_blocked: missing_profile_metadata",
-                duration_ms=elapsed_ms,
-                details={"profile": metadata},
+            return _connection_result(
+                profile_slug, "policy_blocked: missing_profile_metadata", start_time, profile=metadata,
             )
 
         first_name, last_name = self._split_name(metadata.get("name", ""))
@@ -863,46 +899,35 @@ class LinkedInActions:
         )
 
         policy = self._connection_manager.evaluate_connection_policy(target_profile)
+        if dry_run:
+            return _connection_policy_result(
+                profile_slug, metadata, policy, start_time, dry_run=True,
+            )
+
+        prior_work = (profile_slug in self._connection_manager.pending_requests
+                      or profile_slug in self._connection_manager.connections)
         request = self._connection_manager.send_connection_request(
             profile_slug,
             message=message,
             target_profile=target_profile,
         )
 
+        status = getattr(request, "status", None)
         blocked_status = (
             self._connection_status_cls.BLOCKED if self._connection_status_cls else None
         )
-        if not policy.allowed or (blocked_status is not None and request.status == blocked_status):
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-            return LinkedInActionResult(
-                success=False,
-                action="send_connection_request",
-                post_id=profile_slug,
-                error=f"policy_blocked: {policy.reason}",
-                duration_ms=elapsed_ms,
-                details={
-                    "policy_reason": policy.reason,
-                    "matched_allow": policy.matched_allow,
-                    "matched_deny": policy.matched_deny,
-                    "request_status": request.status.value,
-                    "profile": metadata,
-                },
+        if not policy.allowed or (blocked_status is not None and status == blocked_status):
+            return _connection_policy_result(
+                profile_slug, metadata, policy, start_time, request_status=getattr(status, "value", None),
             )
 
-        if dry_run:
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-            return LinkedInActionResult(
-                success=True,
-                action="send_connection_request",
-                post_id=profile_slug,
-                duration_ms=elapsed_ms,
-                details={
-                    "dry_run": True,
-                    "policy_reason": policy.reason,
-                    "matched_allow": policy.matched_allow,
-                    "request_status": request.status.value,
-                    "profile": metadata,
-                },
+        if (prior_work or status is None
+                or status is not getattr(self._connection_status_cls, "PENDING", None)
+                or getattr(request, "to_profile_id", None) != profile_slug
+                or self._connection_manager.pending_requests.get(profile_slug) is not request):
+            return _connection_result(
+                profile_slug, "connection_request_not_admitted", start_time,
+                request_status=getattr(status, "value", None),
             )
 
         connect_click = await self.router.execute(
@@ -911,54 +936,21 @@ class LinkedInActions:
             driver=DriverType.VISION,
         )
         if not connect_click.success:
-            elapsed_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-            return LinkedInActionResult(
-                success=False,
-                action="send_connection_request",
-                post_id=profile_slug,
-                error=f"connect_click_failed: {connect_click.error}",
-                duration_ms=elapsed_ms,
-                details={
-                    "policy_reason": policy.reason,
-                    "request_status": request.status.value,
-                },
+            return _connection_result(
+                profile_slug, f"connect_click_failed: {connect_click.error}", start_time,
+                policy_reason=policy.reason, request_status=request.status.value,
             )
 
         # LinkedIn variants:
         # 1) direct send after connect click
         # 2) modal with optional add note + send invitation
-        add_note_result = None
-        type_result = None
-        send_result = await self.router.execute(
-            'click_by_description',
-            {'description': 'Send invitation button in Connect dialog'},
-            driver=DriverType.VISION,
+        send_result, add_note_result, type_result = await _connection_invitation_clicks(
+            self.router, message,
         )
 
-        if message:
-            add_note_result = await self.router.execute(
-                'click_by_description',
-                {'description': 'Add a note button in Connect dialog'},
-                driver=DriverType.VISION,
-            )
-            if add_note_result.success:
-                type_result = await self.router.execute(
-                    'click_by_description',
-                    {
-                        'description': 'Invitation note text input field',
-                        'text': message,
-                        'slow_type': True,
-                    },
-                    driver=DriverType.VISION,
-                )
-                send_result = await self.router.execute(
-                    'click_by_description',
-                    {'description': 'Send invitation button in Connect dialog'},
-                    driver=DriverType.VISION,
-                )
-
         invitation_sent = connect_click.success and (
-            send_result.success or add_note_result is None
+            (send_result is not None and send_result.success)
+            or (not message and add_note_result is None)
         )
         if invitation_sent:
             self._session_stats['connections_sent'] += 1
@@ -976,7 +968,7 @@ class LinkedInActions:
                 "request_status": request.status.value,
                 "profile": metadata,
                 "connect_click_success": connect_click.success,
-                "send_click_success": send_result.success,
+                "send_click_success": send_result.success if send_result is not None else None,
                 "add_note_success": add_note_result.success if add_note_result else None,
                 "note_typed_success": type_result.success if type_result else None,
             },

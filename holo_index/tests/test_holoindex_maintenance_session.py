@@ -507,6 +507,47 @@ def test_final_snapshot_recheck_blocks_post_proof_mutation(tmp_path: Path) -> No
     assert code.verification == "IN_PROGRESS"
 
 
+def test_dirty_repository_at_publication_boundary_never_publishes_pass(
+    tmp_path: Path,
+) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    states = iter(
+        (
+            _clean_state(HEAD_SHA),
+            _clean_state(HEAD_SHA),
+            SimpleNamespace(
+                proven_clean=False,
+                head_sha=HEAD_SHA,
+                error="HOLOINDEX_REPOSITORY_DIRTY",
+            ),
+        )
+    )
+    session._repository_state_reader = lambda _root: next(states)
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match="HOLOINDEX_REPOSITORY_DIRTY",
+    ):
+        session.complete(
+            _holo(),
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
+
+    invalidation = load_freshness_receipt(freshness_receipt_path(tmp_path / "ssd"))
+    code = next(
+        entry for entry in invalidation.collections if entry.name == "navigation_code"
+    )
+    assert code.verification == "IN_PROGRESS"
+
+
 def test_real_client_routes_final_snapshot_check_to_isolated_probe(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -548,6 +589,11 @@ def test_real_client_routes_final_snapshot_check_to_isolated_probe(
             [],
         )[-1],
     )
+    monkeypatch.setattr(
+        maintenance_module,
+        "_publish_query_snapshots",
+        lambda *_args: lifecycle.append("query_snapshots_published"),
+    )
 
     receipt = session.complete(
         holo,
@@ -563,12 +609,62 @@ def test_real_client_routes_final_snapshot_check_to_isolated_probe(
         "writer_stopped",
         "cache_cleared",
         "persisted_view_opened",
+        "query_snapshots_published",
         "writer_stopped",
         "cache_cleared",
         "isolated_probe",
     ]
     assert calls[0][1]["ssd_path"] == tmp_path / "ssd"
     assert calls[0][1]["repo_root"] == tmp_path / "repo"
+
+
+def test_maintenance_preserves_vector_segment_failure_category(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session = MaintenanceSession.begin(
+        ssd_path=tmp_path / "ssd",
+        repo_root=tmp_path / "repo",
+        planned_collections={"navigation_code"},
+        repository_state_reader=lambda _root: _clean_state(HEAD_SHA),
+    )
+    lifecycle: list[str] = []
+    writer = _holo()
+    proof = _holo()
+    _attach_chroma_client(writer, lifecycle, "writer")
+    _attach_chroma_client(proof, lifecycle, "proof")
+    monkeypatch.setattr(
+        maintenance_module,
+        "open_persisted_collection_view",
+        lambda _ssd: proof,
+    )
+    monkeypatch.setattr(
+        maintenance_module,
+        "verify_collection_snapshots_isolated",
+        lambda *_args, **_kwargs: (_ for _ in ()).throw(
+            maintenance_module.IsolatedSnapshotProbeError(
+                "VECTOR_SEGMENT_UNAVAILABLE"
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        maintenance_module, "_publish_query_snapshots", lambda *_args: None
+    )
+
+    with pytest.raises(
+        MaintenanceSessionError,
+        match=(
+            "HOLOINDEX_FINAL_COLLECTION_SNAPSHOT_PROBE_FAILED: "
+            "VECTOR_SEGMENT_UNAVAILABLE"
+        ),
+    ):
+        session.complete(
+            writer,
+            refreshed_collections={"navigation_code"},
+            source="targeted",
+            refresh_proofs=_proofs("navigation_code"),
+        )
+    session.close()
 
 
 def test_persisted_proof_view_finalizes_when_receipt_build_fails(
@@ -636,6 +732,9 @@ def test_persisted_proof_view_finalizes_when_repository_head_changes(
         maintenance_module,
         "open_persisted_collection_view",
         lambda _ssd: lifecycle.append("persisted_view_opened") or proof,
+    )
+    monkeypatch.setattr(
+        maintenance_module, "_publish_query_snapshots", lambda *_args: None
     )
 
     with pytest.raises(

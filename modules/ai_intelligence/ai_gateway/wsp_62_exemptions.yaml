@@ -15,17 +15,17 @@ exemptions:
     remediation: "ROADMAP.md#runtime-binder-decomposition"
   - file: "src/model_autoresearch_campaign_execution_artifact_supply_bootstrap.py"
     reason: >-
-      This corrective security slice grows the inherited bootstrap entry point
-      from 208 to 235 lines to add fail-closed admission gates, without mixing
-      a broad bootstrap assembly refactor into the evidence migration. No
-      further growth above this exact ceiling is permitted.
-    function_threshold_override: 235
+      The configured-runtime assembly is now extracted from the inherited
+      bootstrap entry point. The remaining 233-line coordinator preserves the
+      fail-closed admission sequence; no further growth above this reduced
+      exact ceiling is permitted.
+    function_threshold_override: 233
     functions:
       - "run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap"
     no_growth_ceiling:
-      file_lines: 920
+      file_lines: 868
       functions:
-        run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap: 235
+        run_reddog_model_autoresearch_campaign_execution_artifact_supply_bootstrap: 233
     temporary: true
     owner: "AI Gateway Maintainers"
     expires_on: "2026-09-30"
