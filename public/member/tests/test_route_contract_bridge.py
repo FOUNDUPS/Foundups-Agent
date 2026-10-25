@@ -486,7 +486,8 @@ _NODE_ROUTE_VM = r"""
 const {runInNewContext} = require('node:vm');
 const input = JSON.parse(require('node:fs').readFileSync(0, 'utf8'));
 const events = [], fetches = [], forbidden = [], errors = [];
-const anchors = [], linkContainers = new Map(), snapshots = [];
+const anchors = [], linkContainers = new Map(), snapshots = [], registrations = [], manifests = [];
+const loadListeners = [];
 let address = new URL(input.path + (input.search || '') + (input.hash || ''),
   'https://shell.invalid');
 let sandbox;
@@ -547,6 +548,7 @@ const location = {
   set href(value) { record('navigate', 'location', value); address = new URL(value, address); }
 };
 const document = {
+  head: {appendChild(node) { manifests.push({rel: node.rel, href: node.href}); }},
   getElementById(id) { if (!nodes[id]) throw new Error('Unexpected DOM id: ' + id); return nodes[id]; },
   createElement(tag) {
     if (tag === 'iframe' || tag === 'script') {
@@ -581,9 +583,20 @@ async function run() {
     }
   };
   sandbox.window = sandbox;
+  if (input.service_worker) {
+    sandbox.navigator = {serviceWorker: {register(url) {
+      registrations.push(url);
+      return input.worker_failure ? Promise.reject(new Error('Synthetic worker unavailable')) : Promise.resolve({});
+    }}};
+    sandbox.addEventListener = function(type, listener) {
+      if (type !== 'load') throw new Error('Unexpected window event: ' + type);
+      loadListeners.push(listener);
+    };
+  }
   if (input.history !== 'missing') sandbox.history = history;
   runInNewContext(input.script, sandbox, {filename: 'actual-f-inline.js', timeout: 500,
     contextCodeGeneration: {strings: false, wasm: false}});
+  loadListeners.forEach(listener => listener());
   // Real Promise callbacks run after the IIFE initializes its local state.
   await new Promise(resolve => setImmediate(resolve));
   for (const action of input.actions || []) {
@@ -596,7 +609,7 @@ async function run() {
     snapshots.push({grid: nodes.showcaseGrid.innerHTML});
   }
   const context = sandbox.entryRedDog ? sandbox.entryRedDog.getContext() : null;
-  process.stdout.write(JSON.stringify({events, fetches, forbidden, errors, context, snapshots,
+  process.stdout.write(JSON.stringify({events, fetches, forbidden, errors, context, snapshots, registrations, manifests,
     pathname: address.pathname, search: address.search, hash: address.hash,
     links: input.capture_links ? anchors.map(node => ({href: node.href,
       label: node.children.length ? node.children[0].textContent : node.textContent,
@@ -622,7 +635,7 @@ def _landing_vm(tmp_path, path, entities=None, **overrides):
                "projection": {"entities": entities if entities is not None else [_public_entity()]}}
     request.update(overrides)
     env = {k: v for k, v in os.environ.items()
-           if k.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "PATHEXT"}}
+           if k.upper() in {"SYSTEMROOT", "WINDIR", "PATH", "PATHEXT", "NODE_OPTIONS", "MALL_NODE_NETWORK_LOG"}}
     env.update(TEMP=str(tmp_path), TMP=str(tmp_path), HOME=str(tmp_path), USERPROFILE=str(tmp_path))
     proc = subprocess.run([node, "--unhandled-rejections=strict", "-e", _NODE_ROUTE_VM],
                           input=json.dumps(request), capture_output=True, text=True,
@@ -969,3 +982,133 @@ def test_vm_fx_catalog_failure_preserves_error_and_mall_return(tmp_path):
     assert 'href="/member/"' in result["html"]["entryContent"]
     assert result["html"]["showcaseGrid"] == ""
     assert result["context"] is None
+
+
+@pytest.mark.parametrize("path,title", [
+    ("/", "Play FoundUps Mall"), ("/index.html", "Play FoundUps Mall"),
+    ("/f/", "FX — FoundUps Exchange"), ("/f/index.html", "FX — FoundUps Exchange"),
+])
+def test_vm_home_and_fx_share_public_projection_with_distinct_framing(tmp_path, path, title):
+    public = _public_entity(display_name="Public workshop", token_symbol="WORK",
+                            entry_url="/private-runtime", creator="PRIVATE_OWNER",
+                            invitation_code="PRIVATE_INVITE")
+    result = _landing_vm(tmp_path, path, [public], service_worker=True,
+                         search="?catalog=/member/mall-video-catalog.json&id=other&next=//elsewhere.invalid")
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["errors"] == []
+    assert result["context"] is None
+    assert not any(event["kind"] == "navigate" for event in result["events"])
+    assert result["pathname"] == path
+    assert [event["value"] for event in result["events"] if event["kind"] == "title"][-1].startswith(title)
+    assert title in result["html"]["entryContent"]
+    assert _showcase_ids(result["html"]["showcaseGrid"]) == ["synthetic_001"]
+    rendered = json.dumps(result["html"])
+    assert "/private-runtime" not in rendered
+    assert "PRIVATE_OWNER" not in rendered and "PRIVATE_INVITE" not in rendered
+    assert result["registrations"] == ["/sw.js"]
+    assert result["manifests"] == [{"rel": "manifest", "href": "/manifest.json"}]
+
+
+@pytest.mark.parametrize("path", ["/", "/index.html"])
+@pytest.mark.parametrize("search,hash_value", [
+    ("?signin=required", ""), ("?auth=failed", ""), ("?auth=error&msg=try+again%20later", "#keep"),
+    ("?signin=required&next=https%3A%2f%2felsewhere.invalid%2f&x=1&x=2&empty=", "#keep%2fraw"),
+    ("?q=hello+world%20again", "#how"), ("", "#roc"), ("", "#build"), ("", "#terms"),
+])
+def test_vm_home_legacy_admission_and_anchor_forwarding_is_fixed_and_lossless(tmp_path, path, search, hash_value):
+    result = _landing_vm(tmp_path, path, service_worker=True, search=search, hash=hash_value)
+    navigations = [event["value"] for event in result["events"] if event["kind"] == "navigate"]
+    assert navigations == ["/about/" + search + hash_value]
+    assert result["fetches"] == []
+    assert result["registrations"] == [] and result["manifests"] == []
+    assert result["context"] is None
+    assert result["html"]["entryContent"] == ""
+
+
+@pytest.mark.parametrize("search,hash_value", [
+    ("?next=signin%3Drequired", ""), ("?signin=optional", ""), ("?Signin=required", ""),
+    ("?signin=Required", ""), ("?auth=success", ""), ("?auth=error-extra", ""),
+    ("?signin=required&signin=optional", ""), ("?auth=error&auth=failed", ""),
+    ("?signin=required&signin=required", ""), ("?%2573ignin=required", ""),
+    ("?sim=1&sse=1&sse_url=https%3A%2F%2Felsewhere.invalid", ""),
+    ("", "#how-extra"), ("", "#How"), ("", "#how/extra"), ("", "#%68ow"), ("", "#account"),
+])
+def test_vm_unrecognized_home_markers_remain_public_discovery(tmp_path, search, hash_value):
+    result = _landing_vm(tmp_path, "/", service_worker=True, search=search, hash=hash_value)
+    assert not any(event["kind"] == "navigate" for event in result["events"])
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["pathname"] == "/" and result["hash"] == hash_value
+
+
+@pytest.mark.parametrize("path", ["/f/", "/f/synthetic_001"])
+def test_vm_about_compatibility_does_not_capture_fx_or_detail_routes(tmp_path, path):
+    result = _landing_vm(tmp_path, path, service_worker=True, search="?signin=required", hash="#how")
+    assert not any(event["kind"] == "navigate" for event in result["events"])
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["pathname"] == path
+
+
+@pytest.mark.parametrize("path", ["/f/synthetic_001/app", "/f/synthetic_001/app/deep", "/f/move2japan/app"])
+@pytest.mark.parametrize("search", ["?signin=required", "?auth=error&devMall=1"])
+def test_vm_protected_app_handoff_never_registers_root_worker_or_manifest(tmp_path, path, search):
+    result = _landing_vm(tmp_path, path, service_worker=True, search=search, hash="#how")
+    expected = "/member/?devMall=1" if "devMall=1" in search else "/member/"
+    assert [event["value"] for event in result["events"] if event["kind"] == "navigate"] == [expected]
+    assert result["fetches"] == []
+    assert result["registrations"] == [] and result["manifests"] == []
+    _assert_no_tenant_render(result)
+
+
+@pytest.mark.parametrize("path", ["/f", "/unknown", "/index.html/extra", "/f/synthetic_001", "/sso-callback/"])
+def test_vm_root_pwa_is_not_registered_outside_exact_directory_paths(tmp_path, path):
+    result = _landing_vm(tmp_path, path, service_worker=True)
+    assert result["registrations"] == [] and result["manifests"] == []
+
+
+@pytest.mark.parametrize("service_worker,worker_failure", [(False, False), (True, True)])
+def test_vm_home_browse_survives_missing_or_failed_worker_api(tmp_path, service_worker, worker_failure):
+    result = _landing_vm(tmp_path, "/", service_worker=service_worker, worker_failure=worker_failure)
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["errors"] == []
+    assert _showcase_ids(result["html"]["showcaseGrid"]) == ["synthetic_001"]
+
+
+def test_root_rewrite_targets_shared_owner_and_gateway_has_one_about_owner():
+    config = json.loads(_read("firebase.json", base=REPO_ROOT))["hosting"]
+    rewrites = config["rewrites"]
+    for source in ("/", "/index.html", "/f/**"):
+        rule = next(rule for rule in rewrites if rule["source"] == source)
+        assert rule["destination"] == "/f/index.html"
+        assert rewrites.index(rule) < next(i for i, item in enumerate(rewrites) if item["source"] == "**")
+    assert next(rule for rule in rewrites if rule["source"] == "**")["destination"] == "/about/index.html"
+    assert not os.path.exists(os.path.join(REPO_ROOT, "public", "index.html")), "Static root gateway would outrank rewrites"
+    assert os.path.isfile(os.path.join(REPO_ROOT, "public", "about", "index.html"))
+
+
+@pytest.mark.parametrize("source", ["/", "/f/**", "/about/**"])
+def test_virtual_public_routes_have_explicit_no_cache_header(source):
+    headers = json.loads(_read("firebase.json", base=REPO_ROOT))["hosting"]["headers"]
+    matches = [header for block in headers if block["source"] == source for header in block["headers"]]
+    assert {header["key"].lower(): header["value"] for header in matches}.get("cache-control") == "no-cache"
+
+
+def test_public_navigation_exposes_play_fx_about_and_member_without_auth_script():
+    class Navigation(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.in_nav = False
+            self.links = []
+        def handle_starttag(self, tag, attrs):
+            if tag == "nav":
+                self.in_nav = True
+            if tag == "a" and self.in_nav:
+                self.links.append(dict(attrs))
+        def handle_endtag(self, tag):
+            if tag == "nav":
+                self.in_nav = False
+    parser = Navigation()
+    html = _read("../f/index.html")
+    parser.feed(html)
+    assert {link.get("href") for link in parser.links} >= {"/", "/f/", "/about/", "/member/"}
+    assert not any("onclick" in link for link in parser.links)
+    assert "clerk.browser.js" not in html

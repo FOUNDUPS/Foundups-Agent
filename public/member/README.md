@@ -5,6 +5,17 @@
 
 ## Overview
 
+### Public home and About
+
+The local homepage candidate displays **Play FoundUps Mall** at `/` and keeps
+**FX — FoundUps Exchange** at `/f/`, using one public renderer/projection.
+The explanatory and admission gateway now lives at `/about/`. Play, FX, About
+and member navigation are visible; browsing creates no member or tenant authority.
+Known old admission-query and section-anchor links at root forward to fixed
+About with query/hash preserved. Member and SSO callback destinations retain
+their owners. Source tests are separate from Hosting/browser rollout; see the
+[route contract](INTERFACE.md#public-home-and-about--2026-10-25).
+
 ### Public FX directory
 
 The homepage's **FX** navigation link opens the existing public `/f/` directory.

@@ -748,3 +748,113 @@ Validates entry-page Red Dog alignment with Mall Red Dog:
 | test_reddog_context_briefing_phase4.py | 48 | C | Context briefing |
 | (other member tests) | ~446 | B/mixed | Mall shell, tiles, etc. |
 | **Total** | **994** | | |
+## 2026-10-25 | Root Play discovery, single About gateway and root-cache boundaries
+
+Pre-authoring plan: `docs/architecture/FOUNDUPS_MALL_HOMEPAGE_20261025.md`,
+approved15/P1 (C3/I4/D4/Impact4), base `c8eb983629454c6bef6e88d33826112ea19dc620`.
+WSP00 awakening/tracker passed. Canonical AGENTS Holo command returned
+`HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`, UNKNOWN freshness/index gap; its
+canonical-main context and additional worktree lexical context are distinguished
+in the plan. No reindex, model/provider/OAuth/deployment effect.
+
+Preserved the four existing test owners and every original case ID/assertion
+after canonical path normalization. Gateway readers now use
+`public/about/index.html`; catch-all expectation migrates to that same owner.
+The old root-worker registration oracle now reads the shared public directory,
+retaining its three assertions and adding About non-registration. Existing
+missing-media/header/embed/legal/admission/app/product oracles remain active.
+
+Extended the existing route VM with optional worker registration and actual
+load callbacks; API absence remains supported. Added root/FX titles, visible
+navigation, public-only reads and private-field exclusion, fixed lossless root
+admission/anchor forwarding, unknown/duplicate markers, app-before-fetch, exact
+PWA path scope and worker-failure cases. An actual root-worker lifecycle/fetch
+VM in `test_gateway_roc_shell.py` verifies namespace-only cache retirement,
+fresh root caching and auth/member/callback/protected-app bypass. No new test
+file, browser router, catalog or source authorization plane.
+
+External evidence root:
+`C:/Users/user/AppData/Local/Temp/foundups-mall-home-695e26d23253404fac695e8fa797a5a3`.
+Each phase has `results.json` (exact collected/executed IDs, args, outcomes,
+source hashes, warnings, guard observations) and `pytest.log`.
+
+| Phase | Result | Qualification |
+|---|---|---|
+| `baseline` |365 passed,3 failed,0 skipped | Unchanged four owners,368 cases |
+| `red` |257 passed,183 failed | Invalid setup run: Windows backslashes in NODE_OPTIONS prevented the external Node preload from loading; not desired RED evidence |
+| `red-desired` |400 passed,40 failed,0 skipped | Corrected preload path;37 new contract failures plus the same3 baseline failures before product edits |
+| `green-candidate` |437 passed,3 failed,0 skipped | All new controls pass |
+| `green-final` |437 passed,3 failed,0 skipped | After bounded About navigation wrap; no new failures |
+| `adjacent` |164 passed,3 failed,0 skipped | Separate167-case PWA/projector/product/auth selection |
+
+The three baseline/affected failures all belong to
+`modules/foundups/pfmall/tests/test_video_mall_media_delivery.py::TestMediaDirectoryConvention`:
+
+- `test_root_thumbs_dir_exists`
+- `test_member_posters_dir_exists`
+- `test_member_thumbs_dir_exists`
+
+Those absent media prerequisites were not created, suppressed or weakened.
+The three adjacent failures are unchanged source-regex expectations in
+`modules/foundups/pfmall/tests/test_member_pwa_hardening.py::TestServiceWorker`:
+
+- `test_catalog_is_network_first`
+- `test_catalog_offline_fallback`
+- `test_poster_cache_is_separate`
+
+Parent independently reproduced the same three failures in untouched epoch
+worktree head `b6d2cf316`, confirming the member-worker/test blobs match this
+baseline/candidate. Evidence:
+`C:/Users/user/AppData/Local/Temp/foundups-mall-parent-pwa-baseline-fc2f35db89b249a38459a51812fa579c`.
+Parent's earlier wrong-path attempt exited4 before collection and is preserved
+separately, not counted. Actual product-state/service-worker and member
+boot/account transition harnesses pass, as do projector controls. Overlapping
+phase counts and internal Node check counts are not added together.
+
+Exact external runner command (from repo root):
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+O:/Foundups-Agent/.venv/Scripts/python.exe -B -X utf8 C:/Users/user/AppData/Local/Temp/foundups-mall-home-695e26d23253404fac695e8fa797a5a3/run_mall_tests.py green-final
+```
+
+The default runner selection is exactly:
+
+```text
+modules/foundups/pfmall/tests/test_gateway_roc_shell.py
+modules/foundups/pfmall/tests/test_gateway_terms_gate.py
+modules/foundups/pfmall/tests/test_video_mall_media_delivery.py
+public/member/tests/test_route_contract_bridge.py
+```
+
+Adjacent invocation uses that same runner with phase `adjacent` and these exact
+explicit arguments:
+
+```text
+modules/foundups/pfmall/tests/test_member_pwa_hardening.py
+modules/foundups/public_catalog_projector/tests/test_projector.py
+public/member/tests/test_mall_product_state.py
+public/member/tests/test_localhost_dev_harness.py
+```
+
+Pytest arguments: `--import-mode=importlib -o addopts= -p no:cacheprovider
+--basetemp <phase>/pytest -q`. Plugin/dotenv autoload and bytecode/cache writes
+are disabled; TMP/TEMP/DB/daemon scratch is outside the checkout. Python parent
+socket/DNS and Node entry points are guarded, with zero recorded attempts in
+the corrected runs. The original baseline route helper did not inherit the
+Node preload; it used the existing controlled VM fetch instead. Projector CLI
+children are pure local reads, not provider tests. Two inherited inactive
+asyncio config warnings remain. No whole-module green claim is made.
+
+`original-oracle-preservation.json` confirms all368 original case IDs and
+original assertions survive after the documented About path normalization;
+72 cases were added. Opaque frontend attribute comparison passed without
+displaying the value. Source/test hashes are frozen for parent independent
+review. A later auxiliary-only correction changes visual QA's three defaults
+to the local HTTP About URL and removes direct-file examples: absolute `/js/`
+assets cannot work from file URLs. This correction is statically inspected;
+no Playwright/provider call was run.
+
+Hosting precedence, actual response headers, mobile/desktop rendering, real
+login, installed-worker upgrade and publication remain parent gates. The VM
+does not establish those outcomes or live media/voice/token/trading readiness.

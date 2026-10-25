@@ -80,7 +80,7 @@ NEED_TO = {
     "member area styles": "public/member/css/member.css - Dark theme, glassmorphism, responsive",
     "invite code display member": "public/member/index.html - renderInviteCodes() with copy functionality",
     "member logout signout": "public/member/index.html - Firebase signOut() with redirect",
-    "landing page signup redirect": "public/index.html - Redirects to /member/ after successful signup",
+    "landing page signup redirect": "public/about/index.html - About gateway redirects to /member/ after successful signup; root is public Play discovery",
     "member area roadmap layers": "public/member/ROADMAP.md - Layer 1-6 module progression",
 
     # FoundUps Simulator (Mesa Model + SSE)

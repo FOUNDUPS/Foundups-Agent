@@ -5,7 +5,7 @@ Tests for video mall media delivery — Worker A phases 1-2.
 
 Verifies:
 - Firebase hosting cache headers differentiate media from HTML/JSON
-- The rewrite-trap (** -> /index.html) is documented and mitigated
+- The rewrite-trap (** -> /about/index.html) is documented and mitigated
 - Media directory conventions exist at both /media/ and /member/media/
 - Embed URL patterns are safe (no arbitrary external sources)
 - Service worker NEVER_CACHE excludes member media correctly
@@ -24,7 +24,7 @@ PUBLIC = ROOT / "public"
 MEMBER = PUBLIC / "member"
 FIREBASE_JSON = ROOT / "firebase.json"
 SW_JS = PUBLIC / "sw.js"
-GATEWAY = PUBLIC / "index.html"
+GATEWAY = PUBLIC / "about" / "index.html"
 MEMBER_INDEX = MEMBER / "index.html"
 FOUNDUP_ENTRY = MEMBER / "foundup.html"
 ROUTE_BRIDGE = PUBLIC / "f" / "index.html"
@@ -122,7 +122,7 @@ class TestFirebaseCacheHeaders:
 # ---------------------------------------------------------------------------
 
 class TestRewriteTrapMitigation:
-    """The ** -> /index.html rewrite silently serves HTML for missing files.
+    """The ** -> /about/index.html rewrite silently serves HTML for missing files.
 
     Any media path that doesn't exist as a real file will return gateway HTML
     with a 200 status instead of 404. This class documents the trap and
@@ -140,10 +140,10 @@ class TestRewriteTrapMitigation:
         assert "**" in sources, "Catch-all rewrite expected"
 
     def test_catchall_goes_to_index(self):
-        """Catch-all rewrites to /index.html (gateway)."""
+        """Catch-all rewrites to /about/index.html (the canonical gateway)."""
         for r in self.rewrites:
             if r["source"] == "**":
-                assert r["destination"] == "/index.html"
+                assert r["destination"] == "/about/index.html"
 
     def test_f_route_rewrite_before_catchall(self):
         """/f/** rewrite must come before ** catch-all."""
@@ -379,7 +379,7 @@ class TestDeliverySurfaces:
         assert "clerk" in html.lower()
 
     def test_gateway_not_changed(self):
-        """Gateway (public/index.html) is not modified by this slice."""
+        """The moved About gateway retains viewport, snap and admission behavior."""
         html = GATEWAY.read_text(encoding="utf-8")
         assert "viewport-fit=cover" in html
         assert "scroll-snap-type" in html

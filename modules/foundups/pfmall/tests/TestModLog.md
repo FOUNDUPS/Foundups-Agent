@@ -1,5 +1,31 @@
 # p.fMALL Test ModLog
 
+## 2026-10-25 — Root Play/About ownership and namespace-safe worker rollout
+
+Reused the existing three gateway/media owners and member route VM. Canonical
+gateway readers and missing-media catch-all oracle move to About. Root PWA
+registration is tested through the shared directory; legal/admission and all
+original assertions remain. New behavior controls cover root/FX framing,
+fixed query/hash compatibility, exact directory registration, protected handoff,
+explicit route headers and actual root-worker lifecycle/cache isolation.
+
+Unchanged baseline:365 pass/3 absent-media prerequisites. Correct desired
+RED:400 pass/40 fail (37 new controls plus the same3). Final four owners:
+437 pass/the same3 failures, zero new failures or skips. Separate adjacent
+selection:164 pass/3 unchanged member-worker regex failures, independently
+reproduced by parent on untouched source; actual product/account/state and
+projector controls pass. No empty media directories, quarantine or weakened
+oracle was introduced. Phase counts overlap and are not cumulative.
+
+Full exact case IDs, two inherited config warnings, commands/environment,
+initial invalid preload setup, SHA snapshots, opaque attribute comparison and
+limits are in `public/member/tests/TestModLog.md` from repository root and in
+external `foundups-mall-home-695e26d23253404fac695e8fa797a5a3/*/results.json`.
+All368 original IDs/assertions retained;72 added cases. Corrected guarded runs
+record no network attempts. Local source verification is not Hosting/browser,
+authentication-provider, media/voice, deployment or trading acceptance. Parent
+owns independent review, generated registry/security artifacts and publication.
+
 ## 2026-10-25 — FX1 gateway link and public filter reuse
 
 Extended the existing `test_gateway_roc_shell.py` with HTML-parser coverage of

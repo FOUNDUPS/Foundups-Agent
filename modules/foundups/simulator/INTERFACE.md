@@ -456,10 +456,18 @@ python -m modules.foundups.simulator.sse_server -r --founders 5 --users 20 --spe
 
 **Web Animation Integration:**
 ```
-http://localhost:5000?sim=1        # Firebase local dev with SSE
-public/index.html?sim=1           # Direct file with SSE
-public/index.html?sse_url=<url>   # Custom SSE endpoint
+http://localhost:5000/about/?sim=1                 # Firebase Hosting local dev with SSE
+http://localhost:5000/about/?sse=1                 # Explicit SSE mode on the same About page
+http://localhost:5000/about/?sim=1&sse_url=<url>    # Custom SSE endpoint
 ```
+
+Serve About through Hosting (or an equivalent local HTTP server with these
+routes); direct `file://` previews do not resolve its root-absolute assets.
+The visual QA defaults target the local Hosting URL. Root `/` now opens public
+Play discovery and does not activate simulator SSE options.
+Start local Firebase Hosting on port5000 before running visual QA; these URLs
+require that HTTP server. Neither direct-file nor Hosting/browser execution is
+established by the source-only path correction.
 
 **Cloud Run Configuration:**
 - Designed for Cloud Run deployment (like chat endpoint)

@@ -2,7 +2,7 @@
 // Safe static-asset caching only. No aggressive offline behavior.
 // Does NOT cache auth flows, Clerk SDK, Firebase SDK, or dynamic API calls.
 
-const CACHE_NAME = 'foundups-root-v1';
+const CACHE_NAME = 'foundups-root-v2';
 
 const STATIC_ASSETS = [
   '/',
@@ -22,12 +22,17 @@ const NEVER_CACHE = [
   'googleapis.com/securetoken',
   'cloudfunctions.net',
   '/member/',
+  '/about/',
   '/sso-callback/',
   'gstatic.com/firebasejs'
 ];
 
 function shouldNeverCache(url) {
-  return NEVER_CACHE.some(pattern => url.includes(pattern));
+  const address = new URL(url);
+  return NEVER_CACHE.some(pattern => url.includes(pattern)) ||
+    ['/about', '/member', '/sso-callback'].includes(address.pathname) ||
+    address.searchParams.has('signin') || address.searchParams.has('auth') ||
+    /^\/f\/[^/]+\/app(?:\/|$)/.test(address.pathname);
 }
 
 // Install: pre-cache static assets
@@ -45,7 +50,8 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
+        keys.filter((key) => key.startsWith('foundups-root-') && key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
       );
     })
   );

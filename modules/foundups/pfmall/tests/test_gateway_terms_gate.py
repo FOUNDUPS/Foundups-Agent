@@ -14,7 +14,21 @@ from pathlib import Path
 import pytest
 
 
-GATEWAY = Path(__file__).resolve().parents[4] / "public" / "index.html"
+GATEWAY = Path(__file__).resolve().parents[4] / "public" / "about" / "index.html"
+PUBLIC_ROOT = Path(__file__).resolve().parents[4] / "public"
+
+
+def test_about_retains_existing_oauth_callback_and_member_completion():
+    about = PUBLIC_ROOT / "about" / "index.html"
+    html = about.read_text(encoding="utf-8")
+    assert "redirectUrl: window.location.origin + '/sso-callback/'" in html
+    assert "redirectUrlComplete: window.location.origin + '/member/'" in html
+    callback = (PUBLIC_ROOT / "sso-callback" / "index.html").read_text(encoding="utf-8")
+    assert "window.location.href = '/?auth=failed'" in callback
+    assert "window.location.href = '/?auth=error&msg='" in callback
+    assert "encodeURIComponent(err.message" in callback
+    member = (PUBLIC_ROOT / "member" / "index.html").read_text(encoding="utf-8")
+    assert "window.location.href = '/?signin=required'" in member
 
 
 # ---------------------------------------------------------------------------
@@ -25,7 +39,7 @@ class TestEnterButtonGate:
     """ENTER button must show disclaimer modal for unsigned users."""
 
     def test_gateway_exists(self):
-        assert GATEWAY.is_file(), "public/index.html must exist"
+        assert GATEWAY.is_file(), "public/about/index.html must exist"
 
     def test_enter_button_exists(self):
         html = GATEWAY.read_text(encoding="utf-8")

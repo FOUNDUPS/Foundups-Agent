@@ -20,7 +20,7 @@ Event Format:
     data: {"event_type": "...", "payload": {...}, "timestamp": "..."}
 
 Web Animation Integration:
-    Open http://localhost:5000?sim=1 or public/index.html?sim=1
+    Open http://localhost:5000/about/?sim=1 or public/about/index.html?sim=1
     The animation will connect to SSE and display live simulator events.
 
 WSP References:

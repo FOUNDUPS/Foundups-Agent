@@ -6,14 +6,16 @@ fresh test run.
 
 ## Public directory and gateway owners
 
-- `test_route_contract_bridge.py` covers the canonical public `/f/` directory,
+- `test_route_contract_bridge.py` covers shared root Play and `/f/` FX discovery,
   landing aliases, public projection isolation and protected app handoff. Its
   existing Node VM executes the actual inline `/f/` owner with controlled DOM,
-  history and fetch. Extend this fixture for public search behavior.
+  history, fetch and optional worker registration. Reuse it for public search,
+  fixed legacy query/hash compatibility and protected app behavior.
 - `../../../modules/foundups/pfmall/tests/test_gateway_roc_shell.py` owns the
-  homepage navigation, framing and existing gateway contracts.
+  public navigation, About framing, root-worker lifecycle and existing gateway
+  contracts. Its worker VM executes the actual root service worker.
 - `../../../modules/foundups/pfmall/tests/test_gateway_terms_gate.py` owns the
-  existing admission path; public directory discovery does not grant admission.
+  existing About admission/callback path; public discovery does not grant admission.
 
 Other member behavior belongs to the existing field, planes, concierge, product
 state and media tests listed in this directory and in the TestModLog. Reuse the

@@ -1,5 +1,30 @@
 # Member Area Module Change Log
 
+## 2026-10-25 — Public Play home and canonical About admission page
+
+Reuse the public directory at root with Play framing, retain `/f/` FX and move
+the existing gateway once to `/about/`. Public top navigation exposes Play/FX/
+About/member. Only known root admission/section links forward to fixed About,
+preserving raw query/hash without accepting a destination. Clerk callback/member
+completion, ordinary admission, account return and the Move2Japan exception keep
+their existing owners. Shared discovery still reads only the public projection.
+
+Keep manifest identity and About install UI. Register root worker only from
+exact home/directory paths; retire only root cache versions and bypass new About,
+admission/member/callback/protected-app requests. Explicit virtual-route no-cache
+headers address the observed pre-change one-hour root/FX Hosting policy. No
+member source, catalog, provider, live media, voice, token or trading change.
+
+WSP 00/15/22/50/84/97/102/104: pre-authoring15/P1 allocation, canonical Holo
+authority mismatch retained, exact-source fallback and existing test owners.
+Baseline365/3 inherited failures; desired RED400/40; final437/3 with the same
+three media prerequisites and all original cases/oracles retained. Adjacent
+164/3 includes three unchanged member-worker regex extraction failures, while
+actual product/account/state/runtime and projector checks pass. No skips or
+guarded network attempts. See tests/TestModLog.md for exact IDs and receipts.
+Source/test frozen for independent parent review; Hosting/browser/provider/
+publication completion is not inferred from controlled VM execution.
+
 ## 2026-10-25 — FX1 public directory discovery
 
 Expose the existing `/f/` public directory through a normal homepage FX link.

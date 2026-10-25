@@ -1,5 +1,20 @@
 # p.fMALL Roadmap
 
+## Mall home and About — 2026-10-25
+
+- Local source candidate: reuse the public directory at `/` with Play framing;
+  retain `/f/` FX and move the single explanatory/admission gateway to `/about/`.
+  Keep fixed legacy query/hash compatibility, public projection isolation,
+  callback/member authority and the existing protected app handoff.
+- Root cache rollout is namespaced and excludes auth/handoff. Extensionless
+  routes receive explicit no-cache headers. Existing source controls pass;
+  unchanged media prerequisites and stale member-worker regex tests remain
+  reported in [tests/TestModLog.md](tests/TestModLog.md).
+- Pending: parent Hosting preview/browser/Cache-Control and cache-upgrade
+  verification, independent review and publication. No live media, voice,
+  catalog expansion, claim, token or trading feature is implied.
+
+
 ## FX1 public discovery — 2026-10-25
 
 - Implemented locally: homepage FX navigation to the existing public `/f/`

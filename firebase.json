@@ -53,6 +53,26 @@
         ]
       },
       {
+        "source": "/",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/f",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/f/**",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/about",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
+        "source": "/about/**",
+        "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+      },
+      {
         "source": "/kosei/app/**",
         "headers": [
           { "key": "Content-Security-Policy", "value": "frame-ancestors https://foundups.com https://*.foundups.com https://foundupscom.web.app https://foundupscom.firebaseapp.com http://localhost:* https://localhost:*" },
@@ -64,12 +84,20 @@
     ],
     "rewrites": [
       {
+        "source": "/",
+        "destination": "/f/index.html"
+      },
+      {
+        "source": "/index.html",
+        "destination": "/f/index.html"
+      },
+      {
         "source": "/f/**",
         "destination": "/f/index.html"
       },
       {
         "source": "**",
-        "destination": "/index.html"
+        "destination": "/about/index.html"
       }
     ]
   },

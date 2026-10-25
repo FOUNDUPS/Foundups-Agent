@@ -11,7 +11,7 @@
 
   <!-- OpenGraph / Facebook -->
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://foundups.com/">
+  <meta property="og:url" content="https://foundups.com/about/">
   <meta property="og:title" content="FoundUPS — Where Will You Aim Your Compute?">
   <meta property="og:description"
     content="Aim your compute at ideas that matter. Agents build. You earn Return on Compute.">
@@ -21,13 +21,13 @@
   <meta name="twitter:card" content="summary">
   <meta name="twitter:site" content="@foundupscom">
   <meta name="twitter:domain" content="foundups.com">
-  <meta name="twitter:url" content="https://foundups.com/">
+  <meta name="twitter:url" content="https://foundups.com/about/">
   <meta name="twitter:title" content="FoundUPS — Where Will You Aim Your Compute?">
   <meta name="twitter:description" content="Aim your compute at ideas that matter. Agents build. You earn Return on Compute.">
   <meta name="twitter:image" content="https://foundups.com/logo-dog.png">
 
   <!-- Canonical -->
-  <link rel="canonical" href="https://foundups.com/">
+  <link rel="canonical" href="https://foundups.com/about/">
 
   <!-- Structured Data -->
   <script type="application/ld+json">
@@ -324,6 +324,8 @@
       align-items: center;
       gap: 6px;
     }
+    .nav-left { flex-shrink: 0; }
+    .nav-right { min-width: 0; flex-wrap: wrap; justify-content: flex-end; }
 
     .user-icon {
       width: 32px;
@@ -1423,7 +1425,10 @@
       </a>
     </div>
     <div class="nav-right">
+      <a href="/" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">Play</a>
       <a href="/f/" class="btn-ghost" aria-label="FX — FoundUps Exchange" style="padding:5px 10px;font-size:0.7rem;">FX</a>
+      <a href="/about/" class="btn-ghost" aria-current="page" style="padding:5px 10px;font-size:0.7rem;">About</a>
+      <a href="/member/" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">Member</a>
       <a href="#how" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">How</a>
       <a href="#roc" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">ROC</a>
       <a href="/litepaper.html" class="btn-ghost" style="padding:5px 10px;font-size:0.7rem;">Litepaper</a>
@@ -2478,7 +2483,7 @@
     })();
   </script>
 
-  <script src="js/foundup-cube.js?v=2"></script>
+  <script src="/js/foundup-cube.js?v=2"></script>
 
   <!-- ELIGIBILITY REQUIREMENTS MODAL (for non-authenticated ENTER clicks) -->
   <div id="disclaimerModal" class="disclaimer-overlay" role="dialog" aria-modal="true" aria-labelledby="disclaimerModalTitle" style="display:none;">
@@ -2625,14 +2630,8 @@
     <span class="handoff-status" id="handoffStatus">Opening FoundUPS Mall...</span>
   </div>
 
-  <!-- SERVICE WORKER REGISTRATION + INSTALL PROMPT -->
+  <!-- INSTALL PROMPT (root worker registration belongs to Play/FX discovery) -->
   <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(() => {});
-      });
-    }
-
     // Standalone detection - suppress all install affordances if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches
       || window.navigator.standalone === true;
