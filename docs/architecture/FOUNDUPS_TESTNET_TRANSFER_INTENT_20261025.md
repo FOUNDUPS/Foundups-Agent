@@ -14,6 +14,11 @@ intent ownership is still outside that resident list. No source/caller/effect,
 signer, schema, authority or oracle extension is allocated. Scope stays17 paths.
 Require immutable parent-blob review, registry check and fresh hosted gates;
 GitGuardian38962564 remains a separate unresolved public-commit classification.
+The actual merge has two insertion conflicts: preserve both root-log sections
+and the exact main-first2,277-entry ledger union. Registry regeneration/check
+passes1,772/273 after resolving and staging; retain main's unchanged manifest
+and pins. Prior TestNet qualification is historical source-bound evidence;
+immutable parent review and fresh hosted checks are still required.
 
 Status: repaired local runtime candidate frozen after173 passing controls; independent
 review pending. No transport activation, publication or settlement qualification.

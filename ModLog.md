@@ -7,6 +7,11 @@ and peer approve only 17 recorded source-SHA fingerprints, retaining all 2,181
 old ledger entries (2,198 total). Both reviews and historical limits remain in
 the intent plan. No scanner rule, source behavior or unknown finding changes;
 the separate GitGuardian main-receipt incident remains unresolved.
+Current reconciliation retains published main0909 (PR2208's38 successful checks,
+16-file and whole-tree source readback). Preserve both parent logs and exact
+2,277-entry prior-approval union; regenerate/check registry1,772/273. Main's
+f427 manifest,1,471 members and caps remain unchanged. No intent/source/oracle
+or authority extension; immutable review and fresh hosted gates remain required.
 
 ## 2026-10-25 — Durable local TestNet probe preparation
 
@@ -21,6 +26,21 @@ Canonical test registry adds one unit owner: 1,771 files, 273 quarantined.
 The module plan retains generated-column, fixture, inventory and packaging
 corrections. No resident integration, signer, chain effect or paid reward exists;
 corrected portable evidence and dedicated hosted publication gates remain.
+## 2026-10-25 — FoundUps delivery and research checkpoint
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP22/50/97. Reconcile existing delivery/research
+owners with observed main5be and exact open-PR heads; preserve earlier chronology.
+Record190 fully read allocated paths and18 supplementary physical versions,
+including all119 WSP-prefixed files and3 support docs; publish the bounded reader
+coverage index with redaction/display/source-authority limits.
+Keep19 mixed registry/5 public/14 media populations distinct and capture012's
+Mall/FX/intake/Outcome-Solution-Pain requirements plus economic policy conflicts.
+Mall2196 and TestNet2202 retain unknown GitGuardian failures. Earlier direct SDK
+attempt failed after1 function passed,6 not reached. Subsequent fixed-target
+direct-v2 passes all7 unchanged functions/4 denied controls with0 unexpected attempts;
+candidate/base/source/origin hashes stay exact. No transaction/runtime admission.
+Documentation only; no runtime/cap, product/test, registry, dependency, signer,
+media publication, production root, reward, asset, liquidity or trading effects.
 
 ## 2026-10-25 — Numeric hosted metadata review
 
@@ -62492,3 +62512,33 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+## 2026-10-25 — intake reference preservation allocation
+
+WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Preserve submitted references
+in the existing draft envelope rather than discard them. Allocate one constructor
+keyword, nearest existing tests/docs and unchanged-membership manifest derivatives;
+desired behavior RED precedes the repair. Existing source AST pin requires explicit
+single-keyword review before rebaseline. No new parser, service, control or authority.
+The four-owner selection now passes601 cases after the independent AST review;
+the five behavioral RED failures and intermediate old-pin failure are preserved.
+Reconciled published nomination main a44; retain1,471 members and unchanged caps,
+updating only the changed source digest and two canonical pins to f427e16b.
+Seven generator passes plus the staged-index pass after staging, and3 existing
+Node entrypoint passes, are separate from the601 intake result. Keep the original
+unstaged-manifest failure; current hosted/security gates remain pending.
+Actual hosted job121124347560 reports40 tree findings and zero in history:
+39 unchanged generated source digests and one unchanged hostile-input fixture
+shifted108 to150. Parent reconstructs all40 exact current/prior bindings and39
+source hashes; append only these after source-bound review, preserving2,220 prior
+entries (2,260 total). Five unchanged security regressions pass; no scanner,
+rule, source or oracle changes. Fresh hosted gates remain required.
+## 2026-10-25 — project nomination inbox allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean
+checkpoint worktree from observed main e801 for a <=90-line GitHub issue form
+plus existing delivery plan/root log. Deliberate public submission and an issue
+permalink supply a usable nomination queue without another service. No automatic
+issue submission, control/admission, registry, token or market activation. Publish
+and verify the default-branch form before separately changing overlapping Mall UI.
+Implemented the55-line form; YAML/schema/required-field/order checks and independent
+source review pass. No issue submitted. Hosted publication gates remain pending.
