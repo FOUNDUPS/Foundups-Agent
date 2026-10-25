@@ -71,7 +71,7 @@ unverified; Actions run provenance is external, not authenticated by a JSON fiel
 No application API/network calls; checkout/setup/artifact use hosted transport.
 
 Baseline: unchanged owners pass387; frozen V1 RED80 missing-module failures/387pass.
-Strengthen the CLI cap oracle with valid JSON at cap/cap+1 (+1 case, no removals).
+Replace the malformed-only CLI cap case with valid JSON at cap/cap+1 (+1 net case).
 Baseline uses normal
 package imports and unchanged source hashes in the qualified external environment.
 The distinct issue adapter avoids growing the existing1,012/1,427-line tests.

@@ -3,13 +3,13 @@
 New distinct owner `test_github_nomination_review.py`:24 methods/81 cases,294 lines.
 Reuse existing mapper/auth/transport/validator owners unchanged. Baseline387PASS;
 frozen V1 RED80 missing-module failures/387PASS. V3 strengthens the CLI byte limit
-with valid JSON at256KiB and+1, retaining all original acceptance cases; RED81FAIL/
+with valid JSON at256KiB and+1, replacing V1's malformed-only cap case; RED81FAIL/
 387PASS. Product GREEN468PASS; final five-owner682PASS with no failures/skips and
 unchanged input hashes. These scopes overlap and are not added.
 An actual module CLI replay emits one DRAFT_ONLY artifact with zero stdout/stderr;
 this is synthetic local input, not a live hosted issue. Default allowlist adds only
-the new owner; canonical registry1772 files/273 quarantined. No source/auth AST
-oracle, fixture or case was removed. External evidence directory:
+the new owner; canonical registry1772 files/273 quarantined. Existing mapper/auth
+AST oracles, fixtures and cases stay unchanged. External evidence directory:
 `foundups-nomination-review-20261026`; hosted workflow retains exact cases/report.
 WSP22/50/84/97; source review and current publication gates remain separate.
 
