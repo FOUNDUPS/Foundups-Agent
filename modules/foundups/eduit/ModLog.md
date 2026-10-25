@@ -9,3 +9,5 @@ Final steering: collapse is instantaneous into uniform dark earth; the foot lift
 012 requires URL-only delivery: simplified game heading and documented agent-owned deployment, with future catalog/PWA reuse assigned to existing Moshpit instead of a duplicate shell. No public deployment claimed.
 
 WSP 97 architecture correction: EDUIT is the education-scoped sleeve of the shared Play FoundUps Mall, not a parallel platform. Retrieved Move2Japan product-selection precedent. Recorded educational projection/search boundaries and tentative chronology/branching/unlock ideas as unimplemented; retained single-story scope.
+
+Recorded 012's watch → play → optional faster challenge and on-device parent-report proposal. Verified current fixed windows/practice against engine and controller. Distinguished story learning from reaction speed, within-player trends from unvalidated age rankings, and local play records from ordinary hosting traffic. Documentation only; no child tracking or adaptive runtime activated.

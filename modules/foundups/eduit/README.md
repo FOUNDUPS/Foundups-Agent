@@ -90,3 +90,55 @@ to the existing shell, with tests that out-of-scope catalog items cannot appear.
 **WSP 97 closure:** exact owner/adjacent product interfaces retrieved; existing
 product reuse chosen over a new shell. Documentation/design change only for the
 Mall sleeve. No production routing, PWA integration or unlock behavior claimed.
+
+## Watch, play, progress — local parent report proposal
+
+**012 proposal, not implemented:** a child watches the episode, plays its
+corresponding game, then may repeat an optional faster challenge. The learning
+objective is tied to the story: notice the cue, choose the appropriate action,
+and complete the sequence. Speed is a separate challenge, not proof of learning.
+Successful repetitions could gradually shorten the response window, within
+reviewed limits; misses should ease the challenge or offer untimed practice.
+Story access should not depend on reaction speed alone. Keep practice and an
+accessible progression path available. Exact difficulty rules remain undecided.
+
+**Observed now:** `public/eduit/storytime/engine.mjs` has two fixed four-second
+cue windows and untimed practice. `game.js` pauses on hidden pages. There is no
+adaptive speed, persistent progress store or parent report in this prototype.
+
+**Proposed parent view:** describe a learning/progress curve, without assuming
+it is a mathematical parabola. Show completed sequences, attempts, success rate,
+challenge level and response-time trends compared with that child's own earlier
+play. Separate first attempts from practiced attempts and compare like-for-like
+game versions, difficulty, input method and device conditions. Show the number
+of observations and insufficient-data states; do not infer a trend from one try.
+Input timing includes rendering, device latency, anticipation and familiarity.
+Use an actual monotonic timing measurement for future reporting, not the current
+animation clock whose per-frame increment is capped. Paused/hidden attempts must
+not produce misleading reaction-time results.
+
+**Exploratory goal:** 012 is interested in whether unusual strengths, including
+fast responses, might become visible to parents. No age percentile, 'gifted',
+IQ, diagnostic or innate-ability label is justified by this game. Age-relative
+comparisons would require separate suitable reference data and validation;
+they are not part of this proof of concept. Do not gather birthdays or build a
+cross-child dataset to support this speculative feature.
+
+**Proposed data boundary:** optional progress remains in browser/device-local
+storage, processed locally for the parent's view. No server upload, cross-family
+comparison, advertising use, telemetry payload, agent memory ingestion or model
+training from children's play. No account or identifying child details required.
+Parent controls should enable/disable recording and clear all recorded progress;
+any export must be an explicit parent action, never an automatic sync. Local
+browser storage may be cleared and is shared by users of that browser profile;
+it is not guaranteed backup or a private per-child identity boundary. Explain
+that limitation and separate optional local player slots only if needed later.
+The no-upload claim concerns play records, not ordinary hosting requests or an
+external YouTube visit. Verify network behavior before making privacy claims.
+
+**Integration/scope:** use EDUIT's adapter within the existing Mall and reuse its
+appropriate storage infrastructure after checking ownership and isolation. Do
+not mix child progress with account data or the global Mall's browsing history.
+This turn preserves the design only: no tracker, database, speed ladder or
+report UI is activated. A future bounded implementation needs synthetic tests
+for timing, difficulty bounds, pause/resume, deletion and no-network leakage.
