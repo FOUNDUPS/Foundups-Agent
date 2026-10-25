@@ -7,6 +7,8 @@ and the [existing Work skill audit](docs/PRIOR_WORK_AUDIT_2026-09-22.md).
 Start with `youtube action scheduling channel=move2japan preflight=true` through
 the existing agent adapter. A one-shot command does not require `main.py`.
 
+Skill composition: [ordered workflow and evidence handoffs](skillz/README.md).
+
 ## Overview
 
 Automated scheduling system for YouTube Shorts across multiple channels:
@@ -18,8 +20,8 @@ Automated scheduling system for YouTube Shorts across multiple channels:
 
 - Selenium/UI-TARS DOM automation for YouTube Studio
 - Multi-channel scheduling with time slot management
-- Smart slot allocation (max 3 per day, ~6 hours apart)
-- Automatic title/description generation (FFCPLN format)
+- Channel-specific slot allocation; resolve limits through the shared scheduling policy
+- Evidence-gated title/description generation with metadata preservation fallback
 - Optional **Schedule → Index Weave**:
   - Reads existing `memory/video_index/{channel}/{video_id}.json` artifacts; this scheduler does not run Gemini or create missing index evidence.
   - Metadata generation can reuse existing index context. Preserving metadata retains the current description.

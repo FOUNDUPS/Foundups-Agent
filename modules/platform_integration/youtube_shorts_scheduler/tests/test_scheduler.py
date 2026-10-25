@@ -68,11 +68,8 @@ class TestChannelConfig:
         assert config is not None
         assert config["id"] == "UC-LSSlOZwpGIRIYihaz8zCw"
         assert config["chrome_port"] == 9222
-        # Density cap is 3/day (was 8). NOTE: the time-slot grid itself is
-        # intentionally NOT reduced in this slice (1-6am window deferred:
-        # Studio timezone is unverified) so slot count is not asserted here.
-        # The HARD_CAP_PER_DAY clamp guarantees <= 3/day regardless of grid size.
-        assert config["max_per_day"] == 3
+        assert config["max_per_day"] == 8
+        assert config["time_slots"] == [f"{hour:02d}:00" for hour in range(8, 23, 2)]
 
     def test_get_channel_config_undaodu(self):
         """Test UnDaoDu channel config."""
@@ -470,3 +467,56 @@ class TestScheduleDensityCap:
             assert summary["full_days"] == 1
             assert summary["partial_days"] == 1
             assert summary["total_scheduled"] == (2 * HARD_CAP_PER_DAY - 1)
+
+
+def test_move2japan_cadence_allocation_and_summary(tmp_path):
+    from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import get_peak_slots_et
+    channel = "UC-LSSlOZwpGIRIYihaz8zCw"
+    tracker = ScheduleTracker(channel, tmp_path)
+    start = datetime(2026, 10, 26)
+    slots = []
+    for i in range(9):
+        date, time = tracker.get_next_available_slot(["08:00"], start_date=start, channel_tz="America/New_York")
+        slots.append((date, time))
+        tracker.increment(date, f"v{i}")
+    assert [time for _, time in slots[:8]] == ["8:00 AM", "10:00 AM", "12:00 PM", "2:00 PM", "4:00 PM", "6:00 PM", "8:00 PM", "10:00 PM"]
+    assert len({date for date, _ in slots[:8]}) == 1
+    assert slots[8][0] != slots[0][0]
+    assert tracker.get_summary()["full_days"] == 1
+    assert tracker.get_summary()["partial_days"] == 1
+
+
+def test_move2japan_policy_planner_priority_and_apply():
+    from modules.platform_integration.youtube_shorts_scheduler.src.reschedule_planner import plan_channel_reschedule, assign_peak_slot
+    from modules.platform_integration.youtube_shorts_scheduler.src.reschedule_applier import apply_moves
+    from modules.platform_integration.youtube_shorts_scheduler.skillz.what_should_i_schedule.executor import compute_channel_need
+    channel = "UC-LSSlOZwpGIRIYihaz8zCw"
+    now = datetime(2026, 10, 25)
+    plan = plan_channel_reschedule(channel, "Move2Japan", "America/New_York", {"Oct 26, 2026": 8}, today=now)
+    assert plan.total_moves == 0
+    assert plan.cap == 8
+    assert assign_peak_slot(7, "America/New_York", now, channel) == ("22:00", "10:00 PM")
+    need = compute_channel_need(channel, "Move2Japan", upcoming_days=1, count_fn=lambda *_: 3, today=now)
+    assert need.total_deficit == 5
+    moves = [{"channel_id": channel, "video_id": f"v{i}", "to_date": "Oct 26, 2026", "slot_local": "8:00 AM"} for i in range(9)]
+    result = apply_moves(moves, dry_run=True, emit_signals=False)
+    assert result["dry_run_count"] == 8
+    assert result["skipped"] == 1
+    result = apply_moves(moves, cap=2, dry_run=True, emit_signals=False)
+    assert result["dry_run_count"] == 2
+    for move in moves:
+        move["channel_id"] = "unknown"
+    assert apply_moves(moves, cap=8, dry_run=True, emit_signals=False)["dry_run_count"] == 3
+
+
+def test_move2japan_cadence_blocks_unqualified_calendar_and_live_apply(tmp_path):
+    from modules.platform_integration.youtube_shorts_scheduler.src.reschedule_applier import apply_moves
+    channel = "UC-LSSlOZwpGIRIYihaz8zCw"
+    tracker = ScheduleTracker(channel, tmp_path)
+    for zone in (None, "Asia/Tokyo"):
+        with pytest.raises(ValueError):
+            tracker.get_next_available_slot(["08:00"], start_date=datetime(2026, 10, 26), channel_tz=zone)
+    moves = [{"channel_id": channel, "video_id": "v1", "to_date": "Oct 26, 2026", "slot_local": "8:00 AM"}]
+    result = apply_moves(moves, dry_run=False, emit_signals=False)
+    assert result["applied"] == 0
+    assert result["results"][0]["reason"] == "cadence_live_unqualified"

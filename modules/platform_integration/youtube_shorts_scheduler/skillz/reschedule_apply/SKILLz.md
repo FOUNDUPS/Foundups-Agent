@@ -72,7 +72,7 @@ PatternMemory outcome with status `dry_run`. The picker/save DOM helpers are NEV
 called. 012 enables the flag after observing dry-runs and live-validates.
 
 Via the `--agent-command` subprocess surface there is no live browser supplied, so
-that surface is dry-run by construction; a live driver is wired through the daemon
+that surface is dry-run by construction; live execution requires a separately verified driver through the daemon
 path.
 
 ---
@@ -82,17 +82,22 @@ path.
 - **Plan**: `reschedule_planner.plan_all_channels` / `MovePlan` rows / `NEEDS_LIVE_LIST`
   (#851). Each row is a complete move instruction
   (`channel_id, channel_name, from_date, to_date, slot_et, slot_local, video_id`).
-  `slot_local` is the ready-to-type bare 12h Studio time (ET->channel-tz, #847).
+  `slot_local` is a clock value only; it does not prove the correct calendar date.
 - **DOM picker**: `dom_automation.YouTubeStudioDOM.reschedule_open_set_save`, which
   opens the `ytcp-video-visibility-edit-popup` via `open_scheduled_edit_popup`
   (clicking the list row's "Scheduled" `span.label-span`, shadow-pierced via
   `shadow_dom_finder.first_deep`) and then reuses `set_schedule_date`,
   `set_schedule_time`, `click_done`, `click_save` UNCHANGED.
-- **Cap**: `HARD_CAP_PER_DAY` (`schedule_tracker.py`, #844).
+- **Cap**: `channel_daily_cap` (`schedule_tracker.py`).
 
 ---
 
 ## Safety guards
+
+Move2Japan live apply is unqualified until full timezone/date and live occupancy
+receipts are supported. The cadence source change fails closed for this apply path.
+Batch-local counting alone is not proof of free capacity.
+
 
 - `YT_RESCHEDULE_APPLY != "1"` -> dry-run hard (picker/save helpers never called).
 - `video_id == "(needs-live-list)"` -> **skipped** (reason `needs_live_list`);
@@ -165,7 +170,13 @@ and live-validates the popup picker against real Studio before trusting apply.
 
 ---
 
-## Success criteria
+## Attempt and verification criteria
+
+The legacy apply result and emitted PatternMemory signals are operational
+attempt records. They must not be promoted to saved success or audience learning
+without independent channel/video/date/time/timezone readback through the
+verified outcome owner. A picker return value alone cannot supply that proof.
+
 
 - Dry-run default: picker/save helpers NOT called; eligible moves logged as `dry_run`.
 - `YT_RESCHEDULE_APPLY=1` + driver: picker called with the correct date+time per move.
@@ -176,3 +187,9 @@ and live-validates the popup picker against real Studio before trusting apply.
 
 **WSP Compliance**: WSP 95, WSP 77, WSP 91, WSP 60/48, WSP 50 (flag-gated mutation),
 WSP 84 (reuse planner + picker + shadow finder + cap).
+
+## Workflow handoff
+
+Follow the [shared scheduling workflow](../README.md) for ordered inputs,
+outputs, evidence gates and resume boundaries. This skill retains its own
+read/write permissions and prototype status; linkage does not expand authority.

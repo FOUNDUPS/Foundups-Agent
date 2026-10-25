@@ -1,3 +1,14 @@
+## Move2Japan cadence manifest metadata review — 2026-10-25
+
+The checksum-pinned Gitleaks staged-tree scan reported 39 unreviewed manifest
+findings and no scanner errors. Parent and implementation-agent reviews each
+rehashed every referenced source, confirmed each finding-bearing line is unique
+and unchanged from base `a490cadb5`, and reconstructed its prior exact approval.
+Append only these 39 file/rule/line bindings after manifest regeneration; retain
+all prior approvals. Scanner rules, scope, exclusions and fingerprint algorithm
+are unchanged. Fresh hosted tree/history checks are required on the published
+head; this metadata review does not establish runtime deployment or live cadence.
+
 ## PR2208 intake reference metadata and fixture bindings — 2026-10-25
 
 Actual job121124347560 reports40 unreviewed tree findings and zero in history:

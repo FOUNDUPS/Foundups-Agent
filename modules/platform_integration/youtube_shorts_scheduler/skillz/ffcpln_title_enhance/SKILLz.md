@@ -77,3 +77,9 @@ and evaluate a bounded held-out sample before proposing another change. Keep
 uncollected metrics missing. A saved telemetry row is not learned model weights,
 causal CTR improvement or deployed policy promotion. No analytics ingestion or
 automatic promotion loop is implemented by this skill.
+
+## Workflow handoff
+
+Follow the [shared scheduling workflow](../README.md) for ordered inputs,
+outputs, evidence gates and resume boundaries. This skill retains its own
+read/write permissions and prototype status; linkage does not expand authority.

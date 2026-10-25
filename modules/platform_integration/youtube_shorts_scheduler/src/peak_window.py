@@ -58,7 +58,28 @@ PEAK_SLOTS_TZ = "America/New_York"
 PEAK_SLOTS_ENV = "SHORTS_PEAK_SLOTS_ET"
 
 
-def get_peak_slots_et() -> List[str]:
+MOVE2JAPAN_CHANNEL_ID = "UC-LSSlOZwpGIRIYihaz8zCw"
+
+
+def is_move2japan(channel_id: str) -> bool:
+    return channel_id in (MOVE2JAPAN_CHANNEL_ID, "move2japan")
+
+
+def require_same_date_cadence(channel_id: str, channel_tz: str, on_date: datetime) -> None:
+    """Fail closed where the legacy date ledger cannot represent ET rollover."""
+    if not is_move2japan(channel_id):
+        return
+    if not channel_tz:
+        raise ValueError("Move2Japan cadence requires an explicit Studio timezone")
+    source = pytz.timezone(PEAK_SLOTS_TZ)
+    destination = pytz.timezone(channel_tz)
+    for hour in range(8, 23, 2):
+        instant = source.localize(datetime(on_date.year, on_date.month, on_date.day, hour))
+        if instant.astimezone(destination).date() != on_date.date():
+            raise ValueError("Move2Japan cadence blocked: Studio date rollover is not qualified")
+
+
+def get_peak_slots_et(channel_id: str = "") -> List[str]:
     """
     Return the canonical ET peak slots as 24h "HH:MM" strings.
 
@@ -66,6 +87,8 @@ def get_peak_slots_et() -> List[str]:
     e.g. "08:00,12:00,20:00"); otherwise returns the researched defaults.
     Malformed env values fall back to the defaults (fail-safe).
     """
+    if is_move2japan(channel_id):
+        return [f"{hour:02d}:00" for hour in range(8, 23, 2)]
     raw = os.getenv(PEAK_SLOTS_ENV, "").strip()
     if not raw:
         return list(_DEFAULT_PEAK_SLOTS_ET)
