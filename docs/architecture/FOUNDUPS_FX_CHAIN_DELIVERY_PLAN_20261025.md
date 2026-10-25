@@ -2,6 +2,33 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Project nomination inbox allocation — 2026-10-25
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Source: main e801a412.
+Smallest usable layer: a deliberate person-submitted GitHub issue form, with
+GitHub sign-in, durable issue permalink and open/closed conversation status.
+Nomination is raw input, distinct from repository control, FoundUp admission,
+issuer authority, asset creation and market listing. Issue closure grants none.
+
+Budget: one new <=90-line `.github/ISSUE_TEMPLATE/foundup-project-nomination.yml`,
+this existing plan and root ModLog. No new runtime, store, registry, test framework,
+label, assignment or custom auth service. Existing launch intake returns only a
+draft and drops reference URLs during mapping; address that separate bug later.
+WSP109 prepares intake, so this inbox does not claim to execute its full gate.
+Qwen/Gemma inference adds no value to this small fixed schema; attributed parallel
+source readers and YAML/schema validation suffice. No model/provider calls.
+
+The form captures public project reference, name and Outcome/vision first, then
+Solution (including PoC/Prototype/MVP) and Pain/obstacles when known. Anyone may
+nominate; public-only acknowledgment and honest proposal wording are required.
+No public-key challenge or rights inference. No issue is submitted by this work.
+Validate YAML/unique IDs/required fields and independently review the actual form.
+Merge and read back default-main template availability before linking an active
+Mall/FX shortcut; its existing `public/f/index.html` overlaps pending Mall2196.
+This prevents premature UI activation and avoids duplicating intake services.
+The55-line form now passes YAML/schema/required-field/order checks and independent
+source review. Publication and default-branch availability remain unproved.
+
 ## Current-state consolidation allocation (before authoring)
 
 WSP15 C2/I4/D4/Impact4 = **14/P1**. On main
