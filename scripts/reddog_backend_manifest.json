@@ -2454,7 +2454,7 @@
     "modules/foundups/simulator/economics/dilution_scenario.py": "43de1e90f7d31514a166da8daf36a2ed776e8f3501b299f500d5588af6d2578f",
     "modules/foundups/simulator/economics/dynamic_exit_friction.py": "73562a4890792f0ce250de824786b27c8d21ff2198eec067b953789fedb8413e",
     "modules/foundups/simulator/economics/emergency_reserve.py": "290218bdcb32875c095ac031f331d85b09bb02ecc0f6e25086b78d48ade67a4d",
-    "modules/foundups/simulator/economics/epoch_ledger.py": "29bf3970b58b15b47ad4687d1fd83752dda20f527d8da61c255e7a926a09227a",
+    "modules/foundups/simulator/economics/epoch_ledger.py": "3c5194fe581ba5b88dac2c8f3d3be98a4ac9e37c379e2f059bc63e107fbd87c9",
     "modules/foundups/simulator/economics/fee_revenue_tracker.py": "237dfbbc161c77cc03847a55e2a49fe71c7872521b7fb4cbe4ff861ead45705b",
     "modules/foundups/simulator/economics/fee_simulation.py": "5b5e30a49222b816e7d7163f9ac85dd7d724e13fb7fa675621b7bf8f8a4abf83",
     "modules/foundups/simulator/economics/fi_orderbook.py": "1e73b38b99992555c34ce7ccfd0ddd8f034d915e1c241f499ac79eb2a6697aac",

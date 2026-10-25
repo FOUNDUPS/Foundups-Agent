@@ -1,3 +1,13 @@
+## FoundUps epoch evidence source closure — 2026-10-25
+
+WSP00/6/15/22/50/97. Rebind only the existing epoch_ledger.py source hash after
+its process-local evidence repair. Runtime membership remains1470; no generator,
+member/byte cap, installed descriptor or authority change. Both existing digest
+pins advance together. Existing generator8 and Node compatibility/preflight/
+recovery3 entrypoints pass; independent review verifies all indexed source blobs.
+Known38 unchanged metadata contexts receive exact new bindings after parent and
+independent review. Fresh full hosted tree/history scans remain required.
+
 ## FoundUps authorization source-closure dependency — 2026-10-25
 
 PR2188 hosted CI exposed stale generated FAM source bindings. Use the existing
