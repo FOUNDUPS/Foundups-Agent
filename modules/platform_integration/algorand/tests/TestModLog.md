@@ -1,5 +1,12 @@
 # Algorand test change log
 
+## 2026-10-25 — canonical JSON framing acceptance allocated
+
+WSP11/15/22/50/62/84/97,13/P1. Appended24 normal methods before product;
+preserve all original28 ASTs/oracles and four denied controls. New total52 IDs
+covers bounded canonical JSON, exact scalar kinds, general-validator fault controls
+and declared request binding. No collection/execution yet; root owns RED/GREEN.
+
 ## 2026-10-25 — distinct hosted pip qualification passed
 
 [Run 40173561283](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/40173561283),
