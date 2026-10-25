@@ -26,4 +26,4 @@ Validation: 266 selected tests passed, including the existing renderer/editor/re
 
 ## 2026-10-26 — Us_Story_Time publisher policy
 
-35 publisher/CI-security cases passed offline. Tests cover FoundUps set 10 reuse, optional explicit set override, invalid override refusal, mismatched live identities/conflicting channel pins, Story Time-only routing, unlisted made-for-kids metadata and explicit synthetic disclosure. Existing publisher regressions included. Fakes verify API arguments, not live OAuth or uploads. Added this existing suite to Kids CI and loaded only the publisher owner to avoid unrelated generation SDK imports.
+35 publisher/CI-security cases passed offline. Tests cover FoundUps set 10 reuse, optional explicit set override, invalid override refusal, missing environment pins/mismatched live identities, Story Time-only routing, unlisted made-for-kids metadata and explicit synthetic disclosure. Existing publisher regressions included. Fakes verify API arguments, not live OAuth or uploads. Added this existing suite to Kids CI and loaded only the publisher owner to avoid unrelated generation SDK imports.

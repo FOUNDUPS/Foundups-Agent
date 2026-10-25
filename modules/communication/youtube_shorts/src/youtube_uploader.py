@@ -43,7 +43,6 @@ class ChannelPolicy:
     default_tags: tuple[str, ...]
     require_expected_channel: bool = False
     credential_set_env: Optional[str] = None
-    expected_channel_id: Optional[str] = None
 
 
 CHANNEL_POLICIES = {
@@ -57,7 +56,6 @@ CHANNEL_POLICIES = {
         ("Us_Story_Time", "FoundUps", "StoryTime"),
         require_expected_channel=True,
         credential_set_env="YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME",
-        expected_channel_id="UCfo9NxwyjAQvaVn3cEjXT4g",
     ),
     "foundups-mall": ChannelPolicy(
         10,
@@ -96,6 +94,12 @@ class YouTubeShortsUploader:
         if youtube_service is not None:
             self.youtube = youtube_service
         else:
+            if service_factory is None:
+                from modules.platform_integration.youtube_auth.src.youtube_auth import (
+                    get_authenticated_service,
+                )
+
+                service_factory = get_authenticated_service
             credential_set = self.policy.credential_set
             if self.policy.credential_set_env:
                 configured = os.getenv(self.policy.credential_set_env, "").strip()
@@ -105,12 +109,6 @@ class YouTubeShortsUploader:
                             f"{self.policy.credential_set_env} must select a positive OAuth set"
                         )
                     credential_set = int(configured)
-            if service_factory is None:
-                from modules.platform_integration.youtube_auth.src.youtube_auth import (
-                    get_authenticated_service,
-                )
-
-                service_factory = get_authenticated_service
             try:
                 self.youtube = service_factory(token_index=credential_set)
             except Exception as exc:
@@ -143,12 +141,6 @@ class YouTubeShortsUploader:
                 raise YouTubeUploadError("Authorized YouTube channel did not return an ID")
 
             expected = os.getenv(self.policy.expected_channel_env, "").strip()
-            if self.policy.expected_channel_id:
-                if expected and expected != self.policy.expected_channel_id:
-                    raise YouTubeUploadError(
-                        f"Configured channel pin conflicts with registered {self.channel} channel"
-                    )
-                expected = self.policy.expected_channel_id
             if self.policy.require_expected_channel and not expected:
                 raise YouTubeUploadError(
                     f"{self.policy.expected_channel_env} must pin the {self.channel} channel before publishing"

@@ -175,7 +175,7 @@ def test_story_channel_rejects_invalid_oauth_override(monkeypatch, configured):
 
 
 @pytest.mark.parametrize("pin", [None, "main-foundups"])
-def test_story_channel_rejects_wrong_identity_or_conflicting_pin(monkeypatch, pin):
+def test_story_channel_rejects_missing_pin_or_wrong_identity(monkeypatch, pin):
     monkeypatch.delenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", raising=False)
     if pin:
         monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", pin)
@@ -222,7 +222,7 @@ def test_story_channel_reuses_foundups_oauth_by_default(monkeypatch, override):
     monkeypatch.delenv("YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME", raising=False)
     if override is not None:
         monkeypatch.setenv("YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME", override)
-    monkeypatch.delenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", raising=False)
+    monkeypatch.setenv("YT_UPLOAD_CHANNEL_ID_US_STORY_TIME", "UCfo9NxwyjAQvaVn3cEjXT4g")
     calls = []
     def factory(**kwargs):
         calls.append(kwargs)
