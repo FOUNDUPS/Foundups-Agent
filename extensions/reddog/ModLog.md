@@ -1,3 +1,12 @@
+## GitHub file-reader source binding — 2026-10-26
+
+WSP6/15/22/50/97; metadata amendment13/P1 in the FoundUps delivery plan.
+Existing1471-member closure changes only the GitHub client's normalized source
+hash; JS and generator-test digest pins become c1f97e86. Membership,1472 refusal
+and328KiB/2MiB/32MiB caps remain unchanged. Eight generator cases and three Node
+compatibility/preflight/blocked-recovery owners pass. Source compatibility only;
+no extension installation, repository claim or issuer/provider authority follows.
+
 ## Numeric/current-main combined closure — 2026-10-25
 
 WSP6/15/22/50/97. Existing canonical generation combines mainc7f0d939's bootstrap

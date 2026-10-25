@@ -1,3 +1,10 @@
+## GitHub file-reader source binding — 2026-10-26
+
+Reuse the three existing Node contract/preflight/blocked-recovery owners:each
+exits0 at the new c1f97e86 pin. Existing eight Python generator cases also pass
+after source/manifest/pins are staged. Runtime1471 and1472 refusal stay fixed;
+no new cases, widened caps, native isolation or installed-runtime admission claim.
+
 ## Numeric/current-main reconciliation qualification — 2026-10-25
 
 Fresh unchanged generator8 pass in77.50s with2 inherited inactive asyncio config

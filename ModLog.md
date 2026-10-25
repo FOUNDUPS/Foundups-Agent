@@ -1,3 +1,15 @@
+## 2026-10-26 — FoundUps GitHub regular-file observation prerequisite
+
+WSP00/6/11/15/22/50/62/84/97; work15/P1, required manifest repair13/P1.
+Extend the existing client with immutable repository/Git-object/file evidence,
+strict regular-file/content checks and sanitized provider errors. Keep legacy
+record/tuple compatibility; repair the observed PATCH and network-fixture gaps.
+Final canonical unit shard135PASS; eight generator cases and three Node owners
+pass. Exact IDs, failures and hashes: [receipt](docs/architecture/receipts/FOUNDUPS_GITHUB_FILE_OBSERVATION_20261026.json).
+Runtime1471 members/caps unchanged; only client hash and two digest pins advance.
+Metadata brackets are non-atomic; no claim, trusted fact, issuer, signer, token,
+reward, trading or installed-runtime grant. Hosted/security/main remain separate.
+
 ## 2026-10-25 — FoundUps unsigned integration checkpoint
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.

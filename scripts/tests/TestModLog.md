@@ -1,5 +1,14 @@
 # Script test inventory
 
+## 2026-10-26 — GitHub client source binding
+
+Rebind only the existing client's normalized hash in the1471-member manifest;
+two digest literals advance to c1f97e86, preserving all membership/cap assertions.
+Stage source+manifest+pins before the unchanged eight generator cases:8PASS,
+zero failures/errors/skips/warnings in the external development environment.
+Three existing Node contract/preflight/blocked-recovery owners exit0. No new
+test file, generator, member, byte cap, provider or installed-runtime admission.
+
 ## 2026-10-25 — Intake reference source binding
 
 The existing mapper remains one of1,471 runtime members; regenerate its source

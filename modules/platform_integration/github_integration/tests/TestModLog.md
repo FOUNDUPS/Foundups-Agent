@@ -18,7 +18,12 @@
   outside this slice. Existing helper adapters remain mock-only infrastructure.
 - Current workflow selects the two real unit owners explicitly, retains JUnit
   and actual wheel-resolution metadata; no directory sweep or provider credential.
-  New acceptance/results are recorded below only after execution. WSP6/22/50/84/97.
+  WSP6/22/50/84/97.
+- Final:23 new methods/94 new cases;120 client and15 permission-probe cases pass.
+  Exact root-tree/ref/mode/hash, one-byte boolean-size, concrete frozen DTO,
+  private visibility, bounded IDs and transport/body sentinel controls included.
+  Frozen RED26PASS/94FAIL; prior long-ID Windows setup failure stays retained.
+  Portable receipt records exact IDs and source/result hashes; no live API proof.
 
 ## 2026-06-28 - REDDOG_GITHUB_PERMISSION_PROBE_PHASE1
 

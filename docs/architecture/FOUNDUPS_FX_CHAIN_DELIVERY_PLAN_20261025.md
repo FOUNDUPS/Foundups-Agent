@@ -65,7 +65,7 @@ it grants no installed runtime or provider activation.
 Local result:135 module cases pass (120 client/15 permission-probe); eight existing
 generator cases and three Node owners pass. Runtime1471 members unchanged; only
 the client's source hash changes, canonical digest c1f97e86. Frozen RED and prior
-runner/long-ID errors remain retained; hosted/security/main convergence is pending.
+runner/long-ID errors remain in the [receipt](receipts/FOUNDUPS_GITHUB_FILE_OBSERVATION_20261026.json); hosted/main gates remain.
 
 ## Unsigned integration checkpoint allocation — before authoring
 
