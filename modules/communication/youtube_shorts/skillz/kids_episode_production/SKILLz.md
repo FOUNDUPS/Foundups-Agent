@@ -1,6 +1,6 @@
 ---
 name: kids_episode_production
-version: 0.1.0
+version: 0.2.0
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -10,6 +10,10 @@ promotion_state: prototype
 
 Use FOUNDUPS/Foundups-Agent as the implementation authority. Read AGENTS.md, WSP 00/97, the current root roadmap, and `modules/foundups/kids_episodes/README.md` before code or runtime work. Locate the repository; never assume a historical checkout is current. Retrieve the YouTube Shorts README, INTERFACE, ModLog and test history through the governed Holo query, or label lexical fallback and its freshness limitations.
 
+
+## Story direction before production
+
+Read `references/story-direction.md` before scripting or revising an educational event. Apply its causal staging and silent-storyboard checks before the existing production workflow.
 
 ## Story-first production
 

@@ -2396,7 +2396,7 @@
     "modules/communication/youtube_shorts/src/story_generator.py": "e5467a57206cb2860eb1026d91d2d659da238439c917249cc67acf3c36d9d026",
     "modules/communication/youtube_shorts/src/veo3_generator.py": "6cfc82d7bbc80471374f56e44e4b9b08eed4072de930272905e56a54db9f95a6",
     "modules/communication/youtube_shorts/src/video_editor.py": "ba86a4fbf2f3f3a919372acf795924a7fb39fec366f843a9311c537223f8a867",
-    "modules/communication/youtube_shorts/src/youtube_uploader.py": "8434fedcc60895225e6a1a15722daaaf0289d63e25d03e35fbba4522ef24e6ba",
+    "modules/communication/youtube_shorts/src/youtube_uploader.py": "3b678c3026f27353cf96f0b39dfffd1a0d58420b95e4423fc89ac9963d57536d",
     "modules/foundups/agent/src/__init__.py": "be7b9252872c45ea42ccf536aab30dc8377d1f9a4ed75ef679f75eb80813d660",
     "modules/foundups/agent/src/hermes_adapter.py": "1d3d4784cd11b2318ce2deddf787c13f4e5e55fbfeedbd1cd96058fca47b91be",
     "modules/foundups/agent/src/hermes_model_router.py": "5d2960b28432d240753162a467cf9c077e47e4ceb4f1e400bd5666b713148b60",

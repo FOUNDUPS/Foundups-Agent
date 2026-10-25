@@ -4,6 +4,33 @@
 
 Story or teaching intent → linked episode plan → original visuals/music → aligned captions → reviewed 15-second episodes → YouTube delivery → later objective-linked EDUIT activities/games. Maintain stable story and episode IDs, a character bible, educational progression and continuity across every output. The editor and FFmpeg renderer are production components, not the autonomous product itself.
 
+## Current execution order — WSP 15, 012 production-first correction
+
+Scores below are work-item judgments: Complexity + Importance + Deferability
+(urgency) + Impact, each 1–5. LLME is not reassigned for these work items.
+Priority is not a runtime authorization. Dependencies decide order within a band.
+
+| Order | Work item | C/I/D/Impact | Total / band | Completion evidence |
+|---|---|---|---|---|
+| 1 | Finish current 15-second episode review and deliver via existing channel | 3/5/5/4 | 17 / P0 | Actual audio listening, final visual/educational review, verified channel and upload receipt |
+| 2 | Capture and forward-test causal story-direction skill | 3/5/4/4 | 16 / P0 | Creator corrections become reusable rules; next actual episode is proposed to 012, revised from feedback and reviewed |
+| 3 | Generate the next linked story using the existing rig/editor | 4/5/4/4 | 17 / P0 | Connected plan, original assets, rendered/reviewed next episode, continuity evidence |
+| 4 | Deploy minimal EDUIT introduction and Story Time watch/play page | 3/4/3/4 | 14 / P1 | Hosted URL, TLS, playback/game checks; authenticated deployment binding |
+| 5 | Integrate EDUIT-scoped discovery into the existing Mall | 4/3/2/3 | 12 / P2 | Registry/projection/return-path tests; no duplicate platform |
+| 6 | Memory Horizon, unlocks and local parent reports | 3/2/1/3 | 9 / P3 | Separately bounded future work; no current tracking activation |
+
+Current video: original code-generated animation, three five-second editorial
+clips, exactly 15 seconds. Latest stomp/crunch/squish render exists locally;
+actual listening and publication are not yet verified. Do not describe the older
+private preview upload as delivery of this latest revision. Publish settings
+still need the prior approval-review block resolved; do not silently bypass it.
+
+Story direction is part of the existing production skill at
+`modules/communication/youtube_shorts/skillz/kids_episode_production/`.
+Use its correction-to-principle reference before the next production pass.
+Paused items stay paused: no scheduled trend scout, new paid provider dependency,
+full education Mall, new memory game or learner analytics in the video slice.
+
 ## 1. Local proof
 
 Register this candidate under the existing YouTube work. Prove a real 15-second export from supplied assets, in draft/final presets and portrait/landscape, with burned captions and an SRT artifact. Validate invalid input handling, duration and decodable audio/video. Review a sample educational episode; a synthetic encoder fixture alone is not an educational-quality proof.
@@ -41,3 +68,17 @@ See the [repository and provider audit](../../communication/youtube_shorts/docs/
 ## Local first-episode proof — 2026-10-25
 
 First three beats now render using the shared deterministic 2D rig and original synthesized audio through the existing Shorts editor. See [production receipt and autonomy owners](../../communication/youtube_shorts/docs/KIDS_LOCAL_PRODUCTION.md). Independent frame/technical review completed; actual audio listening and full publication review remain unverified. General provider generation, durable provider polling, account/spend admission and runtime production binding remain open. The ChatGPT trend scout is disabled per 012; do not reactivate it.
+
+## Working book and next-story test
+
+012 selected **How a Shrew Became a Human** as a working book title. The next
+episode of this same series is the practical test for the story-direction skill;
+do not substitute an unrelated test story. First propose the continuation, then
+retain creator corrections and inspect the resulting episode. Current proposal:
+the survivor peers out from its intact root pocket into the changed world after
+the stomp. This is a proposal, not an approved script or rendered episode.
+
+Series framing follows successive generations and branching lineages; do not
+present an individual shrew transforming into a human, or evolution as a planned
+ladder. Exact ancestors, dates and transitions require evidence before teaching
+them as fact. The title is a narrative framing, not a validated scientific claim.

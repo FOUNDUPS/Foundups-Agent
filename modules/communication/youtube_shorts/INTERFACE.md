@@ -308,3 +308,22 @@ An exclusive `*.storyboard.json` intent is written before egress. `*.storyboard.
 ## Local Little Shrew preview
 
 `src/little_shrew_preview.py:produce_preview(output_dir, preset="draft")` requires a new output directory and produces the first existing episode through `kids_episode.render_episode`. `little_shrew_animation.py` samples the shared SVG rig at absolute times, encodes three 150-frame clips and authors original audio. Output includes MP4/SRT and hashed provenance; status stays `rendered_unreviewed`. This is a local authoring command, not a generic story generator, WRE executor, scheduler or provider admission callback. See docs/KIDS_LOCAL_PRODUCTION.md for dependencies, review limits and autonomy owners.
+
+### Us_Story_Time preschool review upload
+
+`YouTubeShortsUploader("us_story_time")` uses FoundUps credential set 10 by default (optional positive `YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME` override) and requires `YT_UPLOAD_CHANNEL_ID_US_STORY_TIME` from the host environment. `.env.example` records the operator-supplied ID; the runtime does not hardcode it. Authentication remains pinned to the selected set; it does not silently rotate on failure. `publish_story_episode(video_path, title, description, *, contains_synthetic_media: bool)` rejects other channel roles, uses unlisted visibility and made-for-kids true, and returns `YouTubePublishResult`. Call only after artifact/rights review. See [setup](docs/KIDS_LOCAL_PRODUCTION.md#us_story_time-publishing-destination--2026-10-26).
+
+## Episode review tool (2026-10-25)
+
+The existing Shorts editor owns `assets/kids_review/`. EDUIT's `build_site.py`
+mounts these static assets at `/review/`, alongside `/storytime/scene.mjs`,
+`/storytime/rig.mjs`, `/storytime/assets/little-shrew.mp4` and `/style.css`.
+The review tool supports native video controls, looping, cache-busted media
+refresh and a silent shared-scene scrubber. Deployment-relative URLs are its
+asset contract; open it through the built site, not directly from source.
+
+012 gives feedback in the existing conversation; 0102 edits and rebuilds the
+cut, then the existing hosting owner must deploy it before Refresh can show it.
+This is a read-only creator-review surface, not a new renderer, public editing
+API, separate PWA, authentication system or WRE worker. Voice and whiteboard
+capture remain deferred. A local build is not evidence of public deployment.

@@ -155,3 +155,20 @@ Prototype WRE instructions are in `skillz/kids_episode_production/SKILLz.md` and
 ### Kids storyboard provider
 
 The OpenRouter adapter in `src/openrouter_storyboard.py` reuses the existing AI Gateway provider configuration and accepts approved raster character references. Its first candidate is FLUX.2 Klein 4B (Apache-2.0 weights; hosted inference is paid). `StoryboardVideoShot` passes a reviewed frame to the separately configured video generator before the existing five-second trims and 15-second assembly. See INTERFACE.md for host binding, authorization and recovery. No browser login, duplicate key store, automatic model fallback or live deployment is added.
+
+Story Time destination: **Us_Story_Time**, publisher key `us_story_time`. [Verify the channel under the FoundUps OAuth binding](docs/KIDS_LOCAL_PRODUCTION.md#us_story_time-publishing-destination--2026-10-26) before using the preschool review upload helper.
+
+## Episode review tool (2026-10-25)
+
+The existing Shorts editor owns `assets/kids_review/`. EDUIT's `build_site.py`
+mounts these static assets at `/review/`, alongside `/storytime/scene.mjs`,
+`/storytime/rig.mjs`, `/storytime/assets/little-shrew.mp4` and `/style.css`.
+The review tool supports native video controls, looping, cache-busted media
+refresh and a silent shared-scene scrubber. Deployment-relative URLs are its
+asset contract; open it through the built site, not directly from source.
+
+012 gives feedback in the existing conversation; 0102 edits and rebuilds the
+cut, then the existing hosting owner must deploy it before Refresh can show it.
+This is a read-only creator-review surface, not a new renderer, public editing
+API, separate PWA, authentication system or WRE worker. Voice and whiteboard
+capture remain deferred. A local build is not evidence of public deployment.

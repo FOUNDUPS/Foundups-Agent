@@ -1,5 +1,7 @@
 # Kids Episodes — Skills map
 
+Current execution ordering is superseded by the WSP 15 production-first table in `../../ROADMAP.md`. Historical priorities below are intake context.
+
 This intake identifies responsibilities; it does not declare running agents or installed skills. The parent implementation owns reusable skill creation and validation.
 
 | Responsibility | Evidence/output | Priority |
@@ -16,3 +18,5 @@ This intake identifies responsibilities; it does not declare running agents or i
 Use existing work admission, scheduler and memory owners for future live tasks. Keep research separate from production/publication authority. A trend recommendation cannot grant asset rights or authorize upload. Do not activate a second daemon from this intake.
 
 Treat EDUIT as the verified educational context. Preserve uncertain transcription rather than silently adding commerce. Future game-link skill work must resolve existing EDUIT capabilities and retain age/consent boundaries.
+
+Story direction now routes to the existing Shorts `kids_episode_production` skill and its `references/story-direction.md`, before planning/rendering. This is an instruction update, not WRE activation.
