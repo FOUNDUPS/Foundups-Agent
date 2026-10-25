@@ -62537,7 +62537,31 @@ Preallocate three existing security metadata owners to record only the exact
 line28 synthetic public-address fingerprint from job121109366122, after parent
 and independent review. Existing2220 entries, scanner/gate and frozen sources
 remain unchanged. GitGuardian disposition is separate; no merge waiver.
+Reconcile published intake main0909 with codec parents; preserve exact existing
+proof keys and2,261-entry approval union, main f427/pins and1,471/caps unchanged.
+Registry1,772/273 passes. No codec/helper/test/lock/workflow change; independent
+immutable review and fresh current-head hosted gates remain required.
 
+## 2026-10-25 — intake reference preservation allocation
+
+WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Preserve submitted references
+in the existing draft envelope rather than discard them. Allocate one constructor
+keyword, nearest existing tests/docs and unchanged-membership manifest derivatives;
+desired behavior RED precedes the repair. Existing source AST pin requires explicit
+single-keyword review before rebaseline. No new parser, service, control or authority.
+The four-owner selection now passes601 cases after the independent AST review;
+the five behavioral RED failures and intermediate old-pin failure are preserved.
+Reconciled published nomination main a44; retain1,471 members and unchanged caps,
+updating only the changed source digest and two canonical pins to f427e16b.
+Seven generator passes plus the staged-index pass after staging, and3 existing
+Node entrypoint passes, are separate from the601 intake result. Keep the original
+unstaged-manifest failure; current hosted/security gates remain pending.
+Actual hosted job121124347560 reports40 tree findings and zero in history:
+39 unchanged generated source digests and one unchanged hostile-input fixture
+shifted108 to150. Parent reconstructs all40 exact current/prior bindings and39
+source hashes; append only these after source-bound review, preserving2,220 prior
+entries (2,260 total). Five unchanged security regressions pass; no scanner,
+rule, source or oracle changes. Fresh hosted gates remain required.
 ## 2026-10-25 — project nomination inbox allocation
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean

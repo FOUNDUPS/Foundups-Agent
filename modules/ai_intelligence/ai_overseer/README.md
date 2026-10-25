@@ -680,3 +680,13 @@ runtime-environment digest before A-grade/RSI is reproducible.
 **Current boundary**: Mixed operational and legacy surfaces; see INTERFACE.md
 for callable truth. The core exists, but model-labeled heuristic paths are not
 independent reviewer or production RSI evidence.
+
+## Public intake references - 2026-10-25
+
+The existing authenticated LaunchRequest mapper preserves ordered `reference_urls`
+in a detached `FoundUpGenesisEnvelope.prior_art` list, including empty defaults.
+References are untrusted draft metadata; this mapping fetches nothing and grants
+no repository control, admission, execution, token or publication authority.
+The draft stays IDEA/UNBOUND with `external_repo_requested=False`.
+Qualification: all 601 cases pass after independent review approved the exact AST
+rebaseline. Earlier reference-loss RED and old-pin failure remain retained evidence.
