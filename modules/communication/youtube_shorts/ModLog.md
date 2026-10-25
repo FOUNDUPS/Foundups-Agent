@@ -806,3 +806,22 @@ Components tested and working:
 ## 2026-10-23 — OpenRouter reference-conditioned storyboards
 
 Added an image adapter using the AI Gateway's existing provider configuration, explicit host admission, pinned FLUX.2 Klein 4B candidate, verified raster references, bounded image responses, exclusive attempt records and no retry/fallback. Added review-before-video callback composition for Kids Episodes. Kept dormant OpenRouter client, WRE and publishing unchanged. Official current API/model sources and repository-first retrieval evidence are in docs/OPENROUTER_STORYBOARDS.md. No paid generation or runtime activation is claimed.
+
+## 2026-10-26 — Us_Story_Time destination
+
+Registered the operator-selected Story Time channel in the existing publisher with FoundUps OAuth-set 10 reuse and an optional override and required channel-ID pinning. Added an unlisted, made-for-kids preschool review helper and documented headless/Kids ownership. No live account, upload or worker activation claimed. WSP 97 source/evidence notes are in Shorts KIDS_LOCAL_PRODUCTION.md.
+
+## 2026-10-26 — Little Shrew editorial revision 2
+
+012 requested removing the oversized sixth shrew. The rightmost of three equal-sized children now wakes after an early short tremor, wiggles and reaches the root by 5.5 seconds; parents and siblings stay asleep. Audio/captions retimed. Three five-second clips still total 15 seconds. Provenance labels this an editorial override of the original nine-beat source. Existing real render/audio tests passed; motion regression updated to inspect the smaller hero region and verifies five characters, equal child scales and sleeping family. No perceptual audio review or upload claimed for this revision.
+
+## 2026-10-25 — Editor-owned review surface
+
+WSP 97/3/49/84: verified the existing Shorts editor and EDUIT build before
+placing the review UI in Shorts assets and mounting it through EDUIT. Reuses
+the shared scene and generated video; no second renderer/server/PWA or WRE
+activation. Lexical owner retrieval: workspace overlay at 15c888ac0, freshness
+UNKNOWN, index gap true. Results identified the existing editor; optional
+roadmap/test README/memory artifacts absent. Exact files inspected directly.
+The bounded static tool is simpler than deploying the loopback render server
+as a public service; hosting remains a separate unverified gate.

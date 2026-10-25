@@ -36,13 +36,20 @@ def preview():
     return load("little_shrew_preview")
 
 
-def test_six_characters_motion_and_join_continuity(animation):
+def test_five_characters_motion_and_join_continuity(animation):
     scene = animation.ShrewScene(RIG)
     for time in (0, 4.99, 5, 9.99, 10, 14.99):
-        assert scene.svg(time).count('data-character=') == 6
-    still = np.asarray(scene.frame(5))
-    moved = np.asarray(scene.frame(9))
+        assert scene.svg(time).count('data-character=') == 5
+    still = np.asarray(scene.frame(3))[330:430, 340:900]
+    moved = np.asarray(scene.frame(6))[330:430, 340:900]
     assert np.mean(abs(still.astype(float) - moved)) > 1
+    import xml.etree.ElementTree as ET
+    for time in (0, 2.5, 6, 12):
+        root = ET.fromstring(scene.svg(time))
+        characters = [g for g in root.iter() if "data-character" in g.attrib]
+        assert all("scale(0.42)" in g.attrib["transform"] for g in characters[2:])
+        assert all(next(iter(g)).attrib["href"] == "#sleepy" for g in characters[:4])
+        assert next(iter(characters[4])).attrib["href"] == ("#sleepy" if time == 0 else "#neutral")
     # Fixed camera/set and nearly identical motion on both sides of each join.
     for join in (5, 10):
         before = np.asarray(scene.frame(join - 1/30)).astype(float)
@@ -81,7 +88,7 @@ def test_real_first_episode_and_provenance(tmp_path, preview):
                                                   "-of", "json", str(output / name)]))
         video = next(s for s in data["streams"] if s["codec_type"] == "video")
         assert video["nb_frames"] == ("450" if name.startswith("little") else "150")
-    assert "00:00:05,800 --> 00:00:08,600" in (output / "little-shrew-episode-01.srt").read_text()
+    assert "00:00:05,800 --> 00:00:07,200" in (output / "little-shrew-episode-01.srt").read_text()
     original = (output / "provenance.json").read_bytes()
     with pytest.raises(FileExistsError):
         preview.produce_preview(output)

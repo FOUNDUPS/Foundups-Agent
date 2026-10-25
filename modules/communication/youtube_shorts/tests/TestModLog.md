@@ -23,3 +23,19 @@ Validation: 266 selected tests passed, including the existing renderer/editor/re
 ## 2026-10-25 — Local Little Shrew animation
 
 140 focused tests passed, including 3 new real authoring cases for six-character motion/joins, deterministic bounded audio and overwrite refusal, plus a real three-shot render with asset hashes, timed SRT and 450-frame output. Existing renderer, OpenRouter and Kids suites included. Independent final-frame inspection and technical audio decoding passed; no perceptual audio listening or publication approval claimed.
+
+## 2026-10-26 — Us_Story_Time publisher policy
+
+35 publisher/CI-security cases passed offline. Tests cover FoundUps set 10 reuse, optional explicit set override, invalid override refusal, missing environment pins/mismatched live identities, Story Time-only routing, unlisted made-for-kids metadata and explicit synthetic disclosure. Existing publisher regressions included. Fakes verify API arguments, not live OAuth or uploads. Added this existing suite to Kids CI and loaded only the publisher owner to avoid unrelated generation SDK imports.
+
+## 2026-10-26 — Little Shrew editorial revision 2
+
+012 requested removing the oversized sixth shrew. The rightmost of three equal-sized children now wakes after an early short tremor, wiggles and reaches the root by 5.5 seconds; parents and siblings stay asleep. Audio/captions retimed. Three five-second clips still total 15 seconds. Provenance labels this an editorial override of the original nine-beat source. Existing real render/audio tests passed; motion regression updated to inspect the smaller hero region and verifies five characters, equal child scales and sleeping family. No perceptual audio review or upload claimed for this revision.
+
+## 2026-10-25 — Review page integration
+
+Four existing game/scene tests and the review control regression pass. The
+control test verifies that silent scrubbing survives a mode switch and that
+refresh reloads media without autoplay. A build smoke with a mocked renderer
+verified all mounted review/scene/style/media paths; this does not review media
+quality or establish live hosting. JavaScript syntax and diff whitespace pass.
