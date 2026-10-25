@@ -42,6 +42,7 @@ class ChannelPolicy:
     expected_channel_env: str
     default_tags: tuple[str, ...]
     require_expected_channel: bool = False
+    credential_set_env: Optional[str] = None
 
 
 CHANNEL_POLICIES = {
@@ -49,6 +50,13 @@ CHANNEL_POLICIES = {
     "undaodu": ChannelPolicy(1, "YT_UPLOAD_CHANNEL_ID_UNDAODU", ("Shorts", "UnDaoDu")),
     "foundups": ChannelPolicy(10, "YT_UPLOAD_CHANNEL_ID_FOUNDUPS", ("Shorts", "FoundUps")),
     "antifafm": ChannelPolicy(10, "YT_UPLOAD_CHANNEL_ID_ANTIFAFM", ("Shorts", "antifaFM")),
+    "us_story_time": ChannelPolicy(
+        10,
+        "YT_UPLOAD_CHANNEL_ID_US_STORY_TIME",
+        ("Us_Story_Time", "FoundUps", "StoryTime"),
+        require_expected_channel=True,
+        credential_set_env="YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME",
+    ),
     "foundups-mall": ChannelPolicy(
         10,
         "YT_UPLOAD_CHANNEL_ID_FOUNDUPS_MALL",
@@ -86,6 +94,15 @@ class YouTubeShortsUploader:
         if youtube_service is not None:
             self.youtube = youtube_service
         else:
+            credential_set = self.policy.credential_set
+            if self.policy.credential_set_env:
+                configured = os.getenv(self.policy.credential_set_env, "").strip()
+                if configured:
+                    if not configured.isascii() or not configured.isdecimal() or int(configured) < 1:
+                        raise YouTubeUploadError(
+                            f"{self.policy.credential_set_env} must select a positive OAuth set"
+                        )
+                    credential_set = int(configured)
             if service_factory is None:
                 from modules.platform_integration.youtube_auth.src.youtube_auth import (
                     get_authenticated_service,
@@ -93,7 +110,7 @@ class YouTubeShortsUploader:
 
                 service_factory = get_authenticated_service
             try:
-                self.youtube = service_factory(token_index=self.policy.credential_set)
+                self.youtube = service_factory(token_index=credential_set)
             except Exception as exc:
                 raise YouTubeUploadError(
                     f"Hardened YouTube authentication failed for {channel}: {exc}"
@@ -126,7 +143,7 @@ class YouTubeShortsUploader:
             expected = os.getenv(self.policy.expected_channel_env, "").strip()
             if self.policy.require_expected_channel and not expected:
                 raise YouTubeUploadError(
-                    f"{self.policy.expected_channel_env} must pin the Foundups Mall channel before publishing"
+                    f"{self.policy.expected_channel_env} must pin the {self.channel} channel before publishing"
                 )
             if expected and channel_id != expected:
                 raise YouTubeUploadError(
@@ -151,6 +168,29 @@ class YouTubeShortsUploader:
                 f"Unsupported upload media type: {guessed or 'unknown'}; use MP4, WebM, or QuickTime"
             )
         return guessed
+
+    def publish_story_episode(
+        self,
+        video_path: str,
+        title: str,
+        description: str,
+        *,
+        contains_synthetic_media: bool,
+    ) -> YouTubePublishResult:
+        """Upload a reviewed preschool episode to Us_Story_Time for private review.
+
+        Callers own artifact/rights review. The disclosure is a separate explicit
+        decision; this helper never schedules, activates a worker, or goes public.
+        """
+        if self.channel != "us_story_time":
+            raise YouTubeUploadError("Story episodes require the us_story_time channel")
+        if not isinstance(contains_synthetic_media, bool):
+            raise YouTubeUploadError("contains_synthetic_media must be an explicit boolean")
+        return self.publish_video(
+            video_path, title, description,
+            privacy="unlisted", made_for_kids=True,
+            contains_synthetic_media=contains_synthetic_media,
+        )
 
     def publish_video(
         self,

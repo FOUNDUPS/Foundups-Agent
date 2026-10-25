@@ -308,3 +308,7 @@ An exclusive `*.storyboard.json` intent is written before egress. `*.storyboard.
 ## Local Little Shrew preview
 
 `src/little_shrew_preview.py:produce_preview(output_dir, preset="draft")` requires a new output directory and produces the first existing episode through `kids_episode.render_episode`. `little_shrew_animation.py` samples the shared SVG rig at absolute times, encodes three 150-frame clips and authors original audio. Output includes MP4/SRT and hashed provenance; status stays `rendered_unreviewed`. This is a local authoring command, not a generic story generator, WRE executor, scheduler or provider admission callback. See docs/KIDS_LOCAL_PRODUCTION.md for dependencies, review limits and autonomy owners.
+
+### Us_Story_Time preschool review upload
+
+`YouTubeShortsUploader("us_story_time")` uses FoundUps credential set 10 by default (optional positive `YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME` override) and requires `YT_UPLOAD_CHANNEL_ID_US_STORY_TIME` (verified exact channel ID). Authentication remains pinned to the selected set; it does not silently rotate on failure. `publish_story_episode(video_path, title, description, *, contains_synthetic_media: bool)` rejects other channel roles, uses unlisted visibility and made-for-kids true, and returns `YouTubePublishResult`. Call only after artifact/rights review. See [setup](docs/KIDS_LOCAL_PRODUCTION.md#us_story_time-publishing-destination--2026-10-26).

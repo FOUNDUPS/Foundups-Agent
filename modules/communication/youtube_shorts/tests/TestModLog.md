@@ -23,3 +23,7 @@ Validation: 266 selected tests passed, including the existing renderer/editor/re
 ## 2026-10-25 — Local Little Shrew animation
 
 140 focused tests passed, including 3 new real authoring cases for six-character motion/joins, deterministic bounded audio and overwrite refusal, plus a real three-shot render with asset hashes, timed SRT and 450-frame output. Existing renderer, OpenRouter and Kids suites included. Independent final-frame inspection and technical audio decoding passed; no perceptual audio listening or publication approval claimed.
+
+## 2026-10-26 — Us_Story_Time publisher policy
+
+35 publisher/CI-security cases passed offline. Tests cover FoundUps set 10 reuse, optional explicit set override, invalid override refusal, missing/mismatched channel pins, Story Time-only routing, unlisted made-for-kids metadata and explicit synthetic disclosure. Existing publisher regressions included. Fakes verify API arguments, not live OAuth or uploads. Added this existing suite to Kids CI and loaded only the publisher owner to avoid unrelated generation SDK imports.

@@ -31,3 +31,7 @@ WSP 97/50/84: current-head governed lexical retrieval returned UNKNOWN freshness
 ## 2026-10-23 — Open-model generation audit
 
 Reconciled the existing story controller, OpenRouter storyboard adapter, FFmpeg renderer, legacy Veo/Sora/extraction paths and incomplete video analytics. Public OpenRouter video catalog did not list Wan2.2/LTX in the audited name filter; hosted Wan variants are not automatically open-weight equivalents. Roadmap now prioritizes qualifying Wan2.2 and a controlled worker, keeping existing editing and WRE ownership. Compared MLT/Kdenlive, Shotcut, libopenshot and deterministic Grease Pencil animation. Recorded Google-independent planner/reviewer, explicit foley handling and live-worker recovery gaps. 137 focused tests passed; no runtime/code activation. Detailed evidence and official sources: YouTube Shorts docs/OPEN_VIDEO_AUDIT.md.
+
+## 2026-10-26 — Us_Story_Time destination
+
+Registered the operator-selected Story Time channel in the existing publisher with FoundUps OAuth-set 10 reuse and an optional override and required channel-ID pinning. Added an unlisted, made-for-kids preschool review helper and documented headless/Kids ownership. No live account, upload or worker activation claimed. WSP 97 source/evidence notes are in Shorts KIDS_LOCAL_PRODUCTION.md.

@@ -806,3 +806,7 @@ Components tested and working:
 ## 2026-10-23 — OpenRouter reference-conditioned storyboards
 
 Added an image adapter using the AI Gateway's existing provider configuration, explicit host admission, pinned FLUX.2 Klein 4B candidate, verified raster references, bounded image responses, exclusive attempt records and no retry/fallback. Added review-before-video callback composition for Kids Episodes. Kept dormant OpenRouter client, WRE and publishing unchanged. Official current API/model sources and repository-first retrieval evidence are in docs/OPENROUTER_STORYBOARDS.md. No paid generation or runtime activation is claimed.
+
+## 2026-10-26 — Us_Story_Time destination
+
+Registered the operator-selected Story Time channel in the existing publisher with FoundUps OAuth-set 10 reuse and an optional override and required channel-ID pinning. Added an unlisted, made-for-kids preschool review helper and documented headless/Kids ownership. No live account, upload or worker activation claimed. WSP 97 source/evidence notes are in Shorts KIDS_LOCAL_PRODUCTION.md.

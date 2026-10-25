@@ -155,3 +155,5 @@ Prototype WRE instructions are in `skillz/kids_episode_production/SKILLz.md` and
 ### Kids storyboard provider
 
 The OpenRouter adapter in `src/openrouter_storyboard.py` reuses the existing AI Gateway provider configuration and accepts approved raster character references. Its first candidate is FLUX.2 Klein 4B (Apache-2.0 weights; hosted inference is paid). `StoryboardVideoShot` passes a reviewed frame to the separately configured video generator before the existing five-second trims and 15-second assembly. See INTERFACE.md for host binding, authorization and recovery. No browser login, duplicate key store, automatic model fallback or live deployment is added.
+
+Story Time destination: **Us_Story_Time**, publisher key `us_story_time`. [Verify the channel under the FoundUps OAuth binding](docs/KIDS_LOCAL_PRODUCTION.md#us_story_time-publishing-destination--2026-10-26) before using the preschool review upload helper.

@@ -110,3 +110,55 @@ No wallet was invoked and no financial account or subscription was opened.
 The separate ChatGPT trend scout was disabled at 012's request on 2026-10-24.
 Do not recreate it to compensate for absent runtime job polling. No WRE worker,
 timer, provider, account, paid generation or upload was activated in this slice.
+
+## Us_Story_Time publishing destination — 2026-10-26
+
+012 designated **Us_Story_Time** as the headless Story Time channel under the
+FoundUps YouTube account. Canonical publisher key: `us_story_time`; educational
+FoundUp identity remains `kids_episodes`, in the EDUIT context.
+
+**OBSERVED:** channel name and intended use are operator-provided. 012 confirmed reuse of the FoundUps OAuth binding (set 10), like antifafm. The immutable
+YouTube channel ID has not been independently observed. Operator-supplied channel URL:
+https://www.youtube.com/@Us_Story_Time (canonical handle `@Us_Story_Time`).
+A shared Google account does not prove that an existing token selects this channel.
+
+Configure the production host (never commit credentials):
+
+- `YT_UPLOAD_CHANNEL_ID_US_STORY_TIME`: exact channel ID verified in Studio and
+  against the authenticated `channels.list(mine=True)` result; never the display name.
+- `YT_UPLOAD_CREDENTIAL_SET_US_STORY_TIME`: optional positive integer override; defaults to the existing
+  FoundUps set 10, as requested by 012, following the antifafm pattern. Reuse the
+  existing hardened `youtube_auth` owner and verify its observed channel. No new
+  credentials are required by this registration.
+
+After rights, actual audio/video and independent episode review:
+
+```python
+from modules.communication.youtube_shorts.src.youtube_uploader import YouTubeShortsUploader
+
+publisher = YouTubeShortsUploader("us_story_time")
+result = publisher.publish_story_episode(
+    "reviewed-episode.mp4", "Little Shrew — Episode 1", "Original Story Time preview.",
+    contains_synthetic_media=False,  # Explicit reviewed disclosure decision, not a default.
+)
+```
+
+The Story Time helper requires this channel role, sets made-for-kids true, uploads
+unlisted and does not notify subscribers. Synthetic-media disclosure is a separate
+explicit boolean, chosen for the actual content. It returns the existing publish
+receipt. Generic publishing APIs retain their existing behavior; callers must use
+this helper for the preschool review workflow. This is not a generic adult-story
+publishing helper.
+
+**CODED / OFFLINE-TESTED:** channel policy, FoundUps OAuth reuse and optional override, channel-ID
+mismatch refusal, preschool review helper. **BLOCKED / UNVERIFIED:** live account
+binding, upload and headless worker activation. No upload occurs from configuration.
+Use the Kids story pipeline and existing headless assembler for media, then this
+publisher after review; do not introduce another uploader, credential system or
+scheduler. A queue consumer/WRE binding remains separate unfinished work.
+
+WSP 97 retrieval: governed lexical query on main `a490cadb5` found existing publisher
+and Kids owners; semantic freshness UNKNOWN, index gap true. Direct source/test
+reads filled the omitted test inventory; no duplicate owner added. WSP 00 V2 could
+not load torch; canonical tracker fallback passed, not detector execution. This
+change does not access credentials or activate runtime authority.
