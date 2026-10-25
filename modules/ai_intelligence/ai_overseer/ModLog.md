@@ -1,3 +1,34 @@
+## 2026-10-26: Qualify patched optional HTTP dependencies
+
+Initial profile metadata exposed published Starlette/cryptography advisories;
+hold promotion despite green functional/secrets gates. Allocation3bbbb2ee4
+selects a separate FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/crypto50.0.2 profile.
+Same786 cases pass; product/oracles/legacy auth and original environment remain
+unchanged. Public metadata for25 resolved distributions reports zero published
+advisories, not a whole-system/binary audit. Independent inventory found older
+bootstrap pip outside those25; allocationc6557db8b precedes isolated/CI pip26.2.2
+repair, separately reported. Same786 cases pass again; all26 installed packages
+show zero published registry advisories. One reviewed HTTPX test-client warning;
+independent profile/metadata and final workflow reviews accept the bounded
+component, including unchanged11 held-outs plus separate optional-denied503.
+The patched-profile receipt binds those reports and root786; fresh exact-head
+hosted/security/main qualification remains required.
+
+## 2026-10-26: Connect member-authenticated draft intake (initial profile)
+
+15/P1 allocation6efb68f50, frozen tests2e46fd2aa, WSP00/6/11/15/22/50/77/84/97.
+Add one explicit Clerk server-only provider wrapper around the existing body-first
+intake_request seam, consumed by PFMall's actual POST route. Fixed public RSA,
+issuer/origin/time/v2 session policy; generic failures and pseudonymous handle.
+Legacy HMAC behavior/source/oracles and package exports remain unchanged. Optional
+HTTP dependencies are outside resident imports; no environment secrets, JWT/JWKS
+network fetch, nonce/data writes, deployment, admission/ownership/work/token grant.
+PFMall TestModLog records exact RED/GREEN786 evidence/one baseline warning.
+Independent11 held-outs and separate optional-import-denied ASGI probe pass after
+canonical PEM repair, with the original configuration finding retained. Current
+hosted/security/main gates remain separate. Durable claim state and real-session
+qualification are still required.
+
 ## 2026-10-26: Consume public GitHub nominations as review drafts
 
 WSP00/3/6/11/15/22/49/50/62/84/97; C3/I4/D4/Impact4=15/P1.
