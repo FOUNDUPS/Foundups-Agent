@@ -37,3 +37,7 @@ Little Shrew now supplies a source-grounded preset and shared vector storyboard.
 ## Open-model execution plan — 2026-10-23
 
 See the [repository and provider audit](../../communication/youtube_shorts/docs/OPEN_VIDEO_AUDIT.md). Keep the existing FFmpeg editor and story controller. Finish: worker hardware/workflow qualification, image-to-video callback and job recovery, non-Google planner/independent media review, explicit music/foley handling, then the existing first three Little Shrew shots and WRE runtime admission. ComfyUI is a candidate worker API; no worker is activated. Compare deterministic 2D rig animation if diffusion cannot preserve the simple characters.
+
+## Local first-episode proof — 2026-10-25
+
+First three beats now render using the shared deterministic 2D rig and original synthesized audio through the existing Shorts editor. See [production receipt and autonomy owners](../../communication/youtube_shorts/docs/KIDS_LOCAL_PRODUCTION.md). Independent frame/technical review completed; actual audio listening and full publication review remain unverified. General provider generation, durable provider polling, account/spend admission and runtime production binding remain open. The ChatGPT trend scout is disabled per 012; do not reactivate it.

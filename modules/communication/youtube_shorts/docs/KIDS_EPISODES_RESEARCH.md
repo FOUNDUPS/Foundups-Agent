@@ -27,7 +27,7 @@ WSP00 detector script was attempted but unavailable because torch is absent. The
 
 This slice implements a local editor, deterministic rendering and injectable research/music adapters. No paid model call, YouTube upload, semantic video/audio trend review, live channel mapping, automatic speech alignment or installed WRE worker has been validated. Supplied caption cues produce automatic burn-in and SRT, not automatic transcription. Preserve these distinctions in user-facing reports.
 
-ChatGPT Kids Episode Trend Scout is separately scheduled daily around 08:00 Asia/Tokyo from 2026-10-24. It researches/drafts only and does not activate WRE, pay providers or publish videos.
+Historical setup: ChatGPT Kids Episode Trend Scout was scheduled from 2026-10-24 and disabled at 012's request that day. No recurring scout should be inferred from this record; it never activated WRE, paid providers or published videos.
 
 ## First content baseline — observed 2026-10-23 JST
 
