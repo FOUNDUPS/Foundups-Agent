@@ -814,3 +814,14 @@ Registered the operator-selected Story Time channel in the existing publisher wi
 ## 2026-10-26 — Little Shrew editorial revision 2
 
 012 requested removing the oversized sixth shrew. The rightmost of three equal-sized children now wakes after an early short tremor, wiggles and reaches the root by 5.5 seconds; parents and siblings stay asleep. Audio/captions retimed. Three five-second clips still total 15 seconds. Provenance labels this an editorial override of the original nine-beat source. Existing real render/audio tests passed; motion regression updated to inspect the smaller hero region and verifies five characters, equal child scales and sleeping family. No perceptual audio review or upload claimed for this revision.
+
+## 2026-10-25 — Editor-owned review surface
+
+WSP 97/3/49/84: verified the existing Shorts editor and EDUIT build before
+placing the review UI in Shorts assets and mounting it through EDUIT. Reuses
+the shared scene and generated video; no second renderer/server/PWA or WRE
+activation. Lexical owner retrieval: workspace overlay at 15c888ac0, freshness
+UNKNOWN, index gap true. Results identified the existing editor; optional
+roadmap/test README/memory artifacts absent. Exact files inspected directly.
+The bounded static tool is simpler than deploying the loopback render server
+as a public service; hosting remains a separate unverified gate.

@@ -13,6 +13,11 @@ def build(output):
         media=Path(scratch)/'media'
         render(media)
         shutil.copytree(ROOT/'public/eduit',output)
+        # Review tooling belongs to the existing Shorts editor; EDUIT mounts it.
+        shutil.copytree(
+            ROOT/'modules/communication/youtube_shorts/assets/kids_review',
+            output/'review',
+        )
         # Keep every hashed artifact with its receipt for reproducible review.
         shutil.copytree(media, output/'storytime/assets', dirs_exist_ok=True)
 if __name__=='__main__':

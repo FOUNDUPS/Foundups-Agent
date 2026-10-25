@@ -15,3 +15,14 @@ Recorded 012's watch → play → optional faster challenge and on-device parent
 Clarified educational child FoundUps versus category labels; audited registry, projection and existing return owners. Recorded missing EDUIT registry entry and unresolved historical memory-game identity without personal health details. Added explicit Back to EDUIT link to current game; no catalog-scope enforcement or shared-Mall return claimed implemented.
 
 Resolved historical game identity through GitHub branch search: Memory Horizon (`memory_horizon`) exists on docs/memory-horizon-wsp109-intake-20260920 with manifest, registry candidate, design packet and work orders. Updated EDUIT reference; no implementation/merge/deployment claim and no duplicate registration.
+
+## 2026-10-25 — Editor-owned review surface
+
+WSP 97/3/49/84: verified the existing Shorts editor and EDUIT build before
+placing the review UI in Shorts assets and mounting it through EDUIT. Reuses
+the shared scene and generated video; no second renderer/server/PWA or WRE
+activation. Lexical owner retrieval: workspace overlay at 15c888ac0, freshness
+UNKNOWN, index gap true. Results identified the existing editor; optional
+roadmap/test README/memory artifacts absent. Exact files inspected directly.
+The bounded static tool is simpler than deploying the loopback render server
+as a public service; hosting remains a separate unverified gate.
