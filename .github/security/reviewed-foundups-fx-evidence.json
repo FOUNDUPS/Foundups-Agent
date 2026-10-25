@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-10-25",
+  "status": "independently_reviewed_exact_bindings",
+  "scope": "Five observed metadata/public-identifier findings in PR2188 CI job121022325878; no wildcard exclusions",
+  "candidate_head": "73af4af5b3c93153c366ec256b3223bac44f9585",
+  "pre_execution_allocation": {
+    "complexity": 1,
+    "importance": 4,
+    "deferability": 5,
+    "impact": 4,
+    "total": 14,
+    "priority": "P1",
+    "need": "Resolve a real publication gate without disabling detection or changing the reviewed product snapshot",
+    "budget": "Existing exact fingerprint ledger, this evidence file and existing gate regressions only",
+    "deferral": "Blocks reviewed PR delivery; defer additional product layers until the gate is resolved"
+  },
+  "constraints": [
+    "No credential values retained or displayed",
+    "No scanner rule, gate, path class or generic hexadecimal exclusion",
+    "Each exception binds exact path, complete file SHA256, rule and line",
+    "Keep history coverage and review all five findings before ledger mutation"
+  ],
+  "findings": [
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json",
+      "rule": "generic-api-key",
+      "line": 375,
+      "fingerprint": "26652d489b5d5dbc2e5ca232f35102a1f495a1ec5b76b9c451d7438278d43871",
+      "verification": "Measured SHA256 source bytes; exact current file digest equality independently verified"
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json",
+      "rule": "generic-api-key",
+      "line": 381,
+      "fingerprint": "a94731cd014901cab331c71bc98221bc6ebb03f164a4e23d7210a535547032c8",
+      "verification": "Measured SHA256 source bytes; exact current file digest equality independently verified"
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json",
+      "rule": "generic-api-key",
+      "line": 460,
+      "fingerprint": "ff8d9671350a5303724fb35f34b2c40a5a808cafd522a01136c61db076467a5b",
+      "verification": "Measured SHA256 source bytes; exact current file digest equality independently verified"
+    },
+    {
+      "path": "docs/architecture/receipts/FOUNDUPS_FX_CHAIN_DELIVERY_20261025.json",
+      "rule": "generic-api-key",
+      "line": 480,
+      "fingerprint": "8e19289901f8ba8984803cb09f68ce79f7212841701186971c0cb6e5771256b9",
+      "verification": "Measured SHA256 source bytes; exact current file digest equality independently verified"
+    },
+    {
+      "path": "public/index.html",
+      "rule": "generic-api-key",
+      "line": 75,
+      "fingerprint": "f6b19f6eb8167140c0f53a86608e54350bf5d171f6871fb8f59cd63696608891",
+      "verification": "Unchanged frontend publishable identifier; exact prior blob finding already reviewed; only navigation changed"
+    }
+  ],
+  "prior_ledger_sha256": "938cb3e8a21c87002b17a1081647bf0e29851925d4299ba42300869f8f82428e",
+  "prior_ledger_entries": 1814,
+  "independent_reviewer": "/root/blockchain_architecture",
+  "primary_public_identifier_reference": "https://clerk.com/docs/guides/secure/rotate-api-keys",
+  "final_ledger_entries": 1819,
+  "source_digest_provenance": "Four measurement values hash Windows checkout bytes, including CRLF; they are not raw Git-blob SHA values. Normalized source contents match the candidate. Exception fingerprints instead bind exact committed file bytes.",
+  "fresh_scan_required": "Hosted tracked-tree and introduced-history scans must pass on the repaired head; this review is not a new scanner result.",
+  "local_gate_regressions": {
+    "initial": {
+      "counts": {
+        "failed": 3,
+        "passed": 17
+      },
+      "limitation": "Windows cp932 decoding and bare bash resolves to unavailable WSL shell"
+    },
+    "utf8": {
+      "counts": {
+        "passed": 19,
+        "failed": 1
+      },
+      "network_attempts": 0,
+      "remaining_failure": "test_gotjunk_missing_headers_and_http_error_fail invokes bare bash; Windows resolves system WSL shell despite PATH. No source or test oracle altered."
+    },
+    "publication_gate": "Fresh Linux hosted regressions and full tracked-tree/introduced-history scans required before merge."
+  },
+  "scope_guard": "Only exact five observed findings; scanner, fingerprint algorithm and security regression source unchanged."
+}
