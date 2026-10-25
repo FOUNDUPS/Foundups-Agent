@@ -81,6 +81,32 @@ jobs:
           print('Canonical Algorand unit shard selected; one source file, no quarantine')
           '@ | python -I -B -X utf8 -
           if ($LASTEXITCODE -ne 0) { throw 'Registry selection failed' }
+      - name: Record bounded base interpreter link topology
+        run: |
+          @'
+          import json, os, pathlib, sys
+          base = pathlib.Path(sys.base_prefix).resolve()
+          rows = []; overflow = False
+          for current, directories, files in os.walk(base, followlinks=False):
+              directories[:] = [d for d in directories if pathlib.Path(current, d) != base / 'Lib/site-packages']
+              for name in list(directories) + files:
+                  path = pathlib.Path(current, name)
+                  if path.is_symlink() or path.is_junction():
+                      if name in directories:
+                          directories.remove(name)
+                      if len(rows) == 64:
+                          overflow = True
+                          break
+                      rows.append(dict(relative_path=str(path.relative_to(base)), target=os.readlink(path), resolved_target=str(path.resolve()), kind='junction' if path.is_junction() else 'symlink'))
+              if overflow:
+                  break
+          output = pathlib.Path(os.environ['ASA_CODEC_ROOT']) / 'setup-link-topology.json'
+          output.write_text(json.dumps(dict(stage='metadata_only', base=str(base), links=rows, inventory_overflow=overflow, linked_directories_followed=False), sort_keys=True, indent=2), encoding='utf-8')
+          if overflow:
+              raise RuntimeError('link_inventory_limit')
+          print('Base interpreter link metadata retained; no SDK imported')
+          '@ | python -I -B -X utf8 -
+          if ($LASTEXITCODE -ne 0) { throw 'Base link metadata failed' }
       - name: Prepare exact source and installed wheel profile
         run: |
           $taskRoot = $env:ASA_CODEC_ROOT

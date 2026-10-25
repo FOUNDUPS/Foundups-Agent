@@ -71,6 +71,19 @@ Manifest check remains 1,471/canonical0fb3; no resident or cap change. A dedicat
 PR and distinct Windows pip CI qualification are next; local success does not
 admit ordinary installation, a node, signer, asset issuance or a paid transition.
 
+Hosted follow-up allocation, before edits: WSP15 C2/I4/D4/Impact3=13/P1.
+PR2206/head124b's distinct CI installation completes setup and registry selection,
+then metadata preparation refuses `linked_profile_path` in the base-runtime tree;
+SDK test execution is skipped. Preserve the failure/artifact. Add only a bounded
+stdlib link-topology inventory to the same workflow/setup artifacts, plus these
+existing delivery logs, before selecting an environment repair. Do not follow
+linked directories, alter the tested codec/guard/oracle or relax unknown paths.
+The separate GitGuardian incident38965909 reports test line28 `AUTH`, not genesis.
+Independent source review reproduces this synthetic public address from bytes65..96
+and the public-address checksum; both preserved golden requests use it only as the
+declared expected auth address. No private key is generated. Remote disposition
+remains unresolved; this evidence does not waive the hosted security gate.
+
 ## Current-state consolidation allocation (before authoring)
 
 WSP15 C2/I4/D4/Impact4 = **14/P1**. On main

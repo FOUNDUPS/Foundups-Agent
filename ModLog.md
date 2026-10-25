@@ -1,3 +1,14 @@
+## 2026-10-25 — Algorand hosted metadata diagnostic allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/97. PR2206/head124b's distinct CI
+environment refuses a linked base-runtime path before SDK tests. Preserve the
+failed prepare and skipped run; add a bounded stdlib link inventory in the same
+workflow/setup artifacts. Local28 passes remain dated and separate. No tested
+codec/helper/guard/oracle, source/effect grant or financial capability changes.
+Separate incident38965909 identifies the synthetic public AUTH fixture at test28;
+independent stdlib derivation verifies the reported field, with no private key.
+The remote finding remains unresolved; no detector suppression or gate waiver.
+
 ## 2026-10-25 — unsigned Algorand codec local qualification
 
 All 28 frozen methods pass at committed444c9f147 after reconciling main e801;
