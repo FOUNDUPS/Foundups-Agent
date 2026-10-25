@@ -223,3 +223,19 @@ the required process capability to the gateway owner, which now runs the real
 Node worker harness. Membership, owner, suite, collectability and quarantine
 remain unchanged (1770 files/273 quarantined). Retain this truthful derived
 capability; do not alter the classifier or hide the new process dependency.
+
+## Receipt digest review allocation before rebinding
+
+At PR2196 head326654ae104d7f8acf15c91c5347addb9baa86b0, hosted security
+job121045287812 passes20 gate regressions and reports three unreviewed generic
+matches in the new portable receipt, lines494/519/548. Each is a public artifact
+file SHA-256 value. WSP15 C1/I4/D5/Impact4=14/P1 allocates independent comparison
+against the exact archived files and archive receipt, followed only by exact
+whole-Git-blob/rule/line fingerprint bindings for those verified digests. Preserve
+the receipt and scanner algorithms; no global hash/path exemption or unknown
+finding approval. Re-run current-head hosted tree/history scans afterward.
+
+The separate GitGuardian high-entropy finding identifies this receipt file but
+exposes no line through its check API. Its details require dashboard access;
+it remains unclassified and blocking. These three digest comparisons do not
+establish the identity or resolution of that external finding.

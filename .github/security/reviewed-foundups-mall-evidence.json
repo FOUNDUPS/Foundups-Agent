@@ -23,5 +23,23 @@
     "No matched values retained or displayed",
     "No scanner, rule, scope, fingerprint, history or regression changes",
     "No other finding approved; fresh hosted tracked-tree and introduced-history scans remain required"
-  ]
+  ],
+  "receipt_digest_review": {
+    "scope": "Exactly three independently verified artifact SHA-256 metadata findings; GitGuardian finding remains unclassified",
+    "observed_scan_job": 121045287812,
+    "reviewed_source_commit": "326654ae104d7f8acf15c91c5347addb9baa86b0",
+    "path": "docs/architecture/receipts/FOUNDUPS_MALL_HOMEPAGE_20261025.json",
+    "git_blob_sha256": "5d61ec4df85f7d4079cc212795a91174c037f80519c4b9ca084d027f9439f00c",
+    "independent_reviewer": "/root/blockchain_architecture/btc_anchor_audit",
+    "independent_evidence_sha256": "b8b71aadb27fd28e873989dd4111d7c291b2dd60f9cf5b17bbc69f09f8d0d38d",
+    "verification": "Each value equals SHA-256 of the exact source.tar public member and extracted artifact bytes; source336c relation independently checked with the recorded LF/CRLF distinction.",
+    "prior_entries": 1935,
+    "final_entries": 1938,
+    "findings": [
+      {"rule":"generic-api-key","line":494,"source_path":"public/alpha-access.html","fingerprint":"50fce0f4bfb2299515454ae7dad61bb8f08d5c829ddcf36a160b749e1382e522"},
+      {"rule":"generic-api-key","line":519,"source_path":"public/legal/terms-of-access.html","fingerprint":"8f50e3b3170e886fc885012af9765bef5857469d4e4ee72b78846d7796c94831"},
+      {"rule":"generic-api-key","line":548,"source_path":"public/kosei/app/js/kosei-app-auth.js","fingerprint":"4e8ad9ec1471cc7daf71c850d7174c8963f995720ff6e68d9c232aae9b0b8ddd"}
+    ],
+    "status": "exact_metadata_review_complete_fresh_hosted_scans_required"
+  }
 }
