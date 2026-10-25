@@ -22,6 +22,26 @@ simulation; persistent initiation has separate pending semantics.
 
 ## Core Schemas
 
+### Selected economic numeric admission
+
+Work, stake and unstake entrypoints validate exact built-in int/float operands
+before participating wallet, pool, adoption or account mutations. Bool, text,
+custom numeric objects, negatives, nonfinite values and unsupported arithmetic
+results raise ValueError. Selected operation fees satisfy `0 <= rate < 1`;
+unsupported positive amounts that round to zero net also reject. Configurable
+fees and discounts are checked at use. Optional adoption work=None still means
+no increment. Existing finite zero/fractional arithmetic and insufficient-funds
+results remain; engine work retains its existing float normalization after
+strict admission and its historical double work-metric increment.
+
+`economics/_token_numeric.py` owns only private pure scalar calculations.
+Prospective participating balances are validated before live assignments;
+composite success logs follow those assignments. Unknown valid-but-insufficient
+work no longer registers a wallet/pool before preparation fails. Public method
+signatures and existing object references remain. This does not provide
+concurrent isolation, whole-engine or outer Mesa/CABR batch atomicity, aggregate
+issuance limits, monetary precision, chain-unit conversion or funded settlement.
+
 ### Mock BTC anchor contract
 
 `BTCAnchorConnector` retains its constructor, publish, confirmation, status and

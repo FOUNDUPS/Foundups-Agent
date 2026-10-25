@@ -1,3 +1,66 @@
+## 2026-10-25 — Numeric hosted metadata review
+
+WSP15/22/50/97; pre-review14/P1. Parent and peer independently classify75 safe
+hosted descriptors as40 exact source-SHA metadata identities. Rehash13 external
+receipts and current source bindings; retain the two earliest RED test-preimage
+limits. Preserve all2141 old ledger entries and append only40,2181 total.
+Finding-bearing artifacts, runtime, scanner and unknown findings stay unchanged.
+The numeric plan records both review hashes. Fresh hosted gates remain required.
+
+## Parent current-main reconciliation acceptance — 2026-10-25
+
+Preserve parallel PR2199 mainc7f0d939 authority forwarding. The only runtime
+change versus numericc9 is its exact main bootstrap digest; versus main, only
+token_economics plus the allocated private helper change. All169 simulator/FAM
+and8 central raw sources equal the736 run; no simulator rerun is claimed.
+Fresh write/check,8 generator cases and3 Node entrypoints pass,1614 evidence
+maps stable and zero instrumented network/dotenv attempts.1471/1472 and byte
+caps remain fixed. Exact ordered ledger union2103 preserves numeric2026 plus
+main2065 over1988 common; append only independently reverified38,2103->2141.
+The37 unchanged/1 known token-SHA classification is against current main; all38
+source contexts are unchanged against numericc9. Previous proof sections remain.
+Hosted security/CI and dedicated publication/main readback are still required.
+Independent review rawSHA256:
+a76ac8a3eed83db35c8bda3e28430a3351a8538f13e857b26d1630c20507aef5.
+
+## 2026-10-25 — Numeric source closure reconciled with current main
+
+WSP15/22/50/97. Reconcile numericc9bee55e with mainc7f0d939, preserving the
+committed arithmetic, resident bootstrap forwarding, tests and security history.
+All169 simulator/FAM plus8 central raw hashes still match the actual736 receipt;
+no simulator rerun is claimed or needed by this source-identity gate. Preserve
+portable receipt/companion and prior numeric review proof bytes. Existing security
+records union to2103, with no new approval. Fresh canonical write/check, unchanged
+generator8 and Node3 entrypoints pass;1471 members and fixed byte caps remain.
+New38 metadata proposals require independent review before binding. Merge remains
+uncommitted; no push/deploy/native runtime or financial activation.
+
+## Parent independent acceptance — 2026-10-25
+
+Independent review rehashes all1471 staged normalized sources, both pins and
+fixed byte caps. Exactly38 known generator metadata bindings are accepted:
+37 sources/contexts unchanged;1 token_economics source SHA256 value matches the
+actual tested arithmetic bytes. Append only those38,1988->2026; preserve every
+old binding. No unknown finding, scanner rule/path or GitGuardian exemption.
+Generation's1613->1614 evidence-domain growth has unchanged intersection hashes;
+final check/tests/Node1614 maps are stable. Old boundary RED is an expected-count
+assertion before validator invocation, not old-validator execution proof.
+Fresh hosted scans/CI, dedicated PR and main readback remain required.
+Independent report rawSHA256:
+dfc1b1093eb982f11d5e6ebb8b97cea82037e9fb7203946e231dee6bf8da22c2.
+
+## 2026-10-25 — Selected simulator numeric integrity candidate
+
+WSP15 pre-code15/P1; WSP00/6/11/22/50/62/84/97. Reuse existing work/stake/
+unstake paths with strict operand and mutable-fee admission plus pure prospective
+balance calculations before participating mutations. Existing valid arithmetic
+and references remain; one private scalar owner replaces duplicated preparation.
+Focused226, independent28 and combined-main simulator736 pass with3 named SSE
+exclusions; counts overlap. Source/stores and process-guard evidence are recorded,
+including actual failure/oracle chronology and historical isolation limits.
+This is simulation numeric integrity, not aggregate issuance or funded payment.
+Dedicated PR/security/CI/source-binding/main gates remain pending.
+
 ## 2026-10-25 — Public legacy DAO and Playapp research
 
 WSP15 pre-authoring allocation C2/I4/D3/Impact4=13/P1; WSP00/22/50/97.

@@ -1,5 +1,42 @@
 # Script test inventory
 
+## 2026-10-25 — Numeric/current-main canonical binding
+
+Reuse the exact existing8 generator cases after mainc7f0d939 joins numericc9bee55e.
+All8 pass freshly in77.50s, with2 inherited inactive asyncio configuration warnings;
+canonical write/check and3 existing Node owners exit0. Keep every original parity,
+path/member and byte-cap assertion. Only the existing digest literal changes.
+Runtime1471 and1472 rejection remain fixed;1614 evidence maps remain stable.
+External receipts retain actual commands/IDs/hashes in
+`foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934`.
+Zero instrumented network/dotenv attempts. Merge is uncommitted pending exact
+metadata review; historical portable evidence is unchanged.
+
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
 ## 2026-10-25 — Reconciled BTC/Mesa derived source closure
 
 Existing generator8 cases pass on merge d9a57ab1d over main f11d7559746,
