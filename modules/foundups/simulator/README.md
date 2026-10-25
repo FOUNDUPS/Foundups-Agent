@@ -2,6 +2,21 @@
 
 Visual simulation of the autonomous FoundUp ecosystem.
 
+## Mock BTC anchor integrity — 2026-10-25
+
+The existing optional connector now binds each FoundUp/epoch to the full known
+`foundups.epoch.v2` payload and its fixed mock realm. SQLite serializes admission;
+conflicting content, unknown legacy identity and unresolved records cannot be
+overwritten or reported as successful retries. Legacy rows stay visible and
+unclassified. Exact same-content mock force republication remains supported.
+
+Only mock mode is implemented. Testnet/mainnet selection rejects before database
+initialization, regardless of `LAYER_D_ENABLED`; invalid Mesa modes never select
+mock implicitly. Mock confirmation counts are simulation. There is no real BTC
+publisher, signer, network confirmation or funded reward transfer. See the
+[connector contract](INTERFACE.md#mock-btc-anchor-contract) and
+[allocated plan](../../../docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md).
+
 ## Epoch commitment integrity — 2026-10-25
 
 The existing epoch ledger now uses `foundups.epoch.v2` context-bound hashes,

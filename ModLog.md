@@ -1,3 +1,23 @@
+## 2026-10-25 — Mock BTC anchor replay integrity candidate
+
+WSP00/6/11/15/22/50/62/84/97;14/P1 optional mock infrastructure. Bind the
+existing connector's v2 payload and realm immutably; reject conflicting,
+legacy, unresolved and malformed stored evidence. Preserve exact-content
+force behavior and confirmation history, validate canonical SQLite constraints,
+and reject unsupported selected modes before database effects. Mesa never
+coerces an invalid selection into mock.
+
+Qualified211 focused cases are contained in513 simulator passes with three
+named SSE HTTP exclusions; independent21 held-outs pass. Counts overlap.
+The portable receipt retains fixture/runner/WAL/schema/Win32-probe corrections,
+original execution base and current-main reconciliation. Generated closure
+retains1470 members and fixed limits; eight generator cases and three Node
+entrypoints pass. Independently reviewed38 exact metadata bindings do not
+approve unknown findings; hosted security/CI and dedicated-PR/main gates remain.
+No real BTC publisher, custody, chain confirmation or reward transfer exists.
+This optional BTC layer is not required by a separate Algorand transfer pilot
+unless its evidence is explicitly selected as downstream authority.
+
 ## 2026-10-25 — RSI source closure and current input handoff
 
 WSP00/15/22/50/97: reconcile four existing planning documents with #2181 main

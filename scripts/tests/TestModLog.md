@@ -1,5 +1,30 @@
 # Script test inventory
 
+## 2026-10-25 — Reconciled BTC/Mesa derived source closure
+
+Existing generator8 cases pass on merge d9a57ab1d over main f11d7559746,
+97.68s guarded wrapper/96.64s pytest, two inherited inactive asyncio warnings.
+Reuse all eight original case IDs and every oracle; only the existing expected
+canonical digest literal advances. Canonical generator --write and --check
+both pass. Manifest membership remains1470; only BTC connector/Mesa LF hashes
+change, with no generator, sentinel, member/+1 or byte-limit expansion.
+
+The three coordinated binding paths alone are staged: manifest, existing JS
+constant and Python test digest pin. Existing index test verifies all1470 staged
+source blobs plus the pin. Node compatibility/preflight/recovery entrypoints
+also exit0. Every corrected guard run reports zero network/dotenv-read attempts
+and stable1613 measured files (1470 runtime members plus existing extension JS
+and generator/pin evidence, not an installed-member increase).
+
+Exact observed commands,8 IDs, warnings, raw snapshots and outputs are external:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-source-closure-6b08022181194325a9f2eea110484734/`.
+The older epoch manifest folder retained JUnit8 but not original argv; no
+historical invocation was reconstructed. New commands use qualified Python
+-B/-Xutf8, external scratch, disabled plugin/bytecode/cache/dotenv and instrumented
+Python/Node entrypoints. This is source binding, not OS isolation, installed
+promotion or new BTC/chain/authentication coverage. WSP15 pre-allocation16/P0
+and separate unapproved38-metadata proposal14/P1 are in the BTC architecture plan.
+
 ## 2026-10-25 — Epoch ledger source binding
 
 The existing8 generator cases pass on the one-hash epoch update in79.64s, with

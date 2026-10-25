@@ -1,3 +1,27 @@
+## FoundUps BTC/Mesa source closure — 2026-10-25
+
+The same8 generator cases and three existing Node entrypoints pass on the
+reconciled source, with only the existing canonical Python digest literal changed.
+Node commands: test_backend_compatibility_contract.js,
+test_backend_compatibility_preflight.js and test_holoindex_blocked_request_recovery.js
+under extensions/reddog/tests; each exits0. Runtime1470/+1 and all LF/CRLF, source,
+total-byte, hash and path checks remain. Canonical generator --write/--check pass.
+
+New canonical digest is c97e153f6184bcc7f4232ae2d5b17e1af708ec2a104ce4119f549af4839d26cd;
+whole LF manifest hash is6b7144a0d847c7cc96aa095765c464667f0d684a2741cfbc532a227f6a7d6808.
+These are different hash domains. No members or other manifest keys changed;
+only BTC/Mesa source digests advance. Generator8 passes in97.68s wrapper/96.64s
+pytest with two inherited config warnings. Node3 results are commands, not three
+invented case counts; these checks overlap prior source qualification.
+
+External source snapshots and exact commands/results live under
+foundups-btc-source-closure-6b08022181194325a9f2eea110484734 in host scratch.
+All runs record stable1613 evidence files and zero Python/Node network or dotenv
+attempts; runtime membership remains1470. Guards are not an OS sandbox. No
+installed/runtime/chain/authentication result follows. Known38 metadata contexts
+are proposed for independent review only, with no ledger write or scanner run;
+fresh hosted security/CI and main readback remain parent gates.
+
 ## FoundUps epoch source closure — 2026-10-25
 
 Reuse the same8 generator cases and3 Node compatibility/preflight/recovery

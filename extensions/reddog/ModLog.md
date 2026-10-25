@@ -1,3 +1,19 @@
+## FoundUps BTC/Mesa derived source binding — 2026-10-25
+
+WSP00/15/22/50/97; pre-authoring16/P0 in the BTC integrity plan. Regenerate
+the existing AST manifest and advance only its JS/Python digest pins after
+parent merged candidate899a40e6e with main f11d7559746 at d9a57ab1d.
+Exactly two runtime digests change (BTC connector and Mesa), with no added or
+removed1470 members. All328KiB/2MiB/1470/32MiB caps and1471 rejection remain.
+
+Canonical --write/--check and the unchanged generator8/Node3 entrypoints pass.
+Only the three coherent binding paths were staged, without commit/push. No
+product, generator, dependency, installed descriptor or runtime authority change.
+Source snapshots and guard observations are in tests/TestModLog.md and the BTC
+portable receipt.38 known metadata bindings have an external proposal only;
+reviewed-findings.json is untouched and independent approval/fresh hosted scan
+remain required. No unknown finding or scanner rule/scope exemption is approved.
+
 ## FoundUps epoch evidence source closure — 2026-10-25
 
 WSP00/6/15/22/50/97. Rebind only the existing epoch_ledger.py source hash after
