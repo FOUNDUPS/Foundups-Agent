@@ -2,6 +2,23 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Generated-manifest security re-review allocation (before binding)
+
+Frozen candidate `80cccc3f7` security job121027671790 reports38 unreviewed
+tracked-tree findings, all in the regenerated source manifest:36 generic hash
+matches and two Discord-rule hash matches. Introduced history reports zero
+unreviewed findings; the hosted security regression suite passes20 cases.
+These observations require classification, not a scanner exemption by path.
+
+WSP15 C1/I4/D5/Impact4=14/P1. Need: preserve exact source-binding review on a
+changed generated artifact. Budget: verify38 exact line contexts, referenced
+normalized Git source hashes and existing main approvals independently, then
+append only their new whole-file/rule/line bindings to the existing ledger and
+review evidence. Can it wait: it blocks current publication. Competing blanket
+hash/path exclusions would weaken detection and are rejected. No scanner,
+fingerprint algorithm, source manifest, test oracle or unknown finding changes.
+Fresh hosted tree/history scans remain required after the exact review.
+
 ## CI integration dependency allocation (before repair)
 
 At candidate `9b9784770`, the hosted security gate passes. The bounded worker
