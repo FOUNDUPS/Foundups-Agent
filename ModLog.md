@@ -62573,3 +62573,13 @@ issue submission, control/admission, registry, token or market activation. Publi
 and verify the default-branch form before separately changing overlapping Mall UI.
 Implemented the55-line form; YAML/schema/required-field/order checks and independent
 source review pass. No issue submitted. Hosted publication gates remain pending.
+
+## 2026-10-25 — Mall nomination links and current main preserved
+
+WSP15/22/50/84/97. Reconcile main a44 with protected Mall work: exact2340 prior
+ledger union, current1771/273 registry,1,471 resident members and unchanged caps.
+Fresh generator8 and3 Node entrypoints pass. Four fixed-link HTML lines provide
+Nominate project/View nominations after the template reaches main; route220
+passes after the four missing-link RED cases. Independent reviews pass; protected
+historical receipts remain unchanged. Preview and current hosted/GitGuardian
+publication gates remain; no submission, owner, token or market rights are granted.

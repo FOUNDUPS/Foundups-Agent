@@ -1,3 +1,25 @@
+## 2026-10-25 | Fixed public nomination links in the actual INDEX renderer
+
+Base `c19a5055b410e528cf2cc3df9eb5a4991c896707`; parent 15/P1 allocation precedes edits.
+PR2207 form merge/readback is parent evidence, not an authenticated form/submission test.
+
+Unchanged route owner: **212 passed**. Tests-first desired RED: **216 passed, 4 failed**;
+only the four INDEX cases failed for missing anchors before the product edit.
+Candidate: **220 passed, 0 failed, 0 skipped** in 13.03s; two inherited asyncio config warnings.
+All phases had zero Python/Node guarded network attempts and stable source hashes.
+
+Eight cases use four canonical INDEX paths and eligible synthetic/Move2Japan detail/app paths.
+HTMLParser checks actual rendered `entryContent`; the existing VM and guards are unchanged.
+All 60 original top-level definition ASTs and original 212 case IDs/assertions remain exact.
+Removing the four literal source additions restores the complete original renderer bytes.
+
+Exact execution: existing offline Mall runner/Node preload copied to external scratch;
+`O:/Foundups-Agent/.venv/Scripts/python.exe -B -X utf8 <scratch>/run_mall_tests.py <phase> public/member/tests/test_route_contract_bridge.py`
+Phases `baseline`, `red-desired`, `green` retain collected IDs, outcomes, args and before/after hashes.
+
+Scratch: `C:/Users/user/AppData/Local/Temp/foundups-nomination-links-zrudn3no`.
+No adjacent PWA suite ran; its prior three regex failures remain historical. Hosting/browser/login are separate.
+
 ## 2026-10-25 | FX1 public directory and actual filter events
 
 Independent closeout: the same 300 cases passed again in 6.63s, with two inherited

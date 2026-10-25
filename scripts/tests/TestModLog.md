@@ -1,5 +1,15 @@
 # Script test inventory
 
+## 2026-10-25 — Current main and Mall source union
+
+At c19a5055, all8 existing generator cases pass in69.95s; the three existing
+Node compatibility/preflight/blocked-recovery entrypoints also exit0. This fresh
+ordinary local run makes no additional effect-hook/isolation claim. Manifest
+canonical84fbe6a binds1,471 members,332650LF/335665CRLF bytes; all byte/count caps
+and the explicit1,471-accept/1,472-reject oracle are unchanged. Registry is current
+at1771/273. The later four-line nomination UI and its tests/docs are outside the
+resident closure. Historical receipts and earlier failures remain unmodified.
+
 ## 2026-10-25 — Combined Mall/BTC canonical bindings
 
 Reuse the exact existing8 generator cases after main6fe7eba4 joins Mallf3817bb7.

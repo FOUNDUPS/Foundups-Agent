@@ -1135,6 +1135,10 @@
       if (!isMallHome) {
         html += '    <p class="portfolio-tagline">A declared ticker is not evidence of token deployment or trading availability.</p>';
       }
+      html += '    <nav class="portfolio-card-links" aria-label="Project nominations">';
+      html += '      <a class="portfolio-link-btn portfolio-link-btn-sec" href="https://github.com/FOUNDUPS/Foundups-Agent/issues/new?template=foundup-project-nomination.yml" target="_blank" rel="noopener noreferrer">Nominate project</a>';
+      html += '      <a class="portfolio-link-btn portfolio-link-btn-sec" href="https://github.com/FOUNDUPS/Foundups-Agent/issues?q=is%3Aissue+in%3Atitle+%22%5BFoundUp+nomination%5D%22" target="_blank" rel="noopener noreferrer">View nominations</a>';
+      html += '    </nav>';
       html += '  </header>';
 
       // Read-only text search: name, summary, canonical ID and optional declared

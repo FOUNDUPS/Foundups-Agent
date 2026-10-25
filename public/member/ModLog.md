@@ -1,5 +1,17 @@
 # Member Area Module Change Log
 
+## 2026-10-25 — Fixed public project nomination links
+
+Add two native fixed GitHub links to the existing public INDEX header, reusing
+its button CSS. GitHub owns sign-in, deliberate issue submission and issue status.
+Title-search matches are editable inbox entries; they do not prove repository
+control, registry admission or token/market rights. Existing route owners remain.
+
+WSP00/15/22/50/84/97: parent 15/P1 allocation; degraded Holo evidence retained.
+Unchanged route baseline 212 passed; desired RED 216 passed/4 missing-link failures;
+candidate 220 passed, zero skipped/network attempts and two inherited warnings.
+All original definitions/oracles retained; exact receipts are in tests/TestModLog.md.
+
 ## 2026-10-25 — Public Play home and canonical About admission page
 
 Reuse the public directory at root with Play framing, retain `/f/` FX and move

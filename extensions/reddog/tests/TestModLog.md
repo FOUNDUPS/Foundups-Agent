@@ -2953,3 +2953,12 @@ node extensions/foundups_advisory_workers/tests/verify_extension_contract.js
 ```
 ## 2026-08-12 - Independent grant-provider compatibility pin (0.4.87)
 - Updated exhaustive contract fixtures to the exact extension/backend version.
+## 2026-10-25 — Current main and nomination-link source closure
+
+Main a44e7864 joins Mall without changing1,471 membership or byte/count caps.
+Independent immutable review verifies all source hashes, exact2340 prior ledger
+union,17 main-only paths and the complete root-log insertion union. The canonical
+digest is84fbe6a. Existing generator8 and three Node compatibility/preflight/
+blocked-recovery entrypoints pass; this ordinary local run claims no new effect
+hook/native/installed qualification. Public nomination UI changes are outside
+the resident closure; original acceptance/rejection oracles remain intact.

@@ -25,6 +25,13 @@ provider or runtime member. Main-only paths remain inherited rather than new PR
 work. Require focused route tests, independent review, current publication gates
 and browser preview before production deployment. GitGuardian remains separate.
 
+Local result: current-main reconciliation c19a5055 independently preserves all
+parent work and protected receipts. Registry1771/273 is current; all8 existing
+generator cases and3 Node entrypoints pass with unchanged1,471/caps. The new
+four-line fixed-link layer passes220 route cases (original212 retained), following
+four actual missing-link RED failures. Independent source review reports no
+material findings. Preview/current hosted/security gates remain publication work.
+
 ## Allocation before authoring
 
 Approved worker slice on `agent/foundups-mall-home-20261025`, base

@@ -5,6 +5,18 @@
 
 ## Public Interface
 
+### Public project nominations — 2026-10-25
+
+The Mall and FX INDEX headers provide fixed **Nominate project** and
+**View nominations** GitHub links. Nominate selects the merged public issue form;
+GitHub sign-in and deliberate submission remain on GitHub. No current page,
+query, hash or catalog field supplies either destination.
+View nominations searches issue titles for `[FoundUp nomination]`, including
+open and closed matches. Editable titles are an inbox aid, not complete provenance.
+An issue, submission or closure grants no repository control, registry admission,
+token entitlement or market rights. Detail/app routes and existing member,
+About/auth and Move2Japan handoffs keep their existing owners.
+
 ### Public home and About — 2026-10-25
 
 Local source candidate, with independent Hosting/browser rollout still required:

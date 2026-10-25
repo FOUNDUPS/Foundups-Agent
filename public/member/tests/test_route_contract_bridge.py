@@ -1112,3 +1112,70 @@ def test_public_navigation_exposes_play_fx_about_and_member_without_auth_script(
     assert {link.get("href") for link in parser.links} >= {"/", "/f/", "/about/", "/member/"}
     assert not any("onclick" in link for link in parser.links)
     assert "clerk.browser.js" not in html
+
+
+_NOMINATION_URLS = {
+    "Nominate project": "https://github.com/FOUNDUPS/Foundups-Agent/issues/new?template=foundup-project-nomination.yml",
+    "View nominations": "https://github.com/FOUNDUPS/Foundups-Agent/issues?q=is%3Aissue+in%3Atitle+%22%5BFoundUp+nomination%5D%22",
+}
+
+
+class _NominationLinks(HTMLParser):
+    def __init__(self, html):
+        super().__init__()
+        self.current = None
+        self.links = []
+        self.feed(html)
+
+    def handle_starttag(self, tag, attrs):
+        if tag == "a":
+            self.current = dict(attrs, label="")
+
+    def handle_data(self, data):
+        if self.current is not None:
+            self.current["label"] += data
+
+    def handle_endtag(self, tag):
+        if tag == "a" and self.current is not None:
+            self.current["label"] = self.current["label"].strip()
+            self.links.append(self.current)
+            self.current = None
+
+
+@pytest.mark.parametrize("path", ["/", "/index.html", "/f/", "/f/index.html"])
+def test_vm_index_nomination_links_are_fixed_and_deliberate(tmp_path, path):
+    result = _landing_vm(tmp_path, path,
+                         search="?project_url=https://elsewhere.invalid&template=other&foundup=other",
+                         hash="#untrusted")
+    html = result["html"]["entryContent"]
+    links = [link for link in _NominationLinks(html).links if link["label"] in _NOMINATION_URLS]
+    assert len(links) == 2
+    assert {link["label"]: link["href"] for link in links} == _NOMINATION_URLS
+    assert 'aria-label="Project nominations"' in html
+    for link in links:
+        assert link["target"] == "_blank"
+        assert set(link["rel"].split()) == {"noopener", "noreferrer"}
+        assert "onclick" not in link
+    assert result["fetches"] == ["/f/public_catalog.json"]
+    assert result["context"] is None and result["errors"] == []
+    assert result["pathname"] == path
+    assert not any(event["kind"] in {"navigate", "history"} for event in result["events"])
+
+
+@pytest.mark.parametrize("path", ["/f/synthetic_001", "/f/move2japan",
+                                 "/f/synthetic_001/app/", "/f/move2japan/app/"])
+def test_vm_nomination_links_do_not_change_detail_or_app_admission(tmp_path, path):
+    result = _landing_vm(tmp_path, path, [_public_entity(), _registered_move2japan()],
+                         capture_links=True)
+    links = _NominationLinks(result["html"]["entryContent"]).links
+    assert not any(link["label"] in _NOMINATION_URLS for link in links)
+    assert result["errors"] == []
+    if path.endswith("/app/"):
+        assert result["pathname"] == "/member/" and result["search"] == ""
+        assert result["fetches"] == [] and result["links"] == []
+        assert result["context"] is None
+        assert result["events"] == [{"kind": "navigate", "target": "location",
+                                    "value": "/member/", "pathname": path,
+                                    "contextId": None, "itemId": None}]
+    else:
+        _assert_canonical_render(result, path.rsplit("/", 1)[-1], replaced=False)
