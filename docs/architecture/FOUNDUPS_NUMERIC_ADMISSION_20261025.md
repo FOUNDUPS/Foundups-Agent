@@ -443,3 +443,34 @@ source contexts are unchanged against numericc9. Previous proof sections remain.
 Hosted security/CI and dedicated publication/main readback are still required.
 Independent review rawSHA256:
 a76ac8a3eed83db35c8bda3e28430a3351a8538f13e857b26d1630c20507aef5.
+
+## Hosted finding review allocation — 2026-10-25
+
+Before further ledger changes, allocate C2/I4/D4/Impact4=14/P1 under WSP15/50/97
+for the75 safe descriptors from security job121062019308 on head99f3dca4.
+Review the39 tracked-tree and36 introduced-history contexts independently;
+expected deduplication is40 whole-file/rule/line identities, not75 approvals.
+The finding-bearing numeric proof, test-case companion and manifest remain frozen.
+Bind only demonstrated source-integrity metadata after parent and peer agreement;
+retain any missing historical raw preimage as a provenance limit. Preserve the
+scanner, scope, fingerprint function and all prior reviews. This allocates
+metadata investigation, not a clean scan or approval of an unknown finding.
+Main919beb0f adds only published legacy research and its ModLog entry; mergeecb40c61
+preserves both root histories without changing the frozen runtime artifacts.
+
+Parent and independent review agree on exactly40 source-hash metadata bindings:
+35 companion identities shared between tree and history, three current proof
+identities, and two manifest identities with different whole-file Git LF blobs.
+All13 external receipts rehash and their source maps equal the companion.
+The two earliest RED test revisions lack saved full raw preimages; their fields
+are recorded SHA256 measurements with receipt/collector provenance, not a fresh
+historical byte rehash or authenticity claim. Current proof source hashes and
+the manifest's private-helper source hashes rehash independently.
+Append exactly40 fingerprints, retaining the2141 old entries in order:2181 total.
+The three finding-bearing artifacts stay unchanged, avoiding self-referential
+approval drift. No scanner, rule, scope, runtime source or unknown finding changes.
+Parent review: `foundups-numeric-parent-hosted-review-20261025-wd94rytt/review.json`,
+raw SHA256 cb58d4c9f79f83969d74a6fa4bc25f9425ad90203acd327bb47dac61c6e9692c.
+Independent review: `foundups-numeric-hosted-review-20261025/review.json`,
+raw SHA256 5050e93920e1ecbaf55310ec3ba096f511c088832a8139ae2b3769f330955f24.
+This review is not a scanner execution; fresh exact-head hosted gates remain.

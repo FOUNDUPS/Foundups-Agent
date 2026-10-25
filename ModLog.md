@@ -1,3 +1,12 @@
+## 2026-10-25 — Numeric hosted metadata review
+
+WSP15/22/50/97; pre-review14/P1. Parent and peer independently classify75 safe
+hosted descriptors as40 exact source-SHA metadata identities. Rehash13 external
+receipts and current source bindings; retain the two earliest RED test-preimage
+limits. Preserve all2141 old ledger entries and append only40,2181 total.
+Finding-bearing artifacts, runtime, scanner and unknown findings stay unchanged.
+The numeric plan records both review hashes. Fresh hosted gates remain required.
+
 ## Parent current-main reconciliation acceptance — 2026-10-25
 
 Preserve parallel PR2199 mainc7f0d939 authority forwarding. The only runtime
