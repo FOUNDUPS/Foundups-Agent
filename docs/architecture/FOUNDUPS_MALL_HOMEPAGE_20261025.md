@@ -1,5 +1,25 @@
 # Mall homepage and About routing — 2026-10-25
 
+## Observed combined-manifest binding repair — 2026-10-26, before ledger edit
+
+WSP15 C1/I4/D4/Impact4=13/P1; WSP22/50/84/97. Actual hosted job121245486567
+on f0ea8cc6/merge2584c203 reports39 unreviewed tree findings,135 reviewed, and
+zero unreviewed/three reviewed history findings;20 gate regressions pass. Its
+merge tree exactly equals reviewedfd01. All39 current rows are unique public
+source SHA256 entries unchanged from main33f with exact prior approvals. The
+GitHub-client row differs from Mall329; the other38 also match that parent.
+Root's initial strict both-parent assertion stopped on this difference without
+approval or mutation. Corrected root proofe2ed1c15 rehashes all39 actual sources,
+reconstructs every main approval and discloses the one-parent provenance.
+
+Allocate only two existing paths: this plan+24lines and ledger+39entries. Preserve
+all2538 prior approvals in order, append only these actual independently reviewed
+fingerprints (2577 total), and keep protected3 receipt/testcase/proof bytes frozen.
+No source, oracle, scanner/rule/scope, cap, member or GitGuardian disposition edit.
+Require independent root-proof agreement before append, existing five fingerprint/
+fail-closed regression cases, exact39-path scope, and fresh hosted tree/history
+checks. This classification does not clear the separate GitGuardian hold.
+
 ## Current-main release reconciliation — 2026-10-26, before mutation
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP00/6/11/22/50/62/84/97.
