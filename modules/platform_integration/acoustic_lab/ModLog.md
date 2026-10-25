@@ -1,5 +1,36 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-10-25: Bound timeout cleanup to the owned FFmpeg child
+
+- WSP 00/15/22/50/97; C3/I4/D3/Impact3=13/P1. Reuse the existing X adapter
+  and test file. Preserve the 30-second processing deadline, FFmpeg arguments,
+  response semantics, all dependency pins and the original 18 selected cases.
+- A small same-file helper kills the owned child after a timeout, then allows
+  at most five seconds for communication/drain and reaping. Failed kill, drain
+  or reaping is reported explicitly as timeout cleanup failure. Temporary-file
+  unlink failure retains the primary exception and adds a cleanup note.
+  No unbounded context-manager wait or manual Windows reader-thread join is added.
+- The strengthened existing timeout case first failed against the original
+  adapter (17/18 passed; kill was never called). The repaired author run passes
+  18/18 with zero errors/skips, including cleanup-failure and unlink subcases.
+  All other prior test methods and the six Gunicorn cases are unchanged.
+- A separate actual disposable Python-child case passes: kill, bounded drain,
+  closed pipes and reaping precede adapter return, with no outer rescue. This
+  exercises one owned child, not FFmpeg, process trees or a provider. A prior
+  native-phase attempt was rejected before spawning because the file guard
+  denied subprocess's null-device open; retain that failure. The corrected
+  gate admits only the exact constructor-owned open and rejects a generic one.
+- Evidence: external refresh/acoustic-timeout-positive-v3-execution-20261025.json
+  and its raw two-phase outputs (18 cases: 32.216s; one child: 0.294s), plus the
+  preserved baseline/v2 failures. All 16 source bindings stayed unchanged.
+  Independent source/outcome review accepts the bounded repair: a separate
+  one-child positive passes; missing-kill and missing-drain controls each fail
+  the selected case and record intentional rescue teardown failure. Fresh hosted
+  Linux/Gunicorn remains pending. Python guards are not OS confinement or AI acceptance.
+  See acoustic-timeout-independent-outcome-review-20261025.json.
+- The four broader historical failures were not rerun or resolved. Earlier
+  dependency qualification entries below retain their original dated status.
+
 ## 2026-10-25: PR1355 Flask 3.1.3 bounded compatibility qualification
 
 - WSP 00/15/22/50/97; C3/I3/D4/Impact3=13/P1. Carry forward the original
