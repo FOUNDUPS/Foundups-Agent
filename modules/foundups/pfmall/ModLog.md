@@ -6,8 +6,10 @@ server-owned Clerk bearer policy and existing genesis body preflight/mapper.
 No default policy, environment secrets, legacy HMAC change, membership/client
 flag trust, data writes, repo/provider calls or runtime/token grant. Add an
 optional HTTP profile without migrating the shared/umbrella environment.
-Frozen RED and local GREEN evidence are in tests/TestModLog; independent review,
-hosted/security gates and exact main convergence remain separate. Deployment,
+Frozen RED and local GREEN786/one baseline warning are in tests/TestModLog.
+Independent11 held-outs and separate optional-import-denied ASGI probe pass after
+the canonical public-PEM repair; initial10PASS/1FAIL finding remains retained.
+Hosted/security gates and exact main convergence remain separate. Deployment,
 live identity/current revocation, durable claim receipts and issuance are pending.
 
 ## 2026-10-25 — FX1 public directory entry

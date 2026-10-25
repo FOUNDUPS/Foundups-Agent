@@ -29,6 +29,19 @@ plus CRLF positive before repair. Their actual RED is783PASS/3FAIL, no errors/
 skips, with the one reviewed baseline dependency warning. No original test oracle
 or failure history is removed. This adds no bearer/identity or live exposure claim.
 
+Repair6e9b13da requires one canonical public SubjectPublicKeyInfo PEM, accepts
+CRLF/omitted final newline, rejects extra documents/material and stores only the
+canonical public text. Final local786PASS/0FAIL/0ERROR/0SKIP, one baseline warning;
+all695 parent IDs/outcomes retained. Identical independent held-out bytes now
+11/11PASS; separate fresh optional-import-denied ASGI503 probePASS. All13 selected
+source hashes stay stable. Final report SHA256
+`d49d1cfdd1d7a929cfe703857bd5b64c57fda3b5e635e9363b88ab4e406d5a79`.
+Existing manifest8 and Node3 commands pass with1615 source hashes unchanged;
+they bind their recorded allocation-HEAD/overlay, not a fresh full-repository or
+installed-runtime qualification. Canonical registry1773/273 quarantine; no old
+test removal, quarantine, skip or warning filter. Exact-head hosted/security and
+main convergence remain separate from these local results.
+
 ## 2026-10-25 — FX1 gateway link and public filter reuse
 
 Extended the existing `test_gateway_roc_shell.py` with HTML-parser coverage of

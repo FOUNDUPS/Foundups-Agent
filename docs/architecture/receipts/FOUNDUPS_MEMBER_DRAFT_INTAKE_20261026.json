@@ -1,7 +1,7 @@
 {
   "schema": "foundups-member-draft-intake-evidence-v1",
   "date": "2026-10-26",
-  "status": "LOCAL_COMPONENT_TESTED_FINAL_REVIEW_AND_PUBLICATION_PENDING",
+  "status": "LOCAL_COMPONENT_TESTED_INDEPENDENTLY_ACCEPTED_PUBLICATION_PENDING",
   "parent": "4f37c8505c91f03d90c60ce835f1bc9b102491a8",
   "allocation": "6efb68f50",
   "frozen_initial_tests": "2e46fd2aa",
@@ -154,7 +154,9 @@
   "reviewed_warning": "Starlette0.50.0 uses AnyIO4.15 deprecated BlockingPortal alias; present in parent695 and final786. No suppression. Initial short synthetic HS256 fixture warning removed by lengthening only that rejection key, no assertion change.",
   "independent_architecture_review_sha256": "02b2af0a2af533a7bf19ea244aa13211e37a58967246e03f0710c0fdcb7633c8",
   "independent_initial_review_sha256": "5501b7eaa76f474fb31d380409a0cbaa5a2e4f077a1f55d607da3903d22200fb",
-  "independent_initial": "10 held-out functions pass; appended-private-PEM rejection fails. Separate fresh optional-dependency-denied import+ASGI503 passes. Repaired review pending.",
+  "independent_initial": "10 held-out functions pass; appended-private-PEM rejection fails. Separate fresh optional-dependency-denied import+ASGI503 passes. Initial evidence remains immutable.",
+  "independent_final_review_sha256": "d49d1cfdd1d7a929cfe703857bd5b64c57fda3b5e635e9363b88ab4e406d5a79",
+  "independent_final": "Exact6e9b product accepted: identical frozen held-out bytes now11/11PASS; separate fresh optional-dependency-denied actual-ASGI503 probePASS. All13 source hashes stable; no live identity/deployment/revocation claim.",
   "compatibility": {
     "manifest_cases": 8,
     "node_commands": 3,
@@ -169,7 +171,7 @@
     "Only DRAFT_ONLY genesis output; no durable nomination or challenge receipt, membership, repo control, registry/catalog or grant.",
     "Offline signature/expiry verification does not prove current remote session revocation.",
     "No network/JWKS, fetched code, storage/nonce consumption, worker, media provider, signing, mint or trading effect.",
-    "Independent final review, exact-head hosted/security checks and guarded main readback remain required.",
+    "Independent final local review accepted; exact-head hosted/security checks and guarded main readback remain required.",
     "Public deployment/protected runtime promotion additionally requires admitted release/runner, abuse/current-session policy and actual provider evidence."
   ]
 }

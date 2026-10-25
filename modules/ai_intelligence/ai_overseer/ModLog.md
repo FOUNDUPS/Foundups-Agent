@@ -7,7 +7,9 @@ issuer/origin/time/v2 session policy; generic failures and pseudonymous handle.
 Legacy HMAC behavior/source/oracles and package exports remain unchanged. Optional
 HTTP dependencies are outside resident imports; no environment secrets, JWT/JWKS
 network fetch, nonce/data writes, deployment, admission/ownership/work/token grant.
-PFMall TestModLog records exact RED/GREEN evidence; independent review and current
+PFMall TestModLog records exact RED/GREEN786 evidence/one baseline warning.
+Independent11 held-outs and separate optional-import-denied ASGI probe pass after
+canonical PEM repair, with the original configuration finding retained. Current
 hosted/security/main gates remain separate. Durable claim state and real-session
 qualification are still required.
 

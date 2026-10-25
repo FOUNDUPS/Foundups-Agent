@@ -3,10 +3,13 @@
 Allocated15/P1 at6efb68f50, frozen tests2e46fd2aa before product authoring.
 Existing PFMall FastAPI host now has a separate, default-unavailable proposal
 route; one genesis-owned Clerk wrapper reuses the unchanged body preflight and
-mapper. Real ephemeral RSA/HTTP tests pass locally782, including all695 original
-cases. No live provider identity, deployed service, membership, online revocation,
+mapper. Real ephemeral RSA/HTTP tests pass locally786, including all695 original
+cases, with one reviewed baseline dependency warning. Independent11 held-outs
+and a separate optional-import-denied ASGI probe pass after the PEM repair;
+the initial configuration failure is retained. No live provider identity,
+deployed service, membership, online revocation,
 durable claim/registry/catalog, worker, financial signing or token effect is proved.
-Independent and publication gates remain pending; see
+Publication gates remain pending; see
 `docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md` and owner TestModLog.
 
 ## 2026-10-26 — Bound GitHub observation HTTP for project admission
