@@ -1,7 +1,7 @@
 {
   "schema": "eduit_storytime_deployment_receipt_v1",
   "date_jst": "2026-10-26",
-  "status": "PROVIDER_LIVE_CUSTOM_DOMAIN_AWAITING_GODADDY_IDENTITY_VERIFICATION",
+  "status": "PROVIDER_LIVE_GODADDY_SAVE_FAILED_VERIFICATION_UI_STALLED",
   "target_hostname": "storytime.eduit.org",
   "source": {
     "repository": "FOUNDUPS/Foundups-Agent",
@@ -200,11 +200,19 @@
       }
     ],
     "godaddy_save": {
-      "status": "PENDING_IDENTITY_VERIFICATION",
+      "status": "PROVIDER_SAVE_FAILED_RETRY_UI_STALLED",
       "records_prepared": 2,
-      "browser_dialog": "Verify your identity",
-      "verification_requested_from_012": true,
-      "authoritative_records_present": false
+      "one_time_verification_submitted": true,
+      "verification_material_stored": false,
+      "provider_report": "DNS update failed; retry embedded verification remained loading",
+      "recovery_attempts": [
+        "fresh verification code submitted through normal provider UI",
+        "refreshed domain settings and prepared a fresh single-record transaction",
+        "separate provider verification page loaded and submitted",
+        "refreshed settings and prepared the original two-record transaction"
+      ],
+      "authoritative_records_present": false,
+      "human_ui_completion_requested": true
     },
     "foundupscom_after": {
       "version": "projects/gen-lang-client-0061781628/sites/foundupscom/versions/ff28e6dc9bc88a72",
@@ -222,10 +230,16 @@
     "personal_emails_account_identity": "EXCLUDED",
     "provider_project_and_site_resources": "PUBLIC_RESOURCE_REFERENCES_ONLY"
   },
-  "updated_at": "2026-10-25T19:55:44.490Z",
+  "updated_at": "2026-10-25T20:51:41.284070+00:00",
   "verification": {
     "javascript_tests_passed": 21,
     "python_packaging_tests_passed": 6,
-    "independent_review": "No remaining material code/security/ownership blocker; deployment docs corrected to module build directory"
+    "independent_review": "No remaining material code/security/ownership blocker; deployment docs corrected to module build directory",
+    "canonical_registry": {
+      "registered": 1773,
+      "quarantined": 273,
+      "check": "CURRENT"
+    },
+    "integration_merge": "9f2d71965 merges main 4f37c8505; full CI rerunning; Kids Episodes passed"
   }
 }

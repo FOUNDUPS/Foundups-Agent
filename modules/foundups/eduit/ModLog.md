@@ -2,6 +2,14 @@
 
 ## 2026-10-26 — Standalone Story Time watch/play PWA deployment
 
+Continuation: submitted fresh one-time verification through the provider UI;
+GoDaddy reported DNS-save failure, then its embedded verification stalled on
+fresh attempts. Domain settings were refreshed, only the original two records
+reprepared, and actual UI completion requested from 012. Authoritative DNS still
+absent; no cutover claimed. No verification material stored. Fixed canonical
+test-registry freshness and merged current main without changing other-lane
+source; 21 JS + 6 packaging checks still pass, full hosted CI reruns.
+
 WSP 00/15/22/50/84/97/99. Final 012 correction: app/codebase **Story Time**;
 YouTube remains Us Story Time and publisher `us_story_time`. Final target
 `storytime.eduit.org` supersedes prior hostnames. Preserve `eduit`/`kids_episodes`.

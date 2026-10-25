@@ -28,7 +28,10 @@
   Registry remains current at **1,773 / 273**; impacted checks **21 JS + 6 build
   tests passed**, and `git diff --check` passed. Fresh hosted CI remains pending.
 - Live provider URL redirects to /storytime/ and reports the same revision.
-  Custom-domain DNS save awaits GoDaddy identity verification; HTTPS not verified.
+  Fresh provider verification was submitted, but GoDaddy reported a DNS-save
+  failure and subsequent embedded verification stalled. Authoritative Story
+  Time records remain absent; manual browser completion requested. HTTPS is
+  not verified. One-time verification material was not persisted.
 
 An initial review-controller test failed because its import-strip regex assumed
 LF. Accepting CRLF fixed this test harness portability issue; focused rerun passed.
