@@ -73,3 +73,12 @@ Python motion/audio cases pass. Final impression is a stylized side section,
 not a top-down track or scientific reconstruction; footprint readability and
 preschool emotional comprehension remain perceptual limits. Audio peak/sample
 checks are not listening evidence. No upload or domain deployment in this slice.
+
+Latest 012 clarification supersedes the earlier stomp/crunch vocabulary:
+THUMP (1.0–1.9s) wakes the hero, CRACK (2.05–3.4s) accompanies growing fissures,
+and SQUISH (10.56–11.8s) accompanies compaction. Revised original foley and
+exactly three educational word captions; revision sound-words-5. Incidental
+snoring/sniffing remains quiet background audio, not additional teaching labels.
+Learning goal is sound-word/event matching; game input remains notice-and-act.
+Browser preview shows the same three words; its existing optional game beeps
+are not claimed to teach those sounds. No speech/pronunciation generated.

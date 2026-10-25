@@ -21,6 +21,9 @@ test('sound word precedes cracks; family reacts before the descending roof occlu
  assert.ok(!scene({...movie(1.4),showWords:false}).includes('THUMP!'));
  assert.equal((scene(movie(1.4)).match(/href="#sleepy"/g)||[]).length,4);
  assert.ok(scene(movie(3)).includes('data-event="cracks"'));
+ assert.ok(scene(movie(3)).includes('CRACK!'));
+ assert.ok(scene(movie(10.8)).includes('SQUISH!'));
+ assert.equal(movie(4).soundWord,'');
  assert.equal((scene(movie(9.5)).match(/href="#surprised"/g)||[]).length,4);
  assert.ok(movie(9.5).collapse===0 && movie(10.2).collapse>0 && movie(10.2).collapse<1);
  const falling=scene(movie(10.2));

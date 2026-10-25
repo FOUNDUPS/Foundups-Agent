@@ -833,3 +833,9 @@ legacy non-stomp audio/captions are preserved. Updated production skill v0.2.1
 and story-direction reference with material continuity, anticipation/reaction,
 transition-frame review and sound-word pairing. EDUIT owns the shared scene.
 Next actual episode remains the transfer test; no autonomous learning claim.
+
+Latest creator clarification: the educational targets are THUMP → CRACK →
+SQUISH, replacing incidental stomp/crunch labels. Original crack bursts occur
+as fissures develop; compression tone/sweep and SQUISH coincide. Caption tests
+assert the three-word order and event windows. Production skill now requires
+a word → visible referent → actual sound trace rather than decorative captions.

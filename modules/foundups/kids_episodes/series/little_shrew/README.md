@@ -31,3 +31,16 @@ The returned plan round-trips through the canonical `compile_plan` contract and 
 Each shot carries repository-relative reference paths and SHA-256 hashes, plus its beat ID and expression. The admitted generation adapter must resolve and verify these design references and actually supply supported reference inputs to its provider. This preset does not implement that provider binding or claim that a text prompt guarantees continuity. Independent review must compare the output with the rig, palette, story states and source beats. No provider account, scheduler, upload route or publishing authority is activated here.
 
 Music is a brief, not an audio file or rights clearance. Use original audio with provenance through the existing audio owner. Do not copy a Baby Shark melody or recording.
+
+### Current episode-one vocabulary — 2026-10-26
+
+Latest creator direction: **THUMP → CRACK → SQUISH**. One goal: match each
+sound-word to its visible cause. THUMP accompanies the first shake/wake-up;
+CRACK accompanies visible growing roof fissures; SQUISH accompanies the final
+compression into the same dark earth. This replaces the previous stomp/crunch
+caption plan. Keep two parents and three equal-sized young, reacting family
+before roof occlusion, only the hero in the right root pocket afterward.
+Shared implementation remains `public/eduit/storytime/scene.mjs`, rendered by
+`modules/foundups/eduit/render_story_preview.py` (sound-words-5). Storytime's
+website label/domain is Storytime / storytime.eduit.org; YouTube remains Us
+Story Time. No new FoundUp ID or live domain deployment is implied.

@@ -26,7 +26,7 @@ story contract, not hidden reasoning or a list of animation effects.
    captions or sound to conceal ambiguous geometry. Freeze a material palette and reuse each material color across intact, moving and final states. Check sampled pixels in actual rendered frames, not just color names. Reject inconsistent counts,
    unexplained scale changes, floating props and incomplete world-state changes.
 8. Add original music/foley only after the event reads visually. Align each sound
-   to its physical cause. Keep instructional cues intelligible; music supports
+   to its physical cause. For vocabulary learning, assign each target word a visible referent, synchronized sound and legible text window. Review whether a learner can match the word to the event, not merely whether a caption exists. Use the creator-approved vocabulary rather than incidental foley labels. Keep instructional cues intelligible; music supports
    attention and emotional timing. Do not imitate a named song's melody.
 9. Turn the same observation/action into the optional game: cue → relevant input
    → visible consequence → gentle retry. Define one observable learning success
