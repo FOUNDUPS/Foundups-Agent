@@ -22,7 +22,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from .metadata_evidence import validated_video_evidence
+from .content_generator import validated_video_evidence
 
 logger = logging.getLogger(__name__)
 
