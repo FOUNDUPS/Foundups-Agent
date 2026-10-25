@@ -35,10 +35,9 @@ jobs:
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
-          GITHUB_TOKEN: ''
-          GH_TOKEN: ''
         run: |
-          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib \
+          env -u GITHUB_TOKEN -u GH_TOKEN python -B -m pytest -q \
+            -c /dev/null --rootdir="$GITHUB_WORKSPACE" --noconftest --import-mode=importlib \
             -o pythonpath=. -o asyncio_default_fixture_loop_scope=function \
             -p pytest_asyncio.plugin -p no:cacheprovider \
             --basetemp="$RUNNER_TEMP/github-client-pytest" \

@@ -17,6 +17,9 @@ Use .github/workflows/github-client-contracts.yml for the pinned direct tools,
 explicit two-file selection and fresh JUnit/dependency artifacts. HTTP is mocked;
 the job does not prove network denial, zero host effects or production readiness.
 Do not collect the entire directory or use credentials for these unit cases.
+The hosted process must unset credential variables, rather than assign empty
+strings: the legacy presence check distinguishes those states. Pin rootdir to
+the workspace so JUnit case identities agree with local explicit-root evidence.
 
 ## Historical strategy
 

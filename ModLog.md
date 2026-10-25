@@ -9,6 +9,10 @@ pass. Exact IDs, failures and hashes: [receipt](docs/architecture/receipts/FOUND
 Runtime1471 members/caps unchanged; only client hash and two digest pins advance.
 Metadata brackets are non-atomic; no claim, trusted fact, issuer, signer, token,
 reward, trading or installed-runtime grant. Hosted/security/main remain separate.
+Initial hosted profile134PASS/1FAIL retained; unset empty credential variables
+and pin the workspace test root, preserving product/oracles. Source-manifest and
+receipt scanner findings require exact public-metadata review before rebinding.
+Independent review accepted40 exact bindings; the2260-entry prefix is preserved.
 
 ## 2026-10-25 — FoundUps unsigned integration checkpoint
 

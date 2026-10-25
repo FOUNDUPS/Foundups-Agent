@@ -67,6 +67,22 @@ generator cases and three Node owners pass. Runtime1471 members unchanged; only
 the client's source hash changes, canonical digest c1f97e86. Frozen RED and prior
 runner/long-ID errors remain in the [receipt](receipts/FOUNDUPS_GITHUB_FILE_OBSERVATION_20261026.json); hosted/main gates remain.
 
+Hosted-profile/security metadata amendment, before correction: WSP15
+C2/I4/D4/Impact4=14/P1. Preserve run40208878967:134PASS/1FAIL because empty
+GITHUB_TOKEN differs from absent in the legacy presence check. Unset GITHUB_TOKEN
+and GH_TOKEN for the mock test process and set an explicit workspace root;
+no product or assertion change. Retain fresh exact IDs/artifacts at the new head.
+Internal scanner run40208878992 reports41 tree and3 history rows, only in the
+source-hash manifest and new local receipt. Before adding any reviewed binding,
+derive exact fingerprints, prove unchanged parent review coverage and public
+hash/metadata origins, and obtain independent review. Append only individually
+verified bindings to .github/security/reviewed-findings.json; preserve its ordered
+prefix and scanner/rule/history semantics. Unknown findings still block.
+Extend this plan's allocation to+85, root ModLog+16 and test README+30; no new
+receipt, test case, runtime member, cap, secret, signer or provider activation.
+Independent reconstruction accepted exactly40 bindings (39 manifest/one receipt);
+append preserves all2260 prior entries/order/keys. Fresh hosted scan still required.
+
 ## Unsigned integration checkpoint allocation — before authoring
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.
