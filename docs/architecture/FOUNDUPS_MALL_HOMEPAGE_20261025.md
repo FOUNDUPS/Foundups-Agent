@@ -22,6 +22,9 @@ entries, including the moved gateway. Main has93 changed physical paths and14
 overlaps. No shared homepage/auth/GitHub/nomination implementation is edited on
 both sides. Preserve all main-only sources, StoryTime/EDUIT/YUMORI work and all
 Mall product/test blobs, plus both additive documentation histories.
+The combined NAVIGATION entries and two existing digest literals are explicit
+exceptions: retain main's new entries and the Mall About target, with no other
+mapping or assertion change. Compare that expected metadata delta separately.
 
 Existing-ledger composition is main-first2419 plus238 Mall-only existing entries
 =2657; this preserves old approvals, it approves no new finding. Keep the three
