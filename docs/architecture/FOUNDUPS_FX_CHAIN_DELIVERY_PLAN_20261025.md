@@ -84,6 +84,18 @@ and the public-address checksum; both preserved golden requests use it only as t
 declared expected auth address. No private key is generated. Remote disposition
 remains unresolved; this evidence does not waive the hosted security gate.
 
+Hosted accommodation allocation, before edits: WSP15 C2/I4/D4/Impact3=13/P1.
+Head912c's actual artifact observes exactly one base file symlink, `python3.exe`
+to same-base ordinary `python.exe`; no overflow or followed linked directories.
+Official pinned installer research independently corroborates this unused alias.
+Authorize workflow-only normalization inside a fresh disposable Windows job:
+retain topology; verify sole exact alias, nonlinked root/ancestors/target and current
+target identity; unlink only the alias nonrecursively; record unchanged target SHA.
+Any mismatch fails closed. Strict b0aa guard/codec/28 tests/lock remain unchanged;
+fresh CI preparation qualifies the resulting actual environment. No local runtime
+mutation, generic link exception or SDK source grant. A full interpreter copy is
+wider; PATH changes leave the rejected entry in the enumerated tree.
+
 ## Current-state consolidation allocation (before authoring)
 
 WSP15 C2/I4/D4/Impact4 = **14/P1**. On main

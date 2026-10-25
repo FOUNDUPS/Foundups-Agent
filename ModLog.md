@@ -1,3 +1,11 @@
+## 2026-10-25 — hosted interpreter alias accommodation allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/97. The912c artifact observes only the
+official unused python3.exe file symlink. Preallocate a narrowly checked, recorded
+nonrecursive alias unlink inside the disposable hosted job, preserving target
+bytes and strict profile admission. No local runtime, SDK/guard/oracle/28-ID/lock
+change; retain both hosted pre-test failures and the distinct local28 pass.
+
 ## 2026-10-25 — Algorand hosted metadata diagnostic allocation
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/97. PR2206/head124b's distinct CI

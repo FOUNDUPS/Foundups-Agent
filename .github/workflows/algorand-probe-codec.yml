@@ -107,6 +107,38 @@ jobs:
           print('Base interpreter link metadata retained; no SDK imported')
           '@ | python -I -B -X utf8 -
           if ($LASTEXITCODE -ne 0) { throw 'Base link metadata failed' }
+      - name: Normalize the recorded unused interpreter alias in this disposable job
+        run: |
+          @'
+          import hashlib, json, os, pathlib, sys
+          task = pathlib.Path(os.environ['ASA_CODEC_ROOT'])
+          base = pathlib.Path(sys.base_prefix).absolute()
+          alias = base / 'python3.exe'; target = base / 'python.exe'
+          record = dict(stage='hosted_alias_normalization', status='FAILED', alias_removed=False)
+          try:
+              topology = json.loads((task / 'setup-link-topology.json').read_text(encoding='utf-8'))
+              assert sys.version_info[:3] == (3, 12, 10) and sys.platform == 'win32'
+              assert all(not p.is_symlink() and not p.is_junction() for p in (base, *base.parents, target))
+              assert str(base.resolve()) == topology['base'] and not topology['inventory_overflow']
+              assert not topology['linked_directories_followed'] and len(topology['links']) == 1
+              observed = topology['links'][0]
+              assert observed['relative_path'] == 'python3.exe' and observed['kind'] == 'symlink'
+              assert target.is_file() and alias.is_symlink() and not alias.is_junction() and not alias.is_dir()
+              assert os.readlink(alias) == observed['target'] and alias.resolve(strict=True) == target.resolve(strict=True)
+              assert str(target.resolve()) == observed['resolved_target'] and os.path.samefile(alias, target)
+              before = hashlib.sha256(target.read_bytes()).hexdigest()
+              record.update(alias=str(alias), target=str(target), target_sha256_before=before, operation='unlink_exact_file_symlink_nonrecursive')
+              alias.unlink()
+              record['alias_removed'] = True
+              after = hashlib.sha256(target.read_bytes()).hexdigest()
+              record['target_sha256_after'] = after
+              assert not os.path.lexists(alias) and before == after and target.is_file()
+              record['status'] = 'NORMALIZED'
+          finally:
+              (task / 'setup-alias-normalization.json').write_text(json.dumps(record, sort_keys=True, indent=2), encoding='utf-8')
+          print('Recorded unused alias removed; interpreter target bytes unchanged')
+          '@ | python -I -B -X utf8 -
+          if ($LASTEXITCODE -ne 0) { throw 'Recorded interpreter alias normalization failed' }
       - name: Prepare exact source and installed wheel profile
         run: |
           $taskRoot = $env:ASA_CODEC_ROOT
