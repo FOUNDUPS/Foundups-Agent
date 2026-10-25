@@ -1,3 +1,12 @@
+## 2026-10-25 — RSI source closure and current input handoff
+
+WSP00/15/22/50/97: reconcile four existing planning documents with #2181 main
+closure and today's seven-artifact diagnostic, keeping eighth-file metadata separate.
+Preserve failure history and the 19/P0 umbrella; this documentation slice is
+C2/I4/D4/Impact3=13/P1. [Current dispatch](docs/operations/RSI_SWARM_DISPATCH.md#current-owner-input-handoff--2026-10-25)
+separates authentic inputs from remaining caller integration and pinned-runtime limits.
+#2194 main acceptance is verified; separate root Undici maintenance failed. No native RSI claim.
+
 ## 2026-10-23 — Private AutoPost item capture and shared Mall repair
 
 Extend existing AutoPost/PF Mall ownership for Shop clothing and GetK-style
