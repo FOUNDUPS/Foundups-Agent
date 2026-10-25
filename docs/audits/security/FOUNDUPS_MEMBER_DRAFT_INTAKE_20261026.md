@@ -137,3 +137,22 @@ regressions before repair: appended private/public/junk reject, ordinary CRLF
 public key remains accepted. Require a single canonical SubjectPublicKeyInfo
 public PEM, with CRLF normalization; no custom cryptography or private input
 retention. Existing product/test/file/function ceilings remain sufficient.
+
+## Observed secrets-gate closure allocation — 2026-10-26
+
+Current-head hosted CI40234746648/job121293788908 reports exactly two rows:
+one tree and one introduced-history `generic-api-key` finding, both at line12
+of the fixed member-intake evidence receipt. The line records the public,
+reproducible normalized source hash of `pfmall/http_api.py`; receipt contents
+differ between initial13cedc569 and currentcf7ad0a0c, so their whole-file-bound
+fingerprints are distinct. No credential match value is displayed or retained.
+
+Allocate C2/I4/D4/Impact3=13/P1 security closure, within the original22-path
+ceiling. Before any ledger mutation, independently compare the two exact source
+contexts, recompute their source-hash values and scanner fingerprints, and verify
+the current2417-entry ordered ledger prefix. If both are confirmed public source
+metadata, append only their two individual bindings to the existing reviewed
+ledger. Preserve every prefix entry/other key. No detector, rule, fingerprint
+algorithm, scan/history scope, test oracle, unknown finding or GitGuardian record
+change is permitted. Fresh exact-head security and all other gates must pass;
+this allocation is not itself a passing scan or disposition.
