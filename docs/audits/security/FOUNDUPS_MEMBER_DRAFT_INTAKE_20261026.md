@@ -188,6 +188,18 @@ One additional patched-profile evidence receipt is permitted within the original
 the final profile; do not rewrite it or its reviewed fingerprint contexts.
 Fresh exact-head hosted/security/main-convergence gates remain required.
 
+Independent installed-inventory comparison additionally found bootstrap pip25.0.1
+outside the25 resolved application/test distributions, with published advisories.
+Before changing installer tooling, extend this same optional-profile allocation
+to pin pip26.2.2 in the isolated qualification environment and existing CI install
+step; official PyPI currently lists no advisories for that release and supports
+Python3.12. Retain the original bootstrap/inventory observation. Record a separate
+installer acquisition report and inspect all26 installed distributions, without
+claiming that registry metadata proves binary/platform safety. No global/shared
+pip upgrade, product/test change, extra SDK or new path is authorized by this
+amendment. Independent source/held-out qualification and fresh hosted gates remain
+required after the tooling repair.
+
 Primary advisory references:
 [Starlette](https://github.com/Kludex/starlette/security/advisories/GHSA-82w8-qh3p-5jfq),
 [cryptography](https://github.com/pyca/cryptography/security/advisories/GHSA-g6cj-pr64-35w5).
