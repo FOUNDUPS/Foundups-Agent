@@ -48,11 +48,18 @@ governed exact-main maintenance/activation flow and a digest-stable owner query;
 pytest is not a substitute for that operational proof.
 
 The new draft-intake owner uses the optional `../requirements.txt` HTTP profile,
-pytest9.0.3 and httpx0.28.1/Starlette0.50.0 for local transport tests. Existing
+pytest9.0.3 and httpx0.28.1 for local transport tests. Its final runtime profile
+pins FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/cryptography50.0.2 after public
+registry advisories rejected the initial older profile. The isolated environment
+and this contract CI pin pip26.2.2 separately, retaining its acquisition report;
+the final installed-inventory inspection includes all26 distributions, including
+the installer. Existing
 nomination-contract CI retains the resolved dependency report and exact JUnit
 cases. RSA keys and tokens are synthetic and never printed. Offline signatures
 do not qualify a production Clerk instance, membership, current revocation,
 repository control or a deployed service. Keep legacy HMAC owners unchanged.
+The final profile's retained HTTPX test-client deprecation is reviewed and not
+filtered; it is different from the original AnyIO alias warning.
 
 ## Original pre-rebase baseline
 

@@ -1,5 +1,33 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Patched optional HTTP profile qualification
+
+Do not promote the initial profile below: public PyPI metadata found published
+advisories in its Starlette0.50.0 and cryptography46.0.7. This is package evidence,
+not proof that the selected JSON/RSA path was exploitable. After pre-change
+allocation3bbbb2ee4, qualify a separate environment with FastAPI0.162.0,
+Starlette1.10.0, PyJWT2.15.1 and cryptography50.0.2. The original environment,
+failures, scanner bindings and V1 receipt remain unchanged historical evidence.
+
+All786 identical cases pass locally, retaining all695 original IDs/outcomes,
+with zero failure/error/skip. The old AnyIO alias warning is gone; one new
+Starlette HTTPX test-client deprecation is explicitly reviewed, with no warning
+filter or changed test expectation. All25 newly resolved development packages
+have zero published advisories in the inspected public registry snapshot. A
+separate installed-inventory comparison found bootstrap pip25.0.1 outside those
+25 packages, with published advisories. Pre-change allocationc6557db8b authorizes
+repair only to pip26.2.2 locally and in existing CI; separate acquisition report
+retained. Identical786 cases pass again, with all26 installed distributions now
+showing zero published registry advisories. This does not certify installed
+binaries/platforms or whole-system security.
+Independent profile review accepts all26 reported official wheel digests and
+metadata contracts, unchanged11 held-outs and separate optional-import-denied
+actual-ASGI503. Separate static review accepts the final workflow/inventory line.
+Both reports are bound by the patched-profile receipt. Exact-head hosted/security/
+main gates remain required. Product logic, original and new test bodies, legacy HMAC and the
+resident manifest are unchanged. Full details: current allocation and the
+patched-profile receipt, superseding the V1 environment for this component.
+
 ## 2026-10-26 — Member draft intake, test-first allocation
 
 The distinct `test_clerk_proposal_intake.py` owner covers real ephemeral RSA

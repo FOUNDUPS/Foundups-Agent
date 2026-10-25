@@ -1,4 +1,22 @@
-## 2026-10-26 — Connect Clerk member identity to draft intake
+## 2026-10-26 — Hold intake promotion for patched optional dependencies
+
+All5134 hosted gates passed, but a separate public PyPI metadata audit found
+advisories for two original-profile packages. Do not use green functional/secret
+checks as a complete dependency-security claim. Pre-change15/P1 allocation3bbbb2
+selects a separate optional FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/
+cryptography50.0.2 profile; no shared/umbrella environment or product/oracle change.
+Same786 local cases pass; all25 resolved packages have zero advisories in the
+inspected registry metadata, with one reviewed HTTPX test-client warning.
+Independent inventory additionally found the bootstrap installer outside those25;
+allocationc6557db8b precedes its isolated/CI pip26.2.2 repair. Same786 cases pass;
+all26 installed distributions now show zero published registry advisories. Initial
+receipts remain historical. Independent requalification accepts the unchanged11
+held-outs plus separate optional-import-denied503 probe, all26 official reported
+wheel digests and final workflow source. The separate patched-profile receipt
+binds those reports and root786; fresh final-head gates/main readback remain
+required. No live identity, deployment or grant.
+
+## 2026-10-26 — Connect Clerk member identity to draft intake (initial profile)
 
 Allocated15/P1 at6efb68f50, frozen tests2e46fd2aa before product authoring.
 Existing PFMall FastAPI host now has a separate, default-unavailable proposal

@@ -1,4 +1,20 @@
-## 2026-10-26: Connect member-authenticated draft intake
+## 2026-10-26: Qualify patched optional HTTP dependencies
+
+Initial profile metadata exposed published Starlette/cryptography advisories;
+hold promotion despite green functional/secrets gates. Allocation3bbbb2ee4
+selects a separate FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/crypto50.0.2 profile.
+Same786 cases pass; product/oracles/legacy auth and original environment remain
+unchanged. Public metadata for25 resolved distributions reports zero published
+advisories, not a whole-system/binary audit. Independent inventory found older
+bootstrap pip outside those25; allocationc6557db8b precedes isolated/CI pip26.2.2
+repair, separately reported. Same786 cases pass again; all26 installed packages
+show zero published registry advisories. One reviewed HTTPX test-client warning;
+independent profile/metadata and final workflow reviews accept the bounded
+component, including unchanged11 held-outs plus separate optional-denied503.
+The patched-profile receipt binds those reports and root786; fresh exact-head
+hosted/security/main qualification remains required.
+
+## 2026-10-26: Connect member-authenticated draft intake (initial profile)
 
 15/P1 allocation6efb68f50, frozen tests2e46fd2aa, WSP00/6/11/15/22/50/77/84/97.
 Add one explicit Clerk server-only provider wrapper around the existing body-first

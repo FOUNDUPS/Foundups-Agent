@@ -78,11 +78,10 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install the bounded test runner
-        run: >-
-          python -m pip --isolated --disable-pip-version-check install
-          --only-binary=:all: --report "$RUNNER_TEMP/nomination-pip.json"
-          -r modules/foundups/pfmall/requirements.txt
-          pytest==9.0.3 httpx==0.28.1 starlette==0.50.0
+        run: |
+          python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/nomination-installer-pip.json" pip==26.2.2
+          python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/nomination-pip.json" -r modules/foundups/pfmall/requirements.txt pytest==9.0.3 httpx==0.28.1
+          python -c 'import importlib.metadata as m,json; print(json.dumps(sorted([{"name": d.metadata["Name"], "version": d.version} for d in m.distributions()], key=lambda d: d["name"].lower())))' > "$RUNNER_TEMP/nomination-installed.json"
       - name: Verify nomination and unchanged intake contracts
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
@@ -108,5 +107,7 @@ jobs:
           path: |
             ${{ runner.temp }}/nomination-contracts.xml
             ${{ runner.temp }}/nomination-pip.json
+            ${{ runner.temp }}/nomination-installer-pip.json
+            ${{ runner.temp }}/nomination-installed.json
           if-no-files-found: error
           retention-days: 14
