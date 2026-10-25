@@ -2,6 +2,17 @@
 
 ## Current executable inventory (2026-10-26)
 
+Observation transport extends the existing client owner by32 parameter cases;
+the complete canonical shard is152 client plus15 permission-probe cases.
+Keep all original120 client cases and their assertions. Only the selector test's
+mock callback accepts the new private keyword; its behavioral oracle is unchanged.
+Coverage includes exact origin, same/cross-origin redirects, compression, actual
+2MiB boundaries with absent/low Content-Length, early declared oversize, fragmented
+reads, per-request options, whole timeout, cancellation/response release, media
+types, status, UTF-8/recursion sanitation and legacy large-response compatibility.
+The response and StreamReader mocks validate application policy/cleanup; they do
+not prove wire framing, actual decompression/reconnect behavior or OS isolation.
+
 The canonical unit shard contains exactly test_github_api_client.py (real client,
 mocked HTTP) and test_reddog_github_permission_probe.py (mock backend and dry-run
 mapping). Extend these owners; the proposed files in the historical strategy

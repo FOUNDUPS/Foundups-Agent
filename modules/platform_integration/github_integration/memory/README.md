@@ -17,3 +17,8 @@ authenticated provider boundary, then verify a fresh nonce and key possession.
 
 Historical README completeness/security percentages are not current audit results.
 Use exact source, test IDs, environment and hosted receipts for current claims.
+
+Observation HTTP has a private bounded GET policy; legacy requests retain theirs.
+Count actual chunks before JSON parsing and preserve cancellation/cleanup. Library
+deadlines are not hard wall-time/RSS guarantees; logical GET counts are distinct
+from aiohttp reconnect retries. Never infer authenticated control from these bounds.

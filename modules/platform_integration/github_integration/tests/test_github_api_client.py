@@ -10,9 +10,10 @@ import copy
 import dataclasses
 import hashlib
 import asyncio
+import json
 from datetime import datetime
 from unittest.mock import AsyncMock, Mock, patch
-from aioresponses import aioresponses
+from aioresponses import aioresponses, CallbackResult
 
 from modules.platform_integration.github_integration.src.github_api_client import (
     GitHubAPIClient,
@@ -663,7 +664,7 @@ class TestGitHubFileObservation:
     async def test_repository_selectors_are_snapshotted_across_awaits(self, github_client):
         case = _observation_case()
         pending = iter(case["responses"])
-        async def reply(method, endpoint):
+        async def reply(method, endpoint, **_transport_options):
             github_client.owner, github_client.repo = "OtherOwner", "OtherRepo"
             return next(pending)
         request = AsyncMock(side_effect=reply)
@@ -805,3 +806,203 @@ class TestGitHubFileObservation:
             case = _observation_case()
             case["responses"][0] = bad
             await _reject_observation(github_client, case)
+
+
+class TestGitHubObservationTransport:
+    @pytest.mark.asyncio
+    async def test_observation_request_policy(self, github_client):
+        case = _observation_case()
+        with aioresponses() as mocked:
+            for endpoint, payload in zip(case["endpoints"], case["responses"]):
+                mocked.get("https://api.github.com/" + endpoint, payload=payload)
+            async with github_client as client:
+                result = await client.get_file_observation(case["path"])
+            calls = [call for group in mocked.requests.values() for call in group]
+        _assert_observation(result, case["expected"])
+        assert len(calls) == len(case["endpoints"]) <= 13
+        for call in calls:
+            assert call.kwargs["allow_redirects"] is False
+            assert call.kwargs["auto_decompress"] is False
+            assert call.kwargs["headers"]["Accept-Encoding"] == "identity"
+            timeout = call.kwargs["timeout"]
+            assert (timeout.total, timeout.connect, timeout.sock_connect, timeout.sock_read) == (5, 2, 2, 2)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("base", ["http://api.github.com", "https://api.github.com.evil.invalid",
+        "https://name@api.github.com", "https://api.github.com/path", "https://api.github.com?x=1",
+        "https://api.github.com/"], ids=["http", "suffix", "userinfo", "path", "query", "slash"])
+    async def test_noncanonical_origin_rejected_before_http(self, github_client, base):
+        github_client.base_url = base
+        with aioresponses() as mocked:
+            async with github_client as client:
+                with pytest.raises(GitHubAPIError) as caught:
+                    await client.get_file_observation("proof/challenge.bin")
+            assert not mocked.requests
+        _assert_observation_error(caught.value)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("target", ["https://api.github.com/redirected", "https://elsewhere.invalid/redirected"],
+                             ids=["same-origin", "cross-origin"])
+    async def test_redirect_is_not_followed(self, github_client, target):
+        redirected = Mock(return_value=CallbackResult(payload={"message": _OBSERVATION_SENTINEL}))
+        with aioresponses() as mocked:
+            mocked.get("https://api.github.com/repos/TestOwner/TestRepo", status=302, headers={"Location": target})
+            mocked.get(target, callback=redirected)
+            async with github_client as client:
+                with pytest.raises(GitHubAPIError) as caught:
+                    await client.get_file_observation("proof/challenge.bin")
+            assert sum(map(len, mocked.requests.values())) == 1
+            assert all(str(url) != target for _, url in mocked.requests)
+            redirected.assert_not_called()
+        _assert_observation_error(caught.value)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("encoding", ["gzip", "deflate", "br", "duplicate"])
+    async def test_compressed_response_rejected(self, github_client, encoding):
+        case = _observation_case()
+        headers = [("Content-Encoding", "identity"), ("Content-Encoding", "gzip")] if encoding == "duplicate" \
+            else {"Content-Encoding": encoding}
+        with aioresponses() as mocked:
+            for endpoint, payload in zip(case["endpoints"], case["responses"]):
+                mocked.get("https://api.github.com/" + endpoint, payload=payload,
+                           headers=headers)
+            async with github_client as client:
+                with pytest.raises(GitHubAPIError) as caught:
+                    await client.get_file_observation(case["path"])
+            assert sum(map(len, mocked.requests.values())) == 1
+        _assert_observation_error(caught.value)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("extra", [-1, 0, 1], ids=["below", "at", "over"])
+    @pytest.mark.parametrize("declared", [None, "1"], ids=["absent-length", "misleading-length"])
+    async def test_raw_body_boundary(self, github_client, extra, declared):
+        case = _observation_case()
+        raw = json.dumps(case["responses"][0]).encode()
+        raw += b" " * (2 * 1024 * 1024 + extra - len(raw))
+        headers = {} if declared is None else {"Content-Length": declared}
+        with aioresponses() as mocked:
+            mocked.get("https://api.github.com/" + case["endpoints"][0], body=raw, headers=headers)
+            for endpoint, payload in zip(case["endpoints"][1:], case["responses"][1:]):
+                mocked.get("https://api.github.com/" + endpoint, payload=payload)
+            async with github_client as client:
+                if extra > 0:
+                    with pytest.raises(GitHubAPIError) as caught:
+                        await client.get_file_observation(case["path"])
+                    _assert_observation_error(caught.value)
+                    assert sum(map(len, mocked.requests.values())) == 1
+                else:
+                    _assert_observation(await client.get_file_observation(case["path"]), case["expected"])
+
+    @pytest.mark.asyncio
+    async def test_declared_oversize_rejected_before_read(self, github_client):
+        read = AsyncMock(side_effect=AssertionError("body must not be read"))
+        with aioresponses() as mocked, patch.object(aiohttp.StreamReader, "read", read):
+            mocked.get("https://api.github.com/repos/TestOwner/TestRepo", payload={},
+                       headers={"Content-Length": str(2 * 1024 * 1024 + 1)})
+            async with github_client as client:
+                with pytest.raises(GitHubAPIError) as caught:
+                    await client.get_file_observation("proof/challenge.bin")
+            read.assert_not_awaited()
+        _assert_observation_error(caught.value)
+
+    @pytest.mark.asyncio
+    async def test_fragmented_reads_continue_to_eof(self, github_client):
+        case, original = _observation_case(), aiohttp.StreamReader.read
+        async def short_read(stream, n=-1):
+            assert 0 < n <= 65536
+            return await original(stream, min(n, 7))
+        with aioresponses() as mocked, patch.object(aiohttp.StreamReader, "read", short_read):
+            for endpoint, payload in zip(case["endpoints"], case["responses"]):
+                mocked.get("https://api.github.com/" + endpoint, payload=payload)
+            async with github_client as client:
+                _assert_observation(await client.get_file_observation(case["path"]), case["expected"])
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("cancel", [False, True], ids=["whole-deadline", "caller-cancel"])
+    async def test_timeout_and_cancellation_release_response(self, github_client, cancel):
+        from modules.platform_integration.github_integration.src import github_api_client as api
+        started, stopped, released = asyncio.Event(), asyncio.Event(), []
+        original_release = aiohttp.ClientResponse.release
+        async def blocked_read(stream, n=-1):
+            started.set()
+            try:
+                await asyncio.Event().wait()
+            finally:
+                stopped.set()
+        def release(response):
+            released.append(True)
+            return original_release(response)
+        with aioresponses() as mocked, patch.object(aiohttp.StreamReader, "read", blocked_read), \
+                patch.object(aiohttp.ClientResponse, "release", release), \
+                patch.object(api, "_OBSERVATION_TIMEOUT", 10 if cancel else 0.05, create=True):
+            mocked.get("https://api.github.com/repos/TestOwner/TestRepo", payload={})
+            async with github_client as client:
+                task = asyncio.create_task(client.get_file_observation("proof/challenge.bin"))
+                try:
+                    await asyncio.wait_for(started.wait(), 1)
+                    if cancel:
+                        task.cancel()
+                    with pytest.raises(asyncio.CancelledError if cancel else GitHubAPIError) as caught:
+                        await asyncio.wait_for(task, 1)
+                    assert stopped.is_set() and released
+                    if not cancel:
+                        _assert_observation_error(caught.value)
+                finally:
+                    task.cancel()
+                    await asyncio.gather(task, return_exceptions=True)
+
+    @pytest.mark.asyncio
+    async def test_legacy_request_keeps_existing_body_policy(self, github_client):
+        payload = dict(_observation_case()["responses"][0], html_url="public-url", description="x" * (2 * 1024 * 1024))
+        with aioresponses() as mocked:
+            mocked.get("https://api.github.com/repos/TestOwner/TestRepo", payload=payload)
+            async with github_client as client:
+                assert (await client.get_repository()).description == payload["description"]
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("status", [201, 403, 500])
+    async def test_only_status_200_admitted(self, github_client, status):
+        case = _observation_case()
+        with aioresponses() as mocked:
+            for endpoint, payload in zip(case["endpoints"], case["responses"]):
+                mocked.get("https://api.github.com/" + endpoint, payload=payload, status=status)
+            async with github_client as client:
+                with pytest.raises(GitHubAPIError) as caught:
+                    await client.get_file_observation(case["path"])
+            assert sum(map(len, mocked.requests.values())) == 1
+        _assert_observation_error(caught.value)
+
+    @pytest.mark.asyncio
+    async def test_observation_opt_in_rejects_write_before_http(self, github_client):
+        with aioresponses() as mocked:
+            async with github_client as client:
+                with pytest.raises(GitHubAPIError) as caught:
+                    await client._make_request("POST", "repos/TestOwner/TestRepo", _observation=True)
+            assert not mocked.requests
+        _assert_observation_error(caught.value)
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("mime", ["text/html", "application/vnd.github+json"])
+    async def test_json_media_type_policy(self, github_client, mime):
+        case = _observation_case()
+        with aioresponses() as mocked:
+            for endpoint, payload in zip(case["endpoints"], case["responses"]):
+                mocked.get("https://api.github.com/" + endpoint, payload=payload, content_type=mime)
+            async with github_client as client:
+                if mime == "text/html":
+                    with pytest.raises(GitHubAPIError) as caught:
+                        await client.get_file_observation(case["path"])
+                    _assert_observation_error(caught.value)
+                else:
+                    _assert_observation(await client.get_file_observation(case["path"]), case["expected"])
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("problem", ["utf8", "recursion"])
+    async def test_body_decode_errors_sanitized(self, github_client, problem):
+        raw = b"\xff" if problem == "utf8" else b"[" * 20000 + b"]" * 20000
+        with aioresponses() as mocked:
+            mocked.get("https://api.github.com/repos/TestOwner/TestRepo", body=raw)
+            async with github_client as client:
+                with pytest.raises(GitHubAPIError) as caught:
+                    await client.get_file_observation("proof/challenge.bin")
+        _assert_observation_error(caught.value)

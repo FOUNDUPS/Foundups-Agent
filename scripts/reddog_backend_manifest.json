@@ -2871,7 +2871,7 @@
     "modules/platform_integration/antifafm_broadcaster/src/youtube_ingest_resolver.py": "fe184611cee830b1ef9e82318dccfbe2efb9667546373b44008c44700f2d612d",
     "modules/platform_integration/github_integration/__init__.py": "491b21602ee21976ed65be6f52c3c60d9be9207148ac4c7f15d653ed625e76d5",
     "modules/platform_integration/github_integration/src/__init__.py": "a8bd9d858c911d4940acd5dc718bcd70f42fbb4bc8a80ff92dd9a31905cf8a50",
-    "modules/platform_integration/github_integration/src/github_api_client.py": "74e733a841fb32ccd2af82cfc75a34a282276e7d58f7656a743ea01782da5cb8",
+    "modules/platform_integration/github_integration/src/github_api_client.py": "e0e906c197b5b3432a6e600ccb663051d6bc7d2e52e2587016f28f9fc455d4dc",
     "modules/platform_integration/github_integration/src/reddog_github_permission_probe.py": "1fc6510505d41632cd18e3a4ec178501913b7e9c059ab1a902c06c9226713cad",
     "modules/platform_integration/linkedin_agent/__init__.py": "26ad290f0ac8f8871b4fc7f7a437ff82e5b1c9528929e3bf7cdd76a7a8e93abf",
     "modules/platform_integration/linkedin_agent/skillz/linkedin_agentic_reply/__init__.py": "24b0ce182af7ca6e9477e38f3721904a1907c8326d95e6c74f3fbb4363205d94",

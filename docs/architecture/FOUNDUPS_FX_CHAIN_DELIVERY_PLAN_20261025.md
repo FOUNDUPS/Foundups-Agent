@@ -4,6 +4,12 @@ Status: active layered delivery; no testnet or production readiness claim.
 
 ## Observation HTTP allocation — 2026-10-26, before authoring
 
+Review amendment: add32nd case for duplicate encoding; retain all existing budgets.
+Local result: original135PASS; frozen RED146PASS/20FAIL; initial GREEN166PASS.
+Duplicate-header RED166PASS/1FAIL; final167PASS preserves original exact IDs.
+32 new HTTP cases; no live provider/control/issuance or runtime claim. Hosted
+gates, independent review and current-main convergence remain required.
+
 WSP15 C3/I3/D2/Impact3=11/P2; WSP00/6/11/15/22/50/62/71/84/97.
 Parent main2c9c93ead0ee146da8b18078129e4b7059fd4cc8; clean owned
 repository-observation worktree, agent/foundups-observation-transport-20261026.
