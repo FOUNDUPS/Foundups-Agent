@@ -825,3 +825,34 @@ UNKNOWN, index gap true. Results identified the existing editor; optional
 roadmap/test README/memory artifacts absent. Exact files inspected directly.
 The bounded static tool is simpler than deploying the loopback render server
 as a public service; hosting remains a separate unverified gate.
+
+## 2026-10-26 — Collapse sound word and production review lesson
+
+Stomp-mode early cue now reads THUMP! with a shorter low-frequency impact;
+legacy non-stomp audio/captions are preserved. Updated production skill v0.2.1
+and story-direction reference with material continuity, anticipation/reaction,
+transition-frame review and sound-word pairing. EDUIT owns the shared scene.
+Next actual episode remains the transfer test; no autonomous learning claim.
+
+Latest creator clarification: the educational targets are THUMP → CRACK →
+SQUISH, replacing incidental stomp/crunch labels. Original crack bursts occur
+as fissures develop; compression tone/sweep and SQUISH coincide. Caption tests
+assert the three-word order and event windows. Production skill now requires
+a word → visible referent → actual sound trace rather than decorative captions.
+
+## 2026-10-26 — Ordered preview audits and milestone workflow
+
+Production skill v0.2.2 specifies physics/causality → continuity → education →
+art/readability on rendered outputs. Capture repeat sniff learning, event-local
+word anchors, staggered reactions, intermediate turning poses and English-only
+prototype versus planned reviewed locales. Series README records failures in
+current output against the new brief. Skill/docs iteration only; no new render,
+PR, publishing, paid generation or autonomous WRE/RSI activation. Bundle at the
+next milestone; focused preview checks need not wait for broad repository CI.
+
+## 2026-10-26 — Shared learning-event audio and spatial captions
+
+EDUIT supplies one event sheet to synthesized foley and scene rendering. Added
+optional Boolean captions_in_scene to existing renderer, retaining SRT while
+skipping duplicate burn-in. Legacy audio/caption behavior remains the default.
+Actual three-cycle video review and residual limits are in EDUIT ModLog.

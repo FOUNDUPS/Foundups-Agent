@@ -102,3 +102,22 @@ above game as EDUIT.org’s POC entry, with parent access to the catalog/about
 page. Implement through existing Mall owners before claiming shared-PWA
 integration. The current build/target files still package the earlier layout;
 this documentation does not change deployed routes or DNS.
+
+
+## Private Storytime review milestone — 2026-10-26
+
+Sites project `appgprj_6adea1a229dc81918f412edb117f0ba9` hosts the creator preview.
+The deployment copies `public/eduit`, mounts the existing Shorts editor assets at
+`review/`, and includes the exact latest local MP4 and scene sources. Its root
+opens `review/director.html`. This is private staging, not the EDUIT custom domain.
+
+The director supports video playback, the shared two-tap game, scene scrubbing,
+and normalized pointer marks with episode revision and timestamp. Notes are
+local to the browser; copy the feedback record to 0102. There is no automatic
+Red Dog ingestion, microphone capture, or child profile collection.
+
+Observed browser checks: MP4 displays 15 seconds; a pointer stroke and note
+survive reload and reopen; scene seeks to 10 seconds; the game accepts wake
+then root actions. Audio perception and physical phone testing remain unverified.
+Creative revisions stay on the working branch; milestone PRs collect changes
+after review rather than requiring a PR for each preview.
