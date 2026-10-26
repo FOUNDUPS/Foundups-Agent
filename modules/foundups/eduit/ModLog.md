@@ -209,3 +209,22 @@ No numerical average, autonomous worker or next-episode transfer success claimed
 Independent grade review rejected unsupported4/5 entry/readability claims; both
 were reduced to3/5 with their missing observations retained. Source code passed
 14 cases; no new capability or media change was made to raise the score.
+
+
+## 2026-10-26 — Episode tile controls, documentation only
+
+WSP97: source inspected at 1cc7c7228991043ee513ef9f00854ff1e88f4bd1; no viewer
+delta since the reviewed Home Screen milestone. Added canonical tile-controls
+contract: fullscreen video/game switching, pinch/icon parity, exact-frame
+whiteboard, draft retention/share, video-only repeat, child touch-lock and deferred
+Mall ratings. Updated README/INTERFACE/ROADMAP/architecture/deployment/review links;
+reconciled stale hostname, flag labels and private-staging statements. Source
+retrieval is lexical with semantic freshness UNKNOWN, not index maintenance.
+WRE activation is not applicable to this docs-only slice. Runtime, media, DNS,
+YouTube and secrets unchanged. Validation and independent review recorded in PR.
+
+Documentation validation: local Markdown links and diff whitespace pass.
+Independent reviewer confirmed scope and requested correction of stale locale
+status; corrected game en/ja/pt/es vs English film. No runtime tests rerun for
+prose-only changes. Related draft #2221 remains a separate preserved deployment
+lane requiring rebase/reconciliation, not closed as if it were superseded.
