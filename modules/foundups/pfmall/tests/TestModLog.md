@@ -1,5 +1,19 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Real serving acceptance frozen before profile change
+
+Allocation665112e88,14/P1: append three real-process/loopback cases to the existing
+RSA owner, with bounded startup/read/cleanup and child port0/PID log evidence.
+The valid path exercises minimal health,401/201/404, no-store, no server/access
+header logging and actual chunked valid-JSON padding beyond16KiB rejection.
+Missing/malformed policy must terminate before any listening-port announcement.
+Reuse existing RSA/config helpers and all814 cases without oracle changes.
+Old patched profile RED:814PASS/3FAIL/0ERROR/0SKIP; Uvicorn is not installed there.
+Sources stay stable during the run. Evidence: external foundups-member-serving-
+20261026, serving_red JSON/JUnit/log and child logs. The clean child environment
+and loopback subprocess are explicit permissions, not OS/network isolation.
+Freeze these assertions before adding the separate server profile or CI change.
+
 ## 2026-10-26 — Isolated host acceptance frozen before authoring
 
 Allocationf8fa5b25c,15/P1. Reuse the patched Python3.12.10/pytest9.0.3 HTTP/RSA
