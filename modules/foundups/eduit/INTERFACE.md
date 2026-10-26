@@ -5,7 +5,7 @@ Canonical product design: [Episode Mall architecture](docs/EPISODE_MALL_ARCHITEC
 
 ## Existing local prototype
 
-- `public/eduit/storytime/engine.mjs`: deterministic two-cue game and practice.
+- `public/eduit/storytime/engine.mjs`: deterministic 15-second, five-character rescue game.
 - `public/eduit/storytime/scene.mjs`: shared absolute-time scene/movie rendering.
 - `build_site.py`: packages the existing static site, freshly generated media and
   Shorts-owned creator-review assets at `/review/`; refuses existing output.
@@ -46,3 +46,11 @@ Reuse `public/member/INTERFACE.md`, fullscreen/navigation contracts, product sta
 is not a composite episode queue. Preserve other products' behavior.
 PWA install/offline, public-product admission and authenticated conversation
 transport each need separate evidence; none is implied by a working static page.
+
+
+## Current rescue/viewer milestone
+
+See [rescue game and review contract](docs/RESCUE_GAME_REVIEW.md) for the latest
+accepted timeline, five-character rescue mechanics, child-first viewer, local
+whiteboard, fullscreen gestures, priorities and deferred agent experiment.
+This supersedes the earlier two-cue timeout/practice game description.

@@ -1,5 +1,29 @@
 # Acoustic Lab TestModLog
 
+## 2026-10-26 - Requests 2.33.0 candidate qualification
+
+Reuse the existing CI first-phase script and all 18 selected identities.
+In a disposable Linux Python 3.12 environment with the complete current
+Acoustic Lab profile and Requests 2.33.0, all 18 pass. The guard sanity
+controls, exact JUnit identity comparison and source stability checks pass;
+there are no unexpected or duplicate effects. No test identity, assertion,
+guard, source behavior or workflow is changed. Dependency consistency also
+passes. The guarded script is stopped at its existing separate-child boundary;
+this local result does not claim the later owned-child or Gunicorn phases.
+
+The three existing geofencing cases separately give two passes and the known
+test_geolocation_service_failure failure. Its generic Exception mock escapes
+the production requests.RequestException handler. A separate replay importing
+the original Requests 2.31.0 wheel reproduces exactly that result; the failure
+does not originate in this update. Keep both JUnit outputs rather than changing
+the production handler or weakening the assertion.
+
+Evidence is retained externally in python-audit/acoustic-evidence/tmp/
+acoustic-adapter.json and its XML, plus geofence.xml and geofence-baseline.xml.
+Current exact-head hosted Python 3.11/3.12, owned-child and native Gunicorn
+acceptance is still required. Other historical broad-suite failures are not
+rerun or claimed fixed.
+
 ## 2026-10-25 - Timeout repair author and independent local results
 
 The original 18 selected identities are preserved. Only the existing timeout

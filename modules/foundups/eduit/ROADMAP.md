@@ -44,3 +44,11 @@ reservations. Persist private draft tiles, pair video with a reviewed activity
 template, review and publish into EDUIT's shared catalog. Confirm entitlement,
 quota/retry settlement and rating/moderation owners before coding. Public
 multi-user editing, creation pricing and automatic publication are not live.
+
+
+## Current rescue/viewer milestone
+
+See [rescue game and review contract](docs/RESCUE_GAME_REVIEW.md) for the latest
+accepted timeline, five-character rescue mechanics, child-first viewer, local
+whiteboard, fullscreen gestures, priorities and deferred agent experiment.
+This supersedes the earlier two-cue timeout/practice game description.

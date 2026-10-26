@@ -1,5 +1,17 @@
 # foundups_mcp_bridge TestModLog
 
+## 2026-10-26: FastMCP 3.4.11 exact-contract candidate
+
+- Retain the existing 49-case Windows compatibility selection and exact quartet
+  comparison. Update only the reviewed FastMCP version in the existing isolated
+  query candidate regression; no skip condition or assertion is weakened.
+- Disposable Linux Python 3.12.14: 28 passed, 19 existing Windows-only skips,
+  two Windows-owned HTTP lifecycle cases explicitly deselected. The actual
+  candidate interpreter passes the launcher capability probe and pip check.
+- These Linux results do not replace the required 49/49, zero-skips Windows
+  lifecycle gate. The original requirement-only PR2190 failure remains recorded
+  at Actions run 40148256348, job 121034152544 (45 passed, 4 failed).
+
 ## [2026-10-19] MCP 1.30.0 coordinated dependency contract
 
 - Updated the existing exact launcher dependency assertion to MCP 1.30.0;

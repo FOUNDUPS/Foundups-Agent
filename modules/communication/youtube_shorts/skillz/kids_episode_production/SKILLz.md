@@ -1,6 +1,6 @@
 ---
 name: kids_episode_production
-version: 0.2.1
+version: 0.2.2
 intent_type: GENERATION
 promotion_state: prototype
 ---
@@ -13,7 +13,7 @@ Use FOUNDUPS/Foundups-Agent as the implementation authority. Read AGENTS.md, WSP
 
 ## Story direction before production
 
-Read `references/story-direction.md` before scripting or revising an educational event. Apply its causal staging and silent-storyboard checks before the existing production workflow.
+Read `references/story-direction.md` before scripting or revising an educational event. Apply its ordered physics, continuity, education and art/readability audits to each preview. Use the fast creative loop and milestone integration rules; record unverified listening separately.
 
 ## Story-first production
 

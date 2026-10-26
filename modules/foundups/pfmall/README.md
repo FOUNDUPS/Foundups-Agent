@@ -31,6 +31,12 @@ execution, or FoundUp business logic.
 - `member_catalog_export.py` explicitly generates
   `public/member/mall-catalog.json`; generation is a write operation and is
   never performed by the read API.
+- `intake_host.py` supplies an isolated ASGI `create_app` factory for proposal
+  intake and minimal health only. It loads a bounded, administrator-selected
+  public policy file through `PFMALL_CLERK_POLICY_FILE`; invalid/missing config
+  stops startup. It reuses the existing handler and verifier, without publishing
+  development catalog/static routes. Container/cloud and real-session
+  qualification remain required; no deployed service is established here.
 - `member_presentation.py` owns UI-only presentation overrides.
 - `content_load_policy.py` defines bounded load-policy data contracts; it does
   not load content.
@@ -46,9 +52,14 @@ not upgrade the FoundUps umbrella or install a server. Configure
 `app.state.clerk_intake_policy` with a `ClerkIntakePolicy` from
 `modules.ai_intelligence.ai_overseer.src.foundup_genesis.clerk_intake`, using an
 independently selected issuer, HTTPS frontend origins and that instance's RSA
-public key. There is no default policy, environment loader, JWKS request, browser
+public key. That development app has no default policy, environment loader, JWKS request, browser
 submission button, persistence or deployment in this component. A short-lived
 signed-in session permits a draft, not Mall membership or project ownership.
+The isolated factory instead accepts an absolute regular-file target containing
+at most16KiB UTF-8 JSON with exactly `issuer`, `authorized_parties` (list) and
+`public_key_pem`. Duplicate fields and invalid canonical RSA policies fail with
+`intake_configuration_invalid`; no configuration values are logged. Each serving
+app owns its own policy. `/healthz` reports local readiness only, with no-store.
 
 The current browser concierge is a shell-local FAQ IIFE: it makes no network
 call and is not an AI runtime. The `pfmall-control-dispatcher.js` message bridge

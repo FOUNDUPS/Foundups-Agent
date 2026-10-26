@@ -102,6 +102,31 @@ No public deployment is established. The backend policy and real member-token
 smoke test, current membership/revocation, challenge+atomic receipt owner,
 rate/abuse limits and release qualification remain separate prerequisites.
 
+### Isolated proposal host factory — 2026-10-26
+
+`modules.foundups.pfmall.intake_host.create_app()` constructs a separate FastAPI
+application with only `POST /pfmall/proposals` and `GET /healthz`. OpenAPI/docs,
+catalog/static and FoundUp handoff routes are absent. The POST is the same
+`http_api.foundup_proposal` function; policy lookup uses `request.app.state`,
+keeping factory instances and the development app independent.
+
+Trusted server environment must set `PFMALL_CLERK_POLICY_FILE` to an absolute
+regular-file target. Read at most16KiB UTF-8 JSON; require a unique-field object
+with exactly `issuer`, `authorized_parties` (list) and `public_key_pem`. Convert
+parties to the existing tuple policy and reuse canonical public-RSA validation.
+Missing/unreadable/oversized/invalid configuration stops construction with
+`RuntimeError("intake_configuration_invalid")`, without values or fallback policy.
+This is administrator configuration, never selected by a request/header/cookie.
+
+`GET /healthz` returns200 `{"status":"ready"}` with `Cache-Control: no-store`
+after valid local configuration. It is not an online identity/provider probe.
+There is no dotenv/JWKS request or credential/key material generation. Local file
+integrity/custody remains the administrator's obligation; no sealed inode claim.
+Existing draft-only authentication, wire/body bounds and generic failures apply.
+Container/serving profile, cloud IAM/cost limits, real session, same-origin
+browser, abuse/revocation and release qualification remain required. This factory
+does not persist drafts, establish project ownership or grant execution/tokens.
+
 ## Explicit write surface
 
 `export_mall_catalog(output_path=..., shell=None) -> Path` is a separate,

@@ -17,6 +17,7 @@ from modules.foundups.pfmall.http_api import app
 ISSUER = "https://identity.example.com"
 ORIGIN = "https://foundups.example.com"
 OWNER = "modules.ai_intelligence.ai_overseer.src.foundup_genesis.clerk_intake"
+HOST = "modules.foundups.pfmall.intake_host"
 PROPOSAL = {"proposed_name": "Garden Share", "reference_urls": ["https://example.com/garden"]}
 PATH = "/pfmall/proposals"
 
@@ -321,3 +322,96 @@ def test_crlf_public_document_is_supported(owner, policy):
     current = owner.ClerkIntakePolicy(issuer=ISSUER, authorized_parties=(ORIGIN,),
         public_key_pem=policy.public_key_pem.replace("\n", "\r\n"))
     assert current.issuer == policy.issuer
+
+
+def host_config(tmp_path, policy):
+    path = tmp_path / "policy.json"
+    path.write_text(json.dumps({"issuer": policy.issuer,
+        "authorized_parties": list(policy.authorized_parties),
+        "public_key_pem": policy.public_key_pem}), encoding="utf-8")
+    return path
+
+
+def test_isolated_host_reuses_handler_with_its_own_policy(tmp_path, policy, key, monkeypatch):
+    monkeypatch.setenv("PFMALL_CLERK_POLICY_FILE", str(host_config(tmp_path, policy)))
+    monkeypatch.setattr(app.state, "clerk_intake_policy", None, raising=False)
+    current = importlib.import_module(HOST).create_app()
+    route = next(route for route in current.routes if route.path == PATH)
+    assert route.endpoint is importlib.import_module("modules.foundups.pfmall.http_api").foundup_proposal
+    with TestClient(current) as client:
+        response = post(client, key)
+        assert response.status_code == 201 and response.json()["status"] == "DRAFT_ONLY"
+        assert response.headers["cache-control"] == "no-store"
+        assert_rejected(post(client, key, Origin="https://other.example.com"))
+    assert app.state.clerk_intake_policy is None
+
+
+def test_host_instances_keep_independent_signing_policies(tmp_path, policy, key, owner, monkeypatch):
+    path = host_config(tmp_path, policy)
+    monkeypatch.setenv("PFMALL_CLERK_POLICY_FILE", str(path))
+    first = importlib.import_module(HOST).create_app()
+    other = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+    pem = other.public_key().public_bytes(serialization.Encoding.PEM,
+        serialization.PublicFormat.SubjectPublicKeyInfo).decode("ascii")
+    host_config(tmp_path, owner.ClerkIntakePolicy(ISSUER, (ORIGIN,), pem))
+    second = importlib.import_module(HOST).create_app()
+    with TestClient(first) as a, TestClient(second) as b:
+        assert post(a, key).status_code == post(b, other).status_code == 201
+        assert_rejected(post(a, other))
+        assert_rejected(post(b, key))
+
+
+@pytest.mark.parametrize("path", ["/docs", "/redoc", "/openapi.json", "/pfmall/catalog",
+                                  "/pfmall/ui/", "/pfmall/static/", "/f/example"])
+def test_host_does_not_publish_unrelated_routes(tmp_path, policy, monkeypatch, path):
+    monkeypatch.setenv("PFMALL_CLERK_POLICY_FILE", str(host_config(tmp_path, policy)))
+    with TestClient(importlib.import_module(HOST).create_app()) as current:
+        assert current.get(path).status_code == 404
+
+
+def test_host_health_exposes_no_policy_or_catalog(tmp_path, policy, monkeypatch):
+    monkeypatch.setenv("PFMALL_CLERK_POLICY_FILE", str(host_config(tmp_path, policy)))
+    with TestClient(importlib.import_module(HOST).create_app()) as current:
+        response = current.get("/healthz")
+    assert response.status_code == 200 and response.json() == {"status": "ready"}
+    assert response.headers["cache-control"] == "no-store"
+
+
+@pytest.mark.parametrize("kind", ["missing_env", "relative", "missing_file", "directory",
+    "oversize", "utf8", "malformed", "array", "null", "duplicate", "unknown", "deep",
+    "missing_issuer", "missing_parties", "missing_key", "parties_string", "private_key"])
+def test_host_rejects_invalid_server_config_generically(tmp_path, policy, key, monkeypatch, kind):
+    path = host_config(tmp_path, policy)
+    values = json.loads(path.read_text(encoding="utf-8"))
+    missing = {"missing_issuer": "issuer", "missing_parties": "authorized_parties",
+               "missing_key": "public_key_pem"}
+    if kind in missing:
+        del values[missing[kind]]
+    elif kind == "unknown":
+        values["authenticated"] = True
+    elif kind == "parties_string":
+        values["authorized_parties"] = ORIGIN
+    elif kind == "private_key":
+        values["public_key_pem"] = key.private_bytes(serialization.Encoding.PEM,
+            serialization.PrivateFormat.PKCS8, serialization.NoEncryption()).decode("ascii")
+    raw = json.dumps(values).encode("utf-8")
+    special = {"oversize": raw + b" " * (16385 - len(raw)), "utf8": b"\xff",
+        "malformed": b"{", "array": b"[]", "null": b"null", "deep": b"[" * 1100 + b"]" * 1100,
+        "duplicate": b'{"issuer":"https://other.example.com",' + raw[1:]}
+    path.write_bytes(special.get(kind, raw))
+    selected = {"relative": "policy.json", "missing_file": str(path) + ".missing",
+                "directory": str(tmp_path)}.get(kind, str(path))
+    monkeypatch.setenv("PFMALL_CLERK_POLICY_FILE", selected)
+    if kind == "missing_env":
+        monkeypatch.delenv("PFMALL_CLERK_POLICY_FILE")
+    with pytest.raises(RuntimeError, match="^intake_configuration_invalid$"):
+        importlib.import_module(HOST).create_app()
+
+
+def test_host_accepts_exact_config_byte_cap(tmp_path, policy, key, monkeypatch):
+    path = host_config(tmp_path, policy)
+    raw = path.read_bytes()
+    path.write_bytes(raw + b" " * (16384 - len(raw)))
+    monkeypatch.setenv("PFMALL_CLERK_POLICY_FILE", str(path))
+    with TestClient(importlib.import_module(HOST).create_app()) as current:
+        assert post(current, key).status_code == 201

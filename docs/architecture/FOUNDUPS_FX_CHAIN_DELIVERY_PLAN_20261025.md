@@ -2,6 +2,71 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Member host bootstrap allocation — 2026-10-26, before authoring
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/71/77/84/97/109.
+Parent mainfe721d3778969f950dde3b291cf24724d018ee7d; reuse the clean owned
+repository-observation worktree on agent/foundups-member-host-20261026.
+Need: the published draft route has no configured production host. Exact source
+search finds its only policy assignments in tests; Hosting has no API rewrite.
+Read-only Firebase inventory binds projectgen-lang-client-0061781628, its existing
+foundupscom site and six ACTIVE Node20 functions inus-central1. Their matching
+entrypoint is ignored in the shared checkout and absent from clean main, with no
+Clerk reference. Preserve those sources/services and all shared checkout state.
+Installed gcloud has no active account; Docker's current daemon connection fails.
+These observations do not prove billing/IAM, deployed source equivalence or a
+Cloud Run inventory. Evidence: external foundups-member-host-discovery-20261026.
+
+Simplest layer: supply the actual intended isolated ASGI host factory before its
+container/cloud/browser qualification. Reuse existing ClerkIntakePolicy, verifier,
+body/wire limits, mapper and proposal handler; do not clone them in Node or expose
+the development catalog/static application. Bind policy to request.app.state so
+separate server instances do not read the development app's global policy.
+
+Add one <=150-line intake_host.py in the existing flat PFMall owner. Its no-argument
+create_app factory reads only PFMALL_CLERK_POLICY_FILE from trusted server config;
+require an absolute regular-file path, bounded16KiB UTF-8 JSON, unique/exact fields
+issuer/authorized_parties/public_key_pem, and the existing canonical public-RSA
+policy validation. Missing/invalid configuration fails startup with one generic
+error and no configuration/token/key values. No dotenv, default/test issuer,
+provider/JWKS call, membership/revocation claim, private key, storage or grants.
+Expose only POST /pfmall/proposals and minimal no-store GET /healthz; disable
+OpenAPI/docs and unrelated catalog/static/FoundUp routes. Reuse all draft semantics.
+
+Execution plane: local app construction and ordinary credential-free ASGI tests,
+not WRE/resident, cloud deployment, IAM expansion or a live provider session.
+Test-first: preserve the exact786-case seven-owner baseline in the already qualified
+patched optional profile. Extend the existing323-line real-RSA/HTTP test owner by
+<=140 lines/<=30 cases, total<=470; retain all91 old cases/oracles and shared RSA
+fixtures. Freeze desired bootstrap/config/instance-isolation acceptance before
+production edits; retain actual RED, then full GREEN/old-ID parity and independent
+boundary review. Do not mirror all existing token/body tests or add a framework.
+WSP62 exception retains this cohesive fixture/HTTP owner rather than duplicate it.
+
+Budget: new host file above; existing HTTP route changes one policy-owner line;
+workflow adds the new source path to its two existing trigger lists only. Existing
+README+16/INTERFACE+26/ROADMAP+14/ModLog+18, tests README+14/TestModLog+22,
+this plan+65/root ModLog+16. No new test file, dependency, registry or permission.
+Run existing manifest check: if any runtime member/hash/cap would change, stop and
+allocate that real delta before mutation. Do not predict scanner exceptions;
+require actual source-bound classification and fresh hosted gates for publication.
+Historical receipts and protected Mall/TestNet/codec work remain untouched.
+
+Macro path remains bootstrap -> qualified serving/container -> administered public
+policy and cloud IAM/cost bounds -> deployed host/real session -> same-origin UI
+and abuse/revocation qualification -> fresh repository challenge/atomic receipt.
+This layer does not substitute for any of those outcomes or close the whole goal.
+Cloud Run's official FastAPI guide and Uvicorn's factory/resource documentation
+support the selected ASGI path; no CLI/IAM/API-enable/deploy command was executed.
+Sources: [Cloud Run](https://docs.cloud.google.com/run/docs/quickstarts/build-and-deploy/deploy-python-fastapi-service), [Uvicorn](https://uvicorn.dev/settings/).
+
+Retrieval evaluation: task-bound Holo atfe returns UNKNOWN/HEAD_MISMATCH/gaptrue
+againsta519f0ad; no reindex/repair/CURRENT claim. Current source/interface and
+provider resource metadata outrank historical publication-pending prose. Optional
+requirements are present; memory/README absent. Deduplicate into existing RSA,
+mapper and HTTP owners. Qwen/Gemma inference cannot prove app isolation or cloud
+identity; deterministic source/tests plus attributed independent review can.
+
 ## Observation manifest finding allocation — before ledger mutation
 
 WSP15 C1/I4/D5/Impact4=14/P1; WSP6/15/22/50/71/97. Candidate1d2d6a07,

@@ -61,6 +61,14 @@ repository control or a deployed service. Keep legacy HMAC owners unchanged.
 The final profile's retained HTTPX test-client deprecation is reviewed and not
 filtered; it is different from the original AnyIO alias warning.
 
+The same real-RSA owner adds28 isolated-host cases using its original fixtures:
+per-app policy and unchanged-handler identity, separate signing keys, minimal
+routes/health, strict bounded policy files and generic startup failures. No new
+test file or dependency profile. The786-case baseline and all36 original named
+definitions are preserved; test-first RED and814-case GREEN are recorded below.
+These local ASGI checks do not establish container/cloud serving, live provider
+identity, current revocation, abuse protection or a deployed browser integration.
+
 ## Original pre-rebase baseline
 
 At the original pre-rebase baseline

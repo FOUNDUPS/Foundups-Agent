@@ -98,7 +98,7 @@ def render_shot(scene, beat_index, output):
         os.link(temp / "shot.mp4", output)
 
 
-def compose_audio(output, *, stomp=False):
+def compose_audio(output, *, stomp=False, events=None):
     """Original 120 BPM flute-like score plus quiet synthesized snore/sniff/rumble.
 
     No sampled recordings, voices or borrowed melody. Returns actual cue windows.
@@ -113,6 +113,33 @@ def compose_audio(output, *, stomp=False):
         envelope = np.sin(np.pi * np.minimum(1, t / length)) ** 2
         audio[start:start+count] += gain * envelope * (
             np.sin(2 * np.pi * frequency * t) + .12 * np.sin(4 * np.pi * frequency * t))
+
+    if events is not None:
+        # Shared scene event sheet is the timing authority for both sound and text.
+        for start, note in ((0,72),(4.8,76),(12.2,74),(13.5,72)):
+            tone(start,.65,440*2**((note-69)/12),.035)
+        for event in events:
+            start, gain, kind = event['start'], event['gain'], event['kind']
+            if kind == 'thump':
+                tone(start,.32,65,gain)
+                tone(start,.28,83,gain*.3)
+            elif kind in ('sniff','crack'):
+                length=.26 if kind=='sniff' else .16
+                n=round(length*rate)
+                noise=rng.normal(0,gain,n)
+                width=8 if kind=='sniff' else 3
+                noise=np.convolve(noise,np.ones(width)/width,mode='same')
+                envelope=np.sin(np.linspace(0,np.pi,n))**2 if kind=='sniff' else np.exp(-np.linspace(0,6,n))
+                audio[round(start*rate):round(start*rate)+n]+=noise*envelope
+            else:
+                n=round(.55*rate);t=np.arange(n)/rate
+                audio[round(start*rate):round(start*rate)+n]+=gain*np.sin(2*np.pi*(180*t-125*t*t))*np.sin(np.linspace(0,np.pi,n))**2
+        if np.max(np.abs(audio))>=.8:
+            raise ValueError('Unexpected soundtrack peak')
+        with Path(output).open('xb') as target, wave.open(target,'wb') as wav:
+            wav.setparams((1,2,rate,len(audio),'NONE','not compressed'))
+            wav.writeframes((audio*32767).astype('<i2').tobytes())
+        return [{'start':e['start'],'end':e['end'],'text':e['word']} for e in events]
 
     # Authored pitch/rhythm sequence; space around the story's sound cues.
     for start, note in ((0, 72), (1, 76), (2, 74), (3.5, 79), (5, 76),

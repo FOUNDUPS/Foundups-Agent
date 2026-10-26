@@ -44,3 +44,7 @@ quality or establish live hosting. JavaScript syntax and diff whitespace pass.
 
 Extended test_little_shrew_preview.py with THUMP window, ordered foley captions,
 15-second sample count and bounded amplitude; non-stomp deterministic check retained.
+
+2026-10-26 spatial words: renderer contract rejects non-Boolean
+`captions_in_scene`; enabled mode retains validated SRT. Actual EDUIT renders
+verify scene-owned visible words without duplicate subtitle burn-in.

@@ -36,6 +36,65 @@ story contract, not hidden reasoning or a list of animation effects.
     Inspect anticipation, contact, occlusion and reveal frames as well as playback. Give every affected character a visible response before occlusion; do not leave a living cast frozen while the environment changes. Preserve discrepancies and revise the responsible beat. Technical encoding
     checks and a written plan do not prove audience comprehension.
 
+## Ordered output audits — run on every preview revision
+
+Run these passes in order on the rendered outcome, not only the code. Keep each
+pass bounded to the changed beat and its dependencies. Record PASS, FAIL or
+UNVERIFIED with revision, timestamp/frame, observation and repair. If physics
+fails, repair it before polishing typography. After a repair rerun that pass
+and dependent passes; do not repeat unrelated repository suites per preview.
+
+1. **Physics / causal staging:** establish support, gravity direction, contact,
+   travel, collision and occlusion. Follow anticipation → contact → compression
+   → release. A descending roof must visibly cover space and characters, not
+   merely change their visibility. Explain what supports the surviving pocket.
+   Stagger reactions plausibly by character and cue; arbitrary random timing is
+   not physics. Show turns with solid intermediate poses rather than identity swaps or profile/front crossfades. Inspect the midpoint: blended faces can pass endpoint checks yet fail continuity.
+   Use readable stylized mechanics; do not claim a geotechnical simulation or
+   add a physics engine when the existing deterministic scene can express it.
+2. **Continuity:** lock cast IDs, relative scale, geography, material colors,
+   root/pocket geometry and camera. Compare before/during/after and shot joins.
+   Check rendered pixels for material identity; account for codec variation.
+   Verify the full affected chamber disappears with no residual floor or props.
+3. **Education:** name one observable learning objective. For every learning
+   event bind a stable event ID to its visible action, actual sound onset,
+   displayed word and readable duration. For repeated actions, repeat the
+   synchronized word at each occurrence. A sniff must show a nose/body sniff
+   motion, its sound and SNIFF together; sound alone is insufficient. Distinguish
+   sound-word association from spoken pronunciation, reading mastery or proven
+   learning outcomes. Listen to the mix; sample/peak checks alone cannot pass
+   auditory clarity. If listening is unavailable mark that subcheck UNVERIFIED.
+4. **Art direction / readability:** place a large word near its cause (nose,
+   fissure, impact) without covering the action, eyes or essential geography.
+   Use a consistent readable font; vary weight, modest motion or shape only
+   where it reinforces meaning. A crack-like treatment must not break letter
+   recognition. Verify phone-size frames, contrast against each actual background, timing and safe margins. A support or foreground fix must be rechecked against every character below/behind it; solving one physical gap can obscure another learning object.
+   Keep one visible text owner across scene/export/subtitles; avoid double-print.
+   Recheck the whole scene silently, then sound+image together when available.
+
+### Language-ready learning events
+
+Keep event identity, timing, action anchor and sound reference separate from
+locale text, font and optional spoken audio. English is the current prototype;
+Portuguese, Spanish, Japanese and Chinese are future reviewed locale variants,
+not shipped capabilities. Onomatopoeia is language-specific: do not assume a
+literal translation or the same spelling represents the natural local sound.
+Test glyph coverage, line length and readability; use a defined English fallback
+rather than claiming unsupported languages work. Reuse the existing episode
+locale contract when implementing; do not build a second translation service.
+
+### Fast creative loop and milestone integration
+
+Preserve each meaningful revision and correction locally with its source/asset
+identity. Preview → ordered audits → repair → preview is the creative loop.
+Bundle software, skill and documentation changes into a PR at an agreed
+milestone; do not push a new PR or broad CI run for every visual adjustment.
+YouTube publication is a separate authorized media workflow, not a Git merge.
+Changes to authentication, publishing or execution boundaries still require
+appropriate review before use. Store successful corrections as candidate skill
+improvements and test transfer on the next actual episode. This is a manual,
+versioned contribution to RSI, not evidence of an installed autonomous worker.
+
 ## Little Shrew: correction-to-principle record
 
 | Earlier limitation | Creator correction | Transferable rule |
@@ -98,3 +157,13 @@ learning interface generates proposals and apply_improvement currently fails
 closed. Do not claim an automatic production loop merely by calling that API.
 A manually versioned and tested skill is a bounded learning artifact; continual
 execution needs the admitted WRE worker. No new scheduled ChatGPT scout.
+
+
+### Video-to-game review correction — 2026-10-26
+
+The world event must occur on its own timeline even when no input is given. Test
+no action, partial success, full success, late action and retry against the same
+scene. A game's alternative survivors do not rewrite the film's authored outcome.
+Review captured feedback visually: sanitization must preserve safe local character
+references. Keep child-facing play free of creator prose; use explicit review mode.
+These are candidate improvements; next actual episode remains the transfer test.

@@ -32,7 +32,7 @@ def test_validate_copy_and_srt():
 @pytest.mark.parametrize("field,value", [("duration_seconds", 14), ("duration_seconds", float("nan")),
                                          ("duration_seconds", True), ("preset", "high"),
                                          ("orientation", "square"), ("preset", []), ("schema_version", True),
-                                         ("activity", ""), ("captions", [])])
+                                         ("activity", ""), ("captions", []), ("captions_in_scene", "true")])
 def test_bad_contract(field, value):
     spec = episode()
     spec[field] = value
@@ -256,3 +256,10 @@ def test_assemble_rejects_non_episode_and_unbounded_list(media):
         engine.assemble_episodes([media / "clip.mp4"] * 25, media / "too-many.mp4")
     with pytest.raises(ValueError, match="one video and one audio"):
         engine.assemble_episodes([media / "clip.mp4"], media / "no-audio.mp4")
+
+
+def test_scene_caption_owner_preserves_sidecar_contract():
+    spec=episode();spec['captions_in_scene']=True
+    validated=engine.validate_episode(spec)
+    assert validated['captions_in_scene'] is True
+    assert 'Clap with me!' in engine.captions_srt(validated['captions'])
