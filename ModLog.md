@@ -1,3 +1,12 @@
+## 2026-10-26 — Allocate observed serving registry repair
+
+PR2226's actual hosted canonical-registry gate fails. Read-only generation shows
+one existing test owner's capabilities[] ->[process], with1773 paths/273 quarantines
+and every other field fixed. Under13/P1 allocate that exact derived reprojection,
+owner logs and unchanged45-case generator regressions before mutation. No test,
+classifier, scanner, permission or quarantine relaxation. Host PR2225 is merged
+at d0a40a3e8 with the exact independently reviewed tree; serving is now based on main.
+
 ## 2026-10-26 — Allocate real member HTTP serving qualification
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP6/22/50/62/71/77/84/97 before authoring.

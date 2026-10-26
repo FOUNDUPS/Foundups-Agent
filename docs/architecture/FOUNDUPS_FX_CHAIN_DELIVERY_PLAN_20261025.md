@@ -2,6 +2,27 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Serving registry reprojection allocation — before derived mutation
+
+Actual CI40248799360/job121335967046 rejects stale canonical registry bytes.
+WSP15 C1/I4/D5/Impact3=13/P1; WSP6/15/22/50/71/77/97. Read-only generator
+comparison proves exactly one existing row's capabilities change from[] to[process]
+for test_clerk_proposal_intake.py. All1773 paths,273 quarantines, collection,
+shards, classes, descriptions and other fields remain unchanged. This honestly
+records the newly introduced subprocess fixture; no grant follows from metadata.
+Allocate only the existing WSP_knowledge/WSP_Test_Registry.json reprojection via
+the unchanged generator, after independent agreement on the exact delta. Keep
+classifier, registry schema, scan scope, permissions and every test oracle fixed.
+Budget amendment: this plan+20/root ModLog+10, PFMall ModLog+6/TestModLog+6,
+WRE ModLog+8, one derived registry field (+3 lines); no other path or new file.
+Run generator --check and its existing two-owner45-case regression selection;
+recheck manifest immutability and source parity. Preserve failed CI and require
+new-head hosted gates. Local registry generation is AST/Git observation, not
+collection, execution, network isolation or WRE/resident admission. Holo retrieval
+still returns HEAD_MISMATCH/UNKNOWN; current classifier/interface/test memory
+are authoritative. memory/README is absent; requirements exist. Inference cannot
+prove byte identity; deterministic reproduction plus independent review can.
+
 ## Member serving allocation — 2026-10-26, before authoring
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP00/6/11/22/50/62/71/77/84/97.
