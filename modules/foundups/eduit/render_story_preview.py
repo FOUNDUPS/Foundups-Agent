@@ -47,7 +47,7 @@ def render(output):
     result['captions_path'] = Path(result['captions_path']).name
     sources=[ROOT/'public/eduit/storytime'/n for n in ('scene.mjs','rig.mjs','engine.mjs','learning-events.mjs')]
     sources += [Path(__file__), Path(__file__).with_name('export_story_frames.mjs'), SRC/'little_shrew_animation.py', SRC/'kids_episode.py']
-    record={'schema':'eduit.story_preview.v1','revision':'rescue-five-7','created_at':datetime.now(timezone.utc).isoformat(),'status':'rendered_unreviewed','duration_seconds':15,'method':'shared_browser_svg_scene','paid_calls':0,'result':result,
+    record={'schema':'eduit.story_preview.v1','revision':'sound-languages-9','created_at':datetime.now(timezone.utc).isoformat(),'status':'rendered_unreviewed','duration_seconds':15,'method':'shared_browser_svg_scene','paid_calls':0,'result':result,
             'source_hashes':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
             'asset_hashes':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in output.iterdir() if p.is_file()}}
     (output/'provenance.json').write_text(json.dumps(record,indent=2)+'\n')

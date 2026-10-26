@@ -24,3 +24,11 @@ reused Mall pinch engine with viewport-focus fallback and safe-area layout. Fixe
 local SVG references in whiteboard snapshots. Tests cover no input, selection lock,
 all five saved, late arrivals, reset and shared collapse/learning cues. See
 [review contract](../docs/RESCUE_GAME_REVIEW.md) for boundaries and RSI lessons.
+
+
+## 2026-10-26 — Touch/mouse viewer audit
+Recovered latest deployed creative source; replaced flag emoji/text with local
+SVG images and accessible labels. Added standalone manifest/icons and bounded
+UI-only service worker. Pointer cancellation and safe-area layout strengthened;
+locale selection pauses game. Mall mounting/physical-device acceptance remain
+separate. See docs/TOUCH_MOUSE_PWA_AUDIT.md.

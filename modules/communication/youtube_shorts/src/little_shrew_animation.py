@@ -123,8 +123,8 @@ def compose_audio(output, *, stomp=False, events=None):
             if kind == 'thump':
                 tone(start,.32,65,gain)
                 tone(start,.28,83,gain*.3)
-            elif kind in ('sniff','crack'):
-                length=.26 if kind=='sniff' else .16
+            elif kind in ('sniff','crack','crunch'):
+                length=.26 if kind=='sniff' else .28 if kind=='crunch' else .16
                 n=round(length*rate)
                 noise=rng.normal(0,gain,n)
                 width=8 if kind=='sniff' else 3
