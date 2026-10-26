@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: '/partners',
-          has: [{ type: 'host', value: '(?:www\\\\.)?yumori\\\\.me' }],
+          has: [{ type: 'host', value: '(?:www\\.)?yumori\\.me' }],
           destination: '/yumori/partners',
         },
         {
