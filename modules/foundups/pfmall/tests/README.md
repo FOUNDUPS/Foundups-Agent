@@ -89,8 +89,8 @@ checks image source/package/user inventory and actual container PID1/resources/
 port. Missing/malformed policy reaches the factory and retains stopped state.
 UUID ownership labels and finally cleanup apply to the audit and HTTP containers;
 the client process is reaped separately. Image input paths trigger the workflow.
-This first source candidate awaits actual Linux execution. Preserve the initial
-preflight rejection and default817 PASS separately from hosted Docker outcomes.
+First hosted817+3 cases pass, but that image remains security-held. Preserve its
+proof separately; the Debian13/runtime-only replacement needs a fresh image/scan.
 Container receipts/logs omit synthetic policy files and signing keys. Retain the
 tested image only after its three HTTP cases pass; no registry push or deployment.
 

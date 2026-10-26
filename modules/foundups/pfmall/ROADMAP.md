@@ -1,5 +1,13 @@
 # p.fMALL Roadmap
 
+## Actual image security remediation — 2026-10-26
+
+First hosted817+3 cases and independent image reconstruction pass; the security
+scan's2critical/65high/2unknown keep deployment held. Under16/P0 pin official
+Python3.12.15/Trixie and remove pip/ensurepip after dependency checks. Preserve
+the18 runtime pins and HTTP oracles; frozen inventory rejects the prior image.
+Require a fresh image, full cases, exact archive scan and independent acceptance.
+
 ## Linux intake container candidate — 2026-10-26
 
 Allocate15/P1: one minimal nonroot fixed8080 image, exact runtime wheel lock,

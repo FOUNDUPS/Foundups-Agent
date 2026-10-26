@@ -78,9 +78,11 @@ real member identity and durable repository-control admission remain unqualified
 
 `Dockerfile.intake` packages the same factory and ordinary Uvicorn CLI for
 linux/amd64, fixed8080 and numeric nonroot10001:10001. The official Python3.12
-Bookworm base is pinned by platform digest. `requirements-container.lock` fixes
+Trixie base is pinned by platform digest. `requirements-container.lock` fixes
 the18 runtime wheels by version/hash; direct pins match the optional profiles.
 The installer is separately hash-pinned and `pip check` runs during the build.
+Pip and ensurepip are then removed; final inventory must contain exactly the18
+runtime distributions and no importable installer or bundled bootstrap package.
 
 The existing nomination workflow builds only a validated24-file Git archive:
 16 Python sources, four real static assets, two existing profiles, lock and
@@ -90,8 +92,10 @@ The three existing real HTTP cases run through an explicit image-only test
 transport, with loopback host publication and owned-container cleanup. CI keeps
 the tested image for three days and public-safe evidence for14 days.
 
-This is a source candidate pending actual hosted image qualification. The local
-default817-case profile passes; local Docker engine access is unavailable.
+The first Bookworm candidate passed hosted817+3 functional cases, but the exact
+saved image scan reports2critical/65high/2unknown findings. It remains held. The
+Trixie/runtime-only replacement requires its own hosted image tests and scan.
+The local default817-case profile passes; local Docker engine access is unavailable.
 Build/context or wheel checks do not establish Linux execution. Image security,
 cloud policy, actual identity and browser acceptance remain deployment gates.
 The six existing Node functions and shared ignored source are outside this image.

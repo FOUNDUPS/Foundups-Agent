@@ -50,6 +50,9 @@ the image contains no policy or credentials. Missing/invalid policy stops startu
 The public route contract remains exactly proposal plus minimal health.
 `requirements-container.lock` is the Linux CPython3.12 runtime wheel closure;
 it does not replace either optional profile or the umbrella requirements.
+The revised image uses Python3.12.15 on Debian13/Trixie. Build-time pip/ensurepip
+are removed after installation checks; final inventory must equal the18 runtime
+pins. The first image's functional acceptance does not waive its security hold.
 `PFMALL_TEST_CONTAINER_IMAGE` is a test-only opt-in requiring an immutable image
 ID; ordinary tests keep the original process transport. Hosted qualification
 uses readonly rootfs/policy, dropped capabilities, no-new-privileges,256MiB,

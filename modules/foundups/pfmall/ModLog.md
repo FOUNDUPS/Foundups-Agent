@@ -1,3 +1,17 @@
+## 2026-10-26 — Remediate the actual image before deployment
+
+Allocation028bf433a precedes frozen inventory0368eaf97 and product change.
+First hosted run40253565358 passes817+3; independent full archive/context/source/
+package reconstruction accepts its exact bytes. A verified Trivy0.76.1 current-DB
+scan completes with291 findings:2critical/65high/113medium/109low/2unknown and
+zero reported secret findings. Completion is not a clean gate; preserve the hold.
+Pin observed official Python3.12.15/Trixie amd64 digest. Keep18 runtime wheel pins;
+after pip check remove pip/ensurepip and the temporary lock. Stricter image audit
+requires Debian13, exact runtime inventory and absent installers. Prior actual
+metadata rejects that policy, without another local Docker execution claim.
+No application/auth/oracle/scanner-exception change. Require fresh hosted image
+execution, exact archive scan and independent replacement acceptance before use.
+
 ## 2026-10-26 — Author the bounded Linux intake image candidate
 
 Allocationc08509671,15/P1; frozen acceptanceecadb40845. Add only the explicit
