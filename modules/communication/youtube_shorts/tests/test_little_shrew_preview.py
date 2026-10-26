@@ -93,3 +93,16 @@ def test_real_first_episode_and_provenance(tmp_path, preview):
     with pytest.raises(FileExistsError):
         preview.produce_preview(output)
     assert (output / "provenance.json").read_bytes() == original
+
+
+def test_stomp_sound_word_and_foley_order(tmp_path, animation):
+    path = tmp_path / "stomp.wav"
+    cues = animation.compose_audio(path, stomp=True)
+    assert cues[0] == {"start": 1.0, "end": 1.9, "text": "THUMP!"}
+    assert [cue["text"] for cue in cues] == ["THUMP!", "CRACK!", "SQUISH!"]
+    assert cues[1]["start"] == 2.05
+    assert cues[2]["start"] == 10.56
+    with wave.open(str(path)) as audio:
+        samples = np.frombuffer(audio.readframes(audio.getnframes()), dtype="<i2")
+    assert len(samples) == 720000
+    assert np.max(abs(samples.astype(float))) < 26214

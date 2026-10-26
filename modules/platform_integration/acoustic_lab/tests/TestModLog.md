@@ -1,5 +1,67 @@
 # Acoustic Lab TestModLog
 
+## 2026-10-26 - Pytest 9.0.3 and pytest-asyncio 1.3.0 qualification
+
+Keep all existing application tests and the 18/one-child/six-Gunicorn selections
+unchanged. Preserve the rejected bare update: all 18 parent cases pass, but
+pytest 9 emits 20 additional passing unittest subtest reports and the existing
+exact parent list check correctly rejects the 38 entries. Separately, an actual
+async fixture passes with pytest 8/pytest-asyncio 0.23.0, fails with pytest 9/
+0.23.0 (FixtureDef.unittest), and passes with pytest 9.0.3/pytest-asyncio 1.3.0.
+
+The bounded workflow repair uses the public pytest.SubtestReport type in the
+two existing Acoustic Evidence classes. Parent collection/pass lists retain
+exact equality; each subtest report must refer to an expected parent and have
+passed. Failed and skipped subtests remain failures of acceptance, including
+when pytest returns zero for a skipped subtest. Reports retain parent node IDs
+and outcomes, not parameter-level subtest identities. No set deduplication is
+used, and no effect or process-lifecycle permission is added.
+
+Actual guarded Linux Python 3.12.14 execution passes 18/18 plus the separate
+owned-child 1/1, with matching JUnit identities and stable source/guard evidence.
+Six source-bound held-out scenarios exercise both exact workflow classes and
+acceptance expressions: genuine pass, genuine failing/skipped subtests,
+duplicate parent, and failing/skipped subtest reports in a controlled successful
+parent/exit envelope. Only the genuine pass is accepted. These accounting
+controls use neutral fixtures for unrelated guard/child inputs; they are not
+native server acceptance. The complete dependency environment passes pip check.
+
+Do not claim a local native Gunicorn pass. Both original pytest 8 and candidate
+parser baseline runs reject three unknown subprocess probes. The candidate
+native target cannot bind its loopback listener and exits 1; closure reports no
+survivors and no forced kill. No guard exception is added to make it pass.
+Fresh hosted Python 3.11/3.12 adapter, owned-child and native Gunicorn checks are
+still required. Existing broader historical test failures remain outside scope.
+
+Evidence: external python-audit/pytest-903-evidence (rejected bare candidate),
+pytest-repaired-evidence, pytest-report-controls/receipt.json,
+pytest-plugin-probe and pytest-baseline8-native-evidence. The exact workflow
+blocks and source hashes are retained with those receipts for independent review.
+
+## 2026-10-26 - Requests 2.33.0 candidate qualification
+
+Reuse the existing CI first-phase script and all 18 selected identities.
+In a disposable Linux Python 3.12 environment with the complete current
+Acoustic Lab profile and Requests 2.33.0, all 18 pass. The guard sanity
+controls, exact JUnit identity comparison and source stability checks pass;
+there are no unexpected or duplicate effects. No test identity, assertion,
+guard, source behavior or workflow is changed. Dependency consistency also
+passes. The guarded script is stopped at its existing separate-child boundary;
+this local result does not claim the later owned-child or Gunicorn phases.
+
+The three existing geofencing cases separately give two passes and the known
+test_geolocation_service_failure failure. Its generic Exception mock escapes
+the production requests.RequestException handler. A separate replay importing
+the original Requests 2.31.0 wheel reproduces exactly that result; the failure
+does not originate in this update. Keep both JUnit outputs rather than changing
+the production handler or weakening the assertion.
+
+Evidence is retained externally in python-audit/acoustic-evidence/tmp/
+acoustic-adapter.json and its XML, plus geofence.xml and geofence-baseline.xml.
+Current exact-head hosted Python 3.11/3.12, owned-child and native Gunicorn
+acceptance is still required. Other historical broad-suite failures are not
+rerun or claimed fixed.
+
 ## 2026-10-25 - Timeout repair author and independent local results
 
 The original 18 selected identities are preserved. Only the existing timeout

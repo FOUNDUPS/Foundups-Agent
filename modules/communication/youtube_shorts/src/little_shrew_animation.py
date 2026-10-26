@@ -98,7 +98,7 @@ def render_shot(scene, beat_index, output):
         os.link(temp / "shot.mp4", output)
 
 
-def compose_audio(output, *, stomp=False):
+def compose_audio(output, *, stomp=False, events=None):
     """Original 120 BPM flute-like score plus quiet synthesized snore/sniff/rumble.
 
     No sampled recordings, voices or borrowed melody. Returns actual cue windows.
@@ -114,6 +114,33 @@ def compose_audio(output, *, stomp=False):
         audio[start:start+count] += gain * envelope * (
             np.sin(2 * np.pi * frequency * t) + .12 * np.sin(4 * np.pi * frequency * t))
 
+    if events is not None:
+        # Shared scene event sheet is the timing authority for both sound and text.
+        for start, note in ((0,72),(4.8,76),(12.2,74),(13.5,72)):
+            tone(start,.65,440*2**((note-69)/12),.035)
+        for event in events:
+            start, gain, kind = event['start'], event['gain'], event['kind']
+            if kind == 'thump':
+                tone(start,.32,65,gain)
+                tone(start,.28,83,gain*.3)
+            elif kind in ('sniff','crack'):
+                length=.26 if kind=='sniff' else .16
+                n=round(length*rate)
+                noise=rng.normal(0,gain,n)
+                width=8 if kind=='sniff' else 3
+                noise=np.convolve(noise,np.ones(width)/width,mode='same')
+                envelope=np.sin(np.linspace(0,np.pi,n))**2 if kind=='sniff' else np.exp(-np.linspace(0,6,n))
+                audio[round(start*rate):round(start*rate)+n]+=noise*envelope
+            else:
+                n=round(.55*rate);t=np.arange(n)/rate
+                audio[round(start*rate):round(start*rate)+n]+=gain*np.sin(2*np.pi*(180*t-125*t*t))*np.sin(np.linspace(0,np.pi,n))**2
+        if np.max(np.abs(audio))>=.8:
+            raise ValueError('Unexpected soundtrack peak')
+        with Path(output).open('xb') as target, wave.open(target,'wb') as wav:
+            wav.setparams((1,2,rate,len(audio),'NONE','not compressed'))
+            wav.writeframes((audio*32767).astype('<i2').tobytes())
+        return [{'start':e['start'],'end':e['end'],'text':e['word']} for e in events]
+
     # Authored pitch/rhythm sequence; space around the story's sound cues.
     for start, note in ((0, 72), (1, 76), (2, 74), (3.5, 79), (5, 76),
                         (6.5, 79), (8, 81), (9, 76), (12, 74), (13.5, 72)):
@@ -128,23 +155,22 @@ def compose_audio(output, *, stomp=False):
         noise = rng.normal(0, .08, n)
         noise = np.convolve(noise, np.ones(8) / 8, mode="same")
         audio[int(start*rate):int(start*rate)+n] += noise * np.sin(np.linspace(0, np.pi, n)) ** 2
-    tone(1.0, .9, 65, .08)
-    tone(1.0, .9, 83, .035)
+    tone(1.0, .32 if stomp else .9, 65, .08)
+    tone(1.0, .32 if stomp else .9, 83, .035)
     if stomp:
-        # Three original foley layers: foot landing, chamber crunch, soil squish.
-        tone(10.0, .35, 58, .12)
-        tone(10.0, .28, 87, .04)
-        # Muffled earth crunch, timed to the shared scene's instant collapse.
-        tone(10.56, .32, 75, .10)
-        n = int(.28 * rate)
-        crunch = rng.normal(0, .10, n)
-        crunch = np.convolve(crunch, np.ones(12) / 12, mode="same")
-        envelope = np.sin(np.linspace(0, np.pi, n)) ** 2
-        audio[int(10.56*rate):int(10.56*rate)+n] += crunch * envelope
-        n = int(.4 * rate)
+        # Educational foley: THUMP wakes, CRACK shows fissures, SQUISH compacts.
+        # Dry, short original noise bursts follow the growing visible cracks.
+        for start in (2.05, 2.4, 2.8):
+            n = int(.13 * rate)
+            crack = rng.normal(0, .10, n)
+            crack = np.convolve(crack, np.ones(3) / 3, mode="same")
+            audio[int(start*rate):int(start*rate)+n] += crack * np.exp(-np.linspace(0, 6, n))
+        # The low contact bed and downward pitch sweep form one compression cue.
+        tone(10.56, .32, 58, .10)
+        n = int(.55 * rate)
         t = np.arange(n) / rate
         squash = np.sin(2 * np.pi * (180*t - 125*t*t))
-        audio[int(10.82*rate):int(10.82*rate)+n] += .06 * squash * np.sin(np.linspace(0, np.pi, n))**2
+        audio[int(10.56*rate):int(10.56*rate)+n] += .06 * squash * np.sin(np.linspace(0, np.pi, n))**2
     # Leave headroom, never normalize a quiet event into a startling peak.
     if np.max(np.abs(audio)) >= .8:
         raise ValueError("Unexpected soundtrack peak")
@@ -152,8 +178,10 @@ def compose_audio(output, *, stomp=False):
         wav.setparams((1, 2, rate, len(audio), "NONE", "not compressed"))
         wav.writeframes((audio * 32767).astype("<i2").tobytes())
     cues = [{"start": .1, "end": .9, "text": "[soft snoring]"},
-            {"start": 1.0, "end": 1.9, "text": "[gentle rumble]"},
+            {"start": 1.0, "end": 1.9, "text": "THUMP!" if stomp else "[gentle rumble]"},
             {"start": 5.8, "end": 7.2, "text": "[sniff, sniff, sniff]"},
             {"start": 8.3, "end": 9.7, "text": "[sniff, sniff, sniff]"},
             {"start": 11.3, "end": 12.7, "text": "[sniff, sniff, sniff]"}]
-    return cues[:-1] + [{"start": 10, "end": 10.5, "text": "[stomp]"}, {"start": 10.56, "end": 10.82, "text": "[crunch]"}, {"start": 10.82, "end": 11.4, "text": "[squish]"}] if stomp else cues
+    return [{"start": 1.0, "end": 1.9, "text": "THUMP!"},
+            {"start": 2.05, "end": 3.4, "text": "CRACK!"},
+            {"start": 10.56, "end": 11.8, "text": "SQUISH!"}] if stomp else cues
