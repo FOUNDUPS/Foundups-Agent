@@ -1,7 +1,7 @@
 {
   "version": "2.0",
-  "last_updated": "2026-09-30T00:00:00+00:00",
-  "total_skills": 35,
+  "last_updated": "2026-10-23T00:00:00+00:00",
+  "total_skills": 39,
   "skills": {
     "gemma_pqn_data_processor": {
       "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
@@ -415,7 +415,7 @@
         "verifier"
       ],
       "intent_type": "DECISION",
-      "version": "1.1.0",
+      "version": "1.1.1",
       "promotion_state": "production",
       "domain": "operations",
       "wsp_chain": [
@@ -449,13 +449,17 @@
     "reddog_recipient_preflight": {
       "location": "modules/communication/moltbot_bridge/skillz/reddog_recipient_preflight",
       "agents": [
+        "0102",
         "qwen",
         "gemma"
       ],
       "intent_type": "DECISION",
-      "version": "1.0.0",
+      "version": "1.2.0",
       "promotion_state": "prototype",
       "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 48",
         "WSP 50",
         "WSP 73",
         "WSP 77",
@@ -463,7 +467,8 @@
         "WSP 95",
         "WSP 97"
       ],
-      "description": "Fail-closed two-pass recipient authorization and provider read-back verification for outbound correspondence"
+      "description": "Fail-closed independent recipient, audience, content, link, privacy, duplicate, and provider read-back audit for outbound correspondence",
+      "primary_agent": "0102"
     },
     "reddog_correspondence_state": {
       "location": "modules/communication/moltbot_bridge/skillz/reddog_correspondence_state",
@@ -599,6 +604,84 @@
         "WSP 97"
       ],
       "description": "Convert YUMORI planning conversations into live-state-verified WSP 15 work and bounded Work handoff, including governed capital-network expansion"
+    },
+    "reddog_gmail_intake_router": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_gmail_intake_router",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "CLASSIFICATION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "communication",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 48",
+        "WSP 50",
+        "WSP 77",
+        "WSP 91",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Classify privacy-bounded Gmail events into security, YUMORI, FoundUp, general, or held routes without granting provider effects"
+    },
+    "reddog_security_mail_triage": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_security_mail_triage",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "DECISION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "security_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 48",
+        "WSP 50",
+        "WSP 77",
+        "WSP 91",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Deduplicate and verify security-alert mail against exact repository, workflow, scanner, and deployment evidence"
+    },
+    "kids_episode_production": {
+      "location": "modules/communication/youtube_shorts/skillz/kids_episode_production",
+      "agents": [
+        "qwen"
+      ],
+      "intent_type": "GENERATION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "education",
+      "wsp_chain": [
+        "WSP 95",
+        "WSP 97",
+        "WSP 109"
+      ]
+    },
+    "kids_trend_research": {
+      "location": "modules/communication/youtube_shorts/skillz/kids_trend_research",
+      "agents": [
+        "qwen"
+      ],
+      "intent_type": "RESEARCH",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "education",
+      "wsp_chain": [
+        "WSP 95",
+        "WSP 97",
+        "WSP 109"
+      ]
     }
   }
 }

@@ -16,6 +16,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
+from .authorization import CallerAuthorization
 from .exceptions import InvalidStateTransitionError, NotFoundError, PermissionDeniedError, ValidationError
 from .interfaces import TaskPipelineService
 from .models import EventRecord, Payout, Proof, Task, TaskStatus, Verification
@@ -237,7 +238,10 @@ class PersistentTaskPipeline(TaskPipelineService):
         logger.info("Proof %s submitted for task %s", proof.proof_id, task.task_id)
         return updated
 
-    def verify_proof(self, task_id: str, verification: Verification) -> Task:
+    def verify_proof(
+        self, task_id: str, verification: Verification, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Task:
         """Atomically record a SQLite decision or replay its original outcome.
 
         Args:
@@ -252,15 +256,18 @@ class PersistentTaskPipeline(TaskPipelineService):
             StateTransitionError: If a new decision targets a non-SUBMITTED task.
             ValidationError: If verification rejected (approved=False).
         """
-        return verify_proof_atomic(self._adapter, task_id, verification)
+        return verify_proof_atomic(self._adapter, task_id, verification, authorization=authorization)
 
-    def trigger_payout(self, task_id: str, actor_id: str) -> Payout:
+    def trigger_payout(
+        self, task_id: str, actor_id: str, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Payout:
         """Record pending initiation atomically; an exact retry has no new effects.
 
         The task remains VERIFIED until a separate confirmed settlement owner
         exists. SQLite is required; this method grants no payment authority.
         """
-        return self._adapter.initiate_payout(task_id, actor_id)
+        return self._adapter.initiate_payout(task_id, actor_id, authorization=authorization)
 
     def get_task(self, task_id: str) -> Task:
         """Get a task by ID.

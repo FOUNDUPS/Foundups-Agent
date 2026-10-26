@@ -1,3 +1,79 @@
+## 2026-10-25 — Move2Japan per-channel cadence
+
+## 2026-10-26 — Hosted metadata fixture correction
+
+The hosted selected-batch suite exposed four metadata-isolation fixtures using
+Move2Japan's ambient Tokyo timezone. Set their shared mocked scheduler to
+explicit America/New_York so these cases reach the metadata sinks under test;
+retain the separate missing/cross-date rejection tests and all write assertions.
+No runtime guard was relaxed.
+
+168 passed, 2 skipped (existing browser-dependent cases). Offline suites:
+`test_scheduler`, `test_peak_window`, `test_reschedule_planner`,
+`test_reschedule_applier`, `test_what_should_i_schedule`,
+`test_shorts_priority_wiring`, `test_unified_shorts_videos_priority`,
+`test_live_schedule_signal_priority`, `test_remote_cli`.
+New assertions cover eight exact ET slots then next-day rollover, full/partial
+summary, eight-slot planner and priority deficit, apply cap8, lower explicit cap2,
+and unknown-channel hard3. Added failure checks for unknown/Tokyo timezone
+and blocked unqualified live apply; same-date preview fixtures explicitly use ET. No live scheduling or model calls. Existing tests were
+extended, so test registry membership is unchanged.
+
+## 2026-10-25 — Generated runtime closure repair
+
+CI required canonical test-registry and backend-manifest regeneration. Register
+one new test file (1771 total,273 quarantined). Fold the evidence validator into
+the existing content_generator owner rather than growing the installed runtime
+closure: membership remains1471, count rejection remains1472, and all existing
+328KiB/2MiB/32MiB bounds remain unchanged. Refresh the canonical manifest and
+both existing Python/JavaScript digest pins. Stage the generated manifest before
+its independent staged-index parity test. All8 generator cases pass (58.98s),
+all3 Node compatibility entrypoints pass, and manifest/registry/projection
+checks pass. The88 metadata/selected-batch regressions pass after consolidation.
+No validator bypass or deployment.
+
+## 2026-10-25 — Metadata evidence and verified feedback
+
+**88 passed**. Offline pytest (plugin autoload/dotenv disabled, explicit pytest_asyncio):
+`test_metadata_evidence.py`, `test_index_metadata_decoupling.py`, `test_remote_cli.py`.
+Covers wrong-video/stub/failed evidence, Studio Ask identity, YouTube/Whisper
+segments, visual versus speech provenance, duration-not-music, legacy wrappers,
+schedule-only preservation, eligible edits, description opt-out, idempotence,
+platform limits and mismatched saved-slot learning rejection. Existing decoupling
+fixtures now carry actual producer provenance; positive edits remain asserted.
+Browser delays are replaced only in the mocked decoupling harness.
+No browser, API analysis, audience metrics or deployed model was exercised.
+
+## 2026-10-22 — Selected-batch regression and closure evidence
+
+WSP 6/15/22/50/84/97. Reuse `test_remote_cli.py` and existing adapter,
+visibility, tracker, peak-window, rotation, metadata-decoupling and language tests.
+The original PR focused selection passed 65 cases on current main. Added
+wrong-page/unknown-visibility, sync and malformed-receipt probes reproduced
+8 failures (55 passing test cases); focused repair passed 63 cases plus
+9 subtests. Later focused+private-visibility selection passed 78 plus 9 subtests.
+These are successive overlapping runs, not additive completion metrics.
+
+Connected selection initially passed 91/skipped 2/failed 4. All four failure IDs
+are rotation-fairness tests stopped by the same obsolete test-double signature:
+`_prioritize_channels` now receives `driver`. Match the actual interface; keep
+budget and must-fail assertions. Two browser-connection skips are intentional;
+no live browser/channel action is authorized in this closure.
+
+Final local acceptance: the exact nine-file `youtube-selected-batch` CI selection
+passed **147 tests and 9 subtests**, zero skips/failures, in a fresh disposable
+Python 3.12 environment (116.62s). Invocation: `python -B -m pytest
+--import-mode=importlib -p pytest_asyncio.plugin -q --tb=short` followed by the
+explicit paths in `.github/workflows/ci.yml`; dotenv/plugin autoload and bytecode
+were disabled. The rotation fixture repair passed all four retained assertions.
+Independent execution of the earlier 144-case source passed, followed by all
+three diagnostic-preview probes; 23 additional independent source probes passed.
+These are source review and test execution, not live outcome acceptance.
+Generated binding checks and remote/main results remain separate PR1860 receipts.
+External local evidence: `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1860-qualification/`.
+Historical September counts below remain historical. No native admission,
+actual upload, independent saved-state readback or retained RSI benefit claimed.
+
 # YouTube Shorts Scheduler - TestModLog
 
 ## 2026-10-18 - Launcher import without browser dependencies
@@ -26,6 +102,46 @@
   avoiding a collection collision between the two owners' `tests` packages.
 - These results cover import isolation and the offline resident-chain selection;
   they do not establish live browser scheduling behavior or the full CI result.
+## 2026-09-22 - Isolated current-main validation
+
+**85 passed**, one pre-existing Pydantic annotation warning. Same seven-file
+focused suite below, including three new unscoped-command regressions.
+Compared with the historical shared checkout run, current main also contains
+six previously merged STT language cases. Windows temporary fixture access
+required the approved rerun. No live browser or model calls.
+
+The Work source audit supersedes the proposed remote publisher registration;
+no new WRE publisher is registered in this patch. The retained diagnostic
+skill links to the existing `publish_daily_clips` owner.
+
+## 2026-09-21 - Remote CLI and nonpersistent preview regressions
+
+After 012's whole-batch clarification: remote CLI plus adapter suite **49 passed**.
+Includes uncapped default, exact selection, 3/8/13 mocked scheduling calls,
+61-clip pagination, missing clip/partial result, stalled pagination, malformed
+selection/limit and exclusion of unrelated uploads. No live publication occurred.
+
+Final combined targeted rerun: **75 passed**, one existing Pydantic annotation
+warning. Includes remote CLI, private-visibility regressions, adapter, batch/voice
+and audio-language tests. The broader tracker/configuration baseline mismatch
+recorded below remains; this focused rerun does not claim it is repaired.
+
+Combined targeted run: 90 passed, 2 skipped, 1 existing configuration failure.
+The failure expects Move2Japan registry max_per_day=3; HEAD baseline and current
+source both return saved configuration value 8. Tracker HARD_CAP_PER_DAY=3
+remains enforced and its boundary tests pass. No operator configuration changed.
+
+New remote tests cover real async API wiring, registry browser mismatch,
+transport versus authentication, error receipts, optional bounds, shared browser
+detach, planned versus actual counts, combined visibility limits, nonpersistent
+tracker copies, and no dry-run autoheal/repeated unchanged batch. Dependencies
+are mocked; no live YouTube mutation is part of this suite. Windows tmp_path
+needed the approved temporary-directory access. Cross-module collection uses
+`--import-mode=importlib` because several modules name their package `tests`.
+
+The transcript subset plus remote tests passed 29/29 before the additional
+missing-dependency JSON regression. WRE staged discovery and full skill loading
+passed, as did Codex skill validation. Actual preflight returned browser_unavailable.
 
 ## 2026-06-19 - test_schedule_include_private: flag-gated PRIVATE pass (mock-only, MUST-FAIL proven)
 

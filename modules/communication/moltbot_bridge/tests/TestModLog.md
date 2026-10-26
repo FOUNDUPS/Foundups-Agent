@@ -1,3 +1,404 @@
+## Parent authority bootstrap forwarding — 2026-10-25
+
+Inventory first: extend existing `test_reddog_governed_execution_valve_production_wiring.py`;
+reuse `test_reddog_parent_consensus_use_time.fixture`, which enables `real_models=True` internally. No new test family.
+The actual bootstrap builds the actual resolver, whose unchanged `resolve` and collection
+path reach real parent/reviewer/model signature verification. Eight cases cover valid,
+omitted, explicit None, mapping/callable impostors, expiry, work and generation mismatch.
+Valid input clears exactly the two parent blockers; peer/Memex blockers persist.
+Every case retains `lease=None` and the real admission registry rejects it.
+Earlier artifact/queue/signed-work/generation and protected-owner evidence are seams;
+parent verification and lease guards are not replaced. The stage dispatcher is captured,
+so this is source wiring qualification, not a resident author or service run.
+
+Required red: `rsi-parent-bootstrap-red3-20261025` fails on the unsupported keyword.
+Green: eight new cases pass; `rsi-parent-bootstrap-connected-20261025` runs the full
+production-wiring file plus parent use-time suite: 34 pass/one Windows symlink skip.
+CPython 3.12.10 and pytest 9.0.3 reuse the existing portable runtime and explicit
+site-packages without site initialization. The external pre-import Python guard denies
+network/process/provider/sensitive-host access and writes outside owned temporary data;
+positive runs record zero guard violations. This is instrumentation, not an OS sandbox.
+Legacy canary fixture Git setup alone is replaced at its helper boundary; the new cases
+use the existing artifact writer directly. No Git execution/authentic queue claim follows.
+Earlier hostname-metadata and extended Windows temporary-path guard failures remain
+in `red`/`red2` receipts; they are not product regressions or accepted test results.
+
+Guarded runner: `refresh/rsi-parent-bootstrap-guarded-runner-20261025.py`; exact invocation,
+environment, source hashes and XML are retained in the corresponding connected receipts.
+Selection: both files above with `--rootdir=. --confcutdir=. --noconftest --import-mode=importlib
+-p pytest_asyncio.plugin -p no:cacheprovider -o addopts=` and owned log/temp/XML paths.
+Existing CI already selects both owners. Hosted acceptance and independent review remain
+separate; main supplier composition, authentic inputs and native RSI remain unqualified.
+
+## PR1792 producer/consumer candidate — 2026-10-25
+
+The existing target-verifier and FoundUp registry-schema selections pass 74
+cases with zero failures/skips in 4.27 seconds under CPython 3.12.10/pytest 8.0.0. Actual Node
+24.22.1 receipts carry Japanese metadata and a Unicode fixture root into the
+real Python verifier. Rehashed unknown/known-child relabels, changed evidence,
+ambiguous contexts, private paths, links and forged no-brand fields reject.
+Original verifier test functions remain; protected brand content is not copied.
+
+External evidence: `refresh/pr1792-core-source-freeze-repaired-20261025.json` and
+`pr1792-author-python-repaired-final-20261025/` in the existing reconciliation
+artifact root. An initial Windows audit-hook argument-format failure is retained;
+the corrected guard allows only exact Node producer and read-only Git commands.
+Fresh synthetic environment, Python audit hook and Node preload deny unrelated
+effects; instrumentation is not an OS sandbox. Windows Python uses a component
+link-check probe, while the Node suite exercises a real disposable junction.
+Independent review found four private filename variants and malformed
+Unicode requiring repair; these regressions are included in the fresh 74-case
+run, with all 12 source hashes unchanged before/after. The earlier 69-case pass
+was historically observed but its final output directory was partly overwritten
+by a rejected stale-output rerun after an author edit-script encoding error.
+It is not intact final acceptance evidence. The launcher now rejects existing
+output paths before execution; its negative control preserves all result hashes.
+Independent repaired-core receipt
+`refresh/pr1792-independent-core-review-20261025.json` accepts 36 Python cases
+with zero skips and 16 Node positive cases plus one Node causal control.
+Two Python causal controls detect removed private/evidence checks. These are
+separate case sets, not additions to author 74 or blinded evaluation. All 12
+core hashes are stable; instrumentation limits above still apply. Final CI,
+generated/index/package binding and hosted qualification remain pending.
+
+## PR1648 shared transport qualification — 2026-10-23
+
+The frozen six-suite selection passes 130 cases with zero failures/skips in
+16.02 seconds in the qualified runner on Linux Python 3.12.3, pytest 9.0.3
+and requests 2.33.0. It includes
+the proposed credential boundary cases and existing advisory retry/progress,
+ALIAS authorization/redaction, exact K3 and configured-campaign regressions.
+Normal imports execute under a pre-import synthetic environment/effect guard;
+All recorded source hashes remain unchanged. One exact urllib3 IPv6 capability probe is
+blocked before socket creation; every unknown/repeated effect rejects the run.
+The guard is Python-level instrumentation, not an OS sandbox. Initial collection
+was rejected for caught source-cache reads, then repeated with an owned cache
+lookup directory and bytecode writes disabled; both attempts are preserved.
+Dependency stdout decoding initially failed; installed-package readback and
+pip check established the result before any retry. No provider call occurred.
+Independent review passes 23 additional cases; six in-memory faults produce
+10 intended assertion failures. Process/DNS and inventory controls reject even
+when pytest passes. Seven author effect controls and eight report-integrity
+controls also reject as intended. The final class-aware JUnit gate is checked
+against the successful inventory; the runtime/test source remains unchanged.
+Independent manifest tests pass eight cases and three Node contracts; the
+1,469-member startup set changes only two source hashes. Initial expectation
+that manual ALIAS was startup-bound was rejected and corrected, not forced
+into the manifest. Initial registry generation adds one row (1,768/273).
+Incoming independently owned PR2184 adds its separate Kids test row; canonical
+regeneration preserves both at 1,769 entries / 273 quarantines. None of the
+nine other incoming paths overlaps the observed transport source closure;
+classification and runtime bindings stay unchanged. Hosted acceptance remains pending.
+PR2185 head `239469c79` passed transport39920499068 (130 cases) and
+projection39920499090 (87 cases), with independent artifact/source readback.
+CI39920499101 failed on one newly observed workflow source-hash fingerprint,
+reported once in the tree and once in introduced history. Independent and
+coordinator review recomputed all nine source hashes on the exact line before
+adding one ledger binding. No runtime, workflow or scanner policy changed;
+retain the failed attempt and require fresh hosted acceptance of the repair.
+Evidence: `pr1648-qualification/six-suite-positive-execution.json` in the existing
+external PR-reconciliation evidence family; `qualification-receipt.json` owns
+the exact CI run and guard controls. Original PR1648 remains open.
+
+## PR1645 projection-layer inventory — 2026-10-23
+
+WSP00/5/6/15/22/50/62/95/97. Before test edits, original proposal
+`4b316c976aa3cdba21b901191159716f3d58631d` contains 14 test functions in
+182 lines of `test_mosh_pit_projection.py`. Preserve its 13 functional tests
+under canonical `moshpit` naming. Transfer the exact wardrobe discovery test
+(original lines 174–182), skill, manifest and registry acceptance to existing
+#1648; do not turn it into an xfail or claim registration here. The current
+layer remains unmounted and unregistered. Reproduce expiry during source read
+before repair, then record actual collection/results and independent controls.
+Guarded normal-import reproduction collected 30 cases: all 29 original
+functional cases passed; the new source-read expiry control failed with
+`DID NOT RAISE(snapshot_expired)`. No errors, skips or guard violations.
+Original source hashes and failure receipts are preserved outside the checkout.
+The repaired frozen four-file candidate passes 87 cases on Windows and the same
+87 cases in minimal Linux CPython 3.12.3 with pytest 9.0.3; these overlap, not
+174 unique tests. All 13 original functional test bodies and three fixtures are
+retained. Clock-removal, private-fallback and escaping faults are detected by
+unchanged assertions in separate in-memory controls; disk source stays frozen.
+The focused workflow rejects caught effects and invalid/missing XML inventories.
+Independent normal-import probes pass 11 separately selected cases; two
+freshness-removal controls fail for their intended reasons with unchanged disk
+source and zero guarded effects. Independent review confirms original AST parity
+and workflow records. These probes overlap behavior, not a blinded benchmark.
+Hosted projection run39911497355 passes the same 87 cases with zero skipped or
+denied effects and 27 unchanged source bindings. General CI39911497382 exposes
+two separate publication gaps: stale generated test registry and 39 unreviewed
+whole-file secret-scan fingerprints. Preserve both failures until fresh checks.
+The canonical generator adds only the Moshpit row (1767 total / 273 quarantined).
+Its conservative AST classifier mistakes module-scope datetime.replace calls
+for file writes; all 1766 prior rows remain unchanged. The focused guarded job
+executes this file explicitly; default collection is not claimed. Independent
+review and a separate reproduction match all 39 unchanged findings to prior
+reviewed source; the existing ledger retains its 1735 entries and adds only those
+39 exact bindings. Five security-gate boundary tests pass; policy stays unchanged.
+Final hosted gates remain required. API-level guards are not an OS sandbox or
+native RSI execution evidence.
+
+## PR2181 POSIX launcher and isolated runtime checkpoint — 2026-10-23
+
+WSP00/6/10/15/22/50/97; preserve both hosted failures at `174955143d`.
+The 47-suite startup selection reached 1,001 passed / two failed / one skipped;
+both actual process-fence cases failed child import before lock observation.
+Keep spawn, real POSIX locks, inode assertions and bounded cleanup. Reuse the
+existing test-support owner for a canonical child import; no production change.
+
+Separate credential-free installed qualification passed both profiles at that
+exact source. Independent live byte/ownership and cleanup review checked all
+2,701 installed files, 22 required source members, 18 imports and four rejecting
+absent-owner entrypoints. Both owned units are absent with PID zero. The rejected
+first export and all failure evidence remain. No native author or authenticated
+HIGH job is claimed; protected owner/current-generation inputs remain required.
+Repaired local Linux selection: 1,003 passed / one Windows-only skip across all
+47 workflow-selected suites; both actual process cases pass. Independent Linux
+review passes two unchanged positives and two effective lock-removal controls.
+The earlier focused seven cases overlap and are not added. Source hashes remain
+stable; no production or manifest bytes changed. Local --confcutdir=. prevents
+DrvFS ancestor collection; final hosted acceptance and publication remain required.
+
+## PR2181 hosted regression repair — 2026-10-23
+
+WSP00/6/10/15/22/50/62/97; existing 19/P0 integration. Hosted run39892207131
+found two failures before the Linux startup step: the current-selection module
+exceeded its retained 200-line cap, and a malformed schema raised TypeError.
+Preserve that failed run. Extract the existing opaque lease into one private
+95-line owner, retaining canonical aliases, one registry/lock and every use-time
+check. Keep source caps at 200/50 lines. Reject non-string schema values with
+contract errors; move the unknown-version sentinel from supported v11 to v12.
+The positive v11 check validates shape/domain/scope, not cryptographic authority.
+
+The repaired source passes 410 cases with four platform skips across 15 distinct
+suites; independent review passes 21 separate cases with stable source bindings.
+Eight manifest cases and three Node compatibility commands pass separately.
+Windows skips retain two POSIX fence, one symlink and one Unix descriptor gate;
+fresh hosted Linux execution is required. No native author or retained RSI gain.
+The existing machine backlog preserves the failed selection and source lesson.
+
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Current frozen-source qualification: clock/custody/structure128pass/2skip and
+core/LOW/installed compatibility272pass/4skip; together400pass/6skip across406
+cases in18 distinct suites. All22 bound hashes remain stable. The six Windows
+skips cover symlink/Unix descriptor and actual POSIX process-fence conditions;
+Linux acceptance remains required. No installed/native execution follows.
+
+WSP00/5/6/10/15/22/50/97. Complete combined-source acceptance remains pending.
+Preserve raw earlier failures and overlapping fixture results,
+including the Windows path-length correction and Linux process-only controls.
+Independent offline review passes12 held-outs on22 unchanged hashes. Hosted Linux
+results must bind the same source and generated artifacts before publication. Native admission/evaluation/retained use remain unproved.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## 2026-10-22 — Selected-batch regression and closure evidence
+
+WSP 6/15/22/50/84/97. Reuse `test_remote_cli.py` and existing adapter,
+visibility, tracker, peak-window, rotation, metadata-decoupling and language tests.
+The original PR focused selection passed 65 cases on current main. Added
+wrong-page/unknown-visibility, sync and malformed-receipt probes reproduced
+8 failures (55 passing test cases); focused repair passed 63 cases plus
+9 subtests. Later focused+private-visibility selection passed 78 plus 9 subtests.
+These are successive overlapping runs, not additive completion metrics.
+
+Connected selection initially passed 91/skipped 2/failed 4. All four failure IDs
+are rotation-fairness tests stopped by the same obsolete test-double signature:
+`_prioritize_channels` now receives `driver`. Match the actual interface; keep
+budget and must-fail assertions. Two browser-connection skips are intentional;
+no live browser/channel action is authorized in this closure.
+
+Final local acceptance: the exact nine-file `youtube-selected-batch` CI selection
+passed **147 tests and 9 subtests**, zero skips/failures, in a fresh disposable
+Python 3.12 environment (116.62s). Invocation: `python -B -m pytest
+--import-mode=importlib -p pytest_asyncio.plugin -q --tb=short` followed by the
+explicit paths in `.github/workflows/ci.yml`; dotenv/plugin autoload and bytecode
+were disabled. The rotation fixture repair passed all four retained assertions.
+Independent execution of the earlier 144-case source passed, followed by all
+three diagnostic-preview probes; 23 additional independent source probes passed.
+These are source review and test execution, not live outcome acceptance.
+Generated binding checks and remote/main results remain separate PR1860 receipts.
+External local evidence: `O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/1860-qualification/`.
+Historical September counts below remain historical. No native admission,
+actual upload, independent saved-state readback or retained RSI benefit claimed.
+
+## PR2150 exact operations policy bindings — 2026-10-21
+
+WSP00/15/22/50/71/95/97; C2/I4/D4/Impact3=13/P1. Reuse existing operations,
+start-control, role-loader, hygiene, skill-manifest and backend-generator suites;
+no duplicate tests or weakened guards. Source: PR2150 `4ec562fd6`, main `a41a76053`.
+Holo owner query reports authority-head mismatch, freshness UNKNOWN/index gap;
+source-bound lexical bundle and direct module/registry/generator reads supplement
+it. Retrieval noise was reduced to the changed policy's exact bindings; module
+requirements and memory README are absent. No semantic freshness claim.
+
+Before repair, the operations suite fails5/passes2 because frontmatter1.1.1
+disagrees with registry/runtime1.1.0. Aligning those existing pins exposes the
+separate skill-manifest mismatch:87 pass/1 fail/1 platform skip. Existing
+generators repair the one-file skill manifest and three backend member hashes.
+The six existing suites then pass101 with2 platform skips in86.24s; staged-index
+and independently generated manifest equality both pass. Three existing Node
+backend/recovery commands exit0. The complete original policy remains byte-equal
+to PRhead. Receipts/logs/XML are under
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/pr2150-repair/`.
+This is source/binding qualification, not Gmail delivery or installed authority.
+
+## Installed grant startup second-boundary repair — 2026-10-21
+
+WSP 00/15/22/50/71/97. CI on documentation-only PR2166 exposed the existing
+startup call sampling an explicit epoch before the durable revocation fence.
+A deterministic one-second advancement reproduces rejection with
+`durable_revocation_oracle_clock_invalid`; the service correctly fails closed.
+Reuse the existing current-time oracle entry point at dependency revalidation.
+It retains snapshot, permission expiry, revocation and clock-rollback checks;
+the explicit caller-epoch API remains strict. No tolerance or retry was added.
+
+WSP15 allocation: C2/I4/D4/Impact3 = 13 (P1), bounded startup correctness repair.
+Execution plane is source maintenance with disposable synthetic custody tests;
+no production services, installed credentials or native admission are exercised.
+WSP00 canonical boot lacks torch; tracker fallback gate passes, detector witness
+absent. Lexical Holo bundle is bound to main `a6b5efa2`, freshness UNKNOWN and
+index gap true. Exact module interface, custody inventory and durable-key-epoch
+tests supplement retrieval; no semantic freshness is claimed.
+
+Extended the existing installed-composition test with steady and second-boundary
+cases, preserving protected-loader-before-service ordering. Before production
+repair: steady passes, boundary fails. The four startup-custody, custody-version,
+durable-key-epoch and root-LOAD suites pass **123 cases, zero skips** in 28.19s.
+These retain expiry, revoked epoch, stale explicit time and rollback controls.
+The three service, WSP71-rehydration and installed-consumer suites report
+**133 passed, 1 failed, zero skips** in 24.41s. The failure is the native socket
+fixture `test_real_socket_exchange_through_composition_with_synthetic_custody`:
+its readiness assertion also fails in unchanged source at `9fc1ca83`, with
+`FAIL_SIGNER_SERVICE_RUNTIME_ERROR` from the synthetic socket. This test does
+not call the modified startup materializer; its local coverage remains blocked.
+No skip or waiver was added. Both runs use plugin autoload disabled and
+`--import-mode=importlib`; two unknown asyncio config warnings remain.
+
+The canonical backend-manifest generator retains 1,449 entries with no diff:
+this startup module is outside that manifest's existing import closure. No
+security exceptions changed. Current hosted checks remain required.
+
+## Installed HIGH closure reconciliation — 2026-10-22
+
+Final staged diff-check found one surplus trailing blank line in the preserved
+HIGH leaf and one support fixture. Only those blank lines were removed; ASTs are
+identical. The manifest was regenerated and pins rebound to the resulting bytes.
+Earlier freeze/review and failure receipts remain historical. Final byte-bound
+independent review passes8 Python cases in72.34s and all three Node scripts.
+Final connected rerun passes153/skips1 in128.67s on this source; counts overlap.
+
+Independent pre-repair manifest run: 6 passed, 2 failed in 69.12s. Failures were
+Windows CRLF size and indexed-source consistency; separate inspection found stale
+digest and count pins. Existing manifest and JS boundary tests are retained.
+CI adds the existing installed-work/HIGH suites to the startup regression.
+Pre-EOF independent manifest8 passed in67.19s, JS contract/preflight/async
+all exit0, and source/index hashes matched. The pre-EOF connected six-suite run passed
+153/skipped1 in124.52s. Retain original152pass/1skip/1fail: second nested fixture
+path261 characters was published but normal Windows read failed; independent
+extended-length read proved its presence. Single-case shorter-basetemp control
+passed; complete suite then passed with unchanged source. This is a test-path
+environment correction, not a service repair. Two unknown asyncio-config warnings
+reflect disabled plugin autoload. Historical and fresh counts are not additive.
+
+Exact commands, XML, hashes and independent review live under the existing external
+`pr-reconciliation-20261021/refresh/` evidence directory: `rsi-installed-high-final-independent-review-20261022.json`,
+`rsi-installed-high-connected-path-diagnosis-20261022.json`,
+and `rsi-high-connected-final-20261022.xml`. The pre-EOF review/run remain retained
+under their original filenames.
+
+## Installed HIGH service connection — 2026-10-20
+
+Two original controls demonstrated missing V11 full-runtime guard and service selection. The first expanded run retained a 381>300 service-size failure; extracting the HIGH leaf restored the unchanged cap and LOW backend. Focused core passed83/skipped1/failed0 in76.271s. Parent/effect positives execute the actual factory and verify Ed25519 signatures and durable consensus nonce consumption/replay. Original fixture failures are retained: incorrect total lease count (two serial leases are expected), captured dataclass clock and noncanonical peer fixture were corrected only in tests. Four post-sign drift/exit cases withhold the successful result without undoing commit. Independent ingestion5 pass; counts overlap.
+
+Five production files are pinned by external `service-core-freeze.json` SHA256 `7eb7172a5049c7a28ef1363750945607231f00f23d600e24e3e283f76bb5bd0a`. Connected/final bindings are retained in `high-installed-admission-author-review`. No installed HIGH/native admission is inferred. Historical metadata results and unchanged baseline debts follow.
+
+Connected six-suite result: 153 passed, 1 Windows-only skip, 0 failures/errors in
+182.559 seconds (`service-connected.xml`). The five production hashes remained
+unchanged against the pre-run core freeze. It includes the new HIGH tests, live
+composition, model inputs, permission rehydration and signed installed admission;
+83/1 focused and independent5 counts overlap and are not summed.
+
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+Base c5dc5b7a; final freeze contains seven production and four test/support files.
+WSP00/5/6/11/22/50/62/71/77/97. Focused compatibility passed 106/0/0 in61.167s.
+Original connected 11-suite run retained 450 passed/3 failed/0 skipped in108.413s.
+One failure was the now-supported v11 unknown-version fixture; its single literal
+became v12, retaining rejection, and the entire affected suite passed102/0/0 in3.637s.
+Two failures remain exact-base debt in the unchanged startup-authority test file:
+712 lines against675, and its public-v7 startup test89 lines against60. No source
+guard, size cap or exclusion was changed. No broad rerun is claimed after the
+fixture correction. Earlier focused fixture failures are also retained externally.
+
+Independent review passed eight controls in5.6s: real signed positive, duplicate
+scope rejection, v10/v11 signature-domain separation, re-signed root substitution
+rejection and failed enclosing-lease exit. Counts overlap, not additive unique
+coverage. Real signatures/audit/hash readers are exercised; owner/OS/current
+selection seams remain synthetic. No native activation, provider call or grant.
+
+Final author receipt SHA256
+`d0f979b0d7722e5fc1cf0c3763088f1700178555bfabceca256c813428752c93`;
+11-file freeze `293d41b48404c2acd81ce0d798fa1156f22aec72c0ca26959d81b76b254d7671`.
+Both are in the existing external high-installed-admission author-review area;
+the sibling independent-review receipt retains its own pre-fixture-change binding.
+This local checkpoint intentionally leaves generated integrity bindings pending
+until the corrected base and live-lease integration are combined once.
+
+## Live authenticated generation scope — 2026-10-20
+
+Base 5820daf8; WSP00/5/6/11/15/22/62/71/77/97. Nine production owners and eight
+test/support files form the final 17-file freeze. The final delta from the
+connected tested freeze is a Linux test-only 30s watchdog, rerun in the two
+native process controls; production hashes remain unchanged.
+
+Integration base 6dd48a5a preserves all 17 canonical Git-LF blobs. Both
+generators and 36 binding tests pass (zero skips, 96.046s); all three Node
+commands exit 0. The following original source5820 counts and byte-contract
+failure history are retained; no broad core rerun is claimed. Dispatch binds
+the new manifest digest and exact integration receipt.
+
+Connected Windows validation: 390 passed, 9 platform skips, zero failures/errors
+across 25 suites in 389.797s. Separate Linux process controls: 2 passed without
+skips in 29.394s, using the actual same-inode generation lock and signed files
+with synthetic admission/installation seams. Independent core review: 16 unique
+held-outs passed. Counts overlap and are not additive. Original fixture failures
+and the bounded nested-lock red control remain in external evidence.
+
+Independent controls include actual Ed25519 rejection and model-file tamper at
+commit without owner mutation, failed-exit durable replay and stale reservations.
+The first independent run's eight Windows path-length setup failures were retained;
+only its temporary root changed for the eight passing retries. Canonical structure
+coverage remains 33 production components and now 69 tests/helpers, with unchanged
+200/50 ceilings. Five suites join existing startup CI; hosted results remain
+unobserved for this checkpoint.
+Generated closure contains 1,451 files, adding the nonce authority
+and current-owner modules through existing imports. This is source closure,
+not installed qualification. Registry 1,742/270 adds exactly five suites and
+35 shard-only moves; existing classifications/quarantines remain unchanged.
+Both generator checks pass; 36 manifest/registry tests pass without skips in
+80.266s, including staged-index binding. Node contract/preflight/async
+each exit 0. Exact inventory bounds and cap+1 checks follow this inventory;
+structural ceilings are unchanged. All 17 frozen source/test hashes remain exact.
+The serialized-manifest byte contract explicitly evolves from 320 to 324 KiB
+(+4,096 bytes/1.25%): pretty LF 327,910 and CRLF 330,885 fit 331,776,
+leaving 891 bytes above CRLF. The original 35-pass/1-failure receipt is
+retained; formatting stays indent=2. Actual LF/CRLF, exact-max acceptance
+and max+1 rejection are tested; independent 4 MiB readers are unchanged.
+This is a post-read, pre-parse accepted-input bound, not a preallocation
+memory guarantee.
+No installed HIGH/native author claim follows.
+
 ## Consensus nonce publication compatibility repair — 2026-10-20
 
 Hosted PR2165 CI39289991059 found a real regression: a trailing comma made

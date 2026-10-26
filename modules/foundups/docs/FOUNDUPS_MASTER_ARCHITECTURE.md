@@ -1,8 +1,8 @@
 # FoundUps Master Architecture
 
-**Version**: 1.1.0
+**Version**: 1.1.1
 
-**Updated**: 2026-08-26
+**Updated**: 2026-10-23 (document map; lifecycle unchanged)
 
 **Status**: Canonical lifecycle and surface contract
 
@@ -209,6 +209,7 @@ this document.
 | `FOUNDUPS_ENTITLEMENT_TIERS.md` | Per-surface entitlement matrix |
 | `FOUNDUP_TEMPLATE.md` | Adding a FoundUp |
 | `PFMALL_SHELL_CONTRACT.md` | p.fMALL platform boundary |
+| [`../pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md`](../pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) | AutoPost original photos, private item grouping and shared Mall attachment; specification and implementation gates |
 | `public/member/RED_DOG_DIGITAL_TWIN_CONTRACT.md` | RedDog thin-client and authority contract |
 | `WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md` | RedDog/0102 protocol |
 | `WSP_framework/src/WSP_98_FoundUps_Mesh_Native_Architecture_Protocol.md` | Federated/mesh target gates |

@@ -1,5 +1,47 @@
 # Docker build-context hardening and external-audit disposition
 
+## Current reconciliation — 2026-10-26
+
+Reconciled PR2168 with main `16444371a96a579deb2030d8999ff25bc53dbbed`
+for the authorized foundation-software security check. The original seven-file
+context boundary and native positive/negative tests remain. Resolve the Dockerfile
+conflict by retaining main's checksum-verified trust bootstrap and the earlier
+candidate's compiler cleanup. Do not drop either security property.
+
+Python 3.10 reached end of life on 2026-10-01. The candidate selects the official
+`python:3.12.15-slim-bookworm` image as an interim supported base, updates Debian packages during the build,
+retains current CA certificates, and installs the pinned trust bootstrap before
+the unchanged application requirements. The hosted build pulls the base afresh
+and verifies Python 3.12, offline imports, dependency consistency, source
+retention and absence of synthetic credentials/build tools. This updates a build
+recipe; it does not replace an installed host interpreter, Docker Desktop or the
+frozen LOW service. It also does not claim that every image package is CVE-free.
+
+**Remaining interpreter security gap:** PSF released Python 3.12.16 on
+2026-10-25 with the eMudhra intermediate-key distrust, Expat, tarfile and other
+stdlib fixes. The official Docker registry returned `MANIFEST_UNKNOWN` (HTTP404)
+for `3.12.16-slim-bookworm` during this audit; `3.12.15-slim-bookworm` returned
+HTTP200 with multi-platform index digest
+`sha256:6a0e06f5ba0b373d051aabd3fffb9b873f27f9a2a3a14bcbe37dee6f0e3bbc70`.
+The source-only Python release is not the same as a published container image.
+This interim move removes an unsupported interpreter but does not close the
+3.12.16 stdlib advisories. Recheck the official image and rerun the actual-image
+gate for 3.12.16 when available. The pip/certifi bootstrap and OS package updates
+are separate mitigations, not substitutes for the full interpreter update.
+Release evidence: https://www.python.org/downloads/release/python-31216/ .
+
+The repository-bound receipt and its expected base now refer to the reconciled
+main. Its broader mission outcome remains blocked because Windows-host and live
+deployment evidence are unavailable. New exact-head native Docker, image build
+and existing CI results are required; historical passes below are not relabelled.
+
+Sources: https://devguide.python.org/versions/ and
+https://hub.docker.com/_/python . The Docker Desktop crash screenshot identifies
+an inaccessible local `dockerInference` socket, not a failing container build.
+The image changes do not claim to repair that separate Windows startup error.
+
+## Historical 2026-10-21 audit
+
 Audit source: `a6b5efa2c83da31712df6d00540a773daa8748b3`, 2026-10-21.
 Origin: 012-supplied Gemini 0102 directive. Execution: bounded local/CI/docs slice;
 no resident worker, WRE admission, production deployment or credential operation.

@@ -1,3 +1,95 @@
+## 2026-10-26 — Isolated proposal host bootstrap candidate
+
+WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 allocationf8fa5b25c.
+Frozen acceptance4cd8c71f6 precedes production. Add a bounded server-policy ASGI
+factory reusing the existing handler/RSA verifier; change only the HTTP policy
+owner to request.app.state. Expose proposal/health only, with generic startup
+rejection and no default policy or config values in output. Existing anonymous
+development routes keep their original app and semantics.
+Local814PASS/0FAIL/0ERROR/0SKIP retains all786 original cases plus28 new cases;
+initial Windows10055 setup error and desired RED remain in the test log/evidence.
+No dependency, registry, cloud/IAM/deploy, private key, provider or data write.
+Existing Firebase project/site and six Node functions were observed read-only;
+their shared ignored source remains untouched. Independent review, manifest check
+and fresh hosted publication gates remain required; serving/container, real
+session, browser, abuse/revocation and durable repository admission are later gates.
+
+## 2026-10-26 — Replace the initial optional dependency profile before promotion
+
+Fresh public registry metadata found advisories for the initial Starlette/crypto
+versions. Under pre-change allocation3bbbb2ee4, select explicit patched HTTP pins
+in this module's requirements and existing contract workflow. Separate new
+environment: identical786 local cases pass, one reviewed HTTPX test-client
+warning;25 resolved distributions show zero published metadata advisories.
+Independent installed-inventory review found an older bootstrap pip outside25;
+pre-change allocationc6557db8b precedes its isolated/CI pip26.2.2 repair and separate
+acquisition report. Same786 cases pass again; all26 installed distributions now
+show zero published registry advisories.
+This is not a complete binary/platform/security audit. Product/test source,
+legacy contracts, resident/umbrella environment and prior evidence stay unchanged.
+Independent profile/metadata and final workflow reviews accept the bounded
+component; unchanged11 held-outs plus separate optional-import-denied503 pass.
+The patched-profile receipt binds root786 and both reviews; fresh exact-head
+hosted/security/main gates remain required.
+
+## 2026-10-26 — Explicit Clerk-authenticated draft intake component (initial profile)
+
+WSP00/3/6/11/15/22/49/50/62/77/84/97/109;15/P1 allocation6efb68f50.
+Connect one separate POST route in the existing development FastAPI app to a
+server-owned Clerk bearer policy and existing genesis body preflight/mapper.
+No default policy, environment secrets, legacy HMAC change, membership/client
+flag trust, data writes, repo/provider calls or runtime/token grant. Add an
+optional HTTP profile without migrating the shared/umbrella environment.
+Frozen RED and local GREEN786/one baseline warning are in tests/TestModLog.
+Independent11 held-outs and separate optional-import-denied ASGI probe pass after
+the canonical public-PEM repair; initial10PASS/1FAIL finding remains retained.
+Hosted/security gates and exact main convergence remain separate. Deployment,
+live identity/current revocation, durable claim receipts and issuance are pending.
+
+Security closure: independently classify only the observed tree/history receipt
+line12 public HTTP source hash; append exactly two existing-ledger bindings,
+preserving2417 prefix entries and all other keys. No detector, scanner/scope or
+GitGuardian change. Current final-head gates remain required.
+
+## 2026-10-25 — FX1 public directory entry
+
+Add a normal FX anchor to the current homepage navigation, retaining the gateway
+and existing `/f/` owner. The directory explains declared symbols and adds ticker
+search to its existing ID/name/summary/readiness filter. No chain, token, registry,
+wallet, router or trading operation is introduced.
+
+Extend the existing gateway-navigation test and route VM rather than creating a
+new suite. The two complete files pass 300 cases with two inherited configuration
+warnings. Exact command, red/green evidence and controlled-browser limits are in
+`../../../public/member/tests/TestModLog.md`; no public deployment is claimed.
+WSP 15/22/50/84/97: approved 15/P1 slice with current owner retrieval.
+
+## 2026-10-23 — Private AutoPost item handoff and Shop retrieval repair
+
+- Reconciled Foundups-Agent `a048c24071e1a651b161025ba3342f14f3047280` and
+  AutoPost `3c0fc19d40e225ed7f826541a33c38293f9fe664`. AutoPost owns original
+  photo capture/media; the existing platform owns authenticated attachment and
+  permitted Mall presentation. Public Shop visibility remains undecided.
+- Added [the item handoff](AUTOPOST_ITEM_CAPTURE_HANDOFF.md) and bounded
+  [document manifest](doc_index.json); linked module/domain interfaces,
+  roadmaps, registry and navigation. Corrected obsolete AutoPost mock/percentage
+  claims and marked the older capture audit historical for current capability.
+- Distinguished local batch/item/photo IDs, private defaults, missing grouping
+  UI/persistence and missing authenticated media/private-item service. Kept
+  public GotJunk routes/static assets out of the private path; GetK's unmerged
+  `public_browse` default is explicitly unsuitable for private capture.
+- Shared member matcher repair is recorded in `public/member/ModLog.md` and
+  its existing test log. It does not implement structured shopping intent,
+  microphone capture, private garment rendering or public commerce.
+- Verification: immutable-source/blob review, document/manifest attachment
+  checks, independent architecture review and the existing Mall VM harnesses.
+  This slice does not change pfmall Python/runtime authorization or deploy a
+  provider. The owning PR records hosted checks, merge and main readback.
+- WSP 22/50/83/84/97: reuse owners and preserve operational memory. WSP 00
+  canonical bootstrap lacked torch; formula fallback opened a software gate,
+  detector witness absent. No admitted Holo/WRE runtime: semantic freshness
+  UNKNOWN; no reindex or named-worker execution claimed.
+
 ## 2026-10-18 — AutoPost Live-mode owner audit and contract correction
 
 - Audited external AutoPost main `4b9e2fd8958f54e5b4c0c36e690d781ac1e8f147`

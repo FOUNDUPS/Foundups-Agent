@@ -1,3 +1,20 @@
+## PR1792 reusable brand core selection — 2026-10-25
+
+Run `node extensions/reddog/tests/test_foundup_work_grounding.js` and the existing
+package-manifest/surface scripts explicitly; the current Node fast tier does
+not discover this grounding suite. Grounding tests snapshot public registry
+entities into owned fixtures rather than treating a dirty checkout as clean.
+They retain existing generic/unknown-reference, scope and integrity assertions,
+then exercise synthetic child identity, Japanese aliases, dirty/missing evidence,
+private-path preread denial, junction/symlink and hard-link rejection.
+
+The existing Python target-verifier suite invokes the actual Node producer;
+provide Node on PATH or `REDDOG_TEST_NODE`. Missing Node is a failure, not a skip.
+Backend/schema selection currently contains 74 cases. Qualification receipts
+bind exact case identities, normal imports and effect guards. Package surface
+also checks the Git index and must be run after the owner stages the candidate.
+No protected brand activation or deployed-host result is implied.
+
 ## Issuer composition closure count — 2026-10-16
 
 `node extensions/reddog/tests/test_backend_compatibility_contract.js` reproduced
@@ -23,6 +40,20 @@ receipt `effect-signing-extension-count-review.json`, SHA256
 WSP00/6/15/22/50/84/97. New-head hosted checks pending; no native RSI claim.
 
 # RedDog Extension Tests
+
+## PR1638 local activity-ledger reconciliation
+
+Current scope and results: [integration receipt](../docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md)
+and the PR1638 entry in `TestModLog.md`. Existing ledger/adapter suites now cover
+key concurrency/loss, authenticated append, partial I/O and cleanup, cooperating
+child-process locking, strict JSON, latest commitment status, and truthful
+bounded projections using temporary data and fake SecretStorage. Registration
+remains a static contract; real installed-host operation is unqualified.
+
+The fast tier has 18 members, including the three PAL tests. The package contract
+has 69 files (68 LF text, one binary) under its unchanged one MiB cap. Historical
+67-file release receipts below keep their original source scope. The focused
+Linux/Windows CI job is configured; hosted results require new-head execution.
 
 ## 0.4.141 identity / merged builder reconciliation candidate
 

@@ -1,3 +1,90 @@
+## 2026-10-25 | FX1 public directory and actual filter events
+
+Independent closeout: the same 300 cases passed again in 6.63s, with two inherited
+config warnings and zero Python socket/DNS attempts. Exact executed IDs and
+warnings were captured in host scratch
+`foundups-fx1-independent-20261025-efwm62i1/results.json`; original worker red/green
+runs have session output, not a separate machine receipt. Parent browser checks
+confirmed root FX navigation, five public cards, `$junk` search, empty results
+and readiness filtering. Source and docs also received independent review with
+no material findings. These are local results; hosting deployment is pending.
+
+Base checkout: `8b2fccf64251097b647b7fc5a45dad75706a9192`. Read member/PFMall
+README, INTERFACE, ROADMAP, ModLog and test inventories before authoring. Holo
+owner retrieval failed `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH` with UNKNOWN
+freshness/index gap; exact current owner reads supplied the missing evidence.
+WSP 15 pre-authoring allocation: C3/I4/D4/Impact4 = 15/P1.
+
+Added the missing tests README first. Extended the existing
+`test_route_contract_bridge.py` Node VM to retain actual listeners and invoke
+bounded input/change actions, taking grid snapshots after each event. Reused the
+existing inline owner, DOM/fetch guard and route tests. Added no test file,
+framework, catalog record, network provider or model dependency.
+
+Coverage: canonical ID/name/summary/ticker (including `$` and case/spacing),
+missing/null/blank/non-string symbols, independent readiness/query interaction,
+clear and empty recovery, escaped ticker text, discovery wording, failed catalog
+and Return to Mall. Gateway navigation coverage extends the existing
+`test_gateway_roc_shell.py`; its existing admission tests remain included.
+
+Before the product change, `-k fx` produced **5 failed, 13 passed, 282 deselected**:
+missing ticker matches, resulting filter recovery, and missing homepage FX link.
+After the change, the two complete existing owners produced **300 passed,
+0 failed, 0 skipped**, with two inherited unknown asyncio-configuration warnings.
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+O:/Foundups-Agent/.venv/Scripts/python.exe -B -m pytest public/member/tests/test_route_contract_bridge.py modules/foundups/pfmall/tests/test_gateway_roc_shell.py --import-mode=importlib -o addopts= -p no:cacheprovider --basetemp <outside-checkout-scratch> -q
+```
+
+Fresh green scratch: `C:/Users/user/AppData/Local/Temp/foundups-fx1-green-524d67c6f19d48ff93cf2ada2a739b3f`.
+Node runs with controlled I/O and a scratch working
+directory. These tests verify source behavior and escaped output bytes; the VM
+does not parse browser HTML or prove real browser layout, deployed routing,
+provider authentication, claim verification, chain assets, liquidity or trading.
+No previous aggregate pass count is presented as this run's evidence.
+
+## 2026-10-23 | Bounded request normalization in the existing Mall field
+
+Source baseline: `a048c24071e1a651b161025ba3342f14f3047280`; existing field blob
+`966e59f748422a5aed2cf24694d01c6fe6636626` and property harness blob
+`7cd57d0dcab2682906c20e6da4d2b5611ecb7622`. Read the module interface, roadmap,
+this test inventory and the existing actual-field harness before extending it.
+No test file, external dependency or separate search runtime was added.
+
+Release-cache follow-up verified current main
+`f2e9408ba950a80fe549887db39289e6aff04f27`: member worker blob
+`89393c6f0ef95b6150873d819bb6ce5f45cc2be4` is unchanged from the baseline.
+The matcher is a precached, cache-first shell asset, so advance only its existing
+shell cache from v4 to v5. The existing product state/service-worker harness now
+expects v5 installation and retirement of v4 while retaining poster/property
+cache generations. Its original blob is
+`a7efa398b9a34c27f0acdca2144ac75ef029bbbb`; only version-bound assertions changed.
+
+The unchanged property harness passed first. The added “I'm looking for clothing”
+regression then failed on unchanged source with zero results instead of the three
+synthetic clothing records. After the bounded matcher repair, the same harness
+passes straight/curly contractions, case/spacing, addressed request prefixes,
+reciprocal clothing aliases, retained red/dog qualifiers, original query retention,
+and literal unsupported negation/budget/size terms. The grouped-product cases
+also refuse the new phrases without changing their declared projection.
+
+Fresh Node v24.19.0 execution:
+
+- `node public/member/tests/mall_property_listing_vm.mjs`: exit 0, all checks pass.
+- `node public/member/tests/pfmall_control_dispatcher_vm.mjs`: exit 0, all checks pass.
+- `node public/member/tests/public_discovery_concierge_vm.mjs`: 21 passed, 0 failed,
+  0 skipped.
+- `node public/member/tests/mall_product_state_vm.mjs`: 17 passed; this was the
+  only harness rerun for the subsequent cache-generation change.
+
+The first two harnesses do not emit numeric test totals. Existing navigation,
+grouping, video compatibility and domain-isolation assertions were retained.
+These receipts prove offline source behavior with bounded DOM fixtures, not
+browser layout, deployed inventory, semantic shopping filters, speech, uploads,
+payments or public release. Synthetic clothing records remain test data only.
+
 ## 2026-10-21 | CodeQL fixture repair and main reconciliation
 
 Existing property VM now rejects raw script/image markup case-insensitively and

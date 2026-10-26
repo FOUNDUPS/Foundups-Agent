@@ -1,8 +1,8 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1740,
-  "quarantined_tests": 270,
+  "total_tests": 1773,
+  "quarantined_tests": 273,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -3188,6 +3188,19 @@
       "description": "Tests for FoundUp LaunchRequest -- public input cannot self-authenticate or become code."
     },
     {
+      "id": "test::modules::ai_intelligence::ai_overseer::tests::test_github_nomination_review",
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_github_nomination_review.py",
+      "owner": "modules/ai_intelligence/ai_overseer",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-ai-overseer-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "GitHub issue nomination -> untrusted review draft; no control or work grant."
+    },
+    {
       "id": "test::modules::ai_intelligence::ai_overseer::tests::test_ii_agent_adapter",
       "path": "modules/ai_intelligence/ai_overseer/tests/test_ii_agent_adapter.py",
       "owner": "modules/ai_intelligence/ai_overseer",
@@ -4420,6 +4433,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for OBSERVE-MODE acoustic music/talk label in PHASE 2 indexing.\n\nSlice: SHORTS_MUSIC_LABEL_OBSERVE_PHASE1   Worker-Lane: MUSIC-OBSERVE\n\nWSP refs: WSP 5 (coverage), WSP 6 (audit), WSP 84 (reuse VideoArchiveExtractor +\naudio_content_classifier.classify_content).\n\nCONTRACT under test (observe-only, flag-gated, default OFF):\n  - flag ON  -> _observe_audio_label downloads (mocked) + classifies (mocked) and\n                returns {audio_label, audio_label_confidence}; the per-video write\n      "
+    },
+    {
+      "id": "test::modules::ai_intelligence::video_indexer::tests::test_audio_transcript_language",
+      "path": "modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py",
+      "owner": "modules/ai_intelligence/video_indexer",
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-video-indexer-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Test real analyzer conversion without YouTube requests or model downloads."
     },
     {
       "id": "test::modules::ai_intelligence::video_indexer::tests::test_gemini_video_analyzer",
@@ -5993,6 +6019,19 @@
       "description": "Test Script for Emoji Response System\nTests the complete emoji trigger -> response pipeline using 0-1-2 sequences."
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_engagement_runner_lifecycle",
+      "path": "modules/communication/livechat/tests/test_engagement_runner_lifecycle.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline source-bound subprocess, thread and rotation lifecycle cases."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_escalation",
       "path": "modules/communication/livechat/tests/test_escalation.py",
       "owner": "modules/communication/livechat",
@@ -6124,6 +6163,21 @@
       "description": "Test Intelligent Throttle Manager\nWSP-Compliant: WSP 5 (Testing), WSP 6 (Audit)\n\nTests the intelligent throttle manager and enhanced features."
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_live_handoff_selective_cancellation",
+      "path": "modules/communication/livechat/tests/test_live_handoff_selective_cancellation.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-01",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline source-bound PR841 handoff tests; no application imports or live effects.\n\nThe real owner method bodies are compiled from their AST. Browser, auth, model,\ntelemetry and provider boundaries are replaced explicitly. This is bounded local\nlifecycle evidence, not full-package or native/operational YouTube qualification."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_livechat",
       "path": "modules/communication/livechat/tests/test_livechat.py",
       "owner": "modules/communication/livechat",
@@ -6186,7 +6240,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_initialization.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -6199,7 +6253,7 @@
       "path": "modules/communication/livechat/tests/test_livechat_lifecycle.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-01",
+      "shard_id": "modules-communication-livechat-unit-part-02",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -6442,6 +6496,34 @@
       "description": "Unit tests for the channel-scoped OODA activity signal (RC3 observability).\n\nPURE tests -- no live browser, no driver, no router. They pin two things:\n  1. the rollup `current_activity` precedence is UNCHANGED (so should_pivot is\n     byte-for-byte identical to the pre-fix Chrome-only logic), and\n  2. the NEW channel-scoped truth: a stale Chrome comments tab during a live\n     stream is flagged, and Edge-bound channels (FoundUps/antifaFM) are never\n     mislabelled as \"processing comments\" just "
     },
     {
+      "id": "test::modules::communication::livechat::tests::test_operator_command_lifecycle",
+      "path": "modules/communication/livechat/tests/test_operator_command_lifecycle.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline, source-bound tests for ownership of the operator watcher.\n\nCompile the actual run/_run_dae AST without importing the DAE's heavyweight\nmodule graph or calling its constructor. The public run method and the real\nstartup/stop branches execute below; auth, browser, model, and manifest IO do\nnot. This proves bounded lifecycle behavior, not full-module/runtime readiness."
+    },
+    {
+      "id": "test::modules::communication::livechat::tests::test_operator_command_queue",
+      "path": "modules/communication/livechat/tests/test_operator_command_queue.py",
+      "owner": "modules/communication/livechat",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-livechat-unit-part-02",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline contracts using real queue/locks, disposable files and fake senders."
+    },
+    {
       "id": "test::modules::communication::livechat::tests::test_orchestrator",
       "path": "modules/communication/livechat/tests/test_orchestrator.py",
       "owner": "modules/communication/livechat",
@@ -6670,7 +6752,7 @@
       "path": "modules/communication/livechat/tests/test_unified_message_router.py",
       "owner": "modules/communication/livechat",
       "suite_class": "unit",
-      "shard_id": "modules-communication-livechat-unit-part-02",
+      "shard_id": "modules-communication-livechat-unit-part-03",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -7492,6 +7574,21 @@
       "description": "Tests for model/provider status authority reconciliation.\n\nVerifies that get_model_availability_snapshot() is the canonical OpenClaw\nsnapshot builder, callable with or without a DAE instance, and that:\n  - local-target map derives from local_target_dirs() in openclaw_model_policy\n  - provider key/external-target resolution routes through policy functions\n  - startup_refresh_model_status writes the same output shape as runtime\n  - the snapshot includes a generated_on timestamp for freshness track"
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_moshpit_projection",
+      "path": "modules/communication/moltbot_bridge/tests/test_moshpit_projection.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-moltbot-bridge-operational",
+      "capabilities": [],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_file_write"
+      ],
+      "description": "Synthetic-only projection/renderer contracts, with no remote effects."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_openclaw_capability_audit",
       "path": "modules/communication/moltbot_bridge/tests/test_openclaw_capability_audit.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -7654,6 +7751,19 @@
         "module_scope_local_function_invocation"
       ],
       "description": "Integration manifest drift check.\n\nVerifies that the canonical machine-readable ledger\n(openclaw_integration_manifest.json) stays aligned with\nenv surfaces documented in main.py and wre_defaults.env.\n\nSlice: OPENCLAW_INTEGRATION_MANIFEST_LINT_PHASE1"
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_openclaw_kids_story_route",
+      "path": "modules/communication/moltbot_bridge/tests/test_openclaw_kids_story_route.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Explicit story entry retains local trust and WRE's production admission."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_openclaw_maintenance_selector",
@@ -8071,7 +8181,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_authoritative_use_request_preparation.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-03",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8521,7 +8631,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_conversation_work_promotion_crash_recovery.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-04",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -8952,7 +9062,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_extension_live_enqueue_invoke.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-05",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9426,7 +9536,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_holoindex_maintenance_dispatch.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-06",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9556,6 +9666,45 @@
       "description": "Real enrollment/IO/signatures; owner, E0 lease, OS custody are synthetic."
     },
     {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_installed_high_service",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_installed_high_service.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Installed HIGH composition; disposable crypto, explicit OS/admission seams."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_installed_high_service_signing",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_installed_high_service_signing.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Actual HIGH service backend/factory signature and durable consensus consumption."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_installed_work_admission",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_installed_work_admission.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Non-initial installed metadata; real crypto, synthetic owner/selection custody."
+    },
+    {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_isolated_signer_process_entrypoint",
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_isolated_signer_process_entrypoint.py",
       "owner": "modules/communication/moltbot_bridge",
@@ -9670,6 +9819,71 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for RedDog lane-state reconciler dry-run."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_live_lease_composition",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_live_lease_composition.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Actual crypto/store/factory connection under one scope; no installed HIGH service."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_live_lease_current_use",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_live_lease_current_use.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Current consent/model/owner withdrawal at actual signer reservation phases."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_live_lease_generation",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_live_lease_generation.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Actual signed generation selection checks reuse the held fence, not snapshots."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_live_lease_process",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_live_lease_process.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Two-process actual same-inode fence; synthetic authority, actual crypto and stores."
+    },
+    {
+      "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_live_lease_scope",
+      "path": "modules/communication/moltbot_bridge/tests/test_reddog_live_lease_scope.py",
+      "owner": "modules/communication/moltbot_bridge",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Bounded lifetime/currentness controls; authenticated OS selection is a fixture."
     },
     {
       "id": "test::modules::communication::moltbot_bridge::tests::test_reddog_main_architect_fix_model_runtime_bootstrap",
@@ -9799,7 +10013,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_next_stage_dispatch_bootstrap.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9812,7 +10026,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_orchestration_plan_bootstrap.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9825,7 +10039,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_resident_queue_runtime_dependency_bundle.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [
         "network"
       ],
@@ -9857,7 +10071,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_resident_socket_chain.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [
         "network"
       ],
@@ -9872,7 +10086,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_signed_worker_verifier_context.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9885,7 +10099,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_main_signer_service_config_supply_preflight.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [
         "network"
       ],
@@ -9900,7 +10114,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_memex_authority_dispatch_binding.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9913,7 +10127,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_memex_snapshot_projection_supplier.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -9926,7 +10140,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_merge_authority_contract_doc.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-07",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10253,7 +10467,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_transport.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10266,7 +10480,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_consensus_use_time.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10279,7 +10493,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_composition.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10292,7 +10506,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_contract.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10305,7 +10519,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_consent_owner_versions.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10318,7 +10532,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_parent_model_inputs.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10357,7 +10571,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_principal_memex_live_resident_source_supply.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10370,7 +10584,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_principal_memex_resident_admission.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10383,7 +10597,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_progressive_execution_stage_policy.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-08",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10544,7 +10758,9 @@
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
       "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -10742,7 +10958,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_fix_promotion_artifact_handoff.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10755,7 +10971,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [
         "process"
       ],
@@ -10785,7 +11001,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_live_canary_provider_readiness.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10798,7 +11014,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_model_runtime_bindings.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10811,7 +11027,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_assurance_capacity_admission.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10869,7 +11085,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_bounded_worker_model_authority.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10897,7 +11113,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_chain_results_store.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10910,7 +11126,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_draft_pr_publish_request_binding.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -10968,7 +11184,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_held_out_regression_gate_handler.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-09",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11370,7 +11586,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_runtime_module_static_boundaries.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11383,7 +11599,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_authority_worker_dispatch_dryrun.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11396,7 +11612,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_receipt_chain.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11409,7 +11625,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_runtime_artifact_manifest.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11422,7 +11638,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_admission.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11435,7 +11651,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_authority.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11448,7 +11664,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_history.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11461,7 +11677,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_agentdb_runtime.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11474,7 +11690,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signed_worker_dispatch_task_executor.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-10",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
       "capabilities": [
         "process"
       ],
@@ -11819,7 +12035,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_admission_hardening.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11832,7 +12048,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_generation_role_separation.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11845,7 +12061,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_owner_e0_static_contract.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11858,7 +12074,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_peer_instance_packet_validator_generation.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11871,7 +12087,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_process_isolation_gate.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11884,7 +12100,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_resolve_per_sign_backend.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11897,7 +12113,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_root_protected_use_composition.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -11910,7 +12126,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [
         "network"
       ],
@@ -11925,7 +12141,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_signer_runtime_atomic_provisioning_recovery.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-11",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12371,7 +12587,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_typed_evidence_citation_policy.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12384,7 +12600,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_upstream_artifact_provider_bootstrap.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12397,7 +12613,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_verified_grounding_model_evidence.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12410,7 +12626,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_verified_outcome_bootstrap_binding.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12423,7 +12639,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_verified_pattern_memory_sink.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12436,7 +12652,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_work_ledger_refresh_plan_dryrun.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12449,7 +12665,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_work_ledger_source_projection_supply.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12462,7 +12678,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_work_order_receipt.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12475,7 +12691,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_work_order_runtime_invocation.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-12",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12832,7 +13048,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12845,7 +13061,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_roc_candidate_metrics.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12858,7 +13074,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_scripts_namespace.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12871,7 +13087,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_skill_boundary_policy.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -12886,7 +13102,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_skill_safety_guard.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [
         "process"
       ],
@@ -12901,7 +13117,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12914,7 +13130,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_webhook_receiver_auth.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12927,7 +13143,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_x_social_adapter.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12940,7 +13156,7 @@
       "path": "modules/communication/moltbot_bridge/tests/test_youtube_automation_adapter.py",
       "owner": "modules/communication/moltbot_bridge",
       "suite_class": "unit",
-      "shard_id": "modules-communication-moltbot-bridge-unit-part-13",
+      "shard_id": "modules-communication-moltbot-bridge-unit-part-14",
       "capabilities": [],
       "execution_type": "unit",
       "collectable": true,
@@ -12983,7 +13199,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_autonomous_all_comments.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation",
@@ -13000,7 +13216,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_autonomous_dom_verified.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation",
@@ -13017,7 +13233,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_autonomous_full.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13032,7 +13248,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_browser_nav.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13047,7 +13263,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_click_state_change.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13063,7 +13279,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_direct_selenium_click.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13079,7 +13295,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_coordinates.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13094,7 +13310,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_heart_precise.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13110,7 +13326,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_heart_stay_open.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13125,7 +13341,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_simple.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13141,7 +13357,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_vision_like.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13157,7 +13373,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_gemini_vision_visible.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13173,7 +13389,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_heart_not_like.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13188,7 +13404,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_heart_offset.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13203,7 +13419,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_integrated_architecture.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13219,7 +13435,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_map_buttons.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13235,7 +13451,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_qwen_studio_engage.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13250,7 +13466,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_save_screenshot.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13265,7 +13481,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_selenium_like.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13299,7 +13515,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_studio_simple.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13314,7 +13530,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_teaching_system.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13330,7 +13546,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_visible_heart_click.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13346,7 +13562,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_what_gets_clicked.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "browser",
         "import_path_mutation"
@@ -13362,7 +13578,7 @@
       "path": "modules/communication/video_comments/skillz/qwen_studio_engage/tests/test_youtube_studio_vision.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13429,7 +13645,7 @@
       "path": "modules/communication/video_comments/skillz/tars_account_swapper/tests/test_oops_page_switch.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13444,7 +13660,7 @@
       "path": "modules/communication/video_comments/tests/test_classifier_pipeline.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13455,11 +13671,24 @@
       "description": "Test Classification Pipeline - Phase 3O-3R End-to-End Verification\n\nVerifies:\n1. Whacked users database tracking\n2. Fast 0/1/2 classification (<5ms)\n3. Confidence scoring (Gemma-style pattern matching)\n4. Integration with whack_a_magat gamification system\n\nWSP References:\n- WSP 50 (Pre-Action Verification)\n- WSP 77 (Agent Coordination)\n- WSP 96 (WRE Skills)"
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_commenting_control_plane",
+      "path": "modules/communication/video_comments/tests/test_commenting_control_plane.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Local broadcast/context reader contracts; every state file is temporary."
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_like_single_comment",
       "path": "modules/communication/video_comments/tests/test_like_single_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13491,7 +13720,7 @@
       "path": "modules/communication/video_comments/tests/test_move2japan_access.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13507,7 +13736,7 @@
       "path": "modules/communication/video_comments/tests/test_poc_dialogue.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13523,7 +13752,7 @@
       "path": "modules/communication/video_comments/tests/test_post_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13535,11 +13764,28 @@
       "description": "Test posting a comment on a Move2Japan video"
     },
     {
+      "id": "test::modules::communication::video_comments::tests::test_reply_context_pipeline",
+      "path": "modules/communication/video_comments/tests/test_reply_context_pipeline.py",
+      "owner": "modules/communication/video_comments",
+      "suite_class": "operational",
+      "shard_id": "modules-communication-video-comments-operational",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Exact-source behavioral tests; package imports/constructors/live providers excluded.\n\nThe private loader compiles complete production definitions with denied optional\ncollaborators. No Selenium, profile store, model, network, or posting is started.\nDOM checks run the actual extraction JavaScript against synthetic rows in Node."
+    },
+    {
       "id": "test::modules::communication::video_comments::tests::test_reply_to_comment",
       "path": "modules/communication/video_comments/tests/test_reply_to_comment.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-01",
       "capabilities": [
         "import_path_mutation",
         "logging_configuration"
@@ -13555,7 +13801,7 @@
       "path": "modules/communication/video_comments/tests/test_ytr1_runtime_hardening.py",
       "owner": "modules/communication/video_comments",
       "suite_class": "unit",
-      "shard_id": "modules-communication-video-comments-unit",
+      "shard_id": "modules-communication-video-comments-unit-part-02",
       "capabilities": [
         "import_path_mutation"
       ],
@@ -13579,6 +13825,19 @@
         "syntax_error"
       ],
       "description": ""
+    },
+    {
+      "id": "test::modules::communication::voice_command_ingestion::tests::test_transcript_language",
+      "path": "modules/communication/voice_command_ingestion/tests/test_transcript_language.py",
+      "owner": "modules/communication/voice_command_ingestion",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-voice-command-ingestion-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Language and timestamp evidence, using local fakes without model downloads."
     },
     {
       "id": "test::modules::communication::voice_command_ingestion::tests::test_voice_command_ingestion",
@@ -13674,6 +13933,75 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Quick test script for Gemini API functionality\nTests basic text generation to verify API access"
+    },
+    {
+      "id": "test::modules::communication::youtube_shorts::tests::test_kids_editor_server",
+      "path": "modules/communication/youtube_shorts/tests/test_kids_editor_server.py",
+      "owner": "modules/communication/youtube_shorts",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-shorts-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "HTTP and filesystem boundary checks for the local episode editor."
+    },
+    {
+      "id": "test::modules::communication::youtube_shorts::tests::test_kids_episode",
+      "path": "modules/communication/youtube_shorts/tests/test_kids_episode.py",
+      "owner": "modules/communication/youtube_shorts",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-shorts-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline contract and real FFmpeg render checks; no provider credentials."
+    },
+    {
+      "id": "test::modules::communication::youtube_shorts::tests::test_kids_research",
+      "path": "modules/communication/youtube_shorts/tests/test_kids_research.py",
+      "owner": "modules/communication/youtube_shorts",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-shorts-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Credential-free tests of bounds and evidence labels, not live provider proofs."
+    },
+    {
+      "id": "test::modules::communication::youtube_shorts::tests::test_little_shrew_preview",
+      "path": "modules/communication/youtube_shorts/tests/test_little_shrew_preview.py",
+      "owner": "modules/communication/youtube_shorts",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-shorts-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Real local first-episode media; no accounts, paid calls or fake acceptance."
+    },
+    {
+      "id": "test::modules::communication::youtube_shorts::tests::test_openrouter_storyboard",
+      "path": "modules/communication/youtube_shorts/tests/test_openrouter_storyboard.py",
+      "owner": "modules/communication/youtube_shorts",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-youtube-shorts-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline transport and pipeline tests; no live model-quality claim."
     },
     {
       "id": "test::modules::communication::youtube_shorts::tests::test_promo_generation",
@@ -14971,6 +15299,75 @@
       "description": "Pure offline migration-inventory acceptance; no Firebase or browser runtime."
     },
     {
+      "id": "test::modules::foundups::kids_episodes::tests::test_gemini_story_adapters",
+      "path": "modules/foundups/kids_episodes/tests/test_gemini_story_adapters.py",
+      "owner": "modules/foundups/kids_episodes",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-kids-episodes-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline provider-contract tests; no actual semantic review or paid calls."
+    },
+    {
+      "id": "test::modules::foundups::kids_episodes::tests::test_little_shrew",
+      "path": "modules/foundups/kids_episodes/tests/test_little_shrew.py",
+      "owner": "modules/foundups/kids_episodes",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-kids-episodes-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Preset integration with the canonical compiler; no provider or account access."
+    },
+    {
+      "id": "test::modules::foundups::kids_episodes::tests::test_story_pipeline",
+      "path": "modules/foundups/kids_episodes/tests/test_story_pipeline.py",
+      "owner": "modules/foundups/kids_episodes",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-kids-episodes-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "No-network production state-machine contracts with fake injected effects."
+    },
+    {
+      "id": "test::modules::foundups::kids_episodes::tests::test_story_render_integration",
+      "path": "modules/foundups/kids_episodes/tests/test_story_render_integration.py",
+      "owner": "modules/foundups/kids_episodes",
+      "suite_class": "operational",
+      "shard_id": "modules-foundups-kids-episodes-operational",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "operational",
+      "collectable": false,
+      "timeout_s": 900,
+      "quarantine_reasons": [
+        "module_scope_local_function_invocation"
+      ],
+      "description": "Real local FFmpeg story assembly with explicitly synthetic provider/review seams.\n\nNo model, credentials, network, live admission, pedagogical approval or publishing\nis exercised. The synthetic reviewer tests the callback contract, not education."
+    },
+    {
+      "id": "test::modules::foundups::kids_episodes::tests::test_work_order_adapter",
+      "path": "modules/foundups/kids_episodes/tests/test_work_order_adapter.py",
+      "owner": "modules/foundups/kids_episodes",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-kids-episodes-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": ""
+    },
+    {
       "id": "test::modules::foundups::kosei::tests::test_client_workspace",
       "path": "modules/foundups/kosei/tests/test_client_workspace.py",
       "owner": "modules/foundups/kosei",
@@ -15101,6 +15498,19 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Catalog FoundUp Truth Gate \u2014 WSP 97 Validation\n\nEvery entry in mall-video-catalog.json is a FoundUp.\nSome FoundUps also have bound tenant manifests (foundup_manifest.json).\nThe catalog needs its own validator and must join against manifests when present.\n\nTruth labels:\n  BOUND_TENANT:       Has catalog entry + foundup_manifest.json + routing_prefix + data_namespace\n  DISCOVERABLE_ONLY:  Has catalog entry, no manifest binding required\n\nThis test module enforces:\n  - All catalog entries are valid "
+    },
+    {
+      "id": "test::modules::foundups::pfmall::tests::test_clerk_proposal_intake",
+      "path": "modules/foundups/pfmall/tests/test_clerk_proposal_intake.py",
+      "owner": "modules/foundups/pfmall",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-pfmall-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Real RSA/HTTP draft-intake contracts; no live Clerk identity or deployment."
     },
     {
       "id": "test::modules::foundups::pfmall::tests::test_gateway_roc_shell",
@@ -15390,7 +15800,7 @@
       "collectable": true,
       "timeout_s": 180,
       "quarantine_reasons": [],
-      "description": "BTC reserve semantics regression tests.\n\nEnsures canonical UPS naming/behavior:\n- total_ups_circulating is canonical\n- total_ups_minted remains a backward-compatible alias\n- route_ups_from_treasury is canonical routing API"
+      "description": "BTC reserve semantics regression tests.\n\nEnsures canonical UPS naming/behavior:\n- total_ups_circulating is canonical\n- total_ups_minted remains a backward-compatible alias\n- route_ups_from_treasury is canonical routing API\n- genesis UPS denomination remains 1,000 sats per UPS"
     },
     {
       "id": "test::modules::foundups::simulator::tests::test_cabr_flow_router",
@@ -20688,7 +21098,10 @@
       "owner": "modules/platform_integration/acoustic_lab",
       "suite_class": "unit",
       "shard_id": "modules-platform-integration-acoustic-lab-unit",
-      "capabilities": [],
+      "capabilities": [
+        "network",
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,
@@ -23255,6 +23668,19 @@
       "description": "Long-form (Videos-tab) US-ET peak + per-channel Studio-tz conversion tests.\n\nSlice: LONG_FORM_TZ_PEAK_WINDOW_PHASE1  (#847 follow-up)\n\nModel under test\n----------------\nLong-form videos target the US audience exactly like shorts do, so their peak\npublish times are the SAME canonical US-Eastern (ET) slots\n(peak_window.get_peak_slots_et() -> [\"08:00\", \"12:00\", \"20:00\"]). The scheduler\ntypes a BARE time string that YouTube Studio interprets in each channel's own\naccount timezone, so an ET target mu"
     },
     {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_metadata_evidence",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_metadata_evidence.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "capabilities": [],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline evidence, preservation and learning-boundary regressions."
+    },
+    {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_oops_recovery",
       "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_oops_recovery.py",
       "owner": "modules/platform_integration/youtube_shorts_scheduler",
@@ -23282,6 +23708,21 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Unit tests for US-ET peak slots + per-channel Studio-tz conversion.\n\nSlice: SHORTS_SCHEDULE_US_PEAK_WINDOW_PHASE1\n\nModel under test\n----------------\nALL shorts target the US audience, so peak publish times are defined ONCE in\nUS-Eastern (ET): morning ~08:00, lunch ~12:00, evening ~20:00. The scheduler\ntypes a BARE time string that YouTube Studio interprets in each channel's own\naccount timezone, so an ET target must be converted to the channel-local\nwall-clock (DST-aware) before typing.\n\nThese t"
+    },
+    {
+      "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_remote_cli",
+      "path": "modules/platform_integration/youtube_shorts_scheduler/tests/test_remote_cli.py",
+      "owner": "modules/platform_integration/youtube_shorts_scheduler",
+      "suite_class": "unit",
+      "shard_id": "modules-platform-integration-youtube-shorts-scheduler-unit",
+      "capabilities": [
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Remote command regressions: no live browser, model or publishing required."
     },
     {
       "id": "test::modules::platform_integration::youtube_shorts_scheduler::tests::test_reschedule_applier",
@@ -23981,6 +24422,21 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Independent contract tests for the RedDog backend manifest generator."
+    },
+    {
+      "id": "test::scripts::tests::test_openrouter_credential_boundaries",
+      "path": "scripts/tests/test_openrouter_credential_boundaries.py",
+      "owner": "scripts",
+      "suite_class": "unit",
+      "shard_id": "scripts-unit",
+      "capabilities": [
+        "network"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline credential-containment checks across the active OpenRouter transports."
     },
     {
       "id": "test::scripts::tests::test_reddog_fusion_progress_bridge",

@@ -237,6 +237,9 @@ def required_runtime_artifacts_for(
         if payload.get("runtime_profile") != RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE:
             raise RuntimeArtifactManifestError("manifest_schema_invalid")
         return REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS
+    if (schema == SCHEMA_VERSION_V2
+            and payload.get("runtime_profile") == RUNTIME_PROFILE_GRANT_AUTHORITY_INSTALLED_SOURCE):
+        return REQUIRED_INSTALLED_GRANT_RUNTIME_ARTIFACTS
     if (
         schema in {SCHEMA_VERSION_V2, SCHEMA_VERSION_V3}
         and payload.get("runtime_profile") in {

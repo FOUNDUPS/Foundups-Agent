@@ -5,6 +5,26 @@
 
 ## Public Interface
 
+### Public FX directory — 2026-10-25
+
+The homepage navigation links **FX** to `/f/`, whose existing index renderer
+provides **FX — FoundUps Exchange** project/token discovery. Its only catalog
+request remains `/f/public_catalog.json`; member runtime fields are excluded.
+
+The existing input performs case-insensitive substring matching over canonical
+ID, name, public summary and a nonempty string `token_symbol`. Both a bare ticker
+and its `$`-prefixed form match. Null, missing, blank and non-string symbols do
+not become ticker text or search terms. Readiness continues to filter
+`poc_landing_status`, independently of the query. Empty/cleared queries, no-match
+results, catalog errors and Return to Mall retain the existing owners.
+
+Tickers are declarations, not deployment or trading evidence. This slice adds
+no catalog records, router, claim verification, chain observation, price feed,
+wallet, order placement or participation authority. `/f/{id}` landing routes and
+protected app/deep-app handoff remain unchanged. Controlled VM tests exercise
+the actual input/change handlers; deployment and browser layout require separate
+verification.
+
 ### Entry URL
 ```text
 /member/
@@ -67,7 +87,7 @@ Product restoration never applies video scope or layout. Deferred video scroll
 callbacks recheck the selected product. A loading product cannot overwrite its
 previous geographic state with an empty capture. The return is consumed only by
 the normal Mall initializer after Clerk/invite/username admission succeeds.
-Service-worker cache `pfmall-member-v4` normalizes member query navigations to one
+Service-worker cache `pfmall-member-v5` normalizes member query navigations to one
 shell entry; public property JSON uses network-first validation and dated cached
 fallback. Auth, account, dynamic and cross-origin requests are not cached.
 
@@ -570,6 +590,13 @@ The dispatcher tracks a local `sessionState` ( `overrideActive`, `overrideApplie
   `{type:'query', query}` field scope. Input is bounded to 300 characters.
   AND-match search terms against lane/video metadata; `video(s)` requires a video
   queue; small house/car/clothing aliases are explicit, not AI inference.
+  Leading `I'm/I am looking for`, `show me`, `find` and `browse` requests accept
+  bounded greeting/Red Dog/please prefixes. Clothes, clothing and apparel share
+  an alias set. Red and dog are retained as item words outside that request prefix.
+  Negation, price/budget and size terms are preserved as literal metadata terms;
+  no exclusion, numeric comparison or garment-size interpretation is performed.
+  Grouped product discovery still refuses this global operation and retains its
+  domain filter owner.
 - `pfmallControlDispatcher.dispatch('search_catalog', {query})` exposes that same
   local presentation operation, returns `scope: local_catalog` plus observed state,
   and emits `state_changed`. Existing origin checks are unchanged. It is not a

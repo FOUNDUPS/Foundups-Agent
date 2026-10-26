@@ -1,5 +1,79 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-10-26 — Compose existing scheduling skills and recover remote runbook
+
+Connect audit, coverage, selected-batch evidence, metadata, allocation, save,
+independent readback and feedback through skillz/README.md; link the existing
+skills without a new publisher. Recover the dual-surface, push authentication,
+and bounded today's-upload runbook work from PR2203. Low-view recovery remains
+an explicitly proposed review handoff, not an automatic republishing feature.
+
+WSP 50/84: source-bound lexical owner lookup at a490cadb5, workspace-head bundle,
+UNKNOWN semantic freshness/index gap; direct owner reads resolved noisy retrieval.
+WSP 00 bootstrap was attempted but blocked by unavailable torch in this environment;
+no full awakening or live worker compliance is claimed. WSP 22/95/97: preserve
+prototype status, distinguish instruction linkage, tests, live saves and deployment.
+Validation: local Markdown link checks and independent workflow forward review.
+## 2026-10-25 — Explicit Move2Japan cadence
+
+The existing slot owner supplies eight exact two-hour ET slots (08:00–22:00)
+for Move2Japan only. Tracker allocation/coverage, configuration, priority deficit,
+reschedule planning and apply guards resolve the same channel cap. Other channels
+retain three/day; explicit smaller caller limits remain effective. No daemon,
+live publication, model training or runtime-closure member was added.
+
+WSP22/50/84/97: lexical retrieval was source-bound but freshness UNKNOWN with
+index gap; required memory README absent. Bootstrap torch unavailable; cached
+tracker compliance is not a fresh awakening witness. Existing timezone conversion
+returns wall-clock only; non-ET date rollover still requires separate qualification.
+
+
+## 2026-10-25 — Evidence-gated metadata and verified scheduling feedback
+
+Replace unconditional channel/music templates in the scheduling metadata path
+with matched existing analyzer evidence. Preserve metadata for missing, stub,
+failed or mismatched artifacts; retain schedule-only and title/description opt-outs.
+Use conservative content extracts and bounded M2M provenance, not fabricated
+music themes or performance confidence. The legacy enhancement skill now shares
+this gate and its old string-only wrappers preserve their inputs.
+
+The existing DBA records reported success separately and grants positive outcome
+scores only for independent channel/video/date/time/timezone-matched readback.
+Audience-performance metrics remain unmeasured; no model training or automatic
+policy promotion is asserted. Updated both enhancement and scheduling-priority
+skill instructions, without invoking live analysis or publication.
+
+Validation: focused metadata/provenance/learning cases plus selected-batch and
+index-decoupling regressions. See tests/TestModLog.md. WSP 22/50/84/97; source-bound
+lexical retrieval retained UNKNOWN semantic freshness. Both existing analyzer
+schemas and scheduler write sinks were inspected before editing.
+
+## 2026-10-22 — PR1860 current-main scheduling reconciliation
+
+WSP 00/6/10/11/15/22/50/84/97. C4/I4/D4/Impact4=16/P0.
+Main `be7ce629b5f36382466432987eaf279b0e5bbc5c`; original PR
+`d0c3c16f93d3956083a7ab8341de531e43cc7abd`. Isolated source maintenance,
+not native worker execution or live publishing. Holo retrieval rejected the
+checkout/head binding (UNKNOWN freshness/index gap); exact Git, module docs,
+NAVIGATION and prior all-file audit supply the bounded fallback.
+
+Preserves selected-clip CLI/adapter, nonpersistent preview, transcript language
+and offsets, and dated source audits. Adds strict selected edit-page/visibility
+checks, a 100-page discovery bound, attempt limits shared across visibility
+passes, suppression of channel-wide sync for selected/preview requests, restored
+preview tracker state, disabled preview diagnostic screenshots, and explicit success receipts. DOM imports no longer create a diagnostics directory. Preserve-metadata leaves
+prior description-sync evidence unchanged; changed metadata requires independent
+readback before claiming sync. Failed selected metadata updates do not schedule.
+An obsolete rotation-test double now accepts the actual driver keyword without
+weakening its budget assertions. Omitted `.en` model language remains English;
+explicit incompatible language still fails through the existing factory.
+
+The original hosted failure was a backend manifest digest-pin mismatch.
+Regenerate current registry/manifest and both digest pins, retaining current
+main's runtime members. Dedicated offline CI covers the connected path.
+Validation evidence and remaining acceptance are recorded in tests/TestModLog.md;
+merge/CI/main readback receipts belong to PR1860. No deployment/account effect.
+
 ## 2026-10-18 - Defer browser-only peak helper to scheduler execution
 
 **By:** 0102
@@ -17,6 +91,51 @@
   external actions denied. Old source failed; repaired source passed. One
   formerly failing resident-chain main-import test also passed without Selenium.
   See `tests/TestModLog.md`; no browser or scheduler execution was tested.
+## 2026-09-21 - Repair existing remote adapter contract and preview isolation
+
+WSP 00/11/22/50/84/95/97. Reused the scheduler and existing Red Dog adapter;
+no replacement publisher. Corrected stale CLI constructor/method calls,
+added transport-only preflight and metadata preservation, normalized JSON
+planned/actual receipts, and respected payload failures. A shared attached
+browser is detached rather than closed. Missing imports return JSON failures.
+
+Preview trackers no longer create/write storage; slot preview deep-copies
+the current tracker, dry-run cannot trigger postcycle autoheal, and preview
+stops after the first visible batch. One limit covers all visibility passes.
+The later Work audit located the existing `publish_daily_clips` prototype;
+the proposed parallel remote skill registration was excluded from this branch.
+The diagnostic skill points to that owner and its source-export boundary.
+
+Actual adapter preflight returned `browser_unavailable` for Move2Japan/9222.
+No YouTube mutation occurred. Metadata-plan binding, unattended
+ingress and live saved-result proof remain outstanding; see
+[remote runbook](docs/REMOTE_SCHEDULING.md). Offline regression evidence and
+the existing channel-density configuration mismatch are in tests/TestModLog.
+
+Retrieval evaluation: owner query failed `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`
+(freshness UNKNOWN, index gap true). Direct source/Git checks were used.
+Noise: broad YouTube hits include old live-content skills. Ordering: actual
+callers/definitions before historical docs. Missing artifacts: video_indexer
+memory README/requirements and actual clip transcripts. Staleness: branch
+differs from inspected main. Duplication: existing adapter/scheduler reused.
+Japanese STT primitives already present on inspected origin/main were reused
+and extended through batch evidence rather than introducing another backend.
+Manual interface repair was necessary to reproduce stale API calls and verify
+their replacement against the actual scheduler and regression tests.
+
+012 clarified that every recorded clip belongs in the request. Removed the
+adapter's default five and CLI's default ten caps; both now default to all.
+Added exact `video_ids` selection with existing Studio pagination, per-visibility
+order, exclusion of unrelated uploads and explicit incomplete-batch receipts.
+Tests exercise 3/8/13-clip execution with mocked DOM and 61-clip paginated preview.
+No hard cap on total batch size is imposed; existing daily spacing is separate.
+
+September 22 reconciliation: moved only this lane's changes to an isolated
+main-based worktree. Unqualified remote CLI requests now stop with
+`clip_selection_required` before connecting, preventing old backlog selection
+while the existing Work prototype's source is retrieved. The requested recent
+window and unresolved source/readback integration are recorded in
+[the Work audit](docs/PRIOR_WORK_AUDIT_2026-09-22.md).
 
 ## 2026-06-20 - Unified Shorts+Videos live priority signal (flag-gated, fallback-safe)
 
@@ -2732,3 +2851,27 @@ python -m modules.platform_integration.youtube_shorts_scheduler.scripts.launch -
 ### WSP Compliance
 - WSP 50: Pre-action verification (menu shows current channel)
 - WSP 22: This ModLog documents the change
+
+## 2026-09-21 - Read-only remote audit
+
+WSP 00/50/84/97: retained Holo authority mismatch and used source/Git evidence.
+Added [diagnostic skill](skillz/youtube-remote-audit/SKILL.md) and
+[evidence report](docs/REMOTE_AUDIT_2026-09-21.md). Observed 13 unlisted clips.
+Recorded legacy CLI drift and preview tracker writes; neither repaired.
+Source/AST and live read-only inventory verified; no runtime code changed,
+no scheduling tests or public actions performed. Existing dirty files preserved.
+
+## 2026-09-21 - YUMORI source context and factual-scope correction
+
+WSP 50/84/97: added [source context](docs/YUMORI_SOURCE_CONTEXT_2026-09-21.md)
+from current Drive masters, the live site, FIN inspection and municipal records.
+Recorded coverage limits, conflicting request wording, modeled/verified boundaries,
+and the existing ASR path's forced-English behavior. Linked it from the audit
+skill and corrected the initial overbroad factual-content restriction.
+Documentation only; no new publisher, runtime repair, outreach or YouTube write.
+
+Move2Japan cadence is not qualified for live reschedule apply: that legacy adapter
+skips it with `cadence_live_unqualified` until independent timezone and occupied-slot
+receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
+whose local date differs from its ET date (including Asia/Tokyo). This prevents
+clock-only conversion from silently publishing on the wrong calendar date.

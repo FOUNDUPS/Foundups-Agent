@@ -1,3 +1,87 @@
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+Retain v10 initial LOW restrictions, distinct v11 non-initial HIGH scope,
+protected v13 custody/model bindings, current parent/effect/nonce checks and
+startup time sampling inside the durable revocation fence. These combined-source
+invariants have local and independent source validation; credential-free installed
+qualification is bounded as above, while hosted acceptance and authenticated use
+remain required. Public self-leasing
+and private request-scoped APIs remain distinct; failed final checks withhold
+results without claiming reversal of completed effects or nonce consumption.
+
+The dated contract snapshots below preserve both development lines. Their former
+inventory and follow-on composition status are historical; the current combined
+closure has local and bounded installed evidence, while hosted acceptance and
+authenticated use remain pending. No signed authority follows
+from this interface document.
+
+## Selected-clip adapter receipts — 2026-10-22
+
+The scheduling action requires process success and a parsed receipt with boolean
+`success=true`, no error(s), and no incomplete batch. Empty/truncated output,
+truthy strings/numbers and contradictory partial results fail closed. This is
+local result interpretation, not authenticated execution or saved-state proof.
+
+## Installed HIGH service connection — 2026-10-20
+
+Source-level composition, awaiting fresh installed-runtime qualification. A separately signed v11 policy selects HIGH/worktree_create at generation >=2. V10 initial LOW behavior and target-versus-issuer config bindings are unchanged. The materializer authenticates the installed descriptor and full runtime before custody. Protected owner v13 supplies fixed sibling `parent_model_artifacts.json`, using the existing `{author, reviewers}` shape, duplicate-key rejection, 1 MiB read/snapshot limit and exact distinct signed selection set. This is untrusted model data, never a verifier or permission. Startup verifies the author and prepares reviewer resolvers; every parent/effect request verifies the complete proof and reviewers before signing-key resolution, then rereads/verifies the model map before returning.
+
+The consensus nonce loader owns a separate preliminary lease. The new narrow HIGH leaf reuses canonical parent/effect/nonce owners under the opaque live request scope and the existing factory. Only canonical parent and effect-v2 proofs are admitted; legacy resolver slots are unavailable. Failed final checks or lease exit withhold results without undoing completed signatures/commits. No new activation/store/framework, installed authority, provider call or native author admission is supplied. Historical checkpoint statements below retain their original scope.
+
+## Non-initial installed metadata checkpoint — 2026-10-20
+
+Source-level preparation only; unpublished integration checkpoint. Distinct signed
+E0 policy v11 requires generation >=2, HIGH/worktree_create and HIGH consensus.
+The existing generic signed work manifest v2 can describe the installed-source
+artifact family through existing signature, audit-attestation and work-authority
+owners. Initial policy v10 remains generation-1 LOW handshake enrollment; its
+restrictions and initial-approval checks are unchanged.
+
+`bind_grant_authority_service_manifest` verifies this separate issuer bundle under
+the current target E0 lease. The manifest's authorizing signer configuration is
+the target configuration; the issuer artifact/configuration digest is separately
+bound. The returned metadata binding does not activate HIGH service dispatch.
+The ordinary target generation and independent issuer artifact root remain
+distinct; this layer adds no issuer generation store or activation framework.
+
+Permission/live-lease integration, protected parent/model input ingestion, full
+installed runtime guarding and HIGH dispatch remain follow-on composition.
+Generated manifest/registry bindings are deliberately pending integration onto
+the corrected base. No installed runtime, authority, service or provider changed.
+
 ## Protected consensus nonce supply — 2026-10-20
 
 Opt-in owner v13 adds `consensus_nonce_authority` with a purpose-bound store,
@@ -22,6 +106,28 @@ Cleanup failures remain errors rather than claims of successful rollback.
 or unauthenticated state and retains the existing one-step high-water crash
 recovery; it is not a promise of read-only IO.
 
+Private `_authorize_current_grant_authority_scoped_use` passes the existing
+permission action an opaque scope created under the canonical generation lease.
+Current parent/effect and nonce private variants consume that exact live scope;
+public methods still acquire their own leases. No public trusted boolean or
+global reentrancy bypass is introduced. The scope binds thread/process, exact
+owner-config path/repo, owner/policy/selection snapshots and nondecreasing clocks.
+The manifest-selection owner performs its nonlocking current check only while
+the authenticated fence is held. Reserve, pre-sign validation and commit repeat
+actual proof/model verification; withdrawal allows only confined owned rollback.
+Failed lease exit withholds results without undoing side effects or consumption.
+
+The generated 1,451-file closure now includes nonce authority/current-owner
+modules through existing imports; exact binding checks are recorded in dispatch.
+Inclusion in that import closure is not installed qualification.
+This core does not install HIGH signing or widen LOW. Protected non-initial
+policy/source selection and authenticated author/reviewer model-artifact loading
+remain required before the existing HIGH factory can be served. Reuse supplied-
+grant target transport; authentic work/model/reviewer/budget inputs, native
+qualification/admission and retained RSI benefit remain open.
+
+### Historical nonce-only import/composition status — 2026-10-20
+
 The generated 1,449-file runtime currently includes only the new custody leaf;
 the public nonce authority/current-owner leaves remain source/test validated,
 not imported or qualified installed runtime until the HIGH join.
@@ -44,19 +150,19 @@ schemas remain intact. Cross-domain privilege/schema fallback rejects.
 `CurrentParentConsensusAuthority(repo_root, owner_config_path, model_artifacts, proof)`
 reverifies through `verify`, `prepare`, its exact-parent callable supplier and signer
 `reserve`. Parent-to-effect proof preserves policy/consent without legacy projection.
-
-V12 binds 1–9 exact model selection ID/digest entries with six protected inputs each.
-Each author/reviewer pass shares 54 reads and 8 MiB; repeated passes reread/reverify.
-Missing, duplicate or substituted selections reject. Existing qualification and
-independence checks remain; selected membership does not prove actual authorship.
-Parent/effect proof v2 retains the 16,384-byte effect cap by reconstructing one parent;
-conflicting/duplicate parents reject. V1 transport stays intact. Parent v2 grant RPC
-releases then reacquires/revalidates the generation fence; legacy HIGH is unchanged.
-Grants cannot outlive approval. Reserve/commit reverify; rollback attempts do not prove recovery.
-The use-time collector binds exact work/identity/model/generation and rechecks clock
-and generation/peer expiry after parent verification and reason use; missing evidence
-keeps gates closed. Installed HIGH custody/nonce supply and authentic inputs remain
-separate. LOW stays LOW. Sampled checks do not establish continuous immutability.
+V12 binds 1–9 exact model selections with six protected inputs each; each pass shares
+54 reads and 8 MiB. Repeated passes reread/reverify; missing/duplicate/substituted
+selections reject. Qualification/independence checks do not prove actual authorship.
+Parent/effect proof v2 retains the 16,384-byte cap and reconstructs one parent;
+conflicting/duplicate parents reject. V1 transport and legacy HIGH stay intact.
+Parent v2 RPC releases then reacquires/revalidates the generation fence. Grants cannot
+outlive approval; reserve/commit reverify. Rollback attempts do not prove recovery.
+As of 2026-10-25, `run_reddog_main_resident_queue_serial_loop_bootstrap` accepts optional
+`parent_consensus_authority=None` and forwards it unchanged to the real use-time resolver.
+Exact parent verification can clear only its consensus/sovereign blockers; other gates
+persist and the resolver still returns no effect lease. Clock/generation/peer expiry
+are rechecked after verification and reason use. Main caller composition, protected
+inputs and installed HIGH remain separate; LOW/refusals are unchanged. Sampled checks do not prove continuous immutability.
 
 ## Issuer-only root LOAD — 2026-10-15
 
@@ -1619,6 +1725,16 @@ diagnostics, and return no generation receipt. `signed_authority_reverified` sti
 reports the signature result independently. Generation evidence never supplies an
 authoritative effect-use lease. See the existing execution-valve roadmap section.
 
+## YouTube scheduling command repair (2026-09-22)
+
+`youtube action scheduling channel=move2japan preflight=true` checks transport
+without launching or changing YouTube. Preview/apply requires `video_ids`;
+the default `max_videos=0` includes all selected clips. Pass
+`preserve_metadata=true` to retain prepared metadata. Structured CLI failure
+remains failure even with subprocess exit zero. See the scheduler
+[runbook](../../platform_integration/youtube_shorts_scheduler/docs/REMOTE_SCHEDULING.md)
+and existing Work prototype boundary before enabling recent discovery.
+
 ## Public RedDog Lick PoC
 
 `PublicSessionGate.open_lick_encounter(...)` accepts the exact open-source,
@@ -2497,8 +2613,8 @@ timeout within bounds. Raw text is redacted ON ENTRY; only the REDACTED prompt/c
 `openrouter/fusion` alias; only digests are retained; the API key is never logged. Output is ADVISORY
 (`advisory_not_canonical=True`). All failure paths fail closed with a low-cardinality reason
 (`valve_closed`/`redaction_blocked`/`authorization_missing`/`missing_api_key`/`budget_exceeded`/`timeout`/
-`http_error`/`malformed_response`). SERVER_TOOL / LOCAL_FALLBACK remain blocked. HTTP client reused from
-`ai_gateway` (`requests`) -- no new dependency.
+`http_error`/`malformed_response`). SERVER_TOOL / LOCAL_FALLBACK remain blocked. The existing `requests`
+transport disables redirects; non-200 responses are rejected before reading JSON. No new dependency.
 
 **Manual live smoke (NOT CI; requires explicit 012 opt-in):**
 ```
@@ -3283,45 +3399,41 @@ silently corrected.
 
 ### RedDog Correspondence Sender Boundary
 
-```javascript
-// Load the checked-in dependency-free host source in the operator/runtime isolate.
-// It exports:
-buildRecipientPreflightReceipt(...)
-prepareRecipientPreflightReceipt(...)
-executeSenderBoundary(...)
-```
+Current authority is `src/reddog_correspondence_sender_boundary.py`, bootstrapped
+by the trusted service owning provider credentials, reconciliation and private
+state. The superseded caller-loadable V2 JavaScript host always BLOCKs; its
+historical execution description is not an active provider-call interface.
+The Python issue/execute contract owns current recipient preflight, state and
+finalized-draft gating, private receipt registration, durable one-shot claims
+and exact provider Sent readback. Cached context never grants send authority.
+See the [current contact/communication protocol](../../../extensions/reddog/docs/CONTACT_COMMUNICATION_ACTION_PROTOCOL.md)
+for operation scope, reconciliation and privacy requirements. Direct external
+connector interception remains unproved; deployment requires alternate mutation
+paths to be mechanically unavailable to governed AUTO sessions.
+`012_DIRECTED_WORK` remains a separate policy lane with fresh live checks.
 
-Canonical host:
-`modules/communication/moltbot_bridge/host/reddog_correspondence_sender_boundary.mjs`
+### Moshpit projection layer
 
-This is the mechanical provider-call owner for correspondence. A composer, cached
-state capsule, draft, prompt instruction or prior provider success cannot grant send
-authority. The host adapter binds one fresh `SEND` receipt to the exact provider
-operation, scope/purpose, identity IDs, To/CC/BCC roles and addresses, content digest,
-draft/reply/thread identifiers and fresh Sent coverage.
+`src/moshpit_projection.py` defines `MoshpitRequest`,
+`AuthorizedActivitySource`, `AuthorizedActivitySnapshot`, `MoshpitRejected` and
+`project_moshpit(request, *, source, capability=None, now=None)`.
+`src/openclaw_memory_queries.py::query_moshpit(request, *, source=None,
+capability=None)` delegates only to this projector; no legacy memory fallback.
+`src/moshpit_render.py::render_moshpit_html(projection)` escapes text for a
+read-only activity/day/details view. It is not a browser or publication endpoint.
 
-Immediately before submission, `executeSenderBoundary(...)`:
-
-1. rejects missing, `BLOCK`, malformed, expired or transaction-mismatched receipts
-   before any provider mutation;
-2. re-reads provider Sent coverage and rejects a changed watermark/coverage digest;
-3. for `send_draft`, reads the exact draft and rejects recipient, body, message-ID or
-   thread-ID drift before provider submission;
-4. invokes the injected provider submission exactly once only after all checks pass;
-5. reads the exact Sent message and requires exact message/thread identity and
-   To/CC/BCC equality before returning `VERIFIED_SENT`.
-
-The same boundary operation enum covers `send_email`, `reply`, `send_draft` and
-`delivery_repair`; callers do not implement alternate send helpers outside it.
-A provider exception returns `PROVIDER_STATE_UNKNOWN` and requires Sent
-reconciliation before retry. Missing/failed provider readback returns
-`PROVIDER_SENT_INTEGRITY_INCIDENT`; it never authorizes automatic resend.
-
-The adapter is dependency-free ECMAScript so the connected operator can load the
-exact verified `main` source into its V8 tool transaction and wrap Gmail calls.
-Its Node contract test is:
-`modules/communication/moltbot_bridge/tests/test_reddog_correspondence_sender_boundary.mjs`.
-
+This component is **unmounted and unregistered**. The trusted source must verify
+session, FoundUp membership, disclosure, revocation and snapshot identity before
+reading data, then independently curate permitted strings for each audience.
+Constructing the snapshot dataclass is not authentication; a view whitelist is
+not a personal-data detector. Private contact fields must stay out of all history.
+Only explicit `data.moshpit` views feed `moshpit_projection.v1`; old underscore
+contracts are not inferred. Missing authority, mismatched scope, malformed bounds
+or expired snapshots reject. Live calls recheck time after reading and before
+release; explicit `now` is a trusted fixed-clock evaluation input, not live authority.
+No AgentDB access, capture, persistence, Brain ingestion, WRE skill discovery or
+runtime admission is provided. [PR1648 carries the remaining host, reader, skill,
+Gmail-receipt and registration acceptance](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590).
 
 ### RedDog Correspondence Continuity State
 
@@ -3367,9 +3479,3 @@ refresh. Tokens are opaque: no string conversion, trimming or ordering. Literal
 boundary is evaluated first, so invalid cached state still raises its existing
 error even when the observation is invalid. This check does not authenticate a
 provider or grant send authority.
-
-### #1779 current sender-authority override — 2026-10-06
-
-The caller-loadable V2 JavaScript correspondence boundary is quarantined and always BLOCKs. The canonical repository authority is `src/reddog_correspondence_sender_boundary.py`, which must be bootstrapped by a trusted service that owns provider credentials, live reconciliation and private correspondence state. Its issue/execute contract performs canonical recipient preflight, state and finalized-draft gating, private receipt registration, durable one-shot submission claims and exact provider Sent readback.
-
-This repository contract does **not** isolate the external ChatGPT/Work Gmail tool surface. A deployment is qualified only when direct/alternate provider mutations are mechanically unavailable to governed RedDog AUTO sessions and provider access is exposed exclusively through the authenticated authority service. `012_DIRECTED_WORK` remains the separate merged operating-policy lane and still requires fresh live checks.

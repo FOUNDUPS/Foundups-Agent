@@ -1,9 +1,9 @@
 {
   "schema_version": "wsp97_execution_receipt.v1.1",
-  "execution_id": "gemini-audit-docker-context-20261021",
+  "execution_id": "foundation-audit-docker-context-20261026",
   "execution_plane": "local_ci_docs",
   "repository_context": {
-    "base_commit": "a6b5efa2c83da31712df6d00540a773daa8748b3"
+    "base_commit": "16444371a96a579deb2030d8999ff25bc53dbbed"
   },
   "outcome": "blocked",
   "action_evidence": {

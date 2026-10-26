@@ -2,6 +2,51 @@
 
 Visual simulation of the autonomous FoundUp ecosystem.
 
+## Work, stake and unstake numeric validation — 2026-10-25
+
+Selected economic operations now reject invalid quantities, mutable fees and
+overflowing prospective balances before participating mutations. Existing finite
+fee math, zero/fractional values and public signatures remain. A small private
+scalar owner shares preparation formulas with standalone mutators. See the
+[contract](INTERFACE.md#selected-economic-numeric-admission) and
+[allocated plan](../../../docs/architecture/FOUNDUPS_NUMERIC_ADMISSION_20261025.md).
+This is simulation arithmetic validation; asset units, aggregate issuance policy
+and funded blockchain settlement remain separate work.
+
+## Mock BTC anchor integrity — 2026-10-25
+
+The existing optional connector now binds each FoundUp/epoch to the full known
+`foundups.epoch.v2` payload and its fixed mock realm. SQLite serializes admission;
+conflicting content, unknown legacy identity and unresolved records cannot be
+overwritten or reported as successful retries. Legacy rows stay visible and
+unclassified. Exact same-content mock force republication remains supported.
+
+Only mock mode is implemented. Testnet/mainnet selection rejects before database
+initialization, regardless of `LAYER_D_ENABLED`; invalid Mesa modes never select
+mock implicitly. Mock confirmation counts are simulation. There is no real BTC
+publisher, signer, network confirmation or funded reward transfer. See the
+[connector contract](INTERFACE.md#mock-btc-anchor-contract) and
+[allocated plan](../../../docs/architecture/FOUNDUPS_BTC_ANCHOR_INTEGRITY_20261025.md).
+
+## Epoch commitment integrity — 2026-10-25
+
+The existing epoch ledger now uses `foundups.epoch.v2` context-bound hashes,
+immutable snapshots and atomic exact retries. Merkle verification requires an
+externally trusted root, FoundUp, epoch and participant; a proof's own root is
+not an authority source. Repeated commitment preparation retains its finalized
+timestamp. See [INTERFACE.md](INTERFACE.md#epoch-evidence-contract) for encoding
+and compatibility. This is process-local pre-settlement evidence, not a funded
+balance, unique work-receipt consumption or confirmed payment. Old BTC connector
+records have not been migrated to this changed hash format.
+
+## FAM authorization compatibility — 2026-10-25
+
+The FAM bridge supplies explicit host-configured simulation identities
+`verifier_0` and `treasury_0` with exact per-FoundUp grants. Changing the wrapper's
+requested actor ID does not create matching authority. FAM enforces stored proof
+binding and independent verification; simulation completion is not on-chain
+settlement or production authentication. See [the FAM contract](../agent_market/INTERFACE.md#taskpipelineservice).
+
 ## Planning References
 - `modules/foundups/simulator/ROADMAP.md`
 - `modules/foundups/docs/OCCAM_LAYERED_EXECUTION_PLAN.md`

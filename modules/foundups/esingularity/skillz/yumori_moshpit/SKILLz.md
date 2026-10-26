@@ -52,6 +52,17 @@ The canonical Moshpit is a native Google Doc. Content mutations must use the nat
 - If the bounded native Docs write also fails or the target/revision cannot be proven, keep exactly one pending projection delta for the next authorized run. Do not create a parallel ledger and do not replay provider-side campaign actions merely to repair the log.
 - After every successful mutation, immediately read back the canonical Doc and verify target identity, revision advance, exact event presence, duplicate absence, date-anchor integrity, same-day reverse chronology, and the next day boundary.
 
+## Private 0102 Moshpit native write parity
+
+The native Google Docs write-path guard above applies **equally to both** the canonical YUMORI campaign Moshpit and the private `0102 Moshpit — Agent Learning & Action Log`. The private learning log is an existing native Google Doc, not a generic Drive file or a second repository ledger.
+
+- Resolve the exact private Doc ID, active tab, current revision and insertion point from live provider readback. Confirm editor access but do not infer a permanent lock or content-policy prohibition from a rejected generic Drive/file mutation.
+- Deduplicate the proposed learning entry against the current document before writing. Insert one bounded entry using native Google Docs `documents.batchUpdate` (or an equivalent native Docs content-edit operation), with revision control when available.
+- Read back the exact entry, target document/tab and advanced revision. Verify the entry appears once and preserves neighboring content and the private log's newest-first structure.
+- If the write fails, retain the **exact returned connector error code/message**, operation class, target surface and whether mutation was confirmed absent. Do not invent an explanation or retry through a generic Drive/file/library mutation.
+- After one bounded native Docs failure, leave one pending learning-log delta; do not create a parallel log or replay the underlying Gmail/CRM transaction. Reconcile the pending delta against the live private Doc before a later authorized retry.
+- Keep the private log's incident details private; never publish recipient addresses, BCC lists, complete message bodies or sensitive telemetry to public Git or the campaign Moshpit.
+
 ## Event classification
 
 Write to **YUMORI Moshpit** when the event materially answers “what happened in the campaign?” Examples:
@@ -86,6 +97,9 @@ YUMORI Moshpit is grouped by Asia/Tokyo calendar date and is **reverse chronolog
 5. Never prepend above the day anchor.
 6. Never fuse the anchor with an activity paragraph.
 7. Do not allow internal 0102 bookkeeping timestamps to outrank monk/campaign activity.
+8. The ordering timestamp is the event's own timestamp, normally the leading timestamp attached to the event record. Do not sort from times merely mentioned inside the body (meeting schedules, future pickup times, quoted deadlines, historical references, or superseded-model timestamps).
+9. If an event's own time is unknown, do not invent one and do not move it by parsing an embedded time. Preserve its evidence-bounded relative placement until a source establishes the effective time.
+10. Historical repair must be evidence-driven. Do not bulk-reorder an older day by regex unless every moved event has an established effective event time from the entry or source evidence.
 
 ## Campaign-vs-agent boundary
 
@@ -117,12 +131,18 @@ Before editing:
 After editing, read back and assert:
 
 - exactly one date anchor for the date;
+- the date anchor is a standalone `HEADING_2` paragraph;
+- every activity/event record is a standalone `NORMAL_TEXT` paragraph beginning with `•`;
 - anchor precedes all same-day events;
 - newest accepted campaign event is first after the anchor;
 - intervals are ordered by end/completion time;
+- ordering uses the event's own timestamp and ignores unrelated times embedded in the body;
 - no AGENT_INTERNAL-only event displaced campaign activity;
 - no duplicate event was introduced;
+- no day anchor is fused to an event and no paragraph contains multiple activity bullets;
 - prior-day boundaries remain intact.
+
+For a current-day write, verify the whole current-day block after mutation, not only the inserted paragraph. If structural drift is found, repair paragraph roles and day-boundary fusion in place before declaring the write complete. Do not rewrite or reorder historical event text merely to make a regex-based chronology check pass.
 
 ## 0102 learning promotion
 

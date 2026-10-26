@@ -5,6 +5,15 @@
 
 ## Overview
 
+### Public FX directory
+
+The homepage's **FX** navigation link opens the existing public `/f/` directory.
+It searches public project IDs, names, summaries and optional declared tickers;
+landing-readiness filters remain available. Declared symbols do not establish
+token deployment or trading availability. This reads only the existing public
+projection and retains the ordinary member admission path. See
+[INTERFACE.md](INTERFACE.md#public-fx-directory--2026-10-25).
+
 `/member/` is no longer a placeholder member shell.
 
 It is now the admitted-user Mall experience that sits behind the existing FoundUPS invite gateway:
@@ -45,7 +54,7 @@ links target the canonical Foundups host, including from a private review mirror
 Geographic browsing uses `pfmall_product_move2japan_state_v1`; video browsing keeps
 `pfmall_mall_state_v1`. Returning from the account gateway consumes a bounded,
 single-use session record only after actual admission. The shared service worker
-uses `pfmall-member-v4` and explicit public assets; it never caches account data.
+uses `pfmall-member-v5` and explicit public assets; it never caches account data.
 
 ## Runtime Shape
 
@@ -93,8 +102,14 @@ rebuilding the catalog. Explicit density controls still select the legacy grid;
 one channel into its video field; pinch-in returns to the category rows.
 
 Search Mall accepts short requests such as “show me videos on Fukui”, “show me
-houses”, “show me cars” and “show me clothes”. It searches only loaded catalog
+houses”, “show me cars”, “show me clothes” and “I'm looking for clothing”.
+It searches only loaded catalog
 metadata and video metadata, with a small explicit English phrase/alias vocabulary.
+Recognized leading request phrases are removed; clothes, clothing and apparel
+share the same explicit alias set. Item terms such as red and dog remain searchable.
+Negation, budgets and size constraints remain literal words, not interpreted
+filters: a request containing them may return no matches. Structured shopping
+constraints belong to the selected product's domain adapter.
 Missing catalog content returns no results. It is not web search, a semantic model,
 a voice service, a recommendation engine, or a new tenant app. Device keyboard
 dictation can supply text; an authenticated future RedDog adapter can call the
@@ -182,3 +197,9 @@ Do not hand-edit either catalog — edit source manifests, then regenerate.
 *Last Updated: 2026-04-03*
 
 Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.
+
+## EDUIT episode integration design
+
+See [EDUIT episode Mall architecture](../../modules/foundups/eduit/docs/EPISODE_MALL_ARCHITECTURE.md) for the specified shared-shell
+video/game tile, gestures, locale cues, parent area and next-session handoff.
+This is a design dependency, not evidence of an active EDUIT adapter.

@@ -1,3 +1,21 @@
+## 2026-10-23 — Resident RSI canary contract regression
+
+- Reused `test_contracts.py`; no parallel YUMORI test file or synthetic contact/mail database was created.
+- Added a contract for the existing `yumori_work_orchestrator` covering FoundUp-scoped Memex/Brain/Breadcrumb/provider continuity, resident-cycle decision flow, autonomous Gmail triage/audience validation, anti-spam recipient preflight, autonomous partner discovery, #1779 truth boundary and later unseen-cycle retained-improvement measurement.
+- The assertions deliberately do not claim a live Gmail/LinkedIn mutation, deployed OpenRouter client, resident runtime execution or retained RSI benefit. Those require provider/runtime receipts and later-use evidence.
+
+## 2026-10-21 — Moshpit event-time and paragraph policy contracts
+
+- Extended `test_yumori_moshpit_skill_is_wre_registered_and_projected` in the existing suite. Assertions bind ordering rules to their section: completion time, exclusion of body-only timestamps, unknown-time preservation and evidence for every historical move.
+- Write-procedure assertions retain standalone heading/activity paragraphs, one activity per paragraph, whole-current-day readback and protection against rewriting historical text for a chronology check. Existing private-log parity and projection assertions remain intact.
+- Validation: `python -B -m pytest -q -o addopts= -p no:cacheprovider modules/foundups/esingularity/tests/test_contracts.py` passed all 21 cases, with zero failures or skips. These are source-policy contracts, not live Google Docs ordering tests or runtime automation evidence. WSP 22/50/97.
+
+## 2026-10-21 — Private Moshpit native-write parity reconciliation
+
+- PR #2110 extends the existing `test_yumori_moshpit_skill_is_wre_registered_and_projected` contract with private-log native writes, exact errors, one pending delta and no parallel log.
+- Refreshed onto main a41a76053; the existing `test_contracts.py` suite passes 21 cases on exact PR head 5cadc75d4, with zero failures/skips. No new test file or runtime side effect.
+- Tests inspect canonical skill text and registry/projection contracts; they do not execute Google Docs or certify delivery. WSP 22/50/97.
+
 ## 2026-10-02 — Directed Work versus AUTO origin regression
 
 - Extended existing contract tests: origin/schema classification never grants SEND;

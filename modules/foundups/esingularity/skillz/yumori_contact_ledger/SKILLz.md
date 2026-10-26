@@ -1,8 +1,8 @@
 ---
 name: yumori_contact_ledger
 description: Ground YUMORI.me correspondence in live Gmail/CRM state, preserve routing consent, write plain committee correspondence, reconcile receipts, and promote repeated operator failures into reusable rules.
-version: 0.8.0
-communication_policy_revision: 2026-10-06
+version: 0.8.1
+communication_policy_revision: 2026-10-26
 document_audit_policy_revision: 2026-10-08
 author: 0102
 agents: [0102, qwen, gemma]
@@ -85,11 +85,45 @@ For every substantive YUMORI.me correspondence task:
 
 Do not replace these reads with memory.
 
-## Plain committee correspondence
+## External voice modes — principal directive 2026-10-26
 
-Policy revision: 2026-10-06, explicit 012 direction. This replaces the former
-mandatory proxy introduction, third-person monk framing and `0102` sign-off for
-external YUMORI text. Internal operator identity and audit attribution stay intact.
+The principal now wants YUMORI to be a **delegated 0102 AI-operator experiment**. The
+2026-10-06 plain committee policy is retained for actual human/committee-authored
+messages and formal applicant channels, but it is **not a prohibition** on accurate
+0102 attribution when the AI operator is the actual external speaker.
+
+**Mode selection before composition (store in private correspondence state):**
+
+- `AI_OPERATOR`: agent-origin stakeholder research, outreach or follow-up explicitly
+  admitted by a current authority. In natural Japanese, introduce 0102 once as
+  `Michael TroutのAIアシスタント「0102」` and state that Michael has delegated
+  coordination/research. Use the truthful 0102 signature, not a fabricated human
+  sender, employee, legal representative, or registered Japanese subsidiary.
+  No personal human first-person claim and no representation of human review.
+- `HUMAN_COMMITTEE`: 012-directed writing sent as Michael or the actual preparatory
+  committee; do not inject an unwanted AI/proxy preface or sign-off. This includes
+  current historical City/committee threads unless the real sender and recipient
+  context are deliberately changed and verified.
+- `OFFICIAL_FORM`: exact legally/procedurally required applicant, signatory,
+  translator and organization identity. Neither mode can override required fields.
+
+Always answer direct AI-assistance questions truthfully. Changing the voice does not
+retroactively alter historical Sent, current recipient policy, legal authority,
+authorization, or #1779. Unattended `REDDOG_AUTO` SEND is still HOLD-only until the
+sender-boundary service is deployed and independently verified. A human-directed Work
+send is a separate transaction with fresh preflight, not perpetual authorization.
+
+Use the bounded Japanese sample and runtime handoff in
+`../../docs/YUMORI_RESIDENT_0102_OPERATOR_HANDOFF_20261026.md` (from this Skillz
+directory: `../../docs` resolves to `modules/foundups/esingularity/docs`).
+Do not copy the sample blindly: verify current recipient, prior correspondence,
+project claims and release scope. Japanese is the default recipient-facing language
+for Japan, while internal operator state may remain in English with stable schema keys.
+
+### Human/committee-authored correspondence — 2026-10-06 fallback
+
+This replaces the *former mandatory* proxy introduction for human/committee-authored
+messages. Internal operator identity and audit attribution stay intact.
 
 ### Sender and opening
 

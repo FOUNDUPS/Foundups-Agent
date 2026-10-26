@@ -246,15 +246,13 @@ class FoundUpsModel:
         if not self._config.layer_d_anchor_enabled:
             return None
 
-        mode_name = str(self._config.layer_d_anchor_mode or "mock").strip().lower()
+        mode_name = self._config.layer_d_anchor_mode
+        if type(mode_name) is not str:
+            raise ValueError("Selected Layer-D mode must be a supported name")
         try:
-            mode = AnchorMode(mode_name)
-        except ValueError:
-            logger.warning(
-                "[ANCHOR] Invalid layer_d_anchor_mode=%s; defaulting to mock.",
-                mode_name,
-            )
-            mode = AnchorMode.MOCK
+            mode = AnchorMode(mode_name.strip().lower())
+        except ValueError as exc:
+            raise ValueError("Selected Layer-D mode is unsupported") from exc
 
         db_path = None
         if self._config.layer_d_anchor_db_path:

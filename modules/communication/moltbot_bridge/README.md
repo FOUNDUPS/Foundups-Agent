@@ -1,4 +1,70 @@
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+The preserved implementation composes the existing installed HIGH service and
+live authenticated lease; newer main's current-time startup and nonce protections
+must survive reconciliation. Interface descriptions below are source contracts,
+not evidence that this merged candidate has been installed or admitted.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
 ## Installed HIGH connection in progress — 2026-10-20
+
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+The live-lease core passes connected 390/9 platform skips, separate Linux 2/0
+and independent 16 controls. Installed HIGH source/policy selection and model
+artifact ingestion remain separate gates; no native author is admitted.
+[API and limits](INTERFACE.md#protected-consensus-nonce-supply--2026-10-20).
+
+### Historical protected-nonce checkpoint — 2026-10-20
 
 The v13 candidate supplies protected, current-owner consensus nonces using the
 existing atomic MAC state and SQLite high-water store. It preserves legacy owner
@@ -1285,7 +1351,7 @@ OpenClaw now follows a facade + delegated-module design.
 | `src/openclaw_runtime_support.py` | Runtime probing, IronClaw autostart, model availability |
 | `src/openclaw_status_surface.py` | `connect wre` readiness/status and outward status push |
 | `src/openclaw_process_loop.py` | Full autonomy loop orchestration |
-| `src/openclaw_result_memory.py` | Validate + remember (WRE pattern memory writeback) |
+| `src/openclaw_result_memory.py` / `src/openclaw_memory_queries.py` | WRE result writeback / memory queries, including the [unmounted Moshpit projection](INTERFACE.md#moshpit-projection-layer) |
 | `src/openclaw_turn_state.py` | Token telemetry and cooperative turn cancellation |
 | `src/openclaw_action_ledger.py` | Structured DAEmon action emission |
 | `src/openclaw_social_controller.py` | Social-routing bridge and LinkedIn mission control |

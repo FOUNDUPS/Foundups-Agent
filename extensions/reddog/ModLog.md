@@ -1,3 +1,283 @@
+## GitHub file-reader source binding — 2026-10-26
+
+WSP6/15/22/50/97; metadata amendment13/P1 in the FoundUps delivery plan.
+Existing1471-member closure changes only the GitHub client's normalized source
+hash; JS and generator-test digest pins become c1f97e86. Membership,1472 refusal
+and328KiB/2MiB/32MiB caps remain unchanged. Eight generator cases and three Node
+compatibility/preflight/blocked-recovery owners pass. Source compatibility only;
+no extension installation, repository claim or issuer/provider authority follows.
+
+## Numeric/current-main combined closure — 2026-10-25
+
+WSP6/15/22/50/97. Existing canonical generation combines mainc7f0d939's bootstrap
+source hash with numericc9bee55e's tested token source/private member. Only the
+bootstrap digest changes versus numeric; only token digest/private membership
+change versus main. Keep1471 acceptance/1472 rejection and all328KiB/2MiB/32MiB
+caps. Both existing pins advance by one digest literal, with no algorithm or
+installed authority change. Fresh write/check,8 generator cases and3 Node owners
+pass;1614 evidence snapshots remain stable, zero instrumented attempts. The2103
+existing security entries remain a union; new38 exact proposals are unapproved.
+
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## FoundUps BTC/Mesa derived source binding — 2026-10-25
+
+WSP00/15/22/50/97; pre-authoring16/P0 in the BTC integrity plan. Regenerate
+the existing AST manifest and advance only its JS/Python digest pins after
+parent merged candidate899a40e6e with main f11d7559746 at d9a57ab1d.
+Exactly two runtime digests change (BTC connector and Mesa), with no added or
+removed1470 members. All328KiB/2MiB/1470/32MiB caps and1471 rejection remain.
+
+Canonical --write/--check and the unchanged generator8/Node3 entrypoints pass.
+Only the three coherent binding paths were staged, without commit/push. No
+product, generator, dependency, installed descriptor or runtime authority change.
+Source snapshots and guard observations are in tests/TestModLog.md and the BTC
+portable receipt.38 known metadata bindings have an external proposal only;
+reviewed-findings.json is untouched and independent approval/fresh hosted scan
+remain required. No unknown finding or scanner rule/scope exemption is approved.
+
+## FoundUps epoch evidence source closure — 2026-10-25
+
+WSP00/6/15/22/50/97. Rebind only the existing epoch_ledger.py source hash after
+its process-local evidence repair. Runtime membership remains1470; no generator,
+member/byte cap, installed descriptor or authority change. Both existing digest
+pins advance together. Existing generator8 and Node compatibility/preflight/
+recovery3 entrypoints pass; independent review verifies all indexed source blobs.
+Known38 unchanged metadata contexts receive exact new bindings after parent and
+independent review. Fresh full hosted tree/history scans remain required.
+
+## FoundUps authorization source-closure dependency — 2026-10-25
+
+PR2188 hosted CI exposed stale generated FAM source bindings. Use the existing
+AST generator and two digest pins; add only the newly imported authorization
+owner and rehash four changed existing members. Closure 1,469→1,470; retain the
+existing exact member/+1 rejection and all byte limits. No installed descriptor,
+runtime promotion, generator algorithm or authority is changed. Pre-repair
+WSP15 allocation 16/P0 is in the FoundUps FX delivery plan. WSP00/6/15/22/50/97.
+Fresh generator, Python, Node, independent and hosted results belong in the
+test log; earlier PR2188 CI success does not qualify this repaired head.
+
+## PR1792 reusable brand core — 2026-10-25
+
+WSP00/15/22/50/62/71/97. Reconcile the original brand helper and schema with
+current grounding and packaging owners; preserve public discovery aliases.
+Reuse target-read policy and confined-file checks before brand reads, reject
+ambiguous identities, and preserve parent manifest scope. The existing phrase
+parser now retains Japanese aliases. Original-source synthetic probes exposed
+private reads, invalid-path fallback, duplicate/ambiguous children and failed
+Japanese matching; retained evidence precedes the repair.
+
+Author Node grounding and package-manifest checks pass. The existing backend
+verifier/schema suites pass 74 cases with no skips, including real Node-to-
+Python Unicode receipts and known-child relabel rejection. Qualification uses
+synthetic temporary fixtures and instrumented effects; it is not installed
+extension or native authority proof. Independent first-candidate probes found four additional private-name
+reads and an unpaired-surrogate encoding exception. The existing verifier/test
+owners repair them. Independent repaired-core review accepts 36 Python and
+16 Node positive cases plus one Node causal control, separately from author
+74. The receipt is `refresh/pr1792-independent-core-review-20261025.json`.
+Final CI/package/generated and hosted gates remain pending. Original PR1792
+remains open for protected activation/content work.
+
+## PR1645 Moshpit runtime-closure binding — 2026-10-23
+
+WSP00/6/10/22/50/62/97. The existing query seam imports the new unmounted
+projector, so regenerate the existing backend manifest and its digest pins.
+Exactly one runtime member is added; renderer is outside the startup closure.
+The structural member bound becomes 1,469 with a 1,470-member rejection check;
+this is not a WSP62 exemption. Preserve the 328 KiB manifest, 2 MiB member and
+32 MiB aggregate limits. Generated CRLF size is 335,285 bytes (587-byte margin).
+This source/package update grants no host, skill, worker or provider authority.
+
+## PR1663 contact communication policy reconciliation — 2026-10-23
+
+WSP00/15/22/50/62/97. Reconcile the existing protocol and HoloIndex recall entry
+with current Contacts, native Docs and Python V3 correspondence owners. Preserve
+all 24 consolidated clauses from PR1659's duplicate skill proposals and PR1663;
+no new skill, resolver, store or release authority. Identity discovery precedes
+composition, while fresh provider routing, independent audit and exact sender
+checks retain precedence. Internal drafts cannot become provider actions;
+private contact evidence stays separate from sanitized material history. The
+JavaScript compatibility sender remains BLOCK; automatic Contact Memory and
+unqualified channel adapters remain specified rather than implemented.
+
+Validation: 178 existing Python owner cases passed (recipient-preflight plus the
+single synthetic execution-origin contract), with zero Python network/process
+guard attempts; all seven existing JavaScript quarantine cases passed. Actual
+Windows runtimes: CPython 3.12.10 / pytest 8.0.0 and Node 24.11.1. These are local
+synthetic regressions, not live Contacts/Docs, provider delivery, connector
+interception or native execution. No runtime, protected skill, registry, package
+or generated binding changes. Clause/link/source checks and exact receipts are
+retained in the PR reconciliation evidence; independent review and fresh hosted
+publication gates remain required. Existing historical entries below are intact.
+
+## 2026-10-23 — Kids story route dependency closure
+
+Regenerated the backend manifest for the admitted kids story dispatch adapter and changed route/skill registry digests. Runtime file bound is now exactly 1,468; byte bounds remain unchanged. Pin `0bd8eb97c46f9f35072685d3a543c46433b7e24b76ea5038a65c1cb24d59a507`. Production admission and provider execution remain unactivated.
+
+## PR2181 private lease extraction bindings — 2026-10-23
+
+WSP6/11/22/62/97. Regenerate the existing manifest after the private scope
+extraction: 1,467 members, no removals; canonical digest
+`92384847a635da3c7d0f5446f001519ead96eebf297159b9ea0b753657e73d57`.
+Pretty JSON measures 331,870 LF / 334,877 CRLF bytes; the prior 327 KiB cap
+misses CRLF by 29 bytes. Set only the measured whole-KiB ceiling to 328 KiB
+(995 bytes headroom), retain 2 MiB per-file / 32 MiB total, and test exact
+1,467-member acceptance / 1,468 rejection. Eight generator cases and all three
+Node contract/preflight/async commands pass. Independent staged-source/hash and
+reachability review plus its Node contract rerun pass. Fresh hosted gates remain.
+
+## Installed HIGH source integration — 2026-10-23
+
+Reconcile preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+Combined local qualification passed 400 cases with six platform skips; eight
+manifest cases and three Node compatibility commands also passed. These are
+separate scopes. Independent offline source/outcome review passes12 held-out
+cases; hosted Linux qualification and publication remain required. Earlier counts
+below apply to their dated sources.
+
+Locally verified candidate binding: the combined closure has
+1,466 members, adding 13 to main with no removals. Pretty JSON measures LF
+331,626 / CRLF 334,631 bytes. The smallest qualified whole-KiB ceiling is 327 KiB
+(334,848 bytes; 217 above CRLF); main's 324 KiB contract cannot contain it.
+Candidate digest: `88b4b6c91a89bd0849a4d2107b8bfa33d7bd513f50fdcdf88d32fd733d957f16`.
+The paired boundary accepts 1,466 members and rejects 1,467. Per-file 2 MiB,
+total 32 MiB, exact digest/path/hash checks and authority gates remain unchanged.
+Eight Python manifest cases and three Node commands passed, including LF/CRLF,
+exact-byte/+1 and member/+1 controls. This is not installed-runtime qualification.
+
+
+Retain incoming main's runtime/package members and exact digest, path, finite
+membership and byte-bound checks while reconciling the preserved service closure.
+Combined manifest/pin verification and exact-bound/+1 checks pass locally;
+historical 1,451/1,462-member and 324/326 KiB figures below are not its contract.
+No installed extension or native admission is established.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
+## PR841 explicit one-member backend closure — 2026-10-23
+
+WSP 11/22/50/62/97. The cohesive livechat lifecycle extraction adds one actual
+import-closure member. Increase only MAX_RUNTIME_FILES 1450→1451 and require
+existing contract coverage accepting1451/rejecting1452. Preserve byte ceilings,
+digest enforcement and admission/identity boundaries. Generated set-difference
+and validation evidence belongs to refresh/841-qualification; no installed or
+native runtime claim.
+
+## PR1638 current-main integration — 2026-10-23
+
+Integrate main4169b051, preserving PR1759's CI job, trust bootstrap, generated
+1,450-member closure/pins and all received owner work. Resolve three independent
+insertions without dropping either entry. The reviewed PAL source/tests remain
+byte-identical; only the new PAL job adopts main's Node24.22.1 security baseline.
+Portable official archive checksum/version verified; five focused commands,
+18-member fast tier and exact69-file package surface pass on this runtime.
+Actual VSIX build/source mapping passes71 entries/284,535 bytes, with README's
+documented URL-only rewrite. Existing integration receipt owns exact results,
+the retained plain-clone topology failure and historical Node24.11.1 evidence.
+No installed-host, native RSI, hosted-CI or publication claim. WSP00/15/22/50/97.
+
+## PR1638 local activity-ledger reconciliation — 2026-10-22
+
+Preserve original PR head `688eb097` on last verified main `02d1c7c` in an
+isolated lane. Repair reproduced key/I/O/context failures in existing PAL owners:
+scoped serialized key creation; cooperating-process lock; authenticated history
+before append; strict JSON; full write/flush/close before success; globally
+latest commitment state and truthful truncation. Existing ledger/adapter tests
+and adjacent registration/disclosure/package manifest commands exit0 locally
+on Windows Node24.11.1. These are synthetic fixtures, not installed-host proof.
+
+Repair the full-package expected counts 67/66 to 69/68 for exactly the two PAL
+modules; preserve file membership, LF policy and one MiB limit. Add focused
+Linux/Windows CI coverage and reconcile existing interface/architecture/test
+docs. Current evidence and remaining review/publication/installed-host gates:
+`docs/PRINCIPAL_ACTIVITY_LEDGER_INTEGRATION_RECEIPT.md`. Remote connectivity is
+unavailable; no push, merge, hosted CI, installation or native RSI claim.
+Independent review passed 13 adversarial cases; the approved-drive checkout
+passed the 18-member fast tier at `7615273f6`. Final package-list qualification
+is 69 files / 975,019 bytes; local VSIX build and explicit archive/source mapping
+pass. Correct current package counts and the existing README's monorepo link
+base after actual archive inspection exposed wrong generated links. Receipts
+distinguish byte-identical runtime from README-only URL rewriting. No install.
+WSP00/5/6/10/11/15/22/50/77/84/97. Blockchain/PF Mall work remains separate.
+
+## PR1759 operator-command runtime member — 2026-10-22
+
+The generated runtime closure adds exactly the existing PR's
+`modules/communication/livechat/src/operator_command_queue.py`; no member is
+removed. The extension's count bound moves from 1,449 to 1,450 for this measured
+closure. Manifest byte, per-file byte, total byte, path and digest checks stay
+unchanged. The existing boundary test requires the queue member, accepts 1,450
+and rejects 1,451. This does not grant worker or posting authority.
+WSP 6/11/22/50/62/97; exact frozen validation belongs to PR1759.
+
+## Operations policy manifest binding — 2026-10-21
+
+PR2150 preserves policy1.1.1 while synchronizing its existing registry/runtime
+versions and generated manifests. Backend membership remains1,449; exactly the
+policy, loader and registry hashes change. Existing JavaScript and Python pins
+now bind `ff912d79e080aa5003f18a4d31489d5c9a98ecf516015f882202b2b352b6973c`.
+No cap/API/authority changes. Three existing Node compatibility/recovery commands
+exit0; bridge TestModLog records generator and skill evidence. No installation.
+WSP22/50/71/95/97.
+
+## Installed HIGH service manifest contract — 2026-10-22
+
+Existing service-entrypoint imports require 1,462 runtime members (11 additions).
+Canonical digest becomes `759ee0caf65899b1baddc4329b085246e2fe4fcad53c2d273a29f257eaf833bb`.
+Pretty JSON remains LF 330,756 / CRLF 333,753 bytes. The explicit serialized
+limit changes 324→326 KiB (+2,048 bytes, about 0.62%), leaving 71 bytes above
+CRLF. This is the smallest whole-KiB contract covering the measured artifact.
+The consumer still checks exact digest and membership; 1,462/1,463 and exact
+byte-limit/+1 tests remain mandatory. Per-file 2 MiB and total 32 MiB bounds,
+JSON layout, source-line limits and runtime authority are unchanged. No extension
+installation or native HIGH admission is claimed. Independent Python manifest
+suite passes8 (including staged-index equality); JS contract/preflight/async all
+exit0 with LF/CRLF, exact-byte/+1 and member1462/1463 acceptance/rejection.
+Review and hashes: external `pr-reconciliation-20261021/refresh/rsi-installed-high-final-independent-review-20261022.json`. Hosted/current-main evidence is pending.
+
+## Live generation scope backend byte contract — 2026-10-20
+
+The required 1,451-member closure adds nonce authority/current-owner imports.
+Two-space JSON remains 327,910 bytes with LF and 330,885 with CRLF; the former
+crossed the unchanged 320 KiB bound by 230 bytes. The paired consumer/test bound
+is now 324 KiB (331,776 bytes), the smallest whole-KiB bound covering both: an
+explicit 4,096-byte (1.25%) increase with 891 bytes beyond the CRLF artifact.
+Exact canonical digest/member bindings and finite 1,451/1,452 count boundary
+remain. Per-file 2 MiB, runtime-total 32 MiB, independent Python readers' 4 MiB,
+source-line/component limits and all authority checks are unchanged. This is a
+serialized-byte resource contract change, not packing or a size exemption.
+The byte check follows readFileSync and precedes JSON parsing; it is not a
+preallocation memory bound.
+Both generator checks pass; 36 binding tests pass without skips and all three
+Node checks exit 0. Original 35-pass/1-failure evidence is retained.
+WSP00/5/6/11/22/50/62/97; no installed HIGH or native author claim.
+
 ## Windows manifest byte compatibility — 2026-10-20
 
 Current 1,449-member manifest LF327430/CRLF330401 exposed a real Windows

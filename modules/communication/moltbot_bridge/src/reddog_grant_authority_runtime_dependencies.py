@@ -11,8 +11,9 @@ from .foundup_verified_outcome_root_revocation_protocol import GRANT_ROLE
 from .foundup_verified_outcome_root_runtime_materializer import _materialize_durable_revocation_reader
 from .reddog_grant_authority_root_request_signer import build_grant_root_request_signer
 from .reddog_grant_authority_service import (
-    GrantAuthorityServiceDependencies, _policy_scope, _profile_binding, _verify_installed_runtime,
+    GrantAuthorityServiceDependencies, _service_policy_scope, _profile_binding, _verify_installed_runtime,
 )
+from .reddog_grant_authority_high_service import _high_models
 from .reddog_grant_authority_startup_custody import (
     current_grant_custody, require_grant_rate_target_separation, require_private_grant_rate_store,
 )
@@ -82,13 +83,15 @@ def materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_
         raise ValueError("grant_startup_owner_selection_mismatch")
     raw = _read_root_owned_bytes(Path(owner["startup_custody"]["policy_path"]), path.parent)
     policy = freeze_owner_e0_policy(decode_message(raw))
-    _policy_scope(policy)
+    tier = _service_policy_scope(policy)
     _isolate(owner, policy)
     with lease_validated_owner_e0_current_admission(
         owner_config_path=path, repo_root=repo, policy=policy,
     ) as current:
         custody, signing, loader, profile = _current_owner(path, repo, owner, current.policy)
         _verify_installed_runtime(repo, path, current.policy)
+        if tier == 'HIGH':
+            _high_models(repo, path, current.policy)
         replay = _materialize_issuer_store(repo, owner, custody, current.policy,
                                           SystemdCredentialSecretResolver(loader))
         _current_owner(path, repo, owner, current.policy)
@@ -97,9 +100,19 @@ def materialize_grant_authority_runtime_dependencies(*, owner_config_path, repo_
             credential_binding=loader)
         binding, resolver = current.revocation_binding, current.resolver
     oracle = _oracle(owner, repo, policy, binding, resolver, signer)
-    dependencies = GrantAuthorityServiceDependencies(policy, profile, signing, replay, oracle)
+    nonce = _consensus_custody(tier, path, repo, expected_owner_config_id)
+    dependencies = GrantAuthorityServiceDependencies(policy, profile, signing, replay, oracle, nonce)
     _revalidate_dependencies(path, repo, owner, dependencies)
     return dependencies
+
+
+def _consensus_custody(tier, path, repo, owner_id):
+    # This loader owns a generation lease; call only outside the request fence.
+    if tier != 'HIGH':
+        return None
+    from .reddog_consensus_nonce_authority import load_protected_consensus_nonce_authority
+    return load_protected_consensus_nonce_authority(owner_config_path=path,
+        repo_root=repo, expected_owner_config_id=owner_id)
 
 
 def _materialize_issuer_store(repo, owner, custody, policy, resolver):
@@ -125,8 +138,9 @@ def _revalidate_dependencies(path, repo, owner, dependencies):
             if not oracle.matches_owner(policy=current.policy, binding=current.revocation_binding):
                 raise ValueError("grant_startup_revocation_owner_changed")
             _current_owner(path, repo, owner, current.policy)
-    oracle.authorize_key_epoch_use(key_epoch=policy["grant_authority_key_epoch"],
-        at_epoch=int(time.time()), expires_at=policy["expires_at"], action=check_current)
+    # Admission must sample time inside the durable fence, not before lock/I/O.
+    oracle.authorize_current_key_epoch_use(key_epoch=policy["grant_authority_key_epoch"],
+        expires_at=policy["expires_at"], action=check_current)
 
 
 __all__ = ["materialize_grant_authority_runtime_dependencies"]

@@ -13,16 +13,30 @@ execution, or FoundUp business logic.
 
 ## Implemented surfaces
 
+- The public homepage links **FX** to the existing `/f/` directory, which searches
+  public project identity, summary and optional declared ticker with landing
+  readiness filters. This is project/token discovery, not observed asset or
+  market readiness; see [the public directory contract](../../../public/member/INTERFACE.md#public-fx-directory--2026-10-25).
+
 - `shell_core.py` validates `foundup_manifest.json` records, builds the catalog,
   resolves shell and `/f/{foundup_id}` routes, and merges advisory state
   overlays without overriding manifest identity.
 - `api.py` exposes a stable read-only Python adapter for catalog listing,
   FoundUp lookup, and route resolution.
 - `http_api.py` exposes an unauthenticated development/read surface and static
-  shell UI through FastAPI.
+  shell UI through FastAPI. Its separate `POST /pfmall/proposals` route returns
+  503 until a server-owned Clerk policy is explicitly configured; verified
+  bearers can produce only a genesis draft. See the interface below and
+  [the allocation](../../../docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md).
 - `member_catalog_export.py` explicitly generates
   `public/member/mall-catalog.json`; generation is a write operation and is
   never performed by the read API.
+- `intake_host.py` supplies an isolated ASGI `create_app` factory for proposal
+  intake and minimal health only. It loads a bounded, administrator-selected
+  public policy file through `PFMALL_CLERK_POLICY_FILE`; invalid/missing config
+  stops startup. It reuses the existing handler and verifier, without publishing
+  development catalog/static routes. Container/cloud and real-session
+  qualification remain required; no deployed service is established here.
 - `member_presentation.py` owns UI-only presentation overrides.
 - `content_load_policy.py` defines bounded load-policy data contracts; it does
   not load content.
@@ -32,6 +46,20 @@ execution, or FoundUp business logic.
   browser contract remains in `public/member/INTERFACE.md`.
 
 ## RedDog, OpenClaw, and Hermes boundary
+
+The optional local HTTP/intake dependency profile is `requirements.txt`; it does
+not upgrade the FoundUps umbrella or install a server. Configure
+`app.state.clerk_intake_policy` with a `ClerkIntakePolicy` from
+`modules.ai_intelligence.ai_overseer.src.foundup_genesis.clerk_intake`, using an
+independently selected issuer, HTTPS frontend origins and that instance's RSA
+public key. That development app has no default policy, environment loader, JWKS request, browser
+submission button, persistence or deployment in this component. A short-lived
+signed-in session permits a draft, not Mall membership or project ownership.
+The isolated factory instead accepts an absolute regular-file target containing
+at most16KiB UTF-8 JSON with exactly `issuer`, `authorized_parties` (list) and
+`public_key_pem`. Duplicate fields and invalid canonical RSA policies fail with
+`intake_configuration_invalid`; no configuration values are logged. Each serving
+app owns its own policy. `/healthz` reports local readiness only, with no-store.
 
 The current browser concierge is a shell-local FAQ IIFE: it makes no network
 call and is not an AI runtime. The `pfmall-control-dispatcher.js` message bridge
@@ -66,6 +94,21 @@ admitted leaf jobs. The browser remains an untrusted thin client. No text or
 
 See [INTERFACE.md](INTERFACE.md) for Python exports, HTTP routes, mutation
 boundaries, and the RedDog integration seam.
+
+## AutoPost private item capture (updated 2026-10-23)
+
+For Shop clothing, GetK-style item evidence and multiple original photographs,
+start with [AUTOPOST_ITEM_CAPTURE_HANDOFF.md](AUTOPOST_ITEM_CAPTURE_HANDOFF.md).
+AutoPost remains the external capture/media owner. The intended path is private
+local item draft, authenticated shared-media attachment, then a permitted item
+projection inside this same Mall. Public Shop presentation is undecided.
+
+The local draft types and integration obligations are specified; grouping UI,
+group persistence, authenticated transfer/private writer and garment projection
+remain unimplemented. The existing public GotJunk API and static media paths
+must not receive private drafts. The [roadmap](ROADMAP.md#private-item-capture--2026-10-23)
+names the next bounded slice; [doc_index.json](doc_index.json) makes this handoff
+discoverable without claiming semantic-index activation.
 
 ## Mobile creator studio planning (updated 2026-10-18)
 

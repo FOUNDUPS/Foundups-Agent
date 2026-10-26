@@ -7,6 +7,7 @@ on:
       - '.dockerignore'
       - 'Dockerfile'
       - 'requirements.txt'
+      - 'requirements-trust-bootstrap.txt'
       - 'pyrightconfig.json'
       - 'Dockerfile.dockerignore'
       - '.github/scripts/check_docker_context.py'
@@ -21,6 +22,7 @@ on:
       - '.dockerignore'
       - 'Dockerfile'
       - 'requirements.txt'
+      - 'requirements-trust-bootstrap.txt'
       - 'pyrightconfig.json'
       - 'Dockerfile.dockerignore'
       - '.github/scripts/check_docker_context.py'
@@ -90,7 +92,7 @@ jobs:
         run: |
           python tools/wsp97_execution_validator.py \
             .github/security/docker-context-receipt.json --repo-root . \
-            --expected-base a6b5efa2c83da31712df6d00540a773daa8748b3 \
+            --expected-base 16444371a96a579deb2030d8999ff25bc53dbbed \
             > docker-context-receipt-validation.json
           cat docker-context-receipt-validation.json
       - uses: actions/upload-artifact@v4
@@ -124,7 +126,7 @@ jobs:
               (root / name).write_text('synthetic-context-probe\n', encoding='utf-8')
           PYCODE
       - name: Build the actual root application image
-        run: docker build --progress=plain --tag foundups-context-audit .
+        run: docker build --pull --progress=plain --tag foundups-context-audit .
       - name: Inspect image without starting the application or network
         run: |
           docker run --rm --network=none --read-only --cap-drop=ALL \
@@ -132,9 +134,12 @@ jobs:
             foundups-context-audit -c '
           import importlib
           import shutil
+          import sys
           from pathlib import Path
+          if sys.version_info[:2] != (3, 12):
+              raise SystemExit("Application image did not select supported Python 3.12")
           root = Path("/app")
-          required = ("main.py", "requirements.txt", ".docker-context-canary/source.py")
+          required = ("main.py", "requirements.txt", "requirements-trust-bootstrap.txt", ".docker-context-canary/source.py")
           forbidden = (".git", ".docker-context-canary/.env", ".docker-context-canary/credentials")
           missing = [p for p in required if not (root / p).is_file()]
           leaked = [p for p in forbidden if (root / p).exists()]

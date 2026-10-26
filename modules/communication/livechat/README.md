@@ -1,5 +1,17 @@
 # LiveChat
 
+## Current bounded live handoff
+
+PR841 preserves independent Chrome/Edge comment loops during a confirmed API live
+session while awaiting the matching channel's owned work before polling. The default
+termination call still shuts down the full supervisor. The session reservation
+survives an absent/stale file signal and is cleared on exit. See [INTERFACE](INTERFACE.md)
+and [offline acceptance](tests/README.md) for the actual ownership boundary.
+
+Subprocess workers are reaped; threads cannot be force-stopped and can keep a handoff
+waiting. Failed cleanup remains blocking. This does not prove systemwide browser
+quiescence, independent CommunityMonitor shutdown, live delivery or native authoring.
+
 ## [U+1F3E2] WSP Enterprise Domain: `communication`
 
 **WSP Compliance Status**: [OK] **COMPLIANT** with WSP Framework  

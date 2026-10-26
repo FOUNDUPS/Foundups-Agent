@@ -9,6 +9,15 @@
 
 ## Executive Summary
 
+The explicitly configured member draft component in
+`src/foundup_genesis/clerk_intake.py` now connects Clerk bearer verification to
+the existing genesis preflight/mapper through PFMall's local HTTP app. It adds
+no default provider, storage, membership, repo/issuer/work/token authority or
+deployment. Legacy HMAC intake remains unchanged. See INTERFACE.md and the
+[pre-authoring allocation](../../../docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md).
+The HTTP profile's optional dependencies live in PFMall requirements; base
+Overseer imports do not require them.
+
 AI Intelligence Overseer contains operational monitoring, security, M2M, and
 coordination surfaces alongside legacy heuristic paths. Qwen/Gemma labels do
 not by themselves prove a live model call, independent review, or production
@@ -680,3 +689,32 @@ runtime-environment digest before A-grade/RSI is reproducible.
 **Current boundary**: Mixed operational and legacy surfaces; see INTERFACE.md
 for callable truth. The core exists, but model-labeled heuristic paths are not
 independent reviewer or production RSI evidence.
+
+## Public intake references - 2026-10-25
+
+The existing authenticated LaunchRequest mapper preserves ordered `reference_urls`
+in a detached `FoundUpGenesisEnvelope.prior_art` list, including empty defaults.
+References are untrusted draft metadata; this mapping fetches nothing and grants
+no repository control, admission, execution, token or publication authority.
+The draft stays IDEA/UNBOUND with `external_repo_requested=False`.
+Qualification: all 601 cases pass after independent review approved the exact AST
+rebaseline. Earlier reference-loss RED and old-pin failure remain retained evidence.
+
+## GitHub project nominations — 2026-10-26
+
+The existing public issue form now has a nomination review consumer in
+`src/foundup_genesis/github_nomination_review.py`. The `FoundUp nomination review`
+workflow processes newly opened nomination issues using default-branch source.
+Its Actions artifact contains a redacted advisory Outcome/Solution/Pain brief,
+source issue/nominator metadata, and the existing IDEA/UNBOUND genesis draft.
+Unknown Solution/Pain stay null; acceptance criteria remain empty for review.
+
+The fixed review-service context is distinct from HTTP session/invite verification.
+Nominators are supporters, not verified project owners. Replay metadata remains
+unverified; the Actions run provides hosting provenance. No claim, catalog entry,
+agent-work enqueue, token, reward or market follows from an artifact.
+The CLI accepts explicit `--event-path`/`--output-path`; output is created exclusively.
+Malformed input produces a generic manual-review result without echoing input.
+Local qualification:682 cases across five owners and an actual CLI replay pass.
+Hosted checks and main convergence remain publication gates at this checkpoint.
+GitHub documents the [issues event's default-branch behavior](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#issues).

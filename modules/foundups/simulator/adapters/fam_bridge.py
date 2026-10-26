@@ -85,6 +85,10 @@ class FAMBridge:
                 deterministic=self._deterministic,
             )
 
+            # Simulation host configuration, separate from caller-supplied IDs.
+            self._simulation_verifier = "verifier_0"
+            self._simulation_treasury = "treasury_0"
+
             if self._external_daemon is not None:
                 # Shared daemon preserves single-source-of-truth event flow.
                 self._daemon = self._external_daemon
@@ -331,6 +335,7 @@ class FAMBridge:
         """Verify submitted proof for a task."""
         try:
             from modules.foundups.agent_market.src.models import Verification
+            from modules.foundups.agent_market.src.authorization import CallerAuthorization
 
             old_task = self._market.get_task(task_id)
             verification_id = self._id_gen.next_id("verif")
@@ -341,7 +346,11 @@ class FAMBridge:
                 approved=True,
                 reason=reason,
             )
-            task = self._market.verify_proof(task_id, verification)
+            authorization = CallerAuthorization(
+                self._simulation_verifier,
+                frozenset({(old_task.foundup_id, "verifier")}),
+            )
+            task = self._market.verify_proof(task_id, verification, authorization=authorization)
 
             self._daemon.emit(
                 event_type="verification_recorded",
@@ -378,8 +387,16 @@ class FAMBridge:
     ) -> Tuple[bool, str, Optional[str]]:
         """Trigger payout for a verified task."""
         try:
+            from modules.foundups.agent_market.src.authorization import CallerAuthorization
+
             old_task = self._market.get_task(task_id)
-            payout = self._market.trigger_payout(task_id, actor_id=treasury_actor_id)
+            authorization = CallerAuthorization(
+                self._simulation_treasury,
+                frozenset({(old_task.foundup_id, "treasury")}),
+            )
+            payout = self._market.trigger_payout(
+                task_id, actor_id=treasury_actor_id, authorization=authorization,
+            )
             task = self._market.get_task(task_id)
 
             self._daemon.emit(

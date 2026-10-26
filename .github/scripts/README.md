@@ -17,6 +17,11 @@ The dedicated workflow executes it without application dependencies or credentia
 
 ## Change record — 2026-10-21
 
+2026-10-26 reconciliation keeps the native context contract and adds a supported
+Python 3.12 application-image build while preserving current trust bootstrap.
+The receipt base and workflow trigger now cover that reconciled source; current
+hosted results are required before merge. Windows-host repair remains separate.
+
 Added the Docker context contract after verifying root `COPY . .` had no root
 ignore policy. Existing script/workflow inventory and secret-gate ownership were
 reviewed before adding this distinct verifier. The fixture matrix is maintained

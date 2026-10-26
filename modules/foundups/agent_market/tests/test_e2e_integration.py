@@ -12,6 +12,7 @@ WSP Compliance:
 
 import pytest
 
+from modules.foundups.agent_market.src.authorization import CallerAuthorization
 from modules.foundups.agent_market.src.in_memory import InMemoryAgentMarket
 from modules.foundups.agent_market.src.models import (
     Foundup,
@@ -116,7 +117,10 @@ class TestE2ELaunchToDistribution:
             approved=True,
             reason="All acceptance criteria met",
         )
-        market.verify_proof("task_e2e_init", verification)
+        market.verify_proof(
+            "task_e2e_init", verification,
+            authorization=CallerAuthorization("verifier_1", frozenset({("f_e2e_1", "verifier")})),
+        )
         assert market.get_task("task_e2e_init").status == TaskStatus.VERIFIED
 
         # Step 5: Record CABR score (gate requirement)
@@ -136,7 +140,10 @@ class TestE2ELaunchToDistribution:
         assert distribution.channel == "moltbook"
 
         # Step 7: Trigger payout
-        payout = market.trigger_payout("task_e2e_init", "treasury_1")
+        payout = market.trigger_payout(
+            "task_e2e_init", "treasury_1",
+            authorization=CallerAuthorization("treasury_1", frozenset({("f_e2e_1", "treasury")})),
+        )
         assert payout.amount == 500
         assert market.get_task("task_e2e_init").status == TaskStatus.PAID
 
@@ -205,6 +212,7 @@ class TestE2ELaunchToDistribution:
                 approved=True,
                 reason="OK",
             ),
+            authorization=CallerAuthorization("verifier_1", frozenset({("f_cabr_block", "verifier")})),
         )
 
         # Record LOW CABR score
@@ -273,6 +281,7 @@ class TestE2ELaunchToDistribution:
                 approved=True,
                 reason="OK",
             ),
+            authorization=CallerAuthorization("verifier_1", frozenset({("f_no_cabr", "verifier")})),
         )
 
         # NO CABR score recorded - distribution should fail

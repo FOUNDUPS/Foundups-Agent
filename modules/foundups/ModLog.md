@@ -1,6 +1,35 @@
 # FoundUps Domain - ModLog
 
+### 2026-10-25 — PR1792 reusable brand schema candidate
+
+Add the original optional brand-context schema and registry path field while
+preserving current public-discovery and portfolio contracts. Existing registry
+tests add synthetic context/authority-boundary and optional-field compatibility
+checks. Combined backend/schema selection: author repaired 74 pass, zero skips.
+No production registry, protected payload, website or skill bytes change.
+Original eSingularity/YUMORI activation assertions are retained as pending
+original-PR owner acceptance, not replaced by a claim of synthetic deployment.
+WSP00/15/22/50/97. Independent repaired-core review is accepted in
+`refresh/pr1792-independent-core-review-20261025.json`; final CI/package/
+generated and hosted qualification remain pending. No activation is implied.
+
 ## Chronological Change Log
+
+### 2026-10-23 - Private AutoPost item capture inside the shared Mall
+
+- Added the [shared item handoff](pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md) for
+  Shop clothing and GetK-style evidence. AutoPost stays the external camera and
+  original-media owner; item grouping and authenticated private attachment are
+  explicitly specified pending implementation. Public Shop remains undecided.
+- Updated the domain/module roadmaps, interfaces, canonical index, instance and
+  static-media contracts, registry evidence, navigation and bounded doc manifest.
+  Marked obsolete capture findings historical; preserved registry identities,
+  routes and unrelated Live/Lick/GetK work.
+- Repaired the existing member catalog request matcher and extended its current
+  VM harness. Detailed execution evidence lives in the member TestModLog and PR.
+  No new camera, identity/blob store, marketplace or private upload API was added.
+- WSP 22/50/83/84/97: exact-source reuse and independent review; runtime/bootstrap
+  and Holo limits remain recorded in the handoff. PRs own checks and main readback.
 
 ### 2026-10-18 - AutoPost as the mobile Live product vehicle
 

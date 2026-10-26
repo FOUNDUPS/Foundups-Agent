@@ -1,6 +1,6 @@
 # Multi-stage build for GotJUNK? FoundUp
 # Stage 1: Build the Vite app
-FROM node:20-alpine AS builder
+FROM node:22.23.4-alpine AS builder
 
 WORKDIR /app
 

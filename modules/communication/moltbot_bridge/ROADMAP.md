@@ -1,3 +1,54 @@
+## Installed HIGH source integration — 2026-10-23
+
+PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
+The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,
+plus separate manifest (8), Node (3 commands) and independent (12) checks. Hosted CI then found an oversized selection
+module and malformed-schema exception; its Linux startup step did not run.
+The repair extracts the existing private lease into one 95-line owner, retains
+canonical aliases and 200/50-line caps, rejects non-string schemas, and updates the
+unknown-version test while preserving v10 LOW/v11 HIGH scope separation.
+Repaired source passes 410 cases with four Windows platform skips across 15
+non-overlapping suites; independent review passes 21 separate held-out/boundary
+checks. Manifest (8) and Node compatibility (3 commands) also pass. Fresh hosted
+Linux and publication gates remain required; earlier source counts are historical.
+Native author admission, activation and retained improvement remain unproved.
+
+Candidate `174955143d` subsequently passed two isolated credential-free installed
+profiles. Independent review rehashed all 2,701 installed files (1,264 source /
+1,437 runtime), confirmed 18 imports and four absent-owner entrypoint rejections,
+and observed both temporary units absent after cleanup. This validates bounded
+runtime closure and confinement; it does not authenticate a HIGH job or execute
+a native author. The first incomplete export was rejected and remains preserved.
+
+Both hosted runs at `174955143d` reached the POSIX fence tests: 1,001 passed,
+two failed and one skipped. Children could not import the pytest-assigned module
+name; neither failed run proved lock behavior. The repair moves the unchanged
+probe into existing test support and uses its canonical import, retaining spawn,
+the same-inode oracle and all timeout/cleanup limits. The full 47-suite Linux
+selection now passes 1,003 cases with one Windows-only skip; both actual process
+cases pass. Independent Linux review passes the two originals and two effective
+lock-removal controls. These overlapping scopes are not added. The documented
+local DrvFS collection boundary differs from CI; fresh exact-head hosted gates
+remain required. Production/runtime bytes and the manifest are unchanged, so
+the installed result remains explicitly bound to `174955143d`, not relabeled
+as authenticated execution or a final-main installation.
+
+The existing selection remains **19/P0 (C4/I5/D5/Impact5)**: qualify this
+installed HIGH/live-lease composition through existing owners, then establish
+current authenticated admission inputs. Native author admission, independent
+evaluation, activation/rollback, retained use and G1–G5 remain unproved. Preserve
+the frozen LOW runtime `294195cdb` and its checkout-dependent evidence; source
+reconciliation does not authorize replacing that installed runtime.
+
+The next executable source step is the existing merged-source regression and
+binding qualification, preserving main's startup-clock/nonce repairs and LOW.
+Supply authentic current admission inputs only through existing protected owners;
+fixture signatures and historical known-path absence checks cannot supply them.
+
+The following entries preserve historical source, tests and publication states.
+Their then-current counts, pending gates and connectivity observations are dated
+evidence, not the status of the 2026-10-23 integration.
+
 ## Protected consensus nonce checkpoint — 2026-10-20
 
 Current 19/P0 reuses protected owner v13, current E0 and existing MAC/SQLite nonce
@@ -7,6 +58,27 @@ debt is recorded. Next connect one live authenticated parent/effect/nonce lease
 through the existing factory, then protected HIGH service composition and genuine
 admission inputs. LOW and frozen 294 runtime stay unchanged; native author 0.
 [Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#protected-consensus-nonce-checkpoint--2026-10-20).
+
+## Live authenticated generation scope — 2026-10-20
+
+The existing permission, generation, parent/effect, signer and nonce owners now
+share one private authenticated generation scope. Every authorization use retains
+fresh protected-owner, signed proof/model and current-generation checks; public
+self-leasing APIs and the installed LOW service remain unchanged. Scope is bound
+to thread/process, exact owner/repo, policy and generation, and expires on exit.
+Failed checks or lease exit withhold the result; they cannot undo callback effects
+or an already consumed durable nonce.
+
+Connected 390/9 platform skips, Linux process 2/0 and independent 16 controls
+validate this core, not installed HIGH admission.
+
+Next 19/P0 (C4/I5/D5/Impact5): connect protected non-initial installed policy/source
+admission, authenticated author/reviewer model-artifact loading and the existing
+HIGH issuer factory path. This core does not select or install HIGH service.
+Genuine work/model/reviewer/budget inputs, native qualification and author
+admission remain required. Frozen runtime 294195cdb is unchanged; native author
+tickets 0, paid model calls 0, no retained RSI gain.
+[Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#live-authenticated-generation-scope--2026-10-20).
 
 ## Parent admission checkpoint — 2026-10-20
 
@@ -22,12 +94,12 @@ controls pass against44 frozen files. Connected59 suites pass1,545/22 platform
 skips with explicit repository test root; the original failures remain recorded.
 Final45-file source adds a test-only unknown-schema update and EOF-only cleanup.
 
-After exact-source validation/publication, qualify and connect installed HIGH
-custody/nonce supply through existing startup/factory owners. Preserve LOW;
-require authentic work/reviewer/model/budget evidence before a native author.
-Then independently verify, activate/roll back, measure later retained benefit and
-select the next bounded task. No second orchestrator or repeated LOW-handshake
-trial substitutes for this sequence.
+2026-10-25: the serial bootstrap forwards optional `parent_consensus_authority` to its
+real resolver. Connected source checks pass 34 cases with one Windows symlink skip;
+valid parent evidence clears only its two blockers and never supplies an effect lease.
+This 15/P1 slice (C2/I5/D4/Impact4) leaves main caller/issuer composition and authentic
+work/reviewer/model/budget inputs pending under the 19/P0 umbrella. Preserve LOW;
+native admission, independent outcome, activation/rollback and retained benefit remain open.
 [Evidence and limits](../../../docs/operations/RSI_SWARM_DISPATCH.md#parent-consensus-connection--2026-10-20).
 
 ## Native startup integration checkpoint — 2026-10-16
@@ -1597,11 +1669,11 @@ file is at or below the WSP 62 file threshold; do not widen the ceiling.
 
 ## FoundUps Memex lane
 
-The FoundUp Memex grows from existing RedDog operational context, Brain,
-Breadcrumbs, authoritative work state, HoloIndex repository truth, verified
-outcomes, and roadmap receipts. Brain remains the durable-consolidation
-component inside the Memex. The lane does not begin as a separate personal
-second-brain database.
+The FoundUp Memex grows from RedDog context, Brain, Breadcrumbs, authoritative
+work state, HoloIndex repository truth, verified outcomes and roadmap receipts.
+Brain owns durable consolidation; no separate personal second-brain database.
+Moshpit is an unmounted, unregistered activity projection, not durable Brain.
+[PR1648](https://github.com/FOUNDUPS/Foundups-Agent/pull/1648#issuecomment-6358466590) retains host/reader/skill/Gmail-receipt acceptance.
 
 ### POC
 

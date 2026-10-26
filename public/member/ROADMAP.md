@@ -3,6 +3,15 @@
 **Module**: `public/member/`
 **Approach**: Occam's Layered (build/test one layer at a time)
 
+## FX1 Public Directory — 2026-10-25
+
+- Implemented locally: homepage FX link to the existing `/f/` public directory,
+  honest project/ticker framing and declared-symbol search using the existing
+  filter. Existing routes and member admission remain the owners.
+- Verified with existing route/gateway test files; see
+  [tests/TestModLog.md](tests/TestModLog.md). Deployment, actual browser layout,
+  repository claims and chain/market readiness remain separate gates.
+
 ## Move2Japan Product Integration (2026-10-18)
 
 The registered Move2Japan entry now targets the actual member page with houses

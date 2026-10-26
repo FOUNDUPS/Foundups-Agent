@@ -32,6 +32,7 @@ GRANT_SERVICE_GIT_PROVENANCE_DIGEST_FIELDS = (
     "grant_authority_archive_source_descriptor_digest",
 )
 POLICY_SCHEMA_V10 = "reddog-signer-owner-e0-policy.v10"
+POLICY_SCHEMA_V11 = "reddog-signer-owner-e0-policy.v11"
 INSTALLED_DESCRIPTOR_FIELD = "grant_authority_installed_runtime_descriptor_digest"
 POLICY_FIELDS_V10 = (POLICY_FIELDS_V7 - {
     "grant_authority_archive_source_descriptor_digest"}) | {INSTALLED_DESCRIPTOR_FIELD}
@@ -70,6 +71,17 @@ def require_grant_service_installed_source_bindings(raw: Mapping[str, Any]) -> N
             or raw.get("allowed_authority_tiers") != ["LOW"]
             or raw.get("consensus_required_tiers") != []):
         raise ValueError("signer_owner_e0_installed_initial_scope_invalid")
+
+
+def require_grant_service_installed_work_bindings(raw: Mapping[str, Any]) -> None:
+    """Non-initial installed HIGH work admission; never enrollment authority."""
+    if (not _valid_source_identity(raw)
+            or any(not is_sha256(raw.get(name)) for name in GRANT_SERVICE_INSTALLED_DIGEST_FIELDS)
+            or type(raw.get("generation")) is not int or raw["generation"] < 2
+            or tuple(raw.get("allowed_operations", ())) != ("worktree_create",)
+            or tuple(raw.get("allowed_authority_tiers", ())) != ("HIGH",)
+            or tuple(raw.get("consensus_required_tiers", ())) != ("HIGH",)):
+        raise ValueError("signer_owner_e0_installed_work_scope_invalid")
 
 
 __all__ = [

@@ -1,5 +1,41 @@
 # p.fMALL Roadmap
 
+## Isolated proposal host bootstrap candidate — 2026-10-26
+
+The source candidate supplies a separate ASGI factory around the existing draft
+handler and verifier, with explicit bounded server policy loading and per-app
+policy. Only proposal and minimal health routes are exposed. Local814 cases pass,
+including all786 originals and28 test-first host cases; independent/publication
+review remains required. This is not a deployed host or live Clerk qualification.
+Next serving layer: package/qualify the actual server and minimal source closure,
+then administer policy/cloud limits and prove a real session before browser wiring.
+Keep the existing six Node functions and shared ignored source untouched.
+
+## Authenticated member draft component — 2026-10-26
+
+Locally implemented under15/P1 allocation: explicitly configured Clerk bearer
+verification at `POST /pfmall/proposals`, delegated to the existing genesis
+preflight/mapper. Default503; no client flags/cookies/UID authority. Qualification
+and publication are tracked in tests/TestModLog and the dedicated PR. This is
+not a deployed public claim host or durable project admission.
+
+Next: bind independently administered provider/issuer/origin/public key and prove
+one real member session in the selected deployed host; define current-session/
+revocation and abuse policy. Then issue a fresh repository challenge and persist
+its consumption plus immutable receipt atomically in the selected intake owner.
+Preserve draft versus membership/claim/issuer/work/token authority separation.
+Do not attach an inactive browser form or infer live authority from offline RSA.
+
+## FX1 public discovery — 2026-10-25
+
+- Implemented locally: homepage FX navigation to the existing public `/f/`
+  renderer, explicit declared-ticker framing and optional symbol search. No
+  registry, member catalog, router or trading surface is created.
+- Existing route/gateway test owners pass; details and limits are in
+  [tests/TestModLog.md](tests/TestModLog.md). Browser/deployment acceptance,
+  external project admission/claims, token confirmation and venue/liquidity
+  remain independent future layers.
+
 ## Current baseline
 
 - Implemented: manifest discovery/validation, catalog and tile projection,
@@ -14,6 +50,37 @@
   live-session adapter and provider-confirmed live catalog projection. External
   AutoPost already implements browser capture/recorded-file upload; continuous
   streaming and durable live control remain unimplemented.
+
+## Private item capture — 2026-10-23
+
+012's current goal is AutoPost clothing photographs grouped into items inside
+the shared Mall. Public Shop presentation remains undecided; the default is
+private local capture followed by an authenticated, scoped attachment. Read
+[AUTOPOST_ITEM_CAPTURE_HANDOFF.md](AUTOPOST_ITEM_CAPTURE_HANDOFF.md) and the
+[external AutoPost roadmap](https://github.com/FOUNDUPS/autopost/blob/main/ROADMAP.md).
+
+- [x] C0: inspect current owners, specify local item-photo types and private
+  handoff, correct stale AutoPost status, attach documentation/navigation.
+- [x] Repair bounded request-prefix/clothing aliases in the existing member
+  matcher; retain unsupported constraints and grouped-domain command refusal.
+- [ ] C1: implement AutoPost's item grouping/review and draft persistence using
+  its existing media repository; prove two items, reload, missing/duplicate
+  originals, temporary fallback and late/disabled AI behavior.
+- [ ] C2: implement the authenticated shared media/private item adapter with
+  verified principal/FoundUp scope, remote-byte checks, idempotent revisions,
+  conflict handling and truthful durable acknowledgment.
+- [ ] C3: connect permitted garment records to the existing grouped Mall field;
+  prove cross-owner denial, media access, revocation and navigation parity.
+- [ ] C4: decide public/invited-vendor visibility separately, then prove the
+  corresponding authorization, review and media-cache boundaries.
+- [ ] C5: independently implement sourcing/quote/order/fulfillment/settlement.
+
+C0 is a contract and discovery repair, not working capture-to-Mall delivery.
+GetK #802 remains an unmerged comparison source with a public-listing default;
+do not merge or publish it as a shortcut. No new camera, identity/blob store,
+Shop website, public catalog entry or WRE execution service is needed for C1.
+Existing public GotJunk discovery remains unchanged. Runtime/provider choice,
+deployment and physical-phone acceptance require their own evidence.
 
 ## P1 — Mobile creator studio: evidence before implementation
 

@@ -56,6 +56,9 @@ try:
         admit_runtime_skill,
     )
     from modules.infrastructure.wre_core.src.skill_execution_truth import (
+        bind_skill_execution_result,
+        loaded_skill_digest,
+        serialize_bound_skill_result,
         stable_json_record,
         structural_step_output,
     )
@@ -698,6 +701,10 @@ class WREMasterOrchestrator:
                 agent=agent
             )
 
+        execution_result = bind_skill_execution_result(
+            execution_result, skill_content=skill_content, execution_id=execution_id,
+            admission_fingerprint=fingerprint,
+        )
         execution_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
         step_output_dict = structural_step_output(execution_result)
         expected_patterns = ["output", "steps_completed"]  # Required fields
@@ -736,7 +743,7 @@ class WREMasterOrchestrator:
             agent=agent,
             timestamp=start_time.isoformat(),
             input_context=stable_json_record(serializable_context),
-            output_result=stable_json_record(execution_result),
+            output_result=serialize_bound_skill_result(execution_result),
             success=execution_succeeded,
             pattern_fidelity=pattern_fidelity,
             outcome_quality=0.0,
@@ -959,28 +966,11 @@ class WREMasterOrchestrator:
         continuity_id: Optional[str] = None,
         parent_continuity_id: Optional[str] = None,
     ) -> bool:
-        """
-        Create an unverified variation candidate when fidelity is low.
+        """Store an unverified variation with exact loaded-parent lineage.
 
-        Pipeline:
-        1. Recall failure patterns from PatternMemory
-        2. Recall successful patterns for comparison
-        3. Ask Qwen for an unverified proposal
-        4. Store a non-production variation via PatternMemory.store_variation()
-        5. Record learning_event for evolution tracking with continuity lineage
-
-        This does not evaluate, schedule, activate, or promote the candidate.
-
-        Args:
-            skill_name: Skill that underperformed
-            agent: Agent that executed
-            skill_content: Original SKILL.md instructions
-            failed_output: Qwen's execution result dict
-            input_context: Input data that was used
-            current_fidelity: Pattern fidelity that triggered evolution
-            execution_id: Execution ID that triggered evolution
-            continuity_id: Continuity ID for lineage tracking
-            parent_continuity_id: Parent continuity for lineage chain
+        Recall failures/successes, ask Qwen for a proposal, then store it and
+        its execution/continuity event. The parent digest identifies supplied
+        instruction text; it grants no evaluation, scheduling or promotion.
         """
         if not WRE_SKILLS_AVAILABLE or not self.sqlite_memory:
             return False
@@ -1028,7 +1018,7 @@ class WREMasterOrchestrator:
             variation_id=variation_id,
             skill_name=skill_name,
             variation_content=variation_content,
-            parent_version="current",
+            parent_version=loaded_skill_digest(skill_content),
             created_by=agent,
         )
 

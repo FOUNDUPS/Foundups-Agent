@@ -1895,15 +1895,19 @@
   }
 
   function matchesCatalogQuery(item, query) {
-    var normalized = query.toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, ' ');
+    var normalized = query.toLowerCase().replace(/[^\p{L}\p{N}\s-]/gu, ' ').trim().replace(/\s+/g, ' ');
+    // Only remove a recognized leading request. Keep negation, budgets and
+    // other unsupported constraints as literal terms; this is not intent AI.
+    normalized = normalized.replace(/^(?:hey\s+)?(?:red\s+dog\s+)?(?:please\s+)?(?:i\s+(?:m|am)\s+looking\s+for|show\s+me|find|browse)\s+/, '');
     var words = normalized.split(/\s+/).filter(function(word) {
-      return word && !['hey', 'please', 'show', 'me', 'find', 'browse', 'on', 'in', 'about', 'the', 'some', 'red', 'dog'].includes(word);
+      return word && !['hey', 'please', 'show', 'me', 'find', 'browse', 'on', 'in', 'about', 'the', 'some'].includes(word);
     });
     var wantsVideos = words.some(function(word) { return word === 'videos' || word === 'video'; });
     if (wantsVideos && !(item.videos && item.videos.length)) return false;
     words = words.filter(function(word) { return word !== 'videos' && word !== 'video'; });
+    var clothingTerms = 'clothes clothing apparel fashion';
     var aliases = { houses: 'house housing homes property real-estate', house: 'house housing homes property real-estate',
-      cars: 'car cars automotive vehicles', clothes: 'clothes clothing apparel fashion' };
+      cars: 'car cars automotive vehicles', clothes: clothingTerms, clothing: clothingTerms, apparel: clothingTerms };
     var metadata = [item.name, item.title, item.description, item.tagline, item.creator, item.creator_display,
       item.entity, item.category, item.topic_family, item.geo, item.tags].concat((item.videos || []).map(function(video) {
         return [video.title, video.description, video.tags, video.geo].join(' ');
