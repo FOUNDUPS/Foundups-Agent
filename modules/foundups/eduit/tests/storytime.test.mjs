@@ -39,3 +39,10 @@ test('moving actors paint over pocket background, under falling roof',()=>{let s
 
 import {events,locales,localizeEvent,normalizeLocale} from '../../../../public/eduit/storytime/learning-events.mjs';
 test('locale words preserve stable IDs and world timing',()=>{for(const locale of Object.keys(locales))for(const event of events){const cue=localizeEvent(event,locale);assert.equal(cue.id,event.id);assert.equal(cue.start,event.start);assert.equal(cue.end,event.end);assert.ok(cue.word);}assert.equal(normalizeLocale('unknown'),'en');assert.ok(events.some(e=>e.kind==='crunch'));});
+
+test('educational typography cannot change tremor physics',()=>{
+ for(const t of [.9,2.3,7,9.9]){
+  const world=movie(t),base=scene(world),enlarged=scene({...world,cue:{...world.cue,size:world.cue.size*2}});
+  assert.equal(base.match(/<g transform="translate\(([^)]*)\)"/)[1],enlarged.match(/<g transform="translate\(([^)]*)\)"/)[1]);
+ }
+});

@@ -16,7 +16,7 @@ Pause the departing surface first; the destination stays paused until Play.
 Only one audio source runs. Switching never consumes unseen game time or resets
 an attempt. The film's fixed survivor and the game's alternate rescues remain distinct.
 
-Initial audience: ages 3–6. Use consistent SVG icons, accessible names, visible
+Current audience direction: ages 3–4. Use consistent SVG icons, accessible names, visible
 focus and at least 48 CSS-pixel targets with separation. Keep the scene's aspect
 ratio, safe areas and learning words; don't fill spare space with decoration.
 Anchor controls to the panel in a reserved rail, clear of shrews, root and words.
@@ -135,3 +135,8 @@ Follow the existing production skill's viewer-iteration rubric: inspect → grad
 actual episode. Preserve approved art/audio and the 15-second world timeline.
 Bundle one milestone PR, update evidence with exact source and scope; a docs
 commit is not proof of a working control, learned model or admitted WRE worker.
+
+
+Implementation follow-up: [preschool viewer review](PRESCHOOL_VIEWER_REVIEW.md)
+records the bounded controls now implemented and remaining acceptance limits.
+This original specification is retained as the decision contract.
