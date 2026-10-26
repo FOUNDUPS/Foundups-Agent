@@ -14,6 +14,9 @@ All18 acquired Linux wheel hashes match the qualified Linux report; acquisition
 does not prove Linux execution or image security. Retain actual inventories,
 image/PID1/state/HTTP/cleanup evidence in CI and require fresh gates before main.
 WSP6/11/22/49/50/62/71/77/84/97. Deployment/session/admission/chain gates remain.
+Committed preflight catches Windows archive newline conversion on23 members.
+Pin LF in that archive command only; diagnostic comparison is24/24 exact blobs.
+Preserve the failure and byte assertion; require revised review before publication.
 
 ## 2026-10-26 — Reproject the observed process capability
 

@@ -12,6 +12,7 @@ Source candidate reuses817 local cases and18 hash-verified acquired Linux wheels
 actual hosted image execution is pending. Independent review found trigger and
 audit-timeout cleanup gaps; repair those new test surfaces within allocation,
 preserving all HTTP/config oracles and historical evidence. No deployment claim.
+Committed preflight catches archive CRLF conversion; pin LF per command, preserving exact blob checks.
 
 ## 2026-10-26 — Allocate observed serving registry repair
 

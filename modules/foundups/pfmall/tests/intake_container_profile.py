@@ -69,7 +69,8 @@ def build_context(directory):
     """Archive only exact regular Git blobs; never send the working tree."""
     directory.mkdir(parents=True, exist_ok=True)
     head = _run(["git", "rev-parse", "HEAD"], directory).stdout.decode().strip()
-    archive = _run(["git", "archive", "--format=tar", head, "--", *FILES], directory).stdout
+    archive = _run(["git", "-c", "core.autocrlf=false", "-c", "core.eol=lf",
+                    "archive", "--format=tar", head, "--", *FILES], directory).stdout
     listing = _run(["git", "ls-tree", "-rz", head, "--", *FILES], directory).stdout
     blobs = {}
     for row in listing.split(b"\0"):

@@ -71,6 +71,10 @@ Independent review665077df found two new test-side gaps: incomplete input trigge
 and unnamed audit-run timeout cleanup. Repair within the existing budgets before
 first Docker execution; keep all existing HTTP/config oracles fixed. The actual
 image/security/cloud/session/browser/admission/chain gates remain outstanding.
+Actual committed-context probe rejects Windows CRLF conversion on23 archive files.
+Allocate the remaining helper/log budget to per-command LF archive configuration;
+diagnosis confirms24/24 exact Git blobs without changing attributes or assertions.
+Retain the failed probe and require revised independent review before publication.
 
 ## Serving registry reprojection allocation — before derived mutation
 

@@ -20,6 +20,9 @@ with existing owned removal in finally. Freeze the revised helper before the
 first Docker run; original three HTTP/config assertions and45 named definitions
 stay fixed. Runtime wheel acquisition18/18 hashes matches qualified Linux evidence;
 this is acquisition/static evidence only. Hosted image acceptance remains pending.
+Committed adf219907 preflight rejects23 CRLF-transformed archive members on Windows.
+Force LF in this archive command only; all24 then equal their original Git blobs.
+Keep the exact-byte assertion, failed log and independent review; no Docker claim.
 
 ## 2026-10-26 — Exact registry projection after hosted rejection
 
