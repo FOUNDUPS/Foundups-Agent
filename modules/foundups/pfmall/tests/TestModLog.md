@@ -27,6 +27,8 @@ Independent review found taskkill errors could bypass later cleanup; this normal
 PASS did not prove that exception path. Allocate a finally-based launcher fallback
 plus verified-child liveness check, retaining all HTTP/config assertions. Freeze
 that test-only revision and require a new run plus independent fault-path review.
+Repaired run817PASS/0FAIL/0ERROR/0SKIP, all814 old IDs and43 definition ASTs retained;
+one unsuppressed TestClient warning. Independent fault-path acceptance is separate.
 
 ## 2026-10-26 — Isolated host acceptance frozen before authoring
 

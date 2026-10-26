@@ -31,6 +31,16 @@ The package also exports the read-adapter surface:
 `get_default_shell()` lazily boots and caches one process-local shell. This is
 runtime convenience, not durable state or cross-process authority.
 
+## Optional server profile
+
+`requirements-server.txt` includes the HTTP profile plus minimal pinned Uvicorn,
+h11 and click. Use its ordinary CLI with the isolated `intake_host:create_app`
+factory, explicit app directory and resource/trust options in README. No new
+launcher or public API is added. Real-loopback tests identify the child and its
+port0 listener, exercise HTTP draft/rejection/body limits, and reap the process.
+They establish neither container/cloud readiness, a real Clerk identity nor OS
+confinement. The imported development app still requires real tracked static files.
+
 ## Shell-core invariants
 
 1. A manifest is static identity and remains authoritative for identity,

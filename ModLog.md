@@ -8,6 +8,9 @@ New isolated wheel acquisition/inventory and independent review must precede
 publication. No custom launcher, cloud deploy/IAM/provider session or token effect.
 Existing FX/chain plan records exact file/line budgets and remaining deployment,
 live identity, browser and durable repository-control gates.
+Local repaired serving profile817PASS retains all814 old IDs and43 definition ASTs.
+All28 installed wheel digests match official metadata with no listed advisories;
+manifest unchanged. Independent cleanup fault-path and hosted gates remain required.
 
 ## 2026-10-26 — Isolated member host bootstrap candidate
 

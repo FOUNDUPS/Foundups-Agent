@@ -69,6 +69,17 @@ definitions are preserved; test-first RED and814-case GREEN are recorded below.
 These local ASGI checks do not establish container/cloud serving, live provider
 identity, current revocation, abuse protection or a deployed browser integration.
 
+## Real server profile
+
+The optional `../requirements-server.txt` profile adds minimal pinned Uvicorn.
+Three cases in the same RSA owner start its real factory CLI on loopback port0,
+bind startup output to the child process, exercise health/auth/draft/unrelated
+routes and chunked oversize rejection, and reject missing/malformed policy before
+listening. Children receive a stripped environment; Windows also uses built-in
+CIM metadata and taskkill with a verified-child fallback. This explicit subprocess/
+loopback profile is not zero-network, OS isolation or graceful-stop evidence.
+Retain every failed fixture/cleanup run and independently challenge cleanup.
+
 ## Original pre-rebase baseline
 
 At the original pre-rebase baseline

@@ -13,7 +13,7 @@ The umbrella already declares uvicorn[standard]>=0.24.0; do not migrate that
 environment or import its optional dotenv/WebSocket/reloader machinery.
 
 Allocate one optional requirements-server.txt (<=16 lines) including the existing
-HTTP requirements plus exact minimal uvicorn0.54.0/h110.16.0/click8.5.0 pins.
+HTTP requirements plus exact minimal uvicorn0.54.0/h11 0.16.0/click8.5.0 pins.
 Current official PyPI metadata reports no advisories for these three releases;
 verify the actual complete installed inventory before qualifying it. Resolve only
 official binary wheels in a new external environment; retain pip26.2.2 acquisition,
@@ -67,6 +67,9 @@ No memory/README exists; requirements now exist (the old debt note is stale).
 Deterministic wire/inventory checks and a separate reviewer supply evidence that
 Qwen/Gemma inference cannot establish. Uvicorn settings and Cloud Run container
 contract were read from their official current documentation before allocation.
+Local outcome: repaired real-process profile817PASS, all814 prior IDs retained;
+28 installed official wheels match registry metadata with zero listed advisories.
+Manifest check passes unchanged; independent fault-path and hosted gates remain.
 
 ## Member host bootstrap allocation — 2026-10-26, before authoring
 
