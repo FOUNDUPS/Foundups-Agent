@@ -1,5 +1,17 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Freeze runtime-only image acceptance after the actual scan
+
+Allocation028bf433a,16/P0. First hosted run40253565358 passes the exact817 normal
+IDs and same three image cases; independent tar/config/layer/context proof passes.
+Fresh actual archive scan291 findings includes2critical/65high/2unknown, so retain
+the deployment hold. Extend only the new image inventory acceptance: Debian13,
+exactly18 locked runtime distributions, pip and ensurepip absent. The prior actual
+image audit rejects this policy; this metadata control is not another Docker run.
+Freeze before base/installer-removal authoring. All existing HTTP/config oracles,
+45 definitions and the original default fixture behavior remain fixed. Require
+fresh hosted execution, exact archive scan and independent replacement review.
+
 ## 2026-10-26 — Freeze container transport acceptance before image authoring
 
 Allocationc08509671,15/P1. Reuse the same three real_server IDs/assertions through

@@ -115,11 +115,12 @@ def build_image(directory):
     assert config["Config"]["User"] == "10001:10001" and not config["Config"]["Entrypoint"]
     assert config["Config"]["WorkingDir"] == "/app"
     assert config["Config"]["Cmd"][:5] == ["python", "-I", "-B", "-m", "uvicorn"]
-    code = ("import hashlib,importlib.metadata as m,json,os,pathlib,sys;"
+    code = ("import hashlib,importlib.metadata as m,importlib.util as u,json,os,pathlib,sys;"
         "p=pathlib.Path('/app');assert not any(x.is_symlink() for x in p.rglob('*'));"
         "print(json.dumps(dict(uid=os.getuid(),python=sys.version,files={x.relative_to(p).as_posix():"
         "hashlib.sha256(x.read_bytes()).hexdigest() for x in p.rglob('*') if x.is_file()},"
         "packages={d.metadata['Name'].lower().replace('_','-'):d.version for d in m.distributions()},"
+        "installer_absent=u.find_spec('pip') is None and u.find_spec('ensurepip') is None,"
         "os_release=pathlib.Path('/etc/os-release').read_text(),"
         "os_packages=pathlib.Path('/var/lib/dpkg/status').read_text())))")
     name = "foundups-intake-audit-" + uuid.uuid4().hex
@@ -133,7 +134,9 @@ def build_image(directory):
     assert audit["uid"] == 10001 and audit["python"].startswith("3.12.15 ")
     assert audit["files"] == {k: v for k, v in context["files"].items()
                               if k.startswith("modules/") and not k.endswith((".txt", ".lock", "Dockerfile.intake"))}
-    assert audit["packages"] == {**context["locked_packages"], "pip": "26.2.2"}
+    assert audit["packages"] == context["locked_packages"]
+    assert audit["installer_absent"] is True
+    assert 'VERSION_ID="13"' in audit["os_release"].splitlines()
     audit["image"] = image
     (directory / "image-audit.json").write_text(json.dumps(audit, indent=2) + "\n")
     return image
