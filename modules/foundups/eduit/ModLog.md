@@ -184,3 +184,11 @@ Independent review found moving actors hidden by pocket fill; moved the fill
 before actors and added paint-order regression. Rechecked seven cases pass.
 Snapshot SVG accepts only static renderer tags and local fragment references.
 Audio pauses with review and resyncs after timing drift; listening remains unverified.
+
+
+## 2026-10-26 — Touch/mouse viewer audit
+Recovered latest deployed creative source; replaced flag emoji/text with local
+SVG images and accessible labels. Added standalone manifest/icons and bounded
+UI-only service worker. Pointer cancellation and safe-area layout strengthened;
+locale selection pauses game. Mall mounting/physical-device acceptance remain
+separate. See docs/TOUCH_MOUSE_PWA_AUDIT.md.

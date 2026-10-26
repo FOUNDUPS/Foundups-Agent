@@ -1,11 +1,11 @@
 // Deterministic rescue game. The world clock never waits for a tap.
 export const DEADLINE=9.6, DURATION=15;
 export const CAST=[
- {id:'parent-1',x:60,y:346,scale:.7,duration:2.6,destX:715,destY:346},
- {id:'parent-2',x:215,y:340,scale:.75,duration:2.6,destX:795,destY:340},
- {id:'baby-1',x:400,y:378,scale:.42,duration:.9,destX:720,destY:378},
- {id:'baby-2',x:510,y:378,scale:.42,duration:.9,destX:790,destY:378},
- {id:'baby-3',x:620,y:378,scale:.42,duration:.9,destX:860,destY:378}
+ {id:'parent-1',x:75,y:215.6,scale:1.12,duration:2.6,destX:715,destY:240},
+ {id:'parent-2',x:290,y:206,scale:1.2,duration:2.6,destX:710,destY:280},
+ {id:'baby-1',x:120,y:378,scale:.42,duration:.9,destX:720,destY:378},
+ {id:'baby-2',x:235,y:378,scale:.42,duration:.9,destX:790,destY:378},
+ {id:'baby-3',x:350,y:378,scale:.42,duration:.9,destX:860,destY:378}
 ];
 export function initial(){return {phase:'ready',elapsed:0,selected:null,actors:CAST.map(a=>({...a,status:'sleeping',started:null}))};}
 export function advance(state,event,dt=0){

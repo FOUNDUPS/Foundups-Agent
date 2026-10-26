@@ -11,3 +11,5 @@ body.embedded .play-stage{border-radius:0}
 body.embedded .hotspot span{display:none}
 
 .rescue-targets{position:absolute;inset:0;pointer-events:none}.rescue-hit{position:absolute;pointer-events:auto;background:transparent;border:0;padding:0;min-height:32px;min-width:32px;touch-action:manipulation}.rescue-hit:focus-visible{outline:2px solid #e18c35}#ending{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:20px;background:#69472f44;color:white;font-size:28px;font-weight:bold}#ending[hidden]{display:none}.game-page .preferences{display:none}
+
+.rescue-hit{min-width:44px;min-height:44px}

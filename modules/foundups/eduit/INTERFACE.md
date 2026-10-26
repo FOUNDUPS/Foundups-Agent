@@ -54,3 +54,8 @@ See [rescue game and review contract](docs/RESCUE_GAME_REVIEW.md) for the latest
 accepted timeline, five-character rescue mechanics, child-first viewer, local
 whiteboard, fullscreen gestures, priorities and deferred agent experiment.
 This supersedes the earlier two-cue timeout/practice game description.
+
+
+Current [touch/mouse and PWA audit](docs/TOUCH_MOUSE_PWA_AUDIT.md) records responsive
+inputs, flag-only controls, standalone installation artifacts, source recovery,
+Mall ownership and verification limits.

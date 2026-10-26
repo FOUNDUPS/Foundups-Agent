@@ -21,6 +21,7 @@ def build(output):
         gestures=output/'member/js'
         gestures.mkdir(parents=True,exist_ok=True)
         shutil.copy2(ROOT/'public/member/js/gesture-engine.js',gestures/'gesture-engine.js')
+        # Standalone PWA assets belong to this module; Mall integration keeps its own worker.
         # Keep every hashed artifact with its receipt for reproducible review.
         shutil.copytree(media, output/'storytime/assets', dirs_exist_ok=True)
 if __name__=='__main__':

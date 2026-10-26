@@ -44,7 +44,7 @@ jobs:
         with:
           node-version: '22'
       - name: Verify Story Time interaction
-        run: node --test modules/foundups/eduit/tests/storytime.test.mjs
+        run: node --test modules/foundups/eduit/tests/*.test.mjs
       - name: Verify renderer, local editor, research contracts and registry
         run: >-
           python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib

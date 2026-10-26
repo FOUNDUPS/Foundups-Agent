@@ -36,3 +36,6 @@ test('approach, sniff, cracks and compression use visible event-local words',()=
 });
 
 test('moving actors paint over pocket background, under falling roof',()=>{let s=advance(initial(),'start');s=advance(s,'select:baby-3');s=advance(s,'root');s=tick(s,6);const svg=scene({...movie(s.elapsed),actors:s.actors});assert.ok(svg.indexOf('data-place="root-pocket"')<svg.indexOf('data-actor="baby-3"'));});
+
+import {events,locales,localizeEvent,normalizeLocale} from '../../../../public/eduit/storytime/learning-events.mjs';
+test('locale words preserve stable IDs and world timing',()=>{for(const locale of Object.keys(locales))for(const event of events){const cue=localizeEvent(event,locale);assert.equal(cue.id,event.id);assert.equal(cue.start,event.start);assert.equal(cue.end,event.end);assert.ok(cue.word);}assert.equal(normalizeLocale('unknown'),'en');assert.ok(events.some(e=>e.kind==='crunch'));});
