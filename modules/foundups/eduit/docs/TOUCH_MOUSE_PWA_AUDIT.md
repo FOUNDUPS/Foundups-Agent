@@ -74,3 +74,16 @@ active pointer IDs isolate simultaneous fingers; persisted feedback validates
 time, SVG size and normalized stroke coordinates before reopening. Browser
 confirmed SVG flags visible without labels in a narrow viewport. Physical phone
 installation and auditory perception remain unverified.
+
+
+## Deployment audience reconciliation
+
+At publication the private endpoint refused because audience had changed. A fresh
+get_site reported public; the existing audience was preserved via the standard
+deployment of the exact already-saved version. Earlier private staging references
+are historical. No sharing setting was changed by this task.
+
+Sites canonicalizes .html pages to extensionless URLs. Worker installation accepts
+only that same-origin canonical redirect; all unrelated/cross-origin redirects
+remain rejected. This prevents the canonical viewer page from aborting UI cache
+installation while retaining the explicit asset allowlist.
