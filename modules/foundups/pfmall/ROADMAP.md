@@ -1,5 +1,16 @@
 # p.fMALL Roadmap
 
+## Isolated proposal host bootstrap candidate — 2026-10-26
+
+The source candidate supplies a separate ASGI factory around the existing draft
+handler and verifier, with explicit bounded server policy loading and per-app
+policy. Only proposal and minimal health routes are exposed. Local814 cases pass,
+including all786 originals and28 test-first host cases; independent/publication
+review remains required. This is not a deployed host or live Clerk qualification.
+Next serving layer: package/qualify the actual server and minimal source closure,
+then administer policy/cloud limits and prove a real session before browser wiring.
+Keep the existing six Node functions and shared ignored source untouched.
+
 ## Authenticated member draft component — 2026-10-26
 
 Locally implemented under15/P1 allocation: explicitly configured Clerk bearer

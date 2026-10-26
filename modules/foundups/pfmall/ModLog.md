@@ -1,3 +1,19 @@
+## 2026-10-26 — Isolated proposal host bootstrap candidate
+
+WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 allocationf8fa5b25c.
+Frozen acceptance4cd8c71f6 precedes production. Add a bounded server-policy ASGI
+factory reusing the existing handler/RSA verifier; change only the HTTP policy
+owner to request.app.state. Expose proposal/health only, with generic startup
+rejection and no default policy or config values in output. Existing anonymous
+development routes keep their original app and semantics.
+Local814PASS/0FAIL/0ERROR/0SKIP retains all786 original cases plus28 new cases;
+initial Windows10055 setup error and desired RED remain in the test log/evidence.
+No dependency, registry, cloud/IAM/deploy, private key, provider or data write.
+Existing Firebase project/site and six Node functions were observed read-only;
+their shared ignored source remains untouched. Independent review, manifest check
+and fresh hosted publication gates remain required; serving/container, real
+session, browser, abuse/revocation and durable repository admission are later gates.
+
 ## 2026-10-26 — Replace the initial optional dependency profile before promotion
 
 Fresh public registry metadata found advisories for the initial Starlette/crypto

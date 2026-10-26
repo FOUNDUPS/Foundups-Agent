@@ -99,7 +99,7 @@ async def _read_proposal_body(request: Request) -> bytes:
 async def foundup_proposal(request: Request) -> JSONResponse:
     """Local component only: no durable admission, repository control or issuance."""
     response_headers = {"Cache-Control": "no-store"}
-    policy = getattr(app.state, "clerk_intake_policy", None)
+    policy = getattr(request.app.state, "clerk_intake_policy", None)
     if policy is None:
         return JSONResponse({"detail": "intake_unavailable"}, status_code=503, headers=response_headers)
     from modules.ai_intelligence.ai_overseer.src.foundup_genesis.clerk_intake import (
