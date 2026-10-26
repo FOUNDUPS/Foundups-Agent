@@ -5,6 +5,12 @@ This log tracks all changes to the IDE FoundUps module following WSP 22 (Module 
 
 ---
 
+## MSAL Node authorization-flow dependency fix (2026-10-26)
+
+- Pinned transitive `@azure/msal-node` to patched `7.1.1` through the VS Code extension package override; current `@vscode/vsce` and `@azure/identity` releases still select affected MSAL 6.x without the override.
+- Regenerated the extension lockfile and validated the resolved dependency tree and VSCE CLI startup without invoking an authentication flow. The full TypeScript compile still reaches the module's documented pre-existing WRE/interface errors; the dependency change adds no source or type surface.
+- Scope is the local development/publishing toolchain. No credential probing, provider mutation, extension publication, or production deployment is claimed.
+
 ## Temporal Insight Rendering Security Fix (2026-10-10)
 
 - Replaced the broken nested template literal with DOM creation and `textContent`; insight labels and explanations cannot inject HTML into the extension webview.
