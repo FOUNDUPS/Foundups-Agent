@@ -3,7 +3,7 @@
 PR2226's actual hosted canonical-registry gate fails. Read-only generation shows
 one existing test owner's capabilities[] ->[process], with1773 paths/273 quarantines
 and every other field fixed. Under13/P1 allocate that exact derived reprojection,
-owner logs and unchanged45-case generator regressions before mutation. No test,
+owner logs and unchanged generator regressions before mutation. No test,
 classifier, scanner, permission or quarantine relaxation. Host PR2225 is merged
 at d0a40a3e8 with the exact independently reviewed tree; serving is now based on main.
 

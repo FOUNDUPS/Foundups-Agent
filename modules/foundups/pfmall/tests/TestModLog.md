@@ -1,5 +1,11 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Exact registry projection after hosted rejection
+
+CI40248799360 rejects stale registry bytes;6b5d7902f precedes one independently
+reviewed process-capability field. Generator check and50 unchanged cases pass.
+All817-case sources remain exact; retain the failed CI and require fresh gates.
+
 ## 2026-10-26 — Real serving acceptance frozen before profile change
 
 Allocation665112e88,14/P1: append three real-process/loopback cases to the existing

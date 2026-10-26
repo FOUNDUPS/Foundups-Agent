@@ -1,3 +1,9 @@
+## 2026-10-26 — Reproject the observed process capability
+
+Allocation6b5d7902f precedes the independently accepted capabilities[] ->[process]
+reprojection, same1773/273. Unchanged generator check and existing regressions50PASS.
+All817-case sources remain exact; no classifier/quarantine/permission/manifest change.
+
 ## 2026-10-26 — Qualify the actual proposal server separately
 
 Allocation665112e88,14/P1; WSP6/11/22/50/62/71/77/84/97. Add the minimal

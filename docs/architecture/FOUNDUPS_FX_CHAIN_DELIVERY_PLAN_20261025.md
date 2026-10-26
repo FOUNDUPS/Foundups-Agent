@@ -15,13 +15,12 @@ the unchanged generator, after independent agreement on the exact delta. Keep
 classifier, registry schema, scan scope, permissions and every test oracle fixed.
 Budget amendment: this plan+20/root ModLog+10, PFMall ModLog+6/TestModLog+6,
 WRE ModLog+8, one derived registry field (+3 lines); no other path or new file.
-Run generator --check and its existing two-owner45-case regression selection;
+Run generator --check and its existing two-owner regression selection (now50 cases);
 recheck manifest immutability and source parity. Preserve failed CI and require
 new-head hosted gates. Local registry generation is AST/Git observation, not
-collection, execution, network isolation or WRE/resident admission. Holo retrieval
-still returns HEAD_MISMATCH/UNKNOWN; current classifier/interface/test memory
-are authoritative. memory/README is absent; requirements exist. Inference cannot
-prove byte identity; deterministic reproduction plus independent review can.
+collection, execution, network isolation or WRE/resident admission. Current
+source/interface outrank Holo's HEAD_MISMATCH/UNKNOWN. memory/README is absent;
+requirements exist. Deterministic reproduction and review establish byte identity.
 
 ## Member serving allocation — 2026-10-26, before authoring
 
