@@ -2,6 +2,68 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Member serving allocation — 2026-10-26, before authoring
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP00/6/11/22/50/62/71/77/84/97.
+Parent candidate11ca7d54dd10007a2862a7da6b875a16965b4225, PR2225; use
+agent/foundups-member-serving-20261026 in the same clean owned worktree.
+Need: ASGI/TestClient acceptance does not prove a real server can deliver the
+draft route. Reuse the existing Uvicorn CLI rather than add a custom launcher.
+The umbrella already declares uvicorn[standard]>=0.24.0; do not migrate that
+environment or import its optional dotenv/WebSocket/reloader machinery.
+
+Allocate one optional requirements-server.txt (<=16 lines) including the existing
+HTTP requirements plus exact minimal uvicorn0.54.0/h110.16.0/click8.5.0 pins.
+Current official PyPI metadata reports no advisories for these three releases;
+verify the actual complete installed inventory before qualifying it. Resolve only
+official binary wheels in a new external environment; retain pip26.2.2 acquisition,
+installation report, wheel digests and metadata inspection, not credential values.
+Preserve the previous patched profile and every historical receipt unchanged.
+
+Run the real factory through the ordinary CLI over loopback only: one worker,
+asyncio/h11, no WebSockets, proxy-header trust, reload, access log or server header;
+explicit concurrency16/backlog32/keepalive5/graceful10/header-buffer16384 bounds.
+These library settings are not abuse protection, hard RSS/OS/network confinement
+or cloud ingress limits. Do not invent a server wrapper or duplicate HTTP/auth code.
+Cloud Run's separate deployment command must bind0.0.0.0 and its supplied PORT;
+the local proof must never expose a workstation listener to the local network.
+
+Test-first: reuse the original RSA/policy/header helpers in the existing417-line
+test owner. Add <=120 lines/three real-process HTTP cases, keeping every existing
+definition/oracle and all814 IDs. Freeze acceptance before the profile/CI change;
+retain the expected missing-server RED in the old profile, then new-profile GREEN.
+Use credential-free child configuration, ephemeral synthetic keys without output,
+bounded startup/HTTP waits and process cleanup. Exercise actual health, rejection,
+signed201 draft, unrelated404, no-store and absent server/access-log evidence.
+No fixture or server monkeypatch replaces the actual TCP request path. Peer review
+requires chunked oversize rejection and missing/bad policy startup failure. Use
+port0 and the child startup log to identify its actual port/PID without a reserve-
+close race. Terminate/wait/kill/wait cleanup proves reaping, not graceful shutdown.
+
+Existing nomination workflow: add only the new profile's two trigger filters and
+select it for installation; preserve jobs/permissions/tests/report retention.
+Budget: README+35, INTERFACE+12, ROADMAP+12, module ModLog+18, tests README+12,
+TestModLog+20, this plan+60/root ModLog+16. No new test owner, runtime member,
+manifest/pin/ledger/registry change, application logic or grant. Existing manifest
+check and independent exact-candidate review precede publication; hosted gates
+must bind the final head. Stop/reallocate any actual unbudgeted delta.
+
+Execution plane: local package acquisition and loopback server qualification.
+No cloud build/deployment, IAM change, provider identity/session, persistent data,
+repository claim, mint or reward is authorized by this proof. Container closure
+must separately retain the real imported static directory (not a placeholder),
+exclude credentials/shared ignored sources and qualify its Linux image. Existing
+Firebase functions remain untouched. Then administer policy/cost/ingress and prove
+a real session before browser wiring and atomic repository-control admission.
+
+Retrieval: Holo again returns HEAD_MISMATCH/UNKNOWN/gaptrue; no reindex. NAV and
+current HTTP/factory/package imports, module/test memory, requirements and workflow
+are the primary evidence. Old deployment prose and umbrella extras are noise.
+No memory/README exists; requirements now exist (the old debt note is stale).
+Deterministic wire/inventory checks and a separate reviewer supply evidence that
+Qwen/Gemma inference cannot establish. Uvicorn settings and Cloud Run container
+contract were read from their official current documentation before allocation.
+
 ## Member host bootstrap allocation — 2026-10-26, before authoring
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/71/77/84/97/109.
