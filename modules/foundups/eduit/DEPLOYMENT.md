@@ -121,3 +121,11 @@ survive reload and reopen; scene seeks to 10 seconds; the game accepts wake
 then root actions. Audio perception and physical phone testing remain unverified.
 Creative revisions stay on the working branch; milestone PRs collect changes
 after review rather than requiring a PR for each preview.
+
+
+## Home Screen layout milestone — 2026-10-26
+
+See [Home Screen repair](docs/HOME_SCREEN_LAYOUT_REPAIR.md) for the direct
+root viewer, per-panel expand/collapse, pinch adapter, responsive viewport checks
+and physical-device limits. Use `build_site.py --output-dir <new-dir> --storytime-root`
+for standalone Storytime; shared Mall registration remains separately owned.

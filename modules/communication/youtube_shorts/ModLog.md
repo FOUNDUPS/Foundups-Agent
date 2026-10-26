@@ -856,3 +856,9 @@ EDUIT supplies one event sheet to synthesized foley and scene rendering. Added
 optional Boolean captions_in_scene to existing renderer, retaining SRT while
 skipping duplicate burn-in. Legacy audio/caption behavior remains the default.
 Actual three-cycle video review and residual limits are in EDUIT ModLog.
+
+
+## 2026-10-26 — Storytime panel focus and launch audit
+Shorts-owned viewer now places expand/collapse on each panel. EDUIT mounts the
+same source at its standalone root, preventing a viewport-less redirect launch.
+See EDUIT HOME_SCREEN_LAYOUT_REPAIR.md for evidence and physical-device limits.

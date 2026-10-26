@@ -59,3 +59,11 @@ This supersedes the earlier two-cue timeout/practice game description.
 Current [touch/mouse and PWA audit](docs/TOUCH_MOUSE_PWA_AUDIT.md) records responsive
 inputs, flag-only controls, standalone installation artifacts, source recovery,
 Mall ownership and verification limits.
+
+
+## Home Screen layout milestone — 2026-10-26
+
+See [Home Screen repair](docs/HOME_SCREEN_LAYOUT_REPAIR.md) for the direct
+root viewer, per-panel expand/collapse, pinch adapter, responsive viewport checks
+and physical-device limits. Use `build_site.py --output-dir <new-dir> --storytime-root`
+for standalone Storytime; shared Mall registration remains separately owned.

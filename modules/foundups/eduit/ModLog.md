@@ -192,3 +192,11 @@ SVG images and accessible labels. Added standalone manifest/icons and bounded
 UI-only service worker. Pointer cancellation and safe-area layout strengthened;
 locale selection pauses game. Mall mounting/physical-device acceptance remain
 separate. See docs/TOUCH_MOUSE_PWA_AUDIT.md.
+
+
+## 2026-10-26 — Home Screen launch and panel focus
+Replaced viewport-less standalone redirect with a projection of the same viewer.
+Each panel now owns expand/collapse. Added WebKit pinch adapter over Mall gestures,
+pinch tap suppression, viewport rotation pause, safe-area sizing and inert focus.
+Fourteen focused checks plus phone/tablet viewport harness; actual iOS remains
+unverified. Independent CLI/resize findings repaired. See HOME_SCREEN_LAYOUT_REPAIR.

@@ -4,8 +4,9 @@ from pathlib import Path
 import shutil
 import tempfile
 from render_story_preview import ROOT, render
+from storytime_site import mount_storytime_root
 
-def build(output):
+def build(output, storytime_root=False):
     output=Path(output).resolve()
     if output.exists():
         raise FileExistsError(output)
@@ -22,8 +23,10 @@ def build(output):
         gestures.mkdir(parents=True,exist_ok=True)
         shutil.copy2(ROOT/'public/member/js/gesture-engine.js',gestures/'gesture-engine.js')
         # Standalone PWA assets belong to this module; Mall integration keeps its own worker.
+        if storytime_root:
+            mount_storytime_root(output)
         # Keep every hashed artifact with its receipt for reproducible review.
         shutil.copytree(media, output/'storytime/assets', dirs_exist_ok=True)
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--output-dir',required=True)
-    build(parser.parse_args().output_dir)
+    parser=argparse.ArgumentParser();parser.add_argument('--output-dir',required=True);parser.add_argument('--storytime-root',action='store_true')
+    args=parser.parse_args();build(args.output_dir,args.storytime_root)

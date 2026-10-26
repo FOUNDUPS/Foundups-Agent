@@ -1,3 +1,4 @@
+import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
 const $=id=>document.getElementById(id),game=$('game'),ink=$('ink');
 const revision='sound-languages-9',key='eduit.game-feedback.v2.'+revision;
@@ -14,7 +15,7 @@ function show(){game.hidden=true;$('frozen').hidden=false; // SVG originates exc
  $('frozen').replaceChildren(document.importNode(doc.documentElement,true));ink.hidden=false;$('tools').hidden=false;paint();}
 function play(){$('video').pause();ink.hidden=true;$('frozen').hidden=true;$('tools').hidden=true;game.hidden=false;drawing=null;activePointer=null;api()?.play();}
 $('play').onclick=$('close').onclick=play;
-$('feedback').onclick=()=>{const current=api()?.freeze();if(!current)return;$('video').pause();capture=current;strokes=[];$('note').value='';show();};
+$('feedback').onclick=()=>{expand(gamePanel,false);const current=api()?.freeze();if(!current)return;$('video').pause();capture=current;strokes=[];$('note').value='';show();};
 const point=e=>{const r=ink.getBoundingClientRect();return [Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))];};
 ink.onpointerdown=e=>{if(activePointer!==null)return;activePointer=e.pointerId;e.preventDefault();ink.setPointerCapture(e.pointerId);drawing=[point(e)];strokes.push(drawing);paint();};ink.onpointermove=e=>{if(drawing&&e.pointerId===activePointer){drawing.push(point(e));paint();}};ink.onpointerup=ink.onpointercancel=ink.onlostpointercapture=e=>{if(e.pointerId===activePointer){drawing=null;activePointer=null;}};
 $('undo').onclick=()=>{strokes.pop();paint();};$('clear').onclick=()=>{strokes=[];paint();};
@@ -24,20 +25,35 @@ $('save').onclick=()=>{if(!capture)return;entries.push({capture:structuredClone(
 $('copy').onclick=async()=>{try{await navigator.clipboard.writeText(record());$('status').textContent='Copied. Paste into our conversation.';}catch{$('record').hidden=false;$('record').select();$('status').textContent='Copy the record below.';}};
 $('video').onplay=()=>api()?.freeze();new ResizeObserver(paint).observe(ink);list();
 
-const gamePanel=document.querySelector('.stage'),video=$('video');
-function expand(el,on){document.querySelectorAll('.expanded').forEach(n=>n.classList.remove('expanded'));if(on)el.classList.add('expanded');document.body.classList.toggle('focused',on);$('exit-full').hidden=!on;}
+const gamePanel=$('game-panel'),videoPanel=$('video-panel'),video=$('video');
+const expandIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg>';
+const collapseIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h6V3m6 0v6h6M9 21v-6H3m12 6v-6h6"/></svg>';
+let lastViewport="";
+function viewport(){const v=window.visualViewport;const width=v?.scale===1?v.width:window.innerWidth,height=v?.scale===1?v.height:window.innerHeight;const size=width+'x'+height;if(lastViewport&&size!==lastViewport)api()?.pause();lastViewport=size;document.documentElement.style.setProperty('--app-width',width+'px');document.documentElement.style.setProperty('--app-height',height+'px');}
+window.addEventListener('resize',viewport);window.addEventListener('orientationchange',viewport);window.visualViewport?.addEventListener('resize',viewport);viewport();
+let focusReturn=null;
+function expand(el,on){
+ if(on&&!document.body.classList.contains("focused"))focusReturn=document.activeElement;
+ if(el===gamePanel){video.pause();api()?.pause();}else api()?.pause();
+ document.querySelectorAll('.expanded').forEach(n=>n.classList.remove('expanded'));
+ if(on)el.classList.add('expanded');document.body.classList.toggle('focused',on);
+ for(const [panel,id,label] of [[videoPanel,'full-video','video'],[gamePanel,'full-game','game']]){const active=panel.classList.contains('expanded'),button=$(id);button.setAttribute('aria-expanded',String(active));button.setAttribute('aria-label',(active?'Collapse ':'Expand ')+label);button.innerHTML=active?collapseIcon:expandIcon;}
+ for(const sibling of document.querySelector('main').children){if(on&&sibling!==el)sibling.setAttribute('inert','');else sibling.removeAttribute('inert');}
+ if(on)el.querySelector('.expand-button').focus({preventScroll:true});else if(focusReturn?.isConnected){focusReturn.focus({preventScroll:true});focusReturn=null;}
+ viewport();
+}
 $('full-game').onclick=()=>expand(gamePanel,!gamePanel.classList.contains('expanded'));
-$('full-video').onclick=()=>expand(video,!video.classList.contains('expanded'));
-$('exit-full').onclick=()=>expand(gamePanel,false);
-window.addEventListener('keydown',e=>{if(e.key==='Escape')expand(gamePanel,false);});
+$('full-video').onclick=()=>expand(videoPanel,!videoPanel.classList.contains('expanded'));
+window.addEventListener('keydown',e=>{const panel=document.querySelector('.unit.expanded');if(e.key==='Escape'&&panel)expand(panel,false);});
+expand(gamePanel,false);
 window.addEventListener('message',e=>{if(e.origin===location.origin&&e.source===game.contentWindow&&e.data?.type==='storytime.fullscreen')expand(gamePanel,e.data.expanded===true);});
-window.gestureZone?.(video,{onPinchOut:()=>expand(video,true),onPinchIn:()=>expand(video,false)});
-window.gestureZone?.(gamePanel,{onPinchOut:()=>{if(ink.hidden)expand(gamePanel,true);},onPinchIn:()=>{if(ink.hidden)expand(gamePanel,false);}});
+bindPanelGestures(videoPanel,{expand:()=>expand(videoPanel,true),collapse:()=>expand(videoPanel,false)});
+bindPanelGestures(gamePanel,{expand:()=>{if(ink.hidden)expand(gamePanel,true);},collapse:()=>{if(ink.hidden)expand(gamePanel,false);}});
 
 let language='en';try{language=normalizeLocale(localStorage.getItem('eduit.game-language'));}catch{}
 const languageBar=$('languages');
 function chooseLanguage(value){language=normalizeLocale(value);api()?.pause();api()?.setLocale(language);try{localStorage.setItem('eduit.game-language',language);}catch{}languageBar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===language)));}
-for(const [id,l] of Object.entries(locales)){const button=document.createElement('button');button.dataset.locale=id;button.lang=id;button.setAttribute('aria-label',l.label);const flag=document.createElement('img');flag.src='flags/'+({en:'gb',ja:'jp',pt:'pt',es:'es'}[id])+'.svg';flag.alt='';flag.width=36;flag.height=24;button.title=l.label;button.append(flag);button.onclick=()=>chooseLanguage(id);languageBar.append(button);}
+for(const [id,l] of Object.entries(locales)){const button=document.createElement('button');button.dataset.locale=id;button.lang=id;button.setAttribute('aria-label',l.label);const flag=document.createElement('img');flag.src=new URL('flags/'+({en:'gb',ja:'jp',pt:'pt',es:'es'}[id])+'.svg',import.meta.url).href;flag.alt='';flag.width=36;flag.height=24;button.title=l.label;button.append(flag);button.onclick=()=>chooseLanguage(id);languageBar.append(button);}
 game.addEventListener('load',()=>chooseLanguage(language));chooseLanguage(language);
 
-if('serviceWorker' in navigator)navigator.serviceWorker.register('../storytime-sw.js',{scope:'../'}).catch(()=>{});
+if('serviceWorker' in navigator)navigator.serviceWorker.register(new URL('../storytime-sw.js',import.meta.url),{scope:new URL('../',import.meta.url).pathname}).catch(()=>{});
