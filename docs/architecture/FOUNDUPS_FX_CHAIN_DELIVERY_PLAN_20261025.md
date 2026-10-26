@@ -65,6 +65,12 @@ Cloud Run and GitHub runner documentation outrank old deployment prose. Missing
 memory README remains recorded. Avoid duplicate business logic or HTTP oracles.
 Qwen/Gemma inference cannot prove image contents/process cleanup; deterministic
 artifact checks and an attributed independent reviewer supply that evidence.
+Source-stage result: existing817 local cases pass, initial missing-lock preflight
+fails before Docker,18/18 acquired Linux wheel digests match qualified CI evidence.
+Independent review665077df found two new test-side gaps: incomplete input triggers
+and unnamed audit-run timeout cleanup. Repair within the existing budgets before
+first Docker execution; keep all existing HTTP/config oracles fixed. The actual
+image/security/cloud/session/browser/admission/chain gates remain outstanding.
 
 ## Serving registry reprojection allocation — before derived mutation
 

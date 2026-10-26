@@ -67,12 +67,34 @@ python -I -B -m uvicorn modules.foundups.pfmall.intake_host:create_app `
 Use a clean server environment: omit inherited `UVICORN_*`, `WEB_CONCURRENCY`
 and `FORWARDED_ALLOW_IPS`; do not supply an env-file or reload. Local qualification
 binds loopback and uses port0 with child startup/PID evidence. The future Cloud Run
-container must instead bind0.0.0.0 and its supplied PORT. No image/deployment is
-established here. The development HTTP module is still imported and needs its
+container must bind0.0.0.0; the candidate below fixes8080, which Cloud Run must
+explicitly select. The development HTTP module is still imported and needs its
 real tracked static directory; do not fabricate a placeholder during packaging.
 Limits are application/server settings, not OS confinement, abuse prevention or
 proof of graceful shutdown. Public hosting, current session/revocation policy,
 real member identity and durable repository-control admission remain unqualified.
+
+## Linux intake container candidate
+
+`Dockerfile.intake` packages the same factory and ordinary Uvicorn CLI for
+linux/amd64, fixed8080 and numeric nonroot10001:10001. The official Python3.12
+Bookworm base is pinned by platform digest. `requirements-container.lock` fixes
+the18 runtime wheels by version/hash; direct pins match the optional profiles.
+The installer is separately hash-pinned and `pip check` runs during the build.
+
+The existing nomination workflow builds only a validated24-file Git archive:
+16 Python sources, four real static assets, two existing profiles, lock and
+Dockerfile. It excludes the rest of the checkout. Source bytes, installed
+distributions, base OS inventory and immutable image ID are retained for review.
+The three existing real HTTP cases run through an explicit image-only test
+transport, with loopback host publication and owned-container cleanup. CI keeps
+the tested image for three days and public-safe evidence for14 days.
+
+This is a source candidate pending actual hosted image qualification. The local
+default817-case profile passes; local Docker engine access is unavailable.
+Build/context or wheel checks do not establish Linux execution. Image security,
+cloud policy, actual identity and browser acceptance remain deployment gates.
+The six existing Node functions and shared ignored source are outside this image.
 
 ## RedDog, OpenClaw, and Hermes boundary
 

@@ -1,3 +1,20 @@
+## 2026-10-26 — Author the bounded Linux intake image candidate
+
+Allocationc08509671,15/P1; frozen acceptanceecadb40845. Add only the explicit
+Dockerfile/18-package Linux wheel lock and bounded hosted test transport/job.
+The Git archive validates24 regular tracked blobs; the image copies16 Python
+sources and four real static assets, uses a pinned official base/installer,
+numeric nonroot and fixed8080 exec-form Uvicorn. No application/auth changes.
+Existing817 local cases pass with container opt-in unset. The missing-lock
+preflight RED occurs before Docker; local engine access is unavailable. Actual
+Linux execution remains pending. Independent static review found seven missing
+input-trigger selectors and unnamed audit-container timeout cleanup; repair both
+before the first image run, preserving all existing HTTP/config oracles.
+All18 acquired Linux wheel hashes match the qualified Linux report; acquisition
+does not prove Linux execution or image security. Retain actual inventories,
+image/PID1/state/HTTP/cleanup evidence in CI and require fresh gates before main.
+WSP6/11/22/49/50/62/71/77/84/97. Deployment/session/admission/chain gates remain.
+
 ## 2026-10-26 — Reproject the observed process capability
 
 Allocation6b5d7902f precedes the independently accepted capabilities[] ->[process]

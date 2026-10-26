@@ -8,6 +8,10 @@ ignored/shared credentials and functions. Local Docker is unavailable, so actual
 image outcomes must come from hosted Linux evidence, not a local success claim.
 The existing FX/chain plan records exact budgets, source boundaries and remaining
 image-security/cloud/identity/browser/repository-control/chain delivery gates.
+Source candidate reuses817 local cases and18 hash-verified acquired Linux wheels;
+actual hosted image execution is pending. Independent review found trigger and
+audit-timeout cleanup gaps; repair those new test surfaces within allocation,
+preserving all HTTP/config oracles and historical evidence. No deployment claim.
 
 ## 2026-10-26 — Allocate observed serving registry repair
 
