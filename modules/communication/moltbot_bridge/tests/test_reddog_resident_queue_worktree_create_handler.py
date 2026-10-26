@@ -6,12 +6,21 @@ import ast
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
+import pytest
+
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import (
+    StubAuthoritativeUseLease,
+    allow_stub_authoritative_use_lease,
 )
+from modules.communication.moltbot_bridge.src import reddog_worktree_admission_capability as admission_module
 from modules.communication.moltbot_bridge.src.reddog_worktree_admission_capability import (
     InMemoryWorktreeAdmissionRegistry,
 )
+
+
+@pytest.fixture(autouse=True)
+def _allow_stub_lease(monkeypatch) -> None:
+    allow_stub_authoritative_use_lease(monkeypatch, admission_module)
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
     CHAIN_RESULTS_SCHEMA_VERSION,
@@ -24,7 +33,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_next_stage_d
     invoke_reddog_resident_queue_next_stage_dispatch,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestration_plan import (
-    NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE,
+    NEXT_QUEUE_ASSURANCE_CAPACITY_ADMISSION,
     NEXT_QUEUE_WORKTREE_CREATE_INVOKE,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worktree_create_handler import (
@@ -46,9 +55,6 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
-)
-from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
-    QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_executor_plan_dryrun import (
     QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT,
@@ -154,7 +160,6 @@ def _snapshot() -> dict[str, object]:
             "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
             "no_execution_performed": True,
         },
-        prompt_text="RedDog resident queue worktree create worktree authority",
     )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
@@ -339,7 +344,7 @@ def _handler(
             executor_plan_result=stage_results[EXECUTOR_PLAN_STAGE_KEY],
             valve_decision=stage_results[EXECUTION_VALVE_STAGE_KEY]["valve_decision"],
             signed_authority_reverified=True,
-            authoritative_use_lease=AuthoritativeUseLease(
+            authoritative_use_lease=StubAuthoritativeUseLease(
                 lambda: True,
                 expires_at_epoch=2_000_000_000,
                 trusted_now_epoch=lambda: 1_000_000_000,
@@ -381,7 +386,7 @@ def test_dispatcher_records_worktree_create_and_advances_to_bounded_worker_pilot
     assert result.accepted is True
     assert result.decision == RESIDENT_QUEUE_NEXT_STAGE_DISPATCH_ACCEPT
     assert result.dispatched_stage == WORKTREE_CREATE_STAGE_KEY
-    assert result.next_action == NEXT_QUEUE_BOUNDED_WORKER_PILOT_INVOKE
+    assert result.next_action == NEXT_QUEUE_ASSURANCE_CAPACITY_ADMISSION
     assert resolver.calls == [
         {
             "work_order_id": WORK_ORDER_ID,

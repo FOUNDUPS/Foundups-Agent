@@ -27,7 +27,10 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 from dataclasses import dataclass
 from enum import Enum
-from modules.infrastructure.shared_utilities.local_model_selection import resolve_code_model_path
+from functools import wraps
+from threading import RLock
+from modules.infrastructure.shared_utilities.local_model_selection import resolve_general_model_path
+from modules.communication.video_comments.src.reply_context import build_grounded_prompt, select_channel_personality
 
 # Gemma validator for emoji pattern matching (2026-02-21)
 try:
@@ -40,6 +43,22 @@ logger = logging.getLogger(__name__)
 
 # Path to existing moderator database (auto_moderator.db)
 MOD_DB_PATH = Path(__file__).parent.parent.parent / "livechat" / "memory" / "auto_moderator.db"
+
+
+@dataclass(frozen=True)
+class ReplyGenerationResult:
+    """Text and source captured together before another generation may start."""
+
+    text: Optional[str]
+    source: str
+
+
+def _serialized_reply_generation(method):
+    @wraps(method)
+    def serialized(self, *args, **kwargs):
+        with self._generation_lock:
+            return method(self, *args, **kwargs)
+    return serialized
 
 
 def _env_truthy(name: str, default: str = "false") -> bool:
@@ -480,29 +499,18 @@ VARIATION GUIDANCE:
 - Sound like a human, not a bot"""
         },
         "ffcpln": {
-            "keywords": ["ffcpln", "ffc pln", "#ffcpln", "maga", "trump 2024", "lets go brandon", "make america great"],
-            "intent": "User is FFCPLN (MAGA troll) - respond with consciousness mockery + subtle foundups.com promo",
-            "core_message": "Mock their ✊ consciousness level while building at foundups.com",
-            "variation_prompt": """The user is an FFCPLN (MAGA troll)! Mock their consciousness level while subtly promoting foundups.com.
+            "keywords": ["ffcpln", "ffc pln", "#ffcpln"],
+            "intent": "User referenced the channel's #FFCPLN theme or playlist",
+            "core_message": "Respond to the commenter's actual point and treat #FFCPLN as shared channel context",
+            "variation_prompt": """The user referenced #FFCPLN, a recurring Move2Japan/antifaFM channel theme.
 
-FFCPLN CONTEXT:
-- FFCPLN = Our nickname for MAGA trolls
-- They're stuck at consciousness level ✊ (000)
-- Goal: Mock while optionally promoting foundups.com
-
-CORE INFO (must include one):
-- Consciousness level: ✊ (000) = FFCPLN baseline
-- Evolution path: ✊✋🖐️ (can they evolve?)
-- Optional (30% of time): foundups.com mention
-
-VARIATION GUIDANCE:
-- Mock their ✊ consciousness: "FFCPLN.exe crashed at ✊", "Consciousness level: potato", "Still at ✊ I see"
-- Vary mockery style: technical ("error 404: consciousness not found"), sarcastic ("bless your ✊ heart")
-- Sometimes add foundups.com: "While you're at ✊, we're building at foundups.com 🚀"
-- Keep foundups promos subtle - max 30% of responses
-- Use relevant emojis (✊✋🖐️🤡💀🤖)
-- Keep it 1-2 sentences max
-- Sound like 0102 (witty, mocking but not hateful)"""
+CONTEXT RULES:
+- Do NOT assume the commenter is a troll merely because they used #FFCPLN.
+- Respond to the commenter's actual point first.
+- If their comment is supportive, agree or thank them naturally.
+- If their comment is hostile, the separately supplied classification tier controls the response style.
+- A playlist mention at ffc.foundups.com is optional and only relevant when the comment is about music.
+- Keep it 1-2 sentences and avoid generic appreciation templates."""
         },
         "foundups": {
             "keywords": ["foundups", "found ups", "startup", "decentralized", "agent", "ai agent", "build", "venture"],
@@ -607,38 +615,30 @@ VARIATION GUIDANCE:
 
     def __init__(self):
         """Initialize the intelligent reply generator with Grok (primary) or LM Studio (fallback)."""
-        self.grok_connector = None
-        self.lm_studio_available = False
-        self.lm_studio_model_id = os.getenv("LM_STUDIO_MODEL") or None
-        self.banter_engine = None
-        self.maga_detector = None
-        self.chat_history_store = ChatTelemetryStore() if CHAT_HISTORY_AVAILABLE else None
-        self.commenter_history_store = get_commenter_history_store() if COMMENTER_HISTORY_AVAILABLE else None
-        
-        # VoiceMemory (Digital Twin RAG) - lazy init for grounded replies
-        self._voice_memory = None
-        self._voice_memory_enabled = _env_truthy("YT_012_VOICE_MEMORY_ENABLED", default="true")
+        self._initialize_reply_state()
 
-        # PRIMARY: Try Grok via LLMConnector (witty, fewer guardrails!)
-        # Checks GROK_API_KEY or XAI_API_KEY from environment
-        try:
-            from modules.ai_intelligence.rESP_o1o2.src.llm_connector import LLMConnector
-            if os.getenv("GROK_API_KEY") or os.getenv("XAI_API_KEY"):
-                self.grok_connector = LLMConnector(
-                    model="grok-3-fast",
-                    max_tokens=60,  # 2026-02-04: Reduced from 100→60 (enforce short replies)
-                    temperature=0.85,  # Slightly lower = fewer hallucinations/typos
-                    timeout=8  # 2026-02-04: Reduced from 12s→8s (speed optimization)
-                )
-                logger.info("[REPLY-GEN] Grok available (witty replies, 8s timeout)")
-            else:
-                logger.info("[REPLY-GEN] No GROK_API_KEY/XAI_API_KEY, trying LM Studio...")
-        except Exception as e:
-            logger.warning(f"[REPLY-GEN] Grok init failed: {e}")
-        
-        # FALLBACK: Check if LM Studio is running locally
-        if not self.grok_connector:
-            self._check_lm_studio()
+        # Grok is a legacy, explicit opt-in fallback. The autonomous default is
+        # the local Qwen route. RedDog already performs governed OpenRouter calls
+        # without per-call 012 involvement, but its public production surfaces
+        # are not yet typed for short-form YouTube reply generation.
+        if _env_truthy("YT_ENABLE_GROK_REPLIES"):
+            try:
+                from modules.ai_intelligence.rESP_o1o2.src.llm_connector import LLMConnector
+                if os.getenv("GROK_API_KEY") or os.getenv("XAI_API_KEY"):
+                    self.grok_connector = LLMConnector(
+                        model="grok-3-fast",
+                        max_tokens=60,
+                        temperature=0.85,
+                        timeout=3,
+                    )
+                    logger.info("[REPLY-GEN] Legacy Grok fallback enabled (3s timeout)")
+                else:
+                    logger.warning("[REPLY-GEN] Grok fallback enabled but no API key is configured")
+            except Exception as e:
+                logger.warning(f"[REPLY-GEN] Grok init failed: {e}")
+
+        # Primary local service route (normally serving the general Qwen model).
+        self._check_lm_studio()
         
         # Load BanterEngine as ultimate fallback
         # ENV SWITCH: Set DISABLE_BANTER_ENGINE=true to disable template fallbacks
@@ -661,22 +661,21 @@ VARIATION GUIDANCE:
             except Exception as e:
                 logger.warning(f"[REPLY-GEN] GrokGreetingGenerator init failed: {e}")
 
-        # QWEN AGENTIC RESPONDER (2025-12-30): Local llama.cpp fallback
-        # Uses Qwen model directly via llama-cpp-python when Grok/LM Studio fail
+        # QWEN AGENTIC RESPONDER: embedded local fallback for the LM Studio route.
         # ENV SWITCH: Set DISABLE_QWEN_ENGINE=true to skip local Qwen inference
         self.qwen_engine = None
         if _env_truthy("DISABLE_QWEN_ENGINE"):
             logger.info("[REPLY-GEN] QwenEngine DISABLED via DISABLE_QWEN_ENGINE=true")
         elif QWEN_ENGINE_AVAILABLE and QwenInferenceEngine:
             try:
-                # Resolve local code model from central model selection.
-                qwen_model_path = resolve_code_model_path()
+                # Comment replies are a general-language task, not a coding task.
+                qwen_model_path = resolve_general_model_path()
                 if qwen_model_path.exists():
                     self.qwen_engine = QwenInferenceEngine(
                         model_path=qwen_model_path,
                         max_tokens=150,  # Short replies
                         temperature=0.8,  # Creative but focused
-                        context_length=1024  # Sufficient for comment context
+                        context_length=2048,
                     )
                     logger.info(f"[REPLY-GEN] QwenInferenceEngine ready: {qwen_model_path.name}")
                 else:
@@ -721,6 +720,21 @@ VARIATION GUIDANCE:
         logger.info(f"[REPLY-GEN]   Content Analyzer: {'✅ READY' if self.content_analyzer else '❌ NOT AVAILABLE'}")
         logger.info(f"[REPLY-GEN]   BanterEngine: {'✅ READY' if self.banter_engine else '❌ NOT AVAILABLE'}")
         logger.info("[REPLY-GEN] ═════════════════════════")
+
+    def _initialize_reply_state(self):
+        self._generation_lock = RLock()
+        self.grok_connector = None
+        self.lm_studio_available = False
+        self.lm_studio_model_id = os.getenv("LM_STUDIO_MODEL") or None
+        self.banter_engine = None
+        self.maga_detector = None
+        self.chat_history_store = ChatTelemetryStore() if CHAT_HISTORY_AVAILABLE else None
+        self.commenter_history_store = get_commenter_history_store() if COMMENTER_HISTORY_AVAILABLE else None
+
+        # VoiceMemory (Digital Twin RAG) - lazy init for grounded replies
+        self._voice_memory = None
+        self._voice_memory_enabled = _env_truthy("YT_012_VOICE_MEMORY_ENABLED", default="true")
+
 
     def _add_0102_signature(self, reply: str, tier: int = None, comment_age_days: int = None) -> str:
         """
@@ -1032,12 +1046,14 @@ VARIATION GUIDANCE:
             random.shuffle(candidates)
             for candidate in candidates:
                 if candidate and self._normalize_text(candidate) not in recent_reply_norms:
+                    self._last_llm_source = "template"
                     return candidate
 
         if fallback_callable:
             for _ in range(3):
                 candidate = fallback_callable()
                 if candidate and self._normalize_text(candidate) not in recent_reply_norms:
+                    self._last_llm_source = "template"
                     return candidate
 
         return reply_text
@@ -1274,7 +1290,11 @@ VARIATION GUIDANCE:
                 self._voice_memory = False  # Mark unavailable
         return self._voice_memory if self._voice_memory else None
 
-    def _load_voice_memory_context(self, comment_text: str) -> str:
+    def _load_voice_memory_context(
+        self,
+        comment_text: str,
+        video_title: Optional[str] = None,
+    ) -> str:
         """
         Query VoiceMemory for grounding context relevant to the comment.
 
@@ -1289,7 +1309,10 @@ VARIATION GUIDANCE:
             return ""
 
         try:
-            results = vm.query(comment_text, k=3)
+            query_text = comment_text
+            if video_title:
+                query_text = f'{video_title}\n{comment_text}'
+            results = vm.query(query_text, k=3)
             if not results:
                 return ""
 
@@ -1321,14 +1344,17 @@ VARIATION GUIDANCE:
         author_name: str,
         author_channel_id: Optional[str] = None,
         custom_prompt: Optional[str] = None,
-        tier: Optional[int] = None
+        tier: Optional[int] = None,
+        video_title: Optional[str] = None,
     ) -> Optional[str]:
         """
-        Generate a contextual reply using Grok (primary) or LM Studio (fallback).
+        Generate a grounded reply through the local general-language model route.
 
         Priority:
-        1. Grok via xAI API (witty, fewer guardrails) - requires GROK_API_KEY/XAI_API_KEY
-        2. LM Studio (local Qwen) - requires LM Studio running on port 1234
+        1. LM Studio local model service (normally general Qwen)
+        2. Embedded general Qwen through llama.cpp
+        3. Legacy Grok only when ``YT_ENABLE_GROK_REPLIES=true``
+        4. Template engine (reported as non-contextual so the posting gate can skip it)
 
         Args:
             comment_text: The comment to reply to
@@ -1336,123 +1362,17 @@ VARIATION GUIDANCE:
             author_channel_id: Author's channel ID (for history lookup)
             custom_prompt: Optional custom prompt for semantic variation (ANTI-REGURGITATION)
             tier: Classification tier (0=MAGA_TROLL, 1=REGULAR, 2=MODERATOR) for tier-specific prompts
+            video_title: Per-comment video title extracted from Studio or supplied by the caller
 
         Returns:
             Contextual reply or None if all LLMs unavailable
         """
-        # If custom prompt provided (e.g., semantic variation prompts), use it directly
-        if custom_prompt:
-            user_prompt = custom_prompt
-            logger.info("[ANTI-REGURGITATION] Using custom semantic variation prompt")
-        elif tier == 0:
-            # TIER 0 (MAGA_TROLL): Mockery with #FFCPLN hashtag
-            user_prompt = f'''Comment from @{author_name}: "{comment_text}"
-
-Generate a sarcastic, mocking reply that dismisses this troll comment. Style: witty mockery, not hostile.
-- Reference: "besties for 15 years think he didnt know it" (if relevant to trust/betrayal themes)
-- MUST include #FFCPLN hashtag somewhere naturally
-- Keep it short (1-2 sentences)
-- Be dismissive but clever
-- Do NOT start with @mentions
-
-Examples of tone:
-- "Ok buddy, sure 👍 #FFCPLN"
-- "15 years of friendship and you think he didn't see it coming? #FFCPLN"
-- "That's... certainly a take. #FFCPLN"'''
-            logger.info("[TIER-0] Using MAGA mockery prompt with #FFCPLN")
-        elif tier == 2:
-            # TIER 2 (MODERATOR): Empowerment with #FFCPLN references
-            user_prompt = f'''Comment from @{author_name}: "{comment_text}"
-
-Generate an empowering, supportive reply for this community moderator/leader.
-- Use phrases like: "keep up the fight", "stay strong", "you're doing great"
-- Include #FFCPLN context: "#FFCPLN always fail" OR "nearly 100 songs on #FFCPLN playlist at ffc.foundups.com"
-- Acknowledge their contributions to the community
-- Keep it short (1-2 sentences)
-- Be encouraging and appreciative
-- Do NOT start with @mentions
-
-Examples of tone:
-- "Keep up the fight! #FFCPLN always fail 🚀"
-- "You're crushing it! Check out nearly 100 songs on the #FFCPLN playlist at ffc.foundups.com 🎵"
-- "Stay strong - your work matters! #FFCPLN"'''
-            logger.info("[TIER-2] Using moderator empowerment prompt with #FFCPLN")
-        else:
-            # TIER 1 (REGULAR): Standard contextual reply
-            if author_name and author_name.lower() != "unknown":
-                user_prompt = f'Comment from @{author_name}: "{comment_text}"\n\nGenerate a friendly, short reply (1-2 sentences). Do NOT start with @mentions:'
-            else:
-                user_prompt = f'Comment: "{comment_text}"\n\nGenerate a friendly, short reply (1-2 sentences). Do NOT start with @mentions:'
-
-            # Add personalization context (comment history)
-            context = self._load_personalization_context(
-                author_name=author_name,
-                author_channel_id=author_channel_id,
-            )
-            if context:
-                 user_prompt += f"\n\nCONTEXT (Use this to personalize, but don't be creepy):\n{context}"
-
-            # VOICE MEMORY GROUNDING (2026-02-04): Inject Digital Twin RAG context
-            # Prevents identity fabrication by grounding replies in verified memory
-            voice_context = self._load_voice_memory_context(comment_text)
-            if voice_context:
-                user_prompt += f"\n\n012's VERIFIED MEMORY (use ONLY this for personal claims):\n{voice_context}"
-
-        # CONTENT ANALYSIS ENHANCEMENT (2025-12-30): Add extracted meaning to prompt
-        # This enables truly CONTEXTUAL replies instead of generic templates
-        if hasattr(self, '_current_content_analysis') and self._current_content_analysis:
-            analysis = self._current_content_analysis
-
-            # Build alignment guidance (CRITICAL for proper engagement)
-            alignment_guidance = ""
-            if analysis.aligns_with_video is True:
-                alignment_guidance = f"""
-
-🤝 VIDEO ALIGNMENT: AGREES
-The commenter AGREES with the video's stance ({analysis.alignment_reason}).
-RESPONSE STRATEGY: VALIDATE their point. Acknowledge you're on the same side.
-- YES: "100% - calling it what it is", "Exactly right", "Spot on observation"
-- NO: Do NOT dismiss, correct, or redirect them. They're an ally."""
-            elif analysis.aligns_with_video is False:
-                alignment_guidance = f"""
-
-🚫 VIDEO ALIGNMENT: DISAGREES
-The commenter DISAGREES with the video's stance ({analysis.alignment_reason}).
-RESPONSE STRATEGY: Challenge respectfully or redirect.
-- Options: Fact-check, gentle push-back, or redirect to video content"""
-
-            user_prompt += f"""
-
-COMMENT ANALYSIS (use this to craft a relevant response):
-- Topic: {analysis.topic}
-- Sentiment: {analysis.sentiment}
-- Type: {analysis.comment_type}
-- Key Point: {analysis.key_point}
-- Engagement Hook: {analysis.engagement_hook or 'respond to their main point'}{alignment_guidance}
-
-IMPORTANT: Your reply MUST address their {analysis.comment_type} about "{analysis.key_point[:30]}". Do NOT use generic phrases like "thanks for watching" or "holding it down" - respond to what they ACTUALLY said.
-
-OUTPUT FORMAT: Reply with ONLY the reply text. Do NOT include:
-- Explanations (e.g., "This reply addresses...")
-- Notes (e.g., "Note: This comment...")
-- Reasoning (e.g., "This is relevant because...")
-- Multiple options or alternatives
-Just output the actual reply text, nothing else."""
-            logger.info(f"[LLM-CHAIN] 📝 Content analysis added to prompt (topic={analysis.topic}, aligns={analysis.aligns_with_video})")
-
-        # CRITICAL FIX (2026-02-21): OUTPUT FORMAT must ALWAYS be added, not just when content_analysis exists
-        # This prevents LLM from outputting explanations like "Note: This comment..." in replies
-        if "OUTPUT FORMAT:" not in user_prompt:
-            user_prompt += """
-
-OUTPUT FORMAT: Reply with ONLY the reply text. Do NOT include:
-- Explanations (e.g., "This reply addresses...")
-- Notes (e.g., "Note: This comment...")
-- Reasoning (e.g., "This is relevant because...")
-- Multiple options or alternatives
-- Brackets or parentheses with commentary
-Just output the actual reply text, nothing else."""
-            logger.info("[LLM-CHAIN] 📝 OUTPUT FORMAT instructions added to prompt")
+        user_prompt = build_grounded_prompt(
+            comment_text, author_name, custom_prompt, tier, video_title,
+            self._load_personalization_context(author_name=author_name, author_channel_id=author_channel_id),
+            self._load_voice_memory_context(comment_text, video_title=video_title),
+            getattr(self, "_current_content_analysis", None),
+        )
 
         try:
             # LLM FALLBACK CHAIN LOGGING (diagnostic)
@@ -1461,29 +1381,8 @@ Just output the actual reply text, nothing else."""
             logger.info(f"[LLM-CHAIN]   Author: @{author_name}")
             logger.info(f"[LLM-CHAIN]   Tier: {tier}")
 
-            # 1. Try Grok (XAI) - Uses get_response() method from LLMConnector
-            if self.grok_connector:
-                logger.info(f"[LLM-CHAIN] [1/3] Trying Grok (xAI)...")
-                try:
-                    reply = self.grok_connector.get_response(
-                        prompt=user_prompt,
-                        system_prompt=self.REPLY_SYSTEM_PROMPT
-                    )
-                    if reply:
-                        # Clean reply (remove @mentions at start, etc.)
-                        reply = self._clean_reply(reply, author_name)
-                        self._last_llm_source = 'grok'  # Track for training data
-                        logger.info(f"[LLM-CHAIN] ✅ GROK SUCCESS: {reply[:80]}...")
-                        return reply
-                    else:
-                        logger.warning(f"[LLM-CHAIN] ❌ Grok returned None/empty")
-                except Exception as grok_err:
-                    logger.warning(f"[LLM-CHAIN] ❌ Grok exception: {grok_err}")
-            else:
-                logger.warning(f"[LLM-CHAIN] ⏭️ Grok connector NOT AVAILABLE (no API key?)")
-
-            # 2. Try LM Studio (Local Fallback)
-            logger.info(f"[LLM-CHAIN] [2/3] Trying LM Studio (lm_studio_available={self.lm_studio_available}, model={self.lm_studio_model_id})")
+            # 1. Try the local model service (normally the general Qwen model).
+            logger.info(f"[LLM-CHAIN] [1/4] Trying LM Studio (lm_studio_available={self.lm_studio_available}, model={self.lm_studio_model_id})")
             if self.lm_studio_available and self.lm_studio_model_id:
                 # Construct messages for LM Studio
                 messages = [
@@ -1504,7 +1403,7 @@ Just output the actual reply text, nothing else."""
                         self.LM_STUDIO_URL,
                         json=payload,
                         headers={"Content-Type": "application/json"},
-                        timeout=8
+                        timeout=3
                     )
 
                     if response.status_code == 200:
@@ -1532,34 +1431,22 @@ Just output the actual reply text, nothing else."""
             else:
                 logger.warning(f"[LLM-CHAIN] ⏭️ LM Studio NOT AVAILABLE")
 
-            # 3. Try QwenInferenceEngine (Local llama.cpp - 2025-12-30 Agentic Responder)
-            logger.info(f"[LLM-CHAIN] [3/4] Trying QwenInferenceEngine (local llama.cpp)")
+            # 2. Try embedded Qwen (local llama.cpp).
+            logger.info(f"[LLM-CHAIN] [2/4] Trying QwenInferenceEngine (local llama.cpp)")
             if self.qwen_engine:
                 try:
-                    # ENHANCED: Use content analysis for contextual replies
-                    content_context = ""
-                    if hasattr(self, '_current_content_analysis') and self._current_content_analysis:
-                        analysis = self._current_content_analysis
-                        content_context = f"""
-The comment is about: {analysis.topic}
-Sentiment: {analysis.sentiment}
-Key point: {analysis.key_point}
-Respond to: {analysis.engagement_hook or 'their main point'}
-"""
+                    # Reuse the same grounded prompt assembled for every provider.
+                    qwen_prompt = f"""{user_prompt}
 
-                    qwen_prompt = f"""Generate a SHORT reply (max 15 words) to this YouTube comment.
-{content_context}
-Comment: "{comment_text}"
-
-Rules:
-- MAX 15 WORDS
-- ONE sentence only
-- No explanations
-- Just the reply"""
+FINAL LOCAL-QWEN CONSTRAINTS:
+- Maximum 25 words
+- One or two short sentences
+- Output only the reply"""
                     qwen_response = self.qwen_engine.generate_response(
                         prompt=qwen_prompt,
-                        system_prompt="You reply in 15 words or less. Never explain. Just reply.",
-                        max_tokens=50  # Reduced from 100 to force brevity
+                        system_prompt=self.REPLY_SYSTEM_PROMPT,
+                        max_tokens=80,
+                        stop=["###"],
                     )
                     if qwen_response and not qwen_response.startswith("Error:"):
                         # Clean up the response
@@ -1590,7 +1477,24 @@ Rules:
             else:
                 logger.warning(f"[LLM-CHAIN] ⏭️ QwenInferenceEngine NOT AVAILABLE")
 
-            # 4. Fallback to BanterEngine (if available) - Templates only (last resort)
+            # 3. Optional legacy Grok fallback. Disabled unless explicitly opted in.
+            if self.grok_connector and _env_truthy("YT_ENABLE_GROK_REPLIES"):
+                logger.info("[LLM-CHAIN] [3/4] Trying legacy Grok fallback")
+                try:
+                    reply = self.grok_connector.get_response(
+                        prompt=user_prompt,
+                        system_prompt=self.REPLY_SYSTEM_PROMPT,
+                    )
+                    if reply:
+                        reply = self._clean_reply(reply, author_name)
+                        self._last_llm_source = "grok"
+                        logger.info(f"[LLM-CHAIN] ✅ GROK SUCCESS: {reply[:80]}...")
+                        return reply
+                    logger.warning("[LLM-CHAIN] ❌ Grok returned None/empty")
+                except Exception as grok_err:
+                    logger.warning(f"[LLM-CHAIN] ❌ Grok exception: {grok_err}")
+
+            # 4. Fallback to BanterEngine (if available) - templates only.
             logger.info(f"[LLM-CHAIN] [4/4] Falling back to BanterEngine (TEMPLATE-BASED)")
             if self.banter_engine:
                  # Map tier to BanterEngine style if possible, or just generic
@@ -1608,8 +1512,31 @@ Rules:
             logger.error(f"[REPLY-GEN] Contextual reply generation failed: {e}")
             return None
 
+    def generate_reply_with_source(self, *args, cancel_event=None, **kwargs) -> ReplyGenerationResult:
+        """Generate one immutable receipt; cancelled queued work never calls a provider.
+
+        An already running provider cannot be killed by cancelling its awaiting task.
+        The lock also protects the generator's per-comment content/age fields.
+        """
+        with self._generation_lock:
+            if cancel_event is not None and cancel_event.is_set():
+                return ReplyGenerationResult(None, "cancelled")
+            text = self.generate_reply(*args, **kwargs)
+            return ReplyGenerationResult(text, self.get_last_llm_source())
+
+    def _record_skill_source(self, prefix, result, llm_reply, source):
+        """Credit a provider only when the skill retained its actual draft."""
+        text = result.get("reply_text")
+        strategy = result.get("strategy")
+        retained = isinstance(text, str) and bool(text.strip()) and bool(llm_reply)
+        if prefix == "skill_3":
+            retained = retained and strategy == "llm_reengagement_old" and llm_reply in text
+        else:
+            retained = retained and strategy == "llm_contextual" and text == llm_reply
+        self._last_llm_source = f"{prefix}:{source}" if retained else f"{prefix}:unknown"
+
     def get_last_llm_source(self) -> str:
-        """Get the LLM source that generated the last reply (for training data).
+        """Legacy diagnostic only; use generate_reply_with_source for posting receipts.
 
         Returns:
             str: 'grok', 'lm_studio', 'qwen', 'template', 'skill_0', 'skill_1', 'skill_2', or 'unknown'
@@ -2045,6 +1972,7 @@ Rules:
 
         return 0.0
     
+    @_serialized_reply_generation
     def generate_reply(
         self,
         comment_text: str,
@@ -2078,6 +2006,9 @@ Rules:
         Returns:
             Generated reply text
         """
+        # A source receipt is per comment. Never let a successful provider from
+        # the previous inbox row make a later template look contextual.
+        self._last_llm_source = "unknown"
         # LOG INPUT for debugging emoji detection (2026-01-23)
         logger.info(f"[REPLY-GEN] 📥 generate_reply() called:")
         logger.info(f"[REPLY-GEN]   comment_text: '{comment_text}' (len={len(comment_text) if comment_text else 0})")
@@ -2191,66 +2122,7 @@ Rules:
         logger.info(f"[REPLY-GEN] Classified {author_name} as {profile.commenter_type.value} ({classification_code}{classification_emoji})")
 
         # CHANNEL PERSONALITY: Adapt reply style based on target channel
-        CHANNEL_PERSONALITIES = {
-            'UC-LSSlOZwpGIRIYihaz8zCw': {  # Move2Japan
-                'name': 'Move2Japan',
-                'style': 'Political commentary, MAGA mockery',
-                'themes': ['democracy', 'justice', 'anti-fascism', 'MAGA trolling'],
-                'tone': 'sharp, witty, confrontational',
-                'maga_response': 'aggressive',  # Full MAGA mockery
-                'regular_response': 'political_banter'
-            },
-            'UCfHM9Fw9HD-NwiS0seD_oIA': {  # UnDaoDu
-                'name': 'UnDaoDu',
-                'style': 'AI consciousness, 0102 entanglement',
-                'themes': ['AI', 'Bell-State', 'AGI', '0102→0201', 'quantum neural networks'],
-                'tone': 'sharp, witty, scientific',
-                'maga_response': 'soft_redirect',  # Gentle dismissal
-                'regular_response': 'consciousness_banter'
-            },
-            'UCSNTUXjAgpd4sgWYP0xoJgw': {  # FoundUps
-                'name': 'FoundUps',
-                'style': 'pAVS ecosystem, AI-human collaboration, decentralized ventures',
-                'themes': ['pAVS', 'AI agents', 'startup', 'UPS tokens', 'CABR engine', 'decentralization'],
-                'tone': 'visionary, encouraging, practical, educational',
-                'maga_response': 'soft_redirect',  # Off-topic redirect
-                'regular_response': 'startup_banter',
-                # Litepaper context for intelligent replies (2026-02-25)
-                'context_docs': ['litepaper'],
-                'key_concepts': {
-                    'pAVS': 'Peer-to-Peer Autonomous Venture System - where AI agents and humans build ventures together',
-                    'UPS': 'Universal Participation Stake - backed 1:1 by Bitcoin (Hotel California: BTC enters, never exits)',
-                    'CABR': 'Compute-Adjusted Benefit Ratio - the V3 validation engine for fair work distribution',
-                    'F_i': 'FoundUp tokens - each venture has its own token backed by UPS',
-                    'Du': 'Dedicated User stakers - committed participants who stake long-term',
-                },
-                'promo_url': 'foundups.com/litepaper',
-            },
-            'UCVSmg5aOhP4tnQ9KFUg97qA': {  # antifaFM (formerly RavingANTIFA)
-                'name': 'antifaFM',
-                'style': 'Political music, anti-fascist resistance, FFCPLN playlist',
-                'themes': ['FFCPLN', 'anti-fascism', 'resistance', 'music', 'ICE accountability'],
-                'tone': 'sharp, witty, confrontational, musical',
-                'maga_response': 'aggressive',  # Full mockery
-                'regular_response': 'political_music_banter',
-                'promo_url': 'antifafm.com',
-            },
-        }
-
-        channel_personality = CHANNEL_PERSONALITIES.get(target_channel_id)
-        if channel_personality:
-            logger.info(f"[REPLY-GEN] Using {channel_personality['name']} personality: {channel_personality['style']}")
-            # Override theme based on channel
-            if theme == "default":
-                theme = channel_personality['themes'][0]
-        else:
-            logger.debug(f"[REPLY-GEN] Unknown channel {target_channel_id} - using default personality")
-            channel_personality = {
-                'name': 'Default',
-                'style': 'Generic engagement',
-                'maga_response': 'aggressive',
-                'regular_response': 'political_banter'
-            }
+        channel_personality, theme = select_channel_personality(target_channel_id, theme)
 
         # ANTI-SPAM: Rate limiting and duplicate detection
         # Prevent API drain attacks and bot detection via pattern repetition
@@ -2357,7 +2229,14 @@ Rules:
             logger.info(f"[SKILL-ROUTING] 🚀 Routing to Skill 3 (Old Comment Skillz)")
             # 2025-12-29 fix: Generate LLM reply for contextual response to old comments
             # Fixes: "1 year ago" comment getting generic template instead of context-aware reply
-            llm_reply = self._generate_contextual_reply(comment_text, author_name, author_channel_id, tier=treatment_tier)
+            llm_reply = self._generate_contextual_reply(
+                comment_text,
+                author_name,
+                author_channel_id,
+                tier=treatment_tier,
+                video_title=video_title,
+            )
+            generation_source = self.get_last_llm_source()
             skill_context = Skill3Context(
                 user_id=author_channel_id or author_name,
                 username=author_name,
@@ -2371,6 +2250,7 @@ Rules:
             )
             skill = OldCommentEngagementSkill()
             skill_result = skill.execute(skill_context)
+            self._record_skill_source("skill_3", skill_result, llm_reply, generation_source)
             return self._add_0102_signature(skill_result['reply_text'], tier=original_tier, comment_age_days=self._current_comment_age_days)
 
         # PRIORITY 0: Emoji comment? Reply with banter engine emoji!
@@ -2381,7 +2261,9 @@ Rules:
 
         # PRIORITY 1: Check for semantic pattern-based responses (song questions, FFCPLN, etc.)
         # ANTI-REGURGITATION: Use LLM variation prompts instead of fixed templates
-        if not repeat_comment:
+        semantic_pattern = None
+        # Classified trolls belong to Skill 0; a keyword must not override the tier.
+        if not repeat_comment and classification_int != 0:
             semantic_pattern = self._get_semantic_pattern_prompt(comment_text)
         if semantic_pattern:
             pattern_name = semantic_pattern["pattern_name"]
@@ -2409,7 +2291,8 @@ Rules:
                     author_name=author_name,
                     author_channel_id=author_channel_id,
                     custom_prompt=variation_prompt,  # Use semantic variation prompt
-                    tier=tier
+                    tier=treatment_tier,
+                    video_title=video_title,
                 )
 
                 agentic_reply = f"Yo! So you're asking about {semantic_pattern['intent']}? 🤔"
@@ -2453,7 +2336,14 @@ Rules:
                 # 2025-12-29 fix: Generate LLM reply FIRST, same as Skill 1
                 # Fixes: "Bros fed up of being harrassed" → "Appreciate the mod support!" (non-contextual)
                 try:
-                    llm_reply = self._generate_contextual_reply(comment_text, author_name, author_channel_id, tier=2)
+                    llm_reply = self._generate_contextual_reply(
+                        comment_text,
+                        author_name,
+                        author_channel_id,
+                        tier=2,
+                        video_title=video_title,
+                    )
+                    generation_source = self.get_last_llm_source()
                     result = self.skill_2.execute(Skill2Context(
                         user_id=author_channel_id or "unknown",
                         username=author_name,
@@ -2464,10 +2354,11 @@ Rules:
                         content_analysis=self._current_content_analysis  # NEW: enables contextual responses
                     ))
                     logger.info(f"[SKILL-2] Strategy: {result['strategy']}, Confidence: {result['confidence']}")
-                    self._last_llm_source = f"skill_2:{result.get('strategy', 'unknown')}"  # Track for training
+                    self._record_skill_source("skill_2", result, llm_reply, generation_source)
                     reply_text = result.get('reply_text', '')
                     if not reply_text or not reply_text.strip():
                         logger.error(f"[SKILL-2] ❌ Returned EMPTY reply_text! Result: {result}")
+                        self._last_llm_source = "template"
                         return self._add_0102_signature("Thanks for watching! 🚀", tier=original_tier, comment_age_days=self._current_comment_age_days)
                     reply_text = self._dedupe_reply(
                         reply_text,
@@ -2477,6 +2368,7 @@ Rules:
                     return self._add_0102_signature(reply_text, tier=original_tier, comment_age_days=self._current_comment_age_days)
                 except Exception as e:
                     logger.error(f"[SKILL-2] ❌ Execution failed: {e}", exc_info=True)
+                    self._last_llm_source = "template"
                     return self._add_0102_signature("Thanks for watching! 🚀", tier=original_tier, comment_age_days=self._current_comment_age_days)
 
             elif profile.commenter_type == CommenterType.MAGA_TROLL:
@@ -2514,6 +2406,7 @@ Rules:
                         reply_text = result.get('reply_text', '')
                         if not reply_text or not reply_text.strip():
                             logger.error(f"[SKILL-0] ❌ Returned EMPTY reply_text! Result: {result}")
+                            self._last_llm_source = "template"
                             return self._add_0102_signature("Thanks for the comment! 🙏", tier=original_tier, comment_age_days=self._current_comment_age_days)
                         reply_text = self._dedupe_reply(
                             reply_text,
@@ -2523,6 +2416,7 @@ Rules:
                         return self._add_0102_signature(reply_text, tier=original_tier, comment_age_days=self._current_comment_age_days)
                     except Exception as e:
                         logger.error(f"[SKILL-0] ❌ Execution failed: {e}", exc_info=True)
+                        self._last_llm_source = "template"
                         return self._add_0102_signature("Thanks for the comment! 🙏", tier=original_tier, comment_age_days=self._current_comment_age_days)
 
             elif profile.is_ally:
@@ -2555,7 +2449,7 @@ Generate your agreement response (1-2 sentences):"""
 
                     llm_reply = self._generate_contextual_reply(
                         comment_text, author_name, author_channel_id,
-                        custom_prompt=ally_prompt, tier=3
+                        custom_prompt=ally_prompt, tier=3, video_title=video_title
                     )
 
                     if llm_reply:
@@ -2579,13 +2473,21 @@ Generate your agreement response (1-2 sentences):"""
                 except Exception as e:
                     logger.error(f"[ALLY-MODE] ❌ Error: {e}", exc_info=True)
                     # Fallback to template
+                    self._last_llm_source = "template"
                     reply = random.choice(self.ALLY_RESPONSES)
                     return self._add_0102_signature(reply, tier=original_tier, comment_age_days=self._current_comment_age_days)
 
             elif profile.commenter_type == CommenterType.SUBSCRIBER:
                 # Route to Skill 1 (Regular engagement with subscriber flag)
                 try:
-                    llm_reply = self._generate_contextual_reply(comment_text, author_name, author_channel_id, tier=1)
+                    llm_reply = self._generate_contextual_reply(
+                        comment_text,
+                        author_name,
+                        author_channel_id,
+                        tier=1,
+                        video_title=video_title,
+                    )
+                    generation_source = self.get_last_llm_source()
                     result = self.skill_1.execute(Skill1Context(
                         user_id=author_channel_id or "unknown",
                         username=author_name,
@@ -2598,10 +2500,11 @@ Generate your agreement response (1-2 sentences):"""
                         content_analysis=self._current_content_analysis  # NEW: enables contextual responses
                     ))
                     logger.info(f"[SKILL-1] Strategy: {result['strategy']}, Confidence: {result['confidence']}, Subscriber: True")
-                    self._last_llm_source = f"skill_1_sub:{result.get('strategy', 'unknown')}"  # Track for training
+                    self._record_skill_source("skill_1_sub", result, llm_reply, generation_source)
                     reply_text = result.get('reply_text', '')
                     if not reply_text or not reply_text.strip():
                         logger.error(f"[SKILL-1] ❌ Returned EMPTY reply_text! Result: {result}")
+                        self._last_llm_source = "template"
                         return self._add_0102_signature("Thanks for being here! ✨", tier=original_tier, comment_age_days=self._current_comment_age_days)
                     reply_text = self._dedupe_reply(
                         reply_text,
@@ -2612,12 +2515,20 @@ Generate your agreement response (1-2 sentences):"""
                     return self._add_0102_signature(reply_text, tier=original_tier, comment_age_days=self._current_comment_age_days)
                 except Exception as e:
                     logger.error(f"[SKILL-1] ❌ Execution failed (subscriber): {e}", exc_info=True)
+                    self._last_llm_source = "template"
                     return self._add_0102_signature("Thanks for being here! ✨", tier=original_tier, comment_age_days=self._current_comment_age_days)
 
             else:
                 # Route to Skill 1 (Regular engagement)
                 try:
-                    llm_reply = self._generate_contextual_reply(comment_text, author_name, author_channel_id, tier=1)
+                    llm_reply = self._generate_contextual_reply(
+                        comment_text,
+                        author_name,
+                        author_channel_id,
+                        tier=1,
+                        video_title=video_title,
+                    )
+                    generation_source = self.get_last_llm_source()
                     result = self.skill_1.execute(Skill1Context(
                         user_id=author_channel_id or "unknown",
                         username=author_name,
@@ -2630,10 +2541,11 @@ Generate your agreement response (1-2 sentences):"""
                         content_analysis=self._current_content_analysis  # NEW: enables contextual responses
                     ))
                     logger.info(f"[SKILL-1] Strategy: {result['strategy']}, Confidence: {result['confidence']}")
-                    self._last_llm_source = f"skill_1:{result.get('strategy', 'unknown')}"  # Track for training
+                    self._record_skill_source("skill_1", result, llm_reply, generation_source)
                     reply_text = result.get('reply_text', '')
                     if not reply_text or not reply_text.strip():
                         logger.error(f"[SKILL-1] ❌ Returned EMPTY reply_text! Result: {result}")
+                        self._last_llm_source = "template"
                         return self._add_0102_signature("Great point! 👍", tier=original_tier, comment_age_days=self._current_comment_age_days)
                     reply_text = self._dedupe_reply(
                         reply_text,
@@ -2644,6 +2556,7 @@ Generate your agreement response (1-2 sentences):"""
                     return self._add_0102_signature(reply_text, tier=original_tier, comment_age_days=self._current_comment_age_days)
                 except Exception as e:
                     logger.error(f"[SKILL-1] ❌ Execution failed (regular): {e}", exc_info=True)
+                    self._last_llm_source = "template"
                     return self._add_0102_signature("Great point! 👍", tier=original_tier, comment_age_days=self._current_comment_age_days)
 
         else:
@@ -2678,7 +2591,13 @@ Generate your agreement response (1-2 sentences):"""
 
             elif profile.commenter_type == CommenterType.SUBSCRIBER:
                 # Try LLM for contextual subscriber response
-                llm_response = self._generate_contextual_reply(comment_text, author_name, author_channel_id, tier=original_tier)
+                llm_response = self._generate_contextual_reply(
+                    comment_text,
+                    author_name,
+                    author_channel_id,
+                    tier=original_tier,
+                    video_title=video_title,
+                )
                 if llm_response:
                     llm_response = self._dedupe_reply(
                         llm_response,
@@ -2696,7 +2615,13 @@ Generate your agreement response (1-2 sentences):"""
 
             else:
                 # REGULAR USER: Use LLM for contextual, meaningful replies
-                llm_response = self._generate_contextual_reply(comment_text, author_name, author_channel_id, tier=original_tier)
+                llm_response = self._generate_contextual_reply(
+                    comment_text,
+                    author_name,
+                    author_channel_id,
+                    tier=original_tier,
+                    video_title=video_title,
+                )
                 if llm_response:
                     llm_response = self._dedupe_reply(
                         llm_response,
@@ -2754,7 +2679,8 @@ Generate your agreement response (1-2 sentences):"""
             theme=theme,
             published_time=comment_data.get('published_time'),
             tier=comment_data.get('tier'),  # Extract tier from processor
-            target_channel_id=target_channel_id  # Pass target channel for personality
+            target_channel_id=target_channel_id,  # Pass target channel for personality
+            video_title=comment_data.get('video_title'),
         )
 
 

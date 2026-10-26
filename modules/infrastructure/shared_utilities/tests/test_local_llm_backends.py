@@ -10,6 +10,8 @@ Tests:
 3. Compatibility methods (generate_response, __call__)
 """
 
+import json
+
 import pytest
 from unittest.mock import patch, MagicMock
 from pathlib import Path
@@ -24,9 +26,12 @@ class TestIsLMStudioAvailable:
             is_lm_studio_available,
         )
 
-        with patch("urllib.request.urlopen") as mock_urlopen:
+        with patch(
+            "modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect"
+        ) as mock_urlopen:
             mock_response = MagicMock()
-            mock_response.read.return_value = b'{"data": [{"id": "test-model"}]}'
+            mock_response.read.return_value = b'{"models": []}'
+            mock_response.geturl.return_value = "http://localhost:1234/api/v1/models"
             mock_response.__enter__ = MagicMock(return_value=mock_response)
             mock_response.__exit__ = MagicMock(return_value=False)
             mock_urlopen.return_value = mock_response
@@ -39,25 +44,259 @@ class TestIsLMStudioAvailable:
             is_lm_studio_available,
         )
 
-        with patch("urllib.request.urlopen") as mock_urlopen:
+        with patch(
+            "modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect"
+        ) as mock_urlopen:
             mock_urlopen.side_effect = Exception("Connection refused")
 
             assert is_lm_studio_available() is False
 
-    def test_lm_studio_unavailable_returns_false_on_empty_models(self):
-        """When LM Studio has no models loaded, return False."""
+    def test_lm_studio_reachable_returns_true_on_empty_native_inventory(self):
+        """An empty inventory proves server reachability, not model readiness."""
         from modules.infrastructure.shared_utilities.local_llm_backends import (
             is_lm_studio_available,
         )
 
-        with patch("urllib.request.urlopen") as mock_urlopen:
+        with patch(
+            "modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect"
+        ) as mock_urlopen:
             mock_response = MagicMock()
-            mock_response.read.return_value = b'{"data": []}'
+            mock_response.read.return_value = b'{"models": []}'
+            mock_response.geturl.return_value = "http://localhost:1234/api/v1/models"
             mock_response.__enter__ = MagicMock(return_value=mock_response)
             mock_response.__exit__ = MagicMock(return_value=False)
             mock_urlopen.return_value = mock_response
 
-            assert is_lm_studio_available() is False
+            assert is_lm_studio_available() is True
+
+
+class TestLMStudioNativeResidency:
+    """Backend initialization must use native loaded-instance truth."""
+
+    @pytest.fixture
+    def openai(self, monkeypatch):
+        """Mock the optional SDK without requiring it in the offline test host."""
+        import sys
+        from types import ModuleType
+
+        sdk = ModuleType("openai")
+        sdk.OpenAI = MagicMock()
+        monkeypatch.setitem(sys.modules, "openai", sdk)
+        return sdk.OpenAI
+
+    @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
+    def test_installed_but_not_resident_is_not_initialized(self, urlopen, openai):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        response = MagicMock()
+        response.geturl.return_value = "http://localhost:1234/api/v1/models"
+        response.read.return_value = json.dumps(
+            {
+                "models": [
+                    {
+                        "type": "llm",
+                        "key": "nvidia/nemotron-3.5-lightning",
+                        "loaded_instances": [],
+                    }
+                ]
+            }
+        ).encode()
+        urlopen.return_value.__enter__.return_value = response
+        backend = LMStudioBackend(model_id="nvidia/nemotron-3.5-lightning")
+
+        assert backend.initialize() is False
+        openai.assert_not_called()
+
+    def test_native_openers_disable_environment_proxy_inheritance(self):
+        import urllib.request
+
+        from modules.infrastructure.shared_utilities import (
+            lm_studio_native_transport as transport,
+        )
+        from modules.infrastructure.shared_utilities import local_llm_backends
+
+        request = urllib.request.Request("http://localhost:1234/api/v1/models")
+        for open_request in (
+            transport._open_no_redirect,
+            local_llm_backends._open_lm_studio_request,
+        ):
+            with patch("urllib.request.build_opener") as build:
+                build.return_value.open.return_value = MagicMock()
+                open_request(request, timeout=1.0)
+            proxy = build.call_args.args[0]
+            assert isinstance(proxy, urllib.request.ProxyHandler)
+            assert proxy.proxies == {}
+
+    @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
+    def test_exact_native_instance_initializes_backend(self, urlopen, openai):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        response = MagicMock()
+        response.geturl.return_value = "http://localhost:1234/api/v1/models"
+        response.read.return_value = json.dumps(
+            {
+                "models": [
+                    {
+                        "type": "llm",
+                        "key": "nvidia/nemotron-3.5-lightning",
+                        "loaded_instances": [
+                            {"id": "nemotron-owned", "config": {"context_length": 32768}}
+                        ],
+                    }
+                ]
+            }
+        ).encode()
+        urlopen.return_value.__enter__.return_value = response
+        backend = LMStudioBackend(
+            model_id="nvidia/nemotron-3.5-lightning",
+            expected_instance_id="nemotron-owned",
+            api_token="test-token",
+        )
+
+        assert backend.initialize() is True
+        assert backend.expected_instance_id == "nemotron-owned"
+        assert openai.call_args.kwargs["api_key"] == "test-token"
+
+    @patch("modules.infrastructure.shared_utilities.lm_studio_native_transport._open_no_redirect")
+    def test_unexpected_instance_identity_fails_closed(self, urlopen, openai):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        response = MagicMock()
+        response.geturl.return_value = "http://localhost:1234/api/v1/models"
+        response.read.return_value = json.dumps(
+            {
+                "models": [
+                    {
+                        "type": "llm",
+                        "key": "nvidia/nemotron-3.5-lightning",
+                        "loaded_instances": [
+                            {"id": "different", "config": {"context_length": 32768}}
+                        ],
+                    }
+                ]
+            }
+        ).encode()
+        urlopen.return_value.__enter__.return_value = response
+        backend = LMStudioBackend(
+            model_id="nvidia/nemotron-3.5-lightning",
+            expected_instance_id="nemotron-owned",
+        )
+
+        assert backend.initialize() is False
+        openai.assert_not_called()
+
+    @patch(
+        "modules.infrastructure.shared_utilities.local_llm_backends.inspect_lm_studio_model"
+    )
+    def test_openai_call_rejects_external_unload_before_provider_use(self, inspect):
+        from modules.infrastructure.shared_utilities.lm_studio_model_lifecycle import (
+            LMStudioModelState,
+            LMStudioResidencyState,
+        )
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        inspect.return_value = LMStudioModelState(
+            "model", LMStudioResidencyState.INSTALLED_NOT_RESIDENT, ()
+        )
+        backend = LMStudioBackend(model_id="model", expected_instance_id="owned")
+        backend._initialized = True
+        backend._client = MagicMock()
+
+        result = backend.create_completion("prompt")
+
+        assert result == {"choices": [{"text": ""}]}
+        backend._client.completions.create.assert_not_called()
+
+    @patch(
+        "modules.infrastructure.shared_utilities.local_llm_backends.inspect_lm_studio_model"
+    )
+    def test_openai_call_discards_output_if_instance_changes_after_use(self, inspect):
+        from modules.infrastructure.shared_utilities.lm_studio_model_lifecycle import (
+            LMStudioLoadedInstance,
+            LMStudioModelState,
+            LMStudioResidencyState,
+        )
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        inspect.side_effect = [
+            LMStudioModelState(
+                "model",
+                LMStudioResidencyState.RESIDENT,
+                (LMStudioLoadedInstance("owned", {}),),
+            ),
+            LMStudioModelState(
+                "model",
+                LMStudioResidencyState.RESIDENT,
+                (LMStudioLoadedInstance("changed", {}),),
+            ),
+        ]
+        backend = LMStudioBackend(model_id="model", expected_instance_id="owned")
+        backend._initialized = True
+        backend._client = MagicMock()
+        response = MagicMock()
+        response.choices = [MagicMock(text="must be discarded")]
+        backend._client.completions.create.return_value = response
+
+        assert backend.create_completion("prompt") == {"choices": [{"text": ""}]}
+
+    def test_native_chat_rejects_oversized_request_before_network(self):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        backend = LMStudioBackend(model_id="model", expected_instance_id="owned")
+        backend._initialized = True
+        backend._require_exact_instance_unchanged = MagicMock()
+
+        with patch(
+            "modules.infrastructure.shared_utilities.local_llm_backends._open_lm_studio_request"
+        ) as request:
+            with pytest.raises(ValueError, match="native_request_too_large"):
+                backend.create_native_chat(
+                    input_text="x" * (LMStudioBackend.MAX_NATIVE_REQUEST_BYTES + 1),
+                    system_prompt="bounded",
+                    max_output_tokens=1,
+                )
+
+        request.assert_not_called()
+
+    def test_native_chat_preserves_named_authentication_failure(self):
+        import urllib.error
+
+        from modules.infrastructure.shared_utilities.lm_studio_model_lifecycle import (
+            LMStudioAuthenticationError,
+        )
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        backend = LMStudioBackend(model_id="model", expected_instance_id="owned")
+        backend._initialized = True
+        backend._require_exact_instance_unchanged = MagicMock()
+        error = urllib.error.HTTPError(
+            "http://localhost:1234/api/v1/chat", 401, "secret", {}, None
+        )
+
+        with patch(
+            "modules.infrastructure.shared_utilities.local_llm_backends._open_lm_studio_request",
+            side_effect=error,
+        ):
+            with pytest.raises(LMStudioAuthenticationError):
+                backend.create_native_chat(
+                    input_text="bounded",
+                    system_prompt="bounded",
+                    max_output_tokens=1,
+                )
 
 
 class TestResolverBackendSelection:
@@ -249,6 +488,7 @@ class TestCompatibilityMethods:
         backend = LMStudioBackend(model_id="test-model")
         backend._initialized = True
         backend._client = MagicMock()
+        backend._require_exact_instance_unchanged = MagicMock()
 
         mock_response = MagicMock()
         mock_response.choices = [MagicMock(text="Hello world")]
@@ -268,6 +508,7 @@ class TestCompatibilityMethods:
         backend = LMStudioBackend(model_id="test-model")
         backend._initialized = True
         backend._client = MagicMock()
+        backend._require_exact_instance_unchanged = MagicMock()
 
         mock_response = MagicMock()
         mock_response.choices = [MagicMock(text="Response text")]
@@ -277,6 +518,129 @@ class TestCompatibilityMethods:
 
         assert isinstance(result, dict)
         assert "choices" in result
+
+    def test_lm_studio_chat_forwards_only_allowlisted_structured_controls(self):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        backend = LMStudioBackend(model_id="test-model")
+        backend._initialized = True
+        backend._client = MagicMock()
+        backend._require_exact_instance_unchanged = MagicMock()
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = '{"ok":true}'
+        backend._client.chat.completions.create.return_value = mock_response
+        response_format = {"type": "json_schema", "json_schema": {"name": "test"}}
+
+        result = backend.create_chat_completion(
+            [{"role": "user", "content": "Return JSON"}],
+            max_tokens=64,
+            temperature=0,
+            response_format=response_format,
+            seed=7,
+            top_p=0.95,
+            enable_thinking=False,
+            extra_body={"not": "forwarded"},
+            unauthorized_control="blocked",
+        )
+
+        assert result["choices"][0]["message"]["content"] == '{"ok":true}'
+        call = backend._client.chat.completions.create.call_args.kwargs
+        assert call["response_format"] == response_format
+        assert call["seed"] == 7
+        assert call["top_p"] == 0.95
+        assert call["extra_body"] == {
+            "chat_template_kwargs": {"enable_thinking": False}
+        }
+        assert "unauthorized_control" not in call
+
+    @pytest.mark.parametrize("reasoning", ["off", None])
+    @patch(
+        "modules.infrastructure.shared_utilities.local_llm_backends._open_lm_studio_request"
+    )
+    def test_lm_studio_native_chat_uses_explicit_reasoning_and_bounded_read(self, urlopen, reasoning):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        response = MagicMock()
+        response.geturl.return_value = "http://localhost:1234/api/v1/chat"
+        response.read.return_value = (
+            b'{"model_instance_id":"test-instance","stats":{"input_tokens":1},'
+            b'"output":[{"type":"message","content":"{\\"ok\\":true}"}]}'
+        )
+        urlopen.return_value.__enter__.return_value = response
+        backend = LMStudioBackend(
+            model_id="test-model",
+            request_timeout=90,
+            expected_instance_id="test-instance",
+            api_token="test-token",
+        )
+        backend._initialized = True
+        backend._require_exact_instance_unchanged = MagicMock()
+
+        result = backend.create_native_chat(
+            input_text="Return JSON",
+            system_prompt="JSON only",
+            max_output_tokens=128,
+            reasoning=reasoning,
+            max_response_bytes=4096,
+        )
+
+        assert result["output"][0]["content"] == '{"ok":true}'
+        request = urlopen.call_args.args[0]
+        payload = json.loads(request.data)
+        assert request.full_url == "http://localhost:1234/api/v1/chat"
+        assert request.get_header("Authorization") == "Bearer test-token"
+        assert payload["model"] == "test-instance"
+        if reasoning is None:
+            assert "reasoning" not in payload
+        else:
+            assert payload["reasoning"] == reasoning
+        assert payload["store"] is False
+        assert payload["stream"] is False
+        response.read.assert_called_once_with(4097)
+
+    @pytest.mark.parametrize(
+        "response_payload",
+        [
+            {"model_instance_id": "different", "stats": {}, "output": []},
+            {
+                "model_instance_id": "expected",
+                "stats": {"model_load_time_seconds": 1.0},
+                "output": [],
+            },
+        ],
+    )
+    @patch(
+        "modules.infrastructure.shared_utilities.local_llm_backends._open_lm_studio_request"
+    )
+    def test_lm_studio_native_chat_rejects_wrong_or_jit_instance(
+        self, urlopen, response_payload
+    ):
+        from modules.infrastructure.shared_utilities.local_llm_backends import (
+            LMStudioBackend,
+        )
+
+        response = MagicMock()
+        response.geturl.return_value = "http://localhost:1234/api/v1/chat"
+        response.read.return_value = json.dumps(response_payload).encode()
+        urlopen.return_value.__enter__.return_value = response
+        backend = LMStudioBackend(
+            model_id="model-key", expected_instance_id="expected"
+        )
+        backend._initialized = True
+        backend._require_exact_instance_unchanged = MagicMock()
+
+        result = backend.create_native_chat(
+            input_text="Return JSON",
+            system_prompt="JSON only",
+            max_output_tokens=128,
+        )
+
+        assert result == {"output": []}
 
     def test_generate_response_returns_empty_on_failure(self):
         """generate_response() returns empty string on error."""
@@ -309,26 +673,33 @@ class TestCompatibilityMethods:
 class TestLlamaCppFallbackPath:
     """Test the llama_cpp fallback path works correctly."""
 
-    def test_llama_cpp_backend_initializes_with_valid_model(self):
+    def test_llama_cpp_backend_initializes_with_valid_model(self, monkeypatch):
         """LlamaCppBackend.initialize() succeeds with valid model path."""
+        import sys
+        from types import ModuleType
+
         from modules.infrastructure.shared_utilities.local_llm_backends import (
             LlamaCppBackend,
         )
 
-        # Llama is imported inside initialize(), so patch at llama_cpp module
-        with patch("llama_cpp.Llama") as mock_llama:
-            mock_llama.return_value = MagicMock()
+        # Replace the import boundary before resolving Llama. Importing the real
+        # optional package can load a CPU-incompatible native library in CI.
+        sdk = ModuleType("llama_cpp")
+        sdk.Llama = MagicMock()
+        monkeypatch.setitem(sys.modules, "llama_cpp", sdk)
 
-            backend = LlamaCppBackend(
-                model_path=Path("E:/models/test.gguf"), n_ctx=1024
-            )
+        backend = LlamaCppBackend(
+            model_path=Path("E:/models/test.gguf"), n_ctx=1024
+        )
 
-            # Mock path.exists()
-            with patch.object(Path, "exists", return_value=True):
-                result = backend.initialize()
+        with patch.object(Path, "exists", return_value=True):
+            result = backend.initialize()
 
-            assert result is True
-            assert backend._llm is not None
+        assert result is True
+        assert backend._llm is sdk.Llama.return_value
+        sdk.Llama.assert_called_once()
+        assert sdk.Llama.call_args.kwargs["model_path"] == str(backend.model_path)
+        assert sdk.Llama.call_args.kwargs["n_ctx"] == 1024
 
     def test_llama_cpp_backend_fails_with_missing_model(self):
         """LlamaCppBackend.initialize() fails if model file doesn't exist."""

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import ast
+from datetime import datetime, timezone
 from pathlib import Path
 
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_chain_results_store import (
@@ -32,6 +33,7 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifi
     build_reddog_resident_queue_slice_verifier_stage_handler,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_slice_verifier_request_binding import (
+    FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH,
     FAIL_SLICE_VERIFIER_PLAN_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_dryrun import (
@@ -42,9 +44,6 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_runtime
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verification_invoke import (
     QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
-)
-from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_bounded_worker_pilot_invoke import (
-    QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT,
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_execution_valve_invoke import (
     QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT,
@@ -62,6 +61,15 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authorized_worktr
 )
 from modules.communication.moltbot_bridge.src.reddog_wre_queue_verified_authority_work_order_invoke import (
     QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_order_binding import (
+    canonical_full_work_order_digest,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    canonical_work_authority_digest,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_slice_verifier_request_binding import (
+    _exact_sha_commit_receipt,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_wre_queue_authorized_slice_verifier_invoke import (
     ARTIFACT,
@@ -108,7 +116,7 @@ def _snapshot() -> dict[str, object]:
             "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
             "no_execution_performed": True,
         },
-        prompt_text="RedDog resident queue slice verifier worktree authority",
+        prompt_text="Update one bounded FoundUp test fixture",
     )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
@@ -127,18 +135,102 @@ def _snapshot() -> dict[str, object]:
     }
 
 
+def _reservation() -> dict[str, object]:
+    return {
+        "reservation_id": "assurance-reservation-" + "1" * 20,
+        "reservation_digest": "sha256:" + "0" * 64,
+        "admission_reservation_digest": "sha256:" + "0" * 64,
+        "status": "reserved",
+        "work_order_id": WORK_ORDER_ID,
+        "author_task_id": "reddog-worker-dispatch-" + "1" * 16,
+        "author_principal_id": "worker:author",
+        "verifier_task_id": "reddog-worker-dispatch-" + "2" * 16,
+        "verifier_principal_id": "worker:verifier",
+    }
+
+
+class _ReservationStore:
+    def get_independent_assurance_reservation(self, reservation_id: str):
+        assert reservation_id == _reservation()["reservation_id"]
+        return _reservation()
+
+    def stage_independent_assurance_completion(self, request):
+        assert request["reservation_id"] == _reservation()["reservation_id"]
+        assert request["terminal_receipt_id"]
+        assert str(request["terminal_receipt_digest"]).startswith("sha256:")
+        return {"accepted": True, "status": "STAGED"}
+
+
+class _RenewedReservationStore(_ReservationStore):
+    def get_independent_assurance_reservation(self, reservation_id: str):
+        assert reservation_id == _reservation()["reservation_id"]
+        return {
+            **_reservation(),
+            "reservation_digest": "sha256:" + "1" * 64,
+            "renewal_count": 1,
+        }
+
+
+def _exact_sha_commit_stage(worktree_path: str) -> dict[str, object]:
+    work_order_digest = canonical_full_work_order_digest(_work_order())
+    return {
+        "decision": "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT",
+        "accepted": True,
+        "effect_commit_state": "COMMITTED",
+        "reconciliation_required": False,
+        "commit_receipt": _exact_sha_commit_receipt(
+            worktree_path,
+            work_order_digest=work_order_digest,
+        ),
+    }
+
+
 def _seeded_store(**stage_overrides: object) -> InMemoryResidentQueueChainResultsStore:
+    work_authority = {
+        "authority_id": "authority-1",
+        "work_order_id": WORK_ORDER_ID,
+    }
+    authority_digest = canonical_work_authority_digest(work_authority)
     stage_results: dict[str, object] = {
         "authority_request": {"status": QUEUE_AUTHORITY_REQUEST_DRYRUN_ACCEPT},
-        "authority_runtime": {"decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT},
-        "authority_verification": {"decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT},
+        "authority_runtime": {
+            "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
+            "authority_result": {
+                "accepted": True,
+                "work_authority": work_authority,
+                "receipt": {
+                    "receipt_id": _digest("8"),
+                    "status": "DELEGATED_AUTHORITY_ISSUED",
+                    "work_authority_digest": authority_digest,
+                },
+            },
+        },
+        "authority_verification": {
+            "decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+            "verified_work_authority_digest": authority_digest,
+            "verification_result": {"accepted": True},
+        },
         "worker_dispatch_dryrun": WORKER_DISPATCH_DRYRUN_STAGE_RESULT,
         "worker_dispatch_runtime": WORKER_DISPATCH_RUNTIME_STAGE_RESULT,
         "work_order_invocation": {"decision": QUEUE_VERIFIED_AUTHORITY_WORK_ORDER_INVOKE_ACCEPT},
-        "executor_plan": {"decision": QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT},
+        "executor_plan": {
+            "decision": QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT,
+            "executor_plan_result": {
+                "plan": {
+                    "work_order_digest": canonical_full_work_order_digest(
+                        _work_order()
+                    )
+                },
+            },
+        },
         "execution_valve": {"decision": QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT},
         "worktree_create": {"decision": QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT},
+        "assurance_capacity_admission": {
+            "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT",
+            "reservation": _reservation(),
+        },
         BOUNDED_WORKER_PILOT_STAGE_KEY: _queue_pilot_result(),
+        "exact_sha_commit": _exact_sha_commit_stage("O:/tmp/reddog-worker"),
     }
     stage_results.update(stage_overrides)
     return InMemoryResidentQueueChainResultsStore(
@@ -162,6 +254,8 @@ def _handler(
     repo_root: Path | None = None,
     slice_verifier_request_binding_enabled: bool = False,
     holoindex_evidence: dict[str, object] | None = None,
+    assurance_reservation_store: object | None = None,
+    trusted_now: datetime | None = None,
 ):
     return build_reddog_resident_queue_slice_verifier_stage_handler(
         chain_results_store=chain_store,
@@ -172,6 +266,10 @@ def _handler(
         repo_root=repo_root,
         slice_verifier_request_binding_enabled=slice_verifier_request_binding_enabled,
         holoindex_evidence=holoindex_evidence,
+        assurance_reservation_store=(
+            assurance_reservation_store or _ReservationStore()
+        ),
+        trusted_now=trusted_now,
     )
 
 
@@ -282,23 +380,27 @@ def _binding_store(tmp_path: Path, **stage_overrides: object) -> InMemoryResiden
     worktree = tmp_path / "worktree"
     repo.mkdir(exist_ok=True)
     worktree.mkdir(exist_ok=True)
+    work_authority = {
+        "authority_id": "authority-1",
+        "work_order_id": WORK_ORDER_ID,
+    }
+    authority_digest = canonical_work_authority_digest(work_authority)
     return _seeded_store(
         authority_runtime={
             "decision": QUEUE_AUTHORITY_RUNTIME_INVOKE_ACCEPT,
             "authority_result": {
                 "accepted": True,
-                "work_authority": {
-                    "authority_id": "authority-1",
-                    "work_order_id": WORK_ORDER_ID,
-                },
+                "work_authority": work_authority,
                 "receipt": {
                     "receipt_id": _digest("8"),
-                    "work_authority_digest": _digest("9"),
+                    "status": "DELEGATED_AUTHORITY_ISSUED",
+                    "work_authority_digest": authority_digest,
                 },
             }
         },
         authority_verification={
             "decision": QUEUE_AUTHORITY_VERIFICATION_INVOKE_ACCEPT,
+            "verified_work_authority_digest": authority_digest,
             "verification_result": {
                 "accepted": True,
                 "receipt_id": _digest("c"),
@@ -310,6 +412,7 @@ def _binding_store(tmp_path: Path, **stage_overrides: object) -> InMemoryResiden
                 "worktree_path": str(worktree),
             }
         },
+        exact_sha_commit=_exact_sha_commit_stage(str(worktree.resolve())),
         **stage_overrides,
     )
 
@@ -363,6 +466,39 @@ def test_dispatcher_records_slice_verifier_and_advances_to_draft_pr_publish() ->
     assert stage["no_pattern_memory_write_performed"] is True
     assert stage["no_reward_settlement_performed"] is True
     assert stage["no_holoindex_reindex_performed"] is True
+
+
+def test_renewed_verifier_binds_terminal_receipt_to_admission_digest() -> None:
+    chain_store = _seeded_store()
+    precise_now = datetime(
+        2026, 7, 14, 0, 0, 0, 900000, tzinfo=timezone.utc
+    )
+
+    result = invoke_reddog_resident_queue_next_stage_dispatch(
+        explicit_resident_queue_stage_dispatch_requested=True,
+        work_state_snapshot=_snapshot(),
+        store=chain_store,
+        handlers={
+            SLICE_VERIFIER_STAGE_KEY: _handler(
+                chain_store=chain_store,
+                assurance_reservation_store=_RenewedReservationStore(),
+                trusted_now=precise_now,
+            )
+        },
+        now_iso=NOW_ISO,
+    )
+
+    assert result.accepted is True
+    stage = chain_store.load()["stage_results"][SLICE_VERIFIER_STAGE_KEY]
+    receipt = stage["verifier_result"]["receipt"]
+    assert receipt["assurance_reservation_digest"] == _digest("0")
+    completion = stage["assurance_completion_request"]
+    assert completion["reservation_id"] == _reservation()["reservation_id"]
+    assert completion["admission_reservation_digest"] == _digest("0")
+    assert completion["verifier_task_id"] == _reservation()["verifier_task_id"]
+    assert completion["terminal_receipt_id"] == receipt["receipt_id"]
+    assert completion["terminal_status"] == "ACCEPT"
+    assert completion["completed_at"] == precise_now.isoformat()
 
 
 def test_missing_bounded_worker_stage_rejects_direct_handler_call() -> None:
@@ -517,6 +653,44 @@ def test_handler_rejects_binding_failure_before_evidence_runner(tmp_path: Path) 
     assert FAIL_SLICE_VERIFIER_REQUEST_BINDING_REJECTED in result["rejection_reasons"]
     assert FAIL_SLICE_VERIFIER_PLAN_MISSING in result["rejection_reasons"]
     assert result["slice_verifier_request_binding_result"]["accepted"] is False
+    assert runner.calls == []
+
+
+def test_rehashed_authority_stage_rejects_before_evidence_runner(
+    tmp_path: Path,
+) -> None:
+    chain_store = _seeded_store()
+    state = chain_store.load()
+    authority_result = state["stage_results"]["authority_runtime"][
+        "authority_result"
+    ]
+    work_authority = authority_result["work_authority"]
+    work_authority["memex_supply_receipt_id"] = "memex-supply-attacker"
+    work_authority["memex_supply_digest"] = _digest("7")
+    authority_result["receipt"][
+        "work_authority_digest"
+    ] = canonical_work_authority_digest(work_authority)
+    chain_store = InMemoryResidentQueueChainResultsStore(state)
+    runner = _FakeEvidenceRunner()
+    handler = _handler(
+        chain_store=chain_store,
+        verifier_request={},
+        evidence_producer_request=_evidence_producer_request(tmp_path),
+        evidence_command_runner=runner,
+    )
+    request = ResidentQueueStageDispatchRequest(
+        stage_key=SLICE_VERIFIER_STAGE_KEY,
+        next_action=NEXT_QUEUE_SLICE_VERIFIER_INVOKE,
+        queue_item_id="queue-1",
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        plan_id="plan-1",
+        accepted_stages=(),
+    )
+
+    result = dict(handler(request))
+
+    assert result["decision"] == QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_REJECT
+    assert FAIL_SIGNED_AUTHORITY_BINDING_MISMATCH in result["rejection_reasons"]
     assert runner.calls == []
 
 

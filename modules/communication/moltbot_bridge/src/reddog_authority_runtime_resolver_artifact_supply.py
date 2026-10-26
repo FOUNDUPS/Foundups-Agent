@@ -23,6 +23,13 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
+from .reddog_reviewer_designation_contract import validate_reviewer_designations, PARENT_PRIVILEGE
+from .reddog_signer_owner_e0_principal_records import (
+    SCHEMA_VERSION_V2, SCHEMA_VERSION_V3, parse_principal_artifact, parse_principal_records, principal_record_key,
+)
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
+)
 from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
     runtime_operation_lock,
 )
@@ -40,6 +47,7 @@ class AuthorityRuntimeResolverSupplyReason:
     OUTPUT_PATH_INVALID = "authority_runtime_resolver_output_path_invalid"
     OUTPUT_WRITE_FAILED = "authority_runtime_resolver_output_write_failed"
     NON_ASCII_INPUT = "authority_runtime_resolver_non_ascii_input"
+    REVIEWER_AUTHORIZATION_INVALID = "reviewer_authorization_invalid"
 
 
 @dataclass(frozen=True)
@@ -77,10 +85,72 @@ def run_reddog_authority_runtime_resolver_artifact_supply(
     permission_snapshot: Mapping[str, Any] | None,
     principal_records_output_path: Path | str | None,
     permission_snapshots_output_path: Path | str | None,
+    reviewer_authorizations: Sequence[Mapping[str, Any]] | None = None,
+    reviewer_principal_records: Sequence[Mapping[str, Any]] | None = None,
 ) -> AuthorityRuntimeResolverSupplyResult:
     """Materialize plural resolver stores from singular authority artifacts."""
 
     root = Path(repo_root).resolve()
+    principal, snapshot, reasons = _validated_resolver_inputs(
+        principal_authority_record, permission_snapshot
+    )
+    principal_path, principal_path_reasons = _runtime_output_path(
+        principal_records_output_path, root
+    )
+    snapshot_path, snapshot_path_reasons = _runtime_output_path(
+        permission_snapshots_output_path, root
+    )
+    reasons.extend((*principal_path_reasons, *snapshot_path_reasons))
+    if reasons:
+        return _reject(reasons)
+
+    assert principal_path is not None
+    assert snapshot_path is not None
+    try:
+        principal_store, snapshot_store, receipt_id = _resolver_store_payloads(
+            principal, snapshot, principal_path, snapshot_path,
+            reviewer_authorizations=reviewer_authorizations,
+            reviewer_principal_records=reviewer_principal_records,
+        )
+    except (TypeError, ValueError):
+        if reviewer_authorizations is None and reviewer_principal_records is None:
+            raise
+        return _reject((AuthorityRuntimeResolverSupplyReason.REVIEWER_AUTHORIZATION_INVALID,))
+    return _write_supply_result(
+        principal_store, snapshot_store, receipt_id, principal_path, snapshot_path, root,
+    )
+
+
+def _write_supply_result(
+    principal_store: Mapping[str, Any], snapshot_store: Mapping[str, Any], receipt_id: str,
+    principal_path: Path, snapshot_path: Path, root: Path,
+) -> AuthorityRuntimeResolverSupplyResult:
+    try:
+        _write_resolver_artifacts(
+            principal_path,
+            principal_store,
+            snapshot_path,
+            snapshot_store,
+            repo_root=root,
+        )
+    except Exception:
+        return _reject((AuthorityRuntimeResolverSupplyReason.OUTPUT_WRITE_FAILED,))
+    return AuthorityRuntimeResolverSupplyResult(
+        accepted=True,
+        status=AUTHORITY_RUNTIME_RESOLVER_SUPPLY_ACCEPT,
+        resolver_supply_receipt_id=receipt_id,
+        principal_records_path=str(principal_path),
+        permission_snapshots_path=str(snapshot_path),
+        principal_records_loaded=len(principal_store["principals"]),
+        permission_snapshots_loaded=1,
+        rejection_reasons=(),
+    )
+
+
+def _validated_resolver_inputs(
+    principal_authority_record: Mapping[str, Any] | None,
+    permission_snapshot: Mapping[str, Any] | None,
+) -> tuple[Mapping[str, Any], Mapping[str, Any], list[str]]:
     principal = _mapping(principal_authority_record)
     snapshot = _mapping(permission_snapshot)
     reasons: list[str] = []
@@ -92,55 +162,104 @@ def run_reddog_authority_runtime_resolver_artifact_supply(
         reasons.append(AuthorityRuntimeResolverSupplyReason.PRINCIPAL_SNAPSHOT_MISMATCH)
     if not _ascii_deep({"principal": principal, "snapshot": snapshot}):
         reasons.append(AuthorityRuntimeResolverSupplyReason.NON_ASCII_INPUT)
+    return principal, snapshot, reasons
 
-    principal_path, principal_path_reasons = _runtime_output_path(principal_records_output_path, root)
-    snapshot_path, snapshot_path_reasons = _runtime_output_path(permission_snapshots_output_path, root)
-    reasons.extend(principal_path_reasons)
-    reasons.extend(snapshot_path_reasons)
-    if reasons:
-        return _reject(reasons)
 
-    assert principal_path is not None
-    assert snapshot_path is not None
-    principal_key = _principal_key(str(principal["principal_id"]), str(principal["principal_provider"]))
-    snapshot_digest = str(snapshot["evidence_digest"])
-    principal_store = {
-        "schema_version": AUTHORITY_RUNTIME_RESOLVER_SUPPLY_SCHEMA_VERSION,
-        "principals": {principal_key: dict(principal)},
-        "principal_count": 1,
-        "no_holoindex_reindex_performed": True,
-    }
-    snapshot_store = {
-        "schema_version": AUTHORITY_RUNTIME_RESOLVER_SUPPLY_SCHEMA_VERSION,
-        "snapshots": {snapshot_digest: dict(snapshot)},
-        "snapshot_count": 1,
-        "no_holoindex_reindex_performed": True,
-    }
-    receipt_payload = {
-        "principal_store": principal_store,
-        "snapshot_store": snapshot_store,
-        "principal_records_path": str(principal_path),
-        "permission_snapshots_path": str(snapshot_path),
-    }
-    receipt_id = _digest(receipt_payload)
+def _resolver_store_payloads(
+    principal: Mapping[str, Any],
+    snapshot: Mapping[str, Any],
+    principal_path: Path,
+    snapshot_path: Path,
+    *, reviewer_authorizations: Sequence[Mapping[str, Any]] | None = None,
+    reviewer_principal_records: Sequence[Mapping[str, Any]] | None = None,
+) -> tuple[dict[str, Any], dict[str, Any], str]:
+    principal_key = _principal_key(
+        str(principal["principal_id"]), str(principal["principal_provider"])
+    )
+    principal_store = _resolver_store("principals", principal_key, principal)
+    principal_store = _with_reviewer_authorizations(
+        principal_store, reviewer_authorizations, reviewer_principal_records,
+    )
+    snapshot_store = _resolver_store(
+        "snapshots", str(snapshot["evidence_digest"]), snapshot
+    )
+    receipt_id = _digest(
+        {
+            "principal_store": principal_store,
+            "snapshot_store": snapshot_store,
+            "principal_records_path": str(principal_path),
+            "permission_snapshots_path": str(snapshot_path),
+        }
+    )
     principal_store["resolver_supply_receipt_id"] = receipt_id
     snapshot_store["resolver_supply_receipt_id"] = receipt_id
+    if reviewer_authorizations is not None:
+        parse_principal_artifact(json.dumps(principal_store, ensure_ascii=True).encode("ascii"))
+    return principal_store, snapshot_store, receipt_id
 
-    try:
-        _write_json_atomic(principal_path, principal_store)
-        _write_json_atomic(snapshot_path, snapshot_store)
-    except Exception:
-        return _reject((AuthorityRuntimeResolverSupplyReason.OUTPUT_WRITE_FAILED,))
-    return AuthorityRuntimeResolverSupplyResult(
-        accepted=True,
-        status=AUTHORITY_RUNTIME_RESOLVER_SUPPLY_ACCEPT,
-        resolver_supply_receipt_id=receipt_id,
-        principal_records_path=str(principal_path),
-        permission_snapshots_path=str(snapshot_path),
-        principal_records_loaded=1,
-        permission_snapshots_loaded=1,
-        rejection_reasons=(),
-    )
+
+def _with_reviewer_authorizations(
+    principal_store: dict[str, Any], authorizations: Any, reviewer_records: Any,
+) -> dict[str, Any]:
+    if authorizations is None and reviewer_records is None:
+        return principal_store
+    designations = validate_reviewer_designations(authorizations, dual=True)
+    dual = any(item["privilege"] == PARENT_PRIVILEGE for item in designations)
+    records, reviewer_keys = _merged_reviewer_principals(principal_store, reviewer_records,
+                                                       maximum=16 if dual else 8)
+    seen = set()
+    for designation in designations:
+        for entry in designation["reviewers"]:
+            key = principal_record_key(entry["principal_id"], entry["principal_provider"])
+            record = records.get(key)
+            if (record is None or record.principal_id != entry["principal_id"]
+                    or record.principal_provider != entry["principal_provider"]
+                    or record.principal_public_key != entry["public_key"]
+                    or designation["repo_full_name"] not in record.repo_scope
+                    or designation["foundup_id"] not in record.foundup_scope):
+                raise ValueError("reviewer_principal_binding_mismatch")
+            seen.add(key)
+    if seen != reviewer_keys:
+        raise ValueError("reviewer_principal_pair_mismatch")
+    return {
+        **principal_store, "schema_version": SCHEMA_VERSION_V3 if dual else SCHEMA_VERSION_V2,
+        "principals": {key: asdict(record) for key, record in records.items()},
+        "principal_count": len(records), "reviewer_authorizations": list(designations),
+    }
+
+
+def _merged_reviewer_principals(principal_store: dict[str, Any], values: Any, *, maximum=8):
+    if type(values) is not list or not 1 <= len(values) <= maximum:
+        raise ValueError("reviewer_principals_invalid")
+    merged = dict(principal_store["principals"])
+    reviewer_keys = set()
+    for value in values:
+        if (type(value) is not dict or type(value.get("principal_id")) is not str
+                or type(value.get("principal_provider")) is not str):
+            raise ValueError("reviewer_principals_invalid")
+        key = principal_record_key(value["principal_id"], value["principal_provider"])
+        if key in merged:
+            raise ValueError("reviewer_principal_collision")
+        merged[key] = value
+        reviewer_keys.add(key)
+    envelope = {
+        **principal_store, "principals": merged, "principal_count": len(merged),
+        "resolver_supply_receipt_id": "sha256:" + "0" * 64,
+    }
+    raw = json.dumps(envelope, ensure_ascii=True, allow_nan=False).encode("ascii")
+    return parse_principal_records(raw), reviewer_keys
+
+
+def _resolver_store(
+    collection: str, key: str, value: Mapping[str, Any]
+) -> dict[str, Any]:
+    singular = collection.removesuffix("s")
+    return {
+        "schema_version": AUTHORITY_RUNTIME_RESOLVER_SUPPLY_SCHEMA_VERSION,
+        collection: {key: dict(value)},
+        f"{singular}_count": 1,
+        "no_holoindex_reindex_performed": True,
+    }
 
 
 def _valid_principal(principal: Mapping[str, Any]) -> bool:
@@ -188,9 +307,21 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
     return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
-    with runtime_operation_lock(str(path) + ".operation"):
-        _write_json_atomic_unlocked(path, payload)
+def _write_resolver_artifacts(
+    principal_path: Path,
+    principal_store: Mapping[str, Any],
+    snapshot_path: Path,
+    snapshot_store: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
+    with runtime_operation_lock(str(principal_path) + ".operation"):
+        with runtime_operation_lock(str(snapshot_path) + ".operation"):
+            with reddog_runtime_artifact_generation_lock(
+                principal_path.parent, repo_root=repo_root
+            ):
+                _write_json_atomic_unlocked(principal_path, principal_store)
+                _write_json_atomic_unlocked(snapshot_path, snapshot_store)
 
 
 def _write_json_atomic_unlocked(path: Path, payload: Mapping[str, Any]) -> None:

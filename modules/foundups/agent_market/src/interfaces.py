@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Dict, List, Optional
 
+from .authorization import CallerAuthorization
 from .models import AgentProfile, DistributionPost, Foundup, Payout, Proof, Task, TokenTerms, Verification
 
 
@@ -50,10 +51,16 @@ class TaskPipelineService:
     def submit_proof(self, proof: Proof) -> Task:
         raise NotImplementedError
 
-    def verify_proof(self, task_id: str, verification: Verification) -> Task:
+    def verify_proof(
+        self, task_id: str, verification: Verification, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Task:
         raise NotImplementedError
 
-    def trigger_payout(self, task_id: str, actor_id: str) -> Payout:
+    def trigger_payout(
+        self, task_id: str, actor_id: str, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Payout:
         raise NotImplementedError
 
     def get_task(self, task_id: str) -> Task:

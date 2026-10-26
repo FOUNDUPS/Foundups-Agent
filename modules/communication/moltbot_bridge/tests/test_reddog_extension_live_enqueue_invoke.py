@@ -5,12 +5,21 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-from modules.communication.moltbot_bridge.src.reddog_execution_valve_use_time_authority import (
-    AuthoritativeUseLease,
+import pytest
+
+from modules.communication.moltbot_bridge.tests.reddog_authoritative_use_lease_test_support import (
+    StubAuthoritativeUseLease,
+    allow_stub_authoritative_use_lease,
 )
+from modules.communication.moltbot_bridge.src import reddog_live_enqueue_admission_capability as admission_module
 from modules.communication.moltbot_bridge.src.reddog_live_enqueue_admission_capability import (
     InMemoryLiveEnqueueAdmissionRegistry,
 )
+
+
+@pytest.fixture(autouse=True)
+def _allow_stub_lease(monkeypatch) -> None:
+    allow_stub_authoritative_use_lease(monkeypatch, admission_module)
 
 from modules.communication.moltbot_bridge.src.reddog_extension_live_enqueue_invoke import (
     EXTENSION_LIVE_ENQUEUE_INVOKE_ACCEPT,
@@ -154,7 +163,7 @@ def _admission_registry() -> InMemoryLiveEnqueueAdmissionRegistry:
         work_order_id="wo-extension-live-enqueue-001",
         evidence=evidence,
         signed_authority_reverified=True,
-        authoritative_use_lease=AuthoritativeUseLease(
+        authoritative_use_lease=StubAuthoritativeUseLease(
             lambda: True,
             expires_at_epoch=2_000_000_000,
             trusted_now_epoch=lambda: 1_000_000_000,
@@ -198,6 +207,28 @@ def test_rejects_when_explicit_request_missing_before_writer_call() -> None:
 
     assert result.decision == EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT
     assert result.rejection_reasons == [ExtensionLiveEnqueueInvokeReason.EXPLICIT_INVOKE_MISSING]
+    assert writer.calls == []
+
+
+def test_foundup_selection_without_backend_target_receipt_rejects_before_writer() -> None:
+    writer = _FakeWriter()
+    result = invoke_reddog_extension_live_enqueue_explicit_valve(
+        explicit_live_enqueue_requested=True,
+        selection_receipt=_selection_receipt(
+            foundup_id="trade",
+            registered_foundup_target_receipt_id="sha256:" + "a" * 64,
+        ),
+        adapter_result=_adapter(),
+        policy_gate_receipt=_policy(),
+        signed_receipt_chain_result=_chain(),
+        valve_decision=_valve(),
+        writer=writer,
+        admission_registry=_admission_registry(),
+        repo_root=REPO_ROOT,
+    )
+    assert result.decision == EXTENSION_LIVE_ENQUEUE_INVOKE_REJECT
+    assert ExtensionLiveEnqueueInvokeReason.FOUNDUP_TARGET_INVALID in result.rejection_reasons
+    assert "registered_foundup_target_receipt_missing" in result.rejection_reasons
     assert writer.calls == []
 
 

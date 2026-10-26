@@ -10,6 +10,27 @@ Unified orchestration layer for social media platforms (X/Twitter and LinkedIn) 
 
 **Digital Twin POC**: This is the execution layer for the 012 Digital Twin comment pipeline (LinkedIn-first), including comment scheduling and cross-platform routing.
 
+## AntifaFM contextual pilot
+
+The existing SOCIAL route accepts `social campaign antifafm ...` for account
+verification, context-aware listener drafts and verified own-account X updates.
+The default preview loads no model, credentials, provider or publication ledger;
+the outer CLI retains its existing audit behavior. The station drafter reuses
+Digital Twin's local model, with explicit draft/skip/review outcomes and no mock
+fallback. Replies are draft-only. The prototype starts no service or schedule.
+See [the host runbook](docs/ANTIFAFM_CAMPAIGN.md) and
+[the API contract](INTERFACE.md#antifafm-campaign-pilot).
+
+## FoundUp pitch package
+
+The [pitch package instruction](skillz/foundup_pitch_package/SKILLz.md) turns
+existing Outcome, Solution and Pain evidence into narration and a matching deck.
+Solution retains PoC, Prototype and MVP stages. Canonical Claude discovery and its
+generated Codex mirror route to this owner. This local draft skill has no executor,
+resident trigger or provider grant; missing audio/video stays explicitly pending.
+The [FX delivery plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md)
+tracks its publication and the remaining automation dependencies.
+
 ## Rotation Flow (YouTube → Scheduling → LinkedIn)
 
 This module sits in the post-YouTube rotation:
@@ -37,6 +58,14 @@ This keeps the DAE rotation minimal and deterministic for POC validation.
 - **Heat Level Management**: Automatic rate limit tracking and cooling periods
 - **Pattern Learning**: Learns from successful posts and platform responses
 - **Digital Twin Routing**: Accepts Digital Twin drafts/decisions and routes to LinkedIn execution and scheduling
+
+## Scheduler persistence boundary
+
+The existing autonomous scheduler archives typed posting results to JSON and
+serializes the complete schedule before shared atomic publication. Save errors
+remain logged without caller acknowledgement; restart retry safety and external
+delivery are not established. See [the scheduling contract](INTERFACE.md#natural-language-scheduling-0102-mode)
+and [the fixed hosted acceptance](tests/README.md#caller-acknowledgement-and-reload-characterization--2026-09-28).
 
 ## Architecture
 

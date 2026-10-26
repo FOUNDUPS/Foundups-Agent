@@ -1,0 +1,65 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "02d1c7c14c60487619287a9cb753ff3ddaa53c14"
+  },
+  "execution_id": "PYTHON_CA_TRUST_20261022",
+  "execution_plane": "isolated_local_repository_and_github_ci",
+  "outcome": "blocked",
+  "wsp15_allocation": {
+    "complexity": 2,
+    "importance": 5,
+    "deferability": 5,
+    "impact": 5,
+    "total": 17,
+    "priority": "P0"
+  },
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_6_Test_Audit_Coverage_Verification.md",
+      "WSP_framework/src/WSP_12_Dependency_Management.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+    ],
+    "research": [
+      "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+    ],
+    "micro_pass": [
+      "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+    ],
+    "macro_pass": [
+      "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+    ],
+    "hard_think": [
+      "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+    ],
+    "dialectic_sweep": [
+      "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+    ],
+    "first_principles": [
+      "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+    ],
+    "execute": [
+      "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_6",
+    "WSP_12",
+    "WSP_15",
+    "WSP_22",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/security/PYTHON_CA_TRUST_20261022.md"
+  ],
+  "limits": [
+    "Local source fix verified; exact-head CI/merge and production rollout not yet complete."
+  ]
+}

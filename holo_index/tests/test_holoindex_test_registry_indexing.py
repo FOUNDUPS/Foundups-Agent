@@ -69,6 +69,11 @@ def test_canonical_registry_envelope_indexes_test_list(tmp_path: Path) -> None:
                     "description": "first",
                     "capabilities": ["unit", "fast"],
                     "execution_type": "unit",
+                    "owner": "modules/example/demo",
+                    "suite_class": "unit",
+                    "shard_id": "modules-example-demo-unit",
+                    "collectable": True,
+                    "quarantine_reasons": [],
                 },
                 {
                     "id": "test_two",
@@ -93,6 +98,10 @@ def test_canonical_registry_envelope_indexes_test_list(tmp_path: Path) -> None:
     payload = holo.test_collection.add_calls[0]
     assert payload["metadatas"][0]["test_id"] == "test_one"
     assert payload["metadatas"][0]["capabilities"] == "unit, fast"
+    assert payload["metadatas"][0]["owner"] == "modules/example/demo"
+    assert payload["metadatas"][0]["suite_class"] == "unit"
+    assert payload["metadatas"][0]["shard_id"] == "modules-example-demo-unit"
+    assert payload["metadatas"][0]["collectable"] is True
 
 
 def test_legacy_mapping_registry_remains_supported(tmp_path: Path) -> None:
@@ -124,6 +133,20 @@ def test_invalid_registry_shape_does_not_reset_existing_collection(tmp_path: Pat
     assert "1 malformed test entry" in (result.warning or "")
     assert result.failed_count == 1
     assert result.complete is False
+    assert holo.reset_calls == []
+
+
+def test_invalid_v2_registry_uses_strict_loader_before_reset(tmp_path: Path) -> None:
+    _write_registry(tmp_path, {
+        "schema_version": "wsp_test_registry.v2",
+        "generation_policy": "git-tracked-python-tests.v1",
+        "total_tests": 1, "quarantined_tests": 0,
+        "tests": [{"path": "tests/test_missing.py"}],
+    })
+    holo = FakeHolo(tmp_path)
+    result = index_test_registry(holo)
+    assert result.indexed_count == 0
+    assert "Failed to load test registry" in (result.warning or "")
     assert holo.reset_calls == []
 
 

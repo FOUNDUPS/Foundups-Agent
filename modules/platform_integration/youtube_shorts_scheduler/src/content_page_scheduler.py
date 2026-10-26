@@ -962,7 +962,7 @@ class ContentPageScheduler:
     # CALENDAR AUDIT
     # ============================================================
 
-    def audit_calendar(self, channel_key: str, max_per_day: int = 3) -> Dict:
+    def audit_calendar(self, channel_key: str, max_per_day: Optional[int] = None) -> Dict:
         """
         Audit the scheduling calendar for a channel.
 
@@ -978,6 +978,8 @@ class ContentPageScheduler:
         Returns:
             Dict with conflicts, gaps, recommendations
         """
+        from .schedule_tracker import channel_daily_cap
+        max_per_day = channel_daily_cap(channel_key, max_per_day)
         logger.info(f"[CPS-AUDIT] Auditing calendar for {channel_key}")
 
         # Navigate to scheduled shorts

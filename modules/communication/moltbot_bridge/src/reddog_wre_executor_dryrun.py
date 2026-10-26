@@ -203,6 +203,14 @@ def _proposed_worktree_path(repo_root: str, work_order_id: str, nonce: str) -> s
     return f"{_normalize_posix(str(root))}/{work_order_id}/{suffix}/"
 
 
+def canonical_external_worktree_path(
+    repo_root: str, work_order_id: str, nonce: str
+) -> str:
+    """Return the sole executor-issued external worktree path."""
+
+    return _proposed_worktree_path(repo_root, work_order_id, nonce)
+
+
 def _phase_receipt(
     phase: str,
     work_order_id: str,
@@ -441,5 +449,6 @@ __all__ = [
     "ExecutorDryRunPhaseReceipt",
     "WREExecutorDryRunResult",
     "WREExecutorPlan",
+    "canonical_external_worktree_path",
     "plan_wre_isolated_worktree_execution_dryrun",
 ]

@@ -10,6 +10,8 @@ const LOCAL_FAST_PATHS = new Set([
   'simple_identity',
   'run_trace_assessment',
   'daemon_output_assessment',
+  'runtime_health',
+  'model_freshness',
   LOCAL_FAST_PATH
 ]);
 
@@ -39,6 +41,31 @@ function stripQuotedData(value) {
 
 function isLocalFastPath(name) {
   return LOCAL_FAST_PATHS.has(String(name || ''));
+}
+
+function localModelMode(name) {
+  const modes = {
+    simple_identity: 'local_identity_fast_path',
+    run_trace_assessment: 'local_run_trace_assessment',
+    daemon_output_assessment: 'local_daemon_output_assessment',
+    runtime_health: 'local_runtime_health',
+    model_freshness: 'local_model_freshness',
+    authoritative_work_state: 'local_authoritative_work_state'
+  };
+  return modes[String(name || '')] || null;
+}
+
+function modeReason(mode, context) {
+  const suffix = '; context=' + context + '.';
+  const reasons = {
+    local_identity_fast_path: 'Local RedDog identity fast path: skips HoloIndex, model inference, Fusion, repair, and action planning',
+    local_run_trace_assessment: 'Local Run Trace assessment: treats telemetry as data and skips model inference, Fusion, repair, and action planning',
+    local_daemon_output_assessment: 'Local DAEmon assessment: treats operational output as data and skips model inference, Fusion, repair, and action planning',
+    local_runtime_health: 'Local runtime health: uses an authenticated HoloIndex owner receipt and skips model inference, Fusion, repair, and action planning',
+    local_model_freshness: 'Provider catalog freshness: uses bounded official metadata and cannot switch or promote models',
+    local_authoritative_work_state: 'Local authoritative work state: validates governed queue lineage without HoloIndex, model inference, mutation, or execution'
+  };
+  return reasons[String(mode || '')] ? reasons[String(mode || '')] + suffix : '';
 }
 
 function emptyContextPacket() {
@@ -96,6 +123,8 @@ function statusText(name) {
     simple_identity: 'Simple RedDog identity question answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.',
     run_trace_assessment: 'Run Trace diagnostics answered locally. No HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.',
     daemon_output_assessment: 'DAEmon/log diagnostics answered locally. Pasted operational text is treated as data; no HoloIndex, OpenRouter, Fusion, repair, or downstream action planning.',
+    runtime_health: 'Checking HoloIndex locally through its authenticated generation-bound owner. No OpenRouter model or Fusion panel.',
+    model_freshness: 'Checking configured model availability against the bounded official provider catalog. No model inference or production binding change.',
     authoritative_work_state: 'Reading authoritative work state locally. No HoloIndex, OpenRouter, Fusion, queue mutation, or worker dispatch.'
   };
   return messages[String(name || '')] || '';
@@ -110,6 +139,12 @@ async function resolveLocalResult(name, options) {
   }
   if (name === 'daemon_output_assessment') {
     return options.daemon();
+  }
+  if (name === 'runtime_health') {
+    return options.health();
+  }
+  if (name === 'model_freshness') {
+    return options.modelFreshness();
   }
   if (name === LOCAL_FAST_PATH) {
     return buildLocalResult(await options.workState());
@@ -317,6 +352,8 @@ module.exports = {
   failureReceipt,
   isAuthoritativeWorkStateQuestion,
   isLocalFastPath,
+  localModelMode,
+  modeReason,
   parseBridgeOutput,
   resolveLocalResult,
   runConfiguredQuery,

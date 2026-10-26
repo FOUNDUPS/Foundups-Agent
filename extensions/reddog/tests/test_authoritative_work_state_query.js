@@ -10,6 +10,10 @@ const extensionSource = fs.readFileSync(
   path.join(__dirname, '..', 'extension.js'),
   'utf8'
 );
+const ownerRuntimeSource = fs.readFileSync(
+  path.join(__dirname, '..', 'holoindex_owner_runtime.js'),
+  'utf8'
+);
 
 function fakeChild(output, exitCode) {
   const child = new EventEmitter();
@@ -28,6 +32,11 @@ function fakeChild(output, exitCode) {
 }
 
 async function main() {
+  assert.strictEqual(
+    query.localModelMode('authoritative_work_state'),
+    'local_authoritative_work_state'
+  );
+  assert.strictEqual(query.localModelMode('unknown'), null);
   for (const prompt of [
     'What do we need to work on?',
     'What should RedDog work on next?',
@@ -117,7 +126,13 @@ async function main() {
   const wireStart = extensionSource.indexOf('function wireFusionWebview');
   const wireEnd = extensionSource.indexOf('function killBridgeChild', wireStart);
   const wireSource = extensionSource.slice(wireStart, wireEnd);
-  assert(wireSource.includes('const contextPacket = localFastPath ?'));
+  const contextStart = extensionSource.indexOf('function buildContextForRequest');
+  const contextEnd = extensionSource.indexOf('function wireFusionWebview', contextStart);
+  const contextBuilder = extensionSource.slice(contextStart, contextEnd);
+  assert(wireSource.includes('useEmpty: auditDegraded || localFastPath'));
+  assert(contextBuilder.includes('empty: authoritativeWorkStateQuery.emptyContextPacket'));
+  assert(ownerRuntimeSource.includes('if (input.useEmpty) packet = input.empty();'));
+  assert(wireSource.includes('const compatibility = await currentBackendCompatibility()'));
   assert(wireSource.indexOf('if (localFastPath)')
     < wireSource.indexOf('result = await callFusion'));
   assert(wireSource.indexOf('resolveLocalResult')

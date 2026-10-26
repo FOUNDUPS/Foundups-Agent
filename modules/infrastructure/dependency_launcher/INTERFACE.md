@@ -153,6 +153,163 @@ The comment engagement subprocess connects to Chrome on port 9222.
 
 ---
 
+### `run_runtime_compatibility_advisory(repo_root, *, environment=None)`
+
+Reads a bounded, off-repo `reddog_runtime_compatibility_evidence.v1` artifact
+and returns a `RuntimeCompatibilityReceipt`. Required components are OpenClaw,
+Hermes, the general and coding Qwen model bindings, and the inference backend.
+
+The Phase 1 result is integrity-only and therefore always remains
+`NOT_READY` until a later signed source-admission gate authenticates every
+source. Valid component comparisons are still exposed without overclaiming:
+
+- `OBSERVED_MATCH`: the integrity-checked installed and expected references match.
+- `OBSERVED_DRIFT`: the integrity-checked references differ.
+- component `NOT_READY`: evidence is absent, expired, malformed, or incomplete.
+
+An integrity-only envelope includes the stable overall reason
+`evidence_authentication_not_verified`. Recomputing every self-hash cannot
+produce an authenticated `CURRENT` result.
+
+The function catches all input failures, prints one safe summary line, and
+never blocks startup. It makes no network call and performs no runtime mutation,
+model load, route change, package install, or HoloIndex action.
+The self-hash is an integrity check, not identity or update authorization.
+
+### `compose_runtime_compatibility_evidence(supply, *, upstream_releases, now=None)`
+
+Rehydrates exact installed-observation and promoted-expectation source
+receipts, adds stable OpenClaw/Hermes official-release evidence, and returns the
+`reddog_runtime_compatibility_evidence.v1` mapping consumed by startup.
+
+The source sets are exact:
+
+- Installed observations: OpenClaw, Hermes, Qwen general, Qwen code, backend.
+- Official upstream expectations: OpenClaw and Hermes only.
+- Promoted runtime expectations: Qwen general, Qwen code, backend only.
+
+Receipt self-hashes are recomputed at use time. They establish structural
+integrity, not signer identity, so composed envelopes are explicitly marked
+`INTEGRITY_ONLY`. A future authenticated source-admission owner remains
+required before `CURRENT`, update action, or promotion authority is possible.
+
+### Signed expectation projection contract — qualification, 2026-09-22
+
+This is the next-owner contract, not an implemented API or an admission grant.
+The existing composer above still accepts only integrity-checked v1 receipts.
+Qualification baseline: `7ff0ccde76414caaefaefdd29e6d7b21ff2abf79`.
+
+| Required slot | Existing evidence owner | Unresolved mapping; fail-closed disposition |
+|---|---|---|
+| `qwen_general` | AI Gateway runtime policy, signed selection/binding and `role_bindings` | No declared task/surface/role-to-slot mapping. Require exact model ID, provider, role, task family and runtime surface; principal status does not imply this slot. |
+| `qwen_code` | Same AI Gateway owners | No declared mapping. Implementer status or a model name containing “code” does not imply this slot. |
+| `inference_backend` | Dependency-launcher installed-inventory/supply owner; AI Gateway only supplies model/provider evidence | Unsupported by the current MODEL/PANEL signed-evidence schema. A provider identifies a route, not an engine build or installed artifact. Keep unsupported until software provenance and its authority owner are qualified. |
+
+**Named decision dependency.** Before source work, the AI Gateway policy owner
+(`model_runtime_binding.py::ModelRuntimeBindingPolicy`) and the WRE supply
+producer feeding `build_runtime_compatibility_supply` must agree an explicit,
+versioned mapping keyed by task family and runtime surface, with exact role,
+model/provider identity and immutable binding/selection evidence. The existing
+policy has no compatibility-slot field: this paragraph does not add one.
+The dependency-launcher inventory owner must separately define the backend
+artifact identity and software-provenance verifier. Do not infer mappings,
+populate placeholder expectations, add installer powers to MODEL/PANEL signers,
+or introduce a second authentication system. Partial mappings cannot satisfy
+the composer's exact three-expectation requirement.
+
+**Proposed use-time boundary.** Reuse AI Gateway's
+`ModelRuntimeBindingUseTimeVerifier.verify` with serialized original evidence,
+the trusted current clock, current key resolver/trust/revocation state and exact
+binding/selection. Verification rehydrates signed inputs and compares the
+persisted artifact. The verifier holds mappings supplied at construction: it
+calls the current-time callback and key resolver but does not reload trust files.
+The owner must supply current trust/policy inputs at projection; reusing a
+long-lived verifier with a stale trust payload is insufficient. The lower-level
+one-shot capability consumer checks identity
+and digests; it does not itself refresh time or key state. Never treat a cached
+successful verification as current after a wait, retry or authority change.
+The next implementation packet must bind the projection point to fresh
+verification and define rejection of expiry/key-epoch change between capture and
+projection, including cleanup on every failure path. Atomic cross-store trust
+revocation is not established by the current API.
+
+An advisory must not borrow or consume another dispatcher's capability. If the
+qualified design uses a newly issued, private verification capability, discard
+it in `finally` through `discard_verified_runtime_binding_capability`; never
+persist, return, cache or accumulate it as advisory data. Dispatch must obtain
+its own fresh verification. A capability-free verification projection would
+require an explicit existing-owner API decision and independent qualification.
+
+**Compatibility invariant.** Preserve current v1 supply, source-receipt and
+envelope serialization/digests and `INTEGRITY_ONLY`/`NOT_READY` behavior until
+a separately reviewed versioned consumer contract exists. Authentic model
+evidence alone cannot authenticate installed OpenClaw/Hermes binaries, latest
+release provenance, backend artifacts, canary/rollback, or update admission.
+The [fixed acceptance matrix](tests/README.md#signed-expectation-projection-acceptance-matrix)
+separates current owner checks from the unimplemented cross-owner path.
+
+### `publish_runtime_compatibility_evidence(...) -> Path`
+
+Validates the composed evidence and uses the canonical runtime-artifact safety
+layer for descriptor-verified, locked replacement beneath an off-repo root.
+Invalid evidence cannot overwrite the previous cache.
+The supply and output paths must be distinct.
+
+### `scripts/refresh_openclaw_ecosystem_watchlist.py`
+
+When the compatibility root, supply, and output are all configured, the
+existing WRE watchlist refresh fetches the two allowlisted GitHub API release
+documents and publishes the cache. Partial configuration or any retrieval or
+validation failure returns nonzero. It never installs or invokes a component.
+
+### `run_wsl_agent_runtime_advisory(...)`
+
+On Windows, inspects registration/base metadata for the canonical `Ubuntu-24.04`
+WSL distribution. Explicit command mode uses exact shell-free argument vectors
+for `/usr/local/bin/openclaw --version` and `/usr/local/bin/hermes --version`. The optional
+`FOUNDUPS_AGENT_WSL_EXPECTED_BASE` binding rejects a distro registration that
+has moved away from its operator-approved storage location.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FOUNDUPS_AGENT_WSL_RUNTIME_ENABLED` | `0` | Explicitly enable the advisory probe |
+| `FOUNDUPS_AGENT_WSL_COMMAND_PROBE_ENABLED` | `0` | Additionally opt into installed version commands; may start WSL/services |
+| `FOUNDUPS_AGENT_WSL_DISTRO` | `Ubuntu-24.04` | Exact WSL distribution name |
+| `FOUNDUPS_AGENT_WSL_EXPECTED_BASE` | empty | Optional expected Windows distro base path |
+
+The advisory has no install, update, onboarding, service-management or job-dispatch
+command. It is disabled by default and that path makes no host calls, even if
+the command flag alone is set. Enable-only mode validates distro/registration/base
+and returns `NOT_READY`, empty components and `command_probe_disabled`. Invalid
+bindings retain their existing reasons. This mode never invokes the command runner
+or trusted WSL executable resolver.
+
+With both controls enabled, it executes installed programs and may start a
+stopped WSL distribution and its configured services. Command mode therefore
+does not guarantee absence of lifecycle effects.
+Its receipt is explicitly unauthenticated availability evidence, never authority.
+Each component has a ten-second timeout. A failed probe is `NOT_READY` evidence
+and never denies menu access.
+
+The command-mode boolean is captured before the registry callback; callback
+mutation cannot upgrade a metadata request or change that invocation's selected
+mode. This is trusted configuration selection, not live revocation or a signed
+effect-use lease. Disabled receipts remain byte-compatible; explicit command
+results retain existing semantics. Enable-only configurations deliberately change
+from executing version commands to metadata-only `NOT_READY`.
+
+The [mode contract](ROADMAP.md#wsl-advisory-lifecycle-boundary--2026-09-20) does not
+rely on a running-state precheck, which cannot establish strict no-start behavior
+across a later `--exec`. Injected tests do not prove live runtime health or admission.
+
+### `resolve_trusted_wsl_executable() -> Path | None`
+
+Returns the Windows system-owned `wsl.exe` directly from System32 without
+PATH lookup. The upstream OpenClaw command provider reuses this resolver to
+reach the canonical agent distro with `shell=False`. The legacy private alias
+is retained for existing injected test seams; callers should use the public
+function. This resolver grants no component lifecycle or update authority.
+
 ## 0102 Directive
 
 Dependencies are orchestrated autonomously. The system self-heals. ✊✋🖐️

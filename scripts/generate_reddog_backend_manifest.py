@@ -30,13 +30,83 @@ BRIDGE_FILES = (
     "scripts/reddog_extension_live_enqueue_invoke_once.py",
     "scripts/reddog_extension_wre_spine_invoke_once.py",
     "scripts/reddog_github_permission_probe_once.py",
+    "scripts/reddog_holoindex_incident_repair_once.py",
+    "scripts/reddog_holoindex_blocked_request_recovery_once.py",
+    "scripts/reddog_holoindex_candidate_acceptance.py",
     "scripts/reddog_holoindex_owner_query_once.py",
+    "scripts/reddog_holoindex_postmerge_runtime_once.py",
     "scripts/reddog_judgment_verifier_once.py",
+    "scripts/reddog_model_freshness_query_once.py",
+    "scripts/reddog_model_runtime_binding_query_once.py",
     "scripts/reddog_operator_wardrobe_selection_once.py",
     "scripts/reddog_repair_guard_once.py",
     "scripts/reddog_resident_architect_session_once.py",
+    "scripts/reddog_start_operations_control_once.py",
 )
 EXECUTABLE_FILES = (*BRIDGE_FILES, "holo_index.py")
+STATIC_RUNTIME_FILES = (
+    "holo_index/docs/HOLO_INDEX_MACHINE_LANGUAGE_SPEC_0102.json",
+    "holo_index/query_result_contract_schema.py",
+    "extensions/reddog/start_operations_python_bootstrap.py",
+    "scripts/reddog_holoindex_owner_service_once.py",
+    "modules/infrastructure/wre_core/src/wre_pytest_exact_id_collector.py",
+    "modules/infrastructure/wre_core/src/"
+    "wre_test_registry_differential_plan_runtime.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_git.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_wheel.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_writer_windows.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_topology_windows.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_verifier.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_packaging_source_materializer.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_dependency_composition_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_dependency_composition.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_runtime_composition_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_runtime_composition.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_process.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_child_contract.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_child.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_bounded_child_process.py",
+    "modules/infrastructure/foundups_mcp_bridge/src/"
+    "reddog_holoindex_query_runtime_builder_source.py",
+    "modules/communication/moltbot_bridge/src/"
+    "reddog_signer_system_service_entrypoint.py",
+    "modules/communication/moltbot_bridge/src/"
+    "reddog_grant_authority_service.py",
+    "modules/communication/moltbot_bridge/src/"
+    "foundup_verified_outcome_root_authority_service_entrypoint.py",
+    "modules/communication/moltbot_bridge/src/"
+    "foundup_verified_outcome_root_authority_provision_entrypoint.py",
+    "modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md",
+    "modules/infrastructure/wre_core/skillz/skills_registry_v2.json",
+    "modules/infrastructure/wre_core/skillz/"
+    "auto_test_registry_audit/SKILLz.md",
+    "modules/infrastructure/wre_core/skillz/"
+    "auto_test_registry_audit/SKILL_MANIFEST.json",
+    "modules/infrastructure/wre_core/skillz/"
+    "auto_test_registry_audit/executor.py",
+    "modules/ai_intelligence/ai_overseer/skillz/"
+    "m2m_holo_retrieval_benchmark/retrieval_corpus_v1.json",
+)
 REPOSITORY_MARKERS = (
     "main.py",
     "holo_index.py",
@@ -55,6 +125,9 @@ DYNAMIC_IMPORT_MODULES = {
         "scripts.advisory_model_once",
     ),
     "modules/communication/moltbot_bridge/src/reddog_bounded_artifact_generation_runtime.py": (
+        "scripts.advisory_model_once",
+    ),
+    "modules/communication/moltbot_bridge/src/reddog_foundups_fusion_artifact_provider.py": (
         "scripts.advisory_model_once",
     ),
     "modules/communication/moltbot_bridge/src/reddog_readonly_0102_audit_worker_runtime.py": (
@@ -82,11 +155,14 @@ def _digest(path: Path) -> str:
 
 def _resolve_local_module(module_name: str) -> Path | None:
     candidate = REPO_ROOT.joinpath(*module_name.split("."))
-    tracked = _tracked_file_set()
+    tracked_by_casefold = {
+        relative.casefold(): relative for relative in _tracked_files()
+    }
     for path in (candidate.with_suffix(".py"), candidate / "__init__.py"):
-        relative = path.relative_to(REPO_ROOT).as_posix()
-        if relative in tracked and path.is_file():
-            return path
+        if path.is_file():
+            relative = path.relative_to(REPO_ROOT).as_posix()
+            canonical = tracked_by_casefold.get(relative.casefold())
+            return REPO_ROOT / canonical if canonical is not None else path
     return None
 
 
@@ -225,8 +301,13 @@ def _parse_source(path: Path, relative: str) -> ast.AST:
 
 
 def _dependency_closure() -> tuple[str, ...]:
-    queue = [REPO_ROOT / relative for relative in EXECUTABLE_FILES]
+    queue = [
+        REPO_ROOT / relative
+        for relative in (*EXECUTABLE_FILES, *STATIC_RUNTIME_FILES)
+        if relative.endswith(".py")
+    ]
     observed: set[str] = set()
+    tracked = _tracked_file_set()
     while queue:
         path = queue.pop()
         relative = path.relative_to(REPO_ROOT).as_posix()
@@ -234,6 +315,8 @@ def _dependency_closure() -> tuple[str, ...]:
             continue
         if not path.is_file():
             raise FileNotFoundError(relative)
+        if relative not in tracked:
+            raise ValueError(f"untracked_runtime_dependency:{relative}")
         observed.add(relative)
         tree = _parse_source(path, relative)
         queue.extend(_parent_initializers(path))
@@ -247,7 +330,17 @@ def _dependency_closure() -> tuple[str, ...]:
 
 
 def build_manifest() -> dict[str, object]:
-    runtime_files = _dependency_closure()
+    runtime_files = tuple(
+        sorted({*_dependency_closure(), *STATIC_RUNTIME_FILES})
+    )
+    missing_static = [
+        relative
+        for relative in STATIC_RUNTIME_FILES
+        if relative not in _tracked_file_set()
+        or not (REPO_ROOT / relative).is_file()
+    ]
+    if missing_static:
+        raise FileNotFoundError(",".join(missing_static))
     runtime_digests = {
         relative: _digest(REPO_ROOT / relative)
         for relative in runtime_files

@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from holo_index.freshness_receipt import HoloIndexFreshnessReceipt
+from holo_index.freshness_receipt import HoloIndexFreshnessReceipt, read_git_head_sha
 from holo_index.repository_state import RepositoryState
 from modules.communication.moltbot_bridge.src.reddog_backend_architect_determination_runtime import (
     ArchitectModelResult,
@@ -21,12 +21,14 @@ from modules.communication.moltbot_bridge.tests.provider_call_evidence_test_help
     architect_provider_call_evidence,
     audit_provider_call_evidence,
 )
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
+    architect_model_output,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_readonly_audit_swarm_enqueue import (
     READONLY_AUDIT_TASK_SOURCE,
 )
-from modules.communication.moltbot_bridge.src.reddog_grounded_target_assignment_continuity import (
-    SCHEMA_VERSION as GROUNDING_SCHEMA_VERSION,
-    canonical_digest as grounding_digest,
+from modules.communication.moltbot_bridge.tests.grounding_v2_test_helpers import (
+    exact_head_repo_target_grounding_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_readonly_0102_audit_worker_runtime import (
     RepoAuditModelResult,
@@ -64,51 +66,16 @@ MODULE_PATH = (
     / "reddog_resident_architect_durable_agentdb_cycle.py"
 )
 NOW = "2026-07-16T00:00:00+00:00"
-HEAD = "f9ac824d8"
+HEAD = read_git_head_sha(REPO_ROOT)
 REVISION = "sha256:resident-work-state"
 WORK_FOCUS = "resident RedDog architect audit"
 
 
 def _grounding_receipt() -> dict[str, object]:
-    typed = {
-        "repo_file_targets": [
-            "modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py"
-        ],
-        "semantic_targets": [],
-        "external_research_targets": [],
-        "quoted_reference_blocks_count": 0,
-        "quoted_reference_blocks_digest": grounding_digest([]),
-    }
-    value = {
-        "schema_version": GROUNDING_SCHEMA_VERSION,
-        "source_surface": "editor_thin_client",
-        "work_focus_digest": grounding_digest({"work_focus": WORK_FOCUS}),
-        "typed_targets": typed,
-        "typed_targets_digest": grounding_digest(typed),
-        "grounding_preflight_applied": True,
-        "grounding_preflight_passed": True,
-        "grounding_preflight_rejection_reasons": [],
-        "grounding_target_universe_required": True,
-        "repo_file_targets_count": 1,
-        "semantic_targets_count": 0,
-        "external_research_targets_count": 0,
-        "quoted_reference_blocks_count": 0,
-        "semantic_target_coverage": [],
-        "semantic_target_coverage_digest": grounding_digest({"semantic_target_coverage": []}),
-        "target_recall_ok": True,
-        "required_targets_missing": [],
-        "direct_read_paths": [],
-        "holoindex_owner_query_ok": False,
-        "holoindex_freshness": "UNKNOWN",
-        "holoindex_generation_id": "",
-        "holoindex_freshness_receipt_digest": "",
-        "holoindex_repo_head_sha": "",
-        "holoindex_query_receipt_id": "",
-        "holoindex_index_gap_detected": False,
-        "no_holoindex_reindex_performed": True,
-    }
-    value["receipt_id"] = grounding_digest(value)
-    return value
+    return exact_head_repo_target_grounding_receipt(
+        repo_root=REPO_ROOT, work_focus=WORK_FOCUS,
+        repo_target="modules/communication/moltbot_bridge/src/reddog_operational_context_snapshot.py",
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -298,14 +265,11 @@ class _ArchitectRunner:
         self.calls.append({"prompt": prompt, "context": context, "binding": dict(binding)})
         parsed = json.loads(prompt)
         evidence_ref = parsed["reports"][0]["evidence_refs"][0]
-        content = {
-            "action": "FIX",
-            "next_slice_name": "REDDOG_RESIDENT_RUNTIME_NEXT_PHASE1",
-            "summary": "Read-only OpenClaw audit reports support one next resident runtime slice.",
-            "decision_reasons": ["selected highest-priority verified report"],
-            "evidence_refs": [evidence_ref],
-            "wsp15_allocation_receipt_id": parsed["wsp15_allocation_receipt_id"],
-        }
+        content = architect_model_output(
+            {"receipt_id": parsed["wsp15_allocation_receipt_id"], **parsed["wsp15_execution_binding"]},
+            evidence_ref,
+            slice_name="REDDOG_RESIDENT_RUNTIME_NEXT_PHASE1",
+        )
         return ArchitectModelResult(
             ok=True,
             status="MODEL_OK",
@@ -421,7 +385,7 @@ def test_durable_cycle_submits_agentdb_tasks_openclaw_claims_reports_and_determi
     assert all(claim["accepted"] is True for claim in result.openclaw_claims)
     assert result.architect_determination_id
     assert result.architect_action == "FIX"
-    assert result.queue_candidate_count == 1
+    assert result.queue_candidate_count == 0
     assert result.read_only_authority_only is True
     assert result.no_repo_mutation_performed is True
     assert result.no_holoindex_reindex_performed is True
@@ -520,7 +484,7 @@ def test_durable_cycle_supplies_operational_memex_to_openclaw_workers() -> None:
         == _fresh_holo_receipt().generation_id
         for context in contexts
     )
-    assert all(context["memex_evidence_bundle"]["records"] for context in contexts)
+    assert all(context["memex_evidence_bundle"]["record_count"] == 1 and context["memex_evidence_bundle"]["record_digests"] and (context["memex_evidence_bundle"].get("records") or context["memex_evidence_bundle"].get("model_context_omitted_reason") == "memex_supplemental_budget_preserves_repository_evidence") for context in contexts)
     completed = AgentDB().get_autonomous_tasks(status="completed", limit=10)
     readonly_contexts = [
         task["context"] if isinstance(task["context"], dict) else json.loads(task["context"])

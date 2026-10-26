@@ -1,77 +1,57 @@
 {
   "version": "2.0",
-  "last_updated": "2026-03-07T12:00:00+00:00",
-  "total_skills": 28,
+  "last_updated": "2026-10-23T00:00:00+00:00",
+  "total_skills": 39,
   "skills": {
-    "suno_stt_lyrics_extract": {
-      "location": "O:\\Foundups-Agent\\modules\\platform_integration\\antifafm_broadcaster\\skillz\\suno_stt_extract.json",
-      "agents": ["qwen", "gemma"],
-      "intent_type": "GENERAL",
-      "version": "1.1.0",
-      "promotion_state": "production",
-      "domain": "streaming",
-      "wsp_chain": ["WSP 84", "WSP 78", "WSP 50", "WSP 72"],
-      "description": "Automated lyrics extraction from Suno via Whisper STT with SQLite dedup"
-    },
-    "antifafm_add_video": {
-      "location": "O:\\Foundups-Agent\\modules\\platform_integration\\antifafm_broadcaster\\skillz\\add_video_link.json",
-      "agents": ["qwen"],
-      "intent_type": "DECISION",
-      "version": "1.0.0",
-      "promotion_state": "production",
-      "domain": "streaming",
-      "wsp_chain": ["WSP 64", "WSP 91"],
-      "description": "Managing Directors add YouTube videos to broadcast background library"
-    },
     "gemma_pqn_data_processor": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\gemma_pqn_data_processor",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_data_processor",
       "agents": [
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
     "gemma_pqn_emergence_detector": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\gemma_pqn_emergence_detector",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/gemma_pqn_emergence_detector",
       "agents": [
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
     "qwen_google_research_integrator": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\qwen_google_research_integrator",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_google_research_integrator",
       "agents": [
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
     "qwen_pqn_research_coordinator": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\qwen_pqn_research_coordinator",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_pqn_research_coordinator",
       "agents": [
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 77"
       ]
     },
     "qwen_wsp_compliance_auditor": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\pqn_alignment\\skills\\qwen_wsp_compliance_auditor",
+      "location": "modules/ai_intelligence/pqn_alignment/skillz/qwen_wsp_compliance_auditor",
       "agents": [
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 3",
@@ -87,14 +67,15 @@
       ]
     },
     "qwen_gitpush": {
-      "location": "O:\\Foundups-Agent\\modules\\infrastructure\\git_push_dae\\skills\\qwen_gitpush",
+      "location": "modules/infrastructure/git_push_dae/skillz/qwen_gitpush",
       "agents": [
         "qwen",
         "gemma"
       ],
-      "intent_type": "GENERAL",
+      "intent_type": "DECISION",
       "version": "1.0.0",
-      "promotion_state": "unknown",
+      "promotion_state": "prototype",
+      "domain": "autonomous_operations",
       "wsp_chain": [
         "WSP 15",
         "WSP 96",
@@ -102,34 +83,34 @@
       ]
     },
     "gemma_domain_trainer_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\gemma_domain_trainer_prototype",
+      "location": ".claude/skills/gemma_domain_trainer_prototype",
       "agents": [
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15"
       ]
     },
     "gemma_noise_detector_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\gemma_noise_detector_prototype",
+      "location": ".claude/skills/gemma_noise_detector_prototype",
       "agents": [
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": []
     },
     "qwen_cleanup_strategist_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\qwen_cleanup_strategist_prototype",
+      "location": ".claude/skills/qwen_cleanup_strategist_prototype",
       "agents": [
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15",
@@ -139,12 +120,12 @@
       ]
     },
     "qwen_roadmap_auditor_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\qwen_roadmap_auditor_prototype",
+      "location": ".claude/skills/qwen_roadmap_auditor_prototype",
       "agents": [
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 83",
@@ -155,12 +136,12 @@
       ]
     },
     "qwen_training_data_miner_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\qwen_training_data_miner_prototype",
+      "location": ".claude/skills/qwen_training_data_miner_prototype",
       "agents": [
         "qwen"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 15",
@@ -170,13 +151,13 @@
       ]
     },
     "qwen_wsp_enhancement": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\qwen_wsp_enhancement",
+      "location": ".claude/skills/qwen_wsp_enhancement",
       "agents": [
         "qwen",
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": [
         "WSP 80",
@@ -190,13 +171,13 @@
       ]
     },
     "unicode_daemon_monitor_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\unicode_daemon_monitor_prototype",
+      "location": ".claude/skills/unicode_daemon_monitor_prototype",
       "agents": [
         "qwen",
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 5",
@@ -209,18 +190,18 @@
       ]
     },
     "youtube_dae": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\youtube_dae",
+      "location": ".claude/skills/youtube_dae",
       "agents": [
         "qwen",
         "gemma"
       ],
       "intent_type": "GENERAL",
-      "version": 1.0,
+      "version": 1,
       "promotion_state": "unknown",
       "wsp_chain": []
     },
     "youtube_moderation_prototype": {
-      "location": "O:\\Foundups-Agent\\.claude\\skills\\youtube_moderation_prototype",
+      "location": ".claude/skills/youtube_moderation_prototype",
       "agents": [
         "qwen",
         "gemma"
@@ -231,7 +212,7 @@
       "wsp_chain": []
     },
     "qwen_holo_output_skill": {
-      "location": "O:\\Foundups-Agent\\holo_index\\skills\\qwen_holo_output_skill",
+      "location": "holo_index/skills/qwen_holo_output_skill",
       "agents": [
         "qwen"
       ],
@@ -248,7 +229,7 @@
       ]
     },
     "openclaw_intent_router": {
-      "location": "O:\\Foundups-Agent\\modules\\communication\\moltbot_bridge\\skillz\\openclaw_intent_router",
+      "location": "modules/communication/moltbot_bridge/skillz/openclaw_intent_router",
       "agents": [
         "gemma"
       ],
@@ -263,7 +244,7 @@
       ]
     },
     "openclaw_executor": {
-      "location": "O:\\Foundups-Agent\\modules\\communication\\moltbot_bridge\\skillz\\openclaw_executor",
+      "location": "modules/communication/moltbot_bridge/skillz/openclaw_executor",
       "agents": [
         "qwen",
         "gemma"
@@ -281,7 +262,7 @@
       ]
     },
     "linkedin_agentic_reply": {
-      "location": "O:\\Foundups-Agent\\modules\\platform_integration\\linkedin_agent\\skillz\\linkedin_agentic_reply",
+      "location": "modules/platform_integration/linkedin_agent/skillz/linkedin_agentic_reply",
       "agents": [
         "qwen",
         "gemma"
@@ -300,7 +281,7 @@
       "description": "Agentic LinkedIn reply wardrobe with selected-post reading and model-routed drafting"
     },
     "m2m_compile_gate": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\m2m_compile_gate",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_compile_gate",
       "agents": [
         "qwen",
         "gemma"
@@ -318,7 +299,7 @@
       ]
     },
     "m2m_stage_promote_safe": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\m2m_stage_promote_safe",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_stage_promote_safe",
       "agents": [
         "qwen",
         "gemma"
@@ -335,7 +316,7 @@
       ]
     },
     "m2m_qwen_runtime_health": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\m2m_qwen_runtime_health",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_qwen_runtime_health",
       "agents": [
         "qwen",
         "gemma"
@@ -352,7 +333,7 @@
       ]
     },
     "m2m_holo_retrieval_benchmark": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\m2m_holo_retrieval_benchmark",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/m2m_holo_retrieval_benchmark",
       "agents": [
         "qwen",
         "gemma"
@@ -369,7 +350,7 @@
       ]
     },
     "strategic_diligence_gate": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\strategic_diligence_gate",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/strategic_diligence_gate",
       "agents": [
         "qwen",
         "gemma"
@@ -387,7 +368,7 @@
       ]
     },
     "data_architecture_audit": {
-      "location": "O:\\Foundups-Agent\\modules\\ai_intelligence\\ai_overseer\\skillz\\data_architecture_audit",
+      "location": "modules/ai_intelligence/ai_overseer/skillz/data_architecture_audit",
       "agents": [
         "qwen",
         "gemma"
@@ -404,15 +385,58 @@
       "invocation": "/audit-data",
       "description": "WSP 78 compliance auditing of FoundUps data architecture"
     },
-    "qwen_bulk_import_migration": {
-      "location": "O:\\Foundups-Agent\\modules\\infrastructure\\wre_core\\skillz\\qwen_bulk_import_migration",
+    "auto_test_registry_audit": {
+      "location": "modules/infrastructure/wre_core/skillz/auto_test_registry_audit",
       "agents": [
         "qwen",
         "gemma"
       ],
-      "intent_type": "REFACTOR",
-      "version": "1.0.0",
+      "intent_type": "TELEMETRY",
+      "version": "2.3",
       "promotion_state": "production",
+      "domain": "testing",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 6",
+        "WSP 15",
+        "WSP 50",
+        "WSP 62",
+        "WSP 97"
+      ],
+      "description": "Canonical test registry and bounded exact-SHA shard projection without test execution."
+    },
+    "reddog_operations": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_operations",
+      "logical_roles": [
+        "principal",
+        "researcher",
+        "critic",
+        "implementer",
+        "verifier"
+      ],
+      "intent_type": "DECISION",
+      "version": "1.1.1",
+      "promotion_state": "production",
+      "domain": "operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 50",
+        "WSP 77",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Provider-neutral operating discipline for bounded RedDog repository work."
+    },
+    "qwen_bulk_import_migration": {
+      "location": "modules/infrastructure/wre_core/skillz/qwen_bulk_import_migration",
+      "agents": [
+        "qwen",
+        "gemma"
+      ],
+      "intent_type": "REFACTORING",
+      "version": "1.0_prototype",
+      "promotion_state": "prototype",
       "wsp_chain": [
         "WSP 77",
         "WSP 50",
@@ -420,7 +444,244 @@
         "WSP 22"
       ],
       "invocation": "/migrate-imports",
-      "description": "Bulk import migration using Qwen planning and Gemma validation"
+      "description": "Deterministic bulk-import migration prototype; Qwen/Gemma adapters are not bound"
+    },
+    "reddog_recipient_preflight": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_recipient_preflight",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "intent_type": "DECISION",
+      "version": "1.2.0",
+      "promotion_state": "prototype",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 48",
+        "WSP 50",
+        "WSP 73",
+        "WSP 77",
+        "WSP 91",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Fail-closed independent recipient, audience, content, link, privacy, duplicate, and provider read-back audit for outbound correspondence",
+      "primary_agent": "0102"
+    },
+    "reddog_correspondence_state": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_correspondence_state",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "MAINTENANCE",
+      "version": "1.0.0",
+      "promotion_state": "prototype",
+      "domain": "communication",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 78",
+        "WSP 91",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Persist privacy-bounded correspondence event metadata and scope state so Red Dog can resume from provider deltas instead of replaying complete mailboxes"
+    },
+    "yumori_moshpit": {
+      "location": "modules/foundups/esingularity/skillz/yumori_moshpit",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "DECISION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Route YUMORI campaign history versus 0102 learning events and preserve reverse-chronological JST Moshpit integrity"
+    },
+    "fukui_city_procedure": {
+      "location": "modules/foundups/esingularity/skillz/fukui_city_procedure",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "DECISION",
+      "version": "0.2.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Verify Fukui City and Council procedure, official forms, PPP/PFI, disclosure, procurement, routing and legal handoff"
+    },
+    "yumori_funding_ppp_intelligence": {
+      "location": "modules/foundups/esingularity/skillz/yumori_funding_ppp_intelligence",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "RESEARCH",
+      "version": "0.1",
+      "promotion_state": "candidate",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Verify live YUMORI grants, subsidies, GX and PPP/PFI opportunities without overstating funding status"
+    },
+    "yumori_contact_ledger": {
+      "location": "modules/foundups/esingularity/skillz/yumori_contact_ledger",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "MAINTENANCE",
+      "version": "0.8.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Ground YUMORI.me correspondence in live Gmail/CRM state, canonical 0102 proxy voice, routing consent, receipt reconciliation, and recursive learning"
+    },
+    "yumori_work_orchestrator": {
+      "location": "modules/foundups/esingularity/skillz/yumori_work_orchestrator",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "DECISION",
+      "version": "0.2.0",
+      "promotion_state": "prototype",
+      "domain": "foundup_campaign_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 22",
+        "WSP 50",
+        "WSP 77",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Convert YUMORI planning conversations into live-state-verified WSP 15 work and bounded Work handoff, including governed capital-network expansion"
+    },
+    "reddog_gmail_intake_router": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_gmail_intake_router",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "CLASSIFICATION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "communication",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 48",
+        "WSP 50",
+        "WSP 77",
+        "WSP 91",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Classify privacy-bounded Gmail events into security, YUMORI, FoundUp, general, or held routes without granting provider effects"
+    },
+    "reddog_security_mail_triage": {
+      "location": "modules/communication/moltbot_bridge/skillz/reddog_security_mail_triage",
+      "agents": [
+        "0102",
+        "qwen",
+        "gemma"
+      ],
+      "primary_agent": "0102",
+      "intent_type": "DECISION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "security_operations",
+      "wsp_chain": [
+        "WSP 00",
+        "WSP 15",
+        "WSP 48",
+        "WSP 50",
+        "WSP 77",
+        "WSP 91",
+        "WSP 95",
+        "WSP 97"
+      ],
+      "description": "Deduplicate and verify security-alert mail against exact repository, workflow, scanner, and deployment evidence"
+    },
+    "kids_episode_production": {
+      "location": "modules/communication/youtube_shorts/skillz/kids_episode_production",
+      "agents": [
+        "qwen"
+      ],
+      "intent_type": "GENERATION",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "education",
+      "wsp_chain": [
+        "WSP 95",
+        "WSP 97",
+        "WSP 109"
+      ]
+    },
+    "kids_trend_research": {
+      "location": "modules/communication/youtube_shorts/skillz/kids_trend_research",
+      "agents": [
+        "qwen"
+      ],
+      "intent_type": "RESEARCH",
+      "version": "0.1.0",
+      "promotion_state": "prototype",
+      "domain": "education",
+      "wsp_chain": [
+        "WSP 95",
+        "WSP 97",
+        "WSP 109"
+      ]
     }
   }
 }

@@ -150,6 +150,7 @@ def invoke_reddog_wre_queue_authorized_slice_verifier(
     explicit_queue_authorized_slice_verifier_requested: bool,
     queue_bounded_worker_pilot_result: Mapping[str, Any],
     verifier_request: Mapping[str, Any],
+    trusted_work_authority_digest: str,
 ) -> QueueAuthorizedSliceVerifierInvokeResult:
     """Invoke the independent autonomous-slice verifier after a bounded pilot."""
 
@@ -198,7 +199,8 @@ def invoke_reddog_wre_queue_authorized_slice_verifier(
             verifier_payload,
             pilot_receipt,
             artifact_generation_receipt,
-        )
+        ),
+        trusted_work_authority_digest=trusted_work_authority_digest,
     )
     if verifier.decision != AUTONOMOUS_SLICE_VERIFIER_ACCEPT:
         return _reject(

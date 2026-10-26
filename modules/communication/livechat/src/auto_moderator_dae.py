@@ -31,6 +31,10 @@ from .persona_registry import resolve_channel_credential_set
 # Import extracted services (WSP 72: Module Independence, WSP 62: Large File Refactoring)
 from .stream_discovery_service import StreamDiscoveryService
 from .multi_channel_coordinator import MultiChannelCoordinator
+from .engagement_lifecycle import (
+    _await_owned_completion, run_confirmed_live_chat, cancel_browser_tasks,
+    run_owned_rotation, dispatch_comment_engagement,
+)
 # RotationSupervisor: Task-based rotation with heartbeat stall detection (WSP 77)
 from .rotation_supervisor import RotationSupervisor, OperationType as RotationOperation
 # Activity Router for breadcrumb-based activity coordination (WSP 77)
@@ -101,6 +105,7 @@ class AutoModeratorDAE:
         self.start_time = time.time()
         self.enable_ai_monitoring = enable_ai_monitoring
         self.heartbeat_service = None
+        self.operator_manifest_task = None
 
         # Comment engagement subprocess tracking (prevent dual-process race condition)
         self._comment_engagement_task = None  # Active async task reference
@@ -977,80 +982,41 @@ class AutoModeratorDAE:
         logger.info("MONITORING CHAT - WSP-COMPLIANT ARCHITECTURE")
         logger.info("="*60)
 
-        # === FIX 2026-02-06: Verify live chat BEFORE terminating comments ===
-        # Previously: Comments terminated → live chat failed → disruption + 2min stream search
-        # Now: Verify live chat works → THEN terminate comments → no disruption if chat unavailable
-        logger.info("[LOCK] Verifying live chat availability before disabling comments...")
-        if not self.livechat or not await self.livechat.initialize():
-            logger.warning("[LOCK] Live chat NOT available - keeping comment engagement ACTIVE")
-            logger.info("[LOCK] Will search for another stream without disrupting comments")
-            return  # Exit monitor_chat, will search for new stream without disrupting comments
+        await self._run_confirmed_live_chat()
 
-        # === Live chat CONFIRMED available - NOW safe to terminate comments ===
-        logger.info("[LOCK] Live chat CONFIRMED - disabling comment engagement")
-        await self.terminate_comment_engagement()
-        self._live_stream_pending = False
-        self._live_chat_active = True
-        logger.info("[LOCK] Live chat mode ACTIVE - comment engagement DISABLED")
+    def _get_confirmed_live_channel(self) -> Optional[str]:
+        """Session-scoped exclusion, also held while matching work is settling."""
+        return getattr(self, "_confirmed_live_channel_id", None)
 
-        # === CARDIOVASCULAR: Start heartbeat task (WSP 91) ===
-        heartbeat_task = None
-        if self.telemetry:
-            heartbeat_task = asyncio.create_task(self._heartbeat_loop())
-            logger.info("[HEART] Heartbeat monitoring started (30s interval)")
+    async def _run_confirmed_live_chat(self):
+        """Delegate session lifetime while retaining identity on this DAE."""
+        return await run_confirmed_live_chat(self)
 
-        try:
-            # Session already initialized above, start polling directly
-            self.livechat.is_running = True
-            await self.livechat.run_polling_loop()
-        except KeyboardInterrupt:
-            logger.info("[STOP] Monitoring stopped by user")
-        except Exception as e:
-            logger.error(f"Monitoring error: {e}")
-        finally:
-            # === CARDIOVASCULAR: Stop heartbeat and record stream end (WSP 91) ===
-            if heartbeat_task:
-                heartbeat_task.cancel()
-                try:
-                    await heartbeat_task
-                except asyncio.CancelledError:
-                    pass
-                logger.info("[HEART] Heartbeat monitoring stopped")
 
-            # === CRITICAL: Reset live chat mutex (allow comment engagement restart) ===
-            self._live_chat_active = False
-            logger.info("[LOCK] Live chat mode INACTIVE - comment engagement can restart")
+    async def terminate_comment_engagement(self, for_live_handoff: bool = False):
+        """Settle one confirmed channel, or cancel/await the full supervisor by default."""
+        if for_live_handoff:
+            channel_id = self._get_confirmed_live_channel()
+            if not channel_id:
+                raise RuntimeError("Live handoff requires confirmed session identity")
+            coordinator = getattr(self, "multi_channel_coordinator", None)
+            if coordinator:
+                await coordinator.settle_channel(channel_id)
+            for supervisor in tuple(getattr(self, "_rotation_supervisors", {}).values()):
+                await supervisor.settle_channel(channel_id)
+            return
 
-            if self.telemetry and self.current_stream_id:
-                try:
-                    self.telemetry.record_stream_end(self.current_stream_id)
-                    logger.info(f"[HEART] Stream session ended (SQLite ID: {self.current_stream_id})")
-                    self.current_stream_id = None
-                except Exception as e:
-                    logger.warning(f"Failed to record stream end: {e}")
-
-            if self.livechat:
-                self.livechat.stop_listening()
-
-    async def terminate_comment_engagement(self):
-        """
-        Terminate any running comment engagement subprocess (prevent dual-process race condition).
-
-        Called when switching from comment processing to live chat monitoring.
-        WSP 49: Process isolation - ensure only ONE mode active at a time.
-        """
-        if self._comment_engagement_task and not self._comment_engagement_task.done():
-            logger.info("[LOCK] Terminating comment engagement subprocess (switching to live chat)...")
-            self._comment_engagement_task.cancel()
-            try:
-                await self._comment_engagement_task
-            except asyncio.CancelledError:
-                logger.info("[OK] Comment engagement subprocess terminated successfully")
-            except Exception as e:
-                logger.warning(f"[WARN] Comment engagement termination exception: {e}")
+        task = self._comment_engagement_task
+        if task and not task.done():
+            task.cancel()
+            cancelled = await _await_owned_completion(task)
+            if not task.cancelled():
+                task.result()
             self._comment_engagement_task = None
-        else:
-            logger.debug("[LOCK] No active comment engagement subprocess to terminate")
+            if cancelled:
+                raise asyncio.CancelledError
+        elif task:
+            self._comment_engagement_task = None
 
     async def _wait_for_inbox_clear(self):
         """
@@ -1158,16 +1124,14 @@ class AutoModeratorDAE:
         self._comment_engagement_active_channel = channel_id
 
         try:
-            logger.info(f"[DAEMON][CARDIOVASCULAR] 🚀 Calling runner.run_engagement()...")
-            self._log_studio_context(channel_id, label="comment_engagement")
-            result = await runner.run_engagement(
-                channel_id=channel_id,
-                video_id=video_id,
-                max_comments=max_comments
-            )
+            result = await dispatch_comment_engagement(
+                self, runner, channel_id, video_id, max_comments, mode,
+                group_channels_by_browser(role="comments"))
             logger.info(f"[DAEMON][CARDIOVASCULAR] ✅ runner.run_engagement() returned!")
 
-            # Log result
+            # A confirmed handoff is deferred work, not completed engagement.
+            if result and result.get("deferred"):
+                return
             result = result or {}
             stats = result.get('stats', {})
             error = result.get('error')
@@ -1388,9 +1352,7 @@ class AutoModeratorDAE:
 
             except asyncio.CancelledError:
                 logger.info("[SUPERVISOR] Supervisor CANCELLED — shutting down browser loops")
-                for _b, _t in _browser_tasks.items():
-                    if _t and not _t.done():
-                        _t.cancel()
+                await cancel_browser_tasks(_browser_tasks)
                 raise
             except Exception as _sup_err:
                 logger.error(f"[SUPERVISOR] Health check error: {_sup_err}", exc_info=True)
@@ -1408,6 +1370,7 @@ class AutoModeratorDAE:
                 update_engagement_status=lambda cid, status: self._comment_engagement_status.update({cid: status}),
                 set_active_channel=lambda cid: setattr(self, '_comment_engagement_active_channel', cid),
                 is_live_stream_pending=lambda: self._live_stream_pending,
+                get_confirmed_live_channel=self._get_confirmed_live_channel,
             )
 
     async def _browser_engagement_loop(
@@ -1499,11 +1462,10 @@ class AutoModeratorDAE:
                             browser=browser_name,
                             heartbeat_timeout=float(os.getenv("YT_ROTATION_HEARTBEAT_TIMEOUT", "60")),
                             task_timeout=float(os.getenv("YT_ROTATION_TASK_TIMEOUT", "300")),
+                            get_confirmed_live_channel=self._get_confirmed_live_channel,
                         )
-                        result = await supervisor.run_rotation(
-                            operation=RotationOperation.COMMENTS,
-                            max_items_per_channel=max_comments if max_comments > 0 else 10,
-                        )
+                        result = await run_owned_rotation(
+                            self, supervisor, browser_name, max_comments, RotationOperation.COMMENTS)
                         comments_processed = result.total_comments
 
                         # Emit stall detection breadcrumb for AI Overseer
@@ -1835,9 +1797,37 @@ class AutoModeratorDAE:
             mode=mode
         )
     async def run(self):
-        """
-        Main entry point - full DAE lifecycle.
-        """
+        """Own one operator watcher for the complete DAE run lifetime."""
+        if getattr(self, "_operator_manifest_run_active", False):
+            raise RuntimeError("AutoModeratorDAE.run is already active")
+        self._operator_manifest_run_active = True
+        watcher = None
+        try:
+            # Independent of optional AI-overseer monitoring, but owned by run.
+            from .operator_command_queue import OperatorCommandQueue
+            self.operator_manifest_queue = OperatorCommandQueue(self)
+            watcher = asyncio.create_task(self.operator_manifest_queue.watch_forever())
+            self.operator_manifest_task = watcher
+            logger.info("[012-MANIFEST] Independent operator-manifest watcher started")
+            return await self._run_dae()
+        finally:
+            try:
+                if watcher is not None:
+                    watcher.cancel()
+                    try:
+                        await watcher
+                    except asyncio.CancelledError:
+                        pass
+                    except Exception:
+                        # Retrieve watcher failures without masking the DAE's exit.
+                        logger.exception("[012-MANIFEST] Operator watcher failed")
+            finally:
+                self.operator_manifest_task = None
+                self._operator_manifest_run_active = False
+
+    async def _run_dae(self):
+        """Existing startup, comment-only, and stream-monitoring lifecycle."""
+
         logger.info("=" * 60)
         logger.info("[AI] AUTO MODERATOR DAE STARTING")
         logger.info("WSP-Compliant: Using livechat_core architecture")

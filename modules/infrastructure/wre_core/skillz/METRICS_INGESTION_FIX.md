@@ -1,5 +1,10 @@
 # Metrics Ingestion Critical Fixes
 
+> **Historical issue record — non-authoritative.**
+> This 2025 diagnosis is retained for provenance and neither declares the issue
+> current nor proves it resolved. Re-verify current code and tests before using
+> any claim here for production admission or promotion.
+
 **Date**: 2025-10-20
 **Priority**: CRITICAL - Must fix before production use
 **Reviewer Findings**: 0102_gpt feedback

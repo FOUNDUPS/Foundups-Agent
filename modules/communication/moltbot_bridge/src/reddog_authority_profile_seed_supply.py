@@ -1,17 +1,7 @@
-"""Authority-profile seed supplier for resident RedDog FIX promotion.
-
-Slice: REDDOG_AUTHORITY_PROFILE_SEED_SUPPLY_PHASE1
-
-This module materializes the authority seed consumed by
-``reddog_authority_profile_source_artifact_supply`` from already-supplied
-runtime receipts. It removes the last hand-placed seed file from the resident
-FIX-promotion path while preserving the existing authority-profile source
-validator as the enforcement point.
-
-It does not sign, verify signatures, mutate signer state, mutate work state,
-spawn workers, create worktrees, execute shell commands, enqueue OpenClaw,
-dispatch Hermes, create PRs, settle rewards, write PatternMemory, or re-index
-HoloIndex.
+"""Materialize a RedDog FIX seed from supplied receipts.
+Check plan-bearing lineage and explicit plan/scope agreement; legacy receipts
+remain compatible. Source supply and use-time gates still enforce authority.
+No signing, execution, queue/provider effects or PatternMemory writes occur here.
 """
 
 from __future__ import annotations
@@ -21,13 +11,25 @@ import json
 import os
 import tempfile
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_candidate_gate import (
+    snapshot_architect_fix_plan_lineage,
+)
+from modules.communication.moltbot_bridge.src.reddog_authority_profile_rehydration import (
+    rehydrate_authority_profile_seed,
+    snapshot_seed_worker_plan,
+    worker_plan_matches_execution_scope,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     HIGH_AUTHORITY_OPERATIONS,
     HIGH_AUTHORITY_VALVE_STATES,
     PrincipalAuthorityRecord,
+)
+from modules.communication.moltbot_bridge.src.reddog_operational_memex_supply_receipt import (
+    rehydrate_operational_memex_supply_receipt,
 )
 from modules.communication.moltbot_bridge.src.reddog_work_order_signature_verifier import (
     PermissionSnapshot,
@@ -38,6 +40,12 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     canonical_reddog_wsp15_allocation_digest,
     validate_reddog_wsp15_allocation_receipt,
+)
+from modules.infrastructure.shared_utilities.reddog_runtime_artifact_generation import (
+    reddog_runtime_artifact_generation_lock,
+)
+from modules.infrastructure.shared_utilities.runtime_artifact_safety import (
+    runtime_operation_lock,
 )
 
 
@@ -55,6 +63,9 @@ _DEFAULT_REQUIRED_POLICY_GATES = (
 
 
 class AuthorityProfileSeedSupplyReason:
+    BOUNDED_WORKER_PLAN_INVALID = "authority_seed_bounded_worker_plan_invalid"
+    PROPOSAL_PLAN_INVALID = "authority_seed_proposal_plan_invalid"
+    WORKER_PLAN_SCOPE_INVALID = "authority_seed_worker_plan_scope_invalid"
     DETERMINATION_INVALID = "architect_determination_invalid"
     DETERMINATION_NOT_FIX = "architect_determination_not_fix"
     QUEUE_CANDIDATE_INVALID = "queue_candidate_invalid"
@@ -130,17 +141,20 @@ def run_reddog_authority_profile_seed_supply(
     sovereign_authorization_digest: str | None = None,
     identity_ttl_seconds: int = 3600,
     work_authority_ttl_seconds: int = 900,
+    bounded_worker_plan: Mapping[str, Any] | None = None,
 ) -> AuthorityProfileSeedSupplyResult:
     """Materialize one authority-profile seed from resident runtime receipts."""
-
+    plan, determination, has_bound_plan, input_error = _seed_plan_inputs(
+        architect_determination, bounded_worker_plan,
+    )
+    if input_error:
+        return _reject((input_error,))
     root = Path(repo_root).resolve()
-    determination = _mapping(architect_determination)
     model_selection = _mapping(model_selection_receipt)
     memex_supply = _mapping(memex_supply_receipt)
     principal = _principal(principal_authority_record)
     snapshot = _snapshot(permission_snapshot)
     output, output_reasons = _runtime_output_path(output_path, root)
-
     reasons: list[str] = []
     reasons.extend(output_reasons)
     reasons.extend(_determination_reasons(determination))
@@ -157,12 +171,10 @@ def run_reddog_authority_profile_seed_supply(
     else:
         reasons.append(AuthorityProfileSeedSupplyReason.WSP15_ALLOCATION_INVALID)
     reasons.extend(_model_selection_reasons(model_selection))
-    reasons.extend(_memex_supply_reasons(memex_supply, determination))
     if principal is None:
         reasons.append(AuthorityProfileSeedSupplyReason.PRINCIPAL_INVALID)
     if snapshot is None:
         reasons.append(AuthorityProfileSeedSupplyReason.PERMISSION_SNAPSHOT_INVALID)
-
     rid = str(reddog_id or "").strip()
     rkey = str(reddog_public_key or "").strip()
     if not rid:
@@ -171,10 +183,18 @@ def run_reddog_authority_profile_seed_supply(
         reasons.append(AuthorityProfileSeedSupplyReason.MISSING_REDDOG_PUBLIC_KEY)
     if principal is not None and rkey and rkey == principal.principal_public_key:
         reasons.append(AuthorityProfileSeedSupplyReason.PRINCIPAL_REDDOG_KEY_REUSE)
-
     fid = _selected_foundup_id(foundup_id, principal)
     if not fid:
         reasons.append(AuthorityProfileSeedSupplyReason.FOUNDUP_SCOPE_INVALID)
+    reasons.extend(
+        _memex_supply_reasons(
+            memex_supply,
+            determination,
+            principal_id=(principal.principal_id if principal else ""),
+            foundup_id=fid or "",
+            now_epoch=now_epoch,
+        )
+    )
     repo_full_name = _selected_repo_full_name(snapshot, principal)
     if not repo_full_name:
         reasons.append(AuthorityProfileSeedSupplyReason.REPO_SCOPE_INVALID)
@@ -182,7 +202,6 @@ def run_reddog_authority_profile_seed_supply(
         reasons.append(AuthorityProfileSeedSupplyReason.PERMISSION_SNAPSHOT_INVALID)
     if memex_supply and fid and str(memex_supply.get("foundup_id") or "") not in {"", fid}:
         reasons.append(AuthorityProfileSeedSupplyReason.FOUNDUP_SCOPE_INVALID)
-
     allow = _paths_or_default(allowed_paths, fid, denied=False)
     deny = _paths_or_default(denied_paths, fid, denied=True)
     if not fid or not allow or not deny or not all(_path_within_foundup(path, fid) for path in (*allow, *deny)):
@@ -199,7 +218,6 @@ def run_reddog_authority_profile_seed_supply(
         reasons.append(AuthorityProfileSeedSupplyReason.HIGH_AUTHORITY_COSIGN_MISSING)
     if identity_ttl_seconds <= 0 or work_authority_ttl_seconds <= 0:
         reasons.append(AuthorityProfileSeedSupplyReason.TIME_BOUNDS_INVALID)
-
     evidence = _holoindex_evidence(determination, model_selection, memex_supply)
     if not _valid_holoindex_evidence(evidence):
         reasons.append(AuthorityProfileSeedSupplyReason.HOLOINDEX_EVIDENCE_INVALID)
@@ -237,11 +255,12 @@ def run_reddog_authority_profile_seed_supply(
         now_epoch=now_epoch,
         identity_ttl_seconds=identity_ttl_seconds,
         work_authority_ttl_seconds=work_authority_ttl_seconds,
+        bounded_worker_plan=plan,
     )
-    if not _ascii_deep(seed):
-        return _reject((AuthorityProfileSeedSupplyReason.NON_ASCII_INPUT,))
+    if content_reasons := _seed_content_reasons(seed, has_bound_plan):
+        return _reject(content_reasons)
     try:
-        _write_json_atomic(output, seed)
+        _write_json_atomic(output, seed, repo_root=root)
     except Exception:
         return _reject((AuthorityProfileSeedSupplyReason.OUTPUT_WRITE_FAILED,))
     return AuthorityProfileSeedSupplyResult(
@@ -255,6 +274,27 @@ def run_reddog_authority_profile_seed_supply(
         requested_operation=operation,
         rejection_reasons=(),
     )
+
+
+def _seed_content_reasons(seed: Mapping[str, Any], has_bound_plan: bool) -> tuple[str, ...]:
+    if not _ascii_deep(seed):
+        return (AuthorityProfileSeedSupplyReason.NON_ASCII_INPUT,)
+    if has_bound_plan and not worker_plan_matches_execution_scope(seed["bounded_worker_plan"], seed):
+        return (AuthorityProfileSeedSupplyReason.WORKER_PLAN_SCOPE_INVALID,)
+    return ()
+
+
+def _seed_plan_inputs(value: Any, worker_plan: Any) -> tuple:
+    """Capture plan-bearing inputs before unrelated receipt callbacks."""
+    try:
+        plan = snapshot_seed_worker_plan(worker_plan)
+    except (TypeError, ValueError, RecursionError, OverflowError):
+        return None, {}, False, AuthorityProfileSeedSupplyReason.BOUNDED_WORKER_PLAN_INVALID
+    try:
+        determination, bound = snapshot_architect_fix_plan_lineage(_mapping(value), plan)
+    except (TypeError, ValueError, RecursionError, OverflowError):
+        return None, {}, False, AuthorityProfileSeedSupplyReason.PROPOSAL_PLAN_INVALID
+    return plan, determination, bound, None
 
 
 def _determination_reasons(determination: Mapping[str, Any]) -> list[str]:
@@ -302,16 +342,30 @@ def _model_selection_reasons(model_selection: Mapping[str, Any]) -> list[str]:
     return []
 
 
-def _memex_supply_reasons(memex_supply: Mapping[str, Any], determination: Mapping[str, Any]) -> list[str]:
+def _memex_supply_reasons(
+    memex_supply: Mapping[str, Any],
+    determination: Mapping[str, Any],
+    *,
+    principal_id: str,
+    foundup_id: str,
+    now_epoch: int,
+) -> list[str]:
     if not memex_supply:
         return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
-    if memex_supply.get("schema_version") != "reddog_operational_memex_snapshot_supply_receipt.v1":
-        return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
-    if not str(memex_supply.get("receipt_id") or "").startswith("sha256:"):
-        return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
-    if str(memex_supply.get("snapshot_receipt_id") or "") != str(determination.get("snapshot_receipt_id") or ""):
-        return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
-    if memex_supply.get("no_holoindex_reindex_performed") is not True:
+    proposal = _mapping(determination.get("proposal_admission"))
+    try:
+        now_iso = datetime.fromtimestamp(now_epoch, timezone.utc).isoformat()
+        rehydrate_operational_memex_supply_receipt(
+            memex_supply,
+            expected_foundup_id=foundup_id,
+            expected_principal_id=principal_id,
+            expected_snapshot_receipt_id=str(determination.get("snapshot_receipt_id") or ""),
+            expected_snapshot_content_digest=str(determination.get("snapshot_content_digest") or ""),
+            expected_holoindex_generation_id=str(proposal.get("holoindex_generation_id") or ""),
+            expected_source_revision=str(proposal.get("work_state_revision") or ""),
+            now_iso=now_iso,
+        )
+    except (OSError, OverflowError, TypeError, ValueError):
         return [AuthorityProfileSeedSupplyReason.MEMEX_SUPPLY_INVALID]
     return []
 
@@ -385,8 +439,7 @@ def _seed(
     memex_supply: Mapping[str, Any],
     principal: PrincipalAuthorityRecord,
     snapshot: PermissionSnapshot,
-    reddog_id: str,
-    reddog_public_key: str,
+    reddog_id: str, reddog_public_key: str,
     repo_full_name: str,
     foundup_id: str,
     requested_operation: str,
@@ -399,9 +452,8 @@ def _seed(
     consensus_receipt_digest: str | None,
     sovereign_authorization_digest: str | None,
     holoindex_evidence: Mapping[str, Any],
-    now_epoch: int,
-    identity_ttl_seconds: int,
-    work_authority_ttl_seconds: int,
+    now_epoch: int, identity_ttl_seconds: int, work_authority_ttl_seconds: int,
+    bounded_worker_plan: Mapping[str, Any] | None,
 ) -> dict[str, Any]:
     basis = {
         "determination_id": str(determination.get("determination_receipt_id") or ""),
@@ -462,6 +514,8 @@ def _seed(
         seed["consensus_receipt_digest"] = str(consensus_receipt_digest)
     if sovereign_authorization_digest:
         seed["sovereign_authorization_digest"] = str(sovereign_authorization_digest)
+    if bounded_worker_plan is not None:
+        seed["bounded_worker_plan"] = bounded_worker_plan
     seed["seed_supply_receipt_id"] = _digest(seed)
     return seed
 
@@ -518,17 +572,30 @@ def _runtime_output_path(value: Path | str | None, repo_root: Path) -> tuple[Pat
     return resolved, []
 
 
-def _write_json_atomic(path: Path, payload: Mapping[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, tmp_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent))
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8", newline="\n") as handle:
-            json.dump(payload, handle, sort_keys=True, indent=2)
-            handle.write("\n")
-        os.replace(tmp_name, path)
-    finally:
-        if os.path.exists(tmp_name):
-            os.unlink(tmp_name)
+def _write_json_atomic(
+    path: Path,
+    payload: Mapping[str, Any],
+    *,
+    repo_root: Path,
+) -> None:
+    with runtime_operation_lock(str(path) + ".operation"):
+        with reddog_runtime_artifact_generation_lock(
+            path.parent, repo_root=repo_root
+        ):
+            path.parent.mkdir(parents=True, exist_ok=True)
+            fd, tmp_name = tempfile.mkstemp(
+                prefix=f".{path.name}.", suffix=".tmp", dir=str(path.parent)
+            )
+            try:
+                with os.fdopen(
+                    fd, "w", encoding="utf-8", newline="\n"
+                ) as handle:
+                    json.dump(payload, handle, sort_keys=True, indent=2)
+                    handle.write("\n")
+                os.replace(tmp_name, path)
+            finally:
+                if os.path.exists(tmp_name):
+                    os.unlink(tmp_name)
 
 
 def _path_within_foundup(path: str, foundup_id: str) -> bool:
@@ -604,4 +671,5 @@ __all__ = [
     "AuthorityProfileSeedSupplyReason",
     "AuthorityProfileSeedSupplyResult",
     "run_reddog_authority_profile_seed_supply",
+    "snapshot_seed_worker_plan",
 ]

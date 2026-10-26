@@ -9,12 +9,53 @@ public-facing PoB hero language.
 """
 
 from pathlib import Path
+from html.parser import HTMLParser
 
 import pytest
 
 
 GATEWAY = Path(__file__).resolve().parents[4] / "public" / "index.html"
 MANIFEST = Path(__file__).resolve().parents[4] / "public" / "manifest.json"
+
+
+class TestFXDiscoveryNavigation:
+    """Public discovery has a normal link while ENTER retains admission."""
+
+    def test_fx_anchor_is_in_existing_navigation(self):
+        class NavigationLinks(HTMLParser):
+            def __init__(self):
+                super().__init__()
+                self.in_nav = False
+                self.current = None
+                self.links = []
+
+            def handle_starttag(self, tag, attrs):
+                if tag == "nav":
+                    self.in_nav = True
+                if tag == "a" and self.in_nav:
+                    self.current = {"attrs": dict(attrs), "text": ""}
+
+            def handle_data(self, data):
+                if self.current is not None:
+                    self.current["text"] += data
+
+            def handle_endtag(self, tag):
+                if tag == "a" and self.current is not None:
+                    self.links.append(self.current)
+                    self.current = None
+                if tag == "nav":
+                    self.in_nav = False
+
+        parser = NavigationLinks()
+        parser.feed(GATEWAY.read_text(encoding="utf-8"))
+        fx = [link for link in parser.links if link["text"].strip() == "FX"]
+        assert len(fx) == 1
+        assert fx[0]["attrs"]["href"] == "/f/"
+        assert "FoundUps Exchange" in fx[0]["attrs"].get("aria-label", "")
+        assert "onclick" not in fx[0]["attrs"]
+        assert {link["attrs"].get("href") for link in parser.links} >= {
+            "#how", "#roc", "/litepaper.html", "/f/",
+        }
 
 
 # ---------------------------------------------------------------------------

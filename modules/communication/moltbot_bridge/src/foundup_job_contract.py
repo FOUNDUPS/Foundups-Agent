@@ -264,7 +264,7 @@ class PolicyFlags:
     wsp_preflight_checked: bool = False
     wsp_preflight_passed: bool = False
 
-    dry_run_mode: bool = False
+    dry_run_mode: bool = True
 
     # HXA24: Capability token policy flags
     capability_token_checked: bool = False
@@ -310,12 +310,9 @@ class PolicyFlags:
         payload can never grant itself a passing gate or a valid token by
         carrying ``True`` here.
 
-        Server authority for these flags comes EXCLUSIVELY from runtime
-        validation write-back (see HermesJobExecutor.execute, which writes the
-        validator verdict into job.policy_flags before the destructive-action
-        guard reads it). Code that legitimately needs a flag True must set it
-        via the direct ``PolicyFlags(...)`` constructor or by object attribute
-        assignment (server-authored), NOT through this untrusted path.
+        A direct ``PolicyFlags(...)`` constructor is also only a shape carrier;
+        it is not authority. Live execution must use the signed WRE valve path,
+        not Boolean fields on this public dataclass.
 
         ONLY ``dry_run_mode`` is preserved from inbound data: it is
         operator-authored and ``True`` is the safe/sandbox direction.
@@ -338,7 +335,7 @@ class PolicyFlags:
             capability_token_validated=False,
             capability_token_scope_authorized=False,
             # Operator-authored: preserved (True is the safe/sandbox direction).
-            dry_run_mode=bool(data.get("dry_run_mode", False)),
+            dry_run_mode=bool(data.get("dry_run_mode", True)),
         )
 
 

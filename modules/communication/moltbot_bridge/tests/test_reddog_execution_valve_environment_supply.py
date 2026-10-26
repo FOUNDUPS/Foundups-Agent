@@ -6,6 +6,12 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_publication import (
+    architect_fix_publication_state_projection,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    canonical_digest,
+)
 from modules.communication.moltbot_bridge.src.reddog_execution_valve_environment_supply import (
     SCHEMA_VERSION,
     run_reddog_execution_valve_environment_supply,
@@ -22,6 +28,10 @@ from modules.communication.moltbot_bridge.src.reddog_wre_execution_valve import 
     VALVE_CLOSED,
     VALVE_OPEN_WORKTREE_CREATE,
     evaluate_reddog_execution_valve_canonical,
+)
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    STAGE_AUDIT,
+    STAGE_BOUNDED_EXECUTION,
 )
 from modules.communication.moltbot_bridge.tests.test_reddog_architect_fix_signed_wsp15_work_order_promotion import (
     _authority_profile,
@@ -50,6 +60,32 @@ def _inputs() -> tuple[dict, dict, dict, dict]:
     assert result.accepted and result.authority_profile
     work_state = store.load()
     promoted = dict(result.authority_profile)
+    publication_id = str(promoted["promotion_publication_id"])
+    promotion = next(
+        item
+        for item in work_state["architect_fix_promotions"]
+        if item["publication_id"] == publication_id
+    )
+    projection = architect_fix_publication_state_projection(
+        work_state,
+        publication_id=publication_id,
+    )
+    next_state = {key: value for key, value in work_state.items() if key != "revision"}
+    next_state["architect_fix_publications"] = [
+        {
+            "schema_version": "reddog_architect_fix_promotion_publication.v1",
+            "publication_id": publication_id,
+            "state": "COMMITTED",
+            "proposal_authenticity_attestation_id": promotion[
+                "proposal_authenticity_attestation_id"
+            ],
+            "authority_profile_digest": canonical_digest(promoted),
+            "active_work_state_digest": canonical_digest(projection),
+            "base_work_state_digest": None,
+        }
+    ]
+    store.commit(next_state, expected_revision=work_state["revision"])
+    work_state = store.load()
     permission = {
         "evidence_digest": PERMISSION_DIGEST,
         "expires_at": NOW + 600,
@@ -60,7 +96,7 @@ def _inputs() -> tuple[dict, dict, dict, dict]:
     principal = {
         "principal_id": "github:mjtrout",
         "principal_provider": "github",
-        "principal_public_key": "pub:principal",
+        "principal_public_key": promoted["principal_public_key"],
         "repo_scope": ["FOUNDUPS/Foundups-Agent"],
         "foundup_scope": ["paccess_001"],
         "verified_subject_digest": "sha256:verified",
@@ -93,6 +129,7 @@ def _supply(tmp_path: Path, **overrides):
         "requested_valve_state": VALVE_OPEN_WORKTREE_CREATE,
         "queue_item_id": work_state["wre_queue_items"][0]["queue_item_id"],
         "now_epoch": NOW,
+        "progressive_execution_stage_ceiling": STAGE_BOUNDED_EXECUTION,
     }
     params.update(overrides)
     return run_reddog_execution_valve_environment_supply(**params)
@@ -105,6 +142,7 @@ def test_supply_writes_allowlisted_token_free_governed_environment(tmp_path: Pat
     payload = json.loads(Path(result.output_path or "").read_text(encoding="utf-8"))
     assert payload["schema_version"] == SCHEMA_VERSION
     assert payload["requested_valve_state"] == VALVE_OPEN_WORKTREE_CREATE
+    assert payload["progressive_execution_stage_ceiling"] == STAGE_BOUNDED_EXECUTION
     assert payload["authorization_binding_digest"].startswith("sha256:")
     assert payload["supply_provenance"]["environment_digest"] == result.environment_digest
     assert not any("token" in key.lower() for key in payload)
@@ -122,6 +160,15 @@ def test_supply_defaults_fail_closed_without_explicit_open_request(tmp_path: Pat
     assert payload["valve_worktree_create_enabled"] is False
 
 
+def test_audit_stage_cannot_supply_an_open_effect_valve(tmp_path: Path) -> None:
+    result = _supply(
+        tmp_path, progressive_execution_stage_ceiling=STAGE_AUDIT
+    )
+
+    assert result.accepted is False
+    assert "progressive_execution_stage_ceiling_closed" in result.rejection_reasons
+
+
 def test_supply_rejects_authority_splicing(tmp_path: Path) -> None:
     work_state, profile, permissions, principals = _inputs()
     profile["model_selection_digest"] = "sha256:forged"
@@ -129,6 +176,31 @@ def test_supply_rejects_authority_splicing(tmp_path: Path) -> None:
     result = _supply(tmp_path, authority_profile=profile)
 
     assert result.accepted is False
+
+
+def test_supply_rejects_prepared_publication_before_any_effect(
+    tmp_path: Path,
+) -> None:
+    work_state, profile, _, _ = _inputs()
+    queue_item_id = work_state["wre_queue_items"][0]["queue_item_id"]
+    prepared_state = json.loads(json.dumps(work_state, sort_keys=True))
+    prepared_state["architect_fix_publications"][0]["state"] = "STATE_PREPARED"
+    prepared_state["architect_fix_publications"][0]["base_work_state_digest"] = (
+        "sha256:" + "1" * 64
+    )
+    output_path = (tmp_path / "runtime" / "execution_valve_env.json").resolve()
+
+    result = _supply(
+        tmp_path,
+        work_state=prepared_state,
+        authority_profile=profile,
+        queue_item_id=queue_item_id,
+        output_path=output_path,
+    )
+
+    assert result.accepted is False
+    assert "architect_fix_publication_not_committed" in result.rejection_reasons
+    assert not output_path.exists()
 
 
 def test_supply_rejects_inside_repo_and_symlink_output(tmp_path: Path) -> None:
@@ -247,6 +319,7 @@ def test_bootstrap_reads_distinct_outside_repo_inputs(tmp_path: Path) -> None:
         requested_valve_state=VALVE_OPEN_WORKTREE_CREATE,
         queue_item_id=work_state["wre_queue_items"][0]["queue_item_id"],
         now_epoch=NOW,
+        progressive_execution_stage_ceiling=STAGE_BOUNDED_EXECUTION,
     )
 
     assert result.accepted is True, result.rejection_reasons
@@ -284,6 +357,7 @@ def test_cli_supplies_canonical_environment(tmp_path: Path, capsys) -> None:
         "--principal-authority-records", str(paths["principal_authority_records"]),
         "--output", str(paths["output"]),
         "--requested-valve-state", VALVE_OPEN_WORKTREE_CREATE,
+        "--progressive-execution-stage-ceiling", STAGE_BOUNDED_EXECUTION,
         "--queue-item-id", work_state["wre_queue_items"][0]["queue_item_id"],
         "--now-epoch", str(NOW),
     ])

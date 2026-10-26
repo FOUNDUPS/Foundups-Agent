@@ -31,6 +31,10 @@ from modules.communication.moltbot_bridge.src.reddog_signed_worker_queue_serial_
     SignedWorkerQueueSerialLoopRunnerConfig,
     SignedWorkerQueueSerialLoopRunnerReason,
 )
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    queue_wsp15_allocation_receipt,
+    with_queue_wsp15_allocation,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -103,25 +107,7 @@ def _runtime_paths_env(tmp_path: Path) -> dict[str, str]:
 
 
 def _allocation():
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 20,
-        "priority": "P0",
-        "reasoning_tier": "ULTRA",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "reasoning_tier": "ULTRA",
-            "critic_count": 1,
-            "coding_worker_count": 1,
-            "independent_verifier_required": True,
-            "openclaw_candidate": True,
-            "hermes_execution_allowed": False,
-            "queue_mutation_allowed": False,
-            "mode_selection_source": "reddog_wsp15_allocation_receipt.v1",
-        },
-    }
+    return queue_wsp15_allocation_receipt()
 
 
 def _intent(allocation=None, **overrides):
@@ -192,7 +178,7 @@ def _config(
     tmp_path: Path,
     *,
     bootstrap_kwargs=None,
-    max_steps: int = 1,
+    max_steps: int = 2,
 ) -> SignedWorkerQueueSerialLoopRunnerConfig:
     return SignedWorkerQueueSerialLoopRunnerConfig(
         repo_root=tmp_path / "repo",
@@ -233,7 +219,17 @@ def _bootstrap_payload(**overrides):
 
 
 def _snapshot() -> dict[str, object]:
-    allocation = _allocation()
+    queue_item = with_queue_wsp15_allocation(
+        {
+            "queue_item_id": "queue-1",
+            "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
+            "claim_id": "claim-1",
+            "worker_id": "reddog-0102",
+            "status": "QUEUED",
+            "evidence_refs": ["claim:claim-1", "freshness:fresh-1"],
+            "no_execution_performed": True,
+        }
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -247,22 +243,7 @@ def _snapshot() -> dict[str, object]:
                 "freshness_receipt_id": "fresh-1",
             }
         ],
-        "wre_queue_items": [
-            {
-                "queue_item_id": "queue-1",
-                "slice_id": "REDDOG_NEXT_OPERATIONAL_SLICE_PHASE1",
-                "claim_id": "claim-1",
-                "worker_id": "reddog-0102",
-                "status": "QUEUED",
-                "evidence_refs": [
-                    "claim:claim-1",
-                    "freshness:fresh-1",
-                    f"wsp15_allocation:{allocation['receipt_id']}",
-                ],
-                "wsp15_allocation_receipt": allocation,
-                "no_execution_performed": True,
-            }
-        ],
+        "wre_queue_items": [queue_item],
     }
 
 
@@ -277,8 +258,14 @@ def _accepted_results_through(stage_key: str) -> dict[str, dict[str, object]]:
         "executor_plan": {"decision": "QUEUE_AUTHORIZED_EXECUTOR_PLAN_DRYRUN_ACCEPT"},
         "execution_valve": {"decision": "QUEUE_AUTHORIZED_EXECUTION_VALVE_INVOKE_ACCEPT"},
         "worktree_create": {"decision": "QUEUE_AUTHORIZED_WORKTREE_CREATE_INVOKE_ACCEPT"},
+        "assurance_capacity_admission": {
+            "decision": "ASSURANCE_CAPACITY_ADMISSION_ACCEPT"
+        },
         "bounded_worker_pilot": {
             "decision": "QUEUE_AUTHORIZED_BOUNDED_WORKER_PILOT_INVOKE_ACCEPT"
+        },
+        "exact_sha_commit": {
+            "decision": "RESIDENT_QUEUE_EXACT_SHA_COMMIT_ACCEPT"
         },
         "slice_verifier": {
             "decision": "QUEUE_AUTHORIZED_SLICE_VERIFIER_INVOKE_ACCEPT"
@@ -403,6 +390,9 @@ def test_runtime_binding_builds_runner_from_explicit_env(tmp_path: Path) -> None
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert bootstrap.calls[0]["requested_queue_item_id"] == "queue-1"
     assert bootstrap.calls[0]["work_order_materializer_mode"] == "authority_profile"
+    assert bootstrap.calls[0]["now_epoch"] == 1000
+    assert callable(bootstrap.calls[0]["trusted_now_epoch"])
+    assert bootstrap.calls[0]["trusted_now_epoch"]() == 1000
 
 
 def test_runtime_binding_profile_enables_runner_without_explicit_runner_flag(tmp_path: Path) -> None:
@@ -908,6 +898,7 @@ def test_runtime_binding_profile_derives_existing_optional_runtime_paths(
         runtime_root / "principal_authority_records.json"
     )
     assert bootstrap.calls[0]["signer_socket_path"] == str(runtime_root / "reddog_signer.sock")
+    assert bootstrap.calls[0]["signature_verifier_backend"] == "ed25519"
 
 
 def test_runtime_binding_profile_respects_explicit_binding_disable(tmp_path: Path) -> None:
@@ -1006,8 +997,14 @@ def test_queue_serial_loop_runner_rejects_unsupported_worker(tmp_path: Path) -> 
 
 
 def test_queue_serial_loop_runner_accepts_0102_bounded_code_only_at_artifact_stage(tmp_path: Path) -> None:
-    config = _write_queue_stage_files(tmp_path, through_stage="worktree_create")
-    bootstrap = _FakeBootstrap(_bootstrap_payload(dispatched_stages=("bounded_worker_pilot",)))
+    config = _write_queue_stage_files(
+        tmp_path, through_stage="assurance_capacity_admission"
+    )
+    bootstrap = _FakeBootstrap(
+        _bootstrap_payload(
+            dispatched_stages=("bounded_worker_pilot", "exact_sha_commit")
+        )
+    )
     runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=bootstrap)
     context = _context(worker_runtime="0102", role="coding_worker_1", capability="bounded_code_change")
 
@@ -1022,7 +1019,7 @@ def test_queue_serial_loop_runner_accepts_0102_bounded_code_only_at_artifact_sta
     assert result["accepted"] is True, result
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert bootstrap.calls[0]["requested_queue_item_id"] == "queue-1"
-    assert bootstrap.calls[0]["max_steps"] == 1
+    assert bootstrap.calls[0]["max_steps"] == 2
     assert bootstrap.calls[0]["artifact_generator_mode"] == "foundups_fusion"
     assert result["assigned_stage_complete"] is True
     assert result["queue_chain_complete"] is False
@@ -1034,10 +1031,14 @@ def test_queue_serial_loop_runner_accepts_0102_bounded_code_with_artifact_reques
 ) -> None:
     config = _write_queue_stage_files(
         tmp_path,
-        through_stage="worktree_create",
+            through_stage="assurance_capacity_admission",
         artifact_request_binding=True,
     )
-    bootstrap = _FakeBootstrap(_bootstrap_payload(dispatched_stages=("bounded_worker_pilot",)))
+    bootstrap = _FakeBootstrap(
+        _bootstrap_payload(
+            dispatched_stages=("bounded_worker_pilot", "exact_sha_commit")
+        )
+    )
     runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=bootstrap)
     context = _context(worker_runtime="0102", role="coding_worker_1", capability="bounded_code_change")
 
@@ -1067,7 +1068,7 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_without_generation_s
         authority_profile_path=config.authority_profile_path,
         now_iso=config.now_iso,
         now_epoch=config.now_epoch,
-        max_steps=1,
+        max_steps=2,
         bootstrap_kwargs={
             "work_order_materializer_mode": "authority_profile",
             "artifact_generator_mode": "foundups_fusion",
@@ -1090,6 +1091,57 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_without_generation_s
         in result["rejection_reasons"]
     )
 
+
+def test_queue_serial_loop_runner_accepts_only_production_ready_upstream_mode(
+    tmp_path: Path,
+) -> None:
+    for mode in ("openclaw_gateway", "hermes_api"):
+        root = tmp_path / mode
+        root.mkdir()
+        config = _write_queue_stage_files(
+            root,
+            through_stage="assurance_capacity_admission",
+            artifact_request_binding=True,
+        )
+        kwargs = dict(config.bootstrap_kwargs)
+        kwargs["artifact_generator_mode"] = mode
+        configured = SignedWorkerQueueSerialLoopRunnerConfig(
+            repo_root=config.repo_root,
+            runtime_allowed_root=config.runtime_allowed_root,
+            work_state_path=config.work_state_path,
+            chain_results_path=config.chain_results_path,
+            authority_profile_path=config.authority_profile_path,
+            now_iso=config.now_iso,
+            now_epoch=config.now_epoch,
+            max_steps=2,
+            bootstrap_kwargs=kwargs,
+        )
+        runner = RedDogSignedWorkerQueueSerialLoopRunner(
+            configured,
+            bootstrap=_FakeBootstrap(
+                _bootstrap_payload(
+                    dispatched_stages=("bounded_worker_pilot", "exact_sha_commit"),
+                    no_hermes_dispatch_performed=(mode != "hermes_api"),
+                )
+            ),
+        )
+        context = _context(
+            worker_runtime="0102",
+            role="coding_worker_1",
+            capability="bounded_code_change",
+        )
+
+        result = runner.run_signed_worker_dispatch_task(
+            task_id=f"task-{mode}",
+            task_context=context,
+            worker_dispatch_intent=context["worker_dispatch_intent"],
+            signed_authority_receipt=context[
+                "signed_authority_worker_dispatch_receipt"
+            ],
+            repo_root=root / "repo",
+        )
+
+        assert result["accepted"] is True, result
 
 def test_queue_serial_loop_runner_rejects_0102_bounded_code_before_artifact_stage(tmp_path: Path) -> None:
     config = _write_queue_stage_files(tmp_path, through_stage="execution_valve")
@@ -1118,7 +1170,7 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_static_artifacts(tmp
         authority_profile_path=config.authority_profile_path,
         now_iso=config.now_iso,
         now_epoch=config.now_epoch,
-        max_steps=1,
+        max_steps=2,
         bootstrap_kwargs={
             **dict(config.bootstrap_kwargs),
             "artifact_contents_path": str(tmp_path / "artifact_contents.json"),
@@ -1142,10 +1194,10 @@ def test_queue_serial_loop_runner_rejects_0102_bounded_code_static_artifacts(tmp
     )
 
 
-def test_queue_serial_loop_runner_rejects_queue_stage_worker_before_post_bounded_stage(
+def test_queue_serial_loop_runner_rejects_queue_stage_worker_before_assurance_stage(
     tmp_path: Path,
 ) -> None:
-    config = _write_queue_stage_files(tmp_path, through_stage="worktree_create")
+    config = _write_queue_stage_files(tmp_path, through_stage="execution_valve")
     runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=_FakeBootstrap())
     context = _context(
         intent_id="worker_dispatch_intent_queue_stage_progress",
@@ -1169,11 +1221,25 @@ def test_queue_serial_loop_runner_rejects_queue_stage_worker_before_post_bounded
     )
 
 
-def test_queue_serial_loop_runner_accepts_queue_stage_worker_after_bounded_stage(
+def test_queue_serial_loop_runner_accepts_independent_verifier_after_bounded_stage(
     tmp_path: Path,
 ) -> None:
-    config = _write_queue_stage_files(tmp_path, through_stage="bounded_worker_pilot")
-    bootstrap = _FakeBootstrap(
+    config = _write_queue_stage_files(tmp_path, through_stage="exact_sha_commit")
+    class _AssuranceBootstrap(_FakeBootstrap):
+        def __call__(self, **kwargs):
+            result = super().__call__(**kwargs)
+            chain_path = Path(kwargs["chain_results_path"])
+            chain = json.loads(chain_path.read_text(encoding="utf-8"))
+            chain["stage_results"]["slice_verifier"] = {
+                "assurance_completion_request": {
+                    "schema_version": "reddog_signed_worker_assurance_completion.v1",
+                    "reservation_id": "assurance-1",
+                }
+            }
+            chain_path.write_text(json.dumps(chain), encoding="utf-8")
+            return result
+
+    bootstrap = _AssuranceBootstrap(
         _bootstrap_payload(
             dispatched_stages=("slice_verifier",),
             next_action="RUN_QUEUE_AUTHORIZED_VERIFIED_DRAFT_PR_PUBLISH_INVOKE",
@@ -1181,10 +1247,10 @@ def test_queue_serial_loop_runner_accepts_queue_stage_worker_after_bounded_stage
     )
     runner = RedDogSignedWorkerQueueSerialLoopRunner(config, bootstrap=bootstrap)
     context = _context(
-        intent_id="worker_dispatch_intent_queue_stage_progress",
-        role="queue_stage_worker",
+        intent_id="worker_dispatch_intent_independent_verifier",
+        role="independent_slice_verifier",
         worker_runtime="openclaw",
-        capability="queue_stage_progress",
+        capability="independent_slice_verification",
     )
 
     result = runner.run_signed_worker_dispatch_task(
@@ -1198,9 +1264,45 @@ def test_queue_serial_loop_runner_accepts_queue_stage_worker_after_bounded_stage
     assert result["accepted"] is True, result
     assert result["decision"] == SIGNED_WORKER_QUEUE_SERIAL_LOOP_RUNNER_ACCEPT
     assert bootstrap.calls[0]["max_steps"] == 1
-    assert result["assigned_stage_complete"] is False
+    assert result["assigned_stage_complete"] is True
     assert result["queue_chain_complete"] is False
-    assert result["queue_chain_requeue_required"] is True
+    assert result["queue_chain_requeue_required"] is False
+    assert result["bootstrap_result"]["assurance_completion_request"][
+        "reservation_id"
+    ] == "assurance-1"
+
+
+def test_queue_serial_loop_runner_rejects_verifier_without_completion_request(
+    tmp_path: Path,
+) -> None:
+    config = _write_queue_stage_files(tmp_path, through_stage="exact_sha_commit")
+    runner = RedDogSignedWorkerQueueSerialLoopRunner(
+        config,
+        bootstrap=_FakeBootstrap(
+            _bootstrap_payload(dispatched_stages=("slice_verifier",))
+        ),
+    )
+    context = _context(
+        intent_id="worker_dispatch_intent_independent_verifier",
+        role="independent_slice_verifier",
+        worker_runtime="openclaw",
+        capability="independent_slice_verification",
+    )
+
+    result = runner.run_signed_worker_dispatch_task(
+        task_id="task-queue-stage",
+        task_context=context,
+        worker_dispatch_intent=context["worker_dispatch_intent"],
+        signed_authority_receipt=context["signed_authority_worker_dispatch_receipt"],
+        repo_root=tmp_path / "repo",
+    )
+
+    assert result["accepted"] is False
+    assert (
+        SignedWorkerQueueSerialLoopRunnerReason
+        .ASSURANCE_COMPLETION_REQUEST_MISSING
+        in result["rejection_reasons"]
+    )
 
 
 def test_queue_serial_loop_runner_rejects_bootstrap_kwarg_override(tmp_path: Path) -> None:

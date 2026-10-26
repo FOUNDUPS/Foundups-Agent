@@ -1,0 +1,5 @@
+# The upstream rule set remains enabled. Any future exception must combine an
+# exact reviewed fixture path and exact synthetic value; never exclude tests,
+# documentation, generated source, or all hexadecimal values as a class.
+[extend]
+useDefault = true

@@ -8,12 +8,22 @@ Structure:
 - `test_analysis.py` lightweight mission analysis helpers.
 - `test_planning.py` coordination planning helpers.
 - `test_execution.py` execution routing helpers.
+- `test_foundup_launch_request.py` preserves ordered error-category expectations and the source AST guard; only the exact current command error maps to authority rejection, with an unknown near-message control.
+- `test_intake_packet_builder.py` proves actual commander-authorized metadata handoff, frozen
+  job lineage, malformed/conflicting input rejection and preservation of dry-run queue behavior.
+- `test_github_nomination_review.py` owns the distinct GitHub event/form/CLI boundary:
+  fixed service context, nominator identity, OSP preservation/redaction, size limits,
+  generic rejection and exclusive artifacts. It does not authenticate replay metadata.
 - `test_mcp.py` MCP enum smoke checks.
 - `test_mixins_extended.py` extended coverage for mixin fallbacks.
 - `test_monitor_flow.py` witness loop coverage (gated).
 - `test_openclaw_security_sentinel.py` OpenClaw sentinel policy and cache behavior.
 - `test_ai_overseer_openclaw_security.py` AI Overseer sentinel wiring and monitor lifecycle.
 - `test_openclaw_security_alerts.py` OpenClaw security event emission, dispatch, and dedupe behavior.
+- `test_m2m_holo_retrieval_benchmark.py` generation-bound, non-mutating Holo
+  benchmark Skillz runtime plus independent signed A-grade evidence-gate
+  coverage, resident-within-run owner reuse, actual runtime digest capture, and
+  exact dependency-closure rejection.
 
 ## Running Tests
 
@@ -31,7 +41,34 @@ PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -m pytest modules/ai_intelligence/ai_ove
 
 ## Opt-in Flags
 
+The nomination workflow selects this owner plus launch-request, intake-transport,
+intake-auth-provider and genesis-validator directly with normal package imports,
+`--noconftest --import-mode=importlib -p no:cacheprovider`, an external temp root and
+pytest9.0.3. Its682 local cases have no skips. The new owner is also allowlisted for
+ordinary module collection; no existing skip/gating rule is weakened.
+The committed workflow is the exact hosted command and retains Junit/dependency
+artifacts. Local replay and mocked data do not establish live issue provenance,
+project control or production admission. Original RED results remain historical.
+
 - `AI_OVERSEER_WITNESS_LOOP=1` enables witness loop scenarios.
-- `AI_OVERSEER_HEAVY_TESTS=1` re-enables heavy regression files.
+- `AI_OVERSEER_HEAVY_TESTS=1` re-enables otherwise skipped files. Set it when explicitly selecting
+  the deterministic intake/bridge/WRE matrix: this conftest's default allowlist otherwise also
+  skips selected sibling-module tests. It does not itself select or start live workers.
+
+The Holo retrieval benchmark tests are explicitly allowlisted in the default
+lane; broader legacy AI Overseer suites remain opt-in.
+
+The benchmark regression proves canonical authority-root selection, governed
+owner-query invocation, exact owner-error preservation, and non-mutation. The
+2026-08-27 focused benchmark/navigation matrix passed 56 tests; the live corpus
+correctly returned `quality_below_policy`, not success.
+
+The A-grade gate regressions use synthetic signed-evidence verifiers and prove
+the backend-content-bound callable facade re-runs public regressions instead
+of trusting a supplied
+public result, plus minimum corpus size, public-corpus separation, evaluator
+independence, metric and latency policy, candidate binding, signature failure,
+receipt integrity, policy-downgrade rejection, and explicit no-promotion truth.
+They do not claim a live sealed evaluation or non-test caller.
 
 Keep these flags off for fast deterministic runs; enable intentionally for full-stack validation.

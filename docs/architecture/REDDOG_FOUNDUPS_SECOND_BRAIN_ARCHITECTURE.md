@@ -7,6 +7,9 @@
 **Controlling protocol:** WSP_60 Module Memory Architecture
 **WSP addendum:** `WSP_framework/docs/annexes/WSP_60_FOUNDUP_MEMEX_ADDENDUM.md`
 
+Related interaction/cognition architecture:
+`docs/architecture/REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md`
+
 ## Canonical terminology
 
 ```text
@@ -20,10 +23,93 @@ Breadcrumbs
 = episodic continuity and recent operational history
 
 RedDog
-= the orchestrator that launches, builds, runs, audits, and improves FoundUps
+= the lightweight, low-latency interaction, exchange, and attention surface
+  through which 012 communicates with a principal-scoped 0102 Digital Twin
+
+012 Principal Memex
+= persistent principal cognition that informs 0102 across FoundUps
+
+0102 Digital Twin
+= the deep cognition, reasoning, retrieval, and orchestration layer behind RedDog
+
+RedDog services
+= the runtime hosts for authenticated conversation, models, memory adapters,
+  transports, and receipts; no single service is the complete RedDog identity
 ```
 
-"Second Brain" and personal digital-twin language describe possible later applications. They are not the implementation center of the current lane.
+The FoundUp Memex remains the implementation center of FoundUp cognition. The
+Principal Memex is a separate Digital Twin substrate, not a global FoundUp
+store, conversation transcript, AgentDB queue, or authority source.
+
+## Principal Memex and RedDog
+
+```text
+012 <-> RedDog fast surface <-> principal-scoped 0102 Digital Twin
+          |
+          +-> Principal Memex (principal cognition)
+          +-> scoped FoundUp Memex (one FoundUp cognition)
+          +-> HoloIndex (repository/WSP retrieval)
+          |
+          +-> authenticated proposal-to-work promotion
+                    -> OpenClaw -> WRE -> Hermes / FoundUp DAEs
+```
+
+RedDog is how 012 encounters the principal-scoped 0102 Digital Twin, but RedDog
+is not 0102. RedDog services may host the continuous relationship's runtime.
+The Principal Memex helps 0102 interpret stable 012
+goals, preferences, terminology, decision history, and cross-FoundUp strategy.
+Current repository evidence remains authoritative for code truth, and signed
+authorization remains authoritative for work.
+
+The interaction surface and cognition depth operate as distinct components in
+one continuous conversational relationship. The intended fast RedDog loop owns live
+conversation while the deeper 0102 loop performs background retrieval,
+verification, omission/contradiction detection, WSP application, model
+escalation, and worker orchestration. Background results return as bounded
+context deltas; they do not create a second identity, replace source evidence,
+or grant execution authority. The detailed architecture and proposed delivery
+sequence are defined in `REDDOG_DUAL_LOOP_COGNITION_ARCHITECTURE.md`.
+
+The structural read-only projection is implemented in
+`modules/ai_intelligence/digital_twin/src/principal_memex_projection.py`. A
+caller-supplied projection remains non-admissible. The resident backend may
+derive and admit one projection from the exact current signed principal
+conversation only after consuming its conversation capability and a separate
+principal-signed disclosure bound to exact decision IDs, model runtime, nonce,
+TTL, revocation, and durable replay state. This admitted context cannot persist,
+project into a FoundUp, mutate HoloIndex, or grant work authority. Governed
+durable source issuance, conversation learning, and cross-Memex transfer remain
+explicit later lifecycles.
+
+## Model intelligence and worker boundary
+
+```text
+RedDog requirements
+  -> AI Gateway catalog + deterministic incumbent
+  -> Nemotron shadow topology proposals
+  -> governed held-out AutoResearch
+  -> independent promotion authority and signed production evidence
+  -> verified runtime topology
+  -> extension / Fusion / OpenClaw / Hermes consumers
+```
+
+RedDog emits task requirements; it does not choose a champion by prompt
+heuristic. Local Nemotron may propose compact evaluation topologies, but
+deterministic admission owns roles/providers and always retains an incumbent
+outside proposer control. The configured campaign runner reserves the entire
+bounded task-by-candidate matrix before first egress and records exact call
+evidence. Proposer origin, campaign execution, policies, and candidate identity
+must then be authenticated by externally signed, durable, replay-protected
+receipts before a promotion gate can emit champion evidence.
+
+Production routing is a distinct authority layer. Independent benchmark and
+promotion signatures feed deterministic selection and the existing runtime
+binder. Consumers receive only a short-lived one-shot exact
+role/provider/model topology and must declare provider availability. Static
+extension defaults are explicit evaluation fallback, never production or
+worker authority. Aggregate panel promotion remains shadow-only until a signed
+member/topology promotion contract exists. No AI model, extension, OpenClaw, or
+Hermes component owns the external signing keys through this architecture.
 
 ## WSP alignment
 
@@ -55,7 +141,16 @@ Each FoundUp is a decentralized autonomous entity, not merely a repository or ap
 - governed research and environmental signals;
 - decision history, contradictions, and supersession.
 
-RedDog operates through the Memex of the FoundUp currently in scope. RedDog does not silently collapse all FoundUps into one memory store.
+0102 operates against the scoped Memex of the FoundUp currently in context and
+returns bounded results through RedDog. Neither layer silently collapses all
+FoundUps into one memory store.
+
+One continuous RedDog/0102 conversational relationship does not yet mean one durable conversation is
+implemented across every surface. The VSIX currently discards raw provider
+history, and the p.fMALL/phone authenticated resident adapter remains
+specified, not implemented. Continuity becomes `OBSERVED` only when the
+existing session authority, AgentDB event/CAS state, durable idempotency, and
+source-labelled Memex admission are connected and adversarially verified.
 
 ## POC
 
@@ -132,4 +227,8 @@ docs/architecture/FOUNDUPS_MEMEX_DEFERRED_GOVERNANCE_NOTES.md
 7. FOUNDUP_MEMEX_MULTI_REDDOG_COLLABORATION_PROTOTYPE_PHASE1
 ```
 
-Personal 012/0102 Memex work and collective ecosystem memory remain deferred until the FoundUp-centric contracts are proven.
+Authenticated admission of current public accepted principal decisions is now
+implemented for the resident backend architect model. Governed durable
+Principal Memex source issuance and retention, automatic resident supply,
+explicit cross-Memex projection, and collective ecosystem memory remain
+deferred until their independent trust contracts are proven.

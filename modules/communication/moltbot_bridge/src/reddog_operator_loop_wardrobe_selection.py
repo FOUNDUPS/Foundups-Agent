@@ -144,6 +144,8 @@ class RedDogOperatorLoopWardrobeSelectionReceipt:
     grounding_preflight_passed: bool
     grounding_preflight_digest: str
     grounding_preflight_rejection_reasons: List[str]
+    foundup_id: str
+    registered_foundup_target_receipt_id: str
     skillz_candidates: List[str]
     lane_refs: List[str]
     rejection_reasons: List[str]
@@ -383,13 +385,40 @@ def _safe_int(value: Any) -> int:
         return 0
 
 
-def _grounding_preflight_state(value: Optional[Mapping[str, Any]]) -> Tuple[bool, bool, str, List[str]]:
+def _foundup_target_receipt_valid(value: Any) -> bool:
     if not isinstance(value, Mapping):
-        return (False, True, _canonical_digest({"grounding_preflight": "not_applied"}), [])
+        return False
+    if (
+        value.get("schema_version") != "registered_foundup_target_receipt.v1"
+        or value.get("passed") is not True
+        or value.get("grants_authority") is not False
+        or not str(value.get("foundup_id") or "")
+    ):
+        return False
+    payload = {key: item for key, item in value.items() if key != "receipt_id"}
+    return value.get("receipt_id") == f"sha256:{_canonical_digest(payload)}"
+
+
+def _grounding_preflight_state(
+    value: Optional[Mapping[str, Any]],
+) -> Tuple[bool, bool, str, List[str], str, str]:
+    if not isinstance(value, Mapping):
+        return (False, True, _canonical_digest({"grounding_preflight": "not_applied"}), [], "", "")
     raw_reasons = value.get("rejection_reasons") or []
     if isinstance(raw_reasons, (str, bytes)):
         raw_reasons = [raw_reasons]
     reasons = _dedupe(raw_reasons)
+    foundup_id = str(value.get("foundup_id") or "")
+    target_receipt_id = str(value.get("registered_foundup_target_receipt_id") or "")
+    target_receipt = value.get("registered_foundup_target_receipt")
+    target_verified = value.get("foundup_use_time_verified") is True
+    if (foundup_id or target_receipt_id or target_receipt) and (
+        not _foundup_target_receipt_valid(target_receipt)
+        or target_receipt.get("foundup_id") != foundup_id
+        or target_receipt.get("receipt_id") != target_receipt_id
+        or not target_verified
+    ):
+        reasons.append("registered_foundup_target_binding_invalid")
     applied = value.get("applied") is True or "passed" in value or bool(reasons)
     passed = value.get("passed") is True if applied else True
     digest_payload = {
@@ -400,8 +429,12 @@ def _grounding_preflight_state(value: Optional[Mapping[str, Any]]) -> Tuple[bool
         "semantic_targets_count": _safe_int(value.get("semantic_targets_count")),
         "external_research_targets_count": _safe_int(value.get("external_research_targets_count")),
         "quoted_reference_blocks_count": _safe_int(value.get("quoted_reference_blocks_count")),
+        "foundup_id": foundup_id,
+        "registered_foundup_target_receipt_id": target_receipt_id,
+        "registered_foundup_target_receipt": target_receipt if isinstance(target_receipt, Mapping) else None,
+        "foundup_use_time_verified": target_verified,
     }
-    return (applied, passed, _canonical_digest(digest_payload), reasons)
+    return (applied, passed and not reasons, _canonical_digest(digest_payload), reasons, foundup_id, target_receipt_id)
 
 
 def select_reddog_operator_loop_wardrobe_dryrun(
@@ -444,6 +477,8 @@ def select_reddog_operator_loop_wardrobe_dryrun(
         grounding_passed,
         grounding_digest,
         grounding_reasons,
+        foundup_id,
+        target_receipt_id,
     ) = _grounding_preflight_state(grounding_preflight)
 
     rejection_reasons: List[str] = []
@@ -497,6 +532,8 @@ def select_reddog_operator_loop_wardrobe_dryrun(
         "grounding_preflight_passed": grounding_passed,
         "grounding_preflight_digest": grounding_digest,
         "grounding_preflight_rejection_reasons": grounding_reasons,
+        "foundup_id": foundup_id,
+        "registered_foundup_target_receipt_id": target_receipt_id,
         "skillz_candidates": candidates,
         "lane_refs": lanes,
         "wsp_refs": governing_wsps,
@@ -527,6 +564,8 @@ def select_reddog_operator_loop_wardrobe_dryrun(
         grounding_preflight_passed=grounding_passed,
         grounding_preflight_digest=grounding_digest,
         grounding_preflight_rejection_reasons=grounding_reasons,
+        foundup_id=foundup_id,
+        registered_foundup_target_receipt_id=target_receipt_id,
         skillz_candidates=candidates,
         lane_refs=lanes,
         rejection_reasons=_dedupe(rejection_reasons),

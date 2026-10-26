@@ -15,7 +15,27 @@ from .holo_query_embedding_space_proof import (
     embedding_space_evidence,
     pin_backend_generation,
 )
-from .holo_query_service_response import build_response, flatten_hits
+from .holo_query_service_response import (
+    semantic_success_response as _success_response,
+)
+
+
+PRODUCER_FAILURE_CODES = frozenset({
+    "HOLOINDEX_MODULE_INTENT_SNAPSHOT_UNAVAILABLE",
+    "HOLOINDEX_TIER0_INCOMPLETE",
+    "HOLOINDEX_TIER0_LOOKUP_FAILED",
+})
+
+
+def _producer_failure_code(raw: Mapping[str, Any]) -> str:
+    """Allow only stable producer codes across the owner trust boundary."""
+    value = raw.get("metadata")
+    metadata = value if isinstance(value, Mapping) else {}
+    error = str(metadata.get("error") or "")
+    return (
+        error if error in PRODUCER_FAILURE_CODES
+        else "SEMANTIC_BACKEND_UNAVAILABLE"
+    )
 
 
 def _semantic_evidence(
@@ -167,6 +187,12 @@ def _pre_query_proof(
     started: float,
     deadline: float,
 ) -> tuple[FreshnessSnapshot | None, Mapping[str, Any] | None]:
+    try:
+        owner._verify_replica_binding()
+    except Exception:
+        return None, owner._failure(
+            "QUERY_REPLICA_INVALID", query=query, started=started
+        )
     _actual_sha, failure = repository_proof(
         owner,
         expected_sha,
@@ -280,7 +306,7 @@ def _semantic_search(
     pin_backend_generation(owner, before)
     if not semantic:
         return raw, mode, owner._failure(
-            "SEMANTIC_BACKEND_UNAVAILABLE",
+            _producer_failure_code(raw),
             query=query,
             snapshot=before,
             raw=raw,
@@ -346,9 +372,7 @@ def _final_generation_failure(
 
 
 def _post_query_proof(
-    owner: Any,
-    *,
-    expected_sha: str,
+    owner: Any, *, expected_sha: str,
     query: str,
     before: FreshnessSnapshot,
     raw: Mapping[str, Any],
@@ -378,6 +402,13 @@ def _post_query_proof(
     )
     if failure or after is None:
         return None, failure or owner._failure("STALE_INDEX", query=query)
+    try:
+        owner._verify_replica_binding()
+    except Exception:
+        return None, owner._failure(
+            "QUERY_REPLICA_CHANGED", query=query, snapshot=after,
+            raw=raw, mode=mode, started=started,
+        )
     if not after.valid:
         return None, owner._failure(
             snapshot_error(after),
@@ -389,27 +420,6 @@ def _post_query_proof(
         )
     failure = _final_generation_failure(owner, before, after, context)
     return (None, failure) if failure else (after, None)
-
-
-def _success_response(
-    *,
-    query: str,
-    limit: int,
-    raw: Mapping[str, Any],
-    after: FreshnessSnapshot,
-    started: float,
-) -> Mapping[str, Any]:
-    return build_response(
-        ok=True,
-        query=query,
-        freshness="CURRENT",
-        error="",
-        binding=after.binding,
-        raw=raw,
-        hits=flatten_hits(raw, limit),
-        mode="semantic",
-        latency_ms=int((time.monotonic() - started) * 1000),
-    )
 
 
 def run_semantic_proof(
@@ -456,6 +466,7 @@ def run_semantic_proof(
     if failure or after is None:
         return failure or owner._failure("STALE_INDEX", query=query)
     return _success_response(
+        owner=owner,
         query=query, limit=limit, raw=raw, after=after, started=started
     )
 

@@ -1,0 +1,22 @@
+# RedDog principal-scoped private runtime data
+# Architecture/specification documents remain tracked; captured personal data does not.
+
+# Contact / relationship memory stores and source evidence
+data/contact_memory/
+data/contacts/
+runtime/contact_memory/
+runtime/contacts/
+private/contact_memory/
+private/contacts/
+
+# Lick encounter state, receipts, biometric/behavioral evidence, and local templates
+data/lick/
+runtime/lick/
+private/lick/
+lick_receipts/
+encounter_profiles/
+biometric_templates/
+
+# Local capture evidence / derived principal memory
+capture_evidence/
+relationship_memory/

@@ -2,10 +2,55 @@
 
 ## Public API Definition
 
+### X audio extraction timeout contract (2026-10-25 candidate)
+
+The existing X adapter keeps its 30-second FFmpeg communication deadline. On
+TimeoutExpired it kills only the process it created, then communicates with a
+separate five-second drain/reap deadline. Successful settlement preserves the
+existing BadRequest("Audio extraction timeout") response. Kill/drain/reaping
+failure is explicit as "Audio extraction timeout; child cleanup failed" within
+the existing processing-error response. Temporary-file unlink failure preserves
+the primary exception and adds a cleanup note rather than hiding that failure.
+A cleanup failure is not evidence of a settled child; no global/process-tree
+cleanup or unbounded wait is performed.
+
+Local author evidence covers the original 18 guarded cases and one actual
+owned Python child. Independent source/outcome review and a separate child
+positive pass; missing-kill/missing-drain controls reject incomplete cleanup.
+Real FFmpeg/provider execution and hosted POSIX acceptance remain separate;
+no native AI claim is made.
+
+### Ethereum logger: current educational contract
+
+`EthereumLogger` uses Web3 for connection and network-stat queries when available.
+The Web3 7.15.0 / eth-account 0.13.6 pair uses
+`ExtraDataToPOAMiddleware` at layer zero. Prior Web3 compatibility has local and hosted baseline evidence. The new
+Flask 3.1.3 graph passes the same 18 guarded cases in separate author and
+independent runs; fresh hosted Python 3.11/3.12 acceptance remains pending.
+Import, initialization or connection failure retains simulation fallback.
+`log_acoustic_analysis()` still returns `simulated_...` because `_real_logging`
+also delegates to simulation. The illustrative `ethereum_hash` fields below
+are not evidence of submitted transactions or chain receipts.
+
+`verify_log()` returns educational metadata for simulated identifiers, and for
+any supplied value when `simulate_only` is true. Otherwise it returns `None`;
+there is no chain-authenticity verification. Initialization currently prints
+raw exception text. This compatibility slice preserves these limitations and
+does not qualify real-provider diagnostics, keys, signing or transaction access.
+
 ### Web Application Interface
 
 #### `create_app() -> Flask`
 Creates and configures the Flask web application instance.
+
+Flask 3.1.3 retains the default 500000-byte non-file form-field limit. Read
+`request.max_form_memory_size` inside an active request context; Flask 3.1
+exposes this as a request-instance property backed by `MAX_FORM_MEMORY_SIZE`,
+not a numeric class attribute. The existing 600000-byte multipart metadata
+case returns JSON HTTP 413 before processing, while small/malformed requests
+retain their existing 400 contracts. This dependency/test correction does not
+set a new application limit or change the upload handler. Local Python guards
+and controlled fixtures do not establish live-provider or deployment safety.
 
 **Parameters**: None
 
@@ -65,7 +110,13 @@ Process uploaded audio file or X video URL for acoustic analysis.
 **Error Responses**:
 - `400`: Invalid file format, missing audio, or invalid X URL
 - `403`: Geographic access restriction (IP geofencing)
+- `413`: Multipart request exceeds Werkzeug's parsing limits
 - `500`: Internal processing error
+
+Werkzeug 3.1.9 limits each multipart non-file field to 500,000 bytes by default.
+The upload handler preserves `RequestEntityTooLarge` as a JSON error with HTTP
+413 before audio processing or Ethereum logging. This is not a total file-upload
+size limit; the existing application `MAX_CONTENT_LENGTH` setting is unchanged.
 
 #### `/health (GET)`
 Service health monitoring endpoint.
@@ -161,6 +212,7 @@ Upload and process synthetic audio file for acoustic analysis.
 - 200: Success
 - 400: Invalid audio or missing GPS
 - 403: IP geofencing violation
+- 413: Multipart parsing limit exceeded
 - 500: Processing error
 
 ## Error Handling
@@ -223,14 +275,13 @@ Raised when request originates outside allowed geographic area.
 - Automatic memory cleanup after processing
 - IP-based geographic restrictions
 - Synthetic data only (no real audio recordings)
-- Ethereum testnet logging for educational verification
+- Educational Ethereum logging simulation; no authenticated chain receipt
 
 ## Testing
 
 Unit tests available in `tests/` directory:
-- `test_acoustic_processor.py`: Audio processing validation
-- `test_triangulation_engine.py`: Location calculation verification
-- `test_audio_library.py`: Fingerprint matching accuracy
+- `test_acoustic_processor.py`: Existing audio/library tests and six offline
+  Web3 compatibility cases (Windows passed; hosted qualification pending)
 - `test_web_app.py`: API endpoint functionality
 
 Run tests with: `python -m pytest tests/`

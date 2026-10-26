@@ -14,3 +14,25 @@
 # repo-wide normalization policy is being introduced here.
 modules/foundups/kosei/frontend/** text eol=lf
 public/kosei/**                    text eol=lf
+
+# Canonical generated registry is byte-compared on every platform.
+WSP_knowledge/WSP_Test_Registry.json text eol=lf
+
+# RedDog VSIX reproducibility: vsce packages working-tree bytes, so every
+# packaged text input must materialize as LF on every host.
+extensions/reddog/*.js text eol=lf
+extensions/reddog/start_operations_python_bootstrap.py text eol=lf
+extensions/reddog/package.json text eol=lf
+extensions/reddog/README.md text eol=lf
+extensions/reddog/LICENSE text eol=lf
+extensions/reddog/icon.png -text
+
+# Generated shard identity is raw-compared against canonical LF JSON.
+extensions/reddog/tests/contract_shards/manifest.json text eol=lf
+
+# Production Skillz manifests verify exact file bytes. Materialize these
+# registered inputs as their committed LF bytes on every checkout platform.
+modules/communication/moltbot_bridge/skillz/reddog_operations/SKILLz.md text eol=lf
+modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILLz.md text eol=lf
+modules/infrastructure/wre_core/skillz/auto_test_registry_audit/executor.py text eol=lf
+modules/infrastructure/wre_core/skillz/auto_test_registry_audit/SKILL_MANIFEST.json text eol=lf

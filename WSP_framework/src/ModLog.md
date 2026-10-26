@@ -1,5 +1,28 @@
 # WSP Framework Change Log
 
+## 2026-09-05 - RedDog Surface / 0102 Digital Twin Boundary Correction
+
+- Advanced WSP 73 to v2.3 and aligned WSP 98: RedDog is the lightweight
+  low-latency interaction/exchange surface; 0102 is the principal-scoped
+  Digital Twin and deep cognition/orchestration layer behind it.
+- Preserved one continuous conversational relationship without collapsing the
+  two components or creating competing assistants. Synchronized both
+  `WSP_knowledge` mirrors byte-for-byte. (WSP 22/50/64/73/81/97/98)
+
+## 2026-08-26 - RedDog/0102 Canonical Architecture Alignment
+
+- Replaced obsolete WSP 73 II-Agent/FastAPI/Docker/YAML topology with the
+  principal-scoped RedDog/0102 identity, memory, conversation, model-routing,
+  and governed work contract.
+- Corrected WSP 80's DAE terminology and false consciousness/unbounded-capacity
+  language.
+- Replaced WSP 98's nonexistent mandatory mesh SDK/modules and zero-server
+  claims with truth-labelled resident, peer-assisted, federation, and security
+  gates.
+- Synchronized exact WSP_knowledge protocol and master-index mirrors under WSP
+  81. 012 approval was explicit in the initiating direction.
+
+
 <!-- ============================================================
      SCOPE: WSP Framework Protocol Changes ONLY
      ============================================================
@@ -8,6 +31,27 @@
 
      [OK] DOCUMENT HERE:
      - Creating NEW WSP protocol documents
+
+---
+
+## 2026-08-13 - WSP 62 Differential Flexibility Clarified
+
+**WSP References**: WSP 15, WSP 22, WSP 62, WSP 87, WSP 97
+
+**WSP 81 Governance**: `NOTIFICATION_REQUIRED`; 012 notified in the initiating
+request. Exact base: `b0344c4e3a6ba8a45b921b16aabab865a6341bfc`.
+Validation: framework/knowledge byte equality, 65 focused WSP 62 and modular-
+audit tests, GitHub CI, CodeQL, security, red-team observation, and HoloIndex
+freshness. Recovery: revert the focused Git commit; no archive is required.
+
+**Changes Made**:
+- Aligned the Python hard limit with WSP 87 and the implemented modular-audit
+  threshold of 1500 lines.
+- Defined warning and critical thresholds as review signals, not unconditional
+  integration blockers.
+- Preserved hard rejection for candidate-attributed new debt, exemption
+  ratchets, and growth beyond authoritative no-growth ceilings.
+- Synced the canonical `WSP_knowledge` mirror and added a static regression.
 
 ---
 

@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import ast
 import base64
+import hashlib
+import inspect
 import json
 from pathlib import Path
 
@@ -24,8 +26,11 @@ from modules.communication.moltbot_bridge.src.reddog_signer_key_provider_dryrun 
     PROVIDER_MODE_WSP71_PERMISSIONED,
     SIGNING_KEY_PREFIX,
 )
+from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_config_supply import (
+    SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+)
 from modules.communication.moltbot_bridge.src.reddog_signer_socket_service_runtime_cli import (
-    SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT,
+    FAIL_SIGNER_RUNTIME_CLI_RETIRED,
     SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT,
     run_reddog_signer_socket_service_runtime_cli,
 )
@@ -92,6 +97,70 @@ class CapturingBoundedService:
         )
 
 
+class _ManifestSelection:
+    pass
+
+
+class _ManifestSelectionBoundary:
+    def __init__(self, capability: object, values: dict[str, object]) -> None:
+        self._capability = capability
+        self._values = values
+
+    def consume(self, value: object) -> dict[str, object]:
+        if value is not self._capability:
+            raise ValueError("manifest_selection_unverified")
+        self._capability = None
+        return dict(self._values)
+
+
+def _manifest_selection_loader(
+    *,
+    repo_root: Path,
+    config_path: Path,
+    run_packet_path: Path,
+) -> tuple[object, _ManifestSelectionBoundary]:
+    config = json.loads(config_path.read_text(encoding="utf-8"))
+    capability = _ManifestSelection()
+    values = {
+        "manifest_id": "sha256:" + ("a" * 64),
+        "artifact_generation_digest": "sha256:" + ("b" * 64),
+        "config_digest": _payload_digest(config),
+        "config_raw_digest": _raw_digest(config_path),
+        "run_packet_digest": _raw_digest(run_packet_path),
+        "repo_root": str(repo_root.resolve()),
+        "runtime_root": str(config_path.parent.resolve()),
+        "config_path": str(config_path.resolve()),
+        "run_packet_path": str(run_packet_path.resolve()),
+        "generation": 1,
+        "generation_revision": "a" * 64,
+        "selection_issued_at": 100,
+        "selection_expires_at": 130,
+        "owner_config_id": "sha256:" + ("c" * 64),
+    }
+    return capability, _ManifestSelectionBoundary(capability, values)
+
+
+def _payload_digest(value: object) -> str:
+    raw = json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=True
+    )
+    return "sha256:" + hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def _raw_digest(path: Path) -> str:
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def test_public_cli_has_no_manifest_loader_injection() -> None:
+    signature = inspect.signature(
+        run_reddog_signer_socket_service_runtime_cli
+    )
+
+    assert "manifest_selection_loader" not in signature.parameters
+    assert "resolver_factory" not in signature.parameters
+    assert "serve_bounded" not in signature.parameters
+
+
 def _private_key():
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 
@@ -130,8 +199,23 @@ def _repo(tmp_path: Path) -> Path:
 
 
 def _config(public_key: str, *, socket_path: Path) -> dict[str, object]:
+    signer_runtime = (
+        socket_path.parent.parent / f"{socket_path.parent.name}-signer-state"
+    )
     return {
+        "schema_version": SIGNER_SERVICE_CONFIG_SCHEMA_VERSION,
+        "runtime_root": str(socket_path.parent),
+        "signer_runtime_root": str(signer_runtime),
         "socket_path": str(socket_path),
+        "control_loop_anchor_path": str(signer_runtime / "anchor.json"),
+        "control_loop_authority_policy": {
+            "issuer_principal_id": "github:012",
+            "signer_public_key": public_key,
+            "key_epoch": "epoch-1",
+            "consensus_receipt_digest": "sha256:" + ("1" * 64),
+            "authority_profile_digest": "sha256:" + ("2" * 64),
+            "authority_profile_source_receipt_id": "sha256:" + ("3" * 64),
+        },
         "provider_mode": PROVIDER_MODE_WSP71_PERMISSIONED,
         "allow_test_only_key_material": False,
         "permission_snapshot_fresh": True,
@@ -165,23 +249,12 @@ def _write_json(path: Path, payload: object) -> Path:
     return path
 
 
-def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(tmp_path: Path) -> None:
+def test_cli_is_retired_before_authority_secret_or_socket_access(
+    tmp_path: Path,
+) -> None:
     repo = _repo(tmp_path)
     runtime = tmp_path / "runtime"
-    private_key = _private_key()
-    public_key = _public_text(private_key)
-    config = _write_json(
-        runtime / "signer-service.json",
-        _config(public_key, socket_path=runtime / "signer.sock"),
-    )
-    resolver = FakeResolver(
-        {
-            "op://prod-vault/reddog-signing/private": _private_key_secret(private_key),
-            "op://prod-vault/reddog-audit/mac": _audit_secret(),
-        }
-    )
-    resolver_factory = CapturingResolverFactory(resolver)
-    service = CapturingBoundedService()
+    config = _write_json(runtime / "signer-service.json", {})
     emitted: list[str] = []
 
     code = run_reddog_signer_socket_service_runtime_cli(
@@ -190,65 +263,17 @@ def test_cli_runs_signer_bootstrap_with_wsp71_resolver_and_emits_safe_receipt(tm
             str(repo),
             "--config",
             str(config),
-            "--op-executable",
-            "C:/Program Files/1Password/op.exe",
-            "--op-timeout-s",
-            "7",
-            "--ttl-seconds",
-            "61",
-            "--session-id",
-            "session-prod",
         ],
-        resolver_factory=resolver_factory,
-        serve_bounded=service,
-        emit=emitted.append,
-    )
-
-    assert code == 0
-    payload = json.loads(emitted[0])
-    assert payload["status"] == SIGNER_SOCKET_SERVICE_RUNTIME_CLI_ACCEPT
-    assert payload["result"]["accepted"] is True
-    assert payload["no_main_runtime_wiring"] is True
-    assert payload["no_holoindex_reindex_performed"] is True
-    assert resolver_factory.calls == [
-        {
-            "op_executable": "C:/Program Files/1Password/op.exe",
-            "timeout_s": 7.0,
-            "ttl_seconds": 61,
-            "session_id": "session-prod",
-        }
-    ]
-    assert resolver.calls == [
-        ("op://prod-vault/reddog-signing/private", "signer:reddog-authority"),
-        ("op://prod-vault/reddog-audit/mac", "signer:reddog-authority"),
-    ]
-    assert len(service.calls) == 1
-    text = emitted[0]
-    assert SIGNING_KEY_PREFIX not in text
-    assert AUDIT_KEY_PREFIX not in text
-    assert "0123456789abcdef" not in text
-
-
-def test_cli_rejects_unsafe_config_before_service_call(tmp_path: Path) -> None:
-    repo = _repo(tmp_path)
-    inside = _write_json(repo / "signer-service.json", {})
-    resolver_factory = CapturingResolverFactory(FakeResolver({}))
-    service = CapturingBoundedService()
-    emitted: list[str] = []
-
-    code = run_reddog_signer_socket_service_runtime_cli(
-        ["--repo-root", str(repo), "--config", str(inside)],
-        resolver_factory=resolver_factory,
-        serve_bounded=service,
         emit=emitted.append,
     )
 
     assert code == 2
     payload = json.loads(emitted[0])
     assert payload["status"] == SIGNER_SOCKET_SERVICE_RUNTIME_CLI_REJECT
-    assert payload["result"]["accepted"] is False
-    assert "FAIL_SIGNER_BOOTSTRAP_CONFIG_PATH_INSIDE_REPO" in payload["result"]["rejection_reasons"]
-    assert service.calls == []
+    assert payload["rejection_reasons"] == [FAIL_SIGNER_RUNTIME_CLI_RETIRED]
+    assert payload["no_authority_loaded"] is True
+    assert payload["no_secret_resolver_constructed"] is True
+    assert payload["no_socket_bound"] is True
 
 
 def test_cli_module_has_no_main_openclaw_hermes_or_repo_mutation_surface() -> None:

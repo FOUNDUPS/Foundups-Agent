@@ -1,5 +1,40 @@
 # LiveChat Module Interface
 
+## Confirmed live-session handoff (PR841)
+
+`AutoModeratorDAE.terminate_comment_engagement(for_live_handoff=False)` keeps
+full supervisor shutdown as its default. The explicit live-handoff path reserves
+the successfully initialized API session's nonempty actual channel/chat identity,
+settles matching comment operations, then starts polling. Social-only initialization,
+pending stream hints and an environment fallback channel do not confirm a session.
+Concurrent live sessions cannot replace the reservation; every exit clears it.
+
+`MultiChannelCoordinator.settle_channel(channel_id)` and
+`RotationSupervisor.settle_channel(channel_id)` operate on their existing owned
+tasks. Both browser paths, pre-audit/fallback/retry dispatch and enabled rotation
+consult the confirmed identity in addition to the advisory signal's 300-second
+TTL. Rotation resolves registry names to channel IDs. Direct restart/inbox-clear
+runner calls use the same coordinator ownership and canonical browser mapping.
+Unrelated browser work remains owned and running. Deferred work is not reported
+as processed/failed or completed in a rotation checkpoint.
+
+`engagement_lifecycle.py` contains shared functions only; session identities and
+task registries stay on the existing DAE/coordinator/rotation instances. Subprocess
+cancellation recovers racing spawns, terminates then kills if necessary, and awaits
+child exit and pipe readers. Thread cancellation/deadlines await actual worker
+completion and may remain blocked indefinitely. Unknown/in-process runner modes
+are not treated as preemptible; handoff awaits natural completion. Failed cleanup
+retains ownership and blocks later handoff/dispatch rather than reporting settlement.
+Default shutdown awaits browser children; heartbeat cleanup also runs if session
+persistence fails.
+
+This is bounded local source/lifecycle qualification. It does not establish global
+browser quiescence, browser-side rollback, independently scheduled CommunityMonitor
+settlement, live YouTube delivery, full installed-package readiness or native RSI.
+The existing cross-browser singleton checkpoint can still race; no checkpoint
+schema/store or timing configuration is added. Existing #848 indexing, #1759 watcher
+and #782 quota contracts remain separate and intact.
+
 ## Overview
 The LiveChat module provides functionality to connect to a YouTube livestream chat, listen for messages, log them, and send responses. It integrates with other modules like BanterEngine for automated responses and token_manager for credential rotation. The module now includes QWEN intelligence for enhanced decision-making and pattern learning.
 
@@ -10,6 +45,45 @@ This module exports:
 - `QwenYouTubeIntegration`: QWEN intelligence layer for channel prioritization
 
 ## Classes
+
+## Operator command inbox (Phase 1)
+
+`OperatorCommandQueue` polls the trusted-local `memory/012_manifest.json` once
+per minute. `AutoModeratorDAE.run()` owns and awaits its watcher on every exit.
+Allowlisted actions: `status`, gated `announce`, gated `set_context`, and local
+`clear_context`. No arbitrary prompt, shell, browser or code execution exists.
+
+`YT_012_MANIFEST_FILE`, `YT_012_MANIFEST_ACK_FILE` and
+`YT_012_MANIFEST_STATE_FILE` override the three distinct paths. Relative paths
+are rooted in the actual checkout, independent of process working directory.
+`resolve_manifest_state_path()` is shared with the stored-comment reader.
+
+The version-1 acknowledgement ledger claims each immutable ID and payload
+digest **before** any effect. The existing runtime OS lock plus an in-process
+guard serialize one canonical ledger. `unknown` outcomes (including crashes,
+cancellation, timeouts and ambiguous sender results) are terminal and require
+operator reconciliation; they are never automatically retried. Legacy terminal
+receipts remain terminal. This is duplicate-attempt prevention, not exactly-once
+delivery, authentication, or power-loss durability on every filesystem.
+
+Only `deferred` work may retry, using its persisted first-observation time.
+TTL defaults to 3,600 seconds; integer values 60–86,400 are accepted. Deferred
+context waits for every requested surface before activation; newer context/clear
+commands supersede older pending context. `clear_context` clears the shared
+context, not legacy module-local broadcast configuration. Live-chat messages
+are limited to 200 characters; comment-only context allows 500. Existing STOP,
+automation, announcement, send and comment-engagement gates remain authoritative.
+Live-chat dry-run is `simulated` without activating shared context or calling a sender.
+
+Accepted sender results report `sender_accepted=true, delivery_verified=false`
+and amber health. Local status/context acknowledgements can be green. Receipts
+and optional heartbeat telemetry do not authenticate delivery. Malformed state
+blocks the poll without resetting the ledger; the watcher retries later. Each
+JSON file is bounded to 4 MiB and an inbox to 100 entries. Ledgers are not pruned
+automatically: capacity requires supervised archival preserving replay history.
+The sender deadline defaults to 30 seconds (maximum 300), relying on cooperative
+async cancellation. See [the existing contract](docs/clarity/YOUTUBE_DAE_OPERATOR_COMMAND_PLANE_PHASE1.md)
+for authority and validation limits.
 
 ### `QwenYouTubeIntegration`
 QWEN intelligence layer providing smart decision-making for YouTube DAE channel rotation.

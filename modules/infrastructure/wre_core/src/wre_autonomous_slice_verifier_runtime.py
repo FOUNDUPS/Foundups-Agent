@@ -9,17 +9,21 @@ fail-closed REJECT decision for downstream draft-PR publishing.
 """
 
 from __future__ import annotations
-
 import fnmatch
 import hashlib
 import json
 import re
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
-
+from modules.infrastructure.wre_core.src.wre_test_differential_verification import verify_test_differential_evidence
+from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
+    optional_authority_binding_values_valid,
+)
+from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
+    signed_authority_envelope_digest_matches,
+)
 AUTONOMOUS_SLICE_VERIFIER_ACCEPT = "AUTONOMOUS_SLICE_VERIFIER_ACCEPT"
 AUTONOMOUS_SLICE_VERIFIER_REJECT = "AUTONOMOUS_SLICE_VERIFIER_REJECT"
-
 FAIL_REQUIRED_FIELD = "FAIL_REQUIRED_FIELD"
 FAIL_SELF_VERIFICATION = "FAIL_SELF_VERIFICATION"
 FAIL_HEAD_SHA = "FAIL_HEAD_SHA"
@@ -33,12 +37,12 @@ FAIL_RECEIPT_CHAIN = "FAIL_RECEIPT_CHAIN"
 FAIL_WORKTREE_RECEIPT = "FAIL_WORKTREE_RECEIPT"
 FAIL_HOLOINDEX_EVIDENCE = "FAIL_HOLOINDEX_EVIDENCE"
 FAIL_MODEL_RUNTIME_BINDING = "FAIL_MODEL_RUNTIME_BINDING"
+FAIL_MEMEX_SUPPLY_BINDING = "FAIL_MEMEX_SUPPLY_BINDING"
 FAIL_PATTERN_MEMORY_WRITE = "FAIL_PATTERN_MEMORY_WRITE"
 FAIL_PR_OR_MERGE_ALREADY_PERFORMED = "FAIL_PR_OR_MERGE_ALREADY_PERFORMED"
 
 HEAD_SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 SHA256_RE = re.compile(r"^sha256:[0-9a-f]{64}$")
-
 PROTECTED_PATH_PREFIXES = (
     ".github/workflows/",
     "WSP_framework/",
@@ -69,6 +73,7 @@ SECRET_MARKERS = (
     "token=",
     "password=",
 )
+FAIL_ASSURANCE_RESERVATION = "FAIL_ASSURANCE_RESERVATION"
 
 
 @dataclass(frozen=True)
@@ -78,6 +83,9 @@ class AutonomousSliceVerifierReceipt:
     slice_name: str
     verifier_id: str
     worker_id: str
+    assurance_reservation_id: str
+    assurance_reservation_digest: str
+    verifier_task_id: str
     base_sha: str
     head_sha: str
     changed_paths: List[str]
@@ -89,6 +97,8 @@ class AutonomousSliceVerifierReceipt:
     holoindex_freshness_receipt_digest: str
     model_runtime_binding_receipt_id: Optional[str]
     model_runtime_binding_digest: str
+    memex_supply_receipt_id: Optional[str]
+    memex_supply_digest: str
     rejection_reasons: List[str]
     accepted: bool
     no_command_execution_performed: bool = True
@@ -233,14 +243,12 @@ def _diff_evidence_ok(
     return bool(_changed_paths(diff_evidence))
 
 
-def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str) -> bool:
+def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str, request: Mapping[str, Any]) -> bool:
     if test_evidence.get("head_sha") != head_sha:
         return False
     if not _is_digest(test_evidence.get("test_evidence_digest")):
         return False
     checks = _list(test_evidence.get("required_checks"))
-    if not checks:
-        return False
     for check in checks:
         if not isinstance(check, Mapping):
             return False
@@ -248,17 +256,14 @@ def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str) -> bool:
             return False
         if check.get("conclusion") not in ("success", "pass"):
             return False
-    return True
-
-
-def _signed_authority_ok(signed_authority: Mapping[str, Any]) -> bool:
-    if signed_authority.get("accepted") is not True:
+    differential = _mapping(test_evidence.get("differential_evidence"))
+    if not differential:
+        return bool(checks)
+    if differential.get("execution_authority_verified") is not True:
         return False
-    digest = signed_authority.get("signature_gate_digest") or signed_authority.get(
-        "signed_work_authority_digest"
-    )
-    return _is_digest(digest)
-
+    expected_digest = _digest({"required_checks": checks, "differential_evidence": differential})
+    verified, _, _ = verify_test_differential_evidence(differential, request=request)
+    return verified and test_evidence.get("test_evidence_digest") == expected_digest
 
 def _receipt_chain_ok(receipt_chain: Mapping[str, Any]) -> bool:
     if receipt_chain.get("accepted") is not True:
@@ -274,12 +279,16 @@ def _worktree_receipt_ok(worktree_receipt: Mapping[str, Any]) -> bool:
         return False
     if worktree_receipt.get("decision") in {"REJECT", "WORKTREE_CREATE_REJECT"}:
         return False
-    digest = (
-        worktree_receipt.get("receipt_digest")
-        or worktree_receipt.get("worktree_write_receipt_digest")
-        or worktree_receipt.get("receipt_id")
+    return bool(_worktree_receipt_digest(worktree_receipt))
+
+
+def _worktree_receipt_digest(worktree_receipt: Mapping[str, Any]) -> str:
+    explicit = worktree_receipt.get("receipt_digest") or worktree_receipt.get(
+        "worktree_write_receipt_digest"
     )
-    return bool(str(digest or "").strip())
+    if explicit:
+        return str(explicit) if _is_digest(explicit) else ""
+    return _digest(worktree_receipt) if worktree_receipt.get("receipt_id") else ""
 
 
 def _holoindex_evidence_ok(holoindex_evidence: Mapping[str, Any]) -> bool:
@@ -339,6 +348,47 @@ def _runtime_binding_ok(req: Mapping[str, Any]) -> tuple[bool, Optional[str], st
     return True, first[0], first[1]
 
 
+def _memex_binding_pair(value: Mapping[str, Any]) -> tuple[Any, Any]:
+    return (
+        value.get("memex_supply_receipt_id"),
+        value.get("memex_supply_digest"),
+    )
+
+
+def _memex_binding_ok(req: Mapping[str, Any]) -> tuple[bool, Optional[str], str]:
+    signed_authority = _mapping(req.get("signed_authority"))
+    candidates = (
+        req,
+        signed_authority,
+        _mapping(signed_authority.get("work_authority")),
+        _mapping(signed_authority.get("authority")),
+        _mapping(signed_authority.get("payload")),
+        _mapping(req.get("artifact_generation_receipt")),
+        _mapping(_mapping(req.get("artifact_generation_result")).get("receipt")),
+        _mapping(req.get("bounded_worker_pilot_receipt")),
+    )
+    raw_pairs = tuple(
+        pair
+        for pair in (_memex_binding_pair(candidate) for candidate in candidates)
+        if pair[0] not in (None, "") or pair[1] not in (None, "")
+    )
+    if not raw_pairs:
+        return True, None, ""
+    if any(
+        not optional_authority_binding_values_valid(receipt_id, digest)
+        for receipt_id, digest in raw_pairs
+    ):
+        return False, None, ""
+    pairs = tuple(
+        (str(receipt_id), str(digest))
+        for receipt_id, digest in raw_pairs
+    )
+    first = pairs[0]
+    if any(pair != first for pair in pairs[1:]):
+        return False, first[0], first[1]
+    return True, first[0], first[1]
+
+
 def _all_paths_in_scope(paths: Sequence[str], req: Mapping[str, Any]) -> bool:
     allowed_patterns = [str(item) for item in _list(req.get("allowed_path_patterns"))]
     forbidden_patterns = [str(item) for item in _list(req.get("forbidden_path_patterns"))]
@@ -355,9 +405,8 @@ def _all_paths_in_scope(paths: Sequence[str], req: Mapping[str, Any]) -> bool:
     return True
 
 
-def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSliceVerifierResult:
+def verify_autonomous_slice_runtime(request: Mapping[str, Any], *, trusted_work_authority_digest: Any) -> AutonomousSliceVerifierResult:
     """Verify one autonomous coding-slice evidence packet.
-
     The verifier is intentionally independent from the authoring worker. It
     checks evidence shape, exact-head binding, scope, tests, signatures, receipt
     chain, HoloIndex freshness, and non-self verification. It never executes the
@@ -372,22 +421,33 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
     pilot_receipt = _mapping(req.get("bounded_worker_pilot_receipt"))
     holoindex_evidence = _mapping(req.get("holoindex_evidence"))
     runtime_binding_ok, runtime_binding_id, runtime_binding_digest = _runtime_binding_ok(req)
-
+    memex_binding_ok, memex_supply_id, memex_supply_digest = _memex_binding_ok(req)
     work_order_id = str(req.get("work_order_id") or "")
     slice_name = str(req.get("slice_name") or "")
     worker_id = str(req.get("worker_id") or "")
     verifier_id = str(req.get("verifier_id") or "")
     base_sha = str(req.get("base_sha") or "")
     head_sha = str(req.get("head_sha") or "")
-
+    assurance_reservation_id = str(
+        req.get("assurance_reservation_id") or ""
+    )
+    assurance_reservation_digest = str(
+        req.get("assurance_reservation_digest") or ""
+    )
+    verifier_task_id = str(req.get("verifier_task_id") or "")
     reasons: List[str] = []
     if not all([work_order_id, slice_name, worker_id, verifier_id]):
         reasons.append(FAIL_REQUIRED_FIELD)
     if worker_id and verifier_id and worker_id == verifier_id:
         reasons.append(FAIL_SELF_VERIFICATION)
+    if (
+        not assurance_reservation_id.startswith("assurance-reservation-")
+        or not _is_digest(assurance_reservation_digest)
+        or not verifier_task_id.startswith("reddog-worker-dispatch-")
+    ):
+        reasons.append(FAIL_ASSURANCE_RESERVATION)
     if not _is_head_sha(base_sha) or not _is_head_sha(head_sha) or base_sha == head_sha:
         reasons.append(FAIL_HEAD_SHA)
-
     if not _diff_evidence_ok(
         diff_evidence=diff_evidence,
         base_sha=base_sha,
@@ -397,18 +457,16 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
     changed_paths = _changed_paths(diff_evidence)
     if changed_paths and not _all_paths_in_scope(changed_paths, req):
         reasons.append(FAIL_SCOPE_VIOLATION)
-
     protected_paths = [path for path in changed_paths if _protected_path(path)]
     protected_digest = req.get("protected_surface_authorization_digest")
     consensus_digest = req.get("consensus_receipt_digest")
     if protected_paths and not (_is_digest(protected_digest) and _is_digest(consensus_digest)):
         reasons.append(FAIL_PROTECTED_SURFACE)
-
     if _diff_contains_secret(diff_evidence):
         reasons.append(FAIL_SECRET_IN_DIFF)
-    if not _test_evidence_ok(test_evidence, head_sha):
+    if not _test_evidence_ok(test_evidence, head_sha, req):
         reasons.append(FAIL_TEST_EVIDENCE)
-    if not _signed_authority_ok(signed_authority):
+    if not signed_authority_envelope_digest_matches(signed_authority, trusted_work_authority_digest):
         reasons.append(FAIL_SIGNED_AUTHORITY)
     if not _receipt_chain_ok(receipt_chain):
         reasons.append(FAIL_RECEIPT_CHAIN)
@@ -420,11 +478,12 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         reasons.append(FAIL_HOLOINDEX_EVIDENCE)
     if not runtime_binding_ok:
         reasons.append(FAIL_MODEL_RUNTIME_BINDING)
+    if not memex_binding_ok:
+        reasons.append(FAIL_MEMEX_SUPPLY_BINDING)
     if req.get("pattern_memory_write_performed") is True:
         reasons.append(FAIL_PATTERN_MEMORY_WRITE)
     if req.get("draft_pr_published") is True or req.get("merge_performed") is True:
         reasons.append(FAIL_PR_OR_MERGE_ALREADY_PERFORMED)
-
     deduped = _dedupe(reasons)
     accepted = not deduped
     receipt_chain_hash = (
@@ -432,12 +491,7 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         or receipt_chain.get("signed_receipt_chain_terminal_hash")
         or ""
     )
-    worktree_digest = (
-        worktree_receipt.get("receipt_digest")
-        or worktree_receipt.get("worktree_write_receipt_digest")
-        or worktree_receipt.get("receipt_id")
-        or ""
-    )
+    worktree_digest = _worktree_receipt_digest(worktree_receipt)
     signed_digest = signed_authority.get("signature_gate_digest") or signed_authority.get(
         "signed_work_authority_digest"
     )
@@ -446,6 +500,9 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         "slice_name": slice_name,
         "verifier_id": verifier_id,
         "worker_id": worker_id,
+        "assurance_reservation_id": assurance_reservation_id,
+        "assurance_reservation_digest": assurance_reservation_digest,
+        "verifier_task_id": verifier_task_id,
         "base_sha": base_sha,
         "head_sha": head_sha,
         "changed_paths": sorted(changed_paths),
@@ -459,6 +516,8 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         ),
         "model_runtime_binding_receipt_id": runtime_binding_id or "",
         "model_runtime_binding_digest": runtime_binding_digest,
+        "memex_supply_receipt_id": memex_supply_id or "",
+        "memex_supply_digest": memex_supply_digest,
         "rejection_reasons": deduped,
     }
     receipt = AutonomousSliceVerifierReceipt(
@@ -467,6 +526,9 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         slice_name=slice_name,
         verifier_id=verifier_id,
         worker_id=worker_id,
+        assurance_reservation_id=assurance_reservation_id,
+        assurance_reservation_digest=assurance_reservation_digest,
+        verifier_task_id=verifier_task_id,
         base_sha=base_sha,
         head_sha=head_sha,
         changed_paths=sorted(changed_paths),
@@ -480,6 +542,8 @@ def verify_autonomous_slice_runtime(request: Mapping[str, Any]) -> AutonomousSli
         ),
         model_runtime_binding_receipt_id=runtime_binding_id,
         model_runtime_binding_digest=runtime_binding_digest,
+        memex_supply_receipt_id=memex_supply_id,
+        memex_supply_digest=memex_supply_digest,
         rejection_reasons=deduped,
         accepted=accepted,
     )
@@ -500,9 +564,11 @@ __all__ = [
     "AUTONOMOUS_SLICE_VERIFIER_REJECT",
     "AutonomousSliceVerifierReceipt",
     "AutonomousSliceVerifierResult",
+    "FAIL_ASSURANCE_RESERVATION",
     "FAIL_DIFF_EVIDENCE",
     "FAIL_HEAD_SHA",
     "FAIL_HOLOINDEX_EVIDENCE",
+    "FAIL_MEMEX_SUPPLY_BINDING",
     "FAIL_MODEL_RUNTIME_BINDING",
     "FAIL_PATTERN_MEMORY_WRITE",
     "FAIL_PR_OR_MERGE_ALREADY_PERFORMED",

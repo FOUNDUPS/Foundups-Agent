@@ -1,8 +1,154 @@
+## 2026-10-26: Qualify patched optional HTTP dependencies
+
+Initial profile metadata exposed published Starlette/cryptography advisories;
+hold promotion despite green functional/secrets gates. Allocation3bbbb2ee4
+selects a separate FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/crypto50.0.2 profile.
+Same786 cases pass; product/oracles/legacy auth and original environment remain
+unchanged. Public metadata for25 resolved distributions reports zero published
+advisories, not a whole-system/binary audit. Independent inventory found older
+bootstrap pip outside those25; allocationc6557db8b precedes isolated/CI pip26.2.2
+repair, separately reported. Same786 cases pass again; all26 installed packages
+show zero published registry advisories. One reviewed HTTPX test-client warning;
+independent profile/metadata and final workflow reviews accept the bounded
+component, including unchanged11 held-outs plus separate optional-denied503.
+The patched-profile receipt binds those reports and root786; fresh exact-head
+hosted/security/main qualification remains required.
+
+## 2026-10-26: Connect member-authenticated draft intake (initial profile)
+
+15/P1 allocation6efb68f50, frozen tests2e46fd2aa, WSP00/6/11/15/22/50/77/84/97.
+Add one explicit Clerk server-only provider wrapper around the existing body-first
+intake_request seam, consumed by PFMall's actual POST route. Fixed public RSA,
+issuer/origin/time/v2 session policy; generic failures and pseudonymous handle.
+Legacy HMAC behavior/source/oracles and package exports remain unchanged. Optional
+HTTP dependencies are outside resident imports; no environment secrets, JWT/JWKS
+network fetch, nonce/data writes, deployment, admission/ownership/work/token grant.
+PFMall TestModLog records exact RED/GREEN786 evidence/one baseline warning.
+Independent11 held-outs and separate optional-import-denied ASGI probe pass after
+canonical PEM repair, with the original configuration finding retained. Current
+hosted/security/main gates remain separate. Durable claim state and real-session
+qualification are still required.
+
+## 2026-10-26: Consume public GitHub nominations as review drafts
+
+WSP00/3/6/11/15/22/49/50/62/84/97; C3/I4/D4/Impact4=15/P1.
+Add a bounded issue-form adapter/CLI and an opened-issue Actions consumer using
+the existing LaunchRequest mapper. Preserve OSP advisory data and separate the
+fixed review-service context from nominator identity and HTTP authentication.
+No owner, commander, registry, token or trading grant. Old mapper/auth code and
+AST oracles stay unchanged; the new owner is outside the resident closure.
+Baseline387PASS; original RED80FAIL/387PASS and strengthened RED81FAIL/387PASS
+remain retained. Final five-owner682PASS and actual CLI replay pass. The canonical
+test registry adds one unit file (1772 total/273 quarantined); manifest1471 and
+canonical c1f97e86 remain unchanged. Hosted/security/main gates remain required.
+Evidence: external foundups-nomination-review-20261026; workflow retains exact
+Junit cases/dependency report. No live issue-event or whole-system readiness claim.
+
+## 2026-09-21: Qualify the existing FoundUp genesis prototype
+
+- WSP 00/15/22/50/95/97/109; static qualification C3/I3/D2/Impact2 = 10/P2 after PR1838 merged its exact reviewed tree. The previous repair's245 overlapping local/independent cases and ten exact-head checks passed; its main workflows are tracked separately.
+- Existing prototype frontmatter, canonical registry/loader, safety scanner and typed intake contracts are distinct. Missing executable registration/manifest/outcome evidence does not justify a second skill, weaker admission or redundant generic tests.
+- The structured builder/gate is implemented but does not execute the prototype document or turn arbitrary prose into the full WSP109 packet. New-ID collision checking is explicit/injected; the default gate does not load current registry occupancy. Preserve the registered detect_ai identity when extending AmIBot.
+- This slice changes canonical planning/logs only. No production, skill, registry, manifest or test changes; no tests, product imports, scanner subprocess, model/provider or runtime activation. Source/AST/JSON checks and independent review are recorded in the backlog.
+
+## 2026-09-20: Reconcile four FoundUp validation fixture failures
+
+- WSP00/15/22/50/62/84/97/99: two existing test owners only; production guards unchanged. Reuse the canonical synthetic manifest under disposable repo-relative paths and classify the exact current command error.
+- Baseline4failed/197passed; focused205passed and connected677passed, no skips. Four added negative controls prove missing/wrong-FoundUp manifests reject before builder construction. Initial absolute-root fixture attempt5failed/200passed remains evidence.
+- Independent review and remote publication status are recorded in the root RSI backlog. Local mocked builder/receipt tests establish no live worker, runtime admission, active FoundUp result or retained RSI improvement.
+
 # AI Intelligence Overseer - ModLog
+
+## 2026-09-20: Prove commander draft handoff with the declared intent
+
+- Corrected the intake integration fixture that mistook an authority-denial response for success. Actual OpenClawIntent metadata now proves a queued, detached envelope only with explicit commander authority; the dry-run builder itself still does not queue.
+- Focused111pass and independent99overlap/31adversarial cases. Connected1048pass/4fail; all4 reproduced on clean d00b156f. Existing tests retain the13review-discovered regression cases.
+- Reconciled the scaffold roadmap against existing typed job/route/planner owners. Public intake grants draft rights only; planner digest, admission, registry and runtime execution remain separate.
+- WSP00/15/22/50/62/84/95/97/99/109. Exact evidence and PR closure: docs/roadmaps/rsi_swarm_backlog.json#current_observation. Preserved pre-existing ModLog NUL bytes; no unrelated cleanup.
+
+
+## 2026-09-13 - RSI context preservation evidence
+
+- Ran the existing deterministic M2M compiler and compile shim in a disposable replica of source bcc877829. The runbook shrank 186 to 14 lines but lost all eight declared boundary passages and failed YAML parsing.
+- A seven-line synthetic reference passed the YAML gate after losing its worker/verifier independence sentence. Rejected both candidates; original sources and executable Skillz remain unchanged. No model call, promotion or verified learning.
+- Corrected README, INTERFACE and the prototype compile-gate Skillz to describe implemented structural/YAML checks, actual result fields, side effects and unimplemented fidelity checks. This is a documentation correction, not a runtime fidelity repair.
+- Evidence and next acceptance requirements: docs/operations/RSI_SWARM_DISPATCH.md, linked from the root roadmap. WSP 22, 48, 50, 84, 97, 99.
 
 **Module**: `modules/ai_intelligence/ai_overseer/`
 **Status**: Active (Autonomous Code Patching + Daemon Restart + Activity Routing)
 **Version**: 0.10.5
+
+---
+
+## 2026-08-27 - HOLO RUNTIME CANDIDATE BINDING HARDENING
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 83, 87, 97
+
+- Changed the public benchmark to capture the authenticated owner's actual
+  runtime-environment digest instead of predicting child state from the parent.
+- Retained one owner across the probe and complete held-out corpus, with final
+  cleanup, eliminating repeated cold owner startup inside one benchmark.
+- Made A-grade composition reject every run whose query receipts do not prove
+  exact runtime closure. Installed dependency payload bytes remain unverified,
+  so current production evidence cannot pass this gate.
+- Added no ranker, index, route, repository, signer, or promotion authority.
+
+## 2026-08-27 - INDEPENDENT HOLO A-GRADE EVIDENCE GATE
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 87, 97
+
+- Added a pure A-grade composition gate for the public generation-bound run
+  plus a caller-supplied signature-verifier seam for sealed-corpus evaluation.
+  The default policy binds
+  30 disjoint cases, Recall/MRR/nDCG >= .95, and p95 latency <= 5 seconds.
+- Exposed it through a backend-content-bound callable benchmark facade that
+  re-runs the governed public corpus rather than trusting caller-supplied
+  public status flags.
+- Kept authority explicit: even accepted evidence sets promotion authority and
+  performed promotion to false, with no gate-local ranker, index, route, or
+  repository effect. Effects of an injected external verifier are not attested.
+- Made the 30-case, .95 quality, and 5-second latency requirements
+  non-downgradable. The content-bound facade remains without a non-test/VSIX
+  caller pending independent evaluator trust administration.
+- Corrected the M2M sentinel graded judgment and added adversarial coverage for
+  corpus size/leakage, evaluator separation, metric regression, signature
+  failure, public-gate failure, and deterministic receipt integrity.
+- Corrected candidate truth binding so `ranker_digest` covers the extracted
+  retrieval/ranking implementation (including `core/search_engine.py`) and
+  every run rejects an owner-emitted loaded-runtime digest mismatch. The
+  benchmark explicitly pins semantic retrieval mode.
+- Focused validation evidence is recorded in the transaction receipt.
+
+## 2026-08-27 - HOLO OWNER-LIFECYCLE / RETRIEVAL TRUTH REPAIR
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 97
+
+- Replaced the stale root-bound benchmark call with the canonical governed
+  one-shot owner lifecycle and derived authority root. Query-time maintenance,
+  callback injection, and repository writes remain rejected.
+- Preserved exact owner errors instead of masking them. Added regressions for
+  authority selection and failure propagation; the focused benchmark/navigation
+  matrix passed 56 tests.
+- The live fixed corpus returned recall@8 1.0, MRR .9167, nDCG .8718, mean
+  3829ms, and p95 4578ms. The result remains `quality_below_policy` because
+  nDCG is below 0.95; no promotion or AutoResearch success is claimed.
+
+## 2026-08-01 - HOLOINDEX_GENERATION_BOUND_RETRIEVAL_AUTORESEARCH_PHASE1
+
+**Author**: 0102 | WSP: 00, 15, 22, 50, 62, 97
+
+- Replaced the M2M Holo benchmark's query-time reindex and CLI-text parsing
+  with the authenticated generation-bound owner query.
+- Added fixed public-regression relevance requirements and deterministic
+  Recall@K, MRR, nDCG@K, mean-latency, and p95-latency evidence. This corpus is
+  excluded from train but is not independent promotion evidence.
+- Removed repository-local latest/JSONL writes from the query path. The skill
+  now returns a benchmark run and deterministically recomputed verification
+  receipt; it performs no generation promotion.
+- Reused the existing authenticated loopback owner client directly and removed
+  arbitrary query-runner injection from the public Skillz boundary.
+- Bound every run to the exact repository root and current Git HEAD, and made
+  relevance scoring case-exact over canonical repository paths.
 
 ---
 
@@ -3204,3 +3350,13 @@ from modules.platform_integration.youtube_auth.src.mcp_quota_server import MCPQu
 
 ### Outcome
 - 0102 now has a reusable diligence skill for evaluating external open-source tools such as `karpathy/autoresearch`.
+
+## 2026-10-25 - Preserve public intake reference metadata
+
+WSP15 13/P1 allocation in the FX delivery plan; WSP22/50/84/97.
+Added one `prior_art=list(...)` constructor keyword and an untrusted-reference
+comment in the existing mapper. No new parser/auth/store/control or runtime member.
+Nine test-first cases cover order, copies, defaults and transport representations.
+Retained clean RED 596P/5F and old-pin 600P/1F; independent review approved rebaseline.
+Final four-owner selection: 601P, no skips or instrumented network/process/write attempts.
+All existing bytes of this log, including its NUL byte, are preserved as a prefix.

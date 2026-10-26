@@ -58,6 +58,9 @@ from modules.communication.moltbot_bridge.tests.model_runtime_binding_receipt_te
 from modules.communication.moltbot_bridge.tests.provider_call_evidence_test_helpers import (
     architect_provider_call_evidence,
 )
+from modules.communication.moltbot_bridge.tests.architect_proposal_test_helpers import (
+    architect_model_output,
+)
 from modules.infrastructure.foundups_mcp_bridge.src import (
     reddog_holoindex_owner_bootstrap as owner_bootstrap,
 )
@@ -201,14 +204,11 @@ class _FakeArchitectRunner:
         )
         prompt_payload = json.loads(prompt)
         evidence_ref = prompt_payload["reports"][0]["evidence_refs"][0]
-        content = {
-            "action": ACTION_FIX,
-            "next_slice_name": "REDDOG_RUNTIME_RECONCILER_PHASE1",
-            "summary": "Collected read-only reports support one backend runtime fix.",
-            "decision_reasons": ["selected verified runtime reconciler gap"],
-            "evidence_refs": [evidence_ref],
-            "wsp15_allocation_receipt_id": prompt_payload["wsp15_allocation_receipt_id"],
-        }
+        content = architect_model_output(
+            {"receipt_id": prompt_payload["wsp15_allocation_receipt_id"], **prompt_payload["wsp15_execution_binding"]},
+            evidence_ref,
+            slice_name="REDDOG_RUNTIME_RECONCILER_PHASE1",
+        )
         return ArchitectModelResult(
             ok=True,
             status="MODEL_OK",
@@ -435,7 +435,7 @@ def test_bootstrap_runs_backend_architect_determination_when_enabled() -> None:
     assert result.backend_architect_determination_action == ACTION_FIX
     assert result.backend_architect_determination_next_slice == "REDDOG_RUNTIME_RECONCILER_PHASE1"
     assert result.backend_architect_determination_id
-    assert result.backend_architect_determination_queue_candidate_count == 1
+    assert result.backend_architect_determination_queue_candidate_count == 0
     assert result.backend_architect_determination_persist_stored is True
     assert result.backend_architect_determination_rejection_reasons == ()
     assert result.no_model_call_performed is False
@@ -1051,7 +1051,7 @@ def _resident_cycle_result(
         ("same_artifact", "model_runtime_binding_artifacts_not_distinct"),
         ("oversized", "model_runtime_binding_artifact_invalid"),
         ("directory", "model_runtime_binding_artifact_invalid"),
-        ("outside_root", "model_runtime_binding_artifact_invalid"),
+        ("outside_root", "model_runtime_binding_artifact_outside_runtime_root"),
         ("inside_repo", "model_runtime_binding_artifact_inside_repo"),
     ),
 )
@@ -1069,18 +1069,19 @@ def test_main_resident_runtime_artifact_preflight_rejects_before_cycle(
     runtime_root.mkdir()
     audit_path = runtime_root / "audit.json"
     architect_path = runtime_root / "architect.json"
-    audit_path.write_text(
-        json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_readonly_audit_worker")),
-        encoding="utf-8",
+    audit_receipt = model_runtime_binding_receipt(
+        runtime_surface="reddog_readonly_audit_worker"
     )
-    architect_path.write_text(
-        json.dumps(model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")),
-        encoding="utf-8",
-    )
+    architect_receipt = model_runtime_binding_receipt(runtime_surface="reddog_backend_architect")
+    audit_path.write_text(json.dumps(audit_receipt), encoding="utf-8")
+    architect_path.write_text(json.dumps(architect_receipt), encoding="utf-8")
     env = {
         "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": str(runtime_root),
         "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(audit_path),
         "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(architect_path),
+        "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": str(audit_receipt["receipt_id"]),
+        "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_EXPECTED_RECEIPT_ID": str(architect_receipt["receipt_id"]),
+        "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "1",
     }
     if case == "absent":
         env.pop("REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH")
@@ -1110,7 +1111,6 @@ def test_main_resident_runtime_artifact_preflight_rejects_before_cycle(
         env["REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH"] = str(
             REPO_ROOT / "main.py"
         )
-
     monkeypatch.setattr(
         main,
         "_reddog_resident_model_runtime_bindings_from_env",
@@ -1158,6 +1158,7 @@ def test_main_resident_runtime_artifact_preflight_rejects_symlink_before_cycle(
         "REDDOG_RESIDENT_MODEL_RUNTIME_BINDING_ROOT": str(runtime_root),
         "REDDOG_READONLY_AUDIT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(audit_path),
         "REDDOG_BACKEND_ARCHITECT_MODEL_RUNTIME_BINDING_RECEIPT_PATH": str(architect_path),
+        "REDDOG_RESIDENT_ARCHITECT_DURABLE_CYCLE_ENFORCED": "1",
     }
     monkeypatch.setattr(
         main,
@@ -1175,7 +1176,6 @@ def test_main_resident_runtime_artifact_preflight_rejects_symlink_before_cycle(
     output = capsys.readouterr().out
     assert "reason=model_runtime_binding_artifact_invalid" in output
     assert str(tmp_path) not in output
-
 
 def test_main_preflight_durable_resident_cycle_disabled_is_inert() -> None:
     import main

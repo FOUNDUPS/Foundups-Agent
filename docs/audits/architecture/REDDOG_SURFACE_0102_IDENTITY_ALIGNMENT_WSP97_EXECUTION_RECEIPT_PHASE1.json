@@ -1,0 +1,84 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "d35d3478839b15a9f713e4d9e84ab956bfdf3fbe"
+  },
+  "execution_id": "REDDOG_SURFACE_0102_IDENTITY_ALIGNMENT_PHASE1",
+  "execution_plane": "architecture_runtime_contract",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_73_012_Digital_Twin_Architecture.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md",
+      "WSP_framework/src/WSP_98_FoundUps_Mesh_Native_Architecture_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "Governed Holo query failed closed with HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH because the shared wrapper was invoked from the concurrent YUMORI checkout at 0c81418fe while exact main authority was d35d347883; no query-time mutation or reindex occurred.",
+      "Repository-scoped fallback read canonical architecture, WSP mirrors, extension runtime, tests, package metadata, public contract, Digital Twin documentation, and moltbot_bridge documentation.",
+      "Three WSP_00/WSP_97 subagent audits independently reviewed documentation navigation, the runtime identity slice, and PR 1606 reconciliation."
+    ],
+    "research": [
+      "Contact Memory, Lick, Mosh Pit, Memex projection emitter, dual-loop cognition, and RedDog identity documents were verified on the f1f151877 ancestor of exact main rather than stranded on a feature PR.",
+      "Active authority documents and runtime prompts still encoded the superseded RedDog-equals-0102 model even though canonical ARCHITECTURE.md states RedDog is not 0102.",
+      "Historical audit and ModLog statements were preserved as historical evidence; only active contracts, navigation, product metadata, runtime prompts, and current roadmap statements were aligned."
+    ],
+    "micro_pass": [
+      "WSP 73 and WSP 98 framework and knowledge mirrors are byte-identical after the correction.",
+      "Identity, conversation-policy, draft-policy, execution-stage, work-state, backend compatibility, Fusion input, Holo incident, Python-environment, asynchronous bridge, and extension contract-shard checks pass.",
+      "Architecture registry YAML, backend manifest, WRE test registry, Git attributes, and deterministic package-member checks pass."
+    ],
+    "macro_pass": [
+      "Canonical topology is now 012 to RedDog fast interaction surface to principal-scoped 0102 deep cognition and orchestration to governed systems and workers.",
+      "Documentation navigation now exposes the canonical architecture, Contact Memory, Lick, Mosh Pit, Memex projection emitter, and implementation prompt while marking specified-not-implemented surfaces truthfully.",
+      "RedDog 0.4.141 first binds the identity correction above the already merged 0.4.140 builder release; fresh promotion evidence remains mandatory."
+    ],
+    "hard_think": [
+      "Rejected updating only prose because runtime prompts and tests actively enforced the obsolete identity.",
+      "Rejected rewriting or relabeling the already merged builder implementation because its exact 0.4.140 evidence is an independently reviewable historical boundary.",
+      "Kept genuine 0102 worker prompts and internal compatibility identifiers where they describe the deep worker rather than the RedDog foreground surface."
+    ],
+    "dialectic_sweep": [
+      "Builder PR 1606 did merge first as 0.4.140, so the corrected boundary moves to 0.4.141 without erasing or relabeling the exact builder history.",
+      "The merged .vscodeignore exclusions and package-surface expectation order were reverified on exact main and preserved unchanged.",
+      "The isolated environment blocks nested Node and Git process creation, so focused passing checks are recorded without falsely claiming the full release supervisor or a final VSIX."
+    ],
+    "first_principles": [
+      "RedDog is the low-latency interaction, exchange, and attention surface; 0102 is the deeper principal-scoped cognition and orchestration identity behind it.",
+      "Canonical architecture belongs on main so every branch retrieves the same truth; implementation branches absorb main and never supersede it with stale contracts.",
+      "A release claim requires both semantic identity correctness and complete promotion evidence; passing focused checks is not equivalent to publishing a verified VSIX."
+    ],
+    "execute": [
+      "Aligned active WSP, architecture, vision, vocabulary, public, extension, Digital Twin, and moltbot_bridge documentation.",
+      "Corrected foreground, deep-worker, identity-fast-path, bounded-context, and grounding-failure prompts with deterministic positive and negative tests.",
+      "Advanced the identity release to 0.4.141, regenerated the authenticated contract-shard identity, and updated ModLogs and test truth boundaries while preserving 0.4.140 builder evidence."
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_73",
+    "WSP_83",
+    "WSP_97",
+    "WSP_98"
+  ],
+  "compliance_evidence": [
+    "docs/audits/architecture/REDDOG_SURFACE_0102_IDENTITY_ALIGNMENT_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "ModLog.md",
+    "WSP_framework/src/ModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md",
+    "modules/ai_intelligence/digital_twin/ModLog.md",
+    "modules/communication/moltbot_bridge/ModLog.md"
+  ]
+}

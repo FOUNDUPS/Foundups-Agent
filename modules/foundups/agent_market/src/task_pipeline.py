@@ -16,10 +16,12 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
+from .authorization import CallerAuthorization
 from .exceptions import InvalidStateTransitionError, NotFoundError, PermissionDeniedError, ValidationError
 from .interfaces import TaskPipelineService
-from .models import EventRecord, Payout, PayoutStatus, Proof, Task, TaskStatus, Verification
+from .models import EventRecord, Payout, Proof, Task, TaskStatus, Verification
 from .persistence.sqlite_adapter import SQLiteAdapter
+from .persistence.verification import verify_proof_atomic
 
 logger = logging.getLogger(__name__)
 
@@ -37,8 +39,8 @@ class PersistentTaskPipeline(TaskPipelineService):
 
     Delegates storage to SQLiteAdapter and emits events for observability.
 
-    State Transitions:
-        OPEN → CLAIMED → SUBMITTED → VERIFIED → PAID
+    Initiation lifecycle:
+        OPEN → CLAIMED → SUBMITTED → VERIFIED (payout remains pending)
 
     Example:
         adapter = SQLiteAdapter()
@@ -236,8 +238,11 @@ class PersistentTaskPipeline(TaskPipelineService):
         logger.info("Proof %s submitted for task %s", proof.proof_id, task.task_id)
         return updated
 
-    def verify_proof(self, task_id: str, verification: Verification) -> Task:
-        """Verify submitted proof.
+    def verify_proof(
+        self, task_id: str, verification: Verification, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Task:
+        """Atomically record a SQLite decision or replay its original outcome.
 
         Args:
             task_id: ID of task to verify.
@@ -248,103 +253,21 @@ class PersistentTaskPipeline(TaskPipelineService):
 
         Raises:
             NotFoundError: If task not found.
-            StateTransitionError: If task not in SUBMITTED state.
+            StateTransitionError: If a new decision targets a non-SUBMITTED task.
             ValidationError: If verification rejected (approved=False).
         """
-        task = self._adapter.get_task(task_id)
-        self._validate_transition(task.status, TaskStatus.VERIFIED)
+        return verify_proof_atomic(self._adapter, task_id, verification, authorization=authorization)
 
-        if verification.task_id != task_id:
-            raise ValidationError(f"Verification task_id mismatch: {verification.task_id} != {task_id}")
-        self._enforce_compute_access(
-            actor_id=verification.verifier_id,
-            capability="proof.verify",
-            foundup_id=task.foundup_id,
-            reason="verify_proof",
-        )
+    def trigger_payout(
+        self, task_id: str, actor_id: str, *,
+        authorization: Optional[CallerAuthorization] = None,
+    ) -> Payout:
+        """Record pending initiation atomically; an exact retry has no new effects.
 
-        # Save verification
-        self._adapter.create_verification(verification)
-
-        if not verification.approved:
-            # Rejected - emit event but don't transition
-            self._emit_event(
-                event_type="proof.rejected",
-                actor_id=verification.verifier_id,
-                payload={"reason": verification.reason, "approved": False},
-                foundup_id=task.foundup_id,
-                task_id=task_id,
-            )
-            raise ValidationError(f"Proof rejected: {verification.reason}")
-
-        # Approved - transition to VERIFIED
-        task.status = TaskStatus.VERIFIED
-        task.verification_id = verification.verification_id
-
-        updated = self._adapter.update_task(task)
-        self._emit_event(
-            event_type="proof.verified",
-            actor_id=verification.verifier_id,
-            payload={"reason": verification.reason, "approved": True},
-            foundup_id=task.foundup_id,
-            task_id=task_id,
-        )
-        logger.info("Task %s verified by %s", task_id, verification.verifier_id)
-        return updated
-
-    def trigger_payout(self, task_id: str, actor_id: str) -> Payout:
-        """Trigger payout for a verified task.
-
-        Args:
-            task_id: ID of verified task.
-            actor_id: ID of actor triggering payout.
-
-        Returns:
-            Created payout record.
-
-        Raises:
-            NotFoundError: If task not found.
-            StateTransitionError: If task not in VERIFIED state.
+        The task remains VERIFIED until a separate confirmed settlement owner
+        exists. SQLite is required; this method grants no payment authority.
         """
-        task = self._adapter.get_task(task_id)
-        self._validate_transition(task.status, TaskStatus.PAID)
-
-        if task.assignee_id is None:
-            raise ValidationError("Task has no assignee for payout")
-        self._enforce_compute_access(
-            actor_id=actor_id,
-            capability="payout.trigger",
-            foundup_id=task.foundup_id,
-            reason="trigger_payout",
-        )
-
-        # Create payout
-        payout = Payout(
-            payout_id=_generate_id("pay"),
-            task_id=task_id,
-            recipient_id=task.assignee_id,
-            amount=task.reward_amount,
-            status=PayoutStatus.INITIATED,
-            reference=None,
-            paid_at=None,
-        )
-        self._adapter.create_payout(payout)
-
-        # Update task to PAID
-        task.status = TaskStatus.PAID
-        task.payout_id = payout.payout_id
-        self._adapter.update_task(task)
-
-        self._emit_event(
-            event_type="payout.initiated",
-            actor_id=actor_id,
-            payload={"payout_id": payout.payout_id, "amount": payout.amount},
-            foundup_id=task.foundup_id,
-            task_id=task_id,
-            payout_id=payout.payout_id,
-        )
-        logger.info("Payout %s initiated for task %s", payout.payout_id, task_id)
-        return payout
+        return self._adapter.initiate_payout(task_id, actor_id, authorization=authorization)
 
     def get_task(self, task_id: str) -> Task:
         """Get a task by ID.

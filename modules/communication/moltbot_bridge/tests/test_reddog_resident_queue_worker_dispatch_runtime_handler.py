@@ -5,6 +5,9 @@ from __future__ import annotations
 import hashlib
 import json
 
+from modules.communication.moltbot_bridge.src.reddog_authoritative_work_state_refresh_runtime import (
+    InMemoryAuthoritativeWorkStateStore,
+)
 from modules.communication.moltbot_bridge.src.reddog_openclaw_hermes_0102_worker_dispatch_runtime import (
     SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT,
     WorkerDispatchRuntimeReason,
@@ -19,6 +22,8 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_orchestratio
     NEXT_QUEUE_WORKER_DISPATCH_RUNTIME,
 )
 from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispatch_runtime_handler import (
+    FAIL_AUTHORITY_RUNTIME_STAGE_MISSING,
+    FAIL_AUTHORITY_VERIFICATION_STAGE_MISSING,
     FAIL_DISPATCH_RUNTIME_NEXT_ACTION_MISMATCH,
     FAIL_DISPATCH_RUNTIME_STAGE_MISMATCH,
     FAIL_WORKER_DISPATCH_DRYRUN_STAGE_MISSING,
@@ -28,6 +33,16 @@ from modules.communication.moltbot_bridge.src.reddog_resident_queue_worker_dispa
 )
 from modules.communication.moltbot_bridge.src.reddog_signed_authority_worker_dispatch_dryrun import (
     SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
+    derive_worker_dispatch_roles,
+)
+from modules.communication.moltbot_bridge.src.reddog_queue_model_runtime_authority import (
+    model_runtime_authority_fields,
+)
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    governed_worker_dispatch_snapshot,
+    queue_wsp15_allocation_receipt,
+    worker_dispatch_authority_verification_context,
+    worker_dispatch_authority_stages,
 )
 
 
@@ -42,6 +57,12 @@ class _FakeWriter:
             return {"ok": False, "created_task_ids": []}
         return {"ok": True, "created_task_ids": [task.task_id for task in tasks]}
 
+    def activate_signed_worker_dispatch_tasks(self, tasks, receipt):
+        return {
+            "ok": self.ok,
+            "created_task_ids": [task.task_id for task in tasks] if self.ok else [],
+        }
+
 
 def _digest(value: object) -> str:
     raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=True, default=str)
@@ -49,28 +70,12 @@ def _digest(value: object) -> str:
 
 
 def _allocation():
-    return {
-        "schema_version": "reddog_wsp15_allocation_receipt.v1",
-        "receipt_id": "sha256:wsp15-allocation",
-        "mps_total": 14,
-        "priority": "P1",
-        "reasoning_tier": "HIGH",
-        "worker_plan": {
-            "schema_version": "reddog_wsp15_worker_plan.v1",
-            "fusion_required": True,
-            "critic_count": 1,
-            "coding_worker_count": 1,
-            "independent_verifier_required": True,
-            "openclaw_candidate": False,
-            "hermes_execution_allowed": False,
-            "queue_mutation_allowed": False,
-        },
-    }
+    return queue_wsp15_allocation_receipt()
 
 
 def _snapshot():
     allocation = _allocation()
-    return {
+    return governed_worker_dispatch_snapshot({
         "schema_version": "reddog_authoritative_work_state.v1",
         "wre_queue_items": [
             {
@@ -80,26 +85,54 @@ def _snapshot():
                 "wsp15_allocation_receipt": allocation,
             }
         ],
-    }
+    })
 
 
 def _dryrun_stage():
     allocation = _allocation()
-    intent = {
-        "intent_id": "worker_dispatch_intent_fusion_lead",
-        "role": "fusion_lead",
-        "worker_runtime": "0102",
-        "capability": "architect_review",
-        "work_order_id": "wo-1",
-        "foundup_id": "paccess_001",
-        "requested_operation": "create_foundup",
-        "wsp15_allocation_receipt_id": allocation["receipt_id"],
-        "wsp15_allocation_digest": _digest(allocation),
-        "dry_run_only": True,
-        "no_worker_spawn_performed": True,
-        "no_openclaw_enqueue_performed": True,
-        "no_hermes_dispatch_performed": True,
+    _, verification = _authority_stages()
+    queue_item = _snapshot()["wre_queue_items"][0]
+    stage_refs = {
+        key: queue_item[key]
+        for key in (
+            "progressive_policy_stage_receipt_id",
+            "progressive_policy_stage_digest",
+        )
     }
+    refs = {
+        key: verification[key]
+        for key in (
+            "verified_work_authority_digest",
+            "authority_verification_receipt_id",
+            "authority_verification_receipt_digest",
+        )
+    }
+    model_runtime = model_runtime_authority_fields({})
+    intents = [
+        {
+            "intent_id": f"worker_dispatch_intent_{role}",
+            "role": role,
+            "worker_runtime": worker_runtime,
+            "capability": capability,
+            "work_order_id": "wo-1",
+            "foundup_id": "paccess_001",
+            "requested_operation": allocation["requested_operation"],
+            "wsp15_allocation_receipt_id": allocation["receipt_id"],
+            "wsp15_allocation_digest": _digest(allocation),
+            **model_runtime,
+            "memex_supply_receipt_id": queue_item["memex_supply_receipt_id"],
+            "memex_supply_digest": queue_item["memex_supply_digest"],
+            "architect_fix_publication_receipt_id": "",
+            "architect_fix_publication_binding_digest": "",
+            **stage_refs,
+            **refs,
+            "dry_run_only": True,
+            "no_worker_spawn_performed": True,
+            "no_openclaw_enqueue_performed": True,
+            "no_hermes_dispatch_performed": True,
+        }
+        for role, worker_runtime, capability in derive_worker_dispatch_roles(allocation)
+    ]
     return {
         "accepted": True,
         "decision": SIGNED_AUTHORITY_WORKER_DISPATCH_DRYRUN_ACCEPT,
@@ -107,15 +140,48 @@ def _dryrun_stage():
             "receipt_id": "signed_authority_worker_dispatch_abc",
             "work_order_id": "wo-1",
             "foundup_id": "paccess_001",
-            "requested_operation": "create_foundup",
+            "requested_operation": allocation["requested_operation"],
             "wsp15_allocation_receipt_id": allocation["receipt_id"],
             "wsp15_allocation_digest": _digest(allocation),
             "wsp15_priority": allocation["priority"],
             "wsp15_mps_total": allocation["mps_total"],
             "wsp15_reasoning_tier": allocation["reasoning_tier"],
-            "dispatch_intent_count": 1,
-            "dispatch_intents": [intent],
+            **model_runtime,
+            "memex_supply_receipt_id": queue_item["memex_supply_receipt_id"],
+            "memex_supply_digest": queue_item["memex_supply_digest"],
+            "architect_fix_publication_receipt_id": "",
+            "architect_fix_publication_binding_digest": "",
+            **stage_refs,
+            **refs,
+            "dispatch_intent_count": len(intents),
+            "dispatch_intents": intents,
+            "no_worker_spawn_performed": True,
+            "no_queue_mutation_performed": True,
+            "no_worktree_created": True,
+            "no_shell_command_executed": True,
+            "no_openclaw_enqueue_performed": True,
+            "no_hermes_dispatch_performed": True,
+            "no_repo_mutation_performed": True,
+            "no_holoindex_reindex_performed": True,
+            "no_pr_created": True,
+            "no_reward_settlement_performed": True,
         },
+    }
+
+
+def _authority_stages():
+    return worker_dispatch_authority_stages(
+        _allocation(),
+        work_state_snapshot=_snapshot(),
+    )
+
+
+def _stage_results():
+    authority_runtime, authority_verification = _authority_stages()
+    return {
+        "authority_runtime": authority_runtime,
+        "authority_verification": authority_verification,
+        "worker_dispatch_dryrun": _dryrun_stage(),
     }
 
 
@@ -139,10 +205,12 @@ def _handler(writer=None, store=None):
         or InMemoryResidentQueueChainResultsStore(
             {
                 "schema_version": "reddog_resident_queue_chain_results.v1",
-                "stage_results": {"worker_dispatch_dryrun": _dryrun_stage()},
+                "stage_results": _stage_results(),
             }
         ),
         writer=writer or _FakeWriter(),
+        authority_verification_context=worker_dispatch_authority_verification_context(),
+        work_state_store=InMemoryAuthoritativeWorkStateStore(_snapshot()),
     )
 
 
@@ -154,7 +222,8 @@ def test_runtime_handler_publishes_signed_worker_tasks() -> None:
     assert result["decision"] == SIGNED_AUTHORITY_WORKER_DISPATCH_RUNTIME_ACCEPT
     assert result["receipt"]["agentdb_tasks_enqueued"] is True
     assert result["tasks"][0]["context"]["worker_runtime"] == "0102"
-    assert writer.calls and len(writer.calls[0][0]) == 1
+    assert writer.calls
+    assert len(writer.calls[0][0]) == len(derive_worker_dispatch_roles(_allocation()))
 
 
 def test_runtime_handler_rejects_wrong_stage_or_action() -> None:
@@ -178,16 +247,47 @@ def test_runtime_handler_rejects_missing_dryrun_or_writer() -> None:
         chain_results_store=InMemoryResidentQueueChainResultsStore(
             {
                 "schema_version": "reddog_resident_queue_chain_results.v1",
-                "stage_results": {"worker_dispatch_dryrun": _dryrun_stage()},
+                "stage_results": _stage_results(),
             }
         ),
         writer=None,
+        authority_verification_context=worker_dispatch_authority_verification_context(),
+        work_state_store=InMemoryAuthoritativeWorkStateStore(_snapshot()),
     )(_request())
 
     assert missing_dryrun["accepted"] is False
     assert FAIL_WORKER_DISPATCH_DRYRUN_STAGE_MISSING in missing_dryrun["rejection_reasons"]
     assert missing_writer["accepted"] is False
     assert FAIL_WORKER_DISPATCH_WRITER_MISSING in missing_writer["rejection_reasons"]
+
+
+def test_runtime_handler_requires_recorded_authority_and_verification_stages() -> None:
+    dryrun_only = {
+        "schema_version": "reddog_resident_queue_chain_results.v1",
+        "stage_results": {"worker_dispatch_dryrun": _dryrun_stage()},
+    }
+    no_authority = _handler(
+        store=InMemoryResidentQueueChainResultsStore(dryrun_only)
+    )(_request())
+    authority_runtime, _ = _authority_stages()
+    no_verification = _handler(
+        store=InMemoryResidentQueueChainResultsStore(
+            {
+                "schema_version": "reddog_resident_queue_chain_results.v1",
+                "stage_results": {
+                    "authority_runtime": authority_runtime,
+                    "worker_dispatch_dryrun": _dryrun_stage(),
+                },
+            }
+        )
+    )(_request())
+
+    assert FAIL_AUTHORITY_RUNTIME_STAGE_MISSING in no_authority[
+        "rejection_reasons"
+    ]
+    assert FAIL_AUTHORITY_VERIFICATION_STAGE_MISSING in no_verification[
+        "rejection_reasons"
+    ]
 
 
 def test_runtime_handler_surfaces_writer_rejection() -> None:
