@@ -13,6 +13,11 @@ Sources stay stable during the run. Evidence: external foundups-member-serving-
 20261026, serving_red JSON/JUnit/log and child logs. The clean child environment
 and loopback subprocess are explicit permissions, not OS/network isolation.
 Freeze these assertions before adding the separate server profile or CI change.
+First new-profile run:816PASS/1FAIL; the server starts but Windows' venv redirector
+has a different PID. Separate actual-process/CIM evidence proves server-parent equals
+launcher PID; taskkill/T reaps the owned tree and listener absence is checked.
+Correct only this new test's platform ownership/cleanup rule; retain the failed run,
+all three HTTP/config assertions, original814 oracles and separate old environment.
 
 ## 2026-10-26 — Isolated host acceptance frozen before authoring
 

@@ -449,7 +449,15 @@ def wire_server(tmp_path):
         while time.monotonic() < deadline:
             text = log.read_text(encoding="utf-8")
             match = re.search(r"Uvicorn running on http://127\.0\.0\.1:(\d+)", text)
-            if match and f"Started server process [{child.pid}]" in text:
+            if match:
+                server_pid = int(re.search(r"Started server process \[(\d+)\]", text).group(1))
+                if os.name == "nt":
+                    powershell = Path(os.environ["SystemRoot"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+                    command = f"(Get-CimInstance Win32_Process -Filter 'ProcessId = {server_pid}').ParentProcessId"
+                    parent = subprocess.check_output([str(powershell), "-NoProfile", "-Command", command], timeout=4)
+                    assert int(parent) == child.pid
+                else:
+                    assert server_pid == child.pid
                 port = int(match.group(1))
                 break
             if child.poll() is not None:
@@ -462,7 +470,12 @@ def wire_server(tmp_path):
     finally:
         for child in children:
             if child.poll() is None:
-                child.terminate()
+                if os.name == "nt":
+                    killer = Path(os.environ["SystemRoot"]) / "System32/taskkill.exe"
+                    subprocess.run([str(killer), "/PID", str(child.pid), "/T", "/F"],
+                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=4, check=True)
+                else:
+                    child.terminate()
             try:
                 child.wait(timeout=3)
             except subprocess.TimeoutExpired:
