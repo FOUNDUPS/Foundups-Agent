@@ -18,6 +18,10 @@ has a different PID. Separate actual-process/CIM evidence proves server-parent e
 launcher PID; taskkill/T reaps the owned tree and listener absence is checked.
 Correct only this new test's platform ownership/cleanup rule; retain the failed run,
 all three HTTP/config assertions, original814 oracles and separate old environment.
+Second run:816PASS/1FAIL; the new unauthorized fixture used an invalid empty body,
+so the existing body-first contract correctly returns400. Supply the original
+valid PROPOSAL/origin to isolate absent-bearer401; preserve the401 assertion and
+both failed runs. No application logic or existing test assertion is changed.
 
 ## 2026-10-26 — Isolated host acceptance frozen before authoring
 

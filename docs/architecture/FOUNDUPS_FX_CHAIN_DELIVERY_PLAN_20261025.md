@@ -43,7 +43,8 @@ close race. Terminate/wait/kill/wait cleanup proves reaping, not graceful shutdo
 Existing nomination workflow: add only the new profile's two trigger filters and
 select it for installation; preserve jobs/permissions/tests/report retention.
 Budget: README+35, INTERFACE+12, ROADMAP+12, module ModLog+18, tests README+12,
-TestModLog+20, this plan+65/root ModLog+16. No new test owner, runtime member,
+TestModLog+24 (retain actual fixture corrections), this plan+65/root ModLog+16.
+No new test owner, runtime member,
 manifest/pin/ledger/registry change, application logic or grant. Existing manifest
 check and independent exact-candidate review precede publication; hosted gates
 must bind the final head. Stop/reallocate any actual unbudgeted delta.

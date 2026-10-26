@@ -503,7 +503,8 @@ def test_real_server_delivers_only_bounded_drafts(tmp_path, policy, key, wire_se
     response, data = request("GET", "/healthz")
     assert response.status == 200 and data == {"status": "ready"}
     assert response.getheader("cache-control") == "no-store"
-    response, data = request("POST", PATH, "{}", {"Content-Type": "application/json"})
+    response, data = request("POST", PATH, json.dumps(PROPOSAL),
+                             {"Content-Type": "application/json", "Origin": ORIGIN})
     assert response.status == 401 and data == {"detail": "not_authorized"}
     response, data = request("POST", PATH, json.dumps(PROPOSAL), headers(key))
     assert response.status == 201 and data["status"] == "DRAFT_ONLY"
