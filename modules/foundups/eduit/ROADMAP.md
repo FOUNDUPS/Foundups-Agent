@@ -14,7 +14,17 @@ Kids Episodes' production priority and the existing renderer/Mall ownership.
 4. Use governed Holo retrieval; UNKNOWN freshness must stay UNKNOWN. No child
    data belongs in agent memory. Link source decisions instead of duplicating them.
 
-## Bounded implementation order — WSP 15
+## Current next slice — supersedes the historical order below
+
+First repair the existing viewer: stateful Play/Pause, in-panel fullscreen
+whiteboard and draft retention, direct Video/Game switching, then snapshot/share,
+Repeat video and child lock. Verify each bounded layer before adding the next.
+Priority P0 for the broken feedback flow; P1 for repeat/lock after basic state
+continuity. Ratings, Mall mounting and premium features stay deferred. This is
+qualitative sequencing, not a newly calculated WSP15 score. No runtime changes
+are included in this documentation milestone.
+
+## Historical bounded implementation order — WSP 15
 
 C/I/D/Impact are complexity, importance, urgency and impact (1–5 each).
 Scores are planning judgments, not runtime admission or billing authority.
@@ -65,3 +75,12 @@ See [Home Screen repair](docs/HOME_SCREEN_LAYOUT_REPAIR.md) for the direct
 root viewer, per-panel expand/collapse, pinch adapter, responsive viewport checks
 and physical-device limits. Use `build_site.py --output-dir <new-dir> --storytime-root`
 for standalone Storytime; shared Mall registration remains separately owned.
+
+
+## Fullscreen child controls and feedback — 2026-10-26
+
+[Episode tile controls](docs/EPISODE_TILE_CONTROLS.md) owns the latest specified
+video/game switching, panel gestures, fullscreen freeze/mark/share, Repeat video,
+child touch-lock and deferred rating direction. These are requirements, not
+shipped capabilities. Existing source gaps and independent acceptance cases are
+recorded there; keep the current scene/media and existing Mall/Shorts owners.

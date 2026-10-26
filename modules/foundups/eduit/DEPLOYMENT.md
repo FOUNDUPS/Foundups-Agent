@@ -4,7 +4,7 @@
 Source owner: FOUNDUPS/Foundups-Agent; existing Firebase hosting architecture.
 Do not create an unrelated hosted Sites project or a second FoundUp identity.
 
-## Built, not deployed
+## Historical initial build (superseded by later milestones)
 
 - `public/eduit/`: responsive EDUIT landing and `storytime/` two-tap game.
 - `scene.mjs` + copied shared vector rig: same scene for browser and movie.
@@ -47,7 +47,7 @@ video intermediates. The source poster is SVG; MP4 is created at build time.
 | Domain | Firebase target | Result |
 |---|---|---|
 | eduit.org (+ www if owned) | eduit | EDUIT landing |
-| ourstorytime.eduit.org | eduit-storytime | root redirects to /storytime/ game |
+| storytime.eduit.org | eduit-storytime | direct paired video/game viewer root |
 | eduit.foundups.com | eduit-alias | permanent redirect to https://eduit.org/ |
 
 `firebase.eduit.json` is a separate opt-in config: it does not alter existing
@@ -76,7 +76,7 @@ confirming project/site identity. Do not deploy root Firebase functions/rules.
 BLOCKED: authenticated local Codex GoDaddy capability and Firebase target binding
 are unavailable in this workspace. No public deployment or domain cutover claimed.
 The landing currently uses relative game links so preview works before DNS; once
-TLS is verified, change its Story Time CTA to https://ourstorytime.eduit.org/.
+TLS is verified, change its Story Time CTA to https://storytime.eduit.org/.
 
 ## 012 experience and existing Moshpit ownership
 
@@ -129,3 +129,20 @@ See [Home Screen repair](docs/HOME_SCREEN_LAYOUT_REPAIR.md) for the direct
 root viewer, per-panel expand/collapse, pinch adapter, responsive viewport checks
 and physical-device limits. Use `build_site.py --output-dir <new-dir> --storytime-root`
 for standalone Storytime; shared Mall registration remains separately owned.
+
+
+## Current deployment boundary
+
+The existing Storytime Sites preview is public at
+https://storytime-review.undaodu.chatgpt.site/ (prior milestone receipt). Earlier
+private-staging/redirect descriptions above are historical. The root now directly
+mounts the viewer; the custom EDUIT domain is still a separate unverified binding.
+The [tile-controls specification](docs/EPISODE_TILE_CONTROLS.md) changes no assets,
+service worker, deployment, DNS or YouTube upload. Do not redeploy unchanged media
+for this docs-only milestone.
+
+Related draft [PR #2221](https://github.com/FOUNDUPS/Foundups-Agent/pull/2221)
+was observed open/nonmergeable on 2026-10-26; its body reports a separate Firebase
+staging deployment and pending DNS. That branch is NEEDS_REBASE and is not
+merged-main or independently reverified deployment evidence for this slice.
+Preserve its unique hosting/package work; reconcile before future runtime changes.

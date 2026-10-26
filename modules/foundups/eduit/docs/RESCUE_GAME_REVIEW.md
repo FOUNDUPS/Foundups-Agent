@@ -31,7 +31,7 @@ shelf was removed. Screen-space height is not a support requirement. Saved anima
   Expansion is CSS viewport focus, not a promise of browser-native iPhone fullscreen.
 - Responsive aspect ratios, dynamic viewport and safe-area padding replace device
   model detection. No decorative filler content is added to the child's scene.
-- Private Sites staging is deployed separately from `storytime.eduit.org`; domain,
+- The existing Sites preview is deployed separately from `storytime.eduit.org`; domain,
   Mall mounting, installed/offline PWA and authenticated Red Dog transport remain gaps.
 
 ## RSI correction record
@@ -67,3 +67,11 @@ success, latency/cost, and failure recovery; next actual episode is the transfer
 4. Deferred: Mall catalog mounting, memberships, multilingual variants, NPC models.
 
 No artificial Next button, paid membership gate or AI-worker activation is included.
+
+
+## Next viewer repair
+
+[Episode tile controls](EPISODE_TILE_CONTROLS.md) records the fullscreen-feedback
+audit and latest child/adult controls. Current Pencil exits fullscreen; in-place
+marking, stateful pause, repeat, child lock and image sharing are specified repairs,
+not capabilities established by the earlier acceptance evidence.

@@ -239,3 +239,12 @@ See [Home Screen repair](docs/HOME_SCREEN_LAYOUT_REPAIR.md) for the direct
 root viewer, per-panel expand/collapse, pinch adapter, responsive viewport checks
 and physical-device limits. Use `build_site.py --output-dir <new-dir> --storytime-root`
 for standalone Storytime; shared Mall registration remains separately owned.
+
+
+## Fullscreen child controls and feedback — 2026-10-26
+
+[Episode tile controls](docs/EPISODE_TILE_CONTROLS.md) owns the latest specified
+video/game switching, panel gestures, fullscreen freeze/mark/share, Repeat video,
+child touch-lock and deferred rating direction. These are requirements, not
+shipped capabilities. Existing source gaps and independent acceptance cases are
+recorded there; keep the current scene/media and existing Mall/Shorts owners.

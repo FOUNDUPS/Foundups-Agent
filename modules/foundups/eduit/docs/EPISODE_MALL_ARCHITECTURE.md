@@ -20,10 +20,9 @@ learning outcomes. The current Fukui eSingularity application is separate.
 Canonical naming correction from 012: **Us Story Time**, matching the existing
 YouTube handle `@Us_Story_Time` and publisher key `us_story_time`. Earlier
 “Our Story Time” wording is a dictation artifact, not a second collection.
-Preserve `eduit`, `kids_episodes` and the publisher binding. The earlier planned
-`ourstorytime.eduit.org` hostname is not an active deployment or a newly approved
-canonical brand; reconcile the intended `usstorytime.eduit.org` name with actual
-hosting/DNS ownership before binding it. No DNS rename is performed by this spec.
+Preserve `eduit`, `kids_episodes` and the publisher binding. The selected product
+hostname is `storytime.eduit.org`; earlier `ourstorytime`/`usstorytime` hostname
+proposals are superseded. Custom-domain binding is not verified by this spec.
 
 ## Product decisions
 
@@ -67,7 +66,8 @@ wire that method directly to episode Next or inherit video-ended auto-advance
 that skips the game. General Mall tile tap currently starts autoplay; the EDUIT
 adapter must explicitly specialize its own tiles without changing other products.
 
-**OBSERVED:** Story Time currently shows the game before the video. The local
+**HISTORICAL baseline:** Story Time showed the game before the video. The current
+standalone director shows video above game. The local
 review page is editor-owned and mounted by EDUIT's build. Neither is the shared
 Mall episode view. Registry contains `kids_episodes`; EDUIT has a module manifest
 but no canonical registry entry at this baseline. Category `ai-education` alone
@@ -97,9 +97,10 @@ small screens and reduced motion need real device/browser acceptance.
 
 ## Sound, words and language
 
-English is the first released locale; Spanish and Japanese are specified next.
-Display language names (English / Español / 日本語); flags may be decoration,
-not the only label. A locale changes the episode's captions, instructions,
+The current game supports en/ja/pt/es visible sound-word switching. The film
+remains English; translated video, speech and native-language review are unverified.
+Current creator direction uses flag-only visible buttons (GB/JP/PT/ES), with
+accessible language names and tooltips. Do not reintroduce visible language codes. A locale changes the episode's captions, instructions,
 visible sound words and available narration together. It must not alter story
 identity, learning objective, geometry or event order.
 
@@ -225,3 +226,12 @@ existing Mall owners; keep the first story free, English, and one episode. Bind
 video/game layout and arrows, then verify gestures/return lifecycle. Language,
 membership and reports follow separate tested slices. No new story generator,
 payment backend, PWA shell or autonomous worker is authorized by this document.
+
+
+## Current tile interaction refinement
+
+[Episode tile controls](EPISODE_TILE_CONTROLS.md) is the current detailed contract
+for fullscreen switching, in-place annotation, sharing, video repeat and child
+lock. It supersedes earlier minimal-arrow-only direction. Ratings remain a later
+owner integration; heart/hold/Red Dog/pepper affordances are candidates only.
+The standalone viewer repair comes before the shared Mall adapter.
