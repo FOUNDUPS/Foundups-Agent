@@ -11,7 +11,7 @@ export function scene({t=0,awake=false,progress=0,impact=0,lift=0,shake=false,sh
  const p=clamp(progress),k=clamp(impact),l=clamp(lift),c=clamp(collapse),r=clamp(reaction),crushed=c>=1;
  const sniff=cue?.kind==='sniff'?Math.sin(Math.PI*clamp((t-cue.start)/.32)):0;
  const x=350+410*p,y=378-(p>0&&p<1?3*Math.abs(Math.sin(t*16)):0);
- const tremor=shake?(cue?.size||30)/22*Math.sin(t*40):c>0&&!crushed?2*Math.sin(t*52):0;
+ const tremor=shake?(cue?.shakeSize||30)/22*Math.sin(t*40):c>0&&!crushed?2*Math.sin(t*52):0;
  const cave='M30 430 L30 260 Q30 95 230 100 L610 100 Q725 100 730 230 Q900 200 930 325 L930 430 Z';
  const shelves='';
  const family=crushed?'':[[75,215.6,1.12],[290,206,1.2],[120,378,.42],[235,378,.42]].map(([fx,fy,s],i)=>{
@@ -32,7 +32,11 @@ export function scene({t=0,awake=false,progress=0,impact=0,lift=0,shake=false,sh
  const imprint=crushed?`<path data-event="footprint" d="${foot}" transform="translate(0,110)" fill="#C9E4EC"/>`:'';
  const dinosaur=k>0?`<g data-event="foot" transform="translate(0,${-190+300*k-440*l})"><path d="${foot}" fill="#71846D" stroke="#4C5C49" stroke-width="7"/><path d="M580 115 L640 115 Q628 97 604 96 Z M430 145 H510 Q490 125 462 128 Z M220 178 H300 Q280 158 250 158 Z" fill="#E9DEBF" stroke="#4C5C49" stroke-width="3"/></g>`:'';
  const label=cue?.word||(['THUMP!','CRACK!','SNIFF!','SQUISH!'].includes(soundWord)?soundWord:'');
- const wx=cue?.x??(cue?.kind==='sniff'?Math.min(875,x+100):480),wy=cue?.y??(cue?.kind==='sniff'?y+75:480);
- const word=label&&showWords?`<text data-learning="${cue?.id||'game'}" x="${wx}" y="${wy}" text-anchor="middle" font-family="DejaVu Sans,Hiragino Kaku Gothic ProN,Yu Gothic,Noto Sans JP,sans-serif" font-weight="bold" font-size="${cue?.size||38}" fill="${cue?.kind==='crack'?'#382417':'#F8DD79'}" stroke="${cue?.kind==='crack'?'#FFF4D9':'#382417'}" stroke-width="0.7">${label}</text>`:'';
+ const fontSize=cue?.size||58, halfWidth=Math.max(70,[...label].reduce((w,ch)=>w+(/[\u3000-\u9fff]/u.test(ch)?1:.72),0)*fontSize/2);
+ const wx=Math.max(halfWidth+12,Math.min(948-halfWidth,cue?.x??(cue?.kind==='sniff'?(x>650?x-130:x+180):480))),wy=cue?.y??(cue?.kind==='sniff'?y+28:480);
+ const textAttrs=`x="${wx}" y="${wy}" text-anchor="middle" font-family="DejaVu Sans,Hiragino Kaku Gothic ProN,Yu Gothic,Noto Sans JP,sans-serif" font-weight="bold" font-size="${fontSize}"`;
+ // Explicit two-pass text works in browser SVG and Cairo (paint-order is not portable).
+ const word=label&&showWords?`<g data-learning="${cue?.id||'game'}"><text ${textAttrs} fill="#FFF9E8" stroke="#173F43" stroke-width="7" stroke-linejoin="round">${label}</text><text ${textAttrs} fill="#FFF9E8" aria-hidden="true">${label}</text></g>`:'';
+
  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" width="960" height="540" role="img" aria-label="Little shrew in its underground root pocket"><defs>${rig}</defs><rect data-material="earth" width="960" height="540" fill="${EARTH}"/><g transform="translate(${tremor},0)">${crushed?'':`<path d="${cave}" fill="#FFF4D9"/>`}<path data-place="root-pocket" d="M740 430 V300 Q740 230 820 230 Q930 230 930 340 V430 Z" fill="#FFF4D9"/>${shelves}${gameActors===null?family:gameActors}${roof}${cracks}${imprint}${dinosaur}<path d="M850 235 Q825 290 834 370 M839 302 Q805 275 797 292 M839 284 Q868 255 877 275" fill="none" stroke="#789468" stroke-width="7" stroke-linecap="round"/>${gameActors===null?hero:actors.filter(a=>a.status==='safe').map(a=>`<g data-survivor="${a.id}" transform="translate(${a.x+(cue?.actorId===a.id?sniff*6:0)},${a.y}) scale(${a.scale})"><use href="#${turn>.5?'front':'neutral'}"/></g>`).join('')}</g>${word}</svg>`;
 }

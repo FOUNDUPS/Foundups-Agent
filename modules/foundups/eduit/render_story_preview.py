@@ -41,13 +41,13 @@ def render(output):
     spec = {'schema_version':1,'duration_seconds':15,'preset':'final','orientation':'landscape',
             'clips':[{'path':f'b0{i+1}.mp4','start':0,'duration':5} for i in range(3)],
             'captions':cues,'captions_in_scene':True,'music':{'path':'original-score.wav','rights_evidence':'Original code-composed score and synthesized foley, no samples or lyrics.'},
-            'title':'Little Shrew — Find the Root Pocket','learning_objective':'Match THUMP, SNIFF, CRACK and SQUISH to their visible sound-making events.','activity':'Tap the shrew, then the root.','language':'en','age_band':'3-6'}
+            'title':'Little Shrew — Find the Root Pocket','learning_objective':'Match THUMP, SNIFF, CRACK and SQUISH to their visible sound-making events.','activity':'Tap the shrew, then the root.','language':'en','age_band':'3-4'}
     result=editor.render_episode(spec,output/'little-shrew.mp4',base_dir=output)
     result['video_path'] = Path(result['video_path']).name
     result['captions_path'] = Path(result['captions_path']).name
     sources=[ROOT/'public/eduit/storytime'/n for n in ('scene.mjs','rig.mjs','engine.mjs','learning-events.mjs')]
     sources += [Path(__file__), Path(__file__).with_name('export_story_frames.mjs'), SRC/'little_shrew_animation.py', SRC/'kids_episode.py']
-    record={'schema':'eduit.story_preview.v1','revision':'sound-languages-9','created_at':datetime.now(timezone.utc).isoformat(),'status':'rendered_unreviewed','duration_seconds':15,'method':'shared_browser_svg_scene','paid_calls':0,'result':result,
+    record={'schema':'eduit.story_preview.v1','revision':'preschool-controls-10','created_at':datetime.now(timezone.utc).isoformat(),'status':'rendered_unreviewed','duration_seconds':15,'method':'shared_browser_svg_scene','paid_calls':0,'result':result,
             'source_hashes':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest() for p in sources},
             'asset_hashes':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in output.iterdir() if p.is_file()}}
     (output/'provenance.json').write_text(json.dumps(record,indent=2)+'\n')

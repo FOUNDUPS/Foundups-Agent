@@ -40,3 +40,12 @@ Each panel now owns expand/collapse. Added WebKit pinch adapter over Mall gestur
 pinch tap suppression, viewport rotation pause, safe-area sizing and inert focus.
 Fourteen focused checks plus phone/tablet viewport harness; actual iOS remains
 unverified. Independent CLI/resize findings repaired. See HOME_SCREEN_LAYOUT_REPAIR.
+
+
+## 2026-10-26 — Preschool iteration
+
+Existing inventory reviewed before extending storytime.test.mjs with font-size
+independence from tremor.15 Node cases pass. Added separate real-DOM controller
+harness for fullscreen pause, mark/undo/clear/share, switch, repeat and lock
+(20 assertions); synthetic pointer limitations explicit. See tests/README.md
+and docs/PRESCHOOL_VIEWER_REVIEW.md. No mirror-only test suite added.

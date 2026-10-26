@@ -76,3 +76,13 @@ video/game switching, panel gestures, fullscreen freeze/mark/share, Repeat video
 child touch-lock and deferred rating direction. These are requirements, not
 shipped capabilities. Existing source gaps and independent acceptance cases are
 recorded there; keep the current scene/media and existing Mall/Shorts owners.
+
+
+## Preschool viewer implementation — 2026-10-26
+
+[Preschool review](docs/PRESCHOOL_VIEWER_REVIEW.md) records the current ages3–4
+iteration: brighter panel controls, larger cue/count typography, fullscreen
+freeze/mark/share, video/game switch, video repeat and child touch-lock. This
+implements the bounded tile-control slice; native-device acceptance, authentic
+Red Dog feedback transport and Mall ratings remain separate. Next priority is
+physical-device acceptance of this episode before extending the story.

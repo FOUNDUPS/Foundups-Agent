@@ -11,12 +11,12 @@ function syncAudio(){soundtrack.currentTime=state.elapsed;if(!paused&&state.phas
 const embedded=new URLSearchParams(location.search).get('embed')==='1';if(embedded)document.body.classList.add('embedded');
 const hits=document.createElement('div');hits.className='rescue-targets';stage.after(hits);
 for(const id of ['wake','root'])$(id).remove();
-function act(e){if(panelGestures?.isPinching())return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
+function act(e){if(panelGestures?.isPinching())return;if(e==='start'||e==='retry')paused=false;else if(paused)return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
 $('start').onclick=()=>act('start');$('retry').onclick=()=>act('retry');$('pause').onclick=()=>{paused=!paused;syncAudio();};
 function draw(){
  const t=state.elapsed,poses=state.actors.map(a=>actorPose(a,t));
  const world=movie(t);let cue=localizeEvent(world.cue,locale);
- if(cue?.kind==='sniff'){const a=poses.find(a=>a.id===(state.selected||'baby-3'));cue={...cue,actorId:a.id,x:Math.min(875,a.x+100),y:a.y+75};}
+ if(cue?.kind==='sniff'){const a=poses.find(a=>a.id===state.selected)||poses.find(a=>a.status==='moving')||poses.find(a=>a.status==='safe')||poses.find(a=>a.id==='baby-3');cue={...cue,actorId:a.id,x:(a.x>650?a.x-130:a.scale<.6?a.x+180:a.x+165*a.scale),y:a.scale<.6?a.y+28:a.y-20};}
  stage.innerHTML=scene({...world,cue,actors:poses,showWords:true});
  const nextKey=state.phase+state.selected+state.actors.map(a=>a.status).join();
  if(nextKey!==hitKey){hitKey=nextKey;hits.replaceChildren();
@@ -33,11 +33,11 @@ function draw(){
  $('message').textContent=over?(saved?`${saved} / 5 saved`:locales[locale].over):'';
  $('start').hidden=state.phase!=='ready';$('retry').hidden=!over;$('pause').hidden=state.phase!=='playing';$('time').textContent='';
  let end=$('ending');if(!end){end=document.createElement('div');end.id='ending';stage.parentElement.append(end);}
- end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved?`${saved} / 5`:locales[locale].over;const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label',locales[locale].again);button.onclick=()=>act('retry');end.append(text,button);}
+ end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved?`${saved} / 5`:locales[locale].over;text.setAttribute('aria-label',saved?`${saved} of 5 shrews saved`:locales[locale].over);const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label',locales[locale].again);button.onclick=()=>act('retry');end.append(text,button);}
 }
 function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&state.phase==='playing'){state=advance(state,'tick',dt);if(!soundtrack.paused&&Math.abs(soundtrack.currentTime-state.elapsed)>.15)soundtrack.currentTime=state.elapsed;draw();}requestAnimationFrame(frame);}
-window.storytimeReview={setLocale(value){locale=normalizeLocale(value);document.documentElement.lang=locale;draw();return locale;},freeze(){paused=true;soundtrack.pause();return {svg:stage.innerHTML,phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state),locale};},play(){paused=false;if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
+window.storytimeReview={status(){return {paused,phase:state.phase,clock:state.elapsed};},setLocale(value){locale=normalizeLocale(value);document.documentElement.lang=locale;draw();return locale;},freeze(){paused=true;soundtrack.pause();return {svg:stage.innerHTML,phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state),locale};},play(){paused=false;if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
 // Reuse the Mall gesture owner inside the iframe; only same-origin parent can react.
 panelGestures=bindPanelGestures(stage.parentElement,{expand:()=>parent.postMessage({type:'storytime.fullscreen',expanded:true},location.origin),collapse:()=>parent.postMessage({type:'storytime.fullscreen',expanded:false},location.origin)});
-document.addEventListener('visibilitychange',()=>{if(document.hidden)soundtrack.pause();else syncAudio();});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){paused=true;soundtrack.pause();}});
 draw();requestAnimationFrame(frame);

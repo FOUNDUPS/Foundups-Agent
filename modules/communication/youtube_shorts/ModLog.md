@@ -867,3 +867,12 @@ See EDUIT HOME_SCREEN_LAYOUT_REPAIR.md for evidence and physical-device limits.
 Iteration skill v0.2.4 adds five evidence-scoped1–5 diagnostic criteria, autonomous
 adjacent-surface checks and repair/stop/retain rules. WSP15 remains defect priority,
 not visual quality. Current grades keep native iOS and transfer evidence separate.
+
+
+## 2026-10-26 — Storytime preschool viewer milestone
+
+Existing kids_review viewer gains child-sized controls, fullscreen annotation,
+stateful playback, direct video/game switch, snapshot sharing, repeat and touch
+lock. Shared EDUIT renderer enlarges sound words without changing motion/audio.
+See [preschool review](../../foundups/eduit/docs/PRESCHOOL_VIEWER_REVIEW.md)
+for evidence and limits.

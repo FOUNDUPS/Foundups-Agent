@@ -228,3 +228,12 @@ Independent reviewer confirmed scope and requested correction of stale locale
 status; corrected game en/ja/pt/es vs English film. No runtime tests rerun for
 prose-only changes. Related draft #2221 remains a separate preserved deployment
 lane requiring rebase/reconciliation, not closed as if it were superseded.
+
+
+## 2026-10-26 — Preschool controls and readable cues
+
+Implemented existing viewer controls and shared scene typography for ages3–4.
+See docs/PRESCHOOL_VIEWER_REVIEW.md for source/encoded review, rejected attempts,
+independent grades and device limits.15 Node checks pass; browser harness covers
+fullscreen draft/share/lock/switch and undo sequences. Same original audio hash,
+15s duration and engine timeline; no external generation, YouTube upload or DNS.

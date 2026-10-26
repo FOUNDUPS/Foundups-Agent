@@ -1,0 +1,29 @@
+<!doctype html><meta name="viewport" content="width=device-width,initial-scale=1"><title>Storytime interaction acceptance</title>
+<style>body{margin:0;font:14px system-ui;background:#ddd}nav{padding:8px}iframe{display:block;border:0}pre{white-space:pre-wrap;max-height:100px;overflow:auto}</style>
+<nav><button data-size="390,844">Phone portrait</button><button data-size="844,390">Phone landscape</button><button data-size="768,1024">Tablet portrait</button><button data-size="1024,768">Tablet landscape</button><button id="run">Run acceptance</button></nav><pre id="results">Ready</pre><iframe id="app" src="/" width="390" height="844"></iframe>
+<script type="module">
+const frame=document.querySelector('#app'),results=document.querySelector('#results');
+for(const b of document.querySelectorAll('[data-size]'))b.onclick=()=>{const [w,h]=b.dataset.size.split(',');frame.width=w;frame.height=h;};
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+document.querySelector('#run').onclick=async()=>{
+ const d=frame.contentDocument,w=frame.contentWindow,$=id=>d.getElementById(id),api=$('game').contentWindow.storytimeReview,checks=[];
+ function check(name,ok){checks.push({name,result:ok?'PASS':'FAIL'});results.textContent=JSON.stringify(checks,null,2);if(!ok)throw Error(name);}
+ try{
+ $('full-game').click();await wait(250);check('game fills selected viewport',$('game-panel').getBoundingClientRect().width===Number(frame.width));
+ $('play').click();await wait(450);check('stateful pause label',$('play').getAttribute('aria-label')==='Pause game');$('play').click();const clock=api.status().clock;await wait(150);check('pause holds clock',api.status().clock===clock);
+ $('feedback').click();check('Pencil retains fullscreen',$('game-panel').classList.contains('expanded')&&!$('ink').hidden);
+ const ink=$('ink'),rect=ink.getBoundingClientRect(),event=(type,id,x,y)=>ink.dispatchEvent(new w.PointerEvent(type,{pointerId:id,clientX:rect.x+x*rect.width,clientY:rect.y+y*rect.height,bubbles:true}));
+ // Synthetic events validate handlers only, not physical touch delivery.
+ const original=ink.setPointerCapture;ink.setPointerCapture=()=>{};
+ event('pointerdown',1,.2,.3);event('pointermove',1,.3,.4);event('pointerup',1,.3,.4);$('save').click();check('pointer stroke saved',JSON.parse($('record').value).entries.at(-1).strokes.length===1);
+ $('mark-clear').click();$('mark-undo').click();$('save').click();check('Clear is reversible',JSON.parse($('record').value).entries.at(-1).strokes.length===1);
+ $('mark-clear').click();$('mark-clear').click();event('pointerdown',1,.6,.6);event('pointermove',1,.7,.7);event('pointerup',1,.7,.7);$('mark-undo').click();$('save').click();check('Undo removes newest stroke after Clear',JSON.parse($('record').value).entries.at(-1).strokes.length===0);$('mark-undo').click();$('save').click();check('Repeated Clear preserves recovery',JSON.parse($('record').value).entries.at(-1).strokes.length===1);
+ event('pointerdown',1,.4,.3);event('pointerdown',2,.5,.3);event('pointerup',2,.5,.3);event('pointerup',1,.4,.3);$('save').click();check('second finger cancels provisional ink',JSON.parse($('record').value).entries.at(-1).strokes.length===1);ink.setPointerCapture=original;
+ $('full-game').click();$('full-game').click();check('collapse/expand retains whiteboard',!ink.hidden);
+ $('share-image').click();for(let i=0;i<30&&!d.getElementById('picture').open;i++)await wait(100);check('snapshot is available in fullscreen',d.getElementById('picture').open);check('snapshot size',d.querySelector('#picture img').naturalWidth===1920);$('close-picture').click();
+ $('resume-game').click();await wait(150);$('play').click();$('to-video').click();check('direct switch retains fullscreen',$('video-panel').classList.contains('expanded'));check('switch pauses game',api.status().paused);
+ $('video-options').click();$('repeat').click();check('video repeat selected',$('video').loop);$('repeat').click();$('lock-child').click();check('child lock enabled',d.body.classList.contains('child-locked'));$('full-video').click();check('lock refuses collapse',$('video-panel').classList.contains('expanded'));$('to-game').click();check('locked switch works',$('game-panel').classList.contains('expanded'));check('locked adult control hidden',getComputedStyle($('feedback')).display==='none');
+ check('no horizontal overflow',d.documentElement.scrollWidth<=w.innerWidth);results.textContent+='\nComplete. Reload the fixture before another run.';
+ }catch(e){results.textContent+='\nERROR '+e.message;}
+};
+</script>
