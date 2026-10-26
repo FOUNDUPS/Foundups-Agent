@@ -274,5 +274,8 @@
   "dependencies": {
     "uuid": "11.1.1",
     "ws": "^8.13.0"
+  },
+  "overrides": {
+    "@azure/msal-node": "7.1.1"
   }
 }
