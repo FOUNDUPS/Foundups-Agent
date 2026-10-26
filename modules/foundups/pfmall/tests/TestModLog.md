@@ -13,6 +13,13 @@ RED/GREEN. Local engine absence remains an execution limitation. Freeze these
 oracles before Dockerfile/lock authoring; actual image/PID1/HTTP/cleanup acceptance
 must come from the explicit hosted Linux job. Evidence: external
 foundups-member-container-20261026, context-preflight-red and default baseline.
+Independent static review665077df found missing trigger paths and an unnamed
+audit-container timeout gap. Correct only those new test-side surfaces: include
+seven copied-input selectors in each trigger, and UUID-name/label the audit run
+with existing owned removal in finally. Freeze the revised helper before the
+first Docker run; original three HTTP/config assertions and45 named definitions
+stay fixed. Runtime wheel acquisition18/18 hashes matches qualified Linux evidence;
+this is acquisition/static evidence only. Hosted image acceptance remains pending.
 
 ## 2026-10-26 — Exact registry projection after hosted rejection
 

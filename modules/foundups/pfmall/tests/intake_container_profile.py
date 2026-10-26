@@ -118,9 +118,17 @@ def build_image(directory):
         "p=pathlib.Path('/app');assert not any(x.is_symlink() for x in p.rglob('*'));"
         "print(json.dumps(dict(uid=os.getuid(),python=sys.version,files={x.relative_to(p).as_posix():"
         "hashlib.sha256(x.read_bytes()).hexdigest() for x in p.rglob('*') if x.is_file()},"
-        "packages={d.metadata['Name'].lower().replace('_','-'):d.version for d in m.distributions()})))")
-    audit = json.loads(_docker(directory, "run", "--rm", "--network", "none", image,
-        "python", "-I", "-B", "-c", code).stdout)
+        "packages={d.metadata['Name'].lower().replace('_','-'):d.version for d in m.distributions()},"
+        "os_release=pathlib.Path('/etc/os-release').read_text(),"
+        "os_packages=pathlib.Path('/var/lib/dpkg/status').read_text())))")
+    name = "foundups-intake-audit-" + uuid.uuid4().hex
+    assert _inspect(directory, name) is None
+    try:
+        audit = json.loads(_docker(directory, "run", "--name", name, "--label",
+            "foundups.intake.test=" + name, "--network", "none", image,
+            "python", "-I", "-B", "-c", code).stdout)
+    finally:
+        _remove(directory, name)
     assert audit["uid"] == 10001 and audit["python"].startswith("3.12.15 ")
     assert audit["files"] == {k: v for k, v in context["files"].items()
                               if k.startswith("modules/") and not k.endswith((".txt", ".lock", "Dockerfile.intake"))}
