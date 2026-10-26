@@ -205,3 +205,7 @@ unverified. Independent CLI/resize findings repaired. See HOME_SCREEN_LAYOUT_REP
 The same Home Screen milestone now records viewer-iteration v0.2.4 diagnostic
 scores and independently found defects, with native-device gaps explicitly open.
 No numerical average, autonomous worker or next-episode transfer success claimed.
+
+Independent grade review rejected unsupported4/5 entry/readability claims; both
+were reduced to3/5 with their missing observations retained. Source code passed
+14 cases; no new capability or media change was made to raise the score.

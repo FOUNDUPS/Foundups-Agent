@@ -55,7 +55,7 @@ before adding episodes, gestures or decorative filler.
 
 ## Applied skill receipt — same milestone, not a new implementation lane
 
-Canonical skill: `youtube_shorts/skillz/kids_episode_production/SKILLz.md` v0.2.3
+Canonical skill: `youtube_shorts/skillz/kids_episode_production/SKILLz.md` v0.2.4
 and `references/viewer-iteration.md`, under the existing production skill.
 The earlier gap was incomplete viewer routing plus stale perspective notes;
 those are corrected rather than creating a second skill/module/registry owner.
@@ -89,10 +89,10 @@ Freeze them for the next iteration; do not claim a measured learning effect.
 | Criterion | Current scoped grade | Evidence / remaining gap |
 |---|---|---|
 | Launch/fit |4/5 browser scope | Direct live root and four viewport dimensions checked; actual installed iOS acceptance UNVERIFIED |
-| Panel entry/exit |4/5 browser scope | Both live units fill viewport and return;48px controls; real device safe areas UNVERIFIED |
+| Panel entry/exit |3/5 | Both live units fill viewport and return;48px controls; keyboard Escape/focus and real-device safe areas need explicit acceptance |
 | Input parity |3/5 | Mouse and gesture callback/cancellation checks pass; native iOS touch delivery UNVERIFIED |
 | State/feedback continuity |3/5 | Source/test pause and normalized canvas retained; installed-device resume/marks after rotation need acceptance |
-| Educational readability |4/5 changed-surface scope | Scene/words/media identities unchanged; no new spoken-language or learner-understanding claim |
+| Educational readability |3/5 | Scene/words/media identities unchanged; direct word/control overlap checks in the new expanded layout remain needed |
 
 No overall average, completion percentage or physical-iPhone PASS is assigned.
 No speculative new code is justified solely to raise an unverified device score.
@@ -105,3 +105,11 @@ pinch. Those were repaired without waiting for012 to identify each defect.
 The source audit also found stale perspective notes and a missing viewer route
 in the skill. This is a manually governed contribution to RSI, not an installed
 autonomous production line. Next actual episode remains the forward test.
+
+
+Independent score review: `/root/touch_review` evaluated local source8bacd37a
+(tree19c5bd002cf20da41358764bd62a13303f34590b), confirmed14/14 source checks,
+and requested lowering panel-entry and educational-readability grades because
+source invariants alone do not prove keyboard or visual cue acceptance. Those
+corrections are retained above. This identifies a reviewed source tree, not an
+authenticated WRE reviewer or automatic skill-promotion receipt.
