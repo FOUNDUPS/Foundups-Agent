@@ -2,6 +2,102 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Image security remediation allocation — 2026-10-26, before mutation
+
+WSP15 C2/I5/D5/Impact4=16/P0 for this held image; WSP6/11/22/50/62/71/77/84/97.
+Actual hosted run40253565358 passes817 normal cases and the same three image
+cases. Independent archive reconstruction accepts its exact bytes; it is not
+deployment-ready. Verified immutable Trivy0.76.1 scans the saved image with current
+DB:291 findings, including2critical/65high/113medium/109low/2unknown; zero secret
+findings reported. Preserve this first image/report and the deployment hold.
+Both critical package advisories have fixed Trixie releases; the Python findings
+are bundled build-tool packages. Simplest next layer: pin the observed official
+Python3.12.15 slim Trixie amd64 digest, retaining all18 runtime wheel pins; remove
+pip and ensurepip after install/pip check. No unbounded apt upgrade or waiver.
+Freeze stricter OS/runtime-only image assertions before changing Dockerfile;
+preserve all three HTTP/config oracles and the full817 selection. Existing source,
+auth, signer, scanner policy, registry and historical receipt bytes stay fixed.
+Keep Dockerfile<=45/helper<=280/functions<=80. Additional result budgets:
+plan+40/root+12/module ModLog+18/TestModLog+16/README+10/INTERFACE+6/ROADMAP+8.
+Normal-merge the reviewed serving/current-main union; prove every input blob.
+Actual hosted image tests, new exact archive scan and independent artifact review
+must qualify the replacement. A completed scanner exit alone is not a clean gate.
+Use existing security_scanner normalization; no new scanner framework or exception.
+
+## Intake Linux container allocation — 2026-10-26, before authoring
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/71/77/84/97.
+Parent serving candidatef801c0211c50426f06604edbd98ec70b72a174d5, PR2226;
+owned container branch/worktree. Need: checkout HTTP proof is not a packaged
+Linux service. Local Desktop start returned0 but the engine/status probe failed;
+no local image is claimed. Use the existing hosted Linux execution plane, without
+cloud deployment, registry publishing, IAM expansion, provider identity or tokens.
+
+Independent source research and actual normal import agree on16 Python files
+plus four real tracked static assets. Reuse those exact owners; retain genesis
+package initialization/HMAC/contract imports without activating their services.
+Use one Dockerfile.intake (<=45 lines), fixed8080 exec-form ordinary Uvicorn CLI,
+one worker and all qualified trust/resource flags. No PORT launcher. Future Cloud
+Run configuration must explicitly select8080. Pin the official Python3.12 Bookworm
+linux/amd64 image by observed platform digest; verify its actual Python version.
+Set numeric nonroot10001:10001, disable bytecode and copy only explicit sources.
+
+Add requirements-container.lock (<=80 lines) for the18 existing runtime packages,
+exact Linux CPython3.12 wheel hashes derived from the qualified Linux report.
+Bootstrap only the already qualified pip26.2.2 official hash; no other installer,
+global profile change, native compilation or unbounded dependency resolution.
+Require direct-profile/lock agreement and pip check. Retain package/base/OS
+inventories; metadata integrity and functional tests are not a CVE-free image
+certificate. Image vulnerability and real cloud/session qualification still gate
+deployment. Do not loosen any scanner or predict exception fingerprints.
+
+Reuse all three real_server pytest IDs/oracles through a five-line explicit
+PFMALL_TEST_CONTAINER_IMAGE branch in the existing wire fixture. Add one test-only
+intake_container_profile.py helper (<=280 lines; no new test owner/framework).
+WSP62 keeps cohesive archive/build/transport/cleanup operations in that helper;
+functions<=80 lines. Build context is Git archive of exactly24 named regular files
+from immutable HEAD, validated before Docker sees it. No whole checkout, ignored
+functions, policy, VCS, test keys or model data enters the context. Freeze these
+test-side assertions before Dockerfile/lock authoring. Record the missing-artifact
+preflight failure accurately; no local Docker RED/GREEN claim is possible yet.
+
+The Docker transport binds a UUID-owned stopped/running container to its immutable
+image ID, startup line, real host port and PID1 separately from the client PID.
+Missing config omits the mount, reaching the actual factory rejection. Capture
+stopped-state evidence before finally removing only owned containers and reaping
+clients; verify absence, including failure paths. Publish host port on127.0.0.1
+only, readonly policy/rootfs, no added capabilities/privileges,256MiB/one CPU/64pids.
+Bridge networking is explicit; no zero-egress or universal OS-isolation claim.
+
+Add one ubuntu-24.04 job after existing nomination contracts in the same workflow,
+timeout10min, existing read-only permission and checkout rules. It builds without
+publishing, audits actual source/dependency/user/PID1/port state and runs the same
+three HTTP/config cases with JUnit. Preserve the normal817-case job and every old
+oracle. Add only component trigger paths, job and retained public-safe evidence.
+Budget: workflow+100, original test+6, helper/lock/Dockerfile above; README+35,
+INTERFACE+18/ROADMAP+14/module ModLog+20/tests README+16/TestModLog+24,
+this plan+75/root ModLog+16. No registry member/capability, runtime manifest/pin,
+ledger, application/auth source or protected historical receipt change. Stop and
+allocate any actual derived delta before mutation. Independent source/fault-path
+review and fresh exact-head/base hosted gates precede main promotion.
+
+Retrieval: Holo HEAD_MISMATCH/UNKNOWN/gaptrue, no reindex. Current module/test
+contracts,16-file import observation, static Git inventory and official Docker,
+Cloud Run and GitHub runner documentation outrank old deployment prose. Missing
+memory README remains recorded. Avoid duplicate business logic or HTTP oracles.
+Qwen/Gemma inference cannot prove image contents/process cleanup; deterministic
+artifact checks and an attributed independent reviewer supply that evidence.
+Source-stage result: existing817 local cases pass, initial missing-lock preflight
+fails before Docker,18/18 acquired Linux wheel digests match qualified CI evidence.
+Independent review665077df found two new test-side gaps: incomplete input triggers
+and unnamed audit-run timeout cleanup. Repair within the existing budgets before
+first Docker execution; keep all existing HTTP/config oracles fixed. The actual
+image/security/cloud/session/browser/admission/chain gates remain outstanding.
+Actual committed-context probe rejects Windows CRLF conversion on23 archive files.
+Allocate the remaining helper/log budget to per-command LF archive configuration;
+diagnosis confirms24/24 exact Git blobs without changing attributes or assertions.
+Retain the failed probe and require revised independent review before publication.
+
 ## Serving registry reprojection allocation — before derived mutation
 
 Actual CI40248799360/job121335967046 rejects stale canonical registry bytes.

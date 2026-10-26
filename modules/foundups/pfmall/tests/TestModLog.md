@@ -1,5 +1,41 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Freeze runtime-only image acceptance after the actual scan
+
+Allocation028bf433a,16/P0. First hosted run40253565358 passes the exact817 normal
+IDs and same three image cases; independent tar/config/layer/context proof passes.
+Fresh actual archive scan291 findings includes2critical/65high/2unknown, so retain
+the deployment hold. Extend only the new image inventory acceptance: Debian13,
+exactly18 locked runtime distributions, pip and ensurepip absent. The prior actual
+image audit rejects this policy; this metadata control is not another Docker run.
+Freeze before base/installer-removal authoring. All existing HTTP/config oracles,
+45 definitions and the original default fixture behavior remain fixed. Require
+fresh hosted execution, exact archive scan and independent replacement review.
+
+## 2026-10-26 — Freeze container transport acceptance before image authoring
+
+Allocationc08509671,15/P1. Reuse the same three real_server IDs/assertions through
+an explicit image-only fixture branch and one Linux Docker transport helper.
+All45 other named definitions remain AST-identical; removing only the new opt-in
+restores the exact original wire fixture AST. Existing817 cases pass locally with
+the opt-in unset, no failure/error/skip and the retained TestClient warning.
+The committed-context preflight rejects the missing future container lock before
+any Docker invocation. This is a Git-archive admission RED, not a Docker runtime
+RED/GREEN. Local engine absence remains an execution limitation. Freeze these
+oracles before Dockerfile/lock authoring; actual image/PID1/HTTP/cleanup acceptance
+must come from the explicit hosted Linux job. Evidence: external
+foundups-member-container-20261026, context-preflight-red and default baseline.
+Independent static review665077df found missing trigger paths and an unnamed
+audit-container timeout gap. Correct only those new test-side surfaces: include
+seven copied-input selectors in each trigger, and UUID-name/label the audit run
+with existing owned removal in finally. Freeze the revised helper before the
+first Docker run; original three HTTP/config assertions and45 named definitions
+stay fixed. Runtime wheel acquisition18/18 hashes matches qualified Linux evidence;
+this is acquisition/static evidence only. Hosted image acceptance remains pending.
+Committed adf219907 preflight rejects23 CRLF-transformed archive members on Windows.
+Force LF in this archive command only; all24 then equal their original Git blobs.
+Keep the exact-byte assertion, failed log and independent review; no Docker claim.
+
 ## 2026-10-26 — Exact registry projection after hosted rejection
 
 CI40248799360 rejects stale registry bytes;6b5d7902f precedes one independently

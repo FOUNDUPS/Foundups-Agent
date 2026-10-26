@@ -1,5 +1,25 @@
 # p.fMALL Roadmap
 
+## Actual image security remediation — 2026-10-26
+
+First hosted817+3 cases and independent image reconstruction pass; the security
+scan's2critical/65high/2unknown keep deployment held. Under16/P0 pin official
+Python3.12.15/Trixie and remove pip/ensurepip after dependency checks. Preserve
+the18 runtime pins and HTTP oracles; frozen inventory rejects the prior image.
+Require a fresh image, full cases, exact archive scan and independent acceptance.
+
+## Linux intake container candidate — 2026-10-26
+
+Allocate15/P1: one minimal nonroot fixed8080 image, exact runtime wheel lock,
+24-file Git context, existing three HTTP oracles and a hosted Linux job. Default
+817 cases pass locally; archive preflight RED is not Docker execution. Independent
+source review identified trigger-coverage and audit-cleanup gaps; both are repaired
+before first hosted execution. Retain exact image/inventory/PID1/HTTP evidence.
+Next require actual hosted acceptance, current-base/security gates and image
+vulnerability qualification. Then administer cloud limits and provider policy,
+prove a real session and wire the browser; durable project admission follows.
+No existing Node function or shared ignored source is part of this package.
+
 ## Real HTTP serving qualification — 2026-10-26
 
 Allocate a minimal optional Uvicorn profile and three test-first actual-process

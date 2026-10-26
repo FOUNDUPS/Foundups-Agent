@@ -1,3 +1,28 @@
+## 2026-10-26 — Allocate remediation of the actual intake image
+
+Hosted817+3 functional cases pass, but the exact saved image scan reports291
+findings including2critical/65high/2unknown. Preserve the image, scan and hold.
+Under16/P0 allocate a pinned Trixie runtime and removal of installation-only
+pip/ensurepip, retaining18 runtime wheel pins and all HTTP/config oracles.
+Freeze stricter inventory acceptance first; require a fresh hosted image and scan.
+The FX/chain plan records bounds; no scanner waiver, source/auth or token grant.
+
+## 2026-10-26 — Allocate the actual Linux intake container
+
+WSP15 15/P1 before authoring; WSP6/22/50/62/71/77/84/97. Reuse the exact existing
+import/static closure and the three real HTTP assertions. Add one fixed-port
+nonroot image, qualified runtime wheel lock, test-only Docker transport and hosted
+Linux job; no runtime launcher or business/auth duplication. Git archive excludes
+ignored/shared credentials and functions. Local Docker is unavailable, so actual
+image outcomes must come from hosted Linux evidence, not a local success claim.
+The existing FX/chain plan records exact budgets, source boundaries and remaining
+image-security/cloud/identity/browser/repository-control/chain delivery gates.
+Source candidate reuses817 local cases and18 hash-verified acquired Linux wheels;
+actual hosted image execution is pending. Independent review found trigger and
+audit-timeout cleanup gaps; repair those new test surfaces within allocation,
+preserving all HTTP/config oracles and historical evidence. No deployment claim.
+Committed preflight catches archive CRLF conversion; pin LF per command, preserving exact blob checks.
+
 ## 2026-10-26 — Allocate observed serving registry repair
 
 PR2226's actual hosted canonical-registry gate fails. Read-only generation shows

@@ -1,3 +1,37 @@
+## 2026-10-26 — Remediate the actual image before deployment
+
+Allocation028bf433a precedes frozen inventory0368eaf97 and product change.
+First hosted run40253565358 passes817+3; independent full archive/context/source/
+package reconstruction accepts its exact bytes. A verified Trivy0.76.1 current-DB
+scan completes with291 findings:2critical/65high/113medium/109low/2unknown and
+zero reported secret findings. Completion is not a clean gate; preserve the hold.
+Pin observed official Python3.12.15/Trixie amd64 digest. Keep18 runtime wheel pins;
+after pip check remove pip/ensurepip and the temporary lock. Stricter image audit
+requires Debian13, exact runtime inventory and absent installers. Prior actual
+metadata rejects that policy, without another local Docker execution claim.
+No application/auth/oracle/scanner-exception change. Require fresh hosted image
+execution, exact archive scan and independent replacement acceptance before use.
+
+## 2026-10-26 — Author the bounded Linux intake image candidate
+
+Allocationc08509671,15/P1; frozen acceptanceecadb40845. Add only the explicit
+Dockerfile/18-package Linux wheel lock and bounded hosted test transport/job.
+The Git archive validates24 regular tracked blobs; the image copies16 Python
+sources and four real static assets, uses a pinned official base/installer,
+numeric nonroot and fixed8080 exec-form Uvicorn. No application/auth changes.
+Existing817 local cases pass with container opt-in unset. The missing-lock
+preflight RED occurs before Docker; local engine access is unavailable. Actual
+Linux execution remains pending. Independent static review found seven missing
+input-trigger selectors and unnamed audit-container timeout cleanup; repair both
+before the first image run, preserving all existing HTTP/config oracles.
+All18 acquired Linux wheel hashes match the qualified Linux report; acquisition
+does not prove Linux execution or image security. Retain actual inventories,
+image/PID1/state/HTTP/cleanup evidence in CI and require fresh gates before main.
+WSP6/11/22/49/50/62/71/77/84/97. Deployment/session/admission/chain gates remain.
+Committed preflight catches Windows archive newline conversion on23 members.
+Pin LF in that archive command only; diagnostic comparison is24/24 exact blobs.
+Preserve the failure and byte assertion; require revised review before publication.
+
 ## 2026-10-26 — Reproject the observed process capability
 
 Allocation6b5d7902f precedes the independently accepted capabilities[] ->[process]

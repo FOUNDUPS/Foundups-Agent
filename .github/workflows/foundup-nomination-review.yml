@@ -11,10 +11,20 @@ on:
       - 'modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py'
       - 'modules/ai_intelligence/ai_overseer/tests/test_github_nomination_review.py'
       - 'modules/foundups/agent/src/kanban_plugin_contract.py'
+      - 'modules/__init__.py'
+      - 'modules/foundups/agent/src/__init__.py'
+      - 'modules/foundups/pfmall/__init__.py'
+      - 'modules/foundups/pfmall/api.py'
+      - 'modules/foundups/pfmall/shell_core.py'
+      - 'modules/foundups/pfmall/listing_discovery.py'
+      - 'modules/foundups/pfmall/static/**'
       - 'modules/foundups/pfmall/http_api.py'
       - 'modules/foundups/pfmall/intake_host.py'
       - 'modules/foundups/pfmall/requirements.txt'
       - 'modules/foundups/pfmall/requirements-server.txt'
+      - 'modules/foundups/pfmall/requirements-container.lock'
+      - 'modules/foundups/pfmall/Dockerfile.intake'
+      - 'modules/foundups/pfmall/tests/intake_container_profile.py'
       - 'modules/foundups/pfmall/tests/test_http_api.py'
       - 'modules/foundups/pfmall/tests/test_clerk_proposal_intake.py'
       - '.github/ISSUE_TEMPLATE/foundup-project-nomination.yml'
@@ -25,10 +35,20 @@ on:
       - 'modules/ai_intelligence/ai_overseer/src/foundup_genesis/**'
       - 'modules/ai_intelligence/ai_overseer/tests/test_*.py'
       - 'modules/foundups/agent/src/kanban_plugin_contract.py'
+      - 'modules/__init__.py'
+      - 'modules/foundups/agent/src/__init__.py'
+      - 'modules/foundups/pfmall/__init__.py'
+      - 'modules/foundups/pfmall/api.py'
+      - 'modules/foundups/pfmall/shell_core.py'
+      - 'modules/foundups/pfmall/listing_discovery.py'
+      - 'modules/foundups/pfmall/static/**'
       - 'modules/foundups/pfmall/http_api.py'
       - 'modules/foundups/pfmall/intake_host.py'
       - 'modules/foundups/pfmall/requirements.txt'
       - 'modules/foundups/pfmall/requirements-server.txt'
+      - 'modules/foundups/pfmall/requirements-container.lock'
+      - 'modules/foundups/pfmall/Dockerfile.intake'
+      - 'modules/foundups/pfmall/tests/intake_container_profile.py'
       - 'modules/foundups/pfmall/tests/test_http_api.py'
       - 'modules/foundups/pfmall/tests/test_clerk_proposal_intake.py'
       - '.github/ISSUE_TEMPLATE/foundup-project-nomination.yml'
@@ -69,6 +89,72 @@ jobs:
           path: ${{ runner.temp }}/nomination-review.json
           if-no-files-found: error
           retention-days: 14
+
+  intake-container:
+    if: github.event_name != 'issues'
+    needs: nomination-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install the unchanged test-side serving profile
+        run: |
+          python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/container-installer-pip.json" pip==26.2.2
+          python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/container-pip.json" -r modules/foundups/pfmall/requirements-server.txt pytest==9.0.3 httpx==0.28.1
+      - name: Build and audit the exact Git archive image without publishing
+        run: >-
+          env -u GITHUB_TOKEN -u GH_TOKEN python -I -B -c
+          'import os,sys; from pathlib import Path; sys.path.insert(0,os.getcwd());
+          from modules.foundups.pfmall.tests.intake_container_profile import build_image;
+          build_image(Path(os.environ["RUNNER_TEMP"])/"intake-container")'
+      - name: Reuse the three real HTTP assertions against the actual image
+        run: |
+          read -r PFMALL_TEST_CONTAINER_IMAGE < "$RUNNER_TEMP/intake-container/image-id"
+          export PFMALL_TEST_CONTAINER_IMAGE
+          env -u GITHUB_TOKEN -u GH_TOKEN python -B -m pytest -q --tb=short \
+            -c /dev/null --rootdir="$GITHUB_WORKSPACE" --noconftest --import-mode=importlib \
+            -o pythonpath=. -p no:cacheprovider --basetemp="$RUNNER_TEMP/container-pytest" \
+            --junitxml="$RUNNER_TEMP/container-contracts.xml" \
+            modules/foundups/pfmall/tests/test_clerk_proposal_intake.py -k real_server
+      - name: Preserve the tested candidate image for review
+        run: |
+          read -r image < "$RUNNER_TEMP/intake-container/image-id"
+          docker --host unix:///var/run/docker.sock image save --output "$RUNNER_TEMP/intake-image.tar" "$image"
+          sha256sum "$RUNNER_TEMP/intake-image.tar" > "$RUNNER_TEMP/intake-image.sha256"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: intake-container-image
+          path: |
+            ${{ runner.temp }}/intake-image.tar
+            ${{ runner.temp }}/intake-image.sha256
+          compression-level: 0
+          retention-days: 3
+          if-no-files-found: error
+      - name: Retain context, inventory and exact HTTP evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: intake-container-evidence
+          path: |
+            ${{ runner.temp }}/intake-container/context.json
+            ${{ runner.temp }}/intake-container/image-audit.json
+            ${{ runner.temp }}/intake-container/build.log
+            ${{ runner.temp }}/container-installer-pip.json
+            ${{ runner.temp }}/container-pip.json
+            ${{ runner.temp }}/container-contracts.xml
+            ${{ runner.temp }}/container-pytest/**/*-container.json
+            ${{ runner.temp }}/container-pytest/**/*-server.log
+          retention-days: 14
+          if-no-files-found: error
 
   nomination-contracts:
     if: github.event_name != 'issues'

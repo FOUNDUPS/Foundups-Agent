@@ -41,6 +41,25 @@ port0 listener, exercise HTTP draft/rejection/body limits, and reap the process.
 They establish neither container/cloud readiness, a real Clerk identity nor OS
 confinement. The imported development app still requires real tracked static files.
 
+## Linux image candidate
+
+`Dockerfile.intake`: linux/amd64, fixed8080, nonroot10001:10001, exec-form
+Uvicorn factory command and existing trust/resource options. Set the absolute
+`PFMALL_CLERK_POLICY_FILE` to an independently administered readonly JSON mount;
+the image contains no policy or credentials. Missing/invalid policy stops startup.
+The public route contract remains exactly proposal plus minimal health.
+`requirements-container.lock` is the Linux CPython3.12 runtime wheel closure;
+it does not replace either optional profile or the umbrella requirements.
+The revised image uses Python3.12.15 on Debian13/Trixie. Build-time pip/ensurepip
+are removed after installation checks; final inventory must equal the18 runtime
+pins. The first image's functional acceptance does not waive its security hold.
+`PFMALL_TEST_CONTAINER_IMAGE` is a test-only opt-in requiring an immutable image
+ID; ordinary tests keep the original process transport. Hosted qualification
+uses readonly rootfs/policy, dropped capabilities, no-new-privileges,256MiB,
+one CPU,64pids and127.0.0.1 host publication. Bridge networking permits egress.
+Actual image/security/cloud/session acceptance is tracked separately; no deployed
+service, new public API, repository admission or token authority is introduced.
+
 ## Shell-core invariants
 
 1. A manifest is static identity and remains authoritative for identity,

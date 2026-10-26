@@ -80,6 +80,20 @@ CIM metadata and taskkill with a verified-child fallback. This explicit subproce
 loopback profile is not zero-network, OS isolation or graceful-stop evidence.
 Retain every failed fixture/cleanup run and independently challenge cleanup.
 
+## Linux container qualification
+
+The hosted Linux container job explicitly opts the same three `real_server`
+cases into `intake_container_profile.py`; default execution remains unchanged.
+The helper validates the exact24-file immutable Git archive before Docker, then
+checks image source/package/user inventory and actual container PID1/resources/
+port. Missing/malformed policy reaches the factory and retains stopped state.
+UUID ownership labels and finally cleanup apply to the audit and HTTP containers;
+the client process is reaped separately. Image input paths trigger the workflow.
+First hosted817+3 cases pass, but that image remains security-held. Preserve its
+proof separately; the Debian13/runtime-only replacement needs a fresh image/scan.
+Container receipts/logs omit synthetic policy files and signing keys. Retain the
+tested image only after its three HTTP cases pass; no registry push or deployment.
+
 ## Original pre-rebase baseline
 
 At the original pre-rebase baseline

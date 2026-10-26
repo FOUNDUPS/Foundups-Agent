@@ -1,0 +1,23 @@
+# Build only from the validated 24-file Git archive; Linux amd64 qualification.
+FROM python:3.12.15-slim-trixie@sha256:e8a38829209aea82774882e5157e1f7c3e8c8393ff53a697b3580896e57f345c
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PYTHON_DOTENV_DISABLED=1
+WORKDIR /app
+COPY modules/foundups/pfmall/requirements-container.lock /tmp/intake.lock
+RUN python -I -B -m pip --isolated --disable-pip-version-check install --no-cache-dir --no-deps --only-binary=:all: --require-hashes \
+    'https://files.pythonhosted.org/packages/3f/06/3e4420302363fbb71be3c7f35ce042f54bfca330e3e66b3a2e3c4cca579f/pip-26.2.2-py3-none-any.whl#sha256=fd7f4dfa8190e014013b9f08f3e973f4e4c26ffd179a204895533a7254813a70' \
+    && python -I -B -m pip --isolated --disable-pip-version-check install --no-cache-dir --no-deps --only-binary=:all: --require-hashes --index-url https://pypi.org/simple -r /tmp/intake.lock \
+    && python -I -B -m pip check \
+    && python -I -B -m pip --isolated --disable-pip-version-check uninstall --yes pip \
+    && rm -rf /usr/local/lib/python3.12/ensurepip /tmp/intake.lock
+COPY modules/__init__.py /app/modules/
+COPY modules/foundups/agent/src/__init__.py modules/foundups/agent/src/kanban_plugin_contract.py /app/modules/foundups/agent/src/
+COPY modules/foundups/pfmall/__init__.py modules/foundups/pfmall/api.py modules/foundups/pfmall/http_api.py modules/foundups/pfmall/intake_host.py modules/foundups/pfmall/listing_discovery.py modules/foundups/pfmall/shell_core.py /app/modules/foundups/pfmall/
+COPY modules/foundups/pfmall/static/detail.html modules/foundups/pfmall/static/handoff.html modules/foundups/pfmall/static/index.html modules/foundups/pfmall/static/styles.css /app/modules/foundups/pfmall/static/
+COPY modules/ai_intelligence/ai_overseer/src/foundup_genesis/__init__.py modules/ai_intelligence/ai_overseer/src/foundup_genesis/clerk_intake.py modules/ai_intelligence/ai_overseer/src/foundup_genesis/envelope.py modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_transport.py modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py modules/ai_intelligence/ai_overseer/src/foundup_genesis/validator.py /app/modules/ai_intelligence/ai_overseer/src/foundup_genesis/
+USER 10001:10001
+EXPOSE 8080
+CMD ["python", "-I", "-B", "-m", "uvicorn", "modules.foundups.pfmall.intake_host:create_app", \
+    "--factory", "--app-dir", "/app", "--host", "0.0.0.0", "--port", "8080", \
+    "--workers", "1", "--loop", "asyncio", "--http", "h11", "--interface", "asgi3", "--ws", "none", "--lifespan", "on", \
+    "--no-proxy-headers", "--no-access-log", "--no-server-header", "--limit-concurrency", "16", "--backlog", "32", \
+    "--timeout-keep-alive", "5", "--timeout-graceful-shutdown", "10", "--h11-max-incomplete-event-size", "16384", "--log-level", "info"]
