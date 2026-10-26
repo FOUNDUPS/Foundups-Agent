@@ -155,11 +155,44 @@ def test_yumori_operational_skills_are_registered_and_projected() -> None:
     assert "AWARDED" in funding_text
 
     correspondence_text = CONTACT_LEDGER_SKILL_PATH.read_text(encoding="utf-8")
-    assert "Plain committee correspondence" in correspondence_text
-    assert "communication_policy_revision: 2026-10-06" in correspondence_text
-    assert "do not open with" in correspondence_text
-    assert "0102です" in correspondence_text
-    assert "Default sign-off: `YUMORI.me設立準備委員会`." in correspondence_text
+    assert "\nversion: 0.8.1\n" in correspondence_text
+    assert "communication_policy_revision: 2026-10-26" in correspondence_text
+    current_voice, human_fallback = correspondence_text.split(
+        "## External voice modes — principal directive 2026-10-26", 1
+    )[1].split(
+        "### Human/committee-authored correspondence — 2026-10-06 fallback", 1
+    )
+    current_voice = " ".join(current_voice.split())
+    assert (
+        "2026-10-06 plain committee policy is retained for actual human/committee-authored "
+        "messages and formal applicant channels"
+    ) in current_voice
+    for mode in ("AI_OPERATOR", "HUMAN_COMMITTEE", "OFFICIAL_FORM"):
+        assert f"- `{mode}`:" in current_voice
+    assert "explicitly admitted by a current authority" in current_voice
+    assert "Michael TroutのAIアシスタント「0102」" in current_voice
+    assert (
+        "not a fabricated human sender, employee, legal representative, or registered Japanese subsidiary"
+    ) in current_voice
+    assert "No personal human first-person claim and no representation of human review." in current_voice
+    assert "012-directed writing sent as Michael or the actual preparatory committee" in current_voice
+    assert "do not inject an unwanted AI/proxy preface or sign-off" in current_voice
+    assert "Neither mode can override required fields." in current_voice
+    assert "Always answer direct AI-assistance questions truthfully." in current_voice
+    assert (
+        "Changing the voice does not retroactively alter historical Sent, current recipient policy, "
+        "legal authority, authorization, or #1779."
+    ) in current_voice
+    assert (
+        "Unattended `REDDOG_AUTO` SEND is still HOLD-only until the sender-boundary service "
+        "is deployed and independently verified."
+    ) in current_voice
+    assert (
+        "A human-directed Work send is a separate transaction with fresh preflight, not perpetual authorization."
+    ) in current_voice
+    assert "do not open with" in human_fallback
+    assert "0102です" in human_fallback
+    assert "Default sign-off: `YUMORI.me設立準備委員会`." in human_fallback
     assert "Default sign-off:\n\n`0102`" not in correspondence_text
     assert "signature_only_0102_default" not in correspondence_text
     assert "monk_third_person_reference" not in correspondence_text

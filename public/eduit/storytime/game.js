@@ -1,24 +1,37 @@
-import {initial,advance} from './engine.mjs';
-import {scene} from './scene.mjs';
-let state=initial(),last=0,clock=0,paused=false,audio;
-const $=id=>document.getElementById(id), stage=$('scene'), wake=$('wake'),root=$('root'),start=$('start'),message=$('message');
-function sound(freq){if(!$('sound').checked)return;try{audio??=new AudioContext();audio.resume();let o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(.045,audio.currentTime);g.gain.exponentialRampToValueAtTime(.001,audio.currentTime+.22);o.connect(g).connect(audio.destination);o.start();o.stop(audio.currentTime+.23);}catch{}}
-function act(event){let prev=state.phase;state=advance(state,event);if(state.phase!==prev){sound(event==='root'?660:440);update();}}
-start.onclick=()=>act('start');$('retry').onclick=()=>act('retry');wake.onclick=()=>act('shrew');root.onclick=()=>act('root');
-$('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'Resume':'Pause';};
-function update(){
- const phase=state.phase;
- const text={ready:'A tiny adventure beneath your feet.',wake:'The ground is shaking. Tap the little shrew!',root:'Now tap the root to move into the little pocket.',walk:'Shuffle, shuffle… sniff, sniff!',stomp:'A big foot presses down…',success:'Safe in the little pocket! You noticed and acted.',retry:'Oops! Try again. First the shrew, then the root.'};
- message.textContent=text[phase];wake.hidden=phase!=='wake';root.hidden=phase!=='root';start.hidden=phase!=='ready';$('retry').hidden=!['success','retry'].includes(phase);
- $('pause').hidden=['ready','success','retry'].includes(phase);
- if(phase==='wake')wake.focus({preventScroll:true});if(phase==='root')root.focus({preventScroll:true});if(['success','retry'].includes(phase))$('retry').focus({preventScroll:true});
+import {initial,advance,actorPose} from './engine.mjs';
+import {scene,movie} from './scene.mjs';
+const $=id=>document.getElementById(id),stage=$('scene');
+let state=initial(),last=0,paused=false,hitKey="";
+const soundtrack=new Audio("assets/little-shrew.mp4");soundtrack.preload="auto";
+function syncAudio(){soundtrack.currentTime=state.elapsed;if(!paused&&state.phase==="playing")soundtrack.play().catch(()=>{});else soundtrack.pause();}
+const embedded=new URLSearchParams(location.search).get('embed')==='1';if(embedded)document.body.classList.add('embedded');
+const hits=document.createElement('div');hits.className='rescue-targets';stage.after(hits);
+for(const id of ['wake','root'])$(id).remove();
+function act(e){state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
+$('start').onclick=()=>act('start');$('retry').onclick=()=>act('retry');$('pause').onclick=()=>{paused=!paused;syncAudio();};
+function draw(){
+ const t=state.elapsed,poses=state.actors.map(a=>actorPose(a,t));
+ stage.innerHTML=scene({...movie(t),actors:poses,showWords:false});
+ const nextKey=state.phase+state.selected+state.actors.map(a=>a.status).join();
+ if(nextKey!==hitKey){hitKey=nextKey;hits.replaceChildren();
+ if(state.phase==='playing'&&t<9.6){
+  for(const a of poses.filter(a=>a.status==='sleeping'&&state.selected===null)){
+   const b=document.createElement('button');b.className='rescue-hit';b.setAttribute('aria-label',`Wake ${a.id}`);
+   b.style.cssText=`left:${(a.x+20*a.scale)/9.6}%;top:${(a.y+20*a.scale)/5.4}%;width:${170*a.scale/9.6}%;height:${110*a.scale/5.4}%`;
+   b.onclick=()=>act('select:'+a.id);hits.append(b);
+  }
+  if(state.actors.some(a=>a.id===state.selected&&a.status==='awake')){const b=document.createElement('button');b.className='rescue-hit';b.style.cssText='left:81%;top:43%;width:14%;height:30%';b.setAttribute('aria-label','Move selected shrew to root');b.onclick=()=>act('root');hits.append(b);}
+ }
+ }
+ const over=state.phase==='over',saved=state.actors.filter(a=>a.status==='safe').length;
+ $('message').textContent=over?(saved?`${saved} / 5 saved`:'Game over'):'';
+ $('start').hidden=state.phase!=='ready';$('retry').hidden=!over;$('pause').hidden=state.phase!=='playing';$('time').textContent='';
+ let end=$('ending');if(!end){end=document.createElement('div');end.id='ending';stage.parentElement.append(end);}
+ end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved?`${saved} / 5`:'Game over';const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label','Play again');button.onclick=()=>act('retry');end.append(text,button);}
 }
-function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;
- if(!paused&&!document.hidden){clock+=dt;const old=state.phase;state=advance(state,'tick',dt,$('practice').checked);if(old!==state.phase){if(state.phase==='success')sound(784);update();}}
- const p=state.phase,e=state.elapsed;
- const moving=['walk','stomp','success'].includes(p),impact=p==='stomp'?Math.min(e/.7,1):p==='success'?1:0;
- stage.innerHTML=scene({t:clock,awake:['root','walk','stomp','success'].includes(p),progress:moving?(p==='walk'?Math.min(e/1.5,1):1):0,impact,lift:p==='stomp'?Math.max(0,(e-1.5)/1.3):p==='success'?1:0,shake:p==='wake'&&!matchMedia('(prefers-reduced-motion: reduce)').matches});
- $('time').textContent=['wake','root'].includes(p)&&!$('practice').checked?`${Math.max(0,Math.ceil(4-e))} seconds`:$('practice').checked?'Practice · no timer':'';
- requestAnimationFrame(frame);
-}
-update();requestAnimationFrame(frame);
+function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&state.phase==='playing'){state=advance(state,'tick',dt);if(!soundtrack.paused&&Math.abs(soundtrack.currentTime-state.elapsed)>.15)soundtrack.currentTime=state.elapsed;draw();}requestAnimationFrame(frame);}
+window.storytimeReview={freeze(){paused=true;soundtrack.pause();return {svg:stage.innerHTML,phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state)};},play(){paused=false;if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
+// Reuse the Mall gesture owner inside the iframe; only same-origin parent can react.
+window.gestureZone?.(stage.parentElement,{onPinchOut:()=>parent.postMessage({type:'storytime.fullscreen',expanded:true},location.origin),onPinchIn:()=>parent.postMessage({type:'storytime.fullscreen',expanded:false},location.origin)});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)soundtrack.pause();else syncAudio();});
+draw();requestAnimationFrame(frame);

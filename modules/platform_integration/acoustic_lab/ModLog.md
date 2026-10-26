@@ -1,5 +1,27 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-10-26: Qualify the Requests 2.33.0 security candidate
+
+- Carry the existing PR1353 Requests 2.31.0 to 2.33.0 update onto current
+  requirements. This includes the fixes for CVE-2024-35195, CVE-2024-47081
+  and CVE-2026-25645; the last affects direct use of extract_zipped_paths,
+  which this module does not call. Advisory matches establish dependency
+  exposure, not evidence that the application was exploited.
+- The complete current dependency profile installs in a disposable Linux
+  Python 3.12 environment and pip check passes. The unchanged guarded first
+  phase of the current CI job passes all 18 adapter, multipart and Web3 cases,
+  with matching JUnit identities, successful guard controls, stable source
+  bindings and no unexpected or duplicate effects. No guard was relaxed.
+- Additional geofencing cases give two passes and one historical failure:
+  the failure mock raises generic Exception while production catches
+  requests.RequestException. The same failure is reproduced with Requests
+  2.31.0. Preserve this evidence; no test or production behavior is changed.
+- Evidence: external python-audit/acoustic-evidence/tmp/acoustic-adapter.json
+  and matching XML, acoustic-install.json, geofence.xml and
+  geofence-baseline.xml. Fresh hosted Python 3.11/3.12, owned-child and native
+  Gunicorn gates remain required. This records a candidate qualification,
+  not deployment or an installed host upgrade.
+
 ## 2026-10-25: Bound timeout cleanup to the owned FFmpeg child
 
 - WSP 00/15/22/50/97; C3/I4/D3/Impact3=13/P1. Reuse the existing X adapter
