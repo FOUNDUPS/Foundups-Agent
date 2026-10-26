@@ -14,7 +14,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
+import os
 import socket
+import stat
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Callable, Optional
@@ -54,8 +57,20 @@ SIGNER_SOCKET_RESIDENT_SERVICE_REJECT = "SIGNER_SOCKET_RESIDENT_SERVICE_REJECT"
 FAIL_SIGNER_RESIDENT_SERVICE_MAX_REQUESTS_INVALID = (
     "FAIL_SIGNER_RESIDENT_SERVICE_MAX_REQUESTS_INVALID"
 )
+FAIL_SIGNER_SERVICE_SOCKET_PARENT_UNSAFE = (
+    "FAIL_SIGNER_SERVICE_SOCKET_PARENT_UNSAFE"
+)
 
 DEFAULT_SIGNER_SOCKET_RESIDENT_MAX_REQUESTS = 16
+
+
+@dataclass(frozen=True)
+class _BoundSocketIdentity:
+    device: int
+    inode: int
+    uid: int
+    gid: int
+    change_time_ns: int
 
 
 @dataclass(frozen=True)
@@ -102,57 +117,64 @@ def serve_reddog_isolated_signer_socket_bounded(
     if reasons:
         return _reject(*reasons)
     assert resolved is not None
-    limit_reasons = _validate_limits(timeout_s, max_request_bytes, max_response_bytes)
+    limit_reasons = validate_resident_signer_socket_limits(
+        max_requests=max_requests,
+        timeout_s=timeout_s,
+        max_request_bytes=max_request_bytes,
+        max_response_bytes=max_response_bytes,
+    )
     if limit_reasons:
         return _reject(*limit_reasons, socket_path=str(resolved))
-    if not isinstance(max_requests, int) or max_requests < 1 or max_requests > 128:
-        return _reject(FAIL_SIGNER_RESIDENT_SERVICE_MAX_REQUESTS_INVALID, socket_path=str(resolved))
     if not hasattr(socket, "AF_UNIX"):
         return _reject(FAIL_SIGNER_SERVICE_SOCKET_UNAVAILABLE, socket_path=str(resolved))
+    return _serve_validated(
+        resolved=resolved,
+        backend=backend or FailClosedSignerBackend(),
+        peer_attestor=peer_attestor or FailClosedSignerSocketPeerAttestor(),
+        max_requests=max_requests,
+        timeout_s=timeout_s,
+        max_request_bytes=max_request_bytes,
+        max_response_bytes=max_response_bytes,
+        ready_callback=ready_callback,
+    )
 
+
+def _serve_validated(
+    *,
+    resolved: Path,
+    backend: IsolatedSignerBackend,
+    peer_attestor: SignerSocketPeerAttestor,
+    max_requests: int,
+    timeout_s: float,
+    max_request_bytes: int,
+    max_response_bytes: int,
+    ready_callback: Optional[Callable[[], None]],
+) -> IsolatedSignerSocketResidentServiceResult:
     server: Optional[socket.socket] = None
+    bound_identity: Optional[_BoundSocketIdentity] = None
     socket_removed = False
-    response_digests: list[str] = []
     requests_handled = 0
+    response_digests: tuple[str, ...] = ()
     try:
-        server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        server.settimeout(float(timeout_s))
-        server.bind(str(resolved))
-        server.listen(1)
+        server, bound_identity = _bound_server(resolved, timeout_s)
         if ready_callback:
             ready_callback()
-        while requests_handled < max_requests:
-            connection, _ = server.accept()
-            with connection:
-                connection.settimeout(float(timeout_s))
-                request_bytes = _read_bounded(connection, max_request_bytes)
-                peer = (peer_attestor or FailClosedSignerSocketPeerAttestor()).attest(connection)
-                response = handle_reddog_isolated_signer_socket_request(
-                    request_bytes,
-                    peer=peer,
-                    backend=backend or FailClosedSignerBackend(),
-                    max_request_bytes=max_request_bytes,
-                )
-                if len(response) > max_response_bytes:
-                    response = _response_bytes(RuntimeRejectCode.MALFORMED_REQUEST)
-                    if len(response) > max_response_bytes:
-                        return _reject(
-                            FAIL_SIGNER_SERVICE_RESPONSE_LIMIT_INVALID,
-                            socket_path=str(resolved),
-                        )
-                connection.sendall(response)
-                response_digests.append(_digest(response))
-                requests_handled += 1
-        server.close()
-        server = None
-        socket_removed = _cleanup_socket(resolved)
+        requests_handled, response_digests = _serve_requests(
+            server, backend, peer_attestor, max_requests,
+            timeout_s, max_request_bytes, max_response_bytes,
+        )
+        # Keep the listener's bound inode alive until owned-path cleanup.
+        if os.name != "posix":
+            server.close()
+            server = None
+        socket_removed = _cleanup_socket(resolved, bound_identity)
         return IsolatedSignerSocketResidentServiceResult(
             accepted=True,
             status=SIGNER_SOCKET_RESIDENT_SERVICE_SERVED,
             rejection_reasons=(),
             socket_path=str(resolved),
             requests_handled=requests_handled,
-            response_digests=tuple(response_digests),
+            response_digests=response_digests,
             socket_removed=socket_removed,
         )
     except Exception:
@@ -160,13 +182,72 @@ def serve_reddog_isolated_signer_socket_bounded(
             FAIL_SIGNER_SERVICE_RUNTIME_ERROR,
             socket_path=str(resolved),
             requests_handled=requests_handled,
-            response_digests=tuple(response_digests),
+            response_digests=response_digests,
         )
+    finally:
+        _finish_server_cleanup(resolved, bound_identity, server, socket_removed)
+
+
+def _finish_server_cleanup(path, identity, server, socket_removed):
+    """Preserve listener lifetime through POSIX cleanup, including failures."""
+    try:
+        if os.name != "posix" and server is not None:
+            server.close()
+            server = None
+        if not socket_removed and identity is not None:
+            _cleanup_socket(path, identity)
     finally:
         if server is not None:
             server.close()
-        if not socket_removed and resolved is not None:
-            _cleanup_socket(resolved)
+
+
+def _bound_server(
+    path: Path, timeout_s: float
+) -> tuple[socket.socket, _BoundSocketIdentity]:
+    server = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    server.settimeout(float(timeout_s))
+    server.bind(str(path))
+    identity = _socket_identity(path)
+    if identity is None:
+        server.close()
+        raise OSError(FAIL_SIGNER_SERVICE_RUNTIME_ERROR)
+    server.listen(1)
+    return server, identity
+
+
+def _serve_requests(
+    server: socket.socket,
+    backend: IsolatedSignerBackend,
+    peer_attestor: SignerSocketPeerAttestor,
+    max_requests: int,
+    timeout_s: float,
+    max_request_bytes: int,
+    max_response_bytes: int,
+) -> tuple[int, tuple[str, ...]]:
+    digests: list[str] = []
+    for _ in range(max_requests):
+        connection, _ = server.accept()
+        with connection:
+            connection.settimeout(float(timeout_s))
+            request = _read_bounded(connection, max_request_bytes)
+            peer = peer_attestor.attest(connection)
+            response = handle_reddog_isolated_signer_socket_request(
+                request, peer=peer, backend=backend,
+                max_request_bytes=max_request_bytes,
+            )
+            response = _bounded_response(response, max_response_bytes)
+            connection.sendall(response)
+            digests.append(_digest(response))
+    return max_requests, tuple(digests)
+
+
+def _bounded_response(value: bytes, maximum: int) -> bytes:
+    if len(value) <= maximum:
+        return value
+    rejected = _response_bytes(RuntimeRejectCode.MALFORMED_REQUEST)
+    if len(rejected) > maximum:
+        raise ValueError(FAIL_SIGNER_SERVICE_RESPONSE_LIMIT_INVALID)
+    return rejected
 
 
 def _resolve_socket_path(
@@ -186,9 +267,31 @@ def _resolve_socket_path(
         return None, (FAIL_SIGNER_SERVICE_SOCKET_PATH_INSIDE_REPO,)
     if not resolved.parent.exists() or not resolved.parent.is_dir():
         return None, (FAIL_SIGNER_SERVICE_SOCKET_PARENT_MISSING,)
+    if not _socket_parent_protected(resolved.parent):
+        return None, (FAIL_SIGNER_SERVICE_SOCKET_PARENT_UNSAFE,)
     if resolved.exists():
         return None, (FAIL_SIGNER_SERVICE_SOCKET_PATH_EXISTS,)
     return resolved, ()
+
+
+def _socket_parent_protected(parent: Path) -> bool:
+    if os.name != "posix" or not hasattr(os, "geteuid"):
+        return True
+    try:
+        metadata = parent.lstat()
+    except OSError:
+        return False
+    return not parent.is_symlink() and _protected_parent_metadata(metadata)
+
+
+def _protected_parent_metadata(metadata: os.stat_result) -> bool:
+    return all(
+        (
+            stat.S_ISDIR(metadata.st_mode),
+            int(metadata.st_uid) == int(os.geteuid()),
+            stat.S_IMODE(metadata.st_mode) & 0o022 == 0,
+        )
+    )
 
 
 def _validate_limits(
@@ -202,6 +305,37 @@ def _validate_limits(
     if max_response_bytes < 1024 or max_response_bytes > 262144:
         reasons.append(FAIL_SIGNER_SERVICE_RESPONSE_LIMIT_INVALID)
     return tuple(reasons)
+
+
+def validate_resident_signer_socket_limits(
+    *,
+    max_requests: object,
+    timeout_s: object,
+    max_request_bytes: object,
+    max_response_bytes: object,
+) -> tuple[str, ...]:
+    """Validate the exact bounded-service limits without opening a socket."""
+
+    reasons: list[str] = []
+    if type(max_requests) is not int or not 1 <= max_requests <= 128:
+        reasons.append(FAIL_SIGNER_RESIDENT_SERVICE_MAX_REQUESTS_INVALID)
+    if (
+        isinstance(timeout_s, bool)
+        or not isinstance(timeout_s, (int, float))
+        or not math.isfinite(float(timeout_s))
+    ):
+        reasons.append(FAIL_SIGNER_SERVICE_TIMEOUT_INVALID)
+    if type(max_request_bytes) is not int:
+        reasons.append(FAIL_SIGNER_SERVICE_REQUEST_LIMIT_INVALID)
+    if type(max_response_bytes) is not int:
+        reasons.append(FAIL_SIGNER_SERVICE_RESPONSE_LIMIT_INVALID)
+    if reasons:
+        return tuple(dict.fromkeys(reasons))
+    return _validate_limits(
+        float(timeout_s),
+        max_request_bytes,
+        max_response_bytes,
+    )
 
 
 def _read_bounded(connection: socket.socket, max_request_bytes: int) -> bytes:
@@ -234,12 +368,66 @@ def _digest(value: bytes) -> str:
     return "sha256:" + hashlib.sha256(value).hexdigest()
 
 
-def _cleanup_socket(path: Path) -> bool:
+def _socket_identity(path: Path) -> Optional[_BoundSocketIdentity]:
     try:
-        path.unlink(missing_ok=True)
-        return not path.exists()
-    except Exception:
+        current = path.lstat()
+    except OSError:
+        return None
+    return _identity_from_metadata(current)
+
+
+def _identity_from_metadata(
+    current: os.stat_result,
+) -> Optional[_BoundSocketIdentity]:
+    if not stat.S_ISSOCK(current.st_mode):
+        return None
+    return _BoundSocketIdentity(
+        device=int(current.st_dev),
+        inode=int(current.st_ino),
+        uid=int(getattr(current, "st_uid", -1)),
+        gid=int(getattr(current, "st_gid", -1)),
+        # Extra stale-identity defense, not an atomic unlink guarantee.
+        change_time_ns=int(current.st_ctime_ns),
+    )
+
+
+def _cleanup_socket(path: Path, expected: _BoundSocketIdentity) -> bool:
+    if os.name == "posix":
+        return _cleanup_socket_from_protected_parent(path, expected)
+    try:
+        current = _socket_identity(path)
+        if current is None or current != expected:
+            return False
+        path.unlink()
+        return not os.path.lexists(path)
+    except OSError:
         return False
+
+
+def _cleanup_socket_from_protected_parent(
+    path: Path,
+    expected: _BoundSocketIdentity,
+) -> bool:
+    flags = os.O_RDONLY | getattr(os, "O_DIRECTORY", 0)
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    directory_fd: int | None = None
+    try:
+        directory_fd = os.open(path.parent, flags)
+        parent = os.fstat(directory_fd)
+        if not _protected_parent_metadata(parent):
+            return False
+        current = os.stat(
+            path.name, dir_fd=directory_fd, follow_symlinks=False
+        )
+        if _identity_from_metadata(current) != expected:
+            return False
+        os.unlink(path.name, dir_fd=directory_fd)
+        return not os.path.lexists(path)
+    except OSError:
+        return False
+    finally:
+        if directory_fd is not None:
+            os.close(directory_fd)
 
 
 def _reject(
@@ -271,4 +459,5 @@ __all__ = [
     "SIGNER_SOCKET_RESIDENT_SERVICE_REJECT",
     "SIGNER_SOCKET_RESIDENT_SERVICE_SERVED",
     "serve_reddog_isolated_signer_socket_bounded",
+    "validate_resident_signer_socket_limits",
 ]

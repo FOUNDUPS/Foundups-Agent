@@ -1,3 +1,94 @@
+## 2026-10-26: Publish the existing FoundUp pitch instruction
+
+- WSP00/6/15/22/50/62/84/97;12/P2. Publish the local prototype as module-owned
+  Skillz0.1.3, canonical Claude discovery and its generated Codex mirror.
+  Preserve Outcome/Solution/Pain, nested delivery stages, evidence, deck QA and
+  truthful media status; correct superseded campaign and missing-plan references.
+- Existing projection owner: baseline and post-publication17PASS/1 Windows
+  real-symlink capability SKIP; both wrappers structurally validate. No new tests,
+  executor, registry entry, provider call, paid generation or publication grant.
+- Generator changed two existing output line endings only; exact pre-run bytes
+  were restored. Scope remains seven instruction/docs paths. Allocation, current
+  media research and remaining gates: [FX plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+
+## 2026-10-18: Contextual AntifaFM promotion pilot
+
+- WSP00/5/11/15/22/50/62/84/97; source-bound lexical social/comment retrieval,
+  UNKNOWN freshness/index gap, followed by direct current-owner inspection.
+  Historical templates/designs were noise; current interfaces took precedence.
+  No absent memory evidence or live authentication was invented. The documented
+  WSP00 tracker fallback passed with detector witness ABSENT after missing torch.
+- WSP15 C3/I4/D4/Impact4=15/P1: reuse the existing SOCIAL router, CommentDrafter,
+  UnifiedX owner and module database. Add explicit preview/account/listener-draft/
+  own-post operations, connected reply/quote context and durable API readback.
+  Prototype wrappers have no native executor, production registration or cadence.
+- Model decisions are draft/skip/review, with real local generation required and
+  no mock fallback. Listener contact derives from provider metadata, not inferred
+  politics. Account binding, disabled publication and source-linked decisions
+  are explicit. No automated reply publication or external outreach was run.
+- Independent review corrected eager import effects, blocking cancellation,
+  test classification, preview job binding, graph context and error truthfulness.
+  Package exports are lazy and retain compatibility. Provider details are redacted.
+- Offline validation and host limits: [tests/TestModLog.md](tests/TestModLog.md).
+  Host API/model qualification remains separate; [runbook](docs/ANTIFAFM_CAMPAIGN.md).
+
+## 2026-09-28: Verify scheduler caller/reload characterization
+
+- Candidate `8e3c526a2a` passed51/51 methods (57 finite inputs),0 failures/errors/skips in [CI36412636624](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36412636624). All25 exact file records and nine caller records were independently reviewed; all ten PR checks and CI/CodeQL passed. Three normal controls and six failure-boundary witnesses passed against unchanged production. Final-head/main checks and owned closure remain receipt-bound.
+- A pre-replace failure returns an in-memory created action absent after reload, an executed action reattempted by a fresh fake dependency, or a cancelled reminder executed after reload. Post-replace errors retain new visible state but leave durability uncertain. No production repair or retained RSI is claimed.
+
+## 2026-09-28: Qualify scheduler caller acknowledgement and reload
+
+- WSP00/5/6/15/22/50/62/84/97: fresh14/P1 selection after PR1943 verified main closure; preserve its42 fixed methods/48 inputs.
+- Extend the same fixture with nine current-behavior cases across create/execute/cancel and normal/pre-/post-replace publication. Observe exact returns/logs/file bytes/reload and bounded fake replay. Production unchanged.
+- Named hosted selection is51 methods/57 finite inputs;25 file and9 caller records. Existing50 test bodies unchanged, including8 unselected legacy methods. Fixture/effect review and hosted results pending; no host-local application tests or live effects.
+- WSP62: bounded955-line cohesive file in guideline range; new helpers<=50lines, new class<=200. Existing loader/fixture reused, no new module or exemption. Further growth requires fresh cohesion/decomposition review.
+
+## 2026-09-28: Validate scheduler safe publication under fixed controls
+
+- WSP00/5/6/15/22/50/62/84/97: Baseline `5d0da3625d` in [CI36401910480](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36401910480) ran42 methods:29 passed,13 failed with15 assertion failures,0 errors/skips. The identical fixture against candidate `8f36929dc0` in [CI36402439857](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36402439857) passed42/42 methods (48 finite inputs),0 failures/errors/skips; all16 file-evidence records were hash-checked. Candidate CI/CodeQL and all10 PR checks passed. Final reviewed-head/main checks and owned closure remain receipt-bound.
+- Reuse17-line explicit posting-result projection and unchanged atomic writer. Live response/disposition and load/return contracts remain unchanged. Positive evidence is synthetic execution feedback, not independent external delivery, crash proof or retained RSI. Save acknowledgement/restart replay and Windows behavior remain unqualified.
+
+## 2026-09-28: Implement bounded schedule publication repair
+
+- WSP15=15/P1; WSP97/84 reuse the existing scheduler and unchanged shared atomic writer. Project explicit PostResponse fields without mutating the live object, then serialize the full schedule before any destination write.
+- Preserve action disposition, original response identity, JSON archival reload and existing logged-error/None return. Use configured parent rather than hardcoded memory. Before-replace failure preserves old bytes; after-replace sync failure can leave new complete bytes with uncertain durability.
+- Frozen42-method/48-input hosted acceptance is unchanged; baseline/candidate results pending. No local application execution or live posting. Caller acknowledgement, restart replay safety, Windows publication and retained RSI remain open.
+
+## 2026-09-28: Freeze scheduler safe-publication acceptance
+
+- WSP00/5/6/15/22/50/62/84/97: existing save-owner repair scores15/P1 after verified PR1942 closure at main12663d7e4f.
+- Freeze42 methods/48 finite inputs in the existing source-bound fixture and named hosted CI selection. Preserve26 completion and8 unselected legacy bodies. Disposable-file effects and exact publication failure seams require independent review.
+- Production source is unchanged at baseline. Validation is pending; no passing repair, native RSI, external delivery or persistence acknowledgement claim.
+
+## 2026-09-28: Characterize scheduler persistence before repair
+
+- WSP00/5/6/15/22/50/62/84/97: C2/I4/D4/Impact4=14/P1 after current ownership/source reconciliation. Reuse the existing scheduler test/CI owners; no production persistence repair.
+- PR1941 is merged/main-verified at `6acb3f55c2`: the frozen26 methods/32 inputs passed on final PR CI36380808132 and main CI36381188667; both CodeQL runs passed. Its owned branch/worktree were retired after recovery preservation.
+- Freeze six independently reviewed cases: two round-trip controls and four typed-result serialization/reload witnesses, including future-action preservation in memory versus invalid file replacement. Preserve all 26 completion methods,32 existing inputs and eight unselected legacy bodies.
+- Actual save/load effects stay under one disposable directory per case. Exact before/after synthetic bytes and hashes are retained in hosted output. Clock/logger/cwd are restored before scratch deletion; no real posting, account or runtime activation.
+- Candidate `e8e06ea86f` passed all 32 methods / 38 fixed inputs in [CI36390957294](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/36390957294), with zero failures/errors/skips. All six exact file-evidence records were verified: two valid controls and four serialization/reload defect witnesses. CI and CodeQL passed; final integrated-head and merged-main validation remain receipt-bound.
+- Passing witnesses establish the characterized defect, not corrected persistence, external delivery, native admission or retained RSI. Exact PR/main and cleanup evidence remains in the canonical backlog closure receipt.
+
+## 2026-09-28: Admit bounded scheduler completion repair
+
+- PR1936 qualification is merged/main-verified at `cd7e62d680`:13/13 original witnesses passed on both PR and main. Preserve that closure and replace the stale preparation-only reading above the historical entry below.
+- Fresh WSP15 C3/I4/D4/Impact4=15/P1 selects the existing in-memory completion owner; native18/P0 retains its seven actual prerequisites. New main `870849a74` changes only separately owned eSingularity paths.
+- Freeze26 methods/32 input cases in the existing hosted fixture before repairing unsupported success and incomplete/malformed posting disposition. No new scheduler, producer, schema, account action, persistence owner or runtime gate.
+- Hosted baseline CI36379506634 at `34ed9b69ae` ran the frozen26 methods/32 inputs: 5 methods passed,21 failed with27 assertion failures,0 errors/skips. This reproduces incorrect completion against unchanged production source.
+- Candidate repair rejects unsupported branches and incomplete/malformed results, preserves original responses, snapshots validated targets and leaves failures terminal. Independent source review requested exact response/string types and captured post-await classification; corrected without changing the frozen tests.
+- Repaired candidate `9bc31ed6e0` passed the identical26 methods/32 inputs in CI36380266749 (0 failures/errors/skips); CI and CodeQL succeeded. Final integrated-head and merged-main validation remain required; exact closure is receipt-bound.
+- Current state: bounded repair validated on candidate; final integrated-head/main convergence pending. Exact source/results/publication are tracked by the canonical RSI backlog. WSP00/15/22/50/62/84/97.
+
+## 2026-09-28: Qualify scheduler completion evidence before RSI use
+
+- Initial PR1936 CI stopped at the stale canonical test registry; all13 scheduler cases were skipped. Refresh the existing generated registry and rerun the same frozen cases; no successful execution is inferred.
+
+- WSP 00/15/22/50/62/84/97; 14/P1 existing-owner qualification follows PR #1933's operational measurement audit. Native RSI blockers and other platform/project owners remain unchanged.
+- Extend existing test owner with 13 fixed, isolated current-behavior cases and one hosted CI selection. Preserve production source and eight legacy test bodies; clarify historical test inventory and current roadmap scope.
+- Characterization will distinguish logging-only success-shaped results, actual dependency calls, negative/partial/unknown returns and exception handling. Passing witnesses are not repaired behavior, verified external effects or retained improvement.
+- Exact tests/loader/CI require independent effect review before execution; actual PR/main results and clean owned closure are receipt-bound. No new scheduler, posting path, runtime schema or live action.
+
 ﻿# ModLog - Social Media Orchestrator
 
 **WSP Compliance**: WSP 22, WSP 49, WSP 42, WSP 11, WSP 3

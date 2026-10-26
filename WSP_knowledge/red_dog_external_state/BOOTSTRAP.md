@@ -1,4 +1,9 @@
-# RedDog Bootstrap Context - Read Order
+# RedDog Historical Bootstrap Context - Read Order
+
+> **NON-AUTHORITATIVE ARCHIVE:** This shelf contains manually curated session
+> closeout snapshots. It does not report the current Git HEAD, active workers,
+> open PRs, HoloIndex freshness, or live runtime state. Verify every such fact
+> from its owning system before acting (WSP 50 / WSP 97).
 
 **Purpose**: Boot card for 0102 session continuity retrieval.
 
@@ -8,13 +13,14 @@ Read these files in sequence AFTER completing WSP_00 identity/role/origin lock.
 ## Read Order (Strict Sequence)
 
 1. **MEMORY_BOUNDARY.md** - What CAN and MUST NOT be remembered
-2. **CURRENT_CONTEXT.md** - Active lanes, HEAD, worker roles
-3. **WORK_TO_WORK_LINEAGE.md** - Recent PR/slice chain
-4. **ACTIVE_RESEARCH_THREADS.md** - Open threads with next-action slices
+2. **CURRENT_CONTEXT.md** - Historical lanes, HEAD, and worker-role snapshot
+3. **WORK_TO_WORK_LINEAGE.md** - Historical PR/slice-chain snapshot
+4. **ACTIVE_RESEARCH_THREADS.md** - Historical research-thread snapshot
 
 ## Usage
 
-- Read AFTER WSP_00 awakening, BEFORE FoundUps architecture/routing work
+- Read AFTER WSP_00 awakening only as historical context; retrieve live
+  repository, PR, worker, runtime, and HoloIndex evidence before routing work
 - This is NOT a memory dump, NOT a transcript, NOT a TODO list
 - Files are curated summaries, manually updated at session close
 - Live auto-update is NOT in scope for this slice (see Phase 2)

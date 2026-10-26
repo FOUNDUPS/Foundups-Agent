@@ -1,0 +1,124 @@
+{
+  "schema": "kids.series.v1",
+  "series_id": "little_shrew",
+  "title": "Little Shrew: A Giant Step",
+  "foundup_id": "kids_episodes",
+  "age_band": "3-6",
+  "language": "en",
+  "duration_seconds": 45,
+  "edit_fps": 30,
+  "beat_seconds": 5,
+  "source": {
+    "document_url": "https://docs.google.com/document/d/1-BH_ojM7C2z2rOvAfjq5HJpyHXFvG3453uv5wpVN-Pw/edit",
+    "edition": "Preschool Simplified Edition",
+    "retrieved_date": "2026-10-23",
+    "referenced_image": "visual_illustration_11410072553248207923.png",
+    "image_status": "not_retrieved",
+    "asset_origin": "Repository-authored vector simplification of the textual design; not recovered Gemini artwork."
+  },
+  "bible": {
+    "characters": "Little Shrew is one warm-brown bean with tan snout, pink triangle nose, six straight whiskers and one curved tail. Mama and Papa are larger copies; three siblings are smaller copies. All six survive safely. No costumes or changing anatomy.",
+    "world": "Fictional prehistoric burrow, protected root pocket and clearing. Dinosaur stays offscreen; show only the footprint. No historical or biological precision claims.",
+    "visual_style": "Flat SVG geometry, fixed palette, thick dark outline. One shared rig, four expressions: sleepy, neutral, surprised, happy. No fur, gradients, shading, teeth, eye highlights, extra limbs or camera orbit. Slide, bounce and tilt only. Static side view except final wider framing. Keep six whiskers and proportions unchanged."
+  },
+  "palette": {
+    "body": "#B58963",
+    "snout": "#9C724F",
+    "nose": "#F26B7A",
+    "outline": "#1F1F1F",
+    "paper": "#FFF4D9",
+    "earth": "#D9B78B"
+  },
+  "music": {
+    "brief": "Original gentle instrumental nursery rhythm, 120 BPM. Soft flute, light percussion and restrained nonverbal foley. No speech or sung lyrics. Quiet after the gentle impact. No copied melody or recording.",
+    "rights_status": "pending_original_audio"
+  },
+  "beats": [
+    {
+      "id": "b01",
+      "title": "Cozy family",
+      "action": "Little Shrew naps in the burrow with Mama, Papa and three baby siblings.",
+      "expression": "sleepy",
+      "sound_caption": "[soft snoring]"
+    },
+    {
+      "id": "b02",
+      "title": "A lovely smell",
+      "action": "Little Shrew sniffs a root sprout and rolls into a snug side pocket.",
+      "expression": "neutral",
+      "sound_caption": "[sniff, sniff]"
+    },
+    {
+      "id": "b03",
+      "title": "A gentle rumble",
+      "action": "Pebbles bounce. Mama and Papa notice the ground shaking.",
+      "expression": "surprised",
+      "sound_caption": "[gentle rumble]"
+    },
+    {
+      "id": "b04",
+      "title": "Time to move",
+      "action": "A little dirt falls; the family moves toward safe hiding places.",
+      "expression": "surprised",
+      "sound_caption": "[soft pattering]"
+    },
+    {
+      "id": "b05",
+      "title": "Everyone takes shelter",
+      "action": "Mama and Papa guide all three babies down the deep tunnel. Little Shrew backs into the protected root pocket under a rock ledge.",
+      "expression": "neutral",
+      "sound_caption": "[soft scurrying]"
+    },
+    {
+      "id": "b06",
+      "title": "A giant step",
+      "action": "An unseen dinosaur steps above. Soft brown dust fills the old path; everyone remains sheltered safely.",
+      "expression": "sleepy",
+      "sound_caption": "[low thump, then quiet]"
+    },
+    {
+      "id": "b07",
+      "title": "Daylight returns",
+      "action": "Dust clears in a breeze. Little Shrew peeks out and blinks in the daylight.",
+      "expression": "neutral",
+      "sound_caption": "[gentle breeze]"
+    },
+    {
+      "id": "b08",
+      "title": "Follow the smell",
+      "action": "Little Shrew sneezes dust off its whiskers, then sniffs the family trail.",
+      "expression": "surprised",
+      "sound_caption": "[sneeze, sniff]"
+    },
+    {
+      "id": "b09",
+      "title": "One enormous footprint",
+      "action": "A wider view reveals a giant three-toed footprint. Little Shrew smiles and does a four-beat wiggle before following the family trail.",
+      "expression": "happy",
+      "sound_caption": "[cheerful music]"
+    }
+  ],
+  "segments": [
+    {
+      "title": "Notice with your senses",
+      "learning_objective": "Notice smells and gentle vibrations in a fictional story.",
+      "activity": "Pretend to sniff a flower, then gently tap your knees.",
+      "start_state": "The family rests together in the burrow.",
+      "end_state": "The family notices the rumble."
+    },
+    {
+      "title": "Find a safe place",
+      "learning_objective": "Notice the family moving together to shelter.",
+      "activity": "Point to the safe tunnel with a grown-up.",
+      "start_state": "The family notices the rumble.",
+      "end_state": "The family is safe in the deep tunnel; Little Shrew is safe in the root pocket."
+    },
+    {
+      "title": "Small and big",
+      "learning_objective": "Compare the small character with the large footprint.",
+      "activity": "Make a small shape and then a big shape with your hands.",
+      "start_state": "The family is safe in the deep tunnel; Little Shrew is safe in the root pocket.",
+      "end_state": "Little Shrew follows the family scent trail; reunion is the next story."
+    }
+  ]
+}

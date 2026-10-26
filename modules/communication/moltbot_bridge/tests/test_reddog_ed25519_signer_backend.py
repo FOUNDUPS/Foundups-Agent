@@ -19,14 +19,25 @@ from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend impo
     CONTROL_LOOP_SIGNING_PREFIX,
     ControlLoopAuthorityPolicy,
     Ed25519SignerBackend,
+    bind_exact_signing_request,
     REJECT_ED25519_SIGNER_AUDIT_MAC_MISSING,
     REJECT_ED25519_SIGNER_DOMAIN_MISMATCH,
     REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISMATCH,
     REJECT_ED25519_SIGNER_CONTROL_AUTHORITY_POLICY_MISSING,
     REJECT_ED25519_SIGNER_CONTROL_ANCHOR_MISSING,
     REJECT_ED25519_SIGNER_KEY_EPOCH_MISMATCH,
+    REJECT_ED25519_SIGNER_EXACT_REQUEST_MISMATCH,
+    REJECT_ED25519_SIGNER_POLICY_MISSING,
     REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH,
     canonical_control_audit_attestation_input,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_validation import (
+    signing_domain_pairs,
+)
+from modules.communication.moltbot_bridge.src.reddog_conversation_scope_signing import (
+    CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+    CONVERSATION_SCOPE_SIGNING_OPERATION,
+    CONVERSATION_SCOPE_SIGNING_PREFIX,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SIGNER_SOCKET_REQUEST_SCHEMA_VERSION,
@@ -38,6 +49,10 @@ from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     InMemorySignerControlLoopAnchorStore,
+)
+from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
+    ControlLoopReceiptSigningContext,
+    build_resident_control_loop_receipt,
 )
 
 
@@ -143,7 +158,57 @@ def _control_policy(
     )
 
 
-def test_ed25519_signer_backend_signs_and_public_verifier_accepts() -> None:
+def _control_result() -> dict[str, object]:
+    return {
+        "accepted": True,
+        "status": "PASS",
+        "rounds": 1,
+        "serial_progress": 1,
+        "claim_progress": 0,
+        "receipt_ids": (),
+        "rejection_reasons": (),
+        "control_lock_acquired": True,
+        "dispatched_stages": (),
+    }
+
+
+def _control_signing_context(public_key: str, signer: object) -> ControlLoopReceiptSigningContext:
+    return ControlLoopReceiptSigningContext(
+        signer=signer,
+        signature_verifier=Ed25519SignatureVerifier(),
+        issuer_principal_id="github:mjtrout",
+        signer_public_key=public_key,
+        key_epoch="epoch-1",
+        authority_tier="HIGH",
+        consensus_receipt_digest="sha256:" + "c" * 64,
+        authority_profile_digest="sha256:" + "a" * 64,
+        authority_profile_source_receipt_id="sha256:" + "e" * 64,
+    )
+
+
+def _build_control_receipt(public_key: str, signer: object, *, suffix: str):
+    return build_resident_control_loop_receipt(
+        result=_control_result(),
+        repo_root=Path.cwd(),
+        created_at="2026-07-18T00:00:00Z",
+        cycle_id="cycle-" + suffix,
+        nonce="nonce-" + suffix,
+        signing_context=_control_signing_context(public_key, signer),
+    )
+
+
+def _control_signing_input(receipt: object) -> str:
+    payload = {
+        key: value
+        for key, value in receipt.to_dict().items()
+        if key not in {"signature", "signer_audit_mac", "signer_audit_attestation_signature"}
+    }
+    return CONTROL_LOOP_SIGNING_PREFIX + json.dumps(
+        payload, sort_keys=True, separators=(",", ":")
+    )
+
+
+def test_exact_request_bound_signer_backend_signs_and_public_verifier_accepts() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     request = _request(public_key)
@@ -154,7 +219,7 @@ def test_ed25519_signer_backend_signs_and_public_verifier_accepts() -> None:
         audit_mac_builder=AuditMacBuilder(),
     )
 
-    response = backend.sign(request, _peer())
+    response = bind_exact_signing_request(backend, request).sign(request, _peer())
 
     assert response.accepted is True
     assert response.signer_public_key == public_key
@@ -163,7 +228,7 @@ def test_ed25519_signer_backend_signs_and_public_verifier_accepts() -> None:
     assert Ed25519SignatureVerifier().verify(public_key, request.signing_input, response.signature) is True
 
 
-def test_ed25519_signer_backend_round_trips_through_socket_protocol() -> None:
+def test_exact_request_bound_backend_round_trips_through_socket_protocol() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     request = _request(public_key)
@@ -177,7 +242,7 @@ def test_ed25519_signer_backend_round_trips_through_socket_protocol() -> None:
     raw = handle_reddog_isolated_signer_socket_request(
         _wire_payload(request),
         peer=_peer(),
-        backend=backend,
+        backend=bind_exact_signing_request(backend, request),
     )
     response = json.loads(raw.decode("utf-8"))
 
@@ -217,7 +282,8 @@ def test_ed25519_signer_backend_rejects_if_key_object_does_not_match_public_key(
         key_epoch="epoch-1",
         audit_mac_builder=AuditMacBuilder(),
     )
-    response = backend.sign(_request(backend.public_key), _peer())
+    request = _request(backend.public_key)
+    response = bind_exact_signing_request(backend, request).sign(request, _peer())
 
     assert response.accepted is False
     assert response.rejection_code == REJECT_ED25519_SIGNER_PUBLIC_KEY_MISMATCH
@@ -233,10 +299,155 @@ def test_ed25519_signer_backend_requires_audit_mac() -> None:
         audit_mac_builder=EmptyAuditMacBuilder(),
     )
 
-    response = backend.sign(_request(public_key), _peer())
+    request = _request(public_key)
+    response = bind_exact_signing_request(backend, request).sign(request, _peer())
 
     assert response.accepted is False
     assert response.rejection_code == REJECT_ED25519_SIGNER_AUDIT_MAC_MISSING
+
+
+def test_policyless_backend_rejects_delegated_authority_signing() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    backend = Ed25519SignerBackend(
+        private_key=private_key,
+        public_key=public_key,
+        key_epoch="epoch-1",
+        audit_mac_builder=AuditMacBuilder(),
+    )
+
+    response = backend.sign(_request(public_key), _peer())
+
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_POLICY_MISSING
+
+
+def test_exact_request_binding_rejects_altered_request() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request = _request(public_key)
+    backend = bind_exact_signing_request(
+        Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch="epoch-1",
+            audit_mac_builder=AuditMacBuilder(),
+        ),
+        request,
+    )
+
+    response = backend.sign(replace(request, nonce="attacker-nonce"), _peer())
+
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_EXACT_REQUEST_MISMATCH
+
+
+@pytest.mark.parametrize(
+    ("field_name", "replacement"),
+    [
+        ("signing_input", 'reddog-workauth.v1.{"work_order_id":"wo-2"}'),
+        ("payload_digest", "sha256:" + "b" * 64),
+        ("signer_role", "principal"),
+        ("signer_public_key", "ed25519-pub-v1:" + "A" * 43),
+        ("requester_principal_id", "github:attacker"),
+        ("nonce", "attacker-nonce"),
+        ("key_epoch", "epoch-2"),
+        ("requested_operation", "write_repo"),
+        ("authority_tier", "LOW"),
+        ("consensus_receipt_digest", "sha256:" + "d" * 64),
+    ],
+)
+def test_exact_request_binding_rejects_every_field_substitution(
+    field_name: str, replacement: object
+) -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request = _request(public_key)
+    backend = bind_exact_signing_request(
+        Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch="epoch-1",
+            audit_mac_builder=AuditMacBuilder(),
+        ),
+        request,
+    )
+
+    response = backend.sign(replace(request, **{field_name: replacement}), _peer())
+
+    assert response.accepted is False
+
+
+@pytest.mark.parametrize(
+    ("requested_operation", "signing_input"),
+    [
+        ("delegate_reddog_identity", 'reddog-workauth.v1.{"x":1}'),
+        ("create_foundup", 'reddog-identity.v1.{"x":1}'),
+    ],
+)
+def test_exact_request_binding_rejects_delegated_domain_confusion(
+    requested_operation: str, signing_input: str
+) -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request = _request(
+        public_key,
+        requested_operation=requested_operation,
+        signing_input=signing_input,
+    )
+    backend = bind_exact_signing_request(
+        Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch="epoch-1",
+            audit_mac_builder=AuditMacBuilder(),
+        ),
+        request,
+    )
+
+    response = backend.sign(request, _peer())
+
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_DOMAIN_MISMATCH
+
+
+def test_exact_request_binding_cannot_be_rebound() -> None:
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    request = _request(public_key)
+    backend = bind_exact_signing_request(
+        Ed25519SignerBackend(
+            private_key=private_key,
+            public_key=public_key,
+            key_epoch="epoch-1",
+            audit_mac_builder=AuditMacBuilder(),
+        ),
+        request,
+    )
+
+    with pytest.raises(ValueError, match="immutable"):
+        bind_exact_signing_request(backend, request)
+
+
+@pytest.mark.parametrize(
+    "operation",
+    [
+        CONVERSATION_SCOPE_SIGNING_OPERATION,
+        CONVERSATION_SCOPE_RECOVERY_SIGNING_OPERATION,
+    ],
+)
+def test_conversation_operations_match_exactly_one_signing_domain(
+    operation: str,
+) -> None:
+    request = _request(
+        "public-key-v1:signer",
+        requested_operation=operation,
+        signing_input=CONVERSATION_SCOPE_SIGNING_PREFIX + "{}",
+    )
+    pairs = signing_domain_pairs(request)
+
+    assert all(operation_match is prefix_match for operation_match, prefix_match in pairs)
+    assert sum(operation_match and prefix_match for operation_match, prefix_match in pairs) == 1
 
 
 @pytest.mark.parametrize(
@@ -283,81 +494,24 @@ def test_ed25519_signer_backend_signs_control_receipt_only_in_control_domain() -
         control_loop_anchor_store=InMemorySignerControlLoopAnchorStore(),
         control_loop_authority_policy=_control_policy(public_key),
     )
-    from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
-        ControlLoopReceiptSigningContext,
-        build_resident_control_loop_receipt,
-    )
-
     class DirectClient:
         def sign(self, request: SigningRequest):
             return backend.sign(request, _peer())
 
-    receipt = build_resident_control_loop_receipt(
-        result={
-            "accepted": True,
-            "status": "PASS",
-            "rounds": 1,
-            "serial_progress": 1,
-            "claim_progress": 0,
-            "receipt_ids": (),
-            "rejection_reasons": (),
-            "control_lock_acquired": True,
-            "dispatched_stages": (),
-        },
-        repo_root=Path.cwd(),
-        created_at="2026-07-18T00:00:00Z",
-        cycle_id="cycle-1",
-        nonce="nonce-1",
-        signing_context=ControlLoopReceiptSigningContext(
-            signer=DirectClient(),
-            signature_verifier=Ed25519SignatureVerifier(),
-            issuer_principal_id="github:mjtrout",
-            signer_public_key=public_key,
-            key_epoch="epoch-1",
-            authority_tier="HIGH",
-            consensus_receipt_digest="sha256:" + "c" * 64,
-            authority_profile_digest="sha256:" + "a" * 64,
-            authority_profile_source_receipt_id="sha256:" + "e" * 64,
-        ),
-    )
+    receipt = _build_control_receipt(public_key, DirectClient(), suffix="1")
+    signing_input = _control_signing_input(receipt)
 
     assert receipt.authentication_status == "AUTHENTICATED"
     assert receipt.signer_audit_attestation_signature
     assert Ed25519SignatureVerifier().verify(
         public_key,
-        CONTROL_LOOP_SIGNING_PREFIX + json.dumps(
-            {
-                key: value
-                for key, value in receipt.to_dict().items()
-                if key not in {
-                    "signature",
-                    "signer_audit_mac",
-                    "signer_audit_attestation_signature",
-                }
-            },
-            sort_keys=True,
-            separators=(",", ":"),
-        ),
+        signing_input,
         receipt.signature,
     ) is True
     assert Ed25519SignatureVerifier().verify(
         public_key,
         canonical_control_audit_attestation_input(
-            signing_input=CONTROL_LOOP_SIGNING_PREFIX
-            + json.dumps(
-                {
-                    key: value
-                    for key, value in receipt.to_dict().items()
-                    if key
-                    not in {
-                        "signature",
-                        "signer_audit_mac",
-                        "signer_audit_attestation_signature",
-                    }
-                },
-                sort_keys=True,
-                separators=(",", ":"),
-            ),
+            signing_input=signing_input,
             signature=receipt.signature,
             audit_mac=receipt.signer_audit_mac,
             signer_public_key=public_key,
@@ -386,39 +540,7 @@ def test_control_receipt_signer_requires_exact_signer_owned_authority_policy() -
             captured.append(request)
             return trusted.sign(request, _peer())
 
-    from modules.communication.moltbot_bridge.src.reddog_resident_control_loop_receipt_store import (
-        ControlLoopReceiptSigningContext,
-        build_resident_control_loop_receipt,
-    )
-
-    build_resident_control_loop_receipt(
-        result={
-            "accepted": True,
-            "status": "PASS",
-            "rounds": 1,
-            "serial_progress": 1,
-            "claim_progress": 0,
-            "receipt_ids": (),
-            "rejection_reasons": (),
-            "control_lock_acquired": True,
-            "dispatched_stages": (),
-        },
-        repo_root=Path.cwd(),
-        created_at="2026-07-18T00:00:00Z",
-        cycle_id="cycle-policy",
-        nonce="nonce-policy",
-        signing_context=ControlLoopReceiptSigningContext(
-            signer=CapturingClient(),
-            signature_verifier=Ed25519SignatureVerifier(),
-            issuer_principal_id="github:mjtrout",
-            signer_public_key=public_key,
-            key_epoch="epoch-1",
-            authority_tier="HIGH",
-            consensus_receipt_digest="sha256:" + "c" * 64,
-            authority_profile_digest="sha256:" + "a" * 64,
-            authority_profile_source_receipt_id="sha256:" + "e" * 64,
-        ),
-    )
+    _build_control_receipt(public_key, CapturingClient(), suffix="policy")
 
     missing_policy = Ed25519SignerBackend(
         private_key=private_key,

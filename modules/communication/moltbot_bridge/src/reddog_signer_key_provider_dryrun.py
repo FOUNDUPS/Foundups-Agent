@@ -17,15 +17,35 @@ import binascii
 import hashlib
 import hmac
 from dataclasses import asdict, dataclass, field
+from pathlib import Path
 from typing import Any, Optional, Protocol
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
+    decode_ed25519_public_key,
     encode_ed25519_public_key,
 )
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
     ControlLoopAuthorityPolicy,
     Ed25519SignerBackend,
     SignerAuditMacBuilder,
+)
+from modules.communication.moltbot_bridge.src.foundup_memex_verified_outcome_signing import (
+    VerifiedOutcomeSigningAuthority,
+    VerifiedOutcomeSignerPolicy,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    root_verified_outcome_authority_bindings,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_proposal_authenticity import (
+    ArchitectProposalPolicyAuthorization,
+    ArchitectProposalSignerPolicy,
+    architect_proposal_replay_store_binding_digest,
+    architect_proposal_signer_policy_digest,
+    architect_proposal_signer_instance_id,
+)
+from modules.communication.moltbot_bridge.src.reddog_proposal_authenticity_nonce_store import (
+    AtomicProposalAuthenticityNonceStore,
+    ProposalReplayHighWaterStore,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_control_loop_anchor import (
     ControlLoopAnchorStore,
@@ -41,6 +61,9 @@ from modules.infrastructure.secrets_mcp.src.vault_resolver import (
     ResolveResult,
     hash_reference,
     parse_op_reference,
+)
+from modules.infrastructure.secrets_mcp.src.systemd_credential_secret_resolver import (
+    parse_systemd_credential_reference,
 )
 
 
@@ -69,7 +92,7 @@ class SignerKeyResolver(Protocol):
     """Injected WSP 71-like resolver boundary."""
 
     def resolve(self, reference: str, requester_id: Optional[str] = None) -> ResolveResult:
-        """Resolve an op:// reference or return a fail-closed result."""
+        """Resolve an explicitly supported reference or fail closed."""
 
 
 @dataclass(frozen=True)
@@ -140,7 +163,7 @@ class _HmacAuditMacBuilder(SignerAuditMacBuilder):
         return "audit-mac-v1:" + digest
 
 
-def build_test_only_signer_backend_from_provider(
+def _build_signer_backend_from_provider_core(
     profile: SignerKeyProviderProfile,
     resolver: SignerKeyResolver,
     *,
@@ -149,8 +172,18 @@ def build_test_only_signer_backend_from_provider(
     permission_snapshot_fresh: bool = False,
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
+    verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
+    proposal_authority_policy: ArchitectProposalSignerPolicy | None = None,
+    proposal_nonce_store_path: Path | str | None = None,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore | None = None,
+    proposal_replay_high_water_store_id: str | None = None,
+    proposal_replay_high_water_durability_receipt_id: str | None = None,
+    proposal_nonce_store_allowed_root: Path | str | None = None,
+    proposal_nonce_store_repo_root: Path | str | None = None,
+    proposal_policy_authorization: ArchitectProposalPolicyAuthorization | None = None,
 ) -> SignerKeyProviderDryRunResult:
-    """Validate a signer profile and build an Ed25519 signer backend.
+    """Internal key-resolution core; public callers cannot enable proposal mode.
 
     The default path rejects. A caller must explicitly opt into
     ``TEST_ONLY_DRYRUN`` or ``WSP71_PERMISSIONED`` and provide a fresh
@@ -161,22 +194,24 @@ def build_test_only_signer_backend_from_provider(
 
     if not isinstance(profile, SignerKeyProviderProfile):
         return _reject(FAIL_PROVIDER_PROFILE_INVALID)
+    if verified_outcome_signing_authority is not None:
+        try:
+            root_verified_outcome_authority_bindings(
+                verified_outcome_signing_authority
+            )
+        except (TypeError, ValueError):
+            return _reject(FAIL_PROVIDER_PROFILE_INVALID, profile=profile)
     if not _provider_mode_authorized(
         provider_mode,
         allow_test_only_key_material=allow_test_only_key_material,
         resolver=resolver,
     ):
         return _reject(FAIL_PROVIDER_MOCK_IN_PRODUCTION, profile=profile)
-    if not _profile_ascii_and_complete(profile):
-        return _reject(FAIL_PROVIDER_PROFILE_INVALID, profile=profile)
-    if not permission_snapshot_fresh:
+    profile_rejection = validate_signer_key_provider_profile(profile)
+    if profile_rejection is not None:
+        return _reject(profile_rejection, profile=profile)
+    if permission_snapshot_fresh is not True:
         return _reject(FAIL_PROVIDER_PERMISSION_DENIED, profile=profile)
-    if profile.signing_key_ref == profile.audit_mac_key_ref:
-        return _reject(FAIL_PROVIDER_REFERENCE_FORBIDDEN, profile=profile)
-    if not parse_op_reference(profile.signing_key_ref) or not parse_op_reference(profile.audit_mac_key_ref):
-        return _reject(FAIL_PROVIDER_REFERENCE_INVALID, profile=profile)
-    if profile.ttl_seconds <= 0:
-        return _reject(FAIL_PROVIDER_TTL_EXPIRED, profile=profile)
 
     signing_result = _resolve(profile.signing_key_ref, profile.signer_agent_id, resolver)
     if not signing_result.success:
@@ -202,6 +237,110 @@ def build_test_only_signer_backend_from_provider(
     fingerprint = public_key_fingerprint(public_key)
     if fingerprint != profile.expected_key_fingerprint:
         return _reject(FAIL_PROVIDER_FINGERPRINT_MISMATCH, profile=profile, signing=signing_result, audit=audit_result)
+    effective_proposal_nonce_store = None
+    if proposal_authority_policy is not None:
+        try:
+            high_water_store_matches = bool(
+                isinstance(
+                    proposal_replay_high_water_store,
+                    ProposalReplayHighWaterStore,
+                )
+                and proposal_replay_high_water_store_id
+                and hmac.compare_digest(
+                    proposal_replay_high_water_store.store_id,
+                    proposal_replay_high_water_store_id,
+                )
+                and isinstance(
+                    proposal_policy_authorization,
+                    ArchitectProposalPolicyAuthorization,
+                )
+                and hmac.compare_digest(
+                    proposal_policy_authorization.proposal_policy_digest,
+                    architect_proposal_signer_policy_digest(
+                        proposal_authority_policy
+                    ),
+                )
+                and (
+                    provider_mode != PROVIDER_MODE_WSP71_PERMISSIONED
+                    or (
+                        proposal_replay_high_water_store.durable is True
+                        and isinstance(
+                            proposal_replay_high_water_durability_receipt_id,
+                            str,
+                        )
+                        and _is_sha256_digest(
+                            proposal_replay_high_water_durability_receipt_id
+                        )
+                        and hmac.compare_digest(
+                            str(
+                                proposal_replay_high_water_store
+                                .durability_receipt_id
+                            ),
+                            proposal_replay_high_water_durability_receipt_id,
+                        )
+                    )
+                )
+            )
+        except Exception:
+            high_water_store_matches = False
+        if (
+            not high_water_store_matches
+            or proposal_nonce_store_path is None
+            or proposal_nonce_store_allowed_root is None
+            or proposal_nonce_store_repo_root is None
+        ):
+            return _reject(
+                FAIL_PROVIDER_PROFILE_INVALID,
+                profile=profile,
+                signing=signing_result,
+                audit=audit_result,
+            )
+        try:
+            effective_proposal_nonce_store = (
+                AtomicProposalAuthenticityNonceStore(
+                    proposal_nonce_store_path,
+                    allowed_root=proposal_nonce_store_allowed_root,
+                    repo_root=proposal_nonce_store_repo_root,
+                    integrity_key=audit_key,
+                    high_water_store=proposal_replay_high_water_store,
+                    replay_store_binding_digest=(
+                        architect_proposal_replay_store_binding_digest(
+                            architect_proposal_signer_instance_id(
+                                proposal_nonce_store_allowed_root,
+                                profile.expected_public_key,
+                                profile.expected_key_epoch,
+                            ),
+                            proposal_nonce_store_path,
+                            proposal_replay_high_water_store_id,
+                        )
+                    ),
+                )
+            )
+        except (OSError, TypeError, ValueError):
+            return _reject(
+                FAIL_PROVIDER_PROFILE_INVALID,
+                profile=profile,
+                signing=signing_result,
+                audit=audit_result,
+            )
+    elif any(
+        value is not None
+        for value in (
+            proposal_nonce_store_path,
+            proposal_replay_high_water_store,
+            proposal_replay_high_water_store_id,
+            proposal_replay_high_water_durability_receipt_id,
+            proposal_nonce_store_allowed_root,
+            proposal_nonce_store_repo_root,
+            proposal_policy_authorization,
+        )
+    ):
+        return _reject(
+            FAIL_PROVIDER_PROFILE_INVALID,
+            profile=profile,
+            signing=signing_result,
+            audit=audit_result,
+        )
 
     return SignerKeyProviderDryRunResult(
         ok=True,
@@ -221,7 +360,77 @@ def build_test_only_signer_backend_from_provider(
             audit_mac_builder=_HmacAuditMacBuilder(audit_key),
             control_loop_anchor_store=control_loop_anchor_store,
             control_loop_authority_policy=control_loop_authority_policy,
+            proposal_authority_policy=proposal_authority_policy,
+            proposal_nonce_store=effective_proposal_nonce_store,
+            verified_outcome_signer_policy=verified_outcome_signer_policy,
+            verified_outcome_signing_authority=verified_outcome_signing_authority,
         ),
+    )
+
+
+def build_test_only_signer_backend_from_provider(
+    profile: SignerKeyProviderProfile,
+    resolver: SignerKeyResolver,
+    *,
+    provider_mode: str = "",
+    allow_test_only_key_material: bool = False,
+    permission_snapshot_fresh: bool = False,
+    control_loop_anchor_store: ControlLoopAnchorStore | None = None,
+    control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
+    verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
+) -> SignerKeyProviderDryRunResult:
+    """Build a generic signer backend without architect-proposal authority."""
+
+    return _build_signer_backend_from_provider_core(
+        profile,
+        resolver,
+        provider_mode=provider_mode,
+        allow_test_only_key_material=allow_test_only_key_material,
+        permission_snapshot_fresh=permission_snapshot_fresh,
+        control_loop_anchor_store=control_loop_anchor_store,
+        control_loop_authority_policy=control_loop_authority_policy,
+        verified_outcome_signer_policy=verified_outcome_signer_policy,
+        verified_outcome_signing_authority=verified_outcome_signing_authority,
+    )
+
+
+def _build_proposal_signer_backend_from_verified_runtime(
+    profile: SignerKeyProviderProfile,
+    resolver: SignerKeyResolver,
+    *,
+    provider_mode: str,
+    allow_test_only_key_material: bool,
+    permission_snapshot_fresh: bool,
+    proposal_authority_policy: ArchitectProposalSignerPolicy,
+    proposal_policy_authorization: ArchitectProposalPolicyAuthorization,
+    proposal_nonce_store_path: Path | str,
+    proposal_replay_high_water_store: ProposalReplayHighWaterStore,
+    proposal_replay_high_water_store_id: str,
+    proposal_replay_high_water_durability_receipt_id: str,
+    proposal_nonce_store_allowed_root: Path | str,
+    proposal_nonce_store_repo_root: Path | str,
+) -> SignerKeyProviderDryRunResult:
+    """Internal proposal constructor reached only after runtime authorization."""
+
+    return _build_signer_backend_from_provider_core(
+        profile,
+        resolver,
+        provider_mode=provider_mode,
+        allow_test_only_key_material=allow_test_only_key_material,
+        permission_snapshot_fresh=permission_snapshot_fresh,
+        proposal_authority_policy=proposal_authority_policy,
+        proposal_policy_authorization=proposal_policy_authorization,
+        proposal_nonce_store_path=proposal_nonce_store_path,
+        proposal_replay_high_water_store=proposal_replay_high_water_store,
+        proposal_replay_high_water_store_id=(
+            proposal_replay_high_water_store_id
+        ),
+        proposal_replay_high_water_durability_receipt_id=(
+            proposal_replay_high_water_durability_receipt_id
+        ),
+        proposal_nonce_store_allowed_root=proposal_nonce_store_allowed_root,
+        proposal_nonce_store_repo_root=proposal_nonce_store_repo_root,
     )
 
 
@@ -234,10 +443,12 @@ def build_signer_backend_from_provider(
     permission_snapshot_fresh: bool = False,
     control_loop_anchor_store: ControlLoopAnchorStore | None = None,
     control_loop_authority_policy: ControlLoopAuthorityPolicy | None = None,
+    verified_outcome_signer_policy: VerifiedOutcomeSignerPolicy | None = None,
+    verified_outcome_signing_authority: VerifiedOutcomeSigningAuthority | None = None,
 ) -> SignerKeyProviderDryRunResult:
-    """Compatibility wrapper with the production-capable boundary name."""
+    """Production-capable generic signer boundary; proposal mode is internal."""
 
-    return build_test_only_signer_backend_from_provider(
+    return _build_signer_backend_from_provider_core(
         profile,
         resolver,
         provider_mode=provider_mode,
@@ -245,6 +456,8 @@ def build_signer_backend_from_provider(
         permission_snapshot_fresh=permission_snapshot_fresh,
         control_loop_anchor_store=control_loop_anchor_store,
         control_loop_authority_policy=control_loop_authority_policy,
+        verified_outcome_signer_policy=verified_outcome_signer_policy,
+        verified_outcome_signing_authority=verified_outcome_signing_authority,
     )
 
 
@@ -261,6 +474,15 @@ def _provider_mode_authorized(
             return False
         return not _resolver_is_mock_vault(resolver)
     return False
+
+
+def _is_sha256_digest(value: object) -> bool:
+    text = value if isinstance(value, str) else ""
+    return (
+        len(text) == 71
+        and text.startswith("sha256:")
+        and all(char in "0123456789abcdef" for char in text[7:])
+    )
 
 
 def _resolver_is_mock_vault(resolver: object) -> bool:
@@ -402,6 +624,30 @@ def _profile_ascii_and_complete(profile: SignerKeyProviderProfile) -> bool:
     return _assert_ascii_deep(payload)
 
 
+def validate_signer_key_provider_profile(
+    profile: object,
+) -> str | None:
+    """Return the provider rejection code for invalid static profile data."""
+
+    if not isinstance(profile, SignerKeyProviderProfile):
+        return FAIL_PROVIDER_PROFILE_INVALID
+    if not _profile_ascii_and_complete(profile):
+        return FAIL_PROVIDER_PROFILE_INVALID
+    if profile.signing_key_ref == profile.audit_mac_key_ref:
+        return FAIL_PROVIDER_REFERENCE_FORBIDDEN
+    references = (profile.signing_key_ref, profile.audit_mac_key_ref)
+    if not (
+        all(parse_op_reference(ref) for ref in references)
+        or all(parse_systemd_credential_reference(ref) for ref in references)
+    ):
+        return FAIL_PROVIDER_REFERENCE_INVALID
+    if profile.ttl_seconds <= 0:
+        return FAIL_PROVIDER_TTL_EXPIRED
+    if decode_ed25519_public_key(profile.expected_public_key) is None:
+        return FAIL_PROVIDER_PROFILE_INVALID
+    return None
+
+
 def _assert_ascii_deep(value: object) -> bool:
     if isinstance(value, str):
         return all(ord(char) < 128 for char in value)
@@ -437,4 +683,5 @@ __all__ = [
     "SignerKeyProviderProfile",
     "build_signer_backend_from_provider",
     "build_test_only_signer_backend_from_provider",
+    "validate_signer_key_provider_profile",
 ]

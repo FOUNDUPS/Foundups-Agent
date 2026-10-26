@@ -68,7 +68,7 @@ def test_bootstrap_materializes_authority_profile_source(tmp_path: Path) -> None
     )
     profile = json.loads(files["output"].read_text(encoding="utf-8"))
     assert profile["principal_id"] == "github:mjtrout"
-    assert profile["principal_public_key"] == "pub:principal"
+    assert profile["principal_public_key"] == _principal().principal_public_key
     assert profile["no_signing_performed"] is True
     assert profile["no_holoindex_reindex_performed"] is True
 

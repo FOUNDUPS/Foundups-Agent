@@ -498,3 +498,55 @@ class TestExecutionBoundary:
         for pattern in forbidden_imports:
             assert pattern.lower() not in source_code.lower(), \
                 f"Scanner should not import '{pattern}' - execution boundary violation"
+
+
+@pytest.mark.parametrize("tool,code,payload", [
+    ("snyk", 2, {"ok": False, "error": "authentication failed"}),
+    ("semgrep", 2, {"results": [], "errors": [{"message": "invalid config"}]}),
+    ("trivy", 1, {"Results": []}),
+    ("snyk", 0, {}),
+    ("snyk", 1, {"vulnerabilities": []}),
+    ("semgrep", 1, {"results": []}),
+    ("snyk", 0, {"vulnerabilities": "invalid"}),
+    ("snyk", 0, {"ok": False, "vulnerabilities": []}),
+    ("trivy", 0, {"Results": "invalid"}),
+    ("trivy", 0, {"Results": [{"Secrets": ["invalid"]}]}),
+    ("semgrep", 0, {"results": [], "errors": [{"message": "partial failure"}]}),
+    ("semgrep", 0, {"results": [{"check_id": "incomplete"}]}),
+    ("semgrep", 0, []),
+])
+def test_failure_payloads_never_report_success(tool, code, payload):
+    scanner = SecurityScanner()
+    scanner._availability = ToolAvailability(**{f"{tool}_available": True})
+    with patch("subprocess.run", return_value=MagicMock(returncode=code, stdout=json.dumps(payload), stderr="")):
+        result = getattr(scanner, f"scan_{tool}")(".")
+    assert result.success is False
+    assert result.error_message
+    assert result.exit_code == code
+    assert result.report is None or result.report.scan_success is False
+
+
+def test_trivy_categories_preserve_location_without_secret_material():
+    from modules.infrastructure.security_scanner.src.schemas import normalize_trivy_output
+    secret = {"RuleID": "synthetic-rule", "Severity": "HIGH", "Title": "sensitive title",
+              "StartLine": 17, "Match": "synthetic credential", "Code": "synthetic snippet"}
+    payload = {"Results": [{"Target": "src/config", "Secrets": [secret],
+                           "Misconfigurations": [{"ID": "CFG1", "Severity": "HIGH", "Status": "FAIL",
+                                                   "Title": "Unsafe binding", "CauseMetadata": {"StartLine": 8}},
+                                                  {"ID": "CFG2", "Severity": "LOW", "Status": "PASS"}]}]}
+    report = normalize_trivy_output(payload, "test", ".")
+    assert [(f.finding_type, f.file_path, f.line_number) for f in report.findings] == [
+        ("secret", "src/config", 17), ("config", "src/config", 8)]
+    assert report.total_findings == 2
+    assert report.findings[0].raw_data == {}
+    for sensitive in ("synthetic credential", "synthetic snippet", "sensitive title"):
+        assert sensitive not in report.to_json()
+
+
+def test_trivy_explicitly_requests_misconfiguration_and_secret_scanners():
+    scanner = SecurityScanner()
+    scanner._availability = ToolAvailability(trivy_available=True)
+    with patch("subprocess.run", return_value=MagicMock(returncode=0, stdout='{"Results":[]}', stderr="")) as run:
+        assert scanner.scan_trivy(".").success
+    command = run.call_args.args[0]
+    assert command[command.index("--scanners") + 1] == "vuln,secret,misconfig"

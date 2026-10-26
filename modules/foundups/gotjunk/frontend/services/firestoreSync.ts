@@ -17,6 +17,8 @@ import {
   collection,
   doc,
   setDoc,
+  runTransaction,
+  arrayUnion,
   getDoc,
   getDocs,
   onSnapshot,
@@ -124,6 +126,8 @@ export const syncItemToCloud = async (item: CapturedItem): Promise<boolean> => {
     return false;
   }
 
+  if (item.userId && item.userId !== ownerUid) return false;
+
   const db = getFirestoreDb();
   const storage = getFirebaseStorage();
   if (!db) return false;
@@ -142,7 +146,7 @@ export const syncItemToCloud = async (item: CapturedItem): Promise<boolean> => {
       if (item.blob.size < 500 * 1024 && storage) {
         blobBase64 = await blobToBase64(item.blob);
       } else if (storage) {
-        const storageRef = ref(storage, `items/${deviceId}/${item.id}`);
+        const storageRef = ref(storage, `items/${ownerUid}/${item.id}`);
         await uploadBytes(storageRef, item.blob);
         blobStorageUrl = await getDownloadURL(storageRef);
       } else {
@@ -168,7 +172,6 @@ export const syncItemToCloud = async (item: CapturedItem): Promise<boolean> => {
       updatedAt: now,
       alertStatus: item.alertStatus,
       alertTimer: item.alertTimer,
-      cartReservation: item.cartReservation,
       blobStorageUrl,
       blobBase64,
     };
@@ -177,7 +180,7 @@ export const syncItemToCloud = async (item: CapturedItem): Promise<boolean> => {
     await setDoc(doc(db, ITEMS_COLLECTION, item.id), {
       ...itemDoc,
       deviceId,
-    });
+    }, { merge: true });
 
     console.log('[FirestoreSync] Synced item to cloud:', item.id);
     return true;
@@ -399,3 +402,22 @@ export const getSyncStatus = (): {
   isConfigured: isFirebaseConfigured(),
   deviceId: getDeviceId(),
 });
+
+/** Append one vote under the caller UID; transaction preserves concurrent votes. */
+export async function voteOnItem(itemId: string, choice: 'keep' | 'remove') {
+  const uid = getCurrentUserId();
+  const db = getFirestoreDb();
+  if (!uid || !db) throw new Error('Sign in before voting.');
+  return runTransaction(db, async transaction => {
+    const target = doc(db, ITEMS_COLLECTION, itemId);
+    const existing = await transaction.get(target);
+    if (!existing.exists()) throw new Error('Item is unavailable.');
+    const stored = existing.data().moderationVotes;
+    const before = { keep: stored?.keep || [], remove: stored?.remove || [] };
+    if (before.keep.includes(uid) || before.remove.includes(uid)) return before;
+    const votes = { keep: [...before.keep], remove: [...before.remove] };
+    votes[choice].push(uid);
+    transaction.update(target, { [`moderationVotes.${choice}`]: arrayUnion(uid), updatedAt: Timestamp.now() });
+    return votes;
+  });
+}

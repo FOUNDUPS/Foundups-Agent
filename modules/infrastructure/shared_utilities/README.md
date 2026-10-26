@@ -15,8 +15,26 @@
 - YouTube channel registry (shared rotation + scheduling metadata)
 - Cross-cutting concerns for infrastructure layer
 
+The native local chat adapter preserves explicit reasoning controls by default;
+callers selecting a model without that capability may pass `reasoning=None`
+to omit the optional field. This delegates to the server default, not a promise
+that reasoning is disabled. Existing defaults and exact instance checks remain.
+
+The local LLM adapter distinguishes installed models from exact resident
+instances through native `/api/v1/models`. Generic resolution remains
+probe/borrow-only. Explicit callers may use one node/port-wide, bounded-lock
+model transaction that borrows an existing instance or, only when node
+residency is empty and native context limits admit it, loads one exact model.
+The transaction journals interrupted-load intent outside the repository,
+invokes one caller-bounded operation, unloads only proven ownership, verifies
+cleanup, and returns content-free, content-addressed lifecycle evidence.
+Structural receipts require the existing signed provenance layer for
+adversarial trust. No path starts/stops the server, downloads a model, guesses
+an ID, invokes `lms`, evicts an existing model, or falls back implicitly.
+
 **Dependencies:**
-- Standard library only (json, os, logging, datetime, random)
+- Standard library utilities plus optional `openai`/`llama_cpp` adapters for
+  explicitly selected local LLM backends.
 
 ## [STATUS] Current Status & Scoring
 
@@ -67,6 +85,41 @@
   - [ ] Code size optimization (<200 lines per utility)
   - [ ] Performance benchmarking
   - [ ] Comprehensive test coverage (>90%)
+
+### Runtime Artifact Safety Decomposition
+
+`runtime_artifact_safety.py` is an inherited compatibility host for path
+validation, descriptor-confined I/O, cross-process locking, and telemetry
+redaction. New consumers must reuse its public API rather than add parallel
+safety policies. A dedicated parity migration must separate redaction,
+confined reads/writes, and remaining policy seams; the platform lock backend is
+now extracted to `runtime_operation_locking.py` while preserving Windows
+extended-length paths, Linux descriptor verification, and the existing public
+imports. Its temporary exact WSP 62 no-growth ceiling is recorded in
+`wsp_62_exemptions.yaml`.
+
+`runtime_artifact_confined_byte_reader.py` also exposes a bounded streaming
+digest proof for callers that already hold an expected file identity. It uses
+one no-follow confined descriptor, rejects identity/path drift before and after
+hashing, and returns only the digest, size, and admitted identity.
+
+On Windows, confined identity comparison ignores only the execute bits that
+Python projects from executable filename suffixes; file type, read/write mode,
+device/inode, link count, size, timestamps, attributes, and final path remain
+bound. `runtime_artifact_windows_streams.py` provides a bounded
+`FileStreamInfo` check for callers that have already proved no-follow topology:
+clean files admit only the unnamed `::$DATA` stream, clean directories admit no
+reported stream, and every named alternate stream rejects. It must not be used
+alone as link/reparse/final-path proof. The same module exposes
+`windows_extended_path()` so approved runtime-artifact traversal, metadata,
+directory creation, and handle operations use one absolute `\\?\` spelling
+when valid payload paths exceed the legacy Windows `MAX_PATH` boundary.
+
+On POSIX, machine-wide runtime locks create or reopen one owner-private `0700`
+lock directory, reject links or wrong ownership/permissions, pin that directory
+with a no-follow descriptor, and open the private single-link lock file relative
+to the pinned descriptor. A replaceable or redirected temporary lock namespace
+therefore fails closed rather than splitting serialization.
 
 ## [API] Public API & Usage
 

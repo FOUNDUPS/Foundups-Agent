@@ -10,11 +10,16 @@ from pathlib import Path
 import pytest
 
 from modules.communication.moltbot_bridge.src.reddog_ed25519_signature_verifier_backend import (
-    Ed25519SignatureVerifier,
     encode_ed25519_public_key,
+)
+from modules.communication.moltbot_bridge.src.reddog_ed25519_signer_backend import (
+    REJECT_ED25519_SIGNER_POLICY_MISSING,
 )
 from modules.communication.moltbot_bridge.src.reddog_isolated_signer_socket_protocol import (
     SignerPeerAttestation,
+)
+from modules.communication.moltbot_bridge.src.foundup_verified_outcome_root_authority import (
+    RootVerifiedOutcomeSigningAuthority,
 )
 from modules.communication.moltbot_bridge.src.reddog_signer_delegated_authority_runtime import (
     SigningRequest,
@@ -219,6 +224,46 @@ def test_default_path_rejects_without_explicit_test_only_mode() -> None:
     assert result.backend is None
 
 
+@pytest.mark.parametrize("fresh", [
+    True, False, None, 0, 1, -1, "false", "true", [], [True], {}, {"approved": True},
+])
+def test_systemd_reference_pair_preserves_provider_permission_gate(fresh: object) -> None:
+    """Synthetic material tests provider composition, not custody or admission."""
+    private_key = _private_key()
+    public_key = _public_text(private_key)
+    signing_ref, audit_ref = "systemd-creds://work-signing", "systemd-creds://work-audit"
+    profile = _profile(public_key, signing_key_ref=signing_ref, audit_mac_key_ref=audit_ref)
+    resolver = FakeResolver({signing_ref: _private_key_secret(private_key), audit_ref: _audit_secret()})
+    result = build_signer_backend_from_provider(
+        profile, resolver, provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+        allow_test_only_key_material=False, permission_snapshot_fresh=fresh,
+    )
+    allowed = fresh is True
+    assert result.ok is allowed
+    assert resolver.calls == (
+        [(signing_ref, profile.signer_agent_id), (audit_ref, profile.signer_agent_id)]
+        if allowed else []
+    )
+    if not allowed:
+        assert result.rejection_code == FAIL_PROVIDER_PERMISSION_DENIED
+
+
+@pytest.mark.parametrize("audit_ref", [
+    "op://test-vault/reddog-audit/mac", "systemd-creds://../audit",
+    "systemd-creds://work-audit?path=/tmp/audit",
+])
+def test_systemd_profile_rejects_mixed_or_malformed_references_before_resolution(audit_ref: str) -> None:
+    private_key = _private_key()
+    resolver = FakeResolver({})
+    result = build_signer_backend_from_provider(
+        _profile(_public_text(private_key), signing_key_ref="systemd-creds://work-signing", audit_mac_key_ref=audit_ref),
+        resolver, provider_mode=PROVIDER_MODE_WSP71_PERMISSIONED,
+        allow_test_only_key_material=False, permission_snapshot_fresh=True,
+    )
+    assert result.rejection_code == FAIL_PROVIDER_REFERENCE_INVALID
+    assert resolver.calls == []
+
+
 def test_wsp71_permissioned_mode_accepts_injected_non_mock_resolver_without_test_only_override() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
@@ -239,6 +284,36 @@ def test_wsp71_permissioned_mode_accepts_injected_non_mock_resolver_without_test
         ("op://test-vault/reddog-signing/private", "signer:reddog-authority"),
         ("op://test-vault/reddog-audit/mac", "signer:reddog-authority"),
     ]
+
+
+@pytest.mark.parametrize(
+    "builder,mode,allow_test",
+    (
+        (build_signer_backend_from_provider, PROVIDER_MODE_WSP71_PERMISSIONED, False),
+        (build_test_only_signer_backend_from_provider, PROVIDER_MODE_TEST_ONLY_DRYRUN, True),
+    ),
+)
+def test_all_provider_builders_reject_non_root_outcome_authority(
+    builder, mode: str, allow_test: bool
+) -> None:
+    private_key = _private_key()
+    resolver = _resolver(private_key)
+    forged_same_type = object.__new__(RootVerifiedOutcomeSigningAuthority)
+
+    for authority in (object(), forged_same_type):
+        result = builder(
+            _profile(_public_text(private_key)),
+            resolver,
+            provider_mode=mode,
+            allow_test_only_key_material=allow_test,
+            permission_snapshot_fresh=True,
+            verified_outcome_signing_authority=authority,
+        )
+
+        assert result.ok is False
+        assert result.rejection_code == FAIL_PROVIDER_PROFILE_INVALID
+        assert result.backend is None
+        assert resolver.calls == []
 
 
 def test_wsp71_permissioned_mode_accepts_op_cli_secret_resolver() -> None:
@@ -315,17 +390,15 @@ def test_acceptance_builds_backend_and_receipt_excludes_secret_values() -> None:
     ]
 
 
-def test_backend_signs_and_public_verifier_accepts() -> None:
+def test_backend_without_domain_policy_rejects_signing() -> None:
     private_key = _private_key()
     public_key = _public_text(private_key)
     result = _build(_profile(public_key), _resolver(private_key))
 
     response = result.backend.sign(_request(public_key), _peer())  # type: ignore[union-attr]
 
-    assert response.accepted is True
-    assert response.audit_mac.startswith("audit-mac-v1:")
-    assert response.no_secret_material_returned is True
-    assert Ed25519SignatureVerifier().verify(public_key, _request(public_key).signing_input, response.signature) is True
+    assert response.accepted is False
+    assert response.rejection_code == REJECT_ED25519_SIGNER_POLICY_MISSING
 
 
 def test_permission_snapshot_must_be_fresh() -> None:

@@ -1,3 +1,11 @@
+## 2026-08-28: Tier-0 contract restoration
+- Added root README/INTERFACE contracts so strict Holo module retrieval can
+  return the mandatory pair instead of failing `HOLOINDEX_TIER0_INCOMPLETE`.
+- Documented the observed broker policy and the unresolved legacy boundary:
+  explicit launch still constructs `AutonomousHoloDAE`, whose direct
+  `HoloIndex` and auto-reindex path is not governed query/maintenance authority.
+- No launcher, owner, index, maintenance, route, or RSI behavior changed.
+
 ## 2026-07-16: HOLOINDEX_RESIDENT_DAE_RUNTIME_CONSOLIDATION_PHASE1
 - Marked HoloDAE's main.py broker registration as `resident_owner=dae_launch_broker`,
   `runtime_autostart=false`, `runtime_reindex_allowed=false`, and

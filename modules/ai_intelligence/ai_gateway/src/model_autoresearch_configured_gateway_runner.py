@@ -6,20 +6,23 @@ import asyncio
 import hashlib
 import hmac
 import threading
-import time
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from decimal import Decimal
-from typing import Mapping, Protocol
+from typing import Any, Mapping, Protocol, Sequence
 
+from .model_autoresearch_configured_gateway_callers import (
+    AIGatewayConfiguredModelCaller,
+    GatewayModelCallResult,
+    GatewayModelCaller,
+    LMStudioConfiguredModelCaller,
+    RoutedConfiguredModelCaller,
+)
 from .model_autoresearch_configured_gateway_evidence import (
-    MAX_RESPONSE_BYTES,
     ConfiguredGatewayModelBudgetEvidence,
     ConfiguredGatewayReasoningControlEvidence,
     ConfiguredGatewayReceiptStore,
     ConfiguredGatewayRunnerCallReceipt,
     PromptGuardApprovalReceipt,
-    bounded_non_negative_float,
-    bounded_non_negative_int,
     bounded_positive_int,
     build_attempt_receipt,
     build_runner_receipt,
@@ -46,20 +49,6 @@ from .model_intelligence_outcomes import ModelOutcomeMetrics
 CONFIGURED_GATEWAY_RUNNER_SCHEMA_VERSION = "model_autoresearch_configured_gateway_runner.v2"
 
 
-class GatewayModelCaller(Protocol):
-    def call_model(
-        self,
-        *,
-        provider: str,
-        model: str,
-        prompt: str,
-        task_type: str,
-        max_completion_tokens: int,
-        reasoning_effort: str,
-    ) -> "GatewayModelCallResult":
-        """Call exactly one configured route."""
-
-
 class PromptSource(Protocol):
     def prompt_for_task(self, task: ModelBenchmarkTask) -> str:
         """Return one held-out source prompt."""
@@ -74,39 +63,6 @@ class PromptGuard(Protocol):
         source_prompt_digest: str,
     ) -> PromptGuardApprovalReceipt:
         """Approve one fully wrapped egress prompt without changing it."""
-
-
-@dataclass(frozen=True)
-class GatewayModelCallResult:
-    success: bool
-    provider: str
-    model: str
-    response_text: str
-    latency_ms: int
-    input_tokens: int
-    output_tokens: int
-    cost_estimate_usd: float
-
-    def normalized(self) -> "GatewayModelCallResult":
-        if type(self.success) is not bool:
-            raise ValueError("invalid_gateway_model_call_success")
-        if not isinstance(self.response_text, str):
-            raise ValueError("invalid_gateway_model_call_response_text")
-        if len(self.response_text.encode("utf-8")) > MAX_RESPONSE_BYTES:
-            raise ValueError("invalid_gateway_model_call_response_text")
-        return GatewayModelCallResult(
-            success=self.success,
-            provider=exact_provider(self.provider),
-            model=exact_model_id("model", self.model),
-            response_text=self.response_text,
-            latency_ms=bounded_non_negative_int("latency_ms", self.latency_ms),
-            input_tokens=bounded_non_negative_int("input_tokens", self.input_tokens),
-            output_tokens=bounded_non_negative_int("output_tokens", self.output_tokens),
-            cost_estimate_usd=bounded_non_negative_float(
-                "cost_estimate_usd",
-                self.cost_estimate_usd,
-            ),
-        )
 
 
 @dataclass(frozen=True)
@@ -202,72 +158,6 @@ class MappingPromptSource:
 
 
 @dataclass(frozen=True)
-class AIGatewayConfiguredModelCaller:
-    gateway: object
-
-    def call_model(
-        self,
-        *,
-        provider: str,
-        model: str,
-        prompt: str,
-        task_type: str,
-        max_completion_tokens: int,
-        reasoning_effort: str,
-    ) -> GatewayModelCallResult:
-        provider_name = exact_provider(provider)
-        model_name = exact_model_id("model", model)
-        completion_cap = bounded_positive_int(
-            "max_completion_tokens",
-            max_completion_tokens,
-        )
-        try:
-            effort = exact_model_id("reasoning_effort", reasoning_effort)
-        except ValueError:
-            raise ValueError("invalid_reasoning_tokens_control") from None
-        provider_config = _provider_config(self.gateway, provider_name)
-        routed = replace(
-            provider_config,
-            models={task_type: model_name, "quick": model_name},
-        )
-        call_provider = getattr(self.gateway, "_call_provider", None)
-        if not callable(call_provider):
-            raise ValueError("configured_gateway_runner_call_provider_missing")
-        started = time.monotonic()
-        response = call_provider(
-            routed,
-            prompt,
-            task_type,
-            max_completion_tokens=completion_cap,
-            reasoning_effort=effort,
-        )
-        if not isinstance(response, str):
-            raise ValueError("configured_gateway_runner_call_response_invalid")
-        latency_ms = int(round((time.monotonic() - started) * 1000))
-        input_tokens, output_tokens = _token_count(prompt), _token_count(response)
-        return GatewayModelCallResult(
-            success=bool(response.strip()),
-            provider=provider_name,
-            model=model_name,
-            response_text=response,
-            latency_ms=latency_ms,
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            cost_estimate_usd=0.0,
-        ).normalized()
-
-
-def _provider_config(gateway: object, provider: str):
-    providers = getattr(gateway, "providers", None)
-    if not isinstance(providers, Mapping):
-        raise ValueError("configured_gateway_runner_provider_registry_missing")
-    config = providers.get(provider)
-    if config is None or not getattr(config, "api_key", None):
-        raise ValueError("configured_gateway_runner_provider_unavailable")
-    return config
-
-
-@dataclass(frozen=True)
 class _PreparedCall:
     role: str
     provider: str
@@ -331,6 +221,100 @@ class _RunCallReservation:
         self._ledger.release(release_count)
 
 
+class _ConfiguredCampaignRunner:
+    def __init__(self, **inputs: Any) -> None:
+        self._caller = inputs["caller"]
+        self._prompt_source = inputs["prompt_source"]
+        self._policy = inputs["policy"]
+        self._prompt_guard = inputs["prompt_guard"]
+        self._output_store = inputs["output_evidence_store"]
+        self._receipt_store = inputs["runner_receipt_store"]
+        self._attempt_store = inputs["call_attempt_receipt_store"]
+        self._policy_digest = digest_payload(self._policy.to_dict())
+        self._call_budget = _CallBudgetLedger(self._policy.max_total_calls)
+        self._campaign: dict[tuple[str, str], _PreparedRun] = {}
+        self._reservation: _RunCallReservation | None = None
+
+    def __call__(self, task: Any, candidate: Any) -> ModelBenchmarkTaskOutput:
+        prepared, reservation = self._member(task, candidate)
+        try:
+            output = _execute_run(
+                prepared=prepared,
+                caller=self._caller,
+                policy=self._policy,
+                policy_digest=self._policy_digest,
+                output_evidence_store=self._output_store,
+                runner_receipt_store=self._receipt_store,
+                call_attempt_receipt_store=self._attempt_store,
+                reservation=reservation,
+            )
+            self._finish_if_complete(reservation)
+            return output
+        except BaseException:
+            self._abort_campaign(reservation)
+            raise
+        finally:
+            if self._reservation is None:
+                reservation.release_unattempted()
+
+    def prepare_campaign(
+        self,
+        *,
+        tasks: Sequence[ModelBenchmarkTask],
+        candidates: Sequence[ModelBenchmarkCandidate],
+    ) -> str:
+        if self._campaign or self._reservation is not None:
+            raise ValueError("configured_gateway_runner_campaign_already_prepared")
+        runs = self._prepare_members(tasks, candidates)
+        keys = tuple((item.task.task_id, item.candidate.candidate_id) for item in runs)
+        if not runs or len(keys) != len(set(keys)):
+            raise ValueError("configured_gateway_runner_campaign_invalid")
+        reservation = self._call_budget.reserve(sum(len(item.calls) for item in runs))
+        self._campaign.update(zip(keys, runs))
+        self._reservation = reservation
+        return _campaign_digest(self._policy_digest, runs)
+
+    def _prepare_members(self, tasks, candidates) -> tuple[_PreparedRun, ...]:
+        return tuple(
+            _prepare_run(
+                task=task,
+                candidate=candidate,
+                prompt_source=self._prompt_source,
+                prompt_guard=self._prompt_guard,
+                policy=self._policy,
+            )
+            for task in tasks
+            for candidate in candidates
+        )
+
+    def _member(self, task, candidate) -> tuple[_PreparedRun, _RunCallReservation]:
+        prepared = self._campaign.pop((task.task_id, candidate.candidate_id), None)
+        if prepared is not None:
+            assert self._reservation is not None
+            return prepared, self._reservation
+        if self._reservation is not None:
+            raise ValueError("configured_gateway_runner_campaign_member_mismatch")
+        prepared = _prepare_run(
+            task=task,
+            candidate=candidate,
+            prompt_source=self._prompt_source,
+            prompt_guard=self._prompt_guard,
+            policy=self._policy,
+        )
+        return prepared, self._call_budget.reserve(len(prepared.calls))
+
+    def _finish_if_complete(self, reservation: _RunCallReservation) -> None:
+        if self._reservation is not None and not self._campaign:
+            reservation.release_unattempted()
+            self._reservation = None
+
+    def _abort_campaign(self, reservation: _RunCallReservation) -> None:
+        if self._reservation is not None:
+            reservation.release_unattempted()
+            self._campaign.clear()
+            self._reservation = None
+
+
 def build_configured_gateway_benchmark_runner(
     *,
     caller: GatewayModelCaller,
@@ -341,36 +325,44 @@ def build_configured_gateway_benchmark_runner(
     runner_receipt_store: ConfiguredGatewayReceiptStore | None = None,
     call_attempt_receipt_store: ConfiguredGatewayReceiptStore | None = None,
 ) -> BenchmarkRunner:
-    normalized_policy = policy.normalized()
+    normalized = policy.normalized()
     if prompt_guard is None:
         raise ValueError("configured_gateway_runner_prompt_guard_required")
-    policy_digest = digest_payload(normalized_policy.to_dict())
-    call_budget = _CallBudgetLedger(normalized_policy.max_total_calls)
+    return _ConfiguredCampaignRunner(
+        caller=caller,
+        prompt_source=prompt_source,
+        policy=normalized,
+        prompt_guard=prompt_guard,
+        output_evidence_store=output_evidence_store,
+        runner_receipt_store=runner_receipt_store,
+        call_attempt_receipt_store=call_attempt_receipt_store,
+    )
 
-    def _runner(task, candidate):
-        prepared = _prepare_run(
-            task=task,
-            candidate=candidate,
-            prompt_source=prompt_source,
-            prompt_guard=prompt_guard,
-            policy=normalized_policy,
-        )
-        reservation = call_budget.reserve(len(prepared.calls))
-        try:
-            return _execute_run(
-                prepared=prepared,
-                caller=caller,
-                policy=normalized_policy,
-                policy_digest=policy_digest,
-                output_evidence_store=output_evidence_store,
-                runner_receipt_store=runner_receipt_store,
-                call_attempt_receipt_store=call_attempt_receipt_store,
-                reservation=reservation,
-            )
-        finally:
-            reservation.release_unattempted()
 
-    return _runner
+def _campaign_digest(policy_digest: str, runs: Sequence[_PreparedRun]) -> str:
+    return digest_payload(
+        {
+            "policy_digest": policy_digest,
+            "members": [
+                {
+                    "task_id": item.task.task_id,
+                    "candidate_id": item.candidate.candidate_id,
+                    "calls": [
+                        {
+                            "role": call.role,
+                            "provider": call.provider,
+                            "api_model": call.api_model,
+                            "prompt_digest": call.prompt_digest,
+                            "guard_report_digest": call.guard_report_digest,
+                            "reserved_cost_usd": format(call.reserved_cost, "f"),
+                        }
+                        for call in item.calls
+                    ],
+                }
+                for item in runs
+            ],
+        }
+    )
 
 
 def _prepare_run(*, task, candidate, prompt_source, prompt_guard, policy) -> _PreparedRun:
@@ -750,10 +742,6 @@ def _content_digest(value: str) -> str:
     return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()
 
 
-def _token_count(text: str) -> int:
-    return len(text.split())
-
-
 __all__ = [
     "AIGatewayConfiguredModelCaller",
     "CONFIGURED_GATEWAY_RUNNER_SCHEMA_VERSION",
@@ -763,7 +751,9 @@ __all__ = [
     "GatewayModelCallResult",
     "GatewayModelCaller",
     "MappingPromptSource",
+    "LMStudioConfiguredModelCaller",
     "PromptGuardApprovalReceipt",
     "PromptSource",
+    "RoutedConfiguredModelCaller",
     "build_configured_gateway_benchmark_runner",
 ]

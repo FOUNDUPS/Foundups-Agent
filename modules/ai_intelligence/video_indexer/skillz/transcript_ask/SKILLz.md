@@ -1,7 +1,7 @@
 ---
 name: transcript_ask
-description: Extract video transcripts/topics via the YouTube Studio "Ask Studio" header feature (browser, no API)
-version: 1.0.0
+description: Build resumable, per-video semantic manifests through YouTube Studio Ask for one video, one channel, or the Move2Japan/UnDaoDu/FoundUps portfolio
+version: 2.0.0
 author: 0102_video_indexer_team
 agents: [gemini, qwen]
 dependencies: [browser_actions, studio_ask_indexer, action_surface]
@@ -13,270 +13,89 @@ evals: []
 retirement_date: null
 action_ids:
   - video_index.studio_ask.single_video
+  - video_index.studio_ask.channel_cycle
+  - video_index.studio_ask.portfolio_cycle
+  - video_index.studio_ask.daemon_cycle
 ---
-# Transcript Ask SKILLz
+# Studio Ask Video Indexing SKILLz
 
-**Skill Type**: Browser Automation + AI Extraction (WSP 96)
-**Intent**: EXTRACTION (full transcript + timestamps from YouTube)
-**Agents**: Gemini (via YouTube Ask), Qwen (post-processing)
-**Promotion State**: prototype
-**Version**: 1.0.0
-**Created**: 2026-01-16
+Use the typed action surface in `src/action_surface.py`; do not recreate browser
+automation in a menu, scheduler, OpenClaw task, or ad-hoc script.
 
----
+## Capability
 
-## Phase 1 Selector Notice (STUDIO_ASK_STUDIO_HEADER_PHASE1)
+- `video_index.studio_ask.single_video`: index one known video.
+- `video_index.studio_ask.channel_cycle`: run one bounded, resumable channel batch.
+- `video_index.studio_ask.portfolio_cycle`: index Move2Japan and UnDaoDu through
+  Chrome 9222, then FoundUps through Edge 9223.
+- `video_index.studio_ask.daemon_cycle`: run a bounded number of daemon cycles.
 
-**STALE**: The watch-page `button[aria-label="Ask"]` path documented below
-(Architecture / Step 2) is **STALE** and is now a labelled *fallback only*.
+All paths attach to already-authenticated browser sessions. They never handle
+credentials and never publish, schedule, or mutate YouTube metadata.
 
-**Phase 1 canonical path** is the **YouTube Studio "Ask Studio" header**
-(#817 Ask-Studio header selector model):
-- Entry: `ytcp-icon-button[aria-label="Ask Studio"]` on the Studio video-edit page
-- Dialog: `ytcp-dialog#dialog`
-- Prompt: `div[contenteditable][aria-label="Ask something"]`
-- Response: scraped from `#PAcreator_chat_streaming` (DOM text, **no clipboard**)
+## Canonical operation
 
-Canonical implementation: `src/studio_ask_indexer.py`
-(`ASK_STUDIO_SELECTORS`, `StudioAskIndexer.ask_about_video`). The watch-page
-selectors in Step 2 below are retained only as documented fallback.
-
-## Action Surface Binding (SKILLZ_ACTION_SURFACE_PHASE1)
-
-This Skillz contract is backed by the typed action surface in
-`src/action_surface.py`. The action ID it backs is:
-
-- `video_index.studio_ask.single_video` (IMPLEMENTED Phase 1) -> a bounded,
-  single-video Studio Ask index test. Routes ONLY to
-  `StudioAskIndexer.ask_about_video` (navigate + DOM scrape) and optionally
-  persists to `memory/video_index/{channel}/{video_id}.json` via
-  `VideoIndexStore`. It NEVER calls the Gemini API
-  (`GeminiVideoAnalyzer`), the Shorts Scheduler, or any
-  publish/schedule/metadata-mutation path.
-
-The same surface REGISTERS (IDs only, NOT wired in Phase 1):
-`video_index.studio_ask.channel_cycle`, `video_index.studio_ask.daemon_cycle`,
-`video_index.gemini_api.single_video`, `video_index.whisper.local_transcript`,
-`shorts_scheduler.consume_video_index` (scheduler is an artifact CONSUMER, not
-the owner of indexing).
-
-The CLI menu, OpenClaw/WRE, and Hermes invoke the SAME capability via
-`run_action(action_id, ...)` instead of a one-off menu helper.
-
-**Promotion gate**: this Skillz stays `promotion_state: prototype` with
-`evals: []`. Graduation is BLOCKED pending operator live-DOM proof of the Ask
-Studio selectors (#818 Appendix A). Phase 1 does NOT touch the Skillz registry
-or WRE router.
-
-**Phase 2 - `STUDIO_ASK_SKILL_PROMOTE_PHASE2`**: promote the working Ask Studio
-selectors into a registered Skillz and wire the channel/daemon action IDs
-*after* Phase 1 proves stable.
-
-**Phase 3 - `INDEX_BEFORE_SHORTS_SCHEDULE_PHASE3`**: only after Phase 1 is
-stable, revisit scheduler ordering (already `comments -> index -> schedule` in
-`auto_moderator_dae.py`).
-
----
-
-## Skill Purpose
-
-Extract **full verbatim transcripts** from YouTube videos using the built-in "Ask" Gemini feature. This bypasses API quotas by using browser automation.
-
-**Trigger Source**: Video indexing cycle or manual request
-
-**Success Criteria**:
-- Transcript extracted with timestamps
-- Full text captured (not just summary)
-- Video JSON updated with transcript data
-
----
-
-## Architecture
-
-```
-Browser (Selenium/Antigravity)
-    |
-    v
-Navigate to: youtube.com/watch?v={video_id}
-    |
-    v
-Click "Ask" button (aria-label="Ask")
-    |
-    v
-Query: "Give me the full transcript with timestamps"
-    |
-    v
-Parse Gemini response -> Structured segments
-    |
-    v
-Update video JSON in memory/video_index/
+```bash
+python -m modules.ai_intelligence.video_indexer.cli --portfolio --batch-size 10
+python -m modules.ai_intelligence.video_indexer.cli --status
 ```
 
----
+Rerun the portfolio command until each visible catalog has no pending videos.
+Existing valid manifests are skipped; the scanner scrolls beyond the already
+indexed prefix so repeated bounded runs advance rather than loop on one batch.
 
-## Input Context
+Use `--reindex` only when the operator explicitly requests a rebuild. Honor
+`memory/STOP_VIDEO_INDEXER` immediately.
 
-```python
+## Manifest integrity contract
+
+1. The prompt names the requested video ID and requests `source_video_id` back.
+2. A mismatched response ID fails closed; no manifest is written.
+3. The pre-submit answer is snapshotted and ignored, preventing a retained prior
+   Gemini answer from being assigned to the next video.
+4. A normalized response SHA-256 is persisted. Reusing the same response for a
+   different video in the same channel is rejected.
+5. Optional Gemini API enrichment is merged into the owning channel manifest; it
+   must not overwrite Studio provenance or fall through to the `undaodu` default.
+
+## Memory versus weight training
+
+Ask Studio/Gemini output is a semantic index, not a verified word-for-word
+transcript. It is useful for retrieval, topic search, highlights, and prioritizing
+which videos should receive transcription. Manifests must carry:
+
+```json
 {
-    "video_id": str,           # YouTube video ID
-    "channel_id": str,         # Channel for organizing output
-    "output_dir": str,         # Where to save JSON (default: memory/video_index/)
-    "existing_browser": True,  # Use existing logged-in session
+  "transcript_source": "gemini_summary",
+  "metadata": {
+    "retrieval_eligible": true,
+    "training_eligible": false,
+    "training_exclusion_reason": "gemini_summary_not_verbatim"
+  }
 }
 ```
 
----
+Only `youtube_transcript` or `whisper_transcript` segments may feed Red Dog
+weight-training datasets. `DatasetBuilder` enforces this boundary.
 
-## Execution Steps
+## Required live preconditions
 
-### Step 1: Navigate to Video
+- Chrome debugger session on port 9222, authenticated to Move2Japan/UnDaoDu.
+- Edge debugger session on port 9223, authenticated to FoundUps.
+- YouTube Studio Ask available for the owning channel.
 
-**Action**: Connect to browser and navigate to watch page
+If those sessions are absent, report the attach failure. Do not claim the
+portfolio was indexed and do not attempt credential entry.
 
-```python
-from modules.infrastructure.foundups_selenium.src.browser_manager import get_browser_manager
+## Verification
 
-browser = get_browser_manager().get_browser(
-    profile='youtube_move2japan',
-    browser_type='chrome'
-)
+After a cycle, confirm:
 
-video_url = f"https://www.youtube.com/watch?v={video_id}"
-browser.get(video_url)
-# Wait 5 seconds for page load
-```
+- each saved path matches the registry channel key and response video ID;
+- response hashes are not duplicated across different video IDs in a channel;
+- status counts increase only for successful new manifests;
+- no Gemini summary appears in `training_rows.jsonl` or
+  `training_worthy.jsonl`.
 
----
-
-### Step 2: Click Ask Button
-
-**DOM Selector**: `button[aria-label="Ask"]`
-
-**JavaScript Detection**:
-```javascript
-// Find Ask button in #flexible-item-buttons
-const flexItems = document.querySelector('#flexible-item-buttons');
-const viewModels = flexItems.querySelectorAll('yt-button-view-model');
-for (let vm of viewModels) {
-    if (vm.textContent.trim().toLowerCase() === 'ask') {
-        return vm.querySelector('button');
-    }
-}
-// Fallback: aria-label
-return document.querySelector('button[aria-label="Ask"]');
-```
-
----
-
-### Step 3: Query for Full Transcript
-
-**Prompt to Send**:
-```
-Give me the complete word-for-word transcript of this video with timestamps.
-Format each segment as: [MM:SS] Text spoken
-Include everything that was said.
-```
-
-**Wait**: 5-10 seconds for Gemini to process
-
----
-
-### Step 4: Extract Response
-
-**Parse Gemini Output**:
-```python
-def parse_transcript_response(response_text: str) -> List[Dict]:
-    """Parse transcript segments from Gemini response."""
-    segments = []
-    pattern = r'\[(\d+:\d+)\]\s*(.+?)(?=\[\d+:\d+\]|$)'
-    
-    for match in re.finditer(pattern, response_text, re.DOTALL):
-        timestamp, text = match.groups()
-        segments.append({
-            "start_time": timestamp,
-            "text": text.strip(),
-        })
-    
-    return segments
-```
-
----
-
-### Step 5: Update Video JSON
-
-**Merge into existing JSON**:
-```python
-def update_video_json(video_id: str, segments: List[Dict], channel: str):
-    json_path = Path(f"memory/video_index/{channel}/{video_id}.json")
-    
-    if json_path.exists():
-        data = json.loads(json_path.read_text())
-    else:
-        data = {"video_id": video_id}
-    
-    # Update audio section
-    data.setdefault("audio", {})
-    data["audio"]["segments"] = segments
-    data["audio"]["full_transcript"] = " ".join(s["text"] for s in segments)
-    data["audio"]["extraction_method"] = "youtube_ask_gemini"
-    data["audio"]["extracted_at"] = datetime.now().isoformat()
-    
-    json_path.write_text(json.dumps(data, indent=2))
-```
-
----
-
-## Error Handling
-
-### Error: Ask Button Not Found
-- Wait 3 more seconds (page still loading)
-- Try alternate selector
-- Log and skip if still not found
-
-### Error: No Transcript Available
-- Some videos have no captions
-- Log as "no_transcript"
-- Fallback: Try whisper transcription
-
-### Error: Gemini Response Truncated
-- Ask follow-up: "Continue the transcript from where you left off"
-- Merge responses
-
----
-
-## WSP Compliance
-
-- **WSP 96**: Micro Chain-of-Thought (PASS)
-- **WSP 91**: DAE Observability (logging) (PASS)
-- **WSP 72**: Module Independence (PASS)
-- **WSP 84**: Code Reuse (uses existing browser infra) (PASS)
-
----
-
-## Integration
-
-**Called From**:
-- `auto_moderator_dae.py` -> `run_video_indexing_cycle()`
-- Manual: CLI tool
-
-**Output Storage**:
-- `memory/video_index/{channel}/{video_id}.json`
-
----
-
-## Metrics
-
-```python
-{
-    "videos_processed": int,
-    "transcripts_extracted": int,
-    "avg_extraction_time_s": float,
-    "success_rate": float,
-}
-```
-
----
-
-**Maintained By:** 0102 Video Indexer Team
-**Last Updated:** 2026-01-16
-**Status:** Prototype
+This remains `prototype` until both authenticated browser lanes complete a live
+operator proof. The code path is runnable; promotion is a separate evidence gate.

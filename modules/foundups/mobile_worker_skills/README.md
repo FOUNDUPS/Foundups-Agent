@@ -18,6 +18,7 @@
 | [`foundups-task-packet-writer`](foundups-task-packet-writer/) | Task → machine packet |
 | [`foundups-result-interpreter`](foundups-result-interpreter/) | Logs/diffs/tests → summary |
 | [`foundups-handoff-validator`](foundups-handoff-validator/) | Validate pipeline JSON before handoff to 0102 |
+| [`foundups-contact-discovery`](foundups-contact-discovery/) | Public contact discovery/enrichment: official identity anchor → email/site/social search → cross-verification → provenance/confidence handoff to RedDog Contact Memory |
 | [`wsp00-mobile-semantics`](wsp00-mobile-semantics/) | WSP 00 **semantic** subset for on-device boot (no Python gate) |
 
 ## Schemas & examples

@@ -1,5 +1,8 @@
 # WRE Consolidation Plan - Remove Redundant Code
 
+> **Historical plan, not current topology or metric evidence.** Re-verify every
+> count against current main; token reduction percentages below are unmeasured.
+
 ## Executive Summary
 The WRE currently has significant duplication and legacy code referencing non-existent modules. This plan consolidates to a clean, focused implementation.
 

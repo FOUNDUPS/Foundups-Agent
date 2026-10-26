@@ -18,6 +18,7 @@ WSP 50: Pre-Action Verification
 
 import os
 import logging
+import secrets
 import time
 from datetime import datetime
 from typing import Dict, Optional
@@ -214,14 +215,14 @@ app = FastAPI(
 )
 
 
-def get_webhook_token() -> str:
+def get_webhook_token() -> Optional[str]:
     """
     Get webhook token from environment.
 
     Priority:
     1. OpenClaw_Pass from .env (loaded via dotenv)
     2. FOUNDUPS_WEBHOOK_TOKEN env var
-    3. Insecure default (development only)
+    Missing configuration fails closed.
     """
     # Try loading .env if dotenv available
     try:
@@ -233,13 +234,15 @@ def get_webhook_token() -> str:
     except ImportError:
         pass
 
-    # Priority: OpenClaw_Pass > FOUNDUPS_WEBHOOK_TOKEN > insecure default
+    # Priority: OpenClaw_Pass > FOUNDUPS_WEBHOOK_TOKEN.
     token = os.environ.get("OpenClaw_Pass") or os.environ.get("FOUNDUPS_WEBHOOK_TOKEN")
-    if not token:
-        logger.warning("No webhook token configured (OpenClaw_Pass or "
-                       "FOUNDUPS_WEBHOOK_TOKEN) - using insecure default")
-        return "dev-token-change-me"
-    return token
+    if not token or token.strip() == "dev-token-change-me":
+        logger.error(
+            "Webhook authentication is unavailable: configure OpenClaw_Pass "
+            "or FOUNDUPS_WEBHOOK_TOKEN"
+        )
+        return None
+    return token.strip()
 
 
 def verify_token(
@@ -249,18 +252,23 @@ def verify_token(
 ) -> bool:
     """Verify incoming request token (OpenClaw preferred, Moltbot legacy)."""
     expected = get_webhook_token()
+    if expected is None:
+        return False
+
+    def matches(candidate: Optional[str]) -> bool:
+        return bool(candidate) and secrets.compare_digest(candidate, expected)
     
     # Check Authorization: Bearer <token>
     if authorization and authorization.startswith("Bearer "):
-        if authorization[7:] == expected:
+        if matches(authorization[7:]):
             return True
     
     # Check x-openclaw-token header
-    if x_openclaw_token == expected:
+    if matches(x_openclaw_token):
         return True
 
     # Check x-moltbot-token header (legacy)
-    if x_moltbot_token == expected:
+    if matches(x_moltbot_token):
         return True
     
     return False

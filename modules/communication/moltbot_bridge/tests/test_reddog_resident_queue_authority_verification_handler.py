@@ -58,6 +58,16 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_verific
 from modules.communication.moltbot_bridge.src.reddog_wsp15_allocation_receipt import (
     allocate_reddog_wsp15_receipt,
 )
+from modules.communication.moltbot_bridge.src.reddog_progressive_execution_stage_policy import (
+    admit_bounded_execution,
+)
+from modules.communication.moltbot_bridge.src.reddog_architect_fix_promotion_records import (
+    canonical_digest,
+)
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_downstream_test_support import (
+    PermitAwareDownstreamTestSigner,
+    downstream_test_consensus_capability,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -78,10 +88,10 @@ FID = "paccess_001"
 
 def _queue_wsp15_allocation_receipt() -> dict[str, object]:
     return allocate_reddog_wsp15_receipt(
-        requested_operation="create_foundup",
-        prompt_text="RedDog resident queue authority verification worktree authority",
-        changed_paths=("modules/communication/moltbot_bridge/src/reddog_resident_queue_authority_verification_handler.py",),
-        allowed_read_targets=("modules/communication/moltbot_bridge/src/reddog_resident_queue_authority_verification_handler.py",),
+        requested_operation="edit_foundup_module",
+        prompt_text="Fix one bounded FoundUp module defect",
+        changed_paths=(f"modules/foundups/{FID}/src/worker.py",),
+        allowed_read_targets=(f"modules/foundups/{FID}/src/worker.py",),
     ).to_dict()
 
 
@@ -162,6 +172,14 @@ class _NoRevocation:
 
 def _snapshot() -> dict[str, object]:
     allocation = _queue_wsp15_allocation_receipt()
+    stage = admit_bounded_execution(
+        determination_action="FIX",
+        allocation=allocation,
+        selected_slice="REDDOG_TEST_SLICE_PHASE1",
+        requested_operation="edit_foundup_module",
+        changed_paths=tuple(allocation["changed_paths"]),
+        task_prompt_text="Fix one bounded FoundUp module defect",
+    )
     return {
         "schema_version": "reddog_authoritative_work_state.v1",
         "freshness_receipts": [{"receipt_id": "fresh-1", "fresh": True}],
@@ -173,6 +191,9 @@ def _snapshot() -> dict[str, object]:
                 "status": "ACTIVE",
                 "expires_at": EXPIRES,
                 "freshness_receipt_id": "fresh-1",
+                "model_selection_receipt_id": "selection:author",
+                "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+                "model_runtime_binding_verification_receipt_id": "model_runtime_binding_verification:author",
             }
         ],
         "wre_queue_items": [
@@ -186,8 +207,21 @@ def _snapshot() -> dict[str, object]:
                     "claim:claim-1",
                     "freshness:fresh-1",
                     f"wsp15_allocation:{allocation['receipt_id']}",
+                    "model_selection:selection:author",
+                    "model_runtime_binding:reddog_model_runtime_binding:author",
+                    "model_runtime_binding_verification:model_runtime_binding_verification:author",
                 ],
+                "model_selection_receipt_id": "selection:author",
+                "model_selection_digest": "sha256:" + ("b" * 64),
+                "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+                "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+                "model_runtime_binding_verification_receipt_id": "model_runtime_binding_verification:author",
+                "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
                 "wsp15_allocation_receipt": allocation,
+                "progressive_policy_stage_receipt_id": stage.receipt_id,
+                "progressive_policy_stage_digest": canonical_digest(stage.to_dict()),
+                "progressive_policy_stage_receipt": stage.to_dict(),
+                "independent_verifier_required": True,
                 "no_execution_performed": True,
             }
         ],
@@ -204,9 +238,9 @@ def _profile() -> dict[str, object]:
         "repo_full_name": REPO,
         "foundup_id": FID,
         "base_ref": "main",
-        "allowed_paths": [f"modules/foundups/{FID}/**"],
+        "allowed_paths": [f"modules/foundups/{FID}/src/worker.py"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",
         "work_authority_nonce": "workauth-nonce-0001",
@@ -217,6 +251,12 @@ def _profile() -> dict[str, object]:
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + ("b" * 64),
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+        "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+        "model_runtime_binding_verification_receipt_id": "model_runtime_binding_verification:author",
+        "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
     }
 
 
@@ -244,10 +284,21 @@ def _seed_runtime(chain_store: InMemoryResidentQueueChainResultsStore, signer: _
     runtime_handler = build_reddog_resident_queue_authority_runtime_stage_handler(
         chain_results_store=chain_store,
         authority_store=InMemoryAuthorityRuntimeStore(),
-        signer=signer,
+        signer=PermitAwareDownstreamTestSigner(signer, now=NOW),
         principal_resolver=_PrincipalResolver(),
         snapshot_resolver=_SnapshotResolver(),
         now=NOW,
+        work_state_snapshot=_snapshot(),
+        authority_profile=_profile(),
+        work_state_supplier=_snapshot,
+        elevated_consensus_capability_supplier=lambda request: (
+            downstream_test_consensus_capability(
+                request, now=NOW,
+                principal=_PrincipalResolver().resolve(
+                    request.principal_id, request.principal_provider
+                ),
+            )
+        ),
     )
     runtime_result = invoke_reddog_resident_queue_next_stage_dispatch(
         explicit_resident_queue_stage_dispatch_requested=True,

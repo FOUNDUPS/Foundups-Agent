@@ -2,6 +2,137 @@
 
 **WSP Compliance**: WSP 22 (ModLog Updates)
 
+## 2026-10-18 - Bounded AntifaFM station reply drafts
+
+- Added `CommentDrafter.for_station()` and `draft_station_reply()` using the
+  configured local Qwen runtime without human voice memory or legacy prompts.
+- Added strict system/user chat separation, JSON decision validation, caller
+  source bindings, a 2,400-character context cap, and a 280-character draft cap.
+  Eligible drafts answer listener-initiated station/music questions or feedback
+  and disclose 0102 as an AI agent for UnDaoDu. Political persuasion, abuse, and
+  unrelated intents are skipped; the policy requires review for missing facts.
+- Missing models, mock mode, and generation/validation failures return review
+  with no reply. The station path has no mock/template fallback or tools.
+  Results always include `no_publication_performed=True`; legacy
+  `no_execution_performed=True` denotes no external action, not no inference.
+- Preserved ordinary `draft()` and `LocalLLM.generate()` behavior. Guarded real
+  package import found no legacy constructors or external actions; no Digital
+  Twin package initialization change was needed.
+- Validation: 39 focused offline tests passed, including the existing three
+  drafter tests and exact 280/281-character boundary cases. Fixture-generated
+  JSON verifies contract handling, not actual local-model semantic quality.
+  No live model inference or publication was performed. See `tests/TestModLog.md`.
+
+## 2026-09-05 - RedDog surface / 0102 Digital Twin boundary correction
+
+- Corrected the active module contract: RedDog is the fast interaction and
+  attention surface; 0102 is the principal-scoped Digital Twin and deep
+  cognition/orchestration layer behind it. The Principal Memex and all effect
+  authority boundaries remain unchanged. (WSP 22/50/73/97)
+
+## 2026-08-26 - Durable resident first-TURN resolution alignment
+
+- Aligned current Digital Twin truth with the implemented explicit v2 journal
+  link from the original empty-ID request digest to its authenticated resolved
+  conversation ID/revision 0.
+- Recorded the single-generation, two-one-use-FoundUp-authority boundary and
+  later-revision replay check against the immutable E0 receipt chain. Scope
+  schema v4 signs the exact source/resolved request commitment in immutable E0
+  state, and replay atomically consumes its verified authority.
+- Host invocation, operation handlers, immediate conversation CAS, response
+  delivery, and live VSIX/PFMall/phone adapters remain unimplemented.
+
+## 2026-08-26 - Trusted resident new-conversation scope alignment
+
+- Aligned the Digital Twin transport boundary with the communication layer's
+  trusted empty-ID TURN resolution and authenticated AgentDB scope persistence.
+- Recorded exact intent/request/grounding/FoundUp checks, signed-session nonce
+  fencing, E0 exact recovery, and the absence of raw-text persistence.
+- Kept the next boundary explicit: the first request is not yet journal-linked
+  to its resolved conversation or executed, and no VSIX/PFMall/phone host or
+  immediate-CAS operation handler is active.
+
+## 2026-08-26 - RedDog/0102 identity clarification
+
+- Defined RedDog as the operator-facing identity/persona/surface of the
+  principal-scoped 0102 Digital Twin rather than a separate shell that hosts
+  0102.
+- Preserved RedDog services as runtime hosts and Principal Memex as bounded
+  cognition rather than identity or work authority.
+- Documentation-only; no conversation, model, memory, or execution behavior
+  changed.
+
+
+## 2026-08-22 - Resident conversation authenticated-scope binding
+
+- Synchronized the Digital Twin transport documentation with the new resident
+  communication-layer admission boundary for existing conversations.
+- Clarified that the client envelope remains zero-authority while the host
+  consumes a separate opaque session capability and verifies exact AgentDB
+  state without mutation.
+- Kept live VSIX/PFMall transport blocked on trusted new-scope resolution,
+  durable idempotency, operation handlers, and shared acceptance vectors.
+
+## 2026-08-22 - Resident conversation transport contract phase 1
+
+- Added a strict transport-neutral request envelope for RedDog `TURN`,
+  `STATUS`, and `CANCEL` traffic without adding a network endpoint or runtime.
+- Bound canonical request/conversation/turn IDs, CAS revision, client nonce,
+  idempotency, and a maximum five-minute freshness window.
+- Rejected client-supplied identity, FoundUp, credential, model/provider,
+  effect, and work-authority fields; those remain host-derived obligations for
+  the future authenticated resident service.
+- Added content-free receipt projection, exact native-type enforcement,
+  Unicode normalization, adversarial tests, 100% focused branch coverage, and
+  WSP-62 file/function assertions.
+- Corrected RedDog and Digital Twin roadmaps to distinguish the implemented
+  AgentDB/session substrate and envelope from the still-missing service/adapters.
+
+## 2026-08-22 - RedDog continuous conversation plane phase 1
+
+- Added independent interaction-intent, reasoning-depth, and effect-ceiling
+  contracts with default `CHAT / FAST / NONE` behavior.
+- Added strict adapter rehydration and downstream effect-ceiling enforcement;
+  conversation decisions can never grant bounded execution.
+- Hardened the effect gate against forged/mutated decisions, aligned the
+  Python/JavaScript input cap to Unicode scalar values, and pinned ordinary
+  WSP-62 file/function limits in the focused suite.
+- Added shared Python/VSIX acceptance vectors and documented the hybrid
+  PFMall/phone thin-client-to-resident-hub scale boundary.
+- Kept AgentDB, signer, work promotion, OpenClaw, WRE, and Hermes as existing
+  downstream authorities rather than creating parallel infrastructure.
+
+## 2026-08-06 - Authenticated resident Principal Memex admission
+
+- Added a resident-only admission path that derives the structural Principal
+  Memex projection from the exact signed principal conversation record.
+- Bound disclosure to principal identity, conversation revision, exact accepted
+  decision IDs, model-runtime receipt, nonce, TTL, revocation, and durable
+  replay state.
+- Exposed only public accepted operator statements to the backend architect
+  model and preserved zero work, FoundUp, repository, and HoloIndex authority.
+- Kept durable Principal Memex source issuance, retention, learning, and
+  Principal-to-FoundUp projection deferred.
+
+## 2026-08-06 - 012 Principal Memex read-only projection
+
+- Added typed Principal Memex items and a deterministic read-only projection
+  for the 0102 Digital Twin.
+- Added structural rehydration, exact digest and native JSON type checks,
+  principal isolation, provenance/sensitivity/supersession policy, and
+  secret-material rejection.
+- Hardened all serialized text, bounded container admission before traversal,
+  enforced multi-generation supersession relationships, and guarded typed
+  projection/result construction with process-local factories and exact native
+  boolean checks.
+- Kept the result non-persistent and ineligible for model context, FoundUp
+  projection, HoloIndex writes, or work authority.
+- Kept the structural API outside the package export and sealed RedDog runtime
+  closure; authenticated resident admission owns that later integration.
+- Clarified the RedDog/0102 boundary: RedDog is the product identity, runtime
+  services host it, and Principal Memex informs the Digital Twin without
+  becoming the agent.
+
 ## V0.5.0 - WSP_00 Boot Integration (2026-03-23)
 
 ### Added

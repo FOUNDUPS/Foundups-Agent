@@ -2210,110 +2210,14 @@ class AIIntelligenceOverseer:
         return report
 
     def _execute_m2m_holo_retrieval_benchmark(self, payload: Dict[str, Any]) -> Dict[str, Any]:
-        queries = payload.get(
-            "queries",
-            [
-                "m2m compression sentinel",
-                "compile_to_staged promote_staged rollback",
-                "WSP 99 M2M prompting protocol",
-            ],
+        from .m2m_holo_retrieval_benchmark import (
+            execute_m2m_holo_retrieval_benchmark,
         )
-        if not queries or not isinstance(queries, list):
-            return {"success": False, "error": "queries must be a non-empty list"}
 
-        limit = int(payload.get("limit", 8))
-        required_paths = payload.get("required_paths", {})
-        fidelity_threshold = float(payload.get("fidelity_threshold", 0.8))
-        reindex = bool(payload.get("reindex", False))
-
-        if reindex:
-            subprocess.run(
-                ["python", "holo_index.py", "--index-wsp"],
-                cwd=str(self.repo_root),
-                capture_output=True,
-                text=True,
-                timeout=600,
-            )
-
-        latencies: List[float] = []
-        key_hits = 0
-        key_checks = 0
-        per_query: List[Dict[str, Any]] = []
-
-        for query in queries:
-            start = time.perf_counter()
-            proc = subprocess.run(
-                ["python", "holo_index.py", "--search", str(query), "--limit", str(limit), "--fast-search"],
-                cwd=str(self.repo_root),
-                capture_output=True,
-                text=True,
-                timeout=300,
-            )
-            elapsed_ms = (time.perf_counter() - start) * 1000.0
-            latencies.append(elapsed_ms)
-            output_text = (proc.stdout or "") + "\n" + (proc.stderr or "")
-            hits_count = output_text.count("[CODE]") + output_text.count("[WSP]")
-
-            required = required_paths.get(query, [])
-            matched_required = 0
-            for required_path in required:
-                key_checks += 1
-                if str(required_path) in output_text:
-                    key_hits += 1
-                    matched_required += 1
-
-            per_query.append(
-                {
-                    "query": query,
-                    "latency_ms": round(elapsed_ms, 3),
-                    "hits_count": hits_count,
-                    "required_matches": matched_required,
-                    "required_total": len(required),
-                }
-            )
-
-        mean_latency = (sum(latencies) / len(latencies)) if latencies else 0.0
-        p95_latency = sorted(latencies)[int(max(0, len(latencies) * 0.95) - 1)] if latencies else 0.0
-        key_path_hit_rate = (key_hits / key_checks) if key_checks > 0 else 1.0
-        fidelity_score = key_path_hit_rate
-        success = fidelity_score >= fidelity_threshold
-
-        report = {
-            "success": success,
-            "query_count": len(queries),
-            "mean_latency_ms": round(mean_latency, 3),
-            "p95_latency_ms": round(p95_latency, 3),
-            "key_path_hit_rate": round(key_path_hit_rate, 3),
-            "fidelity_score": round(fidelity_score, 3),
-            "fidelity_threshold": fidelity_threshold,
-            "per_query": per_query,
-            "regressions": [] if success else ["fidelity_below_threshold"],
-        }
-
-        latest_path = (
-            self.repo_root
-            / "modules"
-            / "ai_intelligence"
-            / "ai_overseer"
-            / "memory"
-            / "m2m_holo_retrieval_benchmark_latest.json"
+        return execute_m2m_holo_retrieval_benchmark(
+            repo_root=self.repo_root,
+            payload=payload,
         )
-        try:
-            latest_path.parent.mkdir(parents=True, exist_ok=True)
-            latest_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
-        except OSError:
-            pass
-
-        self._append_jsonl_record(
-            self.repo_root
-            / "modules"
-            / "ai_intelligence"
-            / "ai_overseer"
-            / "memory"
-            / "m2m_holo_retrieval_benchmark.jsonl",
-            {"ts": time.time(), **report},
-        )
-        return report
 
     # ==================== UBIQUITOUS DAEMON MONITORING ====================
 

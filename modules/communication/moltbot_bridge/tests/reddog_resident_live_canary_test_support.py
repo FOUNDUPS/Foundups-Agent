@@ -69,13 +69,28 @@ from modules.communication.moltbot_bridge.src.reddog_wre_worktree_create import 
 from modules.communication.moltbot_bridge.tests.reddog_live_canary_artifact_test_support import (
     write_live_canary_artifacts,
 )
-from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_serial_loop import _snapshot
+from modules.communication.moltbot_bridge.tests.reddog_resident_queue_test_helpers import (
+    governed_worker_dispatch_snapshot,
+    with_queue_wsp15_allocation,
+)
+from modules.communication.moltbot_bridge.tests.test_reddog_resident_queue_serial_loop import (
+    _snapshot as _serial_loop_snapshot,
+)
 
 
 SLICE_NAME = "REDDOG_TEST_SLICE_PHASE1"
 WORK_ORDER_ID = "work-order-1"
 NOW = "2026-07-14T00:00:00+00:00"
 QUEUE_ID = "queue-1"
+
+
+def _snapshot() -> dict[str, object]:
+    """Project the legacy serial-loop fixture through current queue policy."""
+
+    snapshot = _serial_loop_snapshot()
+    queue = snapshot["wre_queue_items"][0]
+    snapshot["wre_queue_items"][0] = with_queue_wsp15_allocation(queue)
+    return governed_worker_dispatch_snapshot(snapshot)
 
 
 def _test_private_key():
@@ -122,7 +137,7 @@ _AUTHORITY_PROFILE_SOURCE = {
     "schema_version": "reddog_authority_profile_source.v1",
     "principal_id": "github:mjtrout",
     "principal_provider": "github",
-    "principal_public_key": "ed25519-pub-v1:" + "B" * 43,
+    "principal_public_key": encode_ed25519_public_key(b"B" * 32),
     "reddog_id": "reddog:architect",
     "reddog_public_key": _PUBLIC_KEY,
     "repo_full_name": "FOUNDUPS/Foundups-Agent",
@@ -258,13 +273,16 @@ def _roots(
         if filename == "authority_profile.json":
             payload = dict(_AUTHORITY_PROFILE)
         (runtime / filename).write_text(json.dumps(payload), encoding="utf-8")
-    anchor_path = (
-        runtime.parent
-        / f"{runtime.name}-signer-state"
-        / "signer_control_loop_anchor.json"
-    )
+    signer_runtime = runtime.parent / f"{runtime.name}-signer-state"
+    anchor_path = signer_runtime / "signer_control_loop_anchor.json"
     (runtime / "signer_service_config.json").write_text(
-        json.dumps({"control_loop_anchor_path": str(anchor_path)}),
+        json.dumps(
+            {
+                "control_loop_anchor_path": str(anchor_path),
+                "runtime_root": str(runtime),
+                "signer_runtime_root": str(signer_runtime),
+            }
+        ),
         encoding="utf-8",
     )
     (runtime / "authority_profile_source.json").write_text(
@@ -350,7 +368,9 @@ def _held_out_stage(head: str) -> dict[str, object]:
                 "work_order_id": WORK_ORDER_ID,
                 "slice_name": SLICE_NAME,
                 "verifier_receipt_id": "wre_slice_verify_canary",
+                "outcome_status": "accepted",
                 "pattern_memory_eligible": True,
+                "pattern_memory_write_performed": False,
             },
         },
     }
@@ -389,6 +409,12 @@ def _held_out_stage(head: str) -> dict[str, object]:
             "holoindex_freshness_receipt_digest": "sha256:" + "4" * 64,
         },
     }
+    ratchet["ratchet_result"]["receipt"]["verification_digest"] = (
+        "sha256:" + hashlib.sha256(json.dumps(
+            request["verification_result"], sort_keys=True, separators=(",", ":"),
+            ensure_ascii=True,
+        ).encode("utf-8")).hexdigest()
+    )
     return invoke_reddog_wre_queue_authorized_held_out_regression_gate(
         explicit_queue_authorized_held_out_regression_gate_requested=True,
         queue_verified_outcome_ratchet_result=ratchet,
@@ -442,13 +468,17 @@ def _control_receipt(repo: Path, **changes: object) -> dict[str, object]:
 
 
 def _write_control_receipt_and_head(
-    runtime: Path, control: dict[str, object]
+    repo: Path,
+    runtime: Path,
+    control: dict[str, object],
 ) -> None:
     (runtime / "resident_queue_control_loop_receipts.jsonl").write_text(
         json.dumps(control) + "\n", encoding="utf-8"
     )
     store, state, _ = load_control_receipt_head(
-        runtime / "authority_runtime_state.json"
+        runtime / "authority_runtime_state.json",
+        runtime_root=runtime,
+        repo_root=repo,
     )
     head = build_control_receipt_head(
         receipt=control,
@@ -464,7 +494,11 @@ def _write_control_receipt_and_head(
     config = json.loads(
         (runtime / "signer_service_config.json").read_text(encoding="utf-8")
     )
-    anchor = AtomicSignerControlLoopAnchorStore(config["control_loop_anchor_path"])
+    anchor = AtomicSignerControlLoopAnchorStore(
+        config["control_loop_anchor_path"],
+        runtime_root=config["signer_runtime_root"],
+        repo_root=repo,
+    )
     unsigned = {
         key: value
         for key, value in control.items()
@@ -554,7 +588,7 @@ def _runner(
                     chain["receipts"][-1]["store_revision"] = revision
         (runtime / "resident_queue_chain_results.json").write_text(json.dumps(chain), encoding="utf-8")
         control = _control_receipt(repo, **(receipt_changes or {}))
-        _write_control_receipt_and_head(runtime, control)
+        _write_control_receipt_and_head(repo, runtime, control)
         return {"accepted": True, "status": "PASS", "receipt_id": result_receipt_id or control["receipt_id"]}
 
     return run

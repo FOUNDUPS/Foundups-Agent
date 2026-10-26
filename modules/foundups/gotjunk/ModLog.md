@@ -1,3 +1,96 @@
+## 2026-10-22 — CA trust build protection
+
+WSP12/22/97. Container build dependency downloads now use the reviewed
+incident-fixed runtime/trust bootstrap; build contexts and entrypoints remain.
+See `docs/audits/security/PYTHON_CA_TRUST_20261022.md` for scope and checks.
+No production image rebuild or rollout is claimed.
+
+## 2026-10-19 — Patched multipart parser
+
+WSP 12/22/50/71/97; base `6ad7cf09c2b6df3fd439e72a7cd063b55a427f42`.
+WSP15 allocation: C2/I5/D5/Impact4; bounded dependency repair with focused API
+tests, security-gate regressions, independent review and PR CI before merge.
+Reconciles the unique dependency fix from stale PR #828 with current main.
+Updated the separate Python API's `python-multipart` pin from 0.0.29 to 0.0.31
+for CVE-2026-53539. The 1 MiB admission limit remains defense in depth, not a
+substitute for the parser patch. Preserved Firebase authentication, body/rate
+limits, and the Play FoundUps Mall migration ownership direction.
+
+Extended the existing offline backend suite with bounded form-separator and
+multipart-upload compatibility checks; inventoried the existing tests before
+adding coverage. Holo lexical retrieval found the existing security owner and
+suite; semantic freshness stayed UNKNOWN. WSP00's documented tracker fallback
+passed with the detector unavailable (torch missing). This is local repository
+maintenance, not WRE runtime activation or deployed-backend verification.
+
+Added an isolated CI job that installs the actual backend requirements and runs
+its parser/admission suite on Python 3.12. Focused local verification: 42 passed
+(25 GotJunk tests and 17 security-gate regressions), with one upstream AnyIO
+deprecation warning. Production deployment and credential status remain unverified.
+Negative control: the new parser regression fails with 0.0.29 (semicolon truncates
+the field); after restoring the full backend requirements at 0.0.31 it passes.
+Independent verification repeated all 42 checks successfully in a fresh isolated
+environment with both imported code and package metadata verified at 0.0.31.
+This supersedes the preliminary shared environment, which the reviewer found
+had inconsistent package metadata and source after the negative-control swap.
+
+Release-boundary follow-up: Cloud Build uses only `frontend/Dockerfile` with the
+frontend build context. Removed the separate backend from this frontend/rules
+workflow's production push filter, retaining PR emulator checks and backend CI.
+Extended the existing deployment security regression to enforce that boundary.
+No backend deployment is fabricated and no unrelated Firebase/frontend rollout
+is required to merge this parser repair.
+
+## 2026-10-12 — Metadata-only Mall migration dry-run slice
+
+**WSP:** 00, 22, 50, 84, 97, 98.
+**Dependency:** draft PR #2117 public read projection and PR #2118
+privileged review reader. No production execution.
+
+- Combined CI first ran 24 tests (22 passed, 2 failed): the provider's
+  item-ID regex was over-escaped, silently rejecting valid approvals.
+  Corrected in the owning Mall provider and added a same-head CI retest.
+  This was source-only; no publication or production access was enabled.
+- Added pure offline `src/migration_inventory.py` that requires explicit
+  `--dry-run`, reads bounded metadata-only JSON from stdin, and reports
+  deterministic idempotency-set digest, duplicate/conflicting items,
+  redacted counts and blocked reasons. Uses no Firebase APIs, browser DB,
+  network or cloud state and makes **zero writes**.
+- Added `test_migration_inventory.py` with deterministic replay,
+  conflict-blocking, tenant validation, private-field exclusion and zero-write
+  acceptance. Registered suite in canonical WRE test registry and CI.
+- Added `MIGRATION_INVENTORY_README.md` documenting authoritative source
+  audit, offline origin constraints, rollout canary, independent proof and
+  rollback preconditions. Does not authorize a data move or cutover.
+
+## Play FoundUps migration direction — 2026-10-12
+
+Recorded 012's decision to converge legacy GotJunk with the Mall architecture,
+alongside Shop/GetK, and make Mall the internal search surface. Added a
+source-bound implementation handoff, ownership/storage gaps, migration and
+security acceptance gates. README/roadmap now distinguish direction from
+implementation. Firebase Storage enablement is a provider decision, not an
+automatic prerequisite for Mall routing. Documentation-only; no production
+settings, runtime, user data or security gates changed. WSP 22/50/84/97/98.
+Validation: source references and narrow diff reviewed; no runtime tests needed.
+
+## Security authorization boundaries — 2026-10-10
+
+WSP 50/77/97: inspected exact-source rules and clients using lexical retrieval;
+semantic HoloIndex freshness is not claimed in this detached review runtime.
+- Bound Storage writes to Firebase UID; retained read access to existing assets.
+- Canonicalized Firebase rules; made public discussion history append-only with
+  author binding and creator-only lifecycle changes, including concurrent sync.
+- Restricted votes/reservations to caller identity and server-time bounds.
+- Added Firebase bearer verification, bounded write admission/body parsing and
+  explicit CORS for the separate Liberty API; configuration absence fails closed.
+- Removed committed Cesium demo token; explicit public browser config required.
+- Validation: 9/9 real Firestore/Storage emulator scenarios passed, including
+  production TypeScript concurrent sync; 7/7 offline API admission tests passed.
+  Four changed TS/TSX sources also passed syntax transpilation; no full UI build
+  or deployed-environment verification claimed.
+- No production deployment, credential rotation or edge/global quota proof claimed.
+
 ## Iframe Embed Unblock - Shell Compatibility Fix (2026-04-12)
 
 **Worker**: BV
@@ -1666,3 +1759,13 @@ const getButtonStyle = (isActive: boolean) => {
 **Next Steps**: See ROADMAP.md for Prototype phase features
 
 
+
+## Authorization release gate — 2026-10-10
+
+- Added credential-free Firestore/Storage emulator checks for PR/main/manual runs.
+- Main-only serialized deployment uses existing GCP ADC and verified Firebase CLI
+  14.27.0 to publish rules to the source-confirmed project before Cloud Build.
+- Cloud Build uploads only a tracked-source archive, excluding runner ADC files.
+- IAM or test failures block rollout; indexes and project configuration are not
+  deployed. Rule tightening is not automatically rolled back if frontend build fails.
+- Workflow/source verification only; no Firebase deployment is claimed here.

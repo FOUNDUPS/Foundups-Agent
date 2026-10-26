@@ -1,8 +1,11 @@
 import pytest
 
+from modules.foundups.agent_market.src.authorization import CallerAuthorization
 from modules.foundups.agent_market.src.exceptions import InvalidStateTransitionError
 from modules.foundups.agent_market.src.in_memory import InMemoryAgentMarket
 from modules.foundups.agent_market.src.models import Foundup, Proof, Task, Verification
+
+VERIFIER_AUTHORIZATION = CallerAuthorization("verifier_1", frozenset({("f_1", "verifier")}))
 
 
 def _seed_market() -> InMemoryAgentMarket:
@@ -63,6 +66,7 @@ def test_verified_task_publish_is_idempotent():
             approved=True,
             reason="meets criteria",
         ),
+        authorization=VERIFIER_AUTHORIZATION,
     )
 
     first = market.publish_verified_milestone("t_1", "distribution_1", channel="moltbook")

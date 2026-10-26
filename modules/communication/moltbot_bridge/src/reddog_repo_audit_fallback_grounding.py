@@ -21,7 +21,7 @@ from holo_index.cli.repo_audit_discovery import (
     detect_repo_audit_intent,
     repo_audit_category,
     repo_audit_path_supports_entity,
-    secure_read_repo_file,
+    secure_read_repo_head_file,
 )
 from holo_index.freshness_receipt import read_git_head_sha
 
@@ -199,6 +199,8 @@ def _build_receipt(
 def reread_bound_repo_audit_evidence(
     repo_root: Path,
     fallback: Mapping[str, Any],
+    *,
+    require_object_binding: bool = False,
 ) -> tuple[tuple[Mapping[str, Any], ...], tuple[str, ...]]:
     """Confined re-read requiring exact equality with every selected record."""
     audit = fallback.get("repo_audit_grounding")
@@ -210,25 +212,32 @@ def reread_bound_repo_audit_evidence(
     remaining = TOTAL_READ_BUDGET_BYTES
     for expected in selected:
         path = str(expected.get("path") or "")
-        read = secure_read_repo_file(
+        read = secure_read_repo_head_file(
             repo_root,
             path,
             byte_cap=PER_FILE_READ_BYTES,
             remaining_budget=remaining,
         )
-        if not read.get("ok") or not _read_matches_selected(read, expected):
+        if not read.get("ok") or not _read_matches_selected(
+            read, expected, require_object_binding=require_object_binding
+        ):
             return (), ("repo_audit_selected_evidence_changed",)
         remaining -= int(read["bytes"])
         reads.append(read)
     return tuple(reads), ()
 
 
-def _read_matches_selected(read: Mapping[str, Any], expected: Mapping[str, Any]) -> bool:
+def _read_matches_selected(
+    read: Mapping[str, Any], expected: Mapping[str, Any], *, require_object_binding: bool
+) -> bool:
+    object_fields = ("repo_head_sha", "git_mode", "blob_oid")
     return all((
         str(read.get("path") or "") == str(expected.get("path") or ""),
         str(read.get("digest") or "") == str(expected.get("digest") or ""),
         int(read.get("bytes") or -1) == int(expected.get("bytes") or -2),
         bool(read.get("truncated")) is bool(expected.get("truncated")),
+        all(field in expected for field in object_fields) if require_object_binding else True,
+        all(field not in expected or read.get(field) == expected.get(field) for field in object_fields),
         str(expected.get("category") or "") == repo_audit_category(str(read.get("path") or "")),
     ))
 

@@ -84,13 +84,20 @@ def decode_ed25519_signature(value: str) -> Optional[bytes]:
 
 
 def _decode_with_size(value: str, expected_size: int) -> Optional[bytes]:
-    if not value or not _is_ascii(value):
+    if not value or not _is_ascii(value) or "=" in value:
         return None
     try:
-        decoded = base64.urlsafe_b64decode(value + "=" * (-len(value) % 4))
+        decoded = base64.b64decode(
+            value + "=" * (-len(value) % 4),
+            altchars=b"-_",
+            validate=True,
+        )
     except (binascii.Error, ValueError):
         return None
-    if len(decoded) != expected_size:
+    if (
+        len(decoded) != expected_size
+        or _b64url_no_padding(decoded) != value
+    ):
         return None
     return decoded
 

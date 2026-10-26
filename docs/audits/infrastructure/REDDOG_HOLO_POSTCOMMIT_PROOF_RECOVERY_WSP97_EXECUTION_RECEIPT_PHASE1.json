@@ -1,0 +1,109 @@
+{
+  "schema_version": "wsp97_execution_receipt.v1.1",
+  "repository_context": {
+    "base_commit": "a48e9b61e4133810e3075727b3affd6f8fb46f21"
+  },
+  "execution_id": "REDDOG_HOLO_POSTCOMMIT_PROOF_RECOVERY_PHASE1",
+  "execution_plane": "local_tools_and_wsp00_subagents",
+  "outcome": "completed",
+  "action_evidence": {
+    "retrieve_wsps": [
+      "WSP_framework/src/WSP_00_Zen_State_Attainment_Protocol.md",
+      "WSP_framework/src/WSP_5_Test_Coverage_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_15_Module_Prioritization_Scoring_System.md",
+      "WSP_framework/src/WSP_22_ModLog_Structure.md",
+      "WSP_framework/src/WSP_34_Git_Operations_Protocol.md",
+      "WSP_framework/src/WSP_50_Pre_Action_Verification_Protocol.md",
+      "WSP_framework/src/WSP_62_Large_File_Refactoring_Enforcement_Protocol.md",
+      "WSP_framework/src/WSP_83_Documentation_Tree_Attachment_Protocol.md",
+      "WSP_framework/src/WSP_84_Code_Memory_Verification_Protocol.md",
+      "WSP_framework/src/WSP_87_Code_Navigation_Protocol.md",
+      "WSP_framework/src/WSP_97_System_Execution_Prompting_Protocol.md"
+    ],
+    "retrieve_evidence": [
+      "The real broker-managed OpenClaw task was inspected rather than inferred: candidate admission and route revision 5 commit succeeded, then the first normal stable-route query proof failed ACTIVATION_QUERY_PROOF_INVALID.",
+      "The committed activation receipt remains COMMITTED_UNVERIFIED and AgentDB remains failed; neither historical record was relabeled.",
+      "Governed Holo queries after the task returned CURRENT at exact base a48e9b61, with no index gap, no reindex, and the same immutable generation and replica binding."
+    ],
+    "research": [
+      "HoloIndex retrieval found the activation validator, owner lifecycle, focused tests, and assumption audits at CURRENT exact-base authority.",
+      "An initial semantic-evidence-authority hypothesis was implemented only as a local experiment, falsified by an exact activation-shaped canary, and completely reverted before the candidate change.",
+      "The proven defect was absence of a bounded whole-query recovery after route commit; the same committed route passed later without maintenance or mutation."
+    ],
+    "micro_pass": [
+      "RED reproduced candidate PASS, first stable-route failure, and second stable-route success remaining COMMITTED_UNVERIFIED before the fix.",
+      "GREEN passed 13 activation tests with 1 expected host-capability skip and 90 percent activation-controller coverage.",
+      "The adjacent owner, bootstrap, candidate-acceptance, post-merge, authority, and coordinator closure passed 205 tests with 1 expected skip."
+    ],
+    "macro_pass": [
+      "The complete foundups_mcp_bridge suite passed 1136 tests with 8 expected host-capability skips in 550.92 seconds.",
+      "RedDog fast passed 14 members, conversation passed 32 tests, contract authentication passed 3 members, and the deterministic package contract passed.",
+      "The authenticated RedDog four-group release supervisor passed in 167.248 seconds without timeout.",
+      "The canonical test registry is current at 1588 tests and 268 quarantined programs.",
+      "The authenticated backend closure is current at 1350 files and digest 9f1867c334c955c7d4d87fe307998fb3a38057c58da76165b8aa69c13566685d.",
+      "The 18-shard 6929-line 490-assertion contract aggregate is sha256:e08abe4e0fb984d035f70e335e68d1206dfda31b98c91814e75172e8513509ef.",
+      "The deterministic package surface is 67 files and 945324 bytes at content digest 51fde503c1d81f3f63e3cb07d174c68649de8359bfebc392337fb2db6e65ef02."
+    ],
+    "hard_think": [
+      "WSP_15 scored the false-negative completion defect 17/P0 because Holo integrity was preserved but RedDog could not report successful automatic maintenance.",
+      "The recovery is fixed at two total postcommit proof attempts and catches only CandidateAcceptanceError; candidate admission remains one-shot and unexpected failures propagate.",
+      "Every recovered proof still requires exact authority, generation, receipt, immutable replica, semantic evidence, no-mutation validation, and full replica revalidation before PASS.",
+      "Production remains within WSP_62 at 528 lines and a 39-line maximum function."
+    ],
+    "dialectic_sweep": [
+      "Independent WSP_00/WSP_97 review returned GO with no P0 or P1 findings and verified retry bounds, typed failure scope, precommit one-shot behavior, and fail-closed terminal state.",
+      "Validation first rejected stale contract shard hashes after intentional version fixture edits; exact five-shard and aggregate identities were rebound without bypassing authentication.",
+      "Historical failed-task evidence, feature-branch validation, exact-merged-main replay, and final commit-bound VSIX proof remain separate facts."
+    ],
+    "first_principles": [
+      "Fail-closed integrity and operational availability are separate obligations: a committed immutable route must not be reported successful without proof, but one transient read-only proof must not permanently strand a valid commit.",
+      "Bounded proof replay is lower authority than maintenance replay because it cannot create, modify, publish, or delete Holo state.",
+      "The post-merge exact-main OpenClaw run and immutable verification remain mandatory before building or publishing the 0.4.118 VSIX."
+    ],
+    "execute": [
+      "modules/infrastructure/foundups_mcp_bridge/src/reddog_holoindex_query_replica_activation.py",
+      "modules/infrastructure/foundups_mcp_bridge/tests/test_reddog_holoindex_query_replica_activation.py",
+      "modules/infrastructure/foundups_mcp_bridge/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/INTERFACE.md",
+      "modules/infrastructure/foundups_mcp_bridge/ROADMAP.md",
+      "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/README.md",
+      "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+      "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md",
+      "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md",
+      "scripts/reddog_backend_manifest.json",
+      "extensions/reddog/package.json",
+      "extensions/reddog/extension.js",
+      "extensions/reddog/backend_compatibility_constants.js",
+      "extensions/reddog/README.md",
+      "extensions/reddog/ROADMAP.md",
+      "extensions/reddog/ModLog.md",
+      "extensions/reddog/tests/README.md",
+      "extensions/reddog/tests/TestModLog.md",
+      "extensions/reddog/tests/contract_shards/manifest.json"
+    ]
+  },
+  "wsps_applied": [
+    "WSP_00",
+    "WSP_5",
+    "WSP_15",
+    "WSP_22",
+    "WSP_34",
+    "WSP_50",
+    "WSP_62",
+    "WSP_83",
+    "WSP_84",
+    "WSP_87",
+    "WSP_97"
+  ],
+  "compliance_evidence": [
+    "docs/audits/infrastructure/REDDOG_HOLO_POSTCOMMIT_PROOF_RECOVERY_WSP97_EXECUTION_RECEIPT_PHASE1.json",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_POSTMERGE_ACTIVATION_ORDER_ASSUMPTION_AUDIT_20260827.md",
+    "modules/infrastructure/foundups_mcp_bridge/docs/clarity/REDDOG_HOLO_QUERY_REPLICA_ACTIVATION_ASSUMPTION_AUDIT_20260823.md",
+    "ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/ModLog.md",
+    "modules/infrastructure/foundups_mcp_bridge/tests/TestModLog.md",
+    "extensions/reddog/ModLog.md",
+    "extensions/reddog/tests/TestModLog.md"
+  ]
+}

@@ -296,6 +296,9 @@ def run_model_combination_benchmark(
                 metrics=_aggregate_metrics(tuple(sample.metrics for sample in candidate_samples)),
             )
         )
+    canonical_benchmark_receipts = tuple(
+        sorted(benchmark_receipts, key=lambda receipt: receipt.receipt_id)
+    )
     body = _benchmark_run_digest_body(
         task_family=task_family,
         task_set_digest=task_set_digest,
@@ -303,7 +306,7 @@ def run_model_combination_benchmark(
         verifier_digest=verifier_digest_value,
         candidates=normalized_candidates,
         samples=tuple(samples),
-        benchmark_evidence_receipts=tuple(benchmark_receipts),
+        benchmark_evidence_receipts=canonical_benchmark_receipts,
     )
     return ModelCombinationBenchmarkRunReceipt(
         receipt_id=_digest_prefixed("model_combination_benchmark_run", body),
@@ -313,7 +316,7 @@ def run_model_combination_benchmark(
         verifier_digest=verifier_digest_value,
         candidates=normalized_candidates,
         samples=tuple(samples),
-        benchmark_evidence_receipts=tuple(benchmark_receipts),
+        benchmark_evidence_receipts=canonical_benchmark_receipts,
     )
 
 

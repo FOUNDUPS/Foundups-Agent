@@ -57,6 +57,7 @@ class TestSucceededJobReceipt(unittest.TestCase):
         job.status_reason_human = "Job completed successfully"
         job.compute_used = 150
         job.evidence_refs = ["logs/run_001.txt", "outputs/result.json"]
+        job.policy_flags.dry_run_mode = False
 
         result = create_receipt_from_job(job)
 
@@ -406,6 +407,7 @@ class TestReceiptSerialization(unittest.TestCase):
         job = create_job(requested_action="x", tenant_id="t", foundup_id="f")
         job.status = JobStatus.SUCCEEDED
         job.compute_used = 100
+        job.policy_flags.dry_run_mode = False
 
         result = create_receipt_from_job(job)
         d = result.receipt.to_dict()

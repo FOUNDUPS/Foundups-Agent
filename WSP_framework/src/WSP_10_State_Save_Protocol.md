@@ -1,10 +1,10 @@
-# WSP 10: Repository State Save and Recovery Protocol
+# WSP 10: Repository State Save, Recovery, and Work Closure Protocol
 - **Status:** Active
-- **Version:** 0.2.0
-- **Purpose:** Preserve a verified, recoverable Git state before high-risk work while protecting unrelated worker lanes and user-owned changes.
+- **Version:** 0.3.0
+- **Purpose:** Preserve a verified, recoverable Git state before high-risk work, close agent-owned work completely, and protect unrelated worker lanes and user-owned changes.
 - **Trigger:** Before cross-module refactors, consolidation, dependency or governance changes, destructive Git operations, or any slice whose failure could affect shared repository state.
 - **Input:** Verified base commit, owned file scope, operation type, WSP 15 priority/risk assessment, and validation plan.
-- **Output:** Isolated branch/worktree, reviewed checkpoint commit, validation evidence, and a focused pull request or explicitly local recovery point.
+- **Output:** Isolated branch/worktree, reviewed checkpoint commit, validation evidence, a focused pull request or explicitly local recovery point, and a terminal closure receipt for the owned lane.
 - **Responsible Agent(s):** The acting 0102 worker; verifier/reviewer for shared changes.
 
 ## 1. Truth Boundary
@@ -94,7 +94,27 @@ When publication is authorized:
 
 The pull request is the canonical shared register of the change. A local commit without a pushed branch is only a local recovery point.
 
-## 6. Recovery Procedure
+## 6. Completion and Closure Gate
+
+Agent-owned work MUST NOT be handed back as an ordinary success while its requested outcome, pull request, deployment, or temporary lane remains unfinished. Every owned slice must reach exactly one truthful terminal state:
+
+1. **Complete:** proportionate validation passed; the change was committed and pushed; its pull request was merged when merge authority exists and required gates passed; any requested or workflow-required deployment reached a terminal success and was verified at the appropriate boundary; and temporary agent-owned worktrees, build staging, and branches were removed when no longer needed.
+2. **Blocked:** a permission, required review, failed gate, external outage, or unresolved safety issue prevents completion. Preserve a recoverable commit or cleanly remove only the agent-owned partial work, record the exact blocker and next authorized action, and leave no unexplained dirty state.
+
+An open pull request is not completion when the requested outcome is a live repair and the acting worker has authority to merge and deploy after gates pass. A pending CI job or deployment is not terminal; remain on the task until it succeeds, fails, or becomes an explicit external blocker.
+
+Before reporting either state, the worker MUST:
+
+1. inspect `git status --short --branch` in every worktree it created;
+2. inspect `git worktree list` and identify which lanes it owns;
+3. remove only clean, merged, disposable worktrees and temporary build directories it created;
+4. delete an owned topic branch only when its recovery value is exhausted and deletion is authorized;
+5. preserve every unowned or ambiguous dirty lane without reset, checkout, cleanup, or deletion;
+6. report merge, deployment, live verification, and cleanup as separate evidence rather than collapsing them into one claim.
+
+If cleanup cannot be completed safely, the slice is **blocked**, not complete. The blocker report must name the retained path or branch, its ownership, current status, and the exact reason it remains.
+
+## 7. Recovery Procedure
 
 Recovery MUST preserve evidence and unowned work.
 
@@ -111,7 +131,7 @@ git worktree add -b recovery/<slice> <new-recovery-path> <checkpoint-commit>
 
 After recovery, rerun the original validation plan and record the result in the relevant ModLog or pull request.
 
-## 7. WSP Integration
+## 8. WSP Integration
 
 - **WSP 2:** clean-state and repository-state discipline.
 - **WSP 15:** priority and risk scoring before execution.
@@ -123,7 +143,7 @@ After recovery, rerun the original validation plan and record the result in the 
 - **WSP 81:** governed framework/knowledge backup synchronization.
 - **WSP 97:** evidence-first execution and explicit current/future capability boundaries.
 
-## 8. Compliance Receipt
+## 9. Compliance Receipt
 
 For a high-risk slice, retain at least:
 
@@ -132,6 +152,8 @@ For a high-risk slice, retain at least:
 - explicit owned-file list;
 - validation commands and outcomes;
 - pull request and merge reference when shared;
+- deployment and live-verification reference when publication is part of the requested outcome;
+- terminal state (`complete` or `blocked`) and post-task owned-worktree status;
 - recovery or revert reference if invoked.
 
 Missing evidence means the state save is not verified.

@@ -6,11 +6,59 @@
 
 ## Vision
 
-Train 012's Digital Twin (0102) to autonomously engage across social platforms with 012's authentic voice, using 20 years of 012 video corpus to drive comment drafting, decisioning, and scheduling. Current POC focus: LinkedIn comment processing and scheduling with 012 studio comment style.
+Host 0102 as 012's Digital Twin across FoundUps and bounded applications.
+Social engagement remains one application. Principal cognition is supplied by
+a separate Principal Memex rather than being conflated with voice memory,
+conversation state, AgentDB, or any FoundUp Memex.
+
+## Principal Memex lane
+
+- Complete: structural read-only item and projection contract.
+- Complete: canonical digest, principal isolation, provenance-shape,
+  sensitivity, supersession, and no-authority invariants.
+- Complete: authenticated, one-use resident admission of public accepted
+  decisions from the current signed `principal` conversation scope.
+- Next: governed durable Principal Memex source issuance and default resident
+  supply from the authenticated conversation lifecycle.
+- Deferred: explicit learning admission and
+  explicit Principal-to-FoundUp projection.
+
+## Continuous conversation lane
+
+- Complete: deterministic interaction/reasoning/effect contract.
+- Complete: default `CHAT / FAST / NONE`, ambiguous-authority rejection, risk
+  reasoning escalation without effect escalation, and VSIX thin adapter.
+- Complete: dedicated cross-language `test:conversation` vectors.
+- Complete: strict transport-neutral `TURN` / `STATUS` / `CANCEL` request
+  envelope with CAS revision, digest bindings, nonce/idempotency, five-minute
+  freshness, identity/effect injection rejection, and content-free projection.
+- Complete: admission-only binding for existing conversations consumes one
+  verified session capability and binds the envelope to the exact authenticated
+  AgentDB record/revision without mutation or authority transfer.
+- Complete: durable content-free AgentDB request reservation consumes one
+  secret-backed-authority-derived opaque proof at the store boundary and uses
+  exact replay, an owned expiry clock, global conflict/capacity controls, and
+  SQLite/PostgreSQL current-scope fencing before insert.
+- Complete: inert host aggregation for existing conversations prevalidates the
+  request, holds the current signed-generation session lease through verified
+  scope binding and durable reservation, and returns the content-free result.
+- Complete: trusted empty-ID TURN resolution and current-generation FoundUp
+  scope persistence bind exact intent, request, grounding, registered FoundUp,
+  signed-session identity and E0 authenticated exact recovery. Raw operator
+  text is not persisted.
+- Complete: durable first-turn request-to-resolved-conversation journal binding
+  uses an explicit v2 source/derived digest record and validates immutable E0
+  receipt identity through later signed revisions.
+- Next: host invocation wiring and operation-specific TURN/STATUS/CANCEL
+  handlers with immediate authenticated CAS.
+- Next: thin PFMall/phone transport adapter; the browser remains a client, not
+  the model/OpenClaw host.
+- Deferred: asynchronous critics, durable cross-device history, bounded Memex/
+  HoloIndex recall, voice ingress/TTS, and multi-host event-store scale.
 
 ---
 
-## Current State (V0.5.2) - Audited 2026-01-21
+## Current State (V0.6.0) - Audited 2026-08-06
 
 ### Phase 0b: Vision System ✅ COMPLETE
 

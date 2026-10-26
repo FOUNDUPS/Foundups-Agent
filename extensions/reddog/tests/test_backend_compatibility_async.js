@@ -20,6 +20,18 @@ const repoRoot = path.resolve(__dirname, '..', '..', '..');
   const rejected = await asyncCompatibility.runBackendCompatibilityPreflightAsync('');
   assert.strictEqual(rejected.passed, false);
   assert(rejected.rejection_reasons.includes('workspace_root_missing'));
+  assert.strictEqual(
+    asyncCompatibility.resolveCompatibilityRoot(
+      {}, { workspaceRoot: () => 'dynamic-root' }, repoRoot
+    ),
+    repoRoot
+  );
+  assert.strictEqual(
+    asyncCompatibility.resolveCompatibilityRoot(
+      {}, { workspaceRoot: () => repoRoot }, undefined
+    ),
+    repoRoot
+  );
 
   const messages = [];
   const state = {};

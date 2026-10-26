@@ -1,5 +1,8 @@
 # WRE vs Claude Code - Feature Comparison
 
+> **Historical comparison, not a benchmark.** Capability and token-reduction
+> claims below are not current production proof or receipt-backed measurements.
+
 ## Executive Summary
 WRE enhances Claude Code by adding WSP compliance, pattern-based operation, and infinite DAE spawning while maintaining terminal compatibility.
 

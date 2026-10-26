@@ -1,5 +1,10 @@
 # WRE Recursive Skills System - Implementation Summary
 
+> **Historical design summary — superseded and non-authoritative.**
+> WSP 96 references and completion claims below predate WSP 95 v2.1. This record
+> grants no current execution, effect, promotion, or RSI authority; consult the
+> current module contracts and WSP 95 v2.1.
+
 **Date**: 2025-10-23
 **Status**: ✅ Architecture Complete | 🚧 Implementation Phase 1 Ready
 **Authority**: User Specification + WSP 96 + WSP 77

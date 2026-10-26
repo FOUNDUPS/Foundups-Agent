@@ -1,5 +1,15 @@
 # Browser Actions - Platform Action Router
 
+## Connection admission boundary
+
+`send_connection_request` now checks manager admission before Connect: the target
+must have no prior pending/connected entry, and the returned request must be the
+actual PENDING object stored for that target. Rejection returns
+`connection_request_not_admitted`; policy previews and policy-denial results retain
+their contracts. See [interface](INTERFACE.md#linkedinactions) and
+[test evidence](tests/TestModLog.md). Local acceptance does not verify delivery or
+repair the manager's existing quota/bookkeeping behavior.
+
 **Domain:** infrastructure
 **Status:** POC
 **WSP Compliance:** WSP 49 (Module Structure), WSP 3 (Enterprise Architecture)
@@ -48,6 +58,7 @@ Browser Actions provides a unified interface for platform-specific browser autom
 - `navigate_to_video(video_id)` → Selenium
 
 ### LinkedIn (`linkedin_actions.py`)
+- `send_connection_request(..., dry_run=True)` → policy preview without request bookkeeping or simulation; navigation/metadata access still occurs. See the [interface](INTERFACE.md#linkedinactions) for fields and limits.
 - `post_to_company(company_id, text)` → Selenium (known DOM)
 - `comment_on_post(post_id, text)` → Selenium
 - `like_post(post_id)` → Selenium

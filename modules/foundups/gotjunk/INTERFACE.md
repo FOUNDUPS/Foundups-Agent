@@ -356,3 +356,28 @@ curl -sI https://gotjunk-56566376153.us-west1.run.app/ | grep -i content-securit
 **Last Synced**: 2026-04-12
 **Cloud Run URL**: https://gotjunk-56566376153.us-west1.run.app/
 **Shell Embed Status**: Dockerfile fix in place; redeploy required for entry_url activation
+
+## Security admission update — 2026-10-10
+
+Liberty Alert POST routes require an actual Firebase ID token in
+`Authorization: Bearer …`; missing identity configuration fails closed (503),
+missing/invalid token returns 401, exhausted admission returns 429/503, and a
+body larger than 1 MiB returns 413. See SECURITY.md for project/origin settings,
+replica/edge limits, and emulator validation. Public reads remain public.
+Cloud messages now append under the authenticated author UID; thread lifecycle
+changes require the creator. Storage uploads use UID paths, and votes/reservations
+use dedicated transactions rather than unrestricted whole-document replacement.
+
+## Actual legacy capture storage and migration boundary — 2026-10-12
+
+Historical examples in this file may use stale names. Executable source
+`frontend/services/storage.ts` configures `localforage` with database
+`got-junk-pwa` and object store `captured_items`. Neither is renamed.
+A different browser origin cannot read these captures; an authorized,
+origin-local export/import or authentication bridge is necessary.
+
+`src/migration_inventory.py` provides **offline, metadata-only** dry-run
+analysis. It accepts no blob, exact location, message or credential fields,
+makes no service calls, and emits only counts/conflict reasons and a digest of
+opaque idempotency keys. See [MIGRATION_INVENTORY_README.md](MIGRATION_INVENTORY_README.md).
+This tool does not establish a verified production provider or cutover.

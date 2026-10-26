@@ -1,0 +1,60 @@
+{
+  "description": "FoundUps WSP lifecycle gates for Codex sessions.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume|clear)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -lc 'root=$(git rev-parse --show-toplevel) && cd \"$root\" && python3 -m modules.infrastructure.codex_hooks.src.codex_hooks'",
+            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; Set-Location -LiteralPath $root; python -m modules.infrastructure.codex_hooks.src.codex_hooks\"",
+            "timeout": 120,
+            "statusMessage": "Running FoundUps WSP_00 lifecycle gate",
+            "additionalContextLimit": 3000
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -lc 'root=$(git rev-parse --show-toplevel) && cd \"$root\" && python3 -m modules.infrastructure.codex_hooks.src.codex_hooks'",
+            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; Set-Location -LiteralPath $root; python -m modules.infrastructure.codex_hooks.src.codex_hooks\"",
+            "timeout": 10,
+            "statusMessage": "Checking prompt secret boundary"
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^(Bash|apply_patch|Edit|Write)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -lc 'root=$(git rev-parse --show-toplevel) && cd \"$root\" && python3 -m modules.infrastructure.codex_hooks.src.codex_hooks'",
+            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; Set-Location -LiteralPath $root; python -m modules.infrastructure.codex_hooks.src.codex_hooks\"",
+            "timeout": 10,
+            "statusMessage": "Checking FoundUps tool safety boundary"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "sh -lc 'root=$(git rev-parse --show-toplevel) && cd \"$root\" && python3 -m modules.infrastructure.codex_hooks.src.codex_hooks'",
+            "commandWindows": "powershell -NoProfile -Command \"$root = git rev-parse --show-toplevel; Set-Location -LiteralPath $root; python -m modules.infrastructure.codex_hooks.src.codex_hooks\"",
+            "timeout": 30,
+            "statusMessage": "Checking FoundUps completion boundary"
+          }
+        ]
+      }
+    ]
+  }
+}

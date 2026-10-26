@@ -56,8 +56,29 @@ Use these for parallel 0102 operations:
 ### M2M Prompting (WSP 99)
 
 Machine-to-machine compact format for swarm-internal communication:
-- `swarm/0102_M2M_SCHEMA.yaml` - Canonical K:V schema definition
+- `swarm/0102_M2M_SCHEMA.yaml` - Legacy K:V examples; the current machine envelope is defined by [WSP 99](../WSP_framework/src/WSP_99_M2M_Prompting.md)
 - `swarm/m2m_compiler.py` - Qwen-delegatable 012 prose -> M2M compiler
+
+The compiler now emits an explicit `A:<action>` field, preserving the recognized
+verb across compact parsing and decompilation independently of mode. Legacy
+packets without `A` remain readable with mode-only rendering. This helper does
+not preserve an arbitrary full objective or authenticate a work order. See the
+[field-fidelity contract](../modules/infrastructure/token_efficiency/INTERFACE.md#public-api-p2-compact-fidelity-gate)
+before using compact output as worker context.
+
+The legacy serializer rejects nested or lossy `I` fields before emitting a
+packet. It preserves supported scalar text, including empty values and keys with
+internal spaces. `compile_m2m` raises `ValueError` for unsupported invariants;
+do not flatten or remove them to continue.
+
+For an **already normalized** WSP99 section 0 order, the same module now exposes
+`encode_m2m_envelope(order)` and `decode_m2m_envelope(wire)`. This separate JSON
+codec preserves declared identity, stable task ID, action and nested JSON values.
+It never infers missing fields or sends the result to a worker. See the
+[codec profile](../modules/infrastructure/token_efficiency/INTERFACE.md#canonical-envelope-codec--2026-09-15)
+for required fields and local bounds. The legacy APIs keep their existing format.
+Principal-prose normalization, production consumer integration and admitted AmIBot
+work orders remain open; codec acceptance grants no runtime authority.
 
 **012 Compact Format** (4x token reduction):
 ```yaml

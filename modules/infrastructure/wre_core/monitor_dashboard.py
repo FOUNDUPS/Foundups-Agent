@@ -135,6 +135,28 @@ def format_time_ago(timestamp: float | None) -> str:
     return f"{delta/3600:.1f}h ago"
 
 
+def _activity_indicators(status: dict) -> list[str]:
+    """Build indicators without treating absent telemetry as measured data."""
+    indicators = []
+    runtime = status["runtime_minutes"] + 0.01
+    if status["messages_processed"] > 0:
+        message_rate = status["messages_processed"] / runtime
+        indicators.append("[HIGH ACTIVITY]" if message_rate > 5 else "[ACTIVE]" if message_rate > 1 else "[LOW ACTIVITY]")
+    if status["learning_events"] > 0:
+        learning_rate = status["learning_events"] / runtime
+        if learning_rate > 1:
+            indicators.append("[LEARNING FAST]")
+        elif learning_rate > 0.2:
+            indicators.append("[LEARNING]")
+    efficiency = status.get("token_efficiency")
+    if isinstance(efficiency, (int, float)):
+        if efficiency > 90:
+            indicators.append("[OPTIMAL]")
+        elif efficiency > 80:
+            indicators.append("[EFFICIENT]")
+    return indicators
+
+
 def display_dashboard(filter_skill: str | None, refresh_interval: float):
     """Display real-time dashboard"""
     monitor = get_monitor()
@@ -159,11 +181,10 @@ def display_dashboard(filter_skill: str | None, refresh_interval: float):
             
             # Token efficiency
             efficiency = status['token_efficiency']
-            saved = status['tokens_saved']
-            print(f"\n[EFFICIENCY] {efficiency:.1f}% | Saved: {saved:,} tokens")
+            print("\n[TOKEN TELEMETRY] Unmeasured; authenticated receipts required")
             
             # Progress bars
-            if efficiency > 0:
+            if isinstance(efficiency, (int, float)) and efficiency > 0:
                 bar_len = int(efficiency / 100 * 40)
                 bar = "█" * bar_len + "░" * (40 - bar_len)
                 print(f"            [{bar}]")
@@ -177,36 +198,14 @@ def display_dashboard(filter_skill: str | None, refresh_interval: float):
                 print(f"\n[SUGGESTIONS] {status['suggestions']} improvement opportunities identified")
                 print("[TIP] Check logs/wre_monitor.log for details")
             
-            # Improvements applied
+            # Legacy records do not prove authenticated effects.
             if status['improvements_applied'] > 0:
-                print(f"\n[APPLIED] {status['improvements_applied']} improvements auto-applied")
+                print(f"\n[UNVERIFIED] {status['improvements_applied']} legacy improvement records")
             
             # Real-time activity indicator
             print("\n" + "="*70)
             
-            # Activity indicators
-            indicators = []
-            if status['messages_processed'] > 0:
-                msg_rate = status['messages_processed'] / (status['runtime_minutes'] + 0.01)
-                if msg_rate > 5:
-                    indicators.append("[HIGH ACTIVITY]")
-                elif msg_rate > 1:
-                    indicators.append("[ACTIVE]")
-                else:
-                    indicators.append("[LOW ACTIVITY]")
-            
-            if status['learning_events'] > 0:
-                learn_rate = status['learning_events'] / (status['runtime_minutes'] + 0.01)
-                if learn_rate > 1:
-                    indicators.append("[LEARNING FAST]")
-                elif learn_rate > 0.2:
-                    indicators.append("[LEARNING]")
-            
-            if efficiency > 90:
-                indicators.append("[OPTIMAL]")
-            elif efficiency > 80:
-                indicators.append("[EFFICIENT]")
-            
+            indicators = _activity_indicators(status)
             if indicators:
                 print(" ".join(indicators))
             

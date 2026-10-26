@@ -20,10 +20,11 @@ This protocol implements comprehensive file size management and refactoring enfo
 
 #### 2.1.1. Code Files
 - **Python Files (.py)** (aligned with WSP 87, updated for 0102 agentic growth):
-  - < 1200 lines: OK (allows agentic evolution and AI verbosity)
-  - 1200-1500 lines: Guideline range - plan refactor
-  - 1500-2000 lines: Critical window - document remediation
-  - >=2000 lines: Violation; mandatory split
+  - < 800 lines: OK
+  - 800-1000 lines: Guideline range - review cohesion and growth
+  - >1000 and <1500 lines: Critical window - document remediation
+  - >=1500 lines: Hard limit; candidate-attributed growth requires a split or
+    a pre-existing bounded exemption
 - **JavaScript/TypeScript (.js/.ts)**: 400 lines
 - **Configuration Files (.json/.yaml/.toml)**: 200 lines
 - **Shell Scripts (.sh/.ps1)**: 300 lines
@@ -40,6 +41,11 @@ This protocol implements comprehensive file size management and refactoring enfo
 - **Python Classes**: 200 lines
 - **JavaScript Functions**: 30 lines
 - **Complex Logic Blocks**: 100 lines
+
+Thresholds are inclusive ceilings. Exactly 50 lines is within the default
+Python-function contract. A candidate-created or grown function becomes new
+default debt only above 50 lines, unless an authoritative base already binds a
+different domain threshold or no-growth ceiling.
 
 ### 2.2. Domain-Specific Configurations
 
@@ -59,7 +65,12 @@ thresholds:
     function_limit: 60     # Message processing functions
 ```
 
-**Note**: DAE modules (`*_dae.py`, `*dae*.py` in infrastructure/) are **complex orchestrators** managing state machines, sub-agents, and workflows. They follow the **full Python threshold of 1200/1500/2000** (OK/Guideline/Hard limit) per WSP 87, NOT the lean infrastructure 600-line limit.
+**Note**: DAE modules (`*_dae.py`, `*dae*.py` in infrastructure/) are complex
+orchestrators managing state machines, sub-agents, and workflows. Their
+domain warning threshold may be 1200 lines, but the default Python hard limit
+remains 1500 lines per WSP 87 unless a pre-existing bounded exemption or
+module-specific contract says otherwise. A DAE name is not an automatic
+exemption.
 
 #### 2.2.2. Module-Specific Overrides
 ```yaml
@@ -79,15 +90,55 @@ module_overrides:
 #### 3.1.1. Size Threshold Exceeded
 When a file exceeds its threshold:
 1. **IMMEDIATE**: Log violation in WSP_MODULE_VIOLATIONS.md (WSP 47)
-2. **BLOCK**: Prevent pre-commit if no exemption exists
-3. **WARN**: Display refactoring requirement in WRE UI
-4. **SUGGEST**: Provide automated refactoring recommendations
+2. **BLOCK NEW DEBT**: Prevent integration when the candidate creates a new
+   violation or grows a touched file beyond its documented temporary ceiling.
+3. **DO NOT MISATTRIBUTE BASELINE DEBT**: An unchanged violation already
+   present at the exact comparison base is advisory to an unrelated candidate.
+   It must remain registered with an owner and remediation target, but it must
+   not make unrelated work fail.
+4. **ALLOW DEBT REDUCTION**: A registered no-growth ceiling is a maximum, not
+   an exact line-count snapshot. A candidate may reduce a file or function
+   without first rewriting the exemption.
+5. **WARN**: Display refactoring requirements and inherited debt in WRE output.
+6. **SUGGEST**: Provide automated refactoring recommendations.
+
+Candidate attribution must use an exact base/candidate comparison. A broad
+repository scan may report inherited debt, but it cannot attribute that debt
+to the current candidate without evidence that the candidate touched and
+worsened the affected path.
+
+Authoritative enforcement must bind the exact candidate commit and derive its
+tracked `modules/` inventory from that commit (for example, `git ls-tree -r
+--name-only -z <candidate_sha> -- modules`). Untracked ignored/runtime/vendor
+closure is excluded; intentionally tracked paths remain governed by canonical
+audit skip policy. A default `git ls-files` inventory is a convenient clean-
+checkout diagnostic, not exact-commit authority by itself. Candidate bytes,
+inventory, and repository binding must be rechecked after production and
+before admission so index/worktree drift cannot be misreported as commit debt.
+
+WSP 62 is a differential debt-control protocol, not a mandate to split a
+cohesive module solely because a review threshold was crossed. Warning and
+critical thresholds trigger analysis. Integration blocks only for
+candidate-attributed new debt, growth beyond an authoritative no-growth
+ceiling, an invalid exemption contract, or an applicable hard-limit breach.
+An unexempt new file created at or above its warning threshold is
+candidate-attributed new debt even when it remains below the hard limit.
+Necessary functional or security work must not be blocked by unrelated
+inherited debt. A candidate may reduce debt, or remain at or below an existing
+ceiling, while a separately owned decomposition remains scheduled.
+
+Required append-only audit records at the canonical module-relative paths
+`ModLog.md` and `tests/TestModLog.md` use advisory archival thresholds. This
+allowlist is exhaustive and must not use basename or glob matching. Their
+growth must trigger bounded archival work, not block otherwise valid
+functional or security work. Non-historical documentation such as `README.md`
+and `INTERFACE.md` remains subject to normal candidate-growth enforcement.
 
 #### 3.1.2. Growth Rate Monitoring
 Monitor files approaching thresholds:
-- **>=1600 lines (80% of 2000 hard limit)**: Display warning during development
-- **>=1800 lines (90% of hard limit)**: Require documented remediation plan
-- **>=1900 lines (95% of hard limit)**: Mandatory refactoring review
+- **>=1200 lines (80% of 1500 hard limit)**: Display warning during development
+- **>=1350 lines (90% of hard limit)**: Require documented remediation plan
+- **>=1425 lines (95% of hard limit)**: Mandatory refactoring review
 
 ### 3.2. Enforcement Actions
 
@@ -97,9 +148,11 @@ Monitor files approaching thresholds:
 def enforce_file_sizes():
     violations = []
     for file_path in get_modified_files():
-        if exceeds_threshold(file_path):
-            if not has_exemption(file_path):
-                violations.append(create_violation(file_path))
+        decision = evaluate_size_contract(file_path, exact_base_file(file_path))
+        if decision.invalid_contract or decision.candidate_created_growth:
+            violations.append(create_violation(file_path, decision))
+        elif decision.inherited_debt or decision.advisory_archive:
+            report_advisory(file_path, decision)
     
     if violations:
         block_commit(violations)
@@ -107,18 +160,22 @@ def enforce_file_sizes():
 ```
 
 #### 3.2.2. CI/CD Pipeline Integration
-- **Build Blocking**: Fail builds with oversized files
-- **Quality Gates**: Require size compliance before deployment
+- **Build Blocking**: Fail only candidate-attributed violations and invalid
+  exemption contracts; inherited baseline debt remains advisory
+- **Quality Gates**: Require exact base/candidate attribution before deployment
 - **Automated Reporting**: Generate size compliance reports
 
 ### 3.3. Refactoring Requirements
 
 #### 3.3.1. Mandatory Refactoring Triggers
-- **File > 1000 lines**: Enter critical remediation window; plan decomposition
-- **File >= 1500 lines**: Immediate refactoring required (hard limit per WSP 87)
-- **Class > 300 lines**: Split into multiple classes
-- **Function > 75 lines**: Extract sub-functions
-- **Config > 250 lines**: Modularize configuration
+- **File > 1000 lines**: Enter the critical review window and plan decomposition
+- **File >= 1500 lines**: Candidate-attributed hard-limit breach; split or use
+  a pre-existing bounded exemption
+- **Candidate exceeds no-growth ceiling**: Reject the candidate
+- **Candidate changes or ratchets its own exemption**: Reject the candidate
+- **Class/function/config review threshold exceeded**: Review cohesion and
+  extract only when doing so creates a clearer owned boundary; enforce a hard
+  stop only when a configured limit or no-growth ceiling is exceeded
 
 #### 3.3.2. Refactoring Strategies
 1. **Functional Decomposition**: Break large functions into smaller ones
@@ -207,6 +264,9 @@ exemptions:
   - file: "src/legacy_integration.py"
     reason: "Legacy system integration - gradual refactoring planned"
     threshold_override: 800
+    no_growth_ceiling:
+      file_lines: 800
+      functions: {}
     review_date: "2024-Q2"
     reviewer: "TechnicalArchitect"
   
@@ -214,12 +274,31 @@ exemptions:
     reason: "Auto-generated code from external API"
     permanent: true
     generation_tool: "OpenAPI Generator v6.2.1"
+
+  - file: "ModLog.md"
+    reason: "Required append-only audit history"
+    enforcement_mode: "advisory_archive"
+    advisory_archive_threshold: 1000
+    owner: "Module Maintainers"
+    remediation: "ROADMAP.md#documentation-archive"
 ```
 
 #### 5.1.2. Exemption Validation
 - **Documented Justification**: All exemptions must have clear reasons
 - **Review Requirements**: Periodic review of temporary exemptions
 - **Approval Process**: Technical architect approval for large exemptions
+- **Expiry Handling**: Expired temporary exemptions emit remediation warnings.
+  Expiry alone does not attribute unchanged debt to an unrelated candidate;
+  candidate growth remains governed by the recorded ceiling and exact base.
+- **Advisory Archive Allowlist**: `advisory_archive` applies only to the exact
+  canonical module-relative paths `ModLog.md` and `tests/TestModLog.md`.
+  Basename and glob matching are forbidden. The mode is invalid for source,
+  configuration, interface, or ordinary documentation files.
+- **Two-Stage Policy Migration**: A new exemption mode or allowlist must land
+  as policy before runtime or module metadata may consume it. The consuming
+  candidate must prove that its exact comparison base already contains the
+  policy. A candidate cannot authorize a new mode by changing this protocol
+  and consuming that mode in the same diff.
 
 ### 5.2. Automatic Exemptions
 
@@ -242,9 +321,13 @@ AUTO_EXEMPT_PATTERNS = [
 ## 6. Integration with Existing WSPs
 
 ### 6.1. WSP 4 (FMAS Validation Protocol)
-- **Enhanced Validation**: Add size checks to structural validation
-- **Report Integration**: Include size compliance in FMAS reports
-- **Blocking Integration**: Prevent integration of oversized files
+- **Enhanced Validation**: Apply exact base/candidate size attribution to
+  structural validation
+- **Report Integration**: Include candidate, inherited, advisory, and invalid-
+  contract dispositions in FMAS reports
+- **Blocking Integration**: Fail only candidate-attributed `ERROR` findings,
+  invalid exemption contracts, or applicable hard-limit breaches; inherited
+  and Mode-1 health debt remain visible and non-authorizing
 
 ### 6.2. WSP 47 (Module Violation Tracking)
 - **Violation Logging**: Log all size violations systematically
@@ -269,9 +352,11 @@ AUTO_EXEMPT_PATTERNS = [
 - **UI Integration**: Display warnings in WRE system
 
 ### 7.2. Phase 2: Enforcement
-- **Pre-commit Hooks**: Block oversized files
-- **CI/CD Integration**: Fail builds with size violations
-- **Exemption System**: Implement documented exemptions
+- **Pre-commit Hooks**: Block exact candidate-attributed `ERROR` debt only
+- **CI/CD Integration**: Bind a clean exact candidate, authoritative base, and
+  exact candidate-commit inventory before failing a build
+- **Exemption System**: Accept only base-existing bounded exemptions; candidate
+  exemption ratchets and malformed contracts fail closed
 
 ### 7.3. Phase 3: Automation
 - **Refactoring Suggestions**: Automated refactoring recommendations
@@ -280,30 +365,35 @@ AUTO_EXEMPT_PATTERNS = [
 
 ## 8. Testing and Validation
 
-### 8.1. Size Detection Testing
-```python
-def test_size_detection():
-    """Test WSP 62 size detection accuracy."""
-    large_file = create_test_file(1100)  # Exceeds 1000 line critical window
-    violations = size_validator.validate_file_sizes([large_file])
-    assert len(violations) == 1
-    assert violations[0].file_path == large_file
-```
+### 8.1. Differential Attribution Matrix
+- A new candidate file at or above its warning threshold is candidate debt.
+- Candidate growth across a threshold or above a base-valid no-growth ceiling
+  is candidate debt.
+- Unchanged inherited debt is advisory and must not block unrelated work.
+- Candidate debt reduction remains allowed without rewriting the exemption.
+- Exactly 50 default Python-function lines pass; a new or grown 51-line
+  function is candidate-attributed debt unless a base-valid override applies.
 
-### 8.2. Exemption Testing
-```python
-def test_exemption_handling():
-    """Test WSP 62 exemption mechanism."""
-    exempt_file = "src/autogenerated_api.py"
-    add_exemption(exempt_file, "Auto-generated code")
-    violations = size_validator.validate_file_sizes([exempt_file])
-    assert len(violations) == 0
-```
+### 8.2. Inventory and Exemption Matrix
+- Exact candidate-commit `modules/` inventory is accepted only when repository,
+  commit, path, and post-production bindings remain unchanged.
+- Untracked ignored/runtime/vendor closure must not become authoritative merely
+  because it exists below the checkout.
+- The default `git ls-files` path is tested as a diagnostic convenience and is
+  never labeled exact-commit authority without a clean exact-HEAD proof.
+- Candidate-created or widened exemptions reject; exact-base bounded
+  exemptions can permit no-growth or debt reduction.
+- Only exact module-relative `ModLog.md` and `tests/TestModLog.md` receive the
+  archival advisory disposition; basename or glob lookalikes do not.
 
 ### 8.3. Integration Testing
-- **FMAS Integration**: Verify size checks work with existing validation
-- **WRE Integration**: Test startup warnings and UI integration
-- **Agent Integration**: Validate enhanced agent functionality
+- **FMAS Integration**: Verify structured and string findings preserve exact
+  severity, path, threshold, baseline, and disposition boundaries.
+- **WRE Integration**: Verify broad/no-baseline health audits emit debt evidence
+  but no repair jobs, while exact-baseline candidate findings remain dry-run
+  proposals until independently authorized.
+- **Agent Integration**: Verify model or worker output cannot upgrade inherited,
+  advisory, malformed, or direct raw WSP 62 input into execution readiness.
 
 ## 9. Performance Considerations
 
@@ -344,5 +434,10 @@ def test_exemption_handling():
 
 ---
 
-**WSP 62 Status**: Active and ready for implementation across all WRE systems.
-**Next Steps**: Integrate with WSP 4, WSP 47, WSP 54, and enhance modular_audit.py with size validation capabilities. 
+**WSP 62 Status**: Active. Differential file/function detection, exact-baseline
+comparison, bounded exemptions, and focused FMAS tests are implemented in the
+canonical modular audit. Exact-commit health admission is implemented as a
+proposal-only WRE boundary.
+**Next Steps**: Complete authenticated RedDog review, numeric WSP 15 allocation,
+signed work-order promotion, confined worker dispatch, and independent outcome
+verification without widening FMAS or model authority.

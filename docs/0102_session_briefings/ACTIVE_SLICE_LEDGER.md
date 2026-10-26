@@ -1,5 +1,18 @@
 # Active Slice Ledger
 
+> Dated ledger snapshot: entries below were last reconciled on 2026-04-21. They do not establish current lane ownership. Start at [the system roadmap](../../ROADMAP.md), then verify current commits, open changes and runtime claims before choosing a slice. Preserve these historical entries until each owner reconciles them.
+
+## RSI handoff — 2026-09-13
+
+- **Merged groundwork:** [roadmap PR #1656](https://github.com/FOUNDUPS/Foundups-Agent/pull/1656), merge `18297fc3f1449350b89079db64a3612b004687a1`; [R01 integrity PR #1702](https://github.com/FOUNDUPS/Foundups-Agent/pull/1702), merge `35ed430c61e4e35c1b779f03c13e40368c82b65f`. Their CI selections passed. R01's local tier passed 235 tests with four platform skips; installed runtime admission remains separate.
+- **Current documentation slice:** [R02 enforcement map](../roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md) covers R00–R25 and reconciles selected WSP/runtime contradictions. The [September dispositions](../roadmaps/R02_WSP_RSI_ENFORCEMENT_MAP.md#historical-ledger-dispositions--2026-09-13) now cover all 11 pending April rows/tracks plus four relevant closed rows. R02 remains partial: unresolved owner evidence, SoftProto per-contract archival decisions and separately bound review are outstanding. This handoff does not assert that its own revision has merged.
+- **Next preparation:** R03 current-source Holo entry and authority qualification, followed by the admitted R06–R15 canary path according to dependencies. Reconcile source and ownership again before dispatch.
+- **Concurrent ownership:** YUMORI/eSingularity/RedDog product work and the separate WSP 00 state-semantics review retain their owners. No owner is reassigned by this document.
+
+## Preserved April 21 snapshot
+
+The authority, rules and row statuses below describe that dated snapshot. Retain them until each relevant row has an evidence-backed disposition; they cannot override the current source or delegated policy.
+
 **Authority**: 0102 architect lane
 **Updated**: 2026-04-21 (LEDGER-RECON3 post-PR-queue-cleanup)
 **Rule**: Every agent reads this first. If repo truth contradicts an entry, update this ledger — not 012.
@@ -60,6 +73,7 @@ If already landed:
 
 | Slice | Commit | Evidence |
 |-------|--------|----------|
+| `esingularity_foundup_monorepo_migration` | (this slice) | `modules/foundups/esingularity/` canonical module + registry/catalog projection + CI validation |
 | `openclaw_training_route` | `a5376861e` | `openclaw_execution_routes.py` TRAINING intent |
 | `openclaw_training_route_tests` | `d8ae025e8` | `test_openclaw_training_route.py` (413 lines) |
 | `foundups_canon_docs` | `8b136335d` | `FOUNDUPS_DOMAIN_CANONICAL_INDEX.md`, `FOUNDUP_EXFOLIATION_PROTOCOL.md`, `PQN_SWARM_HUB_FOUNDUP_BRIEF.md` |

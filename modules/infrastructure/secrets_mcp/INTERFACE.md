@@ -53,6 +53,28 @@ Security boundary:
 
 ## Tool Specifications
 
+### `SystemdCredentialBinding` / `SystemdCredentialSecretResolver`
+
+The immutable binding contains `credential_directory`, positive nonroot
+`expected_uid`/`expected_gid`, `expected_requester`, finite `issued_at`/`expires_at`
+(maximum 300 seconds), a frozen allowlist `credential_ids`, and
+`max_secret_bytes` (1–65536). Construction performs no credential reads.
+Binding metadata alone is not permission or authenticated owner state.
+
+`SystemdCredentialSecretResolver(binding, *, clock, monotonic, audit_callback)`
+exposes `resolve(reference, requester_id=None) -> ResolveResult`.
+Production defaults use system clocks. `parse_systemd_credential_reference`
+returns one strict ASCII credential ID or `None`; `op://`, traversal, URI query,
+percent escapes and additional path segments reject.
+
+Resolution requires the bound Linux identity, descriptor-relative no-symlink
+root-owned ancestry and read-only manager credential custody. Missing/extra
+access principals, wrong permissions, changed/oversized/non-UTF8 content and
+expired or regressing clocks fail closed. No value survives in a failed result.
+Audit callbacks receive metadata only; `credential_pre_delivery_validation`
+is not a delivery receipt. Final lifetime/identity checks follow the callback.
+The caller owns prompt disposal of a successful value and permission admission.
+
 ### 1. get_environment_variable
 
 **Purpose**: Retrieve a specific environment variable value with security filtering

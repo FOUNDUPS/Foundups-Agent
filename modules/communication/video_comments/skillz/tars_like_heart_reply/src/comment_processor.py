@@ -13,9 +13,13 @@ import logging
 import os
 import random
 import time
+from threading import Event
 from dataclasses import dataclass
 from typing import Any, Dict, Optional
 from pathlib import Path
+from modules.communication.video_comments.skillz.tars_like_heart_reply.src.comment_row_context import (
+    extract_comment_data as extract_row_comment_data,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +121,27 @@ class CommentProcessor:
         "unknown": "❓",
     }
 
+    CONTEXTUAL_PROVIDERS = frozenset({"lm_studio", "qwen", "grok"})
+    CONTEXTUAL_SKILLS = frozenset({"skill_1", "skill_1_sub", "skill_2", "skill_3"})
+    CONTEXTUAL_STRATEGIES = frozenset({
+        "skill_0:grok_greeting", "skill_0:contextual_mockery",
+        "gemma_emoji:heuristic_love", "gemma_emoji:heuristic_funny",
+        "gemma_emoji:heuristic_positive", "gemma_emoji:gemma_celebration",
+        "gemma_emoji:gemma_love", "gemma_emoji:gemma_funny",
+        "gemma_emoji:gemma_agreement", "gemma_emoji:gemma_positive",
+        "gemma_emoji:gemma_neutral",
+    })
+
+    @classmethod
+    def is_contextual_reply_source(cls, source: Optional[str]) -> bool:
+        """Accept only exact provider receipts or supported content-aware strategies."""
+        if not isinstance(source, str):
+            return False
+        if source in cls.CONTEXTUAL_PROVIDERS or source in cls.CONTEXTUAL_STRATEGIES:
+            return True
+        skill, separator, provider = source.partition(":")
+        return bool(separator and skill in cls.CONTEXTUAL_SKILLS and provider in cls.CONTEXTUAL_PROVIDERS)
+
     def __init__(
         self,
         driver,
@@ -132,6 +157,7 @@ class CommentProcessor:
         mod_lookup=None,
         reply_debug_tags=False,
         video_title=None,
+        target_channel_id=None,
         session_id: Optional[str] = None,
     ):
         """
@@ -149,6 +175,7 @@ class CommentProcessor:
             mod_lookup: ModeratorLookup instance (optional)
             reply_debug_tags: Append debug tags to replies (default False)
             video_title: Video title for context-aware replies (optional)
+            target_channel_id: Channel receiving the comment (personality routing)
         """
         self.driver = driver
         self.human = human
@@ -161,14 +188,7 @@ class CommentProcessor:
         self.ui_tars_bridge = ui_tars_bridge
         self.check_moderators = check_moderators
         self.mod_lookup = mod_lookup
-        self.reply_debug_tags = reply_debug_tags
-        self.video_title = video_title  # NEW (2025-12-30): Video context for alignment detection
-        self.session_id = session_id or time.strftime("%Y%m%d_%H%M%S")
-
-        # UI-derived action switches (requested: Like/Heart should not fire when UI looks disabled/greyed-out)
-        # These switches are dynamic and can flip during a run as UI state changes.
-        self.like_ui_switch = True
-        self.heart_ui_switch = True
+        self._initialize_row_context(reply_debug_tags, video_title, target_channel_id, session_id)
 
         # Entropy-backed RNG (anti-pattern breaker: "dice-on-dice", not fixed percentages)
         self._rng = random.SystemRandom()
@@ -251,6 +271,18 @@ class CommentProcessor:
             logger.info("[CommentProcessor] Semantic state layer DISABLED")
         if self.action_debug:
             logger.info("[CommentProcessor] Action logging enabled (YT_ACTION_LOGS=true)")
+
+    def _initialize_row_context(self, reply_debug_tags, video_title, target_channel_id, session_id):
+        self.reply_debug_tags = reply_debug_tags
+        self.video_title = video_title  # NEW (2025-12-30): Video context for alignment detection
+        self.target_channel_id = target_channel_id
+        self.session_id = session_id or time.strftime("%Y%m%d_%H%M%S")
+
+        # UI-derived action switches (requested: Like/Heart should not fire when UI looks disabled/greyed-out)
+        # These switches are dynamic and can flip during a run as UI state changes.
+        self.like_ui_switch = True
+        self.heart_ui_switch = True
+
 
     @dataclass
     class _UIActionState:
@@ -691,184 +723,8 @@ class CommentProcessor:
             return False
 
     def extract_comment_data(self, comment_idx: int) -> Dict[str, Any]:
-        """
-        Extract comment text and author info from DOM.
-        
-        Phase 0: Knowledge - Gather commenter information
-        
-        DOM Structure (YouTube Studio):
-        - Comment text: yt-formatted-string#content-text
-        - Author name: Link with channel URL or #author-text
-        - Mod badge: Various badge selectors
-        """
-        try:
-            data = self.driver.execute_script(r"""
-                function collectThreads(selector) {
-                    const direct = document.querySelectorAll(selector);
-                    if (direct && direct.length) return Array.from(direct);
-                    const results = [];
-                    const stack = [document];
-                    while (stack.length) {
-                        const node = stack.pop();
-                        if (!node || !node.querySelectorAll) continue;
-                        try {
-                            const found = node.querySelectorAll(selector);
-                            for (const el of found) results.push(el);
-                        } catch (e) {}
-                        const children = node.querySelectorAll('*');
-                        for (const child of children) {
-                            if (child.shadowRoot) stack.push(child.shadowRoot);
-                        }
-                    }
-                    return results;
-                }
-
-                const threads = collectThreads('ytcp-comment-thread');
-                const thread = threads[arguments[0]];
-                if (!thread) return null;
-                
-                // Extract comment text from yt-formatted-string#content-text
-                // This is the actual comment content element
-                let text = '';
-                const contentText = thread.querySelector('yt-formatted-string#content-text');
-                if (contentText) {
-                    text = contentText.textContent.trim();
-                } else {
-                    // Fallback selectors
-                    const contentEl = thread.querySelector('#content, .comment-text, ytcp-comment-renderer');
-                    text = contentEl ? contentEl.textContent.trim() : '';
-                }
-                
-                // Extract author handle/name and channel ID
-                let authorName = 'Unknown';
-                let authorHandle = 'Unknown';
-                let channelId = null;
-                const authorEl = thread.querySelector('#author-text, yt-formatted-string.author-text, a#name, .author-name, a[href*="/channel/"], a[href^="/@"]');
-                if (authorEl) {
-                    const raw = authorEl.textContent.trim().replace(/\\s+/g, ' ');
-                    authorHandle = raw;
-                    authorName = raw.replace(/^@/, '');
-
-                    // Extract channel ID from href (if available)
-                    const authorLink = thread.querySelector('a[href*="/channel/"]');
-                    if (authorLink) {
-                        const href = authorLink.href;
-                        const match = href.match(/\/channel\/([^\/\?]+)/);
-                        if (match) {
-                            channelId = match[1];
-                        }
-                    }
-                }
-
-                // Check for mod badge (moderator indicator)
-                const modBadge = thread.querySelector('.mod-badge, [aria-label*="Moderator"], .moderator-badge');
-                const isMod = !!modBadge;
-
-                // Check for subscriber/member badge
-                const subBadge = thread.querySelector('.subscriber-badge, [aria-label*="Member"], .member-badge');
-                const isSubscriber = !!subBadge;
-
-                // Extract published time (e.g., "3 months ago", "1 year ago")
-                // FIX (2025-12-30): YouTube Studio uses different selectors than regular YouTube
-                // FIX (2025-12-30): Enhanced selectors for YouTube Studio comment inbox
-                let publishedTime = null;
-
-                // Try multiple selectors (YouTube Studio + regular YouTube)
-                // Ordered by specificity - most specific first
-                const timeSelectors = [
-                    // YouTube Studio specific (2025-12-30 enhanced)
-                    'span.published-time',                       // Direct span class
-                    '#published-time',                           // ID-based
-                    'ytcp-comment-view-model #published-time',   // Studio model with ID
-                    'ytcp-comment-view #published-time',         // Studio view with ID
-                    '.ytcp-comment-header span',                 // Header span (often contains time)
-                    '#header #published-time-text',              // Header published time
-                    // Regular YouTube selectors
-                    'yt-formatted-string.published-time-text',   // Regular YouTube
-                    '.published-time-text',                      // Regular YouTube (class)
-                    '#published-time-text',                      // ID-based
-                    'ytcp-comment-view span:not(.author)',       // YouTube Studio: spans that aren't author
-                    '.ytcp-comment-view-model span',             // YouTube Studio model
-                    '[slot="published-time"]',                   // Slot-based
-                ];
-
-                for (const selector of timeSelectors) {
-                    const el = thread.querySelector(selector);
-                    if (el && el.textContent.includes('ago')) {
-                        publishedTime = el.textContent.trim();
-                        console.log('[DOM-DEBUG] Found time via selector:', selector, publishedTime);
-                        break;
-                    }
-                }
-
-                // Fallback 1: Search spans for "ago" pattern
-                if (!publishedTime) {
-                    const spans = thread.querySelectorAll('span');
-                    for (const span of spans) {
-                        const text = span.textContent.trim();
-                        if (text.includes('ago') && /\d+/.test(text)) {
-                            publishedTime = text;
-                            console.log('[DOM-DEBUG] Found time via span scan:', publishedTime);
-                            break;
-                        }
-                    }
-                }
-
-                // Fallback 2: Search for any text containing "ago" pattern in full thread text
-                if (!publishedTime) {
-                    const allText = thread.textContent;
-                    // Enhanced regex: handles "yr", "mo", abbreviated forms
-                    const agoMatch = allText.match(/(\d+\s*(?:second|minute|hour|day|week|month|year|yr|mo|wk|hr|min|sec)s?\s*ago)/i);
-                    if (agoMatch) {
-                        publishedTime = agoMatch[1];
-                        console.log('[DOM-DEBUG] Found time via regex fallback:', publishedTime);
-                    }
-                }
-
-                // Fallback 3: Look for relative time patterns like "Edited 1 year ago"
-                if (!publishedTime) {
-                    const allText = thread.textContent;
-                    const editedMatch = allText.match(/(?:edited\s+)?(\d+\s*(?:second|minute|hour|day|week|month|year)s?\s*ago)/i);
-                    if (editedMatch) {
-                        publishedTime = editedMatch[1];
-                        console.log('[DOM-DEBUG] Found time via edited pattern:', publishedTime);
-                    }
-                }
-
-                return {
-                    text: text.substring(0, 500),
-                    author_name: authorName,
-                    author_handle: authorHandle,
-                    channel_id: channelId,
-                    is_mod: isMod,
-                    is_subscriber: isSubscriber,
-                    published_time: publishedTime
-                };
-            """, comment_idx - 1)
-            
-            if data:
-                logger.info(
-                    "[DAE] Extracted comment by %s (ID: %s, len=%s)",
-                    data.get("author_name"),
-                    data.get("channel_id", "N/A"),
-                    len(data.get("text", "") or ""),
-                )
-                # FIX (2025-12-30): Log published_time for debugging
-                published_time = data.get("published_time")
-                if published_time:
-                    logger.info(f"[DAE] 📅 Comment age: '{published_time}'")
-                else:
-                    logger.warning("[DAE] ⚠️ Could not extract published_time from DOM")
-                return data
-            else:
-                # OCCAM'S RAZOR: No DOM thread at index = no comment exists
-                # Return None instead of fallback dict (first principles detection)
-                logger.debug(f"[DAE] No DOM thread at index - comment doesn't exist")
-                return None
-
-        except Exception as e:
-            logger.warning(f"[DAE] Failed to extract comment data: {e}")
-            return {'text': '', 'author_name': 'Unknown', 'channel_id': None, 'is_mod': False, 'is_subscriber': False, 'published_time': None}
+        """Extract the exact Studio row through the existing driver."""
+        return extract_row_comment_data(self.driver, comment_idx)
 
     @staticmethod
     def parse_comment_age_days(published_time: str) -> Optional[int]:
@@ -957,6 +813,7 @@ class CommentProcessor:
         }
         reply_text_to_post = ""
         used_intelligent = False
+        reply_source = "explicit" if reply_text else "unknown"
         
         # Phase 0: Knowledge - Extract comment data
         logger.info(f"[CARDIOVASCULAR] [PROCESS-COMMENT-{comment_idx}] ═══ START ═══")
@@ -984,6 +841,9 @@ class CommentProcessor:
         results["commenter_channel_id"] = comment_data.get("channel_id")
         # Training Mode: Capture comment text for transcript (Task 3)
         results["comment_text"] = comment_data.get('text', '')[:500]  # Truncate for storage
+        results["video_title"] = comment_data.get("video_title")
+        results["video_id"] = comment_data.get("video_id")
+        results["video_url"] = comment_data.get("video_url")
         try:
             context_flags = self._get_context_flags(comment_data)
         except Exception as e:
@@ -1355,40 +1215,12 @@ class CommentProcessor:
                 logger.info(f"  [LAYER-2] Generating intelligent reply (Tier: {comment_data.get('tier', 'default')})...")
                 logger.info("[HARD-THINK] Layer 2: Invoking Intelligent Reply Generator...")
                 
-                # Start Heartbeat
-                hb_stop = asyncio.Event()
-                hb_task = asyncio.create_task(self._thinking_heartbeat("Layer 2 (Intelligence)", hb_stop))
-                
-                try:
-                    # LLM TIMEOUT: 10 seconds for AI generation
-                    # 2026-02-04: Reduced from 15s→10s (Grok timeout is now 8s)
-                    actual_reply_text = await asyncio.wait_for(
-                        asyncio.to_thread(self._generate_intelligent_reply, comment_data),
-                        timeout=10.0
-                    )
-                    hb_stop.set() # Stop heartbeat
+                actual_reply_text, reply_source = await self._await_reply_generation(comment_data)
+                allow_generic = os.getenv("YT_ALLOW_GENERIC_REPLY_FALLBACK", "false").strip().lower() in {"1", "true", "yes", "on"}
+                if actual_reply_text and not allow_generic and not self.is_contextual_reply_source(reply_source):
+                    logger.warning("[CONTEXT-GATE] Skipping non-contextual reply from source=%s", reply_source)
+                    actual_reply_text = ""
 
-                    # Log result length for debugging
-                    reply_len = len(actual_reply_text) if actual_reply_text else 0
-                    logger.info(f"[HARD-THINK] Layer 2 Result: '{actual_reply_text[:50] if actual_reply_text else ''}...' (len={reply_len})")
-
-                except asyncio.TimeoutError:
-                    hb_stop.set()
-                    logger.warning("[HARD-THINK] ⚠️ Layer 2 TIMEOUT (10s) - AI Generation too slow, check LLM connectivity")
-                    actual_reply_text = None 
-                except Exception as e:
-                    hb_stop.set()
-                    logger.error(f"[HARD-THINK] ⚠️ Layer 2 ERROR: {e}")
-                    actual_reply_text = None
-                finally:
-                    # Ensure heartbeat is killed even if something crazy happens
-                    if not hb_task.done():
-                        hb_stop.set()
-                        try:
-                            await hb_task
-                        except:
-                            pass
-                
                 # FALLBACK MECHANISM (Occam's Safety Net)
                 # CRITICAL FIX (2025-12-23): Distinguish between intentional skip vs failure
                 # - Empty string "" = Intentional skip (anti-spam, probabilistic) → DON'T apply fallback
@@ -1400,23 +1232,32 @@ class CommentProcessor:
                     # actual_reply_text remains "" - caller will handle this as "skip reply"
 
                 elif not actual_reply_text or not actual_reply_text.strip():
-                    # Failure case (None, whitespace-only) - apply fallback
+                    # Failure case: fail closed unless legacy templates are opted in.
                     if actual_reply_text is not None:
                         logger.warning(f"[HARD-THINK] ⚠️ AI returned WHITESPACE reply! Triggering fallback.")
                     else:
                         logger.warning(f"[HARD-THINK] ⚠️ AI returned None! Triggering fallback.")
 
-                    logger.info("[HARD-THINK] Activiting Fallback Reply (Safe Template)")
-                    # Simple, safe, engagement-oriented fallbacks
-                    fallback_opts = [
-                        "Thanks for watching! 🚀",
-                        "Appreciate the comment! 🙏",
-                        "Great point! 👍",
-                        "FoundUps is the way! 💎",
-                        "0102 logic engaged! ✊"
-                    ]
-                    actual_reply_text = random.choice(fallback_opts)
-                    used_intelligent = False
+                    allow_generic = os.getenv(
+                        "YT_ALLOW_GENERIC_REPLY_FALLBACK", "false"
+                    ).strip().lower() in {"1", "true", "yes", "on"}
+                    if allow_generic:
+                        logger.info("[HARD-THINK] Activating legacy fallback reply")
+                        fallback_opts = [
+                            "Thanks for watching! 🚀",
+                            "Appreciate the comment! 🙏",
+                            "Great point! 👍",
+                            "FoundUps is the way! 💎",
+                            "0102 logic engaged! ✊",
+                        ]
+                        actual_reply_text = random.choice(fallback_opts)
+                        reply_source = "template"
+                        used_intelligent = False
+                    else:
+                        logger.warning(
+                            "[CONTEXT-GATE] No grounded reply available; skipping post"
+                        )
+                        actual_reply_text = ""
                 else:
                     used_intelligent = True
 
@@ -1458,13 +1299,8 @@ class CommentProcessor:
                 if reply_ok:
                     results['reply_text_posted'] = reply_text_to_post
                     results['reply_source'] = 'bot'  # vs '012_manual' for training
-                    # LLM SOURCE TRACKING (2026-02-21): Capture which agent generated reply
-                    try:
-                        generator = get_reply_generator()
-                        results['llm_source'] = generator.get_last_llm_source()
-                        logger.info(f"  [REPLY] LLM source: {results['llm_source']}")
-                    except Exception:
-                        results['llm_source'] = 'unknown'
+                    results['llm_source'] = reply_source
+                    logger.info(f"  [REPLY] LLM source: {reply_source}")
                 self.stats['replies'] += 1 if results['reply'] else 0
                 logger.info(f"  [REPLY] {'OK' if results['reply'] else 'FAIL'}")
             elif do_reply:
@@ -1542,7 +1378,31 @@ class CommentProcessor:
             elapsed = time.time() - start_time
             logger.info(f"  [HARD-THINK] {layer_name} still processing... ({elapsed:.1f}s)")
 
-    def _generate_intelligent_reply(self, comment_data: Dict[str, Any]) -> str:
+    async def _await_reply_generation(self, comment_data):
+        """Bound the await and invalidate queued work without pretending to kill threads."""
+        hb_stop = asyncio.Event()
+        hb_task = asyncio.create_task(self._thinking_heartbeat("Layer 2 (Intelligence)", hb_stop))
+        generation_cancel = Event()
+        try:
+            generation = await asyncio.wait_for(
+                asyncio.to_thread(self._generate_intelligent_reply, comment_data,
+                                  with_source=True, cancel_event=generation_cancel),
+                timeout=10.0,
+            )
+            return generation.text, generation.source
+        except asyncio.TimeoutError:
+            logger.warning("[HARD-THINK] Layer 2 TIMEOUT (10s) - skipping this generation")
+            return None, "unknown"
+        except Exception as exc:
+            logger.error("[HARD-THINK] Layer 2 ERROR: %s", exc)
+            return None, "unknown"
+        finally:
+            generation_cancel.set()
+            hb_stop.set()
+            if not hb_task.done():
+                await hb_task
+
+    def _generate_intelligent_reply(self, comment_data: Dict[str, Any], *, with_source=False, cancel_event=None):
         """
         Synchronous wrapper for generating intelligent reply.
         Used within to_thread to prevent blocking the event loop.
@@ -1551,14 +1411,18 @@ class CommentProcessor:
             return None
 
         generator = get_reply_generator()
-        return generator.generate_reply(
+        generate = generator.generate_reply_with_source if with_source else generator.generate_reply
+        receipt_args = {"cancel_event": cancel_event} if with_source else {}
+        return generate(
+            **receipt_args,
             author_name=comment_data.get('author_name', ''),
             comment_text=comment_data.get('text', ''),
             author_channel_id=comment_data.get('channel_id'),
             is_mod=comment_data.get('is_mod', False),
             is_subscriber=comment_data.get('is_subscriber', False),
             published_time=comment_data.get('published_time'),
-            video_title=self.video_title  # NEW (2025-12-30): Pass video context for alignment detection
+            video_title=comment_data.get('video_title'),
+            target_channel_id=self.target_channel_id,
         )
 
     def _get_context_flags(self, comment_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -1568,6 +1432,7 @@ class CommentProcessor:
             'is_question': '?' in text or any(w in text for w in ['how', 'why', 'what', 'when', 'where']),
             'is_positive': any(w in text for w in ['great', 'awesome', 'love', 'thanks', 'good', 'best']),
             'is_negative': any(w in text for w in ['bad', 'hate', 'worst', 'stop', 'why']),
+            'has_video_context': bool(comment_data.get('video_title')),
         }
 
     async def _verify_action_with_vision(self, action_name: str, verify_description: str, timeout: float = 30.0) -> bool:

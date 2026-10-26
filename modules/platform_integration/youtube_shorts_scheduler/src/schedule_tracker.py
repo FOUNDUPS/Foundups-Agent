@@ -5,6 +5,7 @@ Persistent state management for tracking scheduled videos per date.
 """
 
 import json
+import copy
 import logging
 import random
 from pathlib import Path
@@ -15,7 +16,7 @@ from datetime import datetime, timedelta
 # a bare time that Studio interprets in the account's own tz, so an ET target
 # must be converted to the channel-local wall-clock before typing.
 from modules.platform_integration.youtube_shorts_scheduler.src.peak_window import (
-    convert_et_to_channel_tz,
+    convert_et_to_channel_tz, get_peak_slots_et, is_move2japan, require_same_date_cadence,
 )
 
 logger = logging.getLogger(__name__)
@@ -26,8 +27,14 @@ TRACKER_DIR = Path(__file__).parent.parent / "memory"
 # Authoritative per-channel daily cap on scheduled shorts.
 # Belt-and-suspenders: the allocator clamps to this value even if a caller
 # passes a larger max_per_day (e.g. a stale registry/config value of 8).
-# Lowering this is the single load-bearing knob to stop over-scheduling.
+# Move2Japan has an explicit operator-approved override in channel_daily_cap.
 HARD_CAP_PER_DAY = 3
+
+
+def channel_daily_cap(channel_id: str, requested: Optional[int] = None) -> int:
+    """Explicit Move2Japan cadence; all other channels retain the hard-three cap."""
+    limit = 8 if is_move2japan(channel_id) else HARD_CAP_PER_DAY
+    return limit if requested is None else max(0, min(requested, limit))
 
 # Time jitter: max number of 15-minute steps to shift from base time
 # e.g. MAX_JITTER_STEPS=2 means ±30 min (±2 steps x 15 min)
@@ -84,7 +91,7 @@ class ScheduleTracker:
     - Prioritizes empty dates over partially filled
     """
 
-    def __init__(self, channel_id: str, storage_dir: Optional[Path] = None):
+    def __init__(self, channel_id: str, storage_dir: Optional[Path] = None, *, persist: bool = True):
         """
         Initialize tracker for a channel.
 
@@ -94,7 +101,9 @@ class ScheduleTracker:
         """
         self.channel_id = channel_id
         self.storage_dir = storage_dir or TRACKER_DIR
-        self.storage_dir.mkdir(parents=True, exist_ok=True)
+        self.persist = persist
+        if self.persist:
+            self.storage_dir.mkdir(parents=True, exist_ok=True)
 
         self.tracker_file = self.storage_dir / f"schedule_{channel_id}.json"
         self.schedule: Dict[str, int] = {}  # {date_str: count}
@@ -120,6 +129,8 @@ class ScheduleTracker:
 
     def save(self):
         """Persist schedule to JSON file."""
+        if not self.persist:
+            return
         try:
             data = {
                 "channel_id": self.channel_id,
@@ -132,6 +143,12 @@ class ScheduleTracker:
             logger.info(f"[TRACKER] Saved {len(self.schedule)} dates")
         except Exception as e:
             logger.error(f"[TRACKER] Error saving: {e}")
+
+    def preview_copy(self):
+        """Independent in-memory allocation state, retaining this storage scope."""
+        preview = copy.deepcopy(self)
+        preview.persist = False
+        return preview
 
     def get_count(self, date_str: str) -> int:
         """
@@ -196,7 +213,7 @@ class ScheduleTracker:
     def get_next_available_slot(
         self,
         time_slots: List[str],
-        max_per_day: int = 3,
+        max_per_day: Optional[int] = None,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         channel_tz: Optional[str] = None,
@@ -230,11 +247,14 @@ class ScheduleTracker:
 
         # Authoritative clamp: never schedule more than HARD_CAP_PER_DAY per day,
         # even if a caller passes a larger max_per_day from a stale registry/config.
-        effective_cap = min(max_per_day, HARD_CAP_PER_DAY)
+        effective_cap = channel_daily_cap(self.channel_id, max_per_day)
+        if is_move2japan(self.channel_id):
+            time_slots = get_peak_slots_et(self.channel_id)
 
         current = start_date
 
         while current <= end_date:
+            require_same_date_cadence(self.channel_id, channel_tz, current)
             # Format date like YouTube Studio shows it: "Jan 5, 2026"
             # Windows-safe formatting (avoid %-d which is unsupported on Windows)
             date_str = f"{current.strftime('%b')} {current.day}, {current.year}"
@@ -254,7 +274,7 @@ class ScheduleTracker:
                     base_time = et_base
 
                 # Add jitter for human-like variance (reused, unchanged).
-                time_slot = _add_time_jitter(base_time)
+                time_slot = base_time if is_move2japan(self.channel_id) else _add_time_jitter(base_time)
                 slot_label = f"slot {count + 1}/{effective_cap}"
                 logger.info(
                     f"[TRACKER] Allocated: {date_str} at {time_slot} "
@@ -277,8 +297,8 @@ class ScheduleTracker:
         """
         total = sum(self.schedule.values())
         dates_with_videos = {d: c for d, c in self.schedule.items() if c > 0}
-        full_days = sum(1 for c in dates_with_videos.values() if c >= HARD_CAP_PER_DAY)
-        partial_days = sum(1 for c in dates_with_videos.values() if 0 < c < HARD_CAP_PER_DAY)
+        full_days = sum(1 for c in dates_with_videos.values() if c >= channel_daily_cap(self.channel_id))
+        partial_days = sum(1 for c in dates_with_videos.values() if 0 < c < channel_daily_cap(self.channel_id))
 
         # Date range
         sorted_dates = sorted(dates_with_videos.keys(), key=lambda d: self._parse_date(d))
@@ -327,7 +347,7 @@ class ScheduleTracker:
         for date_str, count in self.schedule.items():
             try:
                 parsed_date = self._parse_date(date_str).date()
-                if parsed_date > today and count >= HARD_CAP_PER_DAY:
+                if parsed_date > today and count >= channel_daily_cap(self.channel_id):
                     future_full_days += 1
             except Exception:
                 continue
@@ -351,7 +371,7 @@ class ScheduleTracker:
 
         logger.info(f"[TRACKER] ╔══ SCHEDULE REPORT: {self.channel_id[:12]}... ══╗")
         logger.info(f"[TRACKER] ║ Total scheduled: {total:>4} videos")
-        logger.info(f"[TRACKER] ║ Full days ({HARD_CAP_PER_DAY}/{HARD_CAP_PER_DAY}): {full:>4} days")
+        logger.info(f"[TRACKER] ║ Full days ({channel_daily_cap(self.channel_id)}/{channel_daily_cap(self.channel_id)}): {full:>4} days")
         logger.info(f"[TRACKER] ║ Partial days:    {partial:>4} days")
         logger.info(f"[TRACKER] ║ Date range:      {first} → {last}")
         logger.info(f"[TRACKER] ╚{'═' * 44}╝")

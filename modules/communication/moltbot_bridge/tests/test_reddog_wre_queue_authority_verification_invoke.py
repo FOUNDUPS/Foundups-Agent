@@ -39,6 +39,20 @@ from modules.communication.moltbot_bridge.src.reddog_wre_queue_consumer_dryrun i
     NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
     WRE_QUEUE_CONSUMER_DRYRUN_READY,
 )
+from modules.communication.moltbot_bridge.src.reddog_queue_authority_admission import (
+    _admit_current_queue_authority,
+)
+from modules.communication.moltbot_bridge.src.reddog_wre_queue_authority_request_integrity import (
+    canonical_delegated_authority_request_digest,
+    rehydrate_delegated_authority_request,
+)
+from modules.communication.moltbot_bridge.tests.reddog_signed_worker_dispatch_test_support import (
+    signed_stage_binding,
+)
+from modules.communication.moltbot_bridge.tests.reddog_elevated_consensus_test_support import (
+    sign_with_test_consensus,
+    verified_consensus_for_request,
+)
 
 
 REPO_ROOT = Path(__file__).resolve().parents[4]
@@ -53,6 +67,7 @@ MODULE_PATH = (
 NOW = 1000
 REPO = "FOUNDUPS/Foundups-Agent"
 FID = "paccess_001"
+TARGET = f"modules/foundups/{FID}/README.md"
 
 
 class _MockSignerVerifier:
@@ -83,6 +98,9 @@ class _MockSignerVerifier:
             signer_loads_no_untrusted_code=True,
             no_secret_material_returned=True,
         )
+
+    def sign_with_elevated_consensus(self, request, permit):
+        return sign_with_test_consensus(self, request, permit, now=NOW)
 
     def verify(self, public_key: str, signing_input: str, signature: str) -> bool:
         secret = self.secrets.get(public_key)
@@ -131,20 +149,39 @@ class _NoRevocation:
 
 
 def _queue_result():
+    binding = signed_stage_binding(
+        requested_operation="edit_foundup_module",
+        changed_paths=(TARGET,),
+    )
+    selected_slice = binding["progressive_policy_stage_receipt"][
+        "selected_slice"
+    ]
     receipt = {
         "receipt_id": "wre_queue_consumer_1234",
         "queue_item_id": "queue-1",
-        "slice_id": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "slice_id": selected_slice,
         "claim_id": "claim-1",
         "worker_id": "reddog-main-bootstrap",
         "freshness_receipt_id": "fresh-1",
-        "wsp15_allocation_receipt_id": "sha256:wsp15-allocation",
-        "wsp15_allocation_digest": "sha256:wsp15-allocation-digest",
-        "wsp15_priority": "P0",
-        "wsp15_mps_total": 20,
-        "reasoning_tier": "ULTRA",
+        "wsp15_allocation_receipt": binding["wsp15_allocation_receipt"],
+        "wsp15_allocation_receipt_id": binding["wsp15_allocation_receipt_id"],
+        "wsp15_allocation_digest": binding["wsp15_allocation_digest"],
+        "wsp15_priority": binding["wsp15_priority"],
+        "wsp15_mps_total": binding["wsp15_mps_total"],
+        "reasoning_tier": binding["wsp15_reasoning_tier"],
+        "progressive_policy_stage_receipt_id": binding["progressive_policy_stage_receipt_id"],
+        "progressive_policy_stage_digest": binding["progressive_policy_stage_digest"],
+        "progressive_policy_stage_receipt": binding["progressive_policy_stage_receipt"],
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + ("b" * 64),
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+        "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:author"
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
     }
     return {
         "accepted": True,
@@ -152,10 +189,33 @@ def _queue_result():
         "rejection_reasons": [],
         "receipt": receipt,
         "selected_queue_item_id": "queue-1",
-        "selected_slice": "FOUNDUP_SCOPED_SAMPLE_PHASE1",
+        "selected_slice": selected_slice,
         "next_required_gate": NEXT_GATE_SIGNED_AUTHORITY_REQUIRED,
         "execution_ready": False,
     }
+
+
+def _authoritative_queue_item():
+    item = dict(_queue_result()["receipt"])
+    item.update(
+        status="QUEUED",
+        no_execution_performed=True,
+        independent_verifier_required=item[
+            "progressive_policy_stage_receipt"
+        ]["independent_verifier_required"],
+    )
+    return item
+
+
+def _queue_authority_admission(dryrun):
+    payload = dryrun.to_dict() if hasattr(dryrun, "to_dict") else dryrun
+    request = rehydrate_delegated_authority_request(
+        payload["delegated_authority_request"]
+    )
+    return _admit_current_queue_authority(
+        request=request,
+        authoritative_queue_item=_authoritative_queue_item(),
+    )
 
 
 def _profile(**overrides):
@@ -169,7 +229,7 @@ def _profile(**overrides):
         "foundup_id": FID,
         "allowed_paths": [f"modules/foundups/{FID}/**"],
         "denied_paths": [],
-        "requested_operation": "create_foundup",
+        "requested_operation": "edit_foundup_module",
         "base_ref": "main",
         "permission_snapshot_digest": "sha256:snap-1",
         "identity_nonce": "identity-nonce-0001",
@@ -181,6 +241,14 @@ def _profile(**overrides):
         "key_epoch": "epoch-1",
         "consensus_receipt_digest": "sha256:consensus",
         "sovereign_authorization_digest": "sha256:012-token",
+        "model_selection_receipt_id": "selection:author",
+        "model_selection_digest": "sha256:" + ("b" * 64),
+        "model_runtime_binding_receipt_id": "reddog_model_runtime_binding:author",
+        "model_runtime_binding_digest": "sha256:" + ("c" * 64),
+        "model_runtime_binding_verification_receipt_id": (
+            "model_runtime_binding_verification:author"
+        ),
+        "model_runtime_binding_verification_digest": "sha256:" + ("e" * 64),
     }
     profile.update(overrides)
     return profile
@@ -201,9 +269,26 @@ def _runtime_result(**profile_overrides):
         work_order=_work_order(),
     )
     assert dryrun.accepted is True, dryrun.rejection_reasons
+    dryrun_payload = dryrun.to_dict()
+    request = rehydrate_delegated_authority_request(
+        dryrun_payload["delegated_authority_request"]
+    )
+    request, consensus, _ = verified_consensus_for_request(
+        request,
+        now=NOW,
+        principal=_PrincipalResolver().resolve(
+            request.principal_id, request.principal_provider
+        ),
+    )
+    dryrun_payload["delegated_authority_request"] = request.to_dict()
+    dryrun_payload["receipt"]["delegated_authority_request_digest"] = (
+        canonical_delegated_authority_request_digest(request.to_dict())
+    )
     result = invoke_reddog_wre_queue_authority_runtime(
         explicit_queue_authority_runtime_requested=True,
-        queue_authority_request_dryrun=dryrun.to_dict(),
+        queue_authority_request_dryrun=dryrun_payload,
+        queue_authority_admission=_queue_authority_admission(dryrun_payload),
+        elevated_consensus_capability=consensus,
         store=InMemoryAuthorityRuntimeStore(),
         signer=signer,
         principal_resolver=_PrincipalResolver(),
@@ -276,6 +361,29 @@ def test_missing_authority_payload_rejects() -> None:
     assert QueueAuthorityVerificationInvokeReason.AUTHORITY_PAYLOAD_MISSING in result.rejection_reasons
 
 
+def test_authority_receipt_digest_mismatch_rejects_before_verification() -> None:
+    runtime, signer = _runtime_result()
+    payload = runtime.to_dict()
+    payload["authority_result"]["receipt"]["work_authority_digest"] = "sha256:" + "0" * 64
+
+    result = invoke_reddog_wre_queue_authority_verification(
+        explicit_queue_authority_verification_requested=True,
+        queue_authority_runtime_result=payload,
+        signature_verifier=signer,
+        principal_key_resolver=_PrincipalKeyResolver(),
+        nonce_store=InMemoryNonceStore(),
+        snapshot_resolver=_SnapshotResolver(),
+        revocation_oracle=_NoRevocation(),
+        now=NOW,
+        required_valve_state=VALVE_OPEN_WORKTREE_CREATE,
+    )
+
+    assert result.decision == QUEUE_AUTHORITY_VERIFICATION_INVOKE_REJECT
+    assert QueueAuthorityVerificationInvokeReason.AUTHORITY_DIGEST_MISMATCH in (
+        result.rejection_reasons
+    )
+
+
 def test_verifies_issued_authority_without_execution() -> None:
     runtime, signer = _runtime_result()
 
@@ -295,6 +403,15 @@ def test_verifies_issued_authority_without_execution() -> None:
     assert result.rejection_reasons == []
     assert result.verification_result is not None
     assert result.verification_result.accepted is True
+    assert result.verified_work_authority_digest == (
+        runtime.authority_result.receipt.work_authority_digest
+    )
+    assert result.authority_verification_receipt_id is not None
+    assert result.authority_verification_receipt_id.startswith(
+        "reddog_authority_verification:"
+    )
+    assert result.authority_verification_receipt_digest is not None
+    assert result.authority_verification_receipt_digest.startswith("sha256:")
     assert result.no_signing_performed is True
     assert result.no_authority_issued is True
     assert result.no_worker_spawn_performed is True

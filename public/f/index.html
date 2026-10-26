@@ -910,7 +910,7 @@
       poc_landing_status: true, lightpaper_url: true, website_url: true,
       poc_url: true, app_url: true, github_url: true, docs_url: true,
       screenshot_url: true, public_summary: true, portfolio_priority: true,
-      portfolio_ready: true, is_dual_identity: true
+      portfolio_ready: true, is_dual_identity: true, public_discovery_alias: true
     };
 
     // Human-readable labels for poc_landing_status (the public readiness field).
@@ -929,6 +929,9 @@
     }
 
     var container = document.getElementById('entryContent');
+    // Initialize index state before its asynchronous fetch and early return.
+    var showcaseEntities = [];
+    var showcaseFilter = { query: '', readiness: '' };
 
     // WSP 104: Parse foundup_id from pathname, not query params
     var path = window.location.pathname;
@@ -953,7 +956,8 @@
       return;
     }
 
-    var foundupId = decodeURIComponent(match[1]);
+    var foundupId = match[1];
+    var resolvedDiscoveryId = null;
     // Capture subpath (forward-compat indicator only).
     var subpathMatch = path.match(/^\/f\/[^\/]+\/(.+)$/);
     var subpath = subpathMatch ? subpathMatch[1] : null;
@@ -969,6 +973,13 @@
       return;
     }
 
+    try {
+      foundupId = decodeURIComponent(foundupId);
+    } catch (err) {
+      renderNotFound('FoundUp not found', 'Invalid discovery address.');
+      return;
+    }
+
     fetch(PUBLIC_CATALOG_URL)
       .then(function(r) {
         if (!r.ok) throw new Error('Catalog fetch failed');
@@ -977,7 +988,7 @@
       .then(function(projection) {
         // Scope-free public projection: { entities: [...] }
         var items = projectionEntities(projection);
-        var item = items.find(function(i) { return i.foundup_id === foundupId; });
+        var item = resolveDiscoveryEntry(items);
         if (!item) {
           renderNotFound('FoundUp not found', 'The FoundUp "' + esc(foundupId) + '" does not exist in the catalog.');
           return;
@@ -986,6 +997,7 @@
         // READ-ONLY public discovery: landing only. App mount / shell handoff
         // is a gated participation surface and is NOT served from the public
         // /f/ projection path (no entry_url field exists in the allowlist).
+        resolvedDiscoveryId = item.foundup_id;
         renderEntry(item);
         populateConciergeContext(item);
       })
@@ -993,6 +1005,35 @@
         console.error('Catalog load error:', err);
         renderNotFound('Error', 'Failed to load FoundUp catalog.');
       });
+
+    // Aliases select a canonical landing only; they never become tenant identity.
+    function resolveDiscoveryEntry(items) {
+      var canonical = new Map();
+      var aliases = new Map();
+      items.forEach(function(item) {
+        if (canonical.has(item.foundup_id)) throw new Error('Ambiguous canonical ID');
+        canonical.set(item.foundup_id, item);
+      });
+      items.forEach(function(item) {
+        if (!Object.prototype.hasOwnProperty.call(item, 'public_discovery_alias')) return;
+        var alias = item.public_discovery_alias;
+        if (!discoverySlug(alias) || !discoverySlug(item.foundup_id) ||
+            ['portfolio_candidate', 'portfolio_ready', 'portfolio_featured'].indexOf(item.portfolio_status) < 0 ||
+            canonical.has(alias) || aliases.has(alias)) throw new Error('Invalid discovery alias');
+        aliases.set(alias, item);
+      });
+      if (canonical.has(foundupId)) return canonical.get(foundupId);
+      if (!discoverySlug(foundupId) || !/^\/f\/[^/]+\/?$/.test(path)) return null;
+      var selected = aliases.get(foundupId);
+      if (!selected) return null;
+      window.history.replaceState(null, '', '/f/' + selected.foundup_id);
+      foundupId = selected.foundup_id;
+      return selected;
+    }
+
+    function discoverySlug(value) {
+      return typeof value === 'string' && value.length > 0 && !/[^a-z0-9_]/.test(value);
+    }
 
     // Defense-in-depth: strip any field NOT on the public allowlist from a
     // projection entry before the renderer ever sees it. The projection is
@@ -1021,10 +1062,6 @@
       else if (Array.isArray(projection.items)) raw = projection.items;
       return raw.map(sanitizeEntity);
     }
-
-    // Module-scoped state for the read-only browse filter (index surface only).
-    var showcaseEntities = [];
-    var showcaseFilter = { query: '', readiness: '' };
 
     function renderPortfolioShowcase(projection) {
       // Sort by portfolio_priority (nulls last). Pure read of the projection.
@@ -1056,17 +1093,18 @@
     }
 
     function renderShowcaseShell() {
+      document.title = 'FX — FoundUps Exchange | FoundUPS';
       var html = '<div class="portfolio-container">';
       html += '  <header class="portfolio-header">';
-      html += '    <h1 class="portfolio-title">FoundUps Public Showcase</h1>';
-      html += '    <p class="portfolio-tagline">Consolidated portfolio of active incubating platforms, candidates, and infrastructure substrate under development.</p>';
+      html += '    <h1 class="portfolio-title">FX — FoundUps Exchange</h1>';
+      html += '    <p class="portfolio-tagline">Explore FoundUps projects and declared token symbols.</p>';
+      html += '    <p class="portfolio-tagline">A declared ticker is not evidence of token deployment or trading availability.</p>';
       html += '  </header>';
 
-      // Read-only client-side filter: text search (display_name / public_summary)
-      // + readiness filter (poc_landing_status). Both fields are on the public
-      // allowlist; no member-scoped field is referenced.
+      // Read-only text search: name, summary, canonical ID and optional declared
+      // symbol, plus landing readiness. All fields are public-allowlisted.
       html += '  <div class="portfolio-filter-bar">';
-      html += '    <input type="text" id="showcaseSearch" class="portfolio-filter-search" placeholder="Search FoundUps..." aria-label="Search FoundUps" value="' + esc(showcaseFilter.query) + '">';
+      html += '    <input type="text" id="showcaseSearch" class="portfolio-filter-search" placeholder="Search projects or tickers..." aria-label="Search FoundUps projects or token symbols" value="' + esc(showcaseFilter.query) + '">';
       html += '    <select id="showcaseReadiness" class="portfolio-filter-select" aria-label="Filter by readiness">';
       html += '      <option value="">All readiness</option>';
       showcaseReadinessOptions().forEach(function(r) {
@@ -1103,7 +1141,9 @@
       }
       var q = (showcaseFilter.query || '').trim().toLowerCase();
       if (!q) return true;
-      var hay = ((entity.display_name || '') + ' ' + (entity.public_summary || '') + ' ' + (entity.foundup_id || '')).toLowerCase();
+      var tokenSymbol = typeof entity.token_symbol === 'string' ? entity.token_symbol.trim() : '';
+      var hay = ((entity.display_name || '') + ' ' + (entity.public_summary || '') + ' ' +
+        (entity.foundup_id || '') + (tokenSymbol ? ' ' + tokenSymbol + ' $' + tokenSymbol : '')).toLowerCase();
       return hay.indexOf(q) !== -1;
     }
 
@@ -1121,7 +1161,7 @@
       visible.forEach(function(entity) {
         // READ-ONLY: render ONLY public-allowlisted fields from the projection.
         var name = entity.display_name || entity.foundup_id;
-        var tokenSymbol = entity.token_symbol || entity.foundup_id.toUpperCase().substring(0, 4);
+        var tokenSymbol = typeof entity.token_symbol === 'string' ? entity.token_symbol.trim() : '';
         var summary = entity.public_summary || 'Incubating FoundUp.';
         var readiness = entity.poc_landing_status || 'discoverable_only';
         var status = entity.portfolio_status || '';
@@ -1136,7 +1176,9 @@
         html += '      <div class="portfolio-card-header">';
         html += '        <div class="portfolio-card-title-block">';
         html += '          <div class="portfolio-card-name">' + esc(name) + '</div>';
-        html += '          <div class="portfolio-card-token">$' + esc(tokenSymbol) + '</div>';
+        if (tokenSymbol) {
+          html += '          <div class="portfolio-card-token">$' + esc(tokenSymbol) + '</div>';
+        }
         html += '        </div>';
         html += '      </div>';
 
@@ -1193,7 +1235,10 @@
         var pocSafe = safeUrl(entity.poc_url);
         var appSafe = safeUrl(entity.app_url);
         var siteSafe = safeUrl(entity.website_url);
-        if (pocSafe) {
+        var discoveryPath = shellDiscoveryPath(entity);
+        if (discoveryPath) {
+          linksContainer.appendChild(makeOutboundLink(discoveryPath, 'Browse houses', true));
+        } else if (pocSafe) {
           linksContainer.appendChild(makeOutboundLink(pocSafe, 'Demo App'));
         } else if (appSafe) {
           linksContainer.appendChild(makeOutboundLink(appSafe, 'Open App'));
@@ -1213,14 +1258,27 @@
 
     // Build a single outbound anchor: href set via .href PROPERTY (safe sink),
     // label set via textContent. url MUST already be safeUrl()-validated.
-    function makeOutboundLink(url, label) {
+    function makeOutboundLink(url, label, sameTab) {
       var a = document.createElement('a');
       a.href = url;                 // PROPERTY assignment, validated URL: safe sink
-      a.target = '_blank';
-      a.rel = 'noopener';
+      if (!sameTab) {
+        a.target = '_blank';
+        a.rel = 'noopener';
+      }
       a.className = 'portfolio-link-btn portfolio-link-btn-sec';
       a.textContent = label;        // textContent, never innerHTML, for the label
       return a;
+    }
+
+    // The registered public housing POC is a shell discovery selection. Its
+    // same-tab handoff is fixed by tenant AND canonical public POC URL; neither
+    // request query parameters nor another tenant can turn it into app admission.
+    function shellDiscoveryPath(entity) {
+      if (entity.foundup_id === 'move2japan' &&
+          entity.poc_url === 'https://foundups.com/member/?foundup=move2japan') {
+        return '/member/?foundup=move2japan';
+      }
+      return null;
     }
 
     // Escape a value for safe use inside a CSS attribute selector ("...").
@@ -1234,7 +1292,7 @@
     // external_url, entry_url, ...) is referenced. No participation control.
     function renderEntry(item) {
       var displayName = item.display_name || item.foundup_id;
-      var displayToken = item.token_symbol || item.foundup_id;
+      var displayToken = typeof item.token_symbol === 'string' ? item.token_symbol.trim() : '';
       var summary = item.public_summary || '';
       var readiness = item.poc_landing_status || 'discoverable_only';
       var readinessLabel = READINESS_STATUS_LABELS[readiness] || readiness || 'Unknown';
@@ -1246,7 +1304,9 @@
 
       // Hero
       html += '<section class="entry-hero">';
-      html += '<div class="entry-hero-token">$' + esc(displayToken) + '</div>';
+      if (displayToken) {
+        html += '<div class="entry-hero-token">$' + esc(displayToken) + '</div>';
+      }
       html += '<h1 class="entry-hero-name">' + esc(displayName) + '</h1>';
       if (item.is_dual_identity === true) {
         html += '<p class="entry-hero-tagline">Dual identity FoundUp.</p>';
@@ -1265,11 +1325,16 @@
       // an empty TEXT container is emitted here, and the anchors are built as DOM
       // elements (href set via .href PROPERTY) after container.innerHTML below.
       var links = [];
-      var addLink = function(field, label, url) {
+      var addLink = function(field, label, url, sameTab) {
         var safe = safeUrl(url);
-        if (safe) links.push([field, label, safe]);
+        if (safe) links.push([field, label, safe, sameTab === true]);
       };
-      addLink('poc_url', 'View PoC', item.poc_url);
+      var discoveryPath = shellDiscoveryPath(item);
+      if (discoveryPath) {
+        addLink('poc_url', 'Browse houses', discoveryPath, true);
+      } else {
+        addLink('poc_url', 'View PoC', item.poc_url);
+      }
       addLink('app_url', 'Open App', item.app_url);
       addLink('website_url', 'Website', item.website_url);
       addLink('github_url', 'GitHub', item.github_url);
@@ -1319,13 +1384,15 @@
           links.forEach(function(l) {
             var a = document.createElement('a');
             a.href = l[2];              // PROPERTY assignment, validated URL: safe sink
-            a.target = '_blank';
-            a.rel = 'noopener';
+            if (!l[3]) {
+              a.target = '_blank';
+              a.rel = 'noopener';
+            }
             a.className = 'entry-cta-btn';
             var labelSpan = document.createElement('span');
             labelSpan.textContent = l[1];
             var arrowSpan = document.createElement('span');
-            arrowSpan.textContent = '\u2197';
+            arrowSpan.textContent = l[3] ? '\u2192' : '\u2197';
             a.appendChild(labelSpan);
             a.appendChild(arrowSpan);
             ctaBlock.appendChild(a);
@@ -1474,7 +1541,7 @@
 
     function getEntryContext() {
       return {
-        foundupId: foundupId,
+        foundupId: resolvedDiscoveryId,
         subpath: subpath,
         item: currentItem,
         conciergeOpen: conciergeOpen
