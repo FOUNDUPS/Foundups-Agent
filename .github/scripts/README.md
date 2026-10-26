@@ -22,6 +22,18 @@ Python 3.12 application-image build while preserving current trust bootstrap.
 The receipt base and workflow trigger now cover that reconciled source; current
 hosted results are required before merge. Windows-host repair remains separate.
 
+The existing secret-gate regression now recognizes literal pip install commands
+in order, binds both bootstrap flags to that invocation, and ignores offline
+filename checks and comments. Installer text
+in unsupported wrappers, opaque code/heredocs, substitutions or conditional and
+background execution fails for explicit review, including installer examples
+printed by echo/printf. Its original Windows
+creation/bootstrap/install ordering assertion remains. The two previously missed
+isolated-install jobs (GitHub client and nomination contracts) reuse the existing
+hash-bound bootstrap and trigger on trust-file changes. The scanner itself,
+dependency selections and runtime authority are unchanged. This is a bounded
+workflow-source contract, not a general shell interpreter or host attestation.
+
 Added the Docker context contract after verifying root `COPY . .` had no root
 ignore policy. Existing script/workflow inventory and secret-gate ownership were
 reviewed before adding this distinct verifier. The fixture matrix is maintained

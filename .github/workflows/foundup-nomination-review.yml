@@ -5,6 +5,7 @@ on:
     types: [opened]
   pull_request:
     paths:
+      - 'requirements-trust-bootstrap.txt'
       - 'modules/ai_intelligence/ai_overseer/src/foundup_genesis/**'
       - 'modules/ai_intelligence/ai_overseer/tests/test_*intake*.py'
       - 'modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py'
@@ -21,6 +22,7 @@ on:
   push:
     branches: [main]
     paths:
+      - 'requirements-trust-bootstrap.txt'
       - 'modules/ai_intelligence/ai_overseer/src/foundup_genesis/**'
       - 'modules/ai_intelligence/ai_overseer/tests/test_*.py'
       - 'modules/foundups/agent/src/kanban_plugin_contract.py'
@@ -79,6 +81,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install the bounded test runner
         run: |
           python -m pip --isolated --disable-pip-version-check install --only-binary=:all: --report "$RUNNER_TEMP/nomination-installer-pip.json" pip==26.2.2

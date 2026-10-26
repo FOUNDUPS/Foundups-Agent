@@ -3,11 +3,13 @@ name: GitHub client mocked contracts
 on:
   pull_request:
     paths:
+      - 'requirements-trust-bootstrap.txt'
       - 'modules/platform_integration/github_integration/**'
       - '.github/workflows/github-client-contracts.yml'
   push:
     branches: [main]
     paths:
+      - 'requirements-trust-bootstrap.txt'
       - 'modules/platform_integration/github_integration/**'
       - '.github/workflows/github-client-contracts.yml'
   workflow_dispatch:
@@ -26,6 +28,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install declared test tools in the ephemeral runner
         run: >-
           python -m pip --isolated --disable-pip-version-check install
