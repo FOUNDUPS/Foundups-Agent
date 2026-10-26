@@ -14,3 +14,9 @@ Run `node --test modules/foundups/eduit/tests/*.test.mjs` from repository root.
   Remove before publishing. Exercise real mouse hold/unlock separately.
 
 See TestModLog and ../docs/PRESCHOOL_VIEWER_REVIEW.md for results and limitations.
+
+Slow-rescue revision extends the same engine tests and viewer fixture with
+score/sleep/practice/reset and64px bound checks. The optional live rescue button
+uses real-time waits; cloud-browser suspension can exhaust them before the active
+game clock advances. Treat that as inconclusive, never substitute a green engine
+result for a completed browser round.

@@ -876,3 +876,9 @@ stateful playback, direct video/game switch, snapshot sharing, repeat and touch
 lock. Shared EDUIT renderer enlarges sound words without changing motion/audio.
 See [preschool review](../../foundups/eduit/docs/PRESCHOOL_VIEWER_REVIEW.md)
 for evidence and limits.
+
+## 2026-10-27 — Slow-rescue viewer integration
+Existing director gains64px toolbar,60px fullscreen controls, Restart and untimed
+practice, longer feedback-clock bounds and slow-rescue-11 record namespace.
+EDUIT owns slower engine/cues/scoring; original15s media unchanged. See
+../../foundups/eduit/docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md. No upload/auth changes.

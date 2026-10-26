@@ -1,5 +1,17 @@
 # EDUIT — Education Using Information Technology
 
+## Current slow-rescue direction — 2026-10-27
+
+[SLOW_RESCUE_AND_AGENT_ROADMAP](docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md) supersedes
+the historical15-second game contracts below:60s active round,48s rescue window,
+untimed practice, varied wake taps, progressive hazards and once-only arrival
+points. The original15s film remains separate. The green vine is the destination.
+Creature-agent traits, optional on-device models, honest AI status, flooding and
+play-to-video are specified next prototypes, not active AI features.
+Use [interactive experience review](skillz/interactive_experience_review/SKILLz.md)
+for audience, lifecycle, UI and incentive audits; retain existing WRE ownership.
+
+
 **FoundUp status:** local Story Time proof of concept implemented; domain deployment pending
 **Product module:** Play EDUIT — adaptive learning through play  
 **Historical educational vision:** eSingularity — learn anything, anytime, anywhere (LAAA)

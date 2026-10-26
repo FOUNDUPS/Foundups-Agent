@@ -1,27 +1,38 @@
 import {bindPanelGestures} from './panel-gestures.mjs';
-import {initial,advance,actorPose} from './engine.mjs';
-import {scene,movie} from './scene.mjs';
+import {initial,advance,actorPose,DEADLINE} from './engine.mjs';
+import {scene} from './scene.mjs';
+import {gameWorld} from './game-world.mjs';
 import {locales,normalizeLocale,localizeEvent} from './learning-events.mjs';
 let locale='en';
 const $=id=>document.getElementById(id),stage=$('scene');
 let panelGestures;
 let state=initial(),last=0,paused=false,hitKey="";
 const soundtrack=new Audio("assets/little-shrew.mp4");soundtrack.preload="auto";
-function syncAudio(){soundtrack.currentTime=state.elapsed;if(!paused&&state.phase==="playing")soundtrack.play().catch(()=>{});else soundtrack.pause();}
+let lastCue=null,audioEnabled=false;
+function syncAudio(){if(paused||state.phase!=='playing')soundtrack.pause();}
+function cueAudio(cue){
+ if(!audioEnabled||paused||state.phase!=='playing'){soundtrack.pause();return;}
+ if(cue?.id!==lastCue){soundtrack.pause();lastCue=cue?.id||null;if(cue){soundtrack.currentTime=cue.sourceTime;soundtrack.play().catch(()=>{});}}
+ if(cue&&soundtrack.currentTime>=cue.sourceTime+cue.sourceDuration)soundtrack.pause();
+}
+function enableAudio(){audioEnabled=true;soundtrack.play().then(()=>{if(!lastCue||paused||state.phase!=='playing')soundtrack.pause();}).catch(()=>{});}
 const embedded=new URLSearchParams(location.search).get('embed')==='1';if(embedded)document.body.classList.add('embedded');
 const hits=document.createElement('div');hits.className='rescue-targets';stage.after(hits);
 for(const id of ['wake','root'])$(id).remove();
-function act(e){if(panelGestures?.isPinching())return;if(e==='start'||e==='retry')paused=false;else if(paused)return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
+function act(e){if(panelGestures?.isPinching())return;if(e==='start'||e==='retry'){paused=false;lastCue=null;enableAudio();}else if(paused)return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
 $('start').onclick=()=>act('start');$('retry').onclick=()=>act('retry');$('pause').onclick=()=>{paused=!paused;syncAudio();};
 function draw(){
  const t=state.elapsed,poses=state.actors.map(a=>actorPose(a,t));
- const world=movie(t);let cue=localizeEvent(world.cue,locale);
- if(cue?.kind==='sniff'){const a=poses.find(a=>a.id===state.selected)||poses.find(a=>a.status==='moving')||poses.find(a=>a.status==='safe')||poses.find(a=>a.id==='baby-3');cue={...cue,actorId:a.id,x:(a.x>650?a.x-130:a.scale<.6?a.x+180:a.x+165*a.scale),y:a.scale<.6?a.y+28:a.y-20};}
+ const world=gameWorld(state,poses),cue=localizeEvent(world.cue,locale);cueAudio(cue);
  stage.innerHTML=scene({...world,cue,actors:poses,showWords:true});
+ const svg=stage.querySelector('svg');const ns='http://www.w3.org/2000/svg';
+ const score=document.createElementNS(ns,'text');score.setAttribute('x','35');score.setAttribute('y','510');score.setAttribute('fill','#FFF4D9');score.setAttribute('font-size','60');score.setAttribute('font-family','sans-serif');score.setAttribute('font-weight','bold');score.setAttribute('aria-label',`${state.score} points`);score.textContent=`★ ${state.score}`;svg.append(score);
+ for(const a of poses.filter(a=>a.status==='sleeping'&&a.taps>0)){const text=document.createElementNS(ns,'text');text.setAttribute('x',a.x+60*a.scale);text.setAttribute('y',a.y-12);text.setAttribute('font-size','42');text.setAttribute('fill','#173F43');text.textContent='●'.repeat(a.taps)+'○'.repeat(a.wakeTaps-a.taps);svg.append(text);}
+ const award=state.awards.at(-1);if(award&&t-award.at<2){const pop=document.createElementNS(ns,'text');pop.setAttribute('x','820');pop.setAttribute('y','215');pop.setAttribute('text-anchor','middle');pop.setAttribute('font-size','60');pop.setAttribute('font-weight','bold');pop.setAttribute('fill','#FFF4D9');pop.textContent=`+${award.points}`;svg.append(pop);}
  const nextKey=state.phase+state.selected+state.actors.map(a=>a.status).join();
  if(nextKey!==hitKey){hitKey=nextKey;hits.replaceChildren();
- if(state.phase==='playing'&&t<9.6){
-  for(const a of poses.filter(a=>a.status==='sleeping'&&state.selected===null)){
+ if(state.phase==='playing'&&(state.practice||t<DEADLINE)){
+  for(const a of poses.filter(a=>['sleeping','wandering'].includes(a.status)&&state.selected===null)){
    const b=document.createElement('button');b.className='rescue-hit';b.setAttribute('aria-label',`Wake ${a.id}`);
    b.style.cssText=`left:${(a.x+20*a.scale)/9.6}%;top:${(a.y+20*a.scale)/5.4}%;width:${170*a.scale/9.6}%;height:${110*a.scale/5.4}%`;
    b.onclick=()=>act('select:'+a.id);hits.append(b);
@@ -30,13 +41,13 @@ function draw(){
  }
  }
  const over=state.phase==='over',saved=state.actors.filter(a=>a.status==='safe').length;
- $('message').textContent=over?(saved?`${saved} / 5 saved`:locales[locale].over):'';
+ $('message').textContent=over?(saved?`${saved} / 5 saved · ${state.score} points`:locales[locale].over):'';
  $('start').hidden=state.phase!=='ready';$('retry').hidden=!over;$('pause').hidden=state.phase!=='playing';$('time').textContent='';
  let end=$('ending');if(!end){end=document.createElement('div');end.id='ending';stage.parentElement.append(end);}
- end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved?`${saved} / 5`:locales[locale].over;text.setAttribute('aria-label',saved?`${saved} of 5 shrews saved`:locales[locale].over);const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label',locales[locale].again);button.onclick=()=>act('retry');end.append(text,button);}
+ end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved?`${saved} / 5 ★ ${state.score}`:locales[locale].over;text.setAttribute('aria-label',saved?`${saved} of 5 shrews saved, ${state.score} points`:locales[locale].over);const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label',locales[locale].again);button.onclick=()=>act('retry');end.append(text,button);}
 }
-function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&state.phase==='playing'){state=advance(state,'tick',dt);if(!soundtrack.paused&&Math.abs(soundtrack.currentTime-state.elapsed)>.15)soundtrack.currentTime=state.elapsed;draw();}requestAnimationFrame(frame);}
-window.storytimeReview={status(){return {paused,phase:state.phase,clock:state.elapsed};},setLocale(value){locale=normalizeLocale(value);document.documentElement.lang=locale;draw();return locale;},freeze(){paused=true;soundtrack.pause();return {svg:stage.innerHTML,phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state),locale};},play(){paused=false;if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
+function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&state.phase==='playing'){state=advance(state,'tick',dt);draw();}requestAnimationFrame(frame);}
+window.storytimeReview={status(){return {paused,phase:state.phase,clock:state.elapsed,score:state.score,practice:state.practice};},reset(){lastCue=null;state=advance(state,'retry');paused=true;soundtrack.pause();draw();},setPractice(value){state=initial({practice:!!value});lastCue=null;paused=true;soundtrack.pause();draw();},setLocale(value){locale=normalizeLocale(value);document.documentElement.lang=locale;draw();return locale;},freeze(){paused=true;soundtrack.pause();return {svg:stage.innerHTML,phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state),locale};},play(){paused=false;lastCue=null;enableAudio();if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
 // Reuse the Mall gesture owner inside the iframe; only same-origin parent can react.
 panelGestures=bindPanelGestures(stage.parentElement,{expand:()=>parent.postMessage({type:'storytime.fullscreen',expanded:true},location.origin),collapse:()=>parent.postMessage({type:'storytime.fullscreen',expanded:false},location.origin)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden){paused=true;soundtrack.pause();}});

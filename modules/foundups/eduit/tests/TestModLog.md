@@ -49,3 +49,10 @@ independence from tremor.15 Node cases pass. Added separate real-DOM controller
 harness for fullscreen pause, mark/undo/clear/share, switch, repeat and lock
 (20 assertions); synthetic pointer limitations explicit. See tests/README.md
 and docs/PRESCHOOL_VIEWER_REVIEW.md. No mirror-only test suite added.
+
+## 2026-10-27 — Slow rescue
+Extended existing storytime.test.mjs, no duplicate suite:18 total Node cases
+passed for60s no-input ending, multi-tap wake locks, deliberate all-five rescue,
+late arrival/frozen lost pose, dozing, practice and score uniqueness/bounds.
+Browser harness extended with64px rendered bounds, rail containment, reset and
+practice recovery. See SLOW_RESCUE_REVIEW for actual browser acceptance.
