@@ -1,3 +1,14 @@
+## 2026-10-26 — Allocate the actual Linux intake container
+
+WSP15 15/P1 before authoring; WSP6/22/50/62/71/77/84/97. Reuse the exact existing
+import/static closure and the three real HTTP assertions. Add one fixed-port
+nonroot image, qualified runtime wheel lock, test-only Docker transport and hosted
+Linux job; no runtime launcher or business/auth duplication. Git archive excludes
+ignored/shared credentials and functions. Local Docker is unavailable, so actual
+image outcomes must come from hosted Linux evidence, not a local success claim.
+The existing FX/chain plan records exact budgets, source boundaries and remaining
+image-security/cloud/identity/browser/repository-control/chain delivery gates.
+
 ## 2026-10-26 — Allocate observed serving registry repair
 
 PR2226's actual hosted canonical-registry gate fails. Read-only generation shows
