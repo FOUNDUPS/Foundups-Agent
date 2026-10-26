@@ -1,5 +1,31 @@
 # p.fMALL Roadmap
 
+## Isolated proposal host bootstrap candidate — 2026-10-26
+
+The source candidate supplies a separate ASGI factory around the existing draft
+handler and verifier, with explicit bounded server policy loading and per-app
+policy. Only proposal and minimal health routes are exposed. Local814 cases pass,
+including all786 originals and28 test-first host cases; independent/publication
+review remains required. This is not a deployed host or live Clerk qualification.
+Next serving layer: package/qualify the actual server and minimal source closure,
+then administer policy/cloud limits and prove a real session before browser wiring.
+Keep the existing six Node functions and shared ignored source untouched.
+
+## Authenticated member draft component — 2026-10-26
+
+Locally implemented under15/P1 allocation: explicitly configured Clerk bearer
+verification at `POST /pfmall/proposals`, delegated to the existing genesis
+preflight/mapper. Default503; no client flags/cookies/UID authority. Qualification
+and publication are tracked in tests/TestModLog and the dedicated PR. This is
+not a deployed public claim host or durable project admission.
+
+Next: bind independently administered provider/issuer/origin/public key and prove
+one real member session in the selected deployed host; define current-session/
+revocation and abuse policy. Then issue a fresh repository challenge and persist
+its consumption plus immutable receipt atomically in the selected intake owner.
+Preserve draft versus membership/claim/issuer/work/token authority separation.
+Do not attach an inactive browser form or infer live authority from offline RSA.
+
 ## FX1 public discovery — 2026-10-25
 
 - Implemented locally: homepage FX navigation to the existing public `/f/`

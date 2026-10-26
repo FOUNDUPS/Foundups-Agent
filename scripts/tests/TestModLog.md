@@ -1,5 +1,97 @@
 # Script test inventory
 
+## 2026-10-26 — GitHub client source binding
+
+Rebind only the existing client's normalized hash in the1471-member manifest;
+two digest literals advance to c1f97e86, preserving all membership/cap assertions.
+Stage source+manifest+pins before the unchanged eight generator cases:8PASS,
+zero failures/errors/skips/warnings in the external development environment.
+Three existing Node contract/preflight/blocked-recovery owners exit0. No new
+test file, generator, member, byte cap, provider or installed-runtime admission.
+
+## 2026-10-25 — Intake reference source binding
+
+The existing mapper remains one of1,471 runtime members; regenerate its source
+hash and update only the two canonical digest literals to f427e16b. All count/byte
+caps and the Node1,471-accept/1,472-reject oracle remain unchanged.
+The first existing8-case generator run gives7 passes/1 staged-index failure:
+the generated manifest had not yet been staged beside the committed mapper.
+After staging the actual bindings, the unchanged failed index case passes.
+Preserve that failed JUnit result; this is a staging repair, not a product RED.
+The three existing Node compatibility/preflight/blocked-recovery entrypoints
+also exit0. The separate four-owner intake run passes601 cases. No new test file,
+runtime member, dependency or installed-runtime promotion is introduced.
+
+## 2026-10-25 — Numeric/current-main canonical binding
+
+Reuse the exact existing8 generator cases after mainc7f0d939 joins numericc9bee55e.
+All8 pass freshly in77.50s, with2 inherited inactive asyncio configuration warnings;
+canonical write/check and3 existing Node owners exit0. Keep every original parity,
+path/member and byte-cap assertion. Only the existing digest literal changes.
+Runtime1471 and1472 rejection remain fixed;1614 evidence maps remain stable.
+External receipts retain actual commands/IDs/hashes in
+`foundups-numeric-main-reconciliation-964348f28f734c79bc3b5ac4451f5934`.
+Zero instrumented network/dotenv attempts. Merge is uncommitted pending exact
+metadata review; historical portable evidence is unchanged.
+
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## 2026-10-25 — Reconciled BTC/Mesa derived source closure
+
+Existing generator8 cases pass on merge d9a57ab1d over main f11d7559746,
+97.68s guarded wrapper/96.64s pytest, two inherited inactive asyncio warnings.
+Reuse all eight original case IDs and every oracle; only the existing expected
+canonical digest literal advances. Canonical generator --write and --check
+both pass. Manifest membership remains1470; only BTC connector/Mesa LF hashes
+change, with no generator, sentinel, member/+1 or byte-limit expansion.
+
+The three coordinated binding paths alone are staged: manifest, existing JS
+constant and Python test digest pin. Existing index test verifies all1470 staged
+source blobs plus the pin. Node compatibility/preflight/recovery entrypoints
+also exit0. Every corrected guard run reports zero network/dotenv-read attempts
+and stable1613 measured files (1470 runtime members plus existing extension JS
+and generator/pin evidence, not an installed-member increase).
+
+Exact observed commands,8 IDs, warnings, raw snapshots and outputs are external:
+`C:/Users/user/AppData/Local/Temp/foundups-btc-source-closure-6b08022181194325a9f2eea110484734/`.
+The older epoch manifest folder retained JUnit8 but not original argv; no
+historical invocation was reconstructed. New commands use qualified Python
+-B/-Xutf8, external scratch, disabled plugin/bytecode/cache/dotenv and instrumented
+Python/Node entrypoints. This is source binding, not OS isolation, installed
+promotion or new BTC/chain/authentication coverage. WSP15 pre-allocation16/P0
+and separate unapproved38-metadata proposal14/P1 are in the BTC architecture plan.
+
+## 2026-10-25 — Epoch ledger source binding
+
+The existing8 generator cases pass on the one-hash epoch update in79.64s, with
+2 inherited inactive asyncio configuration warnings. Only the expected canonical
+digest fixture changes; independent generation, staged source/hash consistency,
+member sentinels and LF/CRLF caps remain intact. Three existing Node compatibility
+entrypoints also exit0. This qualifies source closure, not installed promotion.
+
 ## 2026-10-25 — FoundUps source-closure repair inventory
 
 Reuse all eight cases in `test_generate_reddog_backend_manifest.py`; only its

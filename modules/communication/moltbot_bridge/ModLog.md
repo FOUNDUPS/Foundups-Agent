@@ -1,3 +1,16 @@
+## Parent authority bootstrap forwarding — 2026-10-25
+
+WSP00/11/22/50/62/97; C2/I5/D4/Impact4 = 15/P1 under the native 19/P0 umbrella.
+The existing serial bootstrap accepts optional `parent_consensus_authority=None`
+and passes it unchanged to its existing resolver. No new factory, main caller,
+dependency-bundle/canary change, lease minting or authority relaxation is included.
+The connected regression first rejected the missing keyword; after the two-line
+repair, eight new cases pass. Full production-wiring plus parent use-time selection:
+34 pass, one existing Windows symlink skip. Real parent/model signatures remain;
+earlier artifact/signed-work/generation evidence and protected owners are synthetic.
+No native admission, provider call, installed qualification or RSI outcome is claimed.
+See tests/TestModLog.md and the existing `refresh/rsi-parent-bootstrap-*` receipts.
+
 ## PR1792 registered-target brand verification — 2026-10-25
 
 WSP00/11/22/50/71/97. Extend the existing verifier for the optional public brand

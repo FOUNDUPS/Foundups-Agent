@@ -1,5 +1,9 @@
 # Kids Episodes ModLog
 
+## 2026-10-25 — First Little Shrew animated episode
+
+Reused the shared SVG rig, canonical first segment and existing FFmpeg renderer to produce three five-second shots with original code-composed instrumental/foley and timed captions. Added an optional local command with exclusive outputs, source/asset provenance and explicit unreviewed status. 140 focused tests pass; independent actual-frame/technical review passed. Audio listening remains unverified. See YouTube Shorts docs/KIDS_LOCAL_PRODUCTION.md for measured artifact evidence and exact autonomy owner/gap map, including the mock wallet boundary. Updated the disabled research-scout state; no WRE/provider/spending/upload activation.
+
 ## 2026-10-23 — Story product, EDUIT context and discoverable identity
 
 Reconciled follow-up scope into story-to-linked-episodes production with later EDUIT learning-game links. Preserved both canonical IDs and the source ambiguity of “sell a story”; no commerce scope was inferred. Correct EDUIT spelling is repository-verified.
@@ -27,3 +31,15 @@ WSP 97/50/84: current-head governed lexical retrieval returned UNKNOWN freshness
 ## 2026-10-23 — Open-model generation audit
 
 Reconciled the existing story controller, OpenRouter storyboard adapter, FFmpeg renderer, legacy Veo/Sora/extraction paths and incomplete video analytics. Public OpenRouter video catalog did not list Wan2.2/LTX in the audited name filter; hosted Wan variants are not automatically open-weight equivalents. Roadmap now prioritizes qualifying Wan2.2 and a controlled worker, keeping existing editing and WRE ownership. Compared MLT/Kdenlive, Shotcut, libopenshot and deterministic Grease Pencil animation. Recorded Google-independent planner/reviewer, explicit foley handling and live-worker recovery gaps. 137 focused tests passed; no runtime/code activation. Detailed evidence and official sources: YouTube Shorts docs/OPEN_VIDEO_AUDIT.md.
+
+## 2026-10-26 — Us_Story_Time destination
+
+Registered the operator-selected Story Time channel in the existing publisher with FoundUps OAuth-set 10 reuse and an optional override and required channel-ID pinning. Added an unlisted, made-for-kids preschool review helper and documented headless/Kids ownership. No live account, upload or worker activation claimed. WSP 97 source/evidence notes are in Shorts KIDS_LOCAL_PRODUCTION.md.
+
+## 2026-10-26 — Production-first story direction
+
+Applied WSP 15 work-item scores: current episode delivery and reusable causal story direction precede next episode, hosting, Mall expansion and analytics. Expanded existing production skill with creator correction-to-principle examples, spatial state table, silent causality review and independent transfer-test requirement. Latest local MP4 duration rechecked at 15.000 seconds. No new render, audio-listening or publication claim.
+
+Connected collaborative correction capture to existing WRE/autoresearch evidence boundaries: freeze baseline/rubric, bounded candidate, held-out independent evaluation, retain/reject and rollback, later reuse. Legacy recursive proposal API is not an active promotion loop.
+
+012 corrected evaluation scope: use the next actual Little Shrew story, not an unrelated transfer exercise. Unrelated draft test interrupted. Working book title: How a Shrew Became a Human. Next-beat proposal is recorded separately from approved canon; generation and lineage facts still require verification.

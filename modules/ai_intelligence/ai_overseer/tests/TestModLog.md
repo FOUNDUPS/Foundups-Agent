@@ -1,3 +1,18 @@
+## 2026-10-26: GitHub nomination review consumer
+
+New distinct owner `test_github_nomination_review.py`:24 methods/81 cases,294 lines.
+Reuse existing mapper/auth/transport/validator owners unchanged. Baseline387PASS;
+frozen V1 RED80 missing-module failures/387PASS. V3 strengthens the CLI byte limit
+with valid JSON at256KiB and+1, replacing V1's malformed-only cap case; RED81FAIL/
+387PASS. Product GREEN468PASS; final five-owner682PASS with no failures/skips and
+unchanged input hashes. These scopes overlap and are not added.
+An actual module CLI replay emits one DRAFT_ONLY artifact with zero stdout/stderr;
+this is synthetic local input, not a live hosted issue. Default allowlist adds only
+the new owner; canonical registry1772 files/273 quarantined. Existing mapper/auth
+AST oracles, fixtures and cases stay unchanged. External evidence directory:
+`foundups-nomination-review-20261026`; hosted workflow retains exact cases/report.
+WSP22/50/84/97; source review and current publication gates remain separate.
+
 ## 2026-09-24: WRE research display preserves preflight enforcement
 
 Two new cases in `test_preflight_resolution.py` bind the configured advisory reader
@@ -63,3 +78,22 @@ Existing intake fixture now uses the actual intent dataclass, explicit fixture a
 | 2026-02-13 | 0102   | Content-based boot prompt detection + tests | `test_m2m_compression_sentinel.py` expanded to 46 tests: 46 pass. Added TestBootPromptDetection(4): identity_lock_detection, compile_rejects_boot_prompt, normal_docs_pass_through, threshold_requires_3_signals. Replaced filename-based exclusion with 10-pattern content detector (identity locks, equations, state math, quantum notation). Discovery: M2M is for reference docs, not executable prompts. |
 | 2026-02-13 | 0102   | Added M2M skill execution shim tests | Added `test_m2m_skill_shim.py` (5 tests, all pass). Coverage: unknown skill fail-closed, missing SKILLz doc fail, compile gate success path, compile gate boot-prompt rejection for SKILL content, stage-promote target-path gate. |
 | 2026-03-11 | 0102   | LinkedIn company poster Edge browser fix | Fixed `executor.py` to use Edge debug port 9223 instead of Chrome. Added direct debug connection priority over BrowserManager. Fixed BMP emoji error in send_keys by using JavaScript. Manual test: Edge connection ✓, LinkedIn share dialog ✓, accounts loaded (11) ✓ |
+
+## 2026-10-25: LaunchRequest references, old AST pin retained
+
+Added nine cases in the existing launch-request/transport owners (70 lines):
+ordered duplicate-preserving dict/dataclass references, two-way list detachment,
+four empty/default forms, and Mapping/JSON text/bytes transport with provider-once
+and IDEA/UNBOUND/external-false invariants. Original test definitions are unchanged.
+Test-first clean RED: 601 collected, 596 passed/5 reference-loss failures.
+One constructor keyword repairs the loss: 600 passed/1 old AST fingerprint failure;
+all nine new cases pass. The old pin/assertion were retained for independent review.
+Review then approved only the exact AST pin and dated provenance update. Final run:
+601 collected/601 passed, no skipped/xfail cases; the assertion/algorithm are unchanged.
+All three runs use all four existing launch/genesis/auth/transport owners, no skip/xfail,
+external temp/SQLite confinement and Python audit network/process/write denials;
+zero instrumented denials, source maps unchanged. Local hostname metadata is allowed.
+Earlier setup attempts are preserved: 0 collected from overbroad hostname/null-sink
+denials; then 593 call passes/5 desired failures plus 3 fixture errors from Win32
+extended-path spelling. The final runner corrects only the physical phase comparison
+and uses an owned pytest log. This is ordinary local pytest, not SDK/OS admission.

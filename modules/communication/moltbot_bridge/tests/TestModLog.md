@@ -1,3 +1,35 @@
+## Parent authority bootstrap forwarding — 2026-10-25
+
+Inventory first: extend existing `test_reddog_governed_execution_valve_production_wiring.py`;
+reuse `test_reddog_parent_consensus_use_time.fixture`, which enables `real_models=True` internally. No new test family.
+The actual bootstrap builds the actual resolver, whose unchanged `resolve` and collection
+path reach real parent/reviewer/model signature verification. Eight cases cover valid,
+omitted, explicit None, mapping/callable impostors, expiry, work and generation mismatch.
+Valid input clears exactly the two parent blockers; peer/Memex blockers persist.
+Every case retains `lease=None` and the real admission registry rejects it.
+Earlier artifact/queue/signed-work/generation and protected-owner evidence are seams;
+parent verification and lease guards are not replaced. The stage dispatcher is captured,
+so this is source wiring qualification, not a resident author or service run.
+
+Required red: `rsi-parent-bootstrap-red3-20261025` fails on the unsupported keyword.
+Green: eight new cases pass; `rsi-parent-bootstrap-connected-20261025` runs the full
+production-wiring file plus parent use-time suite: 34 pass/one Windows symlink skip.
+CPython 3.12.10 and pytest 9.0.3 reuse the existing portable runtime and explicit
+site-packages without site initialization. The external pre-import Python guard denies
+network/process/provider/sensitive-host access and writes outside owned temporary data;
+positive runs record zero guard violations. This is instrumentation, not an OS sandbox.
+Legacy canary fixture Git setup alone is replaced at its helper boundary; the new cases
+use the existing artifact writer directly. No Git execution/authentic queue claim follows.
+Earlier hostname-metadata and extended Windows temporary-path guard failures remain
+in `red`/`red2` receipts; they are not product regressions or accepted test results.
+
+Guarded runner: `refresh/rsi-parent-bootstrap-guarded-runner-20261025.py`; exact invocation,
+environment, source hashes and XML are retained in the corresponding connected receipts.
+Selection: both files above with `--rootdir=. --confcutdir=. --noconftest --import-mode=importlib
+-p pytest_asyncio.plugin -p no:cacheprovider -o addopts=` and owned log/temp/XML paths.
+Existing CI already selects both owners. Hosted acceptance and independent review remain
+separate; main supplier composition, authentic inputs and native RSI remain unqualified.
+
 ## PR1792 producer/consumer candidate — 2026-10-25
 
 The existing target-verifier and FoundUp registry-schema selections pass 74

@@ -57,10 +57,75 @@ runtime convenience, not durable state or cross-process authority.
 | `GET /pfmall/static/...` | Static assets |
 | `GET /f/{foundup_id...}` | HTTP 307 to the shell handoff UI |
 
-This FastAPI surface has no authentication. It is read-only except for
-process-local lazy shell caching and is not a production authority boundary.
+These GET routes have no authentication. They are read-only except for
+process-local lazy shell caching and are not a production authority boundary.
 Any public deployment requiring private catalog data must add authentication
 outside this module before admission.
+
+### Explicitly configured member draft intake — 2026-10-26
+
+`POST /pfmall/proposals` is a separate authenticated draft surface. By default
+it returns503 `{"detail":"intake_unavailable"}`. Only the server may set
+`app.state.clerk_intake_policy` to the exact immutable `ClerkIntakePolicy` type
+from `foundup_genesis.clerk_intake`; configuration accepts issuer, nonempty tuple
+of HTTPS frontend origins, and a single canonical SubjectPublicKeyInfo
+RSA2048–4096 public PEM (CRLF or omitted final newline supported; extra documents/
+private material/trailers rejected). No environment, body,
+UID, invite flag or forwarded host selects this policy. Optional dependencies
+are listed in this module's requirements; ordinary unconfigured imports do not
+load JWT/crypto packages. The existing GET contracts remain public.
+
+Send `Content-Type: application/json`, one `Authorization: Bearer <session>` and
+one matching allowed `Origin`. Cookies and HMAC invites cannot authenticate this
+route. Duplicate security headers, unsupported content/encoding, malformed or
+oversized declared length reject400. Actual streamed bytes are capped at16KiB
+before decoding, with a5-second application read deadline; these are not TCP,
+OS memory, hard CPU or proxy admission guarantees. UTF-8 charset may be explicit.
+The complete existing LaunchRequest allowlist runs before the verifier.
+
+The genesis-owned adapter verifies real RS256 signatures against the configured
+public key and exact issuer/Origin/azp, signed v2 user/session claims, required
+integer iat/nbf/exp, zero clock skew and TTL<=120seconds. Any aud, sts or act claim
+is unsupported and rejected; this profile has no audience or impersonation mode.
+All authentication failures return401 `{"detail":"not_authorized"}`; body/wire
+failures return400 `{"detail":"invalid_request"}`. Responses use `no-store`.
+There is no online session-revocation or membership lookup; later privileged
+claim use must establish fresh current-session/revocation evidence separately.
+
+Success201 is `{"status":"DRAFT_ONLY","genesis_envelope":{...}}` from the existing
+mapper, with IDEA/UNBOUND and external_repo_requestedFalse. requested_by is a
+domain-distinct hash of the verified issuer and case-sensitive subject, not a
+body handle; raw subject/session/bearer/key are not returned. This is a returned
+draft, not durable nomination/admission, repository/issuer control, registry or
+catalog publication, work dispatch, token creation, voice or model execution.
+No public deployment is established. The backend policy and real member-token
+smoke test, current membership/revocation, challenge+atomic receipt owner,
+rate/abuse limits and release qualification remain separate prerequisites.
+
+### Isolated proposal host factory — 2026-10-26
+
+`modules.foundups.pfmall.intake_host.create_app()` constructs a separate FastAPI
+application with only `POST /pfmall/proposals` and `GET /healthz`. OpenAPI/docs,
+catalog/static and FoundUp handoff routes are absent. The POST is the same
+`http_api.foundup_proposal` function; policy lookup uses `request.app.state`,
+keeping factory instances and the development app independent.
+
+Trusted server environment must set `PFMALL_CLERK_POLICY_FILE` to an absolute
+regular-file target. Read at most16KiB UTF-8 JSON; require a unique-field object
+with exactly `issuer`, `authorized_parties` (list) and `public_key_pem`. Convert
+parties to the existing tuple policy and reuse canonical public-RSA validation.
+Missing/unreadable/oversized/invalid configuration stops construction with
+`RuntimeError("intake_configuration_invalid")`, without values or fallback policy.
+This is administrator configuration, never selected by a request/header/cookie.
+
+`GET /healthz` returns200 `{"status":"ready"}` with `Cache-Control: no-store`
+after valid local configuration. It is not an online identity/provider probe.
+There is no dotenv/JWKS request or credential/key material generation. Local file
+integrity/custody remains the administrator's obligation; no sealed inode claim.
+Existing draft-only authentication, wire/body bounds and generic failures apply.
+Container/serving profile, cloud IAM/cost limits, real session, same-origin
+browser, abuse/revocation and release qualification remain required. This factory
+does not persist drafts, establish project ownership or grant execution/tokens.
 
 ## Explicit write surface
 

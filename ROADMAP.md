@@ -12,7 +12,30 @@ Status: canonical **system planning and completion-gate authority** in this repo
 
 **Current completion verdict:** WSP governance exists; WRE has substantial implemented components and bounded operational proofs; production RSI is incomplete. No defensible whole-system completion percentage has been established.
 
+## Current RSI input gate — 2026-10-25
+
+[#2181](https://github.com/FOUNDUPS/Foundups-Agent/pull/2181) source publication is complete:
+merge `cfa632775f2b13034320d45559cdc77d46e3ead6`, tree
+`228b4f0091a40f7f6363d9abf48c0a1844aa68ed`, with successful exact-main
+[CI](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/39899710212) and
+[CodeQL](https://github.com/FOUNDUPS/Foundups-Agent/actions/runs/39899710236).
+Earlier pending-publication states and failures below are historical.
+
+Today's artifact-only diagnostic rejected seven artifacts; the eighth file's
+absence was a separate scoped metadata finding. Two gates remain: authentic
+owner/E0 and scoped work/model/reviewer/budget inputs, plus existing resident
+caller/authority/issuer integration with refusal checks preserved.
+[Current dispatch](docs/operations/RSI_SWARM_DISPATCH.md#current-owner-input-handoff--2026-10-25)
+owns the exact evidence, diagnostic limits and compatible pinned-runtime rule;
+unrelated main changes alone do not require reinstallation.
+The umbrella remains **19/P0 (C4/I5/D5/Impact5)**; this status reconciliation is
+**13/P1 (C2/I4/D4/Impact3)**. Preserve frozen LOW `294195cdb`. Native admission,
+evaluation, activation/rollback, retained use and G1–G5 remain unproved.
+
 ## Installed HIGH source integration — 2026-10-23
+
+**Historical checkpoint:** pending publication below was completed by #2181;
+retain these source-specific results and failures under their original dates.
 
 PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.
 The prior `beb46b3` local checkpoint passed 400 cases with six platform skips,

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import pytest
+from types import SimpleNamespace
+
 from modules.foundups.simulator.config import SimulatorConfig
 from modules.foundups.simulator.economics.pool_distribution import (
     ActivityLevel,
@@ -72,3 +75,13 @@ def test_layer_d_anchor_disabled_records_epoch_without_publish() -> None:
     assert stats["layer_d_anchor_enabled"] is False
     assert stats["layer_d_anchor_total_published"] == 0
     assert len(model._epoch_ledger.entries) == 1
+
+
+@pytest.mark.parametrize("selected", ["unknown", "", None, 1, "testnet", "mainnet"])
+def test_layer_d_selected_mode_never_falls_back_to_mock(tmp_path, selected):
+    config = SimpleNamespace(layer_d_anchor_enabled=True, layer_d_anchor_mode=selected,
+        layer_d_anchor_db_path=str(tmp_path / "unused" / "anchor.db"))
+    model = SimpleNamespace(_config=config)
+    with pytest.raises(ValueError):
+        FoundUpsModel._build_anchor_connector(model)
+    assert not (tmp_path / "unused").exists()

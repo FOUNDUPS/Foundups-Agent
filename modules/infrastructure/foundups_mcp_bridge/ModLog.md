@@ -1,5 +1,23 @@
 # foundups_mcp_bridge - ModLog
 
+## 2026-10-26: Coordinated FastMCP 3.4.11 security candidate
+
+Update the HTTP launcher's exact dependency contract, requirement, and query
+candidate disjointness regression together from FastMCP 3.2.0 to 3.4.11. The
+upstream release fixes authorization after component transforms and denied
+resource-template fallback (GHSA-7xgj-8392-5q4r); the 3.4.11 follow-on
+requires certifi >=2026.10.19 after the eMudhra trust incident. MCP 1.30.0,
+Pydantic 2.12.3 and Uvicorn 0.38.0 stay pinned. PR2190's requirement-only candidate failed four
+of the existing 49 Windows criteria because the declared version and launcher
+contract disagreed; this repair preserves exact equality instead of relaxing it.
+
+Disposable Linux Python 3.12.14 validation: 28 passed, 19 Windows-only skipped,
+two Windows HTTP lifecycle cases deselected; pip check and the actual candidate
+capability probe passed. All 49 criteria without skips in hosted Windows CI
+remain required. No installed environment, runtime manifest, frozen LOW service,
+authentication, remote tool allowlist, process ownership or cleanup policy is
+changed. This source candidate is not a live runtime upgrade or activation.
+
 ## 2026-10-19: Coordinated MCP 1.30.0 security upgrade
 
 Upgraded the MCP dependency, launcher exact-version gate, and isolated query

@@ -1,5 +1,15 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Channel cadence
+
+Omitted daily cap now resolves per channel: Move2Japan is eight/day at
+08:00,10:00,12:00,14:00,16:00,18:00,20:00,22:00 America/New_York;
+all other/unknown channels retain three/day. Explicit lower caps are preserved.
+The global ET environment override does not override this explicit Move2Japan
+policy. Its slots have no random jitter. Aggregate plan `cap: null` means
+per-channel policy; each channel plan contains its resolved numeric cap.
+
+
 Remote requirements and current gaps: [remote runbook](docs/REMOTE_SCHEDULING.md).
 
 ## CLI Interface (Agent-Callable)
@@ -159,3 +169,29 @@ sync unverified (`synced_to_youtube=false`, `independent_readback_required`);
 this is lack of verification, not proof of absence on YouTube.
 RedDog requires process success plus an explicit boolean success receipt, no
 errors, and no incomplete-batch marker. Missing/malformed receipts fail closed.
+
+
+## Evidence-bound metadata and learning (2026-10-25)
+
+`src/content_generator.py::validated_video_evidence(index, video_id)` is an offline
+identity/provenance gate, not a factual verifier. Metadata generation requires a
+matching, retrieval-eligible existing artifact containing explicit Studio Ask,
+Gemini video-summary, or timestamped YouTube/Whisper transcript evidence.
+Missing/ineligible evidence preserves existing metadata; schedule-only mode
+continues to bypass enrichment. No analyzer is launched by the scheduler.
+`YT_SCHEDULER_INDEX_INFORM_TITLE` retains its existing opt-in. Description opt-out
+preserves the complete description. Proposals reject platform-limit overflow.
+
+`record_schedule_outcome` retains its Boolean storage return. A positive learning
+outcome now additionally requires `details.requested_timezone` and independent
+`details.readback` with matching `channel_id`, `video_id`, `date_str`, `time_str`,
+`timezone` and `visibility="scheduled"`. Old callers remain recorded with
+`reported_success=true`, but no verified success or positive fidelity score.
+Audience performance is always marked unmeasured; no analytics/model promotion
+is connected here.
+
+Move2Japan cadence is not qualified for live reschedule apply: that legacy adapter
+skips it with `cadence_live_unqualified` until independent timezone and occupied-slot
+receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
+whose local date differs from its ET date (including Asia/Tokyo). This prevents
+clock-only conversion from silently publishing on the wrong calendar date.

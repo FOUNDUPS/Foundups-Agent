@@ -1,5 +1,28 @@
 # [U+1F300] Acoustic Lab - Local Development Installation Guide
 
+## Owned-child timeout repair checkpoint (2026-10-25)
+
+This source candidate leaves the installed dependency graph and 30-second
+FFmpeg processing deadline unchanged. Timeout handling now kills the owned
+child and gives drain/reaping a separate five-second bound; failed settlement
+is explicit. Temporary-file cleanup cannot replace the primary timeout error.
+No process-tree or service cleanup is introduced.
+
+Author Windows qualification passes the existing 18 guarded application/Web3
+cases and a separate one-child case using a tiny exact-source Python fixture.
+That fixture proves owned kill/drain/closed pipes/reaping before adapter return;
+it does not run FFmpeg, X downloads, accounts, RPC or models. Independent review
+and a separate one-child positive pass; missing-kill/missing-drain controls fail
+as intended and require rescue. Fresh hosted Linux/native Gunicorn is pending.
+The earlier failed null-device guard attempt is preserved. The corrected gate
+permits only the constructor-owned DEVNULL open and rejects unrelated writes.
+
+See TestModLog for exact raw evidence and the existing Windows adaptations.
+Python API guards are not OS confinement. Prior dependency checkpoints below
+are historical; their pending statements describe their original observation,
+not the current timeout-repair acceptance state. Four broader failures remain
+historical and were not rerun in this repair.
+
 ## Flask 3.1.3 compatibility checkpoint (2026-10-25)
 
 The candidate changes only `Flask==3.0.0` to `Flask==3.1.3`; the other 13

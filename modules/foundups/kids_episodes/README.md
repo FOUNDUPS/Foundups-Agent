@@ -18,7 +18,7 @@ Read [outcome](docs/intake/OUTCOME.md), [solution](docs/intake/SOLUTION.md), [sc
 
 ## Local implementation checkpoint
 
-The companion YouTube module now contains a local browser editor and tested FFmpeg renderer; use its README launch command. This does not advance the independent educational/production prototype gate. A separate ChatGPT trend scout is scheduled daily around 08:00 JST, beginning 2026-10-24; it is not a running WRE worker or deployed editor.
+The companion YouTube module now contains a local browser editor and tested FFmpeg renderer; use its README launch command. This does not advance the independent educational/production prototype gate. The separate ChatGPT trend scout was disabled at 012's request on 2026-10-24. No recurring scout or WRE worker is active from this registration.
 
 ## Discovery and identity
 
@@ -33,3 +33,17 @@ EDUIT is verified from its existing module and manifest. Ambiguous dictated phra
 ## Little Shrew series preset
 
 [Little Shrew](series/little_shrew/README.md) adapts the Gemini/Drive preschool storyboard into nine five-second beats and three linked episodes. It includes a simpler shared vector character rig, nine-panel storyboard, source provenance and `build_pilot` integration with the existing story compiler. Reference assets are design inputs; live generation remains owner-admitted and unactivated.
+
+## First rendered episode
+
+The [local production command and autonomy audit](../../communication/youtube_shorts/docs/KIDS_LOCAL_PRODUCTION.md) generate the first three Little Shrew beats as actual deterministic animation, with original synthesized audio and timed captions. This local preview does not activate the autonomous production executor.
+
+## Story Time channel
+
+012 selected [**Us_Story_Time**](https://www.youtube.com/@Us_Story_Time) under the FoundUps YouTube account for headless Story Time. Use publisher key `us_story_time`; keep the existing `kids_episodes` identity. See the [channel binding and review upload contract](../../communication/youtube_shorts/docs/KIDS_LOCAL_PRODUCTION.md#us_story_time-publishing-destination--2026-10-26). FoundUps OAuth set 10 is selected; live channel identity and autonomous worker activation remain unverified.
+
+## EDUIT episode integration design
+
+See [EDUIT episode Mall architecture](../eduit/docs/EPISODE_MALL_ARCHITECTURE.md) for the specified shared-shell
+video/game tile, gestures, locale cues, parent area and next-session handoff.
+This is a design dependency, not evidence of an active EDUIT adapter.

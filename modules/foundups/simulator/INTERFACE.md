@@ -22,6 +22,114 @@ simulation; persistent initiation has separate pending semantics.
 
 ## Core Schemas
 
+### Selected economic numeric admission
+
+Work, stake and unstake entrypoints validate exact built-in int/float operands
+before participating wallet, pool, adoption or account mutations. Bool, text,
+custom numeric objects, negatives, nonfinite values and unsupported arithmetic
+results raise ValueError. Selected operation fees satisfy `0 <= rate < 1`;
+unsupported positive amounts that round to zero net also reject. Configurable
+fees and discounts are checked at use. Optional adoption work=None still means
+no increment. Existing finite zero/fractional arithmetic and insufficient-funds
+results remain; engine work retains its existing float normalization after
+strict admission and its historical double work-metric increment.
+
+`economics/_token_numeric.py` owns only private pure scalar calculations.
+Prospective participating balances are validated before live assignments;
+composite success logs follow those assignments. Unknown valid-but-insufficient
+work no longer registers a wallet/pool before preparation fails. Public method
+signatures and existing object references remain. This does not provide
+concurrent isolation, whole-engine or outer Mesa/CABR batch atomicity, aggregate
+issuance limits, monetary precision, chain-unit conversion or funded settlement.
+
+### Mock BTC anchor contract
+
+`BTCAnchorConnector` retains its constructor, publish, confirmation, status and
+statistics signatures. Configured mode/path are read-only. Only `AnchorMode.MOCK`
+is supported; other modes reject before database side effects regardless of the
+feature flag. The singleton rejects explicit unsupported mode/path substitutions;
+no-argument reuse remains. Mesa rejects malformed selected modes.
+
+Fresh `publish_commitment` input must contain exactly the complete known v2
+scalar fields emitted by the epoch producer. Unknown/unversioned formats and
+extra/missing fields reject. Identity strings are nonempty built-in strings;
+hashes use lowercase hex with lengths40/64. Epochs are built-in integers in
+`0..2**63-1`, reflecting SQLite capacity; counts are nonnegative built-in integers.
+Amounts use the existing v2 finite/nonnegative built-in int/float normalization,
+including integral floats and signed zero, without monetary conversion. JSON
+conversion failures reject before dispatch or partial records. `force` must be an
+exact bool. UTC-aware timestamps are required but retained verbatim: `Z` and
+`+00:00` spellings are distinct identities. No freshness claim is inferred.
+
+Canonical sorted compact JSON binds the full validated payload and mock realm.
+The existing table adds nullable format/realm/digest/JSON identity columns under
+a SQLite write fence. Existing rows keep their values and NULL identity fields;
+they remain readable as `legacy_unclassified`. No inferred backfill or semantic
+promotion occurs. Unsupported required column/types/primary-key/nullability or
+noncanonical/partial/missing business-key uniqueness rejects at construction,
+without rebuilding or dropping data. The key remains `(foundup_id,epoch)`.
+
+One transaction compares identity and performs only pure deterministic mock work.
+Exact non-force replay returns the stored receipt. Exact same-content mock force
+still performs a second simulated publish with the same reference, a false
+`idempotent_hit` and another publication statistic; first receipt/confirmation
+history remains. Conflict, foreign realm, legacy, pending or failed records deny
+without overwrite/dispatch. Only bound published/confirmed mock receipts with a
+matching reference can gain mock confirmation counts. Invalid thresholds reject.
+Returned status rows label identity classification; that label is not authority.
+
+Public result keys remain, with additive version/realm/digest/mock diagnostics.
+`real_publishing_implemented` is false. Fifteen prior BTC case oracles remain;
+the former test requiring TestNet-to-mock coercion is deliberately replaced.
+Unversioned fixture payloads now explicitly declare current v2 metadata.
+
+This proves local replay admission, not source authenticity, Merkle entitlement,
+funded balances, reserve backing or payment. The fence is not an external-I/O
+transaction/recovery design; no real publisher or confirmation source exists.
+
+### Epoch evidence contract
+
+`economics/epoch_ledger.py` owns the existing process-local ledger. Recording and
+commitment method signatures remain; `MerkleProof.verify` now requires all four
+keyword arguments:
+
+```python
+proof.verify(expected_root=trusted_root, expected_foundup_id="project_a",
+             expected_epoch=1, expected_participant_id="alice")
+```
+
+Verification recomputes the amount/participant leaf and binds FoundUp, epoch and
+`foundups.epoch.v2`. The expected root/context must come from a trusted checkpoint,
+not from the submitted proof. Missing arguments cannot pass. Unknown formats,
+malformed hashes/path directions, mismatched contexts and altered claims reject.
+This proves inclusion of the proof's amount, not work eligibility or settlement.
+
+Amounts accept exact built-in int/float only, excluding bool, negative values,
+NaN and infinities. Integers remain exact; integral floats become integers and
+signed zero becomes zero. Fractional floats retain their value. Hash JSON uses
+sorted keys, compact separators and `allow_nan=False`; leaves, nodes, empty roots
+and entries have explicit domains/context. No financial precision, rounding,
+tolerance, conservation equation or chain unit conversion is added. Individual
+finite values do not establish safe aggregate arithmetic for every magnitude.
+
+`record_epoch` validates and builds before publishing under its instance lock.
+An exact normalized retry returns the original frozen entry/time/hash/tree,
+including after newer epochs. Conflicts reject without mutation. New epochs
+increase with gaps allowed. Entries are tuple snapshots, recorded mappings are
+read-only copies, tree levels/proof paths are tuples, and `to_dict`/commitment
+results are detached ordinary dictionaries. These are in-process guarantees;
+there is no durable epoch recovery or cross-epoch work-source consumption here.
+`verify_chain` checks the listed snapshots themselves and their canonical epoch
+index consistency; a separate valid indexed entry cannot mask list corruption.
+
+Commitments retain `status=pre_settlement`, `wsp_78_layer=D_pending`, the existing
+summary fields and an added `format_version`. Anchors use the finalized entry
+timestamp/context, so repeated preparation is stable. V2 digests differ from the
+old format. Legacy BTC connector rows remain unclassified rather than being
+promoted to v2 receipts. Non-mock effects and recovery remain blocked. Pool
+distribution evidence retains its current units, including the historical
+`total_fi_distributed` field name; it is not a canonical spendable F_i ledger.
+
 ### SSE Event Envelope
 ```python
 SSEEventEnvelope(

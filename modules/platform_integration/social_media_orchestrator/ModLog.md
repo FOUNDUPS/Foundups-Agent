@@ -1,3 +1,16 @@
+## 2026-10-26: Publish the existing FoundUp pitch instruction
+
+- WSP00/6/15/22/50/62/84/97;12/P2. Publish the local prototype as module-owned
+  Skillz0.1.3, canonical Claude discovery and its generated Codex mirror.
+  Preserve Outcome/Solution/Pain, nested delivery stages, evidence, deck QA and
+  truthful media status; correct superseded campaign and missing-plan references.
+- Existing projection owner: baseline and post-publication17PASS/1 Windows
+  real-symlink capability SKIP; both wrappers structurally validate. No new tests,
+  executor, registry entry, provider call, paid generation or publication grant.
+- Generator changed two existing output line endings only; exact pre-run bytes
+  were restored. Scope remains seven instruction/docs paths. Allocation, current
+  media research and remaining gates: [FX plan](../../../docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+
 ## 2026-10-18: Contextual AntifaFM promotion pilot
 
 - WSP00/5/11/15/22/50/62/84/97; source-bound lexical social/comment retrieval,

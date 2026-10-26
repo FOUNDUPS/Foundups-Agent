@@ -197,3 +197,9 @@ Do not hand-edit either catalog — edit source manifests, then regenerate.
 *Last Updated: 2026-04-03*
 
 Catalog queries discover matching channels. Opening a matching channel retains its full video queue; the query does not filter individual videos within that queue.
+
+## EDUIT episode integration design
+
+See [EDUIT episode Mall architecture](../../modules/foundups/eduit/docs/EPISODE_MALL_ARCHITECTURE.md) for the specified shared-shell
+video/game tile, gestures, locale cues, parent area and next-session handoff.
+This is a design dependency, not evidence of an active EDUIT adapter.
