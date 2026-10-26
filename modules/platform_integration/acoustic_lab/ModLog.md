@@ -1,5 +1,33 @@
 # Acoustic Lab Module - Change Log (WSP 22)
 
+## 2026-10-26: Couple the pytest security update with report compatibility
+
+- Qualify PR1348's pytest 9.0.3 security floor with pytest-asyncio 1.3.0,
+  the first plugin release supporting pytest 9. The old 0.23.0 plugin passes
+  an async-fixture probe with pytest 8.0.0 but fails it with 9.0.3 because it
+  references the removed FixtureDef.unittest attribute. The coupled pair passes.
+- Pytest 9 emits separate unittest subtest reports. The requirement-only
+  candidate runs all 18 application cases successfully, but the existing exact
+  parent-report gate rejects its 38 call-pass reports. The two existing Acoustic
+  workflow Evidence classes now recognize public pytest.SubtestReport, retain
+  exact duplicate-sensitive parent lists, and separately reject failed, skipped
+  or unexpected-parent subtest reports. Records contain parent node ID and
+  outcome; they do not claim per-parameter subtest identity coverage.
+- No application assertion, selected identity, network/process/file guard,
+  owned-child condition or Gunicorn baseline assertion changes. Disposable Linux
+  Python 3.12 validation passes the guarded 18 cases and separate owned-child
+  case. Source-bound held-out controls accept genuine passing subtests and reject
+  failing/skipped subtests and duplicate parents in both evidence classes.
+- Native Gunicorn local acceptance remains rejected: the original pytest 8
+  baseline and candidate both encounter three denied, unclassified subprocess
+  probes. The candidate server also cannot bind loopback in this executor; its
+  child exits 1, with no survivors or forced kill. Preserve these failures.
+  Exact-head hosted Python 3.11/3.12 and native gates remain required.
+- External evidence: python-audit/pytest-repaired-evidence,
+  pytest-report-controls/receipt.json, pytest-plugin-probe and
+  pytest-baseline8-native-evidence. The candidate is based on the separately
+  qualified Requests 2.33.0 prerequisite and does not upgrade an installed host.
+
 ## 2026-10-26: Qualify the Requests 2.33.0 security candidate
 
 - Carry the existing PR1353 Requests 2.31.0 to 2.33.0 update onto current
