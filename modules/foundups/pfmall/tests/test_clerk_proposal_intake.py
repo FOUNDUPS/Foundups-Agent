@@ -444,7 +444,7 @@ def wire_server(tmp_path):
             "--h11-max-incomplete-event-size", "16384", "--log-level", "info"]
         with log.open("wb") as stream:
             child = subprocess.Popen(args, cwd=root, env=env, stdout=stream, stderr=stream)
-        children.append(child)
+        children.append([child, None])
         deadline, port = time.monotonic() + 10, None
         while time.monotonic() < deadline:
             text = log.read_text(encoding="utf-8")
@@ -458,6 +458,7 @@ def wire_server(tmp_path):
                     assert int(parent) == child.pid
                 else:
                     assert server_pid == child.pid
+                children[-1][1] = server_pid
                 port = int(match.group(1))
                 break
             if child.poll() is not None:
@@ -468,19 +469,33 @@ def wire_server(tmp_path):
     try:
         yield start
     finally:
-        for child in children:
-            if child.poll() is None:
-                if os.name == "nt":
-                    killer = Path(os.environ["SystemRoot"]) / "System32/taskkill.exe"
-                    subprocess.run([str(killer), "/PID", str(child.pid), "/T", "/F"],
-                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=4, check=True)
-                else:
-                    child.terminate()
+        for child, server_pid in children:
             try:
-                child.wait(timeout=3)
-            except subprocess.TimeoutExpired:
-                child.kill()
-                child.wait(timeout=3)
+                if child.poll() is None:
+                    if os.name == "nt":
+                        killer = Path(os.environ["SystemRoot"]) / "System32/taskkill.exe"
+                        try:
+                            subprocess.run([str(killer), "/PID", str(child.pid), "/T", "/F"],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=4)
+                        except (OSError, subprocess.TimeoutExpired):
+                            pass  # The unconditional launcher/verified-child fallback below owns cleanup.
+                    else:
+                        child.terminate()
+            finally:
+                try:
+                    if child.poll() is None:
+                        child.kill()
+                    child.wait(timeout=3)
+                finally:
+                    if os.name == "nt" and server_pid is not None:
+                        command = (f"$s=Get-CimInstance Win32_Process -Filter 'ProcessId = {server_pid}';"
+                            f"if ($s) {{ if ($s.ParentProcessId -ne {child.pid}) {{ throw 'ownership changed' }};"
+                            f"Stop-Process -Id {server_pid} -ErrorAction SilentlyContinue;"
+                            f"Wait-Process -Id {server_pid} -Timeout 3 -ErrorAction SilentlyContinue }};"
+                            f"if (Get-Process -Id {server_pid} -ErrorAction SilentlyContinue) {{ throw 'child remains' }}")
+                        powershell = Path(os.environ["SystemRoot"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+                        subprocess.run([str(powershell), "-NoProfile", "-Command", command],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=6, check=True)
             assert child.poll() is not None
 
 

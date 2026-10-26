@@ -22,6 +22,11 @@ Second run:816PASS/1FAIL; the new unauthorized fixture used an invalid empty bod
 so the existing body-first contract correctly returns400. Supply the original
 valid PROPOSAL/origin to isolate absent-bearer401; preserve the401 assertion and
 both failed runs. No application logic or existing test assertion is changed.
+Third run:817PASS/0FAIL/0ERROR/0SKIP, retaining the unsuppressed TestClient warning.
+Independent review found taskkill errors could bypass later cleanup; this normal
+PASS did not prove that exception path. Allocate a finally-based launcher fallback
+plus verified-child liveness check, retaining all HTTP/config assertions. Freeze
+that test-only revision and require a new run plus independent fault-path review.
 
 ## 2026-10-26 — Isolated host acceptance frozen before authoring
 

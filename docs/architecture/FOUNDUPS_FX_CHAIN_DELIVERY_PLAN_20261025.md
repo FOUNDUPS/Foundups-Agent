@@ -29,7 +29,7 @@ Cloud Run's separate deployment command must bind0.0.0.0 and its supplied PORT;
 the local proof must never expose a workstation listener to the local network.
 
 Test-first: reuse the original RSA/policy/header helpers in the existing417-line
-test owner. Add <=120 lines/three real-process HTTP cases, keeping every existing
+test owner. Add <=160 lines/three real-process HTTP cases, keeping every existing
 definition/oracle and all814 IDs. Freeze acceptance before the profile/CI change;
 retain the expected missing-server RED in the old profile, then new-profile GREEN.
 Use credential-free child configuration, ephemeral synthetic keys without output,
@@ -39,11 +39,14 @@ No fixture or server monkeypatch replaces the actual TCP request path. Peer revi
 requires chunked oversize rejection and missing/bad policy startup failure. Use
 port0 and the child startup log to identify its actual port/PID without a reserve-
 close race. Terminate/wait/kill/wait cleanup proves reaping, not graceful shutdown.
+Peer cleanup finding allocates finally-based launcher reaping and a separately
+verified Windows child-liveness outcome, even after taskkill failure. WSP62 keeps
+this cohesive RSA/process fixture in the existing owner rather than duplicating it.
 
 Existing nomination workflow: add only the new profile's two trigger filters and
 select it for installation; preserve jobs/permissions/tests/report retention.
 Budget: README+35, INTERFACE+12, ROADMAP+12, module ModLog+18, tests README+12,
-TestModLog+24 (retain actual fixture corrections), this plan+65/root ModLog+16.
+TestModLog+32 (retain fixture/cleanup corrections), this plan+70/root ModLog+16.
 No new test owner, runtime member,
 manifest/pin/ledger/registry change, application logic or grant. Existing manifest
 check and independent exact-candidate review precede publication; hosted gates
