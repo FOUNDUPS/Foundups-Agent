@@ -15505,7 +15505,9 @@
       "owner": "modules/foundups/pfmall",
       "suite_class": "unit",
       "shard_id": "modules-foundups-pfmall-unit",
-      "capabilities": [],
+      "capabilities": [
+        "process"
+      ],
       "execution_type": "unit",
       "collectable": true,
       "timeout_s": 180,

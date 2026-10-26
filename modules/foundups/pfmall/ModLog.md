@@ -1,3 +1,25 @@
+## 2026-10-26 — Reproject the observed process capability
+
+Allocation6b5d7902f precedes the independently accepted capabilities[] ->[process]
+reprojection, same1773/273. Unchanged generator check and existing regressions50PASS.
+All817-case sources remain exact; no classifier/quarantine/permission/manifest change.
+
+## 2026-10-26 — Qualify the actual proposal server separately
+
+Allocation665112e88,14/P1; WSP6/11/22/50/62/71/77/84/97. Add the minimal
+optional Uvicorn server profile and select it in existing contract CI; jobs,
+permissions, test selection and artifact retention remain unchanged. No launcher
+or application logic change. The existing real-RSA owner adds three actual
+loopback-process cases, retaining all814 prior IDs and43 named-definition ASTs.
+Initial missing-server RED814PASS/3FAIL; two new-fixture mistakes and a peer-found
+cleanup gap remain recorded. Repaired817PASS/0FAIL/0ERROR/0SKIP retains the one
+unsuppressed TestClient deprecation. Independent wheel review matches all28
+official release digests, with zero listed registry advisories in this snapshot.
+The manifest check passes unchanged after supplying its missing trusted Git PATH;
+the failed stripped-PATH attempt is preserved. No binary/platform security,
+OS isolation, graceful stop, live provider session, image or deployment claim.
+Independent cleanup fault-path and current-head hosted gates remain required.
+
 ## 2026-10-26 — Isolated proposal host bootstrap candidate
 
 WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 allocationf8fa5b25c.

@@ -1,5 +1,41 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Exact registry projection after hosted rejection
+
+CI40248799360 rejects stale registry bytes;6b5d7902f precedes one independently
+reviewed process-capability field. Generator check and50 unchanged cases pass.
+All817-case sources remain exact; retain the failed CI and require fresh gates.
+
+## 2026-10-26 — Real serving acceptance frozen before profile change
+
+Allocation665112e88,14/P1: append three real-process/loopback cases to the existing
+RSA owner, with bounded startup/read/cleanup and child port0/PID log evidence.
+The valid path exercises minimal health,401/201/404, no-store, no server/access
+header logging and actual chunked valid-JSON padding beyond16KiB rejection.
+Missing/malformed policy must terminate before any listening-port announcement.
+Reuse existing RSA/config helpers and all814 cases without oracle changes.
+Old patched profile RED:814PASS/3FAIL/0ERROR/0SKIP; Uvicorn is not installed there.
+Sources stay stable during the run. Evidence: external foundups-member-serving-
+20261026, serving_red JSON/JUnit/log and child logs. The clean child environment
+and loopback subprocess are explicit permissions, not OS/network isolation.
+Freeze these assertions before adding the separate server profile or CI change.
+First new-profile run:816PASS/1FAIL; the server starts but Windows' venv redirector
+has a different PID. Separate actual-process/CIM evidence proves server-parent equals
+launcher PID; taskkill/T reaps the owned tree and listener absence is checked.
+Correct only this new test's platform ownership/cleanup rule; retain the failed run,
+all three HTTP/config assertions, original814 oracles and separate old environment.
+Second run:816PASS/1FAIL; the new unauthorized fixture used an invalid empty body,
+so the existing body-first contract correctly returns400. Supply the original
+valid PROPOSAL/origin to isolate absent-bearer401; preserve the401 assertion and
+both failed runs. No application logic or existing test assertion is changed.
+Third run:817PASS/0FAIL/0ERROR/0SKIP, retaining the unsuppressed TestClient warning.
+Independent review found taskkill errors could bypass later cleanup; this normal
+PASS did not prove that exception path. Allocate a finally-based launcher fallback
+plus verified-child liveness check, retaining all HTTP/config assertions. Freeze
+that test-only revision and require a new run plus independent fault-path review.
+Repaired run817PASS/0FAIL/0ERROR/0SKIP, all814 old IDs and43 definition ASTs retained;
+one unsuppressed TestClient warning. Independent fault-path acceptance is separate.
+
 ## 2026-10-26 — Isolated host acceptance frozen before authoring
 
 Allocationf8fa5b25c,15/P1. Reuse the patched Python3.12.10/pytest9.0.3 HTTP/RSA

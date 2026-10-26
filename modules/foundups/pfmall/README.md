@@ -45,6 +45,35 @@ execution, or FoundUp business logic.
 - `public/member/` is the Clerk-admitted member PWA. Its detailed
   browser contract remains in `public/member/INTERFACE.md`.
 
+## Optional real HTTP serving profile
+
+`requirements-server.txt` adds bare Uvicorn 0.54.0, h11 0.16.0 and click 8.5.0 to the
+existing HTTP profile. Install in a separate environment; the umbrella profile
+is unchanged. CI retains the actual resolved dependencies and installed inventory;
+these direct pins are not a complete cross-platform lock or security certificate.
+Install there with `python -m pip install -r modules/foundups/pfmall/requirements-server.txt`.
+After independently administering `PFMALL_CLERK_POLICY_FILE`, run from this
+checkout with its explicit absolute path in place of `CHECKOUT`:
+
+```powershell
+python -I -B -m uvicorn modules.foundups.pfmall.intake_host:create_app `
+  --factory --app-dir CHECKOUT --host 127.0.0.1 --port 8080 `
+  --workers 1 --loop asyncio --http h11 --interface asgi3 --ws none --lifespan on `
+  --no-proxy-headers --no-access-log --no-server-header `
+  --limit-concurrency 16 --backlog 32 --timeout-keep-alive 5 `
+  --timeout-graceful-shutdown 10 --h11-max-incomplete-event-size 16384
+```
+
+Use a clean server environment: omit inherited `UVICORN_*`, `WEB_CONCURRENCY`
+and `FORWARDED_ALLOW_IPS`; do not supply an env-file or reload. Local qualification
+binds loopback and uses port0 with child startup/PID evidence. The future Cloud Run
+container must instead bind0.0.0.0 and its supplied PORT. No image/deployment is
+established here. The development HTTP module is still imported and needs its
+real tracked static directory; do not fabricate a placeholder during packaging.
+Limits are application/server settings, not OS confinement, abuse prevention or
+proof of graceful shutdown. Public hosting, current session/revocation policy,
+real member identity and durable repository-control admission remain unqualified.
+
 ## RedDog, OpenClaw, and Hermes boundary
 
 The optional local HTTP/intake dependency profile is `requirements.txt`; it does
@@ -164,7 +193,8 @@ Queries never repair or reindex the store.
 ## Known structural debt
 
 This is a legacy flat Python package: source files are at the module root and
-the module has no `src/`, `memory/`, or module-local `requirements.txt` yet.
+the module has no `src/` or `memory/` yet; optional module-local HTTP and server
+requirements now exist.
 That WSP 49/60/12 debt is recorded in [ROADMAP.md](ROADMAP.md). It must be
 handled as a separate import-compatible migration, not hidden by this Tier-0
 documentation repair.

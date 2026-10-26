@@ -2,8 +2,14 @@
 
 import asyncio
 import hashlib
+import http.client
 import importlib
 import json
+import os
+from pathlib import Path
+import re
+import subprocess
+import sys
 import time
 
 from cryptography.hazmat.primitives import serialization
@@ -415,3 +421,126 @@ def test_host_accepts_exact_config_byte_cap(tmp_path, policy, key, monkeypatch):
     monkeypatch.setenv("PFMALL_CLERK_POLICY_FILE", str(path))
     with TestClient(importlib.import_module(HOST).create_app()) as current:
         assert post(current, key).status_code == 201
+
+
+@pytest.fixture
+def wire_server(tmp_path):
+    """Real child/loopback profile; no OS isolation or graceful-stop claim."""
+    children = []
+
+    def start(config):
+        log = tmp_path / (str(len(children)) + "-server.log")
+        env = {k: os.environ[k] for k in ("SystemRoot", "WINDIR", "COMSPEC") if k in os.environ}
+        env.update(PYTHONDONTWRITEBYTECODE="1", PYTHON_DOTENV_DISABLED="1",
+                   PFMALL_CLERK_POLICY_FILE=str(config), HOME=str(tmp_path),
+                   USERPROFILE=str(tmp_path), TEMP=str(tmp_path), TMP=str(tmp_path))
+        root = str(Path(__file__).resolve().parents[4])
+        args = [sys.executable, "-I", "-B", "-m", "uvicorn", HOST + ":create_app",
+            "--factory", "--app-dir", root, "--host", "127.0.0.1", "--port", "0",
+            "--workers", "1", "--loop", "asyncio", "--http", "h11", "--interface", "asgi3",
+            "--ws", "none", "--lifespan", "on", "--no-proxy-headers", "--no-access-log",
+            "--no-server-header", "--limit-concurrency", "16", "--backlog", "32",
+            "--timeout-keep-alive", "5", "--timeout-graceful-shutdown", "10",
+            "--h11-max-incomplete-event-size", "16384", "--log-level", "info"]
+        with log.open("wb") as stream:
+            child = subprocess.Popen(args, cwd=root, env=env, stdout=stream, stderr=stream)
+        children.append([child, None])
+        deadline, port = time.monotonic() + 10, None
+        while time.monotonic() < deadline:
+            text = log.read_text(encoding="utf-8")
+            match = re.search(r"Uvicorn running on http://127\.0\.0\.1:(\d+)", text)
+            if match:
+                server_pid = int(re.search(r"Started server process \[(\d+)\]", text).group(1))
+                if os.name == "nt":
+                    powershell = Path(os.environ["SystemRoot"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+                    command = f"(Get-CimInstance Win32_Process -Filter 'ProcessId = {server_pid}').ParentProcessId"
+                    parent = subprocess.check_output([str(powershell), "-NoProfile", "-Command", command], timeout=4)
+                    assert int(parent) == child.pid
+                else:
+                    assert server_pid == child.pid
+                children[-1][1] = server_pid
+                port = int(match.group(1))
+                break
+            if child.poll() is not None:
+                break
+            time.sleep(0.025)
+        return child, port, log
+
+    try:
+        yield start
+    finally:
+        for child, server_pid in children:
+            try:
+                if child.poll() is None:
+                    if os.name == "nt":
+                        killer = Path(os.environ["SystemRoot"]) / "System32/taskkill.exe"
+                        try:
+                            subprocess.run([str(killer), "/PID", str(child.pid), "/T", "/F"],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=4)
+                        except (OSError, subprocess.TimeoutExpired):
+                            pass  # The unconditional launcher/verified-child fallback below owns cleanup.
+                    else:
+                        child.terminate()
+            finally:
+                try:
+                    if child.poll() is None:
+                        child.kill()
+                    child.wait(timeout=3)
+                finally:
+                    if os.name == "nt" and server_pid is not None:
+                        command = (f"$s=Get-CimInstance Win32_Process -Filter 'ProcessId = {server_pid}';"
+                            f"if ($s) {{ if ($s.ParentProcessId -ne {child.pid}) {{ throw 'ownership changed' }};"
+                            f"Stop-Process -Id {server_pid} -ErrorAction SilentlyContinue;"
+                            f"Wait-Process -Id {server_pid} -Timeout 3 -ErrorAction SilentlyContinue }};"
+                            f"if (Get-Process -Id {server_pid} -ErrorAction SilentlyContinue) {{ throw 'child remains' }}")
+                        powershell = Path(os.environ["SystemRoot"]) / "System32/WindowsPowerShell/v1.0/powershell.exe"
+                        subprocess.run([str(powershell), "-NoProfile", "-Command", command],
+                            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=6, check=True)
+            assert child.poll() is not None
+
+
+def test_real_server_delivers_only_bounded_drafts(tmp_path, policy, key, wire_server):
+    child, port, log = wire_server(host_config(tmp_path, policy))
+    assert port is not None and child.poll() is None
+
+    def request(method, path, body=None, selected=None, chunked=False):
+        connection = http.client.HTTPConnection("127.0.0.1", port, timeout=2)
+        try:
+            connection.request(method, path, body=body, headers=selected or {},
+                               encode_chunked=chunked)
+            response = connection.getresponse()
+            raw = response.read(32768)
+            assert len(raw) < 32768 and response.getheader("server") is None
+            return response, json.loads(raw)
+        finally:
+            connection.close()
+
+    response, data = request("GET", "/healthz")
+    assert response.status == 200 and data == {"status": "ready"}
+    assert response.getheader("cache-control") == "no-store"
+    response, data = request("POST", PATH, json.dumps(PROPOSAL),
+                             {"Content-Type": "application/json", "Origin": ORIGIN})
+    assert response.status == 401 and data == {"detail": "not_authorized"}
+    response, data = request("POST", PATH, json.dumps(PROPOSAL), headers(key))
+    assert response.status == 201 and data["status"] == "DRAFT_ONLY"
+    assert response.getheader("cache-control") == "no-store"
+    response, _ = request("GET", "/pfmall/catalog")
+    assert response.status == 404
+    raw = json.dumps(PROPOSAL).encode("utf-8")
+    chunks = iter([raw + b" " * (16384 - len(raw)), b" "])
+    response, data = request("POST", PATH, chunks, headers(key), chunked=True)
+    assert response.status == 400 and data == {"detail": "invalid_request"}
+    assert response.getheader("cache-control") == "no-store"
+    assert child.poll() is None and '"GET ' not in log.read_text(encoding="utf-8")
+    assert '"POST ' not in log.read_text(encoding="utf-8")
+
+
+@pytest.mark.parametrize("kind", ["missing", "malformed"])
+def test_real_server_invalid_policy_never_listens(tmp_path, wire_server, kind):
+    config = tmp_path / "policy.json"
+    if kind == "malformed":
+        config.write_text("{", encoding="utf-8")
+    child, port, log = wire_server(config)
+    assert port is None and child.poll() is not None and child.returncode != 0
+    text = log.read_text(encoding="utf-8")
+    assert "intake_configuration_invalid" in text and str(config) not in text

@@ -1,3 +1,11 @@
+## 2026-10-26 — Reproject the PFMall serving test process capability
+
+Allocation6b5d7902f follows actual CI stale-registry rejection. Unchanged generation
+and independent review agree on one existing test row: capabilities[] ->[process].
+All1773 paths/273 quarantines and every other field remain unchanged. Generator
+write/check and50 cases in the two existing registry/differential owners pass.
+No classifier, test, collection, shard, schema or execution-authority change.
+
 ## 2026-10-22 — Re-review unchanged generated hash metadata
 
 PR #2175 secret scan reported 38 existing manifest metadata findings after the
