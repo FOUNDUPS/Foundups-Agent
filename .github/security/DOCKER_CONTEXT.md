@@ -1,5 +1,28 @@
 # Docker build-context hardening and external-audit disposition
 
+## Shared MCP virtualenv context gap — 2026-10-26
+
+The documented `foundups-mcp-p1/foundups-mcp-env` directory is a shared
+virtualenv, but its name does not match the existing `.venv` or `venv`
+exclusions. The MCP README identifies it as the shared Python environment;
+`setup_mcp_servers.py` resolves its Windows `Scripts/python.exe` or POSIX
+`bin/python`. Git also tracks environment launchers and `pyvenv.cfg` there,
+so a clean checkout can otherwise copy those environment artifacts into the image.
+
+Add only that exact directory to the root build-context exclusions. Keep every
+tracked file and the surrounding MCP source in the repository. Extend the native
+synthetic verifier with Windows launchers, POSIX Python, `pyvenv.cfg` and a
+site-package fixture; retain the MCP README, requirements, setup helper and both
+server modules as positive fixtures. The actual-image inspection also requires
+those five source files and rejects the environment directory. All original
+fixtures, both negative controls, image imports, compiler absence, dependency
+consistency and the 30-minute image-job budget remain.
+
+This is a build-context boundary change, not a host environment cleanup or an MCP
+runtime migration. Local checks cover syntax, fixture confinement and preservation
+of the existing controls. Fresh hosted native-context and application-image checks
+must qualify the final source; no local Docker pass is claimed.
+
 ## Current reconciliation — 2026-10-26
 
 Reconciled PR2168 with main `16444371a96a579deb2030d8999ff25bc53dbbed`

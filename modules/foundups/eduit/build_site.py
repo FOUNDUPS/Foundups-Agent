@@ -18,6 +18,9 @@ def build(output):
             ROOT/'modules/communication/youtube_shorts/assets/kids_review',
             output/'review',
         )
+        gestures=output/'member/js'
+        gestures.mkdir(parents=True,exist_ok=True)
+        shutil.copy2(ROOT/'public/member/js/gesture-engine.js',gestures/'gesture-engine.js')
         # Keep every hashed artifact with its receipt for reproducible review.
         shutil.copytree(media, output/'storytime/assets', dirs_exist_ok=True)
 if __name__=='__main__':

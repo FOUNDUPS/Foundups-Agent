@@ -51,6 +51,8 @@ logs
 # Installed dependencies, caches and local model/index bytes are not source.
 **/.venv
 **/venv
+# Documented shared MCP virtualenv; retain the surrounding MCP source tree.
+foundups-mcp-p1/foundups-mcp-env
 **/node_modules
 **/__pycache__
 **/*.pyc

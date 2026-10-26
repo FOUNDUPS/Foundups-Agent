@@ -17,6 +17,37 @@ The dedicated workflow executes it without application dependencies or credentia
 
 ## Change record — 2026-10-21
 
+### Application image build budget — 2026-10-26
+
+Hosted job 121348145185 completed native wheel compilation and requirements
+installation, then reached its 15-minute limit while compiler-package removal
+was still progressing. The application-image job now allows 30 minutes; native
+context remains bounded to 10 minutes. Build, context canaries, offline imports,
+read-only/no-network inspection and pip-check remain required and unchanged.
+The cancelled run is retained as a failed qualification; the composed head
+requires a fresh complete image build and inspection.
+
+### Inline CI dependency qualification — 2026-10-26
+
+Workflow pins were audited separately from requirements files. Public admission
+now selects pytest 9.0.3, FastAPI 0.162.0 and explicit Starlette 1.10.0; the old
+FastAPI ceiling prevented the Starlette security fixes. Effect-lease consensus
+now selects cryptography 50.0.2, including the updated OpenSSL wheel. The existing
+public gate passed 210 tests with 95% coverage (90% required), and the unchanged
+guarded consensus gate passed all 699 exact cases with stable source hashes in
+isolated Python 3.12 environments. Exact-head hosted qualification is still required.
+
+The first aiohttp 3.14.5 trials failed 30 existing cases with released
+aioresponses 0.7.8 and 0.7.9; concrete constructor failures exposed a missing
+`stream_writer` argument. Those failed trials remain evidence. A separately
+qualified, checksum-gated CI-only backport on the released 0.7.9 wheel now passes
+all 167 unchanged client cases and 14 focused compatibility/negative controls.
+See [the backport provenance and removal condition](../security/AIORESPONSES_COMPAT.md).
+Application source, authentication, assertions and the canonical test command
+remain unchanged. Fresh hosted acceptance of the composed head is required.
+The intentional isolated Gunicorn 21.2 parser negative control and conditionally
+affected Chroma pin are unchanged.
+
 2026-10-26 reconciliation keeps the native context contract and adds a supported
 Python 3.12 application-image build while preserving current trust bootstrap.
 The receipt base and workflow trigger now cover that reconciled source; current

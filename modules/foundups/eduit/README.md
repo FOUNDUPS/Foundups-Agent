@@ -218,3 +218,11 @@ exit restores the correct collection position; direct-entry exit has a safe
 fallback; unknown product scopes fail closed. Current change documents this
 contract and adds the explicit POC exit only; registry/projection migration and
 Memory Horizon branch integration remain outstanding.
+
+
+## Current rescue/viewer milestone
+
+See [rescue game and review contract](docs/RESCUE_GAME_REVIEW.md) for the latest
+accepted timeline, five-character rescue mechanics, child-first viewer, local
+whiteboard, fullscreen gestures, priorities and deferred agent experiment.
+This supersedes the earlier two-cue timeout/practice game description.

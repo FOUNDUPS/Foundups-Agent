@@ -4,12 +4,18 @@ on:
   pull_request:
     paths:
       - 'requirements-trust-bootstrap.txt'
+      - '.github/scripts/apply_aioresponses_compat.py'
+      - '.github/security/AIORESPONSES_COMPAT.md'
+      - '.github/security/aioresponses-compat-requirements.txt'
       - 'modules/platform_integration/github_integration/**'
       - '.github/workflows/github-client-contracts.yml'
   push:
     branches: [main]
     paths:
       - 'requirements-trust-bootstrap.txt'
+      - '.github/scripts/apply_aioresponses_compat.py'
+      - '.github/security/AIORESPONSES_COMPAT.md'
+      - '.github/security/aioresponses-compat-requirements.txt'
       - 'modules/platform_integration/github_integration/**'
       - '.github/workflows/github-client-contracts.yml'
   workflow_dispatch:
@@ -31,10 +37,18 @@ jobs:
       - name: Bootstrap checksum-verified Python trust
         run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
       - name: Install declared test tools in the ephemeral runner
+        run: |
+          python -m pip --isolated --disable-pip-version-check install \
+          --only-binary=:all: --report "$RUNNER_TEMP/github-client-pip.json" \
+          pytest==9.0.3 pytest-asyncio==1.3.0 aiohttp==3.14.5
+          python -m pip --isolated --disable-pip-version-check install \
+          --only-binary=:all: --no-deps --require-hashes \
+          --report "$RUNNER_TEMP/github-client-mock-pip.json" \
+          -r .github/security/aioresponses-compat-requirements.txt
+      - name: Apply the checksum-gated test-mock compatibility backport
         run: >-
-          python -m pip --isolated --disable-pip-version-check install
-          --only-binary=:all: --report "$RUNNER_TEMP/github-client-pip.json"
-          pytest==9.0.3 pytest-asyncio==1.3.0 aiohttp==3.13.5 aioresponses==0.7.8
+          python -B .github/scripts/apply_aioresponses_compat.py
+          --receipt "$RUNNER_TEMP/github-client-mock-backport.json"
       - name: Run the two canonical module unit-shard members
         env:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
@@ -56,5 +70,7 @@ jobs:
           path: |
             ${{ runner.temp }}/github-client-results.xml
             ${{ runner.temp }}/github-client-pip.json
+            ${{ runner.temp }}/github-client-mock-pip.json
+            ${{ runner.temp }}/github-client-mock-backport.json
           if-no-files-found: error
           retention-days: 14

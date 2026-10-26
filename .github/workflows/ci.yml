@@ -471,10 +471,14 @@ jobs:
 
           status, sanity_ok, error_type = 2, False, None
           class Evidence:
-              collected, passed = [], []
+              def __init__(self):
+                  self.collected, self.passed, self.subtests = [], [], []
               def pytest_collection_finish(self, session):
                   self.collected = [item.nodeid for item in session.items]
               def pytest_runtest_logreport(self, report):
+                  if isinstance(report, pytest.SubtestReport):
+                      self.subtests.append(dict(nodeid=report.nodeid, outcome=report.outcome))
+                      return
                   if report.when == 'call' and report.passed:
                       self.passed.append(report.nodeid)
           evidence = Evidence()
@@ -563,11 +567,14 @@ jobs:
           xml_ok = (observed_xml == expected_xml and not any(case.find(tag) is not None for case in cases for tag in ('failure', 'error', 'skipped')))
           passed = (status == 0 and sanity_ok and effects_ok and xml_ok and source_before == source_after
                     and sorted(evidence.collected) == expected
-                    and sorted(evidence.passed) == expected)
+                    and sorted(evidence.passed) == expected
+                    and all(item['nodeid'] in expected and item['outcome'] == 'passed'
+                            for item in evidence.subtests))
           report = dict(pytest_exit_code=status, guard_sanity_passed=sanity_ok,
                         guard_events=events, unexpected_effects_or_duplicate_probe=not effects_ok,
                         expected_ids=expected, collected_ids=evidence.collected,
-                        passed_ids=evidence.passed, exception_type=error_type, passed=passed,
+                        passed_ids=evidence.passed, subtest_reports=evidence.subtests,
+                        exception_type=error_type, passed=passed,
                         file_events=file_events, source_before=source_before, source_after=source_after,
                         source_unchanged=source_before == source_after, packages=packages, probe_sources=probe_sources,
                         junit_identities_verified=xml_ok, checkout_commit=checkout_commit,
@@ -671,6 +678,8 @@ jobs:
           native_effects = [event for event in events + file_events if event['phase'] == 'owned_child']
           native_passed = (native_status == 0 and native_error is None and native_xml_ok
               and native_evidence.collected == native_expected and native_evidence.passed == native_expected
+              and all(item['nodeid'] in native_expected and item['outcome'] == 'passed'
+                      for item in native_evidence.subtests)
               and native_source_before == native_source_after and not native_effects and len(launches) == 1
               and native_null_opens == 1 and native_constructor is None
               and child.get('pid') == launches[0].get('pid') and type(child.get('returncode')) is int
@@ -679,7 +688,8 @@ jobs:
               and child.get('outer_rescue') is False and child.get('real_ffmpeg') is False)
           native_report.write_text(json.dumps(dict(passed=native_passed, pytest_exit_code=native_status,
               exception_type=native_error, expected_ids=native_expected, collected_ids=native_evidence.collected,
-              passed_ids=native_evidence.passed, junit_identities_verified=native_xml_ok,
+              passed_ids=native_evidence.passed, subtest_reports=native_evidence.subtests,
+              junit_identities_verified=native_xml_ok,
               launches=launches, child=child, unexpected_effects=native_effects,
               native_null_opens=native_null_opens, subprocess_sha256=subprocess_sha256,
               native_null_open_flags=native_null_open_flags,
@@ -812,11 +822,16 @@ jobs:
           expected = sorted(path + '::TestGunicorn::' + name for name in names)
           negative_id = path + '::TestGunicorn::test_parser_rejects_ambiguous_framing'
           class Evidence:
-              collected, passed, failed, skipped, phase_failures = [], [], [], [], []
-              intended_baseline_assertion = False
+              def __init__(self):
+                  self.collected, self.passed, self.failed, self.skipped, self.phase_failures = [], [], [], [], []
+                  self.subtests = []
+                  self.intended_baseline_assertion = False
               def pytest_collection_finish(self, session):
                   self.collected = [item.nodeid for item in session.items]
               def pytest_runtest_logreport(self, report):
+                  if isinstance(report, pytest.SubtestReport):
+                      self.subtests.append(dict(nodeid=report.nodeid, outcome=report.outcome))
+                      return
                   if report.skipped:
                       self.skipped.append(report.nodeid)
                   if report.failed and report.when != 'call':
@@ -868,6 +883,8 @@ jobs:
           probes = [event['denied_probe'] for event in events if event['phase'] == 'tests']
           effects_ok = None not in probes and len(probes) == len(set(probes))
           common_ok = (sanity_ok and effects_ok and sorted(evidence.collected) == expected
+                       and all(item['nodeid'] in expected and item['outcome'] == 'passed'
+                               for item in evidence.subtests)
                        and not evidence.skipped and not evidence.phase_failures and error_type is None)
           if mode == 'baseline':
               passed = (common_ok and status == 1 and evidence.failed == [negative_id]
@@ -881,6 +898,7 @@ jobs:
                         guard_sanity_passed=sanity_ok, guard_events=events, effects_ok=effects_ok,
                         expected_ids=expected, collected_ids=evidence.collected, passed_ids=evidence.passed,
                         failed_ids=evidence.failed, skipped_ids=evidence.skipped,
+                        subtest_reports=evidence.subtests,
                         phase_failures=evidence.phase_failures, intended_baseline_assertion=evidence.intended_baseline_assertion,
                         owned_child_pid=owned['child'].pid if owned else None,
                         loopback_connections=owned.get('connections', 0), exception_type=error_type)
@@ -1027,7 +1045,7 @@ jobs:
           PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
           PYTHONDONTWRITEBYTECODE: '1'
         run: |
-          python -m pip install "jsonschema==4.26.0" "cryptography==46.0.7"
+          python -m pip install "jsonschema==4.26.0" "cryptography==50.0.2"
           python -I -B - <<'PY'
           from pathlib import Path
           import hashlib,json,os,platform,subprocess,sys,tempfile,types

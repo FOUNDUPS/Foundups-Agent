@@ -95,6 +95,8 @@ def validate_episode(spec: dict) -> dict:
             raise ValueError(f"{kind} must be an object")
         asset["path"] = _text(asset.get("path"), f"{kind}.path", 4096)
     result["music"]["rights_evidence"] = _text(result["music"].get("rights_evidence"), "music.rights_evidence", 2000)
+    if "captions_in_scene" in result and type(result["captions_in_scene"]) is not bool:
+        raise ValueError("captions_in_scene must be Boolean")
     captions = result.get("captions")
     if not isinstance(captions, list) or not 1 <= len(captions) <= 30:
         raise ValueError("captions must contain 1-30 timed cues")
@@ -228,9 +230,12 @@ def render_episode(spec: dict, output_path, *, base_dir=".") -> dict:
                            f"pad={width}:{height}:(ow-iw)/2:(oh-ih)/2,setsar=1,fps=30,format=yuv420p{fades}[v{i}]")
         count = len(episode["clips"])
         filters.append("".join(f"[v{i}]" for i in range(count)) + f"concat=n={count}:v=1:a=0[assembled]")
-        filters.append("[assembled]subtitles=captions.srt:force_style='FontName=DejaVu Sans,FontSize=22,"
-                       "PrimaryColour=&H0000FFFF,OutlineColour=&H00181818,BorderStyle=1,Outline=2,"
-                       "Shadow=0,Alignment=2,MarginV=25'[video]")
+        if episode.get("captions_in_scene") is True:
+            filters.append("[assembled]null[video]")
+        else:
+            filters.append("[assembled]subtitles=captions.srt:force_style='FontName=DejaVu Sans,FontSize=22,"
+                           "PrimaryColour=&H0000FFFF,OutlineColour=&H00181818,BorderStyle=1,Outline=2,"
+                           "Shadow=0,Alignment=2,MarginV=25'[video]")
         music_volume = "0.20" if "voice" in episode else "0.80"
         filters.append(f"[{count}:a:0]asetpts=PTS-STARTPTS,atrim=duration=15,volume={music_volume}[music]")
         if "voice" in episode:

@@ -21,6 +21,10 @@ ALLOWED = (
     "modules/example/src/credentials_manager.py",
     "modules/example/requirements.txt", "modules/example/memory/README.md",
     "public/index.html",
+    "foundups-mcp-p1/README.md", "foundups-mcp-p1/requirements.txt",
+    "foundups-mcp-p1/setup_mcp_servers.py",
+    "foundups-mcp-p1/servers/holo_index/server.py",
+    "foundups-mcp-p1/servers/wsp_governance/server.py",
 )
 DENIED = (
     ".env", ".env.local", "nested/.env", "nested/.env.production",
@@ -42,6 +46,12 @@ DENIED = (
     "nested/probe.sqlite3", "nested/probe.sqlite3-shm", "nested/probe.log",
     "logs/probe.txt", "02_logs/probe.txt", "nested/.venv/probe.py",
     "nested/venv/probe.py", "nested/node_modules/probe.js",
+    "foundups-mcp-p1/foundups-mcp-env/Scripts/python.exe",
+    "foundups-mcp-p1/foundups-mcp-env/Scripts/pip.exe",
+    "foundups-mcp-p1/foundups-mcp-env/Scripts/uv.exe",
+    "foundups-mcp-p1/foundups-mcp-env/bin/python",
+    "foundups-mcp-p1/foundups-mcp-env/pyvenv.cfg",
+    "foundups-mcp-p1/foundups-mcp-env/Lib/site-packages/probe.py",
     "nested/__pycache__/probe.pyc", "nested/probe.pyc",
     "nested/.pytest_cache/probe", "nested/.mypy_cache/probe",
     "nested/.ruff_cache/probe", "nested/.cache/probe", "nested/probe.gguf",

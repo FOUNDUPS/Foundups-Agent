@@ -327,3 +327,10 @@ cut, then the existing hosting owner must deploy it before Refresh can show it.
 This is a read-only creator-review surface, not a new renderer, public editing
 API, separate PWA, authentication system or WRE worker. Voice and whiteboard
 capture remain deferred. A local build is not evidence of public deployment.
+
+### Spatial learning words in existing episode renderer
+
+Optional Boolean `captions_in_scene` defaults to false. When true, input clips
+already contain the visible words; renderer skips subtitle burn-in but still
+validates cues and writes the SRT sidecar. This prevents duplicate text for
+EDUIT's shared scene; callers must verify visible text against that sidecar.

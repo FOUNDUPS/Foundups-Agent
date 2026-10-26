@@ -110,7 +110,7 @@ jobs:
   application-image:
     needs: native-context-boundary
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
         with:
@@ -139,8 +139,16 @@ jobs:
           if sys.version_info[:2] != (3, 12):
               raise SystemExit("Application image did not select supported Python 3.12")
           root = Path("/app")
-          required = ("main.py", "requirements.txt", "requirements-trust-bootstrap.txt", ".docker-context-canary/source.py")
-          forbidden = (".git", ".docker-context-canary/.env", ".docker-context-canary/credentials")
+          required = (
+              "main.py", "requirements.txt", "requirements-trust-bootstrap.txt", ".docker-context-canary/source.py",
+              "foundups-mcp-p1/README.md", "foundups-mcp-p1/requirements.txt",
+              "foundups-mcp-p1/setup_mcp_servers.py", "foundups-mcp-p1/servers/holo_index/server.py",
+              "foundups-mcp-p1/servers/wsp_governance/server.py",
+          )
+          forbidden = (
+              ".git", ".docker-context-canary/.env", ".docker-context-canary/credentials",
+              "foundups-mcp-p1/foundups-mcp-env",
+          )
           missing = [p for p in required if not (root / p).is_file()]
           leaked = [p for p in forbidden if (root / p).exists()]
           if missing or leaked:
