@@ -200,3 +200,8 @@ Each panel now owns expand/collapse. Added WebKit pinch adapter over Mall gestur
 pinch tap suppression, viewport rotation pause, safe-area sizing and inert focus.
 Fourteen focused checks plus phone/tablet viewport harness; actual iOS remains
 unverified. Independent CLI/resize findings repaired. See HOME_SCREEN_LAYOUT_REPAIR.
+
+
+The same Home Screen milestone now records viewer-iteration v0.2.4 diagnostic
+scores and independently found defects, with native-device gaps explicitly open.
+No numerical average, autonomous worker or next-episode transfer success claimed.

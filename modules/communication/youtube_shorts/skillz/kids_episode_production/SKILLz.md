@@ -1,6 +1,6 @@
 ---
 name: kids_episode_production
-version: 0.2.3
+version: 0.2.4
 intent_type: GENERATION
 promotion_state: prototype
 ---

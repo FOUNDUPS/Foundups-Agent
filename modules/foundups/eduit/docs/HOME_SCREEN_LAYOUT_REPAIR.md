@@ -78,3 +78,30 @@ coverage, spatially bound controls and callback/rotation recovery are the three
 criteria. Baseline screenshot/source FAIL; candidate browser checks PASS.
 Physical-device acceptance stays UNVERIFIED, so no overall perfect rating or
 claim of proven iOS behavior. No autonomous RSI promotion or learning-outcome claim.
+
+
+## Current diagnostic grades and autonomous findings
+
+Rubric: viewer-iteration v0.2.4. These engineering judgments were introduced
+as a diagnostic after the current repair, not a preregistered improvement study.
+Freeze them for the next iteration; do not claim a measured learning effect.
+
+| Criterion | Current scoped grade | Evidence / remaining gap |
+|---|---|---|
+| Launch/fit |4/5 browser scope | Direct live root and four viewport dimensions checked; actual installed iOS acceptance UNVERIFIED |
+| Panel entry/exit |4/5 browser scope | Both live units fill viewport and return;48px controls; real device safe areas UNVERIFIED |
+| Input parity |3/5 | Mouse and gesture callback/cancellation checks pass; native iOS touch delivery UNVERIFIED |
+| State/feedback continuity |3/5 | Source/test pause and normalized canvas retained; installed-device resume/marks after rotation need acceptance |
+| Educational readability |4/5 changed-surface scope | Scene/words/media identities unchanged; no new spoken-language or learner-understanding claim |
+
+No overall average, completion percentage or physical-iPhone PASS is assigned.
+No speculative new code is justified solely to raise an unverified device score.
+Independent reviewer confirmed14 checks, ownership and repaired findings; merge
+and deployment receipts remain separate evidence.
+
+Autonomous inspection caught the missing builder CLI option, missing timer pause
+on viewport resize, off-panel keyboard focus and accidental rescue taps during
+pinch. Those were repaired without waiting for012 to identify each defect.
+The source audit also found stale perspective notes and a missing viewer route
+in the skill. This is a manually governed contribution to RSI, not an installed
+autonomous production line. Next actual episode remains the forward test.

@@ -41,3 +41,45 @@ production in the parent skill; do not create another editor, shell or FoundUp.
    one milestone PR. Pass applicable checks, squash-merge, deploy that source and
    verify the exact live root/inner routes. Do not create a PR per visual tweak.
    Do not re-upload an unchanged video or activate WRE for a direct UI repair.
+
+## Score, decide and retain
+
+Use WSP15 to prioritize which defect to fix; do not call its complexity/urgency
+sum a visual-quality grade. Freeze the following diagnostic rubric before the
+next repair cycle. Grade the actual output and interactions, not code confidence.
+
+| Criterion | Required observations |
+|---|---|
+| Launch and fit | Root, manifest URL and installed shortcut where accessible; phone/tablet portrait/landscape; no unintended desktop scaling or clipped controls |
+| Panel entry/exit | Each panel owns a reachable control; aspect ratio, safe area, collapse, focus and Escape work |
+| Input parity | Mouse, keyboard, two-finger pinch/cancel and whiteboard; native touch delivery is a separate acceptance surface |
+| State continuity | Expand/rotate/pause cannot silently consume a rescue, lose marks, change scene identity or restart media |
+| Educational readability | Sound/word/action relationship remains visible; labels and controls do not obscure learning objects |
+
+Score each from1 to5:1=blocked/broken;2=repeatable major defect;3=usable with
+known functional or verification gaps;4=passes the declared scoped checks with
+remaining platform limits explicit;5=independently confirmed on every declared
+target surface. Add evidence, reviewer, source revision and PASS/FAIL/UNVERIFIED.
+Never replace an unavailable native-device result with a score from simulated
+events, average away a failure, or present ordinal grades as learning outcomes.
+
+For scores1-2, identify the responsible owner, prioritize with WSP15, repair and
+recheck before accepting that scope. For3, distinguish a code defect from missing
+evidence: fix an accessible defect autonomously; seek the smallest available
+verification for an evidence gap. More speculative code cannot fix missing device
+proof. For4-5, stop polishing unless a new observation, regression or objective
+justifies it. Preserve approved media and a rollback point throughout.
+
+Inspect beyond012's comment: proactively check adjacent viewport/launch paths,
+gesture lifecycle, collision between controls, stale caches, accessibility focus,
+state timing and recovery. Record independently discovered defects as well as
+creator-reported ones. Run another bounded cycle when evidence warrants it, not
+an endless loop or a fabricated perfect score.
+
+Retain failure -> hypothesized cause -> repair -> scoped test -> independent
+judgment -> accepted/rejected candidate. Keep skill-source identity and evidence
+links for the existing WRE outcome/pattern-memory owner when that integration is
+admitted. Do not create another promotion engine or treat a Markdown receipt as
+an authenticated worker outcome. A skill edit is a candidate improvement; the
+next actual episode is the transfer check. Production autonomy additionally needs
+admitted execution, budgets, independent acceptance, rollback and retained reuse.

@@ -862,3 +862,8 @@ Actual three-cycle video review and residual limits are in EDUIT ModLog.
 Shorts-owned viewer now places expand/collapse on each panel. EDUIT mounts the
 same source at its standalone root, preventing a viewport-less redirect launch.
 See EDUIT HOME_SCREEN_LAYOUT_REPAIR.md for evidence and physical-device limits.
+
+
+Iteration skill v0.2.4 adds five evidence-scoped1–5 diagnostic criteria, autonomous
+adjacent-surface checks and repair/stop/retain rules. WSP15 remains defect priority,
+not visual quality. Current grades keep native iOS and transfer evidence separate.
