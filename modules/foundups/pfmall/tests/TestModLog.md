@@ -1,5 +1,19 @@
 # p.fMALL Test ModLog
 
+## 2026-10-26 — Freeze container transport acceptance before image authoring
+
+Allocationc08509671,15/P1. Reuse the same three real_server IDs/assertions through
+an explicit image-only fixture branch and one Linux Docker transport helper.
+All45 other named definitions remain AST-identical; removing only the new opt-in
+restores the exact original wire fixture AST. Existing817 cases pass locally with
+the opt-in unset, no failure/error/skip and the retained TestClient warning.
+The committed-context preflight rejects the missing future container lock before
+any Docker invocation. This is a Git-archive admission RED, not a Docker runtime
+RED/GREEN. Local engine absence remains an execution limitation. Freeze these
+oracles before Dockerfile/lock authoring; actual image/PID1/HTTP/cleanup acceptance
+must come from the explicit hosted Linux job. Evidence: external
+foundups-member-container-20261026, context-preflight-red and default baseline.
+
 ## 2026-10-26 — Exact registry projection after hosted rejection
 
 CI40248799360 rejects stale registry bytes;6b5d7902f precedes one independently
