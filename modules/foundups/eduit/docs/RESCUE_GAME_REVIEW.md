@@ -2,7 +2,7 @@
 
 ## Current accepted direction
 
-Video above game, with no introductory prose. Learning words remain in the video;
+Video above game, with no introductory prose. Learning words appear in the video and game;
 the game has no visual tap markers. Child-facing controls are icons with accessible
 names. Feedback is a separate mode that freezes the actual game, captures its scene
 and state, and accepts pointer marks. Local save/copy works; automatic Red Dog
@@ -18,8 +18,8 @@ Three babies and two parents are rescuable. Select one, tap the root, watch trav
 then select the next. Selection stays locked during travel. Babies take 0.9 seconds;
 parents 2.6 seconds. This makes saving five possible but harder. These are fictional
 game mechanics, not developmental norms, lives lost across sessions, or intelligence
-measurements. Parents and babies start supported on the cave floor; the green shelf
-is removed. Saved animals occupy the pocket, unsaved animals are occluded by earth.
+measurements. Large parents appear above the babies as stylized burrow depth; only the green
+shelf was removed. Screen-space height is not a support requirement. Saved animals occupy the pocket, unsaved animals are occluded by earth.
 
 ## Ownership and boundaries
 
@@ -42,7 +42,7 @@ is removed. Saved animals occupy the pocket, unsaved animals are occluded by ear
 | Creator page overloaded with prose | Two media panels, icon controls, hidden feedback tools | Browser layout inspection |
 | Annotation review replayed a separate timeline | Capture exact game state and SVG at pause | Frame/state included in saved feedback |
 | SVG sanitizer removed local use elements, losing characters | Preserve fragment-only SVG references, strip external/script content | Reopened snapshot retains cast |
-| Green support line cluttered the cave | Ground all actors on the floor and remove shelf | Render before/during/after |
+| Green support line cluttered the cave | Preserve the approved depth composition and remove only the shelf | Render before/during/after |
 | Visual corrections treated as proof of learning | Keep learning/phone/listening limitations explicit | No child-learning or autonomous RSI claim |
 
 Retrieval used the governed lexical fallback: ok=true, freshness=UNKNOWN,

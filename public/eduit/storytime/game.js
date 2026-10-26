@@ -1,15 +1,17 @@
+import {bindPanelGestures} from './panel-gestures.mjs';
 import {initial,advance,actorPose} from './engine.mjs';
 import {scene,movie} from './scene.mjs';
 import {locales,normalizeLocale,localizeEvent} from './learning-events.mjs';
 let locale='en';
 const $=id=>document.getElementById(id),stage=$('scene');
+let panelGestures;
 let state=initial(),last=0,paused=false,hitKey="";
 const soundtrack=new Audio("assets/little-shrew.mp4");soundtrack.preload="auto";
 function syncAudio(){soundtrack.currentTime=state.elapsed;if(!paused&&state.phase==="playing")soundtrack.play().catch(()=>{});else soundtrack.pause();}
 const embedded=new URLSearchParams(location.search).get('embed')==='1';if(embedded)document.body.classList.add('embedded');
 const hits=document.createElement('div');hits.className='rescue-targets';stage.after(hits);
 for(const id of ['wake','root'])$(id).remove();
-function act(e){state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
+function act(e){if(panelGestures?.isPinching())return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
 $('start').onclick=()=>act('start');$('retry').onclick=()=>act('retry');$('pause').onclick=()=>{paused=!paused;syncAudio();};
 function draw(){
  const t=state.elapsed,poses=state.actors.map(a=>actorPose(a,t));
@@ -36,6 +38,6 @@ function draw(){
 function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&state.phase==='playing'){state=advance(state,'tick',dt);if(!soundtrack.paused&&Math.abs(soundtrack.currentTime-state.elapsed)>.15)soundtrack.currentTime=state.elapsed;draw();}requestAnimationFrame(frame);}
 window.storytimeReview={setLocale(value){locale=normalizeLocale(value);document.documentElement.lang=locale;draw();return locale;},freeze(){paused=true;soundtrack.pause();return {svg:stage.innerHTML,phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state),locale};},play(){paused=false;if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
 // Reuse the Mall gesture owner inside the iframe; only same-origin parent can react.
-window.gestureZone?.(stage.parentElement,{onPinchOut:()=>parent.postMessage({type:'storytime.fullscreen',expanded:true},location.origin),onPinchIn:()=>parent.postMessage({type:'storytime.fullscreen',expanded:false},location.origin)});
+panelGestures=bindPanelGestures(stage.parentElement,{expand:()=>parent.postMessage({type:'storytime.fullscreen',expanded:true},location.origin),collapse:()=>parent.postMessage({type:'storytime.fullscreen',expanded:false},location.origin)});
 document.addEventListener('visibilitychange',()=>{if(document.hidden)soundtrack.pause();else syncAudio();});
 draw();requestAnimationFrame(frame);
