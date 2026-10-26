@@ -55,7 +55,7 @@ logger = logging.getLogger(__name__)
 # single load-bearing knob (HARD_CAP_PER_DAY, schedule_tracker.py, landed #844).
 try:
     from modules.platform_integration.youtube_shorts_scheduler.src.schedule_tracker import (
-        HARD_CAP_PER_DAY,
+        HARD_CAP_PER_DAY, channel_daily_cap,
         ScheduleTracker,
     )
 except Exception:  # pragma: no cover - defensive import for isolated tests
@@ -265,7 +265,7 @@ def compute_channel_need(
     name: str,
     *,
     upcoming_days: int = DEFAULT_UPCOMING_DAYS,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     count_fn: Callable[[str, str], int] = _default_count_fn,
     deficit_fn: Callable[[int, int], int] = _default_deficit_fn,
     today: Optional[datetime] = None,
@@ -284,6 +284,7 @@ def compute_channel_need(
     Returns:
         ChannelNeed with total_deficit, days_empty, and a schedule/sufficient recommend.
     """
+    cap = channel_daily_cap(channel_id, cap)
     date_strings = _upcoming_date_strings(upcoming_days, today=today)
     per_day_counts = [int(count_fn(channel_id, ds)) for ds in date_strings]
 
@@ -320,7 +321,7 @@ def _default_channels() -> List[Dict[str, str]]:
 def rank_channels_by_need(
     *,
     upcoming_days: int = DEFAULT_UPCOMING_DAYS,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     channels: Optional[List[Dict[str, str]]] = None,
     count_fn: Callable[[str, str], int] = _default_count_fn,
     deficit_fn: Callable[[int, int], int] = _default_deficit_fn,
@@ -435,7 +436,7 @@ def _store_outcome(ranking: List[Dict[str, Any]], upcoming_days: int, cap: int) 
 def run_skill(
     *,
     upcoming_days: int = DEFAULT_UPCOMING_DAYS,
-    cap: int = HARD_CAP_PER_DAY,
+    cap: Optional[int] = None,
     channels: Optional[List[Dict[str, str]]] = None,
     count_fn: Callable[[str, str], int] = _default_count_fn,
     deficit_fn: Callable[[int, int], int] = _default_deficit_fn,

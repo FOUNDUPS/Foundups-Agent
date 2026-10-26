@@ -89,7 +89,7 @@ class YouTubeShortsScheduler:
         # Canonical US-Eastern peak slots (morning/lunch/evening), env-configurable
         # via SHORTS_PEAK_SLOTS_ET. Defined ONCE in peak_window; these are ET and
         # get converted to the channel's Studio-account tz at allocation time.
-        self.time_slots = get_peak_slots_et()
+        self.time_slots = get_peak_slots_et(self.channel_id)
         # Channel Studio-account timezone (registry field). Used to convert the
         # ET peak slot to the local wall-clock the bare-time typer must enter.
         self.channel_tz = self.config.get("timezone")
@@ -1064,180 +1064,31 @@ class YouTubeShortsScheduler:
         date_str: str,
         time_str: str,
     ):
-        """Update video title and description (optionally weave index).
-
-        CHANNEL-AWARE (2026-02-22):
-        - FFCPLN channels (move2japan, antifafm): Generate clickbait titles
-        - Non-FFCPLN channels (foundups, undaodu): PRESERVE original title
-        """
+        """Apply matched analyzer evidence, otherwise preserve existing metadata."""
         try:
-            # Get description template for this channel
-            description_template = self.config.get("description_template", "ffcpln")
-
-            # CHANNEL-AWARE TITLE HANDLING
-            # FFCPLN channels: Generate clickbait titles (anti-fascist music promo)
-            # Non-FFCPLN channels: Generate channel-appropriate titles (don't just preserve bad titles)
-
-            def _is_bad_title(title: str) -> bool:
-                """Check if title is just a timestamp or placeholder."""
-                if not title:
-                    return True
-                title = title.strip()
-                # Match timestamp patterns like "0:50", "1:23", "12:34"
-                import re
-                if re.match(r"^\d{1,2}:\d{2}$", title):
-                    return True
-                # Match "Short #abc123" placeholder
-                if title.lower().startswith("short #"):
-                    return True
-                # Too short to be meaningful
-                if len(title) < 5:
-                    return True
-                return False
-
-            if description_template == "ffcpln":
-                # FFCPLN: Use clickbait title generation
-                new_title = generate_clickbait_title(original_title=original_title)
-                logger.info(f"[SCHEDULER] [FFCPLN] Generated clickbait title for {self.channel_key}")
-            elif description_template == "foundups":
-                # FOUNDUPS: Startup/pAVS/OpenClaw content - distinct branding
-                if _is_bad_title(original_title):
-                    import random
-                    foundups_titles = [
-                        "🚀 Building the Future with AI Agents #FoundUps #pAVS",
-                        "💡 pAVS: Peer-to-Peer Autonomous Ventures #FoundUps",
-                        "⚡ OpenClaw: Where AI Meets Entrepreneurship #FoundUps",
-                        "🔥 Startup Wisdom in 60 Seconds #FoundUps #pAVS",
-                        "🧠 AI + Humans = Better Startups #FoundUps #OpenClaw",
-                        "🎯 The Future of Work is Autonomous #FoundUps #pAVS",
-                        "✨ Innovation Never Sleeps #FoundUps #Startup #AI",
-                        "🌟 From Idea to Launch with AI #FoundUps #pAVS",
-                    ]
-                    new_title = random.choice(foundups_titles)
-                    logger.info(f"[SCHEDULER] [FOUNDUPS] Generated title (original was: '{original_title}')")
-                else:
-                    new_title = original_title.strip()
-                    if "#" in new_title:
-                        new_title = new_title.split("#")[0].strip()
-                    new_title = f"{new_title} #FoundUps #pAVS"
-                    logger.info(f"[SCHEDULER] [FOUNDUPS] Enhanced title for {self.channel_key}")
-            elif description_template == "undaodu":
-                # UNDAODU: Mindfulness/Education/Spirituality content - distinct branding
-                if _is_bad_title(original_title):
-                    import random
-                    undaodu_titles = [
-                        "🧘 Find Your Center Today #UnDaoDu #Mindfulness",
-                        "☯️ Wu Wei: The Art of Non-Doing #UnDaoDu #Zen",
-                        "🌸 A Moment of Peace #UnDaoDu #Meditation",
-                        "✨ Breathe. Be. Become. #UnDaoDu #Mindful",
-                        "🙏 Ancient Wisdom for Modern Times #UnDaoDu",
-                        "💫 The Path to Inner Balance #UnDaoDu #Zen",
-                        "🌿 Mindful Moments #UnDaoDu #Meditation #Peace",
-                        "☮️ Finding Calm in Chaos #UnDaoDu #Mindfulness",
-                    ]
-                    new_title = random.choice(undaodu_titles)
-                    logger.info(f"[SCHEDULER] [UNDAODU] Generated title (original was: '{original_title}')")
-                else:
-                    new_title = original_title.strip()
-                    if "#" in new_title:
-                        new_title = new_title.split("#")[0].strip()
-                    new_title = f"{new_title} #UnDaoDu #Mindfulness"
-                    logger.info(f"[SCHEDULER] [UNDAODU] Enhanced title for {self.channel_key}")
-            else:
-                # Other channels: Just clean up
-                new_title = original_title.strip() if original_title else f"Short #{video_id[:8]}"
-                if "#" in new_title:
-                    new_title = new_title.split("#")[0].strip()
-                logger.info(f"[SCHEDULER] [{description_template.upper()}] Preserved title for {self.channel_key}")
-
-            # CHANNEL-AWARE DESCRIPTION HANDLING
-            # FFCPLN: Replace with promotional description
-            # Non-FFCPLN: READ original description, APPEND template as footer
-            template_description = get_standard_description(description_template)
-
-            if description_template == "ffcpln":
-                # FFCPLN: Use template directly (replace original)
-                base_description = template_description
-                new_description = base_description
-                logger.info(f"[SCHEDULER] [FFCPLN] Using promotional description")
-            else:
-                # NON-FFCPLN: Read original description and PRESERVE it
-                original_description = None
-                try:
-                    original_description = self.dom.get_current_description()
-                    if original_description:
-                        logger.info(f"[SCHEDULER] [{description_template.upper()}] Read original: {original_description[:50]}...")
-                except Exception as read_err:
-                    logger.debug(f"[SCHEDULER] Could not read original description: {read_err}")
-
-                if original_description and original_description.strip():
-                    # ENHANCE: Original + divider + template footer
-                    base_description = f"""{original_description.strip()}
-
----
-
-{template_description}"""
-                    logger.info(f"[SCHEDULER] [{description_template.upper()}] Enhanced description (preserved original)")
-                else:
-                    # No original - use template as base
-                    base_description = template_description
-                    logger.info(f"[SCHEDULER] [{description_template.upper()}] No original found, using template")
-
-                new_description = base_description
-
-            # Optional: weave Digital Twin index into description.
-            # Default ON; disable with YT_SCHEDULER_INDEX_WEAVE_ENABLED=false
-            #
-            # PHASE 1 DECOUPLING (read-for-context only):
-            # The scheduler is a READ-ONLY CONSUMER of the video index artifact
-            # (produced OUTSIDE the scheduler by the Studio Ask / video_indexer
-            # SKILLz action, #819). It no longer OWNS/creates the artifact here:
-            # ensure_index_json / GeminiVideoAnalyzer have been removed from this
-            # read path. If the artifact is ABSENT, build_index_metadata_context
-            # returns None and we SKIP enhancement (keep base_description /
-            # original title) -- we do NOT "index now".
-            index_context = "disabled"
-            if os.getenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true").lower() in ("1", "true", "yes"):
-                inform_title = os.getenv(
-                    "YT_SCHEDULER_INDEX_INFORM_TITLE", "false"
-                ).lower() in ("1", "true", "yes")
-                enhance_description = os.getenv(
-                    "YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION", "true"
-                ).lower() in ("1", "true", "yes")
-
-                ctx = build_index_metadata_context(
-                    channel_key=self.channel_key,
-                    video_id=video_id,
-                    original_title=original_title,
-                    base_description=base_description,
-                    inform_title=inform_title,
-                    enhance_description=enhance_description,
-                )
-                if ctx is not None:
-                    # Artifact present -> apply woven title/description.
-                    index_context = "present"
-                    new_title = ctx.new_title
-                    new_description = ctx.new_description
-                else:
-                    # Artifact absent -> skip enhancement (NOT index now).
-                    index_context = "missing"
-
-            # Behaviour-neutral observability: which index-context branch ran
-            # (no response body, no transcript, no secrets).
-            logger.info("[SCHEDULER] index_context=%s for %s", index_context, video_id)
-
-            # Update via DOM
-            self.dom.edit_title(new_title)
-            await asyncio.sleep(0.5)
-
-            self.dom.edit_description(new_description)
-            await asyncio.sleep(0.5)
-
-            logger.info(f"[SCHEDULER] Updated metadata: {new_title[:50]}...")
+            if os.getenv("YT_SCHEDULER_INDEX_WEAVE_ENABLED", "true").lower() not in ("1", "true", "yes"):
+                logger.info("[SCHEDULER] index_context=disabled for %s", video_id)
+                return True  # Metadata preservation, not template substitution.
+            original_description = self.dom.get_current_description()
+            if not isinstance(original_description, str):
+                return False  # Cannot safely preserve an unread description.
+            ctx = build_index_metadata_context(
+                channel_key=self.channel_key, video_id=video_id,
+                original_title=original_title, base_description=original_description,
+                inform_title=os.getenv("YT_SCHEDULER_INDEX_INFORM_TITLE", "false").lower() in ("1", "true", "yes"),
+                enhance_description=os.getenv("YT_SCHEDULER_INDEX_ENHANCE_DESCRIPTION", "true").lower() in ("1", "true", "yes"),
+            )
+            if ctx is None:
+                logger.info("[SCHEDULER] index_context=missing_or_ineligible for %s", video_id)
+                return True
+            logger.info("[SCHEDULER] index_context=present for %s", video_id)
+            if ctx.new_title != original_title:
+                self.dom.edit_title(ctx.new_title)
+            if ctx.new_description != original_description:
+                self.dom.edit_description(ctx.new_description)
             return True
-
-        except Exception as e:
-            logger.warning(f"[SCHEDULER] Metadata update failed: {e}")
+        except Exception as exc:
+            logger.warning("[SCHEDULER] Metadata update failed: %s", exc)
             return False
 
     # =========================================

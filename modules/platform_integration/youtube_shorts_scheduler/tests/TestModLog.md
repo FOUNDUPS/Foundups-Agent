@@ -1,3 +1,49 @@
+## 2026-10-25 — Move2Japan per-channel cadence
+
+## 2026-10-26 — Hosted metadata fixture correction
+
+The hosted selected-batch suite exposed four metadata-isolation fixtures using
+Move2Japan's ambient Tokyo timezone. Set their shared mocked scheduler to
+explicit America/New_York so these cases reach the metadata sinks under test;
+retain the separate missing/cross-date rejection tests and all write assertions.
+No runtime guard was relaxed.
+
+168 passed, 2 skipped (existing browser-dependent cases). Offline suites:
+`test_scheduler`, `test_peak_window`, `test_reschedule_planner`,
+`test_reschedule_applier`, `test_what_should_i_schedule`,
+`test_shorts_priority_wiring`, `test_unified_shorts_videos_priority`,
+`test_live_schedule_signal_priority`, `test_remote_cli`.
+New assertions cover eight exact ET slots then next-day rollover, full/partial
+summary, eight-slot planner and priority deficit, apply cap8, lower explicit cap2,
+and unknown-channel hard3. Added failure checks for unknown/Tokyo timezone
+and blocked unqualified live apply; same-date preview fixtures explicitly use ET. No live scheduling or model calls. Existing tests were
+extended, so test registry membership is unchanged.
+
+## 2026-10-25 — Generated runtime closure repair
+
+CI required canonical test-registry and backend-manifest regeneration. Register
+one new test file (1771 total,273 quarantined). Fold the evidence validator into
+the existing content_generator owner rather than growing the installed runtime
+closure: membership remains1471, count rejection remains1472, and all existing
+328KiB/2MiB/32MiB bounds remain unchanged. Refresh the canonical manifest and
+both existing Python/JavaScript digest pins. Stage the generated manifest before
+its independent staged-index parity test. All8 generator cases pass (58.98s),
+all3 Node compatibility entrypoints pass, and manifest/registry/projection
+checks pass. The88 metadata/selected-batch regressions pass after consolidation.
+No validator bypass or deployment.
+
+## 2026-10-25 — Metadata evidence and verified feedback
+
+**88 passed**. Offline pytest (plugin autoload/dotenv disabled, explicit pytest_asyncio):
+`test_metadata_evidence.py`, `test_index_metadata_decoupling.py`, `test_remote_cli.py`.
+Covers wrong-video/stub/failed evidence, Studio Ask identity, YouTube/Whisper
+segments, visual versus speech provenance, duration-not-music, legacy wrappers,
+schedule-only preservation, eligible edits, description opt-out, idempotence,
+platform limits and mismatched saved-slot learning rejection. Existing decoupling
+fixtures now carry actual producer provenance; positive edits remain asserted.
+Browser delays are replaced only in the mocked decoupling harness.
+No browser, API analysis, audience metrics or deployed model was exercised.
+
 ## 2026-10-22 — Selected-batch regression and closure evidence
 
 WSP 6/15/22/50/84/97. Reuse `test_remote_cli.py` and existing adapter,

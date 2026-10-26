@@ -1,3 +1,245 @@
+## 2026-10-26 — Isolated member host bootstrap candidate
+
+WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 before authoring.
+Allocationf8fa5b25c and frozen acceptance4cd8c71f6 precede implementation.
+Read-only cloud inventory verifies the existing Foundups-Agent project/site and
+six Node functions; their matching ignored shared entrypoint has no Clerk path.
+Preserve all existing services/shared work. Reuse the published Python verifier,
+mapper and HTTP handler in a separate server-configured ASGI app; bind request.app
+policy, expose proposal/health only and reject invalid policy files at startup.
+Local814PASS retains all786 old cases/oracles plus28 frozen host cases; initial
+Windows10055 setup error and RED remain recorded. No dependency, cloud/IAM/deploy, storage,
+runtime/issuer or token grant. Serving/container, real member/session, same-origin
+UI, abuse/revocation and atomic repository claim remain required later layers.
+Allocation: existing FX/chain delivery plan; discovery evidence stays external.
+
+## 2026-10-26 — Hold intake promotion for patched optional dependencies
+
+All5134 hosted gates passed, but a separate public PyPI metadata audit found
+advisories for two original-profile packages. Do not use green functional/secret
+checks as a complete dependency-security claim. Pre-change15/P1 allocation3bbbb2
+selects a separate optional FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/
+cryptography50.0.2 profile; no shared/umbrella environment or product/oracle change.
+Same786 local cases pass; all25 resolved packages have zero advisories in the
+inspected registry metadata, with one reviewed HTTPX test-client warning.
+Independent inventory additionally found the bootstrap installer outside those25;
+allocationc6557db8b precedes its isolated/CI pip26.2.2 repair. Same786 cases pass;
+all26 installed distributions now show zero published registry advisories. Initial
+receipts remain historical. Independent requalification accepts the unchanged11
+held-outs plus separate optional-import-denied503 probe, all26 official reported
+wheel digests and final workflow source. The separate patched-profile receipt
+binds those reports and root786; fresh final-head gates/main readback remain
+required. No live identity, deployment or grant.
+
+## 2026-10-26 — Connect Clerk member identity to draft intake (initial profile)
+
+Allocated15/P1 at6efb68f50, frozen tests2e46fd2aa before product authoring.
+Existing PFMall FastAPI host now has a separate, default-unavailable proposal
+route; one genesis-owned Clerk wrapper reuses the unchanged body preflight and
+mapper. Real ephemeral RSA/HTTP tests pass locally786, including all695 original
+cases, with one reviewed baseline dependency warning. Independent11 held-outs
+and a separate optional-import-denied ASGI probe pass after the PEM repair;
+the initial configuration failure is retained. No live provider identity,
+deployed service, membership, online revocation,
+durable claim/registry/catalog, worker, financial signing or token effect is proved.
+Publication gates remain pending; see
+`docs/audits/security/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.md` and owner TestModLog.
+
+Hosted secrets gate reported two whole-receipt-bound instances of the public
+HTTP source hash. Independent reviewe54eec4c approved only those two bindings;
+append2417→2419 preserves the ordered prefix/all other ledger keys, scanner,
+rules, fingerprint algorithm and scan scope. Fresh final-head gates are still
+required. The three older GitGuardian incident records remain untouched.
+
+## 2026-10-26 — Bound GitHub observation HTTP for project admission
+
+WSP00/6/11/15/22/50/62/71/84/97;11/P2. Extend the existing client only: fixed
+API origin, GET/no redirects, identity/no decompression, counted2MiB JSON bodies,
+request and whole-observation timeouts, sanitized errors and cancellation cleanup.
+Legacy operations and public record/signature are preserved. Original135-case
+baseline passes; frozen desired RED146PASS/20FAIL; initial GREEN166PASS.
+Independent duplicate-encoding review: RED166PASS/1FAIL, then final167PASS.
+Existing1471 runtime members/caps stay fixed; client hash and two digest pins
+follow source. Hosted/security gates and main convergence remain separate.
+Hosted167PASS;39 observed manifest hash bindings require individual re-review;
+preserve the2378-row ledger prefix and fresh blocking scans after approved append.
+No repository claim, provider admission, work, token, signing or activation grant.
+See [FX delivery plan](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+
+## 2026-10-26 — Publish the existing FoundUp pitch/deck instruction
+
+WSP00/6/15/22/50/62/84/97;12/P2. Publish the existing module-owned pitch skill
+through canonical Claude discovery and the generated Codex mirror; preserve
+Outcome vision, Solution stages and Pain obstacles. Correct stale references.
+Unchanged projection owner passes17 with one existing Windows symlink capability
+skip, before and after; both wrappers validate. No runtime, registry, provider,
+paid generation, social/chain action or security-gate bypass. Mall/TestNet/codec
+holds remain separate. Scope, current video-model research and remaining gates:
+[FX delivery plan](docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md).
+
+## 2026-10-26 — Connect project nominations to review drafts
+
+WSP00/3/6/11/15/22/49/50/62/84/97;15/P1. The existing public GitHub form now
+has an opened-issue review workflow and bounded adapter feeding the unchanged
+genesis mapper. Fixed service context and nominator identity remain separate;
+OSP is advisory, unknown stages remain unknown, acceptance criteria remain empty.
+Baseline387PASS; frozen RED81FAIL/387PASS; final five-owner682PASS and actual CLI
+replay pass. Original80-case RED is retained. One new test registry entry yields
+1772 files/273 quarantined; manifest1471/c1f97e86 and runtime caps are unchanged.
+No owner, registry, worker, token, reward or market grant. Evidence and remaining
+release gates: docs/architecture/FOUNDUPS_FX_CHAIN_DELIVERY_PLAN_20261025.md.
+Hosted/security/main convergence remain required; parallel PR-cleanup state and
+the existing Mall/TestNet/codec security holds are preserved.
+
+## 2026-10-26 — FoundUps GitHub regular-file observation prerequisite
+
+WSP00/6/11/15/22/50/62/84/97; work15/P1, required manifest repair13/P1.
+Extend the existing client with immutable repository/Git-object/file evidence,
+strict regular-file/content checks and sanitized provider errors. Keep legacy
+record/tuple compatibility; repair the observed PATCH and network-fixture gaps.
+Final canonical unit shard135PASS; eight generator cases and three Node owners
+pass. Exact IDs, failures and hashes: [receipt](docs/architecture/receipts/FOUNDUPS_GITHUB_FILE_OBSERVATION_20261026.json).
+Runtime1471 members/caps unchanged; only client hash and two digest pins advance.
+Metadata brackets are non-atomic; no claim, trusted fact, issuer, signer, token,
+reward, trading or installed-runtime grant. Hosted/security/main remain separate.
+Initial hosted profile134PASS/1FAIL retained; unset empty credential variables
+and pin the workspace test root, preserving product/oracles. Source-manifest and
+receipt scanner findings require exact public-metadata review before rebinding.
+Independent review accepted40 exact bindings; the2260-entry prefix is preserved.
+
+## 2026-10-25 — FoundUps unsigned integration checkpoint
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.
+Observed main0909 includes nomination2207 and intake-reference2208; preserve
+Mall2196/TestNet2202/codec2206 exact open heads and their GitGuardian gates.
+Record the bounded stored-intent/unsigned-codec experiment: twenty frozen cases,
+two real fixture format/reopen calls and nine child launches. Run001 stays rejected;
+the revised explicit local-hostname grant precedes run002's exit0/no unexpected
+host effects. Preserve source/result/review identities and unchanged accounting.
+Historical28/173/459 counts are nonadditive and were not rerun. External scripts
+and payloads are unbundled; no public reproduction/native/OS/ATTACH proof follows.
+No runtime, cap, scanner, dependency, signing, issuance, payment or deployment
+change. The existing delivery plan/compact receipt retain unfinished work and
+the next separately allocated consumer/artifact layer.
+
+## 2026-10-25 — FoundUps delivery and research checkpoint
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP22/50/97. Reconcile existing delivery/research
+owners with observed main5be and exact open-PR heads; preserve earlier chronology.
+Record190 fully read allocated paths and18 supplementary physical versions,
+including all119 WSP-prefixed files and3 support docs; publish the bounded reader
+coverage index with redaction/display/source-authority limits.
+Keep19 mixed registry/5 public/14 media populations distinct and capture012's
+Mall/FX/intake/Outcome-Solution-Pain requirements plus economic policy conflicts.
+Mall2196 and TestNet2202 retain unknown GitGuardian failures. Earlier direct SDK
+attempt failed after1 function passed,6 not reached. Subsequent fixed-target
+direct-v2 passes all7 unchanged functions/4 denied controls with0 unexpected attempts;
+candidate/base/source/origin hashes stay exact. No transaction/runtime admission.
+Documentation only; no runtime/cap, product/test, registry, dependency, signer,
+media publication, production root, reward, asset, liquidity or trading effects.
+
+## 2026-10-25 — Numeric hosted metadata review
+
+WSP15/22/50/97; pre-review14/P1. Parent and peer independently classify75 safe
+hosted descriptors as40 exact source-SHA metadata identities. Rehash13 external
+receipts and current source bindings; retain the two earliest RED test-preimage
+limits. Preserve all2141 old ledger entries and append only40,2181 total.
+Finding-bearing artifacts, runtime, scanner and unknown findings stay unchanged.
+The numeric plan records both review hashes. Fresh hosted gates remain required.
+
+## Parent current-main reconciliation acceptance — 2026-10-25
+
+Preserve parallel PR2199 mainc7f0d939 authority forwarding. The only runtime
+change versus numericc9 is its exact main bootstrap digest; versus main, only
+token_economics plus the allocated private helper change. All169 simulator/FAM
+and8 central raw sources equal the736 run; no simulator rerun is claimed.
+Fresh write/check,8 generator cases and3 Node entrypoints pass,1614 evidence
+maps stable and zero instrumented network/dotenv attempts.1471/1472 and byte
+caps remain fixed. Exact ordered ledger union2103 preserves numeric2026 plus
+main2065 over1988 common; append only independently reverified38,2103->2141.
+The37 unchanged/1 known token-SHA classification is against current main; all38
+source contexts are unchanged against numericc9. Previous proof sections remain.
+Hosted security/CI and dedicated publication/main readback are still required.
+Independent review rawSHA256:
+a76ac8a3eed83db35c8bda3e28430a3351a8538f13e857b26d1630c20507aef5.
+
+## 2026-10-25 — Numeric source closure reconciled with current main
+
+WSP15/22/50/97. Reconcile numericc9bee55e with mainc7f0d939, preserving the
+committed arithmetic, resident bootstrap forwarding, tests and security history.
+All169 simulator/FAM plus8 central raw hashes still match the actual736 receipt;
+no simulator rerun is claimed or needed by this source-identity gate. Preserve
+portable receipt/companion and prior numeric review proof bytes. Existing security
+records union to2103, with no new approval. Fresh canonical write/check, unchanged
+generator8 and Node3 entrypoints pass;1471 members and fixed byte caps remain.
+New38 metadata proposals require independent review before binding. Merge remains
+uncommitted; no push/deploy/native runtime or financial activation.
+
+## Parent independent acceptance — 2026-10-25
+
+Independent review rehashes all1471 staged normalized sources, both pins and
+fixed byte caps. Exactly38 known generator metadata bindings are accepted:
+37 sources/contexts unchanged;1 token_economics source SHA256 value matches the
+actual tested arithmetic bytes. Append only those38,1988->2026; preserve every
+old binding. No unknown finding, scanner rule/path or GitGuardian exemption.
+Generation's1613->1614 evidence-domain growth has unchanged intersection hashes;
+final check/tests/Node1614 maps are stable. Old boundary RED is an expected-count
+assertion before validator invocation, not old-validator execution proof.
+Fresh hosted scans/CI, dedicated PR and main readback remain required.
+Independent report rawSHA256:
+dfc1b1093eb982f11d5e6ebb8b97cea82037e9fb7203946e231dee6bf8da22c2.
+
+## 2026-10-25 — Selected simulator numeric integrity candidate
+
+WSP15 pre-code15/P1; WSP00/6/11/22/50/62/84/97. Reuse existing work/stake/
+unstake paths with strict operand and mutable-fee admission plus pure prospective
+balance calculations before participating mutations. Existing valid arithmetic
+and references remain; one private scalar owner replaces duplicated preparation.
+Focused226, independent28 and combined-main simulator736 pass with3 named SSE
+exclusions; counts overlap. Source/stores and process-guard evidence are recorded,
+including actual failure/oracle chronology and historical isolation limits.
+This is simulation numeric integrity, not aggregate issuance or funded payment.
+Dedicated PR/security/CI/source-binding/main gates remain pending.
+
+## 2026-10-25 — Public legacy DAO and Playapp research
+
+WSP15 pre-authoring allocation C2/I4/D3/Impact4=13/P1; WSP00/22/50/97.
+Append bounded immutable public-source evidence to the existing
+[FX research](docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md#9-public-legacy-dao-and-playapp-evidence--2026-10-25).
+Preserve legacy FUC roles, custody, license and deployment limits; Playapp is a
+starter, and neither reviewed tree establishes a DEX or DAO2 identity.
+No token, FoundUp admission, economic-policy or runtime capability is created.
+Source/link/diff review only; no tests or chain calls.
+
+## 2026-10-25 — Mock BTC anchor replay integrity candidate
+
+WSP00/6/11/15/22/50/62/84/97;14/P1 optional mock infrastructure. Bind the
+existing connector's v2 payload and realm immutably; reject conflicting,
+legacy, unresolved and malformed stored evidence. Preserve exact-content
+force behavior and confirmation history, validate canonical SQLite constraints,
+and reject unsupported selected modes before database effects. Mesa never
+coerces an invalid selection into mock.
+
+Qualified211 focused cases are contained in513 simulator passes with three
+named SSE HTTP exclusions; independent21 held-outs pass. Counts overlap.
+The portable receipt retains fixture/runner/WAL/schema/Win32-probe corrections,
+original execution base and current-main reconciliation. Generated closure
+retains1470 members and fixed limits; eight generator cases and three Node
+entrypoints pass. Independently reviewed38 exact metadata bindings do not
+approve unknown findings; hosted security/CI and dedicated-PR/main gates remain.
+No real BTC publisher, custody, chain confirmation or reward transfer exists.
+This optional BTC layer is not required by a separate Algorand transfer pilot
+unless its evidence is explicitly selected as downstream authority.
+
+## 2026-10-25 — RSI source closure and current input handoff
+
+WSP00/15/22/50/97: reconcile four existing planning documents with #2181 main
+closure and today's seven-artifact diagnostic, keeping eighth-file metadata separate.
+Preserve failure history and the 19/P0 umbrella; this documentation slice is
+C2/I4/D4/Impact3=13/P1. [Current dispatch](docs/operations/RSI_SWARM_DISPATCH.md#current-owner-input-handoff--2026-10-25)
+separates authentic inputs from remaining caller integration and pinned-runtime limits.
+#2194 main acceptance is verified; separate root Undici maintenance failed. No native RSI claim.
+
 ## 2026-10-23 — Private AutoPost item capture and shared Mall repair
 
 Extend existing AutoPost/PF Mall ownership for Shop clothing and GetK-style
@@ -62366,3 +62608,33 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+## 2026-10-25 — intake reference preservation allocation
+
+WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Preserve submitted references
+in the existing draft envelope rather than discard them. Allocate one constructor
+keyword, nearest existing tests/docs and unchanged-membership manifest derivatives;
+desired behavior RED precedes the repair. Existing source AST pin requires explicit
+single-keyword review before rebaseline. No new parser, service, control or authority.
+The four-owner selection now passes601 cases after the independent AST review;
+the five behavioral RED failures and intermediate old-pin failure are preserved.
+Reconciled published nomination main a44; retain1,471 members and unchanged caps,
+updating only the changed source digest and two canonical pins to f427e16b.
+Seven generator passes plus the staged-index pass after staging, and3 existing
+Node entrypoint passes, are separate from the601 intake result. Keep the original
+unstaged-manifest failure; current hosted/security gates remain pending.
+Actual hosted job121124347560 reports40 tree findings and zero in history:
+39 unchanged generated source digests and one unchanged hostile-input fixture
+shifted108 to150. Parent reconstructs all40 exact current/prior bindings and39
+source hashes; append only these after source-bound review, preserving2,220 prior
+entries (2,260 total). Five unchanged security regressions pass; no scanner,
+rule, source or oracle changes. Fresh hosted gates remain required.
+## 2026-10-25 — project nomination inbox allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97/109. Reuse the owned clean
+checkpoint worktree from observed main e801 for a <=90-line GitHub issue form
+plus existing delivery plan/root log. Deliberate public submission and an issue
+permalink supply a usable nomination queue without another service. No automatic
+issue submission, control/admission, registry, token or market activation. Publish
+and verify the default-branch form before separately changing overlapping Mall UI.
+Implemented the55-line form; YAML/schema/required-field/order checks and independent
+source review pass. No issue submitted. Hosted publication gates remain pending.

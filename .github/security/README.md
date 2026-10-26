@@ -1,3 +1,50 @@
+## PR2215 Story Time manifest rebind — 2026-10-25
+
+Hosted job121251681796 reported39 manifest metadata findings. Author and
+independent reviewer each rehashed the referenced source, verified unchanged
+unique lines against main33f1442d76cca7fc084523355c6895964828258e, and reconstructed
+prior exact approvals. Append only these39 whole-file/rule/line bindings.
+No rules, exclusions, fingerprint algorithm or unknown findings changed.
+Evidence is appended to reviewed-kids-manifest-evidence.json. Fresh tree/history
+scans are required; source-hash review is not credential or deployment evidence.
+
+## Move2Japan cadence manifest metadata review — 2026-10-25
+
+The checksum-pinned Gitleaks staged-tree scan reported 39 unreviewed manifest
+findings and no scanner errors. Parent and implementation-agent reviews each
+rehashed every referenced source, confirmed each finding-bearing line is unique
+and unchanged from base `a490cadb5`, and reconstructed its prior exact approval.
+Append only these 39 file/rule/line bindings after manifest regeneration; retain
+all prior approvals. Scanner rules, scope, exclusions and fingerprint algorithm
+are unchanged. Fresh hosted tree/history checks are required on the published
+head; this metadata review does not establish runtime deployment or live cadence.
+
+## PR2208 intake reference metadata and fixture bindings — 2026-10-25
+
+Actual job121124347560 reports40 unreviewed tree findings and zero in history:
+39 generated source-digest entries and one unchanged synthetic hostile-input
+fixture, moved from line108 to150 by the new cases. Parent and source-bound
+review reconstruct every current/prior fingerprint and all39 referenced hashes.
+Preserve2,220 prior entries and append only40 exact bindings (2,260 total).
+The FX evidence records mapper authorship and the decoded-Git-blob correction;
+the initial raw-response test fingerprint is invalid and is not approved.
+No source, oracle, scanner, scope, rule or fingerprint function changes.
+Fresh current-head tree/history scans remain required; GitGuardian is separate.
+
+## PR2204 scheduler manifest metadata review — 2026-10-25
+
+Hosted security job 121087044548 reported 39 unreviewed tracked-tree findings
+and zero introduced-history findings. Parent and implementation-agent reviews
+independently rehashed all 39 referenced source files, verified each finding is
+a unique unchanged generated SHA256 entry from base `5be89ae4`, and reconstructed
+its prior exact approval in the base ledger. Regenerating the manifest changed
+only the whole-file binding of these previously reviewed metadata findings.
+
+Append only the 39 exact file/rule/line fingerprints, retaining all prior entries.
+No scanner rule, path exclusion, scan scope, fingerprint algorithm or unknown
+finding is approved. Fresh hosted tree/history scans remain required; these
+source-integrity hashes are not credentials and this review is not a new scan.
+
 ## PR2189 brand-grounding metadata bindings - 2026-10-25
 
 Hosted security job 121022484911 on candidate 9fd2618 reported 39 unreviewed
@@ -539,3 +586,27 @@ revocation/restriction evidence. Do not treat source removal as revocation.
 ### Kids story manifest metadata re-review — 2026-10-23
 
 PR #2182 regenerated the runtime manifest for the kids story route. CI job 120249025720 reported 38 whole-file-bound findings. Two independent checks verified every flagged entry equals the referenced source SHA256, preserves the previously accepted entry and source bytes, and has a prior fingerprint in the existing ledger. Append only those 38 new exact file/rule/line fingerprints; preserve all earlier entries and scanner rules. Evidence: `reviewed-kids-manifest-evidence.json`. These are source hashes, not provider credentials.
+
+### Resident parent-authority bootstrap metadata re-review — 2026-10-25
+
+PR #2199 at `5bfcff258415e0bfcb2e3ab2e8d72204783de06a` invalidated
+39 whole-file-bound reviews in CI job 121049860507. Independent review
+compared each finding with main `944127df3856c0be4a545fce926ac17b86320576`:
+38 unchanged manifest entries equal their exact source SHA256, and the
+unchanged changelog prose moved from line 3852 to 3865. Every prior binding
+was present in the existing ledger. Append only these 39 reviewed fingerprints,
+preserving all 1,934 earlier entries (1,973 total). No scanner rule, path
+exclusion, fingerprint formula, or history exception was changed. The failed
+run remains evidence; fresh hosted scans must verify the repaired head.
+Sanitized per-finding proof and independent review are retained under
+`O:/RedDog-Builder-Artifacts/pr-reconciliation-20261021/refresh/` as
+`rsi-parent-bootstrap-security-proofs-20261025.json` and
+`rsi-parent-bootstrap-independent-security-review-20261025.json`.
+
+Subsequent integration of owner-merged #2198 at `6fe7eba4` preserved its
+22 changed paths, including all 1,988 incoming review records. The combined
+manifest at `1d73d8e7` required 38 further source-hash rebindings, individually
+rechecked against exact Git source and prior reviews. Retain the earlier 2,027
+records and append only those 38 (2,065 total); the changelog review remains
+valid. Independent evidence: `rsi-parent-bootstrap-independent-main-union-review-20261025.json`
+in the same evidence directory. Combined-source hosted acceptance remains required.

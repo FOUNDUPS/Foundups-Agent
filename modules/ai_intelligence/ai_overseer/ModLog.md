@@ -1,3 +1,49 @@
+## 2026-10-26: Qualify patched optional HTTP dependencies
+
+Initial profile metadata exposed published Starlette/cryptography advisories;
+hold promotion despite green functional/secrets gates. Allocation3bbbb2ee4
+selects a separate FastAPI0.162.0/Starlette1.10.0/PyJWT2.15.1/crypto50.0.2 profile.
+Same786 cases pass; product/oracles/legacy auth and original environment remain
+unchanged. Public metadata for25 resolved distributions reports zero published
+advisories, not a whole-system/binary audit. Independent inventory found older
+bootstrap pip outside those25; allocationc6557db8b precedes isolated/CI pip26.2.2
+repair, separately reported. Same786 cases pass again; all26 installed packages
+show zero published registry advisories. One reviewed HTTPX test-client warning;
+independent profile/metadata and final workflow reviews accept the bounded
+component, including unchanged11 held-outs plus separate optional-denied503.
+The patched-profile receipt binds those reports and root786; fresh exact-head
+hosted/security/main qualification remains required.
+
+## 2026-10-26: Connect member-authenticated draft intake (initial profile)
+
+15/P1 allocation6efb68f50, frozen tests2e46fd2aa, WSP00/6/11/15/22/50/77/84/97.
+Add one explicit Clerk server-only provider wrapper around the existing body-first
+intake_request seam, consumed by PFMall's actual POST route. Fixed public RSA,
+issuer/origin/time/v2 session policy; generic failures and pseudonymous handle.
+Legacy HMAC behavior/source/oracles and package exports remain unchanged. Optional
+HTTP dependencies are outside resident imports; no environment secrets, JWT/JWKS
+network fetch, nonce/data writes, deployment, admission/ownership/work/token grant.
+PFMall TestModLog records exact RED/GREEN786 evidence/one baseline warning.
+Independent11 held-outs and separate optional-import-denied ASGI probe pass after
+canonical PEM repair, with the original configuration finding retained. Current
+hosted/security/main gates remain separate. Durable claim state and real-session
+qualification are still required.
+
+## 2026-10-26: Consume public GitHub nominations as review drafts
+
+WSP00/3/6/11/15/22/49/50/62/84/97; C3/I4/D4/Impact4=15/P1.
+Add a bounded issue-form adapter/CLI and an opened-issue Actions consumer using
+the existing LaunchRequest mapper. Preserve OSP advisory data and separate the
+fixed review-service context from nominator identity and HTTP authentication.
+No owner, commander, registry, token or trading grant. Old mapper/auth code and
+AST oracles stay unchanged; the new owner is outside the resident closure.
+Baseline387PASS; original RED80FAIL/387PASS and strengthened RED81FAIL/387PASS
+remain retained. Final five-owner682PASS and actual CLI replay pass. The canonical
+test registry adds one unit file (1772 total/273 quarantined); manifest1471 and
+canonical c1f97e86 remain unchanged. Hosted/security/main gates remain required.
+Evidence: external foundups-nomination-review-20261026; workflow retains exact
+Junit cases/dependency report. No live issue-event or whole-system readiness claim.
+
 ## 2026-09-21: Qualify the existing FoundUp genesis prototype
 
 - WSP 00/15/22/50/95/97/109; static qualification C3/I3/D2/Impact2 = 10/P2 after PR1838 merged its exact reviewed tree. The previous repair's245 overlapping local/independent cases and ten exact-head checks passed; its main workflows are tracked separately.
@@ -3304,3 +3350,13 @@ from modules.platform_integration.youtube_auth.src.mcp_quota_server import MCPQu
 
 ### Outcome
 - 0102 now has a reusable diligence skill for evaluating external open-source tools such as `karpathy/autoresearch`.
+
+## 2026-10-25 - Preserve public intake reference metadata
+
+WSP15 13/P1 allocation in the FX delivery plan; WSP22/50/84/97.
+Added one `prior_art=list(...)` constructor keyword and an untrusted-reference
+comment in the existing mapper. No new parser/auth/store/control or runtime member.
+Nine test-first cases cover order, copies, defaults and transport representations.
+Retained clean RED 596P/5F and old-pin 600P/1F; independent review approved rebaseline.
+Final four-owner selection: 601P, no skips or instrumented network/process/write attempts.
+All existing bytes of this log, including its NUL byte, are preserved as a prefix.

@@ -2,6 +2,24 @@
 
 ## Public API Definition
 
+### X audio extraction timeout contract (2026-10-25 candidate)
+
+The existing X adapter keeps its 30-second FFmpeg communication deadline. On
+TimeoutExpired it kills only the process it created, then communicates with a
+separate five-second drain/reap deadline. Successful settlement preserves the
+existing BadRequest("Audio extraction timeout") response. Kill/drain/reaping
+failure is explicit as "Audio extraction timeout; child cleanup failed" within
+the existing processing-error response. Temporary-file unlink failure preserves
+the primary exception and adds a cleanup note rather than hiding that failure.
+A cleanup failure is not evidence of a settled child; no global/process-tree
+cleanup or unbounded wait is performed.
+
+Local author evidence covers the original 18 guarded cases and one actual
+owned Python child. Independent source/outcome review and a separate child
+positive pass; missing-kill/missing-drain controls reject incomplete cleanup.
+Real FFmpeg/provider execution and hosted POSIX acceptance remain separate;
+no native AI claim is made.
+
 ### Ethereum logger: current educational contract
 
 `EthereumLogger` uses Web3 for connection and network-stat queries when available.

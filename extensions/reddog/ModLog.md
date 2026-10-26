@@ -1,3 +1,74 @@
+## GitHub file-reader source binding — 2026-10-26
+
+WSP6/15/22/50/97; metadata amendment13/P1 in the FoundUps delivery plan.
+Existing1471-member closure changes only the GitHub client's normalized source
+hash; JS and generator-test digest pins become c1f97e86. Membership,1472 refusal
+and328KiB/2MiB/32MiB caps remain unchanged. Eight generator cases and three Node
+compatibility/preflight/blocked-recovery owners pass. Source compatibility only;
+no extension installation, repository claim or issuer/provider authority follows.
+
+## Numeric/current-main combined closure — 2026-10-25
+
+WSP6/15/22/50/97. Existing canonical generation combines mainc7f0d939's bootstrap
+source hash with numericc9bee55e's tested token source/private member. Only the
+bootstrap digest changes versus numeric; only token digest/private membership
+change versus main. Keep1471 acceptance/1472 rejection and all328KiB/2MiB/32MiB
+caps. Both existing pins advance by one digest literal, with no algorithm or
+installed authority change. Fresh write/check,8 generator cases and3 Node owners
+pass;1614 evidence snapshots remain stable, zero instrumented attempts. The2103
+existing security entries remain a union; new38 exact proposals are unapproved.
+
+## FoundUps selected numeric source closure — 2026-10-25
+
+Pre-edit WSP15 allocation16/P0 in the numeric plan permits exactly one required
+private arithmetic member. Runtime1470->1471; the existing explicit Node boundary
+now accepts1471 and rejects1472. The old boundary oracle first failed its
+1470 expected-count assertion on actual1471, before calling the validator.
+That RED is an oracle-count mismatch, not evidence of old-validator execution. All328KiB manifest,2MiB/source and32MiB total caps remain unchanged.
+Only token_economics.py's existing LF digest changes, plus _token_numeric.py.
+The alignment test owner is outside runtime membership: an initial parent
+measurement assertion wrongly expected its digest, before any pins changed.
+
+Canonical write/check, all8 existing generator cases and3 existing Node
+compatibility/preflight/blocked-recovery entrypoints pass. Existing Python pin
+and JS pin advance together. All1614 evidence hashes stay stable after deliberate
+write/cap edits; zero instrumented Python/Node network or dotenv attempts.
+No generator/source-discovery algorithm, runtime authority, dependency or API
+change. Evidence count1614 differs from actual1471 runtime members.
+
+Exact commands, IDs, timings and source maps are external under
+foundups-numeric-source-closure-f3jex_4s and in the numeric portable receipt.
+Known38 metadata findings are proposed, pending independent review:37 sources/
+contexts unchanged and1 known arithmetic-source SHA256 value changed. No blanket
+rule/path exemption, unknown finding approval, OS isolation, installed-runtime
+promotion, real chain effect or additional economic coverage follows.
+
+## FoundUps BTC/Mesa derived source binding — 2026-10-25
+
+WSP00/15/22/50/97; pre-authoring16/P0 in the BTC integrity plan. Regenerate
+the existing AST manifest and advance only its JS/Python digest pins after
+parent merged candidate899a40e6e with main f11d7559746 at d9a57ab1d.
+Exactly two runtime digests change (BTC connector and Mesa), with no added or
+removed1470 members. All328KiB/2MiB/1470/32MiB caps and1471 rejection remain.
+
+Canonical --write/--check and the unchanged generator8/Node3 entrypoints pass.
+Only the three coherent binding paths were staged, without commit/push. No
+product, generator, dependency, installed descriptor or runtime authority change.
+Source snapshots and guard observations are in tests/TestModLog.md and the BTC
+portable receipt.38 known metadata bindings have an external proposal only;
+reviewed-findings.json is untouched and independent approval/fresh hosted scan
+remain required. No unknown finding or scanner rule/scope exemption is approved.
+
+## FoundUps epoch evidence source closure — 2026-10-25
+
+WSP00/6/15/22/50/97. Rebind only the existing epoch_ledger.py source hash after
+its process-local evidence repair. Runtime membership remains1470; no generator,
+member/byte cap, installed descriptor or authority change. Both existing digest
+pins advance together. Existing generator8 and Node compatibility/preflight/
+recovery3 entrypoints pass; independent review verifies all indexed source blobs.
+Known38 unchanged metadata contexts receive exact new bindings after parent and
+independent review. Fresh full hosted tree/history scans remain required.
+
 ## FoundUps authorization source-closure dependency — 2026-10-25
 
 PR2188 hosted CI exposed stale generated FAM source bindings. Use the existing

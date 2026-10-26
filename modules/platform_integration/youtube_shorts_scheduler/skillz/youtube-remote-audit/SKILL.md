@@ -117,3 +117,25 @@ Reusable invocation:
 > and callable interfaces, and inventory matching clips using live read-only
 > evidence. Report transcript coverage and runtime blockers. Preserve metadata,
 > visibility, playlists and schedules. Reuse existing components.
+
+
+## Today's-upload publishing handoff
+
+For an explicit today request, freeze the source-day bounds in Asia/Tokyo and
+verify upload timestamps against them, independently of U.S. publish slots.
+Inventory unlisted IDs only; preserve already-scheduled IDs and exclude private
+drafts/backlog. Record pagination coverage and unresolved date boundaries.
+For each clip, pass matched transcript/visual evidence and supported distinct
+title angles to the existing enhancement owner; title-only metadata is insufficient.
+
+Use the [bounded live-session procedure](../../docs/REMOTE_SCHEDULING.md#acting-on-todays-uploads-during-a-live-session)
+for checkpoint fields, cadence, idempotence and stop rules. This audit skill
+remains read-only. Report a concrete selected-ID handoff, not a queued job.
+Claim ongoing scanning only when the existing runtime, authenticated channel,
+frequency, expiration and durable checkpoint have actually been verified.
+
+## Workflow handoff
+
+Follow the [shared scheduling workflow](../README.md) for ordered inputs,
+outputs, evidence gates and resume boundaries. This skill retains its own
+read/write permissions and prototype status; linkage does not expand authority.

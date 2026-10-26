@@ -1,5 +1,53 @@
 # YouTube Shorts Scheduler - ModLog
 
+## 2026-10-26 — Compose existing scheduling skills and recover remote runbook
+
+Connect audit, coverage, selected-batch evidence, metadata, allocation, save,
+independent readback and feedback through skillz/README.md; link the existing
+skills without a new publisher. Recover the dual-surface, push authentication,
+and bounded today's-upload runbook work from PR2203. Low-view recovery remains
+an explicitly proposed review handoff, not an automatic republishing feature.
+
+WSP 50/84: source-bound lexical owner lookup at a490cadb5, workspace-head bundle,
+UNKNOWN semantic freshness/index gap; direct owner reads resolved noisy retrieval.
+WSP 00 bootstrap was attempted but blocked by unavailable torch in this environment;
+no full awakening or live worker compliance is claimed. WSP 22/95/97: preserve
+prototype status, distinguish instruction linkage, tests, live saves and deployment.
+Validation: local Markdown link checks and independent workflow forward review.
+## 2026-10-25 — Explicit Move2Japan cadence
+
+The existing slot owner supplies eight exact two-hour ET slots (08:00–22:00)
+for Move2Japan only. Tracker allocation/coverage, configuration, priority deficit,
+reschedule planning and apply guards resolve the same channel cap. Other channels
+retain three/day; explicit smaller caller limits remain effective. No daemon,
+live publication, model training or runtime-closure member was added.
+
+WSP22/50/84/97: lexical retrieval was source-bound but freshness UNKNOWN with
+index gap; required memory README absent. Bootstrap torch unavailable; cached
+tracker compliance is not a fresh awakening witness. Existing timezone conversion
+returns wall-clock only; non-ET date rollover still requires separate qualification.
+
+
+## 2026-10-25 — Evidence-gated metadata and verified scheduling feedback
+
+Replace unconditional channel/music templates in the scheduling metadata path
+with matched existing analyzer evidence. Preserve metadata for missing, stub,
+failed or mismatched artifacts; retain schedule-only and title/description opt-outs.
+Use conservative content extracts and bounded M2M provenance, not fabricated
+music themes or performance confidence. The legacy enhancement skill now shares
+this gate and its old string-only wrappers preserve their inputs.
+
+The existing DBA records reported success separately and grants positive outcome
+scores only for independent channel/video/date/time/timezone-matched readback.
+Audience-performance metrics remain unmeasured; no model training or automatic
+policy promotion is asserted. Updated both enhancement and scheduling-priority
+skill instructions, without invoking live analysis or publication.
+
+Validation: focused metadata/provenance/learning cases plus selected-batch and
+index-decoupling regressions. See tests/TestModLog.md. WSP 22/50/84/97; source-bound
+lexical retrieval retained UNKNOWN semantic freshness. Both existing analyzer
+schemas and scheduler write sinks were inspected before editing.
+
 ## 2026-10-22 — PR1860 current-main scheduling reconciliation
 
 WSP 00/6/10/11/15/22/50/84/97. C4/I4/D4/Impact4=16/P0.
@@ -2821,3 +2869,9 @@ Recorded coverage limits, conflicting request wording, modeled/verified boundari
 and the existing ASR path's forced-English behavior. Linked it from the audit
 skill and corrected the initial overbroad factual-content restriction.
 Documentation only; no new publisher, runtime repair, outreach or YouTube write.
+
+Move2Japan cadence is not qualified for live reschedule apply: that legacy adapter
+skips it with `cadence_live_unqualified` until independent timezone and occupied-slot
+receipts exist. Allocation/planning rejects unknown Studio timezone or any slot
+whose local date differs from its ET date (including Asia/Tokyo). This prevents
+clock-only conversion from silently publishing on the wrong calendar date.

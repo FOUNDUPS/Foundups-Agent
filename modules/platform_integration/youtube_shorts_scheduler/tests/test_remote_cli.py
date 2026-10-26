@@ -233,6 +233,7 @@ def test_readonly_tracker_does_not_create_storage(tmp_path):
 
 def test_preview_slots_uses_in_memory_state_and_custom_storage(tmp_path):
     scheduler = YouTubeShortsScheduler('move2japan', storage_dir=tmp_path)
+    scheduler.channel_tz = "America/New_York"  # explicit same-date test fixture
     scheduler.tracker.increment('Sep 25, 2026', 'existing')
     before = scheduler.tracker.tracker_file.read_bytes()
     slots = asyncio.run(scheduler.preview_slots(4))
@@ -248,6 +249,7 @@ def test_dry_cycle_exits_without_revisiting_unchanged_rows_or_healing(tmp_path, 
     monkeypatch.delenv('YT_SCHEDULE_INCLUDE_PRIVATE', raising=False)
     storage = tmp_path / 'no-preview-state'
     scheduler = YouTubeShortsScheduler('move2japan', storage_dir=storage, dry_run=True)
+    scheduler.channel_tz = "America/New_York"  # explicit same-date test fixture
     scheduler.driver = MagicMock()
     scheduler.dom = MagicMock()
     scheduler.dom.read_visibility_filter_state.return_value = {'detected': 'UNLISTED'}
@@ -329,6 +331,7 @@ def test_preview_and_selected_batch_never_sync_channel_state(dry_run, selection,
 
 def test_repeated_preview_does_not_retain_reservations(tmp_path):
     scheduler = YouTubeShortsScheduler('move2japan', storage_dir=tmp_path / 'absent', dry_run=True)
+    scheduler.channel_tz = "America/New_York"  # explicit same-date test fixture
     scheduler.driver = MagicMock()
     scheduler.dom = MagicMock()
     scheduler.dom.read_visibility_filter_state.return_value = {'detected': 'UNLISTED'}

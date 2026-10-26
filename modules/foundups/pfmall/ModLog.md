@@ -1,3 +1,56 @@
+## 2026-10-26 — Isolated proposal host bootstrap candidate
+
+WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 allocationf8fa5b25c.
+Frozen acceptance4cd8c71f6 precedes production. Add a bounded server-policy ASGI
+factory reusing the existing handler/RSA verifier; change only the HTTP policy
+owner to request.app.state. Expose proposal/health only, with generic startup
+rejection and no default policy or config values in output. Existing anonymous
+development routes keep their original app and semantics.
+Local814PASS/0FAIL/0ERROR/0SKIP retains all786 original cases plus28 new cases;
+initial Windows10055 setup error and desired RED remain in the test log/evidence.
+No dependency, registry, cloud/IAM/deploy, private key, provider or data write.
+Existing Firebase project/site and six Node functions were observed read-only;
+their shared ignored source remains untouched. Independent review, manifest check
+and fresh hosted publication gates remain required; serving/container, real
+session, browser, abuse/revocation and durable repository admission are later gates.
+
+## 2026-10-26 — Replace the initial optional dependency profile before promotion
+
+Fresh public registry metadata found advisories for the initial Starlette/crypto
+versions. Under pre-change allocation3bbbb2ee4, select explicit patched HTTP pins
+in this module's requirements and existing contract workflow. Separate new
+environment: identical786 local cases pass, one reviewed HTTPX test-client
+warning;25 resolved distributions show zero published metadata advisories.
+Independent installed-inventory review found an older bootstrap pip outside25;
+pre-change allocationc6557db8b precedes its isolated/CI pip26.2.2 repair and separate
+acquisition report. Same786 cases pass again; all26 installed distributions now
+show zero published registry advisories.
+This is not a complete binary/platform/security audit. Product/test source,
+legacy contracts, resident/umbrella environment and prior evidence stay unchanged.
+Independent profile/metadata and final workflow reviews accept the bounded
+component; unchanged11 held-outs plus separate optional-import-denied503 pass.
+The patched-profile receipt binds root786 and both reviews; fresh exact-head
+hosted/security/main gates remain required.
+
+## 2026-10-26 — Explicit Clerk-authenticated draft intake component (initial profile)
+
+WSP00/3/6/11/15/22/49/50/62/77/84/97/109;15/P1 allocation6efb68f50.
+Connect one separate POST route in the existing development FastAPI app to a
+server-owned Clerk bearer policy and existing genesis body preflight/mapper.
+No default policy, environment secrets, legacy HMAC change, membership/client
+flag trust, data writes, repo/provider calls or runtime/token grant. Add an
+optional HTTP profile without migrating the shared/umbrella environment.
+Frozen RED and local GREEN786/one baseline warning are in tests/TestModLog.
+Independent11 held-outs and separate optional-import-denied ASGI probe pass after
+the canonical public-PEM repair; initial10PASS/1FAIL finding remains retained.
+Hosted/security gates and exact main convergence remain separate. Deployment,
+live identity/current revocation, durable claim receipts and issuance are pending.
+
+Security closure: independently classify only the observed tree/history receipt
+line12 public HTTP source hash; append exactly two existing-ledger bindings,
+preserving2417 prefix entries and all other keys. No detector, scanner/scope or
+GitGuardian change. Current final-head gates remain required.
+
 ## 2026-10-25 — FX1 public directory entry
 
 Add a normal FX anchor to the current homepage navigation, retaining the gateway

@@ -1,0 +1,273 @@
+{
+  "schema": "foundups-member-draft-intake-patched-profile-evidence-v1",
+  "date": "2026-10-26",
+  "status": "LOCAL_COMPONENT_PATCHED_PROFILE_INDEPENDENTLY_ACCEPTED_PUBLICATION_PENDING",
+  "parent": "4f37c8505c91f03d90c60ce835f1bc9b102491a8",
+  "profile_prechange_allocation": "3bbbb2ee4fe73facdd464e623cefc26fb5494458",
+  "installer_prechange_allocation": "c6557db8bf5c3c29c2e52f3173ddba253f112a93",
+  "execution_head": "c6557db8bf5c3c29c2e52f3173ddba253f112a93",
+  "execution_overlay": "Profile/docs overlay; product and test sources match accepted6e9b exactly.",
+  "source_bindings": [
+    {
+      "path": "modules/foundups/pfmall/tests/test_http_api.py",
+      "sha256": "74acd4ab74b9b41ccb5a3cb2367ad07a29ec5c9967452f42418b11750c24fab0",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_github_nomination_review.py",
+      "sha256": "b8ccc8200d54a41a8e6b863f5a283f90d92a876e791a1e461cfe40e12b6a099d",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_foundup_launch_request.py",
+      "sha256": "9addb41dd7272150f67c2f94b8912b96ceb75e66eef22e44763c20ed3a7507ee",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_intake_transport.py",
+      "sha256": "d2f24a58965126800f8c9b0b10649052158a18eec1b7fa03b4861388f11db54d",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_intake_auth_provider.py",
+      "sha256": "507677dc978a092d5672b792048260b6b8d9e7fd9d01744aecffb7408a754e9e",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/tests/test_foundup_genesis_validator.py",
+      "sha256": "ae5db93afb1cba9138e1e79e0ad74ad70970f6fa137822be70d8a378d9567b74",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/foundups/pfmall/tests/test_clerk_proposal_intake.py",
+      "sha256": "67bc2ea47754ae0d99d63da7addb3b70c300a771a0ab887166d662fcaec3d734",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/foundups/pfmall/http_api.py",
+      "sha256": "3401a09895e794e349d252b66eb392095a4a64152ab8d7d074500b2822a06680",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_transport.py",
+      "sha256": "192db8a8351a3d5a76085dd14b155cb29d0b52857e06763632dd0ac3bdc66c5d",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/intake_auth_provider.py",
+      "sha256": "ee0c515238fe2688ef35be9080a35e1c53ac8255b822dc6a3e89b25a6fe5fba0",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/launch_request.py",
+      "sha256": "38302d6c8a06635d80904597c9fefe6fee4ba376562448ff1dde67f079b406e3",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/ai_intelligence/ai_overseer/src/foundup_genesis/clerk_intake.py",
+      "sha256": "03a47406796295a86b33510733a8bc034782c29703855866f51e35a280c65b92",
+      "normalization": "Git LF"
+    },
+    {
+      "path": "modules/foundups/pfmall/requirements.txt",
+      "sha256": "a61dd0566bcc6493bcf61ba97e69e6e91e48cc374118adfc63641d3145f62041",
+      "normalization": "Git LF"
+    },
+    {
+      "path": ".github/workflows/foundup-nomination-review.yml",
+      "sha256": "6b848c4bc4a166a494b7e58bbbb979938c91311b23759b44e4a60f4c994fb389",
+      "normalization": "Git LF"
+    }
+  ],
+  "retained_historical_receipt": {
+    "path": "docs/architecture/receipts/FOUNDUPS_MEMBER_DRAFT_INTAKE_20261026.json",
+    "sha256": "270697b79268b25af75b5864001b02fa1150643318297eeb9341279ee31bd0c1",
+    "qualification": "Immutable initial-profile RED/GREEN and review history; superseded only for final dependency profile, not rewritten."
+  },
+  "development_environment": {
+    "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "packages": {
+      "pytest": "9.0.3",
+      "PyJWT": "2.15.1",
+      "cryptography": "50.0.2",
+      "fastapi": "0.162.0",
+      "starlette": "1.10.0",
+      "httpx": "0.28.1"
+    }
+  },
+  "installed_inventory": [
+    {
+      "name": "annotated-doc",
+      "version": "0.0.5"
+    },
+    {
+      "name": "annotated-types",
+      "version": "0.8.0"
+    },
+    {
+      "name": "anyio",
+      "version": "4.15.1"
+    },
+    {
+      "name": "certifi",
+      "version": "2026.10.23"
+    },
+    {
+      "name": "cffi",
+      "version": "2.1.1"
+    },
+    {
+      "name": "colorama",
+      "version": "0.4.6"
+    },
+    {
+      "name": "cryptography",
+      "version": "50.0.2"
+    },
+    {
+      "name": "fastapi",
+      "version": "0.162.0"
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0"
+    },
+    {
+      "name": "httpcore",
+      "version": "1.0.9"
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1"
+    },
+    {
+      "name": "idna",
+      "version": "3.20"
+    },
+    {
+      "name": "iniconfig",
+      "version": "2.3.1"
+    },
+    {
+      "name": "opentelemetry-api",
+      "version": "1.45.1"
+    },
+    {
+      "name": "packaging",
+      "version": "26.3"
+    },
+    {
+      "name": "pip",
+      "version": "26.2.2"
+    },
+    {
+      "name": "pluggy",
+      "version": "1.7.0"
+    },
+    {
+      "name": "pycparser",
+      "version": "3.12"
+    },
+    {
+      "name": "pydantic",
+      "version": "2.14.1"
+    },
+    {
+      "name": "pydantic_core",
+      "version": "2.50.1"
+    },
+    {
+      "name": "Pygments",
+      "version": "2.21.0"
+    },
+    {
+      "name": "PyJWT",
+      "version": "2.15.1"
+    },
+    {
+      "name": "pytest",
+      "version": "9.0.3"
+    },
+    {
+      "name": "starlette",
+      "version": "1.10.0"
+    },
+    {
+      "name": "typing-inspection",
+      "version": "0.4.4"
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0"
+    }
+  ],
+  "public_registry_snapshot": {
+    "inspected_at": "2026-10-25T21:53:05.762580+00:00",
+    "checked": 26,
+    "packages_with_advisories": 0,
+    "qualification": "Registry metadata for this isolated optional development environment including installer; not binary/platform or full-repository security certification."
+  },
+  "evidence_bindings": [
+    {
+      "file": "patched_installer.json",
+      "sha256": "fea43337675c703887c3ba034c5c19964e3759d98eebad457009c036c06c9da5"
+    },
+    {
+      "file": "patched_installer.xml",
+      "sha256": "f6eaa60605e62891071f6b9dd8b20d70469850f50e06d263197f4d6d2eaf1a31"
+    },
+    {
+      "file": "patched_installer.log",
+      "sha256": "9e31fd632fba76aed2d48490b5e6cb83acb3ad1430327a3d2305402e97e74fbb"
+    },
+    {
+      "file": "pip-report.json",
+      "sha256": "93ecbc9ad27ed2528726d92604c096bca93c3928f2c561b3eaa2c00e28aed247"
+    },
+    {
+      "file": "installer-pip-report.json",
+      "sha256": "4ecfb0a183637e4b1e948587e4ad9fee710ab537aef268c1b926568bff7082b7"
+    },
+    {
+      "file": "installed-inventory-after-installer.json",
+      "sha256": "6ea3f5e258d6bd5b3519887633136b18b33139101ded9262a891973683e93626"
+    },
+    {
+      "file": "installed-vulnerability-snapshot.json",
+      "sha256": "ac58054ed29e3e7e20fa5e524f3e5379b11c7f7f661be3548b01fd00c4c411c8"
+    },
+    {
+      "file": "final-patched-profile-review.json",
+      "sha256": "24574afe748f9d9c7d023c67a23a9bfebdeb7487f6dc773fbc627866caa56efe"
+    },
+    {
+      "file": "optional-profile-static-independent-review.json",
+      "sha256": "916a6dff02d300b3ddaaa5645fe3ac01b1438314daa80ac0a93c82cc5628a9ec"
+    }
+  ],
+  "tests": {
+    "passed": 786,
+    "failure": 0,
+    "error": 0,
+    "skipped": 0,
+    "original_cases_preserved": 695,
+    "new_cases": 91,
+    "exact_id_outcome_mapping_sha256": "414badb7ed173ba28c03e2585d3374389ddec4e25a95891696e1fc1a98b70afc",
+    "source_unchanged_before_after": true,
+    "oracles_unchanged_since": "6e9b13da637f82e11a13bf7155df0e2ea8da815b"
+  },
+  "reviewed_warning": "One NEW Starlette HTTPX TestClient deprecation; old AnyIO alias warning is gone. No warning filter, dependency scope expansion or test expectation change.",
+  "independent_review": "Identical11 frozen ASGI/RSA held-out functions and separate fresh optional-import-denied actual-ASGI503 probe pass; report separately binds full26 installed inventory and official acquisition digests. No live provider calls.",
+  "retained_findings": [
+    "Original Starlette0.50.0/cryptography46.0.7 registry advisories reject initial profile despite green functional/secrets checks.",
+    "First patched profile resolved25 application/test packages without listed advisories, but inventory exposed bootstrap pip25.0.1 outside that report. Retain observation, repair only optional installer to26.2.2."
+  ],
+  "limits": [
+    "Default503 until explicit trusted server policy; no deployed Clerk bootstrap or real-session qualification.",
+    "Draft-only; no durable challenge/receipt, membership, repository control, catalog, worker or token authority.",
+    "Offline signature and expiry do not prove current remote session revocation.",
+    "Normal credential-free test processes, not OS/network confinement or installed resident admission.",
+    "No shared/umbrella environment migration, telemetry SDK/exporter, provider activation, financial signing, minting, trading, paid media or deployment.",
+    "Fresh exact-head hosted/security checks and guarded all-entry main convergence remain separate publication gates."
+  ]
+}
