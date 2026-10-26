@@ -2,6 +2,28 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Image security remediation allocation — 2026-10-26, before mutation
+
+WSP15 C2/I5/D5/Impact4=16/P0 for this held image; WSP6/11/22/50/62/71/77/84/97.
+Actual hosted run40253565358 passes817 normal cases and the same three image
+cases. Independent archive reconstruction accepts its exact bytes; it is not
+deployment-ready. Verified immutable Trivy0.76.1 scans the saved image with current
+DB:291 findings, including2critical/65high/113medium/109low/2unknown; zero secret
+findings reported. Preserve this first image/report and the deployment hold.
+Both critical package advisories have fixed Trixie releases; the Python findings
+are bundled build-tool packages. Simplest next layer: pin the observed official
+Python3.12.15 slim Trixie amd64 digest, retaining all18 runtime wheel pins; remove
+pip and ensurepip after install/pip check. No unbounded apt upgrade or waiver.
+Freeze stricter OS/runtime-only image assertions before changing Dockerfile;
+preserve all three HTTP/config oracles and the full817 selection. Existing source,
+auth, signer, scanner policy, registry and historical receipt bytes stay fixed.
+Keep Dockerfile<=45/helper<=280/functions<=80. Additional result budgets:
+plan+40/root+12/module ModLog+18/TestModLog+16/README+10/INTERFACE+6/ROADMAP+8.
+Normal-merge the reviewed serving/current-main union; prove every input blob.
+Actual hosted image tests, new exact archive scan and independent artifact review
+must qualify the replacement. A completed scanner exit alone is not a clean gate.
+Use existing security_scanner normalization; no new scanner framework or exception.
+
 ## Intake Linux container allocation — 2026-10-26, before authoring
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/71/77/84/97.

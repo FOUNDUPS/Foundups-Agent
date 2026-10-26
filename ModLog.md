@@ -1,3 +1,12 @@
+## 2026-10-26 — Allocate remediation of the actual intake image
+
+Hosted817+3 functional cases pass, but the exact saved image scan reports291
+findings including2critical/65high/2unknown. Preserve the image, scan and hold.
+Under16/P0 allocate a pinned Trixie runtime and removal of installation-only
+pip/ensurepip, retaining18 runtime wheel pins and all HTTP/config oracles.
+Freeze stricter inventory acceptance first; require a fresh hosted image and scan.
+The FX/chain plan records bounds; no scanner waiver, source/auth or token grant.
+
 ## 2026-10-26 — Allocate the actual Linux intake container
 
 WSP15 15/P1 before authoring; WSP6/22/50/62/71/77/84/97. Reuse the exact existing
