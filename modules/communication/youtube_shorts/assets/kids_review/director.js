@@ -7,7 +7,8 @@ function paint(){if(ink.hidden)return;const r=ink.getBoundingClientRect(),d=devi
 function show(){game.hidden=true;$('frozen').hidden=false; // SVG originates exclusively in the local scene renderer.
  const doc=new DOMParser().parseFromString(capture.svg,'image/svg+xml');
  // Reopened local feedback cannot introduce scripts, foreign objects or external references.
- doc.querySelectorAll('script,foreignObject,image,a,style').forEach(n=>n.remove());
+ const safeTags=new Set(['svg','defs','g','path','ellipse','circle','text','rect','use']);
+ doc.querySelectorAll('*').forEach(n=>{if(n.namespaceURI!=='http://www.w3.org/2000/svg'||!safeTags.has(n.localName))n.remove();});
  doc.querySelectorAll('*').forEach(n=>[...n.attributes].forEach(a=>{if(/^on/i.test(a.name)||(/href/i.test(a.name)&&!/^#[a-zA-Z][\w-]*$/.test(a.value))||/url\(/i.test(a.value))n.removeAttribute(a.name);}));
  $('frozen').replaceChildren(document.importNode(doc.documentElement,true));ink.hidden=false;$('tools').hidden=false;paint();}
 function play(){$('video').pause();ink.hidden=true;$('frozen').hidden=true;$('tools').hidden=true;game.hidden=false;drawing=null;api()?.play();}

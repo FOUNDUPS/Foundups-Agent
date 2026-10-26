@@ -178,4 +178,9 @@ slower parents, visible travel and game-over/retry. Removed shelf and tap marker
 reused Mall pinch engine with viewport-focus fallback and safe-area layout. Fixed
 local SVG references in whiteboard snapshots. Tests cover no input, selection lock,
 all five saved, late arrivals, reset and shared collapse/learning cues. See
-[review contract](../docs/RESCUE_GAME_REVIEW.md) for boundaries and RSI lessons.
+[review contract](docs/RESCUE_GAME_REVIEW.md) for boundaries and RSI lessons.
+
+Independent review found moving actors hidden by pocket fill; moved the fill
+before actors and added paint-order regression. Rechecked seven cases pass.
+Snapshot SVG accepts only static renderer tags and local fragment references.
+Audio pauses with review and resyncs after timing drift; listening remains unverified.
