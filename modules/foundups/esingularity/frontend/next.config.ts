@@ -7,6 +7,11 @@ const nextConfig: NextConfig = {
       // internal rewrite: the visitor keeps YUMORI.me in the address bar.
       beforeFiles: [
         {
+          source: '/partners',
+          has: [{ type: 'host', value: '(?:www\\\\.)?yumori\\\\.me' }],
+          destination: '/yumori/partners',
+        },
+        {
           source: '/',
           has: [{ type: 'host', value: '(?:www\\.)?yumori\\.me' }],
           destination: '/yumori',
