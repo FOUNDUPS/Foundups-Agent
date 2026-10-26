@@ -1,5 +1,17 @@
 # EDUIT interfaces
 
+## Current slow-rescue direction — 2026-10-27
+
+[SLOW_RESCUE_AND_AGENT_ROADMAP](docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md) supersedes
+the historical15-second game contracts below:60s active round,48s rescue window,
+untimed practice, varied wake taps, progressive hazards and once-only arrival
+points. The original15s film remains separate. The green vine is the destination.
+Creature-agent traits, optional on-device models, honest AI status, flooding and
+play-to-video are specified next prototypes, not active AI features.
+Use [interactive experience review](skillz/interactive_experience_review/SKILLz.md)
+for audience, lifecycle, UI and incentive audits; retain existing WRE ownership.
+
+
 Status: source contracts observed at main a6fed6dd8; episode integration SPECIFIED.
 Canonical product design: [Episode Mall architecture](docs/EPISODE_MALL_ARCHITECTURE.md).
 
@@ -86,3 +98,14 @@ freeze/mark/share, video/game switch, video repeat and child touch-lock. This
 implements the bounded tile-control slice; native-device acceptance, authentic
 Red Dog feedback transport and Mall ratings remain separate. Next priority is
 physical-device acceptance of this episode before extending the story.
+
+### Slow-rescue API additions
+`initial({practice})`, `worldTime(state)`, `rescuePoints(arrival,practice)` and
+`gameWorld(state,poses)` separate simulation/film clocks. State adds score,
+awards, practice and outcome; actor wake profiles are explicit.
+`storytimeReview.status()` adds score/practice; `reset()` clears round and pauses;
+`setPractice(boolean)` resets to ready and pauses. Freeze includes game revision
+and full scene/round state through existing viewer records. New feedback namespace
+`slow-rescue-11` leaves old local notes untouched; clock validation permits up to
+86400 active seconds for bounded untimed practice records. No storage/API upload
+for score. No agent controller runtime is exposed yet.

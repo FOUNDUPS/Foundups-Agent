@@ -15,3 +15,5 @@ body.embedded .hotspot span{display:none}
 .rescue-hit{min-width:44px;min-height:44px}
 
 #ending{background:transparent;align-items:flex-end;padding-bottom:16px;gap:12px;font-size:clamp(30px,7vw,64px);color:#173f43}#ending>span{background:#fff4d9;padding:8px 20px;border-radius:22px;box-shadow:0 3px 0 #173f4333}#ending button{min-width:56px;min-height:56px;background:#ffe18a;color:#173f43;border-radius:18px;font-size:28px;padding:8px 16px}.rescue-hit{min-width:48px;min-height:48px}
+
+#ending{font-size:clamp(22px,5vw,48px)}#ending button{min-width:64px;min-height:64px}.rescue-hit{border-radius:50%}#ending>span{padding:4px 10px}

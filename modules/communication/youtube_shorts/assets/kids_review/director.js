@@ -1,11 +1,11 @@
 import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
 const $=id=>document.getElementById(id),game=$('game'),ink=$('ink');
-const revision='preschool-controls-10',key='eduit.game-feedback.v2.'+revision;
+const revision='slow-rescue-11',key='eduit.game-feedback.v2.'+revision;
 let capture=null,strokes=[],drawing=null,entries=[],activePointer=null,childLocked=false;
 const pointers=new Set();let inkBlocked=false,history=[];
 function rememberInk(){history.push(structuredClone(strokes));if(history.length>50)history.shift();}
-try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))entries=saved.filter(e=>e?.capture&&typeof e.capture.svg==='string'&&e.capture.svg.length<100000&&Number.isFinite(e.capture.clock)&&e.capture.clock>=0&&e.capture.clock<=15&&typeof e.note==='string'&&e.note.length<=4000&&Array.isArray(e.strokes)&&e.strokes.length<=200&&e.strokes.every(line=>Array.isArray(line)&&line.length<=3000&&line.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isFinite(n)&&n>=0&&n<=1)))).slice(-20);}catch{}
+try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))entries=saved.filter(e=>e?.capture&&typeof e.capture.svg==='string'&&e.capture.svg.length<100000&&Number.isFinite(e.capture.clock)&&e.capture.clock>=0&&e.capture.clock<=86400&&typeof e.note==='string'&&e.note.length<=4000&&Array.isArray(e.strokes)&&e.strokes.length<=200&&e.strokes.every(line=>Array.isArray(line)&&line.length<=3000&&line.every(p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isFinite(n)&&n>=0&&n<=1)))).slice(-20);}catch{}
 const api=()=>game.contentWindow?.storytimeReview;
 function paint(){if(ink.hidden)return;const r=ink.getBoundingClientRect(),d=devicePixelRatio;ink.width=r.width*d;ink.height=r.height*d;const ctx=ink.getContext('2d');ctx.strokeStyle='#ef426f';ctx.lineWidth=3*d;ctx.lineCap='round';ctx.lineJoin='round';for(const line of strokes){ctx.beginPath();line.forEach(([x,y],i)=>i?ctx.lineTo(x*ink.width,y*ink.height):ctx.moveTo(x*ink.width,y*ink.height));ctx.stroke();}}
 function show(){$('game-panel').classList.add('marking');$('feedback-actions').hidden=false;game.hidden=true;$('frozen').hidden=false; // SVG originates exclusively in the local scene renderer.
@@ -80,6 +80,8 @@ const repeat=button('repeat','Repeat video','undo',options,()=>{video.loop=!vide
 const unlock=button('unlock','Hold to unlock controls','lock',document.body,()=>{});unlock.hidden=true;
 function lock(on){if(on){if(capture)saveDraft();api()?.pause();video.pause();$('game-panel').classList.remove('marking');$('feedback-actions').hidden=true;ink.hidden=true;$('frozen').hidden=true;$('tools').hidden=true;game.hidden=false;}childLocked=on;document.body.classList.toggle('child-locked',on);unlock.hidden=!on;options.hidden=true;}
 const lockButton=button('lock-child','Child lock','lock',options,()=>{if(!document.querySelector('.unit.expanded'))expand(gamePanel,true);lock(true);});lockButton.textContent='Child lock';
+const restart=button('restart-game','Restart game','undo',options,()=>{if(capture)saveDraft();api()?.reset();$('game-panel').classList.remove('marking');$('feedback-actions').hidden=true;ink.hidden=true;$('frozen').hidden=true;$('tools').hidden=true;game.hidden=false;options.hidden=true;});restart.textContent='Restart game';
+const practice=button('practice-game','Untimed practice','game',options,()=>{const next=!api()?.status().practice;restart.click();api()?.setPractice(next);practice.setAttribute('aria-pressed',String(next));practice.textContent=next?'Untimed practice: on':'Untimed practice: off';options.hidden=true;});practice.textContent='Untimed practice: off';practice.setAttribute('aria-pressed','false');
 const optionsClose=button('close-options','Close options','more',options,()=>{options.hidden=true;});optionsClose.textContent='Done';
 let hold=null;const cancelHold=()=>{clearTimeout(hold);hold=null;};
 function beginHold(e){if(e.type==='keydown'&&![' ','Enter'].includes(e.key))return;if(hold)return;e.preventDefault();hold=setTimeout(()=>{cancelHold();if(confirm('Unlock grown-up controls?'))lock(false);},1200);}

@@ -237,3 +237,11 @@ See docs/PRESCHOOL_VIEWER_REVIEW.md for source/encoded review, rejected attempts
 independent grades and device limits.15 Node checks pass; browser harness covers
 fullscreen draft/share/lock/switch and undo sequences. Same original audio hash,
 15s duration and engine timeline; no external generation, YouTube upload or DNS.
+
+## 2026-10-27 — Slow rescue and creature-agent roadmap
+012 superseded15s game cap. Same engine/scene/viewer extended with60s round,
+48s deadline, practice, differentiated sleepy wake profiles, progressive cracks,
+dirt/vine motion and once-only arrival points. Film remains unchanged.64px primary
+controls and60px fullscreen targets; snapshots carry score and new revision.
+Added prototype review SKILLz and agent/traits/replay roadmap, not WRE activation.
+See SLOW_RESCUE_AND_AGENT_ROADMAP and SLOW_RESCUE_REVIEW for evidence/limits.
