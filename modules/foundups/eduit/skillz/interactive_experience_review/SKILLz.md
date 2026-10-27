@@ -100,3 +100,8 @@ approach to four more. Record rule reuse or failure; update the regression and
 receipt even when 012 did not report the defect. Do not modify the acceptance
 oracle to rescue a failing candidate. This remains a prototype procedure, not
 an active OpenClaw/Hermes worker or a promoted general game-development skill.
+
+When adding a Python test, stage its owned path before running the existing
+`modules/infrastructure/wre_core/scripts/generate_test_registry.py --write`,
+then `--check`; review the exact generated delta before committing. CI exposed
+this missing integration step during the five-tile contract milestone.
