@@ -56,3 +56,9 @@ passed for60s no-input ending, multi-tap wake locks, deliberate all-five rescue,
 late arrival/frozen lost pose, dozing, practice and score uniqueness/bounds.
 Browser harness extended with64px rendered bounds, rail containment, reset and
 practice recovery. See SLOW_RESCUE_REVIEW for actual browser acceptance.
+
+## 2026-10-28 — Learning shell
+18 Node cases and 53 security-gate regressions pass. Existing browser fixture
+extended with About/How pause/state and adaptive control measurements; image
+size assertion now waits for decode, tablet comparison tolerates subpixel rounding.
+Scoped rendered outcomes and device limits: ../docs/LEARNING_SHELL_REVIEW.md.

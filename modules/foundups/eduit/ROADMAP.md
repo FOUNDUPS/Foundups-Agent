@@ -1,5 +1,16 @@
 # EDUIT execution roadmap
 
+## Current learning shell and evolution direction — 2026-10-28
+
+[Learning, evolution and sharing roadmap](docs/EVOLUTION_PLAY_AND_SHARING_ROADMAP.md)
+owns the latest direction: mechanical proof of concept, optional creature-AI
+prototype, then parent-owned membership MVP. Five-mission sets, fictional trait
+bonuses and reviewed replay-to-YouTube are planned, not live. Current score and
+slow rescue remain unchanged. The viewer now adds Play/About/How, a channel link
+above the local film, and viewport-sized controls. No YouTube iframe, upload,
+account, model, fingerprint or child telemetry is introduced.
+
+
 ## Current slow-rescue direction — 2026-10-27
 
 [SLOW_RESCUE_AND_AGENT_ROADMAP](docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md) supersedes
