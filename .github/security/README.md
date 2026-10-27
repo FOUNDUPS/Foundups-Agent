@@ -1,3 +1,15 @@
+## PR2238 editorial package metadata review — 2026-10-27
+
+Hosted job122212162094 reported40 unreviewed tree findings and zero history
+findings. Root and independent verifier recomputed all40 exact bindings:
+39 source SHA256 entries match unchanged referenced Git bytes; one historical
+bridge ModLog sentence matches previously reviewed prose.39 prior exact
+approvals were reconstructed. The remaining youtube_auth.py digest is verified
+source metadata with no prior exact approval. Preserve2,457 ledger entries and
+append only40 bindings (2,497 total). Scanner code, rules, scope and exclusions
+are unchanged.53 gate regression tests passed. Fresh hosted tree/history checks
+remain required. Evidence: reviewed-soro-metadata-evidence.json.
+
 ## PR2215 Story Time manifest rebind — 2026-10-25
 
 Hosted job121251681796 reported39 manifest metadata findings. Author and
