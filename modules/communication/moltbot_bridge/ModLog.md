@@ -1,3 +1,11 @@
+## Petition instruction discovery — 2026-10-27
+
+Add `launch-petition` to the workspace skill wardrobe and its existing hash
+manifest, forwarding to the Social Media Orchestrator's campaign owner.
+Preserve secure login/handoff, evidence and consent boundaries. This is source
+discovery only: no new SOCIAL handler, native executor, grant, cadence or host
+installation. Validation is recorded with the owning petition instruction change.
+
 ## Parent authority bootstrap forwarding — 2026-10-25
 
 WSP00/11/22/50/62/97; C2/I5/D4/Impact4 = 15/P1 under the native 19/P0 umbrella.

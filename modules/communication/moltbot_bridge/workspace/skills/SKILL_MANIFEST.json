@@ -36,6 +36,10 @@
     {
       "path": "promote-antifafm/SKILL.md",
       "sha256": "70b04edfe34030bc2b1c211b772cba8e7d1eb8e16159406b4fd3f984ab246e49"
+    },
+    {
+      "path": "launch-petition/SKILL.md",
+      "sha256": "3a4ae0dbf0034d0ed1d86981b54725b62e0424f32ab03ad650119e5bcbc5cf76"
     }
   ]
 }
