@@ -1,5 +1,13 @@
 # EDUIT execution roadmap
 
+## Five-tile RSI production contract — 2026-10-28
+
+Read [TILE_PRODUCTION_RSI](docs/TILE_PRODUCTION_RSI.md) before the next tile or
+repair. It maps creator corrections to fixed acceptance checks, existing
+OpenClaw/Hermes/FAM/WRE owners, and next-real-tile transfer evidence. The pure
+Kids Episodes planning/record checker is implemented; runtime admission, batch
+execution and retained skill promotion remain unproved. No live UI changes.
+
 ## Current learning shell and evolution direction — 2026-10-28
 
 [Learning, evolution and sharing roadmap](docs/EVOLUTION_PLAY_AND_SHARING_ROADMAP.md)

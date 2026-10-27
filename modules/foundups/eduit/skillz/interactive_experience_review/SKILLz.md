@@ -1,7 +1,7 @@
 ---
 name: interactive_experience_review
 description: Audit and iteratively repair audience-specific games and web interfaces, including EDUIT Storytime timing, touch controls, learning cues, scoring and feedback. Use before implementation and after inspecting each changed output.
-version: 0.1.0
+version: 0.2.0
 intent_type: AUDIT
 promotion_state: prototype
 ---
@@ -87,3 +87,16 @@ For Storytime-specific staging and viewer invariants, read the existing
 [production skill](../../../../communication/youtube_shorts/skillz/kids_episode_production/SKILLz.md)
 and the current EDUIT review receipt. Apply the latest explicit creator direction
 over historical timing defaults without rewriting unrelated approved details.
+
+## Required correction and next-tile loop
+
+Before every Storytime repair or new tile, load
+[the tile-production contract](../../docs/TILE_PRODUCTION_RSI.md). Reuse its
+criterion IDs and correction ledger; freeze acceptance before authoring. A tile
+pairs matching video and game, not just an MP4. Use the Kids Episodes advisory
+batch compiler for five-tile planning; never treat its digest as admission.
+Inspect and independently review the next actual tile before propagating the
+approach to four more. Record rule reuse or failure; update the regression and
+receipt even when 012 did not report the defect. Do not modify the acceptance
+oracle to rescue a failing candidate. This remains a prototype procedure, not
+an active OpenClaw/Hermes worker or a promoted general game-development skill.
