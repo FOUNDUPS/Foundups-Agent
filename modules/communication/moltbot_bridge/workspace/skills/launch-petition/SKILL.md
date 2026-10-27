@@ -1,6 +1,6 @@
 ---
 name: launch-petition
-description: Prepare, launch or resume an evidence-backed petition when 012 asks RedDog to launch a petition, including Action Network setup, human authentication, consent, email and public social drafts.
+description: Plan or resume a petition campaign when 012 asks RedDog to launch a petition, adopting Change.org or Action Network public links with evidence checks, human-assisted account setup, consent and social distribution planning.
 ---
 # Launch a petition
 
@@ -19,6 +19,10 @@ Apply current publication policy to the exact final copy and intended account.
 Keep supporter records and credentials private. Verify saved drafts, public
 petition URLs and any social posts independently. Report each stage truthfully.
 
-This is an instruction prototype. There is no petition CLI route, native
-executor, production cadence or automatic publication grant. Do not repurpose
-the AntifaFM-only route or its station-specific grants for this campaign.
+Run `social campaign petition action=preview` or
+`social campaign petition action=plan petition_url=<public_link>` through the
+existing SOCIAL owner. A direct "RedDog, let's launch a petition ..." request
+also returns this plan. Missing links remain pending; supplied links remain
+unverified until actual readback. All platform entries default disabled.
+No native account-creation/publication executor, production cadence or grant
+is added. Do not repurpose the AntifaFM-only route or its station-specific grants.

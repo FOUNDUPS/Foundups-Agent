@@ -1,8 +1,9 @@
 # Supervised petition workflow
 
 Owner: FoundUp Campaign Operator / Social Media Orchestrator. Stage: prototype
-instruction. No Action Network API adapter, `social campaign petition` command,
-resident trigger or unattended cadence is implemented by this document.
+instruction with an effect-free `social campaign petition` planning route.
+No petition API/browser executor, resident trigger or unattended cadence is
+implemented. Follow [the runbook](../../../docs/PETITION_CAMPAIGN.md).
 
 ## Retrieve and prepare
 
@@ -58,7 +59,28 @@ resident trigger or unattended cadence is implemented by this document.
    Continue independent preparation and report `authentication_blocked`.
    Do not ask for passwords/cookies/API keys as a workaround.
 
-## Action Network draft and launch
+## Adopt an existing petition — current preferred flow
+
+When the principal creates the petition, do not restart signup or make a second
+petition. Take its public Change.org or Action Network link, produce the intake
+plan and verify the actual public page through an approved reader. A supplied
+URL, canonicalized URL or `intake_ready` result is not verification or authority.
+Keep the principal's creator login separate from social-account identity.
+
+## Change.org setup and updates
+
+Use the current official [creation guide](https://help.change.org/en_US/getting-started/how-to-start-a-petition).
+The observed flow offers "I'll write my own", a title/issue editor, petition
+scope and login to save. Before authentication, entered text was an unsaved
+draft. Reinspect current UI; do not promote that observation to a permanent API.
+Use [supporter updates](https://help.change.org/managing-your-petition/post-updates-to-supporters)
+for opted-in notifications. [Supporter data](https://www.change.org/petition-guides/supporter-data)
+does not provide signers' email addresses to starters. Do not promise a raw
+mailing list, Action Network-style autoresponder or transferable browser session.
+Apply the authentication rules above and the host qualification below before
+claiming direct local-browser setup works.
+
+## Action Network draft and launch — optional platform
 
 Consult [Creating petitions](https://help.actionnetwork.org/hc/en-us/articles/203112629-Creating-petitions)
 before operating; labels and account entitlements can change.

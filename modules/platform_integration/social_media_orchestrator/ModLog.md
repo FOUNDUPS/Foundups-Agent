@@ -1,3 +1,44 @@
+## 2026-10-27: Session audit and effect-free petition intake
+
+- Groundwork PR2236 merged at main50cd2ff after22 successful exact-head checks.
+  Audit distinguishes prepared/private campaign copy, unsaved platform entry,
+  failed handoff, source discovery and missing unattended execution.
+- WSP00/11/15/22/50/62/84/97; bounded16/P1 (C3/I4/D4/Impact5) continuation:
+  reuse SOCIAL adapter/controller, add petition preview/plan and direct
+  conversational entry. All provider slots remain disabled and all links
+  unverified. No account, model, provider, persistence, grant or daemon effect.
+- Change.org public-link adoption is preferred; Action Network stays optional.
+  Local browser design reuses FoundUpsDriver/profile persistence; the inspected
+  ActionRouter has no distinct Playwright execution branch. Hosted handoff root
+  cause and any relationship to vulnerability defenses remain unestablished.
+- Add public-link and no-effect boundary tests, preserve research-provider
+  mapping, extend the existing CI campaign selection and regenerate the tracked
+  test registry, Codex discovery and workspace skill hash. Campaign/petition/
+  drafter/projection/manifest selection:121PASS plus76 subtests. Wrapper structural,
+  projection, registry and diff checks PASS; workspace hash readback10 files PASS
+  without signature verification. Backend closure now binds the one new leaf:
+  1,472 members; expected digest/pin refreshed. CRLF335,909 bytes exceeded the
+  prior328KiB cap by37 bytes, so the bounded cap becomes329KiB;2MiB/member and
+  32MiB total remain. Initial Node RED was a count-oracle mismatch before validator
+  entry, and independent Python/preflight RED identified the real CRLF-size bound.
+  Fresh contract qualification follows the explicit1472-accept/1473-reject oracle.
+- Repaired packaging qualification:8 independent generator/index cases PASS and
+  all3 focused Node contract/preflight/async commands PASS. Relative instruction
+  links resolve. These scopes are separate from the121-test campaign selection;
+  no live account, local browser or installed native execution was exercised.
+- Hosted scan identified38 source-integrity metadata rows in the regenerated
+  manifest and a synthetic basic-auth negative URL fixture. Remove the unused
+  fixture password while retaining user-info rejection. For every metadata row,
+  verify the exact path/digest line, rehash staged source and verify its prior
+  whole-file/rule/line review, then add38 exact new fingerprints and public
+  metadata-only evidence. Scanner rules and credential boundaries are unchanged;
+  hosted rerun is required. No real service credential was found in this change.
+- V2 missing torch; documented fallback/check PASS with detector witness ABSENT.
+  Lexical source bundle UNKNOWN/index-gap/workspace-overlay; direct current
+  owner evidence grounds the change. A fresh clone recovered a stale worktree
+  pointer; unrelated untracked artifacts were left untouched. No semantic,
+  installed-host or live-campaign acceptance is claimed.
+
 ## 2026-10-27: Reusable supervised petition instruction
 
 - Extend the existing campaign owner; add `launch-petition` discovery, a

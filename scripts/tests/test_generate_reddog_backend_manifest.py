@@ -261,9 +261,10 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 328 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 329 * 1024
     lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
-    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 328 * 1024
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 329 * 1024
+    assert "modules/platform_integration/social_media_orchestrator/src/petition_campaign.py" in generated["required_runtime_files"]
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
     result_module = (
@@ -277,7 +278,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "3519f497dd3edf3012cd1612bb6c6a83f6429161539ffa11f9e07d0ed43f3c6d"
+    assert digest == "6fa8d63e51022a7307bf4a7a21fff796bf0e78a5b8c94dcb710804cdab5f04a5"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

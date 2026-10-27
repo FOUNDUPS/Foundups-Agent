@@ -1,5 +1,15 @@
 # RedDog Interface
 
+## Petition planning source closure — 2026-10-27
+
+The generated backend closure includes the effect-free petition planning leaf
+and rebinds the existing social adapter/controller. It now admits exactly1,472
+members and rejects1,473; the independent LF/CRLF manifest cap is329KiB.
+The new manifest is332,892 LF bytes /335,909 CRLF bytes, exceeding the previous
+328KiB CRLF ceiling by37 bytes. Individual2MiB and aggregate32MiB caps remain.
+This is a source/package contract, not host installation or campaign authority.
+The dated sections below describe their respective historical source revisions.
+
 ## FoundUps authorization source closure — 2026-10-25
 
 The source backend manifest includes `agent_market/src/authorization.py` and

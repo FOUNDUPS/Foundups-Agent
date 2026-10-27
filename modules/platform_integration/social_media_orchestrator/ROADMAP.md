@@ -12,14 +12,27 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
-### Supervised petition instruction — 2026-10-27
+### Petition intake and audit — 2026-10-27
+
+PR2236 instruction groundwork is merged at main50cd2ff after22 successful
+exact-head checks. The continuation adds an effect-free petition planning route,
+bounded conversation shortcut, public-link intake validation and a Change.org
+adoption flow. This is a source prototype; host installation is unqualified.
+Remaining gates: actual public petition/source readback, private durable campaign
+state, provider account/policy binding, grounded copy generation, admitted
+publication/readback and aggregate outcome/update integration. The principal
+creates the petition and supplies its link. Optional local browser create/manage
+qualification reuses the existing Selenium owner, with human credential steps.
+See [the current audit](docs/audits/PETITION_SESSION_AUDIT_20261027.md).
+
+### Supervised petition instruction — 2026-10-27 (merged groundwork)
 
 Existing campaign owner now contains the reusable petition playbook and
 `launch-petition` discovery wrappers. Campaign-specific copy and evidence remain
 private; authenticated platform access, original-media review,
-draft readback, publication and distribution remain unproved. This instruction
-does not introduce a native executor, CLI route, production registration or
-cadence. Qualify one supervised end-to-end launch before selecting automation.
+draft readback, publication and distribution remained unproved. That instruction
+slice introduced no native executor, CLI route, production registration or
+cadence. The planning continuation above does not establish unattended execution.
 
 ### AntifaFM prototype — 2026-10-18
 
