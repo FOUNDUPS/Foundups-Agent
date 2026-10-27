@@ -26,6 +26,8 @@ ACHIEVEMENTS:
 # === NEED_TO: Problem -> Solution Mapping ===
 # Direct mapping of problems to existing code solutions
 NEED_TO = {
+    "Soro social media DAE gap audit": "modules/platform_integration/social_media_orchestrator/docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md",
+    "source backed brand content calendar": "modules/platform_integration/social_media_orchestrator/src/content/content_orchestrator.py:prepare_campaign()",
     # AutoPost owns capture; shared Mall handoff is specified, not a live upload API.
     "Shop clothing capture": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",
     "AutoPost multiple item photos": "modules/foundups/pfmall/AUTOPOST_ITEM_CAPTURE_HANDOFF.md",

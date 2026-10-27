@@ -1,3 +1,9 @@
+## 2026-10-27: Source-backed editorial-package contracts
+
+- Retrieved existing TestModLog/README and actual content scaffold before test authoring. The old tests/test_content/content_orchestrator.py was invalid Python with two empty assertions; replace with test_content/test_content_orchestrator.py covering source preservation, identity/rules truth boundaries, revision binding, deterministic priorities/deduplication, overlength draft withholding, timezone/overflow, malformed fields/URLs/JSON and denied common file/process/network effects through the real campaign dispatcher.
+- Reuse test_social_campaign_adapter.py plus existing AntifaFM/petition/publication/drafter fixtures for connected regression. No duplicate provider or scheduler tests created.107 tests +131 subtests passed locally on Python3.12.14; campaign_brief+campaign_planner coverage99.54% (162 statements, one unreachable-after-DNS-filter IP diagnostic line uncovered). No module-wide coverage claim.
+- Independent verifier separately exercised145 wrong-type/shape mutations, scope/calendar and malformed JSON cases, common denied effects and actual command routing. Found ID/locale mismatch, decoded surrogate serialization and ambiguous length labeling; fixed and rechecked. No live provider/model/browser/account or resident installation qualified.
+
 ## 2026-10-18: AntifaFM listener context and verified X pilot
 
 - New bounded contract: default preview cannot reach configuration, credentials,

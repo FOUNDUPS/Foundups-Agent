@@ -1,3 +1,8 @@
+## 2026-10-27: Source-backed content campaign dispatcher
+
+- Existing SOCIAL campaign adapter adds strict content/prepare dispatch into the social orchestrator's content owner. Inline bounded JSON only; no live action or conversation-publisher shortcut. Existing research, petition and AntifaFM mappings preserved.
+- Connected offline campaign regression:107 tests +131 subtests passed. Compiler-specific coverage99.54%; independent input/effect review accepted the bounded slice. Soro audit additionally confirmed a denied-social conversation fallback issue; separate repair required before unattended writes.
+
 ## Parent authority bootstrap forwarding — 2026-10-25
 
 WSP00/11/22/50/62/97; C2/I5/D4/Impact4 = 15/P1 under the native 19/P0 umbrella.

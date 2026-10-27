@@ -1,3 +1,7 @@
+## Editorial package compiler — 2026-10-27
+
+The former invalid empty content scaffold is replaced by tests/test_content/test_content_orchestrator.py. Run it alongside the existing connected campaign selection below. To measure only the two new compiler leaves, enable pytest_cov and pass --cov=modules.platform_integration.social_media_orchestrator.src.content.campaign_brief --cov=modules.platform_integration.social_media_orchestrator.src.content.campaign_planner --cov-fail-under=90. The connected local selection passed107 tests +131 subtests with99.54% compiler coverage. These are offline source/contract checks, not voice quality, installed runtime, CMS or live delivery evidence.
+
 # Social Media Orchestrator Tests
 
 ## Petition intake and campaign routing — 2026-10-27
