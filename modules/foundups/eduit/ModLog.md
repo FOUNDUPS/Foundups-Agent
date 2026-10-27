@@ -255,3 +255,27 @@ Captured five-mission/trait/agent/replay publishing/member direction in the link
 roadmap; 2004 is attributed founder recollection, not newly verified history.
 No credential, upload, signup, AI, model download or WRE activation added.
 See docs/LEARNING_SHELL_REVIEW.md for evidence and limits.
+
+
+## 2026-10-28 — Five-tile correction-driven RSI contract
+
+Added pure Kids Episodes five-tile plan DAG and local review-record completeness
+checker; linked EDUIT correction ledger, fixed oracle and existing FAM/WRE,
+OpenClaw/Hermes and Karpathy-style AutoResearch owners. Updated interactive
+review procedure to v0.2.0, still prototype. No worker/promotion/UI activation.
+
+WSP97 retrieval: governed lexical Holo bundle at 0e28155, freshness UNKNOWN,
+index gap true; module docs present, optional memory absent. Results were broad
+protocol hits rather than concrete routing owners; direct source inspection and
+independent owner mapping resolved those gaps. Reconciled on current main
+3574f3c before edits. WSP00 detector failed missing torch; existing tracker gate
+reported compliant, no new detector witness. Existing local authoring chosen:
+no admitted model/executor binding is claimed. WSP15 planning C2/I4/D4/Impact4
+=14/P1; not the quality rubric. No new scheduler, queue, model or credentials.
+
+Validation: stdlib unittest four cases (including invalid inputs and per-criterion
+subtests) passed; existing EDUIT Node tests18 passed; diff whitespace clean.
+Initial pytest command could not run (pytest absent); converted new suite to
+stdlib unittest, still collected by existing pytest CI. Actual video/audio,
+native device review and next-real-tile transfer are not exercised by this slice.
+Independent review and hosted CI results are retained in the milestone PR.

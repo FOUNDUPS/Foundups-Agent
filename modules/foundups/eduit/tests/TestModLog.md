@@ -62,3 +62,17 @@ practice recovery. See SLOW_RESCUE_REVIEW for actual browser acceptance.
 extended with About/How pause/state and adaptive control measurements; image
 size assertion now waits for decode, tablet comparison tolerates subpixel rounding.
 Scoped rendered outcomes and device limits: ../docs/LEARNING_SHELL_REVIEW.md.
+
+
+## 2026-10-28 — Batch RSI planning boundary
+Four stdlib unittest methods pass with per-criterion failure subtests; existing
+18 EDUIT Node tests pass. No runtime, visual/audio or forward-transfer proof.
+Run `python -B -m unittest modules.foundups.kids_episodes.tests.test_tile_batch -v`.
+The existing Kids Episodes workflow collects this suite through pytest; local
+pytest was unavailable, not reported as passed. See TILE_PRODUCTION_RSI in EDUIT.
+
+Hosted first attempt: Kids Episodes passed; general CI stopped at stale canonical
+test registry. Regenerated using the existing owner: one new unit-test entry,
+1774→1775 total, quarantine count273 unchanged; --check now passes locally.
+This integration failure remains recorded and the review procedure now requires
+staging/regenerating/checking the registry when adding Python tests.
