@@ -1,5 +1,24 @@
 # Social Media Orchestrator Tests
 
+## Petition intake and campaign routing — 2026-10-27
+
+Run the offline selection with no host provider configuration:
+
+```bash
+PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/platform_integration/social_media_orchestrator/tests/test_petition_campaign.py modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py
+```
+
+Checks cover canonical/tracking-stable identity; short links remaining unresolved;
+untrusted/login/confusable/traversal URLs; unsupported authority/execution flags;
+denied environment/file/provider/process access; conversational routing; strict
+malformed commands; and preservation of the existing research provider mapping.
+Plans remain unverified and disabled. These are offline source contracts, not a
+browser login, model-generated campaign, installed runtime or live publication.
+The connected CI selection adds the new petition fixture to the existing
+AntifaFM/drafter/router/projection fixtures. That selection plus the existing
+manifest fixture passed121 tests and76 subtests locally. It does not add an
+installed-host or real-account witness.
+
 ## AntifaFM campaign and publication — 2026-10-18
 
 The new campaign fixture covers explicit operations, provider-derived listener

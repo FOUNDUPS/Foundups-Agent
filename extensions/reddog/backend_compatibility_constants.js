@@ -4,11 +4,11 @@ const BACKEND_MANIFEST_SCHEMA = 'reddog_backend_manifest.v3';
 const BACKEND_PRODUCT = 'foundups-agent-reddog-backend';
 const BACKEND_API_VERSION = 2;
 const BACKEND_MANIFEST_PATH = 'scripts/reddog_backend_manifest.json';
-const EXPECTED_MANIFEST_SHA256 = '3519f497dd3edf3012cd1612bb6c6a83f6429161539ffa11f9e07d0ed43f3c6d';
+const EXPECTED_MANIFEST_SHA256 = '6fa8d63e51022a7307bf4a7a21fff796bf0e78a5b8c94dcb710804cdab5f04a5';
 const RUNTIME_DEPENDENCY_GRAPH_VERSION = 2;
-const MAX_MANIFEST_BYTES = 328 * 1024;
+const MAX_MANIFEST_BYTES = 329 * 1024;
 const MAX_RUNTIME_FILE_BYTES = 2 * 1024 * 1024;
-const MAX_RUNTIME_FILES = 1471;
+const MAX_RUNTIME_FILES = 1472;
 const MAX_RUNTIME_TOTAL_BYTES = 32 * 1024 * 1024;
 const REQUIRED_BRIDGE_FILES = Object.freeze([
   'scripts/advisory_model_once.py',

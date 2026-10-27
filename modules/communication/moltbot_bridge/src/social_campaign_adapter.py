@@ -7,6 +7,7 @@ Command format (strict):
 Supported campaigns:
   research_x_to_ln_group
   antifafm
+  petition (planning only)
 
 Example:
   social campaign research_x_to_ln_group \
@@ -18,6 +19,7 @@ Example:
 from __future__ import annotations
 
 import json
+import re
 import shlex
 from typing import Any, Dict, Optional, Tuple
 
@@ -25,7 +27,15 @@ from typing import Any, Dict, Optional, Tuple
 SUPPORTED_CAMPAIGNS = {
     "research_x_to_ln_group",
     "antifafm",
+    "petition",
 }
+
+STRICT_CAMPAIGNS = {"antifafm", "petition"}
+PETITION_REQUEST = re.compile(
+    r"^(?:(?:red\s*dog|0102)[,:]?\s+)?(?:(?:let['’]s|please|we want to|I want to)\s+)?"
+    r"(?:launch|start)\s+(?:a|the|this)\s+petition\b", re.IGNORECASE,
+)
+
 
 CAMPAIGN_ALIASES = {
     "research_to_ln_group": "research_x_to_ln_group",
@@ -37,6 +47,15 @@ def _truthy(value: str) -> bool:
     return str(value).strip().lower() in {"1", "true", "yes", "y", "on"}
 
 
+def _parse_petition_request(text: str) -> Optional[Tuple[str, Dict[str, str]]]:
+    if not PETITION_REQUEST.match(text):
+        return None
+    urls = re.findall(r"https?://[^\s<>\"']+", text)
+    if len(urls) > 1:
+        return "petition", {"_invalid_command": "true"}
+    return "petition", {"petition_url": urls[0]} if urls else {}
+
+
 def _parse_campaign_command(message: str) -> Optional[Tuple[str, Dict[str, str]]]:
     text = (message or "").strip()
     if not text:
@@ -45,7 +64,7 @@ def _parse_campaign_command(message: str) -> Optional[Tuple[str, Dict[str, str]]
     lowered = text.lower()
     prefix = "social campaign "
     if not lowered.startswith(prefix):
-        return None
+        return _parse_petition_request(text)
 
     remainder = text[len(prefix) :].strip()
     if not remainder:
@@ -54,8 +73,9 @@ def _parse_campaign_command(message: str) -> Optional[Tuple[str, Dict[str, str]]
     try:
         parts = shlex.split(remainder)
     except ValueError:
-        if remainder.split(None, 1)[0].lower() == "antifafm":
-            return "antifafm", {"_invalid_command": "true"}
+        name = remainder.split(None, 1)[0].lower()
+        if name in STRICT_CAMPAIGNS:
+            return name, {"_invalid_command": "true"}
         raise
     if not parts:
         return None
@@ -68,13 +88,13 @@ def _parse_campaign_command(message: str) -> Optional[Tuple[str, Dict[str, str]]
     params: Dict[str, str] = {}
     for token in parts[1:]:
         if "=" not in token:
-            if campaign == "antifafm":
+            if campaign in STRICT_CAMPAIGNS:
                 return campaign, {"_invalid_command": "true"}
             continue
         key, value = token.split("=", 1)
         key = key.strip().lower()
         value = value.strip()
-        if campaign == "antifafm" and (not key or key in params):
+        if campaign in STRICT_CAMPAIGNS and (not key or key in params):
             return campaign, {"_invalid_command": "true"}
         if key:
             params[key] = value
@@ -82,6 +102,13 @@ def _parse_campaign_command(message: str) -> Optional[Tuple[str, Dict[str, str]]
 
 
 async def execute_social_campaign(campaign: str, params: Dict[str, str]) -> Dict[str, Any]:
+    if campaign == "petition":
+        from modules.platform_integration.social_media_orchestrator.src.petition_campaign import (
+            execute_petition_campaign,
+        )
+
+        return await execute_petition_campaign(params)
+
     if campaign == "antifafm":
         from modules.platform_integration.social_media_orchestrator.src.antifafm_campaign import (
             execute_antifafm_campaign,
@@ -91,6 +118,13 @@ async def execute_social_campaign(campaign: str, params: Dict[str, str]) -> Dict
 
     if campaign != "research_x_to_ln_group":
         return {"success": False, "campaign": campaign, "error": "unsupported campaign"}
+
+    return await _execute_research_campaign(params)
+
+
+async def _execute_research_campaign(params: Dict[str, str]) -> Dict[str, Any]:
+    """Preserve the existing research campaign's provider mapping."""
+    campaign = "research_x_to_ln_group"
 
     from .linkedin_social_adapter import execute_linkedin_action
     from .x_social_adapter import execute_x_action
@@ -159,10 +193,19 @@ async def handle_social_campaign_intent(message: str, sender: str = "") -> Optio
 
     try:
         result = await execute_social_campaign(campaign, params)
-        label = "result" if campaign == "antifafm" else "executed"
+        label = "result" if campaign in STRICT_CAMPAIGNS else "executed"
         return (
             f"Social campaign {label} for {sender or 'unknown_sender'}:\n"
             f"{json.dumps(result, indent=2, ensure_ascii=False)}"
         )
     except Exception as exc:
         return f"Social campaign execution error: {exc}"
+
+
+async def handle_petition_campaign_intent(message: str, sender: str = "") -> Optional[str]:
+    """Conversation shortcut restricted to the effect-free petition branch."""
+    text = (message or "").strip()
+    if not (PETITION_REQUEST.match(text)
+            or re.match(r"^social campaign petition(?:\s|$)", text, re.IGNORECASE)):
+        return None
+    return await handle_social_campaign_intent(text, sender)

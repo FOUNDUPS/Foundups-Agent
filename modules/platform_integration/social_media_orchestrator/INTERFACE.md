@@ -7,6 +7,28 @@
 
 ## Public API
 
+### Petition intake plan
+
+```python
+async def execute_petition_campaign(params: dict[str, str]) -> dict
+```
+
+Owner: `src/petition_campaign.py`; the existing SOCIAL campaign adapter dispatches
+`social campaign petition`. Parameters: `action` (`preview`/`plan`), `dry_run`
+(`true` only), `petition_url`, `campaign_id`, `title`, `platforms`. Unknown or
+duplicate command parameters, unsupported operations and invalid public URLs
+reject. Conversational launch phrases route only to the effect-free petition
+branch, never the other existing publishers.
+
+Returns `petition_campaign_plan.v1` with `awaiting_petition_url` or `intake_ready`,
+canonical campaign identity, an in-memory brief projection and pending phases.
+All accounts/platforms are disabled; URL/identity/source/policy verification is
+pending. `plan_revision` is not a signature or execution job. The leaf reads no
+host config and performs no model, network, browser, storage or publication effect.
+Outer CLI/runtime audit and admission behavior remains outside that guarantee.
+Account creation, persistence, draft generation, publishing, analytics and local
+browser qualification remain separate. See [the runbook](docs/PETITION_CAMPAIGN.md).
+
 ### AntifaFM campaign pilot
 
 ```python

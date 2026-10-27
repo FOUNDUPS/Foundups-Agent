@@ -27,9 +27,13 @@ The existing [campaign owner](skillz/foundup_campaign_operator/SKILLz.md) includ
 a [petition workflow](skillz/foundup_campaign_operator/references/petition-workflow.md),
 discoverable as `launch-petition` through Claude/Codex and OpenClaw workspace skills.
 It covers evidence, human authentication, platform drafts, consent, email and
-distribution receipts. This is an instruction prototype; no petition CLI route,
-Action Network executor or resident trigger is registered. Keep campaign-specific
-copy and personal-trauma evidence in the approved private campaign record.
+distribution receipts. The [petition intake route](docs/PETITION_CAMPAIGN.md)
+returns effect-free preview/plans for an existing Change.org or Action Network
+public link. Conversation entry supports "RedDog, let's launch a petition ...".
+No petition account/publication executor or resident cadence is registered.
+Keep campaign-specific copy and personal-trauma evidence in the approved private
+campaign record. The [session audit](docs/audits/PETITION_SESSION_AUDIT_20261027.md)
+separates merged instruction groundwork, planning and unfinished live integration.
 
 ## FoundUp pitch package
 
