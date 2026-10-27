@@ -1,5 +1,5 @@
 // Only public episode UI assets are cached. No account/API/feedback requests.
-const CACHE='eduit-storytime-ui-v4';
+const CACHE='eduit-storytime-ui-v5';
 const PATHS=['./','review/director.html','review/director.css','review/director.js','review/flags/gb.svg','review/flags/jp.svg','review/flags/pt.svg','review/flags/es.svg','storytime/','storytime/game.js','storytime/engine.mjs','storytime/game-world.mjs','storytime/panel-gestures.mjs','storytime/scene.mjs','storytime/rig.mjs','storytime/learning-events.mjs','member/js/gesture-engine.js','style.css','storytime.webmanifest','storytime/icon-192.png','storytime/icon-512.png','storytime/assets/poster.jpg'];
 function permitted(url,r){if(!r.ok)return false;const expected=new URL(url),actual=new URL(r.url);return actual.origin===expected.origin&&(!r.redirected||actual.pathname===expected.pathname.replace(/\.html$/,''));}
 const urls=new Set(PATHS.map(p=>new URL(p,self.registration.scope).href));

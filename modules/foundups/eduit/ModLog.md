@@ -245,3 +245,13 @@ dirt/vine motion and once-only arrival points. Film remains unchanged.64px prima
 controls and60px fullscreen targets; snapshots carry score and new revision.
 Added prototype review SKILLz and agent/traits/replay roadmap, not WRE activation.
 See SLOW_RESCUE_AND_AGENT_ROADMAP and SLOW_RESCUE_REVIEW for evidence/limits.
+
+## 2026-10-28 — Learning shell and staged evolution direction
+Extended existing Shorts viewer with Play/About/How, explicit Watch/Play headings,
+Us Story Time channel link, short fictional story opening and pause-preserving
+information dialogs. CSS controls scale independently of art and reserve their
+own rail. Retained film, engine, points, palette and feedback revision. Cache v5.
+Captured five-mission/trait/agent/replay publishing/member direction in the linked
+roadmap; 2004 is attributed founder recollection, not newly verified history.
+No credential, upload, signup, AI, model download or WRE activation added.
+See docs/LEARNING_SHELL_REVIEW.md for evidence and limits.

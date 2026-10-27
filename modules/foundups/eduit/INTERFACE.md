@@ -1,5 +1,16 @@
 # EDUIT interfaces
 
+## Current learning shell and evolution direction — 2026-10-28
+
+[Learning, evolution and sharing roadmap](docs/EVOLUTION_PLAY_AND_SHARING_ROADMAP.md)
+owns the latest direction: mechanical proof of concept, optional creature-AI
+prototype, then parent-owned membership MVP. Five-mission sets, fictional trait
+bonuses and reviewed replay-to-YouTube are planned, not live. Current score and
+slow rescue remain unchanged. The viewer now adds Play/About/How, a channel link
+above the local film, and viewport-sized controls. No YouTube iframe, upload,
+account, model, fingerprint or child telemetry is introduced.
+
+
 ## Current slow-rescue direction — 2026-10-27
 
 [SLOW_RESCUE_AND_AGENT_ROADMAP](docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md) supersedes
@@ -109,3 +120,12 @@ and full scene/round state through existing viewer records. New feedback namespa
 `slow-rescue-11` leaves old local notes untouched; clock validation permits up to
 86400 active seconds for bounded untimed practice records. No storage/API upload
 for score. No agent controller runtime is exposed yet.
+
+### Information and responsive controls
+The Shorts-owned viewer exposes About and How as native modal dialogs. Opening
+pauses both media and game; closing preserves state and leaves explicit resume.
+Full-screen makes page siblings inert. Controls use CSS viewport sizing rather
+than canvas scaling: 64px at <=360px width or <=450px height, otherwise
+clamp(72px,10vmin,88px). The same rule applies to play, switch, feedback and
+expand controls. Actual physical touch delivery remains device acceptance.
+The game/film API, score, scene revision and local feedback namespace are unchanged.
