@@ -1,3 +1,23 @@
+## 2026-10-27: Reusable supervised petition instruction
+
+- Extend the existing campaign owner; add `launch-petition` discovery, a
+  source/authentication/consent/publication playbook. Campaign copy and evidence
+  remain private. No separate campaign runtime or sender.
+- Groundwork: main0328c124; existing AntifaFM pilot and pitch instruction.
+  Open target: supervised petition procedure. Chosen slice: instructions and
+  campaign preparation; platform effects and resident execution remain pending.
+- WSP00 V2 failed for missing torch; documented tracker fallback/check passed,
+  detector witness ABSENT. Source-bound lexical retrieval returned UNKNOWN
+  freshness/index gap; direct current-owner reads resolved instruction paths.
+  Historical archive/phone hits were noise; no semantic acceptance is claimed.
+- Preserve observed handoff/auth failures without inventing a cause. No
+  credentials, private registration details or supporter records are retained.
+  Projection/manifest selection:24PASS; wardrobe hash verification10 files PASS
+  (signature verification not performed); both discovery wrappers structurally
+  validate; generated projection and diff checks PASS. No new tests or live
+  platform effects. Hosted publication and installed-host qualification remain
+  separate from this local evidence.
+
 ## 2026-10-26: Publish the existing FoundUp pitch instruction
 
 - WSP00/6/15/22/50/62/84/97;12/P2. Publish the local prototype as module-owned

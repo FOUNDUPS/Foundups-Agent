@@ -12,6 +12,15 @@ Create a unified, intelligent social media orchestration layer that eliminates r
 
 ## Current Status: CREATED
 
+### Supervised petition instruction — 2026-10-27
+
+Existing campaign owner now contains the reusable petition playbook and
+`launch-petition` discovery wrappers. Campaign-specific copy and evidence remain
+private; authenticated platform access, original-media review,
+draft readback, publication and distribution remain unproved. This instruction
+does not introduce a native executor, CLI route, production registration or
+cadence. Qualify one supervised end-to-end launch before selecting automation.
+
 ### AntifaFM prototype — 2026-10-18
 
 Implemented explicit SOCIAL campaign operations, bounded connected conversation

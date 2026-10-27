@@ -21,6 +21,16 @@ fallback. Replies are draft-only. The prototype starts no service or schedule.
 See [the host runbook](docs/ANTIFAFM_CAMPAIGN.md) and
 [the API contract](INTERFACE.md#antifafm-campaign-pilot).
 
+## Supervised petitions
+
+The existing [campaign owner](skillz/foundup_campaign_operator/SKILLz.md) includes
+a [petition workflow](skillz/foundup_campaign_operator/references/petition-workflow.md),
+discoverable as `launch-petition` through Claude/Codex and OpenClaw workspace skills.
+It covers evidence, human authentication, platform drafts, consent, email and
+distribution receipts. This is an instruction prototype; no petition CLI route,
+Action Network executor or resident trigger is registered. Keep campaign-specific
+copy and personal-trauma evidence in the approved private campaign record.
+
 ## FoundUp pitch package
 
 The [pitch package instruction](skillz/foundup_pitch_package/SKILLz.md) turns
