@@ -153,3 +153,16 @@ blocker; contract, malformed input handling, ownership and portability each4/5.
 This demonstrates a bounded correction cycle, not retained autonomous RSI.
 Transfer to the next actual tile remains pending. Lesson: separate reusable
 invariants from story-specific fixtures before applying a skill to a new tile.
+
+## Mandatory post-merge CI acceptance gate (2026-10-28 correction)
+
+Incident: Storytime victory PR #2244 introduced a deliberate `celebrating` phase but retained a regression expecting immediate `over`. Kids Episodes run 40622731429 failed (17 passed, 1 failed). Test correction PR #2245 was squash-merged; that merge alone is not proof of a green main run.
+
+For **every** EDUIT/Storytime RSI iteration:
+1. Before PR: identify impacted behavior and update or add regression tests alongside code; run available local focused tests and independent visual/audio checks where applicable. Do not weaken assertions merely to obtain green status.
+2. Open a PR with changed files, test evidence and known limitations. Inspect required PR checks before squash merge. If checks are pending or failing, repair on the PR branch; do not treat a successful GitHub merge API response as acceptance.
+3. After squash merge: capture the **new main SHA**, retrieve workflow/check runs **for that exact SHA**, and require relevant jobs to conclude successfully. A status endpoint with no checks is UNKNOWN, not green; a PR-head pass does not establish a main-head pass.
+4. If post-merge CI fails: inspect the failing job logs, repair the cause in a new bounded PR, rerun/verify, and keep the task **BLOCKED** until the resulting main SHA has verified green required checks. Preserve failure and correction in ModLog and existing WRE outcome memory when admitted.
+5. Report separately: code committed, PR merged, main CI verified, live browser/audio/device verified, deployment verified, and RSI transfer demonstrated. No silent promotion from one state to the next.
+
+The release gate must not depend on user notification. Automated branch protection/required checks should enforce pre-merge CI where repository permissions allow; documentation alone does not configure GitHub protections or establish a continuously running agent.
