@@ -111,3 +111,35 @@ introDialog.addEventListener('cancel',event=>{event.preventDefault();finishStory
 introDialog.addEventListener('close',()=>{if(!introClosing)introReturn?.focus();});
 let introSeen=false;try{introSeen=localStorage.getItem(introSeenKey)==='1';}catch{}
 if(!introSeen)queueMicrotask(openStoryIntro);
+
+
+// Sprint 1 prototype: caption timing and optional speech, authored against the current MP4.
+// Future releases should use reviewed, prerecorded locale audio and a shared cue timeline.
+const storyCaption=$('story-caption');
+const storyLines=[
+ {start:0,end:3.4,text:'long long ago'},
+ {start:3.4,end:6.5,text:'there were dinosaurs 🦕'},
+ {start:6.5,end:9.5,text:'little MAMMAs slept underground'},
+ {start:9.5,end:12.3,text:'then came a big THUMP'}
+];
+let storyLast=-1;
+function storySpeechCancel(){try{window.speechSynthesis?.cancel();}catch{}}
+function updateStoryCaption(){
+ const t=video.currentTime;
+ const index=storyLines.findIndex(line=>t>=line.start&&t<line.end);
+ if(index===storyLast)return;
+ storyLast=index;
+ storyCaption.textContent=index<0?'':storyLines[index].text;
+ storySpeechCancel();
+ if(index>=0&&!video.paused&&'speechSynthesis'in window){
+  const speech=new SpeechSynthesisUtterance(storyLines[index].text.replace('🦕',''));
+  speech.lang='en';speech.rate=.78;speech.volume=.75;
+  try{speechSynthesis.speak(speech);}catch{}
+ }
+}
+video.addEventListener('timeupdate',updateStoryCaption);
+video.addEventListener('seeked',updateStoryCaption);
+video.addEventListener('pause',storySpeechCancel);
+video.addEventListener('ended',()=>{storySpeechCancel();storyCaption.textContent='';storyLast=-1;});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)storySpeechCancel();});
+updateStoryCaption();
