@@ -19,6 +19,20 @@ All 1,472 runtime members remain; only the four edited source hashes and two
 existing pins change. Canonical manifest digest:
 `4edbc77efba5fc13fcb67ec70fde129cd54607b31e87b6a56915ccb26548e63e`.
 
+First hosted run on 9aff8815: the new Linux job passed 384/384 in 10.36s.
+Secret scanning correctly stopped on 38 manifest findings because its reviewed
+identities bind the whole file. Architect and independent reviewer verified every
+flagged line unchanged from 4afb9284, already reviewed at that base, and equal
+to its source's public digest. Exactly 38 current fingerprints are added to the
+existing reviewed metadata; all prior identities remain. Scanner/configuration,
+rules, thresholds and full-tree/history coverage are unchanged. Compact sorted
+additions SHA256: `d207314c21d49a3c336d74ebbe926ec90956e8f541dc64d111a36bde5d18361d`.
+Relevant local security controls: 7 pass / 46 deselected. Hosted security-regression
+step passed. The full local suite initially had two Windows encoding errors and
+one unavailable WSL-bash case; UTF8 resolved the encoding errors (52 pass / 1 fail).
+No test was changed or skipped to clear that platform limitation; Linux CI is
+the full shell-test evidence. Publication still requires the repaired head's CI.
+
 Final connected command (Windows PowerShell; CI uses `-c /dev/null`):
 
 ```powershell
