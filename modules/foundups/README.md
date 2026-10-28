@@ -358,3 +358,11 @@ This module operates under **WSP governance** and follows **[WSP 3: Enterprise D
 ---
 
 **Remember**: WSP defines the technical specifications, `/modules/foundups/` implements the specifications to create actual FoundUps. 
+
+
+## Hornet Hunter website handoff
+
+[Hornet Hunter](hornet_hunter/README.md) preserves the sanitized public website source,
+SEO work and maintenance contracts for hornethunter.com. Private correspondence,
+customer data and the unpublished filming manual are excluded. The existing Sites
+repository remains the deployment owner; this is not an automatic publishing integration.
