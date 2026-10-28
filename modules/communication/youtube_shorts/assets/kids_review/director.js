@@ -98,3 +98,16 @@ const storyInfo=$('story-info');let infoReturn=null;
 function openInfo(section){if(childLocked)return;video.pause();api()?.pause();options.hidden=true;infoReturn=document.activeElement;$('about-content').hidden=section!=='about';$('how-content').hidden=section!=='how';storyInfo.setAttribute('aria-label',section==='about'?'About EDUIT':'How to play');storyInfo.removeAttribute('aria-labelledby');storyInfo.showModal();$('info-close').focus();}
 $('about-open').onclick=()=>openInfo('about');$('how-open').onclick=()=>openInfo('how');$('info-close').onclick=()=>storyInfo.close();
 storyInfo.addEventListener('close',()=>infoReturn?.focus());
+
+// One-time illustrated pre-video story. Does not auto-play media or collect child data.
+const introDialog=$('story-intro'),introSeenKey='eduit.storytime.intro-seen.v1';
+let introReturn=null,introClosing=false;
+function openStoryIntro(){if(childLocked||introDialog.open)return;video.pause();api()?.pause();introReturn=document.activeElement;introDialog.classList.remove('intro-collapsing');introDialog.showModal();$('intro-close').focus();}
+function finishStoryIntro(){if(introClosing||!introDialog.open)return;introClosing=true;try{localStorage.setItem(introSeenKey,'1');}catch{}const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced)introDialog.classList.add('intro-collapsing');const close=()=>{introDialog.close();introDialog.classList.remove('intro-collapsing');introClosing=false;$('video').focus({preventScroll:true});$('video-panel').scrollIntoView({block:'nearest',behavior:'instant'});};if(reduced)close();else introDialog.addEventListener('animationend',close,{once:true});}
+$('intro-skip').addEventListener('click',finishStoryIntro);
+$('intro-close').addEventListener('click',finishStoryIntro);
+$('intro-replay').addEventListener('click',openStoryIntro);
+introDialog.addEventListener('cancel',event=>{event.preventDefault();finishStoryIntro();});
+introDialog.addEventListener('close',()=>{if(!introClosing)introReturn?.focus();});
+let introSeen=false;try{introSeen=localStorage.getItem(introSeenKey)==='1';}catch{}
+if(!introSeen)queueMicrotask(openStoryIntro);
