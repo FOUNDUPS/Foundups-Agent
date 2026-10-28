@@ -150,3 +150,18 @@ See [adaptive learning contract](docs/ADAPTIVE_LEARNING_CONTENT.md). P0: three c
 
 ## EDUIT agentic learning game engine (2026-10-28)
 See [EDUIT Agentic Learning Game Engine](docs/EDUIT_AGENTIC_LEARNING_GAME_ENGINE.md) for the sound → written word → spoken word timing contract, family casting with smaller Baby, reusable matching/tracing/counting modes, deterministic browser hooks, and 012 → 0102 → WSP97 RSI feedback loop. This is a design contract, not an implemented autonomous runtime. Replay awards play stars; no Earn Stars button.
+
+## WSP15 prioritized execution cycles — canonical latest decision (2026-10-28)
+**This supersedes earlier Earn Stars / three-round test-gate proposals above.** The only primary end-of-round action is pulsing **Play Again**; rescue earns stars. Three successful rounds may be counted, but no Earn Stars button or forced test. VERIFY is a learning capability to integrate later in a child-appropriate, optional interaction, not a permanent third panel. Reconcile older prose on subsequent cleanup rather than treating it as an active requirement.
+
+| Priority | Cycle | Deliverable | Acceptance evidence |
+|---|---|---|---|
+| P0 / Sprint 0 | Release baseline and audit | Reconcile PR #2249, canonical game owner, About mind map, deployment workflow, and existing TTS/whiteboard skills | Exact branch/CI status, mobile screenshots, no duplicate architecture |
+| P0 / Sprint 1 | **Multimodal cue timing** | THUMP Foley → visible THUMP → spoken THUMP, offsets in **milliseconds**, with locale/audio fallback | Measured onset/jitter, audible phone test, replay cancel, no overlapping speech |
+| P0 / Sprint 2 | **Reliable game cycle** | Five rescues → foot THUMP → soil CRUNCH → foot lifts → Everyone Safe → thumb-side pulsing Replay, round counter, safe seeded placement variation | Deterministic end-to-end test, reduced-motion/mobile tests |
+| P1 / Sprint 3 | **Modular content** | Reviewed sound/family/counting packs; rescued 1–5 with localized numeral/word/voice; smaller Baby; familiar + new replay objects | Fixture validation, no false family roles, all locales |
+| P1 / Sprint 4 | **Integrated verification** | Age-appropriate matching/recognition with play-earned stars; optional later tracing through existing whiteboard owner | Real 3-year-old accessibility review, independent answer integrity, no forced quiz |
+| P1 / Sprint 5 | **Journey UI and release** | Verify scrollable About mind map, first-visit story modal, bottom-right closes, PF Mall tile contract | Phone browser acceptance, exact-main CI, deployment smoke |
+| P2 / Sprint 6 | **RSI transfer** | Turn corrections into skill/test receipts and prove transfer on second tile through existing FAM/WRE/WSP97 owners | Independent next-tile test; no child telemetry or unreviewed auto-publish |
+
+**Why cue timing first:** It is a small cross-cutting engine primitive, unlocks five sound concepts and counting speech, and yields precise regression fixtures. The full test/assessment engine depends on stable content cues and completed game cycles; building it first would hard-code incorrect learning objects. Do not add an autonomous browser agent to ship the first tile. The 012↔0102 correction loop is documented RSI input; production autonomy is a later verified outcome. All PRs must pass CI and be squash-merged before claiming live deployment.
