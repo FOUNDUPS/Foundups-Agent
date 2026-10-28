@@ -1,5 +1,10 @@
 # EDUIT interfaces
 
+## Cross-module RSI architecture — 2026-10-28
+
+Read [Storytime RSI system architecture](docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md) for canonical owners and the continuation sequence. This interface does not authorize new runtime admission, a second memory store, new orchestration, or child telemetry. A tile pairs video and game; the five-tile planner is not a production executor.
+
+
 ## Five-tile RSI production contract — 2026-10-28
 
 Read [TILE_PRODUCTION_RSI](docs/TILE_PRODUCTION_RSI.md) before the next tile or
