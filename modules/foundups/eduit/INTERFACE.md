@@ -153,3 +153,11 @@ than canvas scaling: 64px at <=360px width or <=450px height, otherwise
 clamp(72px,10vmin,88px). The same rule applies to play, switch, feedback and
 expand controls. Actual physical touch delivery remains device acceptance.
 The game/film API, score, scene revision and local feedback namespace are unchanged.
+
+### Fullscreen viewport contract — 2026-10-29
+The viewer follows the visual viewport's dimensions and offsets at normal zoom,
+including scroll, resize and foreground restoration. Changed bounds pause both
+video and game; zoomed browser pages retain the layout viewport fallback. One
+fullscreen CSS owner reserves one active control rail and a separately scaled
+exit. Body-owned options/unlock share these viewport coordinates. Short landscape places the narrative beside the16:9 scene. No manifest,
+install identity, game API or gesture interface changed.

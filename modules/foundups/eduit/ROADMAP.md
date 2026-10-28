@@ -167,3 +167,9 @@ See [EDUIT Agentic Learning Game Engine](docs/EDUIT_AGENTIC_LEARNING_GAME_ENGINE
 | P2 / Sprint 6 | **RSI transfer** | Turn corrections into skill/test receipts and prove transfer on second tile through existing FAM/WRE/WSP97 owners | Independent next-tile test; no child telemetry or unreviewed auto-publish |
 
 **Why cue timing first:** It is a small cross-cutting engine primitive, unlocks five sound concepts and counting speech, and yields precise regression fixtures. The full test/assessment engine depends on stable content cues and completed game cycles; building it first would hard-code incorrect learning objects. Do not add an autonomous browser agent to ship the first tile. The 012↔0102 correction loop is documented RSI input; production autonomy is a later verified outcome. All PRs must pass CI and be squash-merged before claiming live deployment.
+
+### Phone fullscreen acceptance — 2026-10-29
+Bounded repair evidence: docs/PHONE_FULLSCREEN_REPAIR.md. Retain v12 negative
+control and strengthened phone/tablet oracle on the next actual tile. Physical
+Home Screen/pinch/upgrade acceptance and non-layout findings in issue2252 remain
+open; the layout repair is not closure of narration/replay or autonomous RSI.

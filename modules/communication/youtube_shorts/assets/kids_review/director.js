@@ -33,8 +33,21 @@ const gamePanel=$('game-panel'),videoPanel=$('video-panel'),video=$('video');
 const expandIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3H3v6m12-6h6v6M3 15v6h6m12-6v6h-6"/></svg>';
 const collapseIcon='<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9h6V3m6 0v6h6M9 21v-6H3m12 6v-6h6"/></svg>';
 let lastViewport="";
-function viewport(){const v=window.visualViewport;const width=v?.scale===1?v.width:window.innerWidth,height=v?.scale===1?v.height:window.innerHeight;const size=width+'x'+height;if(lastViewport&&size!==lastViewport)api()?.pause();lastViewport=size;document.documentElement.style.setProperty('--app-width',width+'px');document.documentElement.style.setProperty('--app-height',height+'px');}
-window.addEventListener('resize',viewport);window.addEventListener('orientationchange',viewport);window.visualViewport?.addEventListener('resize',viewport);viewport();
+function viewport(){
+ const v=window.visualViewport,useVisual=v?.scale===1&&v.width>0&&v.height>0;
+ // Follow the visible viewport at normal zoom; preserve ordinary browser zoom.
+ const width=useVisual?v.width:window.innerWidth,height=useVisual?v.height:window.innerHeight;
+ const left=useVisual&&Number.isFinite(v.offsetLeft)?v.offsetLeft:0;
+ const top=useVisual&&Number.isFinite(v.offsetTop)?v.offsetTop:0;
+ const size=[width,height,left,top].join('x');
+ if(lastViewport&&size!==lastViewport){video.pause();api()?.pause();}
+ lastViewport=size;
+ for(const [name,value] of Object.entries({width,height,left,top}))document.documentElement.style.setProperty('--app-'+name,value+'px');
+}
+window.addEventListener('resize',viewport);window.addEventListener('orientationchange',viewport);
+window.visualViewport?.addEventListener('resize',viewport);window.visualViewport?.addEventListener('scroll',viewport);
+window.addEventListener('pageshow',viewport);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)viewport();});viewport();
 let focusReturn=null;
 function expand(el,on){
  if(childLocked&&!on)return;

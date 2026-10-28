@@ -311,3 +311,6 @@ See [EDUIT Agentic Learning Game Engine](docs/EDUIT_AGENTIC_LEARNING_GAME_ENGINE
 
 Current narration implementation and bounded review evidence:
 [Narration timing reconciliation](docs/NARRATION_TIMING_REVIEW.md).
+
+[Phone fullscreen repair and retained regression checks](docs/PHONE_FULLSCREEN_REPAIR.md)
+records the v12 comparison, scoped repair and physical-device acceptance limits.

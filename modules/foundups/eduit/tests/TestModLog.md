@@ -84,3 +84,10 @@ buffering/seek cancellation and preserving user volume including zero. Director
 fixture handles first-visit intro and checks fullscreen origin, caption/controls
 and exit nonoverlap. Browser voice unavailable in cloud; no acoustic acceptance.
 See ../docs/NARRATION_TIMING_REVIEW.md.
+
+## 2026-10-29 — Phone fullscreen and viewport regression coverage
+29 Node tests pass (3 new direct viewport/controller tests). Same frozen browser
+oracle rejects v12's60px exit, then passes296 root/inner viewport checks on the
+candidate. Retained35-check suite passes at390x844 including rotation with frozen
+frame/marks. Readiness race retained as fixture failure, bounded wait added.
+Native iOS touch/Home Screen and physical audio remain unverified.
