@@ -147,3 +147,6 @@ physical-device acceptance of this episode before extending the story.
 
 ## Next implementation: three-round learning loop (2026-10-28)
 See [adaptive learning contract](docs/ADAPTIVE_LEARNING_CONTENT.md). P0: three completed game rounds with approved varied lessons, then optional bottom-right Earn Stars opens picture matching, with Play Again available throughout. Keep game score distinct from verified learning points. First implementation deterministic and local; PWA/agent is not prerequisite. Requires actual game/UI/locale tests before release.
+
+## EDUIT agentic learning game engine (2026-10-28)
+See [EDUIT Agentic Learning Game Engine](docs/EDUIT_AGENTIC_LEARNING_GAME_ENGINE.md) for the sound → written word → spoken word timing contract, family casting with smaller Baby, reusable matching/tracing/counting modes, deterministic browser hooks, and 012 → 0102 → WSP97 RSI feedback loop. This is a design contract, not an implemented autonomous runtime. Replay awards play stars; no Earn Stars button.
