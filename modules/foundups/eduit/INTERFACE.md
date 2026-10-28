@@ -1,4 +1,6 @@
 # EDUIT interfaces
+
+> **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 ## EDUIT vision / Storytime Evolution map — 2026-10-28
 
 [EDUIT Pain → Solution → Outcome and Storytime Evolution progression](docs/EDUIT_STORYTIME_VISION_AND_EVOLUTION_MAP.md) is the current specification for the three-question FoundUp vision, Storytime's place inside EDUIT, modular counting/word/language objects, replay, optional parent-controlled memory, About/How links and a proposed accessible Roadmap mind-map modal. All new runtime behavior remains unimplemented until independently verified. A complete tile is WATCH → PLAY → VERIFY, superseding older video + game descriptions.
