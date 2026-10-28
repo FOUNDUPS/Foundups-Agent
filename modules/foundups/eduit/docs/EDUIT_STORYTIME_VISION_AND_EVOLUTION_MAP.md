@@ -1,0 +1,50 @@
+# EDUIT → Storytime → Evolution: vision and progression contract
+Date: 2026-10-28. Status: proposed product specification, not shipped.
+
+## FoundUp: three mandatory questions
+**Pain:** Children need engaging, accessible, repeatable learning that is not a fixed one-time lesson; families lack continuity and feedback across educational games. Human-only authoring limits content variety and iteration.
+**Solution:** EDUIT's educational FoundUp delivers modular WATCH → PLAY → VERIFY tiles. Reviewed learning objects (words, numbers, sounds, languages) can be substituted independently of the game mechanics. Governed RSI workers improve tiles using developer/editor feedback and independent tests, not unconsented child telemetry.
+**Outcome:** An accessible, self-improving educational game ecosystem in which learners can join, learn, replay varied lessons, and optionally retain their progress. The Educational Singularity is the historical framing; autonomous generation and measurable learning impact remain goals, not verified deployments.
+
+EDUIT is the FoundUp. Storytime is an experience/catalog within EDUIT. Evolution is a Storytime narrative learning path. Episodes/tiles are content, not FoundUps. Each tile has **WATCH (video demonstrating story/how to play), PLAY (interactive practice), VERIFY (formative test of that round's actual learning objects)**.
+
+## Evolution roadmap pop-up: proposed mind-map contract
+The map is a *learning progression*, not a literal family tree from an identifiable fossil shrew to modern humans. The Little Shrew is a fictional mammal-like protagonist; circa 150 million years ago is a narrative setting, not proof that a particular shrew species is our direct ancestor. Three opening shrew characters/variants are game branches, not three verified evolutionary lineages.
+
+```mermaid
+flowchart TD
+ A["Early mammal-like world • ~150 Ma (fictional Little Shrew)"]
+ A --> S1["Shrew path A • rescue / sounds"]
+ A --> S2["Shrew path B • counting / words"]
+ A --> S3["Shrew path C • language / patterns"]
+ S1 --> M["Shared learning path • early mammals"]
+ S2 --> M
+ S3 --> M
+ M --> P["Primates"]
+ P --> H["Hominins"]
+ H --> U["Humans"]
+```
+
+The pop-up shows a clearly labeled **YOU ARE HERE** marker on the opening Little Shrew tile, locked/unbuilt later nodes as *planned*, and navigation only to actually released tiles. Each step must distinguish fictional narrative from reviewed evolutionary science; the path is a simplified learning sequence and cannot imply all modern mammals descended from shrews or that evolution has a predetermined human endpoint. Scientific reviewers must approve chronological nodes before release.
+
+## Modular lesson object examples
+- **Sound/word:** THUMP, SNIFF, CRUNCH, SQUISH; three reviewed objects per play, age-appropriate, non-graphic.
+- **Counting:** visible shrew #1 → display numeral **1** and locale-specific written number **one** while saying it; highlight **1**, then fade; repeat 2/two, 3/three, 4/four, 5/five, synchronized to actual five characters. Japanese and other languages use reviewed numeral words and recorded/approved speech; digits 1–5 may remain Arabic numerals.
+- **Vocabulary:** word → visible action/object → matching verification; switch packs only where the scene actually supports the cue.
+- **Replay:** completed tile → VERIFY → score/feedback → Replay. Slightly increase speed within accessible reviewed limits (never force a speed increase); rotate to another compatible approved lesson pack. If no alternative reviewed pack is available, allow repeat honestly.
+- **Assessment:** VERIFY always tests only the selected round's three objects; do not ask number questions unless counting appeared in PLAY.
+
+## Existing UI: About / How / Roadmap
+- **About** should link to EDUIT's historical Education Using Information Technology vision and the FoundUps project; clarify Storytime is one EDUIT experience. Explain the fictional Little Shrew as the beginning of a journey exploring mammal evolution and human origins, without claiming direct shrew ancestry.
+- **How** should teach WATCH → PLAY → VERIFY, wake the five characters, guide them to the green vine, recognize cues, match three objects, then choose replay or next. Include practice, sound, accessibility and gentle replay acceleration.
+- **Roadmap** is a separate, accessible mind-map modal with current node, three opening branches, simplified later evolution milestones and visible release status. No dead links, forced unlocks or fabricated episodes.
+- Preserve existing pop-up/modal owner and shared Mall architecture; inspect live source before changing UI. Documentation alone does not establish that modal changes shipped.
+
+## Player memory and sign-in
+- **P0:** Anonymous, optional, device-local learning history, controlled and clearable by parent; no child identity, birthday, analytics, cross-child comparisons, advertising or RSI training data.
+- **P1:** Parent-managed sign-in using existing FoundUps authentication/tenant ownership *after* authorization and privacy review. Keep child profile pseudonymous and parent-controlled; scoped progress only, explicit consent for sync, delete/export controls, no child-facing OAuth prompt. No new auth service.
+- Track `tile_id`, `tile_revision`, `lesson_pack_id`, `locale`, completed components, assessment outcomes and speed setting minimally. Do not conflate game score and learning verification or infer intelligence.
+- Offline/guest remains usable. Parent login is optional, not a gate to learning.
+
+## WSP97 implementation and acceptance
+Audit actual source and existing skill owners before implementing; reconcile README/INTERFACE/ROADMAP, TILE_PRODUCTION_RSI, STORYTIME_RSI_SYSTEM_ARCHITECTURE and Kids Episodes schemas. Extend the canonical three-part tile contract rather than creating a competing schema. Prioritize (1) content/assessment wiring and deterministic tests, (2) counting/locale packs, (3) About/How and accessible Roadmap modal, (4) optional local memory, (5) parent sign-in after consent/security review, (6) next different tile transfer. Test complete WATCH→PLAY→VERIFY; matching objects on replay, five counts with numeral + localized word, no mismatched quiz, speed cap and untimed path, modal keyboard/focus, roadmap status, guest/privacy deletion and locale fallback. WRE verification must use independent synthetic fixtures and educational review; no autonomous publishing or live child-data ingestion. PR squash merge and verify exact main SHA before marking done.
