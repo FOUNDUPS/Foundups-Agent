@@ -1,5 +1,13 @@
 # EDUIT ModLog
 
+## 2026-10-28 — Storytime RSI continuity architecture (documentation-only)
+
+- Cross-linked README, INTERFACE and ROADMAP to `docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md`.
+- Consolidated educational vision, tile/block/episode/epoch hierarchy, canonical WRE/WSP/FAM/HoloIndex/Kids Episodes/Shorts/Mall ownership and new-session resume sequence.
+- Retained `docs/TILE_PRODUCTION_RSI.md` as frozen acceptance oracle; no duplicate worker, scheduler, memory, UI or production activation.
+- Known gaps: authenticated admission/lease and verifier, actual next-tile transfer, measured retained RSI. PR/squash and CI receipts must be checked independently; this entry alone is not proof of merge.
+
+
 ## 2026-10-26 — Story Time proof of concept
 
 Implemented parent-facing landing, browser-local two-tap game, shared SVG movie export and existing-renderer reuse. Four state/scene tests pass. Independent review checked actual rendered collapse and provenance; floating claw removed. No tracking or child profiles. Deployment handoff records observed Patreon forwarding, local Codex GoDaddy access boundary and isolated Firebase targets. Production domains unchanged.
