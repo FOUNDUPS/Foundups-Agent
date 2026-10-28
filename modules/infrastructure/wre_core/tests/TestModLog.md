@@ -1,3 +1,58 @@
+## 2026-10-28 — Risk-verification preflight and downgrade regressions
+
+Source baseline: `4afb9284d32e9af24f578fda91063114263d5a39`.
+Independent internal Codex reviewer authored 48 fixed cases before the repair:
+44 failed / 4 passed / 31 deselected. They cover policy omission/substitution,
+wrong types, complete-plan rejection before commands, and legacy compatibility.
+Review of the first repair added 14 cases: four force-full escalation failures
+and ten passing controls. The final connected selection passes **384/384**
+in 41.32s after the WSP62 preflight-function extraction, zero skips. Independent rerun of the two modified suites passes
+**93/93** in 21.18s; this overlaps the 384 and must not be added to it.
+Four additional direct-producer mock probes reject before Git is called.
+The extracted orchestration/preflight functions are 35/23 lines. Existing larger
+verifier-function debt is unchanged. No new module or size exemption was added.
+After extraction the reviewer approved the final source and independently reran
+37 affected controls (37 pass, 10 deselected, 0.46s), also overlapping the 384.
+Canonical registry check: current, 1,775 entries / 273 quarantined.
+Manifest tests: 8 pass in 71.07s; Node backend compatibility contract passes.
+All 1,472 runtime members remain; only the four edited source hashes and two
+existing pins change. Canonical manifest digest:
+`4edbc77efba5fc13fcb67ec70fde129cd54607b31e87b6a56915ccb26548e63e`.
+
+Final connected command (Windows PowerShell; CI uses `-c /dev/null`):
+
+```powershell
+$env:PYTHONDONTWRITEBYTECODE='1'
+$env:PYTEST_DISABLE_PLUGIN_AUTOLOAD='1'
+$env:PYTHON_DOTENV_DISABLED='1'
+C:/Python312/python.exe -B -m pytest -q --tb=short -c NUL --noconftest --import-mode=importlib -o pythonpath=. -p no:cacheprovider modules/infrastructure/wre_core/tests/test_wre_test_impact_differential_gate.py modules/infrastructure/wre_core/tests/test_wre_test_scope_coverage.py modules/infrastructure/wre_core/tests/test_wre_test_registry_differential_plan_runtime.py modules/infrastructure/wre_core/tests/test_wre_test_differential_runtime.py modules/infrastructure/wre_core/tests/test_wre_independent_evidence_producer_runtime.py modules/infrastructure/wre_core/tests/test_wre_autonomous_slice_verifier_runtime.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_request_binding.py modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
+```
+
+Reviewer command: the two changed suites with `-q -p no:cacheprovider`.
+Its 93-case run emitted no warnings. An earlier root 79-case run reported two
+existing pytest configuration warnings with async-plugin autoload disabled.
+The final connected command above isolates configuration and emits none.
+Scope includes failed/pending CI, wrong main/head, cleanup/recovery prerequisites,
+security/held-out closure, stale dependency evidence and self-verification.
+These are contract tests, not a live activation/rollback or main deployment proof.
+
+The new CI job records JUnit evidence bound to `github.sha`, in parallel with
+unchanged mandatory jobs. Hosted results and exact-main readback belong to the
+resulting PR's closure receipt, separately from these local results.
+
+**Compute observation:** recording-runner controls show invalid late checks and
+narrow force-full requests now invoke zero checks/differentials; the baseline
+invoked an earlier check. No comparative hosted runner-minutes, provider cost
+or retained efficiency gain has been measured. Model calls for this slice: zero
+external provider calls; coordinator/reviewer usage not quantified.
+
+**Retrieval:** current task-local Holo helper selected this exact source with
+a lexical module bundle (`ok=true`, `freshness=UNKNOWN`, index gap present).
+The earlier shared-root query rejected an authority/head mismatch and was not
+retried or reindexed. Direct source/caller reads filled missing coverage.
+Broad matches were noisy; exact owner paths removed duplicates. Semantic
+freshness is not claimed. WSP00 bootstrap/strict local gate passed.
+
 ## 2026-10-22 — Bind skill feedback to loaded instructions
 
 The coordinator now attaches its execution ID, the exact loaded UTF-8 skill

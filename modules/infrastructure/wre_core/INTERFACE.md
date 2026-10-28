@@ -1,3 +1,29 @@
+## Risk-verification preflight contract — 2026-10-28
+
+`wre_test_differential_runtime.validate_test_impact_policy_binding(request)`
+returns `(differential_requested, rejection_reasons)` without executing commands
+or authenticating authority. It reuses the existing v1 policy schema, scope
+resolver and `required_test_suite_kind` policy function.
+
+Absence and the resident adapter's empty mapping retain ordinary-check
+compatibility. Explicit null/nonmapping policies reject. When a work order is
+bound, its policy cannot be omitted, introduced or substituted downstream.
+Stale dependency, protected authority, release and periodic-audit signals require
+a full-scope plan. An incompatible plan rejects; the verifier never rewrites
+the admitted policy to make it pass.
+
+`execute_independent_test_evidence` validates the entire bounded check list
+before any command: allowed argv, policy, scope, exactly one differential
+pytest request and matching selection. Invalid plans produce no check records
+or command/differential calls. Runtime check failures still prevent differential
+execution. The final slice verifier separately rejects missing, empty or
+malformed differential evidence when the policy requires it.
+
+No schema version changes. One-use capability, exact-source binding,
+self-verification, security/held-out closure and local-only authority rejection
+remain in force. Neither this helper nor serialization grants execution,
+merge or retention authority.
+
 ## Skill-feedback source binding — 2026-10-22
 
 For non-telemetry dispatched outcomes, the coordinator owns `_skill_binding`

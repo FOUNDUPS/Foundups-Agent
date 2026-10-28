@@ -1,3 +1,21 @@
+## 2026-10-28 — Preserve risk-based verification through execution and completion
+
+Reused the existing differential policy, scope resolver, evidence producer and
+slice verifier. Complete preflight now rejects invalid checks before execution;
+declared/bound policies cannot disappear at final verification. Independent
+review found and reproduced four additional stale/protected/release/audit
+escalation gaps; the existing required-suite function now governs preflight too.
+Ordinary absent/empty-policy compatibility and local-only authority rejection
+are preserved. CI gains a separate bounded connected-regression job.
+
+Baseline 44 independent failures, then four escalation failures; corrected
+connected selection 384 pass, with overlapping independent 93-pass review.
+No hosted/merge/native-execution claim is implied by local counts. Details and
+exact commands: [TestModLog](tests/TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+Research and next gates are reconciled into existing roadmap/hybrid owners.
+WSP00/5/6/11/15/22/48/50/62/84/95/97; WSP15 15/P1.
+No paid provider call, worker grant, memory learning or production promotion.
+
 ## 2026-10-22 — Re-review unchanged generated hash metadata
 
 PR #2175 secret scan reported 38 existing manifest metadata findings after the
