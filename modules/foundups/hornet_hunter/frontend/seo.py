@@ -1,6 +1,7 @@
 """Search metadata grounded in the site's visible content."""
 
 LINKEDIN = 'https://www.linkedin.com/in/openstartup/'
+LINKEDIN_COMPANY = 'https://www.linkedin.com/company/hornethunters/'
 LINKEDIN_ICON = '<svg class="linkedin-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><rect width="24" height="24" rx="2" fill="#0a66c2"/><path fill="#fff" d="M5.3 8.7h3.1v10H5.3zm1.55-5a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6M10.3 8.7h3v1.4h.04c.42-.8 1.44-1.65 2.96-1.65 3.17 0 3.75 2.08 3.75 4.79v5.46h-3.1v-4.84c0-1.16-.02-2.65-1.61-2.65-1.62 0-1.87 1.27-1.87 2.57v4.92H10.3z"/></svg>'
 
 TITLES = {
@@ -11,7 +12,7 @@ TITLES = {
 
 def graph(base, path, title, description, image):
  person = {'@type':'Person','@id':base+'/#michael-trout','name':'Michael J. Trout','alternateName':['Mike Trout','UnDaoDu'],'url':base+'/about/','sameAs':[LINKEDIN],'jobTitle':'Hornet filming consultant'}
- org = {'@type':'Organization','@id':base+'/#organization','name':'Hornet Hunter','url':base+'/','founder':{'@id':person['@id']},'sameAs':['https://www.facebook.com/hornethunters/']}
+ org = {'@type':'Organization','@id':base+'/#organization','name':'Hornet Hunter','url':base+'/','founder':{'@id':person['@id']},'sameAs':[LINKEDIN_COMPANY,'https://www.facebook.com/hornethunters/']}
  website = {'@type':'WebSite','@id':base+'/#website','name':'Hornet Hunter','alternateName':'HornetHunter.com','url':base+'/','publisher':{'@id':org['@id']},'inLanguage':'en'}
  page = {'@type':'WebPage','@id':base+path+'#webpage','url':base+path,'name':title,'description':description,'isPartOf':{'@id':website['@id']},'primaryImageOfPage':{'@type':'ImageObject','url':base+image},'inLanguage':'en'}
  nodes = [org,person,website,page]

@@ -1,5 +1,15 @@
 # ModLog
 
+## 2026-10-28 — Public LinkedIn identity and source refresh
+
+Verified hornethunters as the Hornethunter.com company page using its public
+page and owner-supplied launch post. Added discoverable identity documentation,
+kept the post activity ID separate from the unresolved numeric company ID, and
+removed tracking parameters from evidence links. Added the company footer link
+and Organization.sameAs while retaining the personal profile. Source snapshot
+now matches Sites version 16. Local 18-page structural checks and both isolated
+build tests pass. No LinkedIn publication or private data import occurred.
+
 ## 2026-10-28 — Repair PR 2251 canonical test inventory
 
 CI run 40646023390 stopped at the registry check before executing suites. The

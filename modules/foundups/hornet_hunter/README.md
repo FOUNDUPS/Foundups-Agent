@@ -1,6 +1,7 @@
 # Hornet Hunter — public website source handoff
 
 Public site: https://hornethunter.com/  
+LinkedIn company: https://www.linkedin.com/company/hornethunters/  
 Main LinkedIn profile: https://www.linkedin.com/in/openstartup/
 
 This bounded source snapshot brings the Hornet Hunter website work into
@@ -11,7 +12,7 @@ website placement used by `modules/foundups/esingularity`.
 **Authority:** the existing Sites-managed repository remains the live deployment
 source. This directory is a dated, reviewed import, not a second deployment or an
 automatic synchronization service. Source revision:
-`7506868ef3e8f2858a68c871d39343d74b57a0e0` (28 October 2026, version 15).
+`c8d742c5479007fd4d4fb325f44c17b0ce53ccf9` (28 October 2026, version 16).
 Reconcile newer live changes before editing or transferring this snapshot back.
 Do not create another Sites project or change DNS as part of this handoff.
 
@@ -22,6 +23,8 @@ Do not create another Sites project or change DNS as part of this handoff.
 3. [Build and publication contract](INTERFACE.md)
 4. [Roadmap](ROADMAP.md) and [change log](ModLog.md)
 5. [Validation](tests/README.md)
+
+Verified social identity and unresolved numeric company ID: [LinkedIn identity](docs/LINKEDIN_IDENTITY.md).
 
 ## Local build
 

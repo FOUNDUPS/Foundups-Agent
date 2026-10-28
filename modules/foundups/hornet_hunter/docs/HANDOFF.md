@@ -34,11 +34,11 @@
   and links to Silverback's official programme page.
 - Social metadata includes large-image cards, descriptive image metadata and a
   public landscape photo for documentary links. LinkedIn icon points to the
-  main personal profile. Shared photos have intrinsic dimensions.
+  main personal profile, with a separate company link and Organization.sameAs. Shared photos have intrinsic dimensions.
 
 ## Outcomes and limitations
 
-The source revision in README was deployed as version 15. Live documentary title
+The source revision in README was deployed as version 16. Live documentary title
 and LinkedIn icon were verified in the browser. Local checks covered 17 content
 pages, unique titles, one H1, internal links/anchors, JSON-LD, matching CSP hashes
 and absence of public email links. These checks are not evidence of Google
@@ -53,9 +53,9 @@ are not asserted as completed by this handoff.
 1. Verify Search Console access, inspect actual index status and submit sitemap.
 2. Compress the 2–3.4 MB privacy-edited PNGs without losing face blurs; visually
    inspect derivatives and measure mobile performance.
-3. Verify the HornetHunter.com LinkedIn company-page URL/ID and appropriate film
-   industry category. The company ID is unknown. Do not substitute the YouTube
-   channel ID or FoundUps' separate LinkedIn company ID.
+3. Company URL and current industry verified; see [LinkedIn identity](LINKEDIN_IDENTITY.md).
+   Numeric company ID remains unverified. Do not substitute the post activity ID,
+   YouTube ID or FoundUps company ID.
 4. Develop and fact-check the paid manual privately; then implement a genuine
    purchase/delivery flow. Do not advertise a completed certification.
 5. Confirm travel year, capacity, practical family arrangements and booking terms
