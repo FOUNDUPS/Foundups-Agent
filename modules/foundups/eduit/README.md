@@ -1,5 +1,10 @@
 # EDUIT — Education Using Information Technology
 
+## RSI architecture / new-session entrypoint — 2026-10-28
+
+[Storytime RSI system architecture](docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md) is the cross-module continuation map: eSingularity vision → EDUIT mission → Storytime tiles; WSP/WRE/FAM/HoloIndex/Kids Episodes/Mall ownership; current proof versus missing runtime authority. Use existing scaffolding, never a parallel engine. The [five-tile contract](docs/TILE_PRODUCTION_RSI.md) remains the acceptance oracle. First Little Shrew tile calibrates; the next actual tile must demonstrate retained improvement before autonomous RSI is claimed.
+
+
 ## Five-tile RSI production contract — 2026-10-28
 
 Read [TILE_PRODUCTION_RSI](docs/TILE_PRODUCTION_RSI.md) before the next tile or
