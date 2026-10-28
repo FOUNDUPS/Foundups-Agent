@@ -1,5 +1,10 @@
 # EDUIT execution roadmap
 
+## RSI integration gate / next-session execution — 2026-10-28
+
+Read [Storytime RSI system architecture](docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md) and [five-tile contract](docs/TILE_PRODUCTION_RSI.md). Preserve existing viewer repairs as independent UI priorities. RSI critical path: verify current WRE/FAM admission and authority → bind one real Little Shrew composite ticket with independent verifier and budget → inspect actual film/game output → retain a bounded correction in existing WRE memory → demonstrate transfer on the next *different* tile. No second orchestrator, memory, scheduler or auto-promotion. Current planning/checker is implemented; admitted end-to-end execution and transfer remain unproved.
+
+
 ## Five-tile RSI production contract — 2026-10-28
 
 Read [TILE_PRODUCTION_RSI](docs/TILE_PRODUCTION_RSI.md) before the next tile or
