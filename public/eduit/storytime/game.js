@@ -39,6 +39,11 @@ function draw(){
  stage.innerHTML=scene({...world,cue,actors:poses,showWords:true});
  const svg=stage.querySelector('svg');const ns='http://www.w3.org/2000/svg';
  const score=document.createElementNS(ns,'text');score.setAttribute('x','35');score.setAttribute('y','510');score.setAttribute('fill','#FFF4D9');score.setAttribute('font-size','60');score.setAttribute('font-family','sans-serif');score.setAttribute('font-weight','bold');score.setAttribute('aria-label',`${state.score} points`);score.textContent=`★ ${state.score}`;svg.append(score);
+ // Staggered sleeping cues and brief resistance bursts; keep tap-progress dots intact.
+ for(const [i,a] of poses.filter(a=>a.status==='sleeping').entries()){
+  const pulse=(t*.45+i*.31)%2.8;
+  if(pulse<1.25||a.taps>0){const z=document.createElementNS(ns,'text');z.setAttribute('x',String(a.x+55*a.scale+((i%2)*14)));z.setAttribute('y',String(a.y-22-12*Math.min(pulse,1)));z.setAttribute('font-size',String(a.taps>0?32:22));z.setAttribute('font-weight','bold');z.setAttribute('fill','#FFF4D9');z.setAttribute('opacity',String(a.taps>0?.9:Math.max(.2,1-pulse/1.3)));z.textContent=a.taps>0?'Zzz':'Z';svg.append(z);}
+ }
  for(const a of poses.filter(a=>a.status==='sleeping'&&a.taps>0)){const text=document.createElementNS(ns,'text');text.setAttribute('x',a.x+60*a.scale);text.setAttribute('y',a.y-12);text.setAttribute('font-size','42');text.setAttribute('fill','#173F43');text.textContent='●'.repeat(a.taps)+'○'.repeat(a.wakeTaps-a.taps);svg.append(text);}
  const award=state.awards.at(-1);if(award&&t-award.at<2){const pop=document.createElementNS(ns,'text');pop.setAttribute('x','820');pop.setAttribute('y','215');pop.setAttribute('text-anchor','middle');pop.setAttribute('font-size','60');pop.setAttribute('font-weight','bold');pop.setAttribute('fill','#FFF4D9');pop.textContent=`+${award.points}`;svg.append(pop);}
  const nextKey=state.phase+state.selected+state.actors.map(a=>a.status).join();
