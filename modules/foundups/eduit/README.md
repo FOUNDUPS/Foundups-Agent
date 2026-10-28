@@ -1,5 +1,10 @@
 # EDUIT — Education Using Information Technology
 
+## Adaptive learning content and formative assessment — 2026-10-28
+
+[Adaptive learning-content contract](docs/ADAPTIVE_LEARNING_CONTENT.md) defines EDUIT's outcome/experience/production-RSI vision, reusable three-object content packs, post-game picture matching, separate learning points and off-session RSI. This is specified, not shipped. Reuse the existing game and review owners; do not collect child play traces for WRE learning.
+
+
 ## RSI architecture / new-session entrypoint — 2026-10-28
 
 [Storytime RSI system architecture](docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md) is the cross-module continuation map: eSingularity vision → EDUIT mission → Storytime tiles; WSP/WRE/FAM/HoloIndex/Kids Episodes/Mall ownership; current proof versus missing runtime authority. Use existing scaffolding, never a parallel engine. The [five-tile contract](docs/TILE_PRODUCTION_RSI.md) remains the acceptance oracle. First Little Shrew tile calibrates; the next actual tile must demonstrate retained improvement before autonomous RSI is claimed.
