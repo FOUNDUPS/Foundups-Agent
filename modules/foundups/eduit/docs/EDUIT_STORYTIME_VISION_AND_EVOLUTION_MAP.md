@@ -8,24 +8,28 @@ Date: 2026-10-28. Status: proposed product specification, not shipped.
 
 EDUIT is the FoundUp. Storytime is an experience/catalog within EDUIT. Evolution is a Storytime narrative learning path. Episodes/tiles are content, not FoundUps. Each tile has **WATCH (video demonstrating story/how to play), PLAY (interactive practice), VERIFY (formative test of that round's actual learning objects)**.
 
-## Evolution roadmap pop-up: proposed mind-map contract
-The map is a *learning progression*, not a literal family tree from an identifiable fossil shrew to modern humans. The Little Shrew is a fictional mammal-like protagonist; circa 150 million years ago is a narrative setting, not proof that a particular shrew species is our direct ancestor. Three opening shrew characters/variants are game branches, not three verified evolutionary lineages.
+## Evolution roadmap pop-up: scientific taxa and fictional characters
+The map must use recognized fossil taxa or clades, approximate ages and evidence confidence; each game's friendly character nickname is a separate presentation field. **Early mammals were not simply marsupials**: the marsupial/placental divergence is a later branching history. Avoid claiming a particular fossil species was a direct human ancestor.
 
+Provisional educational progression (not a literal unbroken chain of named direct ancestors):
 ```mermaid
 flowchart TD
- A["Early mammal-like world • ~150 Ma (fictional Little Shrew)"]
- A --> S1["Shrew path A • rescue / sounds"]
- A --> S2["Shrew path B • counting / words"]
- A --> S3["Shrew path C • language / patterns"]
- S1 --> M["Shared learning path • early mammals"]
- S2 --> M
- S3 --> M
- M --> P["Primates"]
- P --> H["Hominins"]
- H --> U["Humans"]
+ A["Early mammaliaforms • e.g. Morganucodon (~205–195 Ma)"]
+ A --> B["Jurassic mammals • e.g. Juramaia (~160 Ma; debated placement/date)"]
+ B --> C["Theria / eutherian lineages"]
+ C --> D["Placental mammals • Eutheria/Placentalia distinction"]
+ C --> X["Metatheria → marsupials (side branch)"]
+ D --> E["Primates"]
+ E --> F["Anthropoids"]
+ F --> G["Apes / Hominoidea"]
+ G --> H["Hominins"]
+ H --> I["Genus Homo"]
+ I --> J["Homo sapiens"]
 ```
 
-The pop-up shows a clearly labeled **YOU ARE HERE** marker on the opening Little Shrew tile, locked/unbuilt later nodes as *planned*, and navigation only to actually released tiles. Each step must distinguish fictional narrative from reviewed evolutionary science; the path is a simplified learning sequence and cannot imply all modern mammals descended from shrews or that evolution has a predetermined human endpoint. Scientific reviewers must approve chronological nodes before release.
+This is a **clade-based learning map**, not evidence that Morganucodon or Juramaia were direct ancestors of humans. Fossil dates and taxonomic assignments need paleontology review before publishing. The current ~150 Ma Little Shrew episode is a **fictional Jurassic mammal-like character**; mark **YOU ARE HERE** on that episode at the Jurassic-mammal stage, not on a falsely identified fossil species. If the story introduces three shrew-like character types, give them distinct nicknames and learning roles; do not represent them as three scientific evolutionary branches without fossil evidence.
+
+Suggested data fields per node: `taxon_scientific_name`, `taxon_rank`, `approximate_age_range_ma`, `source_citations`, `evidence_status`, `fictional_character_nickname`, `episode_id`, `release_status`, `parent_node_ids`, `you_are_here`. Only released episodes navigate; future nodes show Planned. Human evolution is one branch of the mammal tree, not evolution's predetermined endpoint.
 
 ## Modular lesson object examples
 - **Sound/word:** THUMP, SNIFF, CRUNCH, SQUISH; three reviewed objects per play, age-appropriate, non-graphic.
