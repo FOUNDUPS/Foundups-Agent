@@ -76,3 +76,11 @@ test registry. Regenerated using the existing owner: one new unit-test entry,
 1774→1775 total, quarantine count273 unchanged; --check now passes locally.
 This integration failure remains recorded and the review procedure now requires
 staging/regenerating/checking the registry when adding Python tests.
+
+## 2026-10-28 — Narration timing and adapter lifecycle
+26 Node tests pass. Added first-play/resume, seek/replay, stale callback,
+muted/unavailable fade and authored THUMP cue tests. Adapter fixture covers
+buffering/seek cancellation and preserving user volume including zero. Director
+fixture handles first-visit intro and checks fullscreen origin, caption/controls
+and exit nonoverlap. Browser voice unavailable in cloud; no acoustic acceptance.
+See ../docs/NARRATION_TIMING_REVIEW.md.

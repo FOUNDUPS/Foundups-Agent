@@ -1,3 +1,4 @@
+import {mountNarration} from './story-narration.mjs';
 import {bindPanelGestures} from '../storytime/panel-gestures.mjs';
 import {locales,normalizeLocale} from '../storytime/learning-events.mjs';
 const $=id=>document.getElementById(id),game=$('game'),ink=$('ink');
@@ -16,7 +17,7 @@ function show(){$('game-panel').classList.add('marking');$('feedback-actions').h
  doc.querySelectorAll('*').forEach(n=>[...n.attributes].forEach(a=>{if(/^on/i.test(a.name)||(/href/i.test(a.name)&&!/^#[a-zA-Z][\w-]*$/.test(a.value))||/url\(/i.test(a.value))n.removeAttribute(a.name);}));
  $('frozen').replaceChildren(document.importNode(doc.documentElement,true));ink.hidden=false;$('tools').hidden=false;paint();}
 function play(){$('game-panel').classList.remove('marking');$('feedback-actions').hidden=true;$('video').pause();ink.hidden=true;$('frozen').hidden=true;$('tools').hidden=true;game.hidden=false;drawing=null;activePointer=null;api()?.play();}
-$('play').onclick=()=>{if(api()?.status().phase==='playing'&&!api()?.status().paused)api()?.pause();else play();};$('close').onclick=$('resume-game').onclick=play;
+$('play').onclick=()=>{if(['playing','celebrating'].includes(api()?.status().phase)&&!api()?.status().paused)api()?.pause();else play();};$('close').onclick=$('resume-game').onclick=play;
 $('feedback').onclick=()=>{if(childLocked)return;options.hidden=true;const current=api()?.freeze();if(!current)return;$('video').pause();if(!capture||capture.clock!==current.clock||capture.locale!==current.locale||JSON.stringify(capture.state)!==JSON.stringify(current.state)){if(capture)saveDraft();capture=current;strokes=[];history=[];$('note').value='';}show();};
 const point=e=>{const r=ink.getBoundingClientRect();return [Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))];};
 ink.onpointerdown=e=>{pointers.add(e.pointerId);if(pointers.size>1){if(drawing){strokes.pop();history.pop();}drawing=null;activePointer=null;inkBlocked=true;paint();return;}if(inkBlocked||activePointer!==null)return;activePointer=e.pointerId;e.preventDefault();ink.setPointerCapture(e.pointerId);rememberInk();drawing=[point(e)];strokes.push(drawing);paint();};ink.onpointermove=e=>{if(drawing&&e.pointerId===activePointer){drawing.push(point(e));paint();}};ink.onpointerup=ink.onpointercancel=ink.onlostpointercapture=e=>{pointers.delete(e.pointerId);if(e.pointerId===activePointer){drawing=null;activePointer=null;}if(!pointers.size)inkBlocked=false;};
@@ -56,7 +57,7 @@ bindPanelGestures(gamePanel,{expand:()=>expand(gamePanel,true),collapse:()=>expa
 
 let language='en';try{language=normalizeLocale(localStorage.getItem('eduit.game-language'));}catch{}
 const languageBar=$('languages');
-function chooseLanguage(value){if(childLocked)return;language=normalizeLocale(value);api()?.pause();api()?.setLocale(language);try{localStorage.setItem('eduit.game-language',language);}catch{}languageBar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===language)));}
+function chooseLanguage(value){if(childLocked)return;video.pause();language=normalizeLocale(value);api()?.pause();api()?.setLocale(language);try{localStorage.setItem('eduit.game-language',language);}catch{}languageBar.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.locale===language)));}
 for(const [id,l] of Object.entries(locales)){const button=document.createElement('button');button.dataset.locale=id;button.lang=id;button.setAttribute('aria-label',l.label);const flag=document.createElement('img');flag.src=new URL('flags/'+({en:'gb',ja:'jp',pt:'pt',es:'es'}[id])+'.svg',import.meta.url).href;flag.alt='';flag.width=36;flag.height=24;button.title=l.label;button.append(flag);button.onclick=()=>chooseLanguage(id);languageBar.append(button);}
 game.addEventListener('load',()=>chooseLanguage(language));chooseLanguage(language);
 
@@ -87,7 +88,7 @@ let hold=null;const cancelHold=()=>{clearTimeout(hold);hold=null;};
 function beginHold(e){if(e.type==='keydown'&&![' ','Enter'].includes(e.key))return;if(hold)return;e.preventDefault();hold=setTimeout(()=>{cancelHold();if(confirm('Unlock grown-up controls?'))lock(false);},1200);}
 unlock.onpointerdown=beginHold;unlock.onkeydown=beginHold;unlock.onpointerup=unlock.onpointercancel=unlock.onpointerleave=unlock.onkeyup=unlock.onblur=cancelHold;
 window.addEventListener('keydown',e=>{if(e.key==='Escape'){options.hidden=true;}});
-let lastPlay='';setInterval(()=>{const state=api()?.status(),running=state?.phase==='playing'&&!state.paused;const label=running?'Pause game':state?.phase==='over'?'Replay game':'Play game';if(label!==lastPlay){$('play').innerHTML=icon(running?'pause':'play');$('play').setAttribute('aria-label',label);lastPlay=label;}$('video-play').innerHTML=icon(video.paused?'play':'pause');$('video-play').setAttribute('aria-label',video.paused?'Play video':'Pause video');},200);
+let lastPlay='';setInterval(()=>{const state=api()?.status(),running=['playing','celebrating'].includes(state?.phase)&&!state.paused;const label=running?'Pause game':state?.phase==='over'?'Replay game':'Play game';if(label!==lastPlay){$('play').innerHTML=icon(running?'pause':'play');$('play').setAttribute('aria-label',label);lastPlay=label;}$('video-play').innerHTML=icon(video.paused?'play':'pause');$('video-play').setAttribute('aria-label',video.paused?'Play video':'Pause video');},200);
 document.addEventListener('visibilitychange',()=>{if(document.hidden){video.pause();api()?.pause();}});
 const picture=document.createElement('dialog');picture.id='picture';picture.setAttribute('aria-label','Your marked picture');document.body.append(picture);
 let pictureURL=null;
@@ -98,3 +99,23 @@ const storyInfo=$('story-info');let infoReturn=null;
 function openInfo(section){if(childLocked)return;video.pause();api()?.pause();options.hidden=true;infoReturn=document.activeElement;$('about-content').hidden=section!=='about';$('how-content').hidden=section!=='how';storyInfo.setAttribute('aria-label',section==='about'?'About EDUIT':'How to play');storyInfo.removeAttribute('aria-labelledby');storyInfo.showModal();$('info-close').focus();}
 $('about-open').onclick=()=>openInfo('about');$('how-open').onclick=()=>openInfo('how');$('info-close').onclick=()=>storyInfo.close();
 storyInfo.addEventListener('close',()=>infoReturn?.focus());
+
+// One-time illustrated pre-video story. Does not auto-play media or collect child data.
+const introDialog=$('story-intro'),introSeenKey='eduit.storytime.intro-seen.v1';
+let introReturn=null,introClosing=false;
+function openStoryIntro(){if(childLocked||introDialog.open)return;video.pause();api()?.pause();introReturn=document.activeElement;introDialog.classList.remove('intro-collapsing');introDialog.showModal();$('intro-close').focus();}
+function finishStoryIntro(){if(introClosing||!introDialog.open)return;introClosing=true;try{localStorage.setItem(introSeenKey,'1');}catch{}const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;if(!reduced)introDialog.classList.add('intro-collapsing');const close=()=>{introDialog.close();introDialog.classList.remove('intro-collapsing');introClosing=false;$('video').focus({preventScroll:true});$('video-panel').scrollIntoView({block:'nearest',behavior:'instant'});};if(reduced)close();else {introDialog.addEventListener('animationend',close,{once:true});setTimeout(()=>{if(introClosing)close();},350);}}
+$('intro-skip').addEventListener('click',finishStoryIntro);
+$('intro-close').addEventListener('click',finishStoryIntro);
+$('intro-replay').addEventListener('click',openStoryIntro);
+introDialog.addEventListener('cancel',event=>{event.preventDefault();finishStoryIntro();});
+introDialog.addEventListener('close',()=>{if(!introClosing)introReturn?.focus();});
+let introSeen=false;try{introSeen=localStorage.getItem(introSeenKey)==='1';}catch{}
+if(!introSeen)queueMicrotask(openStoryIntro);
+
+
+// Narration is an English overlay over the retained film, not regenerated media.
+const narration=mountNarration(video,$('story-caption'));
+window.storytimeNarration=narration;
+const voiceOption=button('story-voice','English story voice','more',options,()=>{const enabled=voiceOption.getAttribute('aria-pressed')!=='true';voiceOption.setAttribute('aria-pressed',String(enabled));voiceOption.textContent=enabled?'English story voice: on':'English story voice: off';narration.setEnabled(enabled);});
+voiceOption.setAttribute('aria-pressed','true');voiceOption.textContent='English story voice: on';
