@@ -1,5 +1,10 @@
 # EDUIT execution roadmap
 
+## Adaptive learning content and formative assessment — 2026-10-28
+
+[Adaptive learning-content contract](docs/ADAPTIVE_LEARNING_CONTENT.md) defines EDUIT's outcome/experience/production-RSI vision, reusable three-object content packs, post-game picture matching, separate learning points and off-session RSI. This is specified, not shipped. Reuse the existing game and review owners; do not collect child play traces for WRE learning.
+
+
 ## CI acceptance rule — 2026-10-28
 
 Every Storytime/EDUIT RSI iteration follows the [mandatory post-merge CI acceptance gate](docs/TILE_PRODUCTION_RSI.md#mandatory-post-merge-ci-acceptance-gate-2026-10-28-correction). Squash merge is not completion: verify checks against the resulting main SHA, inspect failures, and retain corrections before claiming acceptance. Browser/audio/device and deployment gates remain separate.
