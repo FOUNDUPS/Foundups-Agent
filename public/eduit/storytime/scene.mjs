@@ -30,7 +30,7 @@ export function scene({t=0,awake=false,progress=0,impact=0,lift=0,shake=false,sh
  const dirt=dust&&!crushed?Array.from({length:7},(_,i)=>{const fall=(t*.4+i*.17)%1;return `<circle data-event="falling-dirt" cx="${210+i*59}" cy="${110+fall*110+330*c}" r="${2+i%3}" fill="${EARTH}" opacity="${.8*(1-fall)}"/>`;}).join(''):'';
  const roof=c>0?`<path data-event="falling-roof" d="M0 0 H740 V${100+330*c} H0 Z" fill="${EARTH}"/>`:'';
  const foot='M-40 -180 H690 V75 Q680 110 640 115 L580 115 Q560 145 510 145 H430 Q405 178 350 178 H220 Q190 157 145 145 L55 120 Q-10 100 -40 60 Z';
- const imprint=crushed?`<path data-event="footprint" d="${foot}" transform="translate(0,110)" fill="#C9E4EC"/>`:'';
+ const imprint=(crushed||(k>=1&&l>.65))?`<path data-event="footprint" d="${foot}" transform="translate(0,110)" fill="#C9E4EC"/>`:'';
  const dinosaur=k>0?`<g data-event="foot" transform="translate(0,${-190+300*k-440*l})"><path d="${foot}" fill="#71846D" stroke="#4C5C49" stroke-width="7"/><path d="M580 115 L640 115 Q628 97 604 96 Z M430 145 H510 Q490 125 462 128 Z M220 178 H300 Q280 158 250 158 Z" fill="#E9DEBF" stroke="#4C5C49" stroke-width="3"/></g>`:'';
  const label=cue?.word||(['THUMP!','CRACK!','SNIFF!','SQUISH!'].includes(soundWord)?soundWord:'');
  const fontSize=cue?.size||58, halfWidth=Math.max(70,[...label].reduce((w,ch)=>w+(/[\u3000-\u9fff]/u.test(ch)?1:.72),0)*fontSize/2);

@@ -14,10 +14,16 @@ export const gameEvents=[
 ];
 export function gameWorld(state,poses){
  const t=worldTime(state),won=state.outcome==='rescued';
+ const victoryAge=won?Math.max(0,state.elapsed-state.victoryAt):0;
+ if(won){
+  const impact=clamp(victoryAge/.45),lift=clamp((victoryAge-1.1)/.85);
+  const cue=victoryAge>=.35&&victoryAge<1.15?{id:'victory-thump',kind:'thump',word:'THUMP!',start:state.victoryAt+.35,end:state.victoryAt+1.15,x:450,y:230,size:112,shakeSize:85,sourceTime:9.6,sourceDuration:.65}:null;
+  return {t,cue,actors:poses,warning:1,reaction:1,collapse:0,impact,lift,turn:1,shake:!!cue,rootSway:cue?3:0,progressiveCracks:true,dust:false};
+ }
  let cue=gameEvents.find(e=>t>=e.start&&t<e.end);
  const sniffActor=poses.find(a=>['awake','wandering'].includes(a.status));
  if(!cue&&sniffActor){const offset=state.elapsed-sniffActor.awakeAt,index=Math.floor(offset/1.8);if(offset%1.8<.8)cue={id:`sniff-${sniffActor.id}-${sniffActor.awakeAt}-${index}`,kind:'sniff',start:t-offset%1.8,end:t-offset%1.8+.8,size:58,actorId:sniffActor.id,sourceTime:3.1,sourceDuration:.55,x:sniffActor.x>650?sniffActor.x-130:sniffActor.x+180,y:sniffActor.scale<.6?sniffActor.y+28:sniffActor.y-20};}
  if(cue)cue={...cue,word:cue.kind.toUpperCase()};
- const collapse=won?0:clamp((t-DEADLINE)/7);
+ const collapse=clamp((t-DEADLINE)/7);
  return {t,cue:won?null:cue,actors:poses,warning:clamp((t-22)/24),reaction:clamp((t-44)/4),collapse,impact:collapse,lift:clamp((t-56)/3),turn:won?1:clamp((t-58)/2),shake:!won&&cue?.kind==='thump',rootSway:won?0:Math.sin(t*9)*(.2+clamp((t-12)/30))*(cue?.kind==='thump'?3:.3),progressiveCracks:true,dust:!won&&t>23&&t<55};
 }

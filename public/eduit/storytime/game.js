@@ -8,10 +8,19 @@ const $=id=>document.getElementById(id),stage=$('scene');
 let panelGestures;
 let state=initial(),last=0,paused=false,hitKey="";
 const soundtrack=new Audio("assets/little-shrew.mp4");soundtrack.preload="auto";
-let lastCue=null,audioEnabled=false;
+let lastCue=null,audioEnabled=false,ctx=null,playedVictory=false;
+function synthImpact(){
+ try{ctx ||= new (window.AudioContext||window.webkitAudioContext)();ctx.resume();const now=ctx.currentTime;
+ const osc=ctx.createOscillator(),gain=ctx.createGain();osc.type='sine';osc.frequency.setValueAtTime(85,now);osc.frequency.exponentialRampToValueAtTime(34,now+.65);
+ gain.gain.setValueAtTime(.001,now);gain.gain.exponentialRampToValueAtTime(.32,now+.025);gain.gain.exponentialRampToValueAtTime(.001,now+.8);
+ osc.connect(gain).connect(ctx.destination);osc.start(now);osc.stop(now+.82);
+ }catch(e){console.warn('Impact audio unavailable',e);}
+}
 function syncAudio(){if(paused||state.phase!=='playing')soundtrack.pause();}
 function cueAudio(cue){
- if(!audioEnabled||paused||state.phase!=='playing'){soundtrack.pause();return;}
+ if(!audioEnabled||paused||!['playing','celebrating'].includes(state.phase)){soundtrack.pause();return;}
+ if(cue?.id==='victory-thump'&&!playedVictory){playedVictory=true;synthImpact();}
+ if(cue?.kind==='thump')soundtrack.volume=Math.min(1,.25+Math.min(state.elapsed/48,1)*.65);
  if(cue?.id!==lastCue){soundtrack.pause();lastCue=cue?.id||null;if(cue){soundtrack.currentTime=cue.sourceTime;soundtrack.play().catch(()=>{});}}
  if(cue&&soundtrack.currentTime>=cue.sourceTime+cue.sourceDuration)soundtrack.pause();
 }
@@ -19,7 +28,7 @@ function enableAudio(){audioEnabled=true;soundtrack.play().then(()=>{if(!lastCue
 const embedded=new URLSearchParams(location.search).get('embed')==='1';if(embedded)document.body.classList.add('embedded');
 const hits=document.createElement('div');hits.className='rescue-targets';stage.after(hits);
 for(const id of ['wake','root'])$(id).remove();
-function act(e){if(panelGestures?.isPinching())return;if(e==='start'||e==='retry'){paused=false;lastCue=null;enableAudio();}else if(paused)return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
+function act(e){if(panelGestures?.isPinching())return;if(e==='start'||e==='retry'){paused=false;lastCue=null;playedVictory=false;enableAudio();}else if(paused)return;state=advance(state,e);if(e==='start'||e==='retry')syncAudio();draw();}
 $('start').onclick=()=>act('start');$('retry').onclick=()=>act('retry');$('pause').onclick=()=>{paused=!paused;syncAudio();};
 function draw(){
  const t=state.elapsed,poses=state.actors.map(a=>actorPose(a,t));
@@ -41,12 +50,12 @@ function draw(){
  }
  }
  const over=state.phase==='over',saved=state.actors.filter(a=>a.status==='safe').length;
- $('message').textContent=over?(saved?`${saved} / 5 saved · ${state.score} points`:locales[locale].over):'';
+ $('message').textContent=over?(saved===5?'Everyone is safe!':saved?`${saved} / 5 saved · ${state.score} points`:locales[locale].over):'';
  $('start').hidden=state.phase!=='ready';$('retry').hidden=!over;$('pause').hidden=state.phase!=='playing';$('time').textContent='';
  let end=$('ending');if(!end){end=document.createElement('div');end.id='ending';stage.parentElement.append(end);}
- end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved?`${saved} / 5 ★ ${state.score}`:locales[locale].over;text.setAttribute('aria-label',saved?`${saved} of 5 shrews saved, ${state.score} points`:locales[locale].over);const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label',locales[locale].again);button.onclick=()=>act('retry');end.append(text,button);}
+ end.hidden=!over;if(over){end.replaceChildren();const text=document.createElement('span');text.textContent=saved===5?'Everyone is safe!':saved?`${saved} / 5 ★ ${state.score}`:locales[locale].over;text.setAttribute('aria-label',saved?`${saved} of 5 shrews saved, ${state.score} points`:locales[locale].over);const button=document.createElement('button');button.textContent='↻';button.setAttribute('aria-label',locales[locale].again);button.onclick=()=>act('retry');end.append(text,button);}
 }
-function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&state.phase==='playing'){state=advance(state,'tick',dt);draw();}requestAnimationFrame(frame);}
+function frame(now){const dt=last?Math.min((now-last)/1000,.1):0;last=now;if(!paused&&!document.hidden&&['playing','celebrating'].includes(state.phase)){state=advance(state,'tick',dt);draw();}requestAnimationFrame(frame);}
 window.storytimeReview={status(){return {paused,phase:state.phase,clock:state.elapsed,score:state.score,practice:state.practice};},reset(){lastCue=null;state=advance(state,'retry');paused=true;soundtrack.pause();draw();},setPractice(value){state=initial({practice:!!value});lastCue=null;paused=true;soundtrack.pause();draw();},setLocale(value){locale=normalizeLocale(value);document.documentElement.lang=locale;draw();return locale;},freeze(){paused=true;soundtrack.pause();return {svg:stage.innerHTML,phase:state.phase,elapsed:state.elapsed,clock:state.elapsed,state:structuredClone(state),locale};},play(){paused=false;lastCue=null;enableAudio();if(['ready','over'].includes(state.phase))act('start');syncAudio();},pause(){paused=true;soundtrack.pause();}};
 // Reuse the Mall gesture owner inside the iframe; only same-origin parent can react.
 panelGestures=bindPanelGestures(stage.parentElement,{expand:()=>parent.postMessage({type:'storytime.fullscreen',expanded:true},location.origin),collapse:()=>parent.postMessage({type:'storytime.fullscreen',expanded:false},location.origin)});
