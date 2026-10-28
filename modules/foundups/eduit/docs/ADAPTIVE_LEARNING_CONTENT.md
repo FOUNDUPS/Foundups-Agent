@@ -8,6 +8,14 @@ Date: 2026-10-28. Status: VISION + SPECIFIED; not a shipped assessment or autono
 
 The Tool + The Content + The Experience is EDUIT's historical framing; the three dimensions above describe the operating FoundUp. EDUIT is one FoundUp; Storytime is a collection, and tiles/learning objects are content, not new FoundUps.
 
+## Canonical Storytime tile contract — three required components
+A **tile is a complete learning cycle**, not merely a video/game pair:
+1. **WATCH — instructional video:** introduces the story, learning objective, cues and how to play. Its version and content must match the game.
+2. **PLAY — interactive game:** lets the learner encounter and practice up to three reviewed learning objects per round; replay may load a different compatible approved pack.
+3. **VERIFY — formative assessment:** after gameplay, three accessible, untimed picture/sound matching questions verify recognition of the round's actual objects, with feedback and separate learning points. This is not a high-stakes exam; errors never block replay.
+
+A tile is only educationally complete when all three components are present, linked by tile/content revision and tested together. Existing video + game prototypes remain incomplete tiles until VERIFY ships. This three-part tile contract is distinct from the FoundUp's three operating dimensions above. Update all older "video + game" definitions, tile schemas, planners, Skillz, roadmap and acceptance criteria to reference WATCH → PLAY → VERIFY; do not mark the third component implemented until runtime evidence exists.
+
 ## Fundamental separation
 **Stable playable mechanic != fixed lesson.** The same reviewed game can load a different approved three-object lesson on replay, without regenerating the game/video code. Gameplay events and lesson object IDs are mapped through a versioned content pack. The child-facing game cannot call an unbounded model or publish raw generated learning objects.
 
