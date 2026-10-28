@@ -11,7 +11,7 @@ export function initial({practice=false,round=1}={}){const shift=(round-1)%3;ret
 export const rescuePoints=(elapsed,practice=false)=>10+(practice?0:Math.max(0,Math.floor(10*(1-elapsed/DEADLINE))));
 export const worldTime=s=>s.practice?Math.min(PRACTICE_HOLD,s.elapsed):s.elapsed;
 export function advance(state,event,dt=0){
- if(event==='start'||event==='retry')return {...initial({practice:state.practice,round:event==='retry'?Math.min(3,(state.round||1)+1):state.round||1}),phase:'playing'};
+ if(event==='start'||event==='retry')return {...initial({practice:state.practice,round:event==='retry'?(state.outcome==='rescued'?(state.round||1)%3+1:state.round||1):state.round||1}),phase:'playing'};
  if(!['playing','celebrating'].includes(state.phase))return state;
  const s={...state,actors:state.actors.map(a=>({...a})),awards:[...state.awards]};
  if(event==='tick'){
