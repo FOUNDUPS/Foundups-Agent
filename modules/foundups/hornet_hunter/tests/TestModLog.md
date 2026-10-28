@@ -1,5 +1,12 @@
 # TestModLog
 
+## 2026-10-28 — Registry integration repair
+
+- Reproduced the stale registry at PR head f9aa7bf.
+- Canonical regeneration adds only this module test file and increments total.
+- Both public build unittest cases pass in isolated temporary directories.
+- Exact-head hosted CI remains the acceptance gate after publication.
+
 ## 2026-10-28 — Public source import
 
 - Two unittest cases pass: sanitized media contracts and isolated public/private

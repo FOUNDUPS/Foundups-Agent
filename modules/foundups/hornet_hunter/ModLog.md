@@ -1,5 +1,16 @@
 # ModLog
 
+## 2026-10-28 — Repair PR 2251 canonical test inventory
+
+CI run 40646023390 stopped at the registry check before executing suites. The
+source import added test_public_build.py but omitted its generated registry row.
+Regenerated through the existing wre_core owner: one Hornet Hunter entry and
+total 1775 -> 1776; all 273 quarantine entries remain unchanged. Added the
+stage/regenerate/check preflight to the module test handoff. No classification,
+security exception or website deployment policy changed. Bounded source reads
+and deterministic validation were used; no HoloIndex/Qwen/Gemma runtime or
+bootstrap compliance is claimed.
+
 ## 2026-10-28 — Sanitized website source handoff
 
 012 requested continuity of the Hornet Hunter work inside Foundups-Agent without
