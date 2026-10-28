@@ -1,4 +1,8 @@
 # EDUIT interfaces
+## EDUIT vision / Storytime Evolution map — 2026-10-28
+
+[EDUIT Pain → Solution → Outcome and Storytime Evolution progression](docs/EDUIT_STORYTIME_VISION_AND_EVOLUTION_MAP.md) is the current specification for the three-question FoundUp vision, Storytime's place inside EDUIT, modular counting/word/language objects, replay, optional parent-controlled memory, About/How links and a proposed accessible Roadmap mind-map modal. All new runtime behavior remains unimplemented until independently verified. A complete tile is WATCH → PLAY → VERIFY, superseding older video + game descriptions.
+
 
 ## Adaptive learning content and formative assessment — 2026-10-28
 
