@@ -6,6 +6,8 @@ import ast
 import json
 from pathlib import Path
 
+import pytest
+
 from modules.communication.moltbot_bridge.src.reddog_work_authority_digest import (
     canonical_work_authority_digest,
 )
@@ -476,3 +478,72 @@ def test_ast_boundary_no_execution_publish_or_memory_write_surface() -> None:
 
     assert imports.isdisjoint(forbidden_imports)
     assert calls.isdisjoint(forbidden_calls)
+
+
+# These are synthetic authority fixtures, not native worker admission receipts.
+_OMITTED = object()
+
+
+def _valid_test_impact_policy() -> dict:
+    return {
+        "schema_version": "wre_test_impact_policy.v1",
+        "impact_class": "SYSTEMIC", "selection_args": [".", "-q"],
+        "timeout_s": 60, "dependency_evidence_stale": False,
+        "protected_authority_surface": False, "release_candidate": False,
+        "periodic_health_audit": False, "security_closure_required": False,
+        "held_out_closure_required": False,
+        "omitted_scope_rationale": "full repository health is separately scheduled",
+    }
+
+
+@pytest.mark.parametrize("policy_owner", ["request", "bound_work_order"])
+@pytest.mark.parametrize("differential", [_OMITTED, None, {}, []],
+                         ids=["omitted", "null", "empty", "wrong-type"])
+def test_declared_differential_cannot_downgrade_to_ordinary_checks(
+    policy_owner: str, differential: object,
+) -> None:
+    req = valid_request()
+    policy = _valid_test_impact_policy()
+    if policy_owner == "request":
+        req["test_impact_policy"] = policy
+    else:
+        req["bound_work_order"] = {"slice_verifier_plan": {"test_impact_policy": policy}}
+    if differential is not _OMITTED:
+        req["test_evidence"]["differential_evidence"] = differential
+    assert_reject(req, verifier.FAIL_TEST_EVIDENCE)
+
+
+@pytest.mark.parametrize("policy_owner", ["request", "bound_work_order"])
+@pytest.mark.parametrize("policy", [None, False, True, [], ["malformed"], "malformed", 7])
+def test_malformed_policy_cannot_disable_final_differential_requirement(
+    policy_owner: str, policy: object,
+) -> None:
+    req = valid_request()
+    if policy_owner == "request":
+        req["test_impact_policy"] = policy
+    else:
+        req["bound_work_order"] = {"slice_verifier_plan": {"test_impact_policy": policy}}
+    assert_reject(req, verifier.FAIL_TEST_EVIDENCE)
+
+
+def test_disagreeing_bound_policy_cannot_fall_back_to_ordinary_checks() -> None:
+    req = valid_request()
+    req["test_impact_policy"] = {}
+    req["bound_work_order"] = {
+        "slice_verifier_plan": {
+            "test_impact_policy": _valid_test_impact_policy(),
+        },
+    }
+    assert_reject(req, verifier.FAIL_TEST_EVIDENCE)
+
+
+@pytest.mark.parametrize("policy", [_OMITTED, {}], ids=["absent", "adapter-empty"])
+def test_ordinary_checks_keep_legacy_absent_and_empty_policy_compatibility(
+    policy: object,
+) -> None:
+    req = valid_request()
+    if policy is not _OMITTED:
+        req["test_impact_policy"] = policy
+        req["bound_work_order"] = {"slice_verifier_plan": {"test_impact_policy": policy}}
+        req["test_evidence"]["differential_evidence"] = {}
+    assert _verify(req).accepted is True

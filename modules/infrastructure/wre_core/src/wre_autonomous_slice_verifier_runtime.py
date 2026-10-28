@@ -16,6 +16,7 @@ import re
 from dataclasses import asdict, dataclass, field
 from typing import Any, Dict, Iterable, List, Mapping, Optional, Sequence
 from modules.infrastructure.wre_core.src.wre_test_differential_verification import verify_test_differential_evidence
+from modules.infrastructure.wre_core.src.wre_test_differential_runtime import validate_test_impact_policy_binding
 from modules.communication.moltbot_bridge.src.reddog_signer_optional_authority_bindings import (
     optional_authority_binding_values_valid,
 )
@@ -244,6 +245,9 @@ def _diff_evidence_ok(
 
 
 def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str, request: Mapping[str, Any]) -> bool:
+    differential_required, policy_reasons = validate_test_impact_policy_binding(request)
+    if policy_reasons:
+        return False
     if test_evidence.get("head_sha") != head_sha:
         return False
     if not _is_digest(test_evidence.get("test_evidence_digest")):
@@ -256,9 +260,11 @@ def _test_evidence_ok(test_evidence: Mapping[str, Any], head_sha: str, request: 
             return False
         if check.get("conclusion") not in ("success", "pass"):
             return False
-    differential = _mapping(test_evidence.get("differential_evidence"))
+    differential = test_evidence.get("differential_evidence", {})
+    if not isinstance(differential, Mapping):
+        return False
     if not differential:
-        return bool(checks)
+        return bool(checks) and not differential_required
     if differential.get("execution_authority_verified") is not True:
         return False
     expected_digest = _digest({"required_checks": checks, "differential_evidence": differential})

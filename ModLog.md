@@ -1,3 +1,12 @@
+## 2026-10-28 — WRE verification preflight and connected CI
+
+Repaired policy downgrade and premature check execution through existing WRE
+owners; mandatory escalation and local-only authority boundaries remain.
+Added a parallel connected-regression CI job without removing existing gates.
+Source audit, independent validation and remaining native RSI gaps are recorded
+in the [WRE roadmap](modules/infrastructure/wre_core/ROADMAP.md#current-verification-integration--2026-10-28).
+WSP00/15/22/48/97; local tests are separate from PR/main and runtime evidence.
+
 ## 2026-10-26 — Isolated member host bootstrap candidate
 
 WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 before authoring.

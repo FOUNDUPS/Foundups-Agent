@@ -1,3 +1,12 @@
+## Risk-based verification connection — 2026-10-28
+
+The existing verification path now preflights a complete policy/check plan
+before running commands and prevents declared differential evidence from being
+silently dropped at final acceptance. The [interface](INTERFACE.md#risk-verification-preflight-contract--2026-10-28)
+and [current roadmap](ROADMAP.md#current-verification-integration--2026-10-28)
+separate local execution from the remaining native admission and RSI gates.
+CI runs the connected verification contracts in an additive parallel job.
+
 ## Exact parent identity for skill feedback
 
 Execution outcomes and non-production candidates now retain the digest of the

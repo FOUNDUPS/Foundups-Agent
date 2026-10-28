@@ -17,6 +17,7 @@ from modules.infrastructure.wre_core.src.wre_test_impact_differential_gate impor
     evaluate_test_differential,
     make_test_impact_plan,
     make_test_run_snapshot,
+    required_test_suite_kind,
 )
 from modules.infrastructure.wre_core.src.wre_test_differential_capability import (
     issue_test_differential_capability,
@@ -67,13 +68,12 @@ def produce_test_differential_evidence(
     """Run identical trusted collection against exact parent and candidate."""
     req = request if isinstance(request, Mapping) else {}
     policy = _mapping(req.get("test_impact_policy"))
-    reasons = _policy_reasons(policy)
-    scope = resolve_test_scope_coverage(
-        req.get("expected_changed_paths", ()), str(policy.get("impact_class") or ""),
-        policy.get("selection_args", ()),
-    )
-    if not scope.accepted:
-        reasons.extend((FAIL_SCOPE, *scope.rejection_reasons))
+    requested, policy_reasons = validate_test_impact_policy_binding(req)
+    reasons = list(policy_reasons)
+    if not requested:
+        reasons.append(FAIL_POLICY)
+    if reasons:
+        return _reject(reasons)
     base_sha = str(req.get("base_sha") or "")
     head_sha = str(req.get("head_sha") or "")
     collector = Path(__file__).with_name("wre_pytest_exact_id_collector.py").resolve()
@@ -275,6 +275,47 @@ def _canonical_ids(value: Any) -> bool:
     )
 
 
+def validate_test_impact_policy_binding(
+    request: Mapping[str, Any],
+) -> tuple[bool, tuple[str, ...]]:
+    """Validate declaration, bound policy and scope without authenticating authority.
+
+    Absence and the resident adapter's empty mapping preserve ordinary checks.
+    Explicit null/wrong types are invalid. A bound work order cannot have its
+    policy omitted, replaced, or introduced by the downstream request. Stale or
+    protected/release/audit signals require full scope before commands may run.
+    """
+    policy = request.get("test_impact_policy", {})
+    work_order = request.get("bound_work_order", {})
+    if not isinstance(policy, Mapping) or not isinstance(work_order, Mapping):
+        return False, (FAIL_POLICY,)
+    plan = work_order.get("slice_verifier_plan", {})
+    if not isinstance(plan, Mapping):
+        return False, (FAIL_POLICY,)
+    bound_policy = plan.get("test_impact_policy", {})
+    if not isinstance(bound_policy, Mapping):
+        return False, (FAIL_POLICY,)
+    requested = bool(policy or bound_policy)
+    reasons = [reason for value in (policy, bound_policy) if value
+               for reason in _policy_reasons(value)]
+    if "bound_work_order" in request and policy != bound_policy:
+        reasons.append(FAIL_BINDING)
+    if requested and not reasons:
+        scope = resolve_test_scope_coverage(
+            request.get("expected_changed_paths", ()), policy["impact_class"],
+            policy["selection_args"],
+        )
+        required = required_test_suite_kind(
+            policy["impact_class"], **{name: policy[name] for name in (
+                "dependency_evidence_stale", "protected_authority_surface",
+                "release_candidate", "periodic_health_audit",
+            )},
+        )
+        if not scope.accepted or scope.required_suite_kind != required:
+            reasons.extend((FAIL_SCOPE, *scope.rejection_reasons))
+    return requested, tuple(dict.fromkeys(reasons))
+
+
 def _policy_reasons(policy: Mapping[str, Any]) -> list[str]:
     keys = {
         "schema_version", "impact_class", "selection_args", "timeout_s",
@@ -284,6 +325,7 @@ def _policy_reasons(policy: Mapping[str, Any]) -> list[str]:
     }
     valid = (
         set(policy) == keys and policy.get("schema_version") == POLICY_SCHEMA
+        and isinstance(policy.get("impact_class"), str)
         and policy.get("impact_class") in {"ISOLATED", "MODULAR", "SYSTEMIC"}
         and isinstance(policy.get("selection_args"), list) and bool(policy.get("selection_args"))
         and all(isinstance(item, str) and item and "\x00" not in item for item in policy.get("selection_args", ()))
@@ -368,5 +410,5 @@ def _reject(reasons: Sequence[str]) -> TestDifferentialRuntimeResult:
 __all__ = [
     "FAIL_BASE_MATERIALIZATION", "FAIL_BINDING", "FAIL_COLLECTION", "FAIL_LINEAGE",
     "FAIL_POLICY", "FAIL_SCOPE", "POLICY_SCHEMA", "SCHEMA", "TestDifferentialRuntimeResult",
-    "produce_test_differential_evidence",
+    "produce_test_differential_evidence", "validate_test_impact_policy_binding",
 ]
