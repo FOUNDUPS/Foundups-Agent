@@ -1,5 +1,10 @@
 # EDUIT execution roadmap
 
+## CI acceptance rule — 2026-10-28
+
+Every Storytime/EDUIT RSI iteration follows the [mandatory post-merge CI acceptance gate](docs/TILE_PRODUCTION_RSI.md#mandatory-post-merge-ci-acceptance-gate-2026-10-28-correction). Squash merge is not completion: verify checks against the resulting main SHA, inspect failures, and retain corrections before claiming acceptance. Browser/audio/device and deployment gates remain separate.
+
+
 ## RSI integration gate / next-session execution — 2026-10-28
 
 Read [Storytime RSI system architecture](docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md) and [five-tile contract](docs/TILE_PRODUCTION_RSI.md). Preserve existing viewer repairs as independent UI priorities. RSI critical path: verify current WRE/FAM admission and authority → bind one real Little Shrew composite ticket with independent verifier and budget → inspect actual film/game output → retain a bounded correction in existing WRE memory → demonstrate transfer on the next *different* tile. No second orchestrator, memory, scheduler or auto-promotion. Current planning/checker is implemented; admitted end-to-end execution and transfer remain unproved.
