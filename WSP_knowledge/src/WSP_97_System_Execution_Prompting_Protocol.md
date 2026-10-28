@@ -1,8 +1,8 @@
 # WSP 97: System Execution Prompting Protocol
 
 **Status**: ACTIVE
-**Version**: 1.9
-**Date**: 2026-08-26
+**Version**: 1.10
+**Date**: 2026-10-28
 **Author**: 0102 (System Execution Architect)
 
 ---
@@ -10,6 +10,21 @@
 ## System roadmap navigation
 
 After bootstrap, read [the root system roadmap](../../ROADMAP.md#authority-and-fast-start) for completion gates, current planning priorities and the selected work packet. Follow its module and evidence links on demand. The roadmap owns cross-system sequencing; it does not redefine this protocol, certify completion, grant authority or replace a current signed work order. Historical plans are listed in the roadmap archive register.
+
+## Mandatory Outcome Verification and Completion Gate (v1.10, 2026-10-28)
+
+**Universal invariant:** Execution success is not task completion. A worker MUST distinguish attempted execution, produced artifact, independently verified result, and (for WSP 48) demonstrated transferable improvement. A tool success, passing self-review, PR merge, document update, or memory entry alone is not acceptance.
+
+1. **Freeze acceptance before execution.** Identify the affected scope, authoritative owner, required checks, independent verifier, observable postcondition, and rollback or recovery path. A changed acceptance rule requires separate review; never relax tests merely to make a change pass.
+2. **Validate before mutation/promotion.** Run relevant deterministic tests and contract/security checks, inspect changed output, and obtain independent verification when required by the governing owner. No self-issued receipt may impersonate independent verification.
+3. **For repository changes:** create a traceable PR; run and inspect applicable checks on its exact head SHA; squash merge only within authorized repository policy; then obtain the resulting default-branch SHA and verify applicable CI/checks **on that SHA**. An empty status list, pending checks, unavailable CI, or a passing PR-head check alone means UNKNOWN, never PASS. Repository policy may block merging until checks pass; this protocol does not itself change branch protection.
+4. **For other work:** verify the actual task-specific postcondition (e.g. deployed endpoint and TLS, rendered/listened media, independently sourced research, or authorized worker outcome). A build or upload receipt does not prove live deployment or quality.
+5. **On failure or missing evidence:** mark the task BLOCKED/UNVERIFIED; inspect the failing evidence, repair in a bounded new change or revert under existing authority, rerun checks and verify the resulting state. Do not report completion while validation is pending. Preserve incident and correction evidence in the existing work record; route reusable lessons through existing WRE Pattern Memory only when admitted.
+6. **Close with a receipt:** record source/head SHA, PR and squash SHA when applicable, verifier and check identifiers/results, observed postcondition, exclusions, and remaining blockers. Report merge, main CI, live output, deployment, and WSP 48 RSI transfer as separate states. A validated one-off correction does not establish recursive self-improvement until reuse is independently measured.
+
+**Ownership:** WSP 97 defines the general completion gate; WSP 48 governs RSI qualification; WRE/admission components enforce execution authority; existing evidence/memory systems retain outcomes. HoloIndex, Brain and Memex are retrieval/continuity surfaces, not substitute authorities. This written rule does not claim automatic runtime enforcement or an always-on CI watcher.
+
+---
 
 ## What "Follow WSP 97" Means
 
