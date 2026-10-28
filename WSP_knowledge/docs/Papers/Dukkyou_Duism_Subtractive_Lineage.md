@@ -109,3 +109,7 @@ The subtractive method explains how Duism can recognize useful observations insi
 Dukkyō is not another religious layer placed over reality. Its intended operation is the reverse: **make the underlying metaphysical claim visible without requiring belief in the layer that carried it.**
 
 The two-kanji/two-capitalization model preserves both possibilities: **独境 / duist** for the person seeking through a chosen coloring, and **毒教 / Duist** for the uncolored Duist practitioner, while **毒教 / Dukkyō / Duism** remains the canonical name of the metaphysics.
+
+## 2026-10-28 cross-reference: two kanji and comparative teaching
+
+**Both forms are intentional:** **独境** names the seeking/colored **duist** state; **毒教** names the uncolored **Duist** state and is the canonical Japanese name for **Duism**. Older uses of 独境 as the sole Japanese name are historical terminology, not a spelling error to erase. See [canonical lineage](Dukkyou_Duism_Subtractive_Lineage.md), [comparative religion paper](Duism_Applied_to_Religion.md), and [Gospel of Thomas case study](Duism_Gospel_of_Thomas_Case_Study.md). The coined descriptor **sahdu** is lowercase except sentence-initially; it means “say Du,” not a religious title. This note does not elevate metaphorical quantum analogies to established physical results.
