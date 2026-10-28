@@ -1,5 +1,10 @@
 # EDUIT interfaces
 
+## Adaptive learning content and formative assessment — 2026-10-28
+
+[Adaptive learning-content contract](docs/ADAPTIVE_LEARNING_CONTENT.md) defines EDUIT's outcome/experience/production-RSI vision, reusable three-object content packs, post-game picture matching, separate learning points and off-session RSI. This is specified, not shipped. Reuse the existing game and review owners; do not collect child play traces for WRE learning.
+
+
 ## Cross-module RSI architecture — 2026-10-28
 
 Read [Storytime RSI system architecture](docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md) for canonical owners and the continuation sequence. This interface does not authorize new runtime admission, a second memory store, new orchestration, or child telemetry. A tile pairs video and game; the five-tile planner is not a production executor.
