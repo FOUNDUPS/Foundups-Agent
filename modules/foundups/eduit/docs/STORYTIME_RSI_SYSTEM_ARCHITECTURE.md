@@ -1,4 +1,6 @@
 # Storytime RSI system architecture — continuation node
+
+> **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
 Date: 2026-10-28. Status: architecture and integration map, **not** autonomous production activation.
 
 ## Mission, product and hierarchy
