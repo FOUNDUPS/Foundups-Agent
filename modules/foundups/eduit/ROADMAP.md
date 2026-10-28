@@ -144,3 +144,6 @@ freeze/mark/share, video/game switch, video repeat and child touch-lock. This
 implements the bounded tile-control slice; native-device acceptance, authentic
 Red Dog feedback transport and Mall ratings remain separate. Next priority is
 physical-device acceptance of this episode before extending the story.
+
+## Next implementation: three-round learning loop (2026-10-28)
+See [adaptive learning contract](docs/ADAPTIVE_LEARNING_CONTENT.md). P0: three completed game rounds with approved varied lessons, then optional bottom-right Earn Stars opens picture matching, with Play Again available throughout. Keep game score distinct from verified learning points. First implementation deterministic and local; PWA/agent is not prerequisite. Requires actual game/UI/locale tests before release.
