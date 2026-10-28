@@ -84,3 +84,9 @@ For preschoolers, a concept such as dinosaur must be accessible before decoding 
 
 ## Clarification: scenic imprinting and recorded playthroughs (2026-10-28)
 The working tile currently has a **video (WATCH) and game (PLAY)**. The third part, **VERIFY (test)**, remains unbuilt. Earn stars during PLAY; Replay is the end action. Two learning sequences: **narrative imprinting** = see short text → hear same words → fade; **scenic/action imprinting** = visible cause (foot collision and simultaneous physical shake/impact Foley) → prominent written sound word (THUMP/THUD, consistent with approved locale) → spoken word → fade. Align collision, vibration and Foley by actual scene physics; measure onset in milliseconds. The authored video should ultimately be a recording from the same code-driven game timeline. Future PWA playthrough capture/export and parent-reviewed website/YouTube upload require consent, moderation, privacy, reliable audio capture and explicit publication approval. Design reusable hooks now; autonomous RSI and child uploads are not enabled.
+
+## Bounded implementation receipt — 2026-10-28
+The first media-clock narrative scheduler/browser-voice fallback now has a
+[review receipt](NARRATION_TIMING_REVIEW.md). This does not implement the full
+engine above or establish precise acoustic onset. Preserve the reviewed film
+and separate game clock until the shared authored timeline milestone is tested.

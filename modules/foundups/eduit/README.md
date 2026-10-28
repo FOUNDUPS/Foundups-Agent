@@ -308,3 +308,6 @@ physical-device acceptance of this episode before extending the story.
 
 ## EDUIT agentic learning game engine (2026-10-28)
 See [EDUIT Agentic Learning Game Engine](docs/EDUIT_AGENTIC_LEARNING_GAME_ENGINE.md) for the sound → written word → spoken word timing contract, family casting with smaller Baby, reusable matching/tracing/counting modes, deterministic browser hooks, and 012 → 0102 → WSP97 RSI feedback loop. This is a design contract, not an implemented autonomous runtime. Replay awards play stars; no Earn Stars button.
+
+Current narration implementation and bounded review evidence:
+[Narration timing reconciliation](docs/NARRATION_TIMING_REVIEW.md).

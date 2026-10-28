@@ -287,3 +287,12 @@ Initial pytest command could not run (pytest absent); converted new suite to
 stdlib unittest, still collected by existing pytest CI. Actual video/audio,
 native device review and next-real-tile transfer are not exercised by this slice.
 Independent review and hosted CI results are retained in the milestone PR.
+
+## 2026-10-28 — Reconcile learning-engine narration and current Storytime PR
+Added media-clock cue scheduler and Shorts-owned browser voice adapter, bottom
+captions, fade, pause/seek/buffering cancellation, user-volume preservation and
+opt-in local timing trace. Reconciled current handoff, intro/replay/round changes
+from PR2249; corrected fullscreen specificity and caption/control layout.
+See docs/NARRATION_TIMING_REVIEW.md for correction loop, ratings and evidence.
+Device voice availability is platform-dependent; precise recorded speech and the
+full adaptive engine remain unimplemented. No film rerender or YouTube upload.

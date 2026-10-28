@@ -6,6 +6,39 @@ Date: 2026-09-11. Status: `SPECIFIED_NOT_IMPLEMENTED` for the integrated model. 
 
 ## Decision
 
+### Verification and swarm research reconciliation — 2026-10-28
+
+Primary documentation reviewed on 2026-10-28 supports keeping a governed ticket
+as the authority/accounting unit, with optional bounded parallel teams inside
+it. This is an architectural inference, not a benchmark or claim that installed
+runtimes implement every current upstream feature.
+
+- [LangGraph workflows](https://docs.langchain.com/oss/python/langgraph/workflows-agents)
+  distinguish fixed workflow paths from dynamic agents; its
+  [persistence model](https://docs.langchain.com/oss/python/langgraph/persistence)
+  distinguishes per-thread checkpoints from cross-thread storage. Map these
+  responsibilities to existing WRE/AgentDB and PatternMemory owners.
+- [Microsoft Magentic orchestration](https://learn.microsoft.com/en-us/agent-framework/workflows/orchestrations/magentic)
+  provides bounded rounds, stalls and replans, and warns against sharing one
+  stateful manager across concurrent workflows. Preserve separate ticket state
+  and bounded retries; manager agreement is not independent verification.
+- [Hermes delegation](https://hermes-agent.nousresearch.com/docs/user-guide/configuration#delegation)
+  exposes child model/provider routes, concurrency/depth limits and optional
+  worktree isolation. Defaults can inherit the parent route. Measure complete
+  accepted-result cost; spawning a child does not itself make work cheaper.
+- [OpenClaw subagents](https://docs.openclaw.ai/tools/subagents) provide an
+  upstream delegation surface. Its presence does not establish the installed
+  FoundUps adapter's confinement, admission or end-to-end receipts.
+
+Apply deterministic test policy before either execution topology. Parallel
+verification may consume disjoint canonical shards only with complete inventory,
+mandatory closure and exact-source aggregation; budget pressure cannot remove
+checks. Keep independent outcome acceptance outside the authoring team.
+No framework, service, router or memory database is installed by this review.
+The [current WRE checkpoint](../../modules/infrastructure/wre_core/ROADMAP.md#current-verification-integration--2026-10-28)
+records implemented connections, blocked native execution, the preflight repair
+and the next measurable CI layer. Existing historical decisions follow.
+
 Current-source proposal reconciliation (2026-10-22): the
 [OpenClaw/WRE audit and implementation gates](../audits/architecture/OPENCLAW_WRE_SWARM_PROPOSAL_RECONCILIATION_20261022.md)
 map the proposed spooler/playbook/swarm to existing AgentDB, admission, worker,
