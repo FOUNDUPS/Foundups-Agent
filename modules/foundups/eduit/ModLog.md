@@ -296,3 +296,11 @@ from PR2249; corrected fullscreen specificity and caption/control layout.
 See docs/NARRATION_TIMING_REVIEW.md for correction loop, ratings and evidence.
 Device voice availability is platform-dependent; precise recorded speech and the
 full adaptive engine remain unimplemented. No film rerender or YouTube upload.
+
+## 2026-10-29 — Phone fullscreen regression repair
+Replaced conflicting fullscreen CSS rules with one layout owner, restored scaled
+exit targets, exclusive drawing controls and useful landscape video size. Added
+normal-zoom visualViewport offsets/scroll and foreground refresh; changed bounds
+pause both owners. Existing manifest/gesture/game/media/feedback identity retained.
+See docs/PHONE_FULLSCREEN_REPAIR.md for red baseline, browser/Node evidence and
+native-device limits. Remaining issue2252 findings are not relabeled repaired.
