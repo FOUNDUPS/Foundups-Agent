@@ -14,12 +14,13 @@ The Tool + The Content + The Experience is EDUIT's historical framing; the three
 A replay should vary approved content where possible, not promise mathematically unique content with a finite catalog. Keep progression accessible; no penalization for repetition, disability, slow reaction, or limited language familiarity.
 
 ## Example: Little Shrew preschool round
-Target audience example: ages 3–4, subject to child-development review. Three objects:
+Target audience example: ages 3–4, subject to child-development review. Select **three objects per round** from the existing cue pool (THUMP, SNIFF, CRUNCH, SQUISH), subject to actual episode compatibility. Example objects:
 - THUMP: a dinosaur foot/stomp (sound → visible cause).
 - SNIFF: a character smelling a plant (sound/action → visible cause).
 - CRUNCH: a reviewed object/action from the actual episode, not a fabricated science claim.
+- SQUISH: a fourth available sound/action concept in the existing game; depict a soft, cartoon compression or flattening under a descending shape, with no blood, gore, injury detail or frightening aftermath. For preschool learners, use playful squash-and-rebound imagery rather than graphic harm. Match the SQUISH word/sound to a clear visual cause.
 
-Play the short rescue game with three clearly synchronized object cues. At completion, show one large, untimed picture-matching prompt per object, with two or three distinct visual choices and spoken/audio-accessible cues where reviewed. Example: “What made THUMP?” → dinosaur foot / plant / shrew nose. For SNIFF, match nose/smelling to the visible character action. Avoid a trick question or asking children to infer an invisible cause. Reward a correct match once, offer a gentle retry and reveal the answer with sound/animation. A missed match never blocks Replay or Next.
+Play the short rescue game with three clearly synchronized object cues. At completion, show one large, untimed picture-matching prompt per object, with two or three distinct visual choices and spoken/audio-accessible cues where reviewed. Example: “What made THUMP?” → dinosaur foot / plant / shrew nose. For SNIFF, match nose/smelling to the visible character action. For SQUISH, match a gently compressed cartoon character/object or squashing action to the cue, without blood or graphic violence. Avoid a trick question or asking children to infer an invisible cause. Reward a correct match once, offer a gentle retry and reveal the answer with sound/animation. A missed match never blocks Replay or Next.
 
 The quiz is a **formative recognition check**, not a diagnostic test. Record game points and assessment points separately; no IQ, aptitude or age-percentile inference. Provide no-reading, keyboard, pointer and reduced-motion alternatives.
 
