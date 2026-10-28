@@ -1,5 +1,5 @@
 // Game time is independent of the film. Only active play advances this clock.
-export const DEADLINE=48, DURATION=60, PRACTICE_HOLD=30;
+export const DEADLINE=48, DURATION=60, PRACTICE_HOLD=30, VICTORY_REVEAL=3.5;
 export const CAST=[
  {id:'parent-1',x:75,y:215.6,scale:1.12,duration:4,wakeTaps:3,destX:715,destY:240},
  {id:'parent-2',x:290,y:206,scale:1.2,duration:4.5,wakeTaps:4,destX:710,destY:280},
@@ -7,14 +7,19 @@ export const CAST=[
  {id:'baby-2',x:235,y:378,scale:.42,duration:2.4,wakeTaps:2,destX:790,destY:378},
  {id:'baby-3',x:350,y:378,scale:.42,duration:2.2,wakeTaps:2,destX:860,destY:378}
 ];
-export function initial({practice=false}={}){return {phase:'ready',elapsed:0,practice,selected:null,score:0,awards:[],actors:CAST.map(a=>({...a,status:'sleeping',started:null,taps:0,tappedAt:null,awakeAt:null,wandered:false}))};}
+export function initial({practice=false}={}){return {phase:'ready',elapsed:0,practice,selected:null,score:0,awards:[],victoryAt:null,actors:CAST.map(a=>({...a,status:'sleeping',started:null,taps:0,tappedAt:null,awakeAt:null,wandered:false}))};}
 export const rescuePoints=(elapsed,practice=false)=>10+(practice?0:Math.max(0,Math.floor(10*(1-elapsed/DEADLINE))));
 export const worldTime=s=>s.practice?Math.min(PRACTICE_HOLD,s.elapsed):s.elapsed;
 export function advance(state,event,dt=0){
  if(event==='start'||event==='retry')return {...initial({practice:state.practice}),phase:'playing'};
- if(state.phase!=='playing')return state;
+ if(!['playing','celebrating'].includes(state.phase))return state;
  const s={...state,actors:state.actors.map(a=>({...a})),awards:[...state.awards]};
  if(event==='tick'){
+  if(s.phase==='celebrating'){
+   s.elapsed+=Math.max(0,Math.min(Number.isFinite(dt)?dt:0,.1));
+   if(s.elapsed-s.victoryAt>=VICTORY_REVEAL)s.phase='over';
+   return s;
+  }
   s.elapsed=Math.min(86400,s.elapsed+Math.max(0,Math.min(Number.isFinite(dt)?dt:0,.1)));
   for(const a of s.actors){
    if(a.status==='moving'&&a.started+a.duration<=Math.min(s.elapsed,s.practice?Infinity:DEADLINE)+1e-8){
@@ -29,7 +34,7 @@ export function advance(state,event,dt=0){
    if(!s.practice&&s.elapsed>=DEADLINE&&a.status!=='safe')a.status='lost';
   }
   if(!s.practice&&s.elapsed>=DEADLINE)s.selected=null;
-  if(s.actors.every(a=>a.status==='safe')){s.phase='over';s.outcome='rescued';}
+  if(s.actors.every(a=>a.status==='safe')){s.phase='celebrating';s.outcome='rescued';s.victoryAt=s.elapsed;}
   else if(!s.practice&&s.elapsed>=DURATION){s.elapsed=DURATION;s.phase='over';s.outcome='retry';}
  }else if(s.practice||s.elapsed<DEADLINE){
   if(event.startsWith('select:')&&s.selected===null){
