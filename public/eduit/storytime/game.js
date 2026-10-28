@@ -20,6 +20,7 @@ function syncAudio(){if(paused||state.phase!=='playing')soundtrack.pause();}
 function cueAudio(cue){
  if(!audioEnabled||paused||!['playing','celebrating'].includes(state.phase)){soundtrack.pause();return;}
  if(cue?.id==='victory-thump'&&!playedVictory){playedVictory=true;synthImpact();}
+ if(cue?.kind==='thump')soundtrack.volume=Math.min(1,.25+Math.min(state.elapsed/48,1)*.65);
  if(cue?.id!==lastCue){soundtrack.pause();lastCue=cue?.id||null;if(cue){soundtrack.currentTime=cue.sourceTime;soundtrack.play().catch(()=>{});}}
  if(cue&&soundtrack.currentTime>=cue.sourceTime+cue.sourceDuration)soundtrack.pause();
 }
