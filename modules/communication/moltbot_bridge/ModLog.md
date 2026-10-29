@@ -1,3 +1,22 @@
+## 2026-10-29 — Recover bounded Ollama fallback settings
+
+Recover the preserved PC model/default and timeout helpers, retaining current
+preflight and skill boundaries. The fallback selects `qwen-overseer:latest` by
+default and passes a finite 15–300 second configured timeout to Requests.
+Invalid/non-finite settings use 120. Explicit model overrides and blank-disable
+remain available. Align the example template, sample configuration and setup
+docs without changing private environment settings or model/storage state.
+
+The frozen offline oracle has 15 failures/four passes on unchanged helpers and
+19 passes on the preserved candidate. Real helper source is exercised with
+synthetic transport/daemon collaborators. The portable 19-case replay and both original DAE constructor/facade cases pass;
+central registration is isolated and the latter records zero external attempts.
+Eight manifest cases and three Node compatibility commands pass. Registry check
+is current at 1791 files/260 quarantined; the unchanged 1475-member closure changes
+only these two helper digests. Hosted/main/Holo checks remain required. Live cold-start readiness remains
+IMPLEMENTED_NOT_VALIDATED. Requests timeouts do not impose a total-turn deadline.
+WSP 6/11/22/50/71/84/87/97.
+
 ## 2026-10-29 — Recover explicit preflight denial from preserved PC work
 
 Reconcile only the denied-preflight branch from the preserved PC checkout onto

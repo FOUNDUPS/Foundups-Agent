@@ -1,3 +1,25 @@
+## 2026-10-29 — Recover local Ollama fallback configuration
+
+Preflight repair #2271 merged as cb227122828f60d58b50de1046abb09ae31a0929.
+All 24 PR checks and 22 resulting-main checks across five observed workflows
+passed. Fresh Holo evidence binds source, workspace and authority to that main,
+CURRENT/no-gap; both owned maintenance runtimes stopped. Eighteen owned merges
+now have main/Holo acceptance.
+
+The next preserved PC slice replaces Ollama's fixed 15-second request wait with
+a finite configured timeout (default 120, range 15–300) and the repository-defined
+model default. Explicit model override and blank-disable remain. The synchronous
+Requests timeout is not a whole-turn deadline; cancellation can wait for the call.
+The model must be installed separately; no model/storage/runtime operation occurs.
+
+Frozen helper acceptance is 15 failures/four passes on unchanged source and 19
+passes on the candidate. Repository replay passes 19; both original DAE cases
+pass with central registration isolated and zero external attempts. Eight manifest
+tests and three Node commands pass. Registry is current at 1791/260, and all 1475
+runtime source hashes were checked. Prior document bodies, existing DAE tests,
+current preflight and skill handling remain intact. Hosted/main/Holo and live
+application acceptance are separate gates. WSP 6/11/22/50/71/84/87/97.
+
 ## 2026-10-29 — Recover denied-preflight handling from preserved PC work
 
 Module-contract PR #2270 merged as 3a4de0b54cb468580270f99d7b8abca4b89484c0.

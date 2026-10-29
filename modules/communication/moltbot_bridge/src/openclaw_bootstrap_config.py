@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 import os
 import threading
 
@@ -20,7 +21,19 @@ def initialize_control_plane_state(
     allow_external_requested: bool,
 ) -> None:
     """Initialize OpenClaw identity/runtime/model/context control-plane state."""
-    dae._ollama_model = os.getenv("OPENCLAW_OLLAMA_MODEL", "qwen2.5-coder:7b").strip()
+    dae._ollama_model = os.getenv(
+        "OPENCLAW_OLLAMA_MODEL",
+        "qwen-overseer:latest",
+    ).strip()
+    try:
+        ollama_timeout_sec = float(
+            os.getenv("OPENCLAW_OLLAMA_TIMEOUT_SEC", "120")
+        )
+    except ValueError:
+        ollama_timeout_sec = 120.0
+    if not math.isfinite(ollama_timeout_sec):
+        ollama_timeout_sec = 120.0
+    dae._ollama_timeout_sec = min(300.0, max(15.0, ollama_timeout_sec))
     strict_default = "1" if backend == "ironclaw" else "0"
     dae._ironclaw_strict = _env_truthy("OPENCLAW_IRONCLAW_STRICT", strict_default)
     dae._ironclaw_allow_local_fallback = _env_truthy(

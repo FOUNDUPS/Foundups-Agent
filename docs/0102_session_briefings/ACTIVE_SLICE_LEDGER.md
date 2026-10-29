@@ -1,5 +1,51 @@
 # Active Slice Ledger
 
+## Ollama recovery and preflight close-out — 2026-10-29
+
+**Latest accepted slice:** #2271, head `4ad900e06`, base `3a4de0b54`, squash
+`cb227122828f60d58b50de1046abb09ae31a0929`. All 24 PR checks and 22 resulting-main checks
+across five observed workflows passed. Fresh source/workspace/authority match
+that main, CURRENT/no-gap, generation
+`b037c0d6588f85defc5b71402e54f6219d99986c8c36699af6302d8a35f82909`.
+Both owned maintenance runtimes stopped. Eighteen owned merges are accepted.
+The refreshed GitHub snapshot after #2271 contains 36 preserved original PRs.
+
+**Current slice:** `agent/pc-ollama-recovery-20261029`, base maincb227.
+Recover two PC helpers, public sample/default settings, setup notes and the two
+original DAE tests. Default model is `qwen-overseer:latest`; explicit override and
+blank-disable remain. Request timeout defaults to 120 and clamps finite input to
+15–300; blank/invalid/non-finite input uses 120. It is a synchronous Requests
+connect/read timeout, not a total-turn deadline or immediate cancellation.
+No model installation/readiness, provider, storage relocation or live-session
+claim. The newer preflight/skill contracts and llmster startup owner are retained.
+
+Local acceptance: 19 frozen helper cases (15 fail on unchanged source), both
+original DAE cases, eight manifest cases and three Node commands pass. The DAE
+replay isolates central registration and records zero external network/process
+attempts. Registry adds one file (1791/260); all 1790 old records are unchanged
+except 11 generated shard positions. The 1475-member runtime closure changes
+only the two helper digests. Forty-one exact prior scanner reviews are rebound
+to changed blobs while retaining all 2863 prior entries. No scanner relaxation.
+Hosted and resulting-main/Holo acceptance remain required for this slice.
+
+**Preservation/retrieval:** original PC HEAD and the 86-file reverified archive
+remain untouched. The pre-edit lexical bundle is bound to clean maincb227 and
+marked UNKNOWN/gap while the preceding semantic generation is refreshed. Current
+helper/DAE source and focused module documents take priority over noisy old logs;
+optional missing memory docs and truncated bundle excerpts are explicit limits.
+Main's newer pitch v0.1.3 and llmster lifecycle supersede the old restoration
+candidates. No blanket restore or source-branch switch on the shared PC folder.
+
+**Follow-ons:** complete individual disposition of historical PC plans/audits,
+call-safety/media and remaining original PRs. F5 root classification/moves are
+prepared only, with source hashes and exact target checks; stale onboarding/Holo
+examples need historical/current-authority clarification before relocation.
+No original artifact is deleted. F6b/F8/F9 follow-ons and the 24 dependency alerts
+remain. Ignored frontend build paths remain after the prior automatic approval
+review block; owned worktrees are still in use. The separate YouTube Windows
+checkout and live-startup guard remain untouched. WSP 6/11/22/50/71/84/87/97.
+
+
 ## PC recovery and module-contract close-out — 2026-10-29
 
 **Latest accepted slice:** #2270, head `b826ece02`, base `addd00534`, squash
