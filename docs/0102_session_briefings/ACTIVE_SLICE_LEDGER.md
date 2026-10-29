@@ -2,7 +2,27 @@
 
 ## PR reconciliation — 2026-10-29
 
-**Latest acceptance:** F1 #2257 is merged at
+**Latest acceptance:** policy #2258 is merged at
+`ade6bca85470159bef0e447353e9c0b91628a704`, following concurrent YouTube #2259.
+All 23 PR checks and all four resulting-main source workflows passed. A fresh
+governed query proves CURRENT/no-gap and matching source/workspace/authority,
+generation `9cba0a7721354209baef3460a20244e78b329a0603b5779fe85f997b1e112adb`.
+Owned maintenance runtimes stopped; port18800 was already absent on admission.
+Git commit-graph replacement and native verification also repaired the observed
+missing-cache warning without changing branches or source.
+
+**Current owned slice:** `agent/wsp62-expiry-enforcement-20261029`, based on
+that exact main. Historical completion is now implemented in the existing audit
+owner; six dates are derived without renewal, two resolved exemptions removed,
+and the 3481-line interface preserved in five pages plus its heading directory.
+All 134 original headings and source text survive link rebasing. Local bounded
+CI selection: 103 pass / 28 subtests; module static audit: 81 remaining test
+syntax errors, down from 89; exact-base size audit: zero candidate errors.
+Four inherited expiry tests remain failing. Hosted/main acceptance is pending.
+Next action: exact-head checks, squash, resulting-main checks/Holo proof, then
+bounded F2 syntax/scaffold repair. Owner: this architect lane; review 2026-10-29.
+
+**Earlier F1 acceptance:** #2257 is merged at
 `f304ba799f8fa835f0b5127efabe9e724315e3c8`: 25 PR checks and all six observed
 resulting-main source workflows passed. The final AST scan covers 4220 module
 Python files, zero production parser failures and 81 legacy test failures.
@@ -14,27 +34,28 @@ not a claim that all module tests or live runtimes work.
 and concurrent Storytime #2256. YouTube #2254 merged separately at `887c09dd2`
 and was reconciled into F1. Earlier counts below are historical snapshots.
 
-**Current Holo proof:** exact main `f304ba799f` is CURRENT/no-gap, source,
+**Earlier Holo proof:** exact main `f304ba799f` was CURRENT/no-gap, source,
 workspace and authority agree, generation
 `bf26960cc9b61fe8492c5b09051308d5d83d61a01de4b5ce040af08b0c5d4407`.
 Maintenance stopped both owned runtimes; the pre-existing port18800 service
 remains. A query using the primary checkout's helper still correctly rejects
 its old dirty source. Use the current CLAUDE task-helper procedure.
 
-**Next owned slice:** `agent/wsp62-expiry-policy-20261029`, based on this main,
-adds only the historical missing-expiry completion contract to both WSP62
-mirrors. Status: SPECIFIED_NOT_IMPLEMENTED. Acceptance: exact mirrors, preserved
-existing authority/ceiling rules, hosted checks and resulting-main verification.
-Then implement the rule against that immutable base with adversarial tests,
-repair eligible metadata and split the oversized bridge interface. Do not renew
-expired debt or raise its limits.
+**Policy slice completed:** `agent/wsp62-expiry-policy-20261029` added only the
+historical missing-expiry completion contract to both WSP62 mirrors. Its truth
+classification was SPECIFIED_NOT_IMPLEMENTED; implementation is the separately
+based current slice above. Expired debt is not renewed and limits are not raised.
 
 The existing WRE exemption suite reports five passes and one inherited failure:
 `wre_autonomous_slice_verifier_runtime.py` is 591 lines against a 586-line
 ceiling. Test/source/registries match the exact F1 base. Track that debt with
 the subsequent F4 inventory; the policy-only slice does not erase it.
 
-**F4 retrieval evaluation:** fresh semantic hits were noisy (general governance
+**F4 retrieval evaluation:** current-base semantic hits are fresh but dominated
+by explicitly historical WRE audits rather than the exact exemption owner.
+The accompanying lexical bundle ranks canonical WSP62 first but reports
+UNKNOWN/gap separately; it is not the semantic freshness receipt. No duplicate
+hit was treated as independent evidence. Earlier hits were noisy (general governance
 ranked before exemption tests, including one UTF-16 display artifact). No
 duplicate hit was used. The tools-directory bundle truthfully lacks module
 README/INTERFACE; use the existing test README, tools log and canonical WSP62
@@ -78,6 +99,23 @@ fallback. After repair, the WRE-scoped memory bundle and receipt were retrieved.
 Current and historical records remain explicitly separated. Cross-PR merge and
 CI evidence requires architect review; no Qwen/Gemma capability or independent
 agent run is claimed. Existing deterministic Git/CI/maintenance owners were reused.
+
+**Additional source review at ade6bca8547:** retained proposals are not blanket
+supersessions. #408 adds ten skips; three current mocked API-owner suites report
+29 pass / nine failures (seven callback mocks, two stale None expectations), so
+replacement coverage must be reconciled before acceptance. #1339 still has a
+unique gaxios update; #1342 is a Vite major migration with newer current transitive
+resolutions to preserve. #729 retains an old raw Holo recipe and stale stack
+claims. #1636 conflicts with the canonical identity protocol and remains a
+proposal. #1642 must use the current Moshpit projection/ledger owners; production
+AuthorizedActivitySource wiring is still absent. #1646 retains two obsolete
+60-day assumptions and unverified Drive ownership claims. #1762 is partly
+superseded, but eslint-config changes and two dated workflows remain unique;
+one workflow checks out a hardcoded historical SHA. #1886's synthetic POSTED
+schema validation accepts null posting identifiers, with no posting runtime
+wired; it needs explicit ledger invariants. #1906 has additional STT vocabulary
+and future-page coverage beyond the existing main guard. Preserve all these
+unique deltas until reconciled and validated.
 
 **Reconciliation acceptance:** seven PRs have merged: the six inherited rows
 below and governance #2255 (`0680427e2b01baab558a97934f8db452f363688f`). All seven

@@ -1,5 +1,21 @@
 # Tools ModLog
 
+## 2026-10-29 — Enforce historical missing-expiry completion
+
+FMAS consumes WSP62 section 5.1.3 only when both canonical mirrors at the
+comparison base match and contain the separately merged policy from #2258.
+The existing CLI still validates the clean Git merge base. Completion derives
+the past quarter-end date and preserves every other field and type; it cannot
+renew debt, raise limits or bypass normal source growth checks. Null/absent
+expiry and boolean/integer metadata are distinct. Archive-mode migration
+cannot authorize a simultaneous invalid expiry change.
+
+Validation: 103 focused audit, Mode 2, health-triage and interface-boundary
+tests plus 28 subtests pass. The same bounded suite is wired into CI.
+Static module audit: 81 errors, all retained legacy test parse defects;
+exact-base size audit: zero candidate errors. This is not a clean repository
+or runtime qualification. WSP 5/22/50/62/84/97.
+
 ## 2026-07-24 - WSP97_REPOSITORY_EVIDENCE_V11_PHASE1
 
 - Split repository path and Git-base verification into `tools/wsp97_repository_evidence.py`; validator functions remain below the WSP 62 50-line limit.

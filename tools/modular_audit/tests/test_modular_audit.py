@@ -25,6 +25,8 @@ import tempfile
 import shutil
 import logging
 import subprocess
+from copy import deepcopy
+from datetime import date
 from pathlib import Path, PurePosixPath, PureWindowsPath
 from unittest.mock import patch, MagicMock
 
@@ -851,6 +853,149 @@ class TestWSP62Thresholds(unittest.TestCase):
             )
 
             self.assertTrue(any("ERROR: candidate growth" in item for item in findings))
+
+    def _expiry_entry(self, quarter="2024-Q1"):
+        return {"file": "src/sample.py", "temporary": True, "review_date": quarter,
+                "reviewer": "Architect", "remediation": "ROADMAP.md#decomposition",
+                "no_growth_ceiling": {"file_lines": 3, "functions": {}},
+                "flags": [True, 1, {"enabled": False}]}
+
+    def _copy_expiry_policy(self, root):
+        source = Path(__file__).resolve().parents[3]
+        for relative in modular_audit.EXPIRY_POLICY_PATHS:
+            target = root / relative
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(source / relative, target)
+
+    def test_historical_expiry_uses_past_quarter_end(self):
+        for quarter, expiry in (("2024-Q1", "2024-03-31"), ("2024-Q2", "2024-06-30"),
+                                ("2024-Q3", "2024-09-30"), ("2024-Q4", "2024-12-31")):
+            with self.subTest(quarter=quarter):
+                base = self._expiry_entry(quarter)
+                candidate = dict(base, expires_on=expiry)
+                self.assertTrue(modular_audit._historical_expiry_completion(
+                    candidate, base, True, date(2025, 1, 1)))
+                self.assertFalse(modular_audit._historical_expiry_completion(
+                    candidate, base, True, date.fromisoformat(expiry)))
+                self.assertFalse(modular_audit._historical_expiry_completion(
+                    candidate, base, True, date(2024, 1, 1)))
+
+    def test_historical_expiry_rejects_invalid_review_metadata(self):
+        bad_reviews = (None, 2024, "2024-Q0", "2024-Q5", "2024-Q1 ", "24-Q1",
+                       "0000-Q1", "10000-Q1", "２０２４-Q1", "2024-03-31")
+        for review in bad_reviews:
+            with self.subTest(review=review):
+                base = self._expiry_entry(review)
+                self.assertFalse(modular_audit._historical_expiry_completion(
+                    dict(base, expires_on="2024-03-31"), base, True, date(2025, 1, 1)))
+        for key in ("reviewer", "remediation", "temporary", "review_date"):
+            for value in (None, "", " ", 1, False):
+                base = self._expiry_entry()
+                base[key] = value
+                self.assertFalse(modular_audit._historical_expiry_completion(
+                    dict(base, expires_on="2024-03-31"), base, True, date(2025, 1, 1)))
+            del base[key]
+            self.assertFalse(modular_audit._historical_expiry_completion(
+                dict(base, expires_on="2024-03-31"), base, True, date(2025, 1, 1)))
+
+    def test_historical_expiry_requires_exact_string_and_absent_base_key(self):
+        base = self._expiry_entry()
+        for expiry in (None, "never", "2024-02-29", "2024-03-30", "2024-04-01",
+                       "20240331", "2024-3-31", "2024-03-31 ", date(2024, 3, 31)):
+            self.assertFalse(modular_audit._historical_expiry_completion(
+                dict(base, expires_on=expiry), base, True, date(2025, 1, 1)))
+        for previous in (None, "never", "2024-03-31", "2099-01-01"):
+            prior = dict(base, expires_on=previous)
+            self.assertFalse(modular_audit._historical_expiry_completion(
+                dict(base, expires_on="2024-03-31"), prior, True, date(2025, 1, 1)))
+        candidate = dict(base, expires_on="2024-03-31")
+        for prior in (None, modular_audit.BASELINE_MISSING, {}):
+            self.assertFalse(modular_audit._historical_expiry_completion(candidate, prior, True))
+        self.assertFalse(modular_audit._historical_expiry_completion(candidate, base, False))
+
+    def test_historical_expiry_rejects_every_other_entry_change(self):
+        base = self._expiry_entry()
+        changes = {"file": "other.py", "reviewer": "new owner", "temporary": 1,
+                   "remediation": "elsewhere", "enforcement_mode": "advisory_archive",
+                   "permanent": True, "threshold_override": 5000,
+                   "no_growth_ceiling": {"file_lines": 4, "functions": {}},
+                   "flags": [1, 1, {"enabled": False}]}
+        for key, value in changes.items():
+            with self.subTest(key=key):
+                candidate = dict(base, expires_on="2024-03-31")
+                candidate[key] = value
+                self.assertFalse(modular_audit._historical_expiry_completion(candidate, base, True))
+        for key in base:
+            candidate = dict(base, expires_on="2024-03-31")
+            del candidate[key]
+            self.assertFalse(modular_audit._historical_expiry_completion(candidate, base, True))
+        candidate = deepcopy(dict(base, expires_on="2024-03-31"))
+        candidate["flags"][2]["enabled"] = 0
+        self.assertFalse(modular_audit._historical_expiry_completion(candidate, base, True))
+        base["flags"] = [{False: "same"}]
+        candidate = dict(base, expires_on="2024-03-31", flags=[{0: "same"}])
+        self.assertFalse(modular_audit._historical_expiry_completion(candidate, base, True))
+
+    def test_expiry_policy_requires_both_unchanged_base_mirrors(self):
+        with tempfile.TemporaryDirectory() as base_dir:
+            base = Path(base_dir)
+            self.assertFalse(modular_audit._baseline_has_expiry_policy(base))
+            self.assertFalse(modular_audit._baseline_has_expiry_policy(None))
+            self._copy_expiry_policy(base)
+            self.assertTrue(modular_audit._baseline_has_expiry_policy(base))
+            self.assertTrue(modular_audit._baseline_has_expiry_policy(base / "modules"))
+            mirror = base / modular_audit.EXPIRY_POLICY_PATHS[1]
+            original = mirror.read_text(encoding="utf-8")
+            mirror.write_text(original + "\nCandidate change\n", encoding="utf-8")
+            self.assertFalse(modular_audit._baseline_has_expiry_policy(base))
+            for relative in modular_audit.EXPIRY_POLICY_PATHS:
+                (base / relative).write_text(original.replace("strictly earlier", "later"), encoding="utf-8")
+            self.assertFalse(modular_audit._baseline_has_expiry_policy(base))
+            mirror.unlink()
+            self.assertFalse(modular_audit._baseline_has_expiry_policy(base))
+
+    def _historical_expiry_audit(self, policy_at_base=True, lines=3, extra=""):
+        with tempfile.TemporaryDirectory() as target_dir, tempfile.TemporaryDirectory() as base_dir:
+            target, baseline = Path(target_dir), Path(base_dir)
+            rule = ("  - file: src/sample.py\n    temporary: true\n"
+                    "    review_date: '2024-Q1'\n    reviewer: Architect\n"
+                    "    remediation: ROADMAP.md#decomposition\n"
+                    "    no_growth_ceiling: {file_lines: 3, functions: {}}\n")
+            self._write_exempt_module(baseline, "src/sample.py", 3, rule)
+            self._write_exempt_module(target, "src/sample.py", lines,
+                                      rule + "    expires_on: '2024-03-31'\n" + extra)
+            self._copy_expiry_policy(target)
+            if policy_at_base:
+                self._copy_expiry_policy(baseline)
+            return modular_audit.audit_file_sizes(target, enable_wsp_62=True,
+                                                 baseline_root=baseline, rename_map={})
+
+    def test_expiry_completion_remains_expired_and_does_not_excuse_growth(self):
+        findings = self._historical_expiry_audit()
+        self.assertTrue(any("EXEMPTION_EXPIRED" in item for item in findings))
+        self.assertFalse(any("WSP 62 ERROR:" in item for item in findings), findings)
+        findings = self._historical_expiry_audit(lines=4)
+        self.assertTrue(any("ERROR: candidate growth" in item for item in findings), findings)
+        findings = self._historical_expiry_audit(extra="    threshold_override: 9999\n")
+        self.assertTrue(any("exemption policy changed" in item for item in findings), findings)
+        findings = self._historical_expiry_audit(policy_at_base=False)
+        self.assertTrue(any("exemption policy changed" in item for item in findings), findings)
+
+    def test_null_expiry_cannot_masquerade_as_inherited_absence(self):
+        base = self._expiry_entry()
+        candidate = dict(base, expires_on=None)
+        self.assertFalse(modular_audit._inherited_expiry_defect(candidate, base))
+        self.assertIn("ERROR: missing exemption expiry",
+                      modular_audit._expiry_advisory("src/sample.py", candidate, base))
+        prior = dict(base, expires_on=1)
+        self.assertFalse(modular_audit._inherited_expiry_defect(dict(base, expires_on=True), prior))
+
+    def test_archive_conversion_cannot_bypass_expiry_completion(self):
+        base = self._expiry_entry()
+        candidate = dict(base, expires_on="2099-01-01", enforcement_mode="advisory_archive")
+        findings = modular_audit._audit_exemption_authority(
+            "ModLog.md", candidate, base, 3, Path("ModLog.md"), None, True)
+        self.assertTrue(any("exemption policy changed" in item for item in findings))
 
     def test_inherited_missing_expiry_is_advisory(self):
         with tempfile.TemporaryDirectory() as target_dir, tempfile.TemporaryDirectory() as base_dir:
