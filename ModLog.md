@@ -1,3 +1,25 @@
+## 2026-10-29 — Close shared domain policy and qualify frontend dependency repair
+
+F6a #2267 is merged as 4533f7321f8ee5c857ca7f9dc17801b716d429fe after all
+23 logical PR checks and four resulting-main workflows passed. Fresh Holo
+source/workspace/authority match that main, CURRENT/no-gap; both owned maintenance
+runtimes stopped. This closes the fifteenth owned merge. All original unique
+PR work remains preserved.
+
+Read-only dependency triage found 29 open alerts, including two critical Chroma
+alerts with no listed patched version. Governed Holo query serving uses immutable
+snapshots, while maintenance and legacy Chroma callers need further exposure and
+containment review. A bounded synthetic helper probe shows that passing a null
+embedding function does not by itself prevent configured embedding construction;
+no real Chroma database, remote model or exploit was run.
+
+The current focused repair updates the eSingularity Cloudflare dependency cohort
+to resolve Undici 7.30.1 through upstream pins. Existing content/routing tests,
+clean install, lint, production build and the candidate lock audit pass;
+hosted/main acceptance remains a separate gate in the active ledger.
+No website deployment or repository-wide vulnerability
+clearance is claimed. WSP 5/6/10/22/50/71/84/87/97.
+
 ## 2026-10-29 — Align structural auditors with one WSP 3 policy
 
 F7c #2266 is merged as 34b05f48d after all 24 logical PR checks and all five
