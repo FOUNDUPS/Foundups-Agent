@@ -1,3 +1,46 @@
+## 2026-10-29: Current reconciliation local validation
+
+Existing Python manifest suite: eight passed after the measured 330 KiB
+Windows byte-bound amendment. Existing Node compatibility contract, preflight
+and async commands all pass, including actual LF/CRLF, exact byte maximum/+1
+and 1477/1478 member controls. Canonical registry check is current at 1792
+files / 260 quarantines. The original failing byte-bound result is retained;
+no compiler assertion, Node preflight assertion, source hash or runtime-member
+check was removed. Hosted checks and resulting-main/Holo proof remain required.
+This is local packaging evidence, not installed service or provider acceptance.
+
+## 2026-10-29: Measured Windows manifest byte-bound amendment
+
+The actual two-helper closure is 334,056 LF bytes / 337,083 CRLF bytes, 187
+bytes above the previous 329 KiB ceiling. The unchanged Python and Node
+Windows-size tests rejected it (Python: seven pass / one fail). Preserve that
+failure; raise only the serialized-manifest bound to the smallest covering
+whole KiB: 330 KiB / 337,920 bytes, a 1,024-byte increase with 837-byte CRLF
+headroom. This separately reviewed resource-contract amendment supersedes the
+initial unchanged-manifest-size assumption. The consumer and both Python
+bounds agree; Node's actual LF/CRLF and exact maximum/+1 assertions are intact.
+The 1477/1478 member boundary, exact digest/source hashes, 2 MiB/file and 32 MiB
+total limits remain. JSON layout is unchanged. This is a post-read/pre-parse
+limit, not a preallocation bound or live-runtime qualification. No independent
+human/agent review is claimed. WSP 6/11/22/50/97.
+
+## 2026-10-29: Reconcile editorial compiler runtime metadata
+
+Retain current main's runtime set and add only campaign_brief.py and
+campaign_planner.py under the existing content owner: 1475 -> 1477 members.
+Only their existing content wrapper and SOCIAL adapter change among prior
+runtime sources. Canonical digest: `fbe2132cc44adddf625e66bf0eb6a0acb8f5294b420b33d4ecf32c6b77cba064`.
+Preserve all 1791 prior test records and 260 quarantines; add the existing PR's
+one compiler test module (1792 total). No generated shard changes. Bind both
+digest pins and exact 1477 acceptance / 1478 rejection together; file/total-byte
+caps are unchanged. Packaging checks remain separate from runtime activation.
+The retained October 27 entry describes the old 1472/1474 base, not this closure.
+WSP 22/50/71/97. Current contract execution is recorded after validation.
+
+## 2026-10-27: Source-backed editorial package runtime closure
+
+Two content-owned leaves add exactly2 runtime members:1472→1474. Bind regenerated manifest/digest pins; exact1474 boundary accepts and1475 refuses. Preserve byte/file/bundle limits and source hash verification. Independent Python manifest8 and Node contracts qualify packaging only, not installed activation. Initial Node count oracle rejected the real1474 closure; update narrow member bound and refusal oracle together. Content behavior/test receipts remain in social_media_orchestrator.
+
 ## GitHub file-reader source binding — 2026-10-26
 
 Reuse the three existing Node contract/preflight/blocked-recovery owners:each

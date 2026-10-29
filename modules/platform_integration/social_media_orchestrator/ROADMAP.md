@@ -1,3 +1,7 @@
+## Current content layer — 2026-10-27
+
+Source-backed editorial package compilation is implemented locally through the existing content owner/SOCIAL adapter; no model, scheduler or publication effect. [Contract](docs/CONTENT_CAMPAIGN.md), [Soro audit and ordered remaining work](docs/audits/SORO_SOCIAL_DAE_AUDIT_20261027.md). Qualified voice/research generation, durable admitted scheduling, generic verified publishing/CMS and measured performance feedback remain incomplete. Older phase checkboxes below are historical planning, not current runtime certification.
+
 # Social Media Orchestrator - ROADMAP
 
 **Domain**: platform_integration  

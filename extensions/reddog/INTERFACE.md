@@ -1,3 +1,18 @@
+## 2026-10-29: Measured Windows manifest byte-bound amendment
+
+The actual two-helper closure is 334,056 LF bytes / 337,083 CRLF bytes, 187
+bytes above the previous 329 KiB ceiling. The unchanged Python and Node
+Windows-size tests rejected it (Python: seven pass / one fail). Preserve that
+failure; raise only the serialized-manifest bound to the smallest covering
+whole KiB: 330 KiB / 337,920 bytes, a 1,024-byte increase with 837-byte CRLF
+headroom. This separately reviewed resource-contract amendment supersedes the
+initial unchanged-manifest-size assumption. The consumer and both Python
+bounds agree; Node's actual LF/CRLF and exact maximum/+1 assertions are intact.
+The 1477/1478 member boundary, exact digest/source hashes, 2 MiB/file and 32 MiB
+total limits remain. JSON layout is unchanged. This is a post-read/pre-parse
+limit, not a preallocation bound or live-runtime qualification. No independent
+human/agent review is claimed. WSP 6/11/22/50/97.
+
 # RedDog Interface
 
 ## Combined canonical-domain source closure - 2026-10-29

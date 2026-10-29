@@ -1176,6 +1176,7 @@ jobs:
             -o pythonpath=. -p no:cacheprovider \
             modules/platform_integration/social_media_orchestrator/tests/test_antifafm_campaign.py \
             modules/platform_integration/social_media_orchestrator/tests/test_petition_campaign.py \
+            modules/platform_integration/social_media_orchestrator/tests/test_content/test_content_orchestrator.py \
             modules/platform_integration/social_media_orchestrator/tests/test_verified_x_publication.py \
             modules/ai_intelligence/digital_twin/tests/test_comment_drafter.py \
             modules/communication/moltbot_bridge/tests/test_social_campaign_adapter.py \

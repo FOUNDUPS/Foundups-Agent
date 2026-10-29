@@ -1,3 +1,29 @@
+## 2026-10-29: Reconcile existing editorial-package PR #2238
+
+WSP 11/22/50/71/84/97. Preserve the original compiler/strict content route while
+integrating main45aa97ba, including the newer preflight and Ollama owners. This
+is bounded compilation of caller-supplied, unverified sources, with proposed
+dates only; it grants no publication authority or live operation.
+
+The actual integrated package imports pass the original ten compiler methods
+and thirteen current adapter methods: 23 methods / 72 subtests. Production
+leaf replacements: none. Central DAE registration is isolated; Windows asyncio
+setup alone permits loopback fixture creation (16 events). Application imports
+and execution have a denied network/process/private-file/storage-write guard;
+zero denied-effect attempts occurred. These are local offline contracts, not a
+live campaign, installed runtime or independent human/agent review. Preserve
+the repaired, quarantined legacy content scaffold and every original compiler
+assertion; only its introductory replacement claim is corrected. Historical
+October 27 totals and verifier claims below remain dated source records.
+
+## 2026-10-27: Soro comparison and source-backed editorial packages
+
+- WSP00/15/22/50/62/84/97; baseline84f069bd, source-bound lexical fallback with UNKNOWN freshness. V2 bootstrap lacked torch; documented tracker fallback opened the gate without a detector witness.
+- Extend ContentOrchestrator and existing strict SOCIAL campaign dispatcher with scoped editorial brief→source-preserving drafts/proposed dates. Reject cross-FoundUp sources, malformed/oversized JSON, duplicate keys and execution overrides. Package revision is not authority; no host/model/provider/store/scheduler effects.
+- Existing content scaffold had invalid import/empty assertions; replace with substantive coverage. Independent review found canonical ID/locale and Unicode defects; repaired, with raw/provider length distinctions explicit.
+- Connected offline campaign selection:107 tests +131 subtests passed; new compiler coverage99.54% (not whole-module coverage). First coverage attempt failed before collection because pytest-cov was absent; installed test dependency then reran successfully. No production dependency changed.
+- Soro audit records concrete remaining owners/acceptance gates and newly confirmed denied-social fallback defect; repair is a separate concern. No live cadence/publishing/CMS/learning claim.
+
 ## 2026-10-27: Session audit and effect-free petition intake
 
 - Groundwork PR2236 merged at main50cd2ff after22 successful exact-head checks.

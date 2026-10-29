@@ -1,3 +1,28 @@
+## 2026-10-29: Reconcile existing editorial-package PR #2238
+
+WSP 11/22/50/71/84/97. Preserve the original compiler/strict content route while
+integrating main45aa97ba, including the newer preflight and Ollama owners. This
+is bounded compilation of caller-supplied, unverified sources, with proposed
+dates only; it grants no publication authority or live operation.
+
+The actual integrated package imports pass the original ten compiler methods
+and thirteen current adapter methods: 23 methods / 72 subtests. Production
+leaf replacements: none. Central DAE registration is isolated; Windows asyncio
+setup alone permits loopback fixture creation (16 events). Application imports
+and execution have a denied network/process/private-file/storage-write guard;
+zero denied-effect attempts occurred. These are local offline contracts, not a
+live campaign, installed runtime or independent human/agent review. Preserve
+the repaired, quarantined legacy content scaffold and every original compiler
+assertion; only its introductory replacement claim is corrected. Historical
+October 27 totals and verifier claims below remain dated source records.
+
+> Historical PR #2238 record from 2026-10-27, retained verbatim below. Its counts, review and runtime claims apply to that original proposal, not current-main acceptance. See the newer reconciliation entry.
+
+## 2026-10-27: Source-backed content campaign dispatcher
+
+- Existing SOCIAL campaign adapter adds strict content/prepare dispatch into the social orchestrator's content owner. Inline bounded JSON only; no live action or conversation-publisher shortcut. Existing research, petition and AntifaFM mappings preserved.
+- Connected offline campaign regression:107 tests +131 subtests passed. Compiler-specific coverage99.54%; independent input/effect review accepted the bounded slice. Soro audit additionally confirmed a denied-social conversation fallback issue; separate repair required before unattended writes.
+
 ## 2026-10-29 — Recover bounded Ollama fallback settings
 
 Recover the preserved PC model/default and timeout helpers, retaining current

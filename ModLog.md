@@ -1,3 +1,30 @@
+## 2026-10-29 — Reconcile existing editorial-package PR #2238
+
+Root preservation #2273 merged as 45aa97ba841d8100e1a68100bed4a64d69e40312.
+Its tree equals the reviewed candidate. All 23 PR checks and 21 resulting-main
+checks across four observed workflows passed. Governed Holo maintenance and a
+fresh owner query bind source/workspace/authority to this main, CURRENT/no-gap;
+both owned runtimes stopped. Twenty owned merges now have main/Holo acceptance.
+Original PC files, historical artifacts and other chats' checkouts remain intact.
+
+The existing #2238 branch is reconciled with main while preserving its original
+history. Its two compiler helpers, wrapper and strict content route retain exact
+original PR blobs. Retain the newer permission/Ollama owners and repaired legacy
+scaffold; the compiler tests retain all assertions. Actual package imports pass
+23 methods / 72 subtests with central registration isolated and zero attempted
+external application effects. Eight Python manifest tests and three Node commands
+pass; registry 1792/260 preserves every prior record. The runtime closure adds
+exactly two members (1477). Measured Windows bytes require a separately reviewed
+329 -> 330 KiB serialized-manifest cap, preserving maximum/+1 rejection and
+2 MiB/file / 32 MiB total caps. Forty exact reviewed-content security bindings
+preserve all 2904 preceding entries; scanner rules and exclusions stay unchanged.
+
+This produces caller-supplied editorial drafts/proposed dates, with no source
+authentication, publication grant, scheduler/provider/model/storage effect or
+live campaign claim. Earlier Soro findings/counts remain explicitly historical.
+Fresh hosted checks, expected-head squash and resulting-main/Holo proof for
+#2238 are still pending. WSP 6/11/22/50/71/84/87/97.
+
 ## 2026-10-29 — Preserve root artifacts and qualify the existing classifier
 
 Ollama recovery #2272 merged as 0d537a1f89c0510fd4c18f64c304f425f0d14a26.

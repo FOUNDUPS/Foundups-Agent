@@ -1,5 +1,47 @@
 # Active Slice Ledger
 
+## Editorial PR reconciliation and root close-out — 2026-10-29
+
+**Latest accepted slice:** #2273, reviewed head `8f8e0f83ec`, base `0d537a1f89`,
+squash `45aa97ba841d8100e1a68100bed4a64d69e40312`, exact reviewed-tree match. All 23 PR
+checks and 21 resulting-main checks across four observed workflows passed.
+Holo source/workspace/authority match this main, CURRENT/no-gap, generation
+`2721a901178cc0bdb5a188f1f40fa7c4aadd258c17d6194cde8cb9f975fb4a92`.
+Both owned maintenance runtimes stopped. Twenty owned merges are accepted;
+this count includes repair PRs, not twenty original backlog removals.
+
+**Current slice:** update existing PR #2238, original head `bf78e977b6a`, through
+`agent/editorial-reconciliation-20261029` without replacing branch history.
+The original four production blobs remain exact. Current-main permission and
+Ollama repairs, legacy scaffold and all 1791 prior test records remain intact.
+Actual current packages pass 23 methods/72 subtests with no attempted external
+application effects and explicit registration/asyncio fixture isolation. Eight
+manifest tests and three Node commands pass. Add exactly two runtime members,
+1475 -> 1477, and the existing PR's one test module, 1791 -> 1792/260 quarantine.
+The actual manifest is LF334056/CRLF337083 bytes. A separate measured contract
+review raises only its serialized-byte ceiling 329 -> 330 KiB; exact-max/+1,
+member1477/1478, source-hash, individual2MiB and total32MiB checks remain.
+Retain all 2904 prior security bindings and append only 40 exact current-blob
+bindings for unchanged reviewed content. No scanner rule or exclusion change.
+
+**Retrieval/review:** the accepted owner bundle at main0d537 has required module
+artifacts; optional memory README is absent. Noisy old livechat/site hits were
+reranked to the actual content/adapter/test owners. Both affected module trees
+are byte-identical between that retrieval base and main45aa97ba. New PR helpers
+are bound directly to immutable Git blobs. Historical vendor/independent-review
+claims are retained as dated evidence, not fresh acceptance. No independent
+human/agent approval or live campaign operation is claimed by this integration.
+
+**Preservation/follow-ons:** the last full snapshot records 36 retained open PRs,
+eleven drafts, with #2210's changed head retained under its active owner. Updating
+#2238 creates no duplicate PR. Keep remaining PR/PC work, F6b/F8/F9 and dependency
+alerts accountable; do not close unique work on age or conflict alone. Original
+shared PC0c81418fe and snapshots remain untouched. Previously blocked ignored
+frontend folders are retained; both owned checkouts remain in use. Hosted and
+resulting-main/Holo acceptance for this candidate remains required.
+WSP 6/11/22/50/71/84/87/97.
+
+
 ## Root artifacts and Ollama close-out — 2026-10-29
 
 **Latest accepted slice:** #2272, head `d8bc9565e`, base `cb2271228`, squash

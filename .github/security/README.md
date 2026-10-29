@@ -1,3 +1,24 @@
+## PR2238 current-source metadata review — 2026-10-29
+
+Checksum-verified Gitleaks 8.30.1 flags 39 unchanged runtime source-hash rows
+and one unchanged module-log line. All 40 retain exact prior text, five-line
+context and a reviewed path/blob/rule/line binding on main45aa97ba. Rehash all
+1477 runtime sources directly from staged Git blobs and append only these 40
+new whole-blob bindings, retaining all 2904 prior entries (2944 total). No old
+PR ledger is imported. Scanner rules, scope and exclusions are unchanged.
+This is source/provenance review by this agent, not an independent approval or
+full security certification. Fresh hosted tree/history checks remain required.
+Local receipt: editorial-metadata-review.json.
+
+## PR2238 reconciliation — historical evidence boundary, 2026-10-29
+
+`reviewed-soro-metadata-evidence.json` is retained from original PR head
+bf78e977b6a6609fa1b7ef0af1f3d177e5dac495. Its historical bindings and reported
+independent review do not approve the reconciled tree. Keep all current main
+reviewed findings; do not import old ledger rows wholesale. Current changed-file
+findings require exact current-source review, followed by hosted tree/history
+checks. Scanner rules, scope and exclusions remain unchanged.
+
 ## PC Ollama recovery metadata review — 2026-10-29
 
 The pinned Gitleaks 8.30.1 scan identifies 39 unchanged runtime source-hash rows,
