@@ -2,6 +2,16 @@
 
 ## 2026-10-29 — Current-main blockchain convergence
 
+Publication repair allocation, before mutation: head487531fd passed the28-case
+unsigned-probe job123231847698, while security job123231849005 failed the existing
+trust-bootstrap regression before scanning. Preserve that failure and all format
+sources, tests, qualifier and lock. Reuse requirements-trust-bootstrap.txt in the
+workflow before wheel acquisition; add its two path triggers and check exit status.
+Budget: <=10 workflow lines and <=16 log lines; no new dependency owner or gate
+exception. Run the unchanged security regression and fresh hosted codec profile.
+Reconcile main362b4c62a metadata, preserving all newer source/manifest/ledger
+entries and the prior exact public fixture review. Existing14/P1 priority remains.
+
 WSP15 allocation14/P1 in the existing delivery plan precedes integration.
 Preserve the exact codec,28 test methods, golden oracles, qualifier and lock.
 Combine current-main security/CI metadata; regenerate its existing registry,
