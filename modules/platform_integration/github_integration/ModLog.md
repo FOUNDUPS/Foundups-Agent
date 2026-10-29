@@ -1,5 +1,14 @@
 # GitHub Integration Module Log
 
+## 2026-10-29 — Bind WSP scans and follow-up work to one checkout
+
+Correct WSPAutomationManager's default root from the checkout's parent to the
+checkout itself, and pass that same selected root into WREGitHubIntegration.
+The read-only compliance scanner requires an exact Git top-level root; the old
+default could traverse sibling worktrees. Two isolated real-constructor cases
+cover default and explicit roots with inert dependencies. No GitHub API call,
+issue, PR or automatic remediation is executed by this validation. WSP 3/11/22/50/97.
+
 ## 2026-10-29 — Adapter workflow signature syntax repair
 
 Make agent_id, session_id and cube_type required keyword-only arguments after

@@ -1,7 +1,7 @@
 {
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
-  "total_tests": 1784,
+  "total_tests": 1785,
   "quarantined_tests": 260,
   "tests": [
     {
@@ -21039,6 +21039,22 @@
       "timeout_s": 180,
       "quarantine_reasons": [],
       "description": "Tests for WRE Master Orchestrator\n\nWSP Compliance: WSP 5 (Test Coverage), WSP 96 (WRE Skills), WSP 77 (Agent Coordination)"
+    },
+    {
+      "id": "test::modules::infrastructure::wsp_core::tests::test_wsp_compliance_checker",
+      "path": "modules/infrastructure/wsp_core/tests/test_wsp_compliance_checker.py",
+      "owner": "modules/infrastructure/wsp_core",
+      "suite_class": "unit",
+      "shard_id": "modules-infrastructure-wsp-core-unit",
+      "capabilities": [
+        "import_path_mutation",
+        "process"
+      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Offline tracked-inventory and no-write contracts for WSPComplianceChecker."
     },
     {
       "id": "test::modules::infrastructure::wsp_framework_dae::tests::test_wsp_governance",

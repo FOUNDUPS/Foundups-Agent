@@ -48,13 +48,13 @@ class WSPAutomationManager:
 
     def __init__(self, token: Optional[str] = None, project_root: Optional[Path] = None):
         self.token = token
-        self.project_root = project_root or Path(__file__).resolve().parents[5]
+        self.project_root = project_root or Path(__file__).resolve().parents[4]
         self.logger = logging.getLogger(__name__)
 
         # Core components
         self.checker = WSPComplianceChecker(project_root=self.project_root)
         self.github_automation = GitHubAutomation(token=token)
-        self.wre_integration = WREGitHubIntegration(token=token)
+        self.wre_integration = WREGitHubIntegration(token=token, project_root=self.project_root)
 
         # State
         self.violations: List[WSPViolation] = []
