@@ -1,3 +1,16 @@
+## 2026-10-29: WSP26 cryptographic claim correction
+
+Factual correction under explicit blockchain-security research direction;
+WSP15 C1/I4/D4/Impact4=13/P1. Retain the economic design while distinguishing
+Falcon State Proofs, native PQ accounts, Ed25519/multisig and consensus security.
+Remove unsupported universal/uniqueness/probability and automatic-bridge claims;
+reuse dated primary sources in the existing FX venue research document.
+Synchronize both numbered WSP26 copies per WSP81. Classify as a section/source
+clarification with 012 notification; no core economic, status or budget change.
+Base:362b4c62a665bd6c594904e39d974a7187a12649. Before publication require exact
+mirror equality, NAV syntax/data-only diff, link and scope readback; no runtime
+or cryptographic qualification is asserted. Recovery: focused Git revert.
+
 ## 2026-10-29: WSP62 historical missing-expiry completion policy
 
 Specify the narrow first stage of F4a: an existing temporary exemption may

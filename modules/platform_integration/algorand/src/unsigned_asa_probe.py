@@ -159,3 +159,46 @@ def validate_unsigned_asa_probe(unsigned_bytes, expected_request):
     if unsigned_bytes != expected.unsigned_bytes:
         raise ValueError("unsigned_bytes")
     return expected
+
+
+def _reject_json_constant(_value):
+    raise ValueError("request_json")
+
+
+def _format_request(raw):
+    if type(raw) is not bytes or not 1 <= len(raw) <= 4096:
+        raise ValueError("request_json")
+    try:
+        values = json.loads(raw.decode("ascii"), object_pairs_hook=_unique_map,
+                            parse_constant=_reject_json_constant)
+        kinds = UnsignedASAProbeRequest.__annotations__
+        if type(values) is not dict or values.keys() != kinds.keys():
+            raise ValueError("request_json")
+        if any(type(values[name]) is not kind for name, kind in kinds.items()):
+            raise ValueError("request_json")
+        canonical = json.dumps(values, sort_keys=True, separators=(",", ":"),
+                               ensure_ascii=True, allow_nan=False).encode("ascii")
+        if raw != canonical:
+            raise ValueError("request_json")
+    except (ValueError, TypeError, RecursionError):
+        raise ValueError("request_json") from None
+    return UnsignedASAProbeRequest(**values)
+
+
+def format_unsigned_probe_request(request_json: bytes) -> bytes:
+    """Frame one declared request; no producer, host-fact or signing authority."""
+    expected = _format_request(request_json)
+    built = build_unsigned_asa_probe(expected)
+    validated = validate_unsigned_asa_probe(built.unsigned_bytes, expected)
+    raw = validated.unsigned_bytes
+    result = dict(schema="foundups-unsigned-probe-worker-result-v1",
+        request_sha256=hashlib.sha256(request_json).hexdigest(), unsigned_hex=raw.hex(),
+        unsigned_sha256=hashlib.sha256(raw).hexdigest(), transaction_id=validated.transaction_id,
+        source_binding_sha256=validated.source_binding_sha256)
+    if any(type(value) is not str for value in result.values()):
+        raise ValueError("result_json")
+    encoded = json.dumps(result, sort_keys=True, separators=(",", ":"),
+                         ensure_ascii=True, allow_nan=False).encode("ascii")
+    if len(encoded) > 16384:
+        raise ValueError("result_json")
+    return encoded

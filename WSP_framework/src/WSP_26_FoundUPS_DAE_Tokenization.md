@@ -736,9 +736,9 @@ The FoundUps economic infrastructure operates across three layers, each optimize
 |  - Staking / unstaking logic                     |
 |  - UPS allocation + decay math                   |
 |  - Subscription management                       |
-|  - QUANTUM RESISTANT (Falcon-1024, NIST)         |
+|  - Falcon: State Proofs / opt-in PQ accounts    |
 |  - ~$0.001/tx, 10K+ TPS, 3.3s finality          |
-|  - State Proofs ↁEbridge to Bitcoin              |
+|  - State Proofs: bridge verification primitive  |
 +-------------------------+------------------------+
                           | state proofs + BTC settlement
 +-------------------------v------------------------+
@@ -751,9 +751,22 @@ The FoundUps economic infrastructure operates across three layers, each optimize
 +--------------------------------------------------+
 ```
 
-**Why Algorand for Layer 1**: Only production blockchain with live quantum-resistant signatures (Falcon-1024, NIST-selected). 20% chance of cryptographically relevant quantum computers before 2030. "Harvest now, decrypt later" attacks are already occurring. Every FoundUp token issued on Algorand is quantum-safe from day one. State Proofs provide cryptographic bridge to Bitcoin without trust.
+**Why Algorand for Layer 1**: Algorand remains the proposed smart-contract layer.
+Falcon protects State Proof attestations, and native Falcon-1024 accounts are
+supported after consensus v42 (algod v5.0.0). Existing Ed25519 accounts and native
+Ed25519 multisig are not automatically migrated; consensus/VRF security remains
+a separate boundary. ASA issuance alone does not protect every holder or issuer
+authority. NIST-selected Falcon must not be presented as finalized FN-DSA.
 
-**Why not all-Bitcoin**: Bitcoin's L2 ecosystem (Lightning, RGB, Citrea) lacks quantum resistance as of 2026. When Bitcoin adopts post-quantum signatures, the system can migrate Layer 1. FAM's `TokenFactoryAdapter` is chain-agnostic  Eswap the backend, same contracts.
+State Proofs support verification; they do not themselves implement a Bitcoin
+bridge or protect Bitcoin spending keys. FoundUps bridge, custody and migration
+claims require separate implementation and qualification. For dated primary
+sources and migration limits, see [the security boundary](../../docs/architecture/FOUNDUPS_FX_VENUE_AND_PROJECT_CLAIM_RESEARCH_20261025.md#cryptographic-security-boundary-2026-10-29).
+
+**Why not all-Bitcoin**: Keep the existing Bitcoin reserve/settlement and Algorand
+smart-contract design. A future Bitcoin L2 remains an option after separate
+asset, authority, contract, bridge and security review; adapter interchangeability
+does not make assets or authorizers interchangeable.
 
 **Phased Rollout (Occam's Layers)**:
 

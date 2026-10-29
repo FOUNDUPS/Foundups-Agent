@@ -1,5 +1,18 @@
 # Algorand module memory
 
+## Canonical JSON framing memory
+
+Keep JSON shape/type/canonical checks separate from existing semantic request and
+wire validation. Reuse the duplicate-map helper and general validator; do not add
+a fixed-golden decoder or repeat financial/ledger policy in the framing layer.
+Use validated artifact sidecars. `source_binding_sha256` binds all15 declarations,
+not executable/profile/source-code/grant identity. Producer admission stays host-owned.
+
+Keep original28 evidence immutable; qualify the explicit52-ID version with fresh
+source/profile/release bindings. Never import a test helper as a production launcher.
+Fixed valid shapes need not reach4096/1024/16384 caps; test oversize refusal and
+maximum real valid values without inventing padded positive boundary packets.
+
 ## Qualification pattern — 2026-10-25
 
 One fixed local profile passes all 28 codec methods, four expected denied controls
