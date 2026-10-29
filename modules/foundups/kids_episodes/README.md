@@ -47,3 +47,12 @@ The [local production command and autonomy audit](../../communication/youtube_sh
 See [EDUIT episode Mall architecture](../eduit/docs/EPISODE_MALL_ARCHITECTURE.md) for the specified shared-shell
 video/game tile, gestures, locale cues, parent area and next-session handoff.
 This is a design dependency, not evidence of an active EDUIT adapter.
+
+
+## Five composite tiles: planning only — 2026-10-28
+`src/tile_batch.py:prepare_tile_batch` creates an ordered five-tile build/review
+DAG plus series-join review. `check_review_record` checks complete, artifact-bound
+local evidence fields; it authenticates neither evidence nor independent actors.
+See [EDUIT RSI contract](../eduit/docs/TILE_PRODUCTION_RSI.md) for criteria,
+correction lineage, existing runtime owners and blocked integration gates.
+No executor, queue, scheduler, promotion or new FoundUp registration is installed.

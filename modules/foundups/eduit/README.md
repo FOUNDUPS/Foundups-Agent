@@ -1,5 +1,40 @@
 # EDUIT — Education Using Information Technology
 
+> **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
+## EDUIT vision / Storytime Evolution map — 2026-10-28
+
+[EDUIT Pain → Solution → Outcome and Storytime Evolution progression](docs/EDUIT_STORYTIME_VISION_AND_EVOLUTION_MAP.md) is the current specification for the three-question FoundUp vision, Storytime's place inside EDUIT, modular counting/word/language objects, replay, optional parent-controlled memory, About/How links and a proposed accessible Roadmap mind-map modal. All new runtime behavior remains unimplemented until independently verified. A complete tile is WATCH → PLAY → VERIFY, superseding older video + game descriptions.
+
+
+## Adaptive learning content and formative assessment — 2026-10-28
+
+[Adaptive learning-content contract](docs/ADAPTIVE_LEARNING_CONTENT.md) defines EDUIT's outcome/experience/production-RSI vision, reusable three-object content packs, post-game picture matching, separate learning points and off-session RSI. This is specified, not shipped. Reuse the existing game and review owners; do not collect child play traces for WRE learning.
+
+
+## RSI architecture / new-session entrypoint — 2026-10-28
+
+[Storytime RSI system architecture](docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md) is the cross-module continuation map: eSingularity vision → EDUIT mission → Storytime tiles; WSP/WRE/FAM/HoloIndex/Kids Episodes/Mall ownership; current proof versus missing runtime authority. Use existing scaffolding, never a parallel engine. The [five-tile contract](docs/TILE_PRODUCTION_RSI.md) remains the acceptance oracle. First Little Shrew tile calibrates; the next actual tile must demonstrate retained improvement before autonomous RSI is claimed.
+
+
+## Five-tile RSI production contract — 2026-10-28
+
+Read [TILE_PRODUCTION_RSI](docs/TILE_PRODUCTION_RSI.md) before the next tile or
+repair. It maps creator corrections to fixed acceptance checks, existing
+OpenClaw/Hermes/FAM/WRE owners, and next-real-tile transfer evidence. The pure
+Kids Episodes planning/record checker is implemented; runtime admission, batch
+execution and retained skill promotion remain unproved. No live UI changes.
+
+## Current learning shell and evolution direction — 2026-10-28
+
+[Learning, evolution and sharing roadmap](docs/EVOLUTION_PLAY_AND_SHARING_ROADMAP.md)
+owns the latest direction: mechanical proof of concept, optional creature-AI
+prototype, then parent-owned membership MVP. Five-mission sets, fictional trait
+bonuses and reviewed replay-to-YouTube are planned, not live. Current score and
+slow rescue remain unchanged. The viewer now adds Play/About/How, a channel link
+above the local film, and viewport-sized controls. No YouTube iframe, upload,
+account, model, fingerprint or child telemetry is introduced.
+
+
 ## Current slow-rescue direction — 2026-10-27
 
 [SLOW_RESCUE_AND_AGENT_ROADMAP](docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md) supersedes
@@ -270,3 +305,12 @@ freeze/mark/share, video/game switch, video repeat and child touch-lock. This
 implements the bounded tile-control slice; native-device acceptance, authentic
 Red Dog feedback transport and Mall ratings remain separate. Next priority is
 physical-device acceptance of this episode before extending the story.
+
+## EDUIT agentic learning game engine (2026-10-28)
+See [EDUIT Agentic Learning Game Engine](docs/EDUIT_AGENTIC_LEARNING_GAME_ENGINE.md) for the sound → written word → spoken word timing contract, family casting with smaller Baby, reusable matching/tracing/counting modes, deterministic browser hooks, and 012 → 0102 → WSP97 RSI feedback loop. This is a design contract, not an implemented autonomous runtime. Replay awards play stars; no Earn Stars button.
+
+Current narration implementation and bounded review evidence:
+[Narration timing reconciliation](docs/NARRATION_TIMING_REVIEW.md).
+
+[Phone fullscreen repair and retained regression checks](docs/PHONE_FULLSCREEN_REPAIR.md)
+records the v12 comparison, scoped repair and physical-device acceptance limits.

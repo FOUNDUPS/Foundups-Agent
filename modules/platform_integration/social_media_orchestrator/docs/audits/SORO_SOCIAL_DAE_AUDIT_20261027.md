@@ -5,6 +5,18 @@ Authority: 012 requested competitor research, repository audit and implementatio
 Scope: public Soro behavior and Foundups-Agent source. No Soro account, private
 implementation, provider account, local Windows runtime or live posting tested.
 
+## Reconciliation status — 2026-10-29
+
+This is the retained October 27 audit at the source baseline above. Its vendor
+observations, independent-verifier statements and test totals are historical;
+they were not re-performed by this reconciliation. In particular, #2271 has
+since repaired failed-preflight conversation fallback on main. Preserve that
+newer permission owner; the older reproduction below is not a current finding.
+The current integration keeps the repaired, quarantined legacy content scaffold
+and adds the compiler tests separately. Current source-bound validation belongs
+to the newer module TestModLog entry and exact PR/main checks. This document does
+not authorize publication, provider access or an unattended campaign.
+
 ## Finding
 
 The identified product is **Soro at trysoro.com**, an SEO/content autopilot.

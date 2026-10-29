@@ -1,3 +1,12 @@
+## Risk-verification integration — 2026-10-28
+
+The additive CI job `wre-verification-contracts` runs the exact nine-file
+selection in [TestModLog](TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+It covers the planner, local execution, resident request/handler, final verifier
+and merge-sentinel prerequisite contracts. Recording fakes prove preflight
+makes zero calls; temporary Git repositories exercise real differential
+collection. Synthetic admission fixtures are not native authorization receipts.
+
 ## Measured-zero fidelity regression — P15
 
 Nine frozen cases in existing `test_pattern_memory.py` cover overall/recent/

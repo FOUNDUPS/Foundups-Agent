@@ -1,3 +1,24 @@
+## Ollama fallback contract selection
+
+`test_openclaw_ollama_contract.py` freezes 19 offline cases for finite bounded
+timeouts, model overrides/blank-disable, request propagation, cancellation and
+local failure reporting. It imports real helpers without the production package
+initializer, uses synthetic collaborators and forbids live network/process work.
+Two preserved cases in `TestConversationRuntimeFlags` additionally exercise the
+DAE's constructor and conversation facade with mocked transport/overseer.
+These cases do not prove an installed model or live cold-start performance.
+
+## Preflight denial boundary
+
+Run `test_openclaw_preflight_boundary.py` with bytecode and pytest plugins disabled,
+`--noconftest --import-mode=importlib -p no:cacheprovider` and an explicit empty
+pytest config. Its26 cases load actual process/planner helpers without the daemon
+package initializer; collaborators are synthetic. Windows event-loop setup occurs
+before application socket/process denial. No model/provider/service starts.
+Retain `test_skill_boundary_policy.py` and `test_openclaw_permission_fail_closed.py`
+for adjacent contracts. Their constructors need isolated daemon registration,
+containment and permission storage when run locally; they are not live acceptance.
+
 ## Installed HIGH source integration — 2026-10-23
 
 PR #2181 reconciles preserved `0088b9a3` with main `99dc200869d49ab911134a11768c0d9a05472cb2`.

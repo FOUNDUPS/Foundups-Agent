@@ -1,5 +1,45 @@
 # YouTube Shorts Scheduler - Interface Documentation
 
+## Qualified scheduled inventory
+
+`YouTubeStudioDOM.read_scheduled_inventory(channel_id, *, max_pages=100) -> dict`
+reads the current filtered list without account navigation or content changes.
+`status` is `complete`, `partial` or `failed`; `total_scheduled` is an integer
+only for a complete read, including a qualified empty result. Other fields are
+`channel_id`, `channel_verified`, `filter_verified`, `start_verified`,
+`pagination_complete`, `pages_read`, `rows_seen`, `rows_parsed`,
+`observed_scheduled_count`, `videos`, `unparsed_rows` and `issues`.
+Each qualified video includes exact `video_id`, displayed `date`/`time`, raw
+`visibility_text`, raw `date_text`/`date_label`, and `schedule_source` equal to
+`visibility_cell` or `schedule_labeled_date_cell`. A Date cell supplies a slot
+only when its own text/aria-label/title explicitly says Scheduled, with no
+Uploaded/Published contradiction. Unlabeled/upload dates never supply one. These are channel-local displayed wall
+times, not an assertion of timezone or a verified publication write.
+
+Native receiving ID (`ytcfg.get` or `yt.config_`, with conflicts refused) and exact Studio path must agree on every page. An actual
+single Scheduled/Has schedule chip, no extra search/filter, an observed first
+page and known final pagination state are required. Missing pagination controls,
+repeated pages/IDs, invalid slots, changed channel/filter, parse failures or the
+100-page bound retain partial observations and leave the total unknown.
+
+`ContentPageScheduler.audit_calendar` adds `status`, `inventory`,
+`observed_scheduled_count`, `observed_conflicts` and `observed_heavy_days`.
+Partial reads have no automatic `conflicts`/`heavy_days` repair input and cannot
+recommend a clean calendar. `ScheduleAuditor.run_audit` returns `healthy=None`
+when incomplete, with no absence-based comparisons or tracker auto-heal.
+`ScheduleTracker.sync_from_youtube(videos, *, inventory=None) -> bool` refuses
+to reset state without a complete matching receipt, returning false unchanged.
+`resolve_conflicts(..., *, inventory=None)` requires a complete receipt and every
+supplied member/slot bound to it. `thin_schedule` requires matching complete
+inventory, video list, channel config and tracker identity before any repair.
+These read receipts establish observed inputs, not live write/readback authority.
+
+Rotation binds canonical receiving IDs to scheduler/config/tracker/cache and
+verifies native ID, Studio path and known permission before any writer. Unknown
+or failed switches skip writers; fallback is deferred to its own canonical
+entry. Unbound/incomplete zero caches are ignored. This is an additive receipt
+and deliberate safety change for historical unqualified tracker-sync callers.
+
 ## Channel cadence
 
 Omitted daily cap now resolves per channel: Move2Japan is eight/day at

@@ -1,3 +1,50 @@
+## 2026-10-29: WSP85 current root ownership and preservation boundaries
+
+Clarify foundational root ownership instead of a historical ten-file ceiling,
+name temporary/prompt artifacts, and require preservation and ownership review
+before relocation. Document the existing validator as an immediate-child,
+read-only classifier; proposed hooks are not installed enforcement. Mirror the
+numbered framework/knowledge protocol. WSP81 class: NOTIFICATION_REQUIRED;
+012 notified in this authorized audit-repair chat. Core foundational-only intent,
+WSP status and priorities remain unchanged; no automatic deletion is authorized.
+Base: main0d537a1f. Six root-validator cases, exact protocol mirror equality,
+relocation/link preservation and whitespace checks pass. Runtime manifest and
+test registry remain current and unchanged. Hosted/main/Holo acceptance remains
+pending; historical source remains
+in Git and recovery is a focused revert. WSP22/50/64/81/85/97.
+
+## 2026-10-29: WSP26 cryptographic claim correction
+
+Factual correction under explicit blockchain-security research direction;
+WSP15 C1/I4/D4/Impact4=13/P1. Retain the economic design while distinguishing
+Falcon State Proofs, native PQ accounts, Ed25519/multisig and consensus security.
+Remove unsupported universal/uniqueness/probability and automatic-bridge claims;
+reuse dated primary sources in the existing FX venue research document.
+Synchronize both numbered WSP26 copies per WSP81. Classify as a section/source
+clarification with 012 notification; no core economic, status or budget change.
+Base:362b4c62a665bd6c594904e39d974a7187a12649. Before publication require exact
+mirror equality, NAV syntax/data-only diff, link and scope readback; no runtime
+or cryptographic qualification is asserted. Recovery: focused Git revert.
+
+## 2026-10-29: WSP62 historical missing-expiry completion policy
+
+Specify the narrow first stage of F4a: an existing temporary exemption may
+record only its already-past review-quarter boundary, with every other field
+and limit unchanged. It remains expired debt. Require exact-base policy in
+both mirrors; reject renewal, new exemptions and candidate-authored authority.
+No audit implementation or exemption entry changes in this slice:
+`SPECIFIED_NOT_IMPLEMENTED`. WSP81 class: NOTIFICATION_REQUIRED (section and
+compliance clarification); 012 notified during the authorized audit repair.
+Base: `f304ba799f8fa835f0b5127efabe9e724315e3c8`. The numbered framework and
+knowledge files are synchronized; historical content is retained in Git.
+Recovery: focused revert. WSP22/50/62/64/81/97.
+
+Validation: exact mirror equality and whitespace checks pass. Existing
+`test_foundup_route_wsp62_exemptions.py`: five tests pass, one fails because
+the unchanged verifier is 591 lines against its unchanged 586-line ceiling.
+Git blob comparison proves the test, target and both exemption registries
+match the exact base. That inherited size debt remains open; no limit was raised.
+
 ## 2026-10-13: WSP71 security review ownership and candidate triage
 
 Added sections 5.4–5.5 under 012's explicit direction to repair security gaps

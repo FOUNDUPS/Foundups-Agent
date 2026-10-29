@@ -1,7 +1,78 @@
+## 2026-10-29: Reconcile existing editorial-package PR #2238
+
+WSP 11/22/50/71/84/97. Preserve the original compiler/strict content route while
+integrating main45aa97ba, including the newer preflight and Ollama owners. This
+is bounded compilation of caller-supplied, unverified sources, with proposed
+dates only; it grants no publication authority or live operation.
+
+The actual integrated package imports pass the original ten compiler methods
+and thirteen current adapter methods: 23 methods / 72 subtests. Production
+leaf replacements: none. Central DAE registration is isolated; Windows asyncio
+setup alone permits loopback fixture creation (16 events). Application imports
+and execution have a denied network/process/private-file/storage-write guard;
+zero denied-effect attempts occurred. These are local offline contracts, not a
+live campaign, installed runtime or independent human/agent review. Preserve
+the repaired, quarantined legacy content scaffold and every original compiler
+assertion; only its introductory replacement claim is corrected. Historical
+October 27 totals and verifier claims below remain dated source records.
+
+> Historical PR #2238 record from 2026-10-27, retained verbatim below. Its counts, review and runtime claims apply to that original proposal, not current-main acceptance. See the newer reconciliation entry.
+
 ## 2026-10-27: Source-backed content campaign dispatcher
 
 - Existing SOCIAL campaign adapter adds strict content/prepare dispatch into the social orchestrator's content owner. Inline bounded JSON only; no live action or conversation-publisher shortcut. Existing research, petition and AntifaFM mappings preserved.
 - Connected offline campaign regression:107 tests +131 subtests passed. Compiler-specific coverage99.54%; independent input/effect review accepted the bounded slice. Soro audit additionally confirmed a denied-social conversation fallback issue; separate repair required before unattended writes.
+
+## 2026-10-29 — Recover bounded Ollama fallback settings
+
+Recover the preserved PC model/default and timeout helpers, retaining current
+preflight and skill boundaries. The fallback selects `qwen-overseer:latest` by
+default and passes a finite 15–300 second configured timeout to Requests.
+Invalid/non-finite settings use 120. Explicit model overrides and blank-disable
+remain available. Align the example template, sample configuration and setup
+docs without changing private environment settings or model/storage state.
+
+The frozen offline oracle has 15 failures/four passes on unchanged helpers and
+19 passes on the preserved candidate. Real helper source is exercised with
+synthetic transport/daemon collaborators. The portable 19-case replay and both original DAE constructor/facade cases pass;
+central registration is isolated and the latter records zero external attempts.
+Eight manifest cases and three Node compatibility commands pass. Registry check
+is current at 1791 files/260 quarantined; the unchanged 1475-member closure changes
+only these two helper digests. Hosted/main/Holo checks remain required. Live cold-start readiness remains
+IMPLEMENTED_NOT_VALIDATED. Requests timeouts do not impose a total-turn deadline.
+WSP 6/11/22/50/71/84/87/97.
+
+## 2026-10-29 — Recover explicit preflight denial from preserved PC work
+
+Reconcile only the denied-preflight branch from the preserved PC checkout onto
+main3a4de0b. Retain the newer call-local skill verdict and unchanged healthy paths.
+The older working copy and its verified backup remain untouched. Ollama timeout,
+llmster startup, pitch documents and unrelated PC work are excluded.
+Frozen helper/planner contracts: 13 failed/13 passed on unchanged source, then
+26 passed on the reconciled candidate. Connected legacy skill checks add28 passes;
+existing permission regressions add12. Registration/containment and unrelated
+permission storage are isolated in the connected harness; no live service ran.
+Manifest membership remains1475 with one source hash updated; existing pins and
+canonical test registry are regenerated/rebound. Hosted and resulting-main/Holo
+acceptance remain required. WSP 6/11/22/50/71/84/87/97.
+
+## 2026-10-29 — Preserve interface contracts and repair exemption metadata
+
+Split the 3481-line interface into a directory and five active contract pages
+below 1000 lines each. Preserve all 134 original headings in order and all
+source text after reversing relative-link rebasing and navigation additions.
+Existing fragment links still resolve through the directory; this changes no
+API semantics or recorded qualification status. Remove the resolved interface
+and already-small brain-current-state test exemptions. Complete four missing
+expiry fields as the already-past 2026-Q3 boundary under separately merged
+WSP62 policy; no limit or renewal is authorized.
+
+Validation: 170 local links/targets verified; exact-base audit accepts the
+removals and metadata changes without candidate errors. The provider-evidence
+size test now passes after removing its obsolete interface entry. The broader
+selection reports 110 pass / four inherited expiry failures, plus 28 subtests;
+baseline exemption suite had five failures. Expired source debt remains.
+WSP 5/11/22/50/62/84/97. No service, model or platform action was executed.
 
 ## Parent authority bootstrap forwarding — 2026-10-25
 

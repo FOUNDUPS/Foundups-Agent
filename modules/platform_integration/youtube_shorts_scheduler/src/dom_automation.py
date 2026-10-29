@@ -1146,23 +1146,20 @@ class YouTubeStudioDOM:
 
         Returns dict with keys: active, chip_texts, url, detected, wrong_for_unlisted.
         """
+        from .schedule_inventory import FILTER_STATE_SCRIPT
+
         try:
-            raw = self.driver.execute_script("""
-                const chips = document.querySelectorAll('ytcp-chip');
-                const texts = [];
-                for (let chip of chips) {
-                    const text = (chip.textContent || '').trim();
-                    if (text && text.toLowerCase().includes('visibility')) {
-                        texts.push(text);
-                    }
-                }
-                return { chipTexts: texts, url: window.location.href || '' };
-            """) or {}
+            raw = self.driver.execute_script(FILTER_STATE_SCRIPT) or {}
         except Exception as exc:
             logger.warning(f"[DOM] Could not read visibility filter state: {exc}")
             raw = {"chipTexts": [], "url": ""}
 
-        chip_texts = raw.get("chipTexts") or []
+        # The shared snapshot sees every filter chip. A title/search chip whose
+        # value happens to say Unlisted/Scheduled is not visibility authority.
+        bare_labels = {label.casefold() for label in VISIBILITY_CHECKBOX_LABELS.values()} | {"scheduled"}
+        chip_texts = [text for text in (raw.get("chipTexts") or []) if isinstance(text, str)
+                      and ((label := " ".join(text.casefold().split())).startswith(("visibility:", "visibility "))
+                           or label in bare_labels)]
         url = raw.get("url") or ""
         chip_blob = " | ".join(chip_texts)
         detected = classify_visibility_filter(chip_blob, url)
@@ -2515,6 +2512,12 @@ class YouTubeStudioDOM:
                 logger.warning(f"[DOM] Error parsing scheduled row: {e}")
 
         return videos
+
+    def read_scheduled_inventory(self, channel_id: str, *, max_pages: int = 100) -> Dict[str, Any]:
+        """Read qualified scheduled slots; legacy list methods are not completeness proof."""
+        from .schedule_inventory import collect_scheduled_inventory
+
+        return collect_scheduled_inventory(self, channel_id, max_pages=max_pages)
 
     def get_unlisted_videos(self) -> List[Dict[str, str]]:
         """

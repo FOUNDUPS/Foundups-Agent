@@ -56,3 +56,38 @@ passed for60s no-input ending, multi-tap wake locks, deliberate all-five rescue,
 late arrival/frozen lost pose, dozing, practice and score uniqueness/bounds.
 Browser harness extended with64px rendered bounds, rail containment, reset and
 practice recovery. See SLOW_RESCUE_REVIEW for actual browser acceptance.
+
+## 2026-10-28 — Learning shell
+18 Node cases and 53 security-gate regressions pass. Existing browser fixture
+extended with About/How pause/state and adaptive control measurements; image
+size assertion now waits for decode, tablet comparison tolerates subpixel rounding.
+Scoped rendered outcomes and device limits: ../docs/LEARNING_SHELL_REVIEW.md.
+
+
+## 2026-10-28 — Batch RSI planning boundary
+Four stdlib unittest methods pass with per-criterion failure subtests; existing
+18 EDUIT Node tests pass. No runtime, visual/audio or forward-transfer proof.
+Run `python -B -m unittest modules.foundups.kids_episodes.tests.test_tile_batch -v`.
+The existing Kids Episodes workflow collects this suite through pytest; local
+pytest was unavailable, not reported as passed. See TILE_PRODUCTION_RSI in EDUIT.
+
+Hosted first attempt: Kids Episodes passed; general CI stopped at stale canonical
+test registry. Regenerated using the existing owner: one new unit-test entry,
+1774→1775 total, quarantine count273 unchanged; --check now passes locally.
+This integration failure remains recorded and the review procedure now requires
+staging/regenerating/checking the registry when adding Python tests.
+
+## 2026-10-28 — Narration timing and adapter lifecycle
+26 Node tests pass. Added first-play/resume, seek/replay, stale callback,
+muted/unavailable fade and authored THUMP cue tests. Adapter fixture covers
+buffering/seek cancellation and preserving user volume including zero. Director
+fixture handles first-visit intro and checks fullscreen origin, caption/controls
+and exit nonoverlap. Browser voice unavailable in cloud; no acoustic acceptance.
+See ../docs/NARRATION_TIMING_REVIEW.md.
+
+## 2026-10-29 — Phone fullscreen and viewport regression coverage
+29 Node tests pass (3 new direct viewport/controller tests). Same frozen browser
+oracle rejects v12's60px exit, then passes296 root/inner viewport checks on the
+candidate. Retained35-check suite passes at390x844 including rotation with frozen
+frame/marks. Readiness race retained as fixture failure, bounded wait added.
+Native iOS touch/Home Screen and physical audio remain unverified.

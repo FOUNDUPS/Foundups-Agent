@@ -1,4 +1,4 @@
-﻿"""Core schemas for FoundUps Agent Market."""
+"""Core schemas for FoundUps Agent Market."""
 
 from __future__ import annotations
 

@@ -1,4 +1,4 @@
-﻿"""Agent join stubs."""
+"""Agent join stubs."""
 
 from .interfaces import AgentJoinService
 

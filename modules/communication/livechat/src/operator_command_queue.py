@@ -47,6 +47,25 @@ def resolve_manifest_state_path() -> Path:
     return _resolve_path(os.getenv("YT_012_MANIFEST_STATE_FILE", DEFAULT_STATE_FILE))
 
 
+def load_active_theme(surface: str):
+    """Read private, unexpired context for one surface without mutating receipts."""
+    try:
+        raw = OperatorCommandQueue._read_json(resolve_manifest_state_path(), {'version': 1})
+        context = raw.get('active_context')
+        if not isinstance(context, dict) or surface not in ALLOWED_CONTEXT_SURFACES:
+            return None
+        surfaces, expiry = context.get('surfaces'), context.get('expires_at_unix')
+        message = context.get('message')
+        if (not isinstance(surfaces, list) or not surfaces
+                or any(not isinstance(s, str) or s not in ALLOWED_CONTEXT_SURFACES for s in surfaces)
+                or surface not in surfaces or not _finite_number(expiry) or expiry <= time.time()
+                or not isinstance(message, str) or not message.strip() or len(message) > MAX_MESSAGE_LENGTH):
+            return None
+        return dict(context)
+    except (OSError, ValueError, TypeError, OverflowError):
+        return None
+
+
 def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
@@ -56,6 +75,36 @@ def _finite_number(value: Any) -> bool:
         return type(value) in (int, float) and math.isfinite(value)
     except OverflowError:
         return False
+
+
+def enqueue_operator_command(command: dict, *, command_path=None, acknowledgement_path=None) -> str:
+    """Append one immutable command under the queue's existing ledger lock.
+
+    Producers own only the inbox. Acknowledgements and active state stay queue-owned.
+    """
+    inbox_path = _resolve_path(command_path or os.getenv(COMMAND_FILE_ENV, DEFAULT_COMMAND_FILE))
+    ledger_path = _resolve_path(acknowledgement_path or os.getenv(ACK_FILE_ENV, DEFAULT_ACK_FILE))
+    if inbox_path == ledger_path:
+        raise ValueError('manifest_paths_must_be_distinct')
+    if (not isinstance(command, dict) or not isinstance(command.get('id'), str)
+            or not 1 <= len(command['id']) <= 200
+            or command.get('action') not in {'status', 'set_context', 'clear_context', 'announce'}
+            or not isinstance(command.get('payload', {}), dict)):
+        raise ValueError('invalid_command')
+    identity = os.path.normcase(str(ledger_path))
+    with runtime_operation_lock(identity, timeout_seconds=5):
+        inbox = OperatorCommandQueue._read_json(inbox_path, {'version': 1, 'commands': []})
+        ledger = OperatorCommandQueue._read_json(ledger_path, {'version': 1, 'acknowledgements': []})
+        commands, rows = inbox.get('commands'), ledger.get('acknowledgements')
+        if not isinstance(commands, list) or not isinstance(rows, list) or len(commands) >= 100:
+            raise ValueError('invalid_or_full_manifest')
+        if any(not isinstance(row, dict) for row in commands + rows):
+            raise ValueError('invalid_manifest_entry')
+        if any(row.get('id') == command['id'] for row in commands + rows):
+            raise ValueError('command_id_already_exists')
+        inbox['commands'] = [*commands, command]
+        OperatorCommandQueue._atomic_write(inbox_path, inbox)
+    return command['id']
 
 
 class OperatorCommandQueue:
@@ -250,7 +299,7 @@ class OperatorCommandQueue:
         if "livechat" in surfaces and gates["livechat_dry_run"]:
             return {"status": "simulated", "result": {"sender_accepted": False, "delivery_verified": False}}
         sender = getattr(getattr(self.dae, "livechat", None), "send_chat_message", None)
-        if "livechat" in surfaces and not callable(sender):
+        if action == 'announce' and not callable(sender):
             return {"status": "deferred", "reason": "livechat_unavailable"}
         result = {}
         if action == "set_context":
@@ -258,8 +307,13 @@ class OperatorCommandQueue:
                        "expires_at_unix": expires, "source_command_id": command["id"]}
             self._atomic_write(self.state_path, {"version": 1, "active_context": context})
             result["context"] = context
+            # Context is private behavioral guidance. Only announce publishes.
+            result["context_activated"] = True
+            result["public_message_sent"] = False
+            return {"status": "accepted", "result": result}
         if "livechat" not in surfaces:
             return {"status": "accepted", "result": result}
         sent = await sender(message.strip(), response_type="operator")
         result.update(sender_accepted=sent is True, delivery_verified=False)
         return {"status": "accepted" if sent is True else "unknown", "result": result}
+

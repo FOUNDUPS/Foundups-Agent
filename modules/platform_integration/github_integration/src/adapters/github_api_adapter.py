@@ -256,7 +256,7 @@ class GitHubAPIAdapter:
         
         return mock_update
         
-    async def trigger_workflow(self, workflow_id: str, ref: str, inputs: Optional[Dict] = None,
+    async def trigger_workflow(self, workflow_id: str, ref: str, inputs: Optional[Dict] = None, *,
                              agent_id: str, session_id: str, cube_type: str) -> Dict[str, Any]:
         """
         Trigger GitHub Actions workflow

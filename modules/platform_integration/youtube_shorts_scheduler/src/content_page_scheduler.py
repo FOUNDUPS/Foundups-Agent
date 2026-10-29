@@ -266,14 +266,15 @@ class ContentPageScheduler:
 
             # Wait for video table to load
             WebDriverWait(self.driver, 15).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "ytcp-video-row"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, "ytcp-video-row, ytcp-video-section-content"))
             )
-            logger.info(f"[CPS] Content page loaded — video rows visible")
+            logger.info("[CPS] Content list mounted; inventory readiness still requires qualified readback")
 
             # Apply visibility filter via sidebar UI (if specified)
             if visibility:
                 if not self._apply_visibility_filter_via_ui(visibility):
-                    logger.warning(f"[CPS] Filter '{visibility}' failed — continuing unfiltered")
+                    logger.warning(f"[CPS] Filter '{visibility}' failed — refusing unfiltered result")
+                    return False
 
             return True
         except TimeoutException:
@@ -330,6 +331,15 @@ class ContentPageScheduler:
         if not checkbox_label:
             logger.warning(f"[CPS] Unknown visibility filter: {visibility}")
             return False
+
+        if visibility.upper() == "SCHEDULED":
+            # Reuse the existing chip-bar Skillz route, not the obsolete sidebar
+            # selector. A click acknowledgement alone is not applied-filter proof.
+            from ..skillz.shorts_live_schedule_signal.executor import _apply_has_schedule_filter
+
+            if self.dom.verify_visibility_filter("SCHEDULED"):
+                return True
+            return _apply_has_schedule_filter(self.driver) and self.dom.verify_visibility_filter("SCHEDULED")
 
         try:
             # Step 1: Click filter icon to open dropdown
@@ -399,10 +409,11 @@ class ContentPageScheduler:
 
             # Verify rows reloaded
             WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "ytcp-video-row"))
+                EC.presence_of_element_located((By.CSS_SELECTOR, "ytcp-video-row, ytcp-video-section-content"))
             )
-            logger.info(f"[CPS] Visibility filter '{visibility}' ({checkbox_label}) applied")
-            return True
+            verified = self.dom.verify_visibility_filter(visibility)
+            logger.info(f"[CPS] Visibility filter '{visibility}' ({checkbox_label}) verified={verified}")
+            return verified
 
         except TimeoutException:
             logger.warning(f"[CPS] Timeout applying filter '{visibility}'")
@@ -979,34 +990,23 @@ class ContentPageScheduler:
             Dict with conflicts, gaps, recommendations
         """
         from .schedule_tracker import channel_daily_cap
+        from .channel_config import get_channel_config
+        from .schedule_inventory import failed_inventory, qualified_inventory
+
         max_per_day = channel_daily_cap(channel_key, max_per_day)
         logger.info(f"[CPS-AUDIT] Auditing calendar for {channel_key}")
 
-        # Navigate to scheduled shorts
-        if not self.navigate_to_scheduled(channel_key):
-            return {"error": "navigation_failed", "conflicts": [], "gaps": []}
-
-        # Collect all scheduled videos across pages
-        all_scheduled = []
-        page = 1
-        while True:
-            try:
-                self.dom.set_page_size(50)
-            except Exception:
-                pass
-
-            videos = self.dom.get_scheduled_videos_detailed()
-            all_scheduled.extend(videos)
-            logger.info(f"[CPS-AUDIT] Page {page}: {len(videos)} scheduled videos")
-
-            if self.dom.has_next_page():
-                self.dom.click_next_page()
-                time_module.sleep(2)
-                page += 1
-            else:
-                break
-
-        logger.info(f"[CPS-AUDIT] Total scheduled: {len(all_scheduled)} videos")
+        config = get_channel_config(channel_key)
+        channel_id = config["id"] if config else ""
+        inventory = failed_inventory(channel_id, "navigation_failed")
+        if config and self.navigate_to_scheduled(channel_key):
+            inventory = self.dom.read_scheduled_inventory(channel_id)
+        complete = qualified_inventory(inventory, channel_id)
+        inventory_status = "complete" if complete else (inventory["status"] if inventory["status"] in {"partial", "failed"} else "failed")
+        all_scheduled = inventory["videos"]
+        logger.info("[CPS-AUDIT] status=%s observed=%s total=%s rows=%s unparsed=%s",
+                    inventory["status"], len(all_scheduled), inventory["total_scheduled"],
+                    inventory["rows_seen"], len(inventory["unparsed_rows"]))
 
         # Analyze: group by date+time
         slot_map = defaultdict(list)  # "Feb 5, 2026 3:00 PM" -> [video1, video2]
@@ -1046,27 +1046,34 @@ class ContentPageScheduler:
 
         # Build recommendations
         recommendations = []
-        if conflicts:
+        if complete and conflicts:
             recommendations.append(
                 f"CONFLICT: {len(conflicts)} time slots have multiple videos. "
                 "Reschedule to spread them out."
             )
-        if heavy_days:
+        if complete and heavy_days:
             total_excess = sum(d["excess"] for d in heavy_days)
             recommendations.append(
                 f"CLUSTERING: {len(heavy_days)} days exceed {max_per_day}/day limit "
                 f"({total_excess} excess videos need redistribution)."
             )
-        if not conflicts and not heavy_days:
+        if not complete:
+            recommendations.append("Calendar read incomplete; total unknown. No automatic calendar repair is qualified.")
+        elif not conflicts and not heavy_days:
             recommendations.append("Calendar looks clean — no conflicts or clustering detected.")
 
         audit_result = {
             "channel": channel_key,
-            "total_scheduled": len(all_scheduled),
+            "status": inventory_status,
+            "inventory": inventory,
+            "total_scheduled": inventory["total_scheduled"] if complete else None,
+            "observed_scheduled_count": len(all_scheduled),
             "unique_dates": len(date_map),
             "max_per_day": max_per_day,
-            "conflicts": conflicts,
-            "heavy_days": heavy_days,
+            "conflicts": conflicts if complete else [],
+            "heavy_days": heavy_days if complete else [],
+            "observed_conflicts": conflicts,
+            "observed_heavy_days": heavy_days,
             "recommendations": recommendations,
             "date_map": {d: len(v) for d, v in sorted(date_map.items())},
             "videos": all_scheduled,
@@ -1074,7 +1081,7 @@ class ContentPageScheduler:
 
         # Log summary
         logger.info(f"[CPS-AUDIT] Results for {channel_key}:")
-        logger.info(f"[CPS-AUDIT]   Total scheduled: {len(all_scheduled)}")
+        logger.info("[CPS-AUDIT]   Total scheduled: %s", audit_result["total_scheduled"])
         logger.info(f"[CPS-AUDIT]   Unique dates: {len(date_map)}")
         logger.info(f"[CPS-AUDIT]   Conflicts: {len(conflicts)}")
         logger.info(f"[CPS-AUDIT]   Heavy days: {len(heavy_days)}")
@@ -1089,6 +1096,8 @@ class ContentPageScheduler:
         tracker,
         time_slots: List[str],
         max_per_day: int = 3,
+        *,
+        inventory: Optional[Dict] = None,
     ) -> Dict:
         """
         Resolve scheduling conflicts by rescheduling duplicate-slot videos.
@@ -1106,6 +1115,23 @@ class ContentPageScheduler:
             Dict with rescheduled count and details
         """
         results = {"rescheduled": 0, "failed": 0, "details": []}
+
+        from .schedule_inventory import qualified_inventory
+
+        if not qualified_inventory(inventory, getattr(tracker, "channel_id", None)):
+            results["error"] = "calendar_inventory_incomplete"
+            return results
+        observed = {video["video_id"]: video for video in inventory["videos"]}
+        for conflict in conflicts:
+            members = conflict.get("videos", [])
+            if len(members) < 2 or len({member.get("video_id") for member in members}) != len(members):
+                results["error"] = "calendar_conflicts_unbound"
+                return results
+            for member in members:
+                video = observed.get(member.get("video_id"))
+                if video is None or conflict.get("slot") != f"{video['date']} {video['time']}":
+                    results["error"] = "calendar_conflicts_unbound"
+                    return results
 
         for conflict in conflicts:
             # Keep first video, reschedule the rest
@@ -1185,6 +1211,17 @@ class ContentPageScheduler:
             Dict with rescheduled count and details
         """
         results = {"rescheduled": 0, "failed": 0, "skipped": 0, "details": []}
+
+        from .channel_config import get_channel_config
+        from .schedule_inventory import qualified_inventory
+
+        config = get_channel_config(audit_result.get("channel", ""))
+        if (audit_result.get("status") != "complete" or not config
+                or config["id"] != getattr(tracker, "channel_id", None)
+                or not isinstance(audit_result.get("videos"), list)
+                or not qualified_inventory(audit_result.get("inventory"), config["id"], audit_result["videos"])):
+            results["error"] = "calendar_inventory_incomplete"
+            return results
 
         heavy_days = audit_result.get("heavy_days", [])
         if not heavy_days:

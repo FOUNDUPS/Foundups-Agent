@@ -882,3 +882,9 @@ Existing director gains64px toolbar,60px fullscreen controls, Restart and untime
 practice, longer feedback-clock bounds and slow-rescue-11 record namespace.
 EDUIT owns slower engine/cues/scoring; original15s media unchanged. See
 ../../foundups/eduit/docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md. No upload/auth changes.
+
+## 2026-10-28 — Storytime learning shell
+Existing kids_review viewer now owns compact Play/About/How, science-bounded copy,
+channel link and responsive control sizing. EDUIT retains roadmap/education scope;
+no new publisher or credential surface. Film and game engine unchanged. See EDUIT
+LEARNING_SHELL_REVIEW.md and EVOLUTION_PLAY_AND_SHARING_ROADMAP.md.

@@ -1,5 +1,39 @@
 # YouTube Shorts Scheduler
 
+## Local scheduler qualification — 2026-10-29
+
+Calendar audits and optional tracker sync now use `YouTubeStudioDOM.read_scheduled_inventory`.
+The additive receipt reports `complete`, `partial` or `failed`, the expected
+channel, page/row coverage, retained parsed rows and unparsed raw observations.
+Every page must bind the known native `CHANNEL_ID` locations to the exact Studio channel URL and an
+actual Scheduled/Has schedule chip. A whole-list read requires the known first
+page, bounded progress and known final pagination state; an explicit qualified
+empty state can establish zero. Unknown totals remain `None`. A visibility-cell
+slot or an explicitly Scheduled-labeled modern Date cell/tooltip can supply a
+slot; Uploaded, Published and unlabeled generic dates cannot. Failed filtering refuses an unfiltered read;
+the existing Skillz chip-bar filter path is reused.
+
+Partial/failed reads cannot certify a clean calendar, establish absence for
+auto-heal, reset tracker state, or supply a known-zero channel cache. Useful
+positive slots and observed conflicts remain visible. Tracker reset requires
+the matching complete inventory receipt. Legacy list-returning DOM methods are
+compatibility helpers, not completeness evidence.
+Calendar repair consumers also require that receipt and matching video/slot
+bindings; a caller-supplied `status="complete"` alone grants no repair input.
+
+Rotation freezes the canonical receiving ID and verifies first and later
+switches using native ID, Studio path and known permission state. Scheduler,
+config, tracker, alternate receipts and cache bind to that ID. Failed/unknown
+access bypasses writers; permission fallback waits for its canonical once-per-ID
+entry. Legacy, unbound or incomplete zero caches cannot suppress a channel.
+
+This layer is locally qualified with synthetic DOM/permission inputs. Installed
+browser selectors, account access, full daemon startup and saved schedules still
+require separate authorized live qualification. No existing schedule or content
+was changed by the offline checks.
+An installed page showing only `Scheduled` plus an unlabeled Date column remains
+an explicit selector-evidence gap, with unknown slots rather than inferred dates.
+
 **WSP Compliant Module** - YouTube Studio automation for Shorts scheduling.
 
 Remote use: [host requirements and command receipts](docs/REMOTE_SCHEDULING.md)

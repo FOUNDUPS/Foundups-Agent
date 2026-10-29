@@ -1,3 +1,382 @@
+## 2026-10-29 — Reconcile existing editorial-package PR #2238
+
+Root preservation #2273 merged as 45aa97ba841d8100e1a68100bed4a64d69e40312.
+Its tree equals the reviewed candidate. All 23 PR checks and 21 resulting-main
+checks across four observed workflows passed. Governed Holo maintenance and a
+fresh owner query bind source/workspace/authority to this main, CURRENT/no-gap;
+both owned runtimes stopped. Twenty owned merges now have main/Holo acceptance.
+Original PC files, historical artifacts and other chats' checkouts remain intact.
+
+The existing #2238 branch is reconciled with main while preserving its original
+history. Its two compiler helpers, wrapper and strict content route retain exact
+original PR blobs. Retain the newer permission/Ollama owners and repaired legacy
+scaffold; the compiler tests retain all assertions. Actual package imports pass
+23 methods / 72 subtests with central registration isolated and zero attempted
+external application effects. Eight Python manifest tests and three Node commands
+pass; registry 1792/260 preserves every prior record. The runtime closure adds
+exactly two members (1477). Measured Windows bytes require a separately reviewed
+329 -> 330 KiB serialized-manifest cap, preserving maximum/+1 rejection and
+2 MiB/file / 32 MiB total caps. Forty exact reviewed-content security bindings
+preserve all 2904 preceding entries; scanner rules and exclusions stay unchanged.
+
+This produces caller-supplied editorial drafts/proposed dates, with no source
+authentication, publication grant, scheduler/provider/model/storage effect or
+live campaign claim. Earlier Soro findings/counts remain explicitly historical.
+Fresh hosted checks, expected-head squash and resulting-main/Holo proof for
+#2238 are still pending. WSP 6/11/22/50/71/84/87/97.
+
+## 2026-10-29 — Preserve root artifacts and qualify the existing classifier
+
+Ollama recovery #2272 merged as 0d537a1f89c0510fd4c18f64c304f425f0d14a26.
+All 24 PR checks and 22 resulting-main checks across five observed workflows
+passed. Fresh Holo source/workspace/authority match that main, CURRENT/no-gap;
+both owned maintenance runtimes stopped. Nineteen owned merges now have main/Holo
+acceptance. Live Ollama installation/readiness and provider behavior are not
+established by those code checks.
+
+The F5 root slice preserves twelve tracked files in their documented owner/archive
+locations. Eleven retain exact Git bytes; the old onboarding body receives a
+historical notice and six link corrections. Twenty-one index references and
+twenty-seven local links are checked. The escaped E-drive directory contains six
+tracked historical Holo snapshots, contrary to the pasted audit's untracked
+classification; all 2446998 Git bytes are retained. No pickle/vector execution,
+live-index replacement or deployment reconfiguration occurs.
+
+The existing root validator adds temporary/prompt and escaped-drive classification
+and recognizes six existing foundational files. Two old tests plus four frozen
+regressions pass. The registry stays current at 1791/260; the unchanged 1475-member
+manifest passes source-derived verification. Both WSP85 copies agree, preserving
+foundational-only placement and adding explicit ownership/preservation limits.
+Current owned-checkout root-name findings are empty; that is not whole-repository
+content or operational acceptance. Shared PC artifacts and other chats stay intact.
+Hosted/main/Holo acceptance for this new slice remains pending. WSP6/11/22/50/64/71/81/84/85/90/97.
+
+## 2026-10-29 — Recover local Ollama fallback configuration
+
+Preflight repair #2271 merged as cb227122828f60d58b50de1046abb09ae31a0929.
+All 24 PR checks and 22 resulting-main checks across five observed workflows
+passed. Fresh Holo evidence binds source, workspace and authority to that main,
+CURRENT/no-gap; both owned maintenance runtimes stopped. Eighteen owned merges
+now have main/Holo acceptance.
+
+The next preserved PC slice replaces Ollama's fixed 15-second request wait with
+a finite configured timeout (default 120, range 15–300) and the repository-defined
+model default. Explicit model override and blank-disable remain. The synchronous
+Requests timeout is not a whole-turn deadline; cancellation can wait for the call.
+The model must be installed separately; no model/storage/runtime operation occurs.
+
+Frozen helper acceptance is 15 failures/four passes on unchanged source and 19
+passes on the candidate. Repository replay passes 19; both original DAE cases
+pass with central registration isolated and zero external attempts. Eight manifest
+tests and three Node commands pass. Registry is current at 1791/260, and all 1475
+runtime source hashes were checked. Prior document bodies, existing DAE tests,
+current preflight and skill handling remain intact. Hosted/main/Holo and live
+application acceptance are separate gates. WSP 6/11/22/50/71/84/87/97.
+
+## 2026-10-29 — Recover denied-preflight handling from preserved PC work
+
+Module-contract PR #2270 merged as 3a4de0b54cb468580270f99d7b8abca4b89484c0.
+All 23 PR checks and 21 resulting-main checks across four observed workflows
+passed. Fresh Holo evidence binds source, workspace and authority to that main,
+CURRENT/no-gap; both owned maintenance runtimes stopped. Seventeen owned merges
+now have main/Holo acceptance.
+
+The supplied PC reconciliation bundle predates current main. Reverification
+matches all 86 selected preserved files to the archive and current PC. Main's
+newer llmster lifecycle and pitch v0.1.3 remain authoritative; the shared dirty
+checkout and all original work are retained. No blanket restoration is applied.
+
+Recover the small process-loop repair that returns a block on failed WSP
+preflight, retaining the original intent and newer skill-verdict contract.
+Frozen acceptance is 13 failures/13 passes on main and 26 passes on the candidate;
+the connected offline selection passes 54 cases plus 12 permission cases.
+Eight manifest tests and three Node commands pass. The 1475-member manifest
+changes only the repaired helper's digest; registry adds one test file.
+Live daemon/provider acceptance and hosted/main/Holo close-out remain required.
+Ollama timeout recovery is a separate prepared slice. WSP 6/11/22/50/71/84/87/97.
+
+## 2026-10-29 — Add source-bound module contracts
+
+Frontend dependency repair #2268 merged as 21dc71b83bbea1b4c76c9f4c0f84979386480e44 after all 24
+logical PR checks and all five resulting-main workflows passed. GitHub marks all
+five targeted frontend alerts fixed without dismissal. The first Holo activation
+failed before route commit; the existing incident was retried through its governed
+cooldown. Fresh source/workspace/authority now match that main, CURRENT/no-gap;
+both owned maintenance runtimes stopped. Sixteen owned merges are closed through
+main and Holo. Ignored frontend build artifacts remain because automatic approval
+review blocked their removal; worktrees remain in use for this reconciliation.
+
+F9a adds 12 module READMEs, 19 INTERFACEs, 16 ModLogs and three test READMEs for
+19 existing owners, plus three existing log entries. Forty-two source hashes and
+72 local links were checked before integration. Contracts identify real inputs,
+outputs, side effects and known limitations, including dry-run writes, dormant
+or specification-only owners, manual probes and unqualified legacy tools.
+No placeholder code, empty dependency manifest, fabricated test or runtime-memory
+directory is added. Source review is not runtime acceptance. Structural presence
+and hosted/main/Holo acceptance of this documentation remain separate checks.
+WSP 3/5/11/22/49/50/60/84/87/90/97; see the active slice ledger.
+
+PR2270's first secret scan flags one role-description sentence in the social
+utility contract. Checksum-verified Gitleaks reproduces the exact finding. Add
+one content-bound prose review and evidence note, preserving all 2822 bindings
+from main addd00534 after the concurrent YouTube merge and guarded rebase,
+and all scanner rules. This adds two security review paths to the documentation
+slice; fresh hosted tree/history acceptance remains required. WSP 71/97.
+
+## 2026-10-29 — Close shared domain policy and qualify frontend dependency repair
+
+F6a #2267 is merged as 4533f7321f8ee5c857ca7f9dc17801b716d429fe after all
+23 logical PR checks and four resulting-main workflows passed. Fresh Holo
+source/workspace/authority match that main, CURRENT/no-gap; both owned maintenance
+runtimes stopped. This closes the fifteenth owned merge. All original unique
+PR work remains preserved.
+
+Read-only dependency triage found 29 open alerts, including two critical Chroma
+alerts with no listed patched version. Governed Holo query serving uses immutable
+snapshots, while maintenance and legacy Chroma callers need further exposure and
+containment review. A bounded synthetic helper probe shows that passing a null
+embedding function does not by itself prevent configured embedding construction;
+no real Chroma database, remote model or exploit was run.
+
+The current focused repair updates the eSingularity Cloudflare dependency cohort
+to resolve Undici 7.30.1 through upstream pins. Existing content/routing tests,
+clean install, lint, production build and the candidate lock audit pass;
+hosted/main acceptance remains a separate gate in the active ledger.
+No website deployment or repository-wide vulnerability
+clearance is claimed. WSP 5/6/10/22/50/71/84/87/97.
+
+## 2026-10-29 — Align structural auditors with one WSP 3 policy
+
+F7c #2266 is merged as 34b05f48d after all 24 logical PR checks and all five
+resulting-main workflows passed. Fresh Holo source/workspace/authority all bind
+that main, CURRENT/no-gap; the governed controller stopped both owned runtimes.
+This closes the fourteenth owned merge. Unique original PR work remains preserved.
+
+F6a shares the existing canonical domain and module-evidence rule between FMAS
+and WSPComplianceChecker. Unqualified data/intake containers remain ownership
+hints without fabricated module contracts. Three base regressions reproduce;
+the focused candidate selection passes 83 cases. No directory migration or
+live operation is part of this layer. Remaining acceptance is recorded with
+the owning module and active ledger. WSP 3/5/6/11/22/49/50/60/64/84/87/97.
+
+## 2026-10-29 — Run external audits once and report incomplete inspection
+
+F7b #2265 is merged as 77b824801 after all 25 current PR checks and all six
+resulting-main workflows passed. Fresh Holo evidence binds source/workspace/
+authority to that exact main, CURRENT/no-gap; owned maintenance runtimes stopped.
+Thirteen PRs have landed through this reconciliation lane.
+
+F7c replaces per-module external scans with one repository-scoped invocation
+per applicable tool. Tracked Mode 1 structure, explicit Bandit targets, bounded
+process output/deadlines and metadata-only result parsers prevent repeated scans
+and silent empty failure reports. Known pip vulnerabilities stay unrated errors;
+critical npm results and medium warnings are retained. No installs/fixes/moves
+or hosted secret-rule changes. Existing Mode 2/optional WSP62 discovery remains
+outside this new inventory scope. Six baseline regressions reproduced; 72 new
+cases and the final 245-test audit selection plus 28 subtests pass. Mode 2:
+0 errors/127 warnings/306 advisories. Hosted/main acceptance is still required.
+WSP 3/4/5/6/11/22/50/62/71/84/97.
+
+## 2026-10-29 — Bound compliance scans and bind the audit checkout
+
+F7a #2264 is merged as 3ad0eddc8 after 24 logical PR checks; all five resulting-main
+workflows passed. The fresh owner query is CURRENT/no-gap at that exact main.
+This closes the twelfth PR merged by the reconciliation lane; 36 remain open.
+
+The next layer removes WSPComplianceChecker's implicit pattern database and
+recursive local traversal. It uses bounded tracked inventory, explicit incomplete
+results, current size hints and honest documentation presence. The GitHub adapter
+now binds scanner/workflow roots to the same checkout. Frozen acceptance is
+31 failed/8 passed on main3ad and 39 passed on the candidate. A real read-only
+main3ad scan finished in 14.11 seconds with unchanged Git status and one explicit
+uninspected submodule. This does not establish broad test/security/deployment
+acceptance. WSP 3/5/6/11/12/22/50/57/60/62/63/71/87/97.
+
+## 2026-10-29 — Repair FMAS scan scope and misleading clean summaries
+
+The owned audit slice uses Git-tracked module source for secret hints, excludes
+environment content, reports incomplete reads and keeps tracked tests in scope.
+Quoted literals replace expression-based false positives. Audit summaries retain
+warnings/advisories/baseline differences instead of calling them no findings.
+Hosted security rules and reviewed-finding records are unchanged. Synthetic
+acceptance reproduces 19 failures/11 controls on main01b; the candidate's focused
+CI selection passes 134 tests plus 28 subtests. Registry gains one test owner;
+the resident runtime manifest is unchanged. WSP5/6/22/50/62/71/84/97.
+The filesystem/SQLite compliance checker and canonical-domain follow-up remain
+separate work; this slice is not whole-repository audit or security clearance.
+
+## 2026-10-29 — Cryptographic claims correction allocation
+
+Before applying the separate WSP26 correction patch: WSP15 C1/I4/D4/Impact4=13/P1.
+Limit six existing paths: this log, NAVIGATION, both numbered WSP26 copies,
+the existing FX venue research document and WSP_framework/ModLog. Correct
+security facts and synchronize mirrors; preserve economic/vision choices.
+Cap110 added Markdown lines and one NAV value; no runtime logic, dependency,
+crypto implementation, financial policy, signature or provider effect.
+Require source/mirror/NAV/link/scope readback and fresh publication checks.
+Base:362b4c62a665bd6c594904e39d974a7187a12649; external proposal remains unexecuted.
+
+Applied the separately reviewed correction after allocation. Root rechecked
+current Algorand account/SDK and NIST final sources; no future-break forecast or
+blanket token-safety claim remains in section4.11. Direct source retrieval owns
+the evidence: lexical-only Holo returned UNKNOWN/gap with no semantic query;
+no reindex or CURRENT claim. Framework/knowledge mirror and NAV data-only
+validation are required before publication. This changes no economic policy.
+## 2026-10-29 — Test scaffold and legacy parser repair
+
+Repair the existing guardian's absolute-path imports, nested test filenames,
+unsafe overwrite and false coverage credit. Preserve 78 empty scaffolds as
+explicitly unimplemented (156 placeholders, zero behavioral coverage), repair
+the three remaining legacy test-source faults, and keep manual browser effects
+behind explicit invocation. The WRE classifier excludes scaffold/manual modes
+without masking existing effect reasons. No live platform action was executed.
+
+At base 362b4c62a665: 4220 module Python files, 81 parser faults -> zero; 51
+focused generator/import/registry tests and 30 runtime/consumer tests pass.
+Isolated scaffold execution gives 156 skips, zero passes/collection errors.
+Three Node compatibility suites pass. Exact-base Mode2: zero errors, 127
+retained warnings; static size debt remains 74 critical findings. Registry:
+1781 files, 260 quarantined; no existing collectable flag changes. Runtime
+manifest: unchanged 1472 members, one classifier digest and both consumer pins.
+The 38 changed-file scanner findings are prior-reviewed source hashes, verified
+and rebound exactly; hosted full-tree/history checks remain required.
+
+Truth: validated bounded generator/import/classification behavior; manual live
+probe behavior IMPLEMENTED_NOT_VALIDATED; scaffold coverage
+SPECIFIED_NOT_IMPLEMENTED. Main/PR closure is tracked in the active slice ledger.
+WSP5/6/22/34/50/62/84/97.
+
+## 2026-10-29 — F4a enforcement, interface preservation and F3 cache repair
+
+Policy #2258 merged at ade6bca85470159bef0e447353e9c0b91628a704, preserving
+concurrent YouTube #2259. All 23 PR checks and all four resulting-main source
+workflows passed. Governed Holo maintenance and a separate query prove CURRENT,
+no gap and matching source/workspace/authority at that revision, generation
+9cba0a7721354209baef3460a20244e78b329a0603b5779fe85f997b1e112adb.
+Both owned maintenance runtimes stopped. Port18800 was already absent before
+this maintenance admission; no action was taken against that external service.
+
+Implement policy-bound overdue-expiry completion in the existing audit owner,
+add six derived historical dates without renewals, remove two resolved bridge
+exemptions, and preserve the oversized interface across five linked pages.
+All original text/headings survive; no execution contract changes. Local
+bounded suite: 103 pass plus 28 subtests. Static module errors fall 89 -> 81
+(all remaining errors are legacy test syntax defects); exact-base size audit
+has zero candidate errors. Four inherited expiry tests still fail. Hosted and
+resulting-main acceptance for this implementation remains pending.
+
+Git's commit-graph chain referenced two missing cache files. Rebuilt through
+`git commit-graph write --reachable --split=replace --no-progress`; native
+verification passes and the warning is gone. No source, branch or shared
+checkout was reset. This repairs the observed cache fault, not an unverified
+historical permission issue. WSP 5/11/22/50/62/81/84/97.
+
+## 2026-10-29 — F4a policy groundwork and F1 main acceptance
+
+F1 #2257 merged at `f304ba799f8fa835f0b5127efabe9e724315e3c8` after 25 passing
+PR checks; all six observed source workflows on that resulting main passed.
+Governed Holo maintenance completed and stopped both owned runtimes. A fresh
+task-checkout query returned CURRENT/no-gap, matching source/workspace/authority,
+one owner attempt and no query reindexing, generation
+`bf26960cc9b61fe8492c5b09051308d5d83d61a01de4b5ce040af08b0c5d4407`.
+The historical common-directory helper recipe still selects dirty primary
+checkout `0c81418fe` and correctly rejects; current CLAUDE task-helper guidance
+works. Primary work and the existing port18800 service remain untouched.
+
+F4a starts with WSP62 policy only: record a missing historical expiry as the
+already-past review-quarter boundary without renewal or ceiling changes.
+Framework/knowledge mirrors stay equal; enforcement and metadata are a later
+slice after this policy lands. SPECIFIED_NOT_IMPLEMENTED. WSP22/50/62/81/97.
+
+## 2026-10-29 — F1 syntax/encoding and audit parser repair
+
+The first hosted test job stopped at a stale generated test registry after
+BOM removal made 15 entries parseable. Regenerated through the existing owner:
+1779 files / 260 quarantined; no classifier rule changed. All 28 registry tests
+and 85 tests across the three affected dummy-STT/in-memory/schema suites pass.
+The twelve optional rESP import smoke files were inspected, not runtime-qualified.
+Combined with YouTube main `887c09dd2`, the final AST scan covers 4220 files:
+zero production failures, 81 legacy test failures, zero leading BOMs.
+Fresh final security scan outcomes remain separate. The local Windows archive attempt failed before
+scanning; it is not a clean security result.
+
+Revalidated the supplied audit at main `68562f2c8`: 4216 tracked module Python
+files contained 87 byte-parser failures (six production, 81 tests), plus 36
+valid BOM-prefixed files rejected by the audit's text parser. Repair the six
+production declarations/docstrings/import/encoding faults, remove only the
+leading BOM from those 36 files, and parse source bytes in the existing audit
+owner so valid Python encoding cookies remain supported. Git blob comparison
+confirms the 36 normalizations change no other bytes after newline normalization.
+No model, browser, platform action or experiment was run. The legacy monitor's
+missing activate method remains a separate runtime gap. WSP 11/22/50/84/97.
+
+Validation: all 4216 files rescanned; zero production parse failures and zero
+leading BOMs, with 81 legacy test parser failures retained for F2. Audit tests:
+65 passed plus five subtests; valid BOM/Latin-1 controls failed before the fix.
+Isolated adapter signature binding preserves optional inputs and rejects any
+missing identity argument. WSP62 inventory ERROR count falls 131 -> 89: 81 test
+parser failures and eight existing exemption errors. Other severities remain
+229 advisory / 127 warning / 74 critical. This does not claim a clean audit.
+The 1472-member backend closure is unchanged; eleven encoding-only member
+hashes and the two existing digest pins are regenerated. Eight manifest tests
+and all three Node compatibility suites pass; membership/caps remain unchanged.
+
+Seven reconciliation PRs (#2247, #1605, #1835, #2251, #1346, #2255, #2248)
+now have successful resulting-main source workflows. Two separate Dependabot
+updates (undici/qs) report no resolvable patched version under current constraints;
+their failures remain dependency follow-up. All unique retained PR work survives.
+The governed HoloIndex refresh and separate query prove CURRENT/no-gap at
+`68562f2c8` only; later main heads require new receipts. The old shared checkout
+and its 48 tracked modifications were preserved. See the active-slice ledger.
+
+## 2026-10-29 — Reconciliation merge receipts and ordered audit follow-up
+
+Five inherited PRs now merged: #2247 `5e9382535`, #1605 `0eb44e2c7`,
+#1835 `f96c636c5`, #2251 `3ec357892`, #1346 `1bbe01214`. Each passed
+observed PR checks before merge; #2247 main checks passed, later main checks
+remain pending at this snapshot. #2248 now preserves its packet and links
+#2250 implementation with explicit remaining gates; fresh acceptance pending.
+The existing active-slice ledger retains all 43 original rows and now records
+012's ordered follow-up audit with its old-checkout evidence boundary.
+No branch deletion, test skip, runtime grant or deployment. WSP 10/22/50/97.
+
+## 2026-10-29 — PR reconciliation and completion ownership
+
+Inventoried all 43 open PRs against main `8b345ec20`: 13 conflict-free merge
+trees and 30 conflicting trees, with three explicitly stacked PRs. This is
+complete inventory/merge analysis, not blanket source-review acceptance.
+The [dated PR ledger](docs/0102_session_briefings/ACTIVE_SLICE_LEDGER.md#pr-reconciliation--2026-10-29)
+records each disposition and next gate while preserving the earlier history.
+
+PR #2247 landed as `5e9382535`; all five observed main workflows passed.
+GitHub ruleset 8987382 now requires five existing GitHub Actions checks:
+lint, test (3.12), security / secrets, holoindex_freshness and
+wre-verification-contracts. Readback matched the proposed change; prior PR,
+deletion and no-bypass rules were preserved. Branch currency remains an
+architect reconciliation responsibility; no mandatory merge queue was added.
+
+The existing governed HoloIndex transaction repaired the stale authority at
+that exact main SHA. A fresh process then returned CURRENT, no index gap,
+matching workspace/authority/source SHAs and one owner attempt without query
+reindexing. This dated proof is not freshness evidence for later commits.
+No source repair or relaxed authority check was needed. The old shared
+checkout and copied startup instructions are not current-main evidence.
+
+Extended the existing WSP 10 closure instructions with PR ownership, dated
+blocker/action records and proof before superseded closure; regenerated the
+Codex projection. No new scheduler, automatic merger or branch deletion.
+WSP 10/15/22/50/77/84/97; policy text, GitHub enforcement, per-PR validation
+and HoloIndex runtime proof remain separate evidence.
+
+## 2026-10-28 — WRE verification preflight and connected CI
+
+Repaired policy downgrade and premature check execution through existing WRE
+owners; mandatory escalation and local-only authority boundaries remain.
+Added a parallel connected-regression CI job without removing existing gates.
+Source audit, independent validation and remaining native RSI gaps are recorded
+in the [WRE roadmap](modules/infrastructure/wre_core/ROADMAP.md#current-verification-integration--2026-10-28).
+WSP00/15/22/48/97; local tests are separate from PR/main and runtime evidence.
+
 ## 2026-10-26 — Isolated member host bootstrap candidate
 
 WSP00/3/6/11/15/22/49/50/62/71/77/84/97/109;15/P1 before authoring.
@@ -107,6 +486,18 @@ and pin the workspace test root, preserving product/oracles. Source-manifest and
 receipt scanner findings require exact public-metadata review before rebinding.
 Independent review accepted40 exact bindings; the2260-entry prefix is preserved.
 
+## 2026-10-25 — unsigned Algorand JSON format locally qualified
+
+WSP00/3/11/15/22/50/62/84/97;13/P1. Reused existing codec for bounded canonical
+15-field request/six-field output, real general validation and validated sidecars.
+Test-first source1fdd98bdb; reviewed product242a819c4. All52 exact methods PASS;
+original28 ASTs/oracles unchanged, four expected denials, zero unexpected attempts.
+Desired RED and three separately refused profile/release controls are retained.
+No SDK install, FAM launcher, signer, current fact, issuance, reward or DEX effect.
+Parent2206 and current hosted/security gates govern publication/main; local
+qualification grants no runtime/producer authority. Portable evidence:
+`docs/architecture/receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json`.
+
 ## 2026-10-25 — FoundUps unsigned integration checkpoint
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Three documentation paths only.
@@ -122,6 +513,79 @@ No runtime, cap, scanner, dependency, signing, issuance, payment or deployment
 change. The existing delivery plan/compact receipt retain unfinished work and
 the next separately allocated consumer/artifact layer.
 
+## 2026-10-25 — hosted interpreter alias accommodation allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/97. The912c artifact observes only the
+official unused python3.exe file symlink. Preallocate a narrowly checked, recorded
+nonrecursive alias unlink inside the disposable hosted job, preserving target
+bytes and strict profile admission. No local runtime, SDK/guard/oracle/28-ID/lock
+change; retain both hosted pre-test failures and the distinct local28 pass.
+
+## 2026-10-25 — Algorand hosted metadata diagnostic allocation
+
+WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/97. PR2206/head124b's distinct CI
+environment refuses a linked base-runtime path before SDK tests. Preserve the
+failed prepare and skipped run; add a bounded stdlib link inventory in the same
+workflow/setup artifacts. Local28 passes remain dated and separate. No tested
+codec/helper/guard/oracle, source/effect grant or financial capability changes.
+Separate incident38965909 identifies the synthetic public AUTH fixture at test28;
+independent stdlib derivation verifies the reported field, with no private key.
+The remote finding remains unresolved; no detector suppression or gate waiver.
+
+## 2026-10-25 — unsigned Algorand codec local qualification
+
+All 28 frozen methods pass at committed444c9f147 after reconciling main e801;
+four expected denied controls, zero unexpected attempts/skips/errors/failures.
+Parent and independent profile review bind5,263 files and245 loaded origins;
+the original1,505-file materialized environment remains unchanged. Pre-execution
+static findings repaired the separately allocated284-line adapter; no codec/oracle
+change or behavioral RED claim. Manifest check1471/canonical0fb3 stays fixed.
+Record receipt hashes in module TestModLog. Distinct pip CI/security/review gates
+remain pending; no resident, ledger, signer, provider, chain or paid state effect.
+
+## 2026-10-25 — unsigned Algorand probe format allocation
+
+WSP15 C3/I4/D4/Impact4=15/P1; WSP3/6/12/22/49/50/62/84/97.
+Prepare one platform codec with frozen scalar declarations, canonical unsigned
+ASA bytes, actual SDK transaction ID and a separate request binding. Freeze28
+independent unittest methods before product authoring; flat fee avoids SDK account
+generation/signing in fee estimation. New module docs, module-only direct pins,
+exact15-wheel Windows3.12.10 qualification lock, bounded source/effect adapter and
+dedicated workflow are separately reviewed before execution. Current authoring
+is not a passing test, runtime admission or transaction submission result.
+Canonical Holo authority mismatch is preserved; direct source retrieval finds no
+existing codec. Existing FAM intent/accounting owners and global CI/dependencies
+remain unchanged. No resident import, signer, ledger, provider, chain or paid state
+effect is allocated; next integration needs trusted ledger and artifact ownership.
+
+## 2026-10-25 — TestNet evidence portability and exact metadata review
+
+WSP15/22/50/97; preallocated 14/P1. Preserve the companion's committed Git LF
+bytes and all source/test evidence. The main receipt now explicitly separates
+portable Git LF integrity from its original Windows raw packaging hash. Parent
+and peer approve only 17 recorded source-SHA fingerprints, retaining all 2,181
+old ledger entries (2,198 total). Both reviews and historical limits remain in
+the intent plan. No scanner rule, source behavior or unknown finding changes;
+the separate GitGuardian main-receipt incident remains unresolved.
+Current reconciliation retains published main0909 (PR2208's38 successful checks,
+16-file and whole-tree source readback). Preserve both parent logs and exact
+2,277-entry prior-approval union; regenerate/check registry1,772/273. Main's
+f427 manifest,1,471 members and caps remain unchanged. No intent/source/oracle
+or authority extension; immutable review and fresh hosted gates remain required.
+
+## 2026-10-25 — Durable local TestNet probe preparation
+
+WSP00/6/11/15/22/50/62/97; runtime 16/P0, evidence/docs 14/P1. Add an explicit
+immutable TestNet probe-intent API, one shared ORM row and additive migration3.
+Current authority, complete pending lineage, exact integer units/identity/expiry
+and actual SQLite schema precede the single new row or exact content replay.
+Payout/task/event/compute state stays unchanged. Repaired focused 173, independent
+16 and qualified full FAM 459 pass with honest overlap and preserved failures.
+The full run binds 203 stable sources and confines 1,061 SQLite connections.
+Canonical test registry adds one unit owner: 1,771 files, 273 quarantined.
+The module plan retains generated-column, fixture, inventory and packaging
+corrections. No resident integration, signer, chain effect or paid reward exists;
+corrected portable evidence and dedicated hosted publication gates remain.
 ## 2026-10-25 — FoundUps delivery and research checkpoint
 
 WSP15 C2/I4/D4/Impact4=14/P1; WSP22/50/97. Reconcile existing delivery/research
@@ -62608,6 +63072,19 @@ shared backend, focused tests and CI; regenerate integrity bindings. Follow-up
 local schema-constrained reviews produced valid JSON but insufficient quotations,
 so no worker qualification, native admission or retained RSI gain is claimed.
 See shared_utilities ModLog and the RSI dispatch checkpoint for evidence.
+## 2026-10-25 — hosted Algorand result and exact fixture classification
+
+WSP15 C1/I4/D5/Impact4=14/P1; WSP22/50/97. Hosted run40173561283 passes the
+distinct pip profile's28 codec methods. Preserve prior failures and local bounds.
+Preallocate three existing security metadata owners to record only the exact
+line28 synthetic public-address fingerprint from job121109366122, after parent
+and independent review. Existing2220 entries, scanner/gate and frozen sources
+remain unchanged. GitGuardian disposition is separate; no merge waiver.
+Reconcile published intake main0909 with codec parents; preserve exact existing
+proof keys and2,261-entry approval union, main f427/pins and1,471/caps unchanged.
+Registry1,772/273 passes. No codec/helper/test/lock/workflow change; independent
+immutable review and fresh current-head hosted gates remain required.
+
 ## 2026-10-25 — intake reference preservation allocation
 
 WSP15 C2/I4/D3/Impact4=13/P1; WSP22/50/84/97. Preserve submitted references

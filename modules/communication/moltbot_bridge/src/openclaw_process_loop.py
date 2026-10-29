@@ -142,12 +142,14 @@ async def process_message(
     dae._report_daemon_action(
         "wsp_preflight",
         target=intent.category.value,
-        result="passed" if preflight_ok else "downgraded",
+        result="passed" if preflight_ok else "blocked",
         target_domain=intent.target_domain or "none",
     )
     if not preflight_ok:
-        intent.category = dae.IntentCategory.CONVERSATION
-        intent.target_domain = "digital_twin"
+        return (
+            "[SECURITY BLOCK] Execution prevented by WSP preflight: "
+            f"{intent.category.value} intent is not authorized or its required runtime is unavailable."
+        )
 
     if dae._is_turn_cancelled("pre_permission_gate"):
         return dae._turn_cancelled_response()

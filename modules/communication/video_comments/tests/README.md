@@ -1,5 +1,26 @@
 # video_comments Tests
 
+## 2026-10-29 repair selectors
+
+The follow-up private-livechat fallback selection is 88 semantic + 16 submission
+history cases (104 total, plus 12 subtests), with the original context 53 retained
+as a separate selector. Semantic tests also execute both real MessageProcessor
+call sites, busy-lock behavior, comment serialization, async heartbeat/timeout,
+late result discard and cancellation before subsequent provider stages. Provider
+calls are fixtures. Timeout cannot kill a running thread or HTTP call; it bounds
+the caller's wait and invalidates later work. The existing separate operator
+queue/lifecycle/control-plane selection passes 116 and stdlib inspection 15.
+
+With the environment isolation below, also run `test_reply_semantic_assessment.py`
+and `test_reply_submission_history.py` explicitly with pytest. They cover actual
+assessment/write/review ordering, supplied-fact snapshots, format/model-role
+rejection, private enqueue/activation, post-delay livechat guards, real SQLite
+restart/concurrent claims and exact production JavaScript against a synthetic DOM.
+The existing `test_chat_manifest_inspection.py` stdlib selector remains separate.
+Model judgments and DOMs are fixtures; these do not certify live inference or
+current YouTube selectors. CI binds the new case inventory separately from the
+original 53-case context selection.
+
 This directory mixes local regression tests, stateful classification checks, and
 live YouTube/model integration demos. A `test_*.py` filename does not establish an
 offline boundary. Select an explicitly reviewed file; do not use a blanket

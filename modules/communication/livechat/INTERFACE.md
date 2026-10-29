@@ -48,6 +48,42 @@ This module exports:
 
 ## Operator command inbox (Phase 1)
 
+`set_context` activates private behavioral guidance and records
+`context_activated=true, public_message_sent=false`. Only `announce` sends the
+operator's message publicly. A private activation needs no public sender;
+existing STOP, automation, selected-surface and dry-run gates remain authoritative.
+`enqueue_operator_command(command, command_path=None, acknowledgement_path=None)`
+appends under the existing queue ledger lock, preserving queued work and rejecting
+reused IDs. Producers never write active state or acknowledgements.
+Spoken scope: “Live stream …” selects livechat; “Commenting …” selects comments;
+“Push …” selects both; “Update the chat manifest with …” is private and honors
+the stated scope (both when unstated). A public announcement requires explicit intent.
+
+Themed livechat retains the existing Grok generation/review success path. On
+unavailable, empty, failed or rejected output, it reuses the existing comment
+generator with `reply_surface='livechat'` and supplied author, receiving channel
+and stream identity. This fallback accepts only the general-role LM Studio HTTP
+assessment/writer/reviewer; it cannot enter embedded inference, cloud retries or
+templates. Livechat reads only its queue-owned theme; comments retain their
+existing scoped and legacy readers. Generator caching includes channel and stream.
+Malformed native themes fail normalization before either Grok or local inference;
+the local receipt must match the qualified theme captured before generation.
+
+The exact final `@mention` text must fit 200 characters before review; it is never
+truncated afterward. `ReviewedLivechatReply` carries that text and a deep copy of
+the full native theme to `ChatSender`, which rechecks after delay/conversion
+immediately before the API request. Expiry, supersession or native metadata drift
+blocks sending. Existing engagement and cooldown gates precede generation.
+
+Both existing MessageProcessor call sites await threaded generation for at most
+ten seconds and set a cancellation event on exit. Cancellation discards late
+results and prevents subsequent provider stages/local fallback; it cannot kill
+an active provider call. Livechat generation/review rejects a busy shared lock
+immediately; comments keep serialized blocking access. The caller retains themed
+mode across the await, so clearing a theme cannot enable unreviewed fallback.
+Receipt, active context and observed wording remain distinct outcomes; API
+acceptance alone is not delivery readback.
+
 `OperatorCommandQueue` polls the trusted-local `memory/012_manifest.json` once
 per minute. `AutoModeratorDAE.run()` owns and awaits its watcher on every exit.
 Allowlisted actions: `status`, gated `announce`, gated `set_context`, and local

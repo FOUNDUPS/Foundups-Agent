@@ -1,4 +1,4 @@
-"""Offline editorial package contracts; replaces the invalid empty scaffold."""
+"""Offline editorial package contracts; the separate legacy scaffold is retained."""
 
 from copy import deepcopy
 import json

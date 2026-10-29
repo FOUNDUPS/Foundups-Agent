@@ -2,6 +2,40 @@
 
 Status: active layered delivery; no testnet or production readiness claim.
 
+## Blockchain return and codec convergence allocation — 2026-10-29
+
+WSP15 C2/I4/D4/Impact4=14/P1; WSP3/6/11/15/22/50/62/71/77/84/97.
+012 explicitly returns this lane to blockchain delivery and current cryptographic/
+agent threat research. Source baseline f304ba799; GitGuardian incidents38958604,
+38962564 and38965909 are individually verified public metadata/fixture false
+positives, with fresh successful app checks. That removes their incident hold,
+not current-main convergence, image or real-chain qualification requirements.
+
+First concrete slice: reconcile the still-unique unsigned codec PR2206 and its
+exact24fb851 source with current main. Preserve all28 named test methods, golden
+vectors, strict ten-field unsigned wire allowlist and effect-denying qualification.
+Reuse the existing workflow, canonical registry generator and exact reviewed-
+finding owner; preserve every newer main security/CI change. Do not port a stale
+whole registry, receipt, manifest or scanner policy. Classify/review shared-file
+overlap and require fresh exact-head gates and resulting-main readback.
+
+No new signer, signature algorithm, account, funding, provider/client, mint,
+broadcast, reward conversion or settlement is allocated. Native Falcon support,
+ordinary account signatures, consensus and State Proofs require distinct current
+evidence; a public address, source digest or algorithm name grants no authority.
+Controller-level verifier independence and durable exact-artifact/attempt/reissue
+admission remain P0 prerequisites before reward or signer promotion.
+
+Budget: codec and28-case oracle sources remain byte-identical; registry changes
+are generated only. Resolve existing shared log/navigation/security records by
+source-preserving combination, with independent review. Module README/INTERFACE/
+ROADMAP/ModLog and test logs <=18 added lines each for dated current facts; this
+plan <=42 added lines, root ModLog <=12. Preserve all historical test failures.
+Execution is source integration and credential-free format tests, not resident
+WRE activation or a cryptographic/security certification. Manual integration and
+deterministic checks are needed because model inference cannot prove canonical
+bytes, unique nonces, SQLite rollback, independent control or network finality.
+
 ## Member host bootstrap allocation — 2026-10-26, before authoring
 
 WSP15 C3/I4/D4/Impact4=15/P1; WSP00/3/6/11/22/49/50/62/71/77/84/97/109.
@@ -369,6 +403,78 @@ receipt, test case, runtime member, cap, secret, signer or provider activation.
 Independent reconstruction accepted exactly40 bindings (39 manifest/one receipt);
 append preserves all2260 prior entries/order/keys. Fresh hosted scan still required.
 
+## Source-owned unsigned JSON framing allocation — before authoring
+
+WSP00/3/6/11/15/22/50/62/84/97; C2/I4/D3/Impact4=13/P1. Reuse the
+existing Algorand codec owner on a child branch of reviewed codec head24fb851d.
+Observed main remains5da1876; pending codec2206 and intent2202 publication/security
+gates still govern main. This allocation claims no new test result or admission.
+
+Need: bounded fifteen-field request/six-field response framing currently lives
+only in an external experiment. Move the pure format boundary into existing
+`modules/platform_integration/algorand/src/unsigned_asa_probe.py`, not a new module,
+DTO, launcher, controller or SQL layer. Public API:
+`format_unsigned_probe_request(request_json: bytes) -> bytes`.
+
+Admit exact builtin bytes of length1..4096 before parsing. Require one canonical
+ASCII JSON object with exactly the existing fifteen request fields. Reject duplicate
+and escaped-duplicate keys, missing/extra fields, nonfinite values, wrong structural
+kinds and nested values. Existing scalar annotations govern exact kinds before
+constructing the existing request DTO; the existing semantic validator remains
+responsible for realm, address, fee, round and numeric constraints. Sanitize JSON
+encoding/recursion/decoding errors to fixed field-name ValueError, without input echo.
+Canonical means sorted keys, compact separators, ensure_ascii=True, allow_nan=False,
+no whitespace or terminal newline; parsed equivalence alone does not qualify bytes.
+
+Reuse `build_unsigned_asa_probe` and the unchanged general
+`validate_unsigned_asa_probe` with the independently parsed expected request. Emit
+sidecars from the validated artifact, not unchecked builder metadata. Output exact
+canonical ASCII bytes<=16384 with schema=foundups-unsigned-probe-worker-result-v1,
+request_sha256, unsigned_hex, unsigned_sha256, transaction_id and
+source_binding_sha256. Require wire1..1024 and lowercase hex. The source binding
+is the existing domain plus all fifteen request fields; it is not producer/profile
+identity or proof of grants, trusted facts or wallet control. Output is ephemeral.
+
+Freeze24 new ordinary unittest methods plus the original28 unchanged ASTs/oracles:
+exact52 IDs. Commit fixed test/tooling prerequisites before desired RED against
+parent product. Retain actual absent-method failures separately from qualification
+status. Then review/commit the product and prepare a fresh profile for GREEN.
+V2 inventory/profile/release envelopes bind fixed52 count, literal IDs and their
+approved digest; no arbitrary selection, relaxed count or widened source/effect
+guard. Preserve original28 local/hosted profiles, receipts and failures unchanged.
+Up to three separately released malformed-profile/release controls may verify
+pre-import refusal; they are not extra unit methods or a production sandbox proof.
+
+Source ceiling260 lines/new functions<=35; test owner620/new methods<=35;
+qualifier310 with at most26 net lines and an inventory helper<=8. Guard/source
+admission ASTs stay unchanged. Workflow grows<=8 lines only for the v2 envelope;
+setup, dependencies, alias checks and guard stay fixed. This draft<=70 added lines
+fits plan85, all Markdown230 and root ModLog18 allocations. Only one new repository
+file is allocated: the compact protocol receipt<=24KiB. Runtime1471/caps unchanged.
+
+Reuse the exact existing materialized interpreter/base/fifteen-wheel environment
+read-only, with new source/profile phases and explicit parent release after review.
+No install or SDK environment change. Distinct hosted pip qualification must bind
+its own actual profile; local evidence is not relabeled as CI. No results are
+recorded before execution, and component counts are not summed with other suites.
+
+No FAM consumer, CLI/process transport, provider observation, fact/grant admission,
+durable artifact, reservation, signer, issuance, reward/payment, DEX or resident
+activation is introduced. Future host integration still needs current trusted
+facts, admitted producer provenance and existing-intent revalidation after I/O.
+Fresh strict scope and hosted/security checks remain publication gates; no parent
+merge, main/runtime readiness or broader native/OS isolation claim is allocated.
+
+### Local framing result — 2026-10-25
+
+Source242a819c4 passes52 exact methods in the existing materialized profile;
+original28 ASTs/oracles remain unchanged. Desired RED retained28PASS/20ERROR/4FAIL;
+64 retained AttributeErrors and79 unclassified overflow diagnostics are historical.
+GREEN has four expected denials, zero unexpected attempts/diagnostics,5263 stable
+files and286 loaded origins. Three pre-import refusals are separate controls.
+See receipts/FOUNDUPS_ALGORAND_FORMAT_PROTOCOL_20261025.json for literal IDs,
+source/profile/release/review bindings. Hosted/security/main gates remain separate.
+
 ## Unsigned integration checkpoint allocation — before authoring
 
 WSP15 C2/I4/D4/Impact3=13/P1; WSP22/50/84/97. Source: main0909b941.
@@ -443,6 +549,134 @@ Repository-control challenges/admission, ratified reward units/funding, the full
 venture inventory, autonomous pitch/video/deck runtime and a funded trading venue
 remain open. Nineteen mixed catalog records/five cards do not verify115 FoundUps;
 the existing paper DEX/simulator does not establish live markets.
+
+## Published intake-main convergence allocation — 2026-10-25
+
+WSP15/22/50/84/97;14/P1. Reconcile main0909b941, whose entire Git tree equals
+reviewed intake99f81820 after38 successful hosted checks. Preserve codec edfd's
+product/tests/helper/lock/workflow and all historical receipts; retain main-only
+intake changes. Merge only existing exact ledger/proof metadata, preserving both
+parent sets/keys (expected2,261 prior fingerprints, no new approval). Keep main's
+f427 manifest/pins,1,471 members/caps and registry1,772/273. Scope stays22 paths.
+Require immutable parent-tree review, registry check and fresh hosted gates;
+GitGuardian38965909 remains separate. No runtime, source, dependency or authority
+extension is allocated by this convergence.
+Actual merge preserves both existing proof keys and exact2,261-entry approval
+union; no new finding is approved. Registry check passes1,772/273. Main's f427
+manifest/pins are inherited unchanged. Independent immutable review and fresh
+current-head scans remain required; earlier source qualification is not rerun.
+
+## Hosted codec checkpoint — 2026-10-25
+
+Distinct Windows pip run40173561283/job121109365468 passes all28 exact codec
+methods at PR2206 head24a094f; actual tested merge ref297af59 has parents main
+e801 and that PR head. Six repository sources plus lock match Git after CRLF
+conversion; four expected denials, zero unexpected attempts/diagnostics.
+Profile/receipt bindings and earlier pre-test failures remain in the module
+TestModLog. This is unsigned format qualification, without signer/node/issuance.
+
+Custom security job121109366122 reports one tree and one history occurrence of
+the same test-line28 synthetic public address. WSP15 C1/I4/D5/Impact4=14/P1:
+preallocate the existing exact ledger, security README and FX evidence owner for
+one independently reviewed file/rule/line binding; retain all2220 prior entries,
+frozen test/oracle bytes and scanner rules. Fresh scans remain required.
+GitGuardian38965909 is separate. Older Mall38958604 and TestNet38962564 findings
+are now source-verified public Git commit IDs in receipt metadata; their hosted
+gates also remain unresolved. This supersedes the historical unknown status below.
+
+## Unsigned ASA probe codec allocation (before source/test authoring)
+
+WSP15 C3/I4/D4/Impact4 = **15/P1**; WSP3/6/12/22/49/50/62/84/97.
+Source base is reviewed checkpoint branch `b88f438723cce766d9a6a12d22cb3c6707fb1137`,
+whose production code equals observed main5be. This layer may be prepared before
+that documentation PR merges; publish a separate code PR after main reconciliation.
+Need: convert a bounded probe request into inspectable unsigned bytes before a
+signer exists. Affordability: one pure format owner and one qualified dependency
+profile; no chain/client/wallet/treasury service. Deferral blocks transport learning.
+Competing reuse of the placeholder blockchain module or local mining/WSP-token
+simulation would mix responsibilities. FAM-adjacent SDK tests would widen whole-FAM
+CI dependencies. New Algorand platform ownership is the cohesive smaller boundary.
+
+Canonical Holo query again returns `HOLOINDEX_AUTHORITY_ROOT_HEAD_MISMATCH`,
+UNKNOWN/gap (shared authority a519 versus original0c); no reindex. Verified rg finds
+no existing unsigned ASA codec. NAVIGATION, existing blockchain/platform utilities,
+FAM/persistence, registry/CI contracts and pinned SDK source inform the allocation.
+Retrieval noise is placeholder/simulator readiness; missing new-module docs are
+authored with the module. Old manifests/versions are dated; no CURRENT semantic claim.
+Parallel source/CI/containment reviewers supply evidence; model inference adds no
+value to this fixed-format boundary and no Qwen/Gemma download is needed.
+
+Owner: `modules/platform_integration/algorand/src/unsigned_asa_probe.py` (<=220 lines),
+ordinary package imports and a frozen scalar request/immutable byte artifact. Build
+and independently validate canonical unsigned ASA bytes, SDK transaction ID and
+separately named source-binding digest. Exact built-in integer/address/realm/fee/
+round bounds; prohibit signed wrappers, duplicates/noncanonical/trailing maps,
+unknown fields, rekey/close/clawback/group/note/lease. Use SDK flat_fee=True; its
+default estimator generates an account and signs. Public TestNet genesis reference:
+[official networks](https://dev.algorand.co/concepts/protocol/networks/), checked
+2026-10-25. Genesis ID alone is not unique; require the documented32-byte hash.
+
+Budget <=19 paths:12 module structure/source/test/memory files, immutable15-wheel
+test lock, one bounded qualification adapter if needed, one Windows3.12.10 x64
+workflow, registry, NAVIGATION, this existing plan and root ModLog. Test owner
+<=320 lines; canonical collectable unit shard, no skip/quarantine/import alias.
+Preserve root requirements/global CI/whole-FAM jobs. Explicit exact-module source
+admission must retain actual effect denials; never evade the old repository finder.
+Tests precede implementation; missing-module collection is a prerequisite result,
+not a claimed behavioral RED. Qualify real vectors, malformed/forbidden packets,
+immutable inputs and no sign/client/network effects; preserve actual failures.
+
+No intent/ORM/ledger/factory/resident import, source-cap, signing, account creation,
+provider, chain, paid state or economic policy changes. The future consumer is the
+existing durable intent owner after trusted ledger facts and exact artifact/attempt/
+reissue identity are qualified. Changed rounds change txID; UTC expiry is separate.
+Measure resident reachability; no presumed member increase or activation by tests.
+
+Pre-execution adapter revision allocation: preserve initial238-line source and its
+static finding; allow <=284 lines in the same qualification owner to bind actual
+venv launcher/configuration bytes, record guarded source/chdir refusal attempts and
+retain safe exception type/source-line diagnostics. Parent and independent readers
+identified missing candidate baseline byte bindings before any SDK/test execution.
+No product/oracle/case inventory or effect/source grants change; no extra path,
+generic installation framework or OS/native/concurrent-writer claim is allocated.
+The final four-line increment is preallocated for an explicit repository namespace
+location fence and a readable canonical file-name check; it grants no extra import.
+
+Local qualification now passes all 28 exact unittest methods at committed source
+`444c9f147b6a603be57f4bfb51453cd99b1827a9`, after preserving main e801's scheduler
+and registry updates. Four expected denied controls, zero unexpected attempts,
+no skips/failures/errors; all 245 loaded origins and 5,263 profile files rehash.
+The original 1,505-file materialized environment is unchanged. Static adapter
+findings were fixed under preallocated scope before this first codec execution;
+old versions remain preserved. Receipt bindings are in the module TestModLog.
+Manifest check remains 1,471/canonical0fb3; no resident or cap change. A dedicated
+PR and distinct Windows pip CI qualification are next; local success does not
+admit ordinary installation, a node, signer, asset issuance or a paid transition.
+
+Hosted follow-up allocation, before edits: WSP15 C2/I4/D4/Impact3=13/P1.
+PR2206/head124b's distinct CI installation completes setup and registry selection,
+then metadata preparation refuses `linked_profile_path` in the base-runtime tree;
+SDK test execution is skipped. Preserve the failure/artifact. Add only a bounded
+stdlib link-topology inventory to the same workflow/setup artifacts, plus these
+existing delivery logs, before selecting an environment repair. Do not follow
+linked directories, alter the tested codec/guard/oracle or relax unknown paths.
+The separate GitGuardian incident38965909 reports test line28 `AUTH`, not genesis.
+Independent source review reproduces this synthetic public address from bytes65..96
+and the public-address checksum; both preserved golden requests use it only as the
+declared expected auth address. No private key is generated. Remote disposition
+remains unresolved; this evidence does not waive the hosted security gate.
+
+Hosted accommodation allocation, before edits: WSP15 C2/I4/D4/Impact3=13/P1.
+Head912c's actual artifact observes exactly one base file symlink, `python3.exe`
+to same-base ordinary `python.exe`; no overflow or followed linked directories.
+Official pinned installer research independently corroborates this unused alias.
+Authorize workflow-only normalization inside a fresh disposable Windows job:
+retain topology; verify sole exact alias, nonlinked root/ancestors/target and current
+target identity; unlink only the alias nonrecursively; record unchanged target SHA.
+Any mismatch fails closed. Strict b0aa guard/codec/28 tests/lock remain unchanged;
+fresh CI preparation qualifies the resulting actual environment. No local runtime
+mutation, generic link exception or SDK source grant. A full interpreter copy is
+wider; PATH changes leave the rejected entry in the enumerated tree.
 
 ## Intake reference preservation allocation — 2026-10-25
 

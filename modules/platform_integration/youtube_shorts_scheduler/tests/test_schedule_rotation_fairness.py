@@ -38,6 +38,8 @@ ANTI-VACUITY:
 """
 
 import os
+import asyncio
+from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -50,6 +52,7 @@ from modules.platform_integration.youtube_shorts_scheduler.scripts import launch
 import selenium.webdriver as _sel_webdriver  # noqa: E402
 import modules.infrastructure.foundups_selenium.src.foundups_driver  # noqa: F401,E402
 import modules.communication.video_comments.skillz.tars_account_swapper.account_swapper_skill  # noqa: F401,E402
+from modules.communication.video_comments.skillz.tars_account_swapper.account_swapper_skill import TarsAccountSwapper as _RealSwapper
 import modules.communication.livechat.src.multi_channel_coordinator  # noqa: F401,E402
 import modules.platform_integration.youtube_shorts_scheduler.src.scheduler  # noqa: F401,E402
 import modules.platform_integration.youtube_shorts_scheduler.src.dom_automation  # noqa: F401,E402
@@ -70,9 +73,14 @@ class _FakeScheduler:
 
     # class-level recorders shared across the per-channel instances the SUT makes
     calls = []  # list of (channel_key, max_videos)
+    constructed = []
 
     def __init__(self, channel_key, dry_run=False):
         self.channel_key = channel_key
+        self.channel_id = launch_mod.get_channel_by_key(channel_key)["id"]
+        self.config = {"id": self.channel_id}
+        self.tracker = SimpleNamespace(channel_id=self.channel_id)
+        self.constructed.append(channel_key)
         self.dry_run = dry_run
         self.driver = None
         self.dom = None
@@ -83,6 +91,7 @@ class _FakeScheduler:
         remaining = _BACKLOG
         scheduled = remaining if max_videos == 0 else min(max_videos, remaining)
         return {
+            "channel_id": self.channel_id,
             "total_scheduled": scheduled,
             "total_errors": 0,
             "total_skipped": 0,
@@ -98,6 +107,7 @@ def rotation_harness(monkeypatch):
     with NO browser/network/disk. Returns the shared call recorder.
     """
     _FakeScheduler.calls = []
+    _FakeScheduler.constructed = []
 
     # Force a known 2-channel edge rotation regardless of registry state.
     monkeypatch.setitem(launch_mod.BROWSER_CHANNELS, "edge", list(_EDGE_CHANNELS))
@@ -120,11 +130,20 @@ def rotation_harness(monkeypatch):
     )
 
     class _FakeSwapper:
+        CHANNELS = {name: {"id": launch_mod.get_channel_by_key(key)["id"]}
+                    for name, key in (("FoundUps", "foundups"), ("antifaFM", "antifafm"),
+                                      ("Move2Japan", "move2japan"), ("UnDaoDu", "undaodu"))}
+
         def __init__(self, driver):
             self.driver = driver
 
-        async def swap_to(self, *a, **k):
+        async def swap_to(self, target, **kwargs):
+            self.driver.verified_channel_id = self.CHANNELS[target]["id"]
+            self.driver.current_url = f"https://studio.youtube.com/channel/{self.driver.verified_channel_id}/videos/short"
             return True
+
+        async def _ensure_target_access(self, target, *, navigate_to_comments=True, expected_channel_id=None):
+            return self.driver.verified_channel_id == (expected_channel_id or self.CHANNELS[target]["id"])
 
     monkeypatch.setattr(
         "modules.communication.video_comments.skillz.tars_account_swapper.account_swapper_skill.TarsAccountSwapper",
@@ -139,6 +158,9 @@ def rotation_harness(monkeypatch):
     monkeypatch.setattr(launch_mod, "_load_schedule_cache", lambda: {})
     monkeypatch.setattr(launch_mod, "_should_skip_channel", lambda *a, **k: False)
     monkeypatch.setattr(launch_mod, "_record_channel_result", lambda *a, **k: None)
+    monkeypatch.setattr(launch_mod, "_save_schedule_cache", lambda *a, **k: None)
+    monkeypatch.setattr("modules.platform_integration.youtube_shorts_scheduler.src.dae_vitals.DAEVitals.emit_to_telemetry", lambda *a, **k: None)
+    monkeypatch.setattr("time.sleep", lambda *a, **k: None)
     # Keep priority wiring a no-op (do not touch #854 ordering in these tests).
     monkeypatch.setattr(launch_mod, "_prioritize_channels", lambda chans, driver=None: chans)
 
@@ -256,3 +278,244 @@ def test_invalid_env_falls_back_to_default_budget(rotation_harness, monkeypatch)
                 f"bad env '{bad}': {channel_key} got max_videos={max_videos}, "
                 f"expected fallback budget 9"
             )
+
+
+@pytest.mark.parametrize("failure", [False, "exception", "wrong_identity"])
+def test_failed_first_switch_never_schedules_or_enters_cps(rotation_harness, monkeypatch, failure):
+    from modules.communication.video_comments.skillz.tars_account_swapper import account_swapper_skill as account
+    original = account.TarsAccountSwapper.swap_to
+
+    async def switch(self, target, **kwargs):
+        if target == "FoundUps":
+            if failure == "exception":
+                raise RuntimeError("synthetic switch failure")
+            if failure == "wrong_identity":
+                await original(self, "antifaFM", **kwargs)
+                return True
+            return False
+        return await original(self, target, **kwargs)
+
+    monkeypatch.setattr(account.TarsAccountSwapper, "swap_to", switch)
+    result = launch_mod.run_multi_channel_scheduler(browser="edge", max_per_channel=9999)
+    assert _FakeScheduler.constructed == ["antifafm"]
+    assert _FakeScheduler.calls == [("antifafm", 9)]
+    assert result["channels"]["foundups"]["error"] == "receiving_channel_not_verified"
+    assert result["channels"]["antifafm"]["total_scheduled"] == 9
+
+
+def test_permission_fallback_uses_its_own_entry_once(rotation_harness, monkeypatch):
+    from modules.communication.video_comments.skillz.tars_account_swapper import account_swapper_skill as account
+    monkeypatch.setitem(launch_mod.BROWSER_CHANNELS, "edge", ["move2japan", "undaodu", "undaodu"])
+    original = account.TarsAccountSwapper.swap_to
+
+    async def switch(self, target, **kwargs):
+        return False if target == "Move2Japan" else await original(self, target, **kwargs)
+
+    monkeypatch.setattr(account.TarsAccountSwapper, "swap_to", switch)
+    result = launch_mod.run_multi_channel_scheduler(browser="edge", max_per_channel=9999)
+    assert _FakeScheduler.constructed == ["undaodu"]
+    assert _FakeScheduler.calls == [("undaodu", 9)]
+    assert result["channels"]["move2japan"]["error"] == "receiving_channel_not_verified"
+    assert result["channels"]["move2japan"]["fallback_deferred_to"] == "UnDaoDu"
+    assert result["channels"]["undaodu"]["requested_channel_id"] == launch_mod.get_channel_by_key("undaodu")["id"]
+    assert result["duplicate_channel_entries"] == ["undaodu"]
+
+
+def test_scheduler_binding_mismatch_never_enters_cycle_or_cps(rotation_harness, monkeypatch):
+    original = _FakeScheduler.__init__
+
+    def wrong_binding(self, channel_key, **kwargs):
+        original(self, channel_key, **kwargs)
+        self.tracker.channel_id = "synthetic_wrong_channel"
+
+    monkeypatch.setattr(_FakeScheduler, "__init__", wrong_binding)
+    result = launch_mod.run_multi_channel_scheduler(browser="edge", max_per_channel=9999)
+    assert not _FakeScheduler.calls
+    assert all(row["error"] == "scheduler_channel_binding_mismatch" for row in result["channels"].values())
+
+
+@pytest.mark.parametrize("surface,native,path,permission,expected", [
+    (True, "target", "comments/inbox", False, True),
+    (False, "target", "videos/short", False, True),
+    (True, "target", "videos/short", False, False),
+    (False, "other", "videos/short", False, False),
+    (False, None, "videos/short", False, False),
+    (False, "target", "videos/short", True, False),
+    (True, "target", "comments/inbox", True, False),
+])
+def test_actual_access_verifier_uses_native_identity_and_surface(surface, native, path, permission, expected):
+    swapper = object.__new__(_RealSwapper)
+    target_id = swapper.CHANNELS["FoundUps"]["id"]
+    channel_id = target_id if native == "target" else native
+    swapper.driver = SimpleNamespace(current_url=f"https://studio.youtube.com/channel/{target_id}/{path}",
+                                     execute_script=lambda *_a: channel_id)
+    swapper._is_permission_error = lambda **kwargs: permission
+    assert asyncio.run(swapper._ensure_target_access("FoundUps", navigate_to_comments=surface)) is expected
+
+
+@pytest.mark.parametrize("url", [
+    "https://studio.youtube.com.evil.invalid/channel/{target}/videos/short",
+    "https://studio.youtube.com/channel/other/videos/short?channel={target}",
+    "http://studio.youtube.com/channel/{target}/videos/short",
+])
+def test_actual_access_verifier_rejects_deceptive_or_wrong_urls(url):
+    swapper = object.__new__(_RealSwapper)
+    target_id = swapper.CHANNELS["FoundUps"]["id"]
+    swapper.driver = SimpleNamespace(current_url=url.format(target=target_id), execute_script=lambda *_a: target_id)
+    swapper._is_permission_error = lambda **kwargs: False
+    assert not asyncio.run(swapper._ensure_target_access("FoundUps", navigate_to_comments=False))
+
+
+def test_native_id_does_not_excuse_unknown_permission_state():
+    swapper = object.__new__(_RealSwapper)
+    target_id = swapper.CHANNELS["FoundUps"]["id"]
+
+    def read_script(script):
+        if "CHANNEL_ID" in script:
+            return target_id
+        raise RuntimeError("synthetic permission observation failure")
+
+    swapper.driver = SimpleNamespace(current_url=f"https://studio.youtube.com/channel/{target_id}/videos/short",
+                                     execute_script=read_script)
+    assert not asyncio.run(swapper._ensure_target_access("FoundUps", navigate_to_comments=False))
+
+
+@pytest.mark.parametrize("receipt_id", [None, "synthetic_wrong_channel"])
+def test_missing_or_wrong_cycle_identity_does_not_poison_cache(rotation_harness, monkeypatch, receipt_id):
+    original = _FakeScheduler.run_scheduling_cycle
+    cache_calls = []
+
+    async def cycle(self, **kwargs):
+        result = await original(self, **kwargs)
+        result["channel_id"] = receipt_id
+        return result
+
+    monkeypatch.setattr(_FakeScheduler, "run_scheduling_cycle", cycle)
+    monkeypatch.setattr(launch_mod, "_record_channel_result", lambda *a, **k: cache_calls.append(True))
+    result = launch_mod.run_multi_channel_scheduler(browser="edge", max_per_channel=9999)
+    assert len(_FakeScheduler.calls) == 2
+    assert not cache_calls
+    assert all(row["outcome"] == "unverified" for row in result["channels"].values())
+
+
+def test_cache_zero_requires_matching_identity_and_complete_inventory():
+    target_id = launch_mod.get_channel_by_key("foundups")["id"]
+    cache = {}
+    launch_mod._record_channel_result("foundups", cache, 0, 0, channel_id=target_id)
+    assert not launch_mod._should_skip_channel("foundups", cache, channel_id=target_id)
+    launch_mod._record_channel_result("foundups", cache, 0, 0, channel_id=target_id, inventory_complete=True)
+    assert launch_mod._should_skip_channel("foundups", cache, channel_id=target_id)
+    assert not launch_mod._should_skip_channel("foundups", cache, channel_id="rebound_identity")
+    del cache["foundups"]["channel_id"]
+    assert not launch_mod._should_skip_channel("foundups", cache, channel_id=target_id)
+
+
+@pytest.mark.parametrize("stage", ["not_oops", "switch", "return", "direct"])
+@pytest.mark.parametrize("comments", [False, True])
+def test_actual_oops_recovery_preserves_requested_surface(stage, comments, monkeypatch):
+    from modules.communication.video_comments.skillz.tars_account_swapper import account_swapper_skill as account
+    swapper = object.__new__(_RealSwapper)
+    target_id = swapper.CHANNELS["FoundUps"]["id"]
+    visits, checks = [], []
+    swapper.driver = SimpleNamespace(current_url=f"https://studio.youtube.com/channel/{target_id}/videos/short",
+                                     get=visits.append)
+    swapper._is_permission_error = lambda **_k: stage != "not_oops"
+    swapper._click_permission_switch = lambda: stage == "switch"
+    swapper._click_return_to_studio = lambda: stage == "return"
+
+    async def no_delay(*_a, **_k):
+        return None
+
+    async def no_visual(*_a, **_k):
+        return False
+
+    async def selected(*_a, **_k):
+        return True
+
+    async def current_name():
+        return "FoundUps"
+
+    async def verified(_target, *, navigate_to_comments=True, **_k):
+        checks.append(navigate_to_comments)
+        return True
+
+    monkeypatch.setattr(asyncio, "sleep", no_delay)
+    monkeypatch.setattr(account, "_emit_oops_signal", lambda *_a, **_k: None)
+    swapper.sleep_human = no_delay
+    swapper._verify_step = no_delay
+    swapper._ui_tars_click_oops_button = no_visual
+    swapper.select_account = selected
+    swapper._detect_current_channel_name = current_name
+    swapper._ensure_target_access = verified
+    assert asyncio.run(swapper.swap_from_oops_page("FoundUps", navigate_to_comments=comments))
+    assert checks and all(flag is comments for flag in checks)
+    if comments:
+        assert visits and all('/comments/' in url for url in visits)
+    else:
+        assert all('/comments/' not in url for url in visits)
+
+
+def test_frozen_target_id_cannot_be_rebound_during_verification(monkeypatch):
+    target_id = launch_mod.get_channel_by_key("foundups")["id"]
+
+    class ChangingSwapper:
+        @property
+        def CHANNELS(self):
+            return {"FoundUps": {"id": target_id}}
+
+        async def _ensure_target_access(self, name, *, expected_channel_id=None, **kwargs):
+            assert expected_channel_id == target_id
+            return False  # Native state no longer matches the frozen ID.
+
+    assert not asyncio.run(launch_mod._has_schedule_target_access(ChangingSwapper(), "foundups", target_id))
+
+
+@pytest.mark.parametrize("alternate", ["videos", "cps"])
+def test_alternate_receipts_and_trackers_bind_the_same_channel(rotation_harness, monkeypatch, alternate):
+    from modules.platform_integration.youtube_shorts_scheduler.src import content_page_scheduler as cps_mod
+    from modules.platform_integration.youtube_shorts_scheduler.src import schedule_tracker as tracker_mod
+    tracker_ids = []
+
+    class Tracker:
+        def __init__(self, channel_id):
+            self.channel_id = channel_id
+            tracker_ids.append(channel_id)
+
+    class CPS:
+        def __init__(self, driver):
+            self.driver = driver
+
+        def navigate_to_content(self, channel_key, **kwargs):
+            self.channel = channel_key
+            return True
+
+        async def schedule_all_visible(self, *, tracker, **kwargs):
+            assert tracker.channel_id == launch_mod.get_channel_by_key(self.channel)["id"]
+            return {"total_scheduled": 1, "total_errors": 0}
+
+    monkeypatch.setattr(cps_mod, "ContentPageScheduler", CPS)
+    monkeypatch.setattr(tracker_mod, "ScheduleTracker", Tracker)
+    if alternate == "videos":
+        monkeypatch.setenv("YT_VIDEO_PROCESSING_ENABLED", "true")
+    else:
+        def failure(self, *args, **kwargs):
+            raise RuntimeError("synthetic constructor failure before browser writer")
+        monkeypatch.setattr(_FakeScheduler, "__init__", failure)
+
+    result = launch_mod.run_multi_channel_scheduler(browser="edge", max_per_channel=9999)
+    for key in _EDGE_CHANNELS:
+        row = result["channels"][key + "_videos" if alternate == "videos" else key]
+        expected = launch_mod.get_channel_by_key(key)["id"]
+        assert row["channel_id"] == row["requested_channel_id"] == expected
+        assert row["total_scheduled"] == 1
+    assert tracker_ids == [launch_mod.get_channel_by_key(key)["id"] for key in _EDGE_CHANNELS]
+
+
+def test_cycle_exception_does_not_retry_through_another_writer(rotation_harness, monkeypatch):
+    async def uncertain(self, **kwargs):
+        raise RuntimeError("synthetic uncertain writer failure")
+
+    monkeypatch.setattr(_FakeScheduler, "run_scheduling_cycle", uncertain)
+    result = launch_mod.run_multi_channel_scheduler(browser="edge", max_per_channel=9999)
+    assert all(row["outcome"] == "unverified" for row in result["channels"].values())
+    assert all("method" not in row for row in result["channels"].values())

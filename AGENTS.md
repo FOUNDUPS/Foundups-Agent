@@ -233,6 +233,9 @@ $env:PYTHONDONTWRITEBYTECODE = "1"
 - If blocked, preserve a recoverable checkpoint or remove only the owned partial work, then name the exact blocker and retained state.
 - Before the final response, inspect every worktree created for the task. Remove clean, merged, disposable owned worktrees and temporary build staging; never reset, clean, move, or delete an unowned or ambiguous dirty lane.
 - Report repository merge, production deployment, live verification, and cleanup as separate evidence. See WSP 10, Section 6.
+- Treat opening or refreshing a PR as unfinished work. Before starting an unrelated successor PR, land and verify the owned ready PR, or record its exact blocker and next action in the existing work ledger.
+- Every retained open PR needs an accountable lane, observed head SHA, dependency or blocker, next validation/action, and dated review. Refresh these from live GitHub and Git evidence; a stale ledger or old green check is not merge authority.
+- Preserve unique work and dependency order. Close a superseded PR only after proving its full intended change is retained or explicitly dispositioned elsewhere; do not delete branches or bulk-close by age. Required checks must pass without bypass, followed by checks on the resulting main SHA.
 
 ## [ALERT] ANTI-VIBECODING
 

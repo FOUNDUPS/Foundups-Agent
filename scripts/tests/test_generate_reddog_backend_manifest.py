@@ -86,6 +86,7 @@ def test_generated_closure_binds_executable_and_dynamic_load_sentinels(
         "holoindex_postmerge_claim_contract.py",
         "modules/infrastructure/idle_automation/src/holoindex_postmerge_coordinator.py",
         "modules/infrastructure/database/src/database.py",
+        "modules/infrastructure/wsp_core/src/wsp_domain_policy.py",
         "modules/infrastructure/dependency_launcher/src/wsl_agent_runtime.py",
     )
     assert set(required).issubset(runtime)
@@ -261,9 +262,9 @@ def test_checked_in_manifest_matches_independent_generation(
     generated = generated_manifest
 
     assert checked_in == generated
-    assert generator.MANIFEST_PATH.stat().st_size <= 329 * 1024
+    assert generator.MANIFEST_PATH.stat().st_size <= 330 * 1024
     lf_bytes = generator.MANIFEST_PATH.read_bytes().replace(b"\r\n", b"\n")
-    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 329 * 1024
+    assert len(lf_bytes.replace(b"\n", b"\r\n")) <= 330 * 1024
     assert "modules/platform_integration/social_media_orchestrator/src/petition_campaign.py" in generated["required_runtime_files"]
     _assert_registry_and_builder_runtime_files(generated)
     _assert_signer_and_memex_runtime_files(generated)
@@ -278,7 +279,7 @@ def test_checked_in_manifest_matches_independent_generation(
 
 def _assert_manifest_digest_pin(generated: dict[str, object]) -> None:
     digest = generator.canonical_manifest_digest(generated)
-    assert digest == "f28f05fc8dce3054c28579d94f767982862e6c3ce444e0fe139f4e1e18232a38"
+    assert digest == "fbe2132cc44adddf625e66bf0eb6a0acb8f5294b420b33d4ecf32c6b77cba064"
     constants = (
         REPO_ROOT / "extensions/reddog/backend_compatibility_constants.js"
     ).read_text(encoding="utf-8")

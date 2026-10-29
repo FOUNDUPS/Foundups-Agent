@@ -1,14 +1,144 @@
-## PR2238 editorial package metadata review — 2026-10-27
+## PR2238 current-source metadata review — 2026-10-29
 
-Hosted job122212162094 reported40 unreviewed tree findings and zero history
-findings. Root and independent verifier recomputed all40 exact bindings:
-39 source SHA256 entries match unchanged referenced Git bytes; one historical
-bridge ModLog sentence matches previously reviewed prose.39 prior exact
-approvals were reconstructed. The remaining youtube_auth.py digest is verified
-source metadata with no prior exact approval. Preserve2,457 ledger entries and
-append only40 bindings (2,497 total). Scanner code, rules, scope and exclusions
-are unchanged.53 gate regression tests passed. Fresh hosted tree/history checks
-remain required. Evidence: reviewed-soro-metadata-evidence.json.
+Checksum-verified Gitleaks 8.30.1 flags 39 unchanged runtime source-hash rows
+and one unchanged module-log line. All 40 retain exact prior text, five-line
+context and a reviewed path/blob/rule/line binding on main45aa97ba. Rehash all
+1477 runtime sources directly from staged Git blobs and append only these 40
+new whole-blob bindings, retaining all 2904 prior entries (2944 total). No old
+PR ledger is imported. Scanner rules, scope and exclusions are unchanged.
+This is source/provenance review by this agent, not an independent approval or
+full security certification. Fresh hosted tree/history checks remain required.
+Local receipt: editorial-metadata-review.json.
+
+## PR2238 reconciliation — historical evidence boundary, 2026-10-29
+
+`reviewed-soro-metadata-evidence.json` is retained from original PR head
+bf78e977b6a6609fa1b7ef0af1f3d177e5dac495. Its historical bindings and reported
+independent review do not approve the reconciled tree. Keep all current main
+reviewed findings; do not import old ledger rows wholesale. Current changed-file
+findings require exact current-source review, followed by hosted tree/history
+checks. Scanner rules, scope and exclusions remain unchanged.
+
+## PC Ollama recovery metadata review — 2026-10-29
+
+The pinned Gitleaks 8.30.1 scan identifies 39 unchanged runtime source-hash rows,
+one unchanged test line and one unchanged module-log line. Every finding retains
+its exact text and five-line context and a prior whole-file/path/rule/line binding
+on main `cb2271228`. Rebind only these 41 entries to their new Git blobs, retaining
+all 2863 prior bindings (2904 total). All 1475 runtime hashes were rechecked from
+staged Git blobs; only the two recovered Ollama helper digests change.
+
+This is exact prior-content review, not an independent reviewer claim. The public
+example environment template changes only model/default-timeout settings; no
+private environment file is read by the scan. Scanner rules, scope, exclusions
+and fingerprint calculation remain unchanged. Full hosted tree/history scanning
+is a separate acceptance gate. Local receipt: `pc-ollama-metadata-review.json`.
+
+## Preserved PC preflight recovery metadata — 2026-10-29
+
+Checksum-verified Gitleaks 8.30.1 reports39 unchanged source-hash rows in the
+regenerated runtime manifest and one unchanged, previously reviewed module-log
+line. Each retains its exact text/context and a prior path/blob/rule/line binding
+on main3a4de0b. Rebind these40 findings to the new Git blobs and preserve all2823
+prior entries. Direct staged-Git verification rehashes all1475 runtime members;
+only the preflight helper digest changes. The architect performed this review;
+no independent reviewer is claimed. Scanner rules/scope/algorithms are unchanged.
+Fresh hosted tree/history checks remain required; this is not security clearance.
+
+## PR2270 exact documentation prose review — 2026-10-29
+
+Hosted job123361181139 and checksum-verified Gitleaks 8.30.1 both report one
+`generic-api-key` finding at `modules/infrastructure/git_social_posting/INTERFACE.md`
+line22. The complete authored sentence describes account publishing responsibilities;
+it is not a credential assignment, value or example. The architect reviewed that
+source sentence; no independent reviewer is claimed.
+
+Add one path/full-blob/rule/line binding for content SHA256 `645e52ae93f6ec94574910f39f53f0be02ae414d4264f2c4091d0acaf68154e6`:
+`ca6719b3aa2e590fd96d7698c5b5f952252be0a4e7fbc4d25d661552c171e67b`. The same blob occurs in introduced commit
+`26fb18732` after rebasing onto main `addd00534`; the reviewed blob is unchanged,
+so this exact review covers its tree and history finding. Preserve all 2822
+bindings from that main, including the concurrent YouTube review entries. Scanner rules,
+scope, exclusions and fingerprint algorithms stay unchanged. Fresh final tree/history
+checks remain required; this review is not repository-wide security clearance.
+
+## Test-scaffold repair manifest metadata binding — 2026-10-29
+
+Checksum-verified Gitleaks 8.30.1 scanned the 100 changed staged Git files,
+materialized with Git line endings, and reported 38 runtime source-hash rows.
+Each is a unique unchanged line from main `362b4c62a665`, has a prior exact
+review binding, and matches the SHA-256 of its staged runtime source. The
+manifest retains all 1472 members; only the classifier source digest changes.
+Append 38 exact file/rule/line bindings and preserve all 2610 prior entries.
+The architect performed this comparison; no independent review is claimed.
+
+This bounded local scan is not a full tree/history scan. No raw findings,
+credentials, scanner rules, exclusions or fingerprint algorithms are changed.
+The hosted full tree/introduced-history gate remains required.
+
+## PR2260 unchanged historical prose binding — 2026-10-29
+
+Hosted job123246799489 at source f2cb5d9abbfd763e437494e88b3b3bfd15eba469
+reports one unreviewed tree finding, 170 exact prior reviews and zero findings
+in introduced history. The bridge ModLog's existing finding moved from line3865
+to3883 after the new 18-line entry. Immutable Git blobs prove the entire prior
+ModLog is an unchanged suffix, the finding line is unique in both versions,
+the hosted merge-tree blob matches the candidate, and the exact prior binding
+exists in main ade6bca8547's ledger. This is previously reviewed historical
+prose about key resolution, not a newly added credential. The reconciliation
+architect performed this source-bound review; no independent agent review is
+claimed.
+
+Append only that one exact file/rule/line binding and preserve all prior entries.
+No scanner rule, exclusion, scope or fingerprint algorithm changes. Fresh final
+tree/history checks remain required; this review is not a scanner execution.
+
+## PR2257 encoding manifest metadata review — 2026-10-29
+
+Hosted job123214518117 at source `5ce02d043` reports 38 unreviewed
+manifest metadata findings, 133 exact prior reviews and zero introduced-history
+findings. The reconciliation architect verified the hosted merge-tree manifest
+blob equals the candidate, all 1472 runtime source hashes from immutable Git
+blobs, and each flagged unique unchanged line against main `887c09dd2` and its
+prior exact approval. No independent agent review is claimed.
+
+Preserve all 2533 prior entries and append only those 38 exact file/rule/line
+bindings. The combined runtime list is unchanged; its eleven F1 source changes
+remove leading BOMs only. Scanner rules, scope, exclusions and fingerprint
+behavior are unchanged. Fresh final tree/history checks remain required.
+
+## Private livechat theme route manifest rebind — 2026-10-29
+
+At integrated source `02d26d74a0dc3d6b0e79da9f3b65d45b22cb937b`, the pinned
+Gitleaks 8.30.1 canonical Git-LF scan reports 171 findings: 133 exact prior
+reviews and 38 renewed manifest bindings. Author and independent reviewer each
+verified all finding-bearing archive bytes against Git objects, all 1,472
+runtime hashes, and the 38 unique unchanged metadata lines with exact prior
+approvals at incoming main `f304ba799f8fa835f0b5127efabe9e724315e3c8`.
+
+Preserve all 2,571 incoming approvals and append only those 38 exact bindings.
+The canonical backend digest is
+`d90542671bc1be9d8297a5153540a0ad4b397214b9a9003c1ee985566f2be3a6`.
+No scanner rule, exclusion, coverage or fingerprint behavior changes. This is
+public source-integrity metadata review; final tree/history checks and hosted
+verification remain separate from model qualification or YouTube delivery.
+
+## PR2254 YouTube reply manifest rebind — 2026-10-29
+
+The checksum-verified Gitleaks 8.30.1 full Git-LF tree scan at source
+`9b50dae1c3e57f224ebbe53a2840de42f218e5fa` reports 171 findings: 133 exact prior
+reviews and 38 renewed manifest bindings. Author and independent reviewer each
+verified all 171 finding-bearing files against immutable Git blobs, all 1,472
+runtime source digests, and the 38 unique unchanged metadata lines and prior
+exact approvals at `62eae2428ef2bc6c91540be36c2de3f2bd85146f`.
+
+Preserve all 2,495 prior entries and append only those 38 exact file/rule/line
+bindings. The final canonical backend digest is
+`4fd3be5f1b0c25cc4cadfd3c2785662ac3ceeb14cd918fbef49c4812955fccc5`.
+The intermediate source-commit history scan reports zero findings. Scanner rules,
+scope, exclusions and fingerprint behavior are unchanged. An initial Windows
+archive with CRLF conversion was discarded; the accepted scan explicitly forces
+Git LF output and verifies finding-bearing bytes against Git objects. Fresh
+final tree/history checks remain required; metadata review is not deployment.
 
 ## PR2215 Story Time manifest rebind — 2026-10-25
 
@@ -622,3 +752,25 @@ rechecked against exact Git source and prior reviews. Retain the earlier 2,027
 records and append only those 38 (2,065 total); the changelog review remains
 valid. Independent evidence: `rsi-parent-bootstrap-independent-main-union-review-20261025.json`
 in the same evidence directory. Combined-source hosted acceptance remains required.
+## PR2206 synthetic public-address review — 2026-10-25
+
+Security job121109366122 reports one unreviewed tree occurrence and one introduced
+history occurrence: `generic-api-key`, Algorand test file line28 `AUTH`.
+Parent and independent review confirm current24a094 and introduced22d20a have
+identical Git blob82d92cb6d22b567da15141dbef0912c38b313524. The fixture is a public
+address reproducible from bytes65..96 and the public SHA512/256 checksum; both
+preserved golden requests use it only as declared expected authorization address.
+
+Append only its exact whole-file/rule/line fingerprint, retaining all2220 existing
+records (2221 total). Evidence is appended to reviewed-foundups-fx-evidence.json.
+No test/oracle bytes, scanner rules, exclusions, gate or history coverage changes.
+Fresh hosted scans remain required. Separate GitGuardian38965909 is unresolved.
+
+## PR2211 exact public-fixture rebind — 2026-10-25
+
+Job121195695168 reports only generic-api-key at Algorand test line31;
+history has no unreviewed findings. Original AUTH AST/public bytes65..96 are exact.
+Root and independent review append one whole-file/rule/line fingerprint only,
+retaining all2261 ordered entries (2262 total). The format protocol receipt binds
+actual source/job/review evidence. No rule, scope, gate or history behavior changes.
+Fresh hosted acceptance and separate parent GitGuardian disposition remain required.

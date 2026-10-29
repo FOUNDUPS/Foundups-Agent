@@ -1,5 +1,11 @@
 # Blockchain Integration Module - ModLog
 
+## 2026-10-29 — Restore the test package initializer encoding
+
+Decode the existing UTF-16 docstring-only initializer and save its unchanged
+text as UTF-8. The isolated compile/import regression passes. No blockchain
+client, signing, payment, deployment or network action was run. WSP22/34/50/97.
+
 This log tracks changes specific to the **blockchain_integration** module in the **infrastructure** enterprise domain.
 
 ## WSP 22 ModLog Protocol

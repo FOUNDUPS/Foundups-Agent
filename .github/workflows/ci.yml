@@ -9,6 +9,48 @@ on:
     types: [opened, synchronize, reopened, edited, ready_for_review]
 
 jobs:
+  wre-verification-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+      PYTHON_DOTENV_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bootstrap checksum-verified Python trust
+        run: python -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+      - name: Install bounded offline test runner
+        run: python -m pip install pytest==9.0.3
+      - name: Verify impact planning, execution and completion boundaries
+        run: >-
+          python -B -m pytest -q --tb=short -c /dev/null --noconftest
+          --import-mode=importlib -o pythonpath=. -p no:cacheprovider
+          --junitxml=wre-verification-results.xml
+          modules/infrastructure/wre_core/tests/test_wre_test_impact_differential_gate.py
+          modules/infrastructure/wre_core/tests/test_wre_test_scope_coverage.py
+          modules/infrastructure/wre_core/tests/test_wre_test_registry_differential_plan_runtime.py
+          modules/infrastructure/wre_core/tests/test_wre_test_differential_runtime.py
+          modules/infrastructure/wre_core/tests/test_wre_independent_evidence_producer_runtime.py
+          modules/infrastructure/wre_core/tests/test_wre_autonomous_slice_verifier_runtime.py
+          modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_request_binding.py
+          modules/communication/moltbot_bridge/tests/test_reddog_resident_queue_slice_verifier_handler.py
+          modules/infrastructure/wre_core/tests/test_git_main_merge_sentinel.py
+      - name: Preserve exact-revision verification results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wre-verification-${{ github.sha }}
+          path: wre-verification-results.xml
+          if-no-files-found: error
+
   principal-activity-ledger:
     strategy:
       fail-fast: false
@@ -64,6 +106,45 @@ jobs:
           modules/communication/livechat/tests/test_operator_command_queue.py
           modules/communication/livechat/tests/test_operator_command_lifecycle.py
           modules/communication/video_comments/tests/test_commenting_control_plane.py
+
+      - name: Verify private themes and inspected replies with stdlib
+        shell: python
+        run: |
+          import sys
+          import unittest
+          from pathlib import Path
+          sys.path.insert(0, str(Path.cwd()))
+          suite = unittest.defaultTestLoader.discover(
+              'modules/communication/video_comments/tests',
+              pattern='test_chat_manifest_inspection.py')
+          result = unittest.TextTestRunner(verbosity=2).run(suite)
+          assert result.testsRun == 15 and not result.skipped, (result.testsRun, result.skipped)
+          sys.exit(0 if result.wasSuccessful() else 1)
+      - name: Verify durable reply attempts and semantic assessment
+        run: >-
+          python -B -m pytest --import-mode=importlib -o addopts=
+          -p pytest_asyncio.plugin -p no:cacheprovider -q --tb=short
+          modules/communication/video_comments/tests/test_reply_submission_history.py
+          modules/communication/video_comments/tests/test_reply_semantic_assessment.py
+          --junitxml=reply-repair-results.xml
+      - name: Require reply repair results without skips
+        shell: python
+        run: |
+          import hashlib
+          import xml.etree.ElementTree as ET
+          root = ET.parse('reply-repair-results.xml').getroot()
+          cases = list(root.iter('testcase'))
+          assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
+          names = sorted(case.get('name') for case in cases)
+          digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
+          assert len(cases) == 104 and digest == '831e155cd5a850cf0bae533878269c6ab6382fbd3884f608d73cd62a806d1aa8', (len(cases), digest)
+      - name: Preserve reply repair results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reply-repair-results-${{ matrix.os }}
+          path: reply-repair-results.xml
+          if-no-files-found: error
 
       - name: Verify isolated reply provenance and row context
         run: >-
@@ -123,6 +204,25 @@ jobs:
             modules/communication/voice_command_ingestion/tests/test_transcript_language.py \
             modules/communication/voice_command_ingestion/tests/test_voice_command_ingestion.py \
             modules/ai_intelligence/video_indexer/tests/test_audio_transcript_language.py
+      - name: Verify 94 offline native startup controls in a minimal child
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite startup
+      - name: Verify 102 qualified inventory controls in a separate minimal child
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite inventory
+      - name: Verify 35 rotation controls in a separate minimal child
+        run: python -I -B .github/scripts/youtube_repair_offline.py --suite rotation
+      - name: Preserve sanitized offline repair inventories
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: youtube-repair-offline-results
+          path: |
+            ${{ runner.temp }}/youtube-repair-startup/summary.json
+            ${{ runner.temp }}/youtube-repair-startup/results.xml
+            ${{ runner.temp }}/youtube-repair-inventory/summary.json
+            ${{ runner.temp }}/youtube-repair-inventory/results.xml
+            ${{ runner.temp }}/youtube-repair-rotation/summary.json
+            ${{ runner.temp }}/youtube-repair-rotation/results.xml
+          if-no-files-found: error
       - name: Verify stream checker global and local quota boundaries
         run: python -B modules/platform_integration/stream_resolver/tests/test_no_quota_stream_checker.py -v
       - name: Verify live handoff and owned worker settlement
@@ -977,9 +1077,73 @@ jobs:
           pip install pytest pytest-cov
           pip install -r requirements.txt
 
+      - name: Verify audit expiry and exact-base authority contracts
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -o pythonpath=. -p no:cacheprovider
+          tools/modular_audit/tests/test_modular_audit.py
+          tools/modular_audit/tests/test_fmas_mode2.py
+          tools/modular_audit/tests/test_secret_scan.py
+          tools/modular_audit/tests/test_external_audit.py
+          tools/modular_audit/tests/test_tracked_audit.py
+          modules/infrastructure/wsp_core/tests/test_wsp_compliance_checker.py
+          modules/infrastructure/wre_core/tests/test_fmas_health_triage.py
+          modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py::test_interface_contract_pages_need_no_size_exemption
+
       - name: Verify canonical test registry
         run: |
           python modules/infrastructure/wre_core/scripts/generate_test_registry.py --check
+
+      - name: Verify scaffold and test-source import safety
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -o pythonpath=. -p no:cacheprovider
+          tests/test_wsp_compliance_guardian.py
+          tests/test_legacy_test_source_safety.py
+          modules/infrastructure/wre_core/tests/test_wre_test_registry.py
+
+      - name: Verify OpenClaw preflight denial boundary
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -p no:cacheprovider
+          modules/communication/moltbot_bridge/tests/test_openclaw_preflight_boundary.py
+
+      - name: Verify OpenClaw Ollama fallback contract
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -p no:cacheprovider
+          modules/communication/moltbot_bridge/tests/test_openclaw_ollama_contract.py
+
+      - name: Verify read-only root artifact classification
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -o pythonpath=. -p no:cacheprovider
+          modules/infrastructure/system_health_monitor/tests/test_wsp_85_validator.py
 
       - name: Run Mall GotJunk public listing acceptance
         env:

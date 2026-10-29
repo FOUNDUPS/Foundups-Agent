@@ -1,5 +1,40 @@
 # EDUIT interfaces
 
+> **Canonical 2026-10-28 handoff:** [Storytime conversation audit and Prometheus M2M handoff](docs/STORYTIME_RSI_CONVERSATION_AUDIT_AND_HANDOFF.md) is the current decision register. It supersedes conflicting historical statements below about video+game-only tiles, Earn Stars buttons, forced three-round quizzes, and autonomous runtime status. Existing site work is owned by a separate session; this PR documentation change must not overwrite that session's UI work.
+## EDUIT vision / Storytime Evolution map — 2026-10-28
+
+[EDUIT Pain → Solution → Outcome and Storytime Evolution progression](docs/EDUIT_STORYTIME_VISION_AND_EVOLUTION_MAP.md) is the current specification for the three-question FoundUp vision, Storytime's place inside EDUIT, modular counting/word/language objects, replay, optional parent-controlled memory, About/How links and a proposed accessible Roadmap mind-map modal. All new runtime behavior remains unimplemented until independently verified. A complete tile is WATCH → PLAY → VERIFY, superseding older video + game descriptions.
+
+
+## Adaptive learning content and formative assessment — 2026-10-28
+
+[Adaptive learning-content contract](docs/ADAPTIVE_LEARNING_CONTENT.md) defines EDUIT's outcome/experience/production-RSI vision, reusable three-object content packs, post-game picture matching, separate learning points and off-session RSI. This is specified, not shipped. Reuse the existing game and review owners; do not collect child play traces for WRE learning.
+
+
+## Cross-module RSI architecture — 2026-10-28
+
+Read [Storytime RSI system architecture](docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md) for canonical owners and the continuation sequence. This interface does not authorize new runtime admission, a second memory store, new orchestration, or child telemetry. A tile pairs video and game; the five-tile planner is not a production executor.
+
+
+## Five-tile RSI production contract — 2026-10-28
+
+Read [TILE_PRODUCTION_RSI](docs/TILE_PRODUCTION_RSI.md) before the next tile or
+repair. It maps creator corrections to fixed acceptance checks, existing
+OpenClaw/Hermes/FAM/WRE owners, and next-real-tile transfer evidence. The pure
+Kids Episodes planning/record checker is implemented; runtime admission, batch
+execution and retained skill promotion remain unproved. No live UI changes.
+
+## Current learning shell and evolution direction — 2026-10-28
+
+[Learning, evolution and sharing roadmap](docs/EVOLUTION_PLAY_AND_SHARING_ROADMAP.md)
+owns the latest direction: mechanical proof of concept, optional creature-AI
+prototype, then parent-owned membership MVP. Five-mission sets, fictional trait
+bonuses and reviewed replay-to-YouTube are planned, not live. Current score and
+slow rescue remain unchanged. The viewer now adds Play/About/How, a channel link
+above the local film, and viewport-sized controls. No YouTube iframe, upload,
+account, model, fingerprint or child telemetry is introduced.
+
+
 ## Current slow-rescue direction — 2026-10-27
 
 [SLOW_RESCUE_AND_AGENT_ROADMAP](docs/SLOW_RESCUE_AND_AGENT_ROADMAP.md) supersedes
@@ -109,3 +144,20 @@ and full scene/round state through existing viewer records. New feedback namespa
 `slow-rescue-11` leaves old local notes untouched; clock validation permits up to
 86400 active seconds for bounded untimed practice records. No storage/API upload
 for score. No agent controller runtime is exposed yet.
+
+### Information and responsive controls
+The Shorts-owned viewer exposes About and How as native modal dialogs. Opening
+pauses both media and game; closing preserves state and leaves explicit resume.
+Full-screen makes page siblings inert. Controls use CSS viewport sizing rather
+than canvas scaling: 64px at <=360px width or <=450px height, otherwise
+clamp(72px,10vmin,88px). The same rule applies to play, switch, feedback and
+expand controls. Actual physical touch delivery remains device acceptance.
+The game/film API, score, scene revision and local feedback namespace are unchanged.
+
+### Fullscreen viewport contract — 2026-10-29
+The viewer follows the visual viewport's dimensions and offsets at normal zoom,
+including scroll, resize and foreground restoration. Changed bounds pause both
+video and game; zoomed browser pages retain the layout viewport fallback. One
+fullscreen CSS owner reserves one active control rail and a separately scaled
+exit. Body-owned options/unlock share these viewport coordinates. Short landscape places the narrative beside the16:9 scene. No manifest,
+install identity, game API or gesture interface changed.

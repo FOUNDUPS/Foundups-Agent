@@ -1,6 +1,69 @@
+## 2026-10-29: Measured Windows manifest byte-bound amendment
+
+The actual two-helper closure is 334,056 LF bytes / 337,083 CRLF bytes, 187
+bytes above the previous 329 KiB ceiling. The unchanged Python and Node
+Windows-size tests rejected it (Python: seven pass / one fail). Preserve that
+failure; raise only the serialized-manifest bound to the smallest covering
+whole KiB: 330 KiB / 337,920 bytes, a 1,024-byte increase with 837-byte CRLF
+headroom. This separately reviewed resource-contract amendment supersedes the
+initial unchanged-manifest-size assumption. The consumer and both Python
+bounds agree; Node's actual LF/CRLF and exact maximum/+1 assertions are intact.
+The 1477/1478 member boundary, exact digest/source hashes, 2 MiB/file and 32 MiB
+total limits remain. JSON layout is unchanged. This is a post-read/pre-parse
+limit, not a preallocation bound or live-runtime qualification. No independent
+human/agent review is claimed. WSP 6/11/22/50/97.
+
+## 2026-10-29: Reconcile editorial compiler runtime metadata
+
+Retain current main's runtime set and add only campaign_brief.py and
+campaign_planner.py under the existing content owner: 1475 -> 1477 members.
+Only their existing content wrapper and SOCIAL adapter change among prior
+runtime sources. Canonical digest: `fbe2132cc44adddf625e66bf0eb6a0acb8f5294b420b33d4ecf32c6b77cba064`.
+Preserve all 1791 prior test records and 260 quarantines; add the existing PR's
+one compiler test module (1792 total). No generated shard changes. Bind both
+digest pins and exact 1477 acceptance / 1478 rejection together; file/total-byte
+caps are unchanged. Packaging checks remain separate from runtime activation.
+The retained October 27 entry describes the old 1472/1474 base, not this closure.
+WSP 22/50/71/97. Current contract execution is recorded after validation.
+
+> Historical PR #2238 record from 2026-10-27, retained verbatim below. Its counts, review and runtime claims apply to that original proposal, not current-main acceptance. See the newer reconciliation entry.
+
 ## 2026-10-27: Source-backed editorial package runtime closure
 
 Two content-owned leaves add exactly2 runtime members:1472→1474. Bind regenerated manifest/digest pins; exact1474 boundary accepts and1475 refuses. Preserve byte/file/bundle limits and source hash verification. Independent Python manifest8 and Node contracts qualify packaging only, not installed activation. Initial Node count oracle rejected the real1474 closure; update narrow member bound and refusal oracle together. Content behavior/test receipts remain in social_media_orchestrator.
+
+## Combined startup, inventory and WSP-domain closure - 2026-10-29
+
+Merge verified canonical-domain main without changing the accepted YouTube
+production or CI child guard. Existing canonical generation combines the two
+owned YouTube members with `wsp_domain_policy.py`: 1,475 members, accepting 1,475
+and refusing 1,476 in the existing boundary owner. Both pins bind canonical
+digest `31a721be`; manifest LF/CRLF sizes are 333,548/336,571 bytes. All byte caps
+remain 329 KiB/2 MiB/32 MiB. Preserve both preceding-lane records below; neither
+was an installed-runtime admission. WSP 3/5/6/15/22/50/62/97.
+
+## Native startup and scheduled inventory source closure - 2026-10-29
+
+WSP 5/6/15/22/50/62/97. Allocate exactly two required members within the existing
+dependency-launcher and scheduler owners: `lm_studio_startup.py` and
+`schedule_inventory.py`. Canonical generation yields 1,474 members and 333,352
+LF bytes. Both digest pins advance together. The existing Node boundary now
+accepts exactly 1,474 and refuses 1,475; the old 1,472 validator first produced
+the expected controlled refusal. Keep the 329 KiB manifest, 2 MiB/file and
+32 MiB total limits unchanged. Compatibility, preflight, blocked-recovery and
+package-manifest Node owners pass. No installed-runtime or public-effect
+authority follows from this source/package binding.
+
+## Shared WSP domain policy source binding — 2026-10-29
+
+WSP 3/5/6/22/50/84/97. The backend closure adds only
+`modules/infrastructure/wsp_core/src/wsp_domain_policy.py` and changes the
+existing checker source digest. Canonical digest: 62d1c9a6. Rebind the JS and
+generator-test pins; raise the exact member cap by one to 1473 and prove 1474
+is rejected. Manifest/per-file/total byte caps stay 329 KiB/2 MiB/32 MiB.
+The 24-test generator/idle-consumer selection and all three Node compatibility
+suites pass. No extension installation, runtime deployment or provider authority
+is claimed. Exact source-hash security metadata is reviewed separately from rules.
 
 ## GitHub file-reader source binding — 2026-10-26
 

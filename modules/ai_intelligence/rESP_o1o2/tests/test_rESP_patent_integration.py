@@ -1,4 +1,4 @@
-﻿"""Smoke test for src.rESP_patent_integration."""
+"""Smoke test for src.rESP_patent_integration."""
 
 import sys
 from pathlib import Path

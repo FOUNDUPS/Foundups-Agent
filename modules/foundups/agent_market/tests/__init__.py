@@ -1,1 +1,1 @@
-﻿"""Tests package for FoundUps Agent Market."""
+"""Tests package for FoundUps Agent Market."""

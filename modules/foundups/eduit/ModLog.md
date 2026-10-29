@@ -1,5 +1,13 @@
 # EDUIT ModLog
 
+## 2026-10-28 — Storytime RSI continuity architecture (documentation-only)
+
+- Cross-linked README, INTERFACE and ROADMAP to `docs/STORYTIME_RSI_SYSTEM_ARCHITECTURE.md`.
+- Consolidated educational vision, tile/block/episode/epoch hierarchy, canonical WRE/WSP/FAM/HoloIndex/Kids Episodes/Shorts/Mall ownership and new-session resume sequence.
+- Retained `docs/TILE_PRODUCTION_RSI.md` as frozen acceptance oracle; no duplicate worker, scheduler, memory, UI or production activation.
+- Known gaps: authenticated admission/lease and verifier, actual next-tile transfer, measured retained RSI. PR/squash and CI receipts must be checked independently; this entry alone is not proof of merge.
+
+
 ## 2026-10-26 — Story Time proof of concept
 
 Implemented parent-facing landing, browser-local two-tap game, shared SVG movie export and existing-renderer reuse. Four state/scene tests pass. Independent review checked actual rendered collapse and provenance; floating claw removed. No tracking or child profiles. Deployment handoff records observed Patreon forwarding, local Codex GoDaddy access boundary and isolated Firebase targets. Production domains unchanged.
@@ -245,3 +253,54 @@ dirt/vine motion and once-only arrival points. Film remains unchanged.64px prima
 controls and60px fullscreen targets; snapshots carry score and new revision.
 Added prototype review SKILLz and agent/traits/replay roadmap, not WRE activation.
 See SLOW_RESCUE_AND_AGENT_ROADMAP and SLOW_RESCUE_REVIEW for evidence/limits.
+
+## 2026-10-28 — Learning shell and staged evolution direction
+Extended existing Shorts viewer with Play/About/How, explicit Watch/Play headings,
+Us Story Time channel link, short fictional story opening and pause-preserving
+information dialogs. CSS controls scale independently of art and reserve their
+own rail. Retained film, engine, points, palette and feedback revision. Cache v5.
+Captured five-mission/trait/agent/replay publishing/member direction in the linked
+roadmap; 2004 is attributed founder recollection, not newly verified history.
+No credential, upload, signup, AI, model download or WRE activation added.
+See docs/LEARNING_SHELL_REVIEW.md for evidence and limits.
+
+
+## 2026-10-28 — Five-tile correction-driven RSI contract
+
+Added pure Kids Episodes five-tile plan DAG and local review-record completeness
+checker; linked EDUIT correction ledger, fixed oracle and existing FAM/WRE,
+OpenClaw/Hermes and Karpathy-style AutoResearch owners. Updated interactive
+review procedure to v0.2.0, still prototype. No worker/promotion/UI activation.
+
+WSP97 retrieval: governed lexical Holo bundle at 0e28155, freshness UNKNOWN,
+index gap true; module docs present, optional memory absent. Results were broad
+protocol hits rather than concrete routing owners; direct source inspection and
+independent owner mapping resolved those gaps. Reconciled on current main
+3574f3c before edits. WSP00 detector failed missing torch; existing tracker gate
+reported compliant, no new detector witness. Existing local authoring chosen:
+no admitted model/executor binding is claimed. WSP15 planning C2/I4/D4/Impact4
+=14/P1; not the quality rubric. No new scheduler, queue, model or credentials.
+
+Validation: stdlib unittest four cases (including invalid inputs and per-criterion
+subtests) passed; existing EDUIT Node tests18 passed; diff whitespace clean.
+Initial pytest command could not run (pytest absent); converted new suite to
+stdlib unittest, still collected by existing pytest CI. Actual video/audio,
+native device review and next-real-tile transfer are not exercised by this slice.
+Independent review and hosted CI results are retained in the milestone PR.
+
+## 2026-10-28 — Reconcile learning-engine narration and current Storytime PR
+Added media-clock cue scheduler and Shorts-owned browser voice adapter, bottom
+captions, fade, pause/seek/buffering cancellation, user-volume preservation and
+opt-in local timing trace. Reconciled current handoff, intro/replay/round changes
+from PR2249; corrected fullscreen specificity and caption/control layout.
+See docs/NARRATION_TIMING_REVIEW.md for correction loop, ratings and evidence.
+Device voice availability is platform-dependent; precise recorded speech and the
+full adaptive engine remain unimplemented. No film rerender or YouTube upload.
+
+## 2026-10-29 — Phone fullscreen regression repair
+Replaced conflicting fullscreen CSS rules with one layout owner, restored scaled
+exit targets, exclusive drawing controls and useful landscape video size. Added
+normal-zoom visualViewport offsets/scroll and foreground refresh; changed bounds
+pause both owners. Existing manifest/gesture/game/media/feedback identity retained.
+See docs/PHONE_FULLSCREEN_REPAIR.md for red baseline, browser/Node evidence and
+native-device limits. Remaining issue2252 findings are not relabeled repaired.

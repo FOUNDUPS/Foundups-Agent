@@ -1,3 +1,40 @@
+## 2026-10-29 — Preserve Ollama timeout recovery acceptance
+
+Retain the frozen 19-case helper oracle: unchanged source produces 15 failures
+and four passes; the two preserved PC helpers produce 19 passes. The portable
+copy changes only the default source root, retaining its assertions. Recover
+the two original constructor/conversation tests separately from an unrelated
+response-case assertion in the old PC file. Live models, daemon startup and
+provider calls remain outside this offline acceptance. WSP 6/22/50/97.
+
+The repository replay passes all 19 cases; both original DAE cases pass with
+central registration isolated and zero network/process attempts observed.
+
+## 2026-10-29 — PC preflight denial recovery
+
+Frozen26-case oracle: unchanged main helper13 failed/13 passed; reconciled helper
+26 passed, including actual planner COMMAND/SYSTEM authority and absent-WRE
+SCHEDULE cases. The initial Windows harness blocked asyncio's self-pipe; preserve
+that failed attempt separately. Creating the runner loop before socket denial
+repairs setup without changing acceptance assertions. Portable in-repo replay:
+26 passed. Connected run:54 passed (26 new+28 existing skill cases), then12 existing
+permission cases passed. Counts overlap and are not added to repeated runs.
+Synthetic seams: daemon registration/containment, permission storage for the skill
+selection, HTTP/provider/plan/memory collaborators. No live model or deployment.
+Exact-head hosted and resulting-main/Holo gates remain pending. WSP6/22/50/97.
+
+## 2026-10-29 — Interface split and retained expiry debt
+
+Remove INTERFACE.md from the obsolete exact-size exemption expectation and
+require its directory plus five contract pages to remain below 1000 lines
+without an interface exemption. The provider-evidence size test now passes.
+Existing date-sensitive checks still reject expired module/root/database/runtime
+exemptions: four failures retained, versus five on exact base ade6bca8547.
+No date extension, skip or source ceiling increase was used. Broader selected
+audit/Mode 2/brain/exemption run: 110 pass, four inherited failures, 28 subtests.
+The new bounded CI selection independently passes 103 tests and 28 subtests.
+WSP 5/22/50/62/97.
+
 ## Parent authority bootstrap forwarding — 2026-10-25
 
 Inventory first: extend existing `test_reddog_governed_execution_valve_production_wiring.py`;

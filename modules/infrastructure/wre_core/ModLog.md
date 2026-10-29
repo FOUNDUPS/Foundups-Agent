@@ -1,3 +1,102 @@
+## Current-main bounded-audit registry integration - 2026-10-29
+
+Integrate verified main `34b05f48` without changing accepted YouTube production
+or its CI helper. The existing generator/check projects 1,789 test files, 260
+quarantined, adding the two incoming modular-audit owners. This supersedes the
+local 1,787-file pre-merge projection below; all previous descriptors remain.
+No classifier, quarantine or test-selection policy is relaxed. WSP 5/22/50/97.
+
+## Startup and scheduled-inventory registry projection - 2026-10-29
+
+WSP 5/15/22/50/97. Regenerate the existing canonical registry after the two new
+test owners defer module-time fixture construction into test bodies. All case
+and assertion inventories remain intact; both programs now classify as unit and
+collectable without classifier changes or an execution allowlist. Projection:
+1,787 files, 260 quarantined; write/check pass. The focused CI adapter rechecks
+current source with this same AST owner and requires parity with the descriptor
+before either parent admission or child test execution. Quarantined programs
+remain visible and are rejected even if an obsolete JSON descriptor says unit.
+
+## 2026-10-29 — Keep scaffolds and manual programs out of automated evidence
+
+The existing AST classifier recognizes explicit `WRE_TEST_MODE` assignments
+(including annotations): scaffold/manual values remain excluded; unknown or
+nonliteral declarations are invalid and excluded. Existing external-effect
+detection still runs and its reasons cannot be hidden by a mode declaration.
+No production test subject is imported during classification.
+
+Canonical regeneration: 1779 -> 1781 files, still 260 quarantined. Fifty-two
+syntax-broken test-named scaffolds become explicitly unimplemented; the repaired
+Gemini probe remains manual. Two bounded regression owners are added. Every
+previous path and collectable flag is preserved; no old test is promoted.
+The 40 registry tests plus 11 generator/import controls pass. Reconciliation
+with concurrent #2206 preserves its Algorand test: 1782 total / 260 quarantined,
+all 1780 main paths and collectable flags unchanged; all 51 cases pass again.
+WSP5/6/22/50/62/97.
+
+## 2026-10-29 — Regenerate registry after F1 encoding repair
+
+The first PR2257 hosted test gate detected a stale registry: removing BOMs
+makes 15 files statically parseable under the existing classifier. Canonical
+regeneration preserves all 1779 paths and changes only those 15 classifications;
+260 remain quarantined. No discovery/classification rule or test skip was added.
+The 28 registry tests and canonical --check pass; 85 affected dummy-STT,
+in-memory permission and schema tests pass. Twelve optional rESP import smoke
+files remain outside executed acceptance. WSP 22/50/84/97.
+
+## 2026-10-29 — Reconcile the YouTube registry with current main
+
+Combined main `68562f2c8ca4749e360e76758183319d54988879` with the accepted
+YouTube repair `6c655690a7a6ef1f761ed3632be78bd59ffea48a`. Retained both
+conflicting ModLog entries and regenerated the registry through its existing
+owner: 1,779 files / 275 quarantined, including the incoming Hornet Hunter test.
+No classification rule, YouTube runtime source, backend manifest, digest pin or
+security ledger changed. Repository integration and live verification remain
+separate gates. WSP 10/22/50/84/97.
+
+## 2026-10-29 — Register the YouTube reply repair tests
+
+Regenerated the canonical Git-tracked registry with its existing generator after
+the reply inspection, semantic assessment and durable submission tests were
+tracked. The registry is current at 1,778 files / 275 quarantined; no classifier,
+quarantine rule, collection or authority contract changed. The existing registry
+and differential-runtime selection passes 50 cases on Windows. The YouTube CI
+owner separately runs the bounded offline repair selections; registry presence
+does not establish live model or YouTube delivery. WSP 5/6/22/50/97.
+
+## 2026-10-29 — Reconcile risk-verification handoff with landed implementation
+
+Retain PR #2248's original execution packet and dispatch reference; resolve the
+roadmap overlap by preserving PR #2250's newer implementation/status table.
+The handoff now links that landed slice and names the remaining native outcome,
+promotion/rollback and measured-benefit gates. No runtime or authority changes.
+Validation: all relative Markdown file targets in the handoff and changed
+roadmap link resolve; diff whitespace check passed. Hosted checks remain a
+separate merge gate. WSP 10/22/48/50/84/97.
+
+## 2026-10-28 — Preserve risk-based verification through execution and completion
+
+Reused the existing differential policy, scope resolver, evidence producer and
+slice verifier. Complete preflight now rejects invalid checks before execution;
+declared/bound policies cannot disappear at final verification. Independent
+review found and reproduced four additional stale/protected/release/audit
+escalation gaps; the existing required-suite function now governs preflight too.
+Ordinary absent/empty-policy compatibility and local-only authority rejection
+are preserved. CI gains a separate bounded connected-regression job.
+
+Baseline 44 independent failures, then four escalation failures; corrected
+connected selection 384 pass, with overlapping independent 93-pass review.
+No hosted/merge/native-execution claim is implied by local counts. Details and
+exact commands: [TestModLog](tests/TestModLog.md#2026-10-28--risk-verification-preflight-and-downgrade-regressions).
+Research and next gates are reconciled into existing roadmap/hybrid owners.
+WSP00/5/6/11/15/22/48/50/62/84/95/97; WSP15 15/P1.
+No paid provider call, worker grant, memory learning or production promotion.
+
+Hosted secret scan required 38 exact reviewed-metadata rebindings after the
+manifest byte identity changed. Independent review confirmed all 38 matched
+unchanged, previously reviewed public source hashes. Historical identities stay;
+no scanner rule or coverage change. See TestModLog for failed-run provenance.
+
 ## 2026-10-22 — Re-review unchanged generated hash metadata
 
 PR #2175 secret scan reported 38 existing manifest metadata findings after the

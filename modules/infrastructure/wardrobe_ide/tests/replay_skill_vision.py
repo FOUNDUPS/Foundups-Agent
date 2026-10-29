@@ -1,4 +1,4 @@
-﻿"""
+"""
 Replay Wardrobe skill using UI-TARS vision-based automation
 
 This replays skills using vision AI instead of DOM selectors - perfect for
