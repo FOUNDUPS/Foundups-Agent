@@ -1,5 +1,18 @@
 # Livechat Module - ModLog
 
+## 2026-10-29 — Select General readiness for language/DOM startup
+
+- Existing Phase-2 dependency call passes exact `LM_STUDIO_NATIVE_MODEL_KEY`,
+  otherwise unchanged `QWEN_MODEL_ID` General default. Removed the misleading
+  UI-TARS-ready log from a General startup check. DOM actions remain available;
+  explicit vision readiness is separate. Existing caller file does not grow.
+- Two isolated executions of the actual Phase-2 AST node prove configured native
+  key/default forwarding without importing/starting the DAE. Included in the
+  launcher's49 startup cases within94 actual-source offline checks; not a full
+  main.py or live-runtime qualification.
+- WSP11/22/50/62/84/97; no model, browser, service or scheduler action.
+
+
 ## 2026-10-29 — Bounded local fallback for private livechat themes
 
 WSP00/10/11/22/50/77/84/97. Retain reviewed Grok success and reuse the existing

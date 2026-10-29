@@ -1,5 +1,17 @@
 # Video Comments - Public Interface
 
+## Account-switch access contract (2026-10-29)
+
+`TarsAccountSwapper.swap_to(target, *, navigate_to_comments=True)` certifies
+matching native channel identity, exact HTTPS Studio channel path and an
+observed accessible shell. Comments remain the default surface; `False` retains
+content navigation through every recovery branch. The scheduler's private
+verifier passes a frozen `expected_channel_id`, preventing environment/registry
+changes from silently changing an already-bound receiving target. Unknown
+native identity or permission state returns failure. No screenshot Boolean
+substitutes for these checks.
+
+
 ## 2026-10-29 inspected posting contract
 
 The posting wrapper supplies `semantic_context` to `generate_reply_with_source`.
