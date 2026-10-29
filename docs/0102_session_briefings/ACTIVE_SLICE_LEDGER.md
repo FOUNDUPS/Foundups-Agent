@@ -7,23 +7,25 @@
 OpenRouter and Moshpit passed. Resulting-main CodeQL, OpenRouter and Moshpit
 passed; main CI's dependency installation exceeded 25 minutes (versus 91
 seconds on the final PR), so that attempt was cancelled for one bounded retry.
-It remains pending acceptance. Fresh owner query: CURRENT/no-gap, matching
+The retry is queued/running; it remains pending acceptance. Fresh owner query: CURRENT/no-gap, matching
 source/workspace/authority, generation
 `b8d75aea540ca0e311cc021c618b9d1d6723f1f7b88c4170d8e5d20c81834842`.
 Both owned maintenance runtimes stopped; port18880 is absent after cleanup.
 
-**Current prepared slice:** `agent/test-scaffold-repair-20261029`, based on
-that exact merge. Eight generator, three import-safety and 40 registry tests
+**Current prepared slice:** `agent/test-scaffold-repair-20261029`, reconciled
+with main `4c433502e66733ff83bb287ef910ef58dadb34dc` (#2206). Eight generator, three import-safety and 40 registry tests
 pass; 30 runtime/consumer tests and three Node compatibility suites pass.
 All 81 legacy test parser faults are repaired; 78 proven empty scaffolds retain
 156 explicitly skipped placeholders and zero behavioral coverage. Of these,
 52 have test_*.py filenames; the other 26 existing paths remain preserved.
-Registry: 1781 files / 260 quarantined, all prior collectable flags unchanged.
+Registry: 1782 files / 260 quarantined, all 1780 current-main paths and prior
+collectable flags preserved. All 51 focused tests pass again on the combined
+tree; 18 incoming files are byte-identical and four shared records are combined.
 Exact-base Mode2: zero errors / 127 warnings. No live browser/model/platform
 actions or global collection were executed. No PR published yet.
-Next: preserve concurrent main #2206 (`4c433502e66733ff83bb287ef910ef58dadb34dc`),
-regenerate exact derived registries, validate the combined tree, then complete
-exact-head/main checks and Holo proof. Owner: architect lane; review 2026-10-29.
+Next: complete the combined-tree exact-base audit and fresh Holo proof, then
+publish and complete exact-head/main checks. The prepared F2 commit is
+`b35d3901dd871ba373586f86219b9c4842cf1548`; its main integration is separate. Owner: architect lane; review 2026-10-29.
 
 **Concurrent ownership:** the active chat “Plan Foundups Blockchain Migration”
 owns #2202/#2210, #2211, #2261 and #2262; it merged #2206 with 24 green checks

@@ -10,7 +10,10 @@ Canonical regeneration: 1779 -> 1781 files, still 260 quarantined. Fifty-two
 syntax-broken test-named scaffolds become explicitly unimplemented; the repaired
 Gemini probe remains manual. Two bounded regression owners are added. Every
 previous path and collectable flag is preserved; no old test is promoted.
-The 40 registry tests plus 11 generator/import controls pass. WSP5/6/22/50/62/97.
+The 40 registry tests plus 11 generator/import controls pass. Reconciliation
+with concurrent #2206 preserves its Algorand test: 1782 total / 260 quarantined,
+all 1780 main paths and collectable flags unchanged; all 51 cases pass again.
+WSP5/6/22/50/62/97.
 
 ## 2026-10-29 — Regenerate registry after F1 encoding repair
 
