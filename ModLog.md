@@ -1,3 +1,44 @@
+## 2026-10-29 — F1 syntax/encoding and audit parser repair
+
+The first hosted test job stopped at a stale generated test registry after
+BOM removal made 15 entries parseable. Regenerated through the existing owner:
+1779 files / 260 quarantined; no classifier rule changed. All 28 registry tests
+and 85 tests across the three affected dummy-STT/in-memory/schema suites pass.
+The twelve optional rESP import smoke files were inspected, not runtime-qualified.
+Combined with YouTube main `887c09dd2`, the final AST scan covers 4220 files:
+zero production failures, 81 legacy test failures, zero leading BOMs.
+Fresh final security scan outcomes remain separate. The local Windows archive attempt failed before
+scanning; it is not a clean security result.
+
+Revalidated the supplied audit at main `68562f2c8`: 4216 tracked module Python
+files contained 87 byte-parser failures (six production, 81 tests), plus 36
+valid BOM-prefixed files rejected by the audit's text parser. Repair the six
+production declarations/docstrings/import/encoding faults, remove only the
+leading BOM from those 36 files, and parse source bytes in the existing audit
+owner so valid Python encoding cookies remain supported. Git blob comparison
+confirms the 36 normalizations change no other bytes after newline normalization.
+No model, browser, platform action or experiment was run. The legacy monitor's
+missing activate method remains a separate runtime gap. WSP 11/22/50/84/97.
+
+Validation: all 4216 files rescanned; zero production parse failures and zero
+leading BOMs, with 81 legacy test parser failures retained for F2. Audit tests:
+65 passed plus five subtests; valid BOM/Latin-1 controls failed before the fix.
+Isolated adapter signature binding preserves optional inputs and rejects any
+missing identity argument. WSP62 inventory ERROR count falls 131 -> 89: 81 test
+parser failures and eight existing exemption errors. Other severities remain
+229 advisory / 127 warning / 74 critical. This does not claim a clean audit.
+The 1472-member backend closure is unchanged; eleven encoding-only member
+hashes and the two existing digest pins are regenerated. Eight manifest tests
+and all three Node compatibility suites pass; membership/caps remain unchanged.
+
+Seven reconciliation PRs (#2247, #1605, #1835, #2251, #1346, #2255, #2248)
+now have successful resulting-main source workflows. Two separate Dependabot
+updates (undici/qs) report no resolvable patched version under current constraints;
+their failures remain dependency follow-up. All unique retained PR work survives.
+The governed HoloIndex refresh and separate query prove CURRENT/no-gap at
+`68562f2c8` only; later main heads require new receipts. The old shared checkout
+and its 48 tracked modifications were preserved. See the active-slice ledger.
+
 ## 2026-10-29 — Reconciliation merge receipts and ordered audit follow-up
 
 Five inherited PRs now merged: #2247 `5e9382535`, #1605 `0eb44e2c7`,

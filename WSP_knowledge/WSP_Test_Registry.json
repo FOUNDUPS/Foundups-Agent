@@ -2,7 +2,7 @@
   "schema_version": "wsp_test_registry.v2",
   "generation_policy": "git-tracked-python-tests.v1",
   "total_tests": 1779,
-  "quarantined_tests": 275,
+  "quarantined_tests": 260,
   "tests": [
     {
       "id": "test::WSP_agentic::tests::test_0102_awakening_with_pqn_verification",
@@ -4083,121 +4083,121 @@
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_anomaly_detector",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_anomaly_detector.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.anomaly_detector."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_biocognitive_monitoring_system",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_biocognitive_monitoring_system.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.biocognitive_monitoring_system."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_experiment_logger",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_experiment_logger.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.experiment_logger."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_integrated_patent_demonstration",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_integrated_patent_demonstration.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.integrated_patent_demonstration."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_llm_connector",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_llm_connector.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.llm_connector."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_quantum_cognitive_controller",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_quantum_cognitive_controller.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.quantum_cognitive_controller."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_quantum_cognitive_engine",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_quantum_cognitive_engine.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.quantum_cognitive_engine."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_quantum_cryptography_system",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_quantum_cryptography_system.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.quantum_cryptography_system."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_rESP_basic",
@@ -4244,61 +4244,61 @@
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_rESP_patent_integration",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_rESP_patent_integration.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "integration",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-integration",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "integration",
+      "collectable": true,
+      "timeout_s": 600,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.rESP_patent_integration."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_rESP_patent_system",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_rESP_patent_system.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.rESP_patent_system."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_rESP_trigger_engine",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_rESP_trigger_engine.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.rESP_trigger_engine."
     },
     {
       "id": "test::modules::ai_intelligence::rESP_o1o2::tests::test_voice_interface",
       "path": "modules/ai_intelligence/rESP_o1o2/tests/test_voice_interface.py",
       "owner": "modules/ai_intelligence/rESP_o1o2",
-      "suite_class": "operational",
-      "shard_id": "modules-ai-intelligence-resp-o1o2-operational",
-      "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
+      "suite_class": "unit",
+      "shard_id": "modules-ai-intelligence-resp-o1o2-unit",
+      "capabilities": [
+        "import_path_mutation"
       ],
-      "description": ""
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
+      "description": "Smoke test for src.voice_interface."
     },
     {
       "id": "test::modules::ai_intelligence::ric_dae::tests::test_governance",
@@ -13860,15 +13860,13 @@
       "id": "test::modules::communication::voice_command_ingestion::tests::test_batch_transcriber",
       "path": "modules/communication/voice_command_ingestion/tests/test_batch_transcriber.py",
       "owner": "modules/communication/voice_command_ingestion",
-      "suite_class": "operational",
-      "shard_id": "modules-communication-voice-command-ingestion-operational",
+      "suite_class": "unit",
+      "shard_id": "modules-communication-voice-command-ingestion-unit",
       "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
-      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
       "description": ""
     },
     {
@@ -15122,15 +15120,13 @@
       "id": "test::modules::foundups::agent_market::tests::test_permissions",
       "path": "modules/foundups/agent_market/tests/test_permissions.py",
       "owner": "modules/foundups/agent_market",
-      "suite_class": "operational",
-      "shard_id": "modules-foundups-agent-market-operational",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-agent-market-unit",
       "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
-      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
       "description": ""
     },
     {
@@ -15176,15 +15172,13 @@
       "id": "test::modules::foundups::agent_market::tests::test_schemas",
       "path": "modules/foundups/agent_market/tests/test_schemas.py",
       "owner": "modules/foundups/agent_market",
-      "suite_class": "operational",
-      "shard_id": "modules-foundups-agent-market-operational",
+      "suite_class": "unit",
+      "shard_id": "modules-foundups-agent-market-unit",
       "capabilities": [],
-      "execution_type": "operational",
-      "collectable": false,
-      "timeout_s": 900,
-      "quarantine_reasons": [
-        "syntax_error"
-      ],
+      "execution_type": "unit",
+      "collectable": true,
+      "timeout_s": 180,
+      "quarantine_reasons": [],
       "description": ""
     },
     {

@@ -1,4 +1,4 @@
-﻿# ricDAE research ingestion cube DAE package
+# ricDAE research ingestion cube DAE package
 
 from .mcp_tools import ResearchIngestionMCP
 

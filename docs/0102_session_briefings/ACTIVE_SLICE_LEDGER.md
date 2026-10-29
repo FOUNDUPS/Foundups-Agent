@@ -40,10 +40,40 @@ Current and historical records remain explicitly separated. Cross-PR merge and
 CI evidence requires architect review; no Qwen/Gemma capability or independent
 agent run is claimed. Existing deterministic Git/CI/maintenance owners were reused.
 
-**Next action:** finish post-merge checks for the five landed inherited PRs and
-fresh acceptance for #2248. This governance record is PR #2255 and must itself
-reach main with passing checks. Retained rows below have concrete repair or
-scope gates; an open PR is not a completed task.
+**Reconciliation acceptance:** seven PRs have merged: the six inherited rows
+below and governance #2255 (`0680427e2b01baab558a97934f8db452f363688f`). All seven
+resulting-main revisions passed their source workflows (CI, CodeQL, OpenRouter,
+Moshpit; #2247 also Docker context security). Separate Dependabot runs
+40796752577 (undici) and 40796752652 (qs) failed to resolve patched versions;
+retain dependency follow-up rather than call every workflow green. The final
+snapshot has 39 open PRs: 37 retained original rows plus concurrent #2254
+YouTube and #2256 Storytime. Those new lanes retain their owners.
+
+**Chosen follow-up:** F1 PR #2257 on `agent/python-audit-repair-20261029`, based on
+`68562f2c8` and reconciled with YouTube main `887c09dd2`, repairs six production parser failures and 36 BOM-only headers,
+plus the audit owner's Python encoding support and required integrity records.
+Local AST acceptance: 4216 files, zero production failures, 81 remaining test
+failures; no global collection or live service acceptance. Audit suite: 65 pass
+and five subtests. WSP62 ERROR 131 -> 89, with eight exemption faults retained.
+Next gates: this slice's hosted/main checks, then F4a and bounded F2 repair.
+No completed task is represented by an unverified open PR.
+
+**F3 refreshed evidence:** governed maintenance and a fresh owner query now
+qualify exact main `68562f2c8ca4749e360e76758183319d54988879`, generation
+`e09b01dc41a410babd6b37e61b3775e0e636951906ed68b85d0d532b67ff37cf`.
+Query returned CURRENT/no-gap, one owner attempt, matching source/workspace/
+authority and no query reindexing. The first launch failed on occupied port18800;
+its incident/history were preserved. Normal idempotent admission succeeded with
+supported process-local host127.0.0.1/port18880, stopped its two owned runtimes,
+and left the pre-existing port18800 process intact. The shared Git status works;
+the supplied permission fault was not reproduced. Never generalize this receipt
+to a later source revision.
+
+**F1 retrieval evaluation:** the fresh module bundle has all Tier0 artifacts;
+optional roadmap/test/memory files are missing, not synthesized. The first hit
+was the exact gateway owner; peripheral hits were filtered against the six
+verified paths and owning docs. No duplicate result was used. Deterministic
+AST and Git checks establish this syntax slice; no local model result is claimed.
 
 **Ordered follow-up from 012:** after this reconciliation pass, revalidate the
 supplied 2026-10-29 audit against current main and address confirmed failures in
@@ -65,8 +95,8 @@ before any movement. Do not renew exemptions or weaken scans merely to pass.
 | [#802](https://github.com/FOUNDUPS/Foundups-Agent/pull/802) | [de63ab95a](https://github.com/FOUNDUPS/Foundups-Agent/commit/de63ab95aab0ca11247cf2620cb4bc559bbce16c) | Reconcile registry and root ModLog; rerun GetK contracts, manifest and connected dry-run acceptance. |
 | [#1339](https://github.com/FOUNDUPS/Foundups-Agent/pull/1339) | [029d77a20](https://github.com/FOUNDUPS/Foundups-Agent/commit/029d77a20838879e5bbc90e46e445fff29cb9f69) | Rebuild the gaxios-only dependency change on the current lock; preserve newer security fixes and validate GotJunk build. |
 | [#1342](https://github.com/FOUNDUPS/Foundups-Agent/pull/1342) | [df0a9af87](https://github.com/FOUNDUPS/Foundups-Agent/commit/df0a9af87ed3aa086a218fe8f61ef392634042f8) | Review Vite major migration, plugin peers and current lock; require frontend build/regression evidence. |
-| [#1346](https://github.com/FOUNDUPS/Foundups-Agent/pull/1346) | [1c3775f69](https://github.com/FOUNDUPS/Foundups-Agent/commit/1c3775f69a744856dea5ddd125b78cac7fd7b116) | MERGED 1bbe012141ce74bd52d77386a9ff7ac2ff655217 after fresh PR checks; resulting-main checks pending. Preserved ws ^8.21.0 minimum, locked 8.22.0 and all current resolved packages; 236-package dry-run passed. |
-| [#1605](https://github.com/FOUNDUPS/Foundups-Agent/pull/1605) | [467a7ce89](https://github.com/FOUNDUPS/Foundups-Agent/commit/467a7ce898a9b9e050390064dd9d5d212d76187b) | MERGED 0eb44e2c764d704e429977e5a797af06e91f4a0a after full document review and 23 successful PR checks; resulting-main checks pending. Architecture only; no operational engine claim. |
+| [#1346](https://github.com/FOUNDUPS/Foundups-Agent/pull/1346) | [1c3775f69](https://github.com/FOUNDUPS/Foundups-Agent/commit/1c3775f69a744856dea5ddd125b78cac7fd7b116) | MERGED 1bbe012141ce74bd52d77386a9ff7ac2ff655217 after fresh PR checks; resulting-main source workflows passed. Preserved ws ^8.21.0 minimum, locked 8.22.0 and all current resolved packages; 236-package dry-run passed. |
+| [#1605](https://github.com/FOUNDUPS/Foundups-Agent/pull/1605) | [467a7ce89](https://github.com/FOUNDUPS/Foundups-Agent/commit/467a7ce898a9b9e050390064dd9d5d212d76187b) | MERGED 0eb44e2c764d704e429977e5a797af06e91f4a0a after full document review and 23 successful PR checks; resulting-main source workflows passed. Architecture only; no operational engine claim. |
 | [#1618](https://github.com/FOUNDUPS/Foundups-Agent/pull/1618) | [afef5e917](https://github.com/FOUNDUPS/Foundups-Agent/commit/afef5e917dd1c327d34fd8952352d3469085f9b7) | Reconcile overlapping campaign/homepage changes; preserve current page behavior and revalidate bilingual UI/contracts. |
 | [#1636](https://github.com/FOUNDUPS/Foundups-Agent/pull/1636) | [318c68007](https://github.com/FOUNDUPS/Foundups-Agent/commit/318c68007c476fce727b25239d2f3f40d8effce6) | Retain draft: proposed state semantics conflict with current canonical WSP 00 identity language; settle canonical owner scope first. |
 | [#1642](https://github.com/FOUNDUPS/Foundups-Agent/pull/1642) | [3cfeac66a](https://github.com/FOUNDUPS/Foundups-Agent/commit/3cfeac66a9739ad4bf5a8e4587c5c80e574f9023) | Reconcile renamed Moshpit documentation and current memory owner; avoid a parallel protocol/authority. |
@@ -82,7 +112,7 @@ before any movement. Do not renew exemptions or weaken scans merely to pass.
 | [#1774](https://github.com/FOUNDUPS/Foundups-Agent/pull/1774) | [c914bc664](https://github.com/FOUNDUPS/Foundups-Agent/commit/c914bc6640d3322003ce89258b353f8950b66e0c) | Reconcile JHR issue and promotional surfaces; repair validate failure and review citations/rendering before publication claims. |
 | [#1792](https://github.com/FOUNDUPS/Foundups-Agent/pull/1792) | [09d0ad70f](https://github.com/FOUNDUPS/Foundups-Agent/commit/09d0ad70f6a91f9e9690ee796bf594cb50bb8631) | Reconcile brand-context source/registry with current RedDog; repair test and regeneration failures; rerun connected contracts. |
 | [#1822](https://github.com/FOUNDUPS/Foundups-Agent/pull/1822) | [663f0e175](https://github.com/FOUNDUPS/Foundups-Agent/commit/663f0e17566a4e613a6b419456239e02f156923d) | Retain draft; isolate Memory Horizon intake/PoC scope from the 37-file branch and reconcile registry/doc conflicts. |
-| [#1835](https://github.com/FOUNDUPS/Foundups-Agent/pull/1835) | [d0a532556](https://github.com/FOUNDUPS/Foundups-Agent/commit/d0a532556a5a3d22204eb6283ecb5ebac1068381) | MERGED f96c636c566368ce7438b3be31c585542a51d4f9 after full document review and 23 successful PR checks; resulting-main checks pending. Architecture only; unfinished AGI/RSI boundary retained. |
+| [#1835](https://github.com/FOUNDUPS/Foundups-Agent/pull/1835) | [d0a532556](https://github.com/FOUNDUPS/Foundups-Agent/commit/d0a532556a5a3d22204eb6283ecb5ebac1068381) | MERGED f96c636c566368ce7438b3be31c585542a51d4f9 after full document review and 23 successful PR checks; resulting-main source workflows passed. Architecture only; unfinished AGI/RSI boundary retained. |
 | [#1886](https://github.com/FOUNDUPS/Foundups-Agent/pull/1886) | [3aa71a078](https://github.com/FOUNDUPS/Foundups-Agent/commit/3aa71a0786b9202062e01beb84769c9ba0e7950e) | Review accounting schema acceptance versus posting authority; POSTED currently allows null account/payment identifiers. Spec is not a ledger gate. |
 | [#1906](https://github.com/FOUNDUPS/Foundups-Agent/pull/1906) | [d5eb2622a](https://github.com/FOUNDUPS/Foundups-Agent/commit/d5eb2622a14e2c551cedd188a702a5f73fa981b0) | Reconcile STT guard with current homepage; revalidate the intended text/projection contract without overwriting later content. |
 | [#1998](https://github.com/FOUNDUPS/Foundups-Agent/pull/1998) | [0457051b9](https://github.com/FOUNDUPS/Foundups-Agent/commit/0457051b92d2b494dbda50f0676bce851474ecff) | Do not merge stale meeting notice: October 13 is still hard-coded as upcoming. Reconcile current authorized schedule and dated test. |
@@ -100,8 +130,8 @@ before any movement. Do not renew exemptions or weaken scans merely to pass.
 | [#2234](https://github.com/FOUNDUPS/Foundups-Agent/pull/2234) | [b9c109678](https://github.com/FOUNDUPS/Foundups-Agent/commit/b9c109678158882f7020fcc75cd87e299ac9e310) | Diagnose validate failure and verify partner route/build/bilingual UI; retain explicit non-binding inquiry and no-partner-commitment boundaries. |
 | [#2238](https://github.com/FOUNDUPS/Foundups-Agent/pull/2238) | [bf78e977b](https://github.com/FOUNDUPS/Foundups-Agent/commit/bf78e977b6a6609fa1b7ef0af1f3d177e5dac495) | Reconcile reviewed findings, compatibility constants and manifest tests; revalidate dry-run editorial package with current authorization owner. |
 | [#2247](https://github.com/FOUNDUPS/Foundups-Agent/pull/2247) | [91056ef5d](https://github.com/FOUNDUPS/Foundups-Agent/commit/91056ef5dcea561de25310b40de81bc70af9c85e) | MERGED 5e9382535630cd46727bd231b7b2cdd339175e7f; all five observed resulting-main workflows passed. |
-| [#2248](https://github.com/FOUNDUPS/Foundups-Agent/pull/2248) | [0dc706536](https://github.com/FOUNDUPS/Foundups-Agent/commit/0dc706536ab6fd86ea067c47738e55de182d9c99) | Reconciled four-file documentation slice with landed 2250; original packet retained with current implementation and remaining gates. Relative links and whitespace checks passed; fresh hosted checks pending. |
-| [#2251](https://github.com/FOUNDUPS/Foundups-Agent/pull/2251) | [7f425c52b](https://github.com/FOUNDUPS/Foundups-Agent/commit/7f425c52b472c7b6c79e0de7d41c9d55a93d5370) | MERGED 3ec3578921b5e7106fed215a6057830b6058c9fe after source/privacy review, two offline build/privacy tests and 23 successful PR checks; resulting-main checks pending. Sites retains deployment ownership. |
+| [#2248](https://github.com/FOUNDUPS/Foundups-Agent/pull/2248) | [0dc706536](https://github.com/FOUNDUPS/Foundups-Agent/commit/0dc706536ab6fd86ea067c47738e55de182d9c99) | MERGED 68562f2c8ca4749e360e76758183319d54988879 after 40 successful PR checks; resulting-main source workflows passed. Four-file documentation reconciliation retains the original packet, landed 2250 evidence and remaining gates. |
+| [#2251](https://github.com/FOUNDUPS/Foundups-Agent/pull/2251) | [7f425c52b](https://github.com/FOUNDUPS/Foundups-Agent/commit/7f425c52b472c7b6c79e0de7d41c9d55a93d5370) | MERGED 3ec3578921b5e7106fed215a6057830b6058c9fe after source/privacy review, two offline build/privacy tests and 23 successful PR checks; resulting-main source workflows passed. Sites retains deployment ownership. |
 
 > Dated ledger snapshot: entries below were last reconciled on 2026-04-21. They do not establish current lane ownership. Start at [the system roadmap](../../ROADMAP.md), then verify current commits, open changes and runtime claims before choosing a slice. Preserve these historical entries until each owner reconciles them.
 

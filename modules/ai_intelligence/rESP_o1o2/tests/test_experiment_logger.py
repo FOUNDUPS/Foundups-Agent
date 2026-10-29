@@ -1,4 +1,4 @@
-﻿"""Smoke test for src.experiment_logger."""
+"""Smoke test for src.experiment_logger."""
 
 import sys
 from pathlib import Path
