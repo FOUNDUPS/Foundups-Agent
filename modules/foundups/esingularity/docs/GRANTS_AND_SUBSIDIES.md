@@ -1,6 +1,6 @@
 # YUMORI.me / eSingularity — Grants, Subsidies, and PPP Support Registry
 
-Last verified: 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
+Last verified: 2026-10-30 JST for F-12 exact deadline-time clarification; 2026-10-28 JST for F-13/F-14 coverage catch-up; 2026-10-26 targeted checks and other historical entries retain their own verification dates. These catch-up discoveries are not fresh official changes.
 
 ## Purpose and truth boundary
 
@@ -254,7 +254,7 @@ Do not book any F-10 subsidy revenue, do not treat the published rates as expect
 
 - Agency: 環境省 / 一般社団法人静岡県環境資源協会 (SERA).
 - Status: **VERIFIED PROGRAM / THIRD CALL OPEN; YUMORI ELIGIBILITY NOT ESTABLISHED**.
-- Open: 2026-10-16. Deadline: **2026-12-15**; verify exact submission method and cutoff with current guide before any action.
+- Open: 2026-10-16. Deadline: **2026-12-15 17:00 JST (receipt required)**, explicitly stated in the Ministry of the Environment's 2026-10-16 primary release; verify the exact submission method with the administrator before action. Deadline-time evidence rechecked 2026-10-30 (not a new government amendment).
 - Round clarification, rechecked 2026-10-26: SERA identifies this as the **final FY2026 call**. This does not establish a FY2027 successor or opening date.
 - Official ministry release: https://www.env.go.jp/press/press_05673.html
 - Official administrator: https://siz-kankyou.com/2026co2/teitansokenzai3/
