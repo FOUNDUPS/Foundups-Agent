@@ -53,7 +53,7 @@ export function mountStorybook({dialog,video,narration,beforePlay=()=>{},onFinis
  model=new StorybookPlayback({speak:voice.speak,cancel:voice.cancel,view,trace:r=>{if(debug){trace.push(r);if(trace.length>300)trace.shift();}}});
  function pause(reason='interaction'){cancelAnimationFrame(frame);frame=0;model.pause(reason);}
  function navigate(delta){interacted=true;pause('navigation');model.select(model.index+delta);}
- function loop(now){if(!dialog.open||document.hidden){pause('not-visible');return;}model.tick(now);if(model.playing)frame=requestAnimationFrame(loop);}
+ function loop(now){if(!dialog.open||document.hidden){pause('not-visible');return;}model.tick(now);if(model.finished){pause('story-complete');onFinish();return;}if(model.playing)frame=requestAnimationFrame(loop);}
  function play(){
   interacted=true;
   if(model.playing){pause('explicit-pause');return;}
