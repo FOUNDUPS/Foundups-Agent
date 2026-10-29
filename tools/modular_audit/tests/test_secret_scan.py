@@ -64,6 +64,16 @@ def test_tracked_test_fixture_is_scanned_and_only_metadata_returned(repo):
     assert 'synthetic-fixture-placeholder' not in str(findings)
 
 
+def test_inspection_boundary_returns_only_location_metadata(repo):
+    relative = 'modules/infrastructure/example/src/source.py'
+    add_source(repo, relative, 'service_token = "synthetic-fixture-placeholder"\n')
+    hints = audit.inspect_tracked_source(repo / 'modules', [relative])
+    assert [hint._asdict() for hint in hints] == [
+        {'category': 'literal', 'path': relative, 'line': 1},
+    ]
+    assert 'synthetic-fixture-placeholder' not in repr(hints)
+
+
 def test_untracked_worktrees_and_environment_files_are_never_opened(repo):
     add_source(repo, 'modules/infrastructure/example/src/normal.py', 'value = 1\n')
     for relative in ('modules/.worktrees/foreign.py', 'modules/vendor/local.py', 'modules/.env'):

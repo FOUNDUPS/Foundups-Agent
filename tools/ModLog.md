@@ -5,7 +5,8 @@
 FMAS formerly walked local files, silently skipped read failures and classified
 ordinary credential-variable expressions as secrets. It now reuses the existing
 Git module inventory, requires quoted assignment literals, retains key/URI hints,
-and returns only path/line metadata. Environment-named files are never opened.
+and returns typed category/path/line records. A separate adapter formats those
+records without accepting source text or matched values. Environment-named files are never opened.
 Tracked test fixtures remain in scope. Invalid, redirected, missing, oversized
 or unreadable source produces an explicit error; unavailable Git cannot fall
 back to a filesystem walk. The hosted security gate remains unchanged.
@@ -13,7 +14,7 @@ back to a filesystem walk. The hosted security gate remains unchanged.
 Both audit modes now distinguish warnings, advisories and baseline differences
 from a no-findings result. The extracted scanner stays below WSP62 function
 limits. New synthetic acceptance: 19 failures/11 controls on exact main01b;
-candidate CI selection: 133 passed and 28 subtests passed. No real secret scan,
+candidate CI selection: 134 passed and 28 subtests passed. No real secret scan,
 Mode1 external scanners, database-backed compliance scan or global collection
 was executed. WSP5/6/22/50/62/71/84/97.
 

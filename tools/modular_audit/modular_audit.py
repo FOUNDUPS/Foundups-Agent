@@ -108,9 +108,9 @@ SECURITY_THRESHOLDS = {
 
 # Shared by the direct CLI and package import; no live scan runs at import.
 if __package__:
-    from .secret_scan import SECRET_PATTERNS, scan_tracked_secrets
+    from .secret_scan import SECRET_PATTERNS, inspect_tracked_source
 else:
-    from secret_scan import SECRET_PATTERNS, scan_tracked_secrets
+    from secret_scan import SECRET_PATTERNS, inspect_tracked_source
 
 # Define recognized Enterprise Domains (WSP 3)
 ENTERPRISE_DOMAINS = {
@@ -496,7 +496,16 @@ def scan_for_secrets(modules_dir: Path) -> List[str]:
             raise ValueError("Git-tracked inventory unavailable")
     except ValueError:
         return ["SECRET_SCAN_ERROR: Git-tracked module inventory unavailable"]
-    return scan_tracked_secrets(modules_dir, inventory)
+    return [_format_source_hint(item) for item in inspect_tracked_source(modules_dir, inventory)]
+
+
+def _format_source_hint(item):
+    """Format the inspector's location metadata; never accept source content."""
+    if item.category == "environment":
+        return f"SECRET_SCAN_SKIPPED: Environment file not read: {item.path}"
+    if item.category == "literal":
+        return f"SECRET_DETECTED: Potential literal secret in {item.path}:{item.line}"
+    return f"SECRET_SCAN_ERROR: Unable to inspect tracked source: {item.path}"
 
 
 def audit_all_modules(modules_root):

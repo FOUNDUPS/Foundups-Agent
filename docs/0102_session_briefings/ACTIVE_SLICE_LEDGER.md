@@ -25,7 +25,7 @@ browser/model/platform operation was used as acceptance evidence.
 incomplete-read errors, and metadata-only output; it never opens environment
 content. Warnings/advisories/baseline changes remain visible in final summaries.
 New acceptance on the base: 19 failed / 11 controls passed. Candidate CI selection:
-133 passed / 28 subtests passed; registry 1784 / 260, one added test path.
+134 passed / 28 subtests passed; registry 1784 / 260, one added test path.
 The hosted security gate, reviewed findings and runtime manifest are unchanged.
 Owner: architect lane; review 2026-10-29. Next: exact-base audit, final source
 review, hosted checks, squash merge and resulting-main/Holo acceptance.

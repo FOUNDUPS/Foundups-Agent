@@ -10,7 +10,7 @@ files and accurate warning/advisory/baseline-difference summaries. It neither
 scans real credentials nor invokes Mode 1's external scanners.
 
 On main `01b87f0ea`, the new acceptance cases report 19 failures and 11 passing
-controls. The candidate's five-owner CI selection passes 133 tests plus
+controls. The candidate's five-owner CI selection passes 134 tests plus
 28 subtests. This is bounded scanner validation, not whole-repository security
 clearance. See [the scanner scope](../README.md).
 

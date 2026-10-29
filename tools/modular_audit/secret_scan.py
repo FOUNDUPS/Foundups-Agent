@@ -7,11 +7,18 @@ are reported by name without opening them; test directories are not exempted.
 from pathlib import Path
 import re
 import stat
-from typing import Iterable, List
+from typing import Iterable, List, NamedTuple, Optional
 
 
 MAX_FILE_BYTES = 2 * 1024 * 1024
 SOURCE_SUFFIXES = {".py", ".js", ".jsx", ".ts", ".tsx", ".json", ".yaml", ".yml", ".conf", ".config"}
+
+
+class SourceHint(NamedTuple):
+    """Only location metadata crosses the source-inspection boundary."""
+    category: str
+    path: str
+    line: Optional[int] = None
 
 
 def _literal_pattern(names: str, minimum: int) -> str:
@@ -59,23 +66,23 @@ def _source_bytes(root: Path, relative: str) -> bytes:
     return data
 
 
-def scan_tracked_secrets(modules_dir: Path, tracked_paths: Iterable[str]) -> List[str]:
+def inspect_tracked_source(modules_dir: Path, tracked_paths: Iterable[str]) -> List[SourceHint]:
     """Inspect selected tracked working-tree sources without returning values."""
     findings = []
     patterns = [re.compile(pattern) for pattern in SECRET_PATTERNS]
     for relative in sorted(set(tracked_paths)):
         path = Path(relative)
         if _environment_name(path):
-            findings.append(f"SECRET_SCAN_SKIPPED: Environment file not read: {relative}")
+            findings.append(SourceHint("environment", relative))
             continue
         if path.suffix.casefold() not in SOURCE_SUFFIXES:
             continue
         try:
             content = _source_bytes(modules_dir.parent, relative).decode("utf-8-sig", errors="strict")
         except (OSError, UnicodeError, ValueError):
-            findings.append(f"SECRET_SCAN_ERROR: Unable to inspect tracked source: {relative}")
+            findings.append(SourceHint("incomplete", relative))
             continue
         for number, line in enumerate(content.splitlines(), 1):
             if any(pattern.search(line) for pattern in patterns):
-                findings.append(f"SECRET_DETECTED: Potential literal secret in {relative}:{number}")
+                findings.append(SourceHint("literal", relative, number))
     return findings

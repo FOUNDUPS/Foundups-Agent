@@ -34,8 +34,9 @@ symlinks and Windows reparse points before reading. This is a bounded working
 tree inspection, not a race-resistant filesystem security boundary; concurrent
 checkout changes require a new inspection.
 
-Results contain only a category, relative path and optional line number. They
-never contain matched values. Potential literals and unread environment files
+The source inspector returns typed location records containing only category,
+relative path and optional line number. The audit adapter formats those records;
+source text and matched values never cross that reporting boundary. Potential literals and unread environment files
 are warnings; incomplete source inspection is an error. No test directory is
 blanket-exempted.
 

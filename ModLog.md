@@ -6,7 +6,7 @@ Quoted literals replace expression-based false positives. Audit summaries retain
 warnings/advisories/baseline differences instead of calling them no findings.
 Hosted security rules and reviewed-finding records are unchanged. Synthetic
 acceptance reproduces 19 failures/11 controls on main01b; the candidate's focused
-CI selection passes 133 tests plus 28 subtests. Registry gains one test owner;
+CI selection passes 134 tests plus 28 subtests. Registry gains one test owner;
 the resident runtime manifest is unchanged. WSP5/6/22/50/62/71/84/97.
 The filesystem/SQLite compliance checker and canonical-domain follow-up remain
 separate work; this slice is not whole-repository audit or security clearance.
