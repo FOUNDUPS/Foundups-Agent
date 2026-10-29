@@ -2,6 +2,14 @@
 
 This folder contains tests for the Foundups Modular Audit System (FMAS). These tests verify functionality related to module structure checking, test existence verification, and baseline comparison.
 
+Historical expiry coverage binds both baseline policy mirrors, tests all four
+quarter boundaries, malformed/current/future review dates, existing/null expiry,
+ownership and nested type changes, candidate-only policy, ordinary source growth,
+and archive-transition bypass attempts. Completed metadata remains expired debt.
+The audit/Mode 2/health-triage/interface CI selection passes 103 tests plus
+28 subtests locally on 2026-10-29. Unrelated expired-exemption tests still fail
+and are tracked in the active slice ledger; no dates are extended to hide them.
+
 `test_modular_audit.py` also checks Python source-encoding parity: valid UTF-8
 BOM and declared Latin-1 sources produce function spans, while conflicting
 encoding declarations, malformed syntax and null bytes still reject. The

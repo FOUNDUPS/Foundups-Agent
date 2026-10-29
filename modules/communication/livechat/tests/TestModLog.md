@@ -1,5 +1,19 @@
 # TestModLog
 
+## 2026-10-29 — Shared-generator livechat fallback and async caller checks
+
+The existing video-comments semantic selector executes actual livechat generator,
+sender and MessageProcessor definitions with controlled collaborators. Its 88
+cases include exact final mention/theme snapshots, livechat-only context, busy
+generation/inspection, comments serialization, heartbeat, timeout/cancellation,
+late-result/no-late-fallback and both existing eligible caller paths. Paired with
+submission history, 104 cases and 12 subtests pass; the separate original context
+53, adjacent operator queue/lifecycle/reader 116 and stdlib inspection 15 pass.
+See `../../video_comments/tests/TestModLog.md` for inventory/effect boundaries.
+Malformed native source/handle fields are rejected before all providers in six
+controls that reproduced the bypass before repair. No DAE, public sender, paid
+API or real browser/model is started by these tests.
+
 ## 2026-10-23 - PR841 frozen local source acceptance
 
 The two documented source-bound files pass81 cases in8.24s on CPython3.12.2,

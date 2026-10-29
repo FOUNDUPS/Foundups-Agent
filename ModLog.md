@@ -1,3 +1,45 @@
+## 2026-10-29 — F4a enforcement, interface preservation and F3 cache repair
+
+Policy #2258 merged at ade6bca85470159bef0e447353e9c0b91628a704, preserving
+concurrent YouTube #2259. All 23 PR checks and all four resulting-main source
+workflows passed. Governed Holo maintenance and a separate query prove CURRENT,
+no gap and matching source/workspace/authority at that revision, generation
+9cba0a7721354209baef3460a20244e78b329a0603b5779fe85f997b1e112adb.
+Both owned maintenance runtimes stopped. Port18800 was already absent before
+this maintenance admission; no action was taken against that external service.
+
+Implement policy-bound overdue-expiry completion in the existing audit owner,
+add six derived historical dates without renewals, remove two resolved bridge
+exemptions, and preserve the oversized interface across five linked pages.
+All original text/headings survive; no execution contract changes. Local
+bounded suite: 103 pass plus 28 subtests. Static module errors fall 89 -> 81
+(all remaining errors are legacy test syntax defects); exact-base size audit
+has zero candidate errors. Four inherited expiry tests still fail. Hosted and
+resulting-main acceptance for this implementation remains pending.
+
+Git's commit-graph chain referenced two missing cache files. Rebuilt through
+`git commit-graph write --reachable --split=replace --no-progress`; native
+verification passes and the warning is gone. No source, branch or shared
+checkout was reset. This repairs the observed cache fault, not an unverified
+historical permission issue. WSP 5/11/22/50/62/81/84/97.
+
+## 2026-10-29 — F4a policy groundwork and F1 main acceptance
+
+F1 #2257 merged at `f304ba799f8fa835f0b5127efabe9e724315e3c8` after 25 passing
+PR checks; all six observed source workflows on that resulting main passed.
+Governed Holo maintenance completed and stopped both owned runtimes. A fresh
+task-checkout query returned CURRENT/no-gap, matching source/workspace/authority,
+one owner attempt and no query reindexing, generation
+`bf26960cc9b61fe8492c5b09051308d5d83d61a01de4b5ce040af08b0c5d4407`.
+The historical common-directory helper recipe still selects dirty primary
+checkout `0c81418fe` and correctly rejects; current CLAUDE task-helper guidance
+works. Primary work and the existing port18800 service remain untouched.
+
+F4a starts with WSP62 policy only: record a missing historical expiry as the
+already-past review-quarter boundary without renewal or ceiling changes.
+Framework/knowledge mirrors stay equal; enforcement and metadata are a later
+slice after this policy lands. SPECIFIED_NOT_IMPLEMENTED. WSP22/50/62/81/97.
+
 ## 2026-10-29 — F1 syntax/encoding and audit parser repair
 
 The first hosted test job stopped at a stale generated test registry after

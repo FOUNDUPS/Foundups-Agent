@@ -2,6 +2,15 @@
 
 ## 2026-10-29 repair selectors
 
+The follow-up private-livechat fallback selection is 88 semantic + 16 submission
+history cases (104 total, plus 12 subtests), with the original context 53 retained
+as a separate selector. Semantic tests also execute both real MessageProcessor
+call sites, busy-lock behavior, comment serialization, async heartbeat/timeout,
+late result discard and cancellation before subsequent provider stages. Provider
+calls are fixtures. Timeout cannot kill a running thread or HTTP call; it bounds
+the caller's wait and invalidates later work. The existing separate operator
+queue/lifecycle/control-plane selection passes 116 and stdlib inspection 15.
+
 With the environment isolation below, also run `test_reply_semantic_assessment.py`
 and `test_reply_submission_history.py` explicitly with pytest. They cover actual
 assessment/write/review ordering, supplied-fact snapshots, format/model-role

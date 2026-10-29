@@ -1,3 +1,22 @@
+## 2026-10-29: WSP62 historical missing-expiry completion policy
+
+Specify the narrow first stage of F4a: an existing temporary exemption may
+record only its already-past review-quarter boundary, with every other field
+and limit unchanged. It remains expired debt. Require exact-base policy in
+both mirrors; reject renewal, new exemptions and candidate-authored authority.
+No audit implementation or exemption entry changes in this slice:
+`SPECIFIED_NOT_IMPLEMENTED`. WSP81 class: NOTIFICATION_REQUIRED (section and
+compliance clarification); 012 notified during the authorized audit repair.
+Base: `f304ba799f8fa835f0b5127efabe9e724315e3c8`. The numbered framework and
+knowledge files are synchronized; historical content is retained in Git.
+Recovery: focused revert. WSP22/50/62/64/81/97.
+
+Validation: exact mirror equality and whitespace checks pass. Existing
+`test_foundup_route_wsp62_exemptions.py`: five tests pass, one fails because
+the unchanged verifier is 591 lines against its unchanged 586-line ceiling.
+Git blob comparison proves the test, target and both exemption registries
+match the exact base. That inherited size debt remains open; no limit was raised.
+
 ## 2026-10-13: WSP71 security review ownership and candidate triage
 
 Added sections 5.4–5.5 under 012's explicit direction to repair security gaps

@@ -1,3 +1,15 @@
+## 2026-10-29 — Interface split and retained expiry debt
+
+Remove INTERFACE.md from the obsolete exact-size exemption expectation and
+require its directory plus five contract pages to remain below 1000 lines
+without an interface exemption. The provider-evidence size test now passes.
+Existing date-sensitive checks still reject expired module/root/database/runtime
+exemptions: four failures retained, versus five on exact base ade6bca8547.
+No date extension, skip or source ceiling increase was used. Broader selected
+audit/Mode 2/brain/exemption run: 110 pass, four inherited failures, 28 subtests.
+The new bounded CI selection independently passes 103 tests and 28 subtests.
+WSP 5/22/50/62/97.
+
 ## Parent authority bootstrap forwarding — 2026-10-25
 
 Inventory first: extend existing `test_reddog_governed_execution_valve_production_wiring.py`;

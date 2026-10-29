@@ -6,12 +6,14 @@ on:
       - 'modules/platform_integration/algorand/**'
       - 'WSP_knowledge/WSP_Test_Registry.json'
       - '.github/workflows/algorand-probe-codec.yml'
+      - 'requirements-trust-bootstrap.txt'
   push:
     branches: [main]
     paths:
       - 'modules/platform_integration/algorand/**'
       - 'WSP_knowledge/WSP_Test_Registry.json'
       - '.github/workflows/algorand-probe-codec.yml'
+      - 'requirements-trust-bootstrap.txt'
 
 permissions:
   contents: read
@@ -36,6 +38,10 @@ jobs:
         with:
           python-version: '3.12.10'
           architecture: 'x64'
+      - name: Bootstrap checksum-verified Python trust
+        run: |
+          python -I -B -m pip --isolated install --upgrade --no-deps --require-hashes -r requirements-trust-bootstrap.txt
+          if ($LASTEXITCODE -ne 0) { throw 'Python trust bootstrap failed' }
       - name: Prepare distinct hash-locked CI installation
         run: |
           $ErrorActionPreference = 'Stop'

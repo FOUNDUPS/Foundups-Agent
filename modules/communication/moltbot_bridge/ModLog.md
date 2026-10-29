@@ -1,3 +1,21 @@
+## 2026-10-29 — Preserve interface contracts and repair exemption metadata
+
+Split the 3481-line interface into a directory and five active contract pages
+below 1000 lines each. Preserve all 134 original headings in order and all
+source text after reversing relative-link rebasing and navigation additions.
+Existing fragment links still resolve through the directory; this changes no
+API semantics or recorded qualification status. Remove the resolved interface
+and already-small brain-current-state test exemptions. Complete four missing
+expiry fields as the already-past 2026-Q3 boundary under separately merged
+WSP62 policy; no limit or renewal is authorized.
+
+Validation: 170 local links/targets verified; exact-base audit accepts the
+removals and metadata changes without candidate errors. The provider-evidence
+size test now passes after removing its obsolete interface entry. The broader
+selection reports 110 pass / four inherited expiry failures, plus 28 subtests;
+baseline exemption suite had five failures. Expired source debt remains.
+WSP 5/11/22/50/62/84/97. No service, model or platform action was executed.
+
 ## Parent authority bootstrap forwarding — 2026-10-25
 
 WSP00/11/22/50/62/97; C2/I5/D4/Impact4 = 15/P1 under the native 19/P0 umbrella.

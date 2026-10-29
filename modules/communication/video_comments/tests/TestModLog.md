@@ -1,5 +1,34 @@
 # video_comments TestModLog
 
+## 2026-10-29 — Follow-up livechat fallback and bounded caller qualification
+
+Extend the existing `test_reply_semantic_assessment.py` source-bound selection;
+no new test family or weaker source assertions. It now contains 88 collected
+cases covering retained Grok success, four Grok failure modes, exact local HTTP
+receipts, shared-context isolation, full native snapshots, exact final 200-character
+mention review and expiry/supersession/native metadata changes. Added concurrency
+and cancellation controls exercise busy generation/review locks, preserved comment
+serialization, all three HTTP stage failures/cancellations, cancellation during
+news/history/voice preparation, actual caller heartbeat and ten-second timeout
+configuration, late payload discard, no late local fallback, both eligible caller
+identities, and theme clearing without unreviewed fallback. Six malformed native
+theme cases (source ID, handles container/item across main/direct local entry)
+reproduced successful invalid replies before repair and now block all providers.
+
+Final local selector: semantic 88 + unchanged submission history 16 = **104 passed,
+12 subtests passed**, zero failures/errors/skips, Windows CPython3.12. Original
+context selector remains separate at 53 passed; adjacent queue/lifecycle/reader
+116 and stdlib inspection 15 pass separately. Combined 157 is the same context +
+104 scope and must not be added to those counts. JUnit inventory is retained in the
+existing task TEMP evidence root as `followup-repair-results.xml`; exact-case CI
+digest/pins are owned by the publication step. Providers, model judgments and
+browser data are fixtures. A provider thread cannot be killed by await timeout;
+the tests prove result discard and prevention of later stages, not preemption.
+
+One initial caller test supplied a falsey generator and therefore skipped its
+intended branch. An explicit invocation assertion exposed that fixture gap; the
+truthy fixture now executes the real caller. No production assertion was relaxed.
+
 ## 2026-10-29 — Windows completion of source repair
 
 Fresh Windows selection: original 53 reply-context plus 116 adjacent queue,

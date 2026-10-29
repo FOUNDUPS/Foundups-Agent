@@ -137,7 +137,7 @@ jobs:
           assert cases and not any(list(root.iter(tag)) for tag in ('failure', 'error', 'skipped'))
           names = sorted(case.get('name') for case in cases)
           digest = hashlib.sha256('\n'.join(names).encode()).hexdigest()
-          assert len(cases) == 41 and digest == '749231f87a938ee30520fc74e8c87548771193d7621625fd20d292ecdf47a242', (len(cases), digest)
+          assert len(cases) == 104 and digest == '831e155cd5a850cf0bae533878269c6ab6382fbd3884f608d73cd62a806d1aa8', (len(cases), digest)
       - name: Preserve reply repair results
         if: always()
         uses: actions/upload-artifact@v4
@@ -1057,6 +1057,20 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest pytest-cov
           pip install -r requirements.txt
+
+      - name: Verify audit expiry and exact-base authority contracts
+        env:
+          PYTHONUTF8: '1'
+          PYTHONDONTWRITEBYTECODE: '1'
+          PYTEST_DISABLE_PLUGIN_AUTOLOAD: '1'
+          PYTHON_DOTENV_DISABLED: '1'
+        run: >-
+          python -B -m pytest -q -c /dev/null --noconftest --import-mode=importlib
+          -o pythonpath=. -p no:cacheprovider
+          tools/modular_audit/tests/test_modular_audit.py
+          tools/modular_audit/tests/test_fmas_mode2.py
+          modules/infrastructure/wre_core/tests/test_fmas_health_triage.py
+          modules/communication/moltbot_bridge/tests/test_reddog_wsp62_security_repair_exemptions.py::test_interface_contract_pages_need_no_size_exemption
 
       - name: Verify canonical test registry
         run: |
