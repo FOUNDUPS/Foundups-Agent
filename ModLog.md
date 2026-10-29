@@ -1,5 +1,15 @@
 ## 2026-10-29 — F1 syntax/encoding and audit parser repair
 
+The first hosted test job stopped at a stale generated test registry after
+BOM removal made 15 entries parseable. Regenerated through the existing owner:
+1779 files / 260 quarantined; no classifier rule changed. All 28 registry tests
+and 85 tests across the three affected dummy-STT/in-memory/schema suites pass.
+The twelve optional rESP import smoke files were inspected, not runtime-qualified.
+Combined with YouTube main `887c09dd2`, the final AST scan covers 4220 files:
+zero production failures, 81 legacy test failures, zero leading BOMs.
+Fresh final security scan outcomes remain separate. The local Windows archive attempt failed before
+scanning; it is not a clean security result.
+
 Revalidated the supplied audit at main `68562f2c8`: 4216 tracked module Python
 files contained 87 byte-parser failures (six production, 81 tests), plus 36
 valid BOM-prefixed files rejected by the audit's text parser. Repair the six
