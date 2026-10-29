@@ -15,6 +15,18 @@ Append only that one exact file/rule/line binding and preserve all prior entries
 No scanner rule, exclusion, scope or fingerprint algorithm changes. Fresh final
 tree/history checks remain required; this review is not a scanner execution.
 
+## PR2261 quantity manifest metadata review — 2026-10-29
+
+Hosted job123254036323 at head0ff92917c reports38 unreviewed manifest bindings,
+133 prior reviews and zero introduced-history findings. Author and independent
+reviewer each verified the identical hosted merge45542eb5/head Git-LF tree,
+all1472 runtime source hashes, and all38 unique unchanged flagged lines with
+their exact prior approvals at main362b4c62a. Only two quantity source digests
+changed; canonical manifest digest is bf6d43c882f0d0faa78be7e223a6cf7a118692d3f705c48d0bfafed58d50de8f.
+Preserve all2610 prior records; append only these38 exact bindings, retaining
+both observed scanner rule IDs. No scanner rule, exclusion or fingerprint change.
+Fresh tree/history gates remain required; source integrity is not chain readiness.
+
 ## PR2257 encoding manifest metadata review — 2026-10-29
 
 Hosted job123214518117 at source `5ce02d043` reports 38 unreviewed
