@@ -1,42 +1,27 @@
+"""Test scaffold for credentials; SPECIFIED_NOT_IMPLEMENTED.
+
+No behavioral coverage exists yet. Production code is not imported during
+collection. Replace the placeholders with behavioral assertions before removing
+the scaffold marker and skip. SOURCE_MODULE is the intended future test subject.
 """
-Test suite for credentials
-WSP 5 compliant test coverage
-"""
-
-# === UTF-8 ENFORCEMENT (WSP 90) ===
-import sys
-import io
-if __name__ == '__main__' and sys.platform.startswith('win'):
-    try:
-        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
-        sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
-    except (OSError, ValueError):
-        # Ignore if stdout/stderr already wrapped or closed
-        pass
-# === END UTF-8 ENFORCEMENT ===
-
-
 import pytest
-import sys
-from pathlib import Path
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent.parent))
+WRE_TEST_MODE = "scaffold"
+SOURCE_MODULE = 'modules.platform_integration.linkedin_agent.src.auth.credentials'
+pytestmark = pytest.mark.skip(reason="SPECIFIED_NOT_IMPLEMENTED: test scaffold")
 
-from O:.Foundups-Agent.modules.platform_integration.linkedin_agent.src.auth.credentials import *
 
 class TestCredentials:
-    """Test cases for credentials"""
-    
+    """Pending behavioral tests for credentials."""
+
     def test_initialization(self):
-        """Test basic initialization"""
-        # TODO: Implement test
-        assert True
-    
+        """TODO: verify initialization behavior."""
+        pytest.fail("Replace scaffold with behavioral assertions")
+
     def test_basic_functionality(self):
-        """Test core functionality"""
-        # TODO: Implement test
-        assert True
+        """TODO: verify core behavior."""
+        pytest.fail("Replace scaffold with behavioral assertions")
+
 
 if __name__ == "__main__":
-    pytest.main([__file__, "-v"])
+    raise SystemExit(pytest.main([__file__, "-v"]))

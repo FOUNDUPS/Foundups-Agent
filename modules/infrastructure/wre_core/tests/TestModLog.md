@@ -1,3 +1,11 @@
+## 2026-10-29 — Explicit unimplemented/manual classification
+
+Twelve new registry cases cover literal/annotated modes, invalid declarations,
+preserved external-effect reasons and ordinary unit compatibility. The full
+registry owner passes 40 cases; the combined generator/import/registry selection
+passes 51. The 23 added cases yield 19 failures / four passes on unchanged
+baseline. Only inert source fixtures are executed. WSP5/6/22/34/50/97.
+
 ## 2026-10-29 — Regenerate registry after F1 encoding repair
 
 The first PR2257 hosted test gate detected a stale registry: removing BOMs

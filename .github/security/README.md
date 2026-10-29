@@ -1,3 +1,17 @@
+## Test-scaffold repair manifest metadata binding — 2026-10-29
+
+Checksum-verified Gitleaks 8.30.1 scanned the 100 changed staged Git files,
+materialized with Git line endings, and reported 38 runtime source-hash rows.
+Each is a unique unchanged line from main `362b4c62a665`, has a prior exact
+review binding, and matches the SHA-256 of its staged runtime source. The
+manifest retains all 1472 members; only the classifier source digest changes.
+Append 38 exact file/rule/line bindings and preserve all 2610 prior entries.
+The architect performed this comparison; no independent review is claimed.
+
+This bounded local scan is not a full tree/history scan. No raw findings,
+credentials, scanner rules, exclusions or fingerprint algorithms are changed.
+The hosted full tree/introduced-history gate remains required.
+
 ## PR2260 unchanged historical prose binding — 2026-10-29
 
 Hosted job123246799489 at source f2cb5d9abbfd763e437494e88b3b3bfd15eba469

@@ -1,5 +1,12 @@
 # IDE FoundUps Module - Change Log
 
+## 2026-10-29 — Repair Python test-source parsing
+
+Use setattr for the mock VSCode enum member named `None`, preserving its 0
+value and Collapsed/Expanded values 1/2. The isolated import regression passes.
+Generated assert-True scaffolds are now explicitly unfinished; no extension,
+provider or IDE behavior is claimed validated. WSP5/22/34/50.
+
 ## WSP 22 Compliance: Traceable Narrative
 This log tracks all changes to the IDE FoundUps module following WSP 22 (Module ModLog and Roadmap Protocol).
 

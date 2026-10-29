@@ -2816,7 +2816,7 @@
     "modules/infrastructure/wre_core/src/wre_test_impact_differential_gate.py": "0d605ed24efcb891e4c3f385347136768c919f0dc70bfdebd51384947099561a",
     "modules/infrastructure/wre_core/src/wre_test_registry.py": "a83de6c219931376dfbce2add6dc812fc84ca9525a0b2eea07b7bd8f403d872f",
     "modules/infrastructure/wre_core/src/wre_test_registry_ast.py": "f13fff3685c96d11523ab4c41737a0d53dcf80e3b7108dc41bc887b850f8973c",
-    "modules/infrastructure/wre_core/src/wre_test_registry_classification.py": "1c7e51738a8e9933032de68bac49a03e63564efe9010a7cf7102c6fa65b654ce",
+    "modules/infrastructure/wre_core/src/wre_test_registry_classification.py": "7d985795ae0003c8466f3703e36a0d061a121939aa2408a1e22a514f42ce849a",
     "modules/infrastructure/wre_core/src/wre_test_registry_differential_plan_runtime.py": "3b1d40c5ef93e7316bea4a29fb6a33ee48fc2fca5d3a56aabf5c26621ab47a84",
     "modules/infrastructure/wre_core/src/wre_test_registry_git_binding.py": "7f77defd2cbdbf113c09008c11b79086e6f138224187f7e0ac17cf5f98b6f54a",
     "modules/infrastructure/wre_core/src/wre_test_registry_impact_binding.py": "94bf9d407e0cde874252d17888c394dbd898d6b48af6409800e5bfbe74cbe465",

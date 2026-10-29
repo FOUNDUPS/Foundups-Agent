@@ -979,6 +979,14 @@ records the baseline witness, repair and verification limits.
 
 ## Test differential and independent verification
 
+Test source may declare `WRE_TEST_MODE = "scaffold"` or `"manual"` (ordinary or
+annotated assignment). Both remain noncollectable in the canonical registry;
+scaffolds carry `unimplemented_test_scaffold`, manual programs carry
+`manual_test_program`. Other/nonliteral declarations carry `invalid_test_mode`.
+These declarations cannot hide external-effect reasons or grant execution.
+They do not authorize importing arbitrary test modules. Generated scaffolds
+are SPECIFIED_NOT_IMPLEMENTED and never count as behavioral coverage.
+
 `load_canonical_test_registry()`, `collect_registered_test_shards()`,
 `make_test_impact_plan()`, `make_test_run_snapshot()`, and
 `evaluate_test_differential()` preserve the canonical registry/shard and
